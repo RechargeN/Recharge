@@ -173,7 +173,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text('Проверить запись на сайте'));
         await tester.pumpAndSettle();
-        expect(find.text('Не удалось открыть сайт записи'), findsOneWidget);
+        expect(find.text('Could not open the enrollment site'), findsOneWidget);
         await tester.tap(find.text('Проверить запись на сайте'));
         await tester.pump();
         expect(calls, 2);

@@ -648,7 +648,7 @@ class ResolvedDetailsRoute extends ConsumerWidget {
           return DetailsShell(
             state: DetailsScreenUnavailable(
               reason: DetailsUnavailableReason.notFound,
-              message: route ? 'Маршрут недоступен' : null,
+              notice: route ? DetailsUnavailableNotice.routeUnavailable : null,
             ),
           );
         }

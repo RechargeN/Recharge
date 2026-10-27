@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/localization/l10n_context.dart';
 import '../../core/telemetry/analytics_service.dart';
 import '../../features/discover/domain/entities/published_find_people_discovery_entity.dart';
 import '../../features/discover/domain/repositories/timezone_repository.dart';
@@ -78,7 +79,7 @@ class _FindPeopleDetailsPageState extends State<FindPeopleDetailsPage> {
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Ссылка скопирована')));
+    ).showSnackBar(SnackBar(content: Text(context.l10n.detailsLinkCopied)));
   }
 
   void _onMap(

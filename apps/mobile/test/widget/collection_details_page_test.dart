@@ -122,7 +122,7 @@ void main() {
     await tester.pumpWidget(_app());
     await tester.pumpAndSettle();
 
-    expect(find.text('Недоступно'), findsOneWidget);
+    expect(find.text('Unavailable'), findsOneWidget);
   });
 
   testWidgets(

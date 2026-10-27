@@ -108,7 +108,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.favorite_border).first);
     await tester.pumpAndSettle();
 
-    expect(find.text('Сохранено в избранное'), findsNothing);
+    expect(find.text('Saved to favorites'), findsNothing);
     expect(find.byIcon(Icons.favorite), findsWidgets);
   });
 
@@ -139,7 +139,7 @@ void main() {
     await tester.tap(find.text('Поделиться'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Ссылка скопирована'), findsOneWidget);
+    expect(find.text('Link copied'), findsOneWidget);
     expect(clipboardCalls, hasLength(1));
     // DTL-LINK-01: the self-link is now the typed canonical form, not the
     // pre-DTL-LINK-01 untyped `recharge://discover/details/{id}`.
@@ -167,7 +167,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Join activity: заявка отправлена'),
+        find.text('Request sent'),
         findsOneWidget,
       );
       final _SpyAnalyticsService spy =
@@ -205,7 +205,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Спасибо. Сообщение передано на проверку.'),
+        find.text('Thank you. The report was sent for review.'),
         findsOneWidget,
       );
       final _SpyAnalyticsService spy =

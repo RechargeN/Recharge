@@ -282,7 +282,7 @@ void main() {
             ),
           ),
         );
-        expect(find.text('Нет связи'), findsOneWidget);
+        expect(find.text('No connection'), findsOneWidget);
 
         // A new revision: the listing's snapshot reports it, "Обновить" reads it.
         await tester.runAsync(() => stand!.routePageAction('page-revise'));
@@ -303,8 +303,8 @@ void main() {
             ),
           ),
         );
-        expect(find.text('Маршрут обновился'), findsOneWidget);
-        expect(find.text('Обновить'), findsOneWidget);
+        expect(find.text('The route was updated'), findsOneWidget);
+        expect(find.text('Refresh'), findsOneWidget);
         final DiscoverItemEntity revised = (await tester
             .runAsync<DiscoverItemEntity?>(() => lookup.lookup(pageId)))!;
         expect(revised.title, 'Riga two-part walk (stand Page, revised)');

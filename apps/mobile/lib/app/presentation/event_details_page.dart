@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/localization/l10n_context.dart';
 import '../../core/telemetry/analytics_service.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/auth/application/controllers/auth_controller.dart';
@@ -195,7 +196,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Ссылка скопирована')));
+    ).showSnackBar(SnackBar(content: Text(context.l10n.detailsLinkCopied)));
   }
 
   void _onMap(PublishedEventDiscoveryEntity projection) {
@@ -275,7 +276,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
     );
     if (!mounted || result.status != ShareResultStatus.unavailable) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Не удалось открыть экспорт календаря')),
+      SnackBar(content: Text(context.l10n.detailsCalendarExportFailed)),
     );
   }
 
@@ -336,7 +337,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
     if (projection.isFree) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Интерес к событию отмечен')),
+        SnackBar(content: Text(context.l10n.detailsInterestMarked)),
       );
       return;
     }
@@ -347,9 +348,9 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
       mode: LaunchMode.externalApplication,
     );
     if (!launched && mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Could not open ${parsed.host}.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.detailsCouldNotOpenLink)),
+      );
     }
   }
 

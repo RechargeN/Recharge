@@ -522,9 +522,9 @@ void main() {
             onRetry: () {},
           ),
         ),
-        'Маршрут обновился',
+        'The route was updated',
       );
-      expect(find.text('Обновить'), findsOneWidget);
+      expect(find.text('Refresh'), findsOneWidget);
       expect(
         await shown(
           detailsUnavailableForError(
@@ -535,17 +535,17 @@ void main() {
             onRetry: () {},
           ),
         ),
-        'Нет связи',
+        'No connection',
       );
-      expect(find.text('Повторить'), findsOneWidget);
+      expect(find.text('Try again'), findsOneWidget);
       expect(
         await shown(
           const DetailsScreenUnavailable(
             reason: DetailsUnavailableReason.notFound,
-            message: 'Маршрут недоступен',
+            notice: DetailsUnavailableNotice.routeUnavailable,
           ),
         ),
-        'Маршрут недоступен',
+        'Route unavailable',
       );
       expect(find.byKey(const Key('details-unavailable-retry')), findsNothing);
     });

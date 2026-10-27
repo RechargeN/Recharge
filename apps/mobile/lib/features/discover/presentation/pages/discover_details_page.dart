@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../../../app/di/service_locator.dart';
 import '../../../../app/application/visit_history_providers.dart';
 import '../../../../app/presentation/scenario_object_intake_sheet.dart';
@@ -125,9 +126,9 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
             ClipboardData(text: 'recharge:/$canonicalPath'),
           );
           if (!context.mounted) return;
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Ссылка скопирована')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.detailsLinkCopied)),
+          );
         }
 
         void onMap() => context.push(_mapLocationForDetails(item));
@@ -269,9 +270,9 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
         sourceScreen: 'discover_details',
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Сохранено в избранное')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.detailsSavedToFavorites)),
+      );
     });
   }
 
@@ -367,18 +368,14 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
         },
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Спасибо. Сообщение передано на проверку.'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.detailsReportSent)));
     } on Object {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Не удалось отправить сообщение. Попробуйте ещё раз.'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.detailsReportFailed)));
     }
   }
 
@@ -394,9 +391,9 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
         'price_amount': item.priceAmount,
       },
     );
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${ctaLabelForDetails(item)}: заявка отправлена')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(context.l10n.detailsRequestSent)));
   }
 
   Future<void> _onMarkVisited({
@@ -435,7 +432,7 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
       today = ref.read(visitHistoryFacadeProvider).todayAtPlace(item);
     } on ArgumentError {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Place timezone is unavailable')),
+        SnackBar(content: Text(context.l10n.detailsPlaceTimezoneUnavailable)),
       );
       return;
     }
@@ -444,7 +441,7 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
       initialDate: today,
       firstDate: DateTime(1900),
       lastDate: today,
-      helpText: 'When did you visit?',
+      helpText: context.l10n.detailsVisitWhen,
     );
     if (selected == null || !mounted) return;
 
@@ -456,16 +453,17 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Added to Visit history · '
-            '${MaterialLocalizations.of(context).formatMediumDate(selected)}',
+            context.l10n.detailsVisitAdded(
+              MaterialLocalizations.of(context).formatMediumDate(selected),
+            ),
           ),
         ),
       );
     } on Object {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not update Visit history')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.detailsVisitFailed)));
     }
   }
 

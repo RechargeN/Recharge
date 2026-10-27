@@ -3,6 +3,8 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../shared/models/catalog_object_ref.dart';
@@ -154,9 +156,9 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
       _snackShown = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Сохранено в избранное')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.detailsSavedToFavorites)),
+        );
       });
     }
   }
@@ -207,7 +209,7 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
               const SizedBox(height: 18),
               _SectionHeader(
                 title: 'Categories',
-                actionLabel: 'View all',
+                actionLabel: context.l10n.homeViewAll,
                 onAction: () => context.push(RouteNames.categories),
               ),
               const SizedBox(height: 10),
@@ -462,7 +464,7 @@ class _SavedScenarioPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        'Continue your route',
+                        context.l10n.homeContinueRoute,
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w800),
                       ),
@@ -489,7 +491,10 @@ class _SavedScenarioPanel extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                _SavedScenarioChip(icon: Icons.flag, label: 'Saved route'),
+                _SavedScenarioChip(
+                  icon: Icons.flag,
+                  label: context.l10n.homeSavedRoute,
+                ),
                 _SavedScenarioChip(icon: Icons.place, label: scenario.city),
                 if (scenario.distanceKm case final double distanceKm)
                   _SavedScenarioChip(
@@ -498,9 +503,13 @@ class _SavedScenarioPanel extends StatelessWidget {
                   ),
                 _SavedScenarioChip(
                   icon: Icons.payments,
-                  label: scenario.isFree
-                      ? 'Free'
-                      : '${scenario.priceAmount?.toStringAsFixed(0) ?? '—'} EUR',
+                  // L4: the price keeps its own currency.
+                  label: scenario.isFree || scenario.priceAmount == null
+                      ? (scenario.isFree ? context.l10n.homeFree : '—')
+                      : RechargeFormats.money(
+                          scenario.priceAmount!,
+                          context.l10n.localeName,
+                        ),
                 ),
               ],
             ),
@@ -614,7 +623,7 @@ class _SavedSearchPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        'Continue saved search',
+                        context.l10n.homeContinueSavedSearch,
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w800),
                       ),
@@ -646,8 +655,13 @@ class _SavedSearchPanel extends StatelessWidget {
                 _SavedScenarioChip(
                   icon: Icons.near_me_outlined,
                   label: search.query.unlimitedRadius
-                      ? 'Any area'
-                      : '${(search.query.radiusMeters / 1000).round()} km',
+                      ? context.l10n.homeAnyArea
+                      : context.l10n.homeRadiusKm(
+                          RechargeFormats.decimal(
+                            (search.query.radiusMeters / 1000).round(),
+                            context.l10n.localeName,
+                          ),
+                        ),
                 ),
                 if (search.query.freeOnly)
                   const _SavedScenarioChip(
@@ -677,7 +691,7 @@ class _SavedSearchPanel extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 IconButton.filledTonal(
-                  tooltip: 'Create listing from saved search',
+                  tooltip: context.l10n.homeCreateFromSavedSearch,
                   onPressed: onCreate,
                   icon: const Icon(Icons.add_circle_outline),
                 ),
@@ -741,7 +755,7 @@ class _SmartSearchPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        'Continue smart search',
+                        context.l10n.homeContinueSmartSearch,
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w800),
                       ),
@@ -764,9 +778,9 @@ class _SmartSearchPanel extends StatelessWidget {
               children: <Widget>[
                 _SavedScenarioChip(icon: Icons.psychology, label: 'Smart'),
                 if (routeIntent != null) ...<Widget>[
-                  const _SavedScenarioChip(
+                  _SavedScenarioChip(
                     icon: Icons.route_outlined,
-                    label: 'Smart route',
+                    label: context.l10n.homeSmartRoute,
                   ),
                   _SavedScenarioChip(
                     icon: Icons.timer_outlined,
@@ -785,8 +799,13 @@ class _SmartSearchPanel extends StatelessWidget {
                 _SavedScenarioChip(
                   icon: Icons.near_me_outlined,
                   label: item.query.unlimitedRadius
-                      ? 'Any area'
-                      : '${(item.query.radiusMeters / 1000).round()} km',
+                      ? context.l10n.homeAnyArea
+                      : context.l10n.homeRadiusKm(
+                          RechargeFormats.decimal(
+                            (item.query.radiusMeters / 1000).round(),
+                            context.l10n.localeName,
+                          ),
+                        ),
                 ),
                 if (item.query.budgetMax != null)
                   _SavedScenarioChip(
@@ -816,7 +835,7 @@ class _SmartSearchPanel extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 IconButton.filledTonal(
-                  tooltip: 'Create listing from smart search',
+                  tooltip: context.l10n.homeCreateFromSmartSearch,
                   onPressed: onCreate,
                   icon: const Icon(Icons.add_circle_outline),
                 ),
@@ -1187,7 +1206,7 @@ class _HomeContentSection extends StatelessWidget {
       children: <Widget>[
         _SectionHeader(
           title: title,
-          actionLabel: 'View all',
+          actionLabel: context.l10n.homeViewAll,
           onAction: onViewAll,
         ),
         const SizedBox(height: 8),
@@ -1269,7 +1288,7 @@ class _HomeFeatureCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _homeCardMeta(item),
+                      _homeCardMeta(context.l10n, item),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -1393,11 +1412,14 @@ class _HomeEmptyCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onViewAll,
-        child: const Padding(
-          padding: EdgeInsets.all(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
           child: Text(
-            'No activities yet',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+            context.l10n.homeNoActivities,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ),
       ),
@@ -1807,15 +1829,22 @@ class _HomeRouteTemplate {
   final List<String> steps;
 }
 
-String _homeCardMeta(DiscoverItemEntity item) {
-  final DateTime? local = item.startsAtUtc?.toLocal();
-  final String hour = local?.hour.toString().padLeft(2, '0') ?? '';
-  final String minute = local?.minute.toString().padLeft(2, '0') ?? '';
+/// L4: price in the item's own currency and start time in the item's own
+/// zone (the device zone only when the item carries none).
+String _homeCardMeta(AppLocalizations l10n, DiscoverItemEntity item) {
+  final DateTime? start = item.startsAtUtc;
   final String price = item.isFree
-      ? 'Free'
-      : '${item.priceAmount?.toStringAsFixed(0) ?? '—'} EUR';
+      ? l10n.homeFree
+      : item.priceAmount == null
+      ? '—'
+      : RechargeFormats.money(item.priceAmount!, l10n.localeName);
+  final String time = start == null
+      ? (item.activityCatalog?.durationLabel ?? l10n.homeAnyTime)
+      : item.timezoneId.isEmpty
+      ? RechargeFormats.deviceTime(start, l10n.localeName)
+      : RechargeFormats.time(start, item.timezoneId, l10n.localeName);
   final String venue = item.venueName.isEmpty ? item.city : item.venueName;
-  return '$price · ${local == null ? (item.activityCatalog?.durationLabel ?? 'Any time') : '$hour:$minute'} · $venue';
+  return l10n.homeCardMeta(price, time, venue);
 }
 
 IconData _categoryIconForHome(String category) {

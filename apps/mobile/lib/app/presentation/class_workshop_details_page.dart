@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/localization/l10n_context.dart';
 import '../../core/telemetry/analytics_service.dart';
 import '../../features/discover/domain/entities/published_class_workshop_discovery_entity.dart';
 import '../../features/discover/domain/repositories/timezone_repository.dart';
@@ -94,7 +95,7 @@ class _ClassWorkshopDetailsPageState extends State<ClassWorkshopDetailsPage> {
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Ссылка скопирована')));
+    ).showSnackBar(SnackBar(content: Text(context.l10n.detailsLinkCopied)));
   }
 
   void _map(ClassWorkshopPointLocation location) {
@@ -126,7 +127,7 @@ class _ClassWorkshopDetailsPageState extends State<ClassWorkshopDetailsPage> {
     }
     if (!launched && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не удалось открыть сайт записи')),
+        SnackBar(content: Text(context.l10n.detailsEnrollmentSiteFailed)),
       );
     }
   }

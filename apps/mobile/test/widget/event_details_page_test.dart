@@ -127,7 +127,7 @@ void main() {
     await tester.tap(find.text('Записаться').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Интерес к событию отмечен'), findsOneWidget);
+    expect(find.text('Interest in the event noted'), findsOneWidget);
     expect(analytics.eventNames, contains('discover_details_cta_clicked'));
   });
 }

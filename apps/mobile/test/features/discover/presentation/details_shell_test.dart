@@ -91,10 +91,10 @@ void main() {
           ),
         );
 
-        expect(find.text('Не удалось загрузить details'), findsOneWidget);
-        expect(find.text('Повторить'), findsOneWidget);
+        expect(find.text('Details could not be loaded'), findsOneWidget);
+        expect(find.text('Try again'), findsOneWidget);
 
-        await tester.tap(find.text('Повторить'));
+        await tester.tap(find.text('Try again'));
         await tester.pump();
         expect(retried, isTrue);
       },
@@ -113,8 +113,8 @@ void main() {
             ),
           ),
         );
-        expect(find.text('Недоступно'), findsOneWidget);
-        expect(find.text('Повторить'), findsNothing);
+        expect(find.text('Unavailable'), findsOneWidget);
+        expect(find.text('Try again'), findsNothing);
 
         await tester.pumpWidget(
           const MaterialApp(
@@ -125,8 +125,8 @@ void main() {
             ),
           ),
         );
-        expect(find.text('Недоступно'), findsOneWidget);
-        expect(find.text('Повторить'), findsNothing);
+        expect(find.text('Unavailable'), findsOneWidget);
+        expect(find.text('Try again'), findsNothing);
       },
     );
 
@@ -142,7 +142,7 @@ void main() {
             ),
           ),
         );
-        expect(find.text('Повторить'), findsNothing);
+        expect(find.text('Try again'), findsNothing);
       },
     );
   });

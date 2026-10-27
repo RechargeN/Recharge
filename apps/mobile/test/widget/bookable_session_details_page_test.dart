@@ -47,7 +47,7 @@ void main() {
     );
     await tester.tap(find.text('Проверить и забронировать'));
     await tester.pumpAndSettle();
-    expect(find.text('Не удалось открыть сайт бронирования'), findsOneWidget);
+    expect(find.text('Could not open the booking site'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -153,7 +153,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Проверить и забронировать'));
     await tester.pumpAndSettle();
-    expect(find.text('Не удалось открыть сайт бронирования'), findsOneWidget);
+    expect(find.text('Could not open the booking site'), findsOneWidget);
   });
 }
 

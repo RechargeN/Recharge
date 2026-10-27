@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:design_system/design_system.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../domain/repositories/discover_repository.dart';
 import 'details_renderer.dart';
 
@@ -54,21 +55,24 @@ class DetailsScreenAvailable extends DetailsScreenState {
   final bool immersiveHero;
 }
 
+/// L4: what a caller knows beyond [DetailsUnavailableReason]; the shell
+/// localizes it.
+enum DetailsUnavailableNotice { routeUpdated, noConnection, routeUnavailable }
+
 class DetailsScreenUnavailable extends DetailsScreenState {
   const DetailsScreenUnavailable({
     required this.reason,
     this.onRetry,
-    this.message,
-    this.retryLabel,
+    this.notice,
   });
 
   final DetailsUnavailableReason reason;
 
   /// DTL-RTE-02 RD-07/RD-08: a caller that knows more than the reason (a
-  /// newer Route revision, a lost connection, the object family) may give
-  /// its own copy; `null` keeps the shared enumeration-safe text.
-  final String? message;
-  final String? retryLabel;
+  /// newer Route revision, a lost connection, the object family) names it;
+  /// `null` keeps the shared enumeration-safe text. L4: the text is
+  /// localized by the shell, callers pass no copy.
+  final DetailsUnavailableNotice? notice;
 
   /// Offered only for [DetailsUnavailableReason.temporarilyUnavailable];
   /// [DetailsShell] does not render a retry action for the other reasons,
@@ -96,13 +100,8 @@ class DetailsShell extends StatelessWidget {
       DetailsScreenLoading() => _buildLoading(),
       DetailsScreenAvailable(:final renderer, :final immersiveHero) =>
         _buildAvailable(context, renderer, immersiveHero),
-      DetailsScreenUnavailable(
-        :final reason,
-        :final onRetry,
-        :final message,
-        :final retryLabel,
-      ) =>
-        _buildUnavailable(reason, onRetry, message, retryLabel),
+      DetailsScreenUnavailable(:final reason, :final onRetry, :final notice) =>
+        _buildUnavailable(context, reason, onRetry, notice),
     };
   }
 
@@ -143,11 +142,12 @@ class DetailsShell extends StatelessWidget {
   }
 
   Widget _buildUnavailable(
+    BuildContext context,
     DetailsUnavailableReason reason,
     VoidCallback? onRetry,
-    String? message,
-    String? retryLabel,
+    DetailsUnavailableNotice? notice,
   ) {
+    final AppLocalizations l10n = context.l10n;
     return Scaffold(
       appBar: const _DetailsShellAppBar(actions: <Widget>[]),
       body: Center(
@@ -157,7 +157,7 @@ class DetailsShell extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text(
-                message ?? _messageFor(reason),
+                _messageFor(l10n, reason, notice),
                 key: const Key('details-unavailable-message'),
               ),
               if (reason == DetailsUnavailableReason.temporarilyUnavailable &&
@@ -166,7 +166,11 @@ class DetailsShell extends StatelessWidget {
                 OutlinedButton(
                   key: const Key('details-unavailable-retry'),
                   onPressed: onRetry,
-                  child: Text(retryLabel ?? 'Повторить'),
+                  child: Text(
+                    notice == DetailsUnavailableNotice.routeUpdated
+                        ? l10n.commonRefresh
+                        : l10n.commonRetry,
+                  ),
                 ),
               ],
             ],
@@ -184,12 +188,21 @@ class DetailsShell extends StatelessWidget {
   // branches are proven by the shell contract test in isolation
   // (`details_shell_test.dart`) ahead of `DTL-LINK-01`/`DTL-OBJ-01`, which
   // will be the first real producers of them.
-  static String _messageFor(DetailsUnavailableReason reason) {
-    return switch (reason) {
-      DetailsUnavailableReason.temporarilyUnavailable =>
-        'Не удалось загрузить details',
-      DetailsUnavailableReason.unavailable => 'Недоступно',
-      DetailsUnavailableReason.notFound => 'Недоступно',
+  static String _messageFor(
+    AppLocalizations l10n,
+    DetailsUnavailableReason reason,
+    DetailsUnavailableNotice? notice,
+  ) {
+    return switch (notice) {
+      DetailsUnavailableNotice.routeUpdated => l10n.detailsRouteUpdated,
+      DetailsUnavailableNotice.noConnection => l10n.detailsNoConnection,
+      DetailsUnavailableNotice.routeUnavailable => l10n.detailsRouteUnavailable,
+      null => switch (reason) {
+        DetailsUnavailableReason.temporarilyUnavailable =>
+          l10n.detailsLoadFailed,
+        DetailsUnavailableReason.unavailable => l10n.detailsUnavailable,
+        DetailsUnavailableReason.notFound => l10n.detailsUnavailable,
+      },
     };
   }
 }
@@ -206,8 +219,7 @@ DetailsScreenUnavailable detailsUnavailableForError(
     return DetailsScreenUnavailable(
       reason: DetailsUnavailableReason.temporarilyUnavailable,
       onRetry: onRetry,
-      message: 'Маршрут обновился',
-      retryLabel: 'Обновить',
+      notice: DetailsUnavailableNotice.routeUpdated,
     );
   }
   if (error is DiscoverException &&
@@ -215,7 +227,7 @@ DetailsScreenUnavailable detailsUnavailableForError(
     return DetailsScreenUnavailable(
       reason: DetailsUnavailableReason.temporarilyUnavailable,
       onRetry: onRetry,
-      message: 'Нет связи',
+      notice: DetailsUnavailableNotice.noConnection,
     );
   }
   return DetailsScreenUnavailable(

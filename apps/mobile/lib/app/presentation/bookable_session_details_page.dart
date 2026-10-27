@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/localization/l10n_context.dart';
 import '../../core/telemetry/analytics_service.dart';
 import '../../features/discover/domain/entities/bookable_session_schedule_evaluation.dart';
 import '../../features/discover/domain/entities/published_bookable_session_discovery_entity.dart';
@@ -159,7 +160,7 @@ class _BookableSessionDetailsPageState extends State<BookableSessionDetailsPage>
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Ссылка скопирована')));
+    ).showSnackBar(SnackBar(content: Text(context.l10n.detailsLinkCopied)));
   }
 
   void _onMap(
@@ -210,7 +211,7 @@ class _BookableSessionDetailsPageState extends State<BookableSessionDetailsPage>
     }
     if (!launched && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Не удалось открыть сайт бронирования')),
+        SnackBar(content: Text(context.l10n.detailsBookingSiteFailed)),
       );
     }
   }
