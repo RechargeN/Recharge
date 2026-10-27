@@ -312,11 +312,16 @@ void main() {
           releaseMode: false,
           binding: binding(),
         );
+    // L4: the participant (recipient) reads in their own language. The
+    // organizer who reschedules and removes dates never sends theirs: an
+    // effect has no language field, so it cannot leak into B's inbox.
+    String recipientLocale = 'ru';
     final ServerNotificationsRepository inbox = ServerNotificationsRepository(
       port: BookingPortNotificationsAdapter(
         runtime: () async => runtime,
         guard: inboxGuard,
       ),
+      wireLocale: () => recipientLocale,
     );
     Future<List<NotificationItemEntity>> items() =>
         inbox.getNotifications(userId: 'not-sent');
@@ -450,7 +455,7 @@ void main() {
       },
       (EventBookingViewState state) =>
           state.booking == null &&
-          (state.message ?? '').contains('organizer cancelled this event'),
+          state.message?.notice == EventBookingNotice.endedEventCancelled,
       what: 'the cancellation of the removed date',
     );
     await eventually(
@@ -466,6 +471,26 @@ void main() {
       hasLength(all.length),
       reason: 'no duplicate inbox record',
     );
+    // L4: the same records in Latvian; only the text changes.
+    recipientLocale = 'lv-LV';
+    final List<NotificationItemEntity> latvian = await items();
+    expect(
+      latvian.map((NotificationItemEntity item) => item.id).toList(),
+      all.map((NotificationItemEntity item) => item.id).toList(),
+    );
+    expect(
+      latvian.any(
+        (NotificationItemEntity item) => item.title == 'Pasākums atcelts',
+      ),
+      isTrue,
+    );
+    expect(
+      latvian.any(
+        (NotificationItemEntity item) => item.title == 'Apstipriniet dalību',
+      ),
+      isTrue,
+    );
+    recipientLocale = 'ru';
     await meeting.arrive('done');
   }
 

@@ -607,12 +607,12 @@ void main() {
       );
       await waitFor(find.text(localTitle));
       await tapKey('place-publication-save');
-      await waitFor(keyedText('place-publication-status', 'review: draft'));
+      await waitFor(keyedText('place-publication-status', 'Review: draft'));
       await tapKey('place-publication-media-upload');
       await waitFor(find.text('Media uploaded: 3'));
       await tapKey('place-publication-submit');
       await waitFor(
-        keyedText('place-publication-status', 'review: under_review'),
+        keyedText('place-publication-status', 'Review: under review'),
       );
       final tile = find.byWidgetPredicate(
         (widget) =>
@@ -633,9 +633,7 @@ void main() {
           .singleWhere((item) => item['contentId'] == contentId);
       await tester.runAsync(() => approve(pending['submissionId']! as String));
       await tapKey('place-publication-refresh');
-      await waitFor(
-        keyedText('place-publication-status', 'approved_for_publication'),
-      );
+      await waitFor(keyedText('place-publication-status', 'Review: approved'));
 
       final withdrawn = (await tester.runAsync(
         () => stand!.pageAccess(<String>[
@@ -647,8 +645,17 @@ void main() {
       final saved = (withdrawn['before']! as List<Object?>).cast<String>();
       try {
         await tapKey('place-publication-publish');
+        // L4: the server's typed refusal reaches the user localized; the
+        // code itself is never shown.
         await waitFor(
+          keyedText(
+            'place-publication-message',
+            'You do not have access to this action.',
+          ),
+        );
+        expect(
           keyedText('place-publication-message', 'capability_denied'),
+          findsNothing,
         );
         expect(
           keyedText('place-publication-status', 'visibility: visible'),

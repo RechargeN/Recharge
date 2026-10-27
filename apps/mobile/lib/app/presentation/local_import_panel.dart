@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../core/localization/l10n_context.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/application/auth_providers.dart';
@@ -15,7 +17,7 @@ class LocalImportPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Import local data (test)')),
+      appBar: AppBar(title: Text(context.l10n.importPageTitle)),
       body: const SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: LocalImportPanel(),
@@ -46,9 +48,9 @@ class _LocalImportPanelState extends ConsumerState<LocalImportPanel> {
   Widget build(BuildContext context) {
     final String? userId = ref.watch(authControllerProvider).state.user?.id;
     if (userId == null) {
-      return const Text(
-        'Sign in to import your local data',
-        key: Key('local-import-signed-out'),
+      return Text(
+        context.l10n.importSignIn,
+        key: const Key('local-import-signed-out'),
       );
     }
     // A change of account builds a new controller bound to that account.

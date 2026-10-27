@@ -133,7 +133,10 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
       return Column(
         children: <Widget>[
           Expanded(child: shell),
-          EventBookingPanel(target: fixture ? null : bookingRef),
+          EventBookingPanel(
+            target: fixture ? null : bookingRef,
+            eventTimeZoneId: projection.timezoneId,
+          ),
         ],
       );
     }

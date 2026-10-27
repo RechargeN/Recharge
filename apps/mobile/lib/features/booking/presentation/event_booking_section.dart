@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/l10n_context.dart';
+import '../../../core/localization/recharge_formats.dart';
+import '../../../core/localization/user_message_catalog.dart';
 import '../application/event_booking_controller.dart';
 import '../domain/repositories/event_booking_gateway.dart';
 
 /// Booking panel for one Event occurrence. It renders only what the controller
 /// reports; it holds no Booking state of its own.
 class EventBookingSection extends StatelessWidget {
-  const EventBookingSection({super.key, required this.controller});
+  const EventBookingSection({
+    super.key,
+    required this.controller,
+    required this.eventTimeZoneId,
+  });
 
   final EventBookingController controller;
+
+  /// L4: the Event's own IANA zone; Booking times are shown in it, never in
+  /// the device zone, whatever the UI language.
+  final String eventTimeZoneId;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +38,7 @@ class EventBookingSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'Booking',
+                    context.l10n.bookingTitle,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
@@ -42,7 +53,9 @@ class EventBookingSection extends StatelessWidget {
   }
 
   Widget _body(BuildContext context, EventBookingViewState state) {
+    final AppLocalizations l10n = context.l10n;
     final EventBookingView? booking = state.booking;
+    final EventBookingMessage? message = state.message;
     final bool busy =
         state.phase == EventBookingPhase.loading ||
         state.phase == EventBookingPhase.submitting;
@@ -58,35 +71,39 @@ class EventBookingSection extends StatelessWidget {
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
               const SizedBox(width: 12),
-              Text(
-                state.phase == EventBookingPhase.loading
-                    ? 'Loading your booking...'
-                    : 'Sending your request...',
-                key: const Key('event-booking-busy'),
+              Expanded(
+                child: Text(
+                  state.phase == EventBookingPhase.loading
+                      ? l10n.bookingLoading
+                      : l10n.bookingSending,
+                  key: const Key('event-booking-busy'),
+                ),
               ),
             ],
           ),
-        if (state.message != null)
+        if (message != null)
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
-              state.message!,
+              bookingMessageText(l10n, message),
               key: const Key('event-booking-message'),
             ),
           ),
         if (booking != null && booking.isActive)
           Text(
-            'Your booking: ${booking.state.name}, '
-            '${booking.participantUnits} seat(s)',
+            l10n.bookingMine(
+              l10n.bookingStatus(booking.state.name),
+              l10n.bookingSeatsCount(booking.participantUnits),
+            ),
             key: const Key('event-booking-mine'),
           )
         else if (!busy && state.phase == EventBookingPhase.ready)
-          const Text('You have no booking for this event.'),
+          Text(l10n.bookingNone),
         if (booking != null && booking.reconfirmationRequired)
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              _deadlineText(booking.reconfirmationDeadlineUtc),
+              _deadlineText(context, booking.reconfirmationDeadlineUtc),
               key: const Key('event-booking-reconfirm-required'),
             ),
           ),
@@ -95,17 +112,21 @@ class EventBookingSection extends StatelessWidget {
             children: <Widget>[
               IconButton(
                 key: const Key('event-booking-seats-less'),
+                tooltip: l10n.bookingFewerSeats,
                 onPressed: state.seats > 1
                     ? () => controller.selectSeats(state.seats - 1)
                     : null,
                 icon: const Icon(Icons.remove),
               ),
-              Text(
-                '${state.seats} of ${state.maxSeats} seat(s)',
-                key: const Key('event-booking-seats'),
+              Flexible(
+                child: Text(
+                  l10n.bookingSeatsSelector(state.seats, state.maxSeats),
+                  key: const Key('event-booking-seats'),
+                ),
               ),
               IconButton(
                 key: const Key('event-booking-seats-more'),
+                tooltip: l10n.bookingMoreSeats,
                 onPressed: state.seats < state.maxSeats
                     ? () => controller.selectSeats(state.seats + 1)
                     : null,
@@ -122,23 +143,19 @@ class EventBookingSection extends StatelessWidget {
               FilledButton(
                 key: const Key('event-booking-create'),
                 onPressed: state.canBook ? controller.book : null,
-                child: Text(
-                  state.seats == 1
-                      ? 'Book 1 seat'
-                      : 'Book ${state.seats} seats',
-                ),
+                child: Text(l10n.bookingBookSeats(state.seats)),
               ),
             if (state.canReconfirm)
               FilledButton(
                 key: const Key('event-booking-reconfirm'),
                 onPressed: controller.reconfirm,
-                child: const Text('Confirm attendance'),
+                child: Text(l10n.bookingConfirmAttendance),
               ),
             if (state.canCancel)
               OutlinedButton(
                 key: const Key('event-booking-cancel'),
                 onPressed: controller.cancel,
-                child: const Text('Cancel booking'),
+                child: Text(l10n.bookingCancel),
               ),
             if (state.canRetry)
               OutlinedButton(
@@ -146,15 +163,15 @@ class EventBookingSection extends StatelessWidget {
                 onPressed: controller.retry,
                 child: Text(
                   state.phase == EventBookingPhase.unknownOutcome
-                      ? 'Check again'
-                      : 'Try again',
+                      ? l10n.commonCheckAgain
+                      : l10n.commonRetry,
                 ),
               ),
             if (state.canRefresh)
               TextButton(
                 key: const Key('event-booking-refresh'),
                 onPressed: controller.refresh,
-                child: const Text('Refresh'),
+                child: Text(l10n.commonRefresh),
               ),
           ],
         ),
@@ -162,14 +179,35 @@ class EventBookingSection extends StatelessWidget {
     );
   }
 
-  static String _deadlineText(DateTime? deadlineUtc) {
-    if (deadlineUtc == null) {
-      return 'The event changed. Please confirm your attendance.';
-    }
-    final DateTime local = deadlineUtc.toLocal();
-    String two(int value) => value.toString().padLeft(2, '0');
-    return 'The event changed. Confirm your attendance by '
-        '${local.year}-${two(local.month)}-${two(local.day)} '
-        '${two(local.hour)}:${two(local.minute)}.';
+  String _deadlineText(BuildContext context, DateTime? deadlineUtc) {
+    final AppLocalizations l10n = context.l10n;
+    if (deadlineUtc == null) return l10n.bookingReconfirmRequired;
+    return l10n.bookingReconfirmBy(
+      RechargeFormats.dateTime(deadlineUtc, eventTimeZoneId, l10n.localeName),
+    );
   }
 }
+
+/// L4: a Booking notice as localized text. A server refusal goes through the
+/// shared catalog, so an unknown code gets the safe generic text.
+String bookingMessageText(AppLocalizations l10n, EventBookingMessage message) =>
+    switch (message.notice) {
+      EventBookingNotice.offline => l10n.errorOffline,
+      EventBookingNotice.offlineSaved => l10n.errorOfflineSaved,
+      EventBookingNotice.unknownOutcome => l10n.errorUnknownOutcome,
+      EventBookingNotice.sessionNotConfirmed => l10n.errorSessionNotConfirmed,
+      EventBookingNotice.loadFailed => l10n.bookingErrorLoadFailed,
+      EventBookingNotice.rateLimited =>
+        message.retryAfterSeconds == null
+            ? l10n.errorRateLimited
+            : l10n.errorRateLimitedSeconds(message.retryAfterSeconds!),
+      EventBookingNotice.refused => UserMessageCatalog.booking(
+        l10n,
+        message.refusalCode,
+      ),
+      EventBookingNotice.endedMissedReconfirmation =>
+        l10n.bookingEndedMissedReconfirmation,
+      EventBookingNotice.endedEventCancelled => l10n.bookingEndedEventCancelled,
+      EventBookingNotice.endedOrganizerCancelled =>
+        l10n.bookingEndedOrganizerCancelled,
+    };

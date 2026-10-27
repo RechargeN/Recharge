@@ -205,11 +205,11 @@ void main() {
       );
       await waitFor(tester, find.text('Quiet corners (UI path)'));
       // Every item shows the server's exact answer.
-      await waitFor(tester, find.text('eligible'));
-      expect(find.text('eligible'), findsNWidgets(3));
+      await waitFor(tester, find.text('Available'));
+      expect(find.text('Available'), findsNWidgets(3));
 
       await tapKey(tester, 'collection-publication-save');
-      await waitFor(tester, statusText('review: draft'));
+      await waitFor(tester, statusText('Review: draft'));
       await tapKey(tester, 'collection-publication-media-upload');
       await waitFor(tester, find.text('Media uploaded: 1'));
       expect(
@@ -217,7 +217,7 @@ void main() {
         findsNothing,
       );
       await tapKey(tester, 'collection-publication-submit');
-      await waitFor(tester, statusText('review: under_review'));
+      await waitFor(tester, statusText('Review: under review'));
 
       // Staff review through the C2 staff script, for exactly this object.
       final tile = find.byWidgetPredicate(
@@ -248,7 +248,7 @@ void main() {
       expect(approved!.exitCode, 0, reason: '${approved.json}');
 
       await tapKey(tester, 'collection-publication-refresh');
-      await waitFor(tester, statusText('approved_for_publication'));
+      await waitFor(tester, statusText('Review: approved'));
       await tapKey(tester, 'collection-publication-publish');
       await waitFor(tester, statusText('visibility: visible'));
       expect(
@@ -257,9 +257,9 @@ void main() {
       );
 
       await tapKey(tester, 'collection-publication-hide');
-      await waitFor(tester, statusText('visibility: withdrawn'));
+      await waitFor(tester, statusText('visibility: hidden'));
       expect(
-        find.descendant(of: tile, matching: find.textContaining('withdrawn')),
+        find.descendant(of: tile, matching: find.textContaining('hidden')),
         findsOneWidget,
       );
     },

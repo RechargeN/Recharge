@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
+import 'publication_texts.dart';
 import '../../application/place_publication_controller.dart';
 import '../../domain/entities/event_publication.dart';
 
@@ -22,31 +24,35 @@ class PlacePublicationSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Test publication path (local Emulator)',
+              context.l10n.publicationTestPath,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              state.draftTitle ?? 'No Place draft in Create',
+              state.draftTitle ?? context.l10n.publicationNoDraft('place'),
               key: const Key('place-publication-draft-title'),
             ),
             Text(
-              _statusLine(state),
+              _statusLine(context.l10n, state),
               key: const Key('place-publication-status'),
             ),
             if (state.record != null)
               Text(
-                'Media uploaded: ${state.record!.attachments.length}',
+                context.l10n.publicationMediaUploaded(
+                  state.record!.attachments.length,
+                ),
                 key: const Key('place-publication-media'),
               ),
             if (status?.currentPublishedRevisionId != null)
               Text(
-                'Revision ${status!.currentPublishedRevisionId}',
+                context.l10n.publicationRevision(
+                  '${status!.currentPublishedRevisionId}',
+                ),
                 key: const Key('place-publication-revision'),
               ),
             if (state.message != null)
               Text(
-                state.message!,
+                PublicationTexts.message(context.l10n, state.message!),
                 key: const Key('place-publication-message'),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
@@ -54,9 +60,9 @@ class PlacePublicationSection extends StatelessWidget {
             // until the user explicitly saves their version.
             if (state.conflict != null)
               Text(
-                'The server has a newer version '
-                '(revision ${state.conflict!.serverRevision}). Your edit is '
-                'kept here; nothing was overwritten.',
+                context.l10n.publicationConflict(
+                  '${state.conflict!.serverRevision}',
+                ),
                 key: const Key('place-publication-conflict'),
               ),
             const SizedBox(height: 8),
@@ -66,52 +72,55 @@ class PlacePublicationSection extends StatelessWidget {
               children: <Widget>[
                 _action(
                   'place-publication-save',
-                  'Save',
+                  context.l10n.publicationSave,
                   state.canSave,
                   controller.save,
                 ),
                 _action(
                   'place-publication-media-upload',
-                  'Upload media',
+                  context.l10n.publicationUploadMedia,
                   state.canUploadMedia,
                   controller.uploadMedia,
                 ),
                 _action(
                   'place-publication-submit',
-                  'Submit',
+                  context.l10n.publicationSubmit,
                   state.canSubmit,
                   controller.submit,
                 ),
                 _action(
                   'place-publication-refresh',
-                  'Refresh',
+                  context.l10n.commonRefresh,
                   state.phase == PlacePublicationPhase.ready ||
                       state.phase == PlacePublicationPhase.offline,
                   controller.refresh,
                 ),
                 _action(
                   'place-publication-publish',
-                  'Publish',
+                  context.l10n.publicationPublish,
                   state.canPublish,
                   controller.publish,
                 ),
                 _action(
                   'place-publication-hide',
-                  'Hide',
+                  context.l10n.publicationHide,
                   state.canHide,
                   controller.hide,
                 ),
                 if (state.conflict != null)
                   _action(
                     'place-publication-save-over-server',
-                    'Save my version',
+                    context.l10n.publicationSaveMyVersion,
                     state.canSaveOverServerVersion,
                     controller.saveOverServerVersion,
                   ),
               ],
             ),
             const SizedBox(height: 12),
-            Text('My places', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              context.l10n.publicationMyObjects('place'),
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             for (final PlacePublicationObjectView item in state.myObjects)
               ListTile(
                 key: Key('place-publication-object-${item.record.contentId}'),
@@ -119,8 +128,11 @@ class PlacePublicationSection extends StatelessWidget {
                 title: Text(item.record.title),
                 subtitle: Text(
                   item.status == null
-                      ? 'unavailable: ${item.failureCode}'
-                      : _objectLine(item.status!),
+                      ? PublicationTexts.unavailable(
+                          context.l10n,
+                          item.failureCode,
+                        )
+                      : PublicationTexts.objectLine(context.l10n, item.status!),
                 ),
               ),
           ],
@@ -140,16 +152,13 @@ class PlacePublicationSection extends StatelessWidget {
     child: Text(label),
   );
 
-  static String _statusLine(PlacePublicationViewState state) {
+  static String _statusLine(
+    AppLocalizations l10n,
+    PlacePublicationViewState state,
+  ) {
     final EventPublicationStatus? status = state.status;
-    if (state.record == null) return 'Not saved to the server';
-    if (status == null) return 'Saved as a server draft';
-    return _objectLine(status);
-  }
-
-  static String _objectLine(EventPublicationStatus status) {
-    final String review = status.latestSubmissionState ?? 'draft';
-    final String visibility = status.visibility ?? 'unpublished';
-    return 'review: $review; visibility: $visibility';
+    if (state.record == null) return l10n.publicationNotSaved;
+    if (status == null) return l10n.publicationServerDraft;
+    return PublicationTexts.objectLine(l10n, status);
   }
 }

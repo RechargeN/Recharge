@@ -222,7 +222,7 @@ void main() {
       await waitFor(tester, find.text('Morning run (UI path)'));
 
       await tapKey(tester, 'find-people-publication-save');
-      await waitFor(tester, statusText('review: draft'));
+      await waitFor(tester, statusText('Review: draft'));
       expect(
         find.byKey(const Key('find-people-publication-message')),
         findsNothing,
@@ -238,9 +238,9 @@ void main() {
         findsOneWidget,
       );
       await tapKey(tester, 'find-people-publication-consent-grant');
-      await waitFor(tester, find.textContaining('consent: active'));
+      await waitFor(tester, find.textContaining('Consent: active'));
       await tapKey(tester, 'find-people-publication-submit');
-      await waitFor(tester, statusText('review: under_review'));
+      await waitFor(tester, statusText('Review: under review'));
 
       // Staff review through the C2 staff script, for exactly this object.
       final tile = find.byWidgetPredicate(
@@ -271,7 +271,7 @@ void main() {
       expect(approved!.exitCode, 0, reason: '${approved.json}');
 
       await tapKey(tester, 'find-people-publication-refresh');
-      await waitFor(tester, statusText('approved_for_publication'));
+      await waitFor(tester, statusText('Review: approved'));
       await tapKey(tester, 'find-people-publication-publish');
       await waitFor(tester, statusText('visibility: visible'));
       expect(
@@ -280,9 +280,9 @@ void main() {
       );
 
       await tapKey(tester, 'find-people-publication-hide');
-      await waitFor(tester, statusText('visibility: withdrawn'));
+      await waitFor(tester, statusText('visibility: hidden'));
       expect(
-        find.descendant(of: tile, matching: find.textContaining('withdrawn')),
+        find.descendant(of: tile, matching: find.textContaining('hidden')),
         findsOneWidget,
       );
     },

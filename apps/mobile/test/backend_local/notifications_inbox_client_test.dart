@@ -6,6 +6,9 @@ import 'package:recharge/app/di/booking_backend_selection.dart';
 import 'package:recharge/app/di/booking_test_entry_guard.dart';
 import 'package:recharge/app/di/notifications_inbox_composition.dart';
 import 'package:recharge/app/testing/seeded_event_fixture.dart';
+import 'package:recharge/core/localization/app_locale_policy.dart';
+import 'package:recharge/core/localization/locale_controller.dart';
+import 'package:recharge/core/localization/locale_preference_store.dart';
 import 'package:recharge/features/booking/data/booking_callable_adapter.dart';
 import 'package:recharge/features/booking/data/booking_transport_event_booking_gateway.dart';
 import 'package:recharge/features/booking/data/booking_transport_runtime.dart';
@@ -111,6 +114,19 @@ void main() {
             releaseMode: false,
             binding: binding(),
           );
+      // L4: the reader's language comes from the app's LocaleController at
+      // query time. Nothing is stored for this device yet, and its language
+      // (German) is unsupported, so the policy falls back to English.
+      final LocaleController reader = LocaleController(
+        policy: AppLocalePolicy(
+          supportedLanguageCodes: AppLocalePolicy.r1LanguageCodes,
+          fallbackLanguageCode: 'en',
+        ),
+        store: InMemoryLocalePreferenceStore(),
+        deviceLanguageTags: const <String>['de-DE'],
+      );
+      await reader.load();
+      await reader.select(AppLocaleChoice.ru);
       final NotificationsRepository inbox = notificationsRepositoryFor(
         manifest: notificationsBindingManifest(guard),
         local: () => fail('the local inbox must not be used'),
@@ -118,6 +134,7 @@ void main() {
           runtime: () async => runtime,
           guard: guard,
         ),
+        wireLocale: () => reader.notificationWireLocale,
       );
       Future<List<NotificationItemEntity>> items() =>
           inbox.getNotifications(userId: 'not-sent-to-the-server');
@@ -194,6 +211,49 @@ void main() {
         both.map((NotificationItemEntity item) => item.id).toSet(),
         hasLength(2),
       );
+
+      // L4: the same two server records, read in each language the reader
+      // chooses. Ids, order and read state never change; the retried
+      // cancellation is still exactly one record.
+      final Map<AppLocaleChoice, List<String>>
+      titles = <AppLocaleChoice, List<String>>{
+        AppLocaleChoice.lv: <String>[
+          'Rezervācija atcelta',
+          'Rezervācija apstiprināta',
+        ],
+        AppLocaleChoice.en: <String>['Booking cancelled', 'Booking confirmed'],
+        AppLocaleChoice.system: <String>[
+          'Booking cancelled',
+          'Booking confirmed',
+        ],
+        AppLocaleChoice.ru: <String>['Бронь отменена', 'Бронь подтверждена'],
+      };
+      for (final MapEntry<AppLocaleChoice, List<String>> language
+          in titles.entries) {
+        await reader.select(language.key);
+        final List<NotificationItemEntity> read = await items();
+        expect(
+          read.map((NotificationItemEntity item) => item.title).toList(),
+          language.value,
+          reason: language.key.name,
+        );
+        expect(
+          read.map((NotificationItemEntity item) => item.id).toList(),
+          both.map((NotificationItemEntity item) => item.id).toList(),
+        );
+        expect(
+          read.map((NotificationItemEntity item) => item.isRead).toList(),
+          both.map((NotificationItemEntity item) => item.isRead).toList(),
+        );
+        expect(
+          read.every(
+            (NotificationItemEntity item) =>
+                item.contentAvailability ==
+                NotificationContentAvailability.rendered,
+          ),
+          isTrue,
+        );
+      }
 
       // 4. Read state is server-authoritative and idempotent.
       final String confirmationId = both.last.id;

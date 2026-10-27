@@ -24,6 +24,9 @@ enum ProtectedAction {
 }
 
 class AuthController extends ChangeNotifier {
+  /// L4: stable message code of a failed session restore; the UI localizes it.
+  static const String sessionExpiredMessage = 'session_expired';
+
   AuthController({
     required SignInUseCase signInUseCase,
     required RestoreSessionUseCase restoreSessionUseCase,
@@ -161,7 +164,7 @@ class AuthController extends ChangeNotifier {
         _state.copyWith(
           status: AuthStatus.guest,
           errorCode: e.code,
-          message: _humanMessageForCode(e.code),
+          message: e.code,
         ),
       );
       _analyticsService.track(
@@ -235,7 +238,7 @@ class AuthController extends ChangeNotifier {
       _setState(
         const AuthState.guest().copyWith(
           errorCode: e.code,
-          message: 'Сессия истекла. Войдите снова.',
+          message: sessionExpiredMessage,
         ),
       );
       _analyticsService.track(
@@ -304,18 +307,5 @@ class AuthController extends ChangeNotifier {
     if (code.startsWith('VALIDATION_')) return 'validation';
     if (code.contains('NETWORK')) return 'network';
     return 'server';
-  }
-
-  String _humanMessageForCode(String code) {
-    switch (code) {
-      case 'AUTH_INVALID_CREDENTIALS':
-        return 'Неверный email или пароль';
-      case 'AUTH_TOO_MANY_ATTEMPTS':
-        return 'Слишком много попыток. Попробуйте позже';
-      case 'NETWORK_UNAVAILABLE':
-        return 'Нет подключения к интернету';
-      default:
-        return 'Не удалось выполнить вход. Попробуйте еще раз';
-    }
   }
 }

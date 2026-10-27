@@ -202,12 +202,12 @@ void main() {
       await waitFor(tester, find.text('Kipsala kayaks (UI path)'));
 
       await tapKey(tester, 'rental-publication-save');
-      await waitFor(tester, statusText('review: draft'));
+      await waitFor(tester, statusText('Review: draft'));
       await tapKey(tester, 'rental-publication-media-upload');
       await waitFor(tester, find.text('Media uploaded: 3'));
       expect(find.byKey(const Key('rental-publication-message')), findsNothing);
       await tapKey(tester, 'rental-publication-submit');
-      await waitFor(tester, statusText('review: under_review'));
+      await waitFor(tester, statusText('Review: under review'));
 
       // Staff review through the C2 staff script, for exactly this object.
       final tile = find.byWidgetPredicate(
@@ -238,7 +238,7 @@ void main() {
       expect(approved!.exitCode, 0, reason: '${approved.json}');
 
       await tapKey(tester, 'rental-publication-refresh');
-      await waitFor(tester, statusText('approved_for_publication'));
+      await waitFor(tester, statusText('Review: approved'));
       await tapKey(tester, 'rental-publication-publish');
       await waitFor(tester, statusText('visibility: visible'));
       expect(
@@ -247,9 +247,9 @@ void main() {
       );
 
       await tapKey(tester, 'rental-publication-hide');
-      await waitFor(tester, statusText('visibility: withdrawn'));
+      await waitFor(tester, statusText('visibility: hidden'));
       expect(
-        find.descendant(of: tile, matching: find.textContaining('withdrawn')),
+        find.descendant(of: tile, matching: find.textContaining('hidden')),
         findsOneWidget,
       );
     },

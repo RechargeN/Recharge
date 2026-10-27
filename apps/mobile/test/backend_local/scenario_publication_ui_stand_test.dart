@@ -234,11 +234,11 @@ void main() {
       await waitFor(tester, find.text('Server revision 1'));
 
       await tapKey(tester, 'scenario-publication-prepare');
-      await waitFor(tester, statusText('review: draft'));
+      await waitFor(tester, statusText('Review: draft'));
       await tester.tap(find.byKey(const Key('scenario-publication-rights')));
       await tapKey(tester, 'scenario-publication-cover');
       await tapKey(tester, 'scenario-publication-submit');
-      await waitFor(tester, statusText('review: under_review'));
+      await waitFor(tester, statusText('Review: under review'));
       expect(
         find.byKey(const Key('scenario-publication-message')),
         findsNothing,
@@ -262,7 +262,7 @@ void main() {
       expect(approved!.exitCode, 0, reason: '${approved.json}');
 
       await tapKey(tester, 'scenario-publication-refresh');
-      await waitFor(tester, statusText('approved_for_publication'));
+      await waitFor(tester, statusText('Review: approved'));
       await tapKey(tester, 'scenario-publication-publish');
       await waitFor(tester, statusText('visibility: visible'));
 
@@ -311,7 +311,7 @@ void main() {
       expect(refusal, 'not_found');
 
       await tapKey(tester, 'scenario-publication-hide');
-      await waitFor(tester, statusText('visibility: withdrawn'));
+      await waitFor(tester, statusText('visibility: hidden'));
     },
     skip: stand == null || !scenarioPublicationTestEntryDefined,
     timeout: const Timeout(Duration(minutes: 5)),

@@ -8,9 +8,11 @@ const standCli = path.join(here, "emulator-stand.mjs");
 const seedCli = path.join(here, "stand-seed.mjs");
 // A smaller B2_GATE_RUNS is for debugging only and never counts as the gate.
 const runs = Number(process.env.B2_GATE_RUNS ?? 3);
-// Five scenarios each create exactly one booking and cancel it; the seed holds
-// one cancelled booking for the staff user. Any duplicate raises the total.
-const expectedTotal = 6;
+// Five scenarios each create exactly one booking and cancel it, and the L4
+// scenario books once per language (lv, ru) out of band and cancels it; the
+// seed holds one cancelled booking for the staff user. Any duplicate raises
+// the total.
+const expectedTotal = 8;
 
 function run(script, args) {
   const result = spawnSync(process.execPath, [script, ...args], {

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -14,14 +15,19 @@ import 'package:recharge/app/di/service_locator.dart';
 import 'package:recharge/app/presentation/event_booking_panel.dart';
 import 'package:recharge/app/presentation/event_details_page.dart';
 import 'package:recharge/app/testing/seeded_event_fixture.dart';
+import 'package:recharge/core/localization/user_message_catalog.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
+import 'package:recharge/features/booking/application/event_booking_controller.dart';
 import 'package:recharge/features/booking/data/booking_callable_adapter.dart';
+import 'package:recharge/features/booking/data/booking_transport_event_booking_gateway.dart';
 import 'package:recharge/features/booking/data/booking_transport_runtime.dart';
+import 'package:recharge/features/booking/domain/repositories/event_booking_gateway.dart';
 import 'package:recharge/features/booking/presentation/event_booking_section.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/domain/repositories/timezone_repository.dart';
 import 'package:recharge/features/favorites/application/favorites_providers.dart';
+import 'package:recharge/generated/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 import 'support/stand_backend.dart';
@@ -83,7 +89,7 @@ void main() {
     }
   }
 
-  Future<void> pumpPage(WidgetTester tester) async {
+  Future<void> pumpPage(WidgetTester tester, {Locale? locale}) async {
     tester.view.physicalSize = const Size(1200, 2600);
     tester.view.devicePixelRatio = 1;
     addTearDown(() {
@@ -110,7 +116,17 @@ void main() {
             (ref) => favoritesController,
           ),
         ],
-        child: MaterialApp.router(routerConfig: router),
+        child: MaterialApp.router(
+          routerConfig: router,
+          locale: locale,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const <LocalizationsDelegate<Object>>[
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+        ),
       ),
     );
   }
@@ -209,7 +225,7 @@ void main() {
       await waitFor(tester, find.byKey(const Key('event-booking-mine')));
       await expectActive(1, 'create');
       expect(
-        find.textContaining('confirmed'),
+        find.textContaining('Confirmed'),
         findsWidgets,
         reason: 'my booking is shown',
       );
@@ -227,7 +243,7 @@ void main() {
       final loading = Completer<void>();
       client.holdNextRead = loading;
       await pumpPage(tester);
-      await waitFor(tester, find.text('Loading your booking...'));
+      await waitFor(tester, find.text('Loading your booking…'));
       expect(find.byType(CircularProgressIndicator), findsWidgets);
       loading.complete();
       final create = find.byKey(const Key('event-booking-create'));
@@ -324,6 +340,72 @@ void main() {
     },
     skip: stand == null,
     timeout: const Timeout(Duration(minutes: 4)),
+  );
+
+  testWidgets(
+    'L4: a real server refusal travels adapter -> controller -> UI and is '
+    'shown in Latvian and Russian, never as a code',
+    (WidgetTester tester) async {
+      for (final String language in <String>['lv', 'ru']) {
+        await bootClient(tester);
+        await pumpPage(tester, locale: Locale(language));
+        final AppLocalizations l10n = lookupAppLocalizations(Locale(language));
+        await waitFor(tester, find.byKey(const Key('event-booking-create')));
+        await expectActive(0, 'nothing booked yet ($language)');
+
+        // Out of band, the same user books through the real gateway, so the
+        // screen still shows "no booking" while the server has one.
+        final EventBookingController shown = tester
+            .widget<EventBookingSection>(find.byType(EventBookingSection))
+            .controller;
+        final BookingTransportRuntime runtime = await sl
+            .getAsync<BookingTransportRuntime>();
+        final EventBookingResult other =
+            await BookingTransportEventBookingGateway(
+              adapter: runtime.adapter!,
+              port: runtime.port!,
+              gate: sl<BookingTestEntryGuard>(),
+            ).execute(
+              EventBookingOperation(
+                kind: EventBookingOperationKind.create,
+                idempotencyKey: 'l4-${const Uuid().v4()}',
+                occurrenceId: shown.occurrenceId,
+                inventoryPoolId: shown.inventoryPoolId,
+                channel: shown.channel,
+                participantUnits: 1,
+                eventRevision: shown.eventRevision,
+              ),
+            );
+        expect(other.outcome, EventBookingOutcome.succeeded);
+        await expectActive(1, 'booked out of band ($language)');
+
+        // The screen's own create is a new intent; the server refuses it.
+        await tapKey(tester, 'event-booking-create');
+        final Finder message = find.byKey(const Key('event-booking-message'));
+        await waitFor(tester, message);
+        final EventBookingMessage? state = shown.state.message;
+        final String? code = state?.refusalCode;
+        final String text = (tester.widget<Text>(message)).data!;
+        expect(state?.notice, EventBookingNotice.refused, reason: text);
+        expect(code, isNotNull, reason: text);
+        expect(
+          UserMessageCatalog.isRegistered(UserMessageFamily.booking, code!),
+          isTrue,
+          reason: 'the server answered $code',
+        );
+        expect(text, UserMessageCatalog.booking(l10n, code));
+        expect(text.contains(code), isFalse);
+        expect(text, isNot(l10n.bookingErrorGeneric));
+        await expectActive(1, 'the refusal created nothing ($language)');
+
+        await tapKey(tester, 'event-booking-refresh');
+        await waitFor(tester, find.byKey(const Key('event-booking-mine')));
+        await cancelMine(tester);
+        await tester.pumpWidget(const SizedBox.shrink());
+      }
+    },
+    skip: stand == null,
+    timeout: const Timeout(Duration(minutes: 6)),
   );
 }
 

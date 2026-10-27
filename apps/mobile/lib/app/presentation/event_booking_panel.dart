@@ -9,9 +9,16 @@ import '../di/event_booking_composition.dart';
 /// default-off test entry builds a controller: for the B2 fixture Event
 /// ([target] null) or for the exact occurrence a Content Event references.
 class EventBookingPanel extends StatefulWidget {
-  const EventBookingPanel({super.key, this.target});
+  const EventBookingPanel({
+    super.key,
+    this.target,
+    required this.eventTimeZoneId,
+  });
 
   final EventBookingRef? target;
+
+  /// L4: the Event's IANA zone for every Booking time shown.
+  final String eventTimeZoneId;
 
   @override
   State<EventBookingPanel> createState() => _EventBookingPanelState();
@@ -53,7 +60,10 @@ class _EventBookingPanelState extends State<EventBookingPanel> {
           (BuildContext context, AsyncSnapshot<EventBookingController?> s) {
             final EventBookingController? controller = s.data;
             if (controller == null) return const SizedBox.shrink();
-            return EventBookingSection(controller: controller);
+            return EventBookingSection(
+              controller: controller,
+              eventTimeZoneId: widget.eventTimeZoneId,
+            );
           },
     );
   }

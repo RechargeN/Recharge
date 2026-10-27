@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
 import '../../../../app/adapters/legacy_notification_route_resolver.dart';
 import '../../../../app/application/planning_navigation_intent.dart';
 import '../../../../app/application/planning_navigation_resolver.dart';
@@ -50,9 +52,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     final user = authState.user;
 
     if (user == null) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: _notificationsBackground,
-        body: Center(child: Text('Требуется авторизация')),
+        body: Center(child: Text(context.l10n.commonSignInRequired)),
       );
     }
 
@@ -80,7 +82,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           if (state.status == NotificationsStatus.ready &&
               state.unreadCount > 0)
             IconButton(
-              tooltip: 'Read all',
+              tooltip: context.l10n.notificationsReadAll,
               onPressed: controller.markAllAsRead,
               icon: const Icon(Icons.done_all),
             ),
@@ -90,8 +92,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         NotificationsStatus.initial || NotificationsStatus.loading =>
           const Center(child: CircularProgressIndicator()),
         NotificationsStatus.error => _StateMessage(
-          message: state.message ?? 'Не удалось загрузить уведомления',
-          actionLabel: 'Повторить',
+          message: context.l10n.notificationsLoadFailed,
+          actionLabel: context.l10n.commonRetry,
           onAction: () => controller.loadNotifications(userId: user.id),
         ),
         NotificationsStatus.ready => _buildReadyState(
@@ -112,8 +114,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   }) {
     if (state.items.isEmpty) {
       return _StateMessage(
-        message: 'Пока нет уведомлений',
-        actionLabel: 'Обновить',
+        message: context.l10n.notificationsEmpty,
+        actionLabel: context.l10n.commonRefresh,
         onAction: () => controller.loadNotifications(userId: userId),
       );
     }
@@ -134,12 +136,12 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
             textInputAction: TextInputAction.search,
             onChanged: controller.updateSearchQuery,
             decoration: InputDecoration(
-              hintText: 'Search notifications',
+              hintText: context.l10n.notificationsSearchHint,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: state.searchQuery.isEmpty
                   ? null
                   : IconButton(
-                      tooltip: 'Clear search',
+                      tooltip: context.l10n.notificationsClearSearch,
                       onPressed: () {
                         _searchController.clear();
                         controller.clearSearch();
@@ -299,35 +301,35 @@ class _NotificationFilterBar extends StatelessWidget {
         children: <Widget>[
           _NotificationFilterChip(
             icon: Icons.apps_rounded,
-            label: 'All',
+            label: context.l10n.notificationsFilterAll,
             selected: selected == _NotificationFeedFilter.all,
             onTap: () => onChanged(_NotificationFeedFilter.all),
           ),
           const SizedBox(width: 8),
           _NotificationFilterChip(
             icon: Icons.fiber_new_outlined,
-            label: 'New',
+            label: context.l10n.notificationsFilterNew,
             selected: selected == _NotificationFeedFilter.newItems,
             onTap: () => onChanged(_NotificationFeedFilter.newItems),
           ),
           const SizedBox(width: 8),
           _NotificationFilterChip(
             icon: Icons.notifications_none,
-            label: 'Reminders',
+            label: context.l10n.notificationsFilterReminders,
             selected: selected == _NotificationFeedFilter.reminders,
             onTap: () => onChanged(_NotificationFeedFilter.reminders),
           ),
           const SizedBox(width: 8),
           _NotificationFilterChip(
             icon: Icons.sync,
-            label: 'Updates',
+            label: context.l10n.notificationsFilterUpdates,
             selected: selected == _NotificationFeedFilter.updates,
             onTap: () => onChanged(_NotificationFeedFilter.updates),
           ),
           const SizedBox(width: 8),
           _NotificationFilterChip(
             icon: Icons.event_note_outlined,
-            label: 'Scenarios',
+            label: context.l10n.notificationsFilterScenarios,
             selected: selected == _NotificationFeedFilter.scenarios,
             onTap: () => onChanged(_NotificationFeedFilter.scenarios),
           ),
@@ -442,7 +444,7 @@ class _NotificationCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        item.title,
+                        _itemTitle(context.l10n, item),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -452,7 +454,7 @@ class _NotificationCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        item.body,
+                        _itemBody(context.l10n, item),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -463,7 +465,9 @@ class _NotificationCard extends StatelessWidget {
                       if (hasTargetRoute) ...<Widget>[
                         const SizedBox(height: 5),
                         Text(
-                          destination.label,
+                          context.l10n.notificationDestination(
+                            destination.kind,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.labelSmall
@@ -483,11 +487,22 @@ class _NotificationCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Text(
-                        _formatTime(item.createdAtUtc),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.82),
-                          fontWeight: FontWeight.w800,
+                      // L4: the arrival time belongs to the reader, so it is
+                      // shown in the device zone, in the locale's own format;
+                      // it scales down instead of overflowing the column.
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          RechargeFormats.deviceTime(
+                            item.createdAtUtc,
+                            context.l10n.localeName,
+                          ),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.82),
+                                fontWeight: FontWeight.w800,
+                              ),
                         ),
                       ),
                       if (hasMenu) ...<Widget>[
@@ -530,7 +545,7 @@ class _NotificationActionsMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<_NotificationMenuAction>(
-      tooltip: 'Notification actions',
+      tooltip: context.l10n.notificationsActions,
       icon: const Icon(Icons.more_horiz, color: Colors.white, size: 18),
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(minWidth: 38, minHeight: 32),
@@ -550,7 +565,9 @@ class _NotificationActionsMenu extends StatelessWidget {
               children: <Widget>[
                 Icon(destination.icon, size: 18),
                 const SizedBox(width: 8),
-                Text(destination.actionLabel),
+                Text(
+                  context.l10n.notificationDestinationAction(destination.kind),
+                ),
               ],
             ),
           ),
@@ -765,15 +782,12 @@ class _NotificationRouteAction {
 }
 
 class _NotificationDestination {
-  const _NotificationDestination({
-    required this.icon,
-    required this.label,
-    required this.actionLabel,
-  });
+  const _NotificationDestination({required this.icon, required this.kind});
 
   final IconData icon;
-  final String label;
-  final String actionLabel;
+
+  /// L4: a stable destination id; its label and action are localized.
+  final String kind;
 }
 
 _NotificationDestination _notificationDestinationFor(String? targetRoute) {
@@ -783,78 +797,52 @@ _NotificationDestination _notificationDestinationFor(String? targetRoute) {
   if (path == RouteNames.legacyScenarioBuilder) {
     return const _NotificationDestination(
       icon: Icons.notifications_outlined,
-      label: 'Legacy notification',
-      actionLabel: 'Open',
+      kind: 'legacy',
     );
   }
   if (path == RouteNames.discoverMap && query['mode'] == 'scenario') {
-    return const _NotificationDestination(
-      icon: Icons.route,
-      label: 'Route map',
-      actionLabel: 'Open route',
-    );
+    return const _NotificationDestination(icon: Icons.route, kind: 'routeMap');
   }
   if (path == RouteNames.discoverMap) {
-    return const _NotificationDestination(
-      icon: Icons.map,
-      label: 'Map',
-      actionLabel: 'Open map',
-    );
+    return const _NotificationDestination(icon: Icons.map, kind: 'map');
   }
   if (path.startsWith(RouteNames.discoverDetails)) {
     return const _NotificationDestination(
       icon: Icons.local_activity,
-      label: 'Details',
-      actionLabel: 'Open details',
+      kind: 'details',
     );
   }
   if (path == RouteNames.favorites) {
-    return const _NotificationDestination(
-      icon: Icons.favorite,
-      label: 'Saved plan',
-      actionLabel: 'Open saved',
-    );
+    return const _NotificationDestination(icon: Icons.favorite, kind: 'saved');
   }
   if (path == RouteNames.search) {
-    return const _NotificationDestination(
-      icon: Icons.search,
-      label: 'Search',
-      actionLabel: 'Search',
-    );
+    return const _NotificationDestination(icon: Icons.search, kind: 'search');
   }
   if (path == RouteNames.create) {
     if (query['source'] == 'publish' || query['status'] == 'pendingReview') {
       return const _NotificationDestination(
         icon: Icons.fact_check_outlined,
-        label: 'Publish status',
-        actionLabel: 'Open listing',
+        kind: 'publishStatus',
       );
     }
     return const _NotificationDestination(
       icon: Icons.add_circle,
-      label: 'Create',
-      actionLabel: 'Open create',
+      kind: 'create',
     );
   }
   if (path == RouteNames.profile) {
     return const _NotificationDestination(
       icon: Icons.storefront_outlined,
-      label: 'Creator profile',
-      actionLabel: 'Open profile',
+      kind: 'creatorProfile',
     );
   }
   if (path == RouteNames.discover) {
     return const _NotificationDestination(
       icon: Icons.explore,
-      label: 'Discover',
-      actionLabel: 'Open feed',
+      kind: 'discover',
     );
   }
-  return const _NotificationDestination(
-    icon: Icons.info,
-    label: 'Update',
-    actionLabel: 'Open',
-  );
+  return const _NotificationDestination(icon: Icons.info, kind: 'other');
 }
 
 String _pathForTargetRoute(String? targetRoute) {
@@ -941,13 +929,13 @@ class _FilteredNotificationsEmpty extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             hasSearchQuery
-                ? 'По вашему запросу ничего не найдено'
-                : 'В этом фильтре пока пусто',
+                ? context.l10n.notificationsNoSearchResults
+                : context.l10n.notificationsFilterEmpty,
           ),
           const SizedBox(height: 10),
           OutlinedButton(
             onPressed: onShowAll,
-            child: const Text('Показать все'),
+            child: Text(context.l10n.notificationsShowAll),
           ),
         ],
       ),
@@ -984,9 +972,18 @@ class _StateMessage extends StatelessWidget {
   }
 }
 
-String _formatTime(DateTime value) {
-  final DateTime local = value.toLocal();
-  final String hour = local.hour.toString().padLeft(2, '0');
-  final String minute = local.minute.toString().padLeft(2, '0');
-  return '$hour:$minute';
-}
+/// L4: a server item whose text could not be rendered in the reader's
+/// language says so; no other language is substituted.
+String _itemTitle(AppLocalizations l10n, NotificationItemEntity item) =>
+    item.contentAvailability == NotificationContentAvailability.rendered
+    ? item.title
+    : l10n.notificationFallbackTitle;
+
+String _itemBody(AppLocalizations l10n, NotificationItemEntity item) =>
+    switch (item.contentAvailability) {
+      NotificationContentAvailability.rendered => item.body,
+      NotificationContentAvailability.unsupportedLocale =>
+        l10n.notificationUnsupportedLocale,
+      NotificationContentAvailability.templateUnavailable =>
+        l10n.notificationTemplateUnavailable,
+    };

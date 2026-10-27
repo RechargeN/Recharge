@@ -66,7 +66,7 @@ void main() {
     await controller.restoreSession();
 
     expect(controller.state.status, AuthStatus.guest);
-    expect(controller.state.message, contains('Сессия истекла'));
+    expect(controller.state.message, AuthController.sessionExpiredMessage);
   });
 
   test('restoreSession reuses in-flight restore request', () async {

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
 import '../../application/local_import_cleanup_policy.dart';
 import '../../application/local_import_controller.dart';
 import '../../domain/entities/local_import.dart';
+import 'publication_texts.dart';
 
 /// Test-path view of the local→server import (D4, D4.1). It renders the dry
 /// run, the session and each item's server state, and forwards taps; it holds
@@ -21,36 +24,39 @@ class LocalImportSection extends StatelessWidget {
         final LocalImportViewState state = controller.state;
         final LocalImportSession? session = state.session;
         final bool idle = state.phase == LocalImportPhase.ready;
+        final AppLocalizations l10n = context.l10n;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Import local data (local Emulator)',
+              l10n.importSectionTitle,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
               session == null
-                  ? 'No import session'
-                  : 'Session ${session.status.name}: '
-                        '${session.checkpoint}/${session.plannedLocalDraftIds.length}',
+                  ? l10n.importNoSession
+                  : l10n.importSessionProgress(
+                      l10n.importSessionStatus(session.status.name),
+                      session.checkpoint,
+                      session.plannedLocalDraftIds.length,
+                    ),
               key: const Key('local-import-session'),
             ),
             if (state.message != null)
               Text(
-                state.message!,
+                PublicationTexts.message(l10n, state.message!),
                 key: const Key('local-import-message'),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             if (state.pendingCleanups > 0) ...<Widget>[
               Text(
-                '${state.pendingCleanups} deleted local copies to record '
-                'on the server',
+                l10n.importPendingCleanups(state.pendingCleanups),
                 key: const Key('local-import-pending-cleanups'),
               ),
               _action(
                 'local-import-finish-cleanup',
-                'Finish cleanup',
+                l10n.importFinishCleanup,
                 idle || state.phase == LocalImportPhase.offline,
                 controller.finishCleanups,
               ),
@@ -62,21 +68,21 @@ class LocalImportSection extends StatelessWidget {
               children: <Widget>[
                 _action(
                   'local-import-dry-run',
-                  'Dry run',
+                  l10n.importDryRun,
                   idle || state.phase == LocalImportPhase.offline,
                   controller.load,
                 ),
                 _action(
                   'local-import-approve',
-                  'Approve import',
+                  l10n.importApprove,
                   state.canApprove,
                   controller.approve,
                 ),
                 _action(
                   'local-import-run',
                   session?.status == LocalImportSessionStatus.paused
-                      ? 'Resume'
-                      : 'Run',
+                      ? l10n.importResume
+                      : l10n.importRun,
                   state.canRun,
                   controller.run,
                 ),
@@ -124,15 +130,38 @@ class _ItemTile extends StatelessWidget {
     final LocalImportCandidate candidate = item.candidate;
     final LocalImportReceipt? receipt = item.receipt;
     final String id = candidate.localDraftId;
+    final AppLocalizations l10n = context.l10n;
+    final String type = l10n.createTypeName(candidate.typeId);
+    final String classification = l10n.importClassification(
+      candidate.classification.name,
+    );
+    final String? reason = candidate.reason;
+    final String? receiptFailure = receipt?.failureCode;
+    final String? itemFailure = item.failureCode;
     final List<String> lines = <String>[
-      '${candidate.typeId}: ${candidate.classification.name}'
-          '${candidate.reason == null ? '' : ' (${candidate.reason})'}',
+      reason == null
+          ? l10n.importCandidateLine(type, classification)
+          // A reason may carry a detail after a colon (a type or a
+          // capability list); only its stable prefix is shown, localized.
+          : l10n.importCandidateLineReason(
+              type,
+              classification,
+              l10n.importReason(reason.split(':').first),
+            ),
       if (receipt != null)
-        'server ${receipt.contentId}: ${receipt.state.name}'
-            '${receipt.failureCode == null ? '' : ' (${receipt.failureCode})'}',
-      if (receipt == null && item.failureCode != null)
-        'refused: ${item.failureCode}',
-      'local copy: ${_cleanupLine(item.cleanup)}',
+        receiptFailure == null
+            ? l10n.importServerLine(
+                receipt.contentId,
+                l10n.importItemState(receipt.state.name),
+              )
+            : l10n.importServerLineReason(
+                receipt.contentId,
+                l10n.importItemState(receipt.state.name),
+                PublicationTexts.message(l10n, receiptFailure),
+              ),
+      if (receipt == null && itemFailure != null)
+        l10n.importRefused(PublicationTexts.message(l10n, itemFailure)),
+      l10n.importLocalCopy(_cleanupLine(l10n, item.cleanup)),
     ];
     return Card(
       key: Key('local-import-item-$id'),
@@ -153,14 +182,14 @@ class _ItemTile extends StatelessWidget {
                   TextButton(
                     key: Key('local-import-choose-$id'),
                     onPressed: idle ? () => controller.chooseUpdate(id) : null,
-                    child: const Text('Import again'),
+                    child: Text(l10n.importAgain),
                   ),
                 if (item.cleanup.stage ==
                     LocalImportCleanupStage.awaitingConfirmation)
                   TextButton(
                     key: Key('local-import-confirm-$id'),
                     onPressed: idle ? () => controller.confirm(id) : null,
-                    child: const Text('Keep the server copy'),
+                    child: Text(l10n.importKeepServerCopy),
                   ),
                 if (item.cleanup.stage == LocalImportCleanupStage.eligible ||
                     item.cleanup.stage ==
@@ -171,15 +200,15 @@ class _ItemTile extends StatelessWidget {
                     child: Text(
                       item.cleanup.stage ==
                               LocalImportCleanupStage.cleanupReserved
-                          ? 'Finish deleting local copy'
-                          : 'Delete local copy',
+                          ? l10n.importFinishDeleting
+                          : l10n.importDeleteLocal,
                     ),
                   ),
                 if (item.canCancelCleanup)
                   TextButton(
                     key: Key('local-import-cancel-cleanup-$id'),
                     onPressed: idle ? () => controller.cancelCleanup(id) : null,
-                    child: const Text('Keep local copy'),
+                    child: Text(l10n.importKeepLocal),
                   ),
                 if (item.canRollBack)
                   TextButton(
@@ -189,8 +218,8 @@ class _ItemTile extends StatelessWidget {
                         : null,
                     child: Text(
                       receipt?.state == LocalImportItemState.rollbackPending
-                          ? 'Retry rollback'
-                          : 'Roll back import',
+                          ? l10n.importRetryRollback
+                          : l10n.importRollBack,
                     ),
                   ),
               ],
@@ -207,21 +236,18 @@ class _ItemTile extends StatelessWidget {
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
         key: const Key('local-import-rollback-dialog'),
-        title: const Text('Roll back this import?'),
-        content: const Text(
-          'The imported server draft is closed for good. Your local copy '
-          'stays and can be imported again later.',
-        ),
+        title: Text(dialogContext.l10n.importRollbackDialogTitle),
+        content: Text(dialogContext.l10n.importRollbackDialogBody),
         actions: <Widget>[
           TextButton(
             key: const Key('local-import-rollback-cancel'),
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(dialogContext.l10n.commonCancel),
           ),
           FilledButton(
             key: const Key('local-import-rollback-confirm'),
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Roll back'),
+            child: Text(dialogContext.l10n.importRollbackConfirm),
           ),
         ],
       ),
@@ -229,21 +255,25 @@ class _ItemTile extends StatelessWidget {
     if (confirmed == true) await controller.rollback(id);
   }
 
-  static String _cleanupLine(LocalImportCleanupStatus status) =>
-      switch (status.stage) {
-        LocalImportCleanupStage.notImported => 'kept (not imported)',
-        LocalImportCleanupStage.awaitingVerification =>
-          'kept (server copy not verified)',
-        LocalImportCleanupStage.awaitingConfirmation =>
-          'kept (confirm the server copy)',
-        LocalImportCleanupStage.recoveryPeriod =>
-          'kept until ${status.eligibleAtUtc!.toIso8601String()}',
-        LocalImportCleanupStage.eligible => 'may be deleted',
-        LocalImportCleanupStage.cleanupReserved =>
-          'being deleted (reserved on the server)',
-        LocalImportCleanupStage.deleted => 'deleted',
-        LocalImportCleanupStage.rollbackPending =>
-          'kept (rollback waiting for the server)',
-        LocalImportCleanupStage.rolledBack => 'kept (import rolled back)',
-      };
+  static String _cleanupLine(
+    AppLocalizations l10n,
+    LocalImportCleanupStatus status,
+  ) => switch (status.stage) {
+    LocalImportCleanupStage.notImported => l10n.importCleanupNotImported,
+    LocalImportCleanupStage.awaitingVerification =>
+      l10n.importCleanupAwaitingVerification,
+    LocalImportCleanupStage.awaitingConfirmation =>
+      l10n.importCleanupAwaitingConfirmation,
+    // The recovery period ends at an instant of the device's own data, not
+    // of any object's local calendar: shown in the device zone.
+    LocalImportCleanupStage.recoveryPeriod => l10n.importCleanupRecovery(
+      RechargeFormats.deviceDateTime(status.eligibleAtUtc!, l10n.localeName),
+    ),
+    LocalImportCleanupStage.eligible => l10n.importCleanupEligible,
+    LocalImportCleanupStage.cleanupReserved => l10n.importCleanupReserved,
+    LocalImportCleanupStage.deleted => l10n.importCleanupDeleted,
+    LocalImportCleanupStage.rollbackPending =>
+      l10n.importCleanupRollbackPending,
+    LocalImportCleanupStage.rolledBack => l10n.importCleanupRolledBack,
+  };
 }

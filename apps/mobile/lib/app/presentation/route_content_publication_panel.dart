@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../core/localization/l10n_context.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/application/auth_providers.dart';
@@ -17,7 +19,7 @@ class RouteContentPublicationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Route publication (test)')),
+      appBar: AppBar(title: Text(context.l10n.publicationPageTitle('route'))),
       body: const SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: RouteContentPublicationPanel(),
@@ -51,9 +53,9 @@ class _RouteContentPublicationPanelState
     final String? userId = ref.watch(authControllerProvider).state.user?.id;
     final PublisherRef? publisher = ref.watch(activeCreatePublisherProvider);
     if (userId == null) {
-      return const Text(
-        'Sign in to publish your Route',
-        key: Key('route-publication-signed-out'),
+      return Text(
+        context.l10n.publicationSignIn('route'),
+        key: const Key('route-publication-signed-out'),
       );
     }
     // A change of account or workspace builds a new controller bound to it.

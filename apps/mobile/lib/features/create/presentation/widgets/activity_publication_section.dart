@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
+import 'publication_texts.dart';
 import '../../application/activity_publication_controller.dart';
 import '../../domain/entities/event_publication.dart';
 
@@ -27,38 +29,48 @@ class ActivityPublicationSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Test publication path (local Emulator)',
+              context.l10n.publicationTestPath,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              state.draftTitle ?? 'No Activity draft in Create',
+              state.draftTitle ?? context.l10n.publicationNoDraft('activity'),
               key: const Key('activity-publication-draft-title'),
             ),
             Text(
-              _statusLine(state),
+              _statusLine(context.l10n, state),
               key: const Key('activity-publication-status'),
             ),
             if (state.record != null)
               Text(
-                'Media uploaded: ${state.record!.attachments.length}',
+                context.l10n.publicationMediaUploaded(
+                  state.record!.attachments.length,
+                ),
                 key: const Key('activity-publication-media'),
               ),
             if (status?.currentPublishedRevisionId != null)
               Text(
-                'Published version: ${status!.currentPublishedRevisionId}',
+                context.l10n.publicationPublishedVersion(
+                  '${status!.currentPublishedRevisionId}',
+                ),
                 key: const Key('activity-publication-revision'),
               ),
             if (state.record != null)
               Text(
-                'Draft revision: ${state.record!.draftRevision}${state.record!.editingFromRevisionId != null ? ' — unpublished changes; review required' : ''}',
+                state.record!.editingFromRevisionId != null
+                    ? context.l10n.publicationDraftRevisionPending(
+                        '${state.record!.draftRevision}',
+                      )
+                    : context.l10n.publicationDraftRevision(
+                        '${state.record!.draftRevision}',
+                      ),
                 key: const Key('activity-publication-editing'),
               ),
             if (state.message != null)
               Text(
                 state.message == 'validation_failed'
-                    ? 'Check the Activity fields in Create and submit again.'
-                    : state.message!,
+                    ? context.l10n.publicationActivityCheckFields
+                    : PublicationTexts.message(context.l10n, state.message!),
                 key: const Key('activity-publication-message'),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
@@ -66,9 +78,9 @@ class ActivityPublicationSection extends StatelessWidget {
             // until the user explicitly saves their version.
             if (state.conflict != null)
               Text(
-                'The server has a newer version '
-                '(revision ${state.conflict!.serverRevision}). Your edit is '
-                'kept here; nothing was overwritten.',
+                context.l10n.publicationConflict(
+                  '${state.conflict!.serverRevision}',
+                ),
                 key: const Key('activity-publication-conflict'),
               ),
             const SizedBox(height: 8),
@@ -78,58 +90,58 @@ class ActivityPublicationSection extends StatelessWidget {
               children: <Widget>[
                 _action(
                   'activity-publication-save',
-                  'Save',
+                  context.l10n.publicationSave,
                   state.canSave,
                   controller.save,
                 ),
                 _action(
                   'activity-publication-media-upload',
-                  'Upload media',
+                  context.l10n.publicationUploadMedia,
                   state.canUploadMedia,
                   controller.uploadMedia,
                 ),
                 _action(
                   'activity-publication-submit',
-                  'Submit',
+                  context.l10n.publicationSubmit,
                   state.canSubmit,
                   controller.submit,
                 ),
                 _action(
                   'activity-publication-refresh',
-                  'Refresh',
+                  context.l10n.commonRefresh,
                   state.phase == ActivityPublicationPhase.ready ||
                       state.phase == ActivityPublicationPhase.offline,
                   controller.refresh,
                 ),
                 _action(
                   'activity-publication-publish',
-                  'Publish',
+                  context.l10n.publicationPublish,
                   state.canPublish,
                   controller.publish,
                 ),
                 _action(
                   'activity-publication-activate',
-                  'Activate published version',
+                  context.l10n.publicationActivatePublished,
                   state.canActivate,
                   controller.activate,
                 ),
                 if (onEdit != null)
                   _action(
                     'activity-publication-edit',
-                    'Edit in Create',
+                    context.l10n.publicationEditInCreate,
                     state.canEdit,
                     onEdit!,
                   ),
                 _action(
                   'activity-publication-hide',
-                  'Hide',
+                  context.l10n.publicationHide,
                   state.canHide,
                   controller.hide,
                 ),
                 if (state.conflict != null)
                   _action(
                     'activity-publication-save-over-server',
-                    'Save my version',
+                    context.l10n.publicationSaveMyVersion,
                     state.canSaveOverServerVersion,
                     controller.saveOverServerVersion,
                   ),
@@ -137,7 +149,7 @@ class ActivityPublicationSection extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'My activities',
+              context.l10n.publicationMyObjects('activity'),
               style: Theme.of(context).textTheme.titleSmall,
             ),
             for (final ActivityPublicationObjectView item in state.myObjects)
@@ -149,8 +161,11 @@ class ActivityPublicationSection extends StatelessWidget {
                 title: Text(item.record.title),
                 subtitle: Text(
                   item.status == null
-                      ? 'unavailable: ${item.failureCode}'
-                      : _objectLine(item.status!),
+                      ? PublicationTexts.unavailable(
+                          context.l10n,
+                          item.failureCode,
+                        )
+                      : PublicationTexts.objectLine(context.l10n, item.status!),
                 ),
               ),
           ],
@@ -170,16 +185,13 @@ class ActivityPublicationSection extends StatelessWidget {
     child: Text(label),
   );
 
-  static String _statusLine(ActivityPublicationViewState state) {
+  static String _statusLine(
+    AppLocalizations l10n,
+    ActivityPublicationViewState state,
+  ) {
     final EventPublicationStatus? status = state.status;
-    if (state.record == null) return 'Not saved to the server';
-    if (status == null) return 'Saved as a server draft';
-    return _objectLine(status);
-  }
-
-  static String _objectLine(EventPublicationStatus status) {
-    final String review = status.latestSubmissionState ?? 'draft';
-    final String visibility = status.visibility ?? 'unpublished';
-    return 'review: $review; visibility: $visibility';
+    if (state.record == null) return l10n.publicationNotSaved;
+    if (status == null) return l10n.publicationServerDraft;
+    return PublicationTexts.objectLine(l10n, status);
   }
 }

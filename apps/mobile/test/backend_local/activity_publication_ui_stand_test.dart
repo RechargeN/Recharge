@@ -237,7 +237,7 @@ void main() {
       await waitFor(tester, find.text('Ķemeri bog loop (UI path)'));
 
       await tapKey(tester, 'activity-publication-save');
-      await waitFor(tester, statusText('review: draft'));
+      await waitFor(tester, statusText('Review: draft'));
       await tapKey(tester, 'activity-publication-media-upload');
       await waitFor(tester, find.text('Media uploaded: 3'));
       expect(
@@ -245,7 +245,7 @@ void main() {
         findsNothing,
       );
       await tapKey(tester, 'activity-publication-submit');
-      await waitFor(tester, statusText('review: under_review'));
+      await waitFor(tester, statusText('Review: under review'));
 
       // Staff review through the C2 staff script, for exactly this object.
       final tile = find.byWidgetPredicate(
@@ -276,7 +276,7 @@ void main() {
       expect(approved!.exitCode, 0, reason: '${approved.json}');
 
       await tapKey(tester, 'activity-publication-refresh');
-      await waitFor(tester, statusText('approved_for_publication'));
+      await waitFor(tester, statusText('Review: approved'));
       await tapKey(tester, 'activity-publication-publish');
       await waitFor(tester, statusText('visibility: visible'));
       expect(
@@ -285,9 +285,9 @@ void main() {
       );
 
       await tapKey(tester, 'activity-publication-hide');
-      await waitFor(tester, statusText('visibility: withdrawn'));
+      await waitFor(tester, statusText('visibility: hidden'));
       expect(
-        find.descendant(of: tile, matching: find.textContaining('withdrawn')),
+        find.descendant(of: tile, matching: find.textContaining('hidden')),
         findsOneWidget,
       );
       await tapKey(tester, 'activity-publication-activate');
@@ -336,7 +336,7 @@ void main() {
       );
       await tapKey(tester, 'activity-publication-save');
       await tapKey(tester, 'activity-publication-submit');
-      await waitFor(tester, statusText('review: under_review'));
+      await waitFor(tester, statusText('Review: under review'));
       final editedQueue = await tester.runAsync(
         () => stand!.moderate(<String>['queue']),
       );
@@ -354,9 +354,9 @@ void main() {
       );
       expect(editedApproved!.exitCode, 0, reason: '${editedApproved.json}');
       await tapKey(tester, 'activity-publication-refresh');
-      await waitFor(tester, statusText('approved_for_publication'));
+      await waitFor(tester, statusText('Review: approved'));
       await tapKey(tester, 'activity-publication-publish');
-      await waitFor(tester, statusText('review: published'));
+      await waitFor(tester, statusText('Review: published'));
       expect(
         tester
             .widget<Text>(

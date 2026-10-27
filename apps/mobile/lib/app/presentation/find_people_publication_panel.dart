@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../core/localization/l10n_context.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/application/auth_providers.dart';
@@ -17,7 +19,9 @@ class FindPeoplePublicationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Find People publication (test)')),
+      appBar: AppBar(
+        title: Text(context.l10n.publicationPageTitle('findPeople')),
+      ),
       body: const SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: FindPeoplePublicationPanel(),
@@ -66,9 +70,9 @@ class _FindPeoplePublicationPanelState
   Widget build(BuildContext context) {
     final String? userId = ref.watch(authControllerProvider).state.user?.id;
     if (userId == null) {
-      return const Text(
-        'Sign in to publish your Find People draft',
-        key: Key('find-people-publication-signed-out'),
+      return Text(
+        context.l10n.publicationSignIn('findPeople'),
+        key: const Key('find-people-publication-signed-out'),
       );
     }
     // A change of account builds a new controller bound to that account.

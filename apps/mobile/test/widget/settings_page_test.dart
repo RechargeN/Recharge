@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recharge/app/router/route_names.dart';
+import 'package:recharge/app/config/market_config.dart';
+import 'package:recharge/core/localization/app_locale_policy.dart';
+import 'package:recharge/core/localization/locale_controller.dart';
+import 'package:recharge/core/localization/locale_preference_store.dart';
+import 'package:recharge/core/localization/locale_providers.dart';
+import 'package:recharge/generated/l10n/app_localizations.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
@@ -114,15 +121,15 @@ void main() {
         'Очень длинное имя пользователя для проверки доступности действий';
     await tester.enterText(find.byType(TextField).first, longName);
     await tester.scrollUntilVisible(
-      find.text('Сохранить профиль'),
+      find.text('Save profile'),
       180,
       scrollable: find.byType(Scrollable).first,
     );
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Сохранить профиль'));
+    await tester.ensureVisible(find.text('Save profile'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Сохранить профиль'));
+    await tester.tap(find.text('Save profile'));
     await tester.pumpAndSettle();
     expect(exploreRepository.profiles['u']?.displayName, longName);
     expect(tester.takeException(), isNull);
@@ -170,9 +177,9 @@ void main() {
     expect(find.text('Support / Help'), findsOneWidget);
     expect(find.text('Privacy Policy'), findsOneWidget);
     expect(find.text('Terms of Service'), findsOneWidget);
-    expect(find.text('Выйти'), findsOneWidget);
+    expect(find.text('Sign out'), findsOneWidget);
     expect(tester.takeException(), isNull);
-    await tester.tap(find.text('Выйти'));
+    await tester.tap(find.text('Sign out'));
     await tester.pumpAndSettle();
     expect(authController.state.isAuthenticated, isFalse);
     expect(find.text('Logged out home'), findsOneWidget);
@@ -185,6 +192,125 @@ void main() {
       isFalse,
     );
     expect(await exploreRepository.loadProfileEditable('another-user'), isNull);
+  });
+
+  testWidgets('L4: switching the language changes only text; the choice '
+      'persists and market, currency and account settings stay', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(360, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view
+        ..resetPhysicalSize()
+        ..resetDevicePixelRatio();
+    });
+    final authController = AuthController(
+      signInUseCase: SignInUseCase(_NoopAuthRepository()),
+      restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+      signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+      getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await authController.signIn(
+      email: 'user@example.com',
+      password: 'password123',
+      sourceScreen: 'test',
+      sourceAction: 'seed',
+    );
+    final exploreRepository = _FakeExploreRepository();
+    final exploreController = ExploreController(
+      loadProfileEditableUseCase: LoadProfileEditableUseCase(exploreRepository),
+      saveProfileEditableUseCase: SaveProfileEditableUseCase(exploreRepository),
+      loadSettingsUseCase: LoadSettingsUseCase(exploreRepository),
+      saveSettingsUseCase: SaveSettingsUseCase(exploreRepository),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await exploreController.ensureLoaded(
+      userId: 'u',
+      email: 'user@example.com',
+      role: 'user',
+      favoritesCount: 0,
+    );
+    final SettingsEntity settingsBefore = exploreController.state.settings;
+    final InMemoryLocalePreferenceStore store = InMemoryLocalePreferenceStore();
+    final LocaleController locale = LocaleController(
+      policy: AppLocalePolicy(
+        supportedLanguageCodes: AppLocalePolicy.r1LanguageCodes,
+        fallbackLanguageCode: MarketConfig.riga.defaultLocaleCode,
+      ),
+      store: store,
+      deviceLanguageTags: const <String>['de-DE'],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          authControllerProvider.overrideWith((ref) => authController),
+          exploreControllerProvider.overrideWith((ref) => exploreController),
+          localeControllerProvider.overrideWith((ref) => locale),
+        ],
+        // The same root wiring as RechargeApp: one resolved language.
+        child: Consumer(
+          builder: (context, ref, _) => MaterialApp(
+            locale: Locale(ref.watch(localeControllerProvider).languageCode),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const <LocalizationsDelegate<Object>>[
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(2)),
+              child: child!,
+            ),
+            home: const SettingsPage(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Settings'), findsOneWidget);
+
+    for (final (String option, String title, String code)
+        in <(String, String, String)>[
+          ('Latviešu', 'Iestatījumi', 'lv'),
+          ('Русский', 'Настройки', 'ru'),
+          ('English', 'Settings', 'en'),
+        ]) {
+      final Finder selector = find.byKey(const Key('settings-language'));
+      await tester.scrollUntilVisible(
+        selector,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(selector);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(option).last);
+      await tester.pumpAndSettle();
+      expect(find.text(title), findsOneWidget);
+      expect(locale.languageCode, code);
+      expect(await store.read(), AppLocaleChoice.values.byName(code));
+      expect(tester.takeException(), isNull);
+      // Text only: the legacy currency value, account settings and market
+      // are untouched by the language.
+      expect(
+        exploreController.state.settings.currency,
+        settingsBefore.currency,
+      );
+      expect(
+        exploreController.state.settings.language,
+        settingsBefore.language,
+      );
+      expect(exploreRepository.settings['u']?.language, isNot(code));
+      expect(MarketConfig.riga.currencyCode, 'EUR');
+      expect(MarketConfig.riga.timezoneId, 'Europe/Riga');
+      expect(MarketConfig.riga.countryCode, 'LV');
+    }
   });
 }
 

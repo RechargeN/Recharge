@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/generated/l10n/app_localizations.dart';
 import 'package:recharge/features/create/application/local_import_controller.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/entities/event_publication.dart';
@@ -55,9 +57,27 @@ void main() {
 
   tearDown(() => controller.dispose());
 
-  Future<void> show(WidgetTester tester) async {
+  Future<void> show(
+    WidgetTester tester, {
+    Locale? locale,
+    double textScale = 1,
+  }) async {
     await tester.pumpWidget(
       MaterialApp(
+        locale: locale,
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: const <LocalizationsDelegate<Object>>[
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        builder: (BuildContext context, Widget? child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
         home: Scaffold(
           body: SingleChildScrollView(
             child: LocalImportSection(controller: controller),
@@ -103,8 +123,8 @@ void main() {
       await show(tester);
       await tapRollback(tester, confirm: true);
       expect(gateway.calls, contains('rollbackImportedDraft'));
-      expect(find.textContaining(': rolledBack'), findsOne);
-      expect(find.text('local copy: kept (import rolled back)'), findsOne);
+      expect(find.textContaining(': rolled back'), findsOne);
+      expect(find.text('Local copy: kept (import rolled back)'), findsOne);
       expect(rollbackButton(), findsNothing);
       expect(find.byKey(const Key('local-import-delete-$id')), findsNothing);
       expect(find.byKey(const Key('local-import-choose-$id')), findsOne);
@@ -118,14 +138,14 @@ void main() {
     await show(tester);
     await tapRollback(tester, confirm: true);
     expect(find.byKey(const Key('local-import-message')), findsOne);
-    expect(find.textContaining(': rollbackPending'), findsOne);
+    expect(find.textContaining(': rollback pending'), findsOne);
     expect(
-      find.text('local copy: kept (rollback waiting for the server)'),
+      find.text('Local copy: kept (rollback waiting for the server)'),
       findsOne,
     );
     expect(find.text('Retry rollback'), findsOne);
     await tapRollback(tester, confirm: true);
-    expect(find.textContaining(': rolledBack'), findsOne);
+    expect(find.textContaining(': rolled back'), findsOne);
   });
 
   testWidgets('a typed refusal is shown and the import stays as it was', (
@@ -136,9 +156,17 @@ void main() {
     await tapRollback(tester, confirm: true);
     expect(
       tester.widget<Text>(find.byKey(const Key('local-import-message'))).data,
-      'cleanup_reserved',
+      'The import changed meanwhile. Refresh and try again.',
     );
-    expect(find.textContaining(': verified (cleanup_reserved)'), findsOne);
+    // L4: the stable code stays in the state, never on screen.
+    expect(controller.state.message, 'cleanup_reserved');
+    expect(find.textContaining('cleanup_reserved'), findsNothing);
+    expect(
+      find.textContaining(
+        ': verified (The import changed meanwhile. Refresh and try again.)',
+      ),
+      findsOne,
+    );
     expect(find.text('Roll back import'), findsOne);
   });
 
@@ -174,6 +202,34 @@ void main() {
       );
     },
   );
+
+  for (final String language in <String>['en', 'lv', 'ru']) {
+    testWidgets(
+      'L4: $language at 360 dp with text x2: the import, its states and the '
+      'rollback dialog are localized and nothing overflows',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(360, 720);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await show(tester, locale: Locale(language), textScale: 2);
+        expect(tester.takeException(), isNull);
+        final AppLocalizations l10n = lookupAppLocalizations(Locale(language));
+        expect(find.text(l10n.importSectionTitle), findsOne);
+        expect(find.textContaining(l10n.importItemState('verified')), findsOne);
+        // Ids stay ids: the local draft id is never translated.
+        expect(find.byKey(const Key('local-import-item-$id')), findsOne);
+        await tester.ensureVisible(rollbackButton());
+        expect(rollbackButton().hitTestable(), findsOne);
+        await tester.tap(rollbackButton());
+        await tester.pumpAndSettle();
+        expect(find.text(l10n.importRollbackDialogTitle), findsOne);
+        expect(find.text(l10n.importRollbackConfirm), findsOne);
+        expect(tester.takeException(), isNull);
+        await tester.tap(find.byKey(const Key('local-import-rollback-cancel')));
+        await tester.pumpAndSettle();
+      },
+    );
+  }
 }
 
 /// One imported draft on a minimal server, with programmable outcomes.

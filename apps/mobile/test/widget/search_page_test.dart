@@ -72,8 +72,8 @@ void main() {
       await tester.tap(find.byTooltip('Select for Scenario'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Войдите, чтобы продолжить'), findsOneWidget);
-      expect(find.text('Продолжить как гость'), findsNothing);
+      expect(find.text('Sign in to continue'), findsOneWidget);
+      expect(find.text('Continue as guest'), findsNothing);
     },
   );
 

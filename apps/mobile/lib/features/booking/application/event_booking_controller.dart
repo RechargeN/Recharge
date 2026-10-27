@@ -15,6 +15,52 @@ enum EventBookingPhase {
   error,
 }
 
+/// L4: what the Booking section tells the user, as a stable kind; the
+/// presentation turns it into localized text.
+enum EventBookingNotice {
+  offline,
+  offlineSaved,
+  unknownOutcome,
+  sessionNotConfirmed,
+  loadFailed,
+  rateLimited,
+
+  /// A final server refusal; [EventBookingMessage.refusalCode] says which.
+  refused,
+  endedMissedReconfirmation,
+  endedEventCancelled,
+  endedOrganizerCancelled,
+}
+
+final class EventBookingMessage {
+  const EventBookingMessage(
+    this.notice, {
+    this.refusalCode,
+    this.retryAfterSeconds,
+  });
+
+  final EventBookingNotice notice;
+
+  /// Booking's typed refusal code (for example `sold_out`), kept for the
+  /// localized message and diagnostics; never shown as is.
+  final String? refusalCode;
+  final int? retryAfterSeconds;
+
+  @override
+  bool operator ==(Object other) =>
+      other is EventBookingMessage &&
+      other.notice == notice &&
+      other.refusalCode == refusalCode &&
+      other.retryAfterSeconds == retryAfterSeconds;
+
+  @override
+  int get hashCode => Object.hash(notice, refusalCode, retryAfterSeconds);
+
+  @override
+  String toString() =>
+      'EventBookingMessage(${notice.name}, $refusalCode, $retryAfterSeconds)';
+}
+
 final class EventBookingViewState {
   const EventBookingViewState({
     required this.phase,
@@ -31,7 +77,7 @@ final class EventBookingViewState {
   /// server.
   final EventBookingView? booking;
   final bool hasPendingOperation;
-  final String? message;
+  final EventBookingMessage? message;
 
   /// F2: the number of seats chosen for a new Booking, within Booking terms.
   final int seats;
@@ -126,7 +172,7 @@ final class EventBookingController extends ChangeNotifier {
     EventBookingPhase phase, {
     EventBookingView? booking,
     bool hasPendingOperation = false,
-    String? message,
+    EventBookingMessage? message,
   }) => EventBookingViewState(
     phase: phase,
     booking: booking,
@@ -241,7 +287,7 @@ final class EventBookingController extends ChangeNotifier {
     }
   }
 
-  Future<void> _refresh({String? message}) async {
+  Future<void> _refresh({EventBookingMessage? message}) async {
     final result = await _gateway.activeFor(occurrenceId);
     switch (result.outcome) {
       case EventBookingOutcome.succeeded:
@@ -260,21 +306,23 @@ final class EventBookingController extends ChangeNotifier {
           _next(
             EventBookingPhase.offline,
             booking: _state.booking,
-            message: 'No connection. Try again when you are back online.',
+            message: const EventBookingMessage(EventBookingNotice.offline),
           ),
         );
       case EventBookingOutcome.unauthenticated:
         _emit(
           _next(
             EventBookingPhase.error,
-            message: 'Your session could not be confirmed. Try again.',
+            message: const EventBookingMessage(
+              EventBookingNotice.sessionNotConfirmed,
+            ),
           ),
         );
       case EventBookingOutcome.rejected:
         _emit(
           _next(
             EventBookingPhase.error,
-            message: 'Booking could not be loaded.',
+            message: const EventBookingMessage(EventBookingNotice.loadFailed),
           ),
         );
     }
@@ -283,7 +331,7 @@ final class EventBookingController extends ChangeNotifier {
   /// Why the Booking this screen last showed is no longer active, when it
   /// was ended by someone else or by a deadline; null when the user ended it
   /// or nothing was shown.
-  Future<String?> _endedReason() async {
+  Future<EventBookingMessage?> _endedReason() async {
     final String? id = _lastBookingId;
     if (id == null) return null;
     final EventBookingResult ended = await _gateway.booking(id);
@@ -292,12 +340,15 @@ final class EventBookingController extends ChangeNotifier {
       return null;
     }
     return switch (booking.terminalReason) {
-      'missedReconfirmation' =>
-        'Your booking was released because attendance was not confirmed in '
-            'time.',
-      'occurrenceCancelled' || 'eventCancelled' =>
-        'The organizer cancelled this event; your booking was cancelled.',
-      'organizerCancelled' => 'The organizer cancelled your booking.',
+      'missedReconfirmation' => const EventBookingMessage(
+        EventBookingNotice.endedMissedReconfirmation,
+      ),
+      'occurrenceCancelled' || 'eventCancelled' => const EventBookingMessage(
+        EventBookingNotice.endedEventCancelled,
+      ),
+      'organizerCancelled' => const EventBookingMessage(
+        EventBookingNotice.endedOrganizerCancelled,
+      ),
       _ => null,
     };
   }
@@ -323,9 +374,9 @@ final class EventBookingController extends ChangeNotifier {
             EventBookingPhase.unknownOutcome,
             booking: _state.booking,
             hasPendingOperation: true,
-            message:
-                'We could not confirm the result. Checking again will not '
-                'create a second booking.',
+            message: const EventBookingMessage(
+              EventBookingNotice.unknownOutcome,
+            ),
           ),
         );
       case EventBookingOutcome.offline:
@@ -334,9 +385,7 @@ final class EventBookingController extends ChangeNotifier {
             EventBookingPhase.offline,
             booking: _state.booking,
             hasPendingOperation: true,
-            message:
-                'No connection. Your request is saved and will not be '
-                'duplicated.',
+            message: const EventBookingMessage(EventBookingNotice.offlineSaved),
           ),
         );
       case EventBookingOutcome.rateLimited:
@@ -348,9 +397,10 @@ final class EventBookingController extends ChangeNotifier {
             EventBookingPhase.offline,
             booking: _state.booking,
             hasPendingOperation: true,
-            message: seconds == null
-                ? 'Too many attempts. Try again shortly.'
-                : 'Too many attempts. Try again in $seconds s.',
+            message: EventBookingMessage(
+              EventBookingNotice.rateLimited,
+              retryAfterSeconds: seconds,
+            ),
           ),
         );
       case EventBookingOutcome.unauthenticated:
@@ -359,7 +409,9 @@ final class EventBookingController extends ChangeNotifier {
             EventBookingPhase.error,
             booking: _state.booking,
             hasPendingOperation: true,
-            message: 'Your session could not be confirmed. Try again.',
+            message: const EventBookingMessage(
+              EventBookingNotice.sessionNotConfirmed,
+            ),
           ),
         );
       case EventBookingOutcome.rejected:
@@ -369,31 +421,12 @@ final class EventBookingController extends ChangeNotifier {
           _next(
             EventBookingPhase.error,
             booking: _state.booking,
-            message: refusalMessage(result.refusalCode),
+            message: EventBookingMessage(
+              EventBookingNotice.refused,
+              refusalCode: result.refusalCode,
+            ),
           ),
         );
     }
   }
-
-  /// F2: Booking's typed refusal as a user message; an unknown code keeps the
-  /// general wording.
-  static String refusalMessage(String? code) => switch (code) {
-    'sold_out' => 'This event is sold out.',
-    'active_booking_limit_reached' || 'concurrency_cap_reached' =>
-      'You have reached the limit of active bookings.',
-    'registration_not_open' => 'Registration has not opened yet.',
-    'registration_closed' => 'Registration is closed.',
-    'cancellation_deadline_passed' => 'The cancellation deadline has passed.',
-    'reconfirmation_deadline_passed' => 'The confirmation deadline has passed.',
-    'material_revision_mismatch' =>
-      'The event changed again. Refresh and confirm the new time.',
-    'reconfirmation_not_required' => 'No confirmation is needed now.',
-    'revision_conflict' =>
-      'Your booking changed meanwhile. Refresh to see the current state.',
-    'already_active' => 'You already have a booking for this event.',
-    'invalid_guest_count' => 'This number of seats is not allowed.',
-    'event_unavailable' ||
-    'occurrence_cancelled' => 'This event is not available for booking.',
-    _ => 'The booking was not accepted.',
-  };
 }

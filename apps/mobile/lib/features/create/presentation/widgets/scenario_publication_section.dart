@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
+import 'publication_texts.dart';
 import '../../application/scenario_publication_controller.dart';
 import '../../domain/entities/scenario_publication.dart';
 
@@ -32,42 +35,50 @@ class _ScenarioPublicationSectionState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Test publication path (local Emulator)',
+              context.l10n.publicationTestPath,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              state.draftTitle ?? 'No Scenario draft in Create',
+              state.draftTitle ?? context.l10n.publicationNoDraft('scenario'),
               key: const Key('scenario-publication-draft-title'),
             ),
             Text(
               state.serverRevision == null
-                  ? 'Not saved to the server yet'
-                  : 'Server revision ${state.serverRevision}',
+                  ? context.l10n.publicationNotSavedYet
+                  : context.l10n.publicationServerRevision(
+                      '${state.serverRevision}',
+                    ),
               key: const Key('scenario-publication-plan'),
             ),
             Text(
-              _statusLine(state),
+              _statusLine(context.l10n, state),
               key: const Key('scenario-publication-status'),
             ),
             if (share != null)
               SelectableText(
                 share.token == null
-                    ? 'Link issued, answer lost: issue a new link'
-                    : 'Unlisted link until ${share.expiresAtUtc.toIso8601String()}: '
-                          '${share.token}',
+                    ? context.l10n.scenarioShareLost
+                    // The link's expiry is no object's local time: device zone.
+                    : context.l10n.scenarioShareUntil(
+                        RechargeFormats.deviceDateTime(
+                          share.expiresAtUtc,
+                          context.l10n.localeName,
+                        ),
+                        share.token!,
+                      ),
                 key: const Key('scenario-publication-share'),
               ),
             if (state.message != null)
               Text(
-                state.message!,
+                PublicationTexts.message(context.l10n, state.message!),
                 key: const Key('scenario-publication-message'),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             CheckboxListTile(
               key: const Key('scenario-publication-rights'),
               value: _rights,
-              title: const Text('I have permission to use the cover image'),
+              title: Text(context.l10n.publicationCoverPermission),
               onChanged: (bool? value) =>
                   setState(() => _rights = value ?? false),
             ),
@@ -77,49 +88,49 @@ class _ScenarioPublicationSectionState
               children: <Widget>[
                 _action(
                   'scenario-publication-prepare',
-                  'Prepare',
+                  context.l10n.publicationPrepare,
                   state.canPrepare,
                   controller.prepare,
                 ),
                 _action(
                   'scenario-publication-cover',
-                  'Upload cover',
+                  context.l10n.publicationUploadCover,
                   state.canUploadCover,
                   () => controller.uploadCover(rightsConfirmed: _rights),
                 ),
                 _action(
                   'scenario-publication-submit',
-                  'Submit',
+                  context.l10n.publicationSubmit,
                   state.canSubmit,
                   controller.submit,
                 ),
                 _action(
                   'scenario-publication-refresh',
-                  'Refresh',
+                  context.l10n.commonRefresh,
                   state.phase == ScenarioPublicationPhase.ready,
                   controller.refresh,
                 ),
                 _action(
                   'scenario-publication-publish',
-                  'Publish',
+                  context.l10n.publicationPublish,
                   state.canPublish,
                   controller.publish,
                 ),
                 _action(
                   'scenario-publication-hide',
-                  'Hide',
+                  context.l10n.publicationHide,
                   state.canHide,
                   controller.hide,
                 ),
                 _action(
                   'scenario-publication-share-link',
-                  'Share link',
+                  context.l10n.publicationShareLink,
                   state.canShare,
                   controller.share,
                 ),
                 _action(
                   'scenario-publication-unshare',
-                  'Revoke link',
+                  context.l10n.publicationRevokeLink,
                   state.canUnshare,
                   controller.unshare,
                 ),
@@ -142,10 +153,17 @@ class _ScenarioPublicationSectionState
     child: Text(label),
   );
 
-  static String _statusLine(ScenarioPublicationViewState state) {
-    if (state.record?.contentDraftId == null) return 'Not prepared';
-    final String review = state.status?.latestSubmissionState ?? 'draft';
-    final String visibility = state.status?.visibility ?? 'unpublished';
-    return 'review: $review; visibility: $visibility';
+  static String _statusLine(
+    AppLocalizations l10n,
+    ScenarioPublicationViewState state,
+  ) {
+    if (state.record?.contentDraftId == null) {
+      return l10n.publicationNotPrepared;
+    }
+    return PublicationTexts.statusLine(
+      l10n,
+      state.status?.latestSubmissionState,
+      state.status?.visibility,
+    );
   }
 }

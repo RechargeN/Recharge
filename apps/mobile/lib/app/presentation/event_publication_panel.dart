@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../core/localization/l10n_context.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/application/auth_providers.dart';
@@ -15,7 +17,7 @@ class EventPublicationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Event publication (test)')),
+      appBar: AppBar(title: Text(context.l10n.publicationPageTitle('event'))),
       body: const SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: EventPublicationPanel(),
@@ -47,9 +49,9 @@ class _EventPublicationPanelState extends ConsumerState<EventPublicationPanel> {
   Widget build(BuildContext context) {
     final String? userId = ref.watch(authControllerProvider).state.user?.id;
     if (userId == null) {
-      return const Text(
-        'Sign in to publish your Event draft',
-        key: Key('event-publication-signed-out'),
+      return Text(
+        context.l10n.publicationSignIn('event'),
+        key: const Key('event-publication-signed-out'),
       );
     }
     if (_controller == null || _userId != userId) {

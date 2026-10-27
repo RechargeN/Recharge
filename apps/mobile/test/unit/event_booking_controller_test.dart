@@ -195,32 +195,26 @@ void main() {
   );
 
   test(
-    'F2: typed refusals become specific messages; unknown stays general',
+    'F2: typed refusals keep their stable code; the UI localizes it (L4)',
     () async {
       final c = controller();
       await c.load();
-      for (final (String code, String text) in <(String, String)>[
-        ('sold_out', 'This event is sold out.'),
-        (
-          'active_booking_limit_reached',
-          'You have reached the limit of active bookings.',
-        ),
-        ('registration_closed', 'Registration is closed.'),
-        (
-          'reconfirmation_deadline_passed',
-          'The confirmation deadline has passed.',
-        ),
-        (
-          'material_revision_mismatch',
-          'The event changed again. Refresh and confirm the new time.',
-        ),
-        ('something_new', 'The booking was not accepted.'),
+      for (final String code in <String>[
+        'sold_out',
+        'active_booking_limit_reached',
+        'registration_closed',
+        'reconfirmation_deadline_passed',
+        'material_revision_mismatch',
+        'something_new',
       ]) {
         gateway.next.add(
           EventBookingResult(EventBookingOutcome.rejected, refusalCode: code),
         );
         await c.book();
-        expect(c.state.message, text);
+        expect(
+          c.state.message,
+          EventBookingMessage(EventBookingNotice.refused, refusalCode: code),
+        );
         expect(store.pending, isNull);
         await c.retry();
       }
@@ -240,7 +234,13 @@ void main() {
         ),
       );
       await c.book();
-      expect(c.state.message, 'Too many attempts. Try again in 30 s.');
+      expect(
+        c.state.message,
+        const EventBookingMessage(
+          EventBookingNotice.rateLimited,
+          retryAfterSeconds: 30,
+        ),
+      );
       expect(store.pending, isNotNull);
       await c.retry();
       expect(
@@ -291,7 +291,7 @@ void main() {
     expect(c.state.booking, isNull);
     expect(
       c.state.message,
-      'Your booking was released because attendance was not confirmed in time.',
+      const EventBookingMessage(EventBookingNotice.endedMissedReconfirmation),
     );
     expect(c.state.canBook, isTrue);
   });

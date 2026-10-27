@@ -2,6 +2,8 @@ import '../../features/create/application/activity_validation_feedback_provider.
 import '../../features/create/application/create_providers.dart';
 import '../../features/create/application/state/create_state.dart';
 import 'package:flutter/material.dart';
+
+import '../../core/localization/l10n_context.dart';
 import 'package:go_router/go_router.dart';
 import '../router/route_names.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +22,9 @@ class ActivityPublicationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Activity publication (test)')),
+      appBar: AppBar(
+        title: Text(context.l10n.publicationPageTitle('activity')),
+      ),
       body: const SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: ActivityPublicationPanel(),
@@ -61,9 +65,9 @@ class _ActivityPublicationPanelState
   Widget build(BuildContext context) {
     final String? userId = ref.watch(authControllerProvider).state.user?.id;
     if (userId == null) {
-      return const Text(
-        'Sign in to publish your Activity draft',
-        key: Key('activity-publication-signed-out'),
+      return Text(
+        context.l10n.publicationSignIn('activity'),
+        key: const Key('activity-publication-signed-out'),
       );
     }
     // A change of account builds a new controller bound to that account.
@@ -104,9 +108,9 @@ class _ActivityPublicationPanelState
                   }
                   if (create.state.saveStatus != CreateSaveStatus.saved) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
+                      SnackBar(
                         content: Text(
-                          'Save your Create draft before editing this publication.',
+                          context.l10n.publicationSaveCreateDraftFirst,
                         ),
                       ),
                     );

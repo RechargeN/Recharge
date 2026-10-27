@@ -7,6 +7,9 @@ import '../../domain/usecases/mark_notification_read_usecase.dart';
 import '../state/notifications_state.dart';
 
 class NotificationsController extends ChangeNotifier {
+  /// L4: stable message code; the UI localizes it.
+  static const String loadFailedMessage = 'notifications_load_failed';
+
   NotificationsController({
     required GetNotificationsUseCase getNotificationsUseCase,
     required MarkNotificationReadUseCase markNotificationReadUseCase,
@@ -64,7 +67,7 @@ class NotificationsController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: NotificationsStatus.error,
-          message: 'Не удалось загрузить уведомления',
+          message: loadFailedMessage,
         ),
       );
       _analyticsService.track(

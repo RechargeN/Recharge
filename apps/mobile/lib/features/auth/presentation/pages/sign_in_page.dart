@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/auth_providers.dart';
 import '../../application/controllers/auth_controller.dart';
+import '../auth_messages.dart';
 
 class SignInPage extends ConsumerStatefulWidget {
   const SignInPage({
@@ -57,9 +59,10 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   Widget build(BuildContext context) {
     final authController = ref.watch(authControllerProvider);
     final state = authController.state;
+    final AppLocalizations l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Войти')),
+      appBar: AppBar(title: Text(l10n.commonSignIn)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -67,21 +70,22 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              const Text(
-                'Войдите, чтобы сохранить и управлять',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              Text(
+                l10n.authSignInHeadline,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Без входа вы можете смотреть события и места. Вход нужен для избранного, профиля и создания активностей.',
-              ),
+              Text(l10n.authSignInBody),
               const SizedBox(height: 24),
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  hintText: 'Введите email',
+                decoration: InputDecoration(
+                  labelText: l10n.authEmailLabel,
+                  hintText: l10n.authEmailHint,
                 ),
                 validator: _validateEmail,
               ),
@@ -89,33 +93,41 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  hintText: 'Введите пароль',
+                decoration: InputDecoration(
+                  labelText: l10n.authPasswordLabel,
+                  hintText: l10n.authPasswordHint,
                 ),
                 validator: _validatePassword,
               ),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: _isSubmitting ? null : _onSubmit,
-                child: Text(_isSubmitting ? 'Входим в аккаунт...' : 'Войти'),
+                child: Text(
+                  _isSubmitting ? l10n.authSigningIn : l10n.commonSignIn,
+                ),
               ),
               const SizedBox(height: 8),
               TextButton(
                 onPressed: _isSubmitting
                     ? null
                     : () => context.go(RouteNames.discover),
-                child: const Text('Продолжить как гость'),
+                child: Text(l10n.commonContinueAsGuest),
               ),
               if (_inlineError != null) ...<Widget>[
                 const SizedBox(height: 12),
-                Text(_inlineError!, style: const TextStyle(color: Colors.red)),
+                Text(
+                  authMessage(l10n, _inlineError!),
+                  style: const TextStyle(color: Colors.red),
+                ),
               ],
               if (!_isSubmitting &&
                   _inlineError == null &&
                   state.message != null) ...<Widget>[
                 const SizedBox(height: 12),
-                Text(state.message!, style: const TextStyle(color: Colors.red)),
+                Text(
+                  authMessage(l10n, state.message!),
+                  style: const TextStyle(color: Colors.red),
+                ),
               ],
             ],
           ),
@@ -126,16 +138,16 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
   String? _validateEmail(String? value) {
     final text = value?.trim() ?? '';
-    if (text.isEmpty) return 'Введите email';
+    if (text.isEmpty) return context.l10n.authEmailRequired;
     final reg = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-    if (!reg.hasMatch(text)) return 'Введите корректный email';
+    if (!reg.hasMatch(text)) return context.l10n.authEmailInvalid;
     return null;
   }
 
   String? _validatePassword(String? value) {
     final text = value ?? '';
-    if (text.isEmpty) return 'Введите пароль';
-    if (text.length < 8) return 'Пароль слишком короткий';
+    if (text.isEmpty) return context.l10n.authPasswordRequired;
+    if (text.length < 8) return context.l10n.authPasswordTooShort;
     return null;
   }
 

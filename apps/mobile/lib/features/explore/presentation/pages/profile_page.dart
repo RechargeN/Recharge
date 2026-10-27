@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:design_system/design_system.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/localization/l10n_context.dart';
 import '../widgets/scenario_library_panel.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../auth/application/auth_providers.dart';
@@ -107,8 +108,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           child: CircularProgressIndicator(),
         ),
         ExploreStatus.error => _StateMessage(
-          text: state.message ?? 'Не удалось загрузить профиль',
-          actionLabel: 'Повторить',
+          text: context.l10n.profileLoadFailed,
+          actionLabel: context.l10n.commonRetry,
           onTap: () {
             _loadKey = null;
             _scheduleLoad(
@@ -183,9 +184,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 onBookings: () => context.push(RouteNames.notifications),
               ),
             ],
-            if (state.message != null) ...<Widget>[
+            if (state.message ==
+                ExploreController.profileSavedMessage) ...<Widget>[
               const SizedBox(height: 10),
-              Text(state.message!, style: const TextStyle(color: Colors.green)),
+              Text(
+                context.l10n.settingsProfileSaved,
+                style: const TextStyle(color: Colors.green),
+              ),
             ],
           ],
         ),

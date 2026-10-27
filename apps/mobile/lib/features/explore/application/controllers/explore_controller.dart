@@ -10,6 +10,10 @@ import '../../domain/usecases/save_settings_usecase.dart';
 import '../state/explore_state.dart';
 
 class ExploreController extends ChangeNotifier {
+  /// L4: stable message codes; the UI localizes them.
+  static const String loadFailedMessage = 'profile_load_failed';
+  static const String profileSavedMessage = 'profile_saved';
+
   ExploreController({
     required LoadProfileEditableUseCase loadProfileEditableUseCase,
     required SaveProfileEditableUseCase saveProfileEditableUseCase,
@@ -81,7 +85,7 @@ class ExploreController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: ExploreStatus.error,
-          message: 'Не удалось загрузить профиль',
+          message: loadFailedMessage,
         ),
       );
     }
@@ -115,7 +119,10 @@ class ExploreController extends ChangeNotifier {
       profile: _state.profile,
     );
     _setState(
-      _state.copyWith(status: ExploreStatus.ready, message: 'Профиль сохранен'),
+      _state.copyWith(
+        status: ExploreStatus.ready,
+        message: profileSavedMessage,
+      ),
     );
     _analyticsService.track(
       'explore_profile_saved',

@@ -330,14 +330,14 @@ void main() {
         keyed('route-publication-trim', 'start 200 m, end 200 m'),
       );
       await tapKey(tester, 'route-publication-prepare');
-      await waitFor(tester, keyed('route-publication-status', 'review: draft'));
+      await waitFor(tester, keyed('route-publication-status', 'Review: draft'));
       await tester.tap(find.byKey(const Key('route-publication-rights')));
       await tapKey(tester, 'route-publication-cover');
       await tapKey(tester, 'route-publication-submit');
       // RP-06: the stand seed's reviewed Route earned this Creator's trust.
       await waitFor(
         tester,
-        keyed('route-publication-status', 'approved_for_publication'),
+        keyed('route-publication-status', 'Review: approved'),
       );
       expect(find.byKey(const Key('route-publication-message')), findsNothing);
       await tapKey(tester, 'route-publication-publish');
@@ -365,7 +365,7 @@ void main() {
       await tapKey(tester, 'route-publication-hide');
       await waitFor(
         tester,
-        keyed('route-publication-status', 'visibility: withdrawn'),
+        keyed('route-publication-status', 'visibility: hidden'),
       );
     },
     skip: stand == null || !routePublicationTestEntryDefined,

@@ -40,7 +40,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Войти'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Sign in'));
     await tester.pumpAndSettle();
 
     final emailFieldState = tester.state<FormFieldState<String>>(
@@ -51,9 +51,9 @@ void main() {
     );
 
     expect(emailFieldState.hasError, isTrue);
-    expect(emailFieldState.errorText, 'Введите email');
+    expect(emailFieldState.errorText, 'Enter your email');
     expect(passwordFieldState.hasError, isTrue);
-    expect(passwordFieldState.errorText, 'Введите пароль');
+    expect(passwordFieldState.errorText, 'Enter your password');
   });
 }
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/generated/l10n/app_localizations.dart';
 import 'package:recharge/features/booking/application/event_booking_controller.dart';
 import 'package:recharge/features/booking/domain/repositories/event_booking_gateway.dart';
 import 'package:recharge/features/booking/presentation/event_booking_section.dart';
@@ -63,6 +65,8 @@ Future<EventBookingController> _pump(
   WidgetTester tester,
   _Gateway gateway, {
   int maxSeats = 1,
+  Locale? locale,
+  double textScale = 1,
 }) async {
   final EventBookingController controller = EventBookingController(
     gateway: gateway,
@@ -75,7 +79,28 @@ Future<EventBookingController> _pump(
   );
   await tester.pumpWidget(
     MaterialApp(
-      home: Scaffold(body: EventBookingSection(controller: controller)),
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const <LocalizationsDelegate<Object>>[
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      builder: (BuildContext context, Widget? child) => MediaQuery(
+        data: MediaQuery.of(
+          context,
+        ).copyWith(textScaler: TextScaler.linear(textScale)),
+        child: child!,
+      ),
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: EventBookingSection(
+            controller: controller,
+            eventTimeZoneId: 'Europe/Riga',
+          ),
+        ),
+      ),
     ),
   );
   await controller.load();
@@ -122,10 +147,10 @@ void main() {
   ) async {
     final _Gateway gateway = _Gateway();
     await _pump(tester, gateway, maxSeats: 2);
-    expect(find.text('1 of 2 seat(s)'), findsOneWidget);
+    expect(find.text('1 of 2 seats'), findsOneWidget);
     await tester.tap(find.byKey(const Key('event-booking-seats-more')));
     await tester.pump();
-    expect(find.text('2 of 2 seat(s)'), findsOneWidget);
+    expect(find.text('2 of 2 seats'), findsOneWidget);
     expect(find.text('Book 2 seats'), findsOneWidget);
     final IconButton more = tester.widget<IconButton>(
       find.byKey(const Key('event-booking-seats-more')),
@@ -164,5 +189,104 @@ void main() {
     await tester.pump();
     expect(find.text('This event is sold out.'), findsNothing);
     expect(find.byKey(const Key('event-booking-create')), findsOneWidget);
+  });
+
+  group('L4: lv, en and ru on one Booking', () {
+    final DateTime deadline = DateTime.utc(2026, 10, 25, 1, 30);
+    EventBookingView required() => EventBookingView(
+      id: 'b-1',
+      occurrenceId: 'occ-1',
+      state: EventBookingState.confirmed,
+      participantUnits: 2,
+      revision: 2,
+      reconfirmationState: EventReconfirmationState.required,
+      reconfirmationRequiredForRevision: 8,
+      reconfirmationDeadlineUtc: deadline,
+    );
+
+    const Map<String, (String, String, String)> expected =
+        <String, (String, String, String)>{
+          // (deadline wall clock in Riga, a refusal, the cancel action)
+          'en': ('3:30', 'This event is sold out.', 'Cancel booking'),
+          'lv': (
+            '03:30',
+            'Šim pasākumam vairs nav brīvu vietu.',
+            'Atcelt rezervāciju',
+          ),
+          'ru': ('03:30', 'На это событие мест больше нет.', 'Отменить бронь'),
+        };
+
+    for (final MapEntry<String, (String, String, String)> language
+        in expected.entries) {
+      for (final double scale in <double>[1, 2]) {
+        testWidgets(
+          '${language.key} at 360 dp, text x$scale: localized, in the Event '
+          'zone, nothing overflows or is cut off',
+          (WidgetTester tester) async {
+            tester.view.physicalSize = const Size(360, 720);
+            tester.view.devicePixelRatio = 1;
+            addTearDown(tester.view.reset);
+            final _Gateway gateway = _Gateway()..active = required();
+            final EventBookingController controller = await _pump(
+              tester,
+              gateway,
+              locale: Locale(language.key),
+              textScale: scale,
+            );
+            expect(tester.takeException(), isNull);
+            // The deadline is the same instant, shown in Riga wall time
+            // (the DST fall-back hour) in every language.
+            expect(find.textContaining(language.value.$1), findsOneWidget);
+            final Finder cancel = find.text(language.value.$3);
+            expect(cancel, findsOneWidget);
+            await tester.ensureVisible(cancel);
+            expect(cancel.hitTestable(), findsOneWidget);
+            // Domain facts are untouched by the language.
+            expect(controller.state.booking!.id, 'b-1');
+            expect(
+              controller.state.booking!.reconfirmationDeadlineUtc,
+              deadline,
+            );
+            expect(controller.occurrenceId, 'occ-1');
+
+            gateway
+              ..active = null
+              ..next = const EventBookingResult(
+                EventBookingOutcome.rejected,
+                refusalCode: 'sold_out',
+              );
+            await tester.tap(find.byKey(const Key('event-booking-refresh')));
+            await tester.pump();
+            await tester.pump();
+            await tester.ensureVisible(
+              find.byKey(const Key('event-booking-create')),
+            );
+            await tester.tap(find.byKey(const Key('event-booking-create')));
+            await tester.pump();
+            await tester.pump();
+            expect(find.text(language.value.$2), findsOneWidget);
+            expect(find.textContaining('sold_out'), findsNothing);
+            expect(controller.state.message!.refusalCode, 'sold_out');
+            expect(tester.takeException(), isNull);
+          },
+        );
+      }
+    }
+
+    testWidgets('an unknown refusal code shows the safe generic text', (
+      WidgetTester tester,
+    ) async {
+      final _Gateway gateway = _Gateway()
+        ..next = const EventBookingResult(
+          EventBookingOutcome.rejected,
+          refusalCode: 'waitlist_offer_expired',
+        );
+      await _pump(tester, gateway, locale: const Locale('lv'));
+      await tester.tap(find.byKey(const Key('event-booking-create')));
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('Rezervācija netika pieņemta.'), findsOneWidget);
+      expect(find.textContaining('waitlist_offer_expired'), findsNothing);
+    });
   });
 }
