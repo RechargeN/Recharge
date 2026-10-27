@@ -1,6 +1,6 @@
 # RECHARGE — инструкции для coding-агентов
 
-Версия: 2026-10-20. Канонический файл инструкций репозитория.
+Версия: 2026-10-27. Канонический файл инструкций репозитория.
 CLAUDE.md ссылается сюда. При обновлении меняй дату версии.
 
 ## Приоритет документов (при конфликте — верхний побеждает)
@@ -97,8 +97,8 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
    production backend, Payments или provider integration.
 5. **Регион запуска** — Рига/Латвия, EUR. Дефолтные координаты
    в конфиге: 56.9496, 24.1052 (сейчас неверные — задача бэклога).
-   Локализация en/ru/lv — целевая, фактически НЕ настроена
-   (нет lib/l10n) — отдельный slice.
+   Локализация en/ru/lv — целевая; механизм `lib/l10n` добавлен slice L4
+   (Review), большая часть экранов ещё не переведена.
 6. **Route ≠ Scenario ≠ Quick Plan** — Route является непрерывным треком
    по местности с anchors/segments/GPX/elevation/POI. Scenario —
    самостоятельный personal/public план из независимых остановок с
@@ -182,7 +182,7 @@ acceptance criteria, `flutter analyze`, `flutter test`, boundary и diff checks;
 | Quick Plan | локальный лёгкий план остановок реализован частично; стабильные id/revision и явный one-way `Expand to Scenario` (SCN-SB-03); остаётся personal/invited utility вне Create Hub и Discover; legacy-названия Scenario/Route требуют cleanup |
 | Scenario Builder | самостоятельный Latvia-wide city/day/weekend/trip продукт по Scenario spec v1.7: canonical domain/schema v2 и personal Create runtime (composer, undo/redo, autosave, readiness); own-car, ручные legs и официальные planned-transport snapshots с пометкой `not live` (SCN-LV-DATA-01/02 Done); в основном UI — понятные planned/not-live и Recheck-состояния, snapshot остаётся внутренним механизмом; добавление объектов из Details/Search/Map (SCN-INTAKE-01 Done); топливо удалено (SCN-FUEL-CLEANUP-01); SCN-AI-01 — скрытый local-demo. Public/unlisted publish — I3 local Emulator (Review, SCN-PUB-01). Не реализованы: внешний AI и live planning, transfers/fares/booking, явная legacy migration write |
 | Route Builder (creation) | Route-only spec v3.2; RTE-01–07 Done, RTE-08–11 Review. Локально работают GPS-запись (RTE-11: зашифрованный журнал, восстановление без auto-resume) и GPX inspection/import/export с UI; J1 (Review, только Emulator) — owner sync геометрии, безопасный GPX и серверный privacy trim для экспорта; J2 (Done в local/Emulator объёме) — публикация через Content, модерацию с доверием автора и Catalog (RTE-PUB-01); DTL-RTE-02 (Done в local/Emulator объёме, default-off) — показ опубликованного Route из Catalog в Discover/Details. До Done — проверки на Android/iOS и общий stabilization gate; production adapters — RTE-12 |
-| Локализация en/ru/lv | не настроена |
+| Локализация en/ru/lv | L4 в Review: механизм gen-l10n (`lib/l10n`), выбор языка на устройстве, каталог серверных кодов и локализованные серверные R1-поверхности (shell, настройки, вход, бронирование, тестовые пути публикации, импорт, уведомления); остальные экраны, названия категорий, Legal-тексты и языковой review открыты — `docs/product/LOCALIZATION_L4_R1_AMENDMENT.md` |
 | Бронирование | Видимый Mobile MVP по-прежнему использует externalBookingUrl. Добавлен provider-neutral Booking callable adapter с persistent local receipts/checkpoints и только loopback Emulator binding; production binding выключен. Backend имеет disabled local/Emulator-only free Booking authority, Event projection consumer, create/cancel/queries, finite/unlimited inventory, atomic Identity/flag authorization и privacy/retention evidence. Popular-pool escrow только pure/default-off model; Firebase cloud, UI cutover, market activation, production load proof и Payments отсутствуют |
 | Backend (Release R1, Latvia-first) | Локальные foundations в `apps/backend`; состав R1 и baseline проверки приняты владельцем (roadmap §3.5); Payments, AI, Providers и Event Ingestion вне R1. Cloud, deployment и активация рынков закрыты до отдельных разрешений |
 | Геолокация | Discover current location остаётся mock в центре Riga; Route GPS recording подключён через `geolocator` и изолирован provider-neutral port |
