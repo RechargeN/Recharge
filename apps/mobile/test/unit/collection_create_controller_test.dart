@@ -23,6 +23,7 @@ import 'package:recharge/features/create/domain/usecases/publish_create_draft_us
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
 
 import '../support/event_create_test_support.dart';
+import 'package:recharge/features/create/application/state/create_notice.dart';
 
 CollectionCreateCoordinator _buildCoordinator({
   CollectionCreateRuntimeConfig config = const CollectionCreateRuntimeConfig(),
@@ -121,23 +122,29 @@ void main() {
     controller.dispose();
   });
 
-  test('missing create.collection refuses both setObjectType and attach', () async {
-    final controller = buildController();
-    await controller.ensureLoaded(
-      userId: 'u1',
-      organizerEmail: 'e@example.com',
-      organizerName: 'n',
-      capabilities: const <String>[],
-    );
+  test(
+    'missing create.collection refuses both setObjectType and attach',
+    () async {
+      final controller = buildController();
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'e@example.com',
+        organizerName: 'n',
+        capabilities: const <String>[],
+      );
 
-    controller.setObjectType(CreateObjectType.collection);
-    expect(controller.state.draft.objectType, isNot(CreateObjectType.collection));
-    expect(controller.state.message, contains('create.collection'));
+      controller.setObjectType(CreateObjectType.collection);
+      expect(
+        controller.state.draft.objectType,
+        isNot(CreateObjectType.collection),
+      );
+      expect(controller.state.message, CreateNotice.collectionCreateNotAllowed);
 
-    controller.attachCollectionCoordinator(_buildCoordinator(sink: sink));
-    expect(controller.collectionCreateState, isNull);
-    controller.dispose();
-  });
+      controller.attachCollectionCoordinator(_buildCoordinator(sink: sink));
+      expect(controller.collectionCreateState, isNull);
+      controller.dispose();
+    },
+  );
 
   test('collectionPublishingEnabled:false blocks publish independently of '
       'capability — coordinator.publish is never reached', () async {
@@ -150,7 +157,10 @@ void main() {
       userId: 'u1',
       organizerEmail: 'e@example.com',
       organizerName: 'n',
-      capabilities: const <String>['create.collection', 'publish.collection.direct'],
+      capabilities: const <String>[
+        'create.collection',
+        'publish.collection.direct',
+      ],
     );
     controller.setObjectType(CreateObjectType.collection);
     controller.attachCollectionCoordinator(_buildCoordinator(sink: sink));
@@ -159,7 +169,10 @@ void main() {
     final bool published = await controller.publishCollection();
 
     expect(published, isFalse);
-    expect(controller.state.message, contains('временно отключена'));
+    expect(
+      controller.state.message,
+      CreateNotice.collectionPublicationDisabled,
+    );
     expect(sink.activateCalls, isEmpty);
     controller.dispose();
   });
@@ -215,7 +228,7 @@ void main() {
     final bool published = await controller.publishCollection();
 
     expect(published, isTrue);
-    expect(controller.state.message, contains('проверку'));
+    expect(controller.state.message, CreateNotice.collectionSubmitted);
     expect(
       controller.collectionCreateState?.status,
       CollectionCreateStatus.submittedForReview,
@@ -340,7 +353,8 @@ class _RecordingSink implements CollectionPublicationIndexSink {
   }
 }
 
-class _NoopCatalogSearchRepository implements CollectionCatalogSearchRepository {
+class _NoopCatalogSearchRepository
+    implements CollectionCatalogSearchRepository {
   @override
   Future<List<CollectionCatalogSearchResult>> search(
     CollectionCatalogSearchQuery query,

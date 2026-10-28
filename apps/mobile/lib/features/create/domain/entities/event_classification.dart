@@ -87,14 +87,14 @@ class EventParticipation {
       throw ArgumentError.value(
         additional,
         'additional',
-        'At most three additional participation modes are allowed.',
+        'At most three additional participation modes are allowed.', // l10n-ignore: developer error, never displayed
       );
     }
     if (this.additional.contains(primary)) {
       throw ArgumentError.value(
         additional,
         'additional',
-        'The primary participation mode cannot also be additional.',
+        'The primary participation mode cannot also be additional.', // l10n-ignore: developer error, never displayed
       );
     }
   }

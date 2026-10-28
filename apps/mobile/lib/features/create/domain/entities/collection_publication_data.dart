@@ -105,7 +105,7 @@ class CollectionPublishReceipt {
     this.discoverSynced = true,
   }) : assert(
          (publishedAtUtc == null) != (submittedAtUtc == null),
-         'Exactly one of publishedAtUtc/submittedAtUtc must be set.',
+         'Exactly one of publishedAtUtc/submittedAtUtc must be set.', // l10n-ignore: developer error, never displayed
        );
 
   final String collectionId;

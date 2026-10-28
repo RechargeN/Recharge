@@ -8,6 +8,8 @@ import '../../application/create_providers.dart';
 import '../../application/create_taxonomy.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/route_publication_data.dart';
+import '../widgets/create_texts.dart';
+import '../../../../core/localization/l10n_context.dart';
 
 class CreateSuccessPage extends ConsumerWidget {
   const CreateSuccessPage({super.key});
@@ -50,7 +52,16 @@ class CreateSuccessPage extends ConsumerWidget {
                 await controller.archiveRoute(routeReceipt.routeId);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(controller.state.message ?? 'Done')),
+                    SnackBar(
+                      content: Text(
+                        controller.state.message == null
+                            ? context.l10n.createNotice('published')
+                            : CreateTexts.notice(
+                                context.l10n,
+                                controller.state.message!,
+                              ),
+                      ),
+                    ),
                   );
                 }
               },

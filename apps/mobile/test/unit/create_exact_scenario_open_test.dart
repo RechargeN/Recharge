@@ -11,6 +11,7 @@ import 'package:recharge/features/create/domain/usecases/publish_create_draft_us
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
 
 import '../support/event_create_test_support.dart';
+import 'package:recharge/features/create/application/state/create_notice.dart';
 
 void main() {
   test('Create opens only the exact owned Scenario id from intake', () async {
@@ -80,7 +81,7 @@ void main() {
       ),
       isFalse,
     );
-    expect(controller.state.message, 'Scenario is no longer available.');
+    expect(controller.state.message, CreateNotice.scenarioUnavailable);
     controller.dispose();
   });
 }

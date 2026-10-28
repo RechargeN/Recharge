@@ -8,6 +8,7 @@ import '../../domain/entities/class_workshop_draft_data.dart';
 import '../../domain/entities/class_workshop_validation_issue.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/usecases/build_class_workshop_content_body.dart';
+import 'create_texts.dart';
 
 /// Class / Workshop Create block (D3.6, CW-V1). Its sections come from
 /// `classWorkshopCreateSections`; taxonomy and criteria are the shared Create
@@ -94,7 +95,10 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
         if (widget.state.message != null)
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text(widget.state.message!, textAlign: TextAlign.center),
+            child: Text(
+              CreateTexts.notice(context.l10n, widget.state.message!),
+              textAlign: TextAlign.center,
+            ),
           ),
       ],
     );
@@ -136,7 +140,10 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       'Cover image',
       draft.media.coverImage,
       _c.updateCoverImage,
-      errorText: widget.state.validationErrors['coverImage'],
+      errorText: switch (widget.state.validationErrors['coverImage']) {
+        final String id => CreateTexts.fieldError(context.l10n, id),
+        null => null,
+      },
     ),
     DropdownButtonFormField<String>(
       key: const Key('class-workshop-locale'),
@@ -634,7 +641,7 @@ class _SectionCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
-                issue.message,
+                CreateTexts.classWorkshop(context.l10n, issue),
                 key: Key('class-workshop-issue-${issue.code}'),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),

@@ -1,6 +1,7 @@
 import '../domain/entities/event_classification.dart';
 import '../domain/entities/event_validation_issue.dart';
 import '../domain/usecases/suggest_event_classification_usecase.dart';
+import 'create_message_ids.dart';
 
 class EventClassificationSectionDefinition {
   const EventClassificationSectionDefinition({
@@ -34,9 +35,12 @@ class EventClassificationSectionState {
   final EventClassificationSuggestion? suggestion;
   final List<EventValidationIssue> issues;
 
-  String? errorFor(String fieldId) {
+  /// The field-error message id (L4: the UI resolves it to text).
+  String? errorIdFor(String fieldId) {
     for (final EventValidationIssue issue in issues) {
-      if (issue.isBlocking && issue.fieldId == fieldId) return issue.message;
+      if (issue.isBlocking && issue.fieldId == fieldId) {
+        return eventIssueMessageId(issue);
+      }
     }
     return null;
   }

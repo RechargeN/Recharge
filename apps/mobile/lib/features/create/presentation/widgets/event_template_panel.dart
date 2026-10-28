@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 import '../../application/controllers/create_controller.dart';
 import '../../domain/entities/create_template_entity.dart';
+import '../../../../core/localization/l10n_context.dart';
+import 'create_texts.dart';
 
 class EventTemplatePanel extends StatelessWidget {
   const EventTemplatePanel({super.key, required this.controller});
@@ -282,7 +284,9 @@ Future<bool> _confirm(
       false;
 }
 
-void _showMessage(BuildContext context, String? message) {
-  if (message == null) return;
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+void _showMessage(BuildContext context, String? code) {
+  if (code == null) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(CreateTexts.notice(context.l10n, code))),
+  );
 }

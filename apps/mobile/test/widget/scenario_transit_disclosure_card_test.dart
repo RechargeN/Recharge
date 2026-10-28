@@ -23,16 +23,14 @@ void main() {
                   kind: ScenarioTransitDisclosureKind.official,
                   freshness: ScenarioTransitDisclosureFreshness.unavailable,
                   title: 'Regional train with a deliberately long label',
-                  statusLabel:
-                      'Provenance or feed unavailable · saved data retained',
                   providerLabel: 'Official Provider',
                   serviceDateLabel: '2026-08-03',
                   departureLabel: '10:00',
                   arrivalLabel: '11:00',
-                  warnings: <String>[
-                    'Planned schedule · not live.',
-                    'The saved item remains available, but its official provenance or feed cannot be verified.',
-                    BuildScenarioTransitDisclosure.limitations,
+                  warnings: <ScenarioTransitWarning>[
+                    ScenarioTransitWarning.plannedNotLive,
+                    ScenarioTransitWarning.freshnessUnavailable,
+                    ScenarioTransitWarning.limitations,
                   ],
                 ),
               ),

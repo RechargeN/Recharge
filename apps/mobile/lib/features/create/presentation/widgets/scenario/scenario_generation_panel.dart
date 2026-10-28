@@ -6,6 +6,8 @@ import '../../../application/controllers/create_controller.dart';
 import '../../../application/scenario_generation_coordinator.dart';
 import '../../../application/state/create_state.dart';
 import '../../../domain/entities/scenario_generation_proposal.dart';
+import '../create_texts.dart';
+import '../../../../../core/localization/l10n_context.dart';
 
 class ScenarioGenerationPanel extends StatefulWidget {
   const ScenarioGenerationPanel({
@@ -154,7 +156,7 @@ class _ScenarioGenerationPanelState extends State<ScenarioGenerationPanel> {
                 case final String error) ...[
               const SizedBox(height: 10),
               Text(
-                error,
+                CreateTexts.notice(context.l10n, error),
                 key: const ValueKey<String>('scenario-generation-error'),
                 style: TextStyle(color: colors.error),
               ),

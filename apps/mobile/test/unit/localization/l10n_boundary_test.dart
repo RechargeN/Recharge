@@ -18,6 +18,8 @@ void main() {
     const Set<String> allowed = <String>{
       // numbers
       'count', 'seats', 'selected', 'max', 'meters', 'done', 'total',
+      // L4.2: the lower length limit of a Create field (a number, like max)
+      'min',
       // stable ids / server enum values chosen by select
       'type', 'status', 'state', 'kind', 'value', 'revision', 'contentId',
       // localized or formatted fragments built by the app itself

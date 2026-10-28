@@ -22,6 +22,8 @@ import '../../../domain/entities/route_recording_data.dart';
 import 'route_editor_section.dart';
 import 'route_recording_panel.dart';
 import 'route_review_section.dart';
+import '../create_texts.dart';
+import '../../../../../core/localization/l10n_context.dart';
 
 class RouteCreateBlock extends ConsumerStatefulWidget {
   const RouteCreateBlock({
@@ -119,7 +121,9 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
         ),
         if (widget.state.message != null) ...<Widget>[
           const SizedBox(height: 10),
-          _MessageBanner(widget.state.message!),
+          _MessageBanner(
+            CreateTexts.notice(context.l10n, widget.state.message!),
+          ),
         ],
         if (routeState.status == RouteCreateStatus.routing ||
             routeState.status == RouteCreateStatus.saving ||

@@ -5,12 +5,15 @@ final class ClassWorkshopValidationIssue {
   const ClassWorkshopValidationIssue({
     required this.code,
     required this.field,
-    required this.message,
+    this.params = const <String, int>{},
   });
 
   final String code;
 
   /// Section anchor for the field (`basics`, `learning`, `schedule`, `participation`).
   final String field;
-  final String message;
+
+  /// Typed numbers for the message (limits, counts); the UI builds the
+  /// text from [code]. No sentence lives in the domain (L4).
+  final Map<String, int> params;
 }

@@ -12,7 +12,6 @@ class ValidateEventClassificationUseCase {
           code: 'event_archetype_required',
           fieldId: 'eventArchetype',
           step: 0,
-          message: 'Choose how this event is organized.',
         ),
       );
     }
@@ -23,7 +22,6 @@ class ValidateEventClassificationUseCase {
           code: 'primary_participation_required',
           fieldId: 'primaryParticipationMode',
           step: 0,
-          message: 'Choose the attendee\'s primary role.',
         ),
       );
     }
@@ -34,7 +32,6 @@ class ValidateEventClassificationUseCase {
           code: 'additional_participation_limit',
           fieldId: 'additionalParticipationModes',
           step: 0,
-          message: 'Choose no more than three additional attendee roles.',
         ),
       );
     }
@@ -47,7 +44,6 @@ class ValidateEventClassificationUseCase {
           code: 'participation_mode_duplicate',
           fieldId: 'additionalParticipationModes',
           step: 0,
-          message: 'The primary role cannot also be an additional role.',
         ),
       );
     }
@@ -58,7 +54,6 @@ class ValidateEventClassificationUseCase {
           code: 'event_archetype_other_reason_required',
           fieldId: 'eventArchetypeOtherReason',
           step: 0,
-          message: 'Explain the event mechanics when choosing Other.',
         ),
       );
     }
@@ -69,7 +64,6 @@ class ValidateEventClassificationUseCase {
           code: 'event_archetype_other_moderation_review',
           fieldId: 'eventArchetype',
           step: 0,
-          message: 'Other mechanics will be reviewed after submission.',
           severity: EventValidationSeverity.warning,
         ),
       );

@@ -1,6 +1,19 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/application/scenario_transit_disclosure.dart';
 import 'package:recharge/features/create/domain/entities/scenario_item_draft.dart';
+import 'package:recharge/generated/l10n/app_localizations.dart';
+
+/// L4: the disclosure keeps typed status and warnings; these tests read them
+/// through the English fallback text the card shows.
+final AppLocalizations _en = lookupAppLocalizations(const Locale('en'));
+
+String _status(ScenarioTransitDisclosure d) =>
+    _en.scenarioTransitStatus(d.freshness.name);
+
+String _warnings(ScenarioTransitDisclosure d) => d.warnings
+    .map((ScenarioTransitWarning w) => _en.scenarioTransitWarning(w.name))
+    .join(' ');
 
 void main() {
   const build = BuildScenarioTransitDisclosure();
@@ -15,9 +28,9 @@ void main() {
     expect(disclosure.serviceDateLabel, '2026-08-03');
     expect(disclosure.retrievedAtLabel, '2026-08-03T08:00:00.000Z');
     expect(disclosure.digestLabel, 'a' * 64);
-    expect(disclosure.statusLabel, contains('not live'));
-    expect(disclosure.warnings.join(' '), contains('confirms neither'));
-    expect(disclosure.warnings.join(' '), contains('delays nor punctuality'));
+    expect(_status(disclosure), contains('not live'));
+    expect(_warnings(disclosure), contains('confirms neither'));
+    expect(_warnings(disclosure), contains('delays nor punctuality'));
   });
 
   test('stale, unknown and incomplete provenance remain distinct', () {
@@ -42,7 +55,7 @@ void main() {
       incomplete.freshness,
       ScenarioTransitDisclosureFreshness.unavailable,
     );
-    expect(incomplete.statusLabel, contains('saved data retained'));
+    expect(_status(incomplete), contains('saved data retained'));
   });
 
   test('manual entry is visibly unverified and invents no fare or provenance', () {
@@ -62,13 +75,14 @@ void main() {
       disclosure.freshness,
       ScenarioTransitDisclosureFreshness.notApplicable,
     );
-    expect(disclosure.statusLabel, 'Entered manually · not verified');
+    expect(_status(disclosure), 'Entered manually · not verified');
     expect(disclosure.providerLabel, isNull);
     expect(disclosure.licenseLabel, isNull);
     expect(disclosure.digestLabel, isNull);
-    final rendered = <String>[disclosure.statusLabel, ...disclosure.warnings]
-        .join(' ')
-        .toLowerCase();
+    final rendered = <String>[
+      _status(disclosure),
+      _warnings(disclosure),
+    ].join(' ').toLowerCase();
     expect(rendered, contains('fare'));
     expect(rendered, contains('unknown'));
     expect(rendered, isNot(contains('€0')));

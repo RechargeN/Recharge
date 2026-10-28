@@ -8,6 +8,8 @@ import '../../domain/entities/rental_draft_data.dart';
 import '../../domain/entities/rental_listing.dart';
 import '../../domain/entities/rental_validation_issue.dart';
 import 'rental_template_panel.dart';
+import 'create_texts.dart';
+import '../../../../core/localization/l10n_context.dart';
 
 /// Rental / Equipment create block — RNT-CRT-01. A shell + step navigation
 /// (mirrors `PlaceCreateBlock`), with all 8 spec §13 steps rendered as
@@ -138,7 +140,9 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
   String? _error(String fieldId) {
     for (final RentalValidationIssue issue
         in widget.state.rentalValidationIssues) {
-      if (issue.isBlocking && issue.fieldId == fieldId) return issue.messageKey;
+      if (issue.isBlocking && issue.fieldId == fieldId) {
+        return CreateTexts.fieldError(context.l10n, issue.messageKey);
+      }
     }
     return null;
   }

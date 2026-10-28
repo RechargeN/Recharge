@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../application/scenario_transit_disclosure.dart';
+import '../../../../../core/localization/l10n_context.dart';
 
 class ScenarioTransitDisclosureCard extends StatelessWidget {
   const ScenarioTransitDisclosureCard({
@@ -33,10 +34,15 @@ class ScenarioTransitDisclosureCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      disclosure.title,
+                      disclosure.title ??
+                          context.l10n.scenarioTransitPlannedTransport,
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
-                    Text(disclosure.statusLabel),
+                    Text(
+                      context.l10n.scenarioTransitStatus(
+                        disclosure.freshness.name,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -81,7 +87,11 @@ class ScenarioTransitDisclosureCard extends StatelessWidget {
                 children: <Widget>[
                   const Icon(Icons.info_outline, size: 16),
                   const SizedBox(width: 6),
-                  Expanded(child: Text(warning)),
+                  Expanded(
+                    child: Text(
+                      context.l10n.scenarioTransitWarning(warning.name),
+                    ),
+                  ),
                 ],
               ),
             ),

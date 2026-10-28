@@ -17,13 +17,11 @@ class QuickPlanConversionIssue {
   const QuickPlanConversionIssue({
     required this.code,
     required this.severity,
-    required this.message,
     this.quickPlanStopId,
   });
 
   final QuickPlanConversionIssueCode code;
   final QuickPlanConversionIssueSeverity severity;
-  final String message;
   final String? quickPlanStopId;
 }
 

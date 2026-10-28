@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/event_classification_section.dart';
 import '../../domain/entities/event_classification.dart';
+import 'create_texts.dart';
 
 class EventClassificationSection extends StatelessWidget {
   const EventClassificationSection({
@@ -84,7 +86,7 @@ class EventClassificationSection extends StatelessWidget {
             isExpanded: true,
             decoration: InputDecoration(
               labelText: 'Event mechanics *',
-              errorText: state.errorFor('eventArchetype'),
+              errorText: _errorText(context, state, 'eventArchetype'),
             ),
             items: EventArchetype.values
                 .map(
@@ -110,7 +112,11 @@ class EventClassificationSection extends StatelessWidget {
               maxLines: 4,
               decoration: InputDecoration(
                 labelText: 'Explain the event mechanics *',
-                errorText: state.errorFor('eventArchetypeOtherReason'),
+                errorText: _errorText(
+                  context,
+                  state,
+                  'eventArchetypeOtherReason',
+                ),
               ),
               onChanged: onOtherReasonChanged,
             ),
@@ -122,7 +128,7 @@ class EventClassificationSection extends StatelessWidget {
             isExpanded: true,
             decoration: InputDecoration(
               labelText: 'Primary attendee role *',
-              errorText: state.errorFor('primaryParticipationMode'),
+              errorText: _errorText(context, state, 'primaryParticipationMode'),
             ),
             items: ParticipationMode.values
                 .map(
@@ -171,7 +177,8 @@ class EventClassificationSection extends StatelessWidget {
                 })
                 .toList(growable: false),
           ),
-          if (state.errorFor('additionalParticipationModes') case final error?)
+          if (_errorText(context, state, 'additionalParticipationModes')
+              case final error?)
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
@@ -206,3 +213,13 @@ String _label(String wireName) {
       )
       .join(' ');
 }
+
+/// L4: a section field error, resolved from its message id.
+String? _errorText(
+  BuildContext context,
+  EventClassificationSectionState section,
+  String fieldId,
+) => switch (section.errorIdFor(fieldId)) {
+  final String id => CreateTexts.fieldError(context.l10n, id),
+  null => null,
+};

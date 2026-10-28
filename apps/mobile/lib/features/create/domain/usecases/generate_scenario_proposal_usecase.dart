@@ -32,13 +32,13 @@ class GenerateScenarioProposalUseCase {
     if (prompt.isEmpty) {
       throw const ScenarioGenerationFailure(
         ScenarioGenerationFailureCode.emptyPrompt,
-        'Describe the plan you want to build.',
+        'Describe the plan you want to build.', // l10n-ignore: developer error, never displayed
       );
     }
     if (prompt.length > maximumPromptLength) {
       throw const ScenarioGenerationFailure(
         ScenarioGenerationFailureCode.promptTooLong,
-        'Keep the request under 500 characters.',
+        'Keep the request under 500 characters.', // l10n-ignore: developer error, never displayed
       );
     }
 
@@ -83,7 +83,7 @@ class GenerateScenarioProposalUseCase {
     if (invalid) {
       throw const ScenarioGenerationFailure(
         ScenarioGenerationFailureCode.invalidProposal,
-        'The local generator returned an invalid proposal.',
+        'The local generator returned an invalid proposal.', // l10n-ignore: developer error, never displayed
       );
     }
   }

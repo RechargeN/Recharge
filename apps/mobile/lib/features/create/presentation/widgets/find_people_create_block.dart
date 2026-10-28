@@ -10,6 +10,7 @@ import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/find_people_draft_data.dart';
 import '../../domain/entities/find_people_validation_issue.dart';
 import '../../../../shared/primitives/money/money.dart';
+import 'create_texts.dart';
 
 class FindPeopleCreateBlock extends StatefulWidget {
   const FindPeopleCreateBlock({
@@ -1340,7 +1341,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                           ? Theme.of(context).colorScheme.error
                           : Theme.of(context).colorScheme.tertiary,
                     ),
-                    title: Text(issue.message),
+                    title: Text(CreateTexts.findPeople(context.l10n, issue)),
                     subtitle: Text('${issue.sectionId} · ${issue.fieldId}'),
                     onTap: () => widget.controller.goToFindPeopleStep(
                       _stepIndex(issue.sectionId),
@@ -1424,7 +1425,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                   (FindPeopleValidationIssue issue) => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2),
                     child: Text(
-                      '• ${issue.message}',
+                      '• ${CreateTexts.findPeople(context.l10n, issue)}',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onErrorContainer,
                       ),

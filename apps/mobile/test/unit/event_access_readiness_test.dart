@@ -66,7 +66,8 @@ void main() {
     );
     expect(
       ready.disclosures.any(
-        (disclosure) => disclosure.message.contains('local testBackend stand'),
+        (disclosure) =>
+            disclosure.topic == EventAccessDisclosureTopic.internalLocalStand,
       ),
       isTrue,
     );

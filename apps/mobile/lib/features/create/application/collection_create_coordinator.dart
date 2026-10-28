@@ -138,7 +138,7 @@ class CollectionCreateCoordinator {
     if (createDraft.objectType != CreateObjectType.collection ||
         createDraft.id != current.createDraft.id) {
       throw ArgumentError(
-        'The Collection envelope must keep its draft identity.',
+        'The Collection envelope must keep its draft identity.', // l10n-ignore: developer error, never displayed
       );
     }
     _stateOrNull = current.copyWith(
@@ -597,7 +597,7 @@ class CollectionCreateCoordinator {
           issue.severity == CollectionValidationSeverity.error,
     )) {
       throw StateError(
-        'Cannot publish: draft still has blocking validation issues.',
+        'Cannot publish: draft still has blocking validation issues.', // l10n-ignore: developer error, never displayed
       );
     }
     final CollectionCreateState beforePublish = state;

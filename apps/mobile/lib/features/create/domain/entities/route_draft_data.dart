@@ -181,7 +181,7 @@ class RouteGeometryDraft {
       throw ArgumentError.value(
         encodingPolicy,
         'encodingPolicy',
-        'Encoding policy is invalid.',
+        'Encoding policy is invalid.', // l10n-ignore: developer error, never displayed
       );
     }
 

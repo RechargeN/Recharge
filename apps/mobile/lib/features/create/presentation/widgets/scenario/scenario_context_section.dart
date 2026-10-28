@@ -4,6 +4,8 @@ import '../../../application/controllers/create_controller.dart';
 import '../../../application/state/create_state.dart';
 import '../../../domain/entities/scenario_draft_data.dart';
 import '../../../domain/entities/scenario_logistics_draft.dart';
+import '../create_texts.dart';
+import '../../../../../core/localization/l10n_context.dart';
 
 class ScenarioContextSection extends StatelessWidget {
   const ScenarioContextSection({
@@ -26,7 +28,10 @@ class ScenarioContextSection extends StatelessWidget {
           initialValue: state.draft.title,
           decoration: InputDecoration(
             labelText: 'Scenario title *',
-            errorText: state.validationErrors['title'],
+            errorText: switch (state.validationErrors['title']) {
+              final String id => CreateTexts.fieldError(context.l10n, id),
+              null => null,
+            },
             border: const OutlineInputBorder(),
           ),
           maxLength: 80,

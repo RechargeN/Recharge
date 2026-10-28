@@ -13,6 +13,8 @@ import 'event_template_panel.dart';
 import 'event_admission_section.dart';
 import 'event_classification_section.dart';
 import 'event_inventory_section.dart';
+import 'create_texts.dart';
+import '../../../../core/localization/l10n_context.dart';
 
 class EventCreateBlock extends StatelessWidget {
   const EventCreateBlock({
@@ -102,7 +104,7 @@ class EventCreateBlock extends StatelessWidget {
           id: 'event-title',
           label: 'Event title *',
           value: draft.title,
-          error: _error('title'),
+          error: _error(context, 'title'),
           onChanged: controller.updateTitle,
         ),
         _TextField(
@@ -111,7 +113,7 @@ class EventCreateBlock extends StatelessWidget {
           value: draft.shortDescription,
           minLines: 2,
           maxLines: 3,
-          error: _error('shortDescription'),
+          error: _error(context, 'shortDescription'),
           onChanged: controller.updateShortDescription,
         ),
         _TextField(
@@ -126,14 +128,14 @@ class EventCreateBlock extends StatelessWidget {
           id: 'event-cover',
           label: 'Cover image URL/path *',
           value: draft.media.coverImage,
-          error: _error('coverImage'),
+          error: _error(context, 'coverImage'),
           onChanged: controller.updateCoverImage,
         ),
         _TextField(
           id: 'event-cover-alt',
           label: 'Cover description for screen readers *',
           value: event.mediaMetadata.coverAltText,
-          error: _error('coverAltText'),
+          error: _error(context, 'coverAltText'),
           onChanged: (String value) =>
               controller.updateEventMediaMetadata(coverAltText: value),
         ),
@@ -143,7 +145,7 @@ class EventCreateBlock extends StatelessWidget {
           onAdd: controller.addGalleryImage,
           onRemoveAt: controller.removeGalleryImageAt,
           onAltChanged: controller.updateEventGalleryAltText,
-          errorFor: _error,
+          errorFor: (String fieldId) => _error(context, fieldId),
         ),
         CheckboxListTile(
           key: const Key('event-media-rights'),
@@ -153,10 +155,10 @@ class EventCreateBlock extends StatelessWidget {
             rightsConfirmed: value ?? false,
           ),
           title: const Text('I have the right to publish this media *'),
-          subtitle: _error('mediaRights') == null
+          subtitle: _error(context, 'mediaRights') == null
               ? null
               : Text(
-                  _error('mediaRights')!,
+                  _error(context, 'mediaRights')!,
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
         ),
@@ -181,7 +183,7 @@ class EventCreateBlock extends StatelessWidget {
             id: 'event-city',
             label: 'City *',
             value: event.location.city,
-            error: _error('city'),
+            error: _error(context, 'city'),
             onChanged: (String value) =>
                 controller.updateEventLocation(city: value),
           ),
@@ -196,7 +198,7 @@ class EventCreateBlock extends StatelessWidget {
             id: 'event-address',
             label: 'Address',
             value: event.location.formattedAddress ?? '',
-            error: _error('location'),
+            error: _error(context, 'location'),
             onChanged: (String value) =>
                 controller.updateEventLocation(address: value),
           ),
@@ -214,7 +216,7 @@ class EventCreateBlock extends StatelessWidget {
                   id: 'event-latitude',
                   label: 'Latitude *',
                   value: event.location.latitude?.toString() ?? '',
-                  error: _error('locationCoordinates'),
+                  error: _error(context, 'locationCoordinates'),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                     signed: true,
@@ -255,10 +257,10 @@ class EventCreateBlock extends StatelessWidget {
                     pinConfirmed: value ?? false,
                   ),
             title: const Text('Confirm this physical location pin *'),
-            subtitle: _error('locationPin') == null
+            subtitle: _error(context, 'locationPin') == null
                 ? null
                 : Text(
-                    _error('locationPin')!,
+                    _error(context, 'locationPin')!,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.error,
                     ),
@@ -274,7 +276,7 @@ class EventCreateBlock extends StatelessWidget {
               EventOnlineAccessMode.publicLink,
               EventOnlineAccessMode.externalRegistration,
             ],
-            error: _error('onlineAccessMode'),
+            error: _error(context, 'onlineAccessMode'),
             onChanged: (EventOnlineAccessMode value) =>
                 controller.updateEventOnlineAccess(mode: value),
           ),
@@ -283,7 +285,7 @@ class EventCreateBlock extends StatelessWidget {
               id: 'event-public-url',
               label: 'Public HTTPS event URL *',
               value: event.publicOnlineUrl ?? '',
-              error: _error('publicOnlineUrl'),
+              error: _error(context, 'publicOnlineUrl'),
               onChanged: (String value) =>
                   controller.updateEventOnlineAccess(publicUrl: value),
             ),
@@ -309,7 +311,7 @@ class EventCreateBlock extends StatelessWidget {
           id: 'event-local-date',
           label: 'First local date (YYYY-MM-DD)',
           value: event.localStartDate,
-          error: _error('localStartDate'),
+          error: _error(context, 'localStartDate'),
           onChanged: (String value) =>
               controller.updateEventSchedule(localStartDate: value),
         ),
@@ -318,7 +320,7 @@ class EventCreateBlock extends StatelessWidget {
             id: 'event-local-time',
             label: 'Local start time (HH:mm)',
             value: _time(event.startMinute),
-            error: _error('startMinute'),
+            error: _error(context, 'startMinute'),
             onChanged: (String value) {
               final int? minute = parseClockMinute(value);
               if (minute != null) {
@@ -332,7 +334,7 @@ class EventCreateBlock extends StatelessWidget {
               ? 'Duration in minutes (1440 = 1 day)'
               : 'Duration in minutes',
           value: '${event.durationMinutes}',
-          error: _error('durationMinutes'),
+          error: _error(context, 'durationMinutes'),
           keyboardType: TextInputType.number,
           onChanged: (String value) => controller.updateEventSchedule(
             durationMinutes: int.tryParse(value),
@@ -342,7 +344,7 @@ class EventCreateBlock extends StatelessWidget {
           id: 'event-timezone',
           label: 'IANA timezone',
           value: event.timezoneId,
-          error: _error('timezoneId'),
+          error: _error(context, 'timezoneId'),
           onChanged: (String value) =>
               controller.updateEventSchedule(timezoneId: value),
         ),
@@ -351,12 +353,12 @@ class EventCreateBlock extends StatelessWidget {
             id: 'event-multi-dates',
             label: 'Dates separated by commas',
             value: event.multiDateLocalDates.join(', '),
-            error: _error('multiDateLocalDates'),
+            error: _error(context, 'multiDateLocalDates'),
             onChanged: (String value) =>
                 controller.updateEventMultiDates(value.split(',')),
           ),
         if (event.scheduleMode == EventScheduleMode.recurring)
-          _recurrence(event),
+          _recurrence(context, event),
         if (event.occurrences.isNotEmpty) ...<Widget>[
           const SizedBox(height: 8),
           Text(
@@ -372,7 +374,7 @@ class EventCreateBlock extends StatelessWidget {
     ),
   );
 
-  Widget _recurrence(EventDraftData event) {
+  Widget _recurrence(BuildContext context, EventDraftData event) {
     final EventRecurrenceRuleDraft rule =
         event.recurrence ??
         const EventRecurrenceRuleDraft(
@@ -448,7 +450,7 @@ class EventCreateBlock extends StatelessWidget {
             id: 'event-recurrence-until',
             label: 'Until local date',
             value: rule.untilLocalDate ?? '',
-            error: _error('untilLocalDate'),
+            error: _error(context, 'untilLocalDate'),
             onChanged: (String value) => controller.updateEventRecurrence(
               rule.copyWith(untilLocalDate: value),
             ),
@@ -458,7 +460,7 @@ class EventCreateBlock extends StatelessWidget {
             id: 'event-recurrence-count',
             label: 'Occurrence count',
             value: '${rule.occurrenceCount ?? 8}',
-            error: _error('occurrenceCount'),
+            error: _error(context, 'occurrenceCount'),
             keyboardType: TextInputType.number,
             onChanged: (String value) => controller.updateEventRecurrence(
               rule.copyWith(occurrenceCount: int.tryParse(value)),
@@ -468,7 +470,7 @@ class EventCreateBlock extends StatelessWidget {
           id: 'event-recurrence-exceptions',
           label: 'Excluded dates, comma-separated',
           value: rule.exceptionLocalDates.join(', '),
-          error: _error('exceptionLocalDates'),
+          error: _error(context, 'exceptionLocalDates'),
           onChanged: (String value) => controller.updateEventRecurrence(
             rule.copyWith(
               exceptionLocalDates: value
@@ -520,7 +522,7 @@ class EventCreateBlock extends StatelessWidget {
                     id: 'event-age-min',
                     label: 'Minimum age',
                     value: event.ageMin?.toString() ?? '',
-                    error: _error('ageMin'),
+                    error: _error(context, 'ageMin'),
                     keyboardType: TextInputType.number,
                     onChanged: (String value) => controller.updateEventAudience(
                       ageMin: int.tryParse(value),
@@ -534,7 +536,7 @@ class EventCreateBlock extends StatelessWidget {
                     id: 'event-age-max',
                     label: 'Maximum age',
                     value: event.ageMax?.toString() ?? '',
-                    error: _error('ageMax'),
+                    error: _error(context, 'ageMax'),
                     keyboardType: TextInputType.number,
                     onChanged: (String value) => controller.updateEventAudience(
                       ageMax: int.tryParse(value),
@@ -586,7 +588,7 @@ class EventCreateBlock extends StatelessWidget {
             EventPricingMode.free,
             EventPricingMode.fixed,
           ],
-          error: _error('pricingMode'),
+          error: _error(context, 'pricingMode'),
           onChanged: (EventPricingMode value) => controller.updateEventPricing(
             mode: value,
             collectionMode: value == EventPricingMode.free
@@ -601,7 +603,7 @@ class EventCreateBlock extends StatelessWidget {
             value: event.price == null
                 ? ''
                 : (event.price!.amountMinor / 100).toStringAsFixed(2),
-            error: _error('price'),
+            error: _error(context, 'price'),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (String value) => controller.updateEventPricing(
               mode: EventPricingMode.fixed,
@@ -617,7 +619,7 @@ class EventCreateBlock extends StatelessWidget {
               EventPaymentCollectionMode.onsite,
               EventPaymentCollectionMode.external,
             ],
-            error: _error('paymentCollectionMode'),
+            error: _error(context, 'paymentCollectionMode'),
             onChanged: (EventPaymentCollectionMode value) =>
                 controller.updateEventPricing(
                   mode: EventPricingMode.fixed,
@@ -649,7 +651,7 @@ class EventCreateBlock extends StatelessWidget {
               id: 'event-capacity',
               label: 'Maximum participants',
               value: event.capacity?.toString() ?? '',
-              error: _error('capacity'),
+              error: _error(context, 'capacity'),
               keyboardType: TextInputType.number,
               onChanged: (String value) => controller.updateEventCapacity(
                 EventCapacityMode.known,
@@ -664,7 +666,7 @@ class EventCreateBlock extends StatelessWidget {
               EventRegistrationMode.none,
               EventRegistrationMode.external,
             ],
-            error: _error('registrationMode'),
+            error: _error(context, 'registrationMode'),
             onChanged: (EventRegistrationMode value) =>
                 controller.updateEventRegistration(mode: value),
           ),
@@ -673,7 +675,7 @@ class EventCreateBlock extends StatelessWidget {
               id: 'event-booking-url',
               label: 'External HTTPS registration URL',
               value: event.externalBookingUrl ?? '',
-              error: _error('externalBookingUrl'),
+              error: _error(context, 'externalBookingUrl'),
               onChanged: (String value) => controller.updateEventRegistration(
                 mode: EventRegistrationMode.external,
                 externalBookingUrl: value,
@@ -688,7 +690,7 @@ class EventCreateBlock extends StatelessWidget {
             EventVisibility.public,
             EventVisibility.unlisted,
           ],
-          error: _error('visibility'),
+          error: _error(context, 'visibility'),
           onChanged: controller.updateEventVisibility,
         ),
       ],
@@ -776,7 +778,7 @@ class EventCreateBlock extends StatelessWidget {
               (EventValidationIssue issue) => Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
-                  '• ${issue.message}',
+                  '• ${CreateTexts.event(context.l10n, issue)}',
                   style: TextStyle(
                     color: issue.isBlocking
                         ? Theme.of(context).colorScheme.error
@@ -835,11 +837,16 @@ class EventCreateBlock extends StatelessWidget {
           ],
         );
 
-  String? _error(String fieldId) {
+  String? _error(BuildContext context, String fieldId) {
     for (final EventValidationIssue issue in state.eventValidationIssues) {
-      if (issue.fieldId == fieldId && issue.isBlocking) return issue.message;
+      if (issue.fieldId == fieldId && issue.isBlocking) {
+        return CreateTexts.event(context.l10n, issue);
+      }
     }
-    return state.validationErrors[fieldId];
+    return switch (state.validationErrors[fieldId]) {
+      final String id => CreateTexts.fieldError(context.l10n, id),
+      null => null,
+    };
   }
 }
 

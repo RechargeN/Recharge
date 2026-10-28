@@ -125,6 +125,8 @@ import '../../domain/entities/session_validation_issue.dart';
 import '../../domain/entities/location_search_suggestion.dart';
 import '../../domain/repositories/location_search_repository.dart';
 import '../../domain/usecases/validate_session_draft_usecase.dart';
+import '../create_message_ids.dart';
+import '../state/create_notice.dart';
 
 class CreateController extends ChangeNotifier {
   CreateController({
@@ -599,7 +601,9 @@ class CreateController extends ChangeNotifier {
     final CreateTemplateRepository? repository = _createTemplateRepository;
     final ManageCreateTemplateUseCase? useCase = _manageCreateTemplate;
     if (repository == null || useCase == null || _state.userId.isEmpty) {
-      _setState(_state.copyWith(message: 'Хранилище шаблонов недоступно.'));
+      _setState(
+        _state.copyWith(message: CreateNotice.templateStoreUnavailable),
+      );
       return false;
     }
     try {
@@ -613,9 +617,7 @@ class CreateController extends ChangeNotifier {
         template: template,
       );
       await _loadEventTemplates(_state.userId);
-      _setState(
-        _state.copyWith(message: 'Шаблон «${template.name}» сохранён.'),
-      );
+      _setState(_state.copyWith(message: CreateNotice.templateSaved));
       return true;
     } on Object catch (error) {
       _setState(_state.copyWith(message: _templateErrorMessage(error)));
@@ -636,7 +638,7 @@ class CreateController extends ChangeNotifier {
       );
       await repository.upsertTemplate(userId: _state.userId, template: renamed);
       await _loadEventTemplates(_state.userId);
-      _setState(_state.copyWith(message: 'Шаблон переименован.'));
+      _setState(_state.copyWith(message: CreateNotice.templateRenamed));
       return true;
     } on Object catch (error) {
       _setState(_state.copyWith(message: _templateErrorMessage(error)));
@@ -660,9 +662,7 @@ class CreateController extends ChangeNotifier {
         template: replaced,
       );
       await _loadEventTemplates(_state.userId);
-      _setState(
-        _state.copyWith(message: 'Шаблон «${replaced.name}» обновлён.'),
-      );
+      _setState(_state.copyWith(message: CreateNotice.templateUpdated));
       return true;
     } on Object catch (error) {
       _setState(_state.copyWith(message: _templateErrorMessage(error)));
@@ -678,7 +678,7 @@ class CreateController extends ChangeNotifier {
       templateId: templateId,
     );
     await _loadEventTemplates(_state.userId);
-    _setState(_state.copyWith(message: 'Шаблон удалён.'));
+    _setState(_state.copyWith(message: CreateNotice.templateDeleted));
     return true;
   }
 
@@ -718,7 +718,7 @@ class CreateController extends ChangeNotifier {
           clearEventValidationIssues: true,
           clearValidationErrors: true,
           clearPublishedDraft: true,
-          message: 'Применён шаблон «${used.name}».',
+          message: CreateNotice.templateApplied,
         ),
       );
       await _loadEventTemplates(_state.userId);
@@ -779,26 +779,19 @@ class CreateController extends ChangeNotifier {
 
   String _templateErrorMessage(Object error) {
     if (error is ArgumentError) {
-      return error.message?.toString() ?? 'Некорректный шаблон.';
+      return CreateNotice.templateInvalid;
     }
-    return 'Не удалось выполнить действие с шаблоном.';
+    return CreateNotice.templateActionFailed;
   }
 
   void setObjectType(CreateObjectType type) {
     if (type == CreateObjectType.route && !canCreateRoute) {
-      _setState(
-        _state.copyWith(
-          message: 'Для создания Route требуется capability create.route.',
-        ),
-      );
+      _setState(_state.copyWith(message: CreateNotice.routeCreateNotAllowed));
       return;
     }
     if (type == CreateObjectType.collection && !canCreateCollection) {
       _setState(
-        _state.copyWith(
-          message:
-              'Для создания Collection требуется capability create.collection.',
-        ),
+        _state.copyWith(message: CreateNotice.collectionCreateNotAllowed),
       );
       return;
     }
@@ -1043,8 +1036,7 @@ class CreateController extends ChangeNotifier {
           _setState(
             _state.copyWith(
               scenarioGenerationLoading: false,
-              scenarioGenerationError:
-                  'Scenario changed. Generate a fresh preview.',
+              scenarioGenerationError: CreateNotice.scenarioPreviewStale,
               clearScenarioGenerationPreview: true,
             ),
           );
@@ -1063,7 +1055,9 @@ class CreateController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           scenarioGenerationLoading: false,
-          scenarioGenerationError: error.message,
+          scenarioGenerationError: CreateNotice.forScenarioGeneration(
+            error.code,
+          ),
           clearScenarioGenerationPreview: true,
         ),
       );
@@ -1072,8 +1066,7 @@ class CreateController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           scenarioGenerationLoading: false,
-          scenarioGenerationError:
-              'Could not build this local demo preview. Try again.',
+          scenarioGenerationError: CreateNotice.scenarioPreviewFailed,
           clearScenarioGenerationPreview: true,
         ),
       );
@@ -1113,7 +1106,7 @@ class CreateController extends ChangeNotifier {
           scenarioGenerationLoading: false,
           clearScenarioGenerationPreview: true,
           clearScenarioGenerationError: true,
-          message: 'AI proposal added to your Scenario.',
+          message: CreateNotice.scenarioAiProposalAdded,
         ),
       );
     } on ScenarioGenerationStaleFailure {
@@ -1122,8 +1115,7 @@ class CreateController extends ChangeNotifier {
         _state.copyWith(
           scenarioGenerationLoading: false,
           clearScenarioGenerationPreview: true,
-          scenarioGenerationError:
-              'Scenario changed. Generate a fresh preview.',
+          scenarioGenerationError: CreateNotice.scenarioPreviewStale,
         ),
       );
     }
@@ -1398,9 +1390,9 @@ class CreateController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           validationErrors: const <String, String>{
-            'title': 'Give the Scenario a title',
+            'title': 'scenario.validation.title_required',
           },
-          message: 'Add a title before saving',
+          message: CreateNotice.scenarioTitleRequired,
         ),
       );
       return false;
@@ -1412,9 +1404,9 @@ class CreateController extends ChangeNotifier {
             for (final ScenarioValidationIssue issue
                 in readiness.validation.issues)
               if (issue.severity == ScenarioValidationSeverity.error)
-                issue.path: issue.message,
+                issue.path: 'scenario.validation.${issue.code}',
           },
-          message: 'Resolve the blocking Scenario issues',
+          message: CreateNotice.scenarioBlockingIssues,
         ),
       );
       return false;
@@ -1486,7 +1478,7 @@ class CreateController extends ChangeNotifier {
         _setState(
           _state.copyWith(
             status: CreateStatus.ready,
-            message: 'Scenario is no longer available.',
+            message: CreateNotice.scenarioUnavailable,
           ),
         );
         return false;
@@ -1514,7 +1506,7 @@ class CreateController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: CreateStatus.ready,
-          message: 'Could not open this Scenario.',
+          message: CreateNotice.scenarioOpenFailed,
         ),
       );
       return false;
@@ -1724,11 +1716,7 @@ class CreateController extends ChangeNotifier {
       ...current.additionalParticipationModes,
     };
     if (enabled && additional.length >= 3 && !additional.contains(value)) {
-      _setState(
-        _state.copyWith(
-          message: 'Можно выбрать не более трёх дополнительных ролей',
-        ),
-      );
+      _setState(_state.copyWith(message: CreateNotice.classificationRoleLimit));
       return;
     }
     enabled ? additional.add(value) : additional.remove(value);
@@ -1775,11 +1763,7 @@ class CreateController extends ChangeNotifier {
   bool confirmEventClassificationSuggestion({int? expectedRevision}) {
     final int currentRevision = _state.draft.eventData?.revision ?? -1;
     if (expectedRevision != null && expectedRevision != currentRevision) {
-      _setState(
-        _state.copyWith(
-          message: 'Classification changed. Review the current draft.',
-        ),
-      );
+      _setState(_state.copyWith(message: CreateNotice.classificationChanged));
       return false;
     }
     final suggestion = eventClassificationState.suggestion;
@@ -1838,11 +1822,7 @@ class CreateController extends ChangeNotifier {
     if (event == null ||
         preview == null ||
         (expected != null && expected != event.revision)) {
-      _setState(
-        _state.copyWith(
-          message: 'Admission configuration changed. Preview the preset again.',
-        ),
-      );
+      _setState(_state.copyWith(message: CreateNotice.admissionPreviewStale));
       return false;
     }
     if (!_applyEventAdmission(preview)) return false;
@@ -1860,11 +1840,7 @@ class CreateController extends ChangeNotifier {
         suggestion == null ||
         !suggestion.canConfirm ||
         (expectedRevision != null && expectedRevision != event.revision)) {
-      _setState(
-        _state.copyWith(
-          message: 'Legacy admission suggestion must be reviewed again.',
-        ),
-      );
+      _setState(_state.copyWith(message: CreateNotice.admissionLegacyReview));
       return false;
     }
     return _applyEventAdmission(suggestion.admission);
@@ -2392,7 +2368,7 @@ class CreateController extends ChangeNotifier {
           _state.copyWith(
             eventStep: firstInvalidStep,
             eventValidationIssues: issues,
-            message: 'Проверьте обязательные поля шага Event',
+            message: CreateNotice.stepRequiredFields,
           ),
         );
         return false;
@@ -3053,8 +3029,7 @@ class CreateController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           placeEnrichmentLoading: false,
-          placeEnrichmentError:
-              'The local helper could not review this draft. Manual creation still works.',
+          placeEnrichmentError: CreateNotice.placeHelperFailed,
           clearPlaceEnrichmentProposal: true,
         ),
       );
@@ -3071,7 +3046,7 @@ class CreateController extends ChangeNotifier {
       _invalidatePlaceDuplicateCheck();
       _setState(
         _state.copyWith(
-          message: 'Local suggestions applied. Review them before publishing.',
+          message: CreateNotice.placeSuggestionsApplied,
           clearPlaceEnrichmentProposal: true,
           clearPlaceEnrichmentError: true,
         ),
@@ -3079,8 +3054,7 @@ class CreateController extends ChangeNotifier {
     } on PlaceEnrichmentStaleFailure {
       _setState(
         _state.copyWith(
-          placeEnrichmentError:
-              'The draft changed. Run the local review again.',
+          placeEnrichmentError: CreateNotice.placeHelperStale,
           clearPlaceEnrichmentProposal: true,
         ),
       );
@@ -3115,7 +3089,7 @@ class CreateController extends ChangeNotifier {
           )
           .toList(growable: false);
       if (blocking.isNotEmpty) {
-        _setPlaceIssues(issues, message: 'Проверьте обязательные поля шага');
+        _setPlaceIssues(issues, message: CreateNotice.stepRequiredFields);
         return false;
       }
     }
@@ -3194,9 +3168,7 @@ class CreateController extends ChangeNotifier {
     if (trimmed.isEmpty) return;
     if (_state.draft.objectType == CreateObjectType.place &&
         _state.draft.media.gallery.length >= 12) {
-      _setState(
-        _state.copyWith(message: 'В галерее Place можно сохранить до 12 фото'),
-      );
+      _setState(_state.copyWith(message: CreateNotice.placeGalleryLimit));
       return;
     }
     final List<String> gallery = <String>[
@@ -4052,7 +4024,7 @@ class CreateController extends ChangeNotifier {
         _setState(
           _state.copyWith(
             findPeopleValidationIssues: issues,
-            message: 'Проверьте обязательные поля шага',
+            message: CreateNotice.stepRequiredFields,
           ),
         );
         return false;
@@ -4078,7 +4050,7 @@ class CreateController extends ChangeNotifier {
         _setState(
           _state.copyWith(
             saveStatus: CreateSaveStatus.failed,
-            message: 'Редактор Route ещё загружается.',
+            message: CreateNotice.routeEditorLoading,
           ),
         );
         return;
@@ -4102,10 +4074,10 @@ class CreateController extends ChangeNotifier {
                     ? CreateSaveStatus.unsaved
                     : CreateSaveStatus.failed),
           message: saved
-              ? 'Черновик Route сохранён'
+              ? CreateNotice.routeDraftSaved
               : (result.status == RouteDraftSaveStatus.invalidDraft
-                    ? 'Дождитесь завершения операций с участками.'
-                    : 'Не удалось сохранить Route. Черновик остался в форме.'),
+                    ? CreateNotice.routeSegmentsBusy
+                    : CreateNotice.routeSaveFailed),
         ),
       );
       return;
@@ -4123,7 +4095,7 @@ class CreateController extends ChangeNotifier {
         _state.copyWith(
           status: CreateStatus.ready,
           saveStatus: CreateSaveStatus.saved,
-          message: 'Черновик сохранен',
+          message: CreateNotice.draftSaved,
         ),
       );
       _analyticsService.track(
@@ -4137,7 +4109,7 @@ class CreateController extends ChangeNotifier {
         _state.copyWith(
           status: CreateStatus.ready,
           saveStatus: CreateSaveStatus.failed,
-          message: 'Не удалось сохранить. Данные остались в форме.',
+          message: CreateNotice.draftSaveFailed,
         ),
       );
     }
@@ -4166,10 +4138,8 @@ class CreateController extends ChangeNotifier {
         _state.copyWith(
           status: CreateStatus.ready,
           message: publisher.type == PublisherType.page
-              ? 'Публикация от имени страницы недоступна: доступ отозван или '
-                    'ограничен. Черновик сохранён.'
-              : 'Публикация недоступна для этого владельца. Черновик '
-                    'сохранён.',
+              ? CreateNotice.publisherPageUnavailable
+              : CreateNotice.publisherUnavailable,
           clearPublishedDraft: true,
         ),
       );
@@ -4213,8 +4183,7 @@ class CreateController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: CreateStatus.ready,
-          message:
-              'Public Scenario publishing is not enabled yet. Save it to My Scenarios.',
+          message: CreateNotice.scenarioPublicPublishDisabled,
         ),
       );
       return false;
@@ -4238,7 +4207,7 @@ class CreateController extends ChangeNotifier {
             eventStep: firstInvalidStep,
             validationErrors: errors,
             eventValidationIssues: eventIssues,
-            message: 'Проверьте обязательные поля Event',
+            message: CreateNotice.requiredFields,
             clearPublishedDraft: true,
           ),
         );
@@ -4248,16 +4217,16 @@ class CreateController extends ChangeNotifier {
             status: CreateStatus.ready,
             validationErrors: errors,
             sessionValidationIssues: _sessionIssues(_state.draft),
-            message: 'Проверьте обязательные поля Session',
+            message: CreateNotice.requiredFields,
             clearPublishedDraft: true,
           ),
         );
       } else if (_state.draft.objectType == CreateObjectType.place) {
-        _setPlaceIssues(_placeIssues(), message: 'Заполните обязательные поля');
+        _setPlaceIssues(_placeIssues(), message: CreateNotice.requiredFields);
       } else if (_state.draft.objectType == CreateObjectType.activity) {
         _setActivityIssues(
           _activityIssues(),
-          message: 'Проверьте обязательные поля Recharge Activity',
+          message: CreateNotice.requiredFields,
         );
       } else if (_state.draft.objectType == CreateObjectType.findPeople) {
         _setState(
@@ -4265,7 +4234,7 @@ class CreateController extends ChangeNotifier {
             status: CreateStatus.ready,
             validationErrors: errors,
             findPeopleValidationIssues: _findPeopleIssues(),
-            message: 'Проверьте обязательные поля Find People',
+            message: CreateNotice.requiredFields,
             clearPublishedDraft: true,
           ),
         );
@@ -4274,7 +4243,7 @@ class CreateController extends ChangeNotifier {
           _state.copyWith(
             status: CreateStatus.ready,
             validationErrors: errors,
-            message: 'Заполните обязательные поля',
+            message: CreateNotice.requiredFields,
             clearPublishedDraft: true,
           ),
         );
@@ -4291,7 +4260,7 @@ class CreateController extends ChangeNotifier {
           _state.copyWith(
             status: CreateStatus.ready,
             placeDuplicateMatches: duplicateMatches,
-            message: 'Проверьте похожие места перед публикацией',
+            message: CreateNotice.placeDuplicatesReview,
           ),
         );
         return false;
@@ -4307,10 +4276,7 @@ class CreateController extends ChangeNotifier {
           )
           .toList(growable: false);
       if (unacceptedWarnings.isNotEmpty) {
-        _setPlaceIssues(
-          issues,
-          message: 'Подтвердите предупреждения перед публикацией',
-        );
+        _setPlaceIssues(issues, message: CreateNotice.warningsConfirm);
         return false;
       }
     }
@@ -4354,8 +4320,7 @@ class CreateController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: CreateStatus.ready,
-          message:
-              'Не удалось отправить. Черновик сохранён, попробуйте ещё раз.',
+          message: CreateNotice.submitFailed,
           clearPublishedDraft: true,
         ),
       );
@@ -4435,8 +4400,8 @@ class CreateController extends ChangeNotifier {
         draft: finalPublished,
         publishedDraft: finalPublished,
         message: directPublishApplied
-            ? 'Опубликовано'
-            : 'Отправлено на модерацию',
+            ? CreateNotice.published
+            : CreateNotice.submittedForReview,
       ),
     );
     _analyticsService.track(
@@ -4499,7 +4464,7 @@ class CreateController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: CreateStatus.ready,
-          message: 'Сервис публикации Route недоступен.',
+          message: CreateNotice.routePublicationUnavailable,
         ),
       );
       return false;
@@ -4525,8 +4490,7 @@ class CreateController extends ChangeNotifier {
           _state.copyWith(
             status: CreateStatus.ready,
             routePublishReceipt: receipt,
-            message:
-                'Route не опубликован: ${receipt.reasonCode ?? receipt.status.name}.',
+            message: CreateNotice.routeNotPublished,
           ),
         );
         return false;
@@ -4538,8 +4502,8 @@ class CreateController extends ChangeNotifier {
           publishedDraft: receipt.displayDraft,
           routePublishReceipt: receipt,
           message: receipt.isPublished
-              ? 'Route опубликован.'
-              : 'Route отправлен на проверку.',
+              ? CreateNotice.routePublished
+              : CreateNotice.routeSubmitted,
         ),
       );
       _analyticsService.track(
@@ -4552,25 +4516,25 @@ class CreateController extends ChangeNotifier {
         },
       );
       return true;
-    } on RoutePublicationAuthorizationException catch (error) {
+    } on RoutePublicationAuthorizationException {
       _setState(
         _state.copyWith(
           status: CreateStatus.ready,
-          message: 'Операция Route запрещена: ${error.reasonCode}.',
+          message: CreateNotice.routeActionForbidden,
         ),
       );
-    } on RoutePublicationBuildException catch (error) {
+    } on RoutePublicationBuildException {
       _setState(
         _state.copyWith(
           status: CreateStatus.ready,
-          message: 'Route не готов: ${error.codes.join(', ')}.',
+          message: CreateNotice.routeNotReady,
         ),
       );
     } catch (_) {
       _setState(
         _state.copyWith(
           status: CreateStatus.ready,
-          message: 'Не удалось отправить Route. Черновик сохранён.',
+          message: CreateNotice.routeSubmitFailed,
         ),
       );
     }
@@ -4589,12 +4553,8 @@ class CreateController extends ChangeNotifier {
         _state.copyWith(routeModerationRequests: requests, clearMessage: true),
       );
       return true;
-    } on RoutePublicationAuthorizationException catch (error) {
-      _setState(
-        _state.copyWith(
-          message: 'Очередь Route недоступна: ${error.reasonCode}.',
-        ),
-      );
+    } on RoutePublicationAuthorizationException {
+      _setState(_state.copyWith(message: CreateNotice.routeQueueUnavailable));
       return false;
     }
   }
@@ -4619,15 +4579,13 @@ class CreateController extends ChangeNotifier {
         _state.copyWith(
           routePublishReceipt: receipt,
           message: receipt.isPublished
-              ? 'Версия Route одобрена и стала активной.'
-              : 'Версия Route отклонена.',
+              ? CreateNotice.routeVersionApproved
+              : CreateNotice.routeVersionRejected,
         ),
       );
       return receipt;
-    } on RoutePublicationAuthorizationException catch (error) {
-      _setState(
-        _state.copyWith(message: 'Решение запрещено: ${error.reasonCode}.'),
-      );
+    } on RoutePublicationAuthorizationException {
+      _setState(_state.copyWith(message: CreateNotice.routeDecisionForbidden));
       return null;
     }
   }
@@ -4650,16 +4608,13 @@ class CreateController extends ChangeNotifier {
           clearPublishedDraft: true,
           clearRoutePublishReceipt: true,
           routeStep: 0,
-          message:
-              'Создана новая версия. Опубликованный Route пока не изменён.',
+          message: CreateNotice.routeNewVersionCreated,
         ),
       );
       return true;
-    } on RoutePublicationAuthorizationException catch (error) {
+    } on RoutePublicationAuthorizationException {
       _setState(
-        _state.copyWith(
-          message: 'Новая версия недоступна: ${error.reasonCode}.',
-        ),
+        _state.copyWith(message: CreateNotice.routeNewVersionUnavailable),
       );
       return false;
     }
@@ -4677,15 +4632,13 @@ class CreateController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           message: archived == null
-              ? 'Route не найден.'
-              : 'Route снят с публикации. История версий сохранена.',
+              ? CreateNotice.routeNotFound
+              : CreateNotice.routeWithdrawn,
         ),
       );
       return archived != null;
-    } on RoutePublicationAuthorizationException catch (error) {
-      _setState(
-        _state.copyWith(message: 'Архивация запрещена: ${error.reasonCode}.'),
-      );
+    } on RoutePublicationAuthorizationException {
+      _setState(_state.copyWith(message: CreateNotice.routeArchiveForbidden));
       return false;
     }
   }
@@ -4737,7 +4690,7 @@ class CreateController extends ChangeNotifier {
     if (draft.objectType == CreateObjectType.event) {
       return <String, String>{
         for (final EventValidationIssue issue in _eventIssues(draft: draft))
-          if (issue.isBlocking) issue.fieldId: issue.message,
+          if (issue.isBlocking) issue.fieldId: eventIssueMessageId(issue),
       };
     }
     if (draft.objectType == CreateObjectType.place) {
@@ -4766,40 +4719,43 @@ class CreateController extends ChangeNotifier {
       return <String, String>{
         for (final FindPeopleValidationIssue issue in _findPeopleIssues(draft))
           if (issue.severity == FindPeopleValidationSeverity.error)
-            issue.fieldId: issue.message,
+            issue.fieldId: 'find_people.validation.${issue.code}',
       };
     }
     if (draft.objectType == CreateObjectType.scenario) {
       final ScenarioDraftData? scenario = draft.scenarioData;
       if (scenario == null || _scenarioCreateCoordinator == null) {
-        return const <String, String>{'scenario': 'Scenario data is missing'};
+        return const <String, String>{
+          'scenario': 'scenario.validation.data_missing',
+        };
       }
       return <String, String>{
-        if (draft.title.trim().isEmpty) 'title': 'Give the Scenario a title',
+        if (draft.title.trim().isEmpty)
+          'title': 'scenario.validation.title_required',
         for (final ScenarioValidationIssue issue
             in _scenarioCreateCoordinator.evaluate(scenario).validation.issues)
           if (issue.severity == ScenarioValidationSeverity.error)
-            issue.path: issue.message,
+            issue.path: 'scenario.validation.${issue.code}',
       };
     }
     final Map<String, String> errors = <String, String>{
       ..._validateCreateAvailability(draft),
     };
     if (draft.title.trim().isEmpty) {
-      errors['title'] = 'Введите title';
+      errors['title'] = 'create.validation.title_required';
     }
     if (draft.mainCategory.trim().isEmpty) {
-      errors['mainCategory'] = 'Введите category';
+      errors['mainCategory'] = 'create.validation.category_required';
     }
     if (draft.city.trim().isEmpty) {
-      errors['city'] = 'Введите city';
+      errors['city'] = 'create.validation.city_required';
     }
     if (draft.media.coverImage.trim().isEmpty) {
-      errors['coverImage'] = 'Cover image обязательна';
+      errors['coverImage'] = 'create.validation.cover_required';
     }
     final CreateBlockConfig config = createBlockConfigFor(draft.objectType);
     if (config.requiresStartDateTime && draft.startDateTimeUtc == null) {
-      errors['startDateTimeUtc'] = 'Для ${config.title} укажите start datetime';
+      errors['startDateTimeUtc'] = 'create.validation.start_required';
     }
     return errors;
   }
@@ -4887,7 +4843,7 @@ class CreateController extends ChangeNotifier {
         draft: coordinator.state.createDraft,
         saveStatus: CreateSaveStatus.unsaved,
         message: outcome != null && !outcome.accepted
-            ? 'Команда Route отклонена: ${outcome.failureCode?.name ?? 'unknown'}.'
+            ? CreateNotice.routeCommandRefused
             : null,
         clearMessage: outcome == null || outcome.accepted,
       ),
@@ -5033,10 +4989,7 @@ class CreateController extends ChangeNotifier {
         !event.unsupportedFieldIds.contains(fieldId);
     if (!writable) {
       _setState(
-        _state.copyWith(
-          message:
-              'This Event uses a newer access contract and cannot be changed here.',
-        ),
+        _state.copyWith(message: CreateNotice.eventAccessContractUnsupported),
       );
     }
     return writable;
@@ -5085,7 +5038,7 @@ class CreateController extends ChangeNotifier {
         days: <ScenarioDayDraft>[
           ScenarioDayDraft(
             id: dayId,
-            title: 'Day 1',
+            title: 'Day 1', // l10n-ignore: new-draft prefill data
             dayIndex: 0,
             timezoneId: _runtimeDefaults.timezone,
             itemIds: const <String>[],
@@ -5141,14 +5094,14 @@ class CreateController extends ChangeNotifier {
     ScenarioTransitMutationFailure? failure,
   ) => switch (failure) {
     ScenarioTransitMutationFailure.revisionConflict =>
-      'Scenario changed. Review the selected service and try again.',
+      CreateNotice.transitScenarioChanged,
     ScenarioTransitMutationFailure.invalidSelection =>
-      'The selected service cannot be applied safely.',
+      CreateNotice.transitServiceUnsafe,
     ScenarioTransitMutationFailure.missingTarget =>
-      'The planned transport item no longer exists.',
+      CreateNotice.transitItemMissing,
     ScenarioTransitMutationFailure.targetNotOfficial =>
-      'Only an official schedule item can be replaced here.',
-    null => 'The selected service was not applied.',
+      CreateNotice.transitOnlyOfficial,
+    null => CreateNotice.transitNotApplied,
   };
 
   List<FindPeopleValidationIssue> _findPeopleIssues([
@@ -5513,7 +5466,7 @@ class CreateController extends ChangeNotifier {
           )
           .toList(growable: false);
       if (blocking.isNotEmpty) {
-        _setRentalIssues(issues, message: 'Проверьте обязательные поля шага');
+        _setRentalIssues(issues, message: CreateNotice.stepRequiredFields);
         return false;
       }
     }
@@ -5566,7 +5519,9 @@ class CreateController extends ChangeNotifier {
     final CreateTemplateRepository? repository = _createTemplateRepository;
     final ManageCreateTemplateUseCase? useCase = _manageCreateTemplate;
     if (repository == null || useCase == null || _state.userId.isEmpty) {
-      _setState(_state.copyWith(message: 'Хранилище шаблонов недоступно.'));
+      _setState(
+        _state.copyWith(message: CreateNotice.templateStoreUnavailable),
+      );
       return false;
     }
     try {
@@ -5580,9 +5535,7 @@ class CreateController extends ChangeNotifier {
         template: template,
       );
       await _loadRentalTemplates(_state.userId);
-      _setState(
-        _state.copyWith(message: 'Шаблон «${template.name}» сохранён.'),
-      );
+      _setState(_state.copyWith(message: CreateNotice.templateSaved));
       return true;
     } on Object catch (error) {
       _setState(_state.copyWith(message: _templateErrorMessage(error)));
@@ -5616,7 +5569,7 @@ class CreateController extends ChangeNotifier {
           clearRentalValidationIssues: true,
           clearValidationErrors: true,
           clearPublishedDraft: true,
-          message: 'Применён шаблон «${used.name}».',
+          message: CreateNotice.templateApplied,
         ),
       );
       await _loadRentalTemplates(_state.userId);
@@ -5650,7 +5603,7 @@ class CreateController extends ChangeNotifier {
           clearRentalValidationIssues: true,
           clearValidationErrors: true,
           clearPublishedDraft: true,
-          message: 'Создан новый черновик на основе этого объявления.',
+          message: CreateNotice.rentalNewDraftFromListing,
         ),
       );
       await saveDraft();
@@ -5848,7 +5801,7 @@ class CreateController extends ChangeNotifier {
           )
           .toList(growable: false);
       if (blocking.isNotEmpty) {
-        _setActivityIssues(issues, message: 'Проверьте обязательные поля шага');
+        _setActivityIssues(issues, message: CreateNotice.stepRequiredFields);
         return false;
       }
     }
@@ -6129,18 +6082,14 @@ class CreateController extends ChangeNotifier {
     if (coordinator == null) return false;
     if (!_collectionCreateConfig.collectionPublishingEnabled) {
       _setState(
-        _state.copyWith(message: 'Публикация Collection временно отключена.'),
+        _state.copyWith(message: CreateNotice.collectionPublicationDisabled),
       );
       return false;
     }
     final bool direct = canPublishCollectionDirect;
     if (!direct && !canSubmitCollection) {
       _setState(
-        _state.copyWith(
-          message:
-              'Для публикации Collection нужна capability submit.collection '
-              'или publish.collection.direct.',
-        ),
+        _state.copyWith(message: CreateNotice.collectionPublishNotAllowed),
       );
       return false;
     }
@@ -6166,11 +6115,10 @@ class CreateController extends ChangeNotifier {
       // itself succeeded (never reported as a failed publish, per the
       // receipt's own contract), but the softer wording says so honestly.
       final String message = pending
-          ? 'Collection отправлен на проверку.'
+          ? CreateNotice.collectionSubmitted
           : receipt.discoverSynced
-          ? 'Collection опубликован.'
-          : 'Collection опубликован, но синхронизация с Discover ещё не '
-                'завершена.';
+          ? CreateNotice.collectionPublished
+          : CreateNotice.collectionPublishedSyncPending;
       _setState(_state.copyWith(message: message));
       return true;
     } on CollectionPublicationException catch (e) {
@@ -6179,11 +6127,7 @@ class CreateController extends ChangeNotifier {
         action: CollectionCreateTelemetryAction.publish,
         failureCode: e.failure.name,
       );
-      _setState(
-        _state.copyWith(
-          message: 'Collection не опубликован: ${e.failure.name}.',
-        ),
-      );
+      _setState(_state.copyWith(message: CreateNotice.collectionNotPublished));
       return false;
     }
   }
@@ -6205,9 +6149,7 @@ class CreateController extends ChangeNotifier {
       if (!receipt.discoverSynced) {
         _setState(
           _state.copyWith(
-            message:
-                'Пункты удалены, но синхронизация с Discover ещё не '
-                'завершена.',
+            message: CreateNotice.collectionItemsRemovedSyncPending,
           ),
         );
       }
@@ -6233,11 +6175,7 @@ class CreateController extends ChangeNotifier {
       _collectionTelemetry.trackArchive(discoverSynced: discoverSynced);
       if (!discoverSynced) {
         _setState(
-          _state.copyWith(
-            message:
-                'Collection архивирован, но синхронизация с Discover ещё '
-                'не завершена.',
-          ),
+          _state.copyWith(message: CreateNotice.collectionArchivedSyncPending),
         );
       }
       return true;
@@ -6276,7 +6214,9 @@ class CreateController extends ChangeNotifier {
     if (coordinator == null || !canModerateCollection) return false;
     if (!accept && rejectionReason == null) {
       _setState(
-        _state.copyWith(message: 'Отказ по Collection требует кода причины.'),
+        _state.copyWith(
+          message: CreateNotice.collectionRejectionReasonRequired,
+        ),
       );
       return false;
     }
@@ -6295,11 +6235,7 @@ class CreateController extends ChangeNotifier {
       );
       if (accept && !result.discoverSynced) {
         _setState(
-          _state.copyWith(
-            message:
-                'Collection принят, но синхронизация с Discover ещё не '
-                'завершена.',
-          ),
+          _state.copyWith(message: CreateNotice.collectionAcceptedSyncPending),
         );
       }
       return true;

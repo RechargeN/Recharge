@@ -20,6 +20,7 @@ import 'package:recharge/features/create/domain/usecases/save_create_draft_useca
 
 import '../support/event_create_test_support.dart';
 import 'product_analytics/product_analytics_test_support.dart';
+import 'package:recharge/features/create/application/state/create_notice.dart';
 
 void main() {
   late _FakeCreateRepository repository;
@@ -244,7 +245,7 @@ void main() {
 
     expect(routeSuccess, isFalse);
     expect(controller.state.publishedDraft, isNull);
-    expect(controller.state.message, contains('Сервис публикации Route'));
+    expect(controller.state.message, CreateNotice.routePublicationUnavailable);
   });
 
   test('Route selection requires create.route capability', () async {
@@ -257,7 +258,7 @@ void main() {
     controller.setObjectType(CreateObjectType.route);
 
     expect(controller.state.draft.objectType, isNot(CreateObjectType.route));
-    expect(controller.state.message, contains('create.route'));
+    expect(controller.state.message, CreateNotice.routeCreateNotAllowed);
 
     await controller.ensureLoaded(
       userId: 'u1',
@@ -437,14 +438,11 @@ void main() {
         identical(controller.state.draft.scenarioData, scenarioBeforeSave),
         isTrue,
       );
-      expect(controller.state.message, contains('Данные остались в форме'));
+      expect(controller.state.message, CreateNotice.draftSaveFailed);
 
       repository.saveError = null;
       expect(await controller.saveScenarioToMyScenarios(), isTrue);
-      expect(
-        repository._stored?.scenarioData?.items.first.id,
-        'scenario-id-1',
-      );
+      expect(repository._stored?.scenarioData?.items.first.id, 'scenario-id-1');
     },
   );
 
@@ -521,33 +519,42 @@ void main() {
   );
 
   group('CreateController activity wiring', () {
-    test('setObjectType(activity) seeds activityData with market defaults', () async {
-      await controller.ensureLoaded(
-        userId: 'u1',
-        organizerEmail: 'user@example.com',
-        organizerName: 'user',
-      );
-      controller.setObjectType(CreateObjectType.activity);
-      expect(controller.state.draft.objectType, CreateObjectType.activity);
-      expect(controller.state.draft.activityData, isNotNull);
-      expect(controller.state.draft.activityData!.location.accessNotes, '');
-    });
+    test(
+      'setObjectType(activity) seeds activityData with market defaults',
+      () async {
+        await controller.ensureLoaded(
+          userId: 'u1',
+          organizerEmail: 'user@example.com',
+          organizerName: 'user',
+        );
+        controller.setObjectType(CreateObjectType.activity);
+        expect(controller.state.draft.objectType, CreateObjectType.activity);
+        expect(controller.state.draft.activityData, isNotNull);
+        expect(controller.state.draft.activityData!.location.accessNotes, '');
+      },
+    );
 
-    test('updateActivityAccessNotes updates the draft and bumps revision', () async {
-      await controller.ensureLoaded(
-        userId: 'u1',
-        organizerEmail: 'user@example.com',
-        organizerName: 'user',
-      );
-      controller.setObjectType(CreateObjectType.activity);
-      final int before = controller.state.draft.activityData!.revision;
-      controller.updateActivityAccessNotes('Gravel path from parking.');
-      expect(
-        controller.state.draft.activityData!.location.accessNotes,
-        'Gravel path from parking.',
-      );
-      expect(controller.state.draft.activityData!.revision, greaterThan(before));
-    });
+    test(
+      'updateActivityAccessNotes updates the draft and bumps revision',
+      () async {
+        await controller.ensureLoaded(
+          userId: 'u1',
+          organizerEmail: 'user@example.com',
+          organizerName: 'user',
+        );
+        controller.setObjectType(CreateObjectType.activity);
+        final int before = controller.state.draft.activityData!.revision;
+        controller.updateActivityAccessNotes('Gravel path from parking.');
+        expect(
+          controller.state.draft.activityData!.location.accessNotes,
+          'Gravel path from parking.',
+        );
+        expect(
+          controller.state.draft.activityData!.revision,
+          greaterThan(before),
+        );
+      },
+    );
 
     test('confirmActivityPin sets pinConfirmed', () async {
       await controller.ensureLoaded(
@@ -556,50 +563,66 @@ void main() {
         organizerName: 'user',
       );
       controller.setObjectType(CreateObjectType.activity);
-      controller.updateActivityCoordinates(latitude: '56.95', longitude: '24.11');
+      controller.updateActivityCoordinates(
+        latitude: '56.95',
+        longitude: '24.11',
+      );
       controller.confirmActivityPin();
-      expect(controller.state.draft.activityData!.location.pinConfirmed, isTrue);
+      expect(
+        controller.state.draft.activityData!.location.pinConfirmed,
+        isTrue,
+      );
     });
 
-    test('goToActivityStep blocks forward navigation on a blocking error', () async {
-      await controller.ensureLoaded(
-        userId: 'u1',
-        organizerEmail: 'user@example.com',
-        organizerName: 'user',
-      );
-      controller.setObjectType(CreateObjectType.activity);
-      // No cover image set yet -> cover_image_required is a 'basics'-section
-      // blocking error, and step 0 is 'basics'.
-      final bool advanced = await controller.goToActivityStep(2);
-      expect(advanced, isFalse);
-      expect(controller.state.activityStep, 0);
-      expect(controller.state.activityValidationIssues, isNotEmpty);
-    });
+    test(
+      'goToActivityStep blocks forward navigation on a blocking error',
+      () async {
+        await controller.ensureLoaded(
+          userId: 'u1',
+          organizerEmail: 'user@example.com',
+          organizerName: 'user',
+        );
+        controller.setObjectType(CreateObjectType.activity);
+        // No cover image set yet -> cover_image_required is a 'basics'-section
+        // blocking error, and step 0 is 'basics'.
+        final bool advanced = await controller.goToActivityStep(2);
+        expect(advanced, isFalse);
+        expect(controller.state.activityStep, 0);
+        expect(controller.state.activityValidationIssues, isNotEmpty);
+      },
+    );
 
-    test('goToActivityStep allows forward navigation once the current step is valid', () async {
-      await controller.ensureLoaded(
-        userId: 'u1',
-        organizerEmail: 'user@example.com',
-        organizerName: 'user',
-      );
-      controller.setObjectType(CreateObjectType.activity);
-      controller.updateTitle('Hidden viewpoint');
-      controller.updateShortDescription(
-        'A quiet, lesser-known viewpoint with a great sunset view.',
-      );
-      controller.updateCoverImage('cover.jpg');
-      controller.updateActivityCoordinates(latitude: '56.95', longitude: '24.11');
-      controller.confirmActivityPin();
-      controller.updateActivityAccessNotes('Gravel path from parking.');
-      final bool advanced = await controller.goToActivityStep(1);
-      expect(advanced, isTrue);
-      expect(controller.state.activityStep, 1);
-    });
+    test(
+      'goToActivityStep allows forward navigation once the current step is valid',
+      () async {
+        await controller.ensureLoaded(
+          userId: 'u1',
+          organizerEmail: 'user@example.com',
+          organizerName: 'user',
+        );
+        controller.setObjectType(CreateObjectType.activity);
+        controller.updateTitle('Hidden viewpoint');
+        controller.updateShortDescription(
+          'A quiet, lesser-known viewpoint with a great sunset view.',
+        );
+        controller.updateCoverImage('cover.jpg');
+        controller.updateActivityCoordinates(
+          latitude: '56.95',
+          longitude: '24.11',
+        );
+        controller.confirmActivityPin();
+        controller.updateActivityAccessNotes('Gravel path from parking.');
+        final bool advanced = await controller.goToActivityStep(1);
+        expect(advanced, isTrue);
+        expect(controller.state.activityStep, 1);
+      },
+    );
   });
 
   group('CreateController activity publish moderation (§12)', () {
     test('4th+ informal-access card publishes flagged, not blocked', () async {
-      final _FakeCreateRepository moderationRepository = _FakeCreateRepository();
+      final _FakeCreateRepository moderationRepository =
+          _FakeCreateRepository();
       final CreateController moderationController = CreateController(
         loadCreateDraftUseCase: LoadCreateDraftUseCase(moderationRepository),
         saveCreateDraftUseCase: SaveCreateDraftUseCase(moderationRepository),
@@ -656,7 +679,8 @@ void main() {
     });
 
     test('1st-3rd informal-access card publishes as normal pending', () async {
-      final _FakeCreateRepository moderationRepository = _FakeCreateRepository();
+      final _FakeCreateRepository moderationRepository =
+          _FakeCreateRepository();
       final CreateController moderationController = CreateController(
         loadCreateDraftUseCase: LoadCreateDraftUseCase(moderationRepository),
         saveCreateDraftUseCase: SaveCreateDraftUseCase(moderationRepository),
@@ -740,7 +764,8 @@ class _FakeCreateRepository implements CreateRepository {
     // moderation threshold); otherwise default to the normal pending state.
     _stored = draft.copyWith(
       draftStatus: DraftStatus.pendingReview,
-      moderationStatus: draft.moderationStatus == ModerationStatus.flaggedForReview
+      moderationStatus:
+          draft.moderationStatus == ModerationStatus.flaggedForReview
           ? ModerationStatus.flaggedForReview
           : ModerationStatus.pending,
       publishStatus: PublishStatus.pendingReview,

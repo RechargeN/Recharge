@@ -10,6 +10,8 @@ import '../../application/state/create_state.dart';
 import '../../domain/entities/activity_draft_data.dart';
 import '../../domain/entities/activity_validation_issue.dart';
 import '../../domain/entities/create_draft_entity.dart';
+import 'create_texts.dart';
+import '../../../../core/localization/l10n_context.dart';
 
 class ActivityCreateBlock extends StatefulWidget {
   const ActivityCreateBlock({
@@ -131,7 +133,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              widget.state.message!,
+              CreateTexts.notice(context.l10n, widget.state.message!),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: widget.state.validationErrors.isEmpty
@@ -252,7 +254,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              issue.messageKey,
+              CreateTexts.fieldError(context.l10n, issue.messageKey),
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
@@ -540,7 +542,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              issue.messageKey,
+              CreateTexts.fieldError(context.l10n, issue.messageKey),
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
@@ -754,7 +756,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              issue.messageKey,
+              CreateTexts.fieldError(context.l10n, issue.messageKey),
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
@@ -785,7 +787,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              issue.messageKey,
+              CreateTexts.fieldError(context.l10n, issue.messageKey),
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),

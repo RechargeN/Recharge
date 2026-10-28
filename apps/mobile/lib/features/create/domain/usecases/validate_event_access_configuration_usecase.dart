@@ -38,26 +38,15 @@ class ValidateEventAccessConfigurationUseCase {
     EventAccessReadiness readiness = const EventAccessReadiness(),
   }) {
     final List<EventValidationIssue> issues = <EventValidationIssue>[];
-    void add(String code, String field, String message) {
-      issues.add(
-        EventValidationIssue(
-          code: code,
-          fieldId: field,
-          step: 3,
-          message: message,
-        ),
-      );
+    void add(String code, String field) {
+      issues.add(EventValidationIssue(code: code, fieldId: field, step: 3));
     }
 
     if (capacityMode == EventCapacityMode.known && (capacity ?? 0) <= 0) {
-      add('capacity_required', 'capacity', 'Enter a positive capacity.');
+      add('capacity_required', 'capacity');
     }
     if (capacityMode != EventCapacityMode.known && capacity != null) {
-      add(
-        'capacity_mode_conflict',
-        'capacity',
-        'Unknown or unlimited capacity cannot store a numeric limit.',
-      );
+      add('capacity_mode_conflict', 'capacity');
     }
     if (admission != null) {
       _validateAdmission(
@@ -90,24 +79,16 @@ class ValidateEventAccessConfigurationUseCase {
     required String? externalRegistrationUrl,
     required EventInventoryConfiguration? inventory,
     required EventAccessReadiness readiness,
-    required void Function(String, String, String) add,
+    required void Function(String, String) add,
   }) {
     if (!value.isComplete) {
-      add(
-        'admission_axes_incomplete',
-        'admission',
-        'Choose admission, registration and confirmation modes.',
-      );
+      add('admission_axes_incomplete', 'admission');
       return;
     }
     if (value.admissionMode == AdmissionMode.openEntry &&
         (value.registrationMode != EventRegistrationMode.none ||
             value.confirmationMode != ConfirmationMode.none)) {
-      add(
-        'open_entry_axes_conflict',
-        'admissionMode',
-        'Open entry requires no registration and no confirmation.',
-      );
+      add('open_entry_axes_conflict', 'admissionMode');
     }
     final InterestPolicy? interest = value.interestPolicy;
     if (interest != null &&
@@ -115,61 +96,33 @@ class ValidateEventAccessConfigurationUseCase {
             interest.createsBooking ||
             interest.reservesInventory ||
             interest.registrationAtDoorRequired)) {
-      add(
-        'interest_policy_not_non_reserving',
-        'interestPolicy',
-        'Optional interest cannot create a booking or reserve inventory.',
-      );
+      add('interest_policy_not_non_reserving', 'interestPolicy');
     }
     final GuestPolicy? guest = value.guestPolicy;
     if (guest != null) {
       if (!guest.countsAgainstCapacity) {
-        add(
-          'guest_capacity_bypass_unsupported',
-          'guestPolicy',
-          'Guests must count against visitor capacity.',
-        );
+        add('guest_capacity_bypass_unsupported', 'guestPolicy');
       }
       final bool usesCustomLimit =
           guest.mode == GuestPolicyMode.plusN ||
           guest.mode == GuestPolicyMode.namedGuestsOnly;
       if (usesCustomLimit && (guest.maxGuests ?? 0) <= 0) {
-        add(
-          'guest_limit_required',
-          'guestMaxGuests',
-          'Plus-N guest policy requires a positive guest limit.',
-        );
+        add('guest_limit_required', 'guestMaxGuests');
       }
       if (!usesCustomLimit && guest.maxGuests != null) {
-        add(
-          'guest_limit_mode_conflict',
-          'guestMaxGuests',
-          'Only Plus-N guest policy stores a custom guest limit.',
-        );
+        add('guest_limit_mode_conflict', 'guestMaxGuests');
       }
     }
     final Set<String> ruleIds = <String>{};
     for (final EligibilityRule rule in value.eligibilityRules) {
       if (!_stableLocalId(rule.id) || !ruleIds.add(rule.id)) {
-        add(
-          'eligibility_rule_id_invalid',
-          'eligibilityRules',
-          'Eligibility rules require unique stable IDs.',
-        );
+        add('eligibility_rule_id_invalid', 'eligibilityRules');
       }
       if (rule.policyRef != null && !_safeReference(rule.policyRef!)) {
-        add(
-          'eligibility_policy_ref_invalid',
-          'eligibilityRules',
-          'Eligibility policy references cannot contain secret values.',
-        );
+        add('eligibility_policy_ref_invalid', 'eligibilityRules');
       } else if (rule.policyRef != null &&
           !readiness.eligiblePolicyRefs.contains(rule.policyRef)) {
-        add(
-          'eligibility_policy_not_ready',
-          'eligibilityRules',
-          'Eligibility policy reference is not available in this runtime.',
-        );
+        add('eligibility_policy_not_ready', 'eligibilityRules');
       }
     }
     _validateWindow(
@@ -191,59 +144,31 @@ class ValidateEventAccessConfigurationUseCase {
     );
     if (value.registrationMode == EventRegistrationMode.external &&
         !_safeHttps(externalRegistrationUrl)) {
-      add(
-        'external_registration_handoff_required',
-        'externalBookingUrl',
-        'External registration requires a safe HTTPS handoff.',
-      );
+      add('external_registration_handoff_required', 'externalBookingUrl');
     }
     if (value.registrationMode == EventRegistrationMode.internal) {
       final int? cancellation = value.cancellationClosesBeforeOccurrenceMinutes;
       if (cancellation == null) {
-        add(
-          'cancellation_deadline_required',
-          'cancellationDeadline',
-          'Choose when cancellation closes before the start.',
-        );
+        add('cancellation_deadline_required', 'cancellationDeadline');
       } else if (cancellation < 0 || cancellation > 10080) {
-        add(
-          'cancellation_deadline_invalid',
-          'cancellationDeadline',
-          'Cancellation can close 0 to 10080 minutes before the start.',
-        );
+        add('cancellation_deadline_invalid', 'cancellationDeadline');
       }
       if (value.guestPolicy == null) {
-        add(
-          'guest_policy_required',
-          'guestPolicy',
-          'Choose a guest policy, including "none".',
-        );
+        add('guest_policy_required', 'guestPolicy');
       }
     }
     if (value.registrationMode == EventRegistrationMode.internal &&
         !readiness.internalRegistration) {
-      add(
-        'internal_registration_not_ready',
-        'registrationMode',
-        'Internal registration is configuration-only until ECL-03.',
-      );
+      add('internal_registration_not_ready', 'registrationMode');
     }
     if (value.confirmationMode == ConfirmationMode.providerManaged &&
         (value.registrationMode != EventRegistrationMode.external ||
             !readiness.providerManagedConfirmation)) {
-      add(
-        'provider_confirmation_not_ready',
-        'confirmationMode',
-        'Provider-managed confirmation requires a verified provider.',
-      );
+      add('provider_confirmation_not_ready', 'confirmationMode');
     }
     if (value.confirmationMode == ConfirmationMode.lottery &&
         (value.applicationWindow == null || !readiness.auditableLottery)) {
-      add(
-        'lottery_not_ready',
-        'confirmationMode',
-        'Lottery requires an application window and auditable selector.',
-      );
+      add('lottery_not_ready', 'confirmationMode');
     }
     final WaitlistConfiguration? waitlist = value.waitlistPolicy;
     if (waitlist?.enabled == true) {
@@ -253,19 +178,11 @@ class ValidateEventAccessConfigurationUseCase {
           ) ==
           true;
       if (!finite || !readiness.authoritativeWaitlist) {
-        add(
-          'waitlist_not_ready',
-          'waitlistPolicy',
-          'Active waitlist requires finite authoritative inventory lifecycle.',
-        );
+        add('waitlist_not_ready', 'waitlistPolicy');
       }
       if (waitlist!.promotionMode == WaitlistPromotionMode.fifoAutomatic &&
           (waitlist.offerTtlMinutes ?? 0) <= 0) {
-        add(
-          'waitlist_offer_ttl_required',
-          'waitlistOfferTtl',
-          'Automatic waitlist requires a positive offer TTL.',
-        );
+        add('waitlist_offer_ttl_required', 'waitlistOfferTtl');
       }
     }
   }
@@ -276,16 +193,12 @@ class ValidateEventAccessConfigurationUseCase {
     required String fieldId,
     required EventScheduleMode scheduleMode,
     required List<EventOccurrenceDraft> occurrences,
-    required void Function(String, String, String) add,
+    required void Function(String, String) add,
   }) {
     if (value == null) return;
     if (scheduleMode != EventScheduleMode.oneTime &&
         value.kind != EventAccessWindowKind.occurrenceRelative) {
-      add(
-        'access_window_must_be_relative',
-        fieldId,
-        'Multi-date and recurring access windows must be occurrence-relative.',
-      );
+      add('access_window_must_be_relative', fieldId);
       return;
     }
     if (value.kind == EventAccessWindowKind.absolute) {
@@ -299,19 +212,11 @@ class ValidateEventAccessConfigurationUseCase {
           !value.opensAtUtc!.isBefore(value.closesAtUtc!) ||
           occurrenceStart == null ||
           !value.closesAtUtc!.isBefore(occurrenceStart)) {
-        add(
-          'absolute_access_window_invalid',
-          fieldId,
-          'Absolute access must open before it closes and close before start.',
-        );
+        add('absolute_access_window_invalid', fieldId);
       }
       if (value.opensBeforeOccurrenceMinutes != null ||
           value.closesBeforeOccurrenceMinutes != null) {
-        add(
-          'access_window_kind_conflict',
-          fieldId,
-          'Absolute windows cannot store relative offsets.',
-        );
+        add('access_window_kind_conflict', fieldId);
       }
     } else {
       final int opens = value.opensBeforeOccurrenceMinutes ?? 0;
@@ -320,18 +225,10 @@ class ValidateEventAccessConfigurationUseCase {
           value.closesBeforeOccurrenceMinutes == null ||
           (allowZeroClosing ? closes < 0 : closes <= 0) ||
           opens <= closes) {
-        add(
-          'relative_access_window_invalid',
-          fieldId,
-          'Relative opening offset must be greater than closing offset.',
-        );
+        add('relative_access_window_invalid', fieldId);
       }
       if (value.opensAtUtc != null || value.closesAtUtc != null) {
-        add(
-          'access_window_kind_conflict',
-          fieldId,
-          'Relative windows cannot store absolute timestamps.',
-        );
+        add('access_window_kind_conflict', fieldId);
       }
     }
   }
@@ -342,38 +239,22 @@ class ValidateEventAccessConfigurationUseCase {
     required EventCapacityMode eventCapacityMode,
     required int? eventCapacity,
     required EventAccessReadiness readiness,
-    required void Function(String, String, String) add,
+    required void Function(String, String) add,
   }) {
     if (value.authority == InventoryAuthority.none &&
         (value.primaryShape != null || value.pools.isNotEmpty)) {
-      add(
-        'inventory_authority_none_conflict',
-        'inventoryAuthority',
-        'No inventory authority cannot own shapes or pools.',
-      );
+      add('inventory_authority_none_conflict', 'inventoryAuthority');
     }
     if (value.authority != InventoryAuthority.none &&
         value.primaryShape == null) {
-      add(
-        'inventory_primary_shape_required',
-        'inventoryPrimaryShape',
-        'Choose a primary inventory shape.',
-      );
+      add('inventory_primary_shape_required', 'inventoryPrimaryShape');
     }
     if (value.authority != InventoryAuthority.none && value.pools.isEmpty) {
-      add(
-        'inventory_pools_required',
-        'inventoryPools',
-        'Configured inventory authority requires at least one pool.',
-      );
+      add('inventory_pools_required', 'inventoryPools');
     }
     if (value.primaryShape != null &&
         value.additionalShapes.contains(value.primaryShape)) {
-      add(
-        'inventory_shape_duplicate',
-        'inventoryAdditionalShapes',
-        'Primary shape cannot be repeated as an additional shape.',
-      );
+      add('inventory_shape_duplicate', 'inventoryAdditionalShapes');
     }
     final Set<String> poolIds = <String>{};
     final Set<InventoryShape> configuredShapes = <InventoryShape>{
@@ -385,75 +266,39 @@ class ValidateEventAccessConfigurationUseCase {
     for (final EventInventoryPoolDraft pool in value.pools) {
       final bool newStableId = _stableLocalId(pool.id) && poolIds.add(pool.id);
       if (!newStableId) {
-        add(
-          'inventory_pool_id_invalid',
-          'inventoryPools',
-          'Inventory pools require unique stable IDs.',
-        );
+        add('inventory_pool_id_invalid', 'inventoryPools');
       }
       if (pool.label.trim().isEmpty) {
-        add(
-          'inventory_pool_label_required',
-          'inventoryPools',
-          'Every inventory pool needs a public label.',
-        );
+        add('inventory_pool_label_required', 'inventoryPools');
       }
       if (!configuredShapes.contains(pool.shape)) {
-        add(
-          'inventory_pool_shape_unconfigured',
-          'inventoryPools',
-          'Every pool shape must be selected in the inventory configuration.',
-        );
+        add('inventory_pool_shape_unconfigured', 'inventoryPools');
       }
       if (pool.capacityMode == EventCapacityMode.known &&
           (pool.capacity ?? 0) <= 0) {
-        add(
-          'inventory_pool_capacity_required',
-          'inventoryPools',
-          'Known inventory pool capacity must be positive.',
-        );
+        add('inventory_pool_capacity_required', 'inventoryPools');
       }
       if (pool.capacityMode != EventCapacityMode.known &&
           pool.capacity != null) {
-        add(
-          'inventory_pool_capacity_conflict',
-          'inventoryPools',
-          'Unknown or unlimited pool cannot store numeric capacity.',
-        );
+        add('inventory_pool_capacity_conflict', 'inventoryPools');
       }
       if ((pool.shape == InventoryShape.participantRoles ||
               pool.shape == InventoryShape.roleBalancedSlots) &&
           pool.roleIds.isEmpty) {
-        add(
-          'inventory_pool_roles_required',
-          'inventoryPools',
-          'Role-based pools require neutral role IDs.',
-        );
+        add('inventory_pool_roles_required', 'inventoryPools');
       }
       if (pool.roleIds.toSet().length != pool.roleIds.length ||
           pool.roleIds.any((roleId) => !_safeReference(roleId))) {
-        add(
-          'inventory_pool_roles_invalid',
-          'inventoryPools',
-          'Role IDs must be unique neutral identifiers.',
-        );
+        add('inventory_pool_roles_invalid', 'inventoryPools');
       }
       if ((pool.shape == InventoryShape.zones ||
               pool.shape == InventoryShape.tableInventory) &&
           (pool.zoneRef?.trim().isEmpty ?? true)) {
-        add(
-          'inventory_pool_zone_required',
-          'inventoryPools',
-          'Zone and table pools require a stable public reference.',
-        );
+        add('inventory_pool_zone_required', 'inventoryPools');
       }
       if (pool.providerPoolRef != null &&
           !_safeReference(pool.providerPoolRef!)) {
-        add(
-          'inventory_provider_pool_ref_invalid',
-          'inventoryPools',
-          'Provider pool references must be opaque identifiers.',
-        );
+        add('inventory_provider_pool_ref_invalid', 'inventoryPools');
       }
       if (newStableId &&
           pool.capacityMode == EventCapacityMode.known &&
@@ -473,18 +318,10 @@ class ValidateEventAccessConfigurationUseCase {
         eventCapacity != null &&
         eventCapacity > 0) {
       if (onsiteTotal > eventCapacity) {
-        add(
-          'inventory_pool_total_exceeds_event_capacity',
-          'inventoryPools',
-          'Onsite pool capacity exceeds Event capacity.',
-        );
+        add('inventory_pool_total_exceeds_event_capacity', 'inventoryPools');
       }
       if (onlineTotal > eventCapacity) {
-        add(
-          'inventory_pool_total_exceeds_event_capacity',
-          'inventoryPools',
-          'Online pool capacity exceeds Event capacity.',
-        );
+        add('inventory_pool_total_exceeds_event_capacity', 'inventoryPools');
       }
     }
     final bool finitePhysicalEvent =
@@ -496,30 +333,18 @@ class ValidateEventAccessConfigurationUseCase {
           pool.capacityMode == EventCapacityMode.known,
     );
     if (finitePhysicalEvent && !hasBoundedOnsite) {
-      add(
-        'hybrid_onsite_pool_required',
-        'inventoryPools',
-        'Finite physical capacity requires a bounded onsite pool.',
-      );
+      add('hybrid_onsite_pool_required', 'inventoryPools');
     }
     final bool assignedSeating =
         value.primaryShape == InventoryShape.assignedSeating ||
         value.additionalShapes.contains(InventoryShape.assignedSeating) ||
         value.pools.any((pool) => pool.shape == InventoryShape.assignedSeating);
     if (assignedSeating && !readiness.assignedSeatingHolds) {
-      add(
-        'assigned_seating_not_ready',
-        'inventoryPrimaryShape',
-        'Assigned seating requires an authoritative hold API.',
-      );
+      add('assigned_seating_not_ready', 'inventoryPrimaryShape');
     }
     if (value.authority == InventoryAuthority.recharge &&
         !readiness.internalRegistration) {
-      add(
-        'recharge_inventory_not_ready',
-        'inventoryAuthority',
-        'Recharge inventory is configuration-only until ECL-03.',
-      );
+      add('recharge_inventory_not_ready', 'inventoryAuthority');
     }
     if (value.authority == InventoryAuthority.externalProvider) {
       final bool providerRefsPresent =
@@ -528,11 +353,7 @@ class ValidateEventAccessConfigurationUseCase {
             (pool) => (pool.providerPoolRef?.trim().isNotEmpty ?? false),
           );
       if (!providerRefsPresent || !readiness.externalInventory) {
-        add(
-          'external_inventory_not_ready',
-          'inventoryAuthority',
-          'External inventory requires verified provider references and freshness.',
-        );
+        add('external_inventory_not_ready', 'inventoryAuthority');
       }
     }
   }

@@ -16,7 +16,6 @@ class ValidateScenarioDraftUseCase {
     void issue({
       required String code,
       required String path,
-      required String message,
       ScenarioValidationSeverity severity = ScenarioValidationSeverity.error,
       String? dayId,
       String? itemId,
@@ -29,7 +28,6 @@ class ValidateScenarioDraftUseCase {
               ? ScenarioValidationSeverity.warning
               : severity,
           path: path,
-          message: message,
           dayId: dayId,
           itemId: itemId,
           legId: legId,
@@ -38,63 +36,31 @@ class ValidateScenarioDraftUseCase {
     }
 
     if (draft.schemaVersion != ScenarioDraftData.currentSchemaVersion) {
-      issue(
-        code: 'schema_version_unsupported',
-        path: 'schemaVersion',
-        message: 'Scenario schema version is unsupported',
-      );
+      issue(code: 'schema_version_unsupported', path: 'schemaVersion');
     }
     if (draft.revision < 0) {
-      issue(
-        code: 'revision_negative',
-        path: 'revision',
-        message: 'Revision cannot be negative',
-      );
+      issue(code: 'revision_negative', path: 'revision');
     }
     if (!_isIanaTimezone(draft.defaultTimezoneId)) {
-      issue(
-        code: 'default_timezone_invalid',
-        path: 'defaultTimezoneId',
-        message: 'Choose a valid IANA timezone',
-      );
+      issue(code: 'default_timezone_invalid', path: 'defaultTimezoneId');
     }
     if (!_isCurrency(draft.displayCurrencyCode)) {
-      issue(
-        code: 'display_currency_invalid',
-        path: 'displayCurrencyCode',
-        message: 'Display currency must use a three-letter ISO code',
-      );
+      issue(code: 'display_currency_invalid', path: 'displayCurrencyCode');
     }
     _validateParty(draft, issue);
     _validateConstraints(draft, issue);
 
     if (draft.days.isEmpty) {
-      issue(
-        code: 'days_minimum',
-        path: 'days',
-        message: 'A Scenario must contain at least one calendar day',
-      );
+      issue(code: 'days_minimum', path: 'days');
     }
     if (draft.days.length > 30) {
-      issue(
-        code: 'days_limit',
-        path: 'days',
-        message: 'A Scenario can contain at most 30 days',
-      );
+      issue(code: 'days_limit', path: 'days');
     }
     if (draft.items.length > 250) {
-      issue(
-        code: 'items_limit',
-        path: 'items',
-        message: 'A Scenario can contain at most 250 items',
-      );
+      issue(code: 'items_limit', path: 'items');
     }
     if (draft.unscheduledItemIds.length > 50) {
-      issue(
-        code: 'unscheduled_items_limit',
-        path: 'unscheduledItemIds',
-        message: 'Keep at most 50 unscheduled items',
-      );
+      issue(code: 'unscheduled_items_limit', path: 'unscheduledItemIds');
     }
 
     final Map<String, ScenarioDayDraft> days = _uniqueById(
@@ -133,11 +99,7 @@ class ValidateScenarioDraftUseCase {
           ..sort();
     for (int index = 0; index < indices.length; index += 1) {
       if (indices[index] != index) {
-        issue(
-          code: 'day_index_not_contiguous',
-          path: 'days',
-          message: 'Day indices must form a continuous 0-based sequence',
-        );
+        issue(code: 'day_index_not_contiguous', path: 'days');
         break;
       }
     }
@@ -151,7 +113,6 @@ class ValidateScenarioDraftUseCase {
           issue(
             code: 'day_item_duplicate',
             path: 'days.itemIds',
-            message: 'An item can appear only once in a day',
             dayId: day.id,
             itemId: itemId,
           );
@@ -160,7 +121,6 @@ class ValidateScenarioDraftUseCase {
           issue(
             code: 'item_scheduled_multiple_days',
             path: 'days.itemIds',
-            message: 'An item can belong to only one day',
             dayId: day.id,
             itemId: itemId,
           );
@@ -170,7 +130,6 @@ class ValidateScenarioDraftUseCase {
           issue(
             code: 'day_item_dangling',
             path: 'days.itemIds',
-            message: 'Day references a missing item',
             dayId: day.id,
             itemId: itemId,
           );
@@ -178,7 +137,6 @@ class ValidateScenarioDraftUseCase {
           issue(
             code: 'item_day_mismatch',
             path: 'items.dayId',
-            message: 'Item dayId must match its day membership',
             dayId: day.id,
             itemId: itemId,
           );
@@ -192,7 +150,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'unscheduled_item_duplicate',
           path: 'unscheduledItemIds',
-          message: 'Unscheduled item ids must be unique',
           itemId: itemId,
         );
       }
@@ -201,7 +158,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'unscheduled_item_dangling',
           path: 'unscheduledItemIds',
-          message: 'Unscheduled list references a missing item',
           itemId: itemId,
         );
       }
@@ -209,7 +165,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'unscheduled_item_has_day',
           path: 'unscheduledItemIds',
-          message: 'An unscheduled item cannot belong to a day',
           itemId: itemId,
         );
       }
@@ -224,18 +179,12 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'item_missing_from_day',
           path: 'items.dayId',
-          message: 'Scheduled item must appear in its day itemIds',
           itemId: item.id,
           dayId: item.dayId,
         );
       }
       if (item.dayId == null && !unscheduled.contains(item.id)) {
-        issue(
-          code: 'item_orphaned',
-          path: 'items',
-          message: 'Item must be scheduled or explicitly unscheduled',
-          itemId: item.id,
-        );
+        issue(code: 'item_orphaned', path: 'items', itemId: item.id);
       }
     }
     _validateAlternatives(draft, issue);
@@ -246,18 +195,10 @@ class ValidateScenarioDraftUseCase {
 
     final int activeCount = draft.activeScheduledItems.length;
     if (activeCount > 200) {
-      issue(
-        code: 'active_items_limit',
-        path: 'items',
-        message: 'A Scenario can contain at most 200 active items',
-      );
+      issue(code: 'active_items_limit', path: 'items');
     }
     if (target != ScenarioValidationTarget.draft && activeCount < 2) {
-      issue(
-        code: 'active_items_minimum',
-        path: 'items',
-        message: 'Add at least two active scheduled items',
-      );
+      issue(code: 'active_items_minimum', path: 'items');
     }
     if (target != ScenarioValidationTarget.draft) {
       final List<String> persistedIds = <String>[
@@ -267,11 +208,7 @@ class ValidateScenarioDraftUseCase {
         ...draft.legs.map((ScenarioLegDraft value) => value.id),
       ];
       if (persistedIds.any((String id) => id.startsWith('loc_'))) {
-        issue(
-          code: 'temporary_id_not_materialized',
-          path: 'ids',
-          message: 'Temporary local ids must be replaced before saving',
-        );
+        issue(code: 'temporary_id_not_materialized', path: 'ids');
       }
       for (final ScenarioItemDraft item in draft.items) {
         final ScenarioItemSourceDraft source = item.source;
@@ -280,7 +217,6 @@ class ValidateScenarioDraftUseCase {
           issue(
             code: 'temporary_catalog_reference',
             path: 'items.source.objectId',
-            message: 'Catalog references require permanent object ids',
             itemId: item.id,
           );
         }
@@ -298,7 +234,6 @@ class ValidateScenarioDraftUseCase {
               ? 'unlisted_share_disabled'
               : 'public_publish_disabled',
           path: 'capabilities',
-          message: 'Requested distribution capability is disabled',
         );
       }
       for (final ScenarioLocationDraft location in draft.locations) {
@@ -307,7 +242,6 @@ class ValidateScenarioDraftUseCase {
           issue(
             code: 'private_location_in_distribution',
             path: 'locations.disclosure',
-            message: 'Private locations cannot enter a distributed payload',
           );
         }
       }
@@ -321,7 +255,6 @@ class ValidateScenarioDraftUseCase {
           issue(
             code: 'mandatory_item_unscheduled',
             path: 'items.dayId',
-            message: 'Mandatory items must be scheduled',
             itemId: item.id,
           );
         }
@@ -330,7 +263,6 @@ class ValidateScenarioDraftUseCase {
           issue(
             code: 'mandatory_source_unavailable',
             path: 'items.sourceStatus',
-            message: 'Replace or remove the unavailable mandatory item',
             itemId: item.id,
           );
         }
@@ -339,11 +271,7 @@ class ValidateScenarioDraftUseCase {
 
     if (target == ScenarioValidationTarget.start &&
         draft.dateMode != ScenarioDateMode.dated) {
-      issue(
-        code: 'start_requires_dated_mode',
-        path: 'dateMode',
-        message: 'Starting a Scenario requires real dates',
-      );
+      issue(code: 'start_requires_dated_mode', path: 'dateMode');
     }
 
     return ScenarioValidationResult(
@@ -357,7 +285,6 @@ class ValidateScenarioDraftUseCase {
     void Function({
       required String code,
       required String path,
-      required String message,
       ScenarioValidationSeverity severity,
       String? dayId,
       String? itemId,
@@ -369,7 +296,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'party_size_invalid',
         path: 'party.peopleCount',
-        message: 'Party size must be between 1 and 100',
         severity: ScenarioValidationSeverity.error,
       );
     }
@@ -378,7 +304,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'children_count_invalid',
         path: 'party.childrenCount',
-        message: 'Children count must fit the party size',
         severity: ScenarioValidationSeverity.error,
       );
     }
@@ -389,7 +314,6 @@ class ValidateScenarioDraftUseCase {
     void Function({
       required String code,
       required String path,
-      required String message,
       ScenarioValidationSeverity severity,
       String? dayId,
       String? itemId,
@@ -402,7 +326,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'budget_invalid',
         path: 'constraints.totalBudgetLimit',
-        message: 'Budget must be non-negative and use an ISO currency',
         severity: ScenarioValidationSeverity.error,
       );
     }
@@ -410,7 +333,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'travel_modes_empty',
         path: 'constraints.allowedTravelModes',
-        message: 'Choose at least one allowed travel mode',
         severity: ScenarioValidationSeverity.error,
       );
     }
@@ -420,7 +342,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'primary_travel_mode_not_allowed',
         path: 'constraints.primaryTravelMode',
-        message: 'Primary travel mode must be allowed',
         severity: ScenarioValidationSeverity.error,
       );
     }
@@ -430,7 +351,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'vehicle_profile_invalid',
         path: 'constraints.vehicleProfile',
-        message: 'Vehicle passenger seats must be valid',
         severity: ScenarioValidationSeverity.error,
       );
     }
@@ -439,7 +359,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'travel_limit_negative',
         path: 'constraints',
-        message: 'Travel limits cannot be negative',
         severity: ScenarioValidationSeverity.error,
       );
     }
@@ -452,7 +371,6 @@ class ValidateScenarioDraftUseCase {
     void Function({
       required String code,
       required String path,
-      required String message,
       ScenarioValidationSeverity severity,
       String? dayId,
       String? itemId,
@@ -464,7 +382,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'day_id_missing',
         path: 'days.id',
-        message: 'Day id is required',
         severity: ScenarioValidationSeverity.error,
         dayId: day.id,
       );
@@ -474,7 +391,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'dated_day_date_missing',
           path: 'days.localDate',
-          message: 'Dated Scenario days require a valid local date',
           severity: ScenarioValidationSeverity.error,
           dayId: day.id,
         );
@@ -483,7 +399,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'dated_day_timezone_missing',
           path: 'days.timezoneId',
-          message: 'Dated Scenario days require an IANA timezone',
           severity: ScenarioValidationSeverity.error,
           dayId: day.id,
         );
@@ -492,7 +407,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'template_day_has_date',
         path: 'days.localDate',
-        message: 'Template days must not store real dates',
         severity: ScenarioValidationSeverity.error,
         dayId: day.id,
       );
@@ -505,7 +419,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'day_location_dangling',
           path: 'days.locationId',
-          message: 'Day references a missing location',
           severity: ScenarioValidationSeverity.error,
           dayId: day.id,
         );
@@ -518,7 +431,6 @@ class ValidateScenarioDraftUseCase {
     void Function({
       required String code,
       required String path,
-      required String message,
       ScenarioValidationSeverity severity,
       String? dayId,
       String? itemId,
@@ -530,7 +442,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'location_invalid',
         path: 'locations',
-        message: 'Location requires an id and valid coordinates',
         severity: ScenarioValidationSeverity.error,
       );
     }
@@ -540,7 +451,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'location_source_incomplete',
         path: 'locations.sourceObjectId',
-        message: 'Location source type and id must be set together',
         severity: ScenarioValidationSeverity.error,
       );
     }
@@ -554,7 +464,6 @@ class ValidateScenarioDraftUseCase {
     void Function({
       required String code,
       required String path,
-      required String message,
       ScenarioValidationSeverity severity,
       String? dayId,
       String? itemId,
@@ -566,7 +475,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'item_id_missing',
         path: 'items.id',
-        message: 'Item id is required',
         severity: ScenarioValidationSeverity.error,
         itemId: item.id,
       );
@@ -575,7 +483,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'item_day_dangling',
         path: 'items.dayId',
-        message: 'Item references a missing day',
         severity: ScenarioValidationSeverity.error,
         itemId: item.id,
       );
@@ -588,7 +495,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'item_location_dangling',
           path: 'items.locationId',
-          message: 'Item references a missing location',
           severity: ScenarioValidationSeverity.error,
           itemId: item.id,
         );
@@ -599,7 +505,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'item_duration_missing',
         path: 'items.durationMinutes',
-        message: 'Item requires a positive duration',
         severity: ScenarioValidationSeverity.error,
         itemId: item.id,
       );
@@ -608,7 +513,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'mandatory_item_not_selected',
         path: 'items.selected',
-        message: 'Mandatory items are always selected',
         severity: ScenarioValidationSeverity.error,
         itemId: item.id,
       );
@@ -618,7 +522,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'alternative_group_missing',
         path: 'items.alternativeGroupId',
-        message: 'Alternative items require a group id',
         severity: ScenarioValidationSeverity.error,
         itemId: item.id,
       );
@@ -628,7 +531,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'alternative_group_unexpected',
         path: 'items.alternativeGroupId',
-        message: 'Only alternative items can belong to an alternative group',
         severity: ScenarioValidationSeverity.error,
         itemId: item.id,
       );
@@ -640,7 +542,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'source_stale',
         path: 'items.sourceStatus',
-        message: 'Source snapshot is stale and should be refreshed',
         severity: ScenarioValidationSeverity.warning,
         itemId: item.id,
       );
@@ -649,7 +550,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'source_unresolved',
         path: 'items.sourceStatus',
-        message: 'Resolve the item source before distribution or start',
         severity: ScenarioValidationSeverity.warning,
         itemId: item.id,
       );
@@ -662,7 +562,6 @@ class ValidateScenarioDraftUseCase {
     void Function({
       required String code,
       required String path,
-      required String message,
       ScenarioValidationSeverity severity,
       String? dayId,
       String? itemId,
@@ -717,7 +616,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'planned_schedule_stale',
           path: 'items.source.scheduleSnapshot',
-          message: 'Planned schedule is stale and must be rechecked',
           severity: ScenarioValidationSeverity.warning,
           itemId: item.id,
         );
@@ -731,7 +629,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'item_source_incompatible',
         path: 'items.source',
-        message: 'Item kind and source are incompatible',
         severity: ScenarioValidationSeverity.error,
         itemId: item.id,
       );
@@ -744,7 +641,6 @@ class ValidateScenarioDraftUseCase {
     void Function({
       required String code,
       required String path,
-      required String message,
       ScenarioValidationSeverity severity,
       String? dayId,
       String? itemId,
@@ -768,7 +664,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'schedule_date_mode_mismatch',
         path: 'items.schedule',
-        message: 'Schedule representation must match Scenario date mode',
         severity: ScenarioValidationSeverity.error,
         itemId: item.id,
       );
@@ -788,7 +683,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'template_day_range_invalid',
           path: 'items.schedule.planned',
-          message: 'Template day range is invalid',
           severity: ScenarioValidationSeverity.error,
           itemId: item.id,
         );
@@ -806,7 +700,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'fixed_start_missing',
           path: 'items.schedule.planned.fixedStartAtUtc',
-          message: 'Fixed dated items require a start instant',
           severity: ScenarioValidationSeverity.error,
           itemId: item.id,
         );
@@ -817,7 +710,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'fixed_interval_invalid',
           path: 'items.schedule.planned.fixedEndAtUtc',
-          message: 'Fixed end must be after fixed start',
           severity: ScenarioValidationSeverity.error,
           itemId: item.id,
         );
@@ -833,7 +725,6 @@ class ValidateScenarioDraftUseCase {
     void Function({
       required String code,
       required String path,
-      required String message,
       ScenarioValidationSeverity severity,
       String? dayId,
       String? itemId,
@@ -848,7 +739,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'window_bounds_missing',
         path: 'items.schedule.planned',
-        message: 'Window schedule requires valid start and end times',
         severity: ScenarioValidationSeverity.error,
         itemId: item.id,
       );
@@ -856,7 +746,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'window_order_invalid',
         path: 'items.schedule.planned',
-        message: 'Same-day window end must be after its start',
         severity: ScenarioValidationSeverity.error,
         itemId: item.id,
       );
@@ -865,7 +754,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'window_day_offset_invalid',
         path: 'items.schedule.planned.windowEndDayOffset',
-        message: 'Window day offset can only be 0 or 1',
         severity: ScenarioValidationSeverity.error,
         itemId: item.id,
       );
@@ -878,7 +766,6 @@ class ValidateScenarioDraftUseCase {
     void Function({
       required String code,
       required String path,
-      required String message,
       ScenarioValidationSeverity severity,
       String? dayId,
       String? itemId,
@@ -903,7 +790,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'cost_component_invalid',
           path: 'items.cost.components',
-          message: 'Cost component knowledge and amount are inconsistent',
           severity: ScenarioValidationSeverity.error,
           itemId: itemId,
         );
@@ -914,7 +800,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'cost_confidence_invalid',
           path: 'items.cost.components.confidence',
-          message: 'Estimated price confidence must be between 0 and 1',
           severity: ScenarioValidationSeverity.error,
           itemId: itemId,
         );
@@ -924,7 +809,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'cost_confidence_unexpected',
           path: 'items.cost.components.confidence',
-          message: 'Only estimated prices can have confidence',
           severity: ScenarioValidationSeverity.error,
           itemId: itemId,
         );
@@ -939,7 +823,6 @@ class ValidateScenarioDraftUseCase {
           issue(
             code: 'cost_basis_duplicate',
             path: 'items.cost.components.basis',
-            message: 'Price basis cannot be duplicated in one component',
             severity: ScenarioValidationSeverity.error,
             itemId: itemId,
           );
@@ -949,7 +832,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'cost_unknown',
           path: 'items.cost.components',
-          message: 'Item price is unknown',
           severity: ScenarioValidationSeverity.warning,
           itemId: itemId,
         );
@@ -962,7 +844,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'cost_basis_overlap',
           path: 'items.cost.components.basis',
-          message: 'Per-person price overlaps adult or child pricing',
           severity: ScenarioValidationSeverity.error,
           itemId: itemId,
         );
@@ -975,7 +856,6 @@ class ValidateScenarioDraftUseCase {
     void Function({
       required String code,
       required String path,
-      required String message,
       ScenarioValidationSeverity severity,
       String? dayId,
       String? itemId,
@@ -1001,7 +881,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'alternative_limit',
         path: 'items.alternativeGroupId',
-        message: 'Use at most 20 alternative groups with 5 items each',
         severity: ScenarioValidationSeverity.error,
       );
     }
@@ -1014,7 +893,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'alternative_multiple_selected',
           path: 'items.selected',
-          message: 'Only one alternative can be selected in a group',
           severity: ScenarioValidationSeverity.error,
         );
       }
@@ -1029,7 +907,6 @@ class ValidateScenarioDraftUseCase {
     void Function({
       required String code,
       required String path,
-      required String message,
       ScenarioValidationSeverity severity,
       String? dayId,
       String? itemId,
@@ -1046,7 +923,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'leg_reference_invalid',
         path: 'legs',
-        message: 'Leg contains a dangling or incomplete reference',
         severity: ScenarioValidationSeverity.error,
         legId: leg.id,
       );
@@ -1055,7 +931,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'leg_value_negative',
         path: 'legs',
-        message: 'Leg distance and duration cannot be negative',
         severity: ScenarioValidationSeverity.error,
         legId: leg.id,
       );
@@ -1064,7 +939,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'manual_logistics',
         path: 'legs.source',
-        message: 'Travel time was entered manually',
         severity: ScenarioValidationSeverity.warning,
         legId: leg.id,
       );
@@ -1074,7 +948,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'schedule_snapshot_missing',
         path: 'legs.scheduleSnapshot',
-        message: 'Scheduled travel requires a plan snapshot',
         severity: ScenarioValidationSeverity.error,
         legId: leg.id,
       );
@@ -1083,7 +956,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'schedule_stale',
         path: 'legs.scheduleSnapshot.freshness',
-        message: 'Planned schedule is stale and must be rechecked',
         severity: ScenarioValidationSeverity.warning,
         legId: leg.id,
       );
@@ -1095,7 +967,6 @@ class ValidateScenarioDraftUseCase {
     void Function({
       required String code,
       required String path,
-      required String message,
       ScenarioValidationSeverity severity,
       String? dayId,
       String? itemId,
@@ -1109,7 +980,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'multi_day_format_disabled',
         path: 'format',
-        message: 'Weekend and trip formats require the multi-day capability',
         severity: ScenarioValidationSeverity.error,
       );
     }
@@ -1117,7 +987,6 @@ class ValidateScenarioDraftUseCase {
       issue(
         code: 'multi_day_disabled',
         path: 'capabilities.multiDay',
-        message: 'Multi-day data is present while the capability is disabled',
         severity: ScenarioValidationSeverity.error,
       );
     }
@@ -1132,7 +1001,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'item_capability_disabled',
           path: 'capabilities',
-          message: 'Active item uses a disabled Scenario capability',
           severity: ScenarioValidationSeverity.error,
           itemId: item.id,
         );
@@ -1154,8 +1022,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: 'multi_currency_disabled',
           path: 'capabilities.multiCurrency',
-          message:
-              'Foreign-currency costs require the multi-currency capability',
           severity: ScenarioValidationSeverity.error,
         );
       }
@@ -1199,7 +1065,6 @@ class ValidateScenarioDraftUseCase {
     required void Function({
       required String code,
       required String path,
-      required String message,
       ScenarioValidationSeverity severity,
       String? dayId,
       String? itemId,
@@ -1217,7 +1082,6 @@ class ValidateScenarioDraftUseCase {
         issue(
           code: duplicateCode,
           path: path,
-          message: 'Identifiers must be unique',
           severity: ScenarioValidationSeverity.error,
         );
       } else {

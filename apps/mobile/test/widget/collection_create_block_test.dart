@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/features/create/application/state/create_notice.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/collection_create_config.dart';
@@ -172,43 +173,42 @@ void main() {
       await tester.tap(find.text('Publish'));
       await tester.pumpAndSettle();
 
-      expect(controller.state.message, contains('Collection отправлен на проверку.'));
+      expect(controller.state.message, CreateNotice.collectionSubmitted);
       expect(tester.takeException(), isNull);
     },
   );
 
-  testWidgets(
-    'renders without overflow on a 360dp phone viewport',
-    (WidgetTester tester) async {
+  testWidgets('renders without overflow on a 360dp phone viewport', (
+    WidgetTester tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(360, 2200)
+      ..devicePixelRatio = 1;
+    addTearDown(() {
       tester.view
-        ..physicalSize = const Size(360, 2200)
-        ..devicePixelRatio = 1;
-      addTearDown(() {
-        tester.view
-          ..resetPhysicalSize()
-          ..resetDevicePixelRatio();
-      });
+        ..resetPhysicalSize()
+        ..resetDevicePixelRatio();
+    });
 
-      await controller.ensureLoaded(
-        userId: 'user-1',
-        organizerEmail: 'user@example.com',
-        organizerName: 'Creator',
-        capabilities: const <String>['create.collection'],
-      );
-      controller.setObjectType(CreateObjectType.collection);
+    await controller.ensureLoaded(
+      userId: 'user-1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'Creator',
+      capabilities: const <String>['create.collection'],
+    );
+    controller.setObjectType(CreateObjectType.collection);
 
-      await tester.pumpWidget(app());
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
 
-      expect(find.text('Basics & media'), findsOneWidget);
-      expect(tester.takeException(), isNull);
+    expect(find.text('Basics & media'), findsOneWidget);
+    expect(tester.takeException(), isNull);
 
-      // setObjectType() schedules CreateController's autosave debounce
-      // timer (~700ms) — drain it before the test ends, or the framework
-      // flags a pending Timer after the widget tree is disposed.
-      await tester.pump(const Duration(milliseconds: 800));
-    },
-  );
+    // setObjectType() schedules CreateController's autosave debounce
+    // timer (~700ms) — drain it before the test ends, or the framework
+    // flags a pending Timer after the widget tree is disposed.
+    await tester.pump(const Duration(milliseconds: 800));
+  });
 }
 
 class _SequentialIdGenerator implements IdGenerator {
@@ -226,7 +226,8 @@ class _NoopSink implements CollectionPublicationIndexSink {
   Future<void> archive(String collectionId) async {}
 }
 
-class _FakeCatalogSearchRepository implements CollectionCatalogSearchRepository {
+class _FakeCatalogSearchRepository
+    implements CollectionCatalogSearchRepository {
   static final List<CollectionCatalogSearchResult> _fixtures =
       <CollectionCatalogSearchResult>[
         _result('cafe-1', 'Cafe One'),

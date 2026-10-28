@@ -2,6 +2,7 @@ import '../domain/entities/event_availability_projection.dart';
 import '../domain/entities/event_inventory.dart';
 import '../domain/entities/event_validation_issue.dart';
 import 'event_admission_section.dart';
+import 'create_message_ids.dart';
 
 class EventInventorySectionDefinition {
   const EventInventorySectionDefinition({
@@ -62,9 +63,12 @@ class EventInventorySectionState {
   final List<EventAccessCapabilityDisclosure> disclosures;
   final List<EventValidationIssue> issues;
 
-  String? errorFor(String fieldId) {
+  /// The field-error message id (L4: the UI resolves it to text).
+  String? errorIdFor(String fieldId) {
     for (final EventValidationIssue issue in issues) {
-      if (issue.isBlocking && issue.fieldId == fieldId) return issue.message;
+      if (issue.isBlocking && issue.fieldId == fieldId) {
+        return eventIssueMessageId(issue);
+      }
     }
     return null;
   }

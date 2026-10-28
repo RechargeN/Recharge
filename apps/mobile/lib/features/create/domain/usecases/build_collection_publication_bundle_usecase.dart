@@ -34,7 +34,7 @@ class BuildCollectionPublicationBundleUseCase {
     final CollectionCompositionReview? review = data.compositionReview;
     if (review == null) {
       throw StateError(
-        'Cannot publish without a fresh CollectionCompositionReview (§9).',
+        'Cannot publish without a fresh CollectionCompositionReview (§9).', // l10n-ignore: developer error, never displayed
       );
     }
     // Temporary `loc_*` drafts get a permanent id at first publish (ADR

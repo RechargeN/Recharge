@@ -39,6 +39,7 @@ import '../fixtures/create/user_place_draft.dart';
 import '../fixtures/create/user_rental_draft.dart';
 import '../support/event_create_test_support.dart';
 import 'widget_test_viewport.dart';
+import 'package:recharge/features/create/application/state/create_notice.dart';
 
 void main() {
   // M1 stage 3 (3-Б): the real Create page shows what the server publication
@@ -346,14 +347,14 @@ void main() {
 
     expect(
       createController.state.validationErrors['coverImage'],
-      'Cover image обязательна',
+      'create.validation.cover_required',
     );
     await tester.scrollPageUntilVisible(
-      find.text('Cover image обязательна'),
+      find.text('Add a cover image'),
       -240,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('Cover image обязательна'), findsOneWidget);
+    expect(find.text('Add a cover image'), findsOneWidget);
   });
 
   fullPageTestWidgets('taxonomy picker updates draft form fields', (
@@ -921,7 +922,10 @@ void main() {
 
     expect(published, isFalse);
     expect(createController.state.publishedDraft, isNull);
-    expect(createController.state.message, contains('Сервис публикации Route'));
+    expect(
+      createController.state.message,
+      CreateNotice.routePublicationUnavailable,
+    );
     createController.dispose();
   });
 

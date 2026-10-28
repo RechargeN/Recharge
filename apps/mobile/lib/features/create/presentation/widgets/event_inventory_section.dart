@@ -4,6 +4,8 @@ import '../../application/controllers/create_controller.dart';
 import '../../application/event_inventory_section.dart';
 import '../../domain/entities/event_inventory.dart';
 import 'event_availability_preview.dart';
+import '../../../../core/localization/l10n_context.dart';
+import 'create_texts.dart';
 
 class EventInventorySection extends StatelessWidget {
   const EventInventorySection({
@@ -42,7 +44,7 @@ class EventInventorySection extends StatelessWidget {
             label: 'Event capacity',
             value: state.capacityMode,
             values: EventCapacityMode.values,
-            error: state.errorFor('capacity'),
+            error: _errorText(context, state, 'capacity'),
             onChanged: (mode) => controller.updateEventCapacity(
               mode,
               capacity: mode == EventCapacityMode.known ? state.capacity : null,
@@ -55,7 +57,7 @@ class EventInventorySection extends StatelessWidget {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Maximum participants *',
-                errorText: state.errorFor('capacity'),
+                errorText: _errorText(context, state, 'capacity'),
               ),
               onChanged: (raw) => controller.updateEventCapacity(
                 EventCapacityMode.known,
@@ -68,7 +70,7 @@ class EventInventorySection extends StatelessWidget {
             label: 'Inventory authority',
             value: value?.authority,
             values: InventoryAuthority.values,
-            error: state.errorFor('inventoryAuthority'),
+            error: _errorText(context, state, 'inventoryAuthority'),
             onChanged: controller.selectEventInventoryAuthority,
           ),
           if (value != null &&
@@ -78,7 +80,7 @@ class EventInventorySection extends StatelessWidget {
               label: 'Primary inventory shape *',
               value: value.primaryShape,
               values: InventoryShape.values,
-              error: state.errorFor('inventoryPrimaryShape'),
+              error: _errorText(context, state, 'inventoryPrimaryShape'),
               onChanged: (shape) => controller.selectEventInventoryShapes(
                 primaryShape: shape,
                 additionalShapes: value.additionalShapes,
@@ -139,11 +141,13 @@ class EventInventorySection extends StatelessWidget {
                 controller: controller,
               ),
           ],
-          if (state.errorFor('inventoryPools') case final error?)
+          if (_errorText(context, state, 'inventoryPools') case final error?)
             _IssueText(error),
           for (final disclosure in state.disclosures)
             _Disclosure(
-              message: disclosure.message,
+              message: context.l10n.eventAccessDisclosure(
+                disclosure.topic.name,
+              ),
               blocking: disclosure.blocking,
             ),
           const SizedBox(height: 12),
@@ -457,3 +461,13 @@ String _label(String value) => value
     )
     .replaceAll('_', ' ')
     .toLowerCase();
+
+/// L4: a section field error, resolved from its message id.
+String? _errorText(
+  BuildContext context,
+  EventInventorySectionState section,
+  String fieldId,
+) => switch (section.errorIdFor(fieldId)) {
+  final String id => CreateTexts.fieldError(context.l10n, id),
+  null => null,
+};

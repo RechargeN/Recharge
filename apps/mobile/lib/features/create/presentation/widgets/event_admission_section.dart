@@ -4,6 +4,9 @@ import '../../application/controllers/create_controller.dart';
 import '../../application/event_admission_section.dart';
 import '../../domain/entities/event_admission.dart';
 
+import '../../../../core/localization/l10n_context.dart';
+import 'create_texts.dart';
+
 class EventAdmissionSection extends StatelessWidget {
   const EventAdmissionSection({
     super.key,
@@ -112,14 +115,14 @@ class EventAdmissionSection extends StatelessWidget {
           for (final issue in state.issues.where(
             (issue) => issue.code == 'admission_preset_choice_required',
           ))
-            _IssueText(issue.message),
+            _IssueText(CreateTexts.event(context.l10n, issue)),
           const SizedBox(height: 12),
           _EnumField<AdmissionMode>(
             key: const Key('event-admission-mode'),
             label: 'Admission mode *',
             value: value?.admissionMode,
             values: AdmissionMode.values,
-            error: state.errorFor('admissionMode'),
+            error: _errorText(context, state, 'admissionMode'),
             onChanged: (next) =>
                 controller.updateEventAdmissionAxes(admissionMode: next),
           ),
@@ -128,7 +131,7 @@ class EventAdmissionSection extends StatelessWidget {
             label: 'Registration mode *',
             value: value?.registrationMode,
             values: EventRegistrationMode.values,
-            error: state.errorFor('registrationMode'),
+            error: _errorText(context, state, 'registrationMode'),
             onChanged: (next) =>
                 controller.updateEventAdmissionAxes(registrationMode: next),
           ),
@@ -137,7 +140,7 @@ class EventAdmissionSection extends StatelessWidget {
             label: 'Confirmation mode *',
             value: value?.confirmationMode,
             values: ConfirmationMode.values,
-            error: state.errorFor('confirmationMode'),
+            error: _errorText(context, state, 'confirmationMode'),
             onChanged: (next) =>
                 controller.updateEventAdmissionAxes(confirmationMode: next),
           ),
@@ -149,7 +152,7 @@ class EventAdmissionSection extends StatelessWidget {
               initialValue: externalRegistrationUrl ?? '',
               decoration: InputDecoration(
                 labelText: 'External HTTPS registration URL *',
-                errorText: state.errorFor('externalBookingUrl'),
+                errorText: _errorText(context, state, 'externalBookingUrl'),
               ),
               onChanged: controller.updateEventExternalRegistrationUrl,
             ),
@@ -167,7 +170,7 @@ class EventAdmissionSection extends StatelessWidget {
           _AccessWindowEditor(
             title: 'Registration window',
             value: value?.registrationWindow,
-            error: state.errorFor('registrationWindow'),
+            error: _errorText(context, state, 'registrationWindow'),
             onChanged: (window) => controller.updateEventAccessWindows(
               registrationWindow: window,
               clearRegistrationWindow: window == null,
@@ -186,7 +189,7 @@ class EventAdmissionSection extends StatelessWidget {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Cancellation closes N minutes before the start *',
-                errorText: state.errorFor('cancellationDeadline'),
+                errorText: _errorText(context, state, 'cancellationDeadline'),
               ),
               onChanged: (raw) => controller.updateEventCancellationDeadline(
                 int.tryParse(raw.trim()),
@@ -195,7 +198,7 @@ class EventAdmissionSection extends StatelessWidget {
           _AccessWindowEditor(
             title: 'Application window',
             value: value?.applicationWindow,
-            error: state.errorFor('applicationWindow'),
+            error: _errorText(context, state, 'applicationWindow'),
             onChanged: (window) => controller.updateEventAccessWindows(
               applicationWindow: window,
               clearApplicationWindow: window == null,
@@ -222,14 +225,16 @@ class EventAdmissionSection extends StatelessWidget {
               label: 'Future promotion policy',
               value: value!.waitlistPolicy!.promotionMode,
               values: WaitlistPromotionMode.values,
-              error: state.errorFor('waitlistPolicy'),
+              error: _errorText(context, state, 'waitlistPolicy'),
               onChanged: (mode) => controller.updateEventWaitlistConfiguration(
                 value.waitlistPolicy!.copyWith(promotionMode: mode),
               ),
             ),
           for (final disclosure in state.disclosures)
             _Disclosure(
-              message: disclosure.message,
+              message: context.l10n.eventAccessDisclosure(
+                disclosure.topic.name,
+              ),
               blocking: disclosure.blocking,
             ),
         ],
@@ -261,7 +266,7 @@ class _GuestEditor extends StatelessWidget {
           // No silent default: an unchosen policy shows no value (E2.0).
           value: guest?.mode,
           values: GuestPolicyMode.values,
-          error: state.errorFor('guestPolicy'),
+          error: _errorText(context, state, 'guestPolicy'),
           onChanged: (mode) => controller.updateEventGuestPolicy(
             GuestPolicy(
               mode: mode,
@@ -281,7 +286,7 @@ class _GuestEditor extends StatelessWidget {
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               labelText: 'Maximum guests per registration *',
-              errorText: state.errorFor('guestMaxGuests'),
+              errorText: _errorText(context, state, 'guestMaxGuests'),
             ),
             onChanged: (raw) => controller.updateEventGuestPolicy(
               guest!.copyWith(maxGuests: int.tryParse(raw)),
@@ -426,7 +431,8 @@ class _EligibilityEditorState extends State<_EligibilityEditor> {
           ),
         ),
       ],
-      if (widget.state.errorFor('eligibilityRules') case final error?)
+      if (_errorText(context, widget.state, 'eligibilityRules')
+          case final error?)
         _IssueText(error),
     ],
   );
@@ -626,3 +632,13 @@ String _label(String value) => value
     )
     .replaceAll('_', ' ')
     .toLowerCase();
+
+/// L4: a section field error, resolved from its message id.
+String? _errorText(
+  BuildContext context,
+  EventAdmissionSectionState section,
+  String fieldId,
+) => switch (section.errorIdFor(fieldId)) {
+  final String id => CreateTexts.fieldError(context.l10n, id),
+  null => null,
+};

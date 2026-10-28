@@ -8,6 +8,8 @@ import '../../../domain/entities/scenario_item_draft.dart';
 import '../../../domain/entities/scenario_validation_issue.dart';
 import '../../../domain/usecases/evaluate_scenario_readiness_usecase.dart';
 import 'scenario_transit_disclosure_card.dart';
+import '../create_texts.dart';
+import '../../../../../core/localization/l10n_context.dart';
 
 class ScenarioReviewSection extends StatelessWidget {
   const ScenarioReviewSection({
@@ -132,7 +134,7 @@ class ScenarioReviewSection extends StatelessWidget {
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.chevron_right),
-                  title: Text(issue.message),
+                  title: Text(CreateTexts.scenario(context.l10n, issue.code)),
                   subtitle: Text(issue.path),
                 ),
               ),

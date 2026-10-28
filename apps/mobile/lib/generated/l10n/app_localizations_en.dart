@@ -2058,4 +2058,892 @@ class AppLocalizationsEn extends AppLocalizations {
     });
     return '$_temp0';
   }
+
+  @override
+  String scenarioValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'schema_version_unsupported': 'Scenario schema version is unsupported',
+      'revision_negative': 'Revision cannot be negative',
+      'default_timezone_invalid': 'Choose a valid IANA timezone',
+      'display_currency_invalid':
+          'Display currency must use a three-letter ISO code',
+      'days_minimum': 'A Scenario must contain at least one calendar day',
+      'days_limit': 'A Scenario can contain at most 30 days',
+      'items_limit': 'A Scenario can contain at most 250 items',
+      'unscheduled_items_limit': 'Keep at most 50 unscheduled items',
+      'day_index_not_contiguous':
+          'Day indices must form a continuous 0-based sequence',
+      'day_item_duplicate': 'An item can appear only once in a day',
+      'item_scheduled_multiple_days': 'An item can belong to only one day',
+      'day_item_dangling': 'Day references a missing item',
+      'item_day_mismatch': 'Item dayId must match its day membership',
+      'unscheduled_item_duplicate': 'Unscheduled item ids must be unique',
+      'unscheduled_item_dangling': 'Unscheduled list references a missing item',
+      'unscheduled_item_has_day': 'An unscheduled item cannot belong to a day',
+      'item_missing_from_day': 'Scheduled item must appear in its day itemIds',
+      'item_orphaned': 'Item must be scheduled or explicitly unscheduled',
+      'active_items_limit': 'A Scenario can contain at most 200 active items',
+      'active_items_minimum': 'Add at least two active scheduled items',
+      'temporary_id_not_materialized':
+          'Temporary local ids must be replaced before saving',
+      'temporary_catalog_reference':
+          'Catalog references require permanent object ids',
+      'private_location_in_distribution':
+          'Private locations cannot enter a distributed payload',
+      'mandatory_item_unscheduled': 'Mandatory items must be scheduled',
+      'mandatory_source_unavailable':
+          'Replace or remove the unavailable mandatory item',
+      'start_requires_dated_mode': 'Starting a Scenario requires real dates',
+      'party_size_invalid': 'Party size must be between 1 and 100',
+      'children_count_invalid': 'Children count must fit the party size',
+      'budget_invalid': 'Budget must be non-negative and use an ISO currency',
+      'travel_modes_empty': 'Choose at least one allowed travel mode',
+      'primary_travel_mode_not_allowed': 'Primary travel mode must be allowed',
+      'vehicle_profile_invalid': 'Vehicle passenger seats must be valid',
+      'travel_limit_negative': 'Travel limits cannot be negative',
+      'day_id_missing': 'Day id is required',
+      'dated_day_date_missing':
+          'Dated Scenario days require a valid local date',
+      'dated_day_timezone_missing':
+          'Dated Scenario days require an IANA timezone',
+      'template_day_has_date': 'Template days must not store real dates',
+      'day_location_dangling': 'Day references a missing location',
+      'location_invalid': 'Location requires an id and valid coordinates',
+      'location_source_incomplete':
+          'Location source type and id must be set together',
+      'item_id_missing': 'Item id is required',
+      'item_day_dangling': 'Item references a missing day',
+      'item_location_dangling': 'Item references a missing location',
+      'item_duration_missing': 'Item requires a positive duration',
+      'mandatory_item_not_selected': 'Mandatory items are always selected',
+      'alternative_group_missing': 'Alternative items require a group id',
+      'alternative_group_unexpected':
+          'Only alternative items can belong to an alternative group',
+      'source_stale': 'Source snapshot is stale and should be refreshed',
+      'source_unresolved':
+          'Resolve the item source before distribution or start',
+      'planned_schedule_stale':
+          'Planned schedule is stale and must be rechecked',
+      'item_source_incompatible': 'Item kind and source are incompatible',
+      'schedule_date_mode_mismatch':
+          'Schedule representation must match Scenario date mode',
+      'template_day_range_invalid': 'Template day range is invalid',
+      'fixed_start_missing': 'Fixed dated items require a start instant',
+      'fixed_interval_invalid': 'Fixed end must be after fixed start',
+      'window_bounds_missing':
+          'Window schedule requires valid start and end times',
+      'window_order_invalid': 'Same-day window end must be after its start',
+      'window_day_offset_invalid': 'Window day offset can only be 0 or 1',
+      'cost_component_invalid':
+          'Cost component knowledge and amount are inconsistent',
+      'cost_confidence_invalid':
+          'Estimated price confidence must be between 0 and 1',
+      'cost_confidence_unexpected': 'Only estimated prices can have confidence',
+      'cost_basis_duplicate':
+          'Price basis cannot be duplicated in one component',
+      'cost_unknown': 'Item price is unknown',
+      'cost_basis_overlap': 'Per-person price overlaps adult or child pricing',
+      'alternative_limit':
+          'Use at most 20 alternative groups with 5 items each',
+      'alternative_multiple_selected':
+          'Only one alternative can be selected in a group',
+      'leg_reference_invalid':
+          'Leg contains a dangling or incomplete reference',
+      'leg_value_negative': 'Leg distance and duration cannot be negative',
+      'manual_logistics': 'Travel time was entered manually',
+      'schedule_snapshot_missing': 'Scheduled travel requires a plan snapshot',
+      'schedule_stale': 'Planned schedule is stale and must be rechecked',
+      'multi_day_format_disabled':
+          'Weekend and trip formats require the multi-day capability',
+      'multi_day_disabled':
+          'Multi-day data is present while the capability is disabled',
+      'item_capability_disabled':
+          'Active item uses a disabled Scenario capability',
+      'multi_currency_disabled':
+          'Foreign-currency costs require the multi-currency capability',
+      'day_id_duplicate': 'Identifiers must be unique',
+      'location_id_duplicate': 'Identifiers must be unique',
+      'item_id_duplicate': 'Identifiers must be unique',
+      'leg_id_duplicate': 'Identifiers must be unique',
+      'title_required': 'Give the Scenario a title',
+      'data_missing': 'Scenario data is missing',
+      'other': 'Check this part of the Scenario.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String findPeopleValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'details_missing': 'Find People details are missing',
+      'category_required': 'Choose a category',
+      'subcategory_required': 'Choose a subcategory',
+      'tags_limit': 'Use no more than 8 tags',
+      'languages_count': 'Choose 1–3 communication languages',
+      'language_invalid': 'Language codes must use BCP-47 format',
+      'house_rules_limit': 'Use no more than 10 house rules',
+      'public_contact_forbidden':
+          'Public text cannot contain contacts, payment links, or messenger handles',
+      'single_slot_count': 'Single schedule requires exactly one slot',
+      'poll_slot_count': 'Time poll requires at least two options',
+      'recurring_slots':
+          'Recurring schedule needs at least one materialized slot',
+      'recurrence_rule': 'Add a recurrence rule',
+      'recurrence_horizon': 'Recurring schedule must have a finite horizon',
+      'occurrence_limit': 'Occurrence count must be between 2 and 52',
+      'slot_duration': 'Each slot must last from 30 minutes to 24 hours',
+      'slot_overlap': 'Schedule options cannot overlap',
+      'poll_deadline': 'Poll deadline must be before the first option',
+      'application_deadline':
+          'Application deadline must be before the first meeting',
+      'scheduled_publish': 'Scheduled publish must be before the first meeting',
+      'meeting_name': 'Add a public meeting place',
+      'public_area': 'Add a safe public area label',
+      'public_geo': 'Add a valid approximate public map point',
+      'exact_geo': 'Add a valid exact meeting point',
+      'exact_address': 'Add the private exact address',
+      'public_place': 'Confirm that the meeting point is a public place',
+      'unsafe_location':
+          'Private homes and residential access details are not allowed',
+      'online_geo_forbidden':
+          'Online requests cannot publish fake map coordinates or an address',
+      'online_provider': 'Choose an online provider',
+      'online_secret': 'Add a private session-scoped access reference',
+      'offline_secret_forbidden':
+          'In-person requests cannot contain online access data',
+      'group_size': 'Group size must be between 2 and 20',
+      'host_seats': 'Host seats must be lower than total group size',
+      'party_disabled':
+          'Single-person applications must reserve exactly one seat',
+      'party_seats': 'Party applications can request 1–4 available seats',
+      'questions_limit': 'Use no more than 8 application questions',
+      'question_invalid': 'Every application question needs an ID and prompt',
+      'invite_visibility':
+          'Invite-only approval requires invite-only visibility',
+      'visibility_approval':
+          'Invite-only visibility requires invite-only approval',
+      'estimated_cost':
+          'Estimated cost requires a positive amount and currency',
+      'cost_amount_forbidden': 'Only estimated cost can contain an amount',
+      'expense_items': 'Itemized split requires planned expense items',
+      'expense_invalid':
+          'Every expense item needs an ID, category, and positive amount',
+      'publisher': 'Publisher is required',
+      'responsible_host': 'At least one responsible host is required',
+      'page_host': 'A page request needs a responsible host',
+      'cohost_grants': 'Co-host grants must use supported capabilities',
+      'quiet_hours': 'Quiet-hour minutes must be between 0 and 1439',
+      'safety_rules': 'Accept the Find People safety rules',
+      'accuracy': 'Confirm that the request details are accurate',
+      'adult_only': 'Confirm that this request is for adults 18+',
+      'publisher_host_mismatch':
+          'A personal request must include its owner as responsible host',
+      'title_length': 'Check the title length',
+      'shortDescription_length': 'Check the short description length',
+      'fullDescription_length': 'Check the full description length',
+      'equipmentNotes_length': 'Shorten the equipment notes',
+      'accessibilityNotes_length': 'Shorten the accessibility notes',
+      'houseRulesNote_length': 'Shorten the house rules note',
+      'meetingInstructions_length': 'Shorten the meeting instructions',
+      'costNote_length': 'Shorten the cost note',
+      'other': 'Check this part of the request.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String findPeopleLengthIssue(String field, int min, int max) {
+    String _temp0 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: '$max characters',
+      one: '$max character',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: '$max characters',
+      one: '$max character',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: '$max characters',
+      one: '$max character',
+    );
+    String _temp3 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: '$max characters',
+      one: '$max character',
+    );
+    String _temp4 = intl.Intl.selectLogic(field, {
+      'title': 'Title must contain $min–$_temp0',
+      'shortDescription': 'Short description must contain $min–$_temp1',
+      'fullDescription': 'Full description must contain $min–$_temp2',
+      'other': 'Use $min–$_temp3',
+    });
+    return '$_temp4';
+  }
+
+  @override
+  String findPeopleMaxLengthIssue(String field, int max) {
+    String _temp0 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: '$max characters',
+      one: '$max character',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: '$max characters',
+      one: '$max character',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: '$max characters',
+      one: '$max character',
+    );
+    String _temp3 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: '$max characters',
+      one: '$max character',
+    );
+    String _temp4 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: '$max characters',
+      one: '$max character',
+    );
+    String _temp5 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: '$max characters',
+      one: '$max character',
+    );
+    String _temp6 = intl.Intl.selectLogic(field, {
+      'equipmentNotes': 'Equipment notes cannot exceed $_temp0',
+      'accessibilityNotes': 'Accessibility notes cannot exceed $_temp1',
+      'houseRulesNote': 'House rules note cannot exceed $_temp2',
+      'meetingInstructions': 'Meeting instructions cannot exceed $_temp3',
+      'costNote': 'Cost note cannot exceed $_temp4',
+      'other': 'Use at most $_temp5',
+    });
+    return '$_temp6';
+  }
+
+  @override
+  String eventValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'event_data_missing': 'Event details are unavailable. Reopen the draft.',
+      'event_schema_unsupported':
+          'This Event draft was created by a newer app version.',
+      'event_publisher_unsupported':
+          'This Event uses an unsupported publisher contract.',
+      'event_publisher_required': 'Choose who publishes this Event.',
+      'event_classification_unsupported':
+          'This Event uses a classification from a newer app version.',
+      'title_required': 'Add a title of at least 3 characters.',
+      'taxonomy_required': 'Choose a category and subcategory.',
+      'short_description_required':
+          'Add a short description of at least 10 characters.',
+      'cover_required': 'Add a cover image.',
+      'cover_alt_required': 'Describe the cover image for accessibility.',
+      'media_rights_required': 'Confirm that you may publish this media.',
+      'gallery_alt_required': 'Describe every gallery image for accessibility.',
+      'city_required': 'Choose the event city.',
+      'location_required': 'Add an address or a clear meeting point.',
+      'location_coordinates_required':
+          'Place a valid map pin for the physical location.',
+      'location_pin_unconfirmed': 'Confirm the physical location pin.',
+      'online_access_required': 'Choose how attendees receive online access.',
+      'public_online_url_invalid': 'Use a valid HTTPS online event URL.',
+      'online_access_registration_conflict':
+          'External online access requires external registration.',
+      'timezone_required': 'Choose an IANA timezone.',
+      'duration_invalid': 'Duration must be positive.',
+      'local_start_date_invalid':
+          'Use a valid local date in YYYY-MM-DD format.',
+      'start_minute_invalid': 'Choose a valid local start time.',
+      'all_day_duration_invalid':
+          'All-day duration must be a whole number of days.',
+      'multi_dates_required': 'Add at least one date.',
+      'multi_date_invalid': 'Every date must use the YYYY-MM-DD format.',
+      'recurrence_invalid': 'Configure a valid recurrence rule.',
+      'recurrence_weekday_invalid': 'Weekdays must be between 1 and 7.',
+      'recurrence_exception_invalid':
+          'Every excluded date must use the YYYY-MM-DD format.',
+      'recurrence_until_required': 'Choose the final local date.',
+      'recurrence_until_invalid':
+          'Use a valid final date in YYYY-MM-DD format.',
+      'recurrence_count_required': 'Occurrence count must be positive.',
+      'occurrences_required':
+          'The schedule must produce at least one occurrence.',
+      'future_occurrence_required': 'Add at least one future occurrence.',
+      'age_min_invalid': 'Minimum age cannot be negative.',
+      'age_max_invalid': 'Maximum age cannot be negative.',
+      'age_range_invalid': 'Maximum age must not be below minimum age.',
+      'free_price_conflict': 'Free events cannot collect a mandatory payment.',
+      'fixed_price_required': 'Enter a positive fixed price.',
+      'payment_mode_unavailable':
+          'Choose onsite or external payment for this slice.',
+      'pricing_capability_unavailable':
+          'Ticket types and donations require a later capability slice.',
+      'event_admission_unsupported':
+          'This Event uses a newer or unsupported admission contract.',
+      'event_inventory_unsupported':
+          'This Event uses a newer or unsupported inventory contract.',
+      'event_admission_required': 'Confirm the Event admission configuration.',
+      'event_inventory_authority_required':
+          'Confirm who, if anyone, owns Event inventory.',
+      'internal_registration_v1_unsupported':
+          'This configuration is outside local internal registration v1.',
+      'external_booking_url_invalid': 'Use a valid HTTPS registration URL.',
+      'internal_booking_unavailable':
+          'Internal Booking is not enabled in this slice.',
+      'private_access_unavailable':
+          'Private access requires a later protected-access slice.',
+      'event_access_contract_unsupported':
+          'This Event uses a newer access contract and cannot be changed here.',
+      'capacity_required': 'Enter a positive capacity.',
+      'capacity_mode_conflict':
+          'Unknown or unlimited capacity cannot store a numeric limit.',
+      'admission_axes_incomplete':
+          'Choose admission, registration and confirmation modes.',
+      'open_entry_axes_conflict':
+          'Open entry requires no registration and no confirmation.',
+      'interest_policy_not_non_reserving':
+          'Optional interest cannot create a booking or reserve inventory.',
+      'guest_capacity_bypass_unsupported':
+          'Guests must count against visitor capacity.',
+      'guest_limit_required':
+          'Plus-N guest policy requires a positive guest limit.',
+      'guest_limit_mode_conflict':
+          'Only Plus-N guest policy stores a custom guest limit.',
+      'eligibility_rule_id_invalid':
+          'Eligibility rules require unique stable IDs.',
+      'eligibility_policy_ref_invalid':
+          'Eligibility policy references cannot contain secret values.',
+      'eligibility_policy_not_ready':
+          'Eligibility policy reference is not available in this runtime.',
+      'external_registration_handoff_required':
+          'External registration requires a safe HTTPS handoff.',
+      'cancellation_deadline_required':
+          'Choose when cancellation closes before the start.',
+      'cancellation_deadline_invalid':
+          'Cancellation can close 0 to 10080 minutes before the start.',
+      'guest_policy_required': 'Choose a guest policy, including \"none\".',
+      'internal_registration_not_ready':
+          'Internal registration is configuration-only until ECL-03.',
+      'provider_confirmation_not_ready':
+          'Provider-managed confirmation requires a verified provider.',
+      'lottery_not_ready':
+          'Lottery requires an application window and auditable selector.',
+      'waitlist_not_ready':
+          'Active waitlist requires finite authoritative inventory lifecycle.',
+      'waitlist_offer_ttl_required':
+          'Automatic waitlist requires a positive offer TTL.',
+      'access_window_must_be_relative':
+          'Multi-date and recurring access windows must be occurrence-relative.',
+      'absolute_access_window_invalid':
+          'Absolute access must open before it closes and close before start.',
+      'access_window_kind_conflict':
+          'The access window type does not match its values.',
+      'relative_access_window_invalid':
+          'Relative opening offset must be greater than closing offset.',
+      'inventory_authority_none_conflict':
+          'No inventory authority cannot own shapes or pools.',
+      'inventory_primary_shape_required': 'Choose a primary inventory shape.',
+      'inventory_pools_required':
+          'Configured inventory authority requires at least one pool.',
+      'inventory_shape_duplicate':
+          'Primary shape cannot be repeated as an additional shape.',
+      'inventory_pool_id_invalid': 'Inventory pools require unique stable IDs.',
+      'inventory_pool_label_required':
+          'Every inventory pool needs a public label.',
+      'inventory_pool_shape_unconfigured':
+          'Every pool shape must be selected in the inventory configuration.',
+      'inventory_pool_capacity_required':
+          'Known inventory pool capacity must be positive.',
+      'inventory_pool_capacity_conflict':
+          'Unknown or unlimited pool cannot store numeric capacity.',
+      'inventory_pool_roles_required':
+          'Role-based pools require neutral role IDs.',
+      'inventory_pool_roles_invalid':
+          'Role IDs must be unique neutral identifiers.',
+      'inventory_pool_zone_required':
+          'Zone and table pools require a stable public reference.',
+      'inventory_provider_pool_ref_invalid':
+          'Provider pool references must be opaque identifiers.',
+      'inventory_pool_total_exceeds_event_capacity':
+          'Pool capacity exceeds Event capacity.',
+      'hybrid_onsite_pool_required':
+          'Finite physical capacity requires a bounded onsite pool.',
+      'assigned_seating_not_ready':
+          'Assigned seating requires an authoritative hold API.',
+      'recharge_inventory_not_ready':
+          'Recharge inventory is configuration-only until ECL-03.',
+      'external_inventory_not_ready':
+          'External inventory requires verified provider references and freshness.',
+      'event_archetype_required': 'Choose how this event is organized.',
+      'primary_participation_required': 'Choose the attendee\'s primary role.',
+      'additional_participation_limit':
+          'Choose no more than three additional attendee roles.',
+      'participation_mode_duplicate':
+          'The primary role cannot also be an additional role.',
+      'event_archetype_other_reason_required':
+          'Explain the event mechanics when choosing Other.',
+      'event_archetype_other_moderation_review':
+          'Other mechanics will be reviewed after submission.',
+      'other': 'Check this part of the Event.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String eventAdmissionPresetIssue(String field) {
+    String _temp0 = intl.Intl.selectLogic(field, {
+      'admissionMode': 'Choose RSVP or booking before applying this preset.',
+      'confirmationMode':
+          'Choose how registration is confirmed before applying this preset.',
+      'registrationMode': 'Choose internal or external team registration.',
+      'other': 'Choose the admission settings before applying this preset.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String collectionValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'details_missing': 'Collection details are missing',
+      'title_required': 'Add a title',
+      'area_required': 'Add an area or city',
+      'min_items': 'Add more items',
+      'duplicate_item': 'An item is added more than once',
+      'orphan_section': 'An item points to a section that does not exist',
+      'curator_note_length': 'Shorten the curator note',
+      'composition_review_missing':
+          'Review the live composition before publishing',
+      'composition_review_stale':
+          'Some unavailable items were not part of the last review',
+      'curator_note_empty': 'Say why this item is in the Collection',
+      'item_count_high':
+          'This Collection has many items — consider grouping them into sections or splitting it',
+      'self_publisher_share_high':
+          'Most items in this Collection are your own — consider adding independent picks too',
+      'other': 'Check this part of the Collection.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String collectionMinItemsIssue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '$count item',
+    );
+    return 'Add at least $_temp0';
+  }
+
+  @override
+  String collectionCuratorNoteLengthIssue(int max) {
+    String _temp0 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: '$max characters',
+      one: '$max character',
+    );
+    return 'Curator note cannot exceed $_temp0';
+  }
+
+  @override
+  String collectionItemCountHighIssue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '$count item',
+    );
+    return 'This Collection has $_temp0 — consider grouping them into sections or splitting it';
+  }
+
+  @override
+  String classWorkshopValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'offering_kind': 'Choose the offering kind',
+      'title': 'Add a title',
+      'short_description': 'Add a short description',
+      'full_description': 'Add a full description',
+      'media': 'Add a cover and confirm image rights',
+      'outcomes': 'Add an outcome',
+      'modules': 'Add a programme step',
+      'prerequisites': 'Choose prerequisites or \"No prerequisites\"',
+      'take_home_result': 'Describe the result participants take home',
+      'instructor': 'Add the instructor name and bio',
+      'instructor_bio': 'A masterclass needs the instructor bio',
+      'occurrences': 'Check the dates',
+      'timezone': 'Confirm the timezone',
+      'legacy_schedule': 'Clear the old schedule before publishing',
+      'location': 'Confirm the location',
+      'safe_area_label': 'Add the public area label',
+      'online_provider_label': 'Name the online provider',
+      'price': 'Add the amount and what it covers',
+      'enrollment': 'Add the external enrollment link',
+      'other': 'Check this part of the class.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String classWorkshopOccurrencesIssue(String kind) {
+    String _temp0 = intl.Intl.selectLogic(kind, {
+      'single': 'A single class has exactly one date',
+      'series': 'A series has at least two dates',
+      'other': 'Check the dates',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createAvailabilityIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'buffers_negative': 'Buffers cannot be negative',
+      'minimum_visit_required':
+          'Minimum visit duration is required for partial attendance',
+      'slots_required': 'Add at least one schedule slot',
+      'slots_hours_conflict': 'Slots and opening hours cannot be combined',
+      'opening_hours_required': 'Add at least one opening-hours rule',
+      'availability_not_empty':
+          'Availability data must be empty when kind is none',
+      'slot_order_invalid': 'Slot end must be after start',
+      'opening_rule_target_invalid':
+          'Each rule needs either weekday or exception date',
+      'opening_weekday_invalid': 'Weekday must be from 1 to 7',
+      'opening_times_required': 'Open and close times are required',
+      'other': 'Check this field',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String quickPlanConversionIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'sourceNotFoundOrForbidden':
+          'Quick Plan is unavailable or cannot be copied',
+      'sourceRevisionMismatch': 'Quick Plan changed. Review it and try again',
+      'selectionEmpty': 'Select at least one stop to expand',
+      'stopUnavailable':
+          'A stop is unavailable and must be resolved in Scenario',
+      'privateNoteNotCopied': 'A private note was not copied',
+      'legacySourceIdentityMissing':
+          'A stop was copied as a private custom location because the old plan has no catalog object',
+      'stopNotFound': 'Selected stop no longer exists',
+      'other': 'Check this stop.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String activityValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'access_caution_note_length': 'Use at most 200 characters.',
+      'access_caution_note_required': 'Describe the informal access.',
+      'access_notes_length': 'Use 10–300 characters.',
+      'access_notes_required': 'Describe how to get there.',
+      'category_required': 'Choose a category.',
+      'contribution_amount_not_positive': 'Use a positive amount.',
+      'contribution_currency_unsupported': 'Use the market currency.',
+      'contribution_note_length': 'Use 10–140 characters.',
+      'contribution_note_required': 'Describe the optional contribution.',
+      'cover_image_required': 'Add a cover image.',
+      'duration_not_positive': 'Use positive whole minutes.',
+      'duration_range_invalid': 'Minimum must not exceed maximum.',
+      'full_description_length': 'Use at most 1000 characters.',
+      'group_size_not_positive': 'Use positive whole numbers.',
+      'group_size_range_invalid': 'Minimum must not exceed maximum.',
+      'location_coordinates_required': 'Set valid coordinates.',
+      'pin_confirmation_required': 'Confirm the map pin.',
+      'short_description_length': 'Use 20–180 characters.',
+      'subcategory_not_applicable':
+          'Choose a subcategory available for Activity.',
+      'title_length': 'Use 5–80 characters.',
+      'contribution_amount_needs_kind': 'Choose a kind for this contribution',
+      'criterion_required': 'Complete this category criterion',
+      'details_missing': 'Activity details are missing',
+      'duration_out_of_recommended_range':
+          'The duration is outside the usual range for this category',
+      'group_size_out_of_recommended_range':
+          'The group size is outside the usual range for this category',
+      'informal_access_notice':
+          'This place has informal access. Describe it carefully',
+      'other': 'Check this part of the activity.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String rentalValidationIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'title_length': 'Use 3–80 characters for the title',
+      'short_description_length':
+          'Use 20–240 characters for the short description',
+      'full_description_length':
+          'Use 50–4000 characters for the full description',
+      'category_not_whitelisted': 'This category is not available for rentals',
+      'category_not_confirmed': 'Confirm the category',
+      'inventory_group_count': 'Add 1–50 groups of items',
+      'no_available_group': 'Mark at least one group as available',
+      'group_quantity_range': 'Quantity must be from 1 to 999',
+      'group_size_required': 'Add the size for this group',
+      'availability_timezone_missing': 'Choose the time zone',
+      'availability_coverage_missing':
+          'Say how availability is kept up to date',
+      'block_unknown_group':
+          'A blocked period refers to a group that does not exist',
+      'block_interval_invalid': 'A blocked period must end after it starts',
+      'pickup_place_name_missing': 'Add the pickup place name',
+      'public_geo_missing': 'Set the public map point',
+      'approximate_area_has_address':
+          'An approximate area must not contain an exact address',
+      'business_address_missing': 'Add the public business address',
+      'opening_hours_missing': 'Add the opening hours',
+      'delivery_radius_missing': 'Add the delivery radius',
+      'delivery_fee_missing': 'Add the delivery fee (zero if free)',
+      'duration_bounds_invalid': 'Check the minimum and maximum rental time',
+      'billing_unit_exceeds_min_duration':
+          'The billing unit cannot be longer than the minimum rental time',
+      'min_renter_age_required': 'Set the minimum renter age for this category',
+      'id_required_at_handover':
+          'This category requires an ID check at handover',
+      'safety_notice_required': 'Add a safety notice for this category',
+      'currency_invalid': 'Use a three-letter currency code',
+      'rate_steps_missing': 'Add the prices',
+      'rate_first_step_not_one':
+          'The first price step must start from one unit',
+      'rate_steps_not_increasing': 'Price steps must go up in units',
+      'rate_price_increases': 'A longer rental cannot cost more per unit',
+      'rate_step_currency_or_sign': 'Use one currency and positive prices',
+      'deposit_currency_mismatch': 'The deposit must use the price currency',
+      'deposit_zero_requires_none':
+          'A zero deposit cannot have a collection method',
+      'deposit_nonzero_requires_method': 'Choose how the deposit is collected',
+      'deposit_terms_missing': 'Add the deposit terms',
+      'damage_policy_missing': 'Add the damage policy',
+      'cancellation_policy_missing': 'Choose a cancellation policy',
+      'external_url_missing': 'Add the booking link',
+      'external_url_not_https': 'Use a secure https booking link',
+      'attestation_incomplete': 'Confirm all statements before publishing',
+      'other': 'Check this part of the rental.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'template_store_unavailable': 'Template storage is unavailable.',
+      'template_saved': 'Template saved.',
+      'template_renamed': 'Template renamed.',
+      'template_updated': 'Template updated.',
+      'template_deleted': 'Template deleted.',
+      'template_applied': 'Template applied.',
+      'template_invalid': 'This template is invalid.',
+      'template_action_failed': 'The template action could not be completed.',
+      'route_create_not_allowed': 'This account cannot create routes.',
+      'collection_create_not_allowed':
+          'This account cannot create collections.',
+      'scenario_preview_stale': 'Scenario changed. Generate a fresh preview.',
+      'scenario_preview_failed':
+          'Could not build this local demo preview. Try again.',
+      'scenario_title_required': 'Add a title before saving',
+      'scenario_blocking_issues': 'Resolve the blocking Scenario issues',
+      'scenario_unavailable': 'Scenario is no longer available.',
+      'scenario_open_failed': 'Could not open this Scenario.',
+      'scenario_public_publish_disabled':
+          'Public Scenario publishing is not enabled yet. Save it to My Scenarios.',
+      'classification_role_limit':
+          'You can choose up to three additional roles',
+      'classification_changed':
+          'Classification changed. Review the current draft.',
+      'admission_preview_stale':
+          'Admission configuration changed. Preview the preset again.',
+      'admission_legacy_review':
+          'An older admission suggestion must be reviewed again.',
+      'step_required_fields': 'Check the required fields of this step',
+      'required_fields': 'Check the required fields',
+      'place_helper_failed':
+          'The local helper could not review this draft. Manual creation still works.',
+      'place_suggestions_applied':
+          'Local suggestions applied. Review them before publishing.',
+      'place_helper_stale': 'The draft changed. Run the local review again.',
+      'route_editor_loading': 'The Route editor is still loading.',
+      'route_draft_saved': 'Route draft saved',
+      'route_segments_busy': 'Wait until the segment operations finish.',
+      'route_save_failed':
+          'Could not save the Route. The draft stays in the form.',
+      'draft_saved': 'Draft saved',
+      'draft_save_failed': 'Could not save. Your data stays in the form.',
+      'publisher_page_unavailable':
+          'Publishing as this page is unavailable: access was revoked or restricted. The draft is saved.',
+      'publisher_unavailable':
+          'Publishing is unavailable for this owner. The draft is saved.',
+      'place_duplicates_review': 'Review similar places before publishing',
+      'warnings_confirm': 'Confirm the warnings before publishing',
+      'submit_failed': 'Could not send. The draft is saved, try again.',
+      'published': 'Published',
+      'submitted_for_review': 'Sent for review',
+      'route_publication_unavailable':
+          'The Route publication service is unavailable.',
+      'route_not_published': 'The Route was not published. The draft is saved.',
+      'route_published': 'Route published.',
+      'route_submitted': 'Route sent for review.',
+      'route_action_forbidden': 'This Route action is not allowed.',
+      'route_not_ready':
+          'The Route is not ready yet. Check the highlighted parts.',
+      'route_submit_failed': 'Could not send the Route. The draft is saved.',
+      'route_queue_unavailable': 'The Route review queue is unavailable.',
+      'route_version_approved': 'Route version approved and active.',
+      'route_version_rejected': 'Route version rejected.',
+      'route_decision_forbidden': 'This decision is not allowed.',
+      'route_new_version_created':
+          'A new version was created. The published Route has not changed yet.',
+      'route_new_version_unavailable': 'A new version is unavailable.',
+      'route_not_found': 'Route not found.',
+      'route_withdrawn':
+          'Route withdrawn from publication. Version history is kept.',
+      'route_archive_forbidden': 'Archiving is not allowed.',
+      'route_command_refused': 'The Route action was refused.',
+      'transit_scenario_changed':
+          'Scenario changed. Review the selected service and try again.',
+      'transit_service_unsafe':
+          'The selected service cannot be applied safely.',
+      'transit_item_missing': 'The planned transport item no longer exists.',
+      'transit_only_official':
+          'Only an official schedule item can be replaced here.',
+      'transit_not_applied': 'The selected service was not applied.',
+      'rental_new_draft_from_listing':
+          'A new draft was created from this listing.',
+      'collection_publication_disabled':
+          'Collection publishing is temporarily turned off.',
+      'collection_publish_not_allowed':
+          'This account cannot publish collections.',
+      'collection_submitted': 'Collection sent for review.',
+      'collection_published': 'Collection published.',
+      'collection_published_sync_pending':
+          'Collection published, but Discover has not finished updating yet.',
+      'collection_not_published':
+          'The Collection was not published. The draft is saved.',
+      'collection_items_removed_sync_pending':
+          'Items removed, but Discover has not finished updating yet.',
+      'collection_archived_sync_pending':
+          'Collection archived, but Discover has not finished updating yet.',
+      'collection_rejection_reason_required':
+          'Rejecting a Collection requires a reason.',
+      'collection_accepted_sync_pending':
+          'Collection accepted, but Discover has not finished updating yet.',
+      'scenario_ai_proposal_added': 'AI proposal added to your Scenario.',
+      'scenario_generation_empty_prompt':
+          'Describe the plan you want to build.',
+      'scenario_generation_prompt_too_long':
+          'Keep the request under 500 characters.',
+      'scenario_generation_invalid_proposal':
+          'The local generator returned an invalid proposal.',
+      'event_access_contract_unsupported':
+          'This Event uses a newer access contract and cannot be changed here.',
+      'place_gallery_limit': 'The Place gallery is full.',
+      'other': 'Something went wrong. Please try again.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createPlaceGalleryLimit(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos',
+      one: '$count photo',
+    );
+    return 'You can keep up to $_temp0 in the Place gallery';
+  }
+
+  @override
+  String createFieldIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'title_required': 'Enter a title',
+      'category_required': 'Choose a category',
+      'city_required': 'Enter a city',
+      'cover_required': 'Add a cover image',
+      'start_required': 'Choose the start date and time',
+      'other': 'Check this field',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String eventAccessDisclosure(String kind) {
+    String _temp0 = intl.Intl.selectLogic(kind, {
+      'localConfiguration':
+          'Local configuration only. No booking or inventory is reserved.',
+      'internalNotActive': 'Internal registration is not active until ECL-03.',
+      'internalLocalStand':
+          'Internal registration v1 is available only in the local testBackend stand: free, offline, instant confirmation. No booking is created by configuring this draft.',
+      'providerConfirmationNotConnected':
+          'Provider-managed confirmation is not connected.',
+      'waitlistConfigurationOnly':
+          'Waitlist is configuration-only; no queue is running.',
+      'capacityIsConfiguration':
+          'Capacity is configuration, not a live remaining balance.',
+      'externalInventoryUnverified':
+          'External inventory has no verified provider source.',
+      'assignedSeatingUnavailable':
+          'Assigned seating requires an authoritative hold API.',
+      'other': 'This option is configuration only.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String scenarioTransitStatus(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'current': 'Feed snapshot was current when saved · not live',
+      'stale': 'Stale feed snapshot · recheck required',
+      'unknown': 'Feed freshness unknown · recheck required',
+      'unavailable': 'Provenance or feed unavailable · saved data retained',
+      'notApplicable': 'Entered manually · not verified',
+      'other': 'Provenance or feed unavailable · saved data retained',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String scenarioTransitWarning(String kind) {
+    String _temp0 = intl.Intl.selectLogic(kind, {
+      'manualNotVerified':
+          'Planned schedule · not live. Manual values are not verified against an operator timetable.',
+      'plannedNotLive': 'Planned schedule · not live.',
+      'freshnessCurrent':
+          'Current describes feed freshness when saved. It confirms neither service operation, delays nor punctuality.',
+      'freshnessStale':
+          'The saved feed snapshot is stale. Recheck the service before travel.',
+      'freshnessUnknown':
+          'Feed freshness is unknown. Do not treat the saved times as confirmed.',
+      'freshnessUnavailable':
+          'The saved item remains available, but its official provenance or feed cannot be verified.',
+      'manualNoFreshness': 'Manual values have no official feed freshness.',
+      'limitations':
+          'Fare, tickets, seats, availability, delays and cancellations are unknown. Recheck with the operator before travel.',
+      'other':
+          'Fare, tickets, seats, availability, delays and cancellations are unknown. Recheck with the operator before travel.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get scenarioTransitPlannedTransport => 'Planned transport';
 }

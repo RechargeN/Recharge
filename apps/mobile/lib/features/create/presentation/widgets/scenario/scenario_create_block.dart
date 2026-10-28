@@ -8,6 +8,8 @@ import 'scenario_composer_section.dart';
 import 'scenario_context_section.dart';
 import 'scenario_generation_panel.dart';
 import 'scenario_review_section.dart';
+import '../create_texts.dart';
+import '../../../../../core/localization/l10n_context.dart';
 
 class ScenarioCreateBlock extends StatelessWidget {
   const ScenarioCreateBlock({
@@ -123,7 +125,7 @@ class ScenarioCreateBlock extends StatelessWidget {
             ),
             if (state.message != null) ...<Widget>[
               const SizedBox(height: 10),
-              Text(state.message!),
+              Text(CreateTexts.notice(context.l10n, state.message!)),
             ],
           ],
         ),

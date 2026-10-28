@@ -33,6 +33,7 @@ import '../widgets/rental_create_block.dart';
 import '../widgets/server_publication_requirements.dart';
 import '../widgets/route/route_create_block.dart';
 import '../widgets/scenario/scenario_create_block.dart';
+import '../widgets/create_texts.dart';
 
 class CreatePage extends ConsumerStatefulWidget {
   const CreatePage({
@@ -86,6 +87,13 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     _priceController.dispose();
     super.dispose();
   }
+
+  /// L4: a form field error, resolved from its stable message id.
+  String? _fieldError(BuildContext context, CreateState state, String key) =>
+      switch (state.validationErrors[key]) {
+        final String id => CreateTexts.fieldError(context.l10n, id),
+        null => null,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -160,7 +168,9 @@ class _CreatePageState extends ConsumerState<CreatePage> {
           child: CircularProgressIndicator(),
         ),
         CreateStatus.error => _CreateStateMessage(
-          text: state.message ?? 'Ошибка create flow',
+          text: state.message == null
+              ? context.l10n.errorGeneric
+              : CreateTexts.notice(context.l10n, state.message!),
         ),
         CreateStatus.ready ||
         CreateStatus.saving ||
@@ -405,13 +415,13 @@ class _CreatePageState extends ConsumerState<CreatePage> {
               _LabeledField(
                 label: 'Title *',
                 controller: _titleController,
-                errorText: state.validationErrors['title'],
+                errorText: _fieldError(context, state, 'title'),
                 onChanged: controller.updateTitle,
               ),
               _LabeledField(
                 label: 'Main category *',
                 controller: _categoryController,
-                errorText: state.validationErrors['mainCategory'],
+                errorText: _fieldError(context, state, 'mainCategory'),
                 onChanged: controller.updateMainCategory,
               ),
               _LabeledField(
@@ -422,7 +432,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
               _LabeledField(
                 label: 'City *',
                 controller: _cityController,
-                errorText: state.validationErrors['city'],
+                errorText: _fieldError(context, state, 'city'),
                 onChanged: controller.updateCity,
               ),
               _LabeledField(
@@ -449,7 +459,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
               _LabeledField(
                 label: 'Cover image *',
                 controller: _coverController,
-                errorText: state.validationErrors['coverImage'],
+                errorText: _fieldError(context, state, 'coverImage'),
                 onChanged: controller.updateCoverImage,
               ),
               if (blockConfig.requiresStartDateTime)
@@ -457,7 +467,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                   label:
                       '${blockConfig.title} start datetime UTC (YYYY-MM-DDTHH:mm:ssZ) *',
                   controller: _startController,
-                  errorText: state.validationErrors['startDateTimeUtc'],
+                  errorText: _fieldError(context, state, 'startDateTimeUtc'),
                   onChanged: controller.updateStartDateTime,
                 ),
               const SizedBox(height: 12),
@@ -588,7 +598,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
               if (state.message != null) ...<Widget>[
                 const SizedBox(height: 10),
                 Text(
-                  state.message!,
+                  CreateTexts.notice(context.l10n, state.message!),
                   style: TextStyle(
                     color: state.validationErrors.isNotEmpty
                         ? Colors.red
@@ -1606,7 +1616,7 @@ class _CreateAvailabilitySection extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
-                    error,
+                    CreateTexts.fieldError(context.l10n, error),
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.error,
                     ),

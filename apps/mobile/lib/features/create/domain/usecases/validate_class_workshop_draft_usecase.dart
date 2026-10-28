@@ -17,58 +17,45 @@ final class ValidateClassWorkshopDraftUseCase {
     if (data == null) return const <ClassWorkshopValidationIssue>[];
     final List<ClassWorkshopValidationIssue> issues =
         <ClassWorkshopValidationIssue>[];
-    void need(bool ok, String code, String field, String message) {
+    void need(
+      bool ok,
+      String code,
+      String field, [
+      Map<String, int> params = const <String, int>{},
+    ]) {
       if (!ok) {
         issues.add(
           ClassWorkshopValidationIssue(
             code: code,
             field: field,
-            message: message,
+            params: params,
           ),
         );
       }
     }
 
     final ClassWorkshopOfferingKind? kind = data.offeringKind;
-    need(kind != null, 'offering_kind', 'basics', 'Choose the offering kind');
-    need(draft.title.trim().isNotEmpty, 'title', 'basics', 'Add a title');
+    need(kind != null, 'offering_kind', 'basics');
+    need(draft.title.trim().isNotEmpty, 'title', 'basics');
     need(
       draft.shortDescription.trim().isNotEmpty,
       'short_description',
       'basics',
-      'Add a short description',
     );
-    need(
-      draft.fullDescription.trim().isNotEmpty,
-      'full_description',
-      'basics',
-      'Add a full description',
-    );
+    need(draft.fullDescription.trim().isNotEmpty, 'full_description', 'basics');
     need(
       draft.media.coverImage.trim().isNotEmpty && rightsConfirmed,
       'media',
       'basics',
-      'Add a cover and confirm image rights',
     );
-    need(data.outcomes.isNotEmpty, 'outcomes', 'learning', 'Add an outcome');
-    need(
-      data.modules.isNotEmpty,
-      'modules',
-      'learning',
-      'Add a programme step',
-    );
-    need(
-      data.prerequisitesListed != null,
-      'prerequisites',
-      'learning',
-      'Choose prerequisites or "No prerequisites"',
-    );
+    need(data.outcomes.isNotEmpty, 'outcomes', 'learning');
+    need(data.modules.isNotEmpty, 'modules', 'learning');
+    need(data.prerequisitesListed != null, 'prerequisites', 'learning');
     if (kind?.requiresTakeHomeResult ?? false) {
       need(
         data.takeHomeResult.trim().isNotEmpty,
         'take_home_result',
         'learning',
-        'Describe the result participants take home',
       );
     }
     final ClassWorkshopInstructor instructor = data.instructor;
@@ -78,16 +65,10 @@ final class ValidateClassWorkshopDraftUseCase {
             instructor.shortBio.trim().isNotEmpty,
         'instructor',
         'learning',
-        'Add the instructor name and bio',
       );
     }
     if (kind == ClassWorkshopOfferingKind.masterclass) {
-      need(
-        instructor.shortBio.trim().isNotEmpty,
-        'instructor_bio',
-        'learning',
-        'A masterclass needs the instructor bio',
-      );
+      need(instructor.shortBio.trim().isNotEmpty, 'instructor_bio', 'learning');
     }
     final int count = data.occurrences.length;
     need(
@@ -96,30 +77,21 @@ final class ValidateClassWorkshopDraftUseCase {
           : count >= 2,
       'occurrences',
       'schedule',
-      data.contextKind == ClassWorkshopContextKind.singleClass
-          ? 'A single class has exactly one date'
-          : 'A series has at least two dates',
+      <String, int>{
+        'single': data.contextKind == ClassWorkshopContextKind.singleClass
+            ? 1
+            : 0,
+      },
     );
-    need(
-      data.timezoneConfirmed,
-      'timezone',
-      'schedule',
-      'Confirm the timezone',
-    );
-    need(
-      draft.scheduleSlots.isEmpty,
-      'legacy_schedule',
-      'schedule',
-      'Clear the old schedule before publishing',
-    );
+    need(data.timezoneConfirmed, 'timezone', 'schedule');
+    need(draft.scheduleSlots.isEmpty, 'legacy_schedule', 'schedule');
     if (data.deliveryFormat.hasPlace) {
-      need(pinConfirmed, 'location', 'schedule', 'Confirm the location');
+      need(pinConfirmed, 'location', 'schedule');
       if (data.locationMode == ClassWorkshopLocationMode.areaOnly) {
         need(
           data.safeAreaLabel.trim().isNotEmpty,
           'safe_area_label',
           'schedule',
-          'Add the public area label',
         );
       }
     }
@@ -128,7 +100,6 @@ final class ValidateClassWorkshopDraftUseCase {
         data.onlineProviderLabel.trim().isNotEmpty,
         'online_provider_label',
         'schedule',
-        'Name the online provider',
       );
     }
     if (data.price.mode == ClassWorkshopPriceMode.fixed) {
@@ -136,7 +107,6 @@ final class ValidateClassWorkshopDraftUseCase {
         (data.price.amountMinor ?? 0) > 0 && data.price.scope != null,
         'price',
         'participation',
-        'Add the amount and what it covers',
       );
     }
     if (data.enrollment.mode == ClassWorkshopEnrollmentMode.external) {
@@ -144,7 +114,6 @@ final class ValidateClassWorkshopDraftUseCase {
         data.enrollment.externalUrl.trim().isNotEmpty,
         'enrollment',
         'participation',
-        'Add the external enrollment link',
       );
     }
     return List<ClassWorkshopValidationIssue>.unmodifiable(issues);

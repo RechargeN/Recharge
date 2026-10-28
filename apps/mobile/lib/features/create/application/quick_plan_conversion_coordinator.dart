@@ -94,9 +94,11 @@ class QuickPlanConversionCoordinator {
           id: _idGenerator.generate(),
           objectType: CreateObjectType.scenario,
           title: scenarioTitle.trim().isEmpty
-              ? 'Expanded Quick Plan'
+              ? 'Expanded Quick Plan' // l10n-ignore: new-draft prefill data
               : scenarioTitle.trim(),
-          shortDescription: 'Personal Scenario expanded from a Quick Plan.',
+          // l10n-ignore: new-draft prefill data the user edits as content.
+          shortDescription:
+              'Personal Scenario expanded from a Quick Plan.', // l10n-ignore
           sectionData: sectionData,
           scenarioData: result.scenario,
           clearEventData: true,

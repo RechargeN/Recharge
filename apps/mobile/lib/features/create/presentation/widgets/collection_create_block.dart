@@ -18,6 +18,8 @@ import '../../domain/entities/location_search_suggestion.dart';
 import 'collection_curator_notes_section.dart';
 import 'items_picker_section.dart';
 import 'location_search_suggestion_list.dart';
+import 'create_texts.dart';
+import '../../../../core/localization/l10n_context.dart';
 
 /// Collection / Guide 5-step create flow
 /// (COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md §7). Functionally complete
@@ -381,7 +383,7 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
           ),
         for (final CollectionValidationIssue issue in state.issues)
           Text(
-            '• ${issue.message}',
+            '• ${CreateTexts.collection(context.l10n, issue)}',
             style: TextStyle(
               color: issue.severity == CollectionValidationSeverity.error
                   ? Colors.red

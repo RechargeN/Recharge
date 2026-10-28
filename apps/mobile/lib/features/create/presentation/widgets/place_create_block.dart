@@ -19,6 +19,7 @@ import '../../domain/entities/place_enrichment_proposal.dart';
 import '../../domain/entities/place_creation_policy.dart';
 import '../../domain/entities/place_validation_issue.dart';
 import 'location_search_suggestion_list.dart';
+import 'create_texts.dart';
 
 class PlaceCreateBlock extends StatefulWidget {
   const PlaceCreateBlock({
@@ -145,7 +146,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
         if (widget.state.message != null) ...<Widget>[
           const SizedBox(height: 10),
           Text(
-            widget.state.message!,
+            CreateTexts.notice(context.l10n, widget.state.message!),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: widget.state.validationErrors.isEmpty
@@ -1360,7 +1361,10 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
     return InputDecoration(
       labelText: label,
       border: const OutlineInputBorder(),
-      errorText: widget.state.validationErrors[fieldId],
+      errorText: switch (widget.state.validationErrors[fieldId]) {
+        final String id => CreateTexts.fieldError(context.l10n, id),
+        null => null,
+      },
     );
   }
 }
@@ -1461,7 +1465,7 @@ class _PlaceCreatorAssistPanel extends StatelessWidget {
             if (state.placeEnrichmentError != null) ...<Widget>[
               const SizedBox(height: 8),
               Text(
-                state.placeEnrichmentError!,
+                CreateTexts.notice(context.l10n, state.placeEnrichmentError!),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ],

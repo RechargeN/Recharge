@@ -58,7 +58,7 @@ class CalculateRouteQualityUseCase implements RouteQualityCalculator {
       throw ArgumentError.value(
         calculatedAtUtc,
         'calculatedAtUtc',
-        'Must be UTC.',
+        'Must be UTC.', // l10n-ignore: developer error, never displayed
       );
     }
 

@@ -44,24 +44,34 @@ class ValidateCollectionDraftUseCase {
     }
     final List<CollectionValidationIssue> issues =
         <CollectionValidationIssue>[];
-    void error(String code, String section, String field, String message) {
+    void error(
+      String code,
+      String section,
+      String field, [
+      Map<String, int> params = const <String, int>{},
+    ]) {
       issues.add(
         CollectionValidationIssue(
           code: code,
           sectionId: section,
           fieldId: field,
-          message: message,
+          params: params,
         ),
       );
     }
 
-    void warning(String code, String section, String field, String message) {
+    void warning(
+      String code,
+      String section,
+      String field, [
+      Map<String, int> params = const <String, int>{},
+    ]) {
       issues.add(
         CollectionValidationIssue(
           code: code,
           sectionId: section,
           fieldId: field,
-          message: message,
+          params: params,
           severity: CollectionValidationSeverity.warning,
         ),
       );
@@ -69,29 +79,21 @@ class ValidateCollectionDraftUseCase {
 
     final CollectionDraftData? data = draft.collectionData;
     if (data == null) {
-      error(
-        'details_missing',
-        'basics',
-        'collectionData',
-        'Collection details are missing',
-      );
+      error('details_missing', 'basics', 'collectionData');
       return issues;
     }
 
     if (draft.title.trim().isEmpty) {
-      error('title_required', 'basics', 'title', 'Add a title');
+      error('title_required', 'basics', 'title');
     }
     if (data.areaLabel.trim().isEmpty) {
-      error('area_required', 'basics', 'areaLabel', 'Add an area or city');
+      error('area_required', 'basics', 'areaLabel');
     }
 
     if (data.items.length < minPublishableItemCount) {
-      error(
-        'min_items',
-        'items',
-        'items',
-        'Add at least $minPublishableItemCount items',
-      );
+      error('min_items', 'items', 'items', <String, int>{
+        'count': minPublishableItemCount,
+      });
     }
 
     final Set<String> sectionIds = data.sections
@@ -100,49 +102,26 @@ class ValidateCollectionDraftUseCase {
     final Set<String> seenStableKeys = <String>{};
     for (final CollectionItemDraft item in data.items) {
       if (!seenStableKeys.add(item.ref.stableKey)) {
-        error(
-          'duplicate_item',
-          'items',
-          'items',
-          'Item ${item.ref.stableKey} is added more than once',
-        );
+        error('duplicate_item', 'items', 'items');
       }
       final String? sectionId = item.sectionId;
       if (sectionId != null && !sectionIds.contains(sectionId)) {
-        error(
-          'orphan_section',
-          'items',
-          'sectionId',
-          'Item ${item.id} points to a section that does not exist',
-        );
+        error('orphan_section', 'items', 'sectionId');
       }
       if (item.curatorNote.characters.length > curatorNoteMaxLength) {
-        error(
-          'curator_note_length',
-          'items',
-          'curatorNote',
-          'Curator note cannot exceed $curatorNoteMaxLength characters',
-        );
+        error('curator_note_length', 'items', 'curatorNote', <String, int>{
+          'max': curatorNoteMaxLength,
+        });
       }
       if (item.curatorNote.trim().isEmpty) {
-        warning(
-          'curator_note_empty',
-          'items',
-          'curatorNote',
-          'Say why "${item.snapshot.title}" is in this Collection',
-        );
+        warning('curator_note_empty', 'items', 'curatorNote');
       }
     }
 
     if (data.items.length > itemCountSoftWarningThreshold) {
-      warning(
-        'item_count_high',
-        'items',
-        'items',
-        'This Collection has ${data.items.length} items — consider '
-            'grouping them into sections or splitting into more than one '
-            'Collection',
-      );
+      warning('item_count_high', 'items', 'items', <String, int>{
+        'count': data.items.length,
+      });
     }
 
     if (data.items.isNotEmpty) {
@@ -162,13 +141,7 @@ class ValidateCollectionDraftUseCase {
             .length;
         if (selfPublishedCount / readyCount >=
             selfPublisherShareWarningThreshold) {
-          warning(
-            'self_publisher_share_high',
-            'items',
-            'items',
-            'Most items in this Collection are your own — consider adding '
-                'independent picks too',
-          );
+          warning('self_publisher_share_high', 'items', 'items');
         }
       }
     }
@@ -182,21 +155,11 @@ class ValidateCollectionDraftUseCase {
         .toSet();
     final CollectionCompositionReview? review = data.compositionReview;
     if (review == null) {
-      error(
-        'composition_review_missing',
-        'publish',
-        'compositionReview',
-        'Review the live composition before publishing',
-      );
+      error('composition_review_missing', 'publish', 'compositionReview');
     } else if (!unavailableStableKeys.every(
       review.acknowledgedUnavailableStableKeys.contains,
     )) {
-      error(
-        'composition_review_stale',
-        'publish',
-        'compositionReview',
-        'Some unavailable items were not part of the last review',
-      );
+      error('composition_review_stale', 'publish', 'compositionReview');
     }
 
     return issues;

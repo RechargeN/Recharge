@@ -122,7 +122,7 @@ void main() {
       controller.state.eventValidationIssues,
       isEmpty,
       reason: controller.state.eventValidationIssues
-          .map((issue) => '${issue.code}:${issue.message}')
+          .map((issue) => issue.code)
           .join(', '),
     );
     expect(find.text('Step 3 of 5 · Requirements'), findsOneWidget);

@@ -15,6 +15,7 @@ import '../../domain/entities/session_price_disclosure.dart';
 import '../../domain/entities/session_schedule.dart';
 import '../../domain/entities/session_slot_projection.dart';
 import '../../domain/entities/session_validation_issue.dart';
+import 'create_texts.dart';
 
 /// Bookable Session create block (BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md v1.1
 /// §12): guard + three required blocks on one scrollable page, plus a
@@ -91,7 +92,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              widget.state.message!,
+              CreateTexts.notice(context.l10n, widget.state.message!),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: widget.state.validationErrors.isEmpty

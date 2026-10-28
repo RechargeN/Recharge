@@ -11,7 +11,7 @@ class SearchScenarioTransitOptionsUseCase {
       throw ArgumentError.value(
         query.serviceDate.iso8601,
         'serviceDate',
-        'Must be a valid local date.',
+        'Must be a valid local date.', // l10n-ignore: developer error, never displayed
       );
     }
     if (query.originStopId.trim().isEmpty ||

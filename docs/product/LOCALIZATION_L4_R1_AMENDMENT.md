@@ -1,11 +1,12 @@
 # L4 — локализация Release R1 на lv / en / ru
 
 - ID: **LOCALIZATION-L4**
-- Версия: **0.3 (v0.2 + L4.1: хвосты ревью v0.2, честный inventory «только интерфейс», evidence v0.2)**
+- Версия: **0.4 (v0.3 + L4.2: Create — валидаторы и контроллер отдают коды, текст строит UI)**
 - Дата: **2026-10-27**
 - Статус: **Review — механизм, policy, контракты и миграция серверных R1-поверхностей; языковой review не проведён**
 - База: `codex/recharge-integration` @ `01065f6` (L1–L3 + 01–36), ветка `claude/l4-localization`
-  (v0.1–v0.2, вершина `af04b1d`); v0.3 — ветка `claude/l4-1-tails` от `af04b1d`
+  (v0.1–v0.2, вершина `af04b1d`); v0.3 — ветка `claude/l4-1-tails` от `af04b1d`;
+  v0.4 — ветка `claude/l4-2-create-codes` (база — итог L4.1)
 - Расширяет: [BCK-20](REFERENCE_DATA_LOCALIZATION_SPEC.md) §12, §17, §21 (OD-10
   LocalizedText — accepted technical contract), F1 Notifications
   (`notification_templates.ts`, BCK13-OD-05 открыт), Latvia roadmap §2.1–2.2, §3.5
@@ -268,3 +269,49 @@ Ratchet теперь считает только интерфейс; перек�
 
 Evidence прогонов v0.2 на `af04b1d`:
 [L4_LOCALIZATION_VERIFICATION_2026_10_27](../verification/L4_LOCALIZATION_VERIFICATION_2026_10_27.md).
+
+## 13. v0.4 (L4.2): Create — коды вместо предложений
+
+Ветка `claude/l4-2-create-codes`, база — итог L4.1. Domain и application слоя
+Create больше не формируют предложений: валидаторы и контроллер отдают
+стабильный код и числовые параметры, текст строит presentation. Wire-, enum-
+значения, коды проверок, ids и сохранённые данные не менялись.
+
+| Что | Было | Стало |
+|---|---|---|
+| Issue-сущности Scenario, Find People, Event (вкл. Access, Classification, пресеты входа), Collection, Class/Workshop, Quick Plan → Scenario | поле `message` с английским предложением | `message` удалено; `code` + `params: Map<String, int>` (лимиты длины, число пунктов, single/series) |
+| `ValidateCreateAvailabilityUseCase` | поле → предложение | поле → id `availability.validation.<code>` (10 кодов) |
+| `CreateState.message`, `scenarioGenerationError`, `placeEnrichmentError` | ~80 русских/английских предложений, сырые `reasonCode`/`failure.name` в тексте (Route, Collection), имя шаблона пользователя в тексте | стабильный код `CreateNotice.*` (78 кодов); причины отказа сервера остаются диагностикой и на экран не идут; имя шаблона (пользовательский контент) в сообщение не передаётся |
+| `validationErrors` (ошибки полей) | смесь предложений и сырых id (`place.validation.<code>`, `rental.validation.<code>`, `activity.validation.<code>` выводились как текст — найдено в L4.2) | только id `<семейство>.validation.<code>`; один резолвер `CreateTexts.fieldError` (presentation) |
+| Пояснения Event Access и Scenario transit | предложения в application | `EventAccessDisclosureTopic`, `ScenarioTransitWarning`, статус по `freshness`; формулировки planned/not-live — по Scenario spec v1.7 |
+
+ARB (lv/en/ru): ICU select `scenarioValidationIssue`, `findPeopleValidationIssue`,
+`eventValidationIssue`, `collectionValidationIssue`, `classWorkshopValidationIssue`,
+`activityValidationIssue`, `rentalValidationIssue`, `createAvailabilityIssue`,
+`quickPlanConversionIssue`, `createNotice`, `createFieldIssue`,
+`eventAdmissionPresetIssue`, `eventAccessDisclosure`, `scenarioTransitStatus`,
+`scenarioTransitWarning`; plural-сообщения с int-плейсхолдерами
+`findPeopleLengthIssue`, `findPeopleMaxLengthIssue`, `collectionMinItemsIssue`,
+`collectionCuratorNoteLengthIssue`, `collectionItemCountHighIssue`,
+`createPlaceGalleryLimit` (CLDR: en one/other, lv zero/one/other, ru
+one/few/many/other). Тексты Activity переиспользуют уже переведённые
+`validation*` серверной таблицы. Allowlist плейсхолдеров расширен одним
+числом `min` (нижняя граница длины, как `max`).
+
+Проверки: `server_error_contract_test.dart` (L4.2) сканирует коды каждого
+валидатора, контроллера и формы, требует свой текст на трёх языках и не
+допускает snake_case-кода в тексте; положительный контроль — неизвестный
+id/код даёт безопасный общий текст; отдельный тест запрещает `message: '…'`
+в domain-валидаторах и контроллере. Существующие unit/widget-тесты проверяют
+коды или английский fallback, проверки не ослаблены.
+
+Обоснованные исключения (помечены `// l10n-ignore` с причиной): тексты
+developer-исключений (`ArgumentError`, `StateError`, `assert`, `toString`) в
+domain/application; предзаполнение нового черновика, которое дальше
+становится пользовательским контентом (`'Day 1'` первого дня Scenario,
+`'Expanded Quick Plan'` и описание при развёртывании Quick Plan); ключевые слова
+поиска небезопасного адреса в Find People. Вне объёма L4.2: подписи форм
+(`*_create_config.dart`, `create_taxonomy.dart`, `PlaceCreationPolicy.label` —
+заход L4.3), названия категорий (G04).
+
+Inventory «только интерфейс»: 2 537 → 2 123 (138 файлов); весь — 2 413.

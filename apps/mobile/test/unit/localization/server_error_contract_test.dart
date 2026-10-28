@@ -5,6 +5,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/localization/app_locale_policy.dart';
 import 'package:recharge/core/localization/user_message_catalog.dart';
+import 'package:recharge/features/create/application/state/create_notice.dart';
+import 'package:recharge/features/create/domain/entities/quick_plan_conversion.dart';
+import 'package:recharge/features/create/presentation/widgets/create_texts.dart';
 import 'package:recharge/features/create/presentation/widgets/route/route_issue_texts.dart';
 import 'package:recharge/generated/l10n/app_localizations.dart';
 
@@ -260,5 +263,192 @@ void main() {
         );
       }
     }
+  });
+
+  test('every Create validator, controller and form code reads as its own '
+      'message in lv, en and ru, never as the code (L4.2)', () {
+    String src(String path) =>
+        File('lib/features/create/$path').readAsStringSync();
+    Set<String> scan(String pattern, String source) => <String>{
+      for (final RegExpMatch m in RegExp(pattern).allMatches(source))
+        m.group(1)!,
+    };
+    const String usecases = 'domain/usecases';
+    final String controller = src(
+      'application/controllers/create_controller.dart',
+    );
+    final String findPeople = src(
+      '$usecases/validate_find_people_draft_usecase.dart',
+    );
+    final String activity = src(
+      '$usecases/validate_activity_draft_usecase.dart',
+    );
+    // Field id → codes: every family the field-error resolver knows.
+    final Map<String, Set<String>> families = <String, Set<String>>{
+      'scenario.validation.': <String>{
+        ...scan(
+          r"code:\s*'([a-z_]+)'",
+          src('$usecases/validate_scenario_draft_usecase.dart'),
+        ),
+        ...scan(
+          r"duplicateCode:\s*'([a-z_]+)'",
+          src('$usecases/validate_scenario_draft_usecase.dart'),
+        ),
+        ...scan(r"'scenario\.validation\.([a-z_]+)'", controller),
+      },
+      'find_people.validation.': <String>{
+        ...scan(r"error\(\s*'([a-z_]+)'", findPeople),
+        for (final String field in scan(r"field: '(\w+)'", findPeople))
+          '${field}_length',
+        for (final String field in scan(
+          r"_max\(\s*[\w.?]+,\s*\d+,\s*'\w+',\s*'(\w+)'",
+          findPeople,
+        ))
+          '${field}_length',
+      },
+      'event.validation.': <String>{
+        ...scan(
+          r"blocking\(\s*\d+,\s*'([a-z_0-9]+)'",
+          src('$usecases/validate_event_draft_usecase.dart'),
+        ),
+        ...scan(
+          r"code:\s*'([a-z_]+)'",
+          src('$usecases/validate_event_draft_usecase.dart'),
+        ),
+        ...scan(
+          r"add\(\s*'([a-z_]+)'",
+          src('$usecases/validate_event_access_configuration_usecase.dart'),
+        ),
+        ...scan(
+          r"code:\s*'([a-z_]+)'",
+          src('$usecases/validate_event_classification_usecase.dart'),
+        ),
+      },
+      'event.admission_preset.': scan(
+        r"required\('(\w+)'\)",
+        src('$usecases/normalize_event_admission_preset_usecase.dart'),
+      ),
+      'collection.validation.': scan(
+        r"(?:error|warning)\(\s*'([a-z_]+)'",
+        src('$usecases/validate_collection_draft_usecase.dart'),
+      ),
+      'class_workshop.validation.': scan(
+        r"need\(\s*[^,]+,\s*'([a-z_]+)'",
+        src('$usecases/validate_class_workshop_draft_usecase.dart'),
+      ),
+      'availability.validation.': scan(
+        r"'availability\.validation\.([a-z_]+)'",
+        src('$usecases/validate_create_availability_usecase.dart'),
+      ),
+      'activity.validation.': <String>{
+        ...scan(r"(?:error|warning)\(\s*'([a-z_]+)'", activity),
+        ...scan(r"'activity\.validation\.([a-z_]+)'", activity),
+        ...scan(r"'activity\.validation\.([a-z_]+)'", controller),
+      },
+      'rental.validation.': <String>{
+        ...scan(
+          r"'rental\.validation\.([a-z_]+)'",
+          src('$usecases/validate_rental_draft_usecase.dart'),
+        ),
+        ...scan(r"'rental\.validation\.([a-z_]+)'", controller),
+      },
+      'create.validation.': scan(
+        r"'create\.validation\.([a-z_]+)'",
+        controller,
+      ),
+    };
+    final Map<String, int> minimum = <String, int>{
+      'scenario.validation.': 70,
+      'find_people.validation.': 55,
+      'event.validation.': 85,
+      'event.admission_preset.': 3,
+      'collection.validation.': 10,
+      'class_workshop.validation.': 18,
+      'availability.validation.': 10,
+      'activity.validation.': 20,
+      'rental.validation.': 35,
+      'create.validation.': 4,
+    };
+    for (final MapEntry<String, int> m in minimum.entries) {
+      expect(
+        families[m.key]!.length,
+        greaterThanOrEqualTo(m.value),
+        reason: m.key,
+      );
+    }
+    for (final AppLocalizations l10n in languages) {
+      for (final MapEntry<String, Set<String>> family in families.entries) {
+        final String other = CreateTexts.fieldError(
+          l10n,
+          '${family.key}not_a_code',
+        );
+        for (final String code in family.value) {
+          final String text = CreateTexts.fieldError(
+            l10n,
+            '${family.key}$code',
+          );
+          expect(
+            text,
+            isNot(other),
+            reason: '${l10n.localeName} ${family.key}$code',
+          );
+          // A snake_case code never leaks; plain words (title) may.
+          if (code.contains('_')) {
+            expect(text.contains(code), isFalse, reason: code);
+          }
+        }
+      }
+      final String noticeOther = l10n.createNotice('not_a_code');
+      for (final String code in CreateNotice.all) {
+        final String text = CreateTexts.notice(l10n, code);
+        expect(text, isNot(noticeOther), reason: '${l10n.localeName} $code');
+        expect(text.contains(code), isFalse);
+      }
+      final String quickOther = l10n.quickPlanConversionIssue('not_a_code');
+      for (final QuickPlanConversionIssueCode code
+          in QuickPlanConversionIssueCode.values) {
+        expect(l10n.quickPlanConversionIssue(code.name), isNot(quickOther));
+      }
+      for (final String warning in const <String>[
+        'plannedNotLive',
+        'limitations',
+      ]) {
+        expect(l10n.scenarioTransitWarning(warning).contains(warning), isFalse);
+      }
+      // Positive control: an unknown id or code is a safe general text.
+      for (final String unknown in const <String>[
+        'event.validation.future_code',
+        'totally.unknown.id',
+        'session_future_code',
+        'place.validation.future_code',
+      ]) {
+        final String text = CreateTexts.fieldError(l10n, unknown);
+        expect(text.contains('future_code'), isFalse);
+        expect(text.contains('totally'), isFalse);
+      }
+      expect(CreateTexts.notice(l10n, 'future_notice'), noticeOther);
+    }
+  });
+
+  test('Create domain validators and the controller keep no sentence in an '
+      'issue or notice (L4.2)', () {
+    final Directory usecases = Directory('lib/features/create/domain/usecases');
+    final List<String> offenders = <String>[
+      for (final File file in usecases.listSync().whereType<File>())
+        if (RegExp(r"\bmessage:\s*'").hasMatch(file.readAsStringSync()))
+          file.path,
+      if (RegExp(r"message:\s*'").hasMatch(
+        File(
+          'lib/features/create/application/controllers/create_controller.dart',
+        ).readAsStringSync(),
+      ))
+        'create_controller.dart',
+    ];
+    expect(offenders, isEmpty);
+    // Positive control: the scan sees a sentence when there is one.
+    expect(
+      RegExp(r"\bmessage:\s*'").hasMatch("x(message: 'Add a title')"),
+      isTrue,
+    );
   });
 }

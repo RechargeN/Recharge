@@ -22,12 +22,12 @@ class RemoveCollectionItemsOnlyUseCase {
         .toSet();
     if (!removedItemStableKeys.every(activeKeys.contains)) {
       throw ArgumentError(
-        'Cannot remove an item that is not part of the active version.',
+        'Cannot remove an item that is not part of the active version.', // l10n-ignore: developer error, never displayed
       );
     }
     if (removedItemStableKeys.length == activeKeys.length) {
       throw ArgumentError(
-        'Removing every item would leave zero — archive the Collection '
+        'Removing every item would leave zero — archive the Collection ' // l10n-ignore
         'instead (§3.11), removal-only cannot empty it.',
       );
     }

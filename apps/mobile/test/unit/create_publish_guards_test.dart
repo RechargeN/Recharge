@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/features/create/application/state/create_notice.dart';
 import 'package:recharge/app/adapters/identity_publisher_access_check.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
@@ -47,7 +48,7 @@ void main() {
       expect(published, isFalse);
       expect(repo.publishCalls, 0);
       expect(controller.state.publishedDraft, isNull);
-      expect(controller.state.message, contains('Черновик сохранён'));
+      expect(controller.state.message, CreateNotice.publisherPageUnavailable);
       // Draft untouched: owner is never silently rewritten to the user.
       expect(controller.state.draft.effectivePublisher, _page);
     });
@@ -141,7 +142,7 @@ void main() {
         expect(await controller.publishDraft(), isFalse);
         expect(controller.state.status, CreateStatus.ready);
         expect(controller.state.draft.title, 'Pottery');
-        expect(controller.state.message, contains('Черновик сохранён'));
+        expect(controller.state.message, CreateNotice.submitFailed);
         expect(repo.stored?.title, 'Pottery');
 
         expect(await controller.publishDraft(), isTrue);

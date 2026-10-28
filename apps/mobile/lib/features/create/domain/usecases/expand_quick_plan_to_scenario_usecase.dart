@@ -34,7 +34,6 @@ class ExpandQuickPlanToScenarioUseCase {
           QuickPlanConversionIssue(
             code: QuickPlanConversionIssueCode.sourceNotFoundOrForbidden,
             severity: QuickPlanConversionIssueSeverity.error,
-            message: 'Quick Plan is unavailable or cannot be copied',
           ),
         ],
         quickPlanStopIdToScenarioItemId: <String, String>{},
@@ -51,8 +50,6 @@ class ExpandQuickPlanToScenarioUseCase {
           severity: request.continueWithLatestSnapshot
               ? QuickPlanConversionIssueSeverity.warning
               : QuickPlanConversionIssueSeverity.error,
-          message:
-              'Quick Plan changed from revision ${request.expectedQuickPlanRevision} to ${source.revision}',
         ),
       );
       if (!request.continueWithLatestSnapshot) {
@@ -71,7 +68,6 @@ class ExpandQuickPlanToScenarioUseCase {
         const QuickPlanConversionIssue(
           code: QuickPlanConversionIssueCode.selectionEmpty,
           severity: QuickPlanConversionIssueSeverity.error,
-          message: 'Select at least one stop to expand',
         ),
       );
       return ExpandQuickPlanToScenarioResult(
@@ -98,8 +94,6 @@ class ExpandQuickPlanToScenarioUseCase {
           QuickPlanConversionIssue(
             code: QuickPlanConversionIssueCode.stopUnavailable,
             severity: QuickPlanConversionIssueSeverity.warning,
-            message:
-                '${stop.title} is unavailable and must be resolved in Scenario',
             quickPlanStopId: stop.id,
           ),
         );
@@ -171,7 +165,6 @@ class ExpandQuickPlanToScenarioUseCase {
             QuickPlanConversionIssue(
               code: QuickPlanConversionIssueCode.privateNoteNotCopied,
               severity: QuickPlanConversionIssueSeverity.warning,
-              message: 'Private note for ${stop.title} was not copied',
               quickPlanStopId: stop.id,
             ),
           );
@@ -182,8 +175,6 @@ class ExpandQuickPlanToScenarioUseCase {
           QuickPlanConversionIssue(
             code: QuickPlanConversionIssueCode.legacySourceIdentityMissing,
             severity: QuickPlanConversionIssueSeverity.warning,
-            message:
-                '${stop.title} was copied as a private custom location because the legacy plan has no catalog object id',
             quickPlanStopId: stop.id,
           ),
         );
@@ -196,7 +187,6 @@ class ExpandQuickPlanToScenarioUseCase {
         QuickPlanConversionIssue(
           code: QuickPlanConversionIssueCode.stopNotFound,
           severity: QuickPlanConversionIssueSeverity.warning,
-          message: 'Selected stop no longer exists',
           quickPlanStopId: stopId,
         ),
       );
