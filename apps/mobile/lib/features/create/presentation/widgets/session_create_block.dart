@@ -15,7 +15,9 @@ import '../../domain/entities/session_price_disclosure.dart';
 import '../../domain/entities/session_schedule.dart';
 import '../../domain/entities/session_slot_projection.dart';
 import '../../domain/entities/session_validation_issue.dart';
+import 'create_form_texts.dart';
 import 'create_texts.dart';
+import '../../../../core/localization/recharge_formats.dart';
 
 /// Bookable Session create block (BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md v1.1
 /// §12): guard + three required blocks on one scrollable page, plus a
@@ -70,10 +72,10 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
     final CreateDraftEntity draft = widget.state.draft;
     final SessionDraftData? session = draft.sessionData;
     if (session == null) {
-      return const Card(
+      return Card(
         child: Padding(
           padding: EdgeInsets.all(16),
-          child: Text('Loading Bookable session draft…'),
+          child: Text(context.l10n.createSessionLoadingBookableSessionDraft),
         ),
       );
     }
@@ -120,19 +122,23 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         .where((CreateTaxonomySubcategory item) => item.id == draft.subcategory)
         .firstOrNull;
     return _BlockCard(
-      title: 'What and where',
+      title: context.l10n.createSessionWhatWhere,
       required: true,
       children: <Widget>[
         TextFormField(
           controller: _field('title', draft.title),
-          decoration: const InputDecoration(labelText: 'Title'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionTitle,
+          ),
           onChanged: widget.controller.updateTitle,
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<CreateTaxonomyCategory>(
           isExpanded: true,
           initialValue: selectedCategory,
-          decoration: const InputDecoration(labelText: 'Category'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionCategory,
+          ),
           items: <DropdownMenuItem<CreateTaxonomyCategory>>[
             for (final CreateTaxonomyCategory category in categories)
               DropdownMenuItem<CreateTaxonomyCategory>(
@@ -154,7 +160,9 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         DropdownButtonFormField<CreateTaxonomySubcategory>(
           isExpanded: true,
           initialValue: selectedSubcategory,
-          decoration: const InputDecoration(labelText: 'Subcategory'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionSubcategory,
+          ),
           items: <DropdownMenuItem<CreateTaxonomySubcategory>>[
             for (final CreateTaxonomySubcategory sub
                 in selectedCategory?.subcategories ??
@@ -177,25 +185,34 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         const SizedBox(height: 12),
         TextFormField(
           controller: _field('shortDescription', draft.shortDescription),
-          decoration: const InputDecoration(labelText: 'Short description'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionShortDescription,
+          ),
           onChanged: widget.controller.updateShortDescription,
         ),
         const SizedBox(height: 12),
         TextFormField(
           controller: _field('fullDescription', draft.fullDescription),
-          decoration: const InputDecoration(labelText: 'Full description'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionFullDescription,
+          ),
           maxLines: 4,
           onChanged: widget.controller.updateFullDescription,
         ),
         const SizedBox(height: 12),
         TextFormField(
           controller: _field('coverImage', draft.media.coverImage),
-          decoration: const InputDecoration(labelText: 'Cover image URL'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionCoverImageUrl,
+          ),
           onChanged: widget.controller.updateCoverImage,
         ),
         DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: widget.controller.sessionContentLocale,
-          decoration: const InputDecoration(labelText: 'Content language'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionContentLanguage,
+          ),
           items: <DropdownMenuItem<String>>[
             for (final locale in widget.controller.supportedContentLocales)
               DropdownMenuItem(value: locale, child: Text(locale)),
@@ -208,8 +225,8 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
             'sessionCoverAlt:${widget.controller.sessionContentLocale}',
             widget.controller.sessionMediaAltText(),
           ),
-          decoration: const InputDecoration(
-            labelText: 'Cover image description',
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionCoverImageDescription,
           ),
           onChanged: (value) =>
               widget.controller.updateSessionMediaMetadata(coverAltText: value),
@@ -220,8 +237,8 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
               'sessionGalleryAlt:$reference:${widget.controller.sessionContentLocale}',
               widget.controller.sessionMediaAltText(reference),
             ),
-            decoration: const InputDecoration(
-              labelText: 'Gallery image description',
+            decoration: InputDecoration(
+              labelText: context.l10n.createSessionGalleryImageDescription,
             ),
             onChanged: (value) => widget.controller.updateSessionMediaMetadata(
               galleryRef: reference,
@@ -240,8 +257,8 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         const SizedBox(height: 12),
         TextFormField(
           controller: _field('resourceName', session.resourceName),
-          decoration: const InputDecoration(
-            labelText: 'Resource name (e.g. "Sauna 1")',
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionResourceNameEGSauna1,
           ),
           onChanged: (String value) {
             widget.controller.updateSessionResourceName(value);
@@ -251,13 +268,17 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         const SizedBox(height: 12),
         TextFormField(
           controller: _field('address', draft.addressLine1),
-          decoration: const InputDecoration(labelText: 'Address'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionAddress,
+          ),
           onChanged: widget.controller.updateAddress,
         ),
         const SizedBox(height: 12),
         TextFormField(
           controller: _field('city', draft.city),
-          decoration: const InputDecoration(labelText: 'City'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionCity,
+          ),
           onChanged: widget.controller.updateCity,
         ),
         const SizedBox(height: 12),
@@ -285,7 +306,9 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
             'sessionLatitude',
             draft.latitude?.toString() ?? '',
           ),
-          decoration: const InputDecoration(labelText: 'Latitude'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionLatitude,
+          ),
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
             signed: true,
@@ -296,7 +319,9 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
             'sessionLongitude',
             draft.longitude?.toString() ?? '',
           ),
-          decoration: const InputDecoration(labelText: 'Longitude'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionLongitude,
+          ),
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
             signed: true,
@@ -307,7 +332,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
             latitude: _fields['sessionLatitude']?.text ?? '',
             longitude: _fields['sessionLongitude']?.text ?? '',
           ),
-          child: const Text('Confirm this location'),
+          child: Text(context.l10n.createSessionConfirmLocation),
         ),
         ..._fieldIssues(<String>{
           'title',
@@ -333,7 +358,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         .take(7)
         .toList(growable: false);
     return _BlockCard(
-      title: 'When',
+      title: context.l10n.createSessionWhen,
       required: true,
       children: <Widget>[
         Wrap(
@@ -342,7 +367,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
           children: <Widget>[
             for (final SessionWeeklyPreset preset in sessionWeeklyPresets)
               ActionChip(
-                label: Text(preset.label),
+                label: Text(createFormText(context.l10n, preset.labelId)),
                 onPressed: () =>
                     widget.controller.applySessionWeeklyPreset(preset),
               ),
@@ -350,7 +375,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         ),
         const SizedBox(height: 12),
         if (session.schedule.weeklyRules.isEmpty)
-          const Text('No weekly rule yet — pick a preset above.')
+          Text(context.l10n.createSessionNoWeeklyRuleYetPickPreset)
         else
           Wrap(
             spacing: 8,
@@ -369,7 +394,10 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
             ],
           ),
         const SizedBox(height: 12),
-        Text('Slot duration', style: Theme.of(context).textTheme.labelLarge),
+        Text(
+          context.l10n.createSessionSlotDuration,
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
         Wrap(
           spacing: 8,
           children: <Widget>[
@@ -391,7 +419,10 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         ),
         if (preview.isNotEmpty) ...<Widget>[
           const SizedBox(height: 12),
-          Text('Next offers', style: Theme.of(context).textTheme.labelLarge),
+          Text(
+            context.l10n.createSessionNextOffers,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -411,14 +442,14 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
   Widget _priceAndBookingBlock(SessionDraftData session) {
     final bool isFree = session.price.mode == SessionPricingMode.free;
     return _BlockCard(
-      title: 'Price and booking',
+      title: context.l10n.createSessionPriceBooking,
       required: true,
       children: <Widget>[
         Wrap(
           spacing: 8,
           children: <Widget>[
             ChoiceChip(
-              label: const Text('Free'),
+              label: Text(context.l10n.createSessionFree),
               selected: isFree,
               onSelected: (_) => widget.controller.setSessionPriceFree(),
             ),
@@ -443,7 +474,9 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
                       2,
                     ),
             ),
-            decoration: const InputDecoration(labelText: 'Price per slot, EUR'),
+            decoration: InputDecoration(
+              labelText: context.l10n.createSessionPricePerSlotEur,
+            ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (String value) {
               final double? parsed = double.tryParse(
@@ -461,8 +494,8 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         const SizedBox(height: 12),
         TextFormField(
           controller: _field('externalBookingUrl', session.externalBookingUrl),
-          decoration: const InputDecoration(
-            labelText: 'External booking URL (https://…)',
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionExternalBookingUrlHttps,
           ),
           onChanged: widget.controller.setSessionExternalBookingUrl,
         ),
@@ -472,15 +505,17 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
             'externalTermsUrl',
             session.externalTermsUrl ?? '',
           ),
-          decoration: const InputDecoration(
-            labelText: 'Terms URL (optional, https://…)',
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionTermsUrlOptionalHttps,
           ),
           onChanged: widget.controller.setSessionExternalTermsUrl,
         ),
         const SizedBox(height: 12),
         TextFormField(
           controller: _field('maxPartySize', session.maxPartySize.toString()),
-          decoration: const InputDecoration(labelText: 'Max party size'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createSessionMaxPartySize,
+          ),
           keyboardType: TextInputType.number,
           onChanged: (String value) {
             final int? parsed = int.tryParse(value);
@@ -541,15 +576,18 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Blocked dates', style: Theme.of(context).textTheme.labelLarge),
+        Text(
+          context.l10n.createSessionBlockedDates,
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
         const SizedBox(height: 8),
         Row(
           children: <Widget>[
             Expanded(
               child: TextFormField(
                 controller: dateController,
-                decoration: const InputDecoration(
-                  labelText: 'Date (YYYY-MM-DD)',
+                decoration: InputDecoration(
+                  labelText: context.l10n.createFormDateIso,
                 ),
               ),
             ),
@@ -565,7 +603,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
                 );
                 dateController.clear();
               },
-              child: const Text('Block'),
+              child: Text(context.l10n.createSessionBlock),
             ),
           ],
         ),
@@ -601,7 +639,10 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Amenities', style: Theme.of(context).textTheme.labelLarge),
+        Text(
+          context.l10n.createSessionAmenities,
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
         const SizedBox(height: 8),
         for (final MapEntry<String, List<EventAmenityDefinition>> group
             in byGroup.entries)
@@ -646,12 +687,12 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Recommended details for this category',
+          context.l10n.createSessionRecommendedDetailsCategory,
           style: Theme.of(context).textTheme.labelLarge,
         ),
         const SizedBox(height: 4),
         Text(
-          'Never required to publish (SES-D14).',
+          context.l10n.createSessionNeverRequiredPublishSesD14,
           style: Theme.of(context).textTheme.bodySmall,
         ),
         for (final RechargeCriteriaFieldDefinition field in criteria.fields)
@@ -729,29 +770,24 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         children: <Widget>[
           OutlinedButton(
             onPressed: widget.controller.saveDraft,
-            child: const Text('Save draft'),
+            child: Text(context.l10n.createSessionSaveDraft),
           ),
           FilledButton(
             onPressed: () async {
               final bool published = await widget.controller.publishDraft();
               if (published) widget.onPublished();
             },
-            child: const Text('Publish'),
+            child: Text(context.l10n.createSessionPublish),
           ),
         ],
       ),
     );
   }
 
-  static String _weekdayLabel(int isoWeekday) => const <String>[
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat',
-    'Sun',
-  ][(isoWeekday - 1).clamp(0, 6)];
+  String _weekdayLabel(int isoWeekday) => RechargeFormats.weekdayShort(
+    isoWeekday,
+    Localizations.localeOf(context).languageCode,
+  );
 
   static String _minutesLabel(int minutesSinceMidnight) {
     final int hours = minutesSinceMidnight ~/ 60;
@@ -823,8 +859,7 @@ class _InfoBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        'Only what is marked "required" blocks publishing. Everything '
-        'else is optional and can be added now or later.',
+        context.l10n.createSessionOnlyWhatMarkedRequiredBlocksPublishing,
         style: Theme.of(context).textTheme.bodySmall,
       ),
     );

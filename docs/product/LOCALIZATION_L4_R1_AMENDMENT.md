@@ -1,13 +1,14 @@
 # L4 — локализация Release R1 на lv / en / ru
 
 - ID: **LOCALIZATION-L4**
-- Версия: **0.5 (v0.4 + L4.3: формы Create реализованных типов — Place, Event, Activity, Rental, Collection, хаб и страница успеха)**
+- Версия: **0.6 (v0.5 + L4.4: Find People, Session, Class/Workshop, Route, Scenario)**
 - Дата: **2026-10-27**
 - Статус: **Review — механизм, policy, контракты и миграция серверных R1-поверхностей; языковой review не проведён**
 - База: `codex/recharge-integration` @ `01065f6` (L1–L3 + 01–36), ветка `claude/l4-localization`
   (v0.1–v0.2, вершина `af04b1d`); v0.3 — ветка `claude/l4-1-tails` от `af04b1d`;
   v0.4 — ветка `claude/l4-2-create-codes` (база — итог L4.1);
-  v0.5 — ветка `claude/l4-3-create-forms` (база — итог L4.2)
+  v0.5 — ветка `claude/l4-3-create-forms` (база — итог L4.2);
+  v0.6 — ветка `claude/l4-4-create-forms-deferred` (база — итог L4.3)
 - Расширяет: [BCK-20](REFERENCE_DATA_LOCALIZATION_SPEC.md) §12, §17, §21 (OD-10
   LocalizedText — accepted technical contract), F1 Notifications
   (`notification_templates.ts`, BCK13-OD-05 открыт), Latvia roadmap §2.1–2.2, §3.5
@@ -357,3 +358,53 @@ overflow, основное действие шага прокручиваетс�
 `createTaxonomyLabelForPath`.
 
 Inventory «только интерфейс»: 2 123 → 1 631 (115 файлов); весь — 1 921.
+
+## 15. v0.6 (L4.4): Find People, Session, Class/Workshop, Route, Scenario
+
+Ветка `claude/l4-4-create-forms-deferred`, база — итог L4.3. Формы Find People,
+Session, Class/Workshop, Route (редактор, запись GPS, модерация) и Scenario
+(composer, транспорт, расписание, генерация), а также лист «Add to
+Scenario» берут текст только через `context.l10n`.
+
+| Что | Было | Стало |
+|---|---|---|
+| Виджеты пяти форм и страница модерации Route | ~500 литералов | ARB-ключи `createFindPeople*`, `createSession*`, `createClass*`, `createRoute*`, `createScenario*` |
+| Шаги `find_people/route/session/class_workshop/scenario_create_config.dart` | `title`/`description`, подписи пресетов Session | `titleId`/`descriptionId`/`labelId`, тот же резолвер `createFormText` |
+| Варианты enum (одобрение, видимость, уровень, транспорт, темп, вид пункта Scenario, источник и состояние сегмента Route, свежесть расписания) | «очеловеченное» или сырое `.name` | `createOptionText` (select `createOption`) |
+| Правила дома и права со-организатора Find People | `_enumLabel(id)` из стабильного id | select `createFindPeopleHouseRule` / `createFindPeopleCohostRight` по id |
+| Дни недели Session | «Mon…Sun» | `RechargeFormats.weekdayShort` |
+| «Add to Scenario» (`scenario_object_intake_*`) | контроллер хранил предложения; в UI сырые `objectType.name`/`sourceStatus.name`, ISO-даты, текст `FormatException` | контроллер хранит `ScenarioObjectIntakeNotice`; UI — select по стабильным значениям, даты через `RechargeFormats` (фиксированный старт — в зоне объекта, неизвестная зона → UTC с пометкой), разработческий текст исключения не показывается |
+
+Тексты, где смысл важнее стиля, перенесены без изменения английского
+смысла: приватность GPS (точки хранятся зашифрованными на устройстве, пока
+трек не применён; геопозиция запрашивается только для записи Route), «planned / not live» в Scenario по spec v1.7 (транспорт и
+расписание — план, не live-данные), 18+ / согласие / область показа в Find
+People. lv/ru для них написаны агентом и **требуют проверки носителем и
+юристом** до запуска (L4-G01).
+
+Исключения (`// l10n-ignore`): пример запроса генератора Scenario остаётся
+английским — генератор разбирает ключевые слова (открытый вопрос, как и
+`smart_search_parser`); предзаполнение «Day 1» / «Expanded Quick Plan» —
+пользовательский контент, который потом правит автор.
+
+Найдено полным прогоном тестов: id шагов и пресетов пяти новых конфигов не
+были подключены к `createFormText`, резолвер молча возвращал пустую строку,
+и заголовки шагов были пустыми. Подключены все 44 id; новый
+`create_form_texts_test.dart` требует непустой текст для каждого id из
+`*_create_config.dart` на lv/en/ru. В листе «Add to Scenario» название
+сценария и остановки больше не передаётся в сообщение: локализованная
+подпись («After:», «Selected stop 2:») и название как есть показываются
+рядом; заголовок успеха и название сценария — отдельными строками.
+
+Найдено и исправлено тестами 360 dp: выпадающие списки без `isExpanded`
+(Class/Workshop, Route, Scenario, Session) и статус сохранения в заголовке
+Find People при шрифте ×2.
+
+Проверки: `create_blocks_small_screen_test.dart` (группа L4.3 расширена) —
+все шаги Find People, Session, Class/Workshop, Route и Scenario на lv/en/ru
+при 360 dp и шрифте ×1/×2: нет overflow, основное действие шага видно и
+нажимается. Зелёные тесты не подтверждают качество перевода.
+
+Inventory «только интерфейс»: 1 631 → 1 100 (89 файлов); весь — 1 390.
+Остаток — Discover (L4.5), профиль, workspace, Quick Plan, избранное,
+посещённые места.

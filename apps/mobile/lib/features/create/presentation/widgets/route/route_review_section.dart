@@ -93,7 +93,7 @@ class RouteReviewSection extends StatelessWidget {
         const SizedBox(height: 12),
         _IssuePanel(
           title: blocking.isEmpty
-              ? 'Route draft is structurally ready'
+              ? context.l10n.createRouteRouteDraftStructurallyReady
               : '${blocking.length} blocking checks',
           issues: blocking,
           color: blocking.isEmpty
@@ -111,8 +111,7 @@ class RouteReviewSection extends StatelessWidget {
         const SizedBox(height: 12),
         if (demoProviderOnly)
           Text(
-            'Investor demo: this version uses the bundled offline trail graph '
-            'and is marked demo-only. No paid routing call is made.',
+            context.l10n.createRouteInvestorDemoVersionUsesBundledOffline,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         const SizedBox(height: 12),
@@ -121,14 +120,16 @@ class RouteReviewSection extends StatelessWidget {
           onPressed: state.hasPendingOperations ? null : onSave,
           icon: const Icon(Icons.save_outlined),
           label: Text(
-            state.hasPendingOperations ? 'Routing in progress…' : 'Save draft',
+            state.hasPendingOperations
+                ? context.l10n.createRouteRoutingProgress
+                : context.l10n.createRouteSaveDraft,
           ),
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
           onPressed: onRestore,
           icon: const Icon(Icons.restore),
-          label: const Text('Restore last saved revision'),
+          label: Text(context.l10n.createRouteRestoreLastSavedRevision),
         ),
         const SizedBox(height: 8),
         FilledButton.icon(
@@ -143,13 +144,15 @@ class RouteReviewSection extends StatelessWidget {
                 : Icons.rate_review_outlined,
           ),
           label: Text(
-            publishesDirectly ? 'Publish Route' : 'Submit Route for review',
+            publishesDirectly
+                ? context.l10n.createRoutePublishRoute
+                : context.l10n.createRouteSubmitRouteReview,
           ),
         ),
         if (!canSubmit) ...<Widget>[
           const SizedBox(height: 6),
           Text(
-            'Your profile does not have permission to submit this Route.',
+            context.l10n.createRouteYourProfileDoesNotHavePermission,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
@@ -182,7 +185,7 @@ class _RouteQualityPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              'Route quality',
+              context.l10n.createRouteRouteQuality,
               style: Theme.of(
                 context,
               ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
@@ -223,9 +226,10 @@ class _RouteQualityPanel extends StatelessWidget {
             ),
             if (quality.difficulty.differsFromAuthorSelection) ...<Widget>[
               const SizedBox(height: 8),
-              const Text(
-                'The selected difficulty differs from the calculated '
-                'recommendation and requires review.',
+              Text(
+                context
+                    .l10n
+                    .createRouteSelectedDifficultyDiffersFromCalculatedRecommendation,
               ),
             ],
             if (elevation.attribution case final attribution?) ...<Widget>[

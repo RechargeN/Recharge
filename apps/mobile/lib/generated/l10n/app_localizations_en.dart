@@ -4801,6 +4801,101 @@ class AppLocalizationsEn extends AppLocalizations {
       'PublishStatus_archived': 'Archived',
       'PublishStatus_hidden': 'Hidden',
       'PublishStatus_deleted': 'Deleted',
+      'FindPeopleApprovalMode_manual': 'Host approves',
+      'FindPeopleApprovalMode_automatic': 'Automatic',
+      'FindPeopleApprovalMode_inviteOnly': 'Invite only',
+      'FindPeopleConversationPolicy_acceptedOnly': 'Accepted participants only',
+      'FindPeopleConversationPolicy_applicantsAndAccepted':
+          'Applicants and accepted',
+      'FindPeopleCostType_free': 'Free',
+      'FindPeopleCostType_estimated': 'Estimated cost',
+      'FindPeopleCostType_unknown': 'Unknown',
+      'FindPeopleExpenseSplitMode_none': 'No split',
+      'FindPeopleExpenseSplitMode_equal': 'Split equally',
+      'FindPeopleExpenseSplitMode_itemized': 'By item',
+      'FindPeopleExpenseSplitMode_settleLater': 'Settle later',
+      'FindPeopleMeetingMode_inPerson': 'In person',
+      'FindPeopleMeetingMode_online': 'Online',
+      'FindPeopleMeetingMode_hybrid': 'Hybrid',
+      'FindPeopleParticipationGoal_social': 'Socialising',
+      'FindPeopleParticipationGoal_practice': 'Practice',
+      'FindPeopleParticipationGoal_teamUp': 'Team up',
+      'FindPeopleParticipationGoal_sharedTrip': 'Shared trip',
+      'FindPeopleParticipationGoal_accountability': 'Keep each other going',
+      'FindPeopleParticipationGoal_other': 'Other',
+      'FindPeoplePublisherType_user': 'Personal profile',
+      'FindPeoplePublisherType_page': 'Professional page',
+      'FindPeopleScheduleMode_single': 'One time',
+      'FindPeopleScheduleMode_timePoll': 'Time poll',
+      'FindPeopleScheduleMode_recurring': 'Recurring',
+      'FindPeopleSeatFitPolicy_strictOrder': 'Strict order',
+      'FindPeopleSeatFitPolicy_firstFitting': 'First that fits',
+      'FindPeopleSkillLevel_any': 'Any level',
+      'FindPeopleSkillLevel_beginner': 'Beginner',
+      'FindPeopleSkillLevel_intermediate': 'Intermediate',
+      'FindPeopleSkillLevel_advanced': 'Advanced',
+      'FindPeopleVerificationLevel_none': 'No verification',
+      'FindPeopleVerificationLevel_phone': 'Phone',
+      'FindPeopleVerificationLevel_identityDocument': 'Identity document',
+      'FindPeopleVerificationLevel_organization': 'Organisation',
+      'FindPeopleVisibility_public': 'Public',
+      'FindPeopleVisibility_unlisted': 'By link',
+      'FindPeopleVisibility_inviteOnly': 'Invite only',
+      'FindPeopleWaitlistPolicy_firstCome': 'First come',
+      'FindPeopleWaitlistPolicy_hostReview': 'Host review',
+      'ScenarioBudgetBasis_wholeGroup': 'Whole group',
+      'ScenarioBudgetBasis_perPerson': 'Per person',
+      'ScenarioFormat_city': 'City',
+      'ScenarioFormat_day': 'Day',
+      'ScenarioFormat_weekend': 'Weekend',
+      'ScenarioFormat_trip': 'Trip',
+      'ScenarioPace_relaxed': 'Relaxed',
+      'ScenarioPace_balanced': 'Balanced',
+      'ScenarioPace_intensive': 'Intensive',
+      'ScenarioPartyKind_solo': 'Solo',
+      'ScenarioPartyKind_couple': 'Couple',
+      'ScenarioPartyKind_friends': 'Friends',
+      'ScenarioPartyKind_family': 'Family',
+      'ScenarioPartyKind_group': 'Group',
+      'ScenarioPartyKind_mixed': 'Mixed',
+      'ScenarioPlannedTransportKind_bus': 'Bus',
+      'ScenarioPlannedTransportKind_train': 'Train',
+      'ScenarioPlannedTransportKind_tram': 'Tram',
+      'ScenarioPlannedTransportKind_trolleybus': 'Trolleybus',
+      'ScenarioPlannedTransportKind_ferry': 'Ferry',
+      'ScenarioPlannedTransportKind_flight': 'Flight',
+      'ScenarioPlannedTransportKind_other': 'Other',
+      'ScenarioTravelMode_walking': 'Walking',
+      'ScenarioTravelMode_bicycle': 'Bicycle',
+      'ScenarioTravelMode_car': 'Own car',
+      'ScenarioTravelMode_taxi': 'Taxi',
+      'ScenarioTravelMode_transit': 'Public transport',
+      'ScenarioTravelMode_other': 'Other',
+      'ScenarioDateMode_template': 'Flexible template',
+      'ScenarioDateMode_dated': 'Dated trip',
+      'ScenarioItemKind_visit': 'Visit',
+      'ScenarioItemKind_event': 'Event',
+      'ScenarioItemKind_activity': 'Activity',
+      'ScenarioItemKind_route': 'Route',
+      'ScenarioItemKind_bookableSession': 'Session',
+      'ScenarioItemKind_stay': 'Stay',
+      'ScenarioItemKind_plannedTransport': 'Planned transport',
+      'ScenarioItemKind_timeBlock': 'Time block',
+      'RouteSegmentSource_routed': 'Routed',
+      'RouteSegmentSource_generated': 'Generated',
+      'RouteSegmentSource_freehand': 'Freehand',
+      'RouteSegmentSource_recordedGps': 'Recorded GPS',
+      'RouteSegmentSource_importedGpx': 'Imported GPX',
+      'RouteSegmentSource_intentionalDirect': 'Intentional direct line',
+      'RouteSegmentSource_fallbackDirect': 'Direct line (fallback)',
+      'RouteSegmentOperationState_ready': 'Ready',
+      'RouteSegmentOperationState_routing': 'Routing',
+      'RouteSegmentOperationState_failed': 'Failed',
+      'RouteSegmentOperationState_stale': 'Needs update',
+      'ScenarioScheduleFreshness_current': 'Current when saved',
+      'ScenarioScheduleFreshness_stale': 'Stale',
+      'ScenarioScheduleFreshness_unknown': 'Unknown',
+      'ScenarioScheduleFreshness_notApplicable': 'Not applicable',
       'other': 'Other',
     });
     return '$_temp0';
@@ -5071,5 +5166,2268 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String createFormNowStatus(String value) {
     return 'Now: $value.';
+  }
+
+  @override
+  String createFindPeopleFindPeople(int done, int total) {
+    return 'Find People · $done/$total';
+  }
+
+  @override
+  String get createFindPeopleSaveError => 'Save error';
+
+  @override
+  String get createFindPeopleUnsavedChanges => 'Unsaved changes';
+
+  @override
+  String get createFindPeopleContinue => 'Continue';
+
+  @override
+  String get createFindPeopleSaveDraft => 'Save draft';
+
+  @override
+  String get createFindPeopleBack => 'Back';
+
+  @override
+  String get createFindPeoplePublishFindPeopleRequest =>
+      'Publish Find People request';
+
+  @override
+  String get createFindPeopleValidationSummary => 'Validation summary';
+
+  @override
+  String get createFindPeopleMeetPubliclyDoNotSendMoney =>
+      'Meet publicly, do not send money to strangers, and use Report/Block when needed.';
+
+  @override
+  String get createFindPeopleIAcceptFindPeopleSafetyRules =>
+      'I accept the Find People Safety Rules *';
+
+  @override
+  String get createFindPeopleRequestOnlyAdults18 =>
+      'This request is only for adults 18+ *';
+
+  @override
+  String get createFindPeopleSchedulePublicationUtcOptional =>
+      'Schedule publication UTC (optional)';
+
+  @override
+  String get createFindPeopleCoverImageUrlOptional =>
+      'Cover image URL (optional)';
+
+  @override
+  String get createFindPeopleMediaPublication => 'Media and publication';
+
+  @override
+  String get createFindPeopleTheseFieldsAreNeverIncludedPublic =>
+      'These fields are never included in public data, analytics, or push payloads.';
+
+  @override
+  String get createFindPeoplePrivateHostPreview => 'Private host preview';
+
+  @override
+  String get createFindPeopleApproximatePublicArea => 'Approximate public area';
+
+  @override
+  String get createFindPeopleAddShortDescription => 'Add a short description.';
+
+  @override
+  String get createFindPeopleUntitledFindPeopleRequest =>
+      'Untitled Find People request';
+
+  @override
+  String get createFindPeopleMirrorsSafePublicDetailsContract =>
+      'This mirrors the safe public Details contract.';
+
+  @override
+  String get createFindPeoplePublicPreview => 'Public preview';
+
+  @override
+  String get createFindPeopleQuietHoursEnd01439 => 'Quiet hours end (0–1439)';
+
+  @override
+  String get createFindPeopleQuietHoursStart01439 =>
+      'Quiet hours start (0–1439)';
+
+  @override
+  String get createFindPeopleAllowAcceptedParticipantsInvite =>
+      'Allow accepted participants to invite';
+
+  @override
+  String get createFindPeopleConversationPolicy => 'Conversation policy *';
+
+  @override
+  String get createFindPeopleInviteCoHost => 'Invite co-host';
+
+  @override
+  String get createFindPeopleUserId => 'User ID';
+
+  @override
+  String createFindPeopleResponsibleHostsDataResponsiblehostuseridsJoin(
+    int count,
+  ) {
+    return 'Responsible hosts: $count';
+  }
+
+  @override
+  String get createFindPeoplePublisherUserId => 'Publisher user ID *';
+
+  @override
+  String get createFindPeopleManagedPageId => 'Managed Page ID *';
+
+  @override
+  String get createFindPeoplePublishAs => 'Publish as *';
+
+  @override
+  String get createFindPeopleAddExpense => 'Add expense';
+
+  @override
+  String get createFindPeopleExpenseItem => 'Expense item';
+
+  @override
+  String get createFindPeopleExpenseSplitMode => 'Expense split mode *';
+
+  @override
+  String get createFindPeopleCostNote => 'Cost note';
+
+  @override
+  String createFindPeopleExpectedSpendPerPerson(String value) {
+    return 'Expected spend per person ($value) *';
+  }
+
+  @override
+  String get createFindPeopleExpectedCost => 'Expected cost *';
+
+  @override
+  String get createFindPeopleAddQuestion => 'Add question';
+
+  @override
+  String get createFindPeopleSafeQuestion => 'Safe question';
+
+  @override
+  String get createFindPeopleApplicationQuestions => 'Application questions';
+
+  @override
+  String get createFindPeopleRequireAttendanceReconfirmation =>
+      'Require attendance reconfirmation';
+
+  @override
+  String get createFindPeopleWaitlistPolicy => 'Waitlist policy';
+
+  @override
+  String get createFindPeopleEnableWaitlist => 'Enable waitlist';
+
+  @override
+  String get createFindPeopleVerificationRequirement =>
+      'Verification requirement *';
+
+  @override
+  String get createFindPeopleMaximumSeatsPerApplication =>
+      'Maximum seats per application';
+
+  @override
+  String get createFindPeopleAllowPartyApplications =>
+      'Allow party applications';
+
+  @override
+  String get createFindPeopleApprovalMode => 'Approval mode *';
+
+  @override
+  String get createFindPeopleHostSeats => 'Host seats';
+
+  @override
+  String get createFindPeopleTargetGroupSize => 'Target group size';
+
+  @override
+  String get createFindPeopleGroupSizeIncludesHostsExpectedSpend =>
+      'Group size includes hosts. Expected spend is information, never a payment to the host.';
+
+  @override
+  String get createFindPeopleGroupParticipation => 'Group and participation';
+
+  @override
+  String get createFindPeopleBackupMeetingPlan => 'Backup meeting plan';
+
+  @override
+  String get createFindPeoplePrivateAccessSecretReference =>
+      'Private access secret reference *';
+
+  @override
+  String get createFindPeopleGoogleMeetZoomDiscord =>
+      'Google Meet, Zoom, Discord…';
+
+  @override
+  String get createFindPeopleOnlineProvider => 'Online provider *';
+
+  @override
+  String get createFindPeoplePrivateHomesResidentialAccessDetailsAre =>
+      'Private homes and residential access details are not allowed.';
+
+  @override
+  String get createFindPeoplePublicMeetingPlace =>
+      'This is a public meeting place *';
+
+  @override
+  String get createFindPeopleMeetingInstructionsPrivate =>
+      'Meeting instructions (private)';
+
+  @override
+  String get createFindPeopleExactAddressPrivate => 'Exact address (private) *';
+
+  @override
+  String createFindPeoplePublicMapPoint(String value) {
+    return 'Public map point: $value';
+  }
+
+  @override
+  String get createFindPeopleSetExactPointGenerateSafePublic =>
+      'Set exact point and generate safe public point';
+
+  @override
+  String get createFindPeopleExactLongitude => 'Exact longitude *';
+
+  @override
+  String get createFindPeopleExactLatitude => 'Exact latitude *';
+
+  @override
+  String get createFindPeopleOldTownNearCentralPark =>
+      'Old Town, near Central Park';
+
+  @override
+  String get createFindPeoplePublicAreaLabel => 'Public area label *';
+
+  @override
+  String get createFindPeopleMeetingPlaceName => 'Meeting place name *';
+
+  @override
+  String get createFindPeopleMeetingMode => 'Meeting mode *';
+
+  @override
+  String get createFindPeopleOnlyApproximatePublicAreaAppearsDiscover =>
+      'Only the approximate public area appears in Discover. Exact details stay private.';
+
+  @override
+  String get createFindPeopleMeetingLocation => 'Meeting location';
+
+  @override
+  String get createFindPeopleMaximumOccurrences252 =>
+      'Maximum occurrences (2–52)';
+
+  @override
+  String get createFindPeopleSeriesEndUtc => 'Series end UTC';
+
+  @override
+  String get createFindPeopleRecurrenceRule => 'Recurrence rule *';
+
+  @override
+  String get createFindPeopleApplicationDeadlineUtc =>
+      'Application deadline UTC *';
+
+  @override
+  String get createFindPeoplePollResponseDeadlineUtc =>
+      'Poll response deadline UTC *';
+
+  @override
+  String get createFindPeopleRemoveSlot => 'Remove slot';
+
+  @override
+  String get createFindPeopleAddTimeOption => 'Add time option';
+
+  @override
+  String get createFindPeopleSetMeetingTime => 'Set meeting time';
+
+  @override
+  String get createFindPeopleEndUtc => 'End UTC *';
+
+  @override
+  String get createFindPeopleStartUtc => 'Start UTC *';
+
+  @override
+  String get createFindPeopleScheduleMode => 'Schedule mode *';
+
+  @override
+  String createFindPeopleAllTimesAreStoredUtcDisplayed(String value) {
+    return 'All times are stored in UTC and displayed using $value.';
+  }
+
+  @override
+  String get createFindPeopleSchedule => 'Schedule';
+
+  @override
+  String get createFindPeopleHouseRulesNote => 'House rules note';
+
+  @override
+  String get createFindPeopleHouseRules => 'House rules';
+
+  @override
+  String get createFindPeopleAccessibilityNotes => 'Accessibility notes';
+
+  @override
+  String get createFindPeopleEquipmentNotes => 'Equipment notes';
+
+  @override
+  String get createFindPeopleExperienceRequirementsOnePerLine =>
+      'Experience requirements (one per line)';
+
+  @override
+  String get createFindPeopleCommunicationLanguages =>
+      'Communication languages *';
+
+  @override
+  String get createFindPeopleParticipationGoal => 'Participation goal *';
+
+  @override
+  String get createFindPeopleSkillLevel => 'Skill level *';
+
+  @override
+  String get createFindPeopleFullDescription => 'Full description *';
+
+  @override
+  String get createFindPeopleShortDescription => 'Short description *';
+
+  @override
+  String get createFindPeoplePublicContentMustDescribeConcreteActivity =>
+      'Public content must describe a concrete activity without contacts or payment links.';
+
+  @override
+  String get createFindPeopleActivityDescription => 'Activity and description';
+
+  @override
+  String get createFindPeopleFindPeopleDraftDataBeingPrepared =>
+      'Find People draft data is being prepared…';
+
+  @override
+  String get createSessionOnlyWhatMarkedRequiredBlocksPublishing =>
+      'Only what is marked “required” blocks publishing. Everything else is optional and can be added now or later.';
+
+  @override
+  String get createSessionPublish => 'Publish';
+
+  @override
+  String get createSessionSaveDraft => 'Save draft';
+
+  @override
+  String get createSessionNeverRequiredPublishSesD14 =>
+      'Never required to publish.';
+
+  @override
+  String get createSessionRecommendedDetailsCategory =>
+      'Recommended details for this category';
+
+  @override
+  String get createSessionAmenities => 'Amenities';
+
+  @override
+  String get createSessionBlock => 'Block';
+
+  @override
+  String get createSessionBlockedDates => 'Blocked dates';
+
+  @override
+  String get createSessionMaxPartySize => 'Max party size';
+
+  @override
+  String get createSessionTermsUrlOptionalHttps =>
+      'Terms URL (optional, https://…)';
+
+  @override
+  String get createSessionExternalBookingUrlHttps =>
+      'External booking URL (https://…)';
+
+  @override
+  String get createSessionPricePerSlotEur => 'Price per slot, EUR';
+
+  @override
+  String get createSessionFree => 'Free';
+
+  @override
+  String get createSessionPriceBooking => 'Price and booking';
+
+  @override
+  String get createSessionNextOffers => 'Next offers';
+
+  @override
+  String get createSessionSlotDuration => 'Slot duration';
+
+  @override
+  String get createSessionNoWeeklyRuleYetPickPreset =>
+      'No weekly rule yet — pick a preset above.';
+
+  @override
+  String get createSessionWhen => 'When';
+
+  @override
+  String get createSessionConfirmLocation => 'Confirm this location';
+
+  @override
+  String get createSessionLongitude => 'Longitude';
+
+  @override
+  String get createSessionLatitude => 'Latitude';
+
+  @override
+  String get createSessionCity => 'City';
+
+  @override
+  String get createSessionAddress => 'Address';
+
+  @override
+  String get createSessionResourceNameEGSauna1 =>
+      'Resource name (e.g. “Sauna 1”)';
+
+  @override
+  String get createSessionGalleryImageDescription =>
+      'Gallery image description';
+
+  @override
+  String get createSessionCoverImageDescription => 'Cover image description';
+
+  @override
+  String get createSessionContentLanguage => 'Content language';
+
+  @override
+  String get createSessionCoverImageUrl => 'Cover image URL';
+
+  @override
+  String get createSessionFullDescription => 'Full description';
+
+  @override
+  String get createSessionShortDescription => 'Short description';
+
+  @override
+  String get createSessionSubcategory => 'Subcategory';
+
+  @override
+  String get createSessionCategory => 'Category';
+
+  @override
+  String get createSessionTitle => 'Title';
+
+  @override
+  String get createSessionWhatWhere => 'What and where';
+
+  @override
+  String get createSessionLoadingBookableSessionDraft =>
+      'Loading Bookable session draft…';
+
+  @override
+  String get createClassPublish => 'Publish';
+
+  @override
+  String get createClassSaveDraft => 'Save draft';
+
+  @override
+  String get createClassEnrollmentState => 'Enrollment state';
+
+  @override
+  String get createClassEnrollmentLinkHttps => 'Enrollment link (https)';
+
+  @override
+  String get createClassEnrollmentOrganiserSite =>
+      'Enrollment on the organiser site';
+
+  @override
+  String get createClassPriceCovers => 'The price covers';
+
+  @override
+  String createClassAmountCents(String value) {
+    return 'Amount in cents ($value)';
+  }
+
+  @override
+  String get createClassPrice => 'Price';
+
+  @override
+  String get createClassDeclaredGroupSizeOptional =>
+      'Declared group size (optional)';
+
+  @override
+  String get createClassWhatBringKnowOnePerLine =>
+      'What to bring or know (one per line)';
+
+  @override
+  String get createClassIncludedMaterialsOnePerLine =>
+      'Included materials (one per line)';
+
+  @override
+  String get createClassAddDate => 'Add date';
+
+  @override
+  String get createClassRemoveDate => 'Remove date';
+
+  @override
+  String get createClassLocalTimeDoesNotExistAmbiguous =>
+      'This local time does not exist or is ambiguous';
+
+  @override
+  String get createClassPublicArea => 'Public area';
+
+  @override
+  String get createClassShowOnlyAreaPublicly => 'Show only the area publicly';
+
+  @override
+  String get createClassConfirmLocation => 'Confirm this location';
+
+  @override
+  String get createClassLocationConfirmed => 'Location confirmed';
+
+  @override
+  String get createClassOnlineProvider => 'Online provider';
+
+  @override
+  String get createClassDelivery => 'Delivery';
+
+  @override
+  String createClassTimesAre(String value) {
+    return 'Times are in $value';
+  }
+
+  @override
+  String get createClassFixedSeries => 'Fixed series';
+
+  @override
+  String get createClassSingleClass => 'Single class';
+
+  @override
+  String get createClassClear => 'Clear';
+
+  @override
+  String get createClassNotPublishedClearExplicitly =>
+      'It is not published; clear it explicitly.';
+
+  @override
+  String get createClassDraftHasOldSchedule => 'This draft has an old schedule';
+
+  @override
+  String get createClassInstructorBio => 'Instructor bio';
+
+  @override
+  String get createClassInstructorName => 'Instructor name';
+
+  @override
+  String get createClassWhatParticipantsTakeHome =>
+      'What participants take home';
+
+  @override
+  String get createClassNoPrerequisites => 'No prerequisites';
+
+  @override
+  String get createClassProgrammeStepsOnePerLine =>
+      'Programme steps (one per line)';
+
+  @override
+  String get createClassGalleryImageDescription => 'Gallery image description';
+
+  @override
+  String get createClassCoverImageDescription => 'Cover image description';
+
+  @override
+  String get createClassContentLanguage => 'Content language';
+
+  @override
+  String get createClassCoverImage => 'Cover image';
+
+  @override
+  String get createClassFullDescription => 'Full description';
+
+  @override
+  String get createClassShortDescription => 'Short description';
+
+  @override
+  String get createClassOfferingKind => 'Offering kind';
+
+  @override
+  String get createClassClassDraftWasSavedByNewer =>
+      'This Class draft was saved by a newer app version and is read-only.';
+
+  @override
+  String get createRouteGpxOperationCouldNotCompleted =>
+      'The GPX operation could not be completed.';
+
+  @override
+  String get createRouteChooseOneContinuousTrackRouteDraft =>
+      'Choose one continuous track for this Route draft.';
+
+  @override
+  String get createRouteSavingGpxFilesNotAvailableDevice =>
+      'Saving GPX files is not available on this device yet.';
+
+  @override
+  String get createRouteOnlyOneContinuousRouteTrackCan =>
+      'Only one continuous Route track can be exported.';
+
+  @override
+  String get createRouteGpxTrackContainsTooManyPoints =>
+      'The GPX track contains too many points.';
+
+  @override
+  String get createRouteGpxFileDamagedHasUnsupportedStructure =>
+      'The GPX file is damaged or has an unsupported structure.';
+
+  @override
+  String get createRouteChooseValidGpxFile => 'Choose a valid GPX file.';
+
+  @override
+  String get createRouteGpxFileTooLarge => 'The GPX file is too large.';
+
+  @override
+  String get createRouteDismiss => 'Dismiss';
+
+  @override
+  String get createRouteImportTrack => 'Import track';
+
+  @override
+  String get createRouteCancel => 'Cancel';
+
+  @override
+  String get createRouteTheyRemainOffTrackUntilReviewed =>
+      'They remain off-track until reviewed and positioned.';
+
+  @override
+  String get createRouteReviewTheseConnectorsMapBeforePublishing =>
+      'Review these connectors on the map before publishing.';
+
+  @override
+  String get createRouteChooseOneTrack => 'Choose one track';
+
+  @override
+  String get createRoutePrivateMetadataTimestampsWillRemovedDuring =>
+      'Private metadata and timestamps will be removed during import.';
+
+  @override
+  String get createRouteRouteBuilder => 'Route builder';
+
+  @override
+  String get createRouteReplace => 'Replace';
+
+  @override
+  String get createRouteCurrentGeometryWillRemainAvailableThrough =>
+      'The current geometry will remain available through Undo.';
+
+  @override
+  String get createRouteReplaceExistingTrack => 'Replace existing track?';
+
+  @override
+  String get createRouteContinue => 'Continue';
+
+  @override
+  String get createRouteBack => 'Back';
+
+  @override
+  String get createRouteMarkedTrail => 'Marked trail';
+
+  @override
+  String get createRouteHard => 'Hard';
+
+  @override
+  String get createRouteModerate => 'Moderate';
+
+  @override
+  String get createRouteEasy => 'Easy';
+
+  @override
+  String get createRouteDifficulty => 'Difficulty';
+
+  @override
+  String get createRouteConditions => 'Conditions';
+
+  @override
+  String get createRouteSubcategory => 'Subcategory';
+
+  @override
+  String get createRouteCategory => 'Category';
+
+  @override
+  String get createRouteTaxonomy => 'Category';
+
+  @override
+  String get createRouteCoverImageUrl => 'Cover image URL';
+
+  @override
+  String get createRouteFullDescription => 'Full description';
+
+  @override
+  String get createRouteShortDescription => 'Short description *';
+
+  @override
+  String get createRouteRouteDetails => 'Route details';
+
+  @override
+  String get createRoutePreferUnpavedTrails => 'Prefer unpaved trails';
+
+  @override
+  String get createRouteAvoidStairs => 'Avoid stairs';
+
+  @override
+  String get createRouteRoutingPreferences => 'Routing preferences';
+
+  @override
+  String get createRouteLoop => 'Loop';
+
+  @override
+  String get createRouteOneWay => 'One way';
+
+  @override
+  String get createRouteRouteShape => 'Route shape';
+
+  @override
+  String get createRouteProfile => 'Profile';
+
+  @override
+  String get createRouteBundledMeAparksGraphCurrentlyValidates =>
+      'The bundled Mežaparks graph currently validates walking routes locally.';
+
+  @override
+  String get createRouteMovementProfile => 'Movement profile';
+
+  @override
+  String get createRouteSaveFile => 'Save file';
+
+  @override
+  String get createRoutePrivateMetadataNotesTimestampsAreNever =>
+      'Private metadata, notes and timestamps are never exported.';
+
+  @override
+  String get createRouteIncludeRoutePoi => 'Include route POI';
+
+  @override
+  String get createRouteUnavailableTrack => 'Unavailable for this track';
+
+  @override
+  String get createRouteIncludeElevation => 'Include elevation';
+
+  @override
+  String get createRouteExportGpx => 'Export GPX';
+
+  @override
+  String get createRouteExportOnlyTrackOptionalRoutePoi =>
+      'Export only the track and optional route POI. Draft IDs, notes, safety data and timestamps are excluded.';
+
+  @override
+  String get createRouteInspectGpxFileLocallyChooseOne =>
+      'Inspect a GPX file locally, choose one track and remove private metadata.';
+
+  @override
+  String get createRouteImportGpx => 'Import GPX';
+
+  @override
+  String get createRouteRecordMovementDeviceThenReviewAccuracy =>
+      'Record movement on this device, then review accuracy, gaps and privacy trimming.';
+
+  @override
+  String get createRouteRecordWithGps => 'Record with GPS';
+
+  @override
+  String get createRouteDrawOneContinuousLineKeepIts =>
+      'Draw one continuous line and keep its exact geometry.';
+
+  @override
+  String get createRouteFreehand => 'Freehand';
+
+  @override
+  String get createRoutePlaceAnchorsConnectThemAlongOffline =>
+      'Place anchors and connect them along the offline trail graph.';
+
+  @override
+  String get createRoutePoints => 'Points';
+
+  @override
+  String get createRouteAllMethodsUseOneCanonicalRoute =>
+      'All methods use one canonical Route model. This demo enables points and freehand without paid services.';
+
+  @override
+  String get createRouteHowWillYouCreateTrack =>
+      'How will you create the track?';
+
+  @override
+  String get createRouteEditorWillReadyMoment =>
+      'The editor will be ready in a moment.';
+
+  @override
+  String get createRoutePreparingRouteDraft => 'Preparing Route draft…';
+
+  @override
+  String get createRouteRestoringLatestPersistedRevision =>
+      'Restoring the latest saved revision.';
+
+  @override
+  String get createRouteRetry => 'Retry';
+
+  @override
+  String get createRouteOfflineMapCouldNotLoaded =>
+      'Offline map could not be loaded';
+
+  @override
+  String get createRouteNoNetworkPaidRoutingCallRequired =>
+      'No network or paid routing call is required.';
+
+  @override
+  String get createRouteLoadingOfflineTrailEditor =>
+      'Loading offline trail editor…';
+
+  @override
+  String get createRouteGapNeedsTrailRoutingBeforeCan =>
+      'This gap needs trail routing before it can be applied.';
+
+  @override
+  String get createRouteReviewEveryTrackGapBeforeContinuing =>
+      'Review every track gap before continuing.';
+
+  @override
+  String get createRouteProtectedRecordingCouldNotSavedRecording =>
+      'The protected recording could not be saved. Recording was stopped safely.';
+
+  @override
+  String get createRouteNotEnoughReliableMovementWasRecorded =>
+      'Not enough reliable movement was recorded. Delete this recording and try again.';
+
+  @override
+  String get createRouteSafetyPointLimitWasReachedFinish =>
+      'The safety point limit was reached. Finish and review this recording.';
+
+  @override
+  String get createRouteDeviceLocationServicesAreSwitchedOff =>
+      'Device location services are switched off.';
+
+  @override
+  String get createRouteBackgroundAccessWasNotGrantedTurn =>
+      'Background access was not granted. Turn off screen-lock recording or allow it in settings.';
+
+  @override
+  String get createRouteLocationAccessDisabledAppSettings =>
+      'Location access is disabled in app settings.';
+
+  @override
+  String get createRouteLocationPermissionWasNotGranted =>
+      'Location permission was not granted.';
+
+  @override
+  String get createRouteYourSavedRecordingPreservedWhenRecovery =>
+      'Your saved recording is preserved when recovery is possible.';
+
+  @override
+  String get createRouteInspectGapsAccuracyPrivacyTrimmingBefore =>
+      'Inspect gaps, accuracy and privacy trimming before using the track.';
+
+  @override
+  String get createRouteFilteringUnsafeNoisyGpsPoints =>
+      'Filtering unsafe and noisy GPS points.';
+
+  @override
+  String get createRouteReadingProtectedLocalJournal =>
+      'Reading the protected local journal.';
+
+  @override
+  String get createRoutePauseStaysAsExplicitGapWill =>
+      'The pause stays as an explicit gap and will never be connected silently.';
+
+  @override
+  String get createRouteKeepRechargeOpenWhileMovingAlong =>
+      'Keep Recharge open while moving along the Route.';
+
+  @override
+  String get createRouteRecordingContinuesWithVisibleSystemIndicator =>
+      'Recording continues with a visible system indicator.';
+
+  @override
+  String get createRouteRechargeRequestsLocationOnlyRouteRecording =>
+      'Recharge requests location only for Route recording.';
+
+  @override
+  String get createRouteWalkRunRideRoutePointsStay =>
+      'Walk, run or ride the Route. Points stay encrypted on this device until you apply the track.';
+
+  @override
+  String get createRouteRecordingReady => 'Recording ready';
+
+  @override
+  String get createRouteProcessingTrack => 'Processing track…';
+
+  @override
+  String get createRouteRecoveringRecording => 'Recovering recording…';
+
+  @override
+  String get createRouteRecordingPaused => 'Recording paused';
+
+  @override
+  String get createRouteRecordingRoute => 'Recording Route';
+
+  @override
+  String get createRouteCheckingGpsAccess => 'Checking GPS access…';
+
+  @override
+  String get createRouteOpenAppSettings => 'Open app settings';
+
+  @override
+  String get createRouteRecordingActive => 'Recording is active';
+
+  @override
+  String get createRouteConnectDirectly => 'Connect directly';
+
+  @override
+  String createRouteRecordedRoutePreviewTrackSectionsGaps(
+    int count,
+    int total,
+  ) {
+    return 'Recorded Route preview: track sections $count, gaps $total';
+  }
+
+  @override
+  String get createRouteDelete => 'Delete';
+
+  @override
+  String get createRouteRecoveryJournalAllRecordedPointsWill =>
+      'The recovery journal and all recorded points will be removed.';
+
+  @override
+  String get createRouteDeleteGpsRecording => 'Delete GPS recording?';
+
+  @override
+  String get createRouteUseTrack => 'Use this track';
+
+  @override
+  String get createRouteRouteMustStayContinuousConfirmEach =>
+      'A Route must stay continuous. Confirm each straight connection or record the missing section again.';
+
+  @override
+  String get createRouteTrackGaps => 'Track gaps';
+
+  @override
+  String get createRouteHideRouteEnd => 'Hide route end';
+
+  @override
+  String get createRouteHideRouteStart => 'Hide route start';
+
+  @override
+  String get createRoutePrivacyTrim => 'Privacy trim';
+
+  @override
+  String get createRouteReviewRecordedTrack => 'Review recorded track';
+
+  @override
+  String get createRouteDeleteRecording => 'Delete recording';
+
+  @override
+  String get createRouteFinishReview => 'Finish and review';
+
+  @override
+  String get createRouteResumeRecording => 'Resume recording';
+
+  @override
+  String get createRouteFinish => 'Finish';
+
+  @override
+  String get createRoutePause => 'Pause';
+
+  @override
+  String get createRouteStartRecording => 'Start recording';
+
+  @override
+  String get createRouteRequiresBackgroundLocationPermissionShowsSystem =>
+      'Requires background location permission and shows a system indicator.';
+
+  @override
+  String get createRouteContinueWhileScreenLocked =>
+      'Continue while the screen is locked';
+
+  @override
+  String get createRouteRecoveredSafelyAfterPreviousSessionReview =>
+      'Recovered safely after the previous session. Review before resuming.';
+
+  @override
+  String get createRouteRemoveWaypoint => 'Remove waypoint';
+
+  @override
+  String get createRouteAttachAnchor => 'Attach to anchor';
+
+  @override
+  String get createRouteAddViewpointFromAnchorMenu =>
+      'Add a viewpoint from an anchor menu.';
+
+  @override
+  String get createRouteSplitAtMidpoint => 'Split at midpoint';
+
+  @override
+  String get createRouteUseIntentionalDirectLine =>
+      'Use intentional direct line';
+
+  @override
+  String get createRouteRetryRouting => 'Retry routing';
+
+  @override
+  String get createRouteSegmentActions => 'Segment actions';
+
+  @override
+  String get createRouteRemoveAnchor => 'Remove anchor';
+
+  @override
+  String get createRouteAddViewpoint => 'Add viewpoint';
+
+  @override
+  String get createRouteAnchorActions => 'Anchor actions';
+
+  @override
+  String get createRouteMoveAnchorEast => 'Move anchor east';
+
+  @override
+  String get createRouteMoveAnchorWest => 'Move anchor west';
+
+  @override
+  String get createRouteMoveAnchorSouth => 'Move anchor south';
+
+  @override
+  String get createRouteMoveAnchorNorth => 'Move anchor north';
+
+  @override
+  String get createRouteNoAnchorsYet => 'No anchors yet.';
+
+  @override
+  String get createRouteEveryActionAvailableAsLabelledControl =>
+      'Every action is available as a labelled control.';
+
+  @override
+  String get createRouteAddAnchor => 'Add anchor';
+
+  @override
+  String get createRouteLongitude => 'Longitude';
+
+  @override
+  String get createRouteLatitude => 'Latitude';
+
+  @override
+  String get createRouteCoordinatesProvideKeyboardScreenReaderAlternative =>
+      'Coordinates provide a keyboard and screen-reader alternative.';
+
+  @override
+  String get createRouteAddAnchorWithoutMapGestures =>
+      'Add anchor without map gestures';
+
+  @override
+  String get createRouteLastSaved => 'Last saved';
+
+  @override
+  String get createRouteRedo => 'Redo';
+
+  @override
+  String get createRouteUndo => 'Undo';
+
+  @override
+  String get createRouteTapMapAddAnchorsLocalGraph =>
+      'Tap the map to add anchors. The local graph connects them along available trails.';
+
+  @override
+  String get createRouteDrawOneContinuousLineExistingGeometry =>
+      'Draw one continuous line. Existing geometry is replaced only after confirmation.';
+
+  @override
+  String get createRouteOfflineTrailEditor => 'Offline trail editor';
+
+  @override
+  String get createRouteSelectedDifficultyDiffersFromCalculatedRecommendation =>
+      'The selected difficulty differs from the calculated recommendation and requires review.';
+
+  @override
+  String get createRouteRouteQuality => 'Route quality';
+
+  @override
+  String get createRouteYourProfileDoesNotHavePermission =>
+      'Your profile does not have permission to submit this Route.';
+
+  @override
+  String get createRouteSubmitRouteReview => 'Submit Route for review';
+
+  @override
+  String get createRoutePublishRoute => 'Publish Route';
+
+  @override
+  String get createRouteRestoreLastSavedRevision =>
+      'Restore last saved revision';
+
+  @override
+  String get createRouteSaveDraft => 'Save draft';
+
+  @override
+  String get createRouteRoutingProgress => 'Routing in progress…';
+
+  @override
+  String get createRouteInvestorDemoVersionUsesBundledOffline =>
+      'Demo: this version uses the bundled offline trail graph and is marked demo-only. No paid routing call is made.';
+
+  @override
+  String get createRouteRouteDraftStructurallyReady =>
+      'Route draft is structurally ready';
+
+  @override
+  String get createRouteOfflineTrailMapTapAddRoute =>
+      'Offline trail map. Tap to add a route anchor.';
+
+  @override
+  String get createRouteOfflineTrailMapDrawContinuousRoute =>
+      'Offline trail map. Draw a continuous route with one finger.';
+
+  @override
+  String get createRouteNoRouteVersionsAreWaitingReview =>
+      'No Route versions are waiting for review.';
+
+  @override
+  String get createRouteModerateRouteCapabilityRequired =>
+      'You need permission to moderate routes.';
+
+  @override
+  String get createRouteReject => 'Reject';
+
+  @override
+  String get createRouteReasonCodeConciseReason =>
+      'Reason code or concise reason';
+
+  @override
+  String get createRouteRejectRouteVersion => 'Reject Route version';
+
+  @override
+  String get createRouteApprove => 'Approve';
+
+  @override
+  String get createRouteAccept => 'Accept';
+
+  @override
+  String get createRouteDefer => 'Defer';
+
+  @override
+  String get createRouteConfirm => 'Confirm';
+
+  @override
+  String get createRouteReasonCode => 'Reason code';
+
+  @override
+  String get createRouteSafetyDecisionReason => 'Safety decision reason';
+
+  @override
+  String get createRouteCandidateDecisionReason => 'Candidate decision reason';
+
+  @override
+  String get createRouteNewRouteRevisionDraftWasCreated =>
+      'A new Route revision draft was created. Published geometry was not changed.';
+
+  @override
+  String get createRouteSafetyReports => 'Safety reports';
+
+  @override
+  String get createRouteMapUpdateCandidates => 'Map update candidates';
+
+  @override
+  String get createRoutePublicationReview => 'Publication review';
+
+  @override
+  String get createRouteRefresh => 'Refresh';
+
+  @override
+  String get createRouteRouteModeration => 'Route moderation';
+
+  @override
+  String get createScenarioPlannedScheduleNotLive =>
+      'Planned schedule, not live.';
+
+  @override
+  String get createScenarioPlannedServiceSelectedPreviewNotApplied =>
+      'Planned service selected for preview. Not applied to Scenario.';
+
+  @override
+  String get createScenarioNoDirectPlannedServicesFound =>
+      'No direct planned services found.';
+
+  @override
+  String get createScenarioSearchingDirectPlannedServices =>
+      'Searching direct planned services.';
+
+  @override
+  String get createScenarioScheduleSearchFailedTryAgain =>
+      'Schedule search failed. Try again.';
+
+  @override
+  String get createScenarioStopSearchFailedTryAgain =>
+      'Stop search failed. Try again.';
+
+  @override
+  String get createScenarioCompleteProviderStopsDateTimeSelection =>
+      'Complete the provider, stops, date and time selection.';
+
+  @override
+  String get createScenarioNewScheduleCouldNotSavedExisting =>
+      'The new schedule could not be saved. Existing cache was kept.';
+
+  @override
+  String get createScenarioCachedScheduleCouldNotRead2 =>
+      'The cached schedule could not be read.';
+
+  @override
+  String get createScenarioDownloadedScheduleInvalidWasNotSaved =>
+      'The downloaded schedule is invalid and was not saved.';
+
+  @override
+  String get createScenarioScheduleCouldNotDownloaded =>
+      'The schedule could not be downloaded.';
+
+  @override
+  String get createScenarioYouAppearOfflineCachedDataRemains =>
+      'You appear to be offline. Cached data remains available.';
+
+  @override
+  String get createScenarioScheduleDownloadsAreDisabledCachedData =>
+      'Schedule downloads are disabled. Cached data remains available.';
+
+  @override
+  String get createScenarioDownloadSelectUsableCachedScheduleFirst =>
+      'Download or select a usable cached schedule first.';
+
+  @override
+  String get createScenarioChooseValidScheduleProvider =>
+      'Choose a valid schedule provider.';
+
+  @override
+  String get createScenarioNoOfficialScheduleProvidersAreConfigured =>
+      'No official schedule providers are configured.';
+
+  @override
+  String get createScenarioOfficialScheduleTemporarilyUnavailable =>
+      'Official schedule is temporarily unavailable.';
+
+  @override
+  String get createScenarioCachedScheduleCouldNotRead =>
+      'Cached schedule could not be read.';
+
+  @override
+  String get createScenarioCachedScheduleDamagedCannotUsed =>
+      'Cached schedule is damaged and cannot be used.';
+
+  @override
+  String get createScenarioNoScheduleDownloadedProvider =>
+      'No schedule is downloaded for this provider.';
+
+  @override
+  String get createScenarioCachedScheduleFreshnessUnknownRecheckBefore =>
+      'Cached schedule freshness is unknown. Recheck before travel.';
+
+  @override
+  String get createScenarioCheckingCachedSchedule =>
+      'Checking cached schedule…';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveSelectionNot =>
+      'Planned schedule · not live. This selection is not yet applied to the Scenario.';
+
+  @override
+  String get createScenarioSelectionPreview => 'Selection preview';
+
+  @override
+  String get createScenarioScheduleSearchFailed => 'Schedule search failed.';
+
+  @override
+  String get createScenarioNoDirectServicesFoundAfterSelected =>
+      'No direct services found after the selected time.';
+
+  @override
+  String get createScenarioChooseDate => 'Choose date';
+
+  @override
+  String get createScenarioScenarioDateMissing => 'Scenario date is missing';
+
+  @override
+  String get createScenarioRetry => 'Retry';
+
+  @override
+  String get createScenarioUseCached => 'Use cached';
+
+  @override
+  String get createScenarioUpdateSchedule => 'Update schedule';
+
+  @override
+  String get createScenarioDownloadSchedule => 'Download schedule';
+
+  @override
+  String get createScenarioScheduleProvider => 'Schedule provider';
+
+  @override
+  String get createScenarioOfficialScheduleProvidersAreUnavailable =>
+      'Official schedule providers are unavailable.';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveDelaysTickets =>
+      'Planned schedule · not live. Delays, tickets, fares, seats and transfers are not confirmed. Recheck before travel.';
+
+  @override
+  String get createScenarioEnterScheduleManually => 'Enter schedule manually';
+
+  @override
+  String get createScenarioApplyCreatesOneUndoableScenarioChange =>
+      'Apply creates one undoable Scenario change.';
+
+  @override
+  String get createScenarioServiceHasNoValidStopCoordinates =>
+      'This service has no valid stop coordinates and cannot be applied safely.';
+
+  @override
+  String get createScenarioApplyScenario => 'Apply to Scenario';
+
+  @override
+  String get createScenarioChooseDateCheckOfficialSchedule =>
+      'Choose a date to check the official schedule.';
+
+  @override
+  String get createScenarioFindDirectServices => 'Find direct services';
+
+  @override
+  String get createScenarioDownloadScheduleBeforeSearchingStops =>
+      'Download a schedule before searching for stops.';
+
+  @override
+  String get createScenarioDestination => 'Destination';
+
+  @override
+  String get createScenarioOrigin => 'Origin';
+
+  @override
+  String get createScenarioCloseOfficialSchedule => 'Close official schedule';
+
+  @override
+  String get createScenarioOfficialSchedule => 'Official schedule';
+
+  @override
+  String get createScenarioStaticTimetableSnapshotNotLive =>
+      'Static timetable snapshot · not live.';
+
+  @override
+  String get createScenarioFindOfficialSchedule => 'Find in official schedule';
+
+  @override
+  String get createScenarioWorksOfflineStaysEditable =>
+      'Works offline and stays editable.';
+
+  @override
+  String get createScenarioEnterManually => 'Enter manually';
+
+  @override
+  String get createScenarioAddPlannedTransport => 'Add planned transport';
+
+  @override
+  String get createScenarioPublicTransport => 'Public transport';
+
+  @override
+  String get createScenarioOwnCar => 'Own car';
+
+  @override
+  String get createScenarioProviderValue => 'Provider value';
+
+  @override
+  String get createScenarioEstimatedTime => 'Estimated time';
+
+  @override
+  String get createScenarioEnteredManually => 'Entered manually';
+
+  @override
+  String get createScenarioPlannedScheduleNotLive2 =>
+      'Planned schedule · not live';
+
+  @override
+  String get createScenarioCustomLocation => 'Custom location';
+
+  @override
+  String get createScenarioPlannedTransport => 'Planned transport';
+
+  @override
+  String get createScenarioAddAtLeastTwoIndependentStops =>
+      'Add at least two independent stops. Use catalog objects or custom time blocks.';
+
+  @override
+  String get createScenarioLocationDataRequiredManualLeg =>
+      'Location data required for a manual leg';
+
+  @override
+  String get createScenarioScenarioChangedRecheckBeforeReplacing =>
+      'Scenario changed. Recheck before replacing.';
+
+  @override
+  String get createScenarioSavedScheduleReplaced => 'Saved schedule replaced.';
+
+  @override
+  String get createScenarioRecheckSchedule => 'Recheck schedule';
+
+  @override
+  String get createScenarioScenarioChangedReviewServiceTryAgain =>
+      'Scenario changed. Review the service and try again.';
+
+  @override
+  String get createScenarioOfficialScheduleAddedScenario =>
+      'Official schedule added to Scenario.';
+
+  @override
+  String get createScenarioReview => 'Review';
+
+  @override
+  String get createScenarioUseYourPrimaryTransportEnterHonest =>
+      'Use your primary transport or enter honest manual values.';
+
+  @override
+  String get createScenarioTravelBetweenStops => 'Travel between stops';
+
+  @override
+  String get createScenarioTimeLock => 'Time lock';
+
+  @override
+  String get createScenarioOrderLock => 'Order lock';
+
+  @override
+  String get createScenarioOptional => 'Optional';
+
+  @override
+  String get createScenarioMandatory => 'Mandatory';
+
+  @override
+  String get createScenarioRemove => 'Remove';
+
+  @override
+  String get createScenarioMoveDown => 'Move down';
+
+  @override
+  String get createScenarioMoveUp => 'Move up';
+
+  @override
+  String get createScenarioAddCustomTimeBlock => 'Add custom time block';
+
+  @override
+  String get createScenarioBusTrainTimesAreStoredAs =>
+      'Bus and train times are stored as planned schedule · not live.';
+
+  @override
+  String get createScenarioAddCustomStop => 'Add custom stop';
+
+  @override
+  String get createScenarioAdd => 'Add';
+
+  @override
+  String get createScenarioFindCatalogPlaceEventActivityRoute =>
+      'Find a catalog place, event, activity or Route';
+
+  @override
+  String get createScenarioRedo => 'Redo';
+
+  @override
+  String get createScenarioUndo => 'Undo';
+
+  @override
+  String get createScenarioFeedRetrievedAt => 'Feed retrieved at';
+
+  @override
+  String get createScenarioFeedVersion => 'Feed version';
+
+  @override
+  String get createScenarioServiceLabel => 'Service label';
+
+  @override
+  String get createScenarioArrivalTime => 'Arrival time';
+
+  @override
+  String get createScenarioDepartureTime => 'Departure time';
+
+  @override
+  String get createScenarioDestinationStop => 'Destination stop';
+
+  @override
+  String get createScenarioOriginStop => 'Origin stop';
+
+  @override
+  String get createScenarioServiceCalendar => 'Service calendar';
+
+  @override
+  String get createScenarioSavedItemWasKeptUnchangedCannot =>
+      'The saved item was kept unchanged and cannot be rechecked automatically.';
+
+  @override
+  String get createScenarioSavedItemWasKeptUnchangedBecause =>
+      'The saved item was kept unchanged because cached schedule data is unavailable.';
+
+  @override
+  String get createScenarioSavedItemWasKeptUnchangedRecheck =>
+      'The saved item was kept unchanged. Recheck later or enter transport manually.';
+
+  @override
+  String get createScenarioReviewEveryDifferenceBeforeReplacingSaved =>
+      'Review every difference before replacing the saved snapshot.';
+
+  @override
+  String get createScenarioCachedOfficialScheduleMatchesSavedSnapshot =>
+      'The cached official schedule matches the saved snapshot. It is still not live.';
+
+  @override
+  String get createScenarioSavedDataIncomplete => 'Saved data is incomplete';
+
+  @override
+  String get createScenarioRecheckUnavailable => 'Recheck unavailable';
+
+  @override
+  String get createScenarioServiceNotFound => 'Service not found';
+
+  @override
+  String get createScenarioNoScheduleChangesFound =>
+      'No schedule changes found';
+
+  @override
+  String get createScenarioClose => 'Close';
+
+  @override
+  String get createScenarioReplaceSavedSchedule => 'Replace saved schedule';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveReplaceChanges =>
+      'Planned schedule · not live. Replace changes only the saved snapshot after explicit confirmation.';
+
+  @override
+  String get createScenarioChangesCachedOfficialSchedule =>
+      'Changes in the cached official schedule';
+
+  @override
+  String get createScenarioCloseScheduleRecheck => 'Close schedule recheck';
+
+  @override
+  String get createScenarioScheduleRecheck => 'Schedule recheck';
+
+  @override
+  String get createScenarioDiscard => 'Discard';
+
+  @override
+  String get createScenarioEditPrompt => 'Edit prompt';
+
+  @override
+  String get createScenarioStillUnverified => 'Still unverified';
+
+  @override
+  String get createScenarioPreviewReadinessNeedsYourReview =>
+      'Preview readiness: needs your review';
+
+  @override
+  String get createScenarioPreviewReadinessReadyReview =>
+      'Preview readiness: ready to review';
+
+  @override
+  String get createScenarioCatalogSnapshot => 'Catalog snapshot';
+
+  @override
+  String get createScenarioProposedStops => 'Proposed stops';
+
+  @override
+  String get createScenarioGeneratePreview => 'Generate preview';
+
+  @override
+  String get createScenarioBuildingPreview => 'Building preview…';
+
+  @override
+  String get createScenarioUseExample => 'Use an example';
+
+  @override
+  String get createScenarioRelaxedAfternoonRigaWithCultureDinner =>
+      'A relaxed afternoon in Riga with culture and dinner';
+
+  @override
+  String get createScenarioWhatWouldYouLikeDo => 'What would you like to do?';
+
+  @override
+  String get createScenarioDescribeMoodPrioritiesDemoUsesOnly =>
+      'Describe the mood and priorities. This demo uses only the local Recharge catalog; it does not call an external AI.';
+
+  @override
+  String get createScenarioLocalDemo => 'Local demo';
+
+  @override
+  String get createScenarioBuildWithAi => 'Build with AI';
+
+  @override
+  String get createScenarioSaveTravel => 'Save travel';
+
+  @override
+  String get createScenarioTravelMode => 'Travel mode';
+
+  @override
+  String get createScenarioManualValuesStayLockedUntilYou =>
+      'Manual values stay locked until you edit them.';
+
+  @override
+  String get createScenarioAddScenario => 'Add to Scenario';
+
+  @override
+  String get createScenarioServiceRoute => 'Service or route *';
+
+  @override
+  String get createScenarioTransport => 'Transport';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveRecheckService =>
+      'Planned schedule · not live. Recheck the service before travel.';
+
+  @override
+  String get createScenarioPrimaryTransport => 'Primary transport';
+
+  @override
+  String get createScenarioOwnCarFullySupportedPublicTransport =>
+      'Own car is fully supported. Public transport uses planned schedules, not live data.';
+
+  @override
+  String get createScenarioHowWillYouTravel => 'How will you travel?';
+
+  @override
+  String get createScenarioBudgetBasis => 'Budget basis';
+
+  @override
+  String get createScenarioPace => 'Pace';
+
+  @override
+  String get createScenarioPeople => 'People';
+
+  @override
+  String get createScenarioParty => 'Party';
+
+  @override
+  String get createScenarioDatedTrip => 'Dated trip';
+
+  @override
+  String get createScenarioFlexibleTemplate => 'Flexible template';
+
+  @override
+  String get createScenarioFormat => 'Format';
+
+  @override
+  String get createScenarioScenarioTitle => 'Scenario title *';
+
+  @override
+  String get createScenarioPublicUnlistedScenarioPublishingRemainsDisabled =>
+      'Public and unlisted Scenario publishing remains disabled until publisher capabilities and moderation are implemented.';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveRecheckDepartures =>
+      'Planned schedule · not live. Recheck departures, delays and cancellations before travel.';
+
+  @override
+  String get createScenarioActionSavesPersonalScenarioDoesNot =>
+      'This action saves a personal Scenario. It does not publish it to the catalog.';
+
+  @override
+  String get createScenarioReadyMyScenarios => 'Ready for My Scenarios';
+
+  @override
+  String get createScenarioWarnings => 'Warnings';
+
+  @override
+  String get createScenarioUnknownTravel => 'Unknown travel';
+
+  @override
+  String get createScenarioTimeBlocks => 'Time blocks';
+
+  @override
+  String get createScenarioActivity => 'Activity';
+
+  @override
+  String get createScenarioActiveStops => 'Active stops';
+
+  @override
+  String get createScenarioScenarioDataUnavailable =>
+      'Scenario data is unavailable.';
+
+  @override
+  String get createScenarioSaveMyScenarios => 'Save to My Scenarios';
+
+  @override
+  String get createScenarioBack => 'Back';
+
+  @override
+  String get createScenarioExpandedFromQuickPlanAsIndependent =>
+      'Expanded from a Quick Plan as an independent copy. Legacy stops are private custom locations until you review them.';
+
+  @override
+  String get createScenarioBuildCityDayWeekendTripPlan =>
+      'Build a city, day, weekend or trip plan from independent stops. A Scenario is not a Route and does not change a Quick Plan.';
+
+  @override
+  String get createScenarioScenarioPlan => 'Scenario plan';
+
+  @override
+  String get createScenarioTitle => 'Title';
+
+  @override
+  String get createScenarioUseCoordinatesAnyLocationLatviaStop =>
+      'Use coordinates for any location in Latvia. The stop stays private by default.';
+
+  @override
+  String get createScenarioAddTimeBlock => 'Add time block';
+
+  @override
+  String get createScenarioFeedSha256 => 'Feed SHA-256';
+
+  @override
+  String get createScenarioFeedRetrieved2 => 'Feed retrieved';
+
+  @override
+  String get createScenarioLicence => 'Licence';
+
+  @override
+  String get createScenarioStops => 'Stops';
+
+  @override
+  String get createScenarioPlannedTime => 'Planned time';
+
+  @override
+  String get createScenarioServiceDate => 'Service date';
+
+  @override
+  String get createScenarioProvider => 'Provider';
+
+  @override
+  String get createFindPeopleExactAddressLabel => 'Exact address';
+
+  @override
+  String get createFindPeopleExactGeoLabel => 'Exact point';
+
+  @override
+  String get createFindPeopleOnlineAccessLabel => 'Online access reference';
+
+  @override
+  String get createFindPeopleNotSet => 'Not set';
+
+  @override
+  String get createFindPeopleConfigured => 'Configured';
+
+  @override
+  String get createScenarioSelectionPreviewUnchanged =>
+      'Selection preview only. Scenario is unchanged.';
+
+  @override
+  String createScenarioActivityTime(String value) {
+    return 'Activity time: $value';
+  }
+
+  @override
+  String createScenarioDurationMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
+  String createScenarioDurationHours(int count) {
+    return '$count h';
+  }
+
+  @override
+  String createScenarioDurationHoursMinutes(int start, int end) {
+    return '$start h $end min';
+  }
+
+  @override
+  String createScenarioMinutesNotLive(int count) {
+    return '$count min · Planned schedule · not live';
+  }
+
+  @override
+  String createScenarioFeedRetrievedLine(String value) {
+    return 'Feed retrieved $value';
+  }
+
+  @override
+  String get createScenarioCacheCurrent => 'Cached schedule is current.';
+
+  @override
+  String createScenarioCacheCurrentAt(String value) {
+    return 'Cached schedule is current · $value.';
+  }
+
+  @override
+  String get createScenarioCacheStale =>
+      'Cached schedule is stale. You may use it with a warning or update it.';
+
+  @override
+  String createScenarioCacheStaleAt(String value) {
+    return 'Cached schedule is stale · $value. You may use it with a warning or update it.';
+  }
+
+  @override
+  String get createStepFindPeopleActivityTitle => 'Activity';
+
+  @override
+  String get createStepFindPeopleActivityDescription =>
+      'Describe what you want to do and who it suits.';
+
+  @override
+  String get createStepFindPeopleScheduleTitle => 'When';
+
+  @override
+  String get createStepFindPeopleScheduleDescription =>
+      'Choose one time, a poll, or a finite recurring series.';
+
+  @override
+  String get createStepFindPeopleMeetingTitle => 'Where';
+
+  @override
+  String get createStepFindPeopleMeetingDescription =>
+      'Keep the public area separate from private meeting details.';
+
+  @override
+  String get createStepFindPeopleGroupTitle => 'Group';
+
+  @override
+  String get createStepFindPeopleGroupDescription =>
+      'Set capacity, applications, verification, waitlist, and costs.';
+
+  @override
+  String get createStepFindPeopleHostsTitle => 'Hosts & access';
+
+  @override
+  String get createStepFindPeopleHostsDescription =>
+      'Configure publisher, visibility, communication, and sharing.';
+
+  @override
+  String get createStepFindPeoplePublishTitle => 'Preview & publish';
+
+  @override
+  String get createStepFindPeoplePublishDescription =>
+      'Review public/private data and complete safety confirmations.';
+
+  @override
+  String get createStepRouteMethodTitle => 'Method';
+
+  @override
+  String get createStepRouteMethodDescription =>
+      'Choose how the continuous track is created';
+
+  @override
+  String get createStepRouteProfileTitle => 'Profile';
+
+  @override
+  String get createStepRouteProfileDescription =>
+      'Set movement profile and routing preferences';
+
+  @override
+  String get createStepRouteEditorTitle => 'Track';
+
+  @override
+  String get createStepRouteEditorDescription =>
+      'Edit anchors and continuous route segments';
+
+  @override
+  String get createStepRouteDetailsTitle => 'Details';
+
+  @override
+  String get createStepRouteDetailsDescription =>
+      'Add route conditions and practical information';
+
+  @override
+  String get createStepRouteReviewTitle => 'Review';
+
+  @override
+  String get createStepRouteReviewDescription =>
+      'Review geometry, warnings and readiness';
+
+  @override
+  String get createStepSessionWhatWhereTitle => 'What and where';
+
+  @override
+  String get createStepSessionWhatWhereDescription =>
+      'Resource, category, media, location, timezone';
+
+  @override
+  String get createStepSessionWhenTitle => 'When';
+
+  @override
+  String get createStepSessionWhenDescription =>
+      'Weekly schedule, duration, buffer, notice';
+
+  @override
+  String get createStepSessionPriceAndBookingTitle => 'Price and booking';
+
+  @override
+  String get createStepSessionPriceAndBookingDescription =>
+      'Price, max party size, external booking URL';
+
+  @override
+  String get createStepClassWorkshopBasicsTitle => 'Offering';
+
+  @override
+  String get createStepClassWorkshopBasicsDescription =>
+      'Kind, title, descriptions, category, criteria and media';
+
+  @override
+  String get createStepClassWorkshopLearningTitle => 'Programme and instructor';
+
+  @override
+  String get createStepClassWorkshopLearningDescription =>
+      'Outcomes, programme, prerequisites and instructor';
+
+  @override
+  String get createStepClassWorkshopScheduleTitle => 'Dates and place';
+
+  @override
+  String get createStepClassWorkshopScheduleDescription =>
+      'Single class or fixed series, timezone, delivery, place';
+
+  @override
+  String get createStepClassWorkshopParticipationTitle => 'Participation';
+
+  @override
+  String get createStepClassWorkshopParticipationDescription =>
+      'Materials, requirements, group size, price, enrollment';
+
+  @override
+  String get createStepScenarioContextTitle => 'Context';
+
+  @override
+  String get createStepScenarioContextDescription =>
+      'Format, date mode, party, pace and budget';
+
+  @override
+  String get createStepScenarioComposerTitle => 'Plan';
+
+  @override
+  String get createStepScenarioComposerDescription =>
+      'Independent stops, time blocks and their order';
+
+  @override
+  String get createStepScenarioReviewTitle => 'Review';
+
+  @override
+  String get createStepScenarioReviewDescription =>
+      'Totals, warnings and personal save readiness';
+
+  @override
+  String get createSessionPresetEveryday => 'Every day 9:00–21:00';
+
+  @override
+  String get createSessionPresetWeekdays => 'Weekdays 9:00–18:00';
+
+  @override
+  String createFindPeopleHouseRule(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'be_on_time': 'Be on time',
+      'respect_boundaries': 'Respect boundaries',
+      'no_harassment': 'No harassment',
+      'no_sales': 'No sales',
+      'no_substances': 'No alcohol or drugs',
+      'bring_required_gear': 'Bring required gear',
+      'follow_venue_rules': 'Follow venue rules',
+      'leave_no_trace': 'Leave no trace',
+      'other': 'Rule',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createFindPeopleCohostRight(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'review_applications': 'Review applications',
+      'manage_schedule': 'Manage schedule',
+      'manage_participants': 'Manage participants',
+      'moderate_conversation': 'Moderate conversation',
+      'other': 'Right',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFindPeopleCohostAccepted => 'Accepted';
+
+  @override
+  String get createFindPeopleCohostPending => 'Invitation pending';
+
+  @override
+  String get createFindPeopleSeatFitPolicy => 'Seat-fit policy';
+
+  @override
+  String get createFindPeopleVisibilityRequired => 'Visibility *';
+
+  @override
+  String get createFormDateIso => 'Date (YYYY-MM-DD)';
+
+  @override
+  String get createClassFirstSummerTime => 'First (summer time)';
+
+  @override
+  String get createRouteOutAndBack => 'Out & back';
+
+  @override
+  String get createScenarioEdit => 'Edit';
+
+  @override
+  String get createScenarioTimeBlockHint => 'Coffee, rest, free time…';
+
+  @override
+  String get createScenarioPrivateLocalTravel => 'Private / local travel';
+
+  @override
+  String get createScenarioRouteLabel => 'Route';
+
+  @override
+  String get createScenarioCarrierLabel => 'Carrier';
+
+  @override
+  String createScenarioSelectedStop(String value) {
+    return 'Selected: $value';
+  }
+
+  @override
+  String get createScenarioDepartureHhMm => 'Departure (HH:mm)';
+
+  @override
+  String get createScenarioArrivalHhMm => 'Arrival (HH:mm)';
+
+  @override
+  String get createRouteResolveRestore => 'Resolve & restore';
+
+  @override
+  String get createRouteResolve => 'Resolve';
+
+  @override
+  String scenarioIntakeNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'targetsUnavailable': 'Scenarios are unavailable. Retry from Details.',
+      'chooseTarget': 'Choose a Scenario or create a new one.',
+      'targetNotEditable': 'This Scenario is no longer editable.',
+      'titleRequired': 'Enter a Scenario title.',
+      'openFailed': 'Could not open this Scenario.',
+      'signInAgain': 'Sign in again before adding items to Scenario.',
+      'confirmDuplicate': 'Confirm adding another occurrence.',
+      'confirmUnavailable': 'Confirm use of the unavailable saved snapshot.',
+      'confirmScheduleAdjustment':
+          'Confirm conversion to a flexible template stop.',
+      'revisionConflict':
+          'Scenario changed. Go back, reopen it and review again.',
+      'intentExpired':
+          'This selection expired. Return to Details and try again.',
+      'targetGone': 'This Scenario is no longer available. Choose another one.',
+      'lockedLegBoundary':
+          'A locked logistics leg protects this insertion point.',
+      'persistenceUnavailable':
+          'Could not save. Your selection is retained; retry Apply.',
+      'other': 'Could not add this object. Review the selection and retry.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String scenarioIntakeObjectType(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'event': 'Event',
+      'place': 'Place',
+      'activity': 'Activity',
+      'route': 'Route',
+      'bookableSession': 'Session',
+      'other': 'Object',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String scenarioIntakeSourceStatus(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'ready': 'Ready',
+      'stale': 'Needs refresh',
+      'unresolved': 'Not resolved',
+      'unavailable': 'Unavailable',
+      'other': 'Unknown',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get scenarioIntakeUnavailable => 'Add to Scenario is unavailable.';
+
+  @override
+  String get scenarioIntakeTitle => 'Add to Scenario';
+
+  @override
+  String get scenarioIntakeClose => 'Close Add to Scenario';
+
+  @override
+  String get scenarioIntakeChooseTarget => 'Choose a personal Scenario';
+
+  @override
+  String get scenarioIntakeOnlyPrivateDrafts =>
+      'Only your editable private drafts are shown.';
+
+  @override
+  String get scenarioIntakeNoTargets =>
+      'No saved Scenario yet. Create one below.';
+
+  @override
+  String get scenarioIntakeUntitled => 'Untitled';
+
+  @override
+  String get scenarioIntakeCreateNew => 'Create new Scenario';
+
+  @override
+  String get scenarioIntakeCreateNewHint =>
+      'Private · one day · saved only with the stop';
+
+  @override
+  String get scenarioIntakeTitleField => 'Scenario title';
+
+  @override
+  String get scenarioIntakeContinue => 'Continue to placement';
+
+  @override
+  String get scenarioIntakeScenarioFallback => 'Scenario';
+
+  @override
+  String get scenarioIntakeDay => 'Day';
+
+  @override
+  String get scenarioIntakeUnscheduled => 'Unscheduled';
+
+  @override
+  String get scenarioIntakeInsert => 'Insert';
+
+  @override
+  String get scenarioIntakeAtEnd => 'At end';
+
+  @override
+  String get scenarioIntakeRole => 'Role';
+
+  @override
+  String get scenarioIntakeMandatory => 'Mandatory';
+
+  @override
+  String get scenarioIntakeOptional => 'Optional';
+
+  @override
+  String get scenarioIntakeBack => 'Back';
+
+  @override
+  String get scenarioIntakeReview => 'Review';
+
+  @override
+  String get scenarioIntakeAddAnother => 'Add another occurrence';
+
+  @override
+  String get scenarioIntakeAddAnotherHint =>
+      'This exact catalog object already exists in the Scenario.';
+
+  @override
+  String get scenarioIntakeUseUnavailable => 'Use saved unavailable snapshot';
+
+  @override
+  String get scenarioIntakeUseTemplateStop => 'Use as a flexible template stop';
+
+  @override
+  String get scenarioIntakeUseTemplateStopHint =>
+      'The source has a fixed date, but this Scenario is a template.';
+
+  @override
+  String get scenarioIntakeLogisticsNotice =>
+      'Logistics are not recalculated live. Existing unlocked boundary estimates will be invalidated safely.';
+
+  @override
+  String scenarioIntakeAddCount(int count) {
+    return 'Add $count';
+  }
+
+  @override
+  String get scenarioIntakeDurationUnknown => 'Duration unknown';
+
+  @override
+  String scenarioIntakeFixedStart(String time) {
+    return 'Fixed $time';
+  }
+
+  @override
+  String get scenarioIntakeMoveUp => 'Move up';
+
+  @override
+  String get scenarioIntakeMoveDown => 'Move down';
+
+  @override
+  String get scenarioIntakeApplyingSemantics =>
+      'Adding selected stops to Scenario';
+
+  @override
+  String get scenarioIntakeLoadingSemantics => 'Loading your Scenarios';
+
+  @override
+  String get scenarioIntakeApplying => 'Adding to Scenario…';
+
+  @override
+  String get scenarioIntakeLoading => 'Loading your Scenarios…';
+
+  @override
+  String get scenarioIntakeReplayed =>
+      'Already saved · no duplicate was created.';
+
+  @override
+  String get scenarioIntakeStay => 'Stay here';
+
+  @override
+  String get scenarioIntakeOpenScenario => 'Open Scenario';
+
+  @override
+  String get scenarioIntakePrepareFailed =>
+      'Could not prepare Add to Scenario.';
+
+  @override
+  String get scenarioIntakeRetry => 'Retry';
+
+  @override
+  String get scenarioIntakeTemplate => 'Template';
+
+  @override
+  String get scenarioIntakeDated => 'Dated';
+
+  @override
+  String scenarioIntakeStep(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'target': '1 of 3 · Scenario',
+      'placement': '2 of 3 · Placement',
+      'review': '3 of 3 · Review',
+      'success': 'Complete',
+      'applying': 'Saving',
+      'other': 'Preparing',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String scenarioIntakePlacement(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'unscheduled': 'Unscheduled',
+      'atEnd': 'At end',
+      'other': 'After selected stop',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get scenarioIntakeAfterLabel => 'After:';
+
+  @override
+  String scenarioIntakeCandidateLabel(int count) {
+    return 'Selected stop $count:';
+  }
+
+  @override
+  String scenarioIntakeSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $count stops to the Scenario',
+      one: 'Added $count stop to the Scenario',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scenarioIntakeTargetCounts(int count, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '$count day',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total active items',
+      one: '$total active item',
+    );
+    return '$_temp0 · $_temp1';
   }
 }

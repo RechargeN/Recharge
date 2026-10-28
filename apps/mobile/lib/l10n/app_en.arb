@@ -4652,7 +4652,7 @@
   "@createFormSaving": {
     "description": "Create: the draft is being saved."
   },
-  "createOption": "{value, select, EventCapacityMode_known{Known limit}EventCapacityMode_unknown{Unknown}EventCapacityMode_unlimited{Unlimited}EventFormat_offline{In person}EventFormat_online{Online}EventFormat_hybrid{Hybrid}EventOnlineAccessMode_publicLink{Public link}EventOnlineAccessMode_externalRegistration{External registration}EventOnlineAccessMode_internalBooking{Internal booking}EventPaymentCollectionMode_none{No payment}EventPaymentCollectionMode_onsite{On site}EventPaymentCollectionMode_external{External}EventPaymentCollectionMode_internal{In Recharge}EventPricingMode_free{Free}EventPricingMode_fixed{Fixed price}EventPricingMode_ticketTypes{Ticket types}EventPricingMode_donation{Donation}EventRecurrenceEndMode_never{Never}EventRecurrenceEndMode_untilDate{On a date}EventRecurrenceEndMode_occurrenceCount{After a number of times}EventRecurrenceFrequency_daily{Daily}EventRecurrenceFrequency_weekly{Weekly}EventRecurrenceFrequency_monthly{Monthly}EventRecurrenceFrequency_yearly{Yearly}EventRegistrationMode_none{No registration}EventRegistrationMode_external{External}EventRegistrationMode_internal{In Recharge}EventScheduleMode_oneTime{One time}EventScheduleMode_multiDate{Several dates}EventScheduleMode_recurring{Recurring}EventVisibility_public{Public}EventVisibility_unlisted{By link}EventVisibility_private{Private}EventAdmissionPreset_noRegistration{No registration}EventAdmissionPreset_freeRsvp{Free RSVP}EventAdmissionPreset_organizerApplication{Application to the organizer}EventAdmissionPreset_externalRegistration{External registration}EventAdmissionPreset_externalTickets{External tickets}EventAdmissionPreset_rechargeTickets{Recharge tickets}EventAdmissionPreset_teamRegistration{Team registration}AdmissionMode_openEntry{Open entry}AdmissionMode_rsvp{RSVP}AdmissionMode_booking{Booking}AdmissionMode_application{Application}AdmissionMode_ticket{Ticket}AdmissionMode_teamRegistration{Team registration}ConfirmationMode_none{No confirmation}ConfirmationMode_instant{Instant}ConfirmationMode_manualApproval{Manual approval}ConfirmationMode_lottery{Lottery}ConfirmationMode_providerManaged{By the provider}WaitlistPromotionMode_organizerManaged{By the organizer}WaitlistPromotionMode_fifoAutomatic{Automatic, first come}GuestPolicyMode_none{No guests}GuestPolicyMode_plusOne{Plus one}GuestPolicyMode_plusN{Plus N}GuestPolicyMode_namedGuestsOnly{Named guests only}EligibilityRuleKind_invitation{Invitation}EligibilityRuleKind_accessCode{Access code}EligibilityRuleKind_membership{Membership}EligibilityRuleKind_allowlist{Guest list}EligibilityRuleKind_qualification{Qualification}EligibilityRuleKind_accreditation{Accreditation}EligibilityRuleKind_ageRequirement{Age requirement}EligibilityRuleKind_waiver{Waiver}EventAccessWindowKind_absolute{Fixed dates}EventAccessWindowKind_occurrenceRelative{Relative to each date}InventoryShape_generalCapacity{General capacity}InventoryShape_sharedTicketPool{Shared ticket pool}InventoryShape_separateTicketPools{Separate ticket pools}InventoryShape_zones{Zones}InventoryShape_assignedSeating{Assigned seats}InventoryShape_teamSlots{Team slots}InventoryShape_participantRoles{Participant roles}InventoryShape_roleBalancedSlots{Role-balanced slots}InventoryShape_tableInventory{Tables}InventoryShape_timeSlotInventory{Time slots}InventoryChannel_onsite{On site}InventoryChannel_online{Online}InventoryChannel_any{Any}InventoryAuthority_none{Nobody}InventoryAuthority_recharge{Recharge}InventoryAuthority_externalProvider{External provider}ActivityContributionKind_purchase{Purchase}ActivityContributionKind_donation{Donation}ActivityContributionKind_other{Other}ActivitySeason_winter{Winter}ActivitySeason_spring{Spring}ActivitySeason_summer{Summer}ActivitySeason_autumn{Autumn}ActivitySeason_any{Any season}ActivityTimeOfDay_morning{Morning}ActivityTimeOfDay_afternoon{Afternoon}ActivityTimeOfDay_evening{Evening}ActivityTimeOfDay_night{Night}ActivityTimeOfDay_any{Any time}PlaceOperationalStatus_operating{Operating}PlaceOperationalStatus_temporarilyClosed{Temporarily closed}PlaceOperationalStatus_permanentlyClosed{Permanently closed}RentalLocationDisclosure_approximateArea{Approximate area (default)}RentalLocationDisclosure_publicBusinessAddress{Public business address}RentalScheduleMode_openingHours{Opening hours}RentalScheduleMode_byArrangement{By arrangement}RentalBillingUnit_hour{Per hour}RentalBillingUnit_day{Per day}RentalBillingUnit_week{Per week}RentalCondition_rentalNew{New}RentalCondition_likeNew{Like new}RentalCondition_good{Good}RentalCondition_worn{Worn}RentalDepositCollectionMethod_none{No deposit}RentalDepositCollectionMethod_atHandover{At handover}RentalDepositCollectionMethod_externalProvider{External provider}RentalDepositCollectionMethod_other{Other}VisibilityType_public{Public}VisibilityType_unlisted{By link}VisibilityType_private{Private}PublishStatus_draft{Draft}PublishStatus_pendingReview{Pending review}PublishStatus_published{Published}PublishStatus_archived{Archived}PublishStatus_hidden{Hidden}PublishStatus_deleted{Deleted} other{Other}}",
+  "createOption": "{value, select, EventCapacityMode_known{Known limit}EventCapacityMode_unknown{Unknown}EventCapacityMode_unlimited{Unlimited}EventFormat_offline{In person}EventFormat_online{Online}EventFormat_hybrid{Hybrid}EventOnlineAccessMode_publicLink{Public link}EventOnlineAccessMode_externalRegistration{External registration}EventOnlineAccessMode_internalBooking{Internal booking}EventPaymentCollectionMode_none{No payment}EventPaymentCollectionMode_onsite{On site}EventPaymentCollectionMode_external{External}EventPaymentCollectionMode_internal{In Recharge}EventPricingMode_free{Free}EventPricingMode_fixed{Fixed price}EventPricingMode_ticketTypes{Ticket types}EventPricingMode_donation{Donation}EventRecurrenceEndMode_never{Never}EventRecurrenceEndMode_untilDate{On a date}EventRecurrenceEndMode_occurrenceCount{After a number of times}EventRecurrenceFrequency_daily{Daily}EventRecurrenceFrequency_weekly{Weekly}EventRecurrenceFrequency_monthly{Monthly}EventRecurrenceFrequency_yearly{Yearly}EventRegistrationMode_none{No registration}EventRegistrationMode_external{External}EventRegistrationMode_internal{In Recharge}EventScheduleMode_oneTime{One time}EventScheduleMode_multiDate{Several dates}EventScheduleMode_recurring{Recurring}EventVisibility_public{Public}EventVisibility_unlisted{By link}EventVisibility_private{Private}EventAdmissionPreset_noRegistration{No registration}EventAdmissionPreset_freeRsvp{Free RSVP}EventAdmissionPreset_organizerApplication{Application to the organizer}EventAdmissionPreset_externalRegistration{External registration}EventAdmissionPreset_externalTickets{External tickets}EventAdmissionPreset_rechargeTickets{Recharge tickets}EventAdmissionPreset_teamRegistration{Team registration}AdmissionMode_openEntry{Open entry}AdmissionMode_rsvp{RSVP}AdmissionMode_booking{Booking}AdmissionMode_application{Application}AdmissionMode_ticket{Ticket}AdmissionMode_teamRegistration{Team registration}ConfirmationMode_none{No confirmation}ConfirmationMode_instant{Instant}ConfirmationMode_manualApproval{Manual approval}ConfirmationMode_lottery{Lottery}ConfirmationMode_providerManaged{By the provider}WaitlistPromotionMode_organizerManaged{By the organizer}WaitlistPromotionMode_fifoAutomatic{Automatic, first come}GuestPolicyMode_none{No guests}GuestPolicyMode_plusOne{Plus one}GuestPolicyMode_plusN{Plus N}GuestPolicyMode_namedGuestsOnly{Named guests only}EligibilityRuleKind_invitation{Invitation}EligibilityRuleKind_accessCode{Access code}EligibilityRuleKind_membership{Membership}EligibilityRuleKind_allowlist{Guest list}EligibilityRuleKind_qualification{Qualification}EligibilityRuleKind_accreditation{Accreditation}EligibilityRuleKind_ageRequirement{Age requirement}EligibilityRuleKind_waiver{Waiver}EventAccessWindowKind_absolute{Fixed dates}EventAccessWindowKind_occurrenceRelative{Relative to each date}InventoryShape_generalCapacity{General capacity}InventoryShape_sharedTicketPool{Shared ticket pool}InventoryShape_separateTicketPools{Separate ticket pools}InventoryShape_zones{Zones}InventoryShape_assignedSeating{Assigned seats}InventoryShape_teamSlots{Team slots}InventoryShape_participantRoles{Participant roles}InventoryShape_roleBalancedSlots{Role-balanced slots}InventoryShape_tableInventory{Tables}InventoryShape_timeSlotInventory{Time slots}InventoryChannel_onsite{On site}InventoryChannel_online{Online}InventoryChannel_any{Any}InventoryAuthority_none{Nobody}InventoryAuthority_recharge{Recharge}InventoryAuthority_externalProvider{External provider}ActivityContributionKind_purchase{Purchase}ActivityContributionKind_donation{Donation}ActivityContributionKind_other{Other}ActivitySeason_winter{Winter}ActivitySeason_spring{Spring}ActivitySeason_summer{Summer}ActivitySeason_autumn{Autumn}ActivitySeason_any{Any season}ActivityTimeOfDay_morning{Morning}ActivityTimeOfDay_afternoon{Afternoon}ActivityTimeOfDay_evening{Evening}ActivityTimeOfDay_night{Night}ActivityTimeOfDay_any{Any time}PlaceOperationalStatus_operating{Operating}PlaceOperationalStatus_temporarilyClosed{Temporarily closed}PlaceOperationalStatus_permanentlyClosed{Permanently closed}RentalLocationDisclosure_approximateArea{Approximate area (default)}RentalLocationDisclosure_publicBusinessAddress{Public business address}RentalScheduleMode_openingHours{Opening hours}RentalScheduleMode_byArrangement{By arrangement}RentalBillingUnit_hour{Per hour}RentalBillingUnit_day{Per day}RentalBillingUnit_week{Per week}RentalCondition_rentalNew{New}RentalCondition_likeNew{Like new}RentalCondition_good{Good}RentalCondition_worn{Worn}RentalDepositCollectionMethod_none{No deposit}RentalDepositCollectionMethod_atHandover{At handover}RentalDepositCollectionMethod_externalProvider{External provider}RentalDepositCollectionMethod_other{Other}VisibilityType_public{Public}VisibilityType_unlisted{By link}VisibilityType_private{Private}PublishStatus_draft{Draft}PublishStatus_pendingReview{Pending review}PublishStatus_published{Published}PublishStatus_archived{Archived}PublishStatus_hidden{Hidden}PublishStatus_deleted{Deleted}FindPeopleApprovalMode_manual{Host approves}FindPeopleApprovalMode_automatic{Automatic}FindPeopleApprovalMode_inviteOnly{Invite only}FindPeopleConversationPolicy_acceptedOnly{Accepted participants only}FindPeopleConversationPolicy_applicantsAndAccepted{Applicants and accepted}FindPeopleCostType_free{Free}FindPeopleCostType_estimated{Estimated cost}FindPeopleCostType_unknown{Unknown}FindPeopleExpenseSplitMode_none{No split}FindPeopleExpenseSplitMode_equal{Split equally}FindPeopleExpenseSplitMode_itemized{By item}FindPeopleExpenseSplitMode_settleLater{Settle later}FindPeopleMeetingMode_inPerson{In person}FindPeopleMeetingMode_online{Online}FindPeopleMeetingMode_hybrid{Hybrid}FindPeopleParticipationGoal_social{Socialising}FindPeopleParticipationGoal_practice{Practice}FindPeopleParticipationGoal_teamUp{Team up}FindPeopleParticipationGoal_sharedTrip{Shared trip}FindPeopleParticipationGoal_accountability{Keep each other going}FindPeopleParticipationGoal_other{Other}FindPeoplePublisherType_user{Personal profile}FindPeoplePublisherType_page{Professional page}FindPeopleScheduleMode_single{One time}FindPeopleScheduleMode_timePoll{Time poll}FindPeopleScheduleMode_recurring{Recurring}FindPeopleSeatFitPolicy_strictOrder{Strict order}FindPeopleSeatFitPolicy_firstFitting{First that fits}FindPeopleSkillLevel_any{Any level}FindPeopleSkillLevel_beginner{Beginner}FindPeopleSkillLevel_intermediate{Intermediate}FindPeopleSkillLevel_advanced{Advanced}FindPeopleVerificationLevel_none{No verification}FindPeopleVerificationLevel_phone{Phone}FindPeopleVerificationLevel_identityDocument{Identity document}FindPeopleVerificationLevel_organization{Organisation}FindPeopleVisibility_public{Public}FindPeopleVisibility_unlisted{By link}FindPeopleVisibility_inviteOnly{Invite only}FindPeopleWaitlistPolicy_firstCome{First come}FindPeopleWaitlistPolicy_hostReview{Host review}ScenarioBudgetBasis_wholeGroup{Whole group}ScenarioBudgetBasis_perPerson{Per person}ScenarioFormat_city{City}ScenarioFormat_day{Day}ScenarioFormat_weekend{Weekend}ScenarioFormat_trip{Trip}ScenarioPace_relaxed{Relaxed}ScenarioPace_balanced{Balanced}ScenarioPace_intensive{Intensive}ScenarioPartyKind_solo{Solo}ScenarioPartyKind_couple{Couple}ScenarioPartyKind_friends{Friends}ScenarioPartyKind_family{Family}ScenarioPartyKind_group{Group}ScenarioPartyKind_mixed{Mixed}ScenarioPlannedTransportKind_bus{Bus}ScenarioPlannedTransportKind_train{Train}ScenarioPlannedTransportKind_tram{Tram}ScenarioPlannedTransportKind_trolleybus{Trolleybus}ScenarioPlannedTransportKind_ferry{Ferry}ScenarioPlannedTransportKind_flight{Flight}ScenarioPlannedTransportKind_other{Other}ScenarioTravelMode_walking{Walking}ScenarioTravelMode_bicycle{Bicycle}ScenarioTravelMode_car{Own car}ScenarioTravelMode_taxi{Taxi}ScenarioTravelMode_transit{Public transport}ScenarioTravelMode_other{Other}ScenarioDateMode_template{Flexible template}ScenarioDateMode_dated{Dated trip}ScenarioItemKind_visit{Visit}ScenarioItemKind_event{Event}ScenarioItemKind_activity{Activity}ScenarioItemKind_route{Route}ScenarioItemKind_bookableSession{Session}ScenarioItemKind_stay{Stay}ScenarioItemKind_plannedTransport{Planned transport}ScenarioItemKind_timeBlock{Time block}RouteSegmentSource_routed{Routed}RouteSegmentSource_generated{Generated}RouteSegmentSource_freehand{Freehand}RouteSegmentSource_recordedGps{Recorded GPS}RouteSegmentSource_importedGpx{Imported GPX}RouteSegmentSource_intentionalDirect{Intentional direct line}RouteSegmentSource_fallbackDirect{Direct line (fallback)}RouteSegmentOperationState_ready{Ready}RouteSegmentOperationState_routing{Routing}RouteSegmentOperationState_failed{Failed}RouteSegmentOperationState_stale{Needs update}ScenarioScheduleFreshness_current{Current when saved}ScenarioScheduleFreshness_stale{Stale}ScenarioScheduleFreshness_unknown{Unknown}ScenarioScheduleFreshness_notApplicable{Not applicable} other{Other}}",
   "@createOption": {
     "description": "Create form option label; option is \"<EnumType>_<stable value>\".",
     "placeholders": {
@@ -4879,6 +4879,2736 @@
       "value": {
         "type": "String",
         "example": "Published"
+      }
+    }
+  },
+  "createFindPeopleFindPeople": "Find People · {done}/{total}",
+  "@createFindPeopleFindPeople": {
+    "description": "Find People: step done of total.",
+    "placeholders": {
+      "done": {
+        "type": "int",
+        "example": "2"
+      },
+      "total": {
+        "type": "int",
+        "example": "6"
+      }
+    }
+  },
+  "createFindPeopleSaveError": "Save error",
+  "@createFindPeopleSaveError": {
+    "description": "Create form: \"Save error\"."
+  },
+  "createFindPeopleUnsavedChanges": "Unsaved changes",
+  "@createFindPeopleUnsavedChanges": {
+    "description": "Create form: \"Unsaved changes\"."
+  },
+  "createFindPeopleContinue": "Continue",
+  "@createFindPeopleContinue": {
+    "description": "Create form: \"Continue\"."
+  },
+  "createFindPeopleSaveDraft": "Save draft",
+  "@createFindPeopleSaveDraft": {
+    "description": "Create form: \"Save draft\"."
+  },
+  "createFindPeopleBack": "Back",
+  "@createFindPeopleBack": {
+    "description": "Create form: \"Back\"."
+  },
+  "createFindPeoplePublishFindPeopleRequest": "Publish Find People request",
+  "@createFindPeoplePublishFindPeopleRequest": {
+    "description": "Create form: \"Publish Find People request\"."
+  },
+  "createFindPeopleValidationSummary": "Validation summary",
+  "@createFindPeopleValidationSummary": {
+    "description": "Create form: \"Validation summary\"."
+  },
+  "createFindPeopleMeetPubliclyDoNotSendMoney": "Meet publicly, do not send money to strangers, and use Report/Block when needed.",
+  "@createFindPeopleMeetPubliclyDoNotSendMoney": {
+    "description": "Create form: \"Meet publicly, do not send money to strangers, and use Repor\"."
+  },
+  "createFindPeopleIAcceptFindPeopleSafetyRules": "I accept the Find People Safety Rules *",
+  "@createFindPeopleIAcceptFindPeopleSafetyRules": {
+    "description": "Create form: \"I accept the Find People Safety Rules *\"."
+  },
+  "createFindPeopleRequestOnlyAdults18": "This request is only for adults 18+ *",
+  "@createFindPeopleRequestOnlyAdults18": {
+    "description": "Create form: \"This request is only for adults 18+ *\"."
+  },
+  "createFindPeopleSchedulePublicationUtcOptional": "Schedule publication UTC (optional)",
+  "@createFindPeopleSchedulePublicationUtcOptional": {
+    "description": "Create form: \"Schedule publication UTC (optional)\"."
+  },
+  "createFindPeopleCoverImageUrlOptional": "Cover image URL (optional)",
+  "@createFindPeopleCoverImageUrlOptional": {
+    "description": "Create form: \"Cover image URL (optional)\"."
+  },
+  "createFindPeopleMediaPublication": "Media and publication",
+  "@createFindPeopleMediaPublication": {
+    "description": "Create form: \"Media and publication\"."
+  },
+  "createFindPeopleTheseFieldsAreNeverIncludedPublic": "These fields are never included in public data, analytics, or push payloads.",
+  "@createFindPeopleTheseFieldsAreNeverIncludedPublic": {
+    "description": "Create form: \"These fields are never included in public DTO, analytics, or\"."
+  },
+  "createFindPeoplePrivateHostPreview": "Private host preview",
+  "@createFindPeoplePrivateHostPreview": {
+    "description": "Create form: \"Private host preview\"."
+  },
+  "createFindPeopleApproximatePublicArea": "Approximate public area",
+  "@createFindPeopleApproximatePublicArea": {
+    "description": "Create form: \"Approximate public area\"."
+  },
+  "createFindPeopleAddShortDescription": "Add a short description.",
+  "@createFindPeopleAddShortDescription": {
+    "description": "Create form: \"Add a short description.\"."
+  },
+  "createFindPeopleUntitledFindPeopleRequest": "Untitled Find People request",
+  "@createFindPeopleUntitledFindPeopleRequest": {
+    "description": "Create form: \"Untitled Find People request\"."
+  },
+  "createFindPeopleMirrorsSafePublicDetailsContract": "This mirrors the safe public Details contract.",
+  "@createFindPeopleMirrorsSafePublicDetailsContract": {
+    "description": "Create form: \"This mirrors the safe public Details contract.\"."
+  },
+  "createFindPeoplePublicPreview": "Public preview",
+  "@createFindPeoplePublicPreview": {
+    "description": "Create form: \"Public preview\"."
+  },
+  "createFindPeopleQuietHoursEnd01439": "Quiet hours end (0–1439)",
+  "@createFindPeopleQuietHoursEnd01439": {
+    "description": "Create form: \"Quiet hours end (0–1439)\"."
+  },
+  "createFindPeopleQuietHoursStart01439": "Quiet hours start (0–1439)",
+  "@createFindPeopleQuietHoursStart01439": {
+    "description": "Create form: \"Quiet hours start (0–1439)\"."
+  },
+  "createFindPeopleAllowAcceptedParticipantsInvite": "Allow accepted participants to invite",
+  "@createFindPeopleAllowAcceptedParticipantsInvite": {
+    "description": "Create form: \"Allow accepted participants to invite\"."
+  },
+  "createFindPeopleConversationPolicy": "Conversation policy *",
+  "@createFindPeopleConversationPolicy": {
+    "description": "Create form: \"Conversation policy *\"."
+  },
+  "createFindPeopleInviteCoHost": "Invite co-host",
+  "@createFindPeopleInviteCoHost": {
+    "description": "Create form: \"Invite co-host\"."
+  },
+  "createFindPeopleUserId": "User ID",
+  "@createFindPeopleUserId": {
+    "description": "Create form: \"User ID\"."
+  },
+  "createFindPeopleResponsibleHostsDataResponsiblehostuseridsJoin": "Responsible hosts: {count}",
+  "@createFindPeopleResponsibleHostsDataResponsiblehostuseridsJoin": {
+    "description": "Find People: number of responsible hosts (ids are not shown).",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createFindPeoplePublisherUserId": "Publisher user ID *",
+  "@createFindPeoplePublisherUserId": {
+    "description": "Create form: \"Publisher user ID *\"."
+  },
+  "createFindPeopleManagedPageId": "Managed Page ID *",
+  "@createFindPeopleManagedPageId": {
+    "description": "Create form: \"Managed Page ID *\"."
+  },
+  "createFindPeoplePublishAs": "Publish as *",
+  "@createFindPeoplePublishAs": {
+    "description": "Create form: \"Publish as *\"."
+  },
+  "createFindPeopleAddExpense": "Add expense",
+  "@createFindPeopleAddExpense": {
+    "description": "Create form: \"Add expense\"."
+  },
+  "createFindPeopleExpenseItem": "Expense item",
+  "@createFindPeopleExpenseItem": {
+    "description": "Create form: \"Expense item\"."
+  },
+  "createFindPeopleExpenseSplitMode": "Expense split mode *",
+  "@createFindPeopleExpenseSplitMode": {
+    "description": "Create form: \"Expense split mode *\"."
+  },
+  "createFindPeopleCostNote": "Cost note",
+  "@createFindPeopleCostNote": {
+    "description": "Create form: \"Cost note\"."
+  },
+  "createFindPeopleExpectedSpendPerPerson": "Expected spend per person ({value}) *",
+  "@createFindPeopleExpectedSpendPerPerson": {
+    "description": "Find People: expected spend per person in the currency code value.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "EUR"
+      }
+    }
+  },
+  "createFindPeopleExpectedCost": "Expected cost *",
+  "@createFindPeopleExpectedCost": {
+    "description": "Create form: \"Expected cost *\"."
+  },
+  "createFindPeopleAddQuestion": "Add question",
+  "@createFindPeopleAddQuestion": {
+    "description": "Create form: \"Add question\"."
+  },
+  "createFindPeopleSafeQuestion": "Safe question",
+  "@createFindPeopleSafeQuestion": {
+    "description": "Create form: \"Safe question\"."
+  },
+  "createFindPeopleApplicationQuestions": "Application questions",
+  "@createFindPeopleApplicationQuestions": {
+    "description": "Create form: \"Application questions\"."
+  },
+  "createFindPeopleRequireAttendanceReconfirmation": "Require attendance reconfirmation",
+  "@createFindPeopleRequireAttendanceReconfirmation": {
+    "description": "Create form: \"Require attendance reconfirmation\"."
+  },
+  "createFindPeopleWaitlistPolicy": "Waitlist policy",
+  "@createFindPeopleWaitlistPolicy": {
+    "description": "Create form: \"Waitlist policy\"."
+  },
+  "createFindPeopleEnableWaitlist": "Enable waitlist",
+  "@createFindPeopleEnableWaitlist": {
+    "description": "Create form: \"Enable waitlist\"."
+  },
+  "createFindPeopleVerificationRequirement": "Verification requirement *",
+  "@createFindPeopleVerificationRequirement": {
+    "description": "Create form: \"Verification requirement *\"."
+  },
+  "createFindPeopleMaximumSeatsPerApplication": "Maximum seats per application",
+  "@createFindPeopleMaximumSeatsPerApplication": {
+    "description": "Create form: \"Maximum seats per application\"."
+  },
+  "createFindPeopleAllowPartyApplications": "Allow party applications",
+  "@createFindPeopleAllowPartyApplications": {
+    "description": "Create form: \"Allow party applications\"."
+  },
+  "createFindPeopleApprovalMode": "Approval mode *",
+  "@createFindPeopleApprovalMode": {
+    "description": "Create form: \"Approval mode *\"."
+  },
+  "createFindPeopleHostSeats": "Host seats",
+  "@createFindPeopleHostSeats": {
+    "description": "Create form: \"Host seats\"."
+  },
+  "createFindPeopleTargetGroupSize": "Target group size",
+  "@createFindPeopleTargetGroupSize": {
+    "description": "Create form: \"Target group size\"."
+  },
+  "createFindPeopleGroupSizeIncludesHostsExpectedSpend": "Group size includes hosts. Expected spend is information, never a payment to the host.",
+  "@createFindPeopleGroupSizeIncludesHostsExpectedSpend": {
+    "description": "Create form: \"Group size includes hosts. Expected spend is information, ne\"."
+  },
+  "createFindPeopleGroupParticipation": "Group and participation",
+  "@createFindPeopleGroupParticipation": {
+    "description": "Create form: \"Group and participation\"."
+  },
+  "createFindPeopleBackupMeetingPlan": "Backup meeting plan",
+  "@createFindPeopleBackupMeetingPlan": {
+    "description": "Create form: \"Backup meeting plan\"."
+  },
+  "createFindPeoplePrivateAccessSecretReference": "Private access secret reference *",
+  "@createFindPeoplePrivateAccessSecretReference": {
+    "description": "Create form: \"Private access secret reference *\"."
+  },
+  "createFindPeopleGoogleMeetZoomDiscord": "Google Meet, Zoom, Discord…",
+  "@createFindPeopleGoogleMeetZoomDiscord": {
+    "description": "Create form: \"Google Meet, Zoom, Discord…\"."
+  },
+  "createFindPeopleOnlineProvider": "Online provider *",
+  "@createFindPeopleOnlineProvider": {
+    "description": "Create form: \"Online provider *\"."
+  },
+  "createFindPeoplePrivateHomesResidentialAccessDetailsAre": "Private homes and residential access details are not allowed.",
+  "@createFindPeoplePrivateHomesResidentialAccessDetailsAre": {
+    "description": "Create form: \"Private homes and residential access details are not allowed\"."
+  },
+  "createFindPeoplePublicMeetingPlace": "This is a public meeting place *",
+  "@createFindPeoplePublicMeetingPlace": {
+    "description": "Create form: \"This is a public meeting place *\"."
+  },
+  "createFindPeopleMeetingInstructionsPrivate": "Meeting instructions (private)",
+  "@createFindPeopleMeetingInstructionsPrivate": {
+    "description": "Create form: \"Meeting instructions (private)\"."
+  },
+  "createFindPeopleExactAddressPrivate": "Exact address (private) *",
+  "@createFindPeopleExactAddressPrivate": {
+    "description": "Create form: \"Exact address (private) *\"."
+  },
+  "createFindPeoplePublicMapPoint": "Public map point: {value}",
+  "@createFindPeoplePublicMapPoint": {
+    "description": "Find People: the generated public map point; value is \"lat, lng\".",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "56.95, 24.11"
+      }
+    }
+  },
+  "createFindPeopleSetExactPointGenerateSafePublic": "Set exact point and generate safe public point",
+  "@createFindPeopleSetExactPointGenerateSafePublic": {
+    "description": "Create form: \"Set exact point and generate safe public point\"."
+  },
+  "createFindPeopleExactLongitude": "Exact longitude *",
+  "@createFindPeopleExactLongitude": {
+    "description": "Create form: \"Exact longitude *\"."
+  },
+  "createFindPeopleExactLatitude": "Exact latitude *",
+  "@createFindPeopleExactLatitude": {
+    "description": "Create form: \"Exact latitude *\"."
+  },
+  "createFindPeopleOldTownNearCentralPark": "Old Town, near Central Park",
+  "@createFindPeopleOldTownNearCentralPark": {
+    "description": "Create form: \"Old Town, near Central Park\"."
+  },
+  "createFindPeoplePublicAreaLabel": "Public area label *",
+  "@createFindPeoplePublicAreaLabel": {
+    "description": "Create form: \"Public area label *\"."
+  },
+  "createFindPeopleMeetingPlaceName": "Meeting place name *",
+  "@createFindPeopleMeetingPlaceName": {
+    "description": "Create form: \"Meeting place name *\"."
+  },
+  "createFindPeopleMeetingMode": "Meeting mode *",
+  "@createFindPeopleMeetingMode": {
+    "description": "Create form: \"Meeting mode *\"."
+  },
+  "createFindPeopleOnlyApproximatePublicAreaAppearsDiscover": "Only the approximate public area appears in Discover. Exact details stay private.",
+  "@createFindPeopleOnlyApproximatePublicAreaAppearsDiscover": {
+    "description": "Create form: \"Only the approximate public area appears in Discover. Exact \"."
+  },
+  "createFindPeopleMeetingLocation": "Meeting location",
+  "@createFindPeopleMeetingLocation": {
+    "description": "Create form: \"Meeting location\"."
+  },
+  "createFindPeopleMaximumOccurrences252": "Maximum occurrences (2–52)",
+  "@createFindPeopleMaximumOccurrences252": {
+    "description": "Create form: \"Maximum occurrences (2–52)\"."
+  },
+  "createFindPeopleSeriesEndUtc": "Series end UTC",
+  "@createFindPeopleSeriesEndUtc": {
+    "description": "Create form: \"Series end UTC\"."
+  },
+  "createFindPeopleRecurrenceRule": "Recurrence rule *",
+  "@createFindPeopleRecurrenceRule": {
+    "description": "Create form: \"Recurrence rule *\"."
+  },
+  "createFindPeopleApplicationDeadlineUtc": "Application deadline UTC *",
+  "@createFindPeopleApplicationDeadlineUtc": {
+    "description": "Create form: \"Application deadline UTC *\"."
+  },
+  "createFindPeoplePollResponseDeadlineUtc": "Poll response deadline UTC *",
+  "@createFindPeoplePollResponseDeadlineUtc": {
+    "description": "Create form: \"Poll response deadline UTC *\"."
+  },
+  "createFindPeopleRemoveSlot": "Remove slot",
+  "@createFindPeopleRemoveSlot": {
+    "description": "Create form: \"Remove slot\"."
+  },
+  "createFindPeopleAddTimeOption": "Add time option",
+  "@createFindPeopleAddTimeOption": {
+    "description": "Create form: \"Add time option\"."
+  },
+  "createFindPeopleSetMeetingTime": "Set meeting time",
+  "@createFindPeopleSetMeetingTime": {
+    "description": "Create form: \"Set meeting time\"."
+  },
+  "createFindPeopleEndUtc": "End UTC *",
+  "@createFindPeopleEndUtc": {
+    "description": "Create form: \"End UTC *\"."
+  },
+  "createFindPeopleStartUtc": "Start UTC *",
+  "@createFindPeopleStartUtc": {
+    "description": "Create form: \"Start UTC *\"."
+  },
+  "createFindPeopleScheduleMode": "Schedule mode *",
+  "@createFindPeopleScheduleMode": {
+    "description": "Create form: \"Schedule mode *\"."
+  },
+  "createFindPeopleAllTimesAreStoredUtcDisplayed": "All times are stored in UTC and displayed using {value}.",
+  "@createFindPeopleAllTimesAreStoredUtcDisplayed": {
+    "description": "Find People: times are stored in UTC and shown in the IANA zone value.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "Europe/Riga"
+      }
+    }
+  },
+  "createFindPeopleSchedule": "Schedule",
+  "@createFindPeopleSchedule": {
+    "description": "Create form: \"Schedule\"."
+  },
+  "createFindPeopleHouseRulesNote": "House rules note",
+  "@createFindPeopleHouseRulesNote": {
+    "description": "Create form: \"House rules note\"."
+  },
+  "createFindPeopleHouseRules": "House rules",
+  "@createFindPeopleHouseRules": {
+    "description": "Create form: \"House rules\"."
+  },
+  "createFindPeopleAccessibilityNotes": "Accessibility notes",
+  "@createFindPeopleAccessibilityNotes": {
+    "description": "Create form: \"Accessibility notes\"."
+  },
+  "createFindPeopleEquipmentNotes": "Equipment notes",
+  "@createFindPeopleEquipmentNotes": {
+    "description": "Create form: \"Equipment notes\"."
+  },
+  "createFindPeopleExperienceRequirementsOnePerLine": "Experience requirements (one per line)",
+  "@createFindPeopleExperienceRequirementsOnePerLine": {
+    "description": "Create form: \"Experience requirements (one per line)\"."
+  },
+  "createFindPeopleCommunicationLanguages": "Communication languages *",
+  "@createFindPeopleCommunicationLanguages": {
+    "description": "Create form: \"Communication languages *\"."
+  },
+  "createFindPeopleParticipationGoal": "Participation goal *",
+  "@createFindPeopleParticipationGoal": {
+    "description": "Create form: \"Participation goal *\"."
+  },
+  "createFindPeopleSkillLevel": "Skill level *",
+  "@createFindPeopleSkillLevel": {
+    "description": "Create form: \"Skill level *\"."
+  },
+  "createFindPeopleFullDescription": "Full description *",
+  "@createFindPeopleFullDescription": {
+    "description": "Create form: \"Full description *\"."
+  },
+  "createFindPeopleShortDescription": "Short description *",
+  "@createFindPeopleShortDescription": {
+    "description": "Create form: \"Short description *\"."
+  },
+  "createFindPeoplePublicContentMustDescribeConcreteActivity": "Public content must describe a concrete activity without contacts or payment links.",
+  "@createFindPeoplePublicContentMustDescribeConcreteActivity": {
+    "description": "Create form: \"Public content must describe a concrete activity without con\"."
+  },
+  "createFindPeopleActivityDescription": "Activity and description",
+  "@createFindPeopleActivityDescription": {
+    "description": "Create form: \"Activity and description\"."
+  },
+  "createFindPeopleFindPeopleDraftDataBeingPrepared": "Find People draft data is being prepared…",
+  "@createFindPeopleFindPeopleDraftDataBeingPrepared": {
+    "description": "Create form: \"Find People draft data is being prepared…\"."
+  },
+  "createSessionOnlyWhatMarkedRequiredBlocksPublishing": "Only what is marked “required” blocks publishing. Everything else is optional and can be added now or later.",
+  "@createSessionOnlyWhatMarkedRequiredBlocksPublishing": {
+    "description": "Create form: \"Only what is marked 'required' blocks publishing. Everything\"."
+  },
+  "createSessionPublish": "Publish",
+  "@createSessionPublish": {
+    "description": "Create form: \"Publish\"."
+  },
+  "createSessionSaveDraft": "Save draft",
+  "@createSessionSaveDraft": {
+    "description": "Create form: \"Save draft\"."
+  },
+  "createSessionNeverRequiredPublishSesD14": "Never required to publish.",
+  "@createSessionNeverRequiredPublishSesD14": {
+    "description": "Create form: \"Never required to publish (SES-D14).\"."
+  },
+  "createSessionRecommendedDetailsCategory": "Recommended details for this category",
+  "@createSessionRecommendedDetailsCategory": {
+    "description": "Create form: \"Recommended details for this category\"."
+  },
+  "createSessionAmenities": "Amenities",
+  "@createSessionAmenities": {
+    "description": "Create form: \"Amenities\"."
+  },
+  "createSessionBlock": "Block",
+  "@createSessionBlock": {
+    "description": "Create form: \"Block\"."
+  },
+  "createSessionBlockedDates": "Blocked dates",
+  "@createSessionBlockedDates": {
+    "description": "Create form: \"Blocked dates\"."
+  },
+  "createSessionMaxPartySize": "Max party size",
+  "@createSessionMaxPartySize": {
+    "description": "Create form: \"Max party size\"."
+  },
+  "createSessionTermsUrlOptionalHttps": "Terms URL (optional, https://…)",
+  "@createSessionTermsUrlOptionalHttps": {
+    "description": "Create form: \"Terms URL (optional, https://…)\"."
+  },
+  "createSessionExternalBookingUrlHttps": "External booking URL (https://…)",
+  "@createSessionExternalBookingUrlHttps": {
+    "description": "Create form: \"External booking URL (https://…)\"."
+  },
+  "createSessionPricePerSlotEur": "Price per slot, EUR",
+  "@createSessionPricePerSlotEur": {
+    "description": "Create form: \"Price per slot, EUR\"."
+  },
+  "createSessionFree": "Free",
+  "@createSessionFree": {
+    "description": "Create form: \"Free\"."
+  },
+  "createSessionPriceBooking": "Price and booking",
+  "@createSessionPriceBooking": {
+    "description": "Create form: \"Price and booking\"."
+  },
+  "createSessionNextOffers": "Next offers",
+  "@createSessionNextOffers": {
+    "description": "Create form: \"Next offers\"."
+  },
+  "createSessionSlotDuration": "Slot duration",
+  "@createSessionSlotDuration": {
+    "description": "Create form: \"Slot duration\"."
+  },
+  "createSessionNoWeeklyRuleYetPickPreset": "No weekly rule yet — pick a preset above.",
+  "@createSessionNoWeeklyRuleYetPickPreset": {
+    "description": "Create form: \"No weekly rule yet — pick a preset above.\"."
+  },
+  "createSessionWhen": "When",
+  "@createSessionWhen": {
+    "description": "Create form: \"When\"."
+  },
+  "createSessionConfirmLocation": "Confirm this location",
+  "@createSessionConfirmLocation": {
+    "description": "Create form: \"Confirm this location\"."
+  },
+  "createSessionLongitude": "Longitude",
+  "@createSessionLongitude": {
+    "description": "Create form: \"Longitude\"."
+  },
+  "createSessionLatitude": "Latitude",
+  "@createSessionLatitude": {
+    "description": "Create form: \"Latitude\"."
+  },
+  "createSessionCity": "City",
+  "@createSessionCity": {
+    "description": "Create form: \"City\"."
+  },
+  "createSessionAddress": "Address",
+  "@createSessionAddress": {
+    "description": "Create form: \"Address\"."
+  },
+  "createSessionResourceNameEGSauna1": "Resource name (e.g. “Sauna 1”)",
+  "@createSessionResourceNameEGSauna1": {
+    "description": "Create form: \"Resource name (e.g. 'Sauna 1')\"."
+  },
+  "createSessionGalleryImageDescription": "Gallery image description",
+  "@createSessionGalleryImageDescription": {
+    "description": "Create form: \"Gallery image description\"."
+  },
+  "createSessionCoverImageDescription": "Cover image description",
+  "@createSessionCoverImageDescription": {
+    "description": "Create form: \"Cover image description\"."
+  },
+  "createSessionContentLanguage": "Content language",
+  "@createSessionContentLanguage": {
+    "description": "Create form: \"Content language\"."
+  },
+  "createSessionCoverImageUrl": "Cover image URL",
+  "@createSessionCoverImageUrl": {
+    "description": "Create form: \"Cover image URL\"."
+  },
+  "createSessionFullDescription": "Full description",
+  "@createSessionFullDescription": {
+    "description": "Create form: \"Full description\"."
+  },
+  "createSessionShortDescription": "Short description",
+  "@createSessionShortDescription": {
+    "description": "Create form: \"Short description\"."
+  },
+  "createSessionSubcategory": "Subcategory",
+  "@createSessionSubcategory": {
+    "description": "Create form: \"Subcategory\"."
+  },
+  "createSessionCategory": "Category",
+  "@createSessionCategory": {
+    "description": "Create form: \"Category\"."
+  },
+  "createSessionTitle": "Title",
+  "@createSessionTitle": {
+    "description": "Create form: \"Title\"."
+  },
+  "createSessionWhatWhere": "What and where",
+  "@createSessionWhatWhere": {
+    "description": "Create form: \"What and where\"."
+  },
+  "createSessionLoadingBookableSessionDraft": "Loading Bookable session draft…",
+  "@createSessionLoadingBookableSessionDraft": {
+    "description": "Create form: \"Loading Bookable session draft…\"."
+  },
+  "createClassPublish": "Publish",
+  "@createClassPublish": {
+    "description": "Create form: \"Publish\"."
+  },
+  "createClassSaveDraft": "Save draft",
+  "@createClassSaveDraft": {
+    "description": "Create form: \"Save draft\"."
+  },
+  "createClassEnrollmentState": "Enrollment state",
+  "@createClassEnrollmentState": {
+    "description": "Create form: \"Enrollment state\"."
+  },
+  "createClassEnrollmentLinkHttps": "Enrollment link (https)",
+  "@createClassEnrollmentLinkHttps": {
+    "description": "Create form: \"Enrollment link (https)\"."
+  },
+  "createClassEnrollmentOrganiserSite": "Enrollment on the organiser site",
+  "@createClassEnrollmentOrganiserSite": {
+    "description": "Create form: \"Enrollment on the organiser site\"."
+  },
+  "createClassPriceCovers": "The price covers",
+  "@createClassPriceCovers": {
+    "description": "Create form: \"The price covers\"."
+  },
+  "createClassAmountCents": "Amount in cents ({value})",
+  "@createClassAmountCents": {
+    "description": "Class price field: amount in cents of the currency code value.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "EUR"
+      }
+    }
+  },
+  "createClassPrice": "Price",
+  "@createClassPrice": {
+    "description": "Create form: \"Price\"."
+  },
+  "createClassDeclaredGroupSizeOptional": "Declared group size (optional)",
+  "@createClassDeclaredGroupSizeOptional": {
+    "description": "Create form: \"Declared group size (optional)\"."
+  },
+  "createClassWhatBringKnowOnePerLine": "What to bring or know (one per line)",
+  "@createClassWhatBringKnowOnePerLine": {
+    "description": "Create form: \"What to bring or know (one per line)\"."
+  },
+  "createClassIncludedMaterialsOnePerLine": "Included materials (one per line)",
+  "@createClassIncludedMaterialsOnePerLine": {
+    "description": "Create form: \"Included materials (one per line)\"."
+  },
+  "createClassAddDate": "Add date",
+  "@createClassAddDate": {
+    "description": "Create form: \"Add date\"."
+  },
+  "createClassRemoveDate": "Remove date",
+  "@createClassRemoveDate": {
+    "description": "Create form: \"Remove date\"."
+  },
+  "createClassLocalTimeDoesNotExistAmbiguous": "This local time does not exist or is ambiguous",
+  "@createClassLocalTimeDoesNotExistAmbiguous": {
+    "description": "Create form: \"This local time does not exist or is ambiguous\"."
+  },
+  "createClassPublicArea": "Public area",
+  "@createClassPublicArea": {
+    "description": "Create form: \"Public area\"."
+  },
+  "createClassShowOnlyAreaPublicly": "Show only the area publicly",
+  "@createClassShowOnlyAreaPublicly": {
+    "description": "Create form: \"Show only the area publicly\"."
+  },
+  "createClassConfirmLocation": "Confirm this location",
+  "@createClassConfirmLocation": {
+    "description": "Create form: \"Confirm this location\"."
+  },
+  "createClassLocationConfirmed": "Location confirmed",
+  "@createClassLocationConfirmed": {
+    "description": "Create form: \"Location confirmed\"."
+  },
+  "createClassOnlineProvider": "Online provider",
+  "@createClassOnlineProvider": {
+    "description": "Create form: \"Online provider\"."
+  },
+  "createClassDelivery": "Delivery",
+  "@createClassDelivery": {
+    "description": "Create form: \"Delivery\"."
+  },
+  "createClassTimesAre": "Times are in {value}",
+  "@createClassTimesAre": {
+    "description": "Class: times are in the IANA zone value.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "Europe/Riga"
+      }
+    }
+  },
+  "createClassFixedSeries": "Fixed series",
+  "@createClassFixedSeries": {
+    "description": "Create form: \"Fixed series\"."
+  },
+  "createClassSingleClass": "Single class",
+  "@createClassSingleClass": {
+    "description": "Create form: \"Single class\"."
+  },
+  "createClassClear": "Clear",
+  "@createClassClear": {
+    "description": "Create form: \"Clear\"."
+  },
+  "createClassNotPublishedClearExplicitly": "It is not published; clear it explicitly.",
+  "@createClassNotPublishedClearExplicitly": {
+    "description": "Create form: \"It is not published; clear it explicitly.\"."
+  },
+  "createClassDraftHasOldSchedule": "This draft has an old schedule",
+  "@createClassDraftHasOldSchedule": {
+    "description": "Create form: \"This draft has an old schedule\"."
+  },
+  "createClassInstructorBio": "Instructor bio",
+  "@createClassInstructorBio": {
+    "description": "Create form: \"Instructor bio\"."
+  },
+  "createClassInstructorName": "Instructor name",
+  "@createClassInstructorName": {
+    "description": "Create form: \"Instructor name\"."
+  },
+  "createClassWhatParticipantsTakeHome": "What participants take home",
+  "@createClassWhatParticipantsTakeHome": {
+    "description": "Create form: \"What participants take home\"."
+  },
+  "createClassNoPrerequisites": "No prerequisites",
+  "@createClassNoPrerequisites": {
+    "description": "Create form: \"No prerequisites\"."
+  },
+  "createClassProgrammeStepsOnePerLine": "Programme steps (one per line)",
+  "@createClassProgrammeStepsOnePerLine": {
+    "description": "Create form: \"Programme steps (one per line)\"."
+  },
+  "createClassGalleryImageDescription": "Gallery image description",
+  "@createClassGalleryImageDescription": {
+    "description": "Create form: \"Gallery image description\"."
+  },
+  "createClassCoverImageDescription": "Cover image description",
+  "@createClassCoverImageDescription": {
+    "description": "Create form: \"Cover image description\"."
+  },
+  "createClassContentLanguage": "Content language",
+  "@createClassContentLanguage": {
+    "description": "Create form: \"Content language\"."
+  },
+  "createClassCoverImage": "Cover image",
+  "@createClassCoverImage": {
+    "description": "Create form: \"Cover image\"."
+  },
+  "createClassFullDescription": "Full description",
+  "@createClassFullDescription": {
+    "description": "Create form: \"Full description\"."
+  },
+  "createClassShortDescription": "Short description",
+  "@createClassShortDescription": {
+    "description": "Create form: \"Short description\"."
+  },
+  "createClassOfferingKind": "Offering kind",
+  "@createClassOfferingKind": {
+    "description": "Create form: \"Offering kind\"."
+  },
+  "createClassClassDraftWasSavedByNewer": "This Class draft was saved by a newer app version and is read-only.",
+  "@createClassClassDraftWasSavedByNewer": {
+    "description": "Create form: \"This Class draft was saved by a newer app version and is rea\"."
+  },
+  "createRouteGpxOperationCouldNotCompleted": "The GPX operation could not be completed.",
+  "@createRouteGpxOperationCouldNotCompleted": {
+    "description": "Create form: \"The GPX operation could not be completed.\"."
+  },
+  "createRouteChooseOneContinuousTrackRouteDraft": "Choose one continuous track for this Route draft.",
+  "@createRouteChooseOneContinuousTrackRouteDraft": {
+    "description": "Create form: \"Choose one continuous track for this Route draft.\"."
+  },
+  "createRouteSavingGpxFilesNotAvailableDevice": "Saving GPX files is not available on this device yet.",
+  "@createRouteSavingGpxFilesNotAvailableDevice": {
+    "description": "Create form: \"Saving GPX files is not available on this device yet.\"."
+  },
+  "createRouteOnlyOneContinuousRouteTrackCan": "Only one continuous Route track can be exported.",
+  "@createRouteOnlyOneContinuousRouteTrackCan": {
+    "description": "Create form: \"Only one continuous Route track can be exported.\"."
+  },
+  "createRouteGpxTrackContainsTooManyPoints": "The GPX track contains too many points.",
+  "@createRouteGpxTrackContainsTooManyPoints": {
+    "description": "Create form: \"The GPX track contains too many points.\"."
+  },
+  "createRouteGpxFileDamagedHasUnsupportedStructure": "The GPX file is damaged or has an unsupported structure.",
+  "@createRouteGpxFileDamagedHasUnsupportedStructure": {
+    "description": "Create form: \"The GPX file is damaged or has an unsupported structure.\"."
+  },
+  "createRouteChooseValidGpxFile": "Choose a valid GPX file.",
+  "@createRouteChooseValidGpxFile": {
+    "description": "Create form: \"Choose a valid GPX file.\"."
+  },
+  "createRouteGpxFileTooLarge": "The GPX file is too large.",
+  "@createRouteGpxFileTooLarge": {
+    "description": "Create form: \"The GPX file is too large.\"."
+  },
+  "createRouteDismiss": "Dismiss",
+  "@createRouteDismiss": {
+    "description": "Create form: \"Dismiss\"."
+  },
+  "createRouteImportTrack": "Import track",
+  "@createRouteImportTrack": {
+    "description": "Create form: \"Import track\"."
+  },
+  "createRouteCancel": "Cancel",
+  "@createRouteCancel": {
+    "description": "Create form: \"Cancel\"."
+  },
+  "createRouteTheyRemainOffTrackUntilReviewed": "They remain off-track until reviewed and positioned.",
+  "@createRouteTheyRemainOffTrackUntilReviewed": {
+    "description": "Create form: \"They remain off-track until reviewed and positioned.\"."
+  },
+  "createRouteReviewTheseConnectorsMapBeforePublishing": "Review these connectors on the map before publishing.",
+  "@createRouteReviewTheseConnectorsMapBeforePublishing": {
+    "description": "Create form: \"Review these connectors on the map before publishing.\"."
+  },
+  "createRouteChooseOneTrack": "Choose one track",
+  "@createRouteChooseOneTrack": {
+    "description": "Create form: \"Choose one track\"."
+  },
+  "createRoutePrivateMetadataTimestampsWillRemovedDuring": "Private metadata and timestamps will be removed during import.",
+  "@createRoutePrivateMetadataTimestampsWillRemovedDuring": {
+    "description": "Create form: \"Private metadata and timestamps will be removed during impor\"."
+  },
+  "createRouteRouteBuilder": "Route builder",
+  "@createRouteRouteBuilder": {
+    "description": "Create form: \"Route builder\"."
+  },
+  "createRouteReplace": "Replace",
+  "@createRouteReplace": {
+    "description": "Create form: \"Replace\"."
+  },
+  "createRouteCurrentGeometryWillRemainAvailableThrough": "The current geometry will remain available through Undo.",
+  "@createRouteCurrentGeometryWillRemainAvailableThrough": {
+    "description": "Create form: \"The current geometry will remain available through Undo.\"."
+  },
+  "createRouteReplaceExistingTrack": "Replace existing track?",
+  "@createRouteReplaceExistingTrack": {
+    "description": "Create form: \"Replace existing track?\"."
+  },
+  "createRouteContinue": "Continue",
+  "@createRouteContinue": {
+    "description": "Create form: \"Continue\"."
+  },
+  "createRouteBack": "Back",
+  "@createRouteBack": {
+    "description": "Create form: \"Back\"."
+  },
+  "createRouteMarkedTrail": "Marked trail",
+  "@createRouteMarkedTrail": {
+    "description": "Create form: \"Marked trail\"."
+  },
+  "createRouteHard": "Hard",
+  "@createRouteHard": {
+    "description": "Create form: \"Hard\"."
+  },
+  "createRouteModerate": "Moderate",
+  "@createRouteModerate": {
+    "description": "Create form: \"Moderate\"."
+  },
+  "createRouteEasy": "Easy",
+  "@createRouteEasy": {
+    "description": "Create form: \"Easy\"."
+  },
+  "createRouteDifficulty": "Difficulty",
+  "@createRouteDifficulty": {
+    "description": "Create form: \"Difficulty\"."
+  },
+  "createRouteConditions": "Conditions",
+  "@createRouteConditions": {
+    "description": "Create form: \"Conditions\"."
+  },
+  "createRouteSubcategory": "Subcategory",
+  "@createRouteSubcategory": {
+    "description": "Create form: \"Subcategory\"."
+  },
+  "createRouteCategory": "Category",
+  "@createRouteCategory": {
+    "description": "Create form: \"Category\"."
+  },
+  "createRouteTaxonomy": "Category",
+  "@createRouteTaxonomy": {
+    "description": "Create form: \"Taxonomy\"."
+  },
+  "createRouteCoverImageUrl": "Cover image URL",
+  "@createRouteCoverImageUrl": {
+    "description": "Create form: \"Cover image URL\"."
+  },
+  "createRouteFullDescription": "Full description",
+  "@createRouteFullDescription": {
+    "description": "Create form: \"Full description\"."
+  },
+  "createRouteShortDescription": "Short description *",
+  "@createRouteShortDescription": {
+    "description": "Create form: \"Short description *\"."
+  },
+  "createRouteRouteDetails": "Route details",
+  "@createRouteRouteDetails": {
+    "description": "Create form: \"Route details\"."
+  },
+  "createRoutePreferUnpavedTrails": "Prefer unpaved trails",
+  "@createRoutePreferUnpavedTrails": {
+    "description": "Create form: \"Prefer unpaved trails\"."
+  },
+  "createRouteAvoidStairs": "Avoid stairs",
+  "@createRouteAvoidStairs": {
+    "description": "Create form: \"Avoid stairs\"."
+  },
+  "createRouteRoutingPreferences": "Routing preferences",
+  "@createRouteRoutingPreferences": {
+    "description": "Create form: \"Routing preferences\"."
+  },
+  "createRouteLoop": "Loop",
+  "@createRouteLoop": {
+    "description": "Create form: \"Loop\"."
+  },
+  "createRouteOneWay": "One way",
+  "@createRouteOneWay": {
+    "description": "Create form: \"One way\"."
+  },
+  "createRouteRouteShape": "Route shape",
+  "@createRouteRouteShape": {
+    "description": "Create form: \"Route shape\"."
+  },
+  "createRouteProfile": "Profile",
+  "@createRouteProfile": {
+    "description": "Create form: \"Profile\"."
+  },
+  "createRouteBundledMeAparksGraphCurrentlyValidates": "The bundled Mežaparks graph currently validates walking routes locally.",
+  "@createRouteBundledMeAparksGraphCurrentlyValidates": {
+    "description": "Create form: \"The bundled Mežaparks graph currently validates walking rout\"."
+  },
+  "createRouteMovementProfile": "Movement profile",
+  "@createRouteMovementProfile": {
+    "description": "Create form: \"Movement profile\"."
+  },
+  "createRouteSaveFile": "Save file",
+  "@createRouteSaveFile": {
+    "description": "Create form: \"Save file\"."
+  },
+  "createRoutePrivateMetadataNotesTimestampsAreNever": "Private metadata, notes and timestamps are never exported.",
+  "@createRoutePrivateMetadataNotesTimestampsAreNever": {
+    "description": "Create form: \"Private metadata, notes and timestamps are never exported.\"."
+  },
+  "createRouteIncludeRoutePoi": "Include route POI",
+  "@createRouteIncludeRoutePoi": {
+    "description": "Create form: \"Include route POI\"."
+  },
+  "createRouteUnavailableTrack": "Unavailable for this track",
+  "@createRouteUnavailableTrack": {
+    "description": "Create form: \"Unavailable for this track\"."
+  },
+  "createRouteIncludeElevation": "Include elevation",
+  "@createRouteIncludeElevation": {
+    "description": "Create form: \"Include elevation\"."
+  },
+  "createRouteExportGpx": "Export GPX",
+  "@createRouteExportGpx": {
+    "description": "Create form: \"Export GPX\"."
+  },
+  "createRouteExportOnlyTrackOptionalRoutePoi": "Export only the track and optional route POI. Draft IDs, notes, safety data and timestamps are excluded.",
+  "@createRouteExportOnlyTrackOptionalRoutePoi": {
+    "description": "Create form: \"Export only the track and optional route POI. Draft IDs, not\"."
+  },
+  "createRouteInspectGpxFileLocallyChooseOne": "Inspect a GPX file locally, choose one track and remove private metadata.",
+  "@createRouteInspectGpxFileLocallyChooseOne": {
+    "description": "Create form: \"Inspect a GPX file locally, choose one track and remove priv\"."
+  },
+  "createRouteImportGpx": "Import GPX",
+  "@createRouteImportGpx": {
+    "description": "Create form: \"Import GPX\"."
+  },
+  "createRouteRecordMovementDeviceThenReviewAccuracy": "Record movement on this device, then review accuracy, gaps and privacy trimming.",
+  "@createRouteRecordMovementDeviceThenReviewAccuracy": {
+    "description": "Create form: \"Record movement on this device, then review accuracy, gaps a\"."
+  },
+  "createRouteRecordWithGps": "Record with GPS",
+  "@createRouteRecordWithGps": {
+    "description": "Create form: \"Record with GPS\"."
+  },
+  "createRouteDrawOneContinuousLineKeepIts": "Draw one continuous line and keep its exact geometry.",
+  "@createRouteDrawOneContinuousLineKeepIts": {
+    "description": "Create form: \"Draw one continuous line and keep its exact geometry.\"."
+  },
+  "createRouteFreehand": "Freehand",
+  "@createRouteFreehand": {
+    "description": "Create form: \"Freehand\"."
+  },
+  "createRoutePlaceAnchorsConnectThemAlongOffline": "Place anchors and connect them along the offline trail graph.",
+  "@createRoutePlaceAnchorsConnectThemAlongOffline": {
+    "description": "Create form: \"Place anchors and connect them along the offline trail graph\"."
+  },
+  "createRoutePoints": "Points",
+  "@createRoutePoints": {
+    "description": "Create form: \"Points\"."
+  },
+  "createRouteAllMethodsUseOneCanonicalRoute": "All methods use one canonical Route model. This demo enables points and freehand without paid services.",
+  "@createRouteAllMethodsUseOneCanonicalRoute": {
+    "description": "Create form: \"All methods use one canonical Route model. This demo enables\"."
+  },
+  "createRouteHowWillYouCreateTrack": "How will you create the track?",
+  "@createRouteHowWillYouCreateTrack": {
+    "description": "Create form: \"How will you create the track?\"."
+  },
+  "createRouteEditorWillReadyMoment": "The editor will be ready in a moment.",
+  "@createRouteEditorWillReadyMoment": {
+    "description": "Create form: \"The editor will be ready in a moment.\"."
+  },
+  "createRoutePreparingRouteDraft": "Preparing Route draft…",
+  "@createRoutePreparingRouteDraft": {
+    "description": "Create form: \"Preparing Route draft…\"."
+  },
+  "createRouteRestoringLatestPersistedRevision": "Restoring the latest saved revision.",
+  "@createRouteRestoringLatestPersistedRevision": {
+    "description": "Create form: \"Restoring the latest persisted revision.\"."
+  },
+  "createRouteRetry": "Retry",
+  "@createRouteRetry": {
+    "description": "Create form: \"Retry\"."
+  },
+  "createRouteOfflineMapCouldNotLoaded": "Offline map could not be loaded",
+  "@createRouteOfflineMapCouldNotLoaded": {
+    "description": "Create form: \"Offline map could not be loaded\"."
+  },
+  "createRouteNoNetworkPaidRoutingCallRequired": "No network or paid routing call is required.",
+  "@createRouteNoNetworkPaidRoutingCallRequired": {
+    "description": "Create form: \"No network or paid routing call is required.\"."
+  },
+  "createRouteLoadingOfflineTrailEditor": "Loading offline trail editor…",
+  "@createRouteLoadingOfflineTrailEditor": {
+    "description": "Create form: \"Loading offline trail editor…\"."
+  },
+  "createRouteGapNeedsTrailRoutingBeforeCan": "This gap needs trail routing before it can be applied.",
+  "@createRouteGapNeedsTrailRoutingBeforeCan": {
+    "description": "Create form: \"This gap needs trail routing before it can be applied.\"."
+  },
+  "createRouteReviewEveryTrackGapBeforeContinuing": "Review every track gap before continuing.",
+  "@createRouteReviewEveryTrackGapBeforeContinuing": {
+    "description": "Create form: \"Review every track gap before continuing.\"."
+  },
+  "createRouteProtectedRecordingCouldNotSavedRecording": "The protected recording could not be saved. Recording was stopped safely.",
+  "@createRouteProtectedRecordingCouldNotSavedRecording": {
+    "description": "Create form: \"The protected recording could not be saved. Recording was st\"."
+  },
+  "createRouteNotEnoughReliableMovementWasRecorded": "Not enough reliable movement was recorded. Delete this recording and try again.",
+  "@createRouteNotEnoughReliableMovementWasRecorded": {
+    "description": "Create form: \"Not enough reliable movement was recorded. Delete this recor\"."
+  },
+  "createRouteSafetyPointLimitWasReachedFinish": "The safety point limit was reached. Finish and review this recording.",
+  "@createRouteSafetyPointLimitWasReachedFinish": {
+    "description": "Create form: \"The safety point limit was reached. Finish and review this r\"."
+  },
+  "createRouteDeviceLocationServicesAreSwitchedOff": "Device location services are switched off.",
+  "@createRouteDeviceLocationServicesAreSwitchedOff": {
+    "description": "Create form: \"Device location services are switched off.\"."
+  },
+  "createRouteBackgroundAccessWasNotGrantedTurn": "Background access was not granted. Turn off screen-lock recording or allow it in settings.",
+  "@createRouteBackgroundAccessWasNotGrantedTurn": {
+    "description": "Create form: \"Background access was not granted. Turn off screen-lock reco\"."
+  },
+  "createRouteLocationAccessDisabledAppSettings": "Location access is disabled in app settings.",
+  "@createRouteLocationAccessDisabledAppSettings": {
+    "description": "Create form: \"Location access is disabled in app settings.\"."
+  },
+  "createRouteLocationPermissionWasNotGranted": "Location permission was not granted.",
+  "@createRouteLocationPermissionWasNotGranted": {
+    "description": "Create form: \"Location permission was not granted.\"."
+  },
+  "createRouteYourSavedRecordingPreservedWhenRecovery": "Your saved recording is preserved when recovery is possible.",
+  "@createRouteYourSavedRecordingPreservedWhenRecovery": {
+    "description": "Create form: \"Your saved recording is preserved when recovery is possible.\"."
+  },
+  "createRouteInspectGapsAccuracyPrivacyTrimmingBefore": "Inspect gaps, accuracy and privacy trimming before using the track.",
+  "@createRouteInspectGapsAccuracyPrivacyTrimmingBefore": {
+    "description": "Create form: \"Inspect gaps, accuracy and privacy trimming before using the\"."
+  },
+  "createRouteFilteringUnsafeNoisyGpsPoints": "Filtering unsafe and noisy GPS points.",
+  "@createRouteFilteringUnsafeNoisyGpsPoints": {
+    "description": "Create form: \"Filtering unsafe and noisy GPS points.\"."
+  },
+  "createRouteReadingProtectedLocalJournal": "Reading the protected local journal.",
+  "@createRouteReadingProtectedLocalJournal": {
+    "description": "Create form: \"Reading the protected local journal.\"."
+  },
+  "createRoutePauseStaysAsExplicitGapWill": "The pause stays as an explicit gap and will never be connected silently.",
+  "@createRoutePauseStaysAsExplicitGapWill": {
+    "description": "Create form: \"The pause stays as an explicit gap and will never be connect\"."
+  },
+  "createRouteKeepRechargeOpenWhileMovingAlong": "Keep Recharge open while moving along the Route.",
+  "@createRouteKeepRechargeOpenWhileMovingAlong": {
+    "description": "Create form: \"Keep Recharge open while moving along the Route.\"."
+  },
+  "createRouteRecordingContinuesWithVisibleSystemIndicator": "Recording continues with a visible system indicator.",
+  "@createRouteRecordingContinuesWithVisibleSystemIndicator": {
+    "description": "Create form: \"Recording continues with a visible system indicator.\"."
+  },
+  "createRouteRechargeRequestsLocationOnlyRouteRecording": "Recharge requests location only for Route recording.",
+  "@createRouteRechargeRequestsLocationOnlyRouteRecording": {
+    "description": "Create form: \"Recharge requests location only for Route recording.\"."
+  },
+  "createRouteWalkRunRideRoutePointsStay": "Walk, run or ride the Route. Points stay encrypted on this device until you apply the track.",
+  "@createRouteWalkRunRideRoutePointsStay": {
+    "description": "Create form: \"Walk, run or ride the Route. Points stay encrypted on this d\"."
+  },
+  "createRouteRecordingReady": "Recording ready",
+  "@createRouteRecordingReady": {
+    "description": "Create form: \"Recording ready\"."
+  },
+  "createRouteProcessingTrack": "Processing track…",
+  "@createRouteProcessingTrack": {
+    "description": "Create form: \"Processing track…\"."
+  },
+  "createRouteRecoveringRecording": "Recovering recording…",
+  "@createRouteRecoveringRecording": {
+    "description": "Create form: \"Recovering recording…\"."
+  },
+  "createRouteRecordingPaused": "Recording paused",
+  "@createRouteRecordingPaused": {
+    "description": "Create form: \"Recording paused\"."
+  },
+  "createRouteRecordingRoute": "Recording Route",
+  "@createRouteRecordingRoute": {
+    "description": "Create form: \"Recording Route\"."
+  },
+  "createRouteCheckingGpsAccess": "Checking GPS access…",
+  "@createRouteCheckingGpsAccess": {
+    "description": "Create form: \"Checking GPS access…\"."
+  },
+  "createRouteOpenAppSettings": "Open app settings",
+  "@createRouteOpenAppSettings": {
+    "description": "Create form: \"Open app settings\"."
+  },
+  "createRouteRecordingActive": "Recording is active",
+  "@createRouteRecordingActive": {
+    "description": "Create form: \"Recording is active\"."
+  },
+  "createRouteConnectDirectly": "Connect directly",
+  "@createRouteConnectDirectly": {
+    "description": "Create form: \"Connect directly\"."
+  },
+  "createRouteRecordedRoutePreviewTrackSectionsGaps": "Recorded Route preview: track sections {count}, gaps {total}",
+  "@createRouteRecordedRoutePreviewTrackSectionsGaps": {
+    "description": "Route recording preview semantics: count track sections, total gaps.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "total": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "createRouteDelete": "Delete",
+  "@createRouteDelete": {
+    "description": "Create form: \"Delete\"."
+  },
+  "createRouteRecoveryJournalAllRecordedPointsWill": "The recovery journal and all recorded points will be removed.",
+  "@createRouteRecoveryJournalAllRecordedPointsWill": {
+    "description": "Create form: \"The recovery journal and all recorded points will be removed\"."
+  },
+  "createRouteDeleteGpsRecording": "Delete GPS recording?",
+  "@createRouteDeleteGpsRecording": {
+    "description": "Create form: \"Delete GPS recording?\"."
+  },
+  "createRouteUseTrack": "Use this track",
+  "@createRouteUseTrack": {
+    "description": "Create form: \"Use this track\"."
+  },
+  "createRouteRouteMustStayContinuousConfirmEach": "A Route must stay continuous. Confirm each straight connection or record the missing section again.",
+  "@createRouteRouteMustStayContinuousConfirmEach": {
+    "description": "Create form: \"A Route must stay continuous. Confirm each straight connecti\"."
+  },
+  "createRouteTrackGaps": "Track gaps",
+  "@createRouteTrackGaps": {
+    "description": "Create form: \"Track gaps\"."
+  },
+  "createRouteHideRouteEnd": "Hide route end",
+  "@createRouteHideRouteEnd": {
+    "description": "Create form: \"Hide route end\"."
+  },
+  "createRouteHideRouteStart": "Hide route start",
+  "@createRouteHideRouteStart": {
+    "description": "Create form: \"Hide route start\"."
+  },
+  "createRoutePrivacyTrim": "Privacy trim",
+  "@createRoutePrivacyTrim": {
+    "description": "Create form: \"Privacy trim\"."
+  },
+  "createRouteReviewRecordedTrack": "Review recorded track",
+  "@createRouteReviewRecordedTrack": {
+    "description": "Create form: \"Review recorded track\"."
+  },
+  "createRouteDeleteRecording": "Delete recording",
+  "@createRouteDeleteRecording": {
+    "description": "Create form: \"Delete recording\"."
+  },
+  "createRouteFinishReview": "Finish and review",
+  "@createRouteFinishReview": {
+    "description": "Create form: \"Finish and review\"."
+  },
+  "createRouteResumeRecording": "Resume recording",
+  "@createRouteResumeRecording": {
+    "description": "Create form: \"Resume recording\"."
+  },
+  "createRouteFinish": "Finish",
+  "@createRouteFinish": {
+    "description": "Create form: \"Finish\"."
+  },
+  "createRoutePause": "Pause",
+  "@createRoutePause": {
+    "description": "Create form: \"Pause\"."
+  },
+  "createRouteStartRecording": "Start recording",
+  "@createRouteStartRecording": {
+    "description": "Create form: \"Start recording\"."
+  },
+  "createRouteRequiresBackgroundLocationPermissionShowsSystem": "Requires background location permission and shows a system indicator.",
+  "@createRouteRequiresBackgroundLocationPermissionShowsSystem": {
+    "description": "Create form: \"Requires background location permission and shows a system i\"."
+  },
+  "createRouteContinueWhileScreenLocked": "Continue while the screen is locked",
+  "@createRouteContinueWhileScreenLocked": {
+    "description": "Create form: \"Continue while screen is locked\"."
+  },
+  "createRouteRecoveredSafelyAfterPreviousSessionReview": "Recovered safely after the previous session. Review before resuming.",
+  "@createRouteRecoveredSafelyAfterPreviousSessionReview": {
+    "description": "Create form: \"Recovered safely after the previous session. Review before r\"."
+  },
+  "createRouteRemoveWaypoint": "Remove waypoint",
+  "@createRouteRemoveWaypoint": {
+    "description": "Create form: \"Remove waypoint\"."
+  },
+  "createRouteAttachAnchor": "Attach to anchor",
+  "@createRouteAttachAnchor": {
+    "description": "Create form: \"Attach to anchor\"."
+  },
+  "createRouteAddViewpointFromAnchorMenu": "Add a viewpoint from an anchor menu.",
+  "@createRouteAddViewpointFromAnchorMenu": {
+    "description": "Create form: \"Add a viewpoint from an anchor menu.\"."
+  },
+  "createRouteSplitAtMidpoint": "Split at midpoint",
+  "@createRouteSplitAtMidpoint": {
+    "description": "Create form: \"Split at midpoint\"."
+  },
+  "createRouteUseIntentionalDirectLine": "Use intentional direct line",
+  "@createRouteUseIntentionalDirectLine": {
+    "description": "Create form: \"Use intentional direct line\"."
+  },
+  "createRouteRetryRouting": "Retry routing",
+  "@createRouteRetryRouting": {
+    "description": "Create form: \"Retry routing\"."
+  },
+  "createRouteSegmentActions": "Segment actions",
+  "@createRouteSegmentActions": {
+    "description": "Create form: \"Segment actions\"."
+  },
+  "createRouteRemoveAnchor": "Remove anchor",
+  "@createRouteRemoveAnchor": {
+    "description": "Create form: \"Remove anchor\"."
+  },
+  "createRouteAddViewpoint": "Add viewpoint",
+  "@createRouteAddViewpoint": {
+    "description": "Create form: \"Add viewpoint\"."
+  },
+  "createRouteAnchorActions": "Anchor actions",
+  "@createRouteAnchorActions": {
+    "description": "Create form: \"Anchor actions\"."
+  },
+  "createRouteMoveAnchorEast": "Move anchor east",
+  "@createRouteMoveAnchorEast": {
+    "description": "Create form: \"Move anchor east\"."
+  },
+  "createRouteMoveAnchorWest": "Move anchor west",
+  "@createRouteMoveAnchorWest": {
+    "description": "Create form: \"Move anchor west\"."
+  },
+  "createRouteMoveAnchorSouth": "Move anchor south",
+  "@createRouteMoveAnchorSouth": {
+    "description": "Create form: \"Move anchor south\"."
+  },
+  "createRouteMoveAnchorNorth": "Move anchor north",
+  "@createRouteMoveAnchorNorth": {
+    "description": "Create form: \"Move anchor north\"."
+  },
+  "createRouteNoAnchorsYet": "No anchors yet.",
+  "@createRouteNoAnchorsYet": {
+    "description": "Create form: \"No anchors yet.\"."
+  },
+  "createRouteEveryActionAvailableAsLabelledControl": "Every action is available as a labelled control.",
+  "@createRouteEveryActionAvailableAsLabelledControl": {
+    "description": "Create form: \"Every action is available as a labelled control.\"."
+  },
+  "createRouteAddAnchor": "Add anchor",
+  "@createRouteAddAnchor": {
+    "description": "Create form: \"Add anchor\"."
+  },
+  "createRouteLongitude": "Longitude",
+  "@createRouteLongitude": {
+    "description": "Create form: \"Longitude\"."
+  },
+  "createRouteLatitude": "Latitude",
+  "@createRouteLatitude": {
+    "description": "Create form: \"Latitude\"."
+  },
+  "createRouteCoordinatesProvideKeyboardScreenReaderAlternative": "Coordinates provide a keyboard and screen-reader alternative.",
+  "@createRouteCoordinatesProvideKeyboardScreenReaderAlternative": {
+    "description": "Create form: \"Coordinates provide a keyboard and screen-reader alternative\"."
+  },
+  "createRouteAddAnchorWithoutMapGestures": "Add anchor without map gestures",
+  "@createRouteAddAnchorWithoutMapGestures": {
+    "description": "Create form: \"Add anchor without map gestures\"."
+  },
+  "createRouteLastSaved": "Last saved",
+  "@createRouteLastSaved": {
+    "description": "Create form: \"Last saved\"."
+  },
+  "createRouteRedo": "Redo",
+  "@createRouteRedo": {
+    "description": "Create form: \"Redo\"."
+  },
+  "createRouteUndo": "Undo",
+  "@createRouteUndo": {
+    "description": "Create form: \"Undo\"."
+  },
+  "createRouteTapMapAddAnchorsLocalGraph": "Tap the map to add anchors. The local graph connects them along available trails.",
+  "@createRouteTapMapAddAnchorsLocalGraph": {
+    "description": "Create form: \"Tap the map to add anchors. The local graph connects them al\"."
+  },
+  "createRouteDrawOneContinuousLineExistingGeometry": "Draw one continuous line. Existing geometry is replaced only after confirmation.",
+  "@createRouteDrawOneContinuousLineExistingGeometry": {
+    "description": "Create form: \"Draw one continuous line. Existing geometry is replaced only\"."
+  },
+  "createRouteOfflineTrailEditor": "Offline trail editor",
+  "@createRouteOfflineTrailEditor": {
+    "description": "Create form: \"Offline trail editor\"."
+  },
+  "createRouteSelectedDifficultyDiffersFromCalculatedRecommendation": "The selected difficulty differs from the calculated recommendation and requires review.",
+  "@createRouteSelectedDifficultyDiffersFromCalculatedRecommendation": {
+    "description": "Create form: \"The selected difficulty differs from the calculated recommen\"."
+  },
+  "createRouteRouteQuality": "Route quality",
+  "@createRouteRouteQuality": {
+    "description": "Create form: \"Route quality\"."
+  },
+  "createRouteYourProfileDoesNotHavePermission": "Your profile does not have permission to submit this Route.",
+  "@createRouteYourProfileDoesNotHavePermission": {
+    "description": "Create form: \"Your profile does not have permission to submit this Route.\"."
+  },
+  "createRouteSubmitRouteReview": "Submit Route for review",
+  "@createRouteSubmitRouteReview": {
+    "description": "Create form: \"Submit Route for review\"."
+  },
+  "createRoutePublishRoute": "Publish Route",
+  "@createRoutePublishRoute": {
+    "description": "Create form: \"Publish Route\"."
+  },
+  "createRouteRestoreLastSavedRevision": "Restore last saved revision",
+  "@createRouteRestoreLastSavedRevision": {
+    "description": "Create form: \"Restore last saved revision\"."
+  },
+  "createRouteSaveDraft": "Save draft",
+  "@createRouteSaveDraft": {
+    "description": "Create form: \"Save draft\"."
+  },
+  "createRouteRoutingProgress": "Routing in progress…",
+  "@createRouteRoutingProgress": {
+    "description": "Create form: \"Routing in progress…\"."
+  },
+  "createRouteInvestorDemoVersionUsesBundledOffline": "Demo: this version uses the bundled offline trail graph and is marked demo-only. No paid routing call is made.",
+  "@createRouteInvestorDemoVersionUsesBundledOffline": {
+    "description": "Create form: \"Investor demo: this version uses the bundled offline trail g\"."
+  },
+  "createRouteRouteDraftStructurallyReady": "Route draft is structurally ready",
+  "@createRouteRouteDraftStructurallyReady": {
+    "description": "Create form: \"Route draft is structurally ready\"."
+  },
+  "createRouteOfflineTrailMapTapAddRoute": "Offline trail map. Tap to add a route anchor.",
+  "@createRouteOfflineTrailMapTapAddRoute": {
+    "description": "Create form: \"Offline trail map. Tap to add a route anchor.\"."
+  },
+  "createRouteOfflineTrailMapDrawContinuousRoute": "Offline trail map. Draw a continuous route with one finger.",
+  "@createRouteOfflineTrailMapDrawContinuousRoute": {
+    "description": "Create form: \"Offline trail map. Draw a continuous route with one finger.\"."
+  },
+  "createRouteNoRouteVersionsAreWaitingReview": "No Route versions are waiting for review.",
+  "@createRouteNoRouteVersionsAreWaitingReview": {
+    "description": "Create form: \"No Route versions are waiting for review.\"."
+  },
+  "createRouteModerateRouteCapabilityRequired": "You need permission to moderate routes.",
+  "@createRouteModerateRouteCapabilityRequired": {
+    "description": "Create form: \"The moderate.route capability is required.\"."
+  },
+  "createRouteReject": "Reject",
+  "@createRouteReject": {
+    "description": "Create form: \"Reject\"."
+  },
+  "createRouteReasonCodeConciseReason": "Reason code or concise reason",
+  "@createRouteReasonCodeConciseReason": {
+    "description": "Create form: \"Reason code or concise reason\"."
+  },
+  "createRouteRejectRouteVersion": "Reject Route version",
+  "@createRouteRejectRouteVersion": {
+    "description": "Create form: \"Reject Route version\"."
+  },
+  "createRouteApprove": "Approve",
+  "@createRouteApprove": {
+    "description": "Create form: \"Approve\"."
+  },
+  "createRouteAccept": "Accept",
+  "@createRouteAccept": {
+    "description": "Create form: \"Accept\"."
+  },
+  "createRouteDefer": "Defer",
+  "@createRouteDefer": {
+    "description": "Create form: \"Defer\"."
+  },
+  "createRouteConfirm": "Confirm",
+  "@createRouteConfirm": {
+    "description": "Create form: \"Confirm\"."
+  },
+  "createRouteReasonCode": "Reason code",
+  "@createRouteReasonCode": {
+    "description": "Create form: \"Reason code\"."
+  },
+  "createRouteSafetyDecisionReason": "Safety decision reason",
+  "@createRouteSafetyDecisionReason": {
+    "description": "Create form: \"Safety decision reason\"."
+  },
+  "createRouteCandidateDecisionReason": "Candidate decision reason",
+  "@createRouteCandidateDecisionReason": {
+    "description": "Create form: \"Candidate decision reason\"."
+  },
+  "createRouteNewRouteRevisionDraftWasCreated": "A new Route revision draft was created. Published geometry was not changed.",
+  "@createRouteNewRouteRevisionDraftWasCreated": {
+    "description": "Create form: \"A new Route revision draft was created. Published geometry w\"."
+  },
+  "createRouteSafetyReports": "Safety reports",
+  "@createRouteSafetyReports": {
+    "description": "Create form: \"Safety reports\"."
+  },
+  "createRouteMapUpdateCandidates": "Map update candidates",
+  "@createRouteMapUpdateCandidates": {
+    "description": "Create form: \"Map update candidates\"."
+  },
+  "createRoutePublicationReview": "Publication review",
+  "@createRoutePublicationReview": {
+    "description": "Create form: \"Publication review\"."
+  },
+  "createRouteRefresh": "Refresh",
+  "@createRouteRefresh": {
+    "description": "Create form: \"Refresh\"."
+  },
+  "createRouteRouteModeration": "Route moderation",
+  "@createRouteRouteModeration": {
+    "description": "Create form: \"Route moderation\"."
+  },
+  "createScenarioPlannedScheduleNotLive": "Planned schedule, not live.",
+  "@createScenarioPlannedScheduleNotLive": {
+    "description": "Create form: \"Planned schedule, not live.\"."
+  },
+  "createScenarioPlannedServiceSelectedPreviewNotApplied": "Planned service selected for preview. Not applied to Scenario.",
+  "@createScenarioPlannedServiceSelectedPreviewNotApplied": {
+    "description": "Create form: \"Planned service selected for preview. Not applied to Scenari\"."
+  },
+  "createScenarioNoDirectPlannedServicesFound": "No direct planned services found.",
+  "@createScenarioNoDirectPlannedServicesFound": {
+    "description": "Create form: \"No direct planned services found.\"."
+  },
+  "createScenarioSearchingDirectPlannedServices": "Searching direct planned services.",
+  "@createScenarioSearchingDirectPlannedServices": {
+    "description": "Create form: \"Searching direct planned services.\"."
+  },
+  "createScenarioScheduleSearchFailedTryAgain": "Schedule search failed. Try again.",
+  "@createScenarioScheduleSearchFailedTryAgain": {
+    "description": "Create form: \"Schedule search failed. Try again.\"."
+  },
+  "createScenarioStopSearchFailedTryAgain": "Stop search failed. Try again.",
+  "@createScenarioStopSearchFailedTryAgain": {
+    "description": "Create form: \"Stop search failed. Try again.\"."
+  },
+  "createScenarioCompleteProviderStopsDateTimeSelection": "Complete the provider, stops, date and time selection.",
+  "@createScenarioCompleteProviderStopsDateTimeSelection": {
+    "description": "Create form: \"Complete the provider, stops, date and time selection.\"."
+  },
+  "createScenarioNewScheduleCouldNotSavedExisting": "The new schedule could not be saved. Existing cache was kept.",
+  "@createScenarioNewScheduleCouldNotSavedExisting": {
+    "description": "Create form: \"The new schedule could not be saved. Existing cache was kept\"."
+  },
+  "createScenarioCachedScheduleCouldNotRead2": "The cached schedule could not be read.",
+  "@createScenarioCachedScheduleCouldNotRead2": {
+    "description": "Create form: \"The cached schedule could not be read.\"."
+  },
+  "createScenarioDownloadedScheduleInvalidWasNotSaved": "The downloaded schedule is invalid and was not saved.",
+  "@createScenarioDownloadedScheduleInvalidWasNotSaved": {
+    "description": "Create form: \"The downloaded schedule is invalid and was not saved.\"."
+  },
+  "createScenarioScheduleCouldNotDownloaded": "The schedule could not be downloaded.",
+  "@createScenarioScheduleCouldNotDownloaded": {
+    "description": "Create form: \"The schedule could not be downloaded.\"."
+  },
+  "createScenarioYouAppearOfflineCachedDataRemains": "You appear to be offline. Cached data remains available.",
+  "@createScenarioYouAppearOfflineCachedDataRemains": {
+    "description": "Create form: \"You appear to be offline. Cached data remains available.\"."
+  },
+  "createScenarioScheduleDownloadsAreDisabledCachedData": "Schedule downloads are disabled. Cached data remains available.",
+  "@createScenarioScheduleDownloadsAreDisabledCachedData": {
+    "description": "Create form: \"Schedule downloads are disabled. Cached data remains availab\"."
+  },
+  "createScenarioDownloadSelectUsableCachedScheduleFirst": "Download or select a usable cached schedule first.",
+  "@createScenarioDownloadSelectUsableCachedScheduleFirst": {
+    "description": "Create form: \"Download or select a usable cached schedule first.\"."
+  },
+  "createScenarioChooseValidScheduleProvider": "Choose a valid schedule provider.",
+  "@createScenarioChooseValidScheduleProvider": {
+    "description": "Create form: \"Choose a valid schedule provider.\"."
+  },
+  "createScenarioNoOfficialScheduleProvidersAreConfigured": "No official schedule providers are configured.",
+  "@createScenarioNoOfficialScheduleProvidersAreConfigured": {
+    "description": "Create form: \"No official schedule providers are configured.\"."
+  },
+  "createScenarioOfficialScheduleTemporarilyUnavailable": "Official schedule is temporarily unavailable.",
+  "@createScenarioOfficialScheduleTemporarilyUnavailable": {
+    "description": "Create form: \"Official schedule is temporarily unavailable.\"."
+  },
+  "createScenarioCachedScheduleCouldNotRead": "Cached schedule could not be read.",
+  "@createScenarioCachedScheduleCouldNotRead": {
+    "description": "Create form: \"Cached schedule could not be read.\"."
+  },
+  "createScenarioCachedScheduleDamagedCannotUsed": "Cached schedule is damaged and cannot be used.",
+  "@createScenarioCachedScheduleDamagedCannotUsed": {
+    "description": "Create form: \"Cached schedule is damaged and cannot be used.\"."
+  },
+  "createScenarioNoScheduleDownloadedProvider": "No schedule is downloaded for this provider.",
+  "@createScenarioNoScheduleDownloadedProvider": {
+    "description": "Create form: \"No schedule is downloaded for this provider.\"."
+  },
+  "createScenarioCachedScheduleFreshnessUnknownRecheckBefore": "Cached schedule freshness is unknown. Recheck before travel.",
+  "@createScenarioCachedScheduleFreshnessUnknownRecheckBefore": {
+    "description": "Create form: \"Cached schedule freshness is unknown. Recheck before travel.\"."
+  },
+  "createScenarioCheckingCachedSchedule": "Checking cached schedule…",
+  "@createScenarioCheckingCachedSchedule": {
+    "description": "Create form: \"Checking cached schedule…\"."
+  },
+  "createScenarioPlannedScheduleNotLiveSelectionNot": "Planned schedule · not live. This selection is not yet applied to the Scenario.",
+  "@createScenarioPlannedScheduleNotLiveSelectionNot": {
+    "description": "Create form: \"Planned schedule · not live. This selection is not yet appli\"."
+  },
+  "createScenarioSelectionPreview": "Selection preview",
+  "@createScenarioSelectionPreview": {
+    "description": "Create form: \"Selection preview\"."
+  },
+  "createScenarioScheduleSearchFailed": "Schedule search failed.",
+  "@createScenarioScheduleSearchFailed": {
+    "description": "Create form: \"Schedule search failed.\"."
+  },
+  "createScenarioNoDirectServicesFoundAfterSelected": "No direct services found after the selected time.",
+  "@createScenarioNoDirectServicesFoundAfterSelected": {
+    "description": "Create form: \"No direct services found after the selected time.\"."
+  },
+  "createScenarioChooseDate": "Choose date",
+  "@createScenarioChooseDate": {
+    "description": "Create form: \"Choose date\"."
+  },
+  "createScenarioScenarioDateMissing": "Scenario date is missing",
+  "@createScenarioScenarioDateMissing": {
+    "description": "Create form: \"Scenario date is missing\"."
+  },
+  "createScenarioRetry": "Retry",
+  "@createScenarioRetry": {
+    "description": "Create form: \"Retry\"."
+  },
+  "createScenarioUseCached": "Use cached",
+  "@createScenarioUseCached": {
+    "description": "Create form: \"Use cached\"."
+  },
+  "createScenarioUpdateSchedule": "Update schedule",
+  "@createScenarioUpdateSchedule": {
+    "description": "Create form: \"Update schedule\"."
+  },
+  "createScenarioDownloadSchedule": "Download schedule",
+  "@createScenarioDownloadSchedule": {
+    "description": "Create form: \"Download schedule\"."
+  },
+  "createScenarioScheduleProvider": "Schedule provider",
+  "@createScenarioScheduleProvider": {
+    "description": "Create form: \"Schedule provider\"."
+  },
+  "createScenarioOfficialScheduleProvidersAreUnavailable": "Official schedule providers are unavailable.",
+  "@createScenarioOfficialScheduleProvidersAreUnavailable": {
+    "description": "Create form: \"Official schedule providers are unavailable.\"."
+  },
+  "createScenarioPlannedScheduleNotLiveDelaysTickets": "Planned schedule · not live. Delays, tickets, fares, seats and transfers are not confirmed. Recheck before travel.",
+  "@createScenarioPlannedScheduleNotLiveDelaysTickets": {
+    "description": "Create form: \"Planned schedule · not live. Delays, tickets, fares, seats a\"."
+  },
+  "createScenarioEnterScheduleManually": "Enter schedule manually",
+  "@createScenarioEnterScheduleManually": {
+    "description": "Create form: \"Enter schedule manually\"."
+  },
+  "createScenarioApplyCreatesOneUndoableScenarioChange": "Apply creates one undoable Scenario change.",
+  "@createScenarioApplyCreatesOneUndoableScenarioChange": {
+    "description": "Create form: \"Apply creates one undoable Scenario change.\"."
+  },
+  "createScenarioServiceHasNoValidStopCoordinates": "This service has no valid stop coordinates and cannot be applied safely.",
+  "@createScenarioServiceHasNoValidStopCoordinates": {
+    "description": "Create form: \"This service has no valid stop coordinates and cannot be app\"."
+  },
+  "createScenarioApplyScenario": "Apply to Scenario",
+  "@createScenarioApplyScenario": {
+    "description": "Create form: \"Apply to Scenario\"."
+  },
+  "createScenarioChooseDateCheckOfficialSchedule": "Choose a date to check the official schedule.",
+  "@createScenarioChooseDateCheckOfficialSchedule": {
+    "description": "Create form: \"Choose a date to check the official schedule.\"."
+  },
+  "createScenarioFindDirectServices": "Find direct services",
+  "@createScenarioFindDirectServices": {
+    "description": "Create form: \"Find direct services\"."
+  },
+  "createScenarioDownloadScheduleBeforeSearchingStops": "Download a schedule before searching for stops.",
+  "@createScenarioDownloadScheduleBeforeSearchingStops": {
+    "description": "Create form: \"Download a schedule before searching for stops.\"."
+  },
+  "createScenarioDestination": "Destination",
+  "@createScenarioDestination": {
+    "description": "Create form: \"Destination\"."
+  },
+  "createScenarioOrigin": "Origin",
+  "@createScenarioOrigin": {
+    "description": "Create form: \"Origin\"."
+  },
+  "createScenarioCloseOfficialSchedule": "Close official schedule",
+  "@createScenarioCloseOfficialSchedule": {
+    "description": "Create form: \"Close official schedule\"."
+  },
+  "createScenarioOfficialSchedule": "Official schedule",
+  "@createScenarioOfficialSchedule": {
+    "description": "Create form: \"Official schedule\"."
+  },
+  "createScenarioStaticTimetableSnapshotNotLive": "Static timetable snapshot · not live.",
+  "@createScenarioStaticTimetableSnapshotNotLive": {
+    "description": "Create form: \"Static timetable snapshot · not live.\"."
+  },
+  "createScenarioFindOfficialSchedule": "Find in official schedule",
+  "@createScenarioFindOfficialSchedule": {
+    "description": "Create form: \"Find in official schedule\"."
+  },
+  "createScenarioWorksOfflineStaysEditable": "Works offline and stays editable.",
+  "@createScenarioWorksOfflineStaysEditable": {
+    "description": "Create form: \"Works offline and stays editable.\"."
+  },
+  "createScenarioEnterManually": "Enter manually",
+  "@createScenarioEnterManually": {
+    "description": "Create form: \"Enter manually\"."
+  },
+  "createScenarioAddPlannedTransport": "Add planned transport",
+  "@createScenarioAddPlannedTransport": {
+    "description": "Create form: \"Add planned transport\"."
+  },
+  "createScenarioPublicTransport": "Public transport",
+  "@createScenarioPublicTransport": {
+    "description": "Create form: \"Public transport\"."
+  },
+  "createScenarioOwnCar": "Own car",
+  "@createScenarioOwnCar": {
+    "description": "Create form: \"Own car\"."
+  },
+  "createScenarioProviderValue": "Provider value",
+  "@createScenarioProviderValue": {
+    "description": "Create form: \"Provider value\"."
+  },
+  "createScenarioEstimatedTime": "Estimated time",
+  "@createScenarioEstimatedTime": {
+    "description": "Create form: \"Estimated time\"."
+  },
+  "createScenarioEnteredManually": "Entered manually",
+  "@createScenarioEnteredManually": {
+    "description": "Create form: \"Entered manually\"."
+  },
+  "createScenarioPlannedScheduleNotLive2": "Planned schedule · not live",
+  "@createScenarioPlannedScheduleNotLive2": {
+    "description": "Create form: \"Planned schedule · not live\"."
+  },
+  "createScenarioCustomLocation": "Custom location",
+  "@createScenarioCustomLocation": {
+    "description": "Create form: \"Custom location\"."
+  },
+  "createScenarioPlannedTransport": "Planned transport",
+  "@createScenarioPlannedTransport": {
+    "description": "Create form: \"Planned transport\"."
+  },
+  "createScenarioAddAtLeastTwoIndependentStops": "Add at least two independent stops. Use catalog objects or custom time blocks.",
+  "@createScenarioAddAtLeastTwoIndependentStops": {
+    "description": "Create form: \"Add at least two independent stops. Use catalog objects or c\"."
+  },
+  "createScenarioLocationDataRequiredManualLeg": "Location data required for a manual leg",
+  "@createScenarioLocationDataRequiredManualLeg": {
+    "description": "Create form: \"Location data required for a manual leg\"."
+  },
+  "createScenarioScenarioChangedRecheckBeforeReplacing": "Scenario changed. Recheck before replacing.",
+  "@createScenarioScenarioChangedRecheckBeforeReplacing": {
+    "description": "Create form: \"Scenario changed. Recheck before replacing.\"."
+  },
+  "createScenarioSavedScheduleReplaced": "Saved schedule replaced.",
+  "@createScenarioSavedScheduleReplaced": {
+    "description": "Create form: \"Saved schedule replaced.\"."
+  },
+  "createScenarioRecheckSchedule": "Recheck schedule",
+  "@createScenarioRecheckSchedule": {
+    "description": "Create form: \"Recheck schedule\"."
+  },
+  "createScenarioScenarioChangedReviewServiceTryAgain": "Scenario changed. Review the service and try again.",
+  "@createScenarioScenarioChangedReviewServiceTryAgain": {
+    "description": "Create form: \"Scenario changed. Review the service and try again.\"."
+  },
+  "createScenarioOfficialScheduleAddedScenario": "Official schedule added to Scenario.",
+  "@createScenarioOfficialScheduleAddedScenario": {
+    "description": "Create form: \"Official schedule added to Scenario.\"."
+  },
+  "createScenarioReview": "Review",
+  "@createScenarioReview": {
+    "description": "Create form: \"Review\"."
+  },
+  "createScenarioUseYourPrimaryTransportEnterHonest": "Use your primary transport or enter honest manual values.",
+  "@createScenarioUseYourPrimaryTransportEnterHonest": {
+    "description": "Create form: \"Use your primary transport or enter honest manual values.\"."
+  },
+  "createScenarioTravelBetweenStops": "Travel between stops",
+  "@createScenarioTravelBetweenStops": {
+    "description": "Create form: \"Travel between stops\"."
+  },
+  "createScenarioTimeLock": "Time lock",
+  "@createScenarioTimeLock": {
+    "description": "Create form: \"Time lock\"."
+  },
+  "createScenarioOrderLock": "Order lock",
+  "@createScenarioOrderLock": {
+    "description": "Create form: \"Order lock\"."
+  },
+  "createScenarioOptional": "Optional",
+  "@createScenarioOptional": {
+    "description": "Create form: \"Optional\"."
+  },
+  "createScenarioMandatory": "Mandatory",
+  "@createScenarioMandatory": {
+    "description": "Create form: \"Mandatory\"."
+  },
+  "createScenarioRemove": "Remove",
+  "@createScenarioRemove": {
+    "description": "Create form: \"Remove\"."
+  },
+  "createScenarioMoveDown": "Move down",
+  "@createScenarioMoveDown": {
+    "description": "Create form: \"Move down\"."
+  },
+  "createScenarioMoveUp": "Move up",
+  "@createScenarioMoveUp": {
+    "description": "Create form: \"Move up\"."
+  },
+  "createScenarioAddCustomTimeBlock": "Add custom time block",
+  "@createScenarioAddCustomTimeBlock": {
+    "description": "Create form: \"Add custom time block\"."
+  },
+  "createScenarioBusTrainTimesAreStoredAs": "Bus and train times are stored as planned schedule · not live.",
+  "@createScenarioBusTrainTimesAreStoredAs": {
+    "description": "Create form: \"Bus and train times are stored as planned schedule · not liv\"."
+  },
+  "createScenarioAddCustomStop": "Add custom stop",
+  "@createScenarioAddCustomStop": {
+    "description": "Create form: \"Add custom stop\"."
+  },
+  "createScenarioAdd": "Add",
+  "@createScenarioAdd": {
+    "description": "Create form: \"Add\"."
+  },
+  "createScenarioFindCatalogPlaceEventActivityRoute": "Find a catalog place, event, activity or Route",
+  "@createScenarioFindCatalogPlaceEventActivityRoute": {
+    "description": "Create form: \"Find a catalog place, event, activity or Route\"."
+  },
+  "createScenarioRedo": "Redo",
+  "@createScenarioRedo": {
+    "description": "Create form: \"Redo\"."
+  },
+  "createScenarioUndo": "Undo",
+  "@createScenarioUndo": {
+    "description": "Create form: \"Undo\"."
+  },
+  "createScenarioFeedRetrievedAt": "Feed retrieved at",
+  "@createScenarioFeedRetrievedAt": {
+    "description": "Create form: \"Feed retrieved at\"."
+  },
+  "createScenarioFeedVersion": "Feed version",
+  "@createScenarioFeedVersion": {
+    "description": "Create form: \"Feed version\"."
+  },
+  "createScenarioServiceLabel": "Service label",
+  "@createScenarioServiceLabel": {
+    "description": "Create form: \"Service label\"."
+  },
+  "createScenarioArrivalTime": "Arrival time",
+  "@createScenarioArrivalTime": {
+    "description": "Create form: \"Arrival time\"."
+  },
+  "createScenarioDepartureTime": "Departure time",
+  "@createScenarioDepartureTime": {
+    "description": "Create form: \"Departure time\"."
+  },
+  "createScenarioDestinationStop": "Destination stop",
+  "@createScenarioDestinationStop": {
+    "description": "Create form: \"Destination stop\"."
+  },
+  "createScenarioOriginStop": "Origin stop",
+  "@createScenarioOriginStop": {
+    "description": "Create form: \"Origin stop\"."
+  },
+  "createScenarioServiceCalendar": "Service calendar",
+  "@createScenarioServiceCalendar": {
+    "description": "Create form: \"Service calendar\"."
+  },
+  "createScenarioSavedItemWasKeptUnchangedCannot": "The saved item was kept unchanged and cannot be rechecked automatically.",
+  "@createScenarioSavedItemWasKeptUnchangedCannot": {
+    "description": "Create form: \"The saved item was kept unchanged and cannot be rechecked au\"."
+  },
+  "createScenarioSavedItemWasKeptUnchangedBecause": "The saved item was kept unchanged because cached schedule data is unavailable.",
+  "@createScenarioSavedItemWasKeptUnchangedBecause": {
+    "description": "Create form: \"The saved item was kept unchanged because cached schedule da\"."
+  },
+  "createScenarioSavedItemWasKeptUnchangedRecheck": "The saved item was kept unchanged. Recheck later or enter transport manually.",
+  "@createScenarioSavedItemWasKeptUnchangedRecheck": {
+    "description": "Create form: \"The saved item was kept unchanged. Recheck later or enter tr\"."
+  },
+  "createScenarioReviewEveryDifferenceBeforeReplacingSaved": "Review every difference before replacing the saved snapshot.",
+  "@createScenarioReviewEveryDifferenceBeforeReplacingSaved": {
+    "description": "Create form: \"Review every difference before replacing the saved snapshot.\"."
+  },
+  "createScenarioCachedOfficialScheduleMatchesSavedSnapshot": "The cached official schedule matches the saved snapshot. It is still not live.",
+  "@createScenarioCachedOfficialScheduleMatchesSavedSnapshot": {
+    "description": "Create form: \"The cached official schedule matches the saved snapshot. It \"."
+  },
+  "createScenarioSavedDataIncomplete": "Saved data is incomplete",
+  "@createScenarioSavedDataIncomplete": {
+    "description": "Create form: \"Saved data is incomplete\"."
+  },
+  "createScenarioRecheckUnavailable": "Recheck unavailable",
+  "@createScenarioRecheckUnavailable": {
+    "description": "Create form: \"Recheck unavailable\"."
+  },
+  "createScenarioServiceNotFound": "Service not found",
+  "@createScenarioServiceNotFound": {
+    "description": "Create form: \"Service not found\"."
+  },
+  "createScenarioNoScheduleChangesFound": "No schedule changes found",
+  "@createScenarioNoScheduleChangesFound": {
+    "description": "Create form: \"No schedule changes found\"."
+  },
+  "createScenarioClose": "Close",
+  "@createScenarioClose": {
+    "description": "Create form: \"Close\"."
+  },
+  "createScenarioReplaceSavedSchedule": "Replace saved schedule",
+  "@createScenarioReplaceSavedSchedule": {
+    "description": "Create form: \"Replace saved schedule\"."
+  },
+  "createScenarioPlannedScheduleNotLiveReplaceChanges": "Planned schedule · not live. Replace changes only the saved snapshot after explicit confirmation.",
+  "@createScenarioPlannedScheduleNotLiveReplaceChanges": {
+    "description": "Create form: \"Planned schedule · not live. Replace changes only the saved \"."
+  },
+  "createScenarioChangesCachedOfficialSchedule": "Changes in the cached official schedule",
+  "@createScenarioChangesCachedOfficialSchedule": {
+    "description": "Create form: \"Changes in the cached official schedule\"."
+  },
+  "createScenarioCloseScheduleRecheck": "Close schedule recheck",
+  "@createScenarioCloseScheduleRecheck": {
+    "description": "Create form: \"Close schedule recheck\"."
+  },
+  "createScenarioScheduleRecheck": "Schedule recheck",
+  "@createScenarioScheduleRecheck": {
+    "description": "Create form: \"Schedule recheck\"."
+  },
+  "createScenarioDiscard": "Discard",
+  "@createScenarioDiscard": {
+    "description": "Create form: \"Discard\"."
+  },
+  "createScenarioEditPrompt": "Edit prompt",
+  "@createScenarioEditPrompt": {
+    "description": "Create form: \"Edit prompt\"."
+  },
+  "createScenarioStillUnverified": "Still unverified",
+  "@createScenarioStillUnverified": {
+    "description": "Create form: \"Still unverified\"."
+  },
+  "createScenarioPreviewReadinessNeedsYourReview": "Preview readiness: needs your review",
+  "@createScenarioPreviewReadinessNeedsYourReview": {
+    "description": "Create form: \"Preview readiness: needs your review\"."
+  },
+  "createScenarioPreviewReadinessReadyReview": "Preview readiness: ready to review",
+  "@createScenarioPreviewReadinessReadyReview": {
+    "description": "Create form: \"Preview readiness: ready to review\"."
+  },
+  "createScenarioCatalogSnapshot": "Catalog snapshot",
+  "@createScenarioCatalogSnapshot": {
+    "description": "Create form: \"Catalog snapshot\"."
+  },
+  "createScenarioProposedStops": "Proposed stops",
+  "@createScenarioProposedStops": {
+    "description": "Create form: \"Proposed stops\"."
+  },
+  "createScenarioGeneratePreview": "Generate preview",
+  "@createScenarioGeneratePreview": {
+    "description": "Create form: \"Generate preview\"."
+  },
+  "createScenarioBuildingPreview": "Building preview…",
+  "@createScenarioBuildingPreview": {
+    "description": "Create form: \"Building preview…\"."
+  },
+  "createScenarioUseExample": "Use an example",
+  "@createScenarioUseExample": {
+    "description": "Create form: \"Use an example\"."
+  },
+  "createScenarioRelaxedAfternoonRigaWithCultureDinner": "A relaxed afternoon in Riga with culture and dinner",
+  "@createScenarioRelaxedAfternoonRigaWithCultureDinner": {
+    "description": "Create form: \"A relaxed afternoon in Riga with culture and dinner\"."
+  },
+  "createScenarioWhatWouldYouLikeDo": "What would you like to do?",
+  "@createScenarioWhatWouldYouLikeDo": {
+    "description": "Create form: \"What would you like to do?\"."
+  },
+  "createScenarioDescribeMoodPrioritiesDemoUsesOnly": "Describe the mood and priorities. This demo uses only the local Recharge catalog; it does not call an external AI.",
+  "@createScenarioDescribeMoodPrioritiesDemoUsesOnly": {
+    "description": "Create form: \"Describe the mood and priorities. This demo uses only the lo\"."
+  },
+  "createScenarioLocalDemo": "Local demo",
+  "@createScenarioLocalDemo": {
+    "description": "Create form: \"Local demo\"."
+  },
+  "createScenarioBuildWithAi": "Build with AI",
+  "@createScenarioBuildWithAi": {
+    "description": "Create form: \"Build with AI\"."
+  },
+  "createScenarioSaveTravel": "Save travel",
+  "@createScenarioSaveTravel": {
+    "description": "Create form: \"Save travel\"."
+  },
+  "createScenarioTravelMode": "Travel mode",
+  "@createScenarioTravelMode": {
+    "description": "Create form: \"Travel mode\"."
+  },
+  "createScenarioManualValuesStayLockedUntilYou": "Manual values stay locked until you edit them.",
+  "@createScenarioManualValuesStayLockedUntilYou": {
+    "description": "Create form: \"Manual values stay locked until you edit them.\"."
+  },
+  "createScenarioAddScenario": "Add to Scenario",
+  "@createScenarioAddScenario": {
+    "description": "Create form: \"Add to Scenario\"."
+  },
+  "createScenarioServiceRoute": "Service or route *",
+  "@createScenarioServiceRoute": {
+    "description": "Create form: \"Service or route *\"."
+  },
+  "createScenarioTransport": "Transport",
+  "@createScenarioTransport": {
+    "description": "Create form: \"Transport\"."
+  },
+  "createScenarioPlannedScheduleNotLiveRecheckService": "Planned schedule · not live. Recheck the service before travel.",
+  "@createScenarioPlannedScheduleNotLiveRecheckService": {
+    "description": "Create form: \"Planned schedule · not live. Recheck the service before trav\"."
+  },
+  "createScenarioPrimaryTransport": "Primary transport",
+  "@createScenarioPrimaryTransport": {
+    "description": "Create form: \"Primary transport\"."
+  },
+  "createScenarioOwnCarFullySupportedPublicTransport": "Own car is fully supported. Public transport uses planned schedules, not live data.",
+  "@createScenarioOwnCarFullySupportedPublicTransport": {
+    "description": "Create form: \"Own car is fully supported. Public transport uses planned sc\"."
+  },
+  "createScenarioHowWillYouTravel": "How will you travel?",
+  "@createScenarioHowWillYouTravel": {
+    "description": "Create form: \"How will you travel?\"."
+  },
+  "createScenarioBudgetBasis": "Budget basis",
+  "@createScenarioBudgetBasis": {
+    "description": "Create form: \"Budget basis\"."
+  },
+  "createScenarioPace": "Pace",
+  "@createScenarioPace": {
+    "description": "Create form: \"Pace\"."
+  },
+  "createScenarioPeople": "People",
+  "@createScenarioPeople": {
+    "description": "Create form: \"People\"."
+  },
+  "createScenarioParty": "Party",
+  "@createScenarioParty": {
+    "description": "Create form: \"Party\"."
+  },
+  "createScenarioDatedTrip": "Dated trip",
+  "@createScenarioDatedTrip": {
+    "description": "Create form: \"Dated trip\"."
+  },
+  "createScenarioFlexibleTemplate": "Flexible template",
+  "@createScenarioFlexibleTemplate": {
+    "description": "Create form: \"Flexible template\"."
+  },
+  "createScenarioFormat": "Format",
+  "@createScenarioFormat": {
+    "description": "Create form: \"Format\"."
+  },
+  "createScenarioScenarioTitle": "Scenario title *",
+  "@createScenarioScenarioTitle": {
+    "description": "Create form: \"Scenario title *\"."
+  },
+  "createScenarioPublicUnlistedScenarioPublishingRemainsDisabled": "Public and unlisted Scenario publishing remains disabled until publisher capabilities and moderation are implemented.",
+  "@createScenarioPublicUnlistedScenarioPublishingRemainsDisabled": {
+    "description": "Create form: \"Public and unlisted Scenario publishing remains disabled unt\"."
+  },
+  "createScenarioPlannedScheduleNotLiveRecheckDepartures": "Planned schedule · not live. Recheck departures, delays and cancellations before travel.",
+  "@createScenarioPlannedScheduleNotLiveRecheckDepartures": {
+    "description": "Create form: \"Planned schedule · not live. Recheck departures, delays and \"."
+  },
+  "createScenarioActionSavesPersonalScenarioDoesNot": "This action saves a personal Scenario. It does not publish it to the catalog.",
+  "@createScenarioActionSavesPersonalScenarioDoesNot": {
+    "description": "Create form: \"This action saves a personal Scenario. It does not publish i\"."
+  },
+  "createScenarioReadyMyScenarios": "Ready for My Scenarios",
+  "@createScenarioReadyMyScenarios": {
+    "description": "Create form: \"Ready for My Scenarios\"."
+  },
+  "createScenarioWarnings": "Warnings",
+  "@createScenarioWarnings": {
+    "description": "Create form: \"Warnings\"."
+  },
+  "createScenarioUnknownTravel": "Unknown travel",
+  "@createScenarioUnknownTravel": {
+    "description": "Create form: \"Unknown travel\"."
+  },
+  "createScenarioTimeBlocks": "Time blocks",
+  "@createScenarioTimeBlocks": {
+    "description": "Create form: \"Time blocks\"."
+  },
+  "createScenarioActivity": "Activity",
+  "@createScenarioActivity": {
+    "description": "Create form: \"Activity\"."
+  },
+  "createScenarioActiveStops": "Active stops",
+  "@createScenarioActiveStops": {
+    "description": "Create form: \"Active stops\"."
+  },
+  "createScenarioScenarioDataUnavailable": "Scenario data is unavailable.",
+  "@createScenarioScenarioDataUnavailable": {
+    "description": "Create form: \"Scenario data is unavailable.\"."
+  },
+  "createScenarioSaveMyScenarios": "Save to My Scenarios",
+  "@createScenarioSaveMyScenarios": {
+    "description": "Create form: \"Save to My Scenarios\"."
+  },
+  "createScenarioBack": "Back",
+  "@createScenarioBack": {
+    "description": "Create form: \"Back\"."
+  },
+  "createScenarioExpandedFromQuickPlanAsIndependent": "Expanded from a Quick Plan as an independent copy. Legacy stops are private custom locations until you review them.",
+  "@createScenarioExpandedFromQuickPlanAsIndependent": {
+    "description": "Create form: \"Expanded from a Quick Plan as an independent copy. Legacy st\"."
+  },
+  "createScenarioBuildCityDayWeekendTripPlan": "Build a city, day, weekend or trip plan from independent stops. A Scenario is not a Route and does not change a Quick Plan.",
+  "@createScenarioBuildCityDayWeekendTripPlan": {
+    "description": "Create form: \"Build a city, day, weekend or trip plan from independent sto\"."
+  },
+  "createScenarioScenarioPlan": "Scenario plan",
+  "@createScenarioScenarioPlan": {
+    "description": "Create form: \"Scenario plan\"."
+  },
+  "createScenarioTitle": "Title",
+  "@createScenarioTitle": {
+    "description": "Create form: \"Title\"."
+  },
+  "createScenarioUseCoordinatesAnyLocationLatviaStop": "Use coordinates for any location in Latvia. The stop stays private by default.",
+  "@createScenarioUseCoordinatesAnyLocationLatviaStop": {
+    "description": "Create form: \"Use coordinates for any location in Latvia. The stop stays p\"."
+  },
+  "createScenarioAddTimeBlock": "Add time block",
+  "@createScenarioAddTimeBlock": {
+    "description": "Create form: \"Add time block\"."
+  },
+  "createScenarioFeedSha256": "Feed SHA-256",
+  "@createScenarioFeedSha256": {
+    "description": "Create form: \"Feed SHA-256\"."
+  },
+  "createScenarioFeedRetrieved2": "Feed retrieved",
+  "@createScenarioFeedRetrieved2": {
+    "description": "Create form: \"Feed retrieved\"."
+  },
+  "createScenarioLicence": "Licence",
+  "@createScenarioLicence": {
+    "description": "Create form: \"Licence\"."
+  },
+  "createScenarioStops": "Stops",
+  "@createScenarioStops": {
+    "description": "Create form: \"Stops\"."
+  },
+  "createScenarioPlannedTime": "Planned time",
+  "@createScenarioPlannedTime": {
+    "description": "Create form: \"Planned time\"."
+  },
+  "createScenarioServiceDate": "Service date",
+  "@createScenarioServiceDate": {
+    "description": "Create form: \"Service date\"."
+  },
+  "createScenarioProvider": "Provider",
+  "@createScenarioProvider": {
+    "description": "Create form: \"Provider\"."
+  },
+  "createFindPeopleExactAddressLabel": "Exact address",
+  "@createFindPeopleExactAddressLabel": {
+    "description": "Find People private preview: exact address label."
+  },
+  "createFindPeopleExactGeoLabel": "Exact point",
+  "@createFindPeopleExactGeoLabel": {
+    "description": "Find People private preview: exact point label."
+  },
+  "createFindPeopleOnlineAccessLabel": "Online access reference",
+  "@createFindPeopleOnlineAccessLabel": {
+    "description": "Find People private preview: online access reference label."
+  },
+  "createFindPeopleNotSet": "Not set",
+  "@createFindPeopleNotSet": {
+    "description": "Find People private preview: value not set."
+  },
+  "createFindPeopleConfigured": "Configured",
+  "@createFindPeopleConfigured": {
+    "description": "Find People private preview: value configured (hidden)."
+  },
+  "createScenarioSelectionPreviewUnchanged": "Selection preview only. Scenario is unchanged.",
+  "@createScenarioSelectionPreviewUnchanged": {
+    "description": "Scenario transit: the selection is only a preview."
+  },
+  "createScenarioActivityTime": "Activity time: {value}",
+  "@createScenarioActivityTime": {
+    "description": "Scenario AI preview: activity time; value is a localized duration.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "2 h 30 min"
+      }
+    }
+  },
+  "createScenarioDurationMinutes": "{count} min",
+  "@createScenarioDurationMinutes": {
+    "description": "Duration in minutes.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "45"
+      }
+    }
+  },
+  "createScenarioDurationHours": "{count} h",
+  "@createScenarioDurationHours": {
+    "description": "Duration in hours.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "45"
+      }
+    }
+  },
+  "createScenarioDurationHoursMinutes": "{start} h {end} min",
+  "@createScenarioDurationHoursMinutes": {
+    "description": "Duration in hours (start) and minutes (end).",
+    "placeholders": {
+      "start": {
+        "type": "int",
+        "example": "2"
+      },
+      "end": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "createScenarioMinutesNotLive": "{count} min · Planned schedule · not live",
+  "@createScenarioMinutesNotLive": {
+    "description": "Scenario transit option: duration and the planned/not-live mark.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "45"
+      }
+    }
+  },
+  "createScenarioFeedRetrievedLine": "Feed retrieved {value}",
+  "@createScenarioFeedRetrievedLine": {
+    "description": "Scenario transit: when the feed was retrieved (UTC as saved).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "2026-10-28 08:00:00.000Z"
+      }
+    }
+  },
+  "createScenarioCacheCurrent": "Cached schedule is current.",
+  "@createScenarioCacheCurrent": {
+    "description": "Scenario transit cache: current."
+  },
+  "createScenarioCacheCurrentAt": "Cached schedule is current · {value}.",
+  "@createScenarioCacheCurrentAt": {
+    "description": "Scenario transit cache: current, retrieved at value (UTC).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "2026-10-28 08:00:00.000Z"
+      }
+    }
+  },
+  "createScenarioCacheStale": "Cached schedule is stale. You may use it with a warning or update it.",
+  "@createScenarioCacheStale": {
+    "description": "Scenario transit cache: stale."
+  },
+  "createScenarioCacheStaleAt": "Cached schedule is stale · {value}. You may use it with a warning or update it.",
+  "@createScenarioCacheStaleAt": {
+    "description": "Scenario transit cache: stale, retrieved at value (UTC).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "2026-10-28 08:00:00.000Z"
+      }
+    }
+  },
+  "createStepFindPeopleActivityTitle": "Activity",
+  "@createStepFindPeopleActivityTitle": {
+    "description": "Create findPeople step \"activity\" title."
+  },
+  "createStepFindPeopleActivityDescription": "Describe what you want to do and who it suits.",
+  "@createStepFindPeopleActivityDescription": {
+    "description": "Create findPeople step \"activity\" description."
+  },
+  "createStepFindPeopleScheduleTitle": "When",
+  "@createStepFindPeopleScheduleTitle": {
+    "description": "Create findPeople step \"schedule\" title."
+  },
+  "createStepFindPeopleScheduleDescription": "Choose one time, a poll, or a finite recurring series.",
+  "@createStepFindPeopleScheduleDescription": {
+    "description": "Create findPeople step \"schedule\" description."
+  },
+  "createStepFindPeopleMeetingTitle": "Where",
+  "@createStepFindPeopleMeetingTitle": {
+    "description": "Create findPeople step \"meeting\" title."
+  },
+  "createStepFindPeopleMeetingDescription": "Keep the public area separate from private meeting details.",
+  "@createStepFindPeopleMeetingDescription": {
+    "description": "Create findPeople step \"meeting\" description."
+  },
+  "createStepFindPeopleGroupTitle": "Group",
+  "@createStepFindPeopleGroupTitle": {
+    "description": "Create findPeople step \"group\" title."
+  },
+  "createStepFindPeopleGroupDescription": "Set capacity, applications, verification, waitlist, and costs.",
+  "@createStepFindPeopleGroupDescription": {
+    "description": "Create findPeople step \"group\" description."
+  },
+  "createStepFindPeopleHostsTitle": "Hosts & access",
+  "@createStepFindPeopleHostsTitle": {
+    "description": "Create findPeople step \"hosts\" title."
+  },
+  "createStepFindPeopleHostsDescription": "Configure publisher, visibility, communication, and sharing.",
+  "@createStepFindPeopleHostsDescription": {
+    "description": "Create findPeople step \"hosts\" description."
+  },
+  "createStepFindPeoplePublishTitle": "Preview & publish",
+  "@createStepFindPeoplePublishTitle": {
+    "description": "Create findPeople step \"publish\" title."
+  },
+  "createStepFindPeoplePublishDescription": "Review public/private data and complete safety confirmations.",
+  "@createStepFindPeoplePublishDescription": {
+    "description": "Create findPeople step \"publish\" description."
+  },
+  "createStepRouteMethodTitle": "Method",
+  "@createStepRouteMethodTitle": {
+    "description": "Create route step \"method\" title."
+  },
+  "createStepRouteMethodDescription": "Choose how the continuous track is created",
+  "@createStepRouteMethodDescription": {
+    "description": "Create route step \"method\" description."
+  },
+  "createStepRouteProfileTitle": "Profile",
+  "@createStepRouteProfileTitle": {
+    "description": "Create route step \"profile\" title."
+  },
+  "createStepRouteProfileDescription": "Set movement profile and routing preferences",
+  "@createStepRouteProfileDescription": {
+    "description": "Create route step \"profile\" description."
+  },
+  "createStepRouteEditorTitle": "Track",
+  "@createStepRouteEditorTitle": {
+    "description": "Create route step \"editor\" title."
+  },
+  "createStepRouteEditorDescription": "Edit anchors and continuous route segments",
+  "@createStepRouteEditorDescription": {
+    "description": "Create route step \"editor\" description."
+  },
+  "createStepRouteDetailsTitle": "Details",
+  "@createStepRouteDetailsTitle": {
+    "description": "Create route step \"details\" title."
+  },
+  "createStepRouteDetailsDescription": "Add route conditions and practical information",
+  "@createStepRouteDetailsDescription": {
+    "description": "Create route step \"details\" description."
+  },
+  "createStepRouteReviewTitle": "Review",
+  "@createStepRouteReviewTitle": {
+    "description": "Create route step \"review\" title."
+  },
+  "createStepRouteReviewDescription": "Review geometry, warnings and readiness",
+  "@createStepRouteReviewDescription": {
+    "description": "Create route step \"review\" description."
+  },
+  "createStepSessionWhatWhereTitle": "What and where",
+  "@createStepSessionWhatWhereTitle": {
+    "description": "Create session step \"whatWhere\" title."
+  },
+  "createStepSessionWhatWhereDescription": "Resource, category, media, location, timezone",
+  "@createStepSessionWhatWhereDescription": {
+    "description": "Create session step \"whatWhere\" description."
+  },
+  "createStepSessionWhenTitle": "When",
+  "@createStepSessionWhenTitle": {
+    "description": "Create session step \"when\" title."
+  },
+  "createStepSessionWhenDescription": "Weekly schedule, duration, buffer, notice",
+  "@createStepSessionWhenDescription": {
+    "description": "Create session step \"when\" description."
+  },
+  "createStepSessionPriceAndBookingTitle": "Price and booking",
+  "@createStepSessionPriceAndBookingTitle": {
+    "description": "Create session step \"priceAndBooking\" title."
+  },
+  "createStepSessionPriceAndBookingDescription": "Price, max party size, external booking URL",
+  "@createStepSessionPriceAndBookingDescription": {
+    "description": "Create session step \"priceAndBooking\" description."
+  },
+  "createStepClassWorkshopBasicsTitle": "Offering",
+  "@createStepClassWorkshopBasicsTitle": {
+    "description": "Create classWorkshop step \"basics\" title."
+  },
+  "createStepClassWorkshopBasicsDescription": "Kind, title, descriptions, category, criteria and media",
+  "@createStepClassWorkshopBasicsDescription": {
+    "description": "Create classWorkshop step \"basics\" description."
+  },
+  "createStepClassWorkshopLearningTitle": "Programme and instructor",
+  "@createStepClassWorkshopLearningTitle": {
+    "description": "Create classWorkshop step \"learning\" title."
+  },
+  "createStepClassWorkshopLearningDescription": "Outcomes, programme, prerequisites and instructor",
+  "@createStepClassWorkshopLearningDescription": {
+    "description": "Create classWorkshop step \"learning\" description."
+  },
+  "createStepClassWorkshopScheduleTitle": "Dates and place",
+  "@createStepClassWorkshopScheduleTitle": {
+    "description": "Create classWorkshop step \"schedule\" title."
+  },
+  "createStepClassWorkshopScheduleDescription": "Single class or fixed series, timezone, delivery, place",
+  "@createStepClassWorkshopScheduleDescription": {
+    "description": "Create classWorkshop step \"schedule\" description."
+  },
+  "createStepClassWorkshopParticipationTitle": "Participation",
+  "@createStepClassWorkshopParticipationTitle": {
+    "description": "Create classWorkshop step \"participation\" title."
+  },
+  "createStepClassWorkshopParticipationDescription": "Materials, requirements, group size, price, enrollment",
+  "@createStepClassWorkshopParticipationDescription": {
+    "description": "Create classWorkshop step \"participation\" description."
+  },
+  "createStepScenarioContextTitle": "Context",
+  "@createStepScenarioContextTitle": {
+    "description": "Create scenario step \"context\" title."
+  },
+  "createStepScenarioContextDescription": "Format, date mode, party, pace and budget",
+  "@createStepScenarioContextDescription": {
+    "description": "Create scenario step \"context\" description."
+  },
+  "createStepScenarioComposerTitle": "Plan",
+  "@createStepScenarioComposerTitle": {
+    "description": "Create scenario step \"composer\" title."
+  },
+  "createStepScenarioComposerDescription": "Independent stops, time blocks and their order",
+  "@createStepScenarioComposerDescription": {
+    "description": "Create scenario step \"composer\" description."
+  },
+  "createStepScenarioReviewTitle": "Review",
+  "@createStepScenarioReviewTitle": {
+    "description": "Create scenario step \"review\" title."
+  },
+  "createStepScenarioReviewDescription": "Totals, warnings and personal save readiness",
+  "@createStepScenarioReviewDescription": {
+    "description": "Create scenario step \"review\" description."
+  },
+  "createSessionPresetEveryday": "Every day 9:00–21:00",
+  "@createSessionPresetEveryday": {
+    "description": "Session schedule preset: every day 9:00–21:00."
+  },
+  "createSessionPresetWeekdays": "Weekdays 9:00–18:00",
+  "@createSessionPresetWeekdays": {
+    "description": "Session schedule preset: weekdays 9:00–18:00."
+  },
+  "createFindPeopleHouseRule": "{value, select, be_on_time{Be on time}respect_boundaries{Respect boundaries}no_harassment{No harassment}no_sales{No sales}no_substances{No alcohol or drugs}bring_required_gear{Bring required gear}follow_venue_rules{Follow venue rules}leave_no_trace{Leave no trace} other{Rule}}",
+  "@createFindPeopleHouseRule": {
+    "description": "Find People house rule; value is the stable rule id.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "be_on_time"
+      }
+    }
+  },
+  "createFindPeopleCohostRight": "{value, select, review_applications{Review applications}manage_schedule{Manage schedule}manage_participants{Manage participants}moderate_conversation{Moderate conversation} other{Right}}",
+  "@createFindPeopleCohostRight": {
+    "description": "Find People co-host right; value is the stable capability id.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "manage_schedule"
+      }
+    }
+  },
+  "createFindPeopleCohostAccepted": "Accepted",
+  "@createFindPeopleCohostAccepted": {
+    "description": "Find People co-host invitation accepted."
+  },
+  "createFindPeopleCohostPending": "Invitation pending",
+  "@createFindPeopleCohostPending": {
+    "description": "Find People co-host invitation pending."
+  },
+  "createFindPeopleSeatFitPolicy": "Seat-fit policy",
+  "@createFindPeopleSeatFitPolicy": {
+    "description": "Find People field: seat-fit policy."
+  },
+  "createFindPeopleVisibilityRequired": "Visibility *",
+  "@createFindPeopleVisibilityRequired": {
+    "description": "Find People field: visibility (required)."
+  },
+  "createFormDateIso": "Date (YYYY-MM-DD)",
+  "@createFormDateIso": {
+    "description": "Create field: a date in YYYY-MM-DD."
+  },
+  "createClassFirstSummerTime": "First (summer time)",
+  "@createClassFirstSummerTime": {
+    "description": "Class: ambiguous local time — take the first (summer time) instance."
+  },
+  "createRouteOutAndBack": "Out & back",
+  "@createRouteOutAndBack": {
+    "description": "Route shape: out and back."
+  },
+  "createScenarioEdit": "Edit",
+  "@createScenarioEdit": {
+    "description": "Scenario item editor: edit."
+  },
+  "createScenarioTimeBlockHint": "Coffee, rest, free time…",
+  "@createScenarioTimeBlockHint": {
+    "description": "Scenario time block title hint."
+  },
+  "createScenarioPrivateLocalTravel": "Private / local travel",
+  "@createScenarioPrivateLocalTravel": {
+    "description": "Scenario review: private or local travel."
+  },
+  "createScenarioRouteLabel": "Route",
+  "@createScenarioRouteLabel": {
+    "description": "Scenario recheck field: route."
+  },
+  "createScenarioCarrierLabel": "Carrier",
+  "@createScenarioCarrierLabel": {
+    "description": "Scenario recheck field: carrier."
+  },
+  "createScenarioSelectedStop": "Selected: {value}",
+  "@createScenarioSelectedStop": {
+    "description": "Scenario stop search: the selected stop; value is the stop name from the feed.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "Centrāltirgus"
+      }
+    }
+  },
+  "createScenarioDepartureHhMm": "Departure (HH:mm)",
+  "@createScenarioDepartureHhMm": {
+    "description": "Scenario transport field: departure HH:mm."
+  },
+  "createScenarioArrivalHhMm": "Arrival (HH:mm)",
+  "@createScenarioArrivalHhMm": {
+    "description": "Scenario transport field: arrival HH:mm."
+  },
+  "createRouteResolveRestore": "Resolve & restore",
+  "@createRouteResolveRestore": {
+    "description": "Route moderation: resolve and restore."
+  },
+  "createRouteResolve": "Resolve",
+  "@createRouteResolve": {
+    "description": "Route moderation: resolve."
+  },
+  "scenarioIntakeNotice": "{code, select, targetsUnavailable{Scenarios are unavailable. Retry from Details.}chooseTarget{Choose a Scenario or create a new one.}targetNotEditable{This Scenario is no longer editable.}titleRequired{Enter a Scenario title.}openFailed{Could not open this Scenario.}signInAgain{Sign in again before adding items to Scenario.}confirmDuplicate{Confirm adding another occurrence.}confirmUnavailable{Confirm use of the unavailable saved snapshot.}confirmScheduleAdjustment{Confirm conversion to a flexible template stop.}revisionConflict{Scenario changed. Go back, reopen it and review again.}intentExpired{This selection expired. Return to Details and try again.}targetGone{This Scenario is no longer available. Choose another one.}lockedLegBoundary{A locked logistics leg protects this insertion point.}persistenceUnavailable{Could not save. Your selection is retained; retry Apply.} other{Could not add this object. Review the selection and retry.}}",
+  "@scenarioIntakeNotice": {
+    "description": "Add to Scenario: notice for a stable intake code.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "chooseTarget"
+      }
+    }
+  },
+  "scenarioIntakeObjectType": "{value, select, event{Event}place{Place}activity{Activity}route{Route}bookableSession{Session} other{Object}}",
+  "@scenarioIntakeObjectType": {
+    "description": "Add to Scenario: catalog object type of a selected stop (stable value).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "event"
+      }
+    }
+  },
+  "scenarioIntakeSourceStatus": "{value, select, ready{Ready}stale{Needs refresh}unresolved{Not resolved}unavailable{Unavailable} other{Unknown}}",
+  "@scenarioIntakeSourceStatus": {
+    "description": "Add to Scenario: source status of a selected stop (stable value).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "ready"
+      }
+    }
+  },
+  "scenarioIntakeUnavailable": "Add to Scenario is unavailable.",
+  "@scenarioIntakeUnavailable": {
+    "description": "Add to Scenario cannot start from this surface or selection."
+  },
+  "scenarioIntakeTitle": "Add to Scenario",
+  "@scenarioIntakeTitle": {
+    "description": "Add to Scenario sheet title."
+  },
+  "scenarioIntakeClose": "Close Add to Scenario",
+  "@scenarioIntakeClose": {
+    "description": "Add to Scenario: close button tooltip."
+  },
+  "scenarioIntakeChooseTarget": "Choose a personal Scenario",
+  "@scenarioIntakeChooseTarget": {
+    "description": "Add to Scenario: target step heading."
+  },
+  "scenarioIntakeOnlyPrivateDrafts": "Only your editable private drafts are shown.",
+  "@scenarioIntakeOnlyPrivateDrafts": {
+    "description": "Add to Scenario: which targets are listed."
+  },
+  "scenarioIntakeNoTargets": "No saved Scenario yet. Create one below.",
+  "@scenarioIntakeNoTargets": {
+    "description": "Add to Scenario: no target yet."
+  },
+  "scenarioIntakeUntitled": "Untitled",
+  "@scenarioIntakeUntitled": {
+    "description": "Add to Scenario: target without a title."
+  },
+  "scenarioIntakeCreateNew": "Create new Scenario",
+  "@scenarioIntakeCreateNew": {
+    "description": "Add to Scenario: create a new target."
+  },
+  "scenarioIntakeCreateNewHint": "Private · one day · saved only with the stop",
+  "@scenarioIntakeCreateNewHint": {
+    "description": "Add to Scenario: what the new target is."
+  },
+  "scenarioIntakeTitleField": "Scenario title",
+  "@scenarioIntakeTitleField": {
+    "description": "Add to Scenario: new Scenario title field."
+  },
+  "scenarioIntakeContinue": "Continue to placement",
+  "@scenarioIntakeContinue": {
+    "description": "Add to Scenario: go to placement."
+  },
+  "scenarioIntakeScenarioFallback": "Scenario",
+  "@scenarioIntakeScenarioFallback": {
+    "description": "Add to Scenario: target title when none is known."
+  },
+  "scenarioIntakeDay": "Day",
+  "@scenarioIntakeDay": {
+    "description": "Add to Scenario: day field."
+  },
+  "scenarioIntakeUnscheduled": "Unscheduled",
+  "@scenarioIntakeUnscheduled": {
+    "description": "Add to Scenario: not tied to a day."
+  },
+  "scenarioIntakeInsert": "Insert",
+  "@scenarioIntakeInsert": {
+    "description": "Add to Scenario: insertion point field."
+  },
+  "scenarioIntakeAtEnd": "At end",
+  "@scenarioIntakeAtEnd": {
+    "description": "Add to Scenario: insert at the end of the day."
+  },
+  "scenarioIntakeRole": "Role",
+  "@scenarioIntakeRole": {
+    "description": "Add to Scenario: stop role heading."
+  },
+  "scenarioIntakeMandatory": "Mandatory",
+  "@scenarioIntakeMandatory": {
+    "description": "Add to Scenario: mandatory stop."
+  },
+  "scenarioIntakeOptional": "Optional",
+  "@scenarioIntakeOptional": {
+    "description": "Add to Scenario: optional stop."
+  },
+  "scenarioIntakeBack": "Back",
+  "@scenarioIntakeBack": {
+    "description": "Add to Scenario: back."
+  },
+  "scenarioIntakeReview": "Review",
+  "@scenarioIntakeReview": {
+    "description": "Add to Scenario: go to review."
+  },
+  "scenarioIntakeAddAnother": "Add another occurrence",
+  "@scenarioIntakeAddAnother": {
+    "description": "Add to Scenario: confirm a duplicate occurrence."
+  },
+  "scenarioIntakeAddAnotherHint": "This exact catalog object already exists in the Scenario.",
+  "@scenarioIntakeAddAnotherHint": {
+    "description": "Add to Scenario: why a duplicate is asked about."
+  },
+  "scenarioIntakeUseUnavailable": "Use saved unavailable snapshot",
+  "@scenarioIntakeUseUnavailable": {
+    "description": "Add to Scenario: confirm using an unavailable saved snapshot."
+  },
+  "scenarioIntakeUseTemplateStop": "Use as a flexible template stop",
+  "@scenarioIntakeUseTemplateStop": {
+    "description": "Add to Scenario: confirm converting to a flexible template stop."
+  },
+  "scenarioIntakeUseTemplateStopHint": "The source has a fixed date, but this Scenario is a template.",
+  "@scenarioIntakeUseTemplateStopHint": {
+    "description": "Add to Scenario: why a template stop is asked about."
+  },
+  "scenarioIntakeLogisticsNotice": "Logistics are not recalculated live. Existing unlocked boundary estimates will be invalidated safely.",
+  "@scenarioIntakeLogisticsNotice": {
+    "description": "Add to Scenario: logistics are not recalculated."
+  },
+  "scenarioIntakeAddCount": "Add {count}",
+  "@scenarioIntakeAddCount": {
+    "description": "Add to Scenario: apply button with the number of stops.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "scenarioIntakeDurationUnknown": "Duration unknown",
+  "@scenarioIntakeDurationUnknown": {
+    "description": "Add to Scenario: stop duration unknown."
+  },
+  "scenarioIntakeFixedStart": "Fixed {time}",
+  "@scenarioIntakeFixedStart": {
+    "description": "Add to Scenario: fixed start of a stop, formatted in the object zone.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "Oct 28, 2026, 6:00 PM"
+      }
+    }
+  },
+  "scenarioIntakeMoveUp": "Move up",
+  "@scenarioIntakeMoveUp": {
+    "description": "Add to Scenario: move a stop up."
+  },
+  "scenarioIntakeMoveDown": "Move down",
+  "@scenarioIntakeMoveDown": {
+    "description": "Add to Scenario: move a stop down."
+  },
+  "scenarioIntakeApplyingSemantics": "Adding selected stops to Scenario",
+  "@scenarioIntakeApplyingSemantics": {
+    "description": "Add to Scenario: screen reader text while stops are added."
+  },
+  "scenarioIntakeLoadingSemantics": "Loading your Scenarios",
+  "@scenarioIntakeLoadingSemantics": {
+    "description": "Add to Scenario: screen reader text while targets load."
+  },
+  "scenarioIntakeApplying": "Adding to Scenario…",
+  "@scenarioIntakeApplying": {
+    "description": "Add to Scenario: progress text while stops are added."
+  },
+  "scenarioIntakeLoading": "Loading your Scenarios…",
+  "@scenarioIntakeLoading": {
+    "description": "Add to Scenario: progress text while targets load."
+  },
+  "scenarioIntakeReplayed": "Already saved · no duplicate was created.",
+  "@scenarioIntakeReplayed": {
+    "description": "Add to Scenario: the same request was already saved."
+  },
+  "scenarioIntakeStay": "Stay here",
+  "@scenarioIntakeStay": {
+    "description": "Add to Scenario: stay on the current page."
+  },
+  "scenarioIntakeOpenScenario": "Open Scenario",
+  "@scenarioIntakeOpenScenario": {
+    "description": "Add to Scenario: open the target Scenario."
+  },
+  "scenarioIntakePrepareFailed": "Could not prepare Add to Scenario.",
+  "@scenarioIntakePrepareFailed": {
+    "description": "Add to Scenario: the sheet could not be prepared."
+  },
+  "scenarioIntakeRetry": "Retry",
+  "@scenarioIntakeRetry": {
+    "description": "Add to Scenario: retry."
+  },
+  "scenarioIntakeTemplate": "Template",
+  "@scenarioIntakeTemplate": {
+    "description": "Add to Scenario target summary: template Scenario without dates."
+  },
+  "scenarioIntakeDated": "Dated",
+  "@scenarioIntakeDated": {
+    "description": "Add to Scenario target summary: dated Scenario without a known first date."
+  },
+  "scenarioIntakeStep": "{state, select, target{1 of 3 · Scenario}placement{2 of 3 · Placement}review{3 of 3 · Review}success{Complete}applying{Saving} other{Preparing}}",
+  "@scenarioIntakeStep": {
+    "description": "Add to Scenario: progress line for the sheet stage (stable stage name).",
+    "placeholders": {
+      "state": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "scenarioIntakePlacement": "{state, select, unscheduled{Unscheduled}atEnd{At end} other{After selected stop}}",
+  "@scenarioIntakePlacement": {
+    "description": "Add to Scenario review: where the stops go (stable value); shown after the Scenario title.",
+    "placeholders": {
+      "state": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "scenarioIntakeAfterLabel": "After:",
+  "@scenarioIntakeAfterLabel": {
+    "description": "Add to Scenario: label before a stop title (the title is shown as is)."
+  },
+  "scenarioIntakeCandidateLabel": "Selected stop {count}:",
+  "@scenarioIntakeCandidateLabel": {
+    "description": "Add to Scenario: screen reader label before a selected stop title (the title is shown as is).",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "scenarioIntakeSuccess": "{count, plural, one{Added {count} stop to the Scenario} other{Added {count} stops to the Scenario}}",
+  "@scenarioIntakeSuccess": {
+    "description": "Add to Scenario: success heading; the Scenario title is shown separately as is.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "scenarioIntakeTargetCounts": "{count, plural, one{{count} day} other{{count} days}} · {total, plural, one{{total} active item} other{{total} active items}}",
+  "@scenarioIntakeTargetCounts": {
+    "description": "Add to Scenario target summary: number of days (count) and active items (total).",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "total": {
+        "type": "int",
+        "example": "2"
       }
     }
   }

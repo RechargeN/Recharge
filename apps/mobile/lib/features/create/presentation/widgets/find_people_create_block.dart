@@ -10,6 +10,7 @@ import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/find_people_draft_data.dart';
 import '../../domain/entities/find_people_validation_issue.dart';
 import '../../../../shared/primitives/money/money.dart';
+import 'create_form_texts.dart';
 import 'create_texts.dart';
 
 class FindPeopleCreateBlock extends StatefulWidget {
@@ -56,7 +57,11 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
     final CreateDraftEntity draft = widget.state.draft;
     final FindPeopleDraftData? data = draft.findPeopleData;
     if (data == null) {
-      return _Panel(child: Text('Find People draft data is being prepared…'));
+      return _Panel(
+        child: Text(
+          context.l10n.createFindPeopleFindPeopleDraftDataBeingPrepared,
+        ),
+      );
     }
     final int step = widget.state.findPeopleStep;
     final FindPeopleCreateStepConfig config = findPeopleCreateSteps[step];
@@ -97,9 +102,10 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
     final List<CreateTaxonomySubcategory> subcategories =
         category.subcategories;
     return _Panel(
-      title: 'Activity and description',
-      subtitle:
-          'Public content must describe a concrete activity without contacts or payment links.',
+      title: context.l10n.createFindPeopleActivityDescription,
+      subtitle: context
+          .l10n
+          .createFindPeoplePublicContentMustDescribeConcreteActivity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -107,7 +113,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             isExpanded: true,
             key: const ValueKey<String>('find-people-category'),
             initialValue: category.id,
-            decoration: _decoration('Category *'),
+            decoration: _decoration(context.l10n.createFormCategoryRequired),
             items: categories
                 .map(
                   (CreateTaxonomyCategory item) => DropdownMenuItem<String>(
@@ -139,7 +145,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 )
                 ? draft.subcategory
                 : (subcategories.isEmpty ? null : subcategories.first.id),
-            decoration: _decoration('Subcategory *'),
+            decoration: _decoration(context.l10n.createFormSubcategoryRequired),
             items: subcategories
                 .map(
                   (CreateTaxonomySubcategory item) => DropdownMenuItem<String>(
@@ -159,13 +165,13 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           const SizedBox(height: 10),
           _DraftTextField(
-            label: 'Title *',
+            label: context.l10n.createFormTitleRequired,
             value: draft.title,
             maxLength: 80,
             onChanged: widget.controller.updateTitle,
           ),
           _DraftTextField(
-            label: 'Short description *',
+            label: context.l10n.createFindPeopleShortDescription,
             value: draft.shortDescription,
             minLines: 2,
             maxLines: 3,
@@ -173,7 +179,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             onChanged: widget.controller.updateShortDescription,
           ),
           _DraftTextField(
-            label: 'Full description *',
+            label: context.l10n.createFindPeopleFullDescription,
             value: draft.fullDescription,
             minLines: 4,
             maxLines: 8,
@@ -190,13 +196,13 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           DropdownButtonFormField<FindPeopleSkillLevel>(
             isExpanded: true,
             initialValue: data.skillLevel,
-            decoration: _decoration('Skill level *'),
+            decoration: _decoration(context.l10n.createFindPeopleSkillLevel),
             items: FindPeopleSkillLevel.values
                 .map(
                   (FindPeopleSkillLevel value) =>
                       DropdownMenuItem<FindPeopleSkillLevel>(
                         value: value,
-                        child: Text(_enumLabel(value.name)),
+                        child: Text(createOptionText(context.l10n, value)),
                       ),
                 )
                 .toList(growable: false),
@@ -208,13 +214,15 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           DropdownButtonFormField<FindPeopleParticipationGoal>(
             isExpanded: true,
             initialValue: data.participationGoal,
-            decoration: _decoration('Participation goal *'),
+            decoration: _decoration(
+              context.l10n.createFindPeopleParticipationGoal,
+            ),
             items: FindPeopleParticipationGoal.values
                 .map(
                   (FindPeopleParticipationGoal value) =>
                       DropdownMenuItem<FindPeopleParticipationGoal>(
                         value: value,
-                        child: Text(_enumLabel(value.name)),
+                        child: Text(createOptionText(context.l10n, value)),
                       ),
                 )
                 .toList(growable: false),
@@ -226,7 +234,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Communication languages *',
+            context.l10n.createFindPeopleCommunicationLanguages,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           Wrap(
@@ -258,7 +266,8 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             ),
           ),
           _DraftTextField(
-            label: 'Experience requirements (one per line)',
+            label:
+                context.l10n.createFindPeopleExperienceRequirementsOnePerLine,
             value: data.experienceRequirements.join('\n'),
             minLines: 2,
             maxLines: 5,
@@ -266,7 +275,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 _update(data.copyWith(experienceRequirements: _lines(value))),
           ),
           _DraftTextField(
-            label: 'Equipment notes',
+            label: context.l10n.createFindPeopleEquipmentNotes,
             value: data.equipmentNotes ?? '',
             maxLength: 500,
             minLines: 2,
@@ -279,7 +288,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             ),
           ),
           _DraftTextField(
-            label: 'Accessibility notes',
+            label: context.l10n.createFindPeopleAccessibilityNotes,
             value: data.accessibilityNotes ?? '',
             maxLength: 500,
             minLines: 2,
@@ -292,14 +301,17 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             ),
           ),
           const SizedBox(height: 8),
-          Text('House rules', style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            context.l10n.createFindPeopleHouseRules,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           Wrap(
             spacing: 8,
             runSpacing: 4,
             children: findPeopleHouseRuleOptions
                 .map(
                   (String id) => FilterChip(
-                    label: Text(_enumLabel(id)),
+                    label: Text(context.l10n.createFindPeopleHouseRule(id)),
                     selected: data.houseRuleIds.contains(id),
                     onSelected: (bool selected) {
                       final Set<String> next = <String>{...data.houseRuleIds};
@@ -311,7 +323,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 .toList(growable: false),
           ),
           _DraftTextField(
-            label: 'House rules note',
+            label: context.l10n.createFindPeopleHouseRulesNote,
             value: data.houseRulesNote ?? '',
             maxLength: 500,
             minLines: 2,
@@ -331,9 +343,10 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
 
   Widget _scheduleStep(CreateDraftEntity draft, FindPeopleDraftData data) {
     return _Panel(
-      title: 'Schedule',
-      subtitle:
-          'All times are stored in UTC and displayed using ${draft.timezone}.',
+      title: context.l10n.createFindPeopleSchedule,
+      subtitle: context.l10n.createFindPeopleAllTimesAreStoredUtcDisplayed(
+        draft.timezone,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -341,13 +354,13 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             isExpanded: true,
             key: const ValueKey<String>('find-people-schedule-mode'),
             initialValue: data.scheduleMode,
-            decoration: _decoration('Schedule mode *'),
+            decoration: _decoration(context.l10n.createFindPeopleScheduleMode),
             items: FindPeopleScheduleMode.values
                 .map(
                   (FindPeopleScheduleMode value) =>
                       DropdownMenuItem<FindPeopleScheduleMode>(
                         value: value,
-                        child: Text(_enumLabel(value.name)),
+                        child: Text(createOptionText(context.l10n, value)),
                       ),
                 )
                 .toList(growable: false),
@@ -382,7 +395,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 child: TextField(
                   controller: _slotStart,
                   decoration: _decoration(
-                    'Start UTC *',
+                    context.l10n.createFindPeopleStartUtc,
                     hint: '2026-08-20T16:00:00Z',
                   ),
                 ),
@@ -392,7 +405,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 child: TextField(
                   controller: _slotEnd,
                   decoration: _decoration(
-                    'End UTC *',
+                    context.l10n.createFindPeopleEndUtc,
                     hint: '2026-08-20T18:00:00Z',
                   ),
                 ),
@@ -405,8 +418,8 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             icon: const Icon(Icons.add_alarm_outlined),
             label: Text(
               data.scheduleMode == FindPeopleScheduleMode.single
-                  ? 'Set meeting time'
-                  : 'Add time option',
+                  ? context.l10n.createFindPeopleSetMeetingTime
+                  : context.l10n.createFindPeopleAddTimeOption,
             ),
           ),
           const SizedBox(height: 8),
@@ -420,7 +433,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
-                  tooltip: 'Remove slot',
+                  tooltip: context.l10n.createFindPeopleRemoveSlot,
                   onPressed: () =>
                       widget.controller.removeScheduleSlot(slot.localId),
                 ),
@@ -429,7 +442,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           if (data.scheduleMode == FindPeopleScheduleMode.timePoll)
             _DraftTextField(
-              label: 'Poll response deadline UTC *',
+              label: context.l10n.createFindPeoplePollResponseDeadlineUtc,
               value: data.pollResponseDeadlineUtc?.toIso8601String() ?? '',
               hint: '2026-08-18T18:00:00Z',
               onChanged: (String value) {
@@ -444,7 +457,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             )
           else
             _DraftTextField(
-              label: 'Application deadline UTC *',
+              label: context.l10n.createFindPeopleApplicationDeadlineUtc,
               value: draft.registrationDeadlineUtc?.toIso8601String() ?? '',
               hint: '2026-08-19T18:00:00Z',
               onChanged: widget.controller.updateRegistrationDeadline,
@@ -452,7 +465,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           if (data.scheduleMode ==
               FindPeopleScheduleMode.recurring) ...<Widget>[
             _DraftTextField(
-              label: 'Recurrence rule *',
+              label: context.l10n.createFindPeopleRecurrenceRule,
               value: data.recurrenceRule ?? '',
               hint: 'FREQ=WEEKLY;BYDAY=SA',
               onChanged: (String value) => _update(
@@ -463,7 +476,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               ),
             ),
             _DraftTextField(
-              label: 'Series end UTC',
+              label: context.l10n.createFindPeopleSeriesEndUtc,
               value: data.seriesEndAtUtc?.toIso8601String() ?? '',
               onChanged: (String value) {
                 final DateTime? date = DateTime.tryParse(value)?.toUtc();
@@ -476,7 +489,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               },
             ),
             _DraftTextField(
-              label: 'Maximum occurrences (2–52)',
+              label: context.l10n.createFindPeopleMaximumOccurrences252,
               value: data.maxOccurrences?.toString() ?? '',
               keyboardType: TextInputType.number,
               onChanged: (String value) {
@@ -500,9 +513,9 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
     final bool physical = data.meetingMode != FindPeopleMeetingMode.online;
     final bool online = data.meetingMode != FindPeopleMeetingMode.inPerson;
     return _Panel(
-      title: 'Meeting location',
+      title: context.l10n.createFindPeopleMeetingLocation,
       subtitle:
-          'Only the approximate public area appears in Discover. Exact details stay private.',
+          context.l10n.createFindPeopleOnlyApproximatePublicAreaAppearsDiscover,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -510,13 +523,13 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             isExpanded: true,
             key: const ValueKey<String>('find-people-meeting-mode'),
             initialValue: data.meetingMode,
-            decoration: _decoration('Meeting mode *'),
+            decoration: _decoration(context.l10n.createFindPeopleMeetingMode),
             items: FindPeopleMeetingMode.values
                 .map(
                   (FindPeopleMeetingMode value) =>
                       DropdownMenuItem<FindPeopleMeetingMode>(
                         value: value,
-                        child: Text(_enumLabel(value.name)),
+                        child: Text(createOptionText(context.l10n, value)),
                       ),
                 )
                 .toList(growable: false),
@@ -544,7 +557,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           if (physical) ...<Widget>[
             _DraftTextField(
-              label: 'Meeting place name *',
+              label: context.l10n.createFindPeopleMeetingPlaceName,
               value: data.meetingPlaceName ?? '',
               onChanged: (String value) => _update(
                 data.copyWith(
@@ -554,9 +567,9 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               ),
             ),
             _DraftTextField(
-              label: 'Public area label *',
+              label: context.l10n.createFindPeoplePublicAreaLabel,
               value: data.publicAreaLabel ?? '',
-              hint: 'Old Town, near Central Park',
+              hint: context.l10n.createFindPeopleOldTownNearCentralPark,
               onChanged: (String value) => _update(
                 data.copyWith(
                   publicAreaLabel: _text(value),
@@ -573,7 +586,9 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                       decimal: true,
                       signed: true,
                     ),
-                    decoration: _decoration('Exact latitude *'),
+                    decoration: _decoration(
+                      context.l10n.createFindPeopleExactLatitude,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -584,7 +599,9 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                       decimal: true,
                       signed: true,
                     ),
-                    decoration: _decoration('Exact longitude *'),
+                    decoration: _decoration(
+                      context.l10n.createFindPeopleExactLongitude,
+                    ),
                   ),
                 ),
               ],
@@ -596,19 +613,21 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 longitude: _longitude.text,
               ),
               icon: const Icon(Icons.location_on_outlined),
-              label: const Text(
-                'Set exact point and generate safe public point',
+              label: Text(
+                context.l10n.createFindPeopleSetExactPointGenerateSafePublic,
               ),
             ),
             if (data.publicGeo != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  'Public map point: ${data.publicGeo!.latitude}, ${data.publicGeo!.longitude}',
+                  context.l10n.createFindPeoplePublicMapPoint(
+                    '${data.publicGeo!.latitude}, ${data.publicGeo!.longitude}',
+                  ),
                 ),
               ),
             _DraftTextField(
-              label: 'Exact address (private) *',
+              label: context.l10n.createFindPeopleExactAddressPrivate,
               value: data.exactAddressLine ?? '',
               onChanged: (String value) => _update(
                 data.copyWith(
@@ -618,7 +637,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               ),
             ),
             _DraftTextField(
-              label: 'Meeting instructions (private)',
+              label: context.l10n.createFindPeopleMeetingInstructionsPrivate,
               value: data.meetingInstructions ?? '',
               maxLength: 500,
               minLines: 2,
@@ -633,9 +652,11 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             SwitchListTile.adaptive(
               value: data.publicPlaceConfirmed,
               contentPadding: EdgeInsets.zero,
-              title: const Text('This is a public meeting place *'),
-              subtitle: const Text(
-                'Private homes and residential access details are not allowed.',
+              title: Text(context.l10n.createFindPeoplePublicMeetingPlace),
+              subtitle: Text(
+                context
+                    .l10n
+                    .createFindPeoplePrivateHomesResidentialAccessDetailsAre,
               ),
               onChanged: (bool value) =>
                   _update(data.copyWith(publicPlaceConfirmed: value)),
@@ -643,9 +664,9 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ],
           if (online) ...<Widget>[
             _DraftTextField(
-              label: 'Online provider *',
+              label: context.l10n.createFindPeopleOnlineProvider,
               value: data.onlineProvider ?? '',
-              hint: 'Google Meet, Zoom, Discord…',
+              hint: context.l10n.createFindPeopleGoogleMeetZoomDiscord,
               onChanged: (String value) => _update(
                 data.copyWith(
                   onlineProvider: _text(value),
@@ -654,7 +675,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               ),
             ),
             _DraftTextField(
-              label: 'Private access secret reference *',
+              label: context.l10n.createFindPeoplePrivateAccessSecretReference,
               value: data.onlineAccessSecretRef ?? '',
               hint: 'Session-scoped secure reference; never shown publicly',
               onChanged: (String value) => _update(
@@ -666,7 +687,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             ),
           ],
           _DraftTextField(
-            label: 'Backup meeting plan',
+            label: context.l10n.createFindPeopleBackupMeetingPlan,
             value: data.backupMeetingPlan ?? '',
             maxLength: 500,
             minLines: 2,
@@ -686,14 +707,14 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
 
   Widget _groupStep(FindPeopleDraftData data) {
     return _Panel(
-      title: 'Group and participation',
+      title: context.l10n.createFindPeopleGroupParticipation,
       subtitle:
-          'Group size includes hosts. Expected spend is information, never a payment to the host.',
+          context.l10n.createFindPeopleGroupSizeIncludesHostsExpectedSpend,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           _NumberStepper(
-            label: 'Target group size',
+            label: context.l10n.createFindPeopleTargetGroupSize,
             value: data.targetGroupSize,
             min: 2,
             max: 20,
@@ -709,7 +730,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             ),
           ),
           _NumberStepper(
-            label: 'Host seats',
+            label: context.l10n.createFindPeopleHostSeats,
             value: data.hostSeatCount,
             min: 1,
             max: (data.targetGroupSize - 1).clamp(1, 19),
@@ -719,13 +740,13 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           DropdownButtonFormField<FindPeopleApprovalMode>(
             isExpanded: true,
             initialValue: data.approvalMode,
-            decoration: _decoration('Approval mode *'),
+            decoration: _decoration(context.l10n.createFindPeopleApprovalMode),
             items: FindPeopleApprovalMode.values
                 .map(
                   (FindPeopleApprovalMode value) =>
                       DropdownMenuItem<FindPeopleApprovalMode>(
                         value: value,
-                        child: Text(_enumLabel(value.name)),
+                        child: Text(createOptionText(context.l10n, value)),
                       ),
                 )
                 .toList(growable: false),
@@ -744,7 +765,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           SwitchListTile.adaptive(
             value: data.allowPartyApplications,
             contentPadding: EdgeInsets.zero,
-            title: const Text('Allow party applications'),
+            title: Text(context.l10n.createFindPeopleAllowPartyApplications),
             onChanged: (bool value) => _update(
               data.copyWith(
                 allowPartyApplications: value,
@@ -754,7 +775,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           if (data.allowPartyApplications)
             _NumberStepper(
-              label: 'Maximum seats per application',
+              label: context.l10n.createFindPeopleMaximumSeatsPerApplication,
               value: data.maxSeatsPerApplication,
               min: 1,
               max: (data.targetGroupSize - data.hostSeatCount).clamp(1, 4),
@@ -764,13 +785,15 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           DropdownButtonFormField<FindPeopleVerificationLevel>(
             isExpanded: true,
             initialValue: data.verificationRequirement,
-            decoration: _decoration('Verification requirement *'),
+            decoration: _decoration(
+              context.l10n.createFindPeopleVerificationRequirement,
+            ),
             items: FindPeopleVerificationLevel.values
                 .map(
                   (FindPeopleVerificationLevel value) =>
                       DropdownMenuItem<FindPeopleVerificationLevel>(
                         value: value,
-                        child: Text(_enumLabel(value.name)),
+                        child: Text(createOptionText(context.l10n, value)),
                       ),
                 )
                 .toList(growable: false),
@@ -783,7 +806,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           SwitchListTile.adaptive(
             value: data.waitlistEnabled,
             contentPadding: EdgeInsets.zero,
-            title: const Text('Enable waitlist'),
+            title: Text(context.l10n.createFindPeopleEnableWaitlist),
             onChanged: (bool value) =>
                 _update(data.copyWith(waitlistEnabled: value)),
           ),
@@ -791,13 +814,15 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             DropdownButtonFormField<FindPeopleWaitlistPolicy>(
               isExpanded: true,
               initialValue: data.waitlistPolicy,
-              decoration: _decoration('Waitlist policy'),
+              decoration: _decoration(
+                context.l10n.createFindPeopleWaitlistPolicy,
+              ),
               items: FindPeopleWaitlistPolicy.values
                   .map(
                     (FindPeopleWaitlistPolicy value) =>
                         DropdownMenuItem<FindPeopleWaitlistPolicy>(
                           value: value,
-                          child: Text(_enumLabel(value.name)),
+                          child: Text(createOptionText(context.l10n, value)),
                         ),
                   )
                   .toList(growable: false),
@@ -811,13 +836,15 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             DropdownButtonFormField<FindPeopleSeatFitPolicy>(
               isExpanded: true,
               initialValue: data.waitlistSeatFitPolicy,
-              decoration: _decoration('Seat-fit policy'),
+              decoration: _decoration(
+                context.l10n.createFindPeopleSeatFitPolicy,
+              ),
               items: FindPeopleSeatFitPolicy.values
                   .map(
                     (FindPeopleSeatFitPolicy value) =>
                         DropdownMenuItem<FindPeopleSeatFitPolicy>(
                           value: value,
-                          child: Text(_enumLabel(value.name)),
+                          child: Text(createOptionText(context.l10n, value)),
                         ),
                   )
                   .toList(growable: false),
@@ -831,13 +858,15 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           SwitchListTile.adaptive(
             value: data.attendanceConfirmationRequired,
             contentPadding: EdgeInsets.zero,
-            title: const Text('Require attendance reconfirmation'),
+            title: Text(
+              context.l10n.createFindPeopleRequireAttendanceReconfirmation,
+            ),
             onChanged: (bool value) =>
                 _update(data.copyWith(attendanceConfirmationRequired: value)),
           ),
           const Divider(height: 28),
           Text(
-            'Application questions',
+            context.l10n.createFindPeopleApplicationQuestions,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           Row(
@@ -845,13 +874,15 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               Expanded(
                 child: TextField(
                   controller: _question,
-                  decoration: _decoration('Safe question'),
+                  decoration: _decoration(
+                    context.l10n.createFindPeopleSafeQuestion,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               IconButton.filledTonal(
                 icon: const Icon(Icons.add),
-                tooltip: 'Add question',
+                tooltip: context.l10n.createFindPeopleAddQuestion,
                 onPressed: () => _addQuestion(data),
               ),
             ],
@@ -862,7 +893,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               leading: const Icon(Icons.help_outline),
               title: Text(item.prompt),
               subtitle: Text(
-                '${_enumLabel(item.type.name)} • ${item.required ? 'required' : 'optional'}',
+                '${createOptionText(context.l10n, item.type)} • ${item.required ? 'required' : 'optional'}',
               ),
               trailing: IconButton(
                 icon: const Icon(Icons.delete_outline),
@@ -883,13 +914,13 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           DropdownButtonFormField<FindPeopleCostType>(
             isExpanded: true,
             initialValue: data.costType,
-            decoration: _decoration('Expected cost *'),
+            decoration: _decoration(context.l10n.createFindPeopleExpectedCost),
             items: FindPeopleCostType.values
                 .map(
                   (FindPeopleCostType value) =>
                       DropdownMenuItem<FindPeopleCostType>(
                         value: value,
-                        child: Text(_enumLabel(value.name)),
+                        child: Text(createOptionText(context.l10n, value)),
                       ),
                 )
                 .toList(growable: false),
@@ -907,7 +938,9 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           if (data.costType == FindPeopleCostType.estimated)
             _DraftTextField(
-              label: 'Expected spend per person (${data.currencyCode}) *',
+              label: context.l10n.createFindPeopleExpectedSpendPerPerson(
+                data.currencyCode,
+              ),
               value: data.expectedSpendAmount?.formatMajor() ?? '',
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
@@ -926,7 +959,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               },
             ),
           _DraftTextField(
-            label: 'Cost note',
+            label: context.l10n.createFindPeopleCostNote,
             value: data.costNote ?? '',
             maxLength: 300,
             minLines: 2,
@@ -941,13 +974,15 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           DropdownButtonFormField<FindPeopleExpenseSplitMode>(
             isExpanded: true,
             initialValue: data.expenseSplitMode,
-            decoration: _decoration('Expense split mode *'),
+            decoration: _decoration(
+              context.l10n.createFindPeopleExpenseSplitMode,
+            ),
             items: FindPeopleExpenseSplitMode.values
                 .map(
                   (FindPeopleExpenseSplitMode value) =>
                       DropdownMenuItem<FindPeopleExpenseSplitMode>(
                         value: value,
-                        child: Text(_enumLabel(value.name)),
+                        child: Text(createOptionText(context.l10n, value)),
                       ),
                 )
                 .toList(growable: false),
@@ -966,7 +1001,9 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                   flex: 2,
                   child: TextField(
                     controller: _expenseCategory,
-                    decoration: _decoration('Expense item'),
+                    decoration: _decoration(
+                      context.l10n.createFindPeopleExpenseItem,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -981,7 +1018,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 ),
                 IconButton.filledTonal(
                   icon: const Icon(Icons.add),
-                  tooltip: 'Add expense',
+                  tooltip: context.l10n.createFindPeopleAddExpense,
                   onPressed: () => _addExpense(data),
                 ),
               ],
@@ -1026,13 +1063,13 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           DropdownButtonFormField<FindPeoplePublisherType>(
             isExpanded: true,
             initialValue: data.publisherType,
-            decoration: _decoration('Publish as *'),
+            decoration: _decoration(context.l10n.createFindPeoplePublishAs),
             items: FindPeoplePublisherType.values
                 .map(
                   (FindPeoplePublisherType value) =>
                       DropdownMenuItem<FindPeoplePublisherType>(
                         value: value,
-                        child: Text(_enumLabel(value.name)),
+                        child: Text(createOptionText(context.l10n, value)),
                       ),
                 )
                 .toList(growable: false),
@@ -1051,28 +1088,36 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           ),
           _DraftTextField(
             label: data.publisherType == FindPeoplePublisherType.page
-                ? 'Managed Page ID *'
-                : 'Publisher user ID *',
+                ? context.l10n.createFindPeopleManagedPageId
+                : context.l10n.createFindPeoplePublisherUserId,
             value: data.publisherId,
             onChanged: (String value) =>
                 _update(data.copyWith(publisherId: value.trim())),
           ),
           const SizedBox(height: 8),
-          Text('Responsible hosts: ${data.responsibleHostUserIds.join(', ')}'),
+          Text(
+            context.l10n
+                .createFindPeopleResponsibleHostsDataResponsiblehostuseridsJoin(
+                  data.responsibleHostUserIds.length,
+                ),
+          ),
           const SizedBox(height: 12),
-          Text('Invite co-host', style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            context.l10n.createFindPeopleInviteCoHost,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           Row(
             children: <Widget>[
               Expanded(
                 child: TextField(
                   controller: _coHostUserId,
-                  decoration: _decoration('User ID'),
+                  decoration: _decoration(context.l10n.createFindPeopleUserId),
                 ),
               ),
               const SizedBox(width: 8),
               IconButton.filledTonal(
                 icon: const Icon(Icons.person_add_alt),
-                tooltip: 'Invite co-host',
+                tooltip: context.l10n.createFindPeopleInviteCoHost,
                 onPressed: () => _addCoHost(data),
               ),
             ],
@@ -1083,7 +1128,8 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               leading: const Icon(Icons.supervisor_account_outlined),
               title: Text(item.userId),
               subtitle: Text(
-                '${item.accepted ? 'Accepted' : 'Invitation pending'} • ${item.capabilityIds.map(_enumLabel).join(', ')}',
+                '${item.accepted ? context.l10n.createFindPeopleCohostAccepted : context.l10n.createFindPeopleCohostPending} • '
+                '${item.capabilityIds.map(context.l10n.createFindPeopleCohostRight).join(', ')}',
               ),
               trailing: IconButton(
                 icon: const Icon(Icons.delete_outline),
@@ -1104,13 +1150,15 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           DropdownButtonFormField<FindPeopleVisibility>(
             isExpanded: true,
             initialValue: data.visibility,
-            decoration: _decoration('Visibility *'),
+            decoration: _decoration(
+              context.l10n.createFindPeopleVisibilityRequired,
+            ),
             items: FindPeopleVisibility.values
                 .map(
                   (FindPeopleVisibility value) =>
                       DropdownMenuItem<FindPeopleVisibility>(
                         value: value,
-                        child: Text(_enumLabel(value.name)),
+                        child: Text(createOptionText(context.l10n, value)),
                       ),
                 )
                 .toList(growable: false),
@@ -1131,13 +1179,15 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           DropdownButtonFormField<FindPeopleConversationPolicy>(
             isExpanded: true,
             initialValue: data.conversationPolicy,
-            decoration: _decoration('Conversation policy *'),
+            decoration: _decoration(
+              context.l10n.createFindPeopleConversationPolicy,
+            ),
             items: FindPeopleConversationPolicy.values
                 .map(
                   (FindPeopleConversationPolicy value) =>
                       DropdownMenuItem<FindPeopleConversationPolicy>(
                         value: value,
-                        child: Text(_enumLabel(value.name)),
+                        child: Text(createOptionText(context.l10n, value)),
                       ),
                 )
                 .toList(growable: false),
@@ -1150,7 +1200,9 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           SwitchListTile.adaptive(
             value: data.allowParticipantInvites,
             contentPadding: EdgeInsets.zero,
-            title: const Text('Allow accepted participants to invite'),
+            title: Text(
+              context.l10n.createFindPeopleAllowAcceptedParticipantsInvite,
+            ),
             onChanged: (bool value) =>
                 _update(data.copyWith(allowParticipantInvites: value)),
           ),
@@ -1158,7 +1210,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             children: <Widget>[
               Expanded(
                 child: _DraftTextField(
-                  label: 'Quiet hours start (0–1439)',
+                  label: context.l10n.createFindPeopleQuietHoursStart01439,
                   value: data.quietHoursStartMinute?.toString() ?? '',
                   keyboardType: TextInputType.number,
                   onChanged: (String value) {
@@ -1175,7 +1227,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               const SizedBox(width: 8),
               Expanded(
                 child: _DraftTextField(
-                  label: 'Quiet hours end (0–1439)',
+                  label: context.l10n.createFindPeopleQuietHoursEnd01439,
                   value: data.quietHoursEndMinute?.toString() ?? '',
                   keyboardType: TextInputType.number,
                   onChanged: (String value) {
@@ -1204,21 +1256,22 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         _Panel(
-          title: 'Public preview',
-          subtitle: 'This mirrors the safe public Details contract.',
+          title: context.l10n.createFindPeoplePublicPreview,
+          subtitle:
+              context.l10n.createFindPeopleMirrorsSafePublicDetailsContract,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
                 draft.title.isEmpty
-                    ? 'Untitled Find People request'
+                    ? context.l10n.createFindPeopleUntitledFindPeopleRequest
                     : draft.title,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 6),
               Text(
                 draft.shortDescription.isEmpty
-                    ? 'Add a short description.'
+                    ? context.l10n.createFindPeopleAddShortDescription
                     : draft.shortDescription,
               ),
               const SizedBox(height: 10),
@@ -1226,8 +1279,16 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 spacing: 8,
                 runSpacing: 8,
                 children: <Widget>[
-                  Chip(label: Text(_enumLabel(data.meetingMode.name))),
-                  Chip(label: Text(_enumLabel(data.scheduleMode.name))),
+                  Chip(
+                    label: Text(
+                      createOptionText(context.l10n, data.meetingMode),
+                    ),
+                  ),
+                  Chip(
+                    label: Text(
+                      createOptionText(context.l10n, data.scheduleMode),
+                    ),
+                  ),
                   Chip(label: Text('${data.targetGroupSize} people')),
                   Chip(
                     label: Text(
@@ -1236,7 +1297,9 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                           .join(' · '),
                     ),
                   ),
-                  Chip(label: Text(_enumLabel(data.costType.name))),
+                  Chip(
+                    label: Text(createOptionText(context.l10n, data.costType)),
+                  ),
                 ],
               ),
               if (data.publicAreaLabel != null)
@@ -1244,42 +1307,51 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.location_on_outlined),
                   title: Text(data.publicAreaLabel!),
-                  subtitle: const Text('Approximate public area'),
+                  subtitle: Text(
+                    context.l10n.createFindPeopleApproximatePublicArea,
+                  ),
                 ),
             ],
           ),
         ),
         const SizedBox(height: 12),
         _Panel(
-          title: 'Private host preview',
+          title: context.l10n.createFindPeoplePrivateHostPreview,
           subtitle:
-              'These fields are never included in public DTO, analytics, or push payloads.',
+              context.l10n.createFindPeopleTheseFieldsAreNeverIncludedPublic,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text('Exact address: ${data.exactAddressLine ?? 'Not set'}'),
+              // The host's own private values are shown as entered.
               Text(
-                'Exact geo: ${data.exactGeo == null ? 'Not set' : '${data.exactGeo!.latitude}, ${data.exactGeo!.longitude}'}',
+                '${context.l10n.createFindPeopleExactAddressLabel}: '
+                '${data.exactAddressLine ?? context.l10n.createFindPeopleNotSet}',
               ),
               Text(
-                'Online access reference: ${data.onlineAccessSecretRef == null ? 'Not set' : 'Configured'}',
+                '${context.l10n.createFindPeopleExactGeoLabel}: '
+                '${data.exactGeo == null ? context.l10n.createFindPeopleNotSet : '${data.exactGeo!.latitude}, ${data.exactGeo!.longitude}'}',
+              ),
+              Text(
+                '${context.l10n.createFindPeopleOnlineAccessLabel}: '
+                '${data.onlineAccessSecretRef == null ? context.l10n.createFindPeopleNotSet : context.l10n.createFindPeopleConfigured}',
               ),
             ],
           ),
         ),
         const SizedBox(height: 12),
         _Panel(
-          title: 'Media and publication',
+          title: context.l10n.createFindPeopleMediaPublication,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               _DraftTextField(
-                label: 'Cover image URL (optional)',
+                label: context.l10n.createFindPeopleCoverImageUrlOptional,
                 value: draft.media.coverImage,
                 onChanged: widget.controller.updateCoverImage,
               ),
               _DraftTextField(
-                label: 'Schedule publication UTC (optional)',
+                label:
+                    context.l10n.createFindPeopleSchedulePublicationUtcOptional,
                 value: data.publishAtUtc?.toIso8601String() ?? '',
                 onChanged: (String value) {
                   final DateTime? date = DateTime.tryParse(value)?.toUtc();
@@ -1295,7 +1367,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 value: data.ageRequirementConfirmed,
                 controlAffinity: ListTileControlAffinity.leading,
                 contentPadding: EdgeInsets.zero,
-                title: const Text('This request is only for adults 18+ *'),
+                title: Text(context.l10n.createFindPeopleRequestOnlyAdults18),
                 onChanged: (bool? value) => _update(
                   data.copyWith(ageRequirementConfirmed: value ?? false),
                 ),
@@ -1304,9 +1376,11 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 value: data.safetyRulesAccepted,
                 controlAffinity: ListTileControlAffinity.leading,
                 contentPadding: EdgeInsets.zero,
-                title: const Text('I accept the Find People Safety Rules *'),
-                subtitle: const Text(
-                  'Meet publicly, do not send money to strangers, and use Report/Block when needed.',
+                title: Text(
+                  context.l10n.createFindPeopleIAcceptFindPeopleSafetyRules,
+                ),
+                subtitle: Text(
+                  context.l10n.createFindPeopleMeetPubliclyDoNotSendMoney,
                 ),
                 onChanged: (bool? value) =>
                     _update(data.copyWith(safetyRulesAccepted: value ?? false)),
@@ -1322,7 +1396,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               if (issues.isNotEmpty) ...<Widget>[
                 const Divider(height: 28),
                 Text(
-                  'Validation summary',
+                  context.l10n.createFindPeopleValidationSummary,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 6),
@@ -1361,7 +1435,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 label: Text(
                   widget.state.status == CreateStatus.publishing
                       ? 'Publishing…'
-                      : 'Publish Find People request',
+                      : context.l10n.createFindPeoplePublishFindPeopleRequest,
                 ),
               ),
             ],
@@ -1383,18 +1457,18 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           OutlinedButton.icon(
             onPressed: () => widget.controller.goToFindPeopleStep(step - 1),
             icon: const Icon(Icons.arrow_back),
-            label: const Text('Back'),
+            label: Text(context.l10n.createFindPeopleBack),
           ),
         TextButton.icon(
           onPressed: widget.controller.saveDraft,
           icon: const Icon(Icons.save_outlined),
-          label: const Text('Save draft'),
+          label: Text(context.l10n.createFindPeopleSaveDraft),
         ),
         if (step < findPeopleCreateSteps.length - 1)
           FilledButton.icon(
             onPressed: () => widget.controller.goToFindPeopleStep(step + 1),
             icon: const Icon(Icons.arrow_forward),
-            label: const Text('Continue'),
+            label: Text(context.l10n.createFindPeopleContinue),
           ),
       ],
     );
@@ -1545,10 +1619,10 @@ class _StepHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String saveLabel = switch (saveStatus) {
-      CreateSaveStatus.saved => 'Saved',
-      CreateSaveStatus.saving => 'Saving…',
-      CreateSaveStatus.unsaved => 'Unsaved changes',
-      CreateSaveStatus.failed => 'Save error',
+      CreateSaveStatus.saved => context.l10n.createFormSaved,
+      CreateSaveStatus.saving => context.l10n.createFormSaving,
+      CreateSaveStatus.unsaved => context.l10n.createFindPeopleUnsavedChanges,
+      CreateSaveStatus.failed => context.l10n.createFindPeopleSaveError,
     };
     return _Panel(
       child: Column(
@@ -1558,13 +1632,23 @@ class _StepHeader extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  'Find People · ${step + 1}/${findPeopleCreateSteps.length}',
+                  context.l10n.createFindPeopleFindPeople(
+                    step + 1,
+                    findPeopleCreateSteps.length,
+                  ),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
-              Text(saveLabel, style: Theme.of(context).textTheme.bodySmall),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  saveLabel,
+                  textAlign: TextAlign.end,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -1572,8 +1656,11 @@ class _StepHeader extends StatelessWidget {
             value: (step + 1) / findPeopleCreateSteps.length,
           ),
           const SizedBox(height: 10),
-          Text(config.title, style: Theme.of(context).textTheme.titleLarge),
-          Text(config.description),
+          Text(
+            createFormText(context.l10n, config.titleId),
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          Text(createFormText(context.l10n, config.descriptionId)),
           const SizedBox(height: 10),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -1584,7 +1671,7 @@ class _StepHeader extends StatelessWidget {
                   padding: const EdgeInsets.only(right: 6),
                   child: ChoiceChip(
                     label: Text(
-                      '${index + 1}. ${findPeopleCreateSteps[index].title}',
+                      '${index + 1}. ${createFormText(context.l10n, findPeopleCreateSteps[index].titleId)}',
                     ),
                     selected: index == step,
                     onSelected: (_) => onStepSelected(index),
@@ -1736,18 +1823,6 @@ InputDecoration _decoration(String label, {String? hint}) => InputDecoration(
   hintText: hint,
   border: const OutlineInputBorder(),
 );
-
-String _enumLabel(String value) {
-  final String spaced = value
-      .replaceAllMapped(
-        RegExp(r'([a-z0-9])([A-Z])'),
-        (Match match) => '${match.group(1)} ${match.group(2)}',
-      )
-      .replaceAll('_', ' ');
-  return spaced.isEmpty
-      ? spaced
-      : '${spaced[0].toUpperCase()}${spaced.substring(1)}';
-}
 
 String? _text(String value) {
   final String normalized = value.replaceAll(RegExp(r'\s+'), ' ').trim();

@@ -27,10 +27,37 @@ class ScenarioIntakeDayOption {
 }
 
 class ScenarioIntakeAnchorOption {
-  const ScenarioIntakeAnchorOption({required this.id, required this.title});
+  const ScenarioIntakeAnchorOption({
+    required this.id,
+    required this.title,
+    required this.kind,
+  });
 
   final String id;
-  final String title;
+
+  /// The stop title (user content); null when the stop has none and the
+  /// presentation names it by [kind].
+  final String? title;
+  final ScenarioItemKind kind;
+}
+
+/// Stable intake notice codes; the sheet resolves each to localized text.
+enum ScenarioObjectIntakeNotice {
+  targetsUnavailable,
+  chooseTarget,
+  targetNotEditable,
+  titleRequired,
+  openFailed,
+  signInAgain,
+  confirmDuplicate,
+  confirmUnavailable,
+  confirmScheduleAdjustment,
+  revisionConflict,
+  intentExpired,
+  targetGone,
+  lockedLegBoundary,
+  persistenceUnavailable,
+  applyFailed,
 }
 
 class ScenarioObjectIntakeState {
@@ -90,7 +117,7 @@ class ScenarioObjectIntakeState {
   final bool confirmDuplicate;
   final bool confirmUnavailable;
   final bool confirmScheduleAdjustment;
-  final String? message;
+  final ScenarioObjectIntakeNotice? message;
   final String? successTargetId;
   final int? successTargetRevision;
   final int successItemCount;
@@ -116,7 +143,7 @@ class ScenarioObjectIntakeState {
     bool? confirmDuplicate,
     bool? confirmUnavailable,
     bool? confirmScheduleAdjustment,
-    String? message,
+    ScenarioObjectIntakeNotice? message,
     bool clearMessage = false,
     String? successTargetId,
     int? successTargetRevision,

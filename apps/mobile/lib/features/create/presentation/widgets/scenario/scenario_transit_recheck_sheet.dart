@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/localization/l10n_context.dart';
 import '../../../domain/entities/scenario_transit_mutation.dart';
+import '../create_form_texts.dart';
 
 Future<bool> showScenarioTransitRecheckSheet(
   BuildContext context,
@@ -34,12 +36,12 @@ class _ScenarioTransitRecheckSheet extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    'Schedule recheck',
+                    context.l10n.createScenarioScheduleRecheck,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Close schedule recheck',
+                  tooltip: context.l10n.createScenarioCloseScheduleRecheck,
                   onPressed: () => Navigator.of(context).pop(false),
                   icon: const Icon(Icons.close),
                 ),
@@ -52,7 +54,7 @@ class _ScenarioTransitRecheckSheet extends StatelessWidget {
                 child: ListView(
                   children: <Widget>[
                     Text(
-                      'Changes in the cached official schedule',
+                      context.l10n.createScenarioChangesCachedOfficialSchedule,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 8),
@@ -62,7 +64,9 @@ class _ScenarioTransitRecheckSheet extends StatelessWidget {
                           'scenario-transit-diff-${difference.fieldCode}',
                         ),
                         dense: true,
-                        title: Text(_fieldLabel(difference.fieldCode)),
+                        title: Text(
+                          _fieldLabel(context.l10n, difference.fieldCode),
+                        ),
                         subtitle: Text(
                           '${_diffValue(difference, difference.before)} → '
                           '${_diffValue(difference, difference.after)}',
@@ -77,12 +81,13 @@ class _ScenarioTransitRecheckSheet extends StatelessWidget {
                     ),
                     Text(
                       '${candidate.manifest.providerDisplayName} · '
-                      '${candidate.manifest.freshness.name}',
+                      '${createOptionText(context.l10n, candidate.manifest.freshness)}',
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Planned schedule · not live. Replace changes only the '
-                      'saved snapshot after explicit confirmation.',
+                    Text(
+                      context
+                          .l10n
+                          .createScenarioPlannedScheduleNotLiveReplaceChanges,
                     ),
                   ],
                 ),
@@ -90,13 +95,13 @@ class _ScenarioTransitRecheckSheet extends StatelessWidget {
               FilledButton(
                 key: const ValueKey<String>('scenario-transit-confirm-replace'),
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Replace saved schedule'),
+                child: Text(context.l10n.createScenarioReplaceSavedSchedule),
               ),
             ] else ...<Widget>[
               const Spacer(),
               OutlinedButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Close'),
+                child: Text(context.l10n.createScenarioClose),
               ),
             ],
           ],
@@ -114,37 +119,46 @@ class _StatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
     liveRegion: true,
-    label: _statusText(result.status),
+    label: _statusText(context.l10n, result.status),
     child: Card.outlined(
       key: const ValueKey<String>('scenario-transit-recheck-status'),
       child: ListTile(
         leading: Icon(_statusIcon(result.status)),
-        title: Text(_statusTitle(result.status)),
-        subtitle: Text(_statusText(result.status)),
+        title: Text(_statusTitle(context.l10n, result.status)),
+        subtitle: Text(_statusText(context.l10n, result.status)),
       ),
     ),
   );
 }
 
-String _statusTitle(ScenarioTransitRecheckStatus status) => switch (status) {
-  ScenarioTransitRecheckStatus.unchanged => 'No schedule changes found',
+String _statusTitle(
+  AppLocalizations l10n,
+  ScenarioTransitRecheckStatus status,
+) => switch (status) {
+  ScenarioTransitRecheckStatus.unchanged =>
+    l10n.createScenarioNoScheduleChangesFound,
   ScenarioTransitRecheckStatus.changed => 'A changed service was found',
-  ScenarioTransitRecheckStatus.notFound => 'Service not found',
-  ScenarioTransitRecheckStatus.unavailable => 'Recheck unavailable',
-  ScenarioTransitRecheckStatus.invalidSnapshot => 'Saved data is incomplete',
+  ScenarioTransitRecheckStatus.notFound => l10n.createScenarioServiceNotFound,
+  ScenarioTransitRecheckStatus.unavailable =>
+    l10n.createScenarioRecheckUnavailable,
+  ScenarioTransitRecheckStatus.invalidSnapshot =>
+    l10n.createScenarioSavedDataIncomplete,
 };
 
-String _statusText(ScenarioTransitRecheckStatus status) => switch (status) {
+String _statusText(
+  AppLocalizations l10n,
+  ScenarioTransitRecheckStatus status,
+) => switch (status) {
   ScenarioTransitRecheckStatus.unchanged =>
-    'The cached official schedule matches the saved snapshot. It is still not live.',
+    l10n.createScenarioCachedOfficialScheduleMatchesSavedSnapshot,
   ScenarioTransitRecheckStatus.changed =>
-    'Review every difference before replacing the saved snapshot.',
+    l10n.createScenarioReviewEveryDifferenceBeforeReplacingSaved,
   ScenarioTransitRecheckStatus.notFound =>
-    'The saved item was kept unchanged. Recheck later or enter transport manually.',
+    l10n.createScenarioSavedItemWasKeptUnchangedRecheck,
   ScenarioTransitRecheckStatus.unavailable =>
-    'The saved item was kept unchanged because cached schedule data is unavailable.',
+    l10n.createScenarioSavedItemWasKeptUnchangedBecause,
   ScenarioTransitRecheckStatus.invalidSnapshot =>
-    'The saved item was kept unchanged and cannot be rechecked automatically.',
+    l10n.createScenarioSavedItemWasKeptUnchangedCannot,
 };
 
 IconData _statusIcon(ScenarioTransitRecheckStatus status) => switch (status) {
@@ -155,18 +169,18 @@ IconData _statusIcon(ScenarioTransitRecheckStatus status) => switch (status) {
   ScenarioTransitRecheckStatus.invalidSnapshot => Icons.warning_amber_outlined,
 };
 
-String _fieldLabel(String code) => switch (code) {
-  'route' => 'Route',
-  'service' => 'Service calendar',
-  'origin_stop' => 'Origin stop',
-  'destination_stop' => 'Destination stop',
-  'departure' => 'Departure time',
-  'arrival' => 'Arrival time',
-  'carrier' => 'Carrier',
-  'label' => 'Service label',
-  'feed_hash' => 'Feed version',
+String _fieldLabel(AppLocalizations l10n, String code) => switch (code) {
+  'route' => l10n.createScenarioRouteLabel,
+  'service' => l10n.createScenarioServiceCalendar,
+  'origin_stop' => l10n.createScenarioOriginStop,
+  'destination_stop' => l10n.createScenarioDestinationStop,
+  'departure' => l10n.createScenarioDepartureTime,
+  'arrival' => l10n.createScenarioArrivalTime,
+  'carrier' => l10n.createScenarioCarrierLabel,
+  'label' => l10n.createScenarioServiceLabel,
+  'feed_hash' => l10n.createScenarioFeedVersion,
   'freshness' => 'Freshness',
-  'retrieved_at' => 'Feed retrieved at',
+  'retrieved_at' => l10n.createScenarioFeedRetrievedAt,
   _ => code,
 };
 

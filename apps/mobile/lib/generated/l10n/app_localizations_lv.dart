@@ -4873,6 +4873,103 @@ class AppLocalizationsLv extends AppLocalizations {
       'PublishStatus_archived': 'Arhivēts',
       'PublishStatus_hidden': 'Paslēpts',
       'PublishStatus_deleted': 'Dzēsts',
+      'FindPeopleApprovalMode_manual': 'Rīkotājs apstiprina',
+      'FindPeopleApprovalMode_automatic': 'Automātiski',
+      'FindPeopleApprovalMode_inviteOnly': 'Tikai ar ielūgumu',
+      'FindPeopleConversationPolicy_acceptedOnly':
+          'Tikai apstiprinātie dalībnieki',
+      'FindPeopleConversationPolicy_applicantsAndAccepted':
+          'Pieteicēji un apstiprinātie',
+      'FindPeopleCostType_free': 'Bez maksas',
+      'FindPeopleCostType_estimated': 'Aptuvenas izmaksas',
+      'FindPeopleCostType_unknown': 'Nav zināms',
+      'FindPeopleExpenseSplitMode_none': 'Bez sadalīšanas',
+      'FindPeopleExpenseSplitMode_equal': 'Vienādi',
+      'FindPeopleExpenseSplitMode_itemized': 'Pa pozīcijām',
+      'FindPeopleExpenseSplitMode_settleLater': 'Norēķināties vēlāk',
+      'FindPeopleMeetingMode_inPerson': 'Klātienē',
+      'FindPeopleMeetingMode_online': 'Tiešsaistē',
+      'FindPeopleMeetingMode_hybrid': 'Hibrīds',
+      'FindPeopleParticipationGoal_social': 'Socializēšanās',
+      'FindPeopleParticipationGoal_practice': 'Prakse',
+      'FindPeopleParticipationGoal_teamUp': 'Komanda',
+      'FindPeopleParticipationGoal_sharedTrip': 'Kopīgs brauciens',
+      'FindPeopleParticipationGoal_accountability': 'Atbalstīt vienam otru',
+      'FindPeopleParticipationGoal_other': 'Cits',
+      'FindPeoplePublisherType_user': 'Personīgais profils',
+      'FindPeoplePublisherType_page': 'Profesionāla lapa',
+      'FindPeopleScheduleMode_single': 'Vienreiz',
+      'FindPeopleScheduleMode_timePoll': 'Laika aptauja',
+      'FindPeopleScheduleMode_recurring': 'Atkārtots',
+      'FindPeopleSeatFitPolicy_strictOrder': 'Stingra secība',
+      'FindPeopleSeatFitPolicy_firstFitting': 'Pirmais piemērotais',
+      'FindPeopleSkillLevel_any': 'Jebkurš līmenis',
+      'FindPeopleSkillLevel_beginner': 'Iesācējs',
+      'FindPeopleSkillLevel_intermediate': 'Vidējs',
+      'FindPeopleSkillLevel_advanced': 'Pieredzējis',
+      'FindPeopleVerificationLevel_none': 'Bez pārbaudes',
+      'FindPeopleVerificationLevel_phone': 'Tālrunis',
+      'FindPeopleVerificationLevel_identityDocument':
+          'Personu apliecinošs dokuments',
+      'FindPeopleVerificationLevel_organization': 'Organizācija',
+      'FindPeopleVisibility_public': 'Publisks',
+      'FindPeopleVisibility_unlisted': 'Pēc saites',
+      'FindPeopleVisibility_inviteOnly': 'Tikai ar ielūgumu',
+      'FindPeopleWaitlistPolicy_firstCome': 'Pēc kārtas',
+      'FindPeopleWaitlistPolicy_hostReview': 'Rīkotāja pārbaude',
+      'ScenarioBudgetBasis_wholeGroup': 'Visa grupa',
+      'ScenarioBudgetBasis_perPerson': 'Uz cilvēku',
+      'ScenarioFormat_city': 'Pilsēta',
+      'ScenarioFormat_day': 'Diena',
+      'ScenarioFormat_weekend': 'Nedēļas nogale',
+      'ScenarioFormat_trip': 'Ceļojums',
+      'ScenarioPace_relaxed': 'Mierīgs',
+      'ScenarioPace_balanced': 'Līdzsvarots',
+      'ScenarioPace_intensive': 'Intensīvs',
+      'ScenarioPartyKind_solo': 'Viens',
+      'ScenarioPartyKind_couple': 'Pāris',
+      'ScenarioPartyKind_friends': 'Draugi',
+      'ScenarioPartyKind_family': 'Ģimene',
+      'ScenarioPartyKind_group': 'Grupa',
+      'ScenarioPartyKind_mixed': 'Jaukta',
+      'ScenarioPlannedTransportKind_bus': 'Autobuss',
+      'ScenarioPlannedTransportKind_train': 'Vilciens',
+      'ScenarioPlannedTransportKind_tram': 'Tramvajs',
+      'ScenarioPlannedTransportKind_trolleybus': 'Trolejbuss',
+      'ScenarioPlannedTransportKind_ferry': 'Prāmis',
+      'ScenarioPlannedTransportKind_flight': 'Lidojums',
+      'ScenarioPlannedTransportKind_other': 'Cits',
+      'ScenarioTravelMode_walking': 'Kājām',
+      'ScenarioTravelMode_bicycle': 'Velosipēds',
+      'ScenarioTravelMode_car': 'Savs auto',
+      'ScenarioTravelMode_taxi': 'Taksometrs',
+      'ScenarioTravelMode_transit': 'Sabiedriskais transports',
+      'ScenarioTravelMode_other': 'Cits',
+      'ScenarioDateMode_template': 'Elastīga veidne',
+      'ScenarioDateMode_dated': 'Ceļojums ar datumiem',
+      'ScenarioItemKind_visit': 'Apmeklējums',
+      'ScenarioItemKind_event': 'Pasākums',
+      'ScenarioItemKind_activity': 'Aktivitāte',
+      'ScenarioItemKind_route': 'Maršruts',
+      'ScenarioItemKind_bookableSession': 'Nodarbība',
+      'ScenarioItemKind_stay': 'Naktsmītne',
+      'ScenarioItemKind_plannedTransport': 'Plānotais transports',
+      'ScenarioItemKind_timeBlock': 'Laika bloks',
+      'RouteSegmentSource_routed': 'Maršrutēts',
+      'RouteSegmentSource_generated': 'Ģenerēts',
+      'RouteSegmentSource_freehand': 'Brīvi',
+      'RouteSegmentSource_recordedGps': 'GPS ieraksts',
+      'RouteSegmentSource_importedGpx': 'Importēts GPX',
+      'RouteSegmentSource_intentionalDirect': 'Apzināta taisna līnija',
+      'RouteSegmentSource_fallbackDirect': 'Taisna līnija (rezerves)',
+      'RouteSegmentOperationState_ready': 'Gatavs',
+      'RouteSegmentOperationState_routing': 'Maršrutē',
+      'RouteSegmentOperationState_failed': 'Neizdevās',
+      'RouteSegmentOperationState_stale': 'Jāatjaunina',
+      'ScenarioScheduleFreshness_current': 'Aktuāls saglabāšanas brīdī',
+      'ScenarioScheduleFreshness_stale': 'Novecojis',
+      'ScenarioScheduleFreshness_unknown': 'Nav zināms',
+      'ScenarioScheduleFreshness_notApplicable': 'Neattiecas',
       'other': 'Cits',
     });
     return '$_temp0';
@@ -5150,5 +5247,2284 @@ class AppLocalizationsLv extends AppLocalizations {
   @override
   String createFormNowStatus(String value) {
     return 'Tagad: $value.';
+  }
+
+  @override
+  String createFindPeopleFindPeople(int done, int total) {
+    return 'Find People · $done/$total';
+  }
+
+  @override
+  String get createFindPeopleSaveError => 'Saglabāšanas kļūda';
+
+  @override
+  String get createFindPeopleUnsavedChanges => 'Nesaglabātas izmaiņas';
+
+  @override
+  String get createFindPeopleContinue => 'Turpināt';
+
+  @override
+  String get createFindPeopleSaveDraft => 'Saglabāt melnrakstu';
+
+  @override
+  String get createFindPeopleBack => 'Atpakaļ';
+
+  @override
+  String get createFindPeoplePublishFindPeopleRequest =>
+      'Publicēt Find People pieprasījumu';
+
+  @override
+  String get createFindPeopleValidationSummary => 'Pārbaudes kopsavilkums';
+
+  @override
+  String get createFindPeopleMeetPubliclyDoNotSendMoney =>
+      'Tiecieties publiskās vietās, nesūtiet naudu svešiniekiem un vajadzības gadījumā izmantojiet «Ziņot/Bloķēt».';
+
+  @override
+  String get createFindPeopleIAcceptFindPeopleSafetyRules =>
+      'Es pieņemu Find People drošības noteikumus *';
+
+  @override
+  String get createFindPeopleRequestOnlyAdults18 =>
+      'Šis pieprasījums ir tikai pieaugušajiem 18+ *';
+
+  @override
+  String get createFindPeopleSchedulePublicationUtcOptional =>
+      'Plānotā publicēšana UTC (pēc izvēles)';
+
+  @override
+  String get createFindPeopleCoverImageUrlOptional =>
+      'Vāka attēla URL (pēc izvēles)';
+
+  @override
+  String get createFindPeopleMediaPublication => 'Attēli un publicēšana';
+
+  @override
+  String get createFindPeopleTheseFieldsAreNeverIncludedPublic =>
+      'Šie lauki nekad netiek iekļauti publiskajos datos, analītikā vai push ziņās.';
+
+  @override
+  String get createFindPeoplePrivateHostPreview =>
+      'Privāts rīkotāja priekšskatījums';
+
+  @override
+  String get createFindPeopleApproximatePublicArea => 'Aptuvena publiska zona';
+
+  @override
+  String get createFindPeopleAddShortDescription =>
+      'Pievienojiet īsu aprakstu.';
+
+  @override
+  String get createFindPeopleUntitledFindPeopleRequest =>
+      'Find People pieprasījums bez nosaukuma';
+
+  @override
+  String get createFindPeopleMirrorsSafePublicDetailsContract =>
+      'Tas atbilst drošajai publiskajai detaļu formai.';
+
+  @override
+  String get createFindPeoplePublicPreview => 'Publisks priekšskatījums';
+
+  @override
+  String get createFindPeopleQuietHoursEnd01439 =>
+      'Klusuma stundu beigas (0–1439)';
+
+  @override
+  String get createFindPeopleQuietHoursStart01439 =>
+      'Klusuma stundu sākums (0–1439)';
+
+  @override
+  String get createFindPeopleAllowAcceptedParticipantsInvite =>
+      'Atļaut apstiprinātajiem dalībniekiem uzaicināt';
+
+  @override
+  String get createFindPeopleConversationPolicy => 'Sarunas politika *';
+
+  @override
+  String get createFindPeopleInviteCoHost => 'Uzaicināt līdzrīkotāju';
+
+  @override
+  String get createFindPeopleUserId => 'Lietotāja ID';
+
+  @override
+  String createFindPeopleResponsibleHostsDataResponsiblehostuseridsJoin(
+    int count,
+  ) {
+    return 'Atbildīgie rīkotāji: $count';
+  }
+
+  @override
+  String get createFindPeoplePublisherUserId => 'Publicētāja lietotāja ID *';
+
+  @override
+  String get createFindPeopleManagedPageId => 'Pārvaldītās lapas ID *';
+
+  @override
+  String get createFindPeoplePublishAs => 'Publicēt kā *';
+
+  @override
+  String get createFindPeopleAddExpense => 'Pievienot izmaksas';
+
+  @override
+  String get createFindPeopleExpenseItem => 'Izmaksu pozīcija';
+
+  @override
+  String get createFindPeopleExpenseSplitMode => 'Izmaksu sadalīšanas veids *';
+
+  @override
+  String get createFindPeopleCostNote => 'Piezīme par izmaksām';
+
+  @override
+  String createFindPeopleExpectedSpendPerPerson(String value) {
+    return 'Paredzamie tēriņi uz cilvēku ($value) *';
+  }
+
+  @override
+  String get createFindPeopleExpectedCost => 'Paredzamās izmaksas *';
+
+  @override
+  String get createFindPeopleAddQuestion => 'Pievienot jautājumu';
+
+  @override
+  String get createFindPeopleSafeQuestion => 'Drošs jautājums';
+
+  @override
+  String get createFindPeopleApplicationQuestions => 'Pieteikuma jautājumi';
+
+  @override
+  String get createFindPeopleRequireAttendanceReconfirmation =>
+      'Pieprasīt dalības atkārtotu apstiprinājumu';
+
+  @override
+  String get createFindPeopleWaitlistPolicy => 'Gaidīšanas rindas politika';
+
+  @override
+  String get createFindPeopleEnableWaitlist => 'Ieslēgt gaidīšanas rindu';
+
+  @override
+  String get createFindPeopleVerificationRequirement => 'Pārbaudes prasība *';
+
+  @override
+  String get createFindPeopleMaximumSeatsPerApplication =>
+      'Maksimālais vietu skaits pieteikumā';
+
+  @override
+  String get createFindPeopleAllowPartyApplications =>
+      'Atļaut grupu pieteikumus';
+
+  @override
+  String get createFindPeopleApprovalMode => 'Apstiprināšanas veids *';
+
+  @override
+  String get createFindPeopleHostSeats => 'Rīkotāju vietas';
+
+  @override
+  String get createFindPeopleTargetGroupSize => 'Vēlamais grupas lielums';
+
+  @override
+  String get createFindPeopleGroupSizeIncludesHostsExpectedSpend =>
+      'Grupas lielumā ieskaitīti rīkotāji. Paredzamie tēriņi ir informācija, nevis maksājums rīkotājam.';
+
+  @override
+  String get createFindPeopleGroupParticipation => 'Grupa un dalība';
+
+  @override
+  String get createFindPeopleBackupMeetingPlan => 'Rezerves tikšanās plāns';
+
+  @override
+  String get createFindPeoplePrivateAccessSecretReference =>
+      'Privātās piekļuves slepenā atsauce *';
+
+  @override
+  String get createFindPeopleGoogleMeetZoomDiscord =>
+      'Google Meet, Zoom, Discord…';
+
+  @override
+  String get createFindPeopleOnlineProvider => 'Tiešsaistes platforma *';
+
+  @override
+  String get createFindPeoplePrivateHomesResidentialAccessDetailsAre =>
+      'Privātmājas un piekļuves dati dzīvojamām ēkām nav atļauti.';
+
+  @override
+  String get createFindPeoplePublicMeetingPlace =>
+      'Šī ir publiska tikšanās vieta *';
+
+  @override
+  String get createFindPeopleMeetingInstructionsPrivate =>
+      'Norādes tikšanās vietai (privāti)';
+
+  @override
+  String get createFindPeopleExactAddressPrivate =>
+      'Precīza adrese (privāta) *';
+
+  @override
+  String createFindPeoplePublicMapPoint(String value) {
+    return 'Publiskais punkts kartē: $value';
+  }
+
+  @override
+  String get createFindPeopleSetExactPointGenerateSafePublic =>
+      'Iestatīt precīzu punktu un izveidot drošu publisku punktu';
+
+  @override
+  String get createFindPeopleExactLongitude => 'Precīzs garums *';
+
+  @override
+  String get createFindPeopleExactLatitude => 'Precīzs platums *';
+
+  @override
+  String get createFindPeopleOldTownNearCentralPark =>
+      'Vecrīga, pie Centrālā parka';
+
+  @override
+  String get createFindPeoplePublicAreaLabel => 'Publiskās zonas nosaukums *';
+
+  @override
+  String get createFindPeopleMeetingPlaceName => 'Tikšanās vietas nosaukums *';
+
+  @override
+  String get createFindPeopleMeetingMode => 'Tikšanās veids *';
+
+  @override
+  String get createFindPeopleOnlyApproximatePublicAreaAppearsDiscover =>
+      'Discover rāda tikai aptuvenu publisku zonu. Precīzā informācija paliek privāta.';
+
+  @override
+  String get createFindPeopleMeetingLocation => 'Tikšanās vieta';
+
+  @override
+  String get createFindPeopleMaximumOccurrences252 =>
+      'Maksimālais reižu skaits (2–52)';
+
+  @override
+  String get createFindPeopleSeriesEndUtc => 'Sērijas beigas UTC';
+
+  @override
+  String get createFindPeopleRecurrenceRule => 'Atkārtošanās noteikums *';
+
+  @override
+  String get createFindPeopleApplicationDeadlineUtc =>
+      'Pieteikšanās termiņš UTC *';
+
+  @override
+  String get createFindPeoplePollResponseDeadlineUtc =>
+      'Aptaujas atbildes termiņš UTC *';
+
+  @override
+  String get createFindPeopleRemoveSlot => 'Noņemt laika posmu';
+
+  @override
+  String get createFindPeopleAddTimeOption => 'Pievienot laika variantu';
+
+  @override
+  String get createFindPeopleSetMeetingTime => 'Iestatīt tikšanās laiku';
+
+  @override
+  String get createFindPeopleEndUtc => 'Beigas UTC *';
+
+  @override
+  String get createFindPeopleStartUtc => 'Sākums UTC *';
+
+  @override
+  String get createFindPeopleScheduleMode => 'Grafika veids *';
+
+  @override
+  String createFindPeopleAllTimesAreStoredUtcDisplayed(String value) {
+    return 'Visi laiki tiek glabāti UTC un rādīti joslā $value.';
+  }
+
+  @override
+  String get createFindPeopleSchedule => 'Grafiks';
+
+  @override
+  String get createFindPeopleHouseRulesNote => 'Piezīme par noteikumiem';
+
+  @override
+  String get createFindPeopleHouseRules => 'Noteikumi';
+
+  @override
+  String get createFindPeopleAccessibilityNotes => 'Piezīmes par pieejamību';
+
+  @override
+  String get createFindPeopleEquipmentNotes => 'Piezīmes par aprīkojumu';
+
+  @override
+  String get createFindPeopleExperienceRequirementsOnePerLine =>
+      'Prasības pēc pieredzes (pa vienai rindā)';
+
+  @override
+  String get createFindPeopleCommunicationLanguages => 'Saziņas valodas *';
+
+  @override
+  String get createFindPeopleParticipationGoal => 'Dalības mērķis *';
+
+  @override
+  String get createFindPeopleSkillLevel => 'Prasmju līmenis *';
+
+  @override
+  String get createFindPeopleFullDescription => 'Pilns apraksts *';
+
+  @override
+  String get createFindPeopleShortDescription => 'Īss apraksts *';
+
+  @override
+  String get createFindPeoplePublicContentMustDescribeConcreteActivity =>
+      'Publiskajam saturam jāapraksta konkrēta aktivitāte bez kontaktiem vai maksājumu saitēm.';
+
+  @override
+  String get createFindPeopleActivityDescription => 'Aktivitāte un apraksts';
+
+  @override
+  String get createFindPeopleFindPeopleDraftDataBeingPrepared =>
+      'Find People melnraksta dati tiek sagatavoti…';
+
+  @override
+  String get createSessionOnlyWhatMarkedRequiredBlocksPublishing =>
+      'Publicēšanu bloķē tikai tas, kas atzīmēts kā «obligāts». Pārējo var pievienot tagad vai vēlāk.';
+
+  @override
+  String get createSessionPublish => 'Publicēt';
+
+  @override
+  String get createSessionSaveDraft => 'Saglabāt melnrakstu';
+
+  @override
+  String get createSessionNeverRequiredPublishSesD14 =>
+      'Publicēšanai nekad nav obligāts.';
+
+  @override
+  String get createSessionRecommendedDetailsCategory =>
+      'Ieteicamā informācija šai kategorijai';
+
+  @override
+  String get createSessionAmenities => 'Ērtības';
+
+  @override
+  String get createSessionBlock => 'Bloķēt';
+
+  @override
+  String get createSessionBlockedDates => 'Bloķētie datumi';
+
+  @override
+  String get createSessionMaxPartySize => 'Maks. grupas lielums';
+
+  @override
+  String get createSessionTermsUrlOptionalHttps =>
+      'Noteikumu saite (pēc izvēles, https://…)';
+
+  @override
+  String get createSessionExternalBookingUrlHttps =>
+      'Ārējā rezervēšanas saite (https://…)';
+
+  @override
+  String get createSessionPricePerSlotEur => 'Cena par laika posmu, EUR';
+
+  @override
+  String get createSessionFree => 'Bez maksas';
+
+  @override
+  String get createSessionPriceBooking => 'Cena un rezervēšana';
+
+  @override
+  String get createSessionNextOffers => 'Nākamie piedāvājumi';
+
+  @override
+  String get createSessionSlotDuration => 'Laika posma ilgums';
+
+  @override
+  String get createSessionNoWeeklyRuleYetPickPreset =>
+      'Nedēļas noteikuma vēl nav — izvēlieties sagatavi augstāk.';
+
+  @override
+  String get createSessionWhen => 'Kad';
+
+  @override
+  String get createSessionConfirmLocation => 'Apstiprināt vietu';
+
+  @override
+  String get createSessionLongitude => 'Garums';
+
+  @override
+  String get createSessionLatitude => 'Platums';
+
+  @override
+  String get createSessionCity => 'Pilsēta';
+
+  @override
+  String get createSessionAddress => 'Adrese';
+
+  @override
+  String get createSessionResourceNameEGSauna1 =>
+      'Resursa nosaukums (piem., «Pirts 1»)';
+
+  @override
+  String get createSessionGalleryImageDescription =>
+      'Galerijas attēla apraksts';
+
+  @override
+  String get createSessionCoverImageDescription => 'Vāka attēla apraksts';
+
+  @override
+  String get createSessionContentLanguage => 'Satura valoda';
+
+  @override
+  String get createSessionCoverImageUrl => 'Vāka attēla URL';
+
+  @override
+  String get createSessionFullDescription => 'Pilns apraksts';
+
+  @override
+  String get createSessionShortDescription => 'Īss apraksts';
+
+  @override
+  String get createSessionSubcategory => 'Apakškategorija';
+
+  @override
+  String get createSessionCategory => 'Kategorija';
+
+  @override
+  String get createSessionTitle => 'Nosaukums';
+
+  @override
+  String get createSessionWhatWhere => 'Kas un kur';
+
+  @override
+  String get createSessionLoadingBookableSessionDraft =>
+      'Ielādē rezervējamās nodarbības melnrakstu…';
+
+  @override
+  String get createClassPublish => 'Publicēt';
+
+  @override
+  String get createClassSaveDraft => 'Saglabāt melnrakstu';
+
+  @override
+  String get createClassEnrollmentState => 'Pieteikšanās statuss';
+
+  @override
+  String get createClassEnrollmentLinkHttps => 'Pieteikšanās saite (https)';
+
+  @override
+  String get createClassEnrollmentOrganiserSite =>
+      'Pieteikšanās organizatora vietnē';
+
+  @override
+  String get createClassPriceCovers => 'Cenā ietilpst';
+
+  @override
+  String createClassAmountCents(String value) {
+    return 'Summa centos ($value)';
+  }
+
+  @override
+  String get createClassPrice => 'Cena';
+
+  @override
+  String get createClassDeclaredGroupSizeOptional =>
+      'Norādītais grupas lielums (pēc izvēles)';
+
+  @override
+  String get createClassWhatBringKnowOnePerLine =>
+      'Kas jāņem līdzi vai jāzina (pa vienam rindā)';
+
+  @override
+  String get createClassIncludedMaterialsOnePerLine =>
+      'Iekļautie materiāli (pa vienam rindā)';
+
+  @override
+  String get createClassAddDate => 'Pievienot datumu';
+
+  @override
+  String get createClassRemoveDate => 'Noņemt datumu';
+
+  @override
+  String get createClassLocalTimeDoesNotExistAmbiguous =>
+      'Šāds vietējais laiks nepastāv vai ir divdomīgs';
+
+  @override
+  String get createClassPublicArea => 'Publiskā zona';
+
+  @override
+  String get createClassShowOnlyAreaPublicly => 'Publiski rādīt tikai apgabalu';
+
+  @override
+  String get createClassConfirmLocation => 'Apstiprināt vietu';
+
+  @override
+  String get createClassLocationConfirmed => 'Vieta apstiprināta';
+
+  @override
+  String get createClassOnlineProvider => 'Tiešsaistes platforma';
+
+  @override
+  String get createClassDelivery => 'Norises veids';
+
+  @override
+  String createClassTimesAre(String value) {
+    return 'Laiki ir joslā $value';
+  }
+
+  @override
+  String get createClassFixedSeries => 'Noteikta sērija';
+
+  @override
+  String get createClassSingleClass => 'Viena nodarbība';
+
+  @override
+  String get createClassClear => 'Notīrīt';
+
+  @override
+  String get createClassNotPublishedClearExplicitly =>
+      'Tas netiek publicēts; notīriet to.';
+
+  @override
+  String get createClassDraftHasOldSchedule =>
+      'Šim melnrakstam ir vecs grafiks';
+
+  @override
+  String get createClassInstructorBio => 'Par pasniedzēju';
+
+  @override
+  String get createClassInstructorName => 'Pasniedzēja vārds';
+
+  @override
+  String get createClassWhatParticipantsTakeHome =>
+      'Ko dalībnieki paņems līdzi';
+
+  @override
+  String get createClassNoPrerequisites => 'Bez priekšnosacījumiem';
+
+  @override
+  String get createClassProgrammeStepsOnePerLine =>
+      'Programmas soļi (pa vienam rindā)';
+
+  @override
+  String get createClassGalleryImageDescription => 'Galerijas attēla apraksts';
+
+  @override
+  String get createClassCoverImageDescription => 'Vāka attēla apraksts';
+
+  @override
+  String get createClassContentLanguage => 'Satura valoda';
+
+  @override
+  String get createClassCoverImage => 'Vāka attēls';
+
+  @override
+  String get createClassFullDescription => 'Pilns apraksts';
+
+  @override
+  String get createClassShortDescription => 'Īss apraksts';
+
+  @override
+  String get createClassOfferingKind => 'Piedāvājuma veids';
+
+  @override
+  String get createClassClassDraftWasSavedByNewer =>
+      'Šo nodarbības melnrakstu saglabāja jaunāka lietotnes versija; to var tikai skatīt.';
+
+  @override
+  String get createRouteGpxOperationCouldNotCompleted =>
+      'GPX darbību neizdevās pabeigt.';
+
+  @override
+  String get createRouteChooseOneContinuousTrackRouteDraft =>
+      'Izvēlieties vienu nepārtrauktu maršrutu šim melnrakstam.';
+
+  @override
+  String get createRouteSavingGpxFilesNotAvailableDevice =>
+      'GPX failu saglabāšana šajā ierīcē vēl nav pieejama.';
+
+  @override
+  String get createRouteOnlyOneContinuousRouteTrackCan =>
+      'Var eksportēt tikai vienu nepārtrauktu maršrutu.';
+
+  @override
+  String get createRouteGpxTrackContainsTooManyPoints =>
+      'GPX maršrutā ir pārāk daudz punktu.';
+
+  @override
+  String get createRouteGpxFileDamagedHasUnsupportedStructure =>
+      'GPX fails ir bojāts vai tam ir neatbalstīta struktūra.';
+
+  @override
+  String get createRouteChooseValidGpxFile => 'Izvēlieties derīgu GPX failu.';
+
+  @override
+  String get createRouteGpxFileTooLarge => 'GPX fails ir pārāk liels.';
+
+  @override
+  String get createRouteDismiss => 'Aizvērt';
+
+  @override
+  String get createRouteImportTrack => 'Importēt maršrutu';
+
+  @override
+  String get createRouteCancel => 'Atcelt';
+
+  @override
+  String get createRouteTheyRemainOffTrackUntilReviewed =>
+      'Tie paliek ārpus maršruta, līdz tiek pārbaudīti un novietoti.';
+
+  @override
+  String get createRouteReviewTheseConnectorsMapBeforePublishing =>
+      'Pirms publicēšanas pārbaudiet šos savienojumus kartē.';
+
+  @override
+  String get createRouteChooseOneTrack => 'Izvēlieties vienu maršrutu';
+
+  @override
+  String get createRoutePrivateMetadataTimestampsWillRemovedDuring =>
+      'Importējot tiks noņemti privātie metadati un laika zīmogi.';
+
+  @override
+  String get createRouteRouteBuilder => 'Maršruta veidotājs';
+
+  @override
+  String get createRouteReplace => 'Aizstāt';
+
+  @override
+  String get createRouteCurrentGeometryWillRemainAvailableThrough =>
+      'Pašreizējo formu varēs atgūt ar «Atsaukt».';
+
+  @override
+  String get createRouteReplaceExistingTrack => 'Aizstāt esošo maršrutu?';
+
+  @override
+  String get createRouteContinue => 'Turpināt';
+
+  @override
+  String get createRouteBack => 'Atpakaļ';
+
+  @override
+  String get createRouteMarkedTrail => 'Marķēta taka';
+
+  @override
+  String get createRouteHard => 'Grūts';
+
+  @override
+  String get createRouteModerate => 'Vidējs';
+
+  @override
+  String get createRouteEasy => 'Viegls';
+
+  @override
+  String get createRouteDifficulty => 'Grūtība';
+
+  @override
+  String get createRouteConditions => 'Apstākļi';
+
+  @override
+  String get createRouteSubcategory => 'Apakškategorija';
+
+  @override
+  String get createRouteCategory => 'Kategorija';
+
+  @override
+  String get createRouteTaxonomy => 'Kategorija';
+
+  @override
+  String get createRouteCoverImageUrl => 'Vāka attēla URL';
+
+  @override
+  String get createRouteFullDescription => 'Pilns apraksts';
+
+  @override
+  String get createRouteShortDescription => 'Īss apraksts *';
+
+  @override
+  String get createRouteRouteDetails => 'Maršruta informācija';
+
+  @override
+  String get createRoutePreferUnpavedTrails =>
+      'Dot priekšroku neasfaltētām takām';
+
+  @override
+  String get createRouteAvoidStairs => 'Izvairīties no kāpnēm';
+
+  @override
+  String get createRouteRoutingPreferences => 'Maršrutēšanas iestatījumi';
+
+  @override
+  String get createRouteLoop => 'Aplis';
+
+  @override
+  String get createRouteOneWay => 'Vienā virzienā';
+
+  @override
+  String get createRouteRouteShape => 'Maršruta forma';
+
+  @override
+  String get createRouteProfile => 'Profils';
+
+  @override
+  String get createRouteBundledMeAparksGraphCurrentlyValidates =>
+      'Iekļautais Mežaparka tīkls pašlaik lokāli pārbauda kājāmgājēju maršrutus.';
+
+  @override
+  String get createRouteMovementProfile => 'Kustības profils';
+
+  @override
+  String get createRouteSaveFile => 'Saglabāt failu';
+
+  @override
+  String get createRoutePrivateMetadataNotesTimestampsAreNever =>
+      'Privātie metadati, piezīmes un laika zīmogi nekad netiek eksportēti.';
+
+  @override
+  String get createRouteIncludeRoutePoi => 'Iekļaut maršruta interešu punktus';
+
+  @override
+  String get createRouteUnavailableTrack => 'Šim maršrutam nav pieejams';
+
+  @override
+  String get createRouteIncludeElevation => 'Iekļaut augstumu';
+
+  @override
+  String get createRouteExportGpx => 'Eksportēt GPX';
+
+  @override
+  String get createRouteExportOnlyTrackOptionalRoutePoi =>
+      'Eksportējiet tikai maršrutu un, ja vēlaties, tā interešu punktus. Melnraksta ID, piezīmes, drošības dati un laika zīmogi netiek iekļauti.';
+
+  @override
+  String get createRouteInspectGpxFileLocallyChooseOne =>
+      'Pārbaudiet GPX failu lokāli, izvēlieties vienu maršrutu un noņemiet privātos metadatus.';
+
+  @override
+  String get createRouteImportGpx => 'Importēt GPX';
+
+  @override
+  String get createRouteRecordMovementDeviceThenReviewAccuracy =>
+      'Ierakstiet kustību šajā ierīcē, pēc tam pārbaudiet precizitāti, pārtraukumus un privātuma apgriešanu.';
+
+  @override
+  String get createRouteRecordWithGps => 'Ierakstīt ar GPS';
+
+  @override
+  String get createRouteDrawOneContinuousLineKeepIts =>
+      'Uzzīmējiet vienu nepārtrauktu līniju un saglabājiet tās precīzo formu.';
+
+  @override
+  String get createRouteFreehand => 'Brīvi';
+
+  @override
+  String get createRoutePlaceAnchorsConnectThemAlongOffline =>
+      'Izvietojiet punktus un savienojiet tos pa bezsaistes taku tīklu.';
+
+  @override
+  String get createRoutePoints => 'Punkti';
+
+  @override
+  String get createRouteAllMethodsUseOneCanonicalRoute =>
+      'Visi veidi izmanto vienu maršruta modeli. Šī demonstrācija ļauj punktus un brīvu zīmēšanu bez maksas pakalpojumiem.';
+
+  @override
+  String get createRouteHowWillYouCreateTrack => 'Kā veidosiet maršrutu?';
+
+  @override
+  String get createRouteEditorWillReadyMoment => 'Redaktors drīz būs gatavs.';
+
+  @override
+  String get createRoutePreparingRouteDraft => 'Sagatavo maršruta melnrakstu…';
+
+  @override
+  String get createRouteRestoringLatestPersistedRevision =>
+      'Atjauno pēdējo saglabāto versiju.';
+
+  @override
+  String get createRouteRetry => 'Mēģināt vēlreiz';
+
+  @override
+  String get createRouteOfflineMapCouldNotLoaded =>
+      'Neizdevās ielādēt bezsaistes karti';
+
+  @override
+  String get createRouteNoNetworkPaidRoutingCallRequired =>
+      'Nav vajadzīgs tīkls vai maksas maršrutēšana.';
+
+  @override
+  String get createRouteLoadingOfflineTrailEditor =>
+      'Ielādē bezsaistes taku redaktoru…';
+
+  @override
+  String get createRouteGapNeedsTrailRoutingBeforeCan =>
+      'Šim pārtraukumam vispirms vajag taku maršrutēšanu.';
+
+  @override
+  String get createRouteReviewEveryTrackGapBeforeContinuing =>
+      'Pirms turpināšanas pārbaudiet katru pārtraukumu.';
+
+  @override
+  String get createRouteProtectedRecordingCouldNotSavedRecording =>
+      'Aizsargāto ierakstu neizdevās saglabāt. Ieraksts droši apturēts.';
+
+  @override
+  String get createRouteNotEnoughReliableMovementWasRecorded =>
+      'Ierakstīts par maz uzticamas kustības. Dzēsiet šo ierakstu un mēģiniet vēlreiz.';
+
+  @override
+  String get createRouteSafetyPointLimitWasReachedFinish =>
+      'Sasniegts drošības punktu limits. Pabeidziet un pārbaudiet šo ierakstu.';
+
+  @override
+  String get createRouteDeviceLocationServicesAreSwitchedOff =>
+      'Ierīces atrašanās vietas pakalpojumi ir izslēgti.';
+
+  @override
+  String get createRouteBackgroundAccessWasNotGrantedTurn =>
+      'Piekļuve fonā netika piešķirta. Izslēdziet ierakstu ar bloķētu ekrānu vai atļaujiet to iestatījumos.';
+
+  @override
+  String get createRouteLocationAccessDisabledAppSettings =>
+      'Piekļuve atrašanās vietai ir izslēgta lietotnes iestatījumos.';
+
+  @override
+  String get createRouteLocationPermissionWasNotGranted =>
+      'Atļauja piekļūt atrašanās vietai netika piešķirta.';
+
+  @override
+  String get createRouteYourSavedRecordingPreservedWhenRecovery =>
+      'Saglabātais ieraksts tiek saglabāts, ja to var atjaunot.';
+
+  @override
+  String get createRouteInspectGapsAccuracyPrivacyTrimmingBefore =>
+      'Pirms maršruta izmantošanas pārbaudiet pārtraukumus, precizitāti un privātuma apgriešanu.';
+
+  @override
+  String get createRouteFilteringUnsafeNoisyGpsPoints =>
+      'Filtrē nedrošus un neprecīzus GPS punktus.';
+
+  @override
+  String get createRouteReadingProtectedLocalJournal =>
+      'Lasa aizsargāto lokālo žurnālu.';
+
+  @override
+  String get createRoutePauseStaysAsExplicitGapWill =>
+      'Pauze paliek kā skaidrs pārtraukums un nekad netiks savienota automātiski.';
+
+  @override
+  String get createRouteKeepRechargeOpenWhileMovingAlong =>
+      'Pārvietojoties pa maršrutu, turiet Recharge atvērtu.';
+
+  @override
+  String get createRouteRecordingContinuesWithVisibleSystemIndicator =>
+      'Ieraksts turpinās ar redzamu sistēmas indikatoru.';
+
+  @override
+  String get createRouteRechargeRequestsLocationOnlyRouteRecording =>
+      'Recharge pieprasa atrašanās vietu tikai maršruta ierakstam.';
+
+  @override
+  String get createRouteWalkRunRideRoutePointsStay =>
+      'Ejiet, skrieniet vai brauciet pa maršrutu. Punkti paliek šifrēti šajā ierīcē, līdz izmantojat maršrutu.';
+
+  @override
+  String get createRouteRecordingReady => 'Ieraksts gatavs';
+
+  @override
+  String get createRouteProcessingTrack => 'Apstrādā maršrutu…';
+
+  @override
+  String get createRouteRecoveringRecording => 'Atjauno ierakstu…';
+
+  @override
+  String get createRouteRecordingPaused => 'Ieraksts apturēts';
+
+  @override
+  String get createRouteRecordingRoute => 'Ieraksta maršrutu';
+
+  @override
+  String get createRouteCheckingGpsAccess => 'Pārbauda piekļuvi GPS…';
+
+  @override
+  String get createRouteOpenAppSettings => 'Atvērt lietotnes iestatījumus';
+
+  @override
+  String get createRouteRecordingActive => 'Ieraksts notiek';
+
+  @override
+  String get createRouteConnectDirectly => 'Savienot tieši';
+
+  @override
+  String createRouteRecordedRoutePreviewTrackSectionsGaps(
+    int count,
+    int total,
+  ) {
+    return 'Ierakstītā maršruta priekšskatījums: posmi $count, pārtraukumi $total';
+  }
+
+  @override
+  String get createRouteDelete => 'Dzēst';
+
+  @override
+  String get createRouteRecoveryJournalAllRecordedPointsWill =>
+      'Tiks dzēsts atjaunošanas žurnāls un visi ierakstītie punkti.';
+
+  @override
+  String get createRouteDeleteGpsRecording => 'Dzēst GPS ierakstu?';
+
+  @override
+  String get createRouteUseTrack => 'Izmantot šo maršrutu';
+
+  @override
+  String get createRouteRouteMustStayContinuousConfirmEach =>
+      'Maršrutam jābūt nepārtrauktam. Apstipriniet katru taisno savienojumu vai ierakstiet trūkstošo posmu vēlreiz.';
+
+  @override
+  String get createRouteTrackGaps => 'Pārtraukumi maršrutā';
+
+  @override
+  String get createRouteHideRouteEnd => 'Slēpt maršruta beigas';
+
+  @override
+  String get createRouteHideRouteStart => 'Slēpt maršruta sākumu';
+
+  @override
+  String get createRoutePrivacyTrim => 'Privātuma apgriešana';
+
+  @override
+  String get createRouteReviewRecordedTrack => 'Pārbaudīt ierakstīto maršrutu';
+
+  @override
+  String get createRouteDeleteRecording => 'Dzēst ierakstu';
+
+  @override
+  String get createRouteFinishReview => 'Pabeigt un pārbaudīt';
+
+  @override
+  String get createRouteResumeRecording => 'Turpināt ierakstu';
+
+  @override
+  String get createRouteFinish => 'Pabeigt';
+
+  @override
+  String get createRoutePause => 'Pauze';
+
+  @override
+  String get createRouteStartRecording => 'Sākt ierakstu';
+
+  @override
+  String get createRouteRequiresBackgroundLocationPermissionShowsSystem =>
+      'Vajag atļauju piekļūt atrašanās vietai fonā; sistēma rāda indikatoru.';
+
+  @override
+  String get createRouteContinueWhileScreenLocked =>
+      'Turpināt, kad ekrāns ir bloķēts';
+
+  @override
+  String get createRouteRecoveredSafelyAfterPreviousSessionReview =>
+      'Droši atjaunots pēc iepriekšējās sesijas. Pārbaudiet pirms turpināšanas.';
+
+  @override
+  String get createRouteRemoveWaypoint => 'Noņemt punktu';
+
+  @override
+  String get createRouteAttachAnchor => 'Piesaistīt punktam';
+
+  @override
+  String get createRouteAddViewpointFromAnchorMenu =>
+      'Pievienojiet skatu punktu no punkta izvēlnes.';
+
+  @override
+  String get createRouteSplitAtMidpoint => 'Sadalīt vidū';
+
+  @override
+  String get createRouteUseIntentionalDirectLine =>
+      'Izmantot apzinātu taisnu līniju';
+
+  @override
+  String get createRouteRetryRouting => 'Atkārtot maršrutēšanu';
+
+  @override
+  String get createRouteSegmentActions => 'Darbības ar posmu';
+
+  @override
+  String get createRouteRemoveAnchor => 'Noņemt punktu';
+
+  @override
+  String get createRouteAddViewpoint => 'Pievienot skatu punktu';
+
+  @override
+  String get createRouteAnchorActions => 'Darbības ar punktu';
+
+  @override
+  String get createRouteMoveAnchorEast => 'Pārvietot punktu uz austrumiem';
+
+  @override
+  String get createRouteMoveAnchorWest => 'Pārvietot punktu uz rietumiem';
+
+  @override
+  String get createRouteMoveAnchorSouth => 'Pārvietot punktu uz dienvidiem';
+
+  @override
+  String get createRouteMoveAnchorNorth => 'Pārvietot punktu uz ziemeļiem';
+
+  @override
+  String get createRouteNoAnchorsYet => 'Punktu vēl nav.';
+
+  @override
+  String get createRouteEveryActionAvailableAsLabelledControl =>
+      'Katra darbība pieejama kā vadīkla ar nosaukumu.';
+
+  @override
+  String get createRouteAddAnchor => 'Pievienot punktu';
+
+  @override
+  String get createRouteLongitude => 'Garums';
+
+  @override
+  String get createRouteLatitude => 'Platums';
+
+  @override
+  String get createRouteCoordinatesProvideKeyboardScreenReaderAlternative =>
+      'Koordinātas ir alternatīva tastatūrai un ekrāna lasītājiem.';
+
+  @override
+  String get createRouteAddAnchorWithoutMapGestures =>
+      'Pievienot punktu bez kartes žestiem';
+
+  @override
+  String get createRouteLastSaved => 'Pēdējā saglabātā';
+
+  @override
+  String get createRouteRedo => 'Atkārtot';
+
+  @override
+  String get createRouteUndo => 'Atsaukt';
+
+  @override
+  String get createRouteTapMapAddAnchorsLocalGraph =>
+      'Pieskarieties kartei, lai pievienotu punktus. Lokālais tīkls tos savieno pa pieejamām takām.';
+
+  @override
+  String get createRouteDrawOneContinuousLineExistingGeometry =>
+      'Uzzīmējiet vienu nepārtrauktu līniju. Esošā forma tiek aizstāta tikai pēc apstiprinājuma.';
+
+  @override
+  String get createRouteOfflineTrailEditor => 'Bezsaistes taku redaktors';
+
+  @override
+  String get createRouteSelectedDifficultyDiffersFromCalculatedRecommendation =>
+      'Izvēlētā grūtība atšķiras no aprēķinātā ieteikuma, un to vajag pārbaudīt.';
+
+  @override
+  String get createRouteRouteQuality => 'Maršruta kvalitāte';
+
+  @override
+  String get createRouteYourProfileDoesNotHavePermission =>
+      'Jūsu profilam nav atļaujas iesniegt šo maršrutu.';
+
+  @override
+  String get createRouteSubmitRouteReview => 'Iesniegt maršrutu pārbaudei';
+
+  @override
+  String get createRoutePublishRoute => 'Publicēt maršrutu';
+
+  @override
+  String get createRouteRestoreLastSavedRevision =>
+      'Atjaunot pēdējo saglabāto versiju';
+
+  @override
+  String get createRouteSaveDraft => 'Saglabāt melnrakstu';
+
+  @override
+  String get createRouteRoutingProgress => 'Notiek maršrutēšana…';
+
+  @override
+  String get createRouteInvestorDemoVersionUsesBundledOffline =>
+      'Demonstrācija: šī versija izmanto iekļauto bezsaistes taku tīklu un ir tikai demonstrācijai. Maksas maršrutēšana netiek izmantota.';
+
+  @override
+  String get createRouteRouteDraftStructurallyReady =>
+      'Maršruta melnraksts ir strukturāli gatavs';
+
+  @override
+  String get createRouteOfflineTrailMapTapAddRoute =>
+      'Bezsaistes taku karte. Pieskarieties, lai pievienotu maršruta punktu.';
+
+  @override
+  String get createRouteOfflineTrailMapDrawContinuousRoute =>
+      'Bezsaistes taku karte. Zīmējiet nepārtrauktu maršrutu ar vienu pirkstu.';
+
+  @override
+  String get createRouteNoRouteVersionsAreWaitingReview =>
+      'Neviena maršruta versija negaida pārbaudi.';
+
+  @override
+  String get createRouteModerateRouteCapabilityRequired =>
+      'Vajag tiesības moderēt maršrutus.';
+
+  @override
+  String get createRouteReject => 'Noraidīt';
+
+  @override
+  String get createRouteReasonCodeConciseReason =>
+      'Iemesla kods vai īss iemesls';
+
+  @override
+  String get createRouteRejectRouteVersion => 'Noraidīt maršruta versiju';
+
+  @override
+  String get createRouteApprove => 'Apstiprināt';
+
+  @override
+  String get createRouteAccept => 'Pieņemt';
+
+  @override
+  String get createRouteDefer => 'Atlikt';
+
+  @override
+  String get createRouteConfirm => 'Apstiprināt';
+
+  @override
+  String get createRouteReasonCode => 'Iemesla kods';
+
+  @override
+  String get createRouteSafetyDecisionReason => 'Drošības lēmuma iemesls';
+
+  @override
+  String get createRouteCandidateDecisionReason => 'Kandidāta lēmuma iemesls';
+
+  @override
+  String get createRouteNewRouteRevisionDraftWasCreated =>
+      'Izveidots jauns maršruta versijas melnraksts. Publicētā forma nav mainīta.';
+
+  @override
+  String get createRouteSafetyReports => 'Drošības ziņojumi';
+
+  @override
+  String get createRouteMapUpdateCandidates => 'Kartes atjauninājumu kandidāti';
+
+  @override
+  String get createRoutePublicationReview => 'Publikāciju pārbaude';
+
+  @override
+  String get createRouteRefresh => 'Atjaunināt';
+
+  @override
+  String get createRouteRouteModeration => 'Maršrutu moderācija';
+
+  @override
+  String get createScenarioPlannedScheduleNotLive =>
+      'Plānotais saraksts, nav reāllaika.';
+
+  @override
+  String get createScenarioPlannedServiceSelectedPreviewNotApplied =>
+      'Plānotais reiss izvēlēts priekšskatījumam. Scenārijam nav piemērots.';
+
+  @override
+  String get createScenarioNoDirectPlannedServicesFound =>
+      'Tiešie plānotie reisi nav atrasti.';
+
+  @override
+  String get createScenarioSearchingDirectPlannedServices =>
+      'Meklē tiešos plānotos reisus.';
+
+  @override
+  String get createScenarioScheduleSearchFailedTryAgain =>
+      'Saraksta meklēšana neizdevās. Mēģiniet vēlreiz.';
+
+  @override
+  String get createScenarioStopSearchFailedTryAgain =>
+      'Pieturu meklēšana neizdevās. Mēģiniet vēlreiz.';
+
+  @override
+  String get createScenarioCompleteProviderStopsDateTimeSelection =>
+      'Izvēlieties nodrošinātāju, pieturas, datumu un laiku.';
+
+  @override
+  String get createScenarioNewScheduleCouldNotSavedExisting =>
+      'Jauno sarakstu neizdevās saglabāt. Esošais paliek.';
+
+  @override
+  String get createScenarioCachedScheduleCouldNotRead2 =>
+      'Saglabāto sarakstu neizdevās nolasīt.';
+
+  @override
+  String get createScenarioDownloadedScheduleInvalidWasNotSaved =>
+      'Lejupielādētais saraksts nav derīgs un netika saglabāts.';
+
+  @override
+  String get createScenarioScheduleCouldNotDownloaded =>
+      'Sarakstu neizdevās lejupielādēt.';
+
+  @override
+  String get createScenarioYouAppearOfflineCachedDataRemains =>
+      'Šķiet, esat bezsaistē. Saglabātie dati paliek pieejami.';
+
+  @override
+  String get createScenarioScheduleDownloadsAreDisabledCachedData =>
+      'Saraksta lejupielāde ir izslēgta. Saglabātie dati paliek pieejami.';
+
+  @override
+  String get createScenarioDownloadSelectUsableCachedScheduleFirst =>
+      'Vispirms lejupielādējiet vai izvēlieties izmantojamu saglabātu sarakstu.';
+
+  @override
+  String get createScenarioChooseValidScheduleProvider =>
+      'Izvēlieties derīgu saraksta nodrošinātāju.';
+
+  @override
+  String get createScenarioNoOfficialScheduleProvidersAreConfigured =>
+      'Oficiālo sarakstu nodrošinātāji nav iestatīti.';
+
+  @override
+  String get createScenarioOfficialScheduleTemporarilyUnavailable =>
+      'Oficiālais saraksts īslaicīgi nav pieejams.';
+
+  @override
+  String get createScenarioCachedScheduleCouldNotRead =>
+      'Saglabāto sarakstu neizdevās nolasīt.';
+
+  @override
+  String get createScenarioCachedScheduleDamagedCannotUsed =>
+      'Saglabātais saraksts ir bojāts, to nevar izmantot.';
+
+  @override
+  String get createScenarioNoScheduleDownloadedProvider =>
+      'Šim nodrošinātājam saraksts nav lejupielādēts.';
+
+  @override
+  String get createScenarioCachedScheduleFreshnessUnknownRecheckBefore =>
+      'Saglabātā saraksta aktualitāte nav zināma. Pārbaudiet pirms brauciena.';
+
+  @override
+  String get createScenarioCheckingCachedSchedule =>
+      'Pārbauda saglabāto sarakstu…';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveSelectionNot =>
+      'Plānotais saraksts · nav reāllaika. Šī izvēle vēl nav piemērota scenārijam.';
+
+  @override
+  String get createScenarioSelectionPreview => 'Izvēles priekšskatījums';
+
+  @override
+  String get createScenarioScheduleSearchFailed =>
+      'Saraksta meklēšana neizdevās.';
+
+  @override
+  String get createScenarioNoDirectServicesFoundAfterSelected =>
+      'Pēc izvēlētā laika tiešie reisi nav atrasti.';
+
+  @override
+  String get createScenarioChooseDate => 'Izvēlēties datumu';
+
+  @override
+  String get createScenarioScenarioDateMissing =>
+      'Scenārija datums nav norādīts';
+
+  @override
+  String get createScenarioRetry => 'Mēģināt vēlreiz';
+
+  @override
+  String get createScenarioUseCached => 'Izmantot saglabāto';
+
+  @override
+  String get createScenarioUpdateSchedule => 'Atjaunināt sarakstu';
+
+  @override
+  String get createScenarioDownloadSchedule => 'Lejupielādēt sarakstu';
+
+  @override
+  String get createScenarioScheduleProvider => 'Saraksta nodrošinātājs';
+
+  @override
+  String get createScenarioOfficialScheduleProvidersAreUnavailable =>
+      'Oficiālo sarakstu nodrošinātāji nav pieejami.';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveDelaysTickets =>
+      'Plānotais saraksts · nav reāllaika. Kavējumi, biļetes, cenas, vietas un pārsēšanās nav apstiprināti. Pārbaudiet pirms brauciena.';
+
+  @override
+  String get createScenarioEnterScheduleManually => 'Ievadīt sarakstu manuāli';
+
+  @override
+  String get createScenarioApplyCreatesOneUndoableScenarioChange =>
+      'Piemērošana rada vienu atsaucamu scenārija izmaiņu.';
+
+  @override
+  String get createScenarioServiceHasNoValidStopCoordinates =>
+      'Šim reisam nav derīgu pieturu koordinātu, to nevar droši piemērot.';
+
+  @override
+  String get createScenarioApplyScenario => 'Piemērot scenārijam';
+
+  @override
+  String get createScenarioChooseDateCheckOfficialSchedule =>
+      'Izvēlieties datumu, lai pārbaudītu oficiālo sarakstu.';
+
+  @override
+  String get createScenarioFindDirectServices => 'Atrast tiešos reisus';
+
+  @override
+  String get createScenarioDownloadScheduleBeforeSearchingStops =>
+      'Pirms pieturu meklēšanas lejupielādējiet sarakstu.';
+
+  @override
+  String get createScenarioDestination => 'Uz';
+
+  @override
+  String get createScenarioOrigin => 'No';
+
+  @override
+  String get createScenarioCloseOfficialSchedule => 'Aizvērt oficiālo sarakstu';
+
+  @override
+  String get createScenarioOfficialSchedule => 'Oficiālais saraksts';
+
+  @override
+  String get createScenarioStaticTimetableSnapshotNotLive =>
+      'Statisks saraksta momentuzņēmums · nav reāllaika.';
+
+  @override
+  String get createScenarioFindOfficialSchedule => 'Atrast oficiālajā sarakstā';
+
+  @override
+  String get createScenarioWorksOfflineStaysEditable =>
+      'Darbojas bezsaistē un paliek rediģējams.';
+
+  @override
+  String get createScenarioEnterManually => 'Ievadīt manuāli';
+
+  @override
+  String get createScenarioAddPlannedTransport =>
+      'Pievienot plānoto transportu';
+
+  @override
+  String get createScenarioPublicTransport => 'Sabiedriskais transports';
+
+  @override
+  String get createScenarioOwnCar => 'Savs auto';
+
+  @override
+  String get createScenarioProviderValue => 'Nodrošinātāja vērtība';
+
+  @override
+  String get createScenarioEstimatedTime => 'Aptuvenais laiks';
+
+  @override
+  String get createScenarioEnteredManually => 'Ievadīts manuāli';
+
+  @override
+  String get createScenarioPlannedScheduleNotLive2 =>
+      'Plānotais saraksts · nav reāllaika';
+
+  @override
+  String get createScenarioCustomLocation => 'Sava vieta';
+
+  @override
+  String get createScenarioPlannedTransport => 'Plānotais transports';
+
+  @override
+  String get createScenarioAddAtLeastTwoIndependentStops =>
+      'Pievienojiet vismaz divas neatkarīgas pieturas. Izmantojiet kataloga objektus vai savus laika blokus.';
+
+  @override
+  String get createScenarioLocationDataRequiredManualLeg =>
+      'Manuālam posmam vajag vietas datus';
+
+  @override
+  String get createScenarioScenarioChangedRecheckBeforeReplacing =>
+      'Scenārijs ir mainījies. Pirms aizstāšanas pārbaudiet vēlreiz.';
+
+  @override
+  String get createScenarioSavedScheduleReplaced =>
+      'Saglabātais saraksts aizstāts.';
+
+  @override
+  String get createScenarioRecheckSchedule => 'Pārbaudīt sarakstu vēlreiz';
+
+  @override
+  String get createScenarioScenarioChangedReviewServiceTryAgain =>
+      'Scenārijs ir mainījies. Pārbaudiet reisu un mēģiniet vēlreiz.';
+
+  @override
+  String get createScenarioOfficialScheduleAddedScenario =>
+      'Oficiālais saraksts pievienots scenārijam.';
+
+  @override
+  String get createScenarioReview => 'Pārskatīt';
+
+  @override
+  String get createScenarioUseYourPrimaryTransportEnterHonest =>
+      'Izmantojiet galveno transportu vai ievadiet patiesas vērtības manuāli.';
+
+  @override
+  String get createScenarioTravelBetweenStops => 'Ceļš starp pieturām';
+
+  @override
+  String get createScenarioTimeLock => 'Fiksēts laiks';
+
+  @override
+  String get createScenarioOrderLock => 'Fiksēta secība';
+
+  @override
+  String get createScenarioOptional => 'Pēc izvēles';
+
+  @override
+  String get createScenarioMandatory => 'Obligāts';
+
+  @override
+  String get createScenarioRemove => 'Noņemt';
+
+  @override
+  String get createScenarioMoveDown => 'Pārvietot lejup';
+
+  @override
+  String get createScenarioMoveUp => 'Pārvietot augšup';
+
+  @override
+  String get createScenarioAddCustomTimeBlock => 'Pievienot savu laika bloku';
+
+  @override
+  String get createScenarioBusTrainTimesAreStoredAs =>
+      'Autobusu un vilcienu laiki tiek glabāti kā plānotais saraksts · nav reāllaika.';
+
+  @override
+  String get createScenarioAddCustomStop => 'Pievienot savu pieturu';
+
+  @override
+  String get createScenarioAdd => 'Pievienot';
+
+  @override
+  String get createScenarioFindCatalogPlaceEventActivityRoute =>
+      'Atrast kataloga vietu, pasākumu, aktivitāti vai maršrutu';
+
+  @override
+  String get createScenarioRedo => 'Atkārtot';
+
+  @override
+  String get createScenarioUndo => 'Atsaukt';
+
+  @override
+  String get createScenarioFeedRetrievedAt => 'Dati iegūti';
+
+  @override
+  String get createScenarioFeedVersion => 'Datu versija';
+
+  @override
+  String get createScenarioServiceLabel => 'Reisa nosaukums';
+
+  @override
+  String get createScenarioArrivalTime => 'Ierašanās laiks';
+
+  @override
+  String get createScenarioDepartureTime => 'Atiešanas laiks';
+
+  @override
+  String get createScenarioDestinationStop => 'Galapietura';
+
+  @override
+  String get createScenarioOriginStop => 'Sākuma pietura';
+
+  @override
+  String get createScenarioServiceCalendar => 'Reisu kalendārs';
+
+  @override
+  String get createScenarioSavedItemWasKeptUnchangedCannot =>
+      'Saglabātais vienums nav mainīts, un to nevar pārbaudīt automātiski.';
+
+  @override
+  String get createScenarioSavedItemWasKeptUnchangedBecause =>
+      'Saglabātais vienums nav mainīts, jo saglabātie saraksta dati nav pieejami.';
+
+  @override
+  String get createScenarioSavedItemWasKeptUnchangedRecheck =>
+      'Saglabātais vienums nav mainīts. Pārbaudiet vēlāk vai ievadiet transportu manuāli.';
+
+  @override
+  String get createScenarioReviewEveryDifferenceBeforeReplacingSaved =>
+      'Pirms aizstāšanas pārbaudiet katru atšķirību.';
+
+  @override
+  String get createScenarioCachedOfficialScheduleMatchesSavedSnapshot =>
+      'Saglabātais oficiālais saraksts sakrīt ar saglabāto momentuzņēmumu. Tas joprojām nav reāllaika.';
+
+  @override
+  String get createScenarioSavedDataIncomplete => 'Saglabātie dati nav pilnīgi';
+
+  @override
+  String get createScenarioRecheckUnavailable => 'Pārbaude nav pieejama';
+
+  @override
+  String get createScenarioServiceNotFound => 'Reiss nav atrasts';
+
+  @override
+  String get createScenarioNoScheduleChangesFound =>
+      'Saraksta izmaiņas nav atrastas';
+
+  @override
+  String get createScenarioClose => 'Aizvērt';
+
+  @override
+  String get createScenarioReplaceSavedSchedule => 'Aizstāt saglabāto sarakstu';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveReplaceChanges =>
+      'Plānotais saraksts · nav reāllaika. Aizstāšana maina tikai saglabāto momentuzņēmumu un tikai pēc apstiprinājuma.';
+
+  @override
+  String get createScenarioChangesCachedOfficialSchedule =>
+      'Izmaiņas saglabātajā oficiālajā sarakstā';
+
+  @override
+  String get createScenarioCloseScheduleRecheck => 'Aizvērt saraksta pārbaudi';
+
+  @override
+  String get createScenarioScheduleRecheck => 'Saraksta pārbaude';
+
+  @override
+  String get createScenarioDiscard => 'Atmest';
+
+  @override
+  String get createScenarioEditPrompt => 'Labot pieprasījumu';
+
+  @override
+  String get createScenarioStillUnverified => 'Vēl nav pārbaudīts';
+
+  @override
+  String get createScenarioPreviewReadinessNeedsYourReview =>
+      'Priekšskatījuma gatavība: vajag jūsu pārbaudi';
+
+  @override
+  String get createScenarioPreviewReadinessReadyReview =>
+      'Priekšskatījuma gatavība: gatavs pārbaudei';
+
+  @override
+  String get createScenarioCatalogSnapshot => 'Kataloga momentuzņēmums';
+
+  @override
+  String get createScenarioProposedStops => 'Piedāvātās pieturas';
+
+  @override
+  String get createScenarioGeneratePreview => 'Izveidot priekšskatījumu';
+
+  @override
+  String get createScenarioBuildingPreview => 'Veido priekšskatījumu…';
+
+  @override
+  String get createScenarioUseExample => 'Izmantot piemēru';
+
+  @override
+  String get createScenarioRelaxedAfternoonRigaWithCultureDinner =>
+      'Atpūtas pēcpusdiena Rīgā ar kultūru un vakariņām';
+
+  @override
+  String get createScenarioWhatWouldYouLikeDo => 'Ko vēlaties darīt?';
+
+  @override
+  String get createScenarioDescribeMoodPrioritiesDemoUsesOnly =>
+      'Aprakstiet noskaņu un prioritātes. Šī demonstrācija izmanto tikai lokālo Recharge katalogu un neizsauc ārēju AI.';
+
+  @override
+  String get createScenarioLocalDemo => 'Lokāla demonstrācija';
+
+  @override
+  String get createScenarioBuildWithAi => 'Veidot ar AI';
+
+  @override
+  String get createScenarioSaveTravel => 'Saglabāt ceļu';
+
+  @override
+  String get createScenarioTravelMode => 'Pārvietošanās veids';
+
+  @override
+  String get createScenarioManualValuesStayLockedUntilYou =>
+      'Manuālās vērtības paliek fiksētas, līdz tās maināt.';
+
+  @override
+  String get createScenarioAddScenario => 'Pievienot scenārijam';
+
+  @override
+  String get createScenarioServiceRoute => 'Reiss vai maršruts *';
+
+  @override
+  String get createScenarioTransport => 'Transports';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveRecheckService =>
+      'Plānotais saraksts · nav reāllaika. Pirms brauciena pārbaudiet reisu.';
+
+  @override
+  String get createScenarioPrimaryTransport => 'Galvenais transports';
+
+  @override
+  String get createScenarioOwnCarFullySupportedPublicTransport =>
+      'Savs auto ir pilnībā atbalstīts. Sabiedriskais transports izmanto plānotos sarakstus, nevis reāllaika datus.';
+
+  @override
+  String get createScenarioHowWillYouTravel => 'Kā pārvietosieties?';
+
+  @override
+  String get createScenarioBudgetBasis => 'Budžeta pamats';
+
+  @override
+  String get createScenarioPace => 'Temps';
+
+  @override
+  String get createScenarioPeople => 'Cilvēki';
+
+  @override
+  String get createScenarioParty => 'Grupa';
+
+  @override
+  String get createScenarioDatedTrip => 'Ceļojums ar datumiem';
+
+  @override
+  String get createScenarioFlexibleTemplate => 'Elastīga veidne';
+
+  @override
+  String get createScenarioFormat => 'Formāts';
+
+  @override
+  String get createScenarioScenarioTitle => 'Scenārija nosaukums *';
+
+  @override
+  String get createScenarioPublicUnlistedScenarioPublishingRemainsDisabled =>
+      'Publiska un pēc saites pieejama scenāriju publicēšana paliek izslēgta, līdz būs ieviestas publicētāja iespējas un moderācija.';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveRecheckDepartures =>
+      'Plānotais saraksts · nav reāllaika. Pirms brauciena pārbaudiet atiešanu, kavējumus un atcelšanu.';
+
+  @override
+  String get createScenarioActionSavesPersonalScenarioDoesNot =>
+      'Šī darbība saglabā personisku scenāriju. Tā to nepublicē katalogā.';
+
+  @override
+  String get createScenarioReadyMyScenarios => 'Gatavs «Maniem scenārijiem»';
+
+  @override
+  String get createScenarioWarnings => 'Brīdinājumi';
+
+  @override
+  String get createScenarioUnknownTravel => 'Nezināms ceļš';
+
+  @override
+  String get createScenarioTimeBlocks => 'Laika bloki';
+
+  @override
+  String get createScenarioActivity => 'Aktivitāte';
+
+  @override
+  String get createScenarioActiveStops => 'Aktīvās pieturas';
+
+  @override
+  String get createScenarioScenarioDataUnavailable =>
+      'Scenārija dati nav pieejami.';
+
+  @override
+  String get createScenarioSaveMyScenarios => 'Saglabāt «Manos scenārijos»';
+
+  @override
+  String get createScenarioBack => 'Atpakaļ';
+
+  @override
+  String get createScenarioExpandedFromQuickPlanAsIndependent =>
+      'Izveidots no Quick Plan kā neatkarīga kopija. Vecās pieturas ir privātas vietas, līdz tās pārskatāt.';
+
+  @override
+  String get createScenarioBuildCityDayWeekendTripPlan =>
+      'Veidojiet pilsētas, dienas, nedēļas nogales vai ceļojuma plānu no neatkarīgām pieturām. Scenārijs nav maršruts un nemaina Quick Plan.';
+
+  @override
+  String get createScenarioScenarioPlan => 'Scenārija plāns';
+
+  @override
+  String get createScenarioTitle => 'Nosaukums';
+
+  @override
+  String get createScenarioUseCoordinatesAnyLocationLatviaStop =>
+      'Izmantojiet koordinātas jebkurai vietai Latvijā. Pēc noklusējuma pietura paliek privāta.';
+
+  @override
+  String get createScenarioAddTimeBlock => 'Pievienot laika bloku';
+
+  @override
+  String get createScenarioFeedSha256 => 'Datu SHA-256';
+
+  @override
+  String get createScenarioFeedRetrieved2 => 'Dati iegūti';
+
+  @override
+  String get createScenarioLicence => 'Licence';
+
+  @override
+  String get createScenarioStops => 'Pieturas';
+
+  @override
+  String get createScenarioPlannedTime => 'Plānotais laiks';
+
+  @override
+  String get createScenarioServiceDate => 'Reisa datums';
+
+  @override
+  String get createScenarioProvider => 'Nodrošinātājs';
+
+  @override
+  String get createFindPeopleExactAddressLabel => 'Precīza adrese';
+
+  @override
+  String get createFindPeopleExactGeoLabel => 'Precīzs punkts';
+
+  @override
+  String get createFindPeopleOnlineAccessLabel =>
+      'Tiešsaistes piekļuves atsauce';
+
+  @override
+  String get createFindPeopleNotSet => 'Nav iestatīts';
+
+  @override
+  String get createFindPeopleConfigured => 'Iestatīts';
+
+  @override
+  String get createScenarioSelectionPreviewUnchanged =>
+      'Tikai izvēles priekšskatījums. Scenārijs nav mainīts.';
+
+  @override
+  String createScenarioActivityTime(String value) {
+    return 'Aktivitāšu laiks: $value';
+  }
+
+  @override
+  String createScenarioDurationMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
+  String createScenarioDurationHours(int count) {
+    return '$count h';
+  }
+
+  @override
+  String createScenarioDurationHoursMinutes(int start, int end) {
+    return '$start h $end min';
+  }
+
+  @override
+  String createScenarioMinutesNotLive(int count) {
+    return '$count min · Plānotais saraksts · nav reāllaika';
+  }
+
+  @override
+  String createScenarioFeedRetrievedLine(String value) {
+    return 'Dati iegūti $value';
+  }
+
+  @override
+  String get createScenarioCacheCurrent => 'Saglabātais saraksts ir aktuāls.';
+
+  @override
+  String createScenarioCacheCurrentAt(String value) {
+    return 'Saglabātais saraksts ir aktuāls · $value.';
+  }
+
+  @override
+  String get createScenarioCacheStale =>
+      'Saglabātais saraksts ir novecojis. To var izmantot ar brīdinājumu vai atjaunināt.';
+
+  @override
+  String createScenarioCacheStaleAt(String value) {
+    return 'Saglabātais saraksts ir novecojis · $value. To var izmantot ar brīdinājumu vai atjaunināt.';
+  }
+
+  @override
+  String get createStepFindPeopleActivityTitle => 'Aktivitāte';
+
+  @override
+  String get createStepFindPeopleActivityDescription =>
+      'Aprakstiet, ko vēlaties darīt un kam tas der.';
+
+  @override
+  String get createStepFindPeopleScheduleTitle => 'Kad';
+
+  @override
+  String get createStepFindPeopleScheduleDescription =>
+      'Izvēlieties vienu laiku, aptauju vai ierobežotu atkārtotu sēriju.';
+
+  @override
+  String get createStepFindPeopleMeetingTitle => 'Kur';
+
+  @override
+  String get createStepFindPeopleMeetingDescription =>
+      'Nošķiriet publisko zonu no privātās tikšanās informācijas.';
+
+  @override
+  String get createStepFindPeopleGroupTitle => 'Grupa';
+
+  @override
+  String get createStepFindPeopleGroupDescription =>
+      'Iestatiet ietilpību, pieteikumus, pārbaudi, gaidīšanas rindu un izmaksas.';
+
+  @override
+  String get createStepFindPeopleHostsTitle => 'Rīkotāji un piekļuve';
+
+  @override
+  String get createStepFindPeopleHostsDescription =>
+      'Iestatiet publicētāju, redzamību, saziņu un kopīgošanu.';
+
+  @override
+  String get createStepFindPeoplePublishTitle => 'Priekšskatīt un publicēt';
+
+  @override
+  String get createStepFindPeoplePublishDescription =>
+      'Pārskatiet publiskos un privātos datus un apstipriniet drošības nosacījumus.';
+
+  @override
+  String get createStepRouteMethodTitle => 'Veids';
+
+  @override
+  String get createStepRouteMethodDescription =>
+      'Izvēlieties, kā tiks veidots nepārtrauktais maršruts';
+
+  @override
+  String get createStepRouteProfileTitle => 'Profils';
+
+  @override
+  String get createStepRouteProfileDescription =>
+      'Iestatiet kustības profilu un maršrutēšanas iestatījumus';
+
+  @override
+  String get createStepRouteEditorTitle => 'Maršruts';
+
+  @override
+  String get createStepRouteEditorDescription =>
+      'Rediģējiet punktus un nepārtrauktos posmus';
+
+  @override
+  String get createStepRouteDetailsTitle => 'Informācija';
+
+  @override
+  String get createStepRouteDetailsDescription =>
+      'Pievienojiet maršruta apstākļus un praktisku informāciju';
+
+  @override
+  String get createStepRouteReviewTitle => 'Pārbaude';
+
+  @override
+  String get createStepRouteReviewDescription =>
+      'Pārbaudiet formu, brīdinājumus un gatavību';
+
+  @override
+  String get createStepSessionWhatWhereTitle => 'Kas un kur';
+
+  @override
+  String get createStepSessionWhatWhereDescription =>
+      'Resurss, kategorija, attēli, vieta, laika josla';
+
+  @override
+  String get createStepSessionWhenTitle => 'Kad';
+
+  @override
+  String get createStepSessionWhenDescription =>
+      'Nedēļas grafiks, ilgums, rezerves laiks, iepriekšēja pieteikšanās';
+
+  @override
+  String get createStepSessionPriceAndBookingTitle => 'Cena un rezervēšana';
+
+  @override
+  String get createStepSessionPriceAndBookingDescription =>
+      'Cena, maks. grupas lielums, ārējā rezervēšanas saite';
+
+  @override
+  String get createStepClassWorkshopBasicsTitle => 'Piedāvājums';
+
+  @override
+  String get createStepClassWorkshopBasicsDescription =>
+      'Veids, nosaukums, apraksti, kategorija, kritēriji un attēli';
+
+  @override
+  String get createStepClassWorkshopLearningTitle => 'Programma un pasniedzējs';
+
+  @override
+  String get createStepClassWorkshopLearningDescription =>
+      'Rezultāti, programma, priekšnosacījumi un pasniedzējs';
+
+  @override
+  String get createStepClassWorkshopScheduleTitle => 'Datumi un vieta';
+
+  @override
+  String get createStepClassWorkshopScheduleDescription =>
+      'Viena nodarbība vai sērija, laika josla, norises veids, vieta';
+
+  @override
+  String get createStepClassWorkshopParticipationTitle => 'Dalība';
+
+  @override
+  String get createStepClassWorkshopParticipationDescription =>
+      'Materiāli, prasības, grupas lielums, cena, pieteikšanās';
+
+  @override
+  String get createStepScenarioContextTitle => 'Konteksts';
+
+  @override
+  String get createStepScenarioContextDescription =>
+      'Formāts, datumu režīms, grupa, temps un budžets';
+
+  @override
+  String get createStepScenarioComposerTitle => 'Plāns';
+
+  @override
+  String get createStepScenarioComposerDescription =>
+      'Neatkarīgas pieturas, laika bloki un to secība';
+
+  @override
+  String get createStepScenarioReviewTitle => 'Pārskats';
+
+  @override
+  String get createStepScenarioReviewDescription =>
+      'Kopsummas, brīdinājumi un gatavība saglabāšanai';
+
+  @override
+  String get createSessionPresetEveryday => 'Katru dienu 9:00–21:00';
+
+  @override
+  String get createSessionPresetWeekdays => 'Darbdienās 9:00–18:00';
+
+  @override
+  String createFindPeopleHouseRule(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'be_on_time': 'Ierodieties laikā',
+      'respect_boundaries': 'Ievērojiet robežas',
+      'no_harassment': 'Bez uzmākšanās',
+      'no_sales': 'Bez tirdzniecības',
+      'no_substances': 'Bez alkohola un narkotikām',
+      'bring_required_gear': 'Paņemiet vajadzīgo aprīkojumu',
+      'follow_venue_rules': 'Ievērojiet vietas noteikumus',
+      'leave_no_trace': 'Neatstājiet pēdas',
+      'other': 'Noteikums',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createFindPeopleCohostRight(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'review_applications': 'Pārskatīt pieteikumus',
+      'manage_schedule': 'Pārvaldīt grafiku',
+      'manage_participants': 'Pārvaldīt dalībniekus',
+      'moderate_conversation': 'Moderēt sarunu',
+      'other': 'Tiesības',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFindPeopleCohostAccepted => 'Pieņemts';
+
+  @override
+  String get createFindPeopleCohostPending => 'Ielūgums gaida atbildi';
+
+  @override
+  String get createFindPeopleSeatFitPolicy => 'Vietu sadales politika';
+
+  @override
+  String get createFindPeopleVisibilityRequired => 'Redzamība *';
+
+  @override
+  String get createFormDateIso => 'Datums (GGGG-MM-DD)';
+
+  @override
+  String get createClassFirstSummerTime => 'Pirmais (vasaras laiks)';
+
+  @override
+  String get createRouteOutAndBack => 'Turp un atpakaļ';
+
+  @override
+  String get createScenarioEdit => 'Rediģēt';
+
+  @override
+  String get createScenarioTimeBlockHint => 'Kafija, atpūta, brīvais laiks…';
+
+  @override
+  String get createScenarioPrivateLocalTravel => 'Privāts / vietējs ceļš';
+
+  @override
+  String get createScenarioRouteLabel => 'Maršruts';
+
+  @override
+  String get createScenarioCarrierLabel => 'Pārvadātājs';
+
+  @override
+  String createScenarioSelectedStop(String value) {
+    return 'Izvēlēts: $value';
+  }
+
+  @override
+  String get createScenarioDepartureHhMm => 'Atiešana (HH:mm)';
+
+  @override
+  String get createScenarioArrivalHhMm => 'Ierašanās (HH:mm)';
+
+  @override
+  String get createRouteResolveRestore => 'Atrisināt un atjaunot';
+
+  @override
+  String get createRouteResolve => 'Atrisināt';
+
+  @override
+  String scenarioIntakeNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'targetsUnavailable':
+          'Scenāriji nav pieejami. Mēģiniet vēlreiz no detaļām.',
+      'chooseTarget': 'Izvēlieties scenāriju vai izveidojiet jaunu.',
+      'targetNotEditable': 'Šo scenāriju vairs nevar rediģēt.',
+      'titleRequired': 'Ievadiet scenārija nosaukumu.',
+      'openFailed': 'Neizdevās atvērt šo scenāriju.',
+      'signInAgain': 'Pirms pievienošanas scenārijam piesakieties vēlreiz.',
+      'confirmDuplicate': 'Apstipriniet vēl viena gadījuma pievienošanu.',
+      'confirmUnavailable':
+          'Apstipriniet nepieejamā saglabātā momentuzņēmuma izmantošanu.',
+      'confirmScheduleAdjustment':
+          'Apstipriniet pārveidošanu par elastīgu veidnes pieturu.',
+      'revisionConflict':
+          'Scenārijs ir mainījies. Atgriezieties, atveriet to vēlreiz un pārskatiet.',
+      'intentExpired':
+          'Šīs izvēles derīgums beidzies. Atgriezieties detaļās un mēģiniet vēlreiz.',
+      'targetGone': 'Šis scenārijs vairs nav pieejams. Izvēlieties citu.',
+      'lockedLegBoundary':
+          'Šo ievietošanas vietu aizsargā bloķēts loģistikas posms.',
+      'persistenceUnavailable':
+          'Neizdevās saglabāt. Jūsu izvēle ir saglabāta; mēģiniet pievienot vēlreiz.',
+      'other':
+          'Neizdevās pievienot šo objektu. Pārskatiet izvēli un mēģiniet vēlreiz.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String scenarioIntakeObjectType(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'event': 'Pasākums',
+      'place': 'Vieta',
+      'activity': 'Aktivitāte',
+      'route': 'Maršruts',
+      'bookableSession': 'Nodarbība',
+      'other': 'Objekts',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String scenarioIntakeSourceStatus(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'ready': 'Gatavs',
+      'stale': 'Jāatjauno',
+      'unresolved': 'Nav atrisināts',
+      'unavailable': 'Nav pieejams',
+      'other': 'Nav zināms',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get scenarioIntakeUnavailable =>
+      'Pievienošana scenārijam nav pieejama.';
+
+  @override
+  String get scenarioIntakeTitle => 'Pievienot scenārijam';
+
+  @override
+  String get scenarioIntakeClose => 'Aizvērt pievienošanu scenārijam';
+
+  @override
+  String get scenarioIntakeChooseTarget => 'Izvēlieties personīgu scenāriju';
+
+  @override
+  String get scenarioIntakeOnlyPrivateDrafts =>
+      'Tiek rādīti tikai jūsu rediģējamie privātie melnraksti.';
+
+  @override
+  String get scenarioIntakeNoTargets =>
+      'Vēl nav saglabātu scenāriju. Izveidojiet to zemāk.';
+
+  @override
+  String get scenarioIntakeUntitled => 'Bez nosaukuma';
+
+  @override
+  String get scenarioIntakeCreateNew => 'Izveidot jaunu scenāriju';
+
+  @override
+  String get scenarioIntakeCreateNewHint =>
+      'Privāts · viena diena · tiek saglabāts tikai kopā ar pieturu';
+
+  @override
+  String get scenarioIntakeTitleField => 'Scenārija nosaukums';
+
+  @override
+  String get scenarioIntakeContinue => 'Turpināt uz novietojumu';
+
+  @override
+  String get scenarioIntakeScenarioFallback => 'Scenārijs';
+
+  @override
+  String get scenarioIntakeDay => 'Diena';
+
+  @override
+  String get scenarioIntakeUnscheduled => 'Bez plāna';
+
+  @override
+  String get scenarioIntakeInsert => 'Ievietot';
+
+  @override
+  String get scenarioIntakeAtEnd => 'Beigās';
+
+  @override
+  String get scenarioIntakeRole => 'Loma';
+
+  @override
+  String get scenarioIntakeMandatory => 'Obligāta';
+
+  @override
+  String get scenarioIntakeOptional => 'Neobligāta';
+
+  @override
+  String get scenarioIntakeBack => 'Atpakaļ';
+
+  @override
+  String get scenarioIntakeReview => 'Pārskatīt';
+
+  @override
+  String get scenarioIntakeAddAnother => 'Pievienot vēl vienu gadījumu';
+
+  @override
+  String get scenarioIntakeAddAnotherHint =>
+      'Šis kataloga objekts scenārijā jau ir.';
+
+  @override
+  String get scenarioIntakeUseUnavailable =>
+      'Izmantot saglabāto nepieejamā objekta momentuzņēmumu';
+
+  @override
+  String get scenarioIntakeUseTemplateStop =>
+      'Izmantot kā elastīgu veidnes pieturu';
+
+  @override
+  String get scenarioIntakeUseTemplateStopHint =>
+      'Avotam ir noteikts datums, bet šis scenārijs ir veidne.';
+
+  @override
+  String get scenarioIntakeLogisticsNotice =>
+      'Loģistika netiek pārrēķināta reāllaikā. Esošās nebloķētās robežu aplēses tiks droši atceltas.';
+
+  @override
+  String scenarioIntakeAddCount(int count) {
+    return 'Pievienot $count';
+  }
+
+  @override
+  String get scenarioIntakeDurationUnknown => 'Ilgums nav zināms';
+
+  @override
+  String scenarioIntakeFixedStart(String time) {
+    return 'Fiksēts: $time';
+  }
+
+  @override
+  String get scenarioIntakeMoveUp => 'Pārvietot augšup';
+
+  @override
+  String get scenarioIntakeMoveDown => 'Pārvietot lejup';
+
+  @override
+  String get scenarioIntakeApplyingSemantics =>
+      'Izvēlētās pieturas tiek pievienotas scenārijam';
+
+  @override
+  String get scenarioIntakeLoadingSemantics => 'Ielādē jūsu scenārijus';
+
+  @override
+  String get scenarioIntakeApplying => 'Pievieno scenārijam…';
+
+  @override
+  String get scenarioIntakeLoading => 'Ielādē jūsu scenārijus…';
+
+  @override
+  String get scenarioIntakeReplayed =>
+      'Jau saglabāts · dublikāts netika izveidots.';
+
+  @override
+  String get scenarioIntakeStay => 'Palikt šeit';
+
+  @override
+  String get scenarioIntakeOpenScenario => 'Atvērt scenāriju';
+
+  @override
+  String get scenarioIntakePrepareFailed =>
+      'Neizdevās sagatavot pievienošanu scenārijam.';
+
+  @override
+  String get scenarioIntakeRetry => 'Mēģināt vēlreiz';
+
+  @override
+  String get scenarioIntakeTemplate => 'Veidne';
+
+  @override
+  String get scenarioIntakeDated => 'Ar datumiem';
+
+  @override
+  String scenarioIntakeStep(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'target': '1. no 3 · Scenārijs',
+      'placement': '2. no 3 · Novietojums',
+      'review': '3. no 3 · Pārskats',
+      'success': 'Pabeigts',
+      'applying': 'Saglabā',
+      'other': 'Sagatavo',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String scenarioIntakePlacement(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'unscheduled': 'Bez plāna',
+      'atEnd': 'Beigās',
+      'other': 'Pēc izvēlētās pieturas',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get scenarioIntakeAfterLabel => 'Pēc:';
+
+  @override
+  String scenarioIntakeCandidateLabel(int count) {
+    return 'Izvēlētā pietura $count:';
+  }
+
+  @override
+  String scenarioIntakeSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Scenārijam pievienotas $count pieturas',
+      one: 'Scenārijam pievienota $count pietura',
+      zero: 'Scenārijam pievienotas $count pieturas',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scenarioIntakeTargetCounts(int count, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dienas',
+      one: '$count diena',
+      zero: '$count dienas',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total aktīvi vienumi',
+      one: '$total aktīvs vienums',
+      zero: '$total aktīvi vienumi',
+    );
+    return '$_temp0 · $_temp1';
   }
 }

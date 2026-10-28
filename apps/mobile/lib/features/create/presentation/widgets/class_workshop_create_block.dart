@@ -8,6 +8,7 @@ import '../../domain/entities/class_workshop_draft_data.dart';
 import '../../domain/entities/class_workshop_validation_issue.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/usecases/build_class_workshop_content_body.dart';
+import 'create_form_texts.dart';
 import 'create_texts.dart';
 
 /// Class / Workshop Create block (D3.6, CW-V1). Its sections come from
@@ -60,13 +61,11 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
     final CreateDraftEntity draft = widget.state.draft;
     final ClassWorkshopDraftData? data = draft.classWorkshopData;
     if (data == null) {
-      return const Card(
+      return Card(
         key: Key('class-workshop-read-only'),
         child: Padding(
           padding: EdgeInsets.all(16),
-          child: Text(
-            'This Class draft was saved by a newer app version and is read-only.',
-          ),
+          child: Text(context.l10n.createClassClassDraftWasSavedByNewer),
         ),
       );
     }
@@ -109,9 +108,12 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
     ClassWorkshopDraftData data,
   ) => <Widget>[
     DropdownButtonFormField<ClassWorkshopOfferingKind>(
+      isExpanded: true,
       key: const Key('class-workshop-kind'),
       initialValue: data.offeringKind,
-      decoration: const InputDecoration(labelText: 'Offering kind'),
+      decoration: InputDecoration(
+        labelText: context.l10n.createClassOfferingKind,
+      ),
       items: <DropdownMenuItem<ClassWorkshopOfferingKind>>[
         for (final ClassWorkshopOfferingKind kind
             in ClassWorkshopOfferingKind.values)
@@ -121,23 +123,28 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
         if (value != null) _c.setClassWorkshopOfferingKind(value);
       },
     ),
-    _text('class-workshop-title', 'Title', draft.title, _c.updateTitle),
+    _text(
+      'class-workshop-title',
+      context.l10n.createSessionTitle,
+      draft.title,
+      _c.updateTitle,
+    ),
     _text(
       'class-workshop-short',
-      'Short description',
+      context.l10n.createClassShortDescription,
       draft.shortDescription,
       _c.updateShortDescription,
     ),
     _text(
       'class-workshop-full',
-      'Full description',
+      context.l10n.createClassFullDescription,
       draft.fullDescription,
       _c.updateFullDescription,
       lines: 4,
     ),
     _text(
       'class-workshop-cover',
-      'Cover image',
+      context.l10n.createClassCoverImage,
       draft.media.coverImage,
       _c.updateCoverImage,
       errorText: switch (widget.state.validationErrors['coverImage']) {
@@ -146,9 +153,12 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       },
     ),
     DropdownButtonFormField<String>(
+      isExpanded: true,
       key: const Key('class-workshop-locale'),
       initialValue: _c.classWorkshopContentLocale,
-      decoration: const InputDecoration(labelText: 'Content language'),
+      decoration: InputDecoration(
+        labelText: context.l10n.createClassContentLanguage,
+      ),
       items: <DropdownMenuItem<String>>[
         for (final String locale in _c.supportedContentLocales)
           DropdownMenuItem(value: locale, child: Text(locale)),
@@ -158,14 +168,14 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
     ),
     _text(
       'class-workshop-cover-alt:${_c.classWorkshopContentLocale}',
-      'Cover image description',
+      context.l10n.createClassCoverImageDescription,
       _c.classWorkshopMediaAltText(),
       (String v) => _c.updateClassWorkshopMediaMetadata(coverAltText: v),
     ),
     for (final String reference in draft.media.gallery)
       _text(
         'class-workshop-gallery-alt:$reference:${_c.classWorkshopContentLocale}',
-        'Gallery image description',
+        context.l10n.createClassGalleryImageDescription,
         _c.classWorkshopMediaAltText(reference),
         (String v) => _c.updateClassWorkshopMediaMetadata(
           galleryRef: reference,
@@ -191,7 +201,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
     ),
     _text(
       'class-workshop-modules',
-      'Programme steps (one per line)',
+      context.l10n.createClassProgrammeStepsOnePerLine,
       data.modules.map((ClassWorkshopModule m) => m.title).join('\n'),
       _c.setClassWorkshopModules,
       lines: 3,
@@ -199,7 +209,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
     SwitchListTile(
       key: const Key('class-workshop-prerequisites-none'),
       value: data.prerequisitesListed == false,
-      title: const Text('No prerequisites'),
+      title: Text(context.l10n.createClassNoPrerequisites),
       onChanged: (bool none) => _c.setClassWorkshopPrerequisites(listed: !none),
     ),
     if (data.prerequisitesListed == true)
@@ -212,7 +222,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       ),
     _text(
       'class-workshop-result',
-      'What participants take home',
+      context.l10n.createClassWhatParticipantsTakeHome,
       data.takeHomeResult,
       _c.setClassWorkshopTakeHomeResult,
     ),
@@ -226,13 +236,13 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
     if (!data.instructor.sameAsPublisher)
       _text(
         'class-workshop-instructor-name',
-        'Instructor name',
+        context.l10n.createClassInstructorName,
         data.instructor.displayName,
         (String v) => _c.setClassWorkshopInstructor(displayName: v),
       ),
     _text(
       'class-workshop-instructor-bio',
-      'Instructor bio',
+      context.l10n.createClassInstructorBio,
       data.instructor.shortBio,
       (String v) => _c.setClassWorkshopInstructor(shortBio: v),
       lines: 2,
@@ -246,11 +256,11 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       if (draft.scheduleSlots.isNotEmpty)
         ListTile(
           key: const Key('class-workshop-legacy-schedule'),
-          title: const Text('This draft has an old schedule'),
-          subtitle: const Text('It is not published; clear it explicitly.'),
+          title: Text(context.l10n.createClassDraftHasOldSchedule),
+          subtitle: Text(context.l10n.createClassNotPublishedClearExplicitly),
           trailing: TextButton(
             onPressed: _c.clearClassWorkshopLegacySchedule,
-            child: const Text('Clear'),
+            child: Text(context.l10n.createClassClear),
           ),
         ),
       SegmentedButton<ClassWorkshopContextKind>(
@@ -258,11 +268,11 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
         segments: <ButtonSegment<ClassWorkshopContextKind>>[
           ButtonSegment(
             value: ClassWorkshopContextKind.singleClass,
-            label: Text('Single class'),
+            label: Text(context.l10n.createClassSingleClass),
           ),
           ButtonSegment(
             value: ClassWorkshopContextKind.fixedSeries,
-            label: Text('Fixed series'),
+            label: Text(context.l10n.createClassFixedSeries),
           ),
         ],
         selected: <ClassWorkshopContextKind>{data.contextKind},
@@ -272,7 +282,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       CheckboxListTile(
         key: const Key('class-workshop-timezone'),
         value: data.timezoneConfirmed,
-        title: Text('Times are in ${data.timezoneId}'),
+        title: Text(context.l10n.createClassTimesAre(data.timezoneId)),
         onChanged: (bool? value) {
           if (value == true) _c.confirmClassWorkshopTimezone(data.timezoneId);
         },
@@ -281,9 +291,12 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
         _occurrenceTile(data, item),
       _addOccurrence(),
       DropdownButtonFormField<ClassWorkshopDeliveryFormat>(
+        isExpanded: true,
         key: const Key('class-workshop-delivery'),
         initialValue: data.deliveryFormat,
-        decoration: const InputDecoration(labelText: 'Delivery'),
+        decoration: InputDecoration(
+          labelText: context.l10n.createClassDelivery,
+        ),
         items: <DropdownMenuItem<ClassWorkshopDeliveryFormat>>[
           for (final ClassWorkshopDeliveryFormat format
               in ClassWorkshopDeliveryFormat.values)
@@ -296,7 +309,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       if (data.deliveryFormat != ClassWorkshopDeliveryFormat.offline)
         _text(
           'class-workshop-provider',
-          'Online provider',
+          context.l10n.createClassOnlineProvider,
           data.onlineProviderLabel,
           _c.setClassWorkshopOnlineProviderLabel,
         ),
@@ -309,20 +322,25 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
         ),
         _text(
           'class-workshop-address',
-          'Address',
+          context.l10n.createSessionAddress,
           draft.addressLine1,
           _c.updateAddress,
         ),
-        _text('class-workshop-city', 'City', draft.city, _c.updateCity),
+        _text(
+          'class-workshop-city',
+          context.l10n.createSessionCity,
+          draft.city,
+          _c.updateCity,
+        ),
         _text(
           'class-workshop-latitude',
-          'Latitude',
+          context.l10n.createSessionLatitude,
           draft.latitude?.toString() ?? '',
           (_) {},
         ),
         _text(
           'class-workshop-longitude',
-          'Longitude',
+          context.l10n.createSessionLongitude,
           draft.longitude?.toString() ?? '',
           (_) {},
         ),
@@ -332,12 +350,16 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
             latitude: _fields['class-workshop-latitude']?.text ?? '',
             longitude: _fields['class-workshop-longitude']?.text ?? '',
           ),
-          child: Text(pinned ? 'Location confirmed' : 'Confirm this location'),
+          child: Text(
+            pinned
+                ? context.l10n.createClassLocationConfirmed
+                : context.l10n.createClassConfirmLocation,
+          ),
         ),
         SwitchListTile(
           key: const Key('class-workshop-area-only'),
           value: data.locationMode == ClassWorkshopLocationMode.areaOnly,
-          title: const Text('Show only the area publicly'),
+          title: Text(context.l10n.createClassShowOnlyAreaPublicly),
           onChanged: (bool value) => _c.setClassWorkshopLocationMode(
             value
                 ? ClassWorkshopLocationMode.areaOnly
@@ -347,7 +369,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
         if (data.locationMode == ClassWorkshopLocationMode.areaOnly)
           _text(
             'class-workshop-area',
-            'Public area',
+            context.l10n.createClassPublicArea,
             data.safeAreaLabel,
             _c.setClassWorkshopSafeAreaLabel,
           ),
@@ -372,10 +394,10 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
             '${_time(item.endMinuteLocal)}',
           ),
           subtitle: unresolved
-              ? const Text('This local time does not exist or is ambiguous')
+              ? Text(context.l10n.createClassLocalTimeDoesNotExistAmbiguous)
               : null,
           trailing: IconButton(
-            tooltip: 'Remove date',
+            tooltip: context.l10n.createClassRemoveDate,
             icon: const Icon(Icons.delete_outline),
             onPressed: () => _c.removeClassWorkshopOccurrence(item.id),
           ),
@@ -386,7 +408,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
             segments: <ButtonSegment<ClassWorkshopFold>>[
               ButtonSegment(
                 value: ClassWorkshopFold.earlier,
-                label: Text('First (summer time)'),
+                label: Text(context.l10n.createClassFirstSummerTime),
               ),
               ButtonSegment(
                 value: ClassWorkshopFold.later,
@@ -406,7 +428,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       Expanded(
         child: _text(
           'class-workshop-new-date',
-          'Date (YYYY-MM-DD)',
+          context.l10n.createFormDateIso,
           '',
           (_) {},
         ),
@@ -421,7 +443,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       ),
       IconButton(
         key: const Key('class-workshop-add-date'),
-        tooltip: 'Add date',
+        tooltip: context.l10n.createClassAddDate,
         icon: const Icon(Icons.add),
         onPressed: () {
           final int? start = _minutes(
@@ -447,28 +469,29 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
     return <Widget>[
       _text(
         'class-workshop-materials',
-        'Included materials (one per line)',
+        context.l10n.createClassIncludedMaterialsOnePerLine,
         data.includedMaterials.join('\n'),
         _c.setClassWorkshopIncludedMaterials,
         lines: 2,
       ),
       _text(
         'class-workshop-requirements',
-        'What to bring or know (one per line)',
+        context.l10n.createClassWhatBringKnowOnePerLine,
         data.requirements.join('\n'),
         _c.setClassWorkshopRequirements,
         lines: 2,
       ),
       _text(
         'class-workshop-group',
-        'Declared group size (optional)',
+        context.l10n.createClassDeclaredGroupSizeOptional,
         data.declaredGroupLimit?.toString() ?? '',
         (String v) => _c.setClassWorkshopGroupLimit(int.tryParse(v.trim())),
       ),
       DropdownButtonFormField<ClassWorkshopPriceMode>(
+        isExpanded: true,
         key: const Key('class-workshop-price-mode'),
         initialValue: price.mode,
-        decoration: const InputDecoration(labelText: 'Price'),
+        decoration: InputDecoration(labelText: context.l10n.createClassPrice),
         items: <DropdownMenuItem<ClassWorkshopPriceMode>>[
           for (final ClassWorkshopPriceMode mode
               in ClassWorkshopPriceMode.values)
@@ -488,7 +511,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       if (price.mode == ClassWorkshopPriceMode.fixed) ...<Widget>[
         _text(
           'class-workshop-price-amount',
-          'Amount in cents (${price.currencyCode ?? ''})',
+          context.l10n.createClassAmountCents(price.currencyCode ?? ''),
           price.amountMinor?.toString() ?? '',
           (String v) => _c.setClassWorkshopPriceFixed(
             amountMinor: int.tryParse(v.trim()) ?? 0,
@@ -496,9 +519,12 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
           ),
         ),
         DropdownButtonFormField<ClassWorkshopPriceScope>(
+          isExpanded: true,
           key: const Key('class-workshop-price-scope'),
           initialValue: price.scope,
-          decoration: const InputDecoration(labelText: 'The price covers'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createClassPriceCovers,
+          ),
           items: <DropdownMenuItem<ClassWorkshopPriceScope>>[
             for (final ClassWorkshopPriceScope scope
                 in ClassWorkshopPriceScope.values)
@@ -517,7 +543,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       SwitchListTile(
         key: const Key('class-workshop-enrollment-external'),
         value: enrollment.mode == ClassWorkshopEnrollmentMode.external,
-        title: const Text('Enrollment on the organiser site'),
+        title: Text(context.l10n.createClassEnrollmentOrganiserSite),
         onChanged: (bool value) => value
             ? _c.setClassWorkshopExternalEnrollment(enrollment.externalUrl)
             : _c.setClassWorkshopInformationOnly(
@@ -527,15 +553,18 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       if (enrollment.mode == ClassWorkshopEnrollmentMode.external)
         _text(
           'class-workshop-enrollment-url',
-          'Enrollment link (https)',
+          context.l10n.createClassEnrollmentLinkHttps,
           enrollment.externalUrl,
           _c.setClassWorkshopExternalEnrollment,
         )
       else
         DropdownButtonFormField<ClassWorkshopInformationReason>(
+          isExpanded: true,
           key: const Key('class-workshop-information'),
           initialValue: enrollment.informationReason,
-          decoration: const InputDecoration(labelText: 'Enrollment state'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createClassEnrollmentState,
+          ),
           items: <DropdownMenuItem<ClassWorkshopInformationReason>>[
             for (final ClassWorkshopInformationReason reason
                 in ClassWorkshopInformationReason.values)
@@ -562,13 +591,13 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       children: <Widget>[
         OutlinedButton(
           onPressed: _c.saveDraft,
-          child: const Text('Save draft'),
+          child: Text(context.l10n.createClassSaveDraft),
         ),
         FilledButton(
           onPressed: () async {
             if (await _c.publishDraft()) widget.onPublished();
           },
-          child: const Text('Publish'),
+          child: Text(context.l10n.createClassPublish),
         ),
       ],
     ),
@@ -631,9 +660,12 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Text(config.title, style: Theme.of(context).textTheme.titleMedium),
           Text(
-            config.description,
+            createFormText(context.l10n, config.titleId),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          Text(
+            createFormText(context.l10n, config.descriptionId),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           ...children,

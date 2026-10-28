@@ -8,6 +8,7 @@ import 'scenario_composer_section.dart';
 import 'scenario_context_section.dart';
 import 'scenario_generation_panel.dart';
 import 'scenario_review_section.dart';
+import '../create_form_texts.dart';
 import '../create_texts.dart';
 import '../../../../../core/localization/l10n_context.dart';
 
@@ -34,16 +35,13 @@ class ScenarioCreateBlock extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              'Scenario plan',
+              context.l10n.createScenarioScenarioPlan,
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Build a city, day, weekend or trip plan from independent stops. '
-              'A Scenario is not a Route and does not change a Quick Plan.',
-            ),
+            Text(context.l10n.createScenarioBuildCityDayWeekendTripPlan),
             if (state.draft.sectionData['quick_plan_conversion'] != null) ...[
               const SizedBox(height: 12),
               DecoratedBox(
@@ -51,7 +49,7 @@ class ScenarioCreateBlock extends StatelessWidget {
                   color: Theme.of(context).colorScheme.tertiaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.all(12),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,8 +58,9 @@ class ScenarioCreateBlock extends StatelessWidget {
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          'Expanded from a Quick Plan as an independent copy. '
-                          'Legacy stops are private custom locations until you review them.',
+                          context
+                              .l10n
+                              .createScenarioExpandedFromQuickPlanAsIndependent,
                         ),
                       ),
                     ],
@@ -81,7 +80,7 @@ class ScenarioCreateBlock extends StatelessWidget {
                 scenarioCreateSteps.length,
                 (int index) => ChoiceChip(
                   label: Text(
-                    '${index + 1}. ${scenarioCreateSteps[index].title}',
+                    '${index + 1}. ${createFormText(context.l10n, scenarioCreateSteps[index].titleId)}',
                   ),
                   selected: step == index,
                   onSelected: (_) => controller.goToScenarioStep(index),
@@ -105,7 +104,7 @@ class ScenarioCreateBlock extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => controller.goToScenarioStep(step - 1),
-                      child: const Text('Back'),
+                      child: Text(context.l10n.createScenarioBack),
                     ),
                   ),
                 if (step > 0) const SizedBox(width: 12),
@@ -117,7 +116,7 @@ class ScenarioCreateBlock extends StatelessWidget {
                     child: Text(
                       step < scenarioCreateSteps.length - 1
                           ? 'Continue'
-                          : 'Save to My Scenarios',
+                          : context.l10n.createScenarioSaveMyScenarios,
                     ),
                   ),
                 ),

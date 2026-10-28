@@ -1,5 +1,10 @@
 import '../../../../core/localization/l10n_context.dart';
 import '../../domain/entities/activity_draft_data.dart';
+import '../../domain/entities/route_draft_data.dart';
+import '../../domain/entities/scenario_logistics_draft.dart';
+import '../../domain/entities/scenario_item_draft.dart';
+import '../../domain/entities/scenario_draft_data.dart';
+import '../../domain/entities/find_people_draft_data.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/event_admission.dart';
 import '../../domain/entities/event_draft_data.dart';
@@ -86,6 +91,70 @@ String createFormText(AppLocalizations l10n, String id) => switch (id) {
     l10n.createStepRentalFulfillmentDescription,
   'createStepRentalReviewTitle' => l10n.createStepRentalReviewTitle,
   'createStepRentalReviewDescription' => l10n.createStepRentalReviewDescription,
+  'createSessionPresetEveryday' => l10n.createSessionPresetEveryday,
+  'createSessionPresetWeekdays' => l10n.createSessionPresetWeekdays,
+  'createStepClassWorkshopBasicsDescription' =>
+    l10n.createStepClassWorkshopBasicsDescription,
+  'createStepClassWorkshopBasicsTitle' =>
+    l10n.createStepClassWorkshopBasicsTitle,
+  'createStepClassWorkshopLearningDescription' =>
+    l10n.createStepClassWorkshopLearningDescription,
+  'createStepClassWorkshopLearningTitle' =>
+    l10n.createStepClassWorkshopLearningTitle,
+  'createStepClassWorkshopParticipationDescription' =>
+    l10n.createStepClassWorkshopParticipationDescription,
+  'createStepClassWorkshopParticipationTitle' =>
+    l10n.createStepClassWorkshopParticipationTitle,
+  'createStepClassWorkshopScheduleDescription' =>
+    l10n.createStepClassWorkshopScheduleDescription,
+  'createStepClassWorkshopScheduleTitle' =>
+    l10n.createStepClassWorkshopScheduleTitle,
+  'createStepFindPeopleActivityDescription' =>
+    l10n.createStepFindPeopleActivityDescription,
+  'createStepFindPeopleActivityTitle' => l10n.createStepFindPeopleActivityTitle,
+  'createStepFindPeopleGroupDescription' =>
+    l10n.createStepFindPeopleGroupDescription,
+  'createStepFindPeopleGroupTitle' => l10n.createStepFindPeopleGroupTitle,
+  'createStepFindPeopleHostsDescription' =>
+    l10n.createStepFindPeopleHostsDescription,
+  'createStepFindPeopleHostsTitle' => l10n.createStepFindPeopleHostsTitle,
+  'createStepFindPeopleMeetingDescription' =>
+    l10n.createStepFindPeopleMeetingDescription,
+  'createStepFindPeopleMeetingTitle' => l10n.createStepFindPeopleMeetingTitle,
+  'createStepFindPeoplePublishDescription' =>
+    l10n.createStepFindPeoplePublishDescription,
+  'createStepFindPeoplePublishTitle' => l10n.createStepFindPeoplePublishTitle,
+  'createStepFindPeopleScheduleDescription' =>
+    l10n.createStepFindPeopleScheduleDescription,
+  'createStepFindPeopleScheduleTitle' => l10n.createStepFindPeopleScheduleTitle,
+  'createStepRouteDetailsDescription' => l10n.createStepRouteDetailsDescription,
+  'createStepRouteDetailsTitle' => l10n.createStepRouteDetailsTitle,
+  'createStepRouteEditorDescription' => l10n.createStepRouteEditorDescription,
+  'createStepRouteEditorTitle' => l10n.createStepRouteEditorTitle,
+  'createStepRouteMethodDescription' => l10n.createStepRouteMethodDescription,
+  'createStepRouteMethodTitle' => l10n.createStepRouteMethodTitle,
+  'createStepRouteProfileDescription' => l10n.createStepRouteProfileDescription,
+  'createStepRouteProfileTitle' => l10n.createStepRouteProfileTitle,
+  'createStepRouteReviewDescription' => l10n.createStepRouteReviewDescription,
+  'createStepRouteReviewTitle' => l10n.createStepRouteReviewTitle,
+  'createStepScenarioComposerDescription' =>
+    l10n.createStepScenarioComposerDescription,
+  'createStepScenarioComposerTitle' => l10n.createStepScenarioComposerTitle,
+  'createStepScenarioContextDescription' =>
+    l10n.createStepScenarioContextDescription,
+  'createStepScenarioContextTitle' => l10n.createStepScenarioContextTitle,
+  'createStepScenarioReviewDescription' =>
+    l10n.createStepScenarioReviewDescription,
+  'createStepScenarioReviewTitle' => l10n.createStepScenarioReviewTitle,
+  'createStepSessionPriceAndBookingDescription' =>
+    l10n.createStepSessionPriceAndBookingDescription,
+  'createStepSessionPriceAndBookingTitle' =>
+    l10n.createStepSessionPriceAndBookingTitle,
+  'createStepSessionWhatWhereDescription' =>
+    l10n.createStepSessionWhatWhereDescription,
+  'createStepSessionWhatWhereTitle' => l10n.createStepSessionWhatWhereTitle,
+  'createStepSessionWhenDescription' => l10n.createStepSessionWhenDescription,
+  'createStepSessionWhenTitle' => l10n.createStepSessionWhenTitle,
   _ => '',
 };
 
@@ -124,6 +193,30 @@ String createOptionText(AppLocalizations l10n, Enum value) {
     RentalDepositCollectionMethod() => 'RentalDepositCollectionMethod',
     VisibilityType() => 'VisibilityType',
     PublishStatus() => 'PublishStatus',
+    FindPeopleApprovalMode() => 'FindPeopleApprovalMode',
+    FindPeopleConversationPolicy() => 'FindPeopleConversationPolicy',
+    FindPeopleCostType() => 'FindPeopleCostType',
+    FindPeopleExpenseSplitMode() => 'FindPeopleExpenseSplitMode',
+    FindPeopleMeetingMode() => 'FindPeopleMeetingMode',
+    FindPeopleParticipationGoal() => 'FindPeopleParticipationGoal',
+    FindPeoplePublisherType() => 'FindPeoplePublisherType',
+    FindPeopleScheduleMode() => 'FindPeopleScheduleMode',
+    FindPeopleSeatFitPolicy() => 'FindPeopleSeatFitPolicy',
+    FindPeopleSkillLevel() => 'FindPeopleSkillLevel',
+    FindPeopleVerificationLevel() => 'FindPeopleVerificationLevel',
+    FindPeopleVisibility() => 'FindPeopleVisibility',
+    FindPeopleWaitlistPolicy() => 'FindPeopleWaitlistPolicy',
+    ScenarioBudgetBasis() => 'ScenarioBudgetBasis',
+    ScenarioFormat() => 'ScenarioFormat',
+    ScenarioPace() => 'ScenarioPace',
+    ScenarioPartyKind() => 'ScenarioPartyKind',
+    ScenarioDateMode() => 'ScenarioDateMode',
+    ScenarioPlannedTransportKind() => 'ScenarioPlannedTransportKind',
+    ScenarioItemKind() => 'ScenarioItemKind',
+    ScenarioScheduleFreshness() => 'ScenarioScheduleFreshness',
+    ScenarioTravelMode() => 'ScenarioTravelMode',
+    RouteSegmentSource() => 'RouteSegmentSource',
+    RouteSegmentOperationState() => 'RouteSegmentOperationState',
     _ => 'unknown',
   };
   return l10n.createOption('${type}_${value.name}');

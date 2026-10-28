@@ -6115,7 +6115,7 @@ abstract class AppLocalizations {
   /// Create form option label; option is "<EnumType>_<stable value>".
   ///
   /// In en, this message translates to:
-  /// **'{value, select, EventCapacityMode_known{Known limit}EventCapacityMode_unknown{Unknown}EventCapacityMode_unlimited{Unlimited}EventFormat_offline{In person}EventFormat_online{Online}EventFormat_hybrid{Hybrid}EventOnlineAccessMode_publicLink{Public link}EventOnlineAccessMode_externalRegistration{External registration}EventOnlineAccessMode_internalBooking{Internal booking}EventPaymentCollectionMode_none{No payment}EventPaymentCollectionMode_onsite{On site}EventPaymentCollectionMode_external{External}EventPaymentCollectionMode_internal{In Recharge}EventPricingMode_free{Free}EventPricingMode_fixed{Fixed price}EventPricingMode_ticketTypes{Ticket types}EventPricingMode_donation{Donation}EventRecurrenceEndMode_never{Never}EventRecurrenceEndMode_untilDate{On a date}EventRecurrenceEndMode_occurrenceCount{After a number of times}EventRecurrenceFrequency_daily{Daily}EventRecurrenceFrequency_weekly{Weekly}EventRecurrenceFrequency_monthly{Monthly}EventRecurrenceFrequency_yearly{Yearly}EventRegistrationMode_none{No registration}EventRegistrationMode_external{External}EventRegistrationMode_internal{In Recharge}EventScheduleMode_oneTime{One time}EventScheduleMode_multiDate{Several dates}EventScheduleMode_recurring{Recurring}EventVisibility_public{Public}EventVisibility_unlisted{By link}EventVisibility_private{Private}EventAdmissionPreset_noRegistration{No registration}EventAdmissionPreset_freeRsvp{Free RSVP}EventAdmissionPreset_organizerApplication{Application to the organizer}EventAdmissionPreset_externalRegistration{External registration}EventAdmissionPreset_externalTickets{External tickets}EventAdmissionPreset_rechargeTickets{Recharge tickets}EventAdmissionPreset_teamRegistration{Team registration}AdmissionMode_openEntry{Open entry}AdmissionMode_rsvp{RSVP}AdmissionMode_booking{Booking}AdmissionMode_application{Application}AdmissionMode_ticket{Ticket}AdmissionMode_teamRegistration{Team registration}ConfirmationMode_none{No confirmation}ConfirmationMode_instant{Instant}ConfirmationMode_manualApproval{Manual approval}ConfirmationMode_lottery{Lottery}ConfirmationMode_providerManaged{By the provider}WaitlistPromotionMode_organizerManaged{By the organizer}WaitlistPromotionMode_fifoAutomatic{Automatic, first come}GuestPolicyMode_none{No guests}GuestPolicyMode_plusOne{Plus one}GuestPolicyMode_plusN{Plus N}GuestPolicyMode_namedGuestsOnly{Named guests only}EligibilityRuleKind_invitation{Invitation}EligibilityRuleKind_accessCode{Access code}EligibilityRuleKind_membership{Membership}EligibilityRuleKind_allowlist{Guest list}EligibilityRuleKind_qualification{Qualification}EligibilityRuleKind_accreditation{Accreditation}EligibilityRuleKind_ageRequirement{Age requirement}EligibilityRuleKind_waiver{Waiver}EventAccessWindowKind_absolute{Fixed dates}EventAccessWindowKind_occurrenceRelative{Relative to each date}InventoryShape_generalCapacity{General capacity}InventoryShape_sharedTicketPool{Shared ticket pool}InventoryShape_separateTicketPools{Separate ticket pools}InventoryShape_zones{Zones}InventoryShape_assignedSeating{Assigned seats}InventoryShape_teamSlots{Team slots}InventoryShape_participantRoles{Participant roles}InventoryShape_roleBalancedSlots{Role-balanced slots}InventoryShape_tableInventory{Tables}InventoryShape_timeSlotInventory{Time slots}InventoryChannel_onsite{On site}InventoryChannel_online{Online}InventoryChannel_any{Any}InventoryAuthority_none{Nobody}InventoryAuthority_recharge{Recharge}InventoryAuthority_externalProvider{External provider}ActivityContributionKind_purchase{Purchase}ActivityContributionKind_donation{Donation}ActivityContributionKind_other{Other}ActivitySeason_winter{Winter}ActivitySeason_spring{Spring}ActivitySeason_summer{Summer}ActivitySeason_autumn{Autumn}ActivitySeason_any{Any season}ActivityTimeOfDay_morning{Morning}ActivityTimeOfDay_afternoon{Afternoon}ActivityTimeOfDay_evening{Evening}ActivityTimeOfDay_night{Night}ActivityTimeOfDay_any{Any time}PlaceOperationalStatus_operating{Operating}PlaceOperationalStatus_temporarilyClosed{Temporarily closed}PlaceOperationalStatus_permanentlyClosed{Permanently closed}RentalLocationDisclosure_approximateArea{Approximate area (default)}RentalLocationDisclosure_publicBusinessAddress{Public business address}RentalScheduleMode_openingHours{Opening hours}RentalScheduleMode_byArrangement{By arrangement}RentalBillingUnit_hour{Per hour}RentalBillingUnit_day{Per day}RentalBillingUnit_week{Per week}RentalCondition_rentalNew{New}RentalCondition_likeNew{Like new}RentalCondition_good{Good}RentalCondition_worn{Worn}RentalDepositCollectionMethod_none{No deposit}RentalDepositCollectionMethod_atHandover{At handover}RentalDepositCollectionMethod_externalProvider{External provider}RentalDepositCollectionMethod_other{Other}VisibilityType_public{Public}VisibilityType_unlisted{By link}VisibilityType_private{Private}PublishStatus_draft{Draft}PublishStatus_pendingReview{Pending review}PublishStatus_published{Published}PublishStatus_archived{Archived}PublishStatus_hidden{Hidden}PublishStatus_deleted{Deleted} other{Other}}'**
+  /// **'{value, select, EventCapacityMode_known{Known limit}EventCapacityMode_unknown{Unknown}EventCapacityMode_unlimited{Unlimited}EventFormat_offline{In person}EventFormat_online{Online}EventFormat_hybrid{Hybrid}EventOnlineAccessMode_publicLink{Public link}EventOnlineAccessMode_externalRegistration{External registration}EventOnlineAccessMode_internalBooking{Internal booking}EventPaymentCollectionMode_none{No payment}EventPaymentCollectionMode_onsite{On site}EventPaymentCollectionMode_external{External}EventPaymentCollectionMode_internal{In Recharge}EventPricingMode_free{Free}EventPricingMode_fixed{Fixed price}EventPricingMode_ticketTypes{Ticket types}EventPricingMode_donation{Donation}EventRecurrenceEndMode_never{Never}EventRecurrenceEndMode_untilDate{On a date}EventRecurrenceEndMode_occurrenceCount{After a number of times}EventRecurrenceFrequency_daily{Daily}EventRecurrenceFrequency_weekly{Weekly}EventRecurrenceFrequency_monthly{Monthly}EventRecurrenceFrequency_yearly{Yearly}EventRegistrationMode_none{No registration}EventRegistrationMode_external{External}EventRegistrationMode_internal{In Recharge}EventScheduleMode_oneTime{One time}EventScheduleMode_multiDate{Several dates}EventScheduleMode_recurring{Recurring}EventVisibility_public{Public}EventVisibility_unlisted{By link}EventVisibility_private{Private}EventAdmissionPreset_noRegistration{No registration}EventAdmissionPreset_freeRsvp{Free RSVP}EventAdmissionPreset_organizerApplication{Application to the organizer}EventAdmissionPreset_externalRegistration{External registration}EventAdmissionPreset_externalTickets{External tickets}EventAdmissionPreset_rechargeTickets{Recharge tickets}EventAdmissionPreset_teamRegistration{Team registration}AdmissionMode_openEntry{Open entry}AdmissionMode_rsvp{RSVP}AdmissionMode_booking{Booking}AdmissionMode_application{Application}AdmissionMode_ticket{Ticket}AdmissionMode_teamRegistration{Team registration}ConfirmationMode_none{No confirmation}ConfirmationMode_instant{Instant}ConfirmationMode_manualApproval{Manual approval}ConfirmationMode_lottery{Lottery}ConfirmationMode_providerManaged{By the provider}WaitlistPromotionMode_organizerManaged{By the organizer}WaitlistPromotionMode_fifoAutomatic{Automatic, first come}GuestPolicyMode_none{No guests}GuestPolicyMode_plusOne{Plus one}GuestPolicyMode_plusN{Plus N}GuestPolicyMode_namedGuestsOnly{Named guests only}EligibilityRuleKind_invitation{Invitation}EligibilityRuleKind_accessCode{Access code}EligibilityRuleKind_membership{Membership}EligibilityRuleKind_allowlist{Guest list}EligibilityRuleKind_qualification{Qualification}EligibilityRuleKind_accreditation{Accreditation}EligibilityRuleKind_ageRequirement{Age requirement}EligibilityRuleKind_waiver{Waiver}EventAccessWindowKind_absolute{Fixed dates}EventAccessWindowKind_occurrenceRelative{Relative to each date}InventoryShape_generalCapacity{General capacity}InventoryShape_sharedTicketPool{Shared ticket pool}InventoryShape_separateTicketPools{Separate ticket pools}InventoryShape_zones{Zones}InventoryShape_assignedSeating{Assigned seats}InventoryShape_teamSlots{Team slots}InventoryShape_participantRoles{Participant roles}InventoryShape_roleBalancedSlots{Role-balanced slots}InventoryShape_tableInventory{Tables}InventoryShape_timeSlotInventory{Time slots}InventoryChannel_onsite{On site}InventoryChannel_online{Online}InventoryChannel_any{Any}InventoryAuthority_none{Nobody}InventoryAuthority_recharge{Recharge}InventoryAuthority_externalProvider{External provider}ActivityContributionKind_purchase{Purchase}ActivityContributionKind_donation{Donation}ActivityContributionKind_other{Other}ActivitySeason_winter{Winter}ActivitySeason_spring{Spring}ActivitySeason_summer{Summer}ActivitySeason_autumn{Autumn}ActivitySeason_any{Any season}ActivityTimeOfDay_morning{Morning}ActivityTimeOfDay_afternoon{Afternoon}ActivityTimeOfDay_evening{Evening}ActivityTimeOfDay_night{Night}ActivityTimeOfDay_any{Any time}PlaceOperationalStatus_operating{Operating}PlaceOperationalStatus_temporarilyClosed{Temporarily closed}PlaceOperationalStatus_permanentlyClosed{Permanently closed}RentalLocationDisclosure_approximateArea{Approximate area (default)}RentalLocationDisclosure_publicBusinessAddress{Public business address}RentalScheduleMode_openingHours{Opening hours}RentalScheduleMode_byArrangement{By arrangement}RentalBillingUnit_hour{Per hour}RentalBillingUnit_day{Per day}RentalBillingUnit_week{Per week}RentalCondition_rentalNew{New}RentalCondition_likeNew{Like new}RentalCondition_good{Good}RentalCondition_worn{Worn}RentalDepositCollectionMethod_none{No deposit}RentalDepositCollectionMethod_atHandover{At handover}RentalDepositCollectionMethod_externalProvider{External provider}RentalDepositCollectionMethod_other{Other}VisibilityType_public{Public}VisibilityType_unlisted{By link}VisibilityType_private{Private}PublishStatus_draft{Draft}PublishStatus_pendingReview{Pending review}PublishStatus_published{Published}PublishStatus_archived{Archived}PublishStatus_hidden{Hidden}PublishStatus_deleted{Deleted}FindPeopleApprovalMode_manual{Host approves}FindPeopleApprovalMode_automatic{Automatic}FindPeopleApprovalMode_inviteOnly{Invite only}FindPeopleConversationPolicy_acceptedOnly{Accepted participants only}FindPeopleConversationPolicy_applicantsAndAccepted{Applicants and accepted}FindPeopleCostType_free{Free}FindPeopleCostType_estimated{Estimated cost}FindPeopleCostType_unknown{Unknown}FindPeopleExpenseSplitMode_none{No split}FindPeopleExpenseSplitMode_equal{Split equally}FindPeopleExpenseSplitMode_itemized{By item}FindPeopleExpenseSplitMode_settleLater{Settle later}FindPeopleMeetingMode_inPerson{In person}FindPeopleMeetingMode_online{Online}FindPeopleMeetingMode_hybrid{Hybrid}FindPeopleParticipationGoal_social{Socialising}FindPeopleParticipationGoal_practice{Practice}FindPeopleParticipationGoal_teamUp{Team up}FindPeopleParticipationGoal_sharedTrip{Shared trip}FindPeopleParticipationGoal_accountability{Keep each other going}FindPeopleParticipationGoal_other{Other}FindPeoplePublisherType_user{Personal profile}FindPeoplePublisherType_page{Professional page}FindPeopleScheduleMode_single{One time}FindPeopleScheduleMode_timePoll{Time poll}FindPeopleScheduleMode_recurring{Recurring}FindPeopleSeatFitPolicy_strictOrder{Strict order}FindPeopleSeatFitPolicy_firstFitting{First that fits}FindPeopleSkillLevel_any{Any level}FindPeopleSkillLevel_beginner{Beginner}FindPeopleSkillLevel_intermediate{Intermediate}FindPeopleSkillLevel_advanced{Advanced}FindPeopleVerificationLevel_none{No verification}FindPeopleVerificationLevel_phone{Phone}FindPeopleVerificationLevel_identityDocument{Identity document}FindPeopleVerificationLevel_organization{Organisation}FindPeopleVisibility_public{Public}FindPeopleVisibility_unlisted{By link}FindPeopleVisibility_inviteOnly{Invite only}FindPeopleWaitlistPolicy_firstCome{First come}FindPeopleWaitlistPolicy_hostReview{Host review}ScenarioBudgetBasis_wholeGroup{Whole group}ScenarioBudgetBasis_perPerson{Per person}ScenarioFormat_city{City}ScenarioFormat_day{Day}ScenarioFormat_weekend{Weekend}ScenarioFormat_trip{Trip}ScenarioPace_relaxed{Relaxed}ScenarioPace_balanced{Balanced}ScenarioPace_intensive{Intensive}ScenarioPartyKind_solo{Solo}ScenarioPartyKind_couple{Couple}ScenarioPartyKind_friends{Friends}ScenarioPartyKind_family{Family}ScenarioPartyKind_group{Group}ScenarioPartyKind_mixed{Mixed}ScenarioPlannedTransportKind_bus{Bus}ScenarioPlannedTransportKind_train{Train}ScenarioPlannedTransportKind_tram{Tram}ScenarioPlannedTransportKind_trolleybus{Trolleybus}ScenarioPlannedTransportKind_ferry{Ferry}ScenarioPlannedTransportKind_flight{Flight}ScenarioPlannedTransportKind_other{Other}ScenarioTravelMode_walking{Walking}ScenarioTravelMode_bicycle{Bicycle}ScenarioTravelMode_car{Own car}ScenarioTravelMode_taxi{Taxi}ScenarioTravelMode_transit{Public transport}ScenarioTravelMode_other{Other}ScenarioDateMode_template{Flexible template}ScenarioDateMode_dated{Dated trip}ScenarioItemKind_visit{Visit}ScenarioItemKind_event{Event}ScenarioItemKind_activity{Activity}ScenarioItemKind_route{Route}ScenarioItemKind_bookableSession{Session}ScenarioItemKind_stay{Stay}ScenarioItemKind_plannedTransport{Planned transport}ScenarioItemKind_timeBlock{Time block}RouteSegmentSource_routed{Routed}RouteSegmentSource_generated{Generated}RouteSegmentSource_freehand{Freehand}RouteSegmentSource_recordedGps{Recorded GPS}RouteSegmentSource_importedGpx{Imported GPX}RouteSegmentSource_intentionalDirect{Intentional direct line}RouteSegmentSource_fallbackDirect{Direct line (fallback)}RouteSegmentOperationState_ready{Ready}RouteSegmentOperationState_routing{Routing}RouteSegmentOperationState_failed{Failed}RouteSegmentOperationState_stale{Needs update}ScenarioScheduleFreshness_current{Current when saved}ScenarioScheduleFreshness_stale{Stale}ScenarioScheduleFreshness_unknown{Unknown}ScenarioScheduleFreshness_notApplicable{Not applicable} other{Other}}'**
   String createOption(String value);
 
   /// Create field: city (required).
@@ -6303,6 +6303,3818 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Now: {value}.'**
   String createFormNowStatus(String value);
+
+  /// Find People: step done of total.
+  ///
+  /// In en, this message translates to:
+  /// **'Find People · {done}/{total}'**
+  String createFindPeopleFindPeople(int done, int total);
+
+  /// Create form: "Save error".
+  ///
+  /// In en, this message translates to:
+  /// **'Save error'**
+  String get createFindPeopleSaveError;
+
+  /// Create form: "Unsaved changes".
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get createFindPeopleUnsavedChanges;
+
+  /// Create form: "Continue".
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get createFindPeopleContinue;
+
+  /// Create form: "Save draft".
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get createFindPeopleSaveDraft;
+
+  /// Create form: "Back".
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get createFindPeopleBack;
+
+  /// Create form: "Publish Find People request".
+  ///
+  /// In en, this message translates to:
+  /// **'Publish Find People request'**
+  String get createFindPeoplePublishFindPeopleRequest;
+
+  /// Create form: "Validation summary".
+  ///
+  /// In en, this message translates to:
+  /// **'Validation summary'**
+  String get createFindPeopleValidationSummary;
+
+  /// Create form: "Meet publicly, do not send money to strangers, and use Repor".
+  ///
+  /// In en, this message translates to:
+  /// **'Meet publicly, do not send money to strangers, and use Report/Block when needed.'**
+  String get createFindPeopleMeetPubliclyDoNotSendMoney;
+
+  /// Create form: "I accept the Find People Safety Rules *".
+  ///
+  /// In en, this message translates to:
+  /// **'I accept the Find People Safety Rules *'**
+  String get createFindPeopleIAcceptFindPeopleSafetyRules;
+
+  /// Create form: "This request is only for adults 18+ *".
+  ///
+  /// In en, this message translates to:
+  /// **'This request is only for adults 18+ *'**
+  String get createFindPeopleRequestOnlyAdults18;
+
+  /// Create form: "Schedule publication UTC (optional)".
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule publication UTC (optional)'**
+  String get createFindPeopleSchedulePublicationUtcOptional;
+
+  /// Create form: "Cover image URL (optional)".
+  ///
+  /// In en, this message translates to:
+  /// **'Cover image URL (optional)'**
+  String get createFindPeopleCoverImageUrlOptional;
+
+  /// Create form: "Media and publication".
+  ///
+  /// In en, this message translates to:
+  /// **'Media and publication'**
+  String get createFindPeopleMediaPublication;
+
+  /// Create form: "These fields are never included in public DTO, analytics, or".
+  ///
+  /// In en, this message translates to:
+  /// **'These fields are never included in public data, analytics, or push payloads.'**
+  String get createFindPeopleTheseFieldsAreNeverIncludedPublic;
+
+  /// Create form: "Private host preview".
+  ///
+  /// In en, this message translates to:
+  /// **'Private host preview'**
+  String get createFindPeoplePrivateHostPreview;
+
+  /// Create form: "Approximate public area".
+  ///
+  /// In en, this message translates to:
+  /// **'Approximate public area'**
+  String get createFindPeopleApproximatePublicArea;
+
+  /// Create form: "Add a short description.".
+  ///
+  /// In en, this message translates to:
+  /// **'Add a short description.'**
+  String get createFindPeopleAddShortDescription;
+
+  /// Create form: "Untitled Find People request".
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled Find People request'**
+  String get createFindPeopleUntitledFindPeopleRequest;
+
+  /// Create form: "This mirrors the safe public Details contract.".
+  ///
+  /// In en, this message translates to:
+  /// **'This mirrors the safe public Details contract.'**
+  String get createFindPeopleMirrorsSafePublicDetailsContract;
+
+  /// Create form: "Public preview".
+  ///
+  /// In en, this message translates to:
+  /// **'Public preview'**
+  String get createFindPeoplePublicPreview;
+
+  /// Create form: "Quiet hours end (0–1439)".
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet hours end (0–1439)'**
+  String get createFindPeopleQuietHoursEnd01439;
+
+  /// Create form: "Quiet hours start (0–1439)".
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet hours start (0–1439)'**
+  String get createFindPeopleQuietHoursStart01439;
+
+  /// Create form: "Allow accepted participants to invite".
+  ///
+  /// In en, this message translates to:
+  /// **'Allow accepted participants to invite'**
+  String get createFindPeopleAllowAcceptedParticipantsInvite;
+
+  /// Create form: "Conversation policy *".
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation policy *'**
+  String get createFindPeopleConversationPolicy;
+
+  /// Create form: "Invite co-host".
+  ///
+  /// In en, this message translates to:
+  /// **'Invite co-host'**
+  String get createFindPeopleInviteCoHost;
+
+  /// Create form: "User ID".
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get createFindPeopleUserId;
+
+  /// Find People: number of responsible hosts (ids are not shown).
+  ///
+  /// In en, this message translates to:
+  /// **'Responsible hosts: {count}'**
+  String createFindPeopleResponsibleHostsDataResponsiblehostuseridsJoin(
+    int count,
+  );
+
+  /// Create form: "Publisher user ID *".
+  ///
+  /// In en, this message translates to:
+  /// **'Publisher user ID *'**
+  String get createFindPeoplePublisherUserId;
+
+  /// Create form: "Managed Page ID *".
+  ///
+  /// In en, this message translates to:
+  /// **'Managed Page ID *'**
+  String get createFindPeopleManagedPageId;
+
+  /// Create form: "Publish as *".
+  ///
+  /// In en, this message translates to:
+  /// **'Publish as *'**
+  String get createFindPeoplePublishAs;
+
+  /// Create form: "Add expense".
+  ///
+  /// In en, this message translates to:
+  /// **'Add expense'**
+  String get createFindPeopleAddExpense;
+
+  /// Create form: "Expense item".
+  ///
+  /// In en, this message translates to:
+  /// **'Expense item'**
+  String get createFindPeopleExpenseItem;
+
+  /// Create form: "Expense split mode *".
+  ///
+  /// In en, this message translates to:
+  /// **'Expense split mode *'**
+  String get createFindPeopleExpenseSplitMode;
+
+  /// Create form: "Cost note".
+  ///
+  /// In en, this message translates to:
+  /// **'Cost note'**
+  String get createFindPeopleCostNote;
+
+  /// Find People: expected spend per person in the currency code value.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected spend per person ({value}) *'**
+  String createFindPeopleExpectedSpendPerPerson(String value);
+
+  /// Create form: "Expected cost *".
+  ///
+  /// In en, this message translates to:
+  /// **'Expected cost *'**
+  String get createFindPeopleExpectedCost;
+
+  /// Create form: "Add question".
+  ///
+  /// In en, this message translates to:
+  /// **'Add question'**
+  String get createFindPeopleAddQuestion;
+
+  /// Create form: "Safe question".
+  ///
+  /// In en, this message translates to:
+  /// **'Safe question'**
+  String get createFindPeopleSafeQuestion;
+
+  /// Create form: "Application questions".
+  ///
+  /// In en, this message translates to:
+  /// **'Application questions'**
+  String get createFindPeopleApplicationQuestions;
+
+  /// Create form: "Require attendance reconfirmation".
+  ///
+  /// In en, this message translates to:
+  /// **'Require attendance reconfirmation'**
+  String get createFindPeopleRequireAttendanceReconfirmation;
+
+  /// Create form: "Waitlist policy".
+  ///
+  /// In en, this message translates to:
+  /// **'Waitlist policy'**
+  String get createFindPeopleWaitlistPolicy;
+
+  /// Create form: "Enable waitlist".
+  ///
+  /// In en, this message translates to:
+  /// **'Enable waitlist'**
+  String get createFindPeopleEnableWaitlist;
+
+  /// Create form: "Verification requirement *".
+  ///
+  /// In en, this message translates to:
+  /// **'Verification requirement *'**
+  String get createFindPeopleVerificationRequirement;
+
+  /// Create form: "Maximum seats per application".
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum seats per application'**
+  String get createFindPeopleMaximumSeatsPerApplication;
+
+  /// Create form: "Allow party applications".
+  ///
+  /// In en, this message translates to:
+  /// **'Allow party applications'**
+  String get createFindPeopleAllowPartyApplications;
+
+  /// Create form: "Approval mode *".
+  ///
+  /// In en, this message translates to:
+  /// **'Approval mode *'**
+  String get createFindPeopleApprovalMode;
+
+  /// Create form: "Host seats".
+  ///
+  /// In en, this message translates to:
+  /// **'Host seats'**
+  String get createFindPeopleHostSeats;
+
+  /// Create form: "Target group size".
+  ///
+  /// In en, this message translates to:
+  /// **'Target group size'**
+  String get createFindPeopleTargetGroupSize;
+
+  /// Create form: "Group size includes hosts. Expected spend is information, ne".
+  ///
+  /// In en, this message translates to:
+  /// **'Group size includes hosts. Expected spend is information, never a payment to the host.'**
+  String get createFindPeopleGroupSizeIncludesHostsExpectedSpend;
+
+  /// Create form: "Group and participation".
+  ///
+  /// In en, this message translates to:
+  /// **'Group and participation'**
+  String get createFindPeopleGroupParticipation;
+
+  /// Create form: "Backup meeting plan".
+  ///
+  /// In en, this message translates to:
+  /// **'Backup meeting plan'**
+  String get createFindPeopleBackupMeetingPlan;
+
+  /// Create form: "Private access secret reference *".
+  ///
+  /// In en, this message translates to:
+  /// **'Private access secret reference *'**
+  String get createFindPeoplePrivateAccessSecretReference;
+
+  /// Create form: "Google Meet, Zoom, Discord…".
+  ///
+  /// In en, this message translates to:
+  /// **'Google Meet, Zoom, Discord…'**
+  String get createFindPeopleGoogleMeetZoomDiscord;
+
+  /// Create form: "Online provider *".
+  ///
+  /// In en, this message translates to:
+  /// **'Online provider *'**
+  String get createFindPeopleOnlineProvider;
+
+  /// Create form: "Private homes and residential access details are not allowed".
+  ///
+  /// In en, this message translates to:
+  /// **'Private homes and residential access details are not allowed.'**
+  String get createFindPeoplePrivateHomesResidentialAccessDetailsAre;
+
+  /// Create form: "This is a public meeting place *".
+  ///
+  /// In en, this message translates to:
+  /// **'This is a public meeting place *'**
+  String get createFindPeoplePublicMeetingPlace;
+
+  /// Create form: "Meeting instructions (private)".
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting instructions (private)'**
+  String get createFindPeopleMeetingInstructionsPrivate;
+
+  /// Create form: "Exact address (private) *".
+  ///
+  /// In en, this message translates to:
+  /// **'Exact address (private) *'**
+  String get createFindPeopleExactAddressPrivate;
+
+  /// Find People: the generated public map point; value is "lat, lng".
+  ///
+  /// In en, this message translates to:
+  /// **'Public map point: {value}'**
+  String createFindPeoplePublicMapPoint(String value);
+
+  /// Create form: "Set exact point and generate safe public point".
+  ///
+  /// In en, this message translates to:
+  /// **'Set exact point and generate safe public point'**
+  String get createFindPeopleSetExactPointGenerateSafePublic;
+
+  /// Create form: "Exact longitude *".
+  ///
+  /// In en, this message translates to:
+  /// **'Exact longitude *'**
+  String get createFindPeopleExactLongitude;
+
+  /// Create form: "Exact latitude *".
+  ///
+  /// In en, this message translates to:
+  /// **'Exact latitude *'**
+  String get createFindPeopleExactLatitude;
+
+  /// Create form: "Old Town, near Central Park".
+  ///
+  /// In en, this message translates to:
+  /// **'Old Town, near Central Park'**
+  String get createFindPeopleOldTownNearCentralPark;
+
+  /// Create form: "Public area label *".
+  ///
+  /// In en, this message translates to:
+  /// **'Public area label *'**
+  String get createFindPeoplePublicAreaLabel;
+
+  /// Create form: "Meeting place name *".
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting place name *'**
+  String get createFindPeopleMeetingPlaceName;
+
+  /// Create form: "Meeting mode *".
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting mode *'**
+  String get createFindPeopleMeetingMode;
+
+  /// Create form: "Only the approximate public area appears in Discover. Exact ".
+  ///
+  /// In en, this message translates to:
+  /// **'Only the approximate public area appears in Discover. Exact details stay private.'**
+  String get createFindPeopleOnlyApproximatePublicAreaAppearsDiscover;
+
+  /// Create form: "Meeting location".
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting location'**
+  String get createFindPeopleMeetingLocation;
+
+  /// Create form: "Maximum occurrences (2–52)".
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum occurrences (2–52)'**
+  String get createFindPeopleMaximumOccurrences252;
+
+  /// Create form: "Series end UTC".
+  ///
+  /// In en, this message translates to:
+  /// **'Series end UTC'**
+  String get createFindPeopleSeriesEndUtc;
+
+  /// Create form: "Recurrence rule *".
+  ///
+  /// In en, this message translates to:
+  /// **'Recurrence rule *'**
+  String get createFindPeopleRecurrenceRule;
+
+  /// Create form: "Application deadline UTC *".
+  ///
+  /// In en, this message translates to:
+  /// **'Application deadline UTC *'**
+  String get createFindPeopleApplicationDeadlineUtc;
+
+  /// Create form: "Poll response deadline UTC *".
+  ///
+  /// In en, this message translates to:
+  /// **'Poll response deadline UTC *'**
+  String get createFindPeoplePollResponseDeadlineUtc;
+
+  /// Create form: "Remove slot".
+  ///
+  /// In en, this message translates to:
+  /// **'Remove slot'**
+  String get createFindPeopleRemoveSlot;
+
+  /// Create form: "Add time option".
+  ///
+  /// In en, this message translates to:
+  /// **'Add time option'**
+  String get createFindPeopleAddTimeOption;
+
+  /// Create form: "Set meeting time".
+  ///
+  /// In en, this message translates to:
+  /// **'Set meeting time'**
+  String get createFindPeopleSetMeetingTime;
+
+  /// Create form: "End UTC *".
+  ///
+  /// In en, this message translates to:
+  /// **'End UTC *'**
+  String get createFindPeopleEndUtc;
+
+  /// Create form: "Start UTC *".
+  ///
+  /// In en, this message translates to:
+  /// **'Start UTC *'**
+  String get createFindPeopleStartUtc;
+
+  /// Create form: "Schedule mode *".
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule mode *'**
+  String get createFindPeopleScheduleMode;
+
+  /// Find People: times are stored in UTC and shown in the IANA zone value.
+  ///
+  /// In en, this message translates to:
+  /// **'All times are stored in UTC and displayed using {value}.'**
+  String createFindPeopleAllTimesAreStoredUtcDisplayed(String value);
+
+  /// Create form: "Schedule".
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get createFindPeopleSchedule;
+
+  /// Create form: "House rules note".
+  ///
+  /// In en, this message translates to:
+  /// **'House rules note'**
+  String get createFindPeopleHouseRulesNote;
+
+  /// Create form: "House rules".
+  ///
+  /// In en, this message translates to:
+  /// **'House rules'**
+  String get createFindPeopleHouseRules;
+
+  /// Create form: "Accessibility notes".
+  ///
+  /// In en, this message translates to:
+  /// **'Accessibility notes'**
+  String get createFindPeopleAccessibilityNotes;
+
+  /// Create form: "Equipment notes".
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment notes'**
+  String get createFindPeopleEquipmentNotes;
+
+  /// Create form: "Experience requirements (one per line)".
+  ///
+  /// In en, this message translates to:
+  /// **'Experience requirements (one per line)'**
+  String get createFindPeopleExperienceRequirementsOnePerLine;
+
+  /// Create form: "Communication languages *".
+  ///
+  /// In en, this message translates to:
+  /// **'Communication languages *'**
+  String get createFindPeopleCommunicationLanguages;
+
+  /// Create form: "Participation goal *".
+  ///
+  /// In en, this message translates to:
+  /// **'Participation goal *'**
+  String get createFindPeopleParticipationGoal;
+
+  /// Create form: "Skill level *".
+  ///
+  /// In en, this message translates to:
+  /// **'Skill level *'**
+  String get createFindPeopleSkillLevel;
+
+  /// Create form: "Full description *".
+  ///
+  /// In en, this message translates to:
+  /// **'Full description *'**
+  String get createFindPeopleFullDescription;
+
+  /// Create form: "Short description *".
+  ///
+  /// In en, this message translates to:
+  /// **'Short description *'**
+  String get createFindPeopleShortDescription;
+
+  /// Create form: "Public content must describe a concrete activity without con".
+  ///
+  /// In en, this message translates to:
+  /// **'Public content must describe a concrete activity without contacts or payment links.'**
+  String get createFindPeoplePublicContentMustDescribeConcreteActivity;
+
+  /// Create form: "Activity and description".
+  ///
+  /// In en, this message translates to:
+  /// **'Activity and description'**
+  String get createFindPeopleActivityDescription;
+
+  /// Create form: "Find People draft data is being prepared…".
+  ///
+  /// In en, this message translates to:
+  /// **'Find People draft data is being prepared…'**
+  String get createFindPeopleFindPeopleDraftDataBeingPrepared;
+
+  /// Create form: "Only what is marked 'required' blocks publishing. Everything".
+  ///
+  /// In en, this message translates to:
+  /// **'Only what is marked “required” blocks publishing. Everything else is optional and can be added now or later.'**
+  String get createSessionOnlyWhatMarkedRequiredBlocksPublishing;
+
+  /// Create form: "Publish".
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get createSessionPublish;
+
+  /// Create form: "Save draft".
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get createSessionSaveDraft;
+
+  /// Create form: "Never required to publish (SES-D14).".
+  ///
+  /// In en, this message translates to:
+  /// **'Never required to publish.'**
+  String get createSessionNeverRequiredPublishSesD14;
+
+  /// Create form: "Recommended details for this category".
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended details for this category'**
+  String get createSessionRecommendedDetailsCategory;
+
+  /// Create form: "Amenities".
+  ///
+  /// In en, this message translates to:
+  /// **'Amenities'**
+  String get createSessionAmenities;
+
+  /// Create form: "Block".
+  ///
+  /// In en, this message translates to:
+  /// **'Block'**
+  String get createSessionBlock;
+
+  /// Create form: "Blocked dates".
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked dates'**
+  String get createSessionBlockedDates;
+
+  /// Create form: "Max party size".
+  ///
+  /// In en, this message translates to:
+  /// **'Max party size'**
+  String get createSessionMaxPartySize;
+
+  /// Create form: "Terms URL (optional, https://…)".
+  ///
+  /// In en, this message translates to:
+  /// **'Terms URL (optional, https://…)'**
+  String get createSessionTermsUrlOptionalHttps;
+
+  /// Create form: "External booking URL (https://…)".
+  ///
+  /// In en, this message translates to:
+  /// **'External booking URL (https://…)'**
+  String get createSessionExternalBookingUrlHttps;
+
+  /// Create form: "Price per slot, EUR".
+  ///
+  /// In en, this message translates to:
+  /// **'Price per slot, EUR'**
+  String get createSessionPricePerSlotEur;
+
+  /// Create form: "Free".
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get createSessionFree;
+
+  /// Create form: "Price and booking".
+  ///
+  /// In en, this message translates to:
+  /// **'Price and booking'**
+  String get createSessionPriceBooking;
+
+  /// Create form: "Next offers".
+  ///
+  /// In en, this message translates to:
+  /// **'Next offers'**
+  String get createSessionNextOffers;
+
+  /// Create form: "Slot duration".
+  ///
+  /// In en, this message translates to:
+  /// **'Slot duration'**
+  String get createSessionSlotDuration;
+
+  /// Create form: "No weekly rule yet — pick a preset above.".
+  ///
+  /// In en, this message translates to:
+  /// **'No weekly rule yet — pick a preset above.'**
+  String get createSessionNoWeeklyRuleYetPickPreset;
+
+  /// Create form: "When".
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get createSessionWhen;
+
+  /// Create form: "Confirm this location".
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this location'**
+  String get createSessionConfirmLocation;
+
+  /// Create form: "Longitude".
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude'**
+  String get createSessionLongitude;
+
+  /// Create form: "Latitude".
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude'**
+  String get createSessionLatitude;
+
+  /// Create form: "City".
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get createSessionCity;
+
+  /// Create form: "Address".
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get createSessionAddress;
+
+  /// Create form: "Resource name (e.g. 'Sauna 1')".
+  ///
+  /// In en, this message translates to:
+  /// **'Resource name (e.g. “Sauna 1”)'**
+  String get createSessionResourceNameEGSauna1;
+
+  /// Create form: "Gallery image description".
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery image description'**
+  String get createSessionGalleryImageDescription;
+
+  /// Create form: "Cover image description".
+  ///
+  /// In en, this message translates to:
+  /// **'Cover image description'**
+  String get createSessionCoverImageDescription;
+
+  /// Create form: "Content language".
+  ///
+  /// In en, this message translates to:
+  /// **'Content language'**
+  String get createSessionContentLanguage;
+
+  /// Create form: "Cover image URL".
+  ///
+  /// In en, this message translates to:
+  /// **'Cover image URL'**
+  String get createSessionCoverImageUrl;
+
+  /// Create form: "Full description".
+  ///
+  /// In en, this message translates to:
+  /// **'Full description'**
+  String get createSessionFullDescription;
+
+  /// Create form: "Short description".
+  ///
+  /// In en, this message translates to:
+  /// **'Short description'**
+  String get createSessionShortDescription;
+
+  /// Create form: "Subcategory".
+  ///
+  /// In en, this message translates to:
+  /// **'Subcategory'**
+  String get createSessionSubcategory;
+
+  /// Create form: "Category".
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get createSessionCategory;
+
+  /// Create form: "Title".
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get createSessionTitle;
+
+  /// Create form: "What and where".
+  ///
+  /// In en, this message translates to:
+  /// **'What and where'**
+  String get createSessionWhatWhere;
+
+  /// Create form: "Loading Bookable session draft…".
+  ///
+  /// In en, this message translates to:
+  /// **'Loading Bookable session draft…'**
+  String get createSessionLoadingBookableSessionDraft;
+
+  /// Create form: "Publish".
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get createClassPublish;
+
+  /// Create form: "Save draft".
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get createClassSaveDraft;
+
+  /// Create form: "Enrollment state".
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment state'**
+  String get createClassEnrollmentState;
+
+  /// Create form: "Enrollment link (https)".
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment link (https)'**
+  String get createClassEnrollmentLinkHttps;
+
+  /// Create form: "Enrollment on the organiser site".
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment on the organiser site'**
+  String get createClassEnrollmentOrganiserSite;
+
+  /// Create form: "The price covers".
+  ///
+  /// In en, this message translates to:
+  /// **'The price covers'**
+  String get createClassPriceCovers;
+
+  /// Class price field: amount in cents of the currency code value.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount in cents ({value})'**
+  String createClassAmountCents(String value);
+
+  /// Create form: "Price".
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get createClassPrice;
+
+  /// Create form: "Declared group size (optional)".
+  ///
+  /// In en, this message translates to:
+  /// **'Declared group size (optional)'**
+  String get createClassDeclaredGroupSizeOptional;
+
+  /// Create form: "What to bring or know (one per line)".
+  ///
+  /// In en, this message translates to:
+  /// **'What to bring or know (one per line)'**
+  String get createClassWhatBringKnowOnePerLine;
+
+  /// Create form: "Included materials (one per line)".
+  ///
+  /// In en, this message translates to:
+  /// **'Included materials (one per line)'**
+  String get createClassIncludedMaterialsOnePerLine;
+
+  /// Create form: "Add date".
+  ///
+  /// In en, this message translates to:
+  /// **'Add date'**
+  String get createClassAddDate;
+
+  /// Create form: "Remove date".
+  ///
+  /// In en, this message translates to:
+  /// **'Remove date'**
+  String get createClassRemoveDate;
+
+  /// Create form: "This local time does not exist or is ambiguous".
+  ///
+  /// In en, this message translates to:
+  /// **'This local time does not exist or is ambiguous'**
+  String get createClassLocalTimeDoesNotExistAmbiguous;
+
+  /// Create form: "Public area".
+  ///
+  /// In en, this message translates to:
+  /// **'Public area'**
+  String get createClassPublicArea;
+
+  /// Create form: "Show only the area publicly".
+  ///
+  /// In en, this message translates to:
+  /// **'Show only the area publicly'**
+  String get createClassShowOnlyAreaPublicly;
+
+  /// Create form: "Confirm this location".
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this location'**
+  String get createClassConfirmLocation;
+
+  /// Create form: "Location confirmed".
+  ///
+  /// In en, this message translates to:
+  /// **'Location confirmed'**
+  String get createClassLocationConfirmed;
+
+  /// Create form: "Online provider".
+  ///
+  /// In en, this message translates to:
+  /// **'Online provider'**
+  String get createClassOnlineProvider;
+
+  /// Create form: "Delivery".
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get createClassDelivery;
+
+  /// Class: times are in the IANA zone value.
+  ///
+  /// In en, this message translates to:
+  /// **'Times are in {value}'**
+  String createClassTimesAre(String value);
+
+  /// Create form: "Fixed series".
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed series'**
+  String get createClassFixedSeries;
+
+  /// Create form: "Single class".
+  ///
+  /// In en, this message translates to:
+  /// **'Single class'**
+  String get createClassSingleClass;
+
+  /// Create form: "Clear".
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get createClassClear;
+
+  /// Create form: "It is not published; clear it explicitly.".
+  ///
+  /// In en, this message translates to:
+  /// **'It is not published; clear it explicitly.'**
+  String get createClassNotPublishedClearExplicitly;
+
+  /// Create form: "This draft has an old schedule".
+  ///
+  /// In en, this message translates to:
+  /// **'This draft has an old schedule'**
+  String get createClassDraftHasOldSchedule;
+
+  /// Create form: "Instructor bio".
+  ///
+  /// In en, this message translates to:
+  /// **'Instructor bio'**
+  String get createClassInstructorBio;
+
+  /// Create form: "Instructor name".
+  ///
+  /// In en, this message translates to:
+  /// **'Instructor name'**
+  String get createClassInstructorName;
+
+  /// Create form: "What participants take home".
+  ///
+  /// In en, this message translates to:
+  /// **'What participants take home'**
+  String get createClassWhatParticipantsTakeHome;
+
+  /// Create form: "No prerequisites".
+  ///
+  /// In en, this message translates to:
+  /// **'No prerequisites'**
+  String get createClassNoPrerequisites;
+
+  /// Create form: "Programme steps (one per line)".
+  ///
+  /// In en, this message translates to:
+  /// **'Programme steps (one per line)'**
+  String get createClassProgrammeStepsOnePerLine;
+
+  /// Create form: "Gallery image description".
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery image description'**
+  String get createClassGalleryImageDescription;
+
+  /// Create form: "Cover image description".
+  ///
+  /// In en, this message translates to:
+  /// **'Cover image description'**
+  String get createClassCoverImageDescription;
+
+  /// Create form: "Content language".
+  ///
+  /// In en, this message translates to:
+  /// **'Content language'**
+  String get createClassContentLanguage;
+
+  /// Create form: "Cover image".
+  ///
+  /// In en, this message translates to:
+  /// **'Cover image'**
+  String get createClassCoverImage;
+
+  /// Create form: "Full description".
+  ///
+  /// In en, this message translates to:
+  /// **'Full description'**
+  String get createClassFullDescription;
+
+  /// Create form: "Short description".
+  ///
+  /// In en, this message translates to:
+  /// **'Short description'**
+  String get createClassShortDescription;
+
+  /// Create form: "Offering kind".
+  ///
+  /// In en, this message translates to:
+  /// **'Offering kind'**
+  String get createClassOfferingKind;
+
+  /// Create form: "This Class draft was saved by a newer app version and is rea".
+  ///
+  /// In en, this message translates to:
+  /// **'This Class draft was saved by a newer app version and is read-only.'**
+  String get createClassClassDraftWasSavedByNewer;
+
+  /// Create form: "The GPX operation could not be completed.".
+  ///
+  /// In en, this message translates to:
+  /// **'The GPX operation could not be completed.'**
+  String get createRouteGpxOperationCouldNotCompleted;
+
+  /// Create form: "Choose one continuous track for this Route draft.".
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one continuous track for this Route draft.'**
+  String get createRouteChooseOneContinuousTrackRouteDraft;
+
+  /// Create form: "Saving GPX files is not available on this device yet.".
+  ///
+  /// In en, this message translates to:
+  /// **'Saving GPX files is not available on this device yet.'**
+  String get createRouteSavingGpxFilesNotAvailableDevice;
+
+  /// Create form: "Only one continuous Route track can be exported.".
+  ///
+  /// In en, this message translates to:
+  /// **'Only one continuous Route track can be exported.'**
+  String get createRouteOnlyOneContinuousRouteTrackCan;
+
+  /// Create form: "The GPX track contains too many points.".
+  ///
+  /// In en, this message translates to:
+  /// **'The GPX track contains too many points.'**
+  String get createRouteGpxTrackContainsTooManyPoints;
+
+  /// Create form: "The GPX file is damaged or has an unsupported structure.".
+  ///
+  /// In en, this message translates to:
+  /// **'The GPX file is damaged or has an unsupported structure.'**
+  String get createRouteGpxFileDamagedHasUnsupportedStructure;
+
+  /// Create form: "Choose a valid GPX file.".
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a valid GPX file.'**
+  String get createRouteChooseValidGpxFile;
+
+  /// Create form: "The GPX file is too large.".
+  ///
+  /// In en, this message translates to:
+  /// **'The GPX file is too large.'**
+  String get createRouteGpxFileTooLarge;
+
+  /// Create form: "Dismiss".
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get createRouteDismiss;
+
+  /// Create form: "Import track".
+  ///
+  /// In en, this message translates to:
+  /// **'Import track'**
+  String get createRouteImportTrack;
+
+  /// Create form: "Cancel".
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get createRouteCancel;
+
+  /// Create form: "They remain off-track until reviewed and positioned.".
+  ///
+  /// In en, this message translates to:
+  /// **'They remain off-track until reviewed and positioned.'**
+  String get createRouteTheyRemainOffTrackUntilReviewed;
+
+  /// Create form: "Review these connectors on the map before publishing.".
+  ///
+  /// In en, this message translates to:
+  /// **'Review these connectors on the map before publishing.'**
+  String get createRouteReviewTheseConnectorsMapBeforePublishing;
+
+  /// Create form: "Choose one track".
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one track'**
+  String get createRouteChooseOneTrack;
+
+  /// Create form: "Private metadata and timestamps will be removed during impor".
+  ///
+  /// In en, this message translates to:
+  /// **'Private metadata and timestamps will be removed during import.'**
+  String get createRoutePrivateMetadataTimestampsWillRemovedDuring;
+
+  /// Create form: "Route builder".
+  ///
+  /// In en, this message translates to:
+  /// **'Route builder'**
+  String get createRouteRouteBuilder;
+
+  /// Create form: "Replace".
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get createRouteReplace;
+
+  /// Create form: "The current geometry will remain available through Undo.".
+  ///
+  /// In en, this message translates to:
+  /// **'The current geometry will remain available through Undo.'**
+  String get createRouteCurrentGeometryWillRemainAvailableThrough;
+
+  /// Create form: "Replace existing track?".
+  ///
+  /// In en, this message translates to:
+  /// **'Replace existing track?'**
+  String get createRouteReplaceExistingTrack;
+
+  /// Create form: "Continue".
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get createRouteContinue;
+
+  /// Create form: "Back".
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get createRouteBack;
+
+  /// Create form: "Marked trail".
+  ///
+  /// In en, this message translates to:
+  /// **'Marked trail'**
+  String get createRouteMarkedTrail;
+
+  /// Create form: "Hard".
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get createRouteHard;
+
+  /// Create form: "Moderate".
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get createRouteModerate;
+
+  /// Create form: "Easy".
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get createRouteEasy;
+
+  /// Create form: "Difficulty".
+  ///
+  /// In en, this message translates to:
+  /// **'Difficulty'**
+  String get createRouteDifficulty;
+
+  /// Create form: "Conditions".
+  ///
+  /// In en, this message translates to:
+  /// **'Conditions'**
+  String get createRouteConditions;
+
+  /// Create form: "Subcategory".
+  ///
+  /// In en, this message translates to:
+  /// **'Subcategory'**
+  String get createRouteSubcategory;
+
+  /// Create form: "Category".
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get createRouteCategory;
+
+  /// Create form: "Taxonomy".
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get createRouteTaxonomy;
+
+  /// Create form: "Cover image URL".
+  ///
+  /// In en, this message translates to:
+  /// **'Cover image URL'**
+  String get createRouteCoverImageUrl;
+
+  /// Create form: "Full description".
+  ///
+  /// In en, this message translates to:
+  /// **'Full description'**
+  String get createRouteFullDescription;
+
+  /// Create form: "Short description *".
+  ///
+  /// In en, this message translates to:
+  /// **'Short description *'**
+  String get createRouteShortDescription;
+
+  /// Create form: "Route details".
+  ///
+  /// In en, this message translates to:
+  /// **'Route details'**
+  String get createRouteRouteDetails;
+
+  /// Create form: "Prefer unpaved trails".
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer unpaved trails'**
+  String get createRoutePreferUnpavedTrails;
+
+  /// Create form: "Avoid stairs".
+  ///
+  /// In en, this message translates to:
+  /// **'Avoid stairs'**
+  String get createRouteAvoidStairs;
+
+  /// Create form: "Routing preferences".
+  ///
+  /// In en, this message translates to:
+  /// **'Routing preferences'**
+  String get createRouteRoutingPreferences;
+
+  /// Create form: "Loop".
+  ///
+  /// In en, this message translates to:
+  /// **'Loop'**
+  String get createRouteLoop;
+
+  /// Create form: "One way".
+  ///
+  /// In en, this message translates to:
+  /// **'One way'**
+  String get createRouteOneWay;
+
+  /// Create form: "Route shape".
+  ///
+  /// In en, this message translates to:
+  /// **'Route shape'**
+  String get createRouteRouteShape;
+
+  /// Create form: "Profile".
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get createRouteProfile;
+
+  /// Create form: "The bundled Mežaparks graph currently validates walking rout".
+  ///
+  /// In en, this message translates to:
+  /// **'The bundled Mežaparks graph currently validates walking routes locally.'**
+  String get createRouteBundledMeAparksGraphCurrentlyValidates;
+
+  /// Create form: "Movement profile".
+  ///
+  /// In en, this message translates to:
+  /// **'Movement profile'**
+  String get createRouteMovementProfile;
+
+  /// Create form: "Save file".
+  ///
+  /// In en, this message translates to:
+  /// **'Save file'**
+  String get createRouteSaveFile;
+
+  /// Create form: "Private metadata, notes and timestamps are never exported.".
+  ///
+  /// In en, this message translates to:
+  /// **'Private metadata, notes and timestamps are never exported.'**
+  String get createRoutePrivateMetadataNotesTimestampsAreNever;
+
+  /// Create form: "Include route POI".
+  ///
+  /// In en, this message translates to:
+  /// **'Include route POI'**
+  String get createRouteIncludeRoutePoi;
+
+  /// Create form: "Unavailable for this track".
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable for this track'**
+  String get createRouteUnavailableTrack;
+
+  /// Create form: "Include elevation".
+  ///
+  /// In en, this message translates to:
+  /// **'Include elevation'**
+  String get createRouteIncludeElevation;
+
+  /// Create form: "Export GPX".
+  ///
+  /// In en, this message translates to:
+  /// **'Export GPX'**
+  String get createRouteExportGpx;
+
+  /// Create form: "Export only the track and optional route POI. Draft IDs, not".
+  ///
+  /// In en, this message translates to:
+  /// **'Export only the track and optional route POI. Draft IDs, notes, safety data and timestamps are excluded.'**
+  String get createRouteExportOnlyTrackOptionalRoutePoi;
+
+  /// Create form: "Inspect a GPX file locally, choose one track and remove priv".
+  ///
+  /// In en, this message translates to:
+  /// **'Inspect a GPX file locally, choose one track and remove private metadata.'**
+  String get createRouteInspectGpxFileLocallyChooseOne;
+
+  /// Create form: "Import GPX".
+  ///
+  /// In en, this message translates to:
+  /// **'Import GPX'**
+  String get createRouteImportGpx;
+
+  /// Create form: "Record movement on this device, then review accuracy, gaps a".
+  ///
+  /// In en, this message translates to:
+  /// **'Record movement on this device, then review accuracy, gaps and privacy trimming.'**
+  String get createRouteRecordMovementDeviceThenReviewAccuracy;
+
+  /// Create form: "Record with GPS".
+  ///
+  /// In en, this message translates to:
+  /// **'Record with GPS'**
+  String get createRouteRecordWithGps;
+
+  /// Create form: "Draw one continuous line and keep its exact geometry.".
+  ///
+  /// In en, this message translates to:
+  /// **'Draw one continuous line and keep its exact geometry.'**
+  String get createRouteDrawOneContinuousLineKeepIts;
+
+  /// Create form: "Freehand".
+  ///
+  /// In en, this message translates to:
+  /// **'Freehand'**
+  String get createRouteFreehand;
+
+  /// Create form: "Place anchors and connect them along the offline trail graph".
+  ///
+  /// In en, this message translates to:
+  /// **'Place anchors and connect them along the offline trail graph.'**
+  String get createRoutePlaceAnchorsConnectThemAlongOffline;
+
+  /// Create form: "Points".
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get createRoutePoints;
+
+  /// Create form: "All methods use one canonical Route model. This demo enables".
+  ///
+  /// In en, this message translates to:
+  /// **'All methods use one canonical Route model. This demo enables points and freehand without paid services.'**
+  String get createRouteAllMethodsUseOneCanonicalRoute;
+
+  /// Create form: "How will you create the track?".
+  ///
+  /// In en, this message translates to:
+  /// **'How will you create the track?'**
+  String get createRouteHowWillYouCreateTrack;
+
+  /// Create form: "The editor will be ready in a moment.".
+  ///
+  /// In en, this message translates to:
+  /// **'The editor will be ready in a moment.'**
+  String get createRouteEditorWillReadyMoment;
+
+  /// Create form: "Preparing Route draft…".
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing Route draft…'**
+  String get createRoutePreparingRouteDraft;
+
+  /// Create form: "Restoring the latest persisted revision.".
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring the latest saved revision.'**
+  String get createRouteRestoringLatestPersistedRevision;
+
+  /// Create form: "Retry".
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get createRouteRetry;
+
+  /// Create form: "Offline map could not be loaded".
+  ///
+  /// In en, this message translates to:
+  /// **'Offline map could not be loaded'**
+  String get createRouteOfflineMapCouldNotLoaded;
+
+  /// Create form: "No network or paid routing call is required.".
+  ///
+  /// In en, this message translates to:
+  /// **'No network or paid routing call is required.'**
+  String get createRouteNoNetworkPaidRoutingCallRequired;
+
+  /// Create form: "Loading offline trail editor…".
+  ///
+  /// In en, this message translates to:
+  /// **'Loading offline trail editor…'**
+  String get createRouteLoadingOfflineTrailEditor;
+
+  /// Create form: "This gap needs trail routing before it can be applied.".
+  ///
+  /// In en, this message translates to:
+  /// **'This gap needs trail routing before it can be applied.'**
+  String get createRouteGapNeedsTrailRoutingBeforeCan;
+
+  /// Create form: "Review every track gap before continuing.".
+  ///
+  /// In en, this message translates to:
+  /// **'Review every track gap before continuing.'**
+  String get createRouteReviewEveryTrackGapBeforeContinuing;
+
+  /// Create form: "The protected recording could not be saved. Recording was st".
+  ///
+  /// In en, this message translates to:
+  /// **'The protected recording could not be saved. Recording was stopped safely.'**
+  String get createRouteProtectedRecordingCouldNotSavedRecording;
+
+  /// Create form: "Not enough reliable movement was recorded. Delete this recor".
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough reliable movement was recorded. Delete this recording and try again.'**
+  String get createRouteNotEnoughReliableMovementWasRecorded;
+
+  /// Create form: "The safety point limit was reached. Finish and review this r".
+  ///
+  /// In en, this message translates to:
+  /// **'The safety point limit was reached. Finish and review this recording.'**
+  String get createRouteSafetyPointLimitWasReachedFinish;
+
+  /// Create form: "Device location services are switched off.".
+  ///
+  /// In en, this message translates to:
+  /// **'Device location services are switched off.'**
+  String get createRouteDeviceLocationServicesAreSwitchedOff;
+
+  /// Create form: "Background access was not granted. Turn off screen-lock reco".
+  ///
+  /// In en, this message translates to:
+  /// **'Background access was not granted. Turn off screen-lock recording or allow it in settings.'**
+  String get createRouteBackgroundAccessWasNotGrantedTurn;
+
+  /// Create form: "Location access is disabled in app settings.".
+  ///
+  /// In en, this message translates to:
+  /// **'Location access is disabled in app settings.'**
+  String get createRouteLocationAccessDisabledAppSettings;
+
+  /// Create form: "Location permission was not granted.".
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission was not granted.'**
+  String get createRouteLocationPermissionWasNotGranted;
+
+  /// Create form: "Your saved recording is preserved when recovery is possible.".
+  ///
+  /// In en, this message translates to:
+  /// **'Your saved recording is preserved when recovery is possible.'**
+  String get createRouteYourSavedRecordingPreservedWhenRecovery;
+
+  /// Create form: "Inspect gaps, accuracy and privacy trimming before using the".
+  ///
+  /// In en, this message translates to:
+  /// **'Inspect gaps, accuracy and privacy trimming before using the track.'**
+  String get createRouteInspectGapsAccuracyPrivacyTrimmingBefore;
+
+  /// Create form: "Filtering unsafe and noisy GPS points.".
+  ///
+  /// In en, this message translates to:
+  /// **'Filtering unsafe and noisy GPS points.'**
+  String get createRouteFilteringUnsafeNoisyGpsPoints;
+
+  /// Create form: "Reading the protected local journal.".
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the protected local journal.'**
+  String get createRouteReadingProtectedLocalJournal;
+
+  /// Create form: "The pause stays as an explicit gap and will never be connect".
+  ///
+  /// In en, this message translates to:
+  /// **'The pause stays as an explicit gap and will never be connected silently.'**
+  String get createRoutePauseStaysAsExplicitGapWill;
+
+  /// Create form: "Keep Recharge open while moving along the Route.".
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Recharge open while moving along the Route.'**
+  String get createRouteKeepRechargeOpenWhileMovingAlong;
+
+  /// Create form: "Recording continues with a visible system indicator.".
+  ///
+  /// In en, this message translates to:
+  /// **'Recording continues with a visible system indicator.'**
+  String get createRouteRecordingContinuesWithVisibleSystemIndicator;
+
+  /// Create form: "Recharge requests location only for Route recording.".
+  ///
+  /// In en, this message translates to:
+  /// **'Recharge requests location only for Route recording.'**
+  String get createRouteRechargeRequestsLocationOnlyRouteRecording;
+
+  /// Create form: "Walk, run or ride the Route. Points stay encrypted on this d".
+  ///
+  /// In en, this message translates to:
+  /// **'Walk, run or ride the Route. Points stay encrypted on this device until you apply the track.'**
+  String get createRouteWalkRunRideRoutePointsStay;
+
+  /// Create form: "Recording ready".
+  ///
+  /// In en, this message translates to:
+  /// **'Recording ready'**
+  String get createRouteRecordingReady;
+
+  /// Create form: "Processing track…".
+  ///
+  /// In en, this message translates to:
+  /// **'Processing track…'**
+  String get createRouteProcessingTrack;
+
+  /// Create form: "Recovering recording…".
+  ///
+  /// In en, this message translates to:
+  /// **'Recovering recording…'**
+  String get createRouteRecoveringRecording;
+
+  /// Create form: "Recording paused".
+  ///
+  /// In en, this message translates to:
+  /// **'Recording paused'**
+  String get createRouteRecordingPaused;
+
+  /// Create form: "Recording Route".
+  ///
+  /// In en, this message translates to:
+  /// **'Recording Route'**
+  String get createRouteRecordingRoute;
+
+  /// Create form: "Checking GPS access…".
+  ///
+  /// In en, this message translates to:
+  /// **'Checking GPS access…'**
+  String get createRouteCheckingGpsAccess;
+
+  /// Create form: "Open app settings".
+  ///
+  /// In en, this message translates to:
+  /// **'Open app settings'**
+  String get createRouteOpenAppSettings;
+
+  /// Create form: "Recording is active".
+  ///
+  /// In en, this message translates to:
+  /// **'Recording is active'**
+  String get createRouteRecordingActive;
+
+  /// Create form: "Connect directly".
+  ///
+  /// In en, this message translates to:
+  /// **'Connect directly'**
+  String get createRouteConnectDirectly;
+
+  /// Route recording preview semantics: count track sections, total gaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded Route preview: track sections {count}, gaps {total}'**
+  String createRouteRecordedRoutePreviewTrackSectionsGaps(int count, int total);
+
+  /// Create form: "Delete".
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get createRouteDelete;
+
+  /// Create form: "The recovery journal and all recorded points will be removed".
+  ///
+  /// In en, this message translates to:
+  /// **'The recovery journal and all recorded points will be removed.'**
+  String get createRouteRecoveryJournalAllRecordedPointsWill;
+
+  /// Create form: "Delete GPS recording?".
+  ///
+  /// In en, this message translates to:
+  /// **'Delete GPS recording?'**
+  String get createRouteDeleteGpsRecording;
+
+  /// Create form: "Use this track".
+  ///
+  /// In en, this message translates to:
+  /// **'Use this track'**
+  String get createRouteUseTrack;
+
+  /// Create form: "A Route must stay continuous. Confirm each straight connecti".
+  ///
+  /// In en, this message translates to:
+  /// **'A Route must stay continuous. Confirm each straight connection or record the missing section again.'**
+  String get createRouteRouteMustStayContinuousConfirmEach;
+
+  /// Create form: "Track gaps".
+  ///
+  /// In en, this message translates to:
+  /// **'Track gaps'**
+  String get createRouteTrackGaps;
+
+  /// Create form: "Hide route end".
+  ///
+  /// In en, this message translates to:
+  /// **'Hide route end'**
+  String get createRouteHideRouteEnd;
+
+  /// Create form: "Hide route start".
+  ///
+  /// In en, this message translates to:
+  /// **'Hide route start'**
+  String get createRouteHideRouteStart;
+
+  /// Create form: "Privacy trim".
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy trim'**
+  String get createRoutePrivacyTrim;
+
+  /// Create form: "Review recorded track".
+  ///
+  /// In en, this message translates to:
+  /// **'Review recorded track'**
+  String get createRouteReviewRecordedTrack;
+
+  /// Create form: "Delete recording".
+  ///
+  /// In en, this message translates to:
+  /// **'Delete recording'**
+  String get createRouteDeleteRecording;
+
+  /// Create form: "Finish and review".
+  ///
+  /// In en, this message translates to:
+  /// **'Finish and review'**
+  String get createRouteFinishReview;
+
+  /// Create form: "Resume recording".
+  ///
+  /// In en, this message translates to:
+  /// **'Resume recording'**
+  String get createRouteResumeRecording;
+
+  /// Create form: "Finish".
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get createRouteFinish;
+
+  /// Create form: "Pause".
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get createRoutePause;
+
+  /// Create form: "Start recording".
+  ///
+  /// In en, this message translates to:
+  /// **'Start recording'**
+  String get createRouteStartRecording;
+
+  /// Create form: "Requires background location permission and shows a system i".
+  ///
+  /// In en, this message translates to:
+  /// **'Requires background location permission and shows a system indicator.'**
+  String get createRouteRequiresBackgroundLocationPermissionShowsSystem;
+
+  /// Create form: "Continue while screen is locked".
+  ///
+  /// In en, this message translates to:
+  /// **'Continue while the screen is locked'**
+  String get createRouteContinueWhileScreenLocked;
+
+  /// Create form: "Recovered safely after the previous session. Review before r".
+  ///
+  /// In en, this message translates to:
+  /// **'Recovered safely after the previous session. Review before resuming.'**
+  String get createRouteRecoveredSafelyAfterPreviousSessionReview;
+
+  /// Create form: "Remove waypoint".
+  ///
+  /// In en, this message translates to:
+  /// **'Remove waypoint'**
+  String get createRouteRemoveWaypoint;
+
+  /// Create form: "Attach to anchor".
+  ///
+  /// In en, this message translates to:
+  /// **'Attach to anchor'**
+  String get createRouteAttachAnchor;
+
+  /// Create form: "Add a viewpoint from an anchor menu.".
+  ///
+  /// In en, this message translates to:
+  /// **'Add a viewpoint from an anchor menu.'**
+  String get createRouteAddViewpointFromAnchorMenu;
+
+  /// Create form: "Split at midpoint".
+  ///
+  /// In en, this message translates to:
+  /// **'Split at midpoint'**
+  String get createRouteSplitAtMidpoint;
+
+  /// Create form: "Use intentional direct line".
+  ///
+  /// In en, this message translates to:
+  /// **'Use intentional direct line'**
+  String get createRouteUseIntentionalDirectLine;
+
+  /// Create form: "Retry routing".
+  ///
+  /// In en, this message translates to:
+  /// **'Retry routing'**
+  String get createRouteRetryRouting;
+
+  /// Create form: "Segment actions".
+  ///
+  /// In en, this message translates to:
+  /// **'Segment actions'**
+  String get createRouteSegmentActions;
+
+  /// Create form: "Remove anchor".
+  ///
+  /// In en, this message translates to:
+  /// **'Remove anchor'**
+  String get createRouteRemoveAnchor;
+
+  /// Create form: "Add viewpoint".
+  ///
+  /// In en, this message translates to:
+  /// **'Add viewpoint'**
+  String get createRouteAddViewpoint;
+
+  /// Create form: "Anchor actions".
+  ///
+  /// In en, this message translates to:
+  /// **'Anchor actions'**
+  String get createRouteAnchorActions;
+
+  /// Create form: "Move anchor east".
+  ///
+  /// In en, this message translates to:
+  /// **'Move anchor east'**
+  String get createRouteMoveAnchorEast;
+
+  /// Create form: "Move anchor west".
+  ///
+  /// In en, this message translates to:
+  /// **'Move anchor west'**
+  String get createRouteMoveAnchorWest;
+
+  /// Create form: "Move anchor south".
+  ///
+  /// In en, this message translates to:
+  /// **'Move anchor south'**
+  String get createRouteMoveAnchorSouth;
+
+  /// Create form: "Move anchor north".
+  ///
+  /// In en, this message translates to:
+  /// **'Move anchor north'**
+  String get createRouteMoveAnchorNorth;
+
+  /// Create form: "No anchors yet.".
+  ///
+  /// In en, this message translates to:
+  /// **'No anchors yet.'**
+  String get createRouteNoAnchorsYet;
+
+  /// Create form: "Every action is available as a labelled control.".
+  ///
+  /// In en, this message translates to:
+  /// **'Every action is available as a labelled control.'**
+  String get createRouteEveryActionAvailableAsLabelledControl;
+
+  /// Create form: "Add anchor".
+  ///
+  /// In en, this message translates to:
+  /// **'Add anchor'**
+  String get createRouteAddAnchor;
+
+  /// Create form: "Longitude".
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude'**
+  String get createRouteLongitude;
+
+  /// Create form: "Latitude".
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude'**
+  String get createRouteLatitude;
+
+  /// Create form: "Coordinates provide a keyboard and screen-reader alternative".
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinates provide a keyboard and screen-reader alternative.'**
+  String get createRouteCoordinatesProvideKeyboardScreenReaderAlternative;
+
+  /// Create form: "Add anchor without map gestures".
+  ///
+  /// In en, this message translates to:
+  /// **'Add anchor without map gestures'**
+  String get createRouteAddAnchorWithoutMapGestures;
+
+  /// Create form: "Last saved".
+  ///
+  /// In en, this message translates to:
+  /// **'Last saved'**
+  String get createRouteLastSaved;
+
+  /// Create form: "Redo".
+  ///
+  /// In en, this message translates to:
+  /// **'Redo'**
+  String get createRouteRedo;
+
+  /// Create form: "Undo".
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get createRouteUndo;
+
+  /// Create form: "Tap the map to add anchors. The local graph connects them al".
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the map to add anchors. The local graph connects them along available trails.'**
+  String get createRouteTapMapAddAnchorsLocalGraph;
+
+  /// Create form: "Draw one continuous line. Existing geometry is replaced only".
+  ///
+  /// In en, this message translates to:
+  /// **'Draw one continuous line. Existing geometry is replaced only after confirmation.'**
+  String get createRouteDrawOneContinuousLineExistingGeometry;
+
+  /// Create form: "Offline trail editor".
+  ///
+  /// In en, this message translates to:
+  /// **'Offline trail editor'**
+  String get createRouteOfflineTrailEditor;
+
+  /// Create form: "The selected difficulty differs from the calculated recommen".
+  ///
+  /// In en, this message translates to:
+  /// **'The selected difficulty differs from the calculated recommendation and requires review.'**
+  String get createRouteSelectedDifficultyDiffersFromCalculatedRecommendation;
+
+  /// Create form: "Route quality".
+  ///
+  /// In en, this message translates to:
+  /// **'Route quality'**
+  String get createRouteRouteQuality;
+
+  /// Create form: "Your profile does not have permission to submit this Route.".
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile does not have permission to submit this Route.'**
+  String get createRouteYourProfileDoesNotHavePermission;
+
+  /// Create form: "Submit Route for review".
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Route for review'**
+  String get createRouteSubmitRouteReview;
+
+  /// Create form: "Publish Route".
+  ///
+  /// In en, this message translates to:
+  /// **'Publish Route'**
+  String get createRoutePublishRoute;
+
+  /// Create form: "Restore last saved revision".
+  ///
+  /// In en, this message translates to:
+  /// **'Restore last saved revision'**
+  String get createRouteRestoreLastSavedRevision;
+
+  /// Create form: "Save draft".
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get createRouteSaveDraft;
+
+  /// Create form: "Routing in progress…".
+  ///
+  /// In en, this message translates to:
+  /// **'Routing in progress…'**
+  String get createRouteRoutingProgress;
+
+  /// Create form: "Investor demo: this version uses the bundled offline trail g".
+  ///
+  /// In en, this message translates to:
+  /// **'Demo: this version uses the bundled offline trail graph and is marked demo-only. No paid routing call is made.'**
+  String get createRouteInvestorDemoVersionUsesBundledOffline;
+
+  /// Create form: "Route draft is structurally ready".
+  ///
+  /// In en, this message translates to:
+  /// **'Route draft is structurally ready'**
+  String get createRouteRouteDraftStructurallyReady;
+
+  /// Create form: "Offline trail map. Tap to add a route anchor.".
+  ///
+  /// In en, this message translates to:
+  /// **'Offline trail map. Tap to add a route anchor.'**
+  String get createRouteOfflineTrailMapTapAddRoute;
+
+  /// Create form: "Offline trail map. Draw a continuous route with one finger.".
+  ///
+  /// In en, this message translates to:
+  /// **'Offline trail map. Draw a continuous route with one finger.'**
+  String get createRouteOfflineTrailMapDrawContinuousRoute;
+
+  /// Create form: "No Route versions are waiting for review.".
+  ///
+  /// In en, this message translates to:
+  /// **'No Route versions are waiting for review.'**
+  String get createRouteNoRouteVersionsAreWaitingReview;
+
+  /// Create form: "The moderate.route capability is required.".
+  ///
+  /// In en, this message translates to:
+  /// **'You need permission to moderate routes.'**
+  String get createRouteModerateRouteCapabilityRequired;
+
+  /// Create form: "Reject".
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get createRouteReject;
+
+  /// Create form: "Reason code or concise reason".
+  ///
+  /// In en, this message translates to:
+  /// **'Reason code or concise reason'**
+  String get createRouteReasonCodeConciseReason;
+
+  /// Create form: "Reject Route version".
+  ///
+  /// In en, this message translates to:
+  /// **'Reject Route version'**
+  String get createRouteRejectRouteVersion;
+
+  /// Create form: "Approve".
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get createRouteApprove;
+
+  /// Create form: "Accept".
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get createRouteAccept;
+
+  /// Create form: "Defer".
+  ///
+  /// In en, this message translates to:
+  /// **'Defer'**
+  String get createRouteDefer;
+
+  /// Create form: "Confirm".
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get createRouteConfirm;
+
+  /// Create form: "Reason code".
+  ///
+  /// In en, this message translates to:
+  /// **'Reason code'**
+  String get createRouteReasonCode;
+
+  /// Create form: "Safety decision reason".
+  ///
+  /// In en, this message translates to:
+  /// **'Safety decision reason'**
+  String get createRouteSafetyDecisionReason;
+
+  /// Create form: "Candidate decision reason".
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate decision reason'**
+  String get createRouteCandidateDecisionReason;
+
+  /// Create form: "A new Route revision draft was created. Published geometry w".
+  ///
+  /// In en, this message translates to:
+  /// **'A new Route revision draft was created. Published geometry was not changed.'**
+  String get createRouteNewRouteRevisionDraftWasCreated;
+
+  /// Create form: "Safety reports".
+  ///
+  /// In en, this message translates to:
+  /// **'Safety reports'**
+  String get createRouteSafetyReports;
+
+  /// Create form: "Map update candidates".
+  ///
+  /// In en, this message translates to:
+  /// **'Map update candidates'**
+  String get createRouteMapUpdateCandidates;
+
+  /// Create form: "Publication review".
+  ///
+  /// In en, this message translates to:
+  /// **'Publication review'**
+  String get createRoutePublicationReview;
+
+  /// Create form: "Refresh".
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get createRouteRefresh;
+
+  /// Create form: "Route moderation".
+  ///
+  /// In en, this message translates to:
+  /// **'Route moderation'**
+  String get createRouteRouteModeration;
+
+  /// Create form: "Planned schedule, not live.".
+  ///
+  /// In en, this message translates to:
+  /// **'Planned schedule, not live.'**
+  String get createScenarioPlannedScheduleNotLive;
+
+  /// Create form: "Planned service selected for preview. Not applied to Scenari".
+  ///
+  /// In en, this message translates to:
+  /// **'Planned service selected for preview. Not applied to Scenario.'**
+  String get createScenarioPlannedServiceSelectedPreviewNotApplied;
+
+  /// Create form: "No direct planned services found.".
+  ///
+  /// In en, this message translates to:
+  /// **'No direct planned services found.'**
+  String get createScenarioNoDirectPlannedServicesFound;
+
+  /// Create form: "Searching direct planned services.".
+  ///
+  /// In en, this message translates to:
+  /// **'Searching direct planned services.'**
+  String get createScenarioSearchingDirectPlannedServices;
+
+  /// Create form: "Schedule search failed. Try again.".
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule search failed. Try again.'**
+  String get createScenarioScheduleSearchFailedTryAgain;
+
+  /// Create form: "Stop search failed. Try again.".
+  ///
+  /// In en, this message translates to:
+  /// **'Stop search failed. Try again.'**
+  String get createScenarioStopSearchFailedTryAgain;
+
+  /// Create form: "Complete the provider, stops, date and time selection.".
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the provider, stops, date and time selection.'**
+  String get createScenarioCompleteProviderStopsDateTimeSelection;
+
+  /// Create form: "The new schedule could not be saved. Existing cache was kept".
+  ///
+  /// In en, this message translates to:
+  /// **'The new schedule could not be saved. Existing cache was kept.'**
+  String get createScenarioNewScheduleCouldNotSavedExisting;
+
+  /// Create form: "The cached schedule could not be read.".
+  ///
+  /// In en, this message translates to:
+  /// **'The cached schedule could not be read.'**
+  String get createScenarioCachedScheduleCouldNotRead2;
+
+  /// Create form: "The downloaded schedule is invalid and was not saved.".
+  ///
+  /// In en, this message translates to:
+  /// **'The downloaded schedule is invalid and was not saved.'**
+  String get createScenarioDownloadedScheduleInvalidWasNotSaved;
+
+  /// Create form: "The schedule could not be downloaded.".
+  ///
+  /// In en, this message translates to:
+  /// **'The schedule could not be downloaded.'**
+  String get createScenarioScheduleCouldNotDownloaded;
+
+  /// Create form: "You appear to be offline. Cached data remains available.".
+  ///
+  /// In en, this message translates to:
+  /// **'You appear to be offline. Cached data remains available.'**
+  String get createScenarioYouAppearOfflineCachedDataRemains;
+
+  /// Create form: "Schedule downloads are disabled. Cached data remains availab".
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule downloads are disabled. Cached data remains available.'**
+  String get createScenarioScheduleDownloadsAreDisabledCachedData;
+
+  /// Create form: "Download or select a usable cached schedule first.".
+  ///
+  /// In en, this message translates to:
+  /// **'Download or select a usable cached schedule first.'**
+  String get createScenarioDownloadSelectUsableCachedScheduleFirst;
+
+  /// Create form: "Choose a valid schedule provider.".
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a valid schedule provider.'**
+  String get createScenarioChooseValidScheduleProvider;
+
+  /// Create form: "No official schedule providers are configured.".
+  ///
+  /// In en, this message translates to:
+  /// **'No official schedule providers are configured.'**
+  String get createScenarioNoOfficialScheduleProvidersAreConfigured;
+
+  /// Create form: "Official schedule is temporarily unavailable.".
+  ///
+  /// In en, this message translates to:
+  /// **'Official schedule is temporarily unavailable.'**
+  String get createScenarioOfficialScheduleTemporarilyUnavailable;
+
+  /// Create form: "Cached schedule could not be read.".
+  ///
+  /// In en, this message translates to:
+  /// **'Cached schedule could not be read.'**
+  String get createScenarioCachedScheduleCouldNotRead;
+
+  /// Create form: "Cached schedule is damaged and cannot be used.".
+  ///
+  /// In en, this message translates to:
+  /// **'Cached schedule is damaged and cannot be used.'**
+  String get createScenarioCachedScheduleDamagedCannotUsed;
+
+  /// Create form: "No schedule is downloaded for this provider.".
+  ///
+  /// In en, this message translates to:
+  /// **'No schedule is downloaded for this provider.'**
+  String get createScenarioNoScheduleDownloadedProvider;
+
+  /// Create form: "Cached schedule freshness is unknown. Recheck before travel.".
+  ///
+  /// In en, this message translates to:
+  /// **'Cached schedule freshness is unknown. Recheck before travel.'**
+  String get createScenarioCachedScheduleFreshnessUnknownRecheckBefore;
+
+  /// Create form: "Checking cached schedule…".
+  ///
+  /// In en, this message translates to:
+  /// **'Checking cached schedule…'**
+  String get createScenarioCheckingCachedSchedule;
+
+  /// Create form: "Planned schedule · not live. This selection is not yet appli".
+  ///
+  /// In en, this message translates to:
+  /// **'Planned schedule · not live. This selection is not yet applied to the Scenario.'**
+  String get createScenarioPlannedScheduleNotLiveSelectionNot;
+
+  /// Create form: "Selection preview".
+  ///
+  /// In en, this message translates to:
+  /// **'Selection preview'**
+  String get createScenarioSelectionPreview;
+
+  /// Create form: "Schedule search failed.".
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule search failed.'**
+  String get createScenarioScheduleSearchFailed;
+
+  /// Create form: "No direct services found after the selected time.".
+  ///
+  /// In en, this message translates to:
+  /// **'No direct services found after the selected time.'**
+  String get createScenarioNoDirectServicesFoundAfterSelected;
+
+  /// Create form: "Choose date".
+  ///
+  /// In en, this message translates to:
+  /// **'Choose date'**
+  String get createScenarioChooseDate;
+
+  /// Create form: "Scenario date is missing".
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario date is missing'**
+  String get createScenarioScenarioDateMissing;
+
+  /// Create form: "Retry".
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get createScenarioRetry;
+
+  /// Create form: "Use cached".
+  ///
+  /// In en, this message translates to:
+  /// **'Use cached'**
+  String get createScenarioUseCached;
+
+  /// Create form: "Update schedule".
+  ///
+  /// In en, this message translates to:
+  /// **'Update schedule'**
+  String get createScenarioUpdateSchedule;
+
+  /// Create form: "Download schedule".
+  ///
+  /// In en, this message translates to:
+  /// **'Download schedule'**
+  String get createScenarioDownloadSchedule;
+
+  /// Create form: "Schedule provider".
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule provider'**
+  String get createScenarioScheduleProvider;
+
+  /// Create form: "Official schedule providers are unavailable.".
+  ///
+  /// In en, this message translates to:
+  /// **'Official schedule providers are unavailable.'**
+  String get createScenarioOfficialScheduleProvidersAreUnavailable;
+
+  /// Create form: "Planned schedule · not live. Delays, tickets, fares, seats a".
+  ///
+  /// In en, this message translates to:
+  /// **'Planned schedule · not live. Delays, tickets, fares, seats and transfers are not confirmed. Recheck before travel.'**
+  String get createScenarioPlannedScheduleNotLiveDelaysTickets;
+
+  /// Create form: "Enter schedule manually".
+  ///
+  /// In en, this message translates to:
+  /// **'Enter schedule manually'**
+  String get createScenarioEnterScheduleManually;
+
+  /// Create form: "Apply creates one undoable Scenario change.".
+  ///
+  /// In en, this message translates to:
+  /// **'Apply creates one undoable Scenario change.'**
+  String get createScenarioApplyCreatesOneUndoableScenarioChange;
+
+  /// Create form: "This service has no valid stop coordinates and cannot be app".
+  ///
+  /// In en, this message translates to:
+  /// **'This service has no valid stop coordinates and cannot be applied safely.'**
+  String get createScenarioServiceHasNoValidStopCoordinates;
+
+  /// Create form: "Apply to Scenario".
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to Scenario'**
+  String get createScenarioApplyScenario;
+
+  /// Create form: "Choose a date to check the official schedule.".
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a date to check the official schedule.'**
+  String get createScenarioChooseDateCheckOfficialSchedule;
+
+  /// Create form: "Find direct services".
+  ///
+  /// In en, this message translates to:
+  /// **'Find direct services'**
+  String get createScenarioFindDirectServices;
+
+  /// Create form: "Download a schedule before searching for stops.".
+  ///
+  /// In en, this message translates to:
+  /// **'Download a schedule before searching for stops.'**
+  String get createScenarioDownloadScheduleBeforeSearchingStops;
+
+  /// Create form: "Destination".
+  ///
+  /// In en, this message translates to:
+  /// **'Destination'**
+  String get createScenarioDestination;
+
+  /// Create form: "Origin".
+  ///
+  /// In en, this message translates to:
+  /// **'Origin'**
+  String get createScenarioOrigin;
+
+  /// Create form: "Close official schedule".
+  ///
+  /// In en, this message translates to:
+  /// **'Close official schedule'**
+  String get createScenarioCloseOfficialSchedule;
+
+  /// Create form: "Official schedule".
+  ///
+  /// In en, this message translates to:
+  /// **'Official schedule'**
+  String get createScenarioOfficialSchedule;
+
+  /// Create form: "Static timetable snapshot · not live.".
+  ///
+  /// In en, this message translates to:
+  /// **'Static timetable snapshot · not live.'**
+  String get createScenarioStaticTimetableSnapshotNotLive;
+
+  /// Create form: "Find in official schedule".
+  ///
+  /// In en, this message translates to:
+  /// **'Find in official schedule'**
+  String get createScenarioFindOfficialSchedule;
+
+  /// Create form: "Works offline and stays editable.".
+  ///
+  /// In en, this message translates to:
+  /// **'Works offline and stays editable.'**
+  String get createScenarioWorksOfflineStaysEditable;
+
+  /// Create form: "Enter manually".
+  ///
+  /// In en, this message translates to:
+  /// **'Enter manually'**
+  String get createScenarioEnterManually;
+
+  /// Create form: "Add planned transport".
+  ///
+  /// In en, this message translates to:
+  /// **'Add planned transport'**
+  String get createScenarioAddPlannedTransport;
+
+  /// Create form: "Public transport".
+  ///
+  /// In en, this message translates to:
+  /// **'Public transport'**
+  String get createScenarioPublicTransport;
+
+  /// Create form: "Own car".
+  ///
+  /// In en, this message translates to:
+  /// **'Own car'**
+  String get createScenarioOwnCar;
+
+  /// Create form: "Provider value".
+  ///
+  /// In en, this message translates to:
+  /// **'Provider value'**
+  String get createScenarioProviderValue;
+
+  /// Create form: "Estimated time".
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated time'**
+  String get createScenarioEstimatedTime;
+
+  /// Create form: "Entered manually".
+  ///
+  /// In en, this message translates to:
+  /// **'Entered manually'**
+  String get createScenarioEnteredManually;
+
+  /// Create form: "Planned schedule · not live".
+  ///
+  /// In en, this message translates to:
+  /// **'Planned schedule · not live'**
+  String get createScenarioPlannedScheduleNotLive2;
+
+  /// Create form: "Custom location".
+  ///
+  /// In en, this message translates to:
+  /// **'Custom location'**
+  String get createScenarioCustomLocation;
+
+  /// Create form: "Planned transport".
+  ///
+  /// In en, this message translates to:
+  /// **'Planned transport'**
+  String get createScenarioPlannedTransport;
+
+  /// Create form: "Add at least two independent stops. Use catalog objects or c".
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least two independent stops. Use catalog objects or custom time blocks.'**
+  String get createScenarioAddAtLeastTwoIndependentStops;
+
+  /// Create form: "Location data required for a manual leg".
+  ///
+  /// In en, this message translates to:
+  /// **'Location data required for a manual leg'**
+  String get createScenarioLocationDataRequiredManualLeg;
+
+  /// Create form: "Scenario changed. Recheck before replacing.".
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario changed. Recheck before replacing.'**
+  String get createScenarioScenarioChangedRecheckBeforeReplacing;
+
+  /// Create form: "Saved schedule replaced.".
+  ///
+  /// In en, this message translates to:
+  /// **'Saved schedule replaced.'**
+  String get createScenarioSavedScheduleReplaced;
+
+  /// Create form: "Recheck schedule".
+  ///
+  /// In en, this message translates to:
+  /// **'Recheck schedule'**
+  String get createScenarioRecheckSchedule;
+
+  /// Create form: "Scenario changed. Review the service and try again.".
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario changed. Review the service and try again.'**
+  String get createScenarioScenarioChangedReviewServiceTryAgain;
+
+  /// Create form: "Official schedule added to Scenario.".
+  ///
+  /// In en, this message translates to:
+  /// **'Official schedule added to Scenario.'**
+  String get createScenarioOfficialScheduleAddedScenario;
+
+  /// Create form: "Review".
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get createScenarioReview;
+
+  /// Create form: "Use your primary transport or enter honest manual values.".
+  ///
+  /// In en, this message translates to:
+  /// **'Use your primary transport or enter honest manual values.'**
+  String get createScenarioUseYourPrimaryTransportEnterHonest;
+
+  /// Create form: "Travel between stops".
+  ///
+  /// In en, this message translates to:
+  /// **'Travel between stops'**
+  String get createScenarioTravelBetweenStops;
+
+  /// Create form: "Time lock".
+  ///
+  /// In en, this message translates to:
+  /// **'Time lock'**
+  String get createScenarioTimeLock;
+
+  /// Create form: "Order lock".
+  ///
+  /// In en, this message translates to:
+  /// **'Order lock'**
+  String get createScenarioOrderLock;
+
+  /// Create form: "Optional".
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get createScenarioOptional;
+
+  /// Create form: "Mandatory".
+  ///
+  /// In en, this message translates to:
+  /// **'Mandatory'**
+  String get createScenarioMandatory;
+
+  /// Create form: "Remove".
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get createScenarioRemove;
+
+  /// Create form: "Move down".
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get createScenarioMoveDown;
+
+  /// Create form: "Move up".
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get createScenarioMoveUp;
+
+  /// Create form: "Add custom time block".
+  ///
+  /// In en, this message translates to:
+  /// **'Add custom time block'**
+  String get createScenarioAddCustomTimeBlock;
+
+  /// Create form: "Bus and train times are stored as planned schedule · not liv".
+  ///
+  /// In en, this message translates to:
+  /// **'Bus and train times are stored as planned schedule · not live.'**
+  String get createScenarioBusTrainTimesAreStoredAs;
+
+  /// Create form: "Add custom stop".
+  ///
+  /// In en, this message translates to:
+  /// **'Add custom stop'**
+  String get createScenarioAddCustomStop;
+
+  /// Create form: "Add".
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get createScenarioAdd;
+
+  /// Create form: "Find a catalog place, event, activity or Route".
+  ///
+  /// In en, this message translates to:
+  /// **'Find a catalog place, event, activity or Route'**
+  String get createScenarioFindCatalogPlaceEventActivityRoute;
+
+  /// Create form: "Redo".
+  ///
+  /// In en, this message translates to:
+  /// **'Redo'**
+  String get createScenarioRedo;
+
+  /// Create form: "Undo".
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get createScenarioUndo;
+
+  /// Create form: "Feed retrieved at".
+  ///
+  /// In en, this message translates to:
+  /// **'Feed retrieved at'**
+  String get createScenarioFeedRetrievedAt;
+
+  /// Create form: "Feed version".
+  ///
+  /// In en, this message translates to:
+  /// **'Feed version'**
+  String get createScenarioFeedVersion;
+
+  /// Create form: "Service label".
+  ///
+  /// In en, this message translates to:
+  /// **'Service label'**
+  String get createScenarioServiceLabel;
+
+  /// Create form: "Arrival time".
+  ///
+  /// In en, this message translates to:
+  /// **'Arrival time'**
+  String get createScenarioArrivalTime;
+
+  /// Create form: "Departure time".
+  ///
+  /// In en, this message translates to:
+  /// **'Departure time'**
+  String get createScenarioDepartureTime;
+
+  /// Create form: "Destination stop".
+  ///
+  /// In en, this message translates to:
+  /// **'Destination stop'**
+  String get createScenarioDestinationStop;
+
+  /// Create form: "Origin stop".
+  ///
+  /// In en, this message translates to:
+  /// **'Origin stop'**
+  String get createScenarioOriginStop;
+
+  /// Create form: "Service calendar".
+  ///
+  /// In en, this message translates to:
+  /// **'Service calendar'**
+  String get createScenarioServiceCalendar;
+
+  /// Create form: "The saved item was kept unchanged and cannot be rechecked au".
+  ///
+  /// In en, this message translates to:
+  /// **'The saved item was kept unchanged and cannot be rechecked automatically.'**
+  String get createScenarioSavedItemWasKeptUnchangedCannot;
+
+  /// Create form: "The saved item was kept unchanged because cached schedule da".
+  ///
+  /// In en, this message translates to:
+  /// **'The saved item was kept unchanged because cached schedule data is unavailable.'**
+  String get createScenarioSavedItemWasKeptUnchangedBecause;
+
+  /// Create form: "The saved item was kept unchanged. Recheck later or enter tr".
+  ///
+  /// In en, this message translates to:
+  /// **'The saved item was kept unchanged. Recheck later or enter transport manually.'**
+  String get createScenarioSavedItemWasKeptUnchangedRecheck;
+
+  /// Create form: "Review every difference before replacing the saved snapshot.".
+  ///
+  /// In en, this message translates to:
+  /// **'Review every difference before replacing the saved snapshot.'**
+  String get createScenarioReviewEveryDifferenceBeforeReplacingSaved;
+
+  /// Create form: "The cached official schedule matches the saved snapshot. It ".
+  ///
+  /// In en, this message translates to:
+  /// **'The cached official schedule matches the saved snapshot. It is still not live.'**
+  String get createScenarioCachedOfficialScheduleMatchesSavedSnapshot;
+
+  /// Create form: "Saved data is incomplete".
+  ///
+  /// In en, this message translates to:
+  /// **'Saved data is incomplete'**
+  String get createScenarioSavedDataIncomplete;
+
+  /// Create form: "Recheck unavailable".
+  ///
+  /// In en, this message translates to:
+  /// **'Recheck unavailable'**
+  String get createScenarioRecheckUnavailable;
+
+  /// Create form: "Service not found".
+  ///
+  /// In en, this message translates to:
+  /// **'Service not found'**
+  String get createScenarioServiceNotFound;
+
+  /// Create form: "No schedule changes found".
+  ///
+  /// In en, this message translates to:
+  /// **'No schedule changes found'**
+  String get createScenarioNoScheduleChangesFound;
+
+  /// Create form: "Close".
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get createScenarioClose;
+
+  /// Create form: "Replace saved schedule".
+  ///
+  /// In en, this message translates to:
+  /// **'Replace saved schedule'**
+  String get createScenarioReplaceSavedSchedule;
+
+  /// Create form: "Planned schedule · not live. Replace changes only the saved ".
+  ///
+  /// In en, this message translates to:
+  /// **'Planned schedule · not live. Replace changes only the saved snapshot after explicit confirmation.'**
+  String get createScenarioPlannedScheduleNotLiveReplaceChanges;
+
+  /// Create form: "Changes in the cached official schedule".
+  ///
+  /// In en, this message translates to:
+  /// **'Changes in the cached official schedule'**
+  String get createScenarioChangesCachedOfficialSchedule;
+
+  /// Create form: "Close schedule recheck".
+  ///
+  /// In en, this message translates to:
+  /// **'Close schedule recheck'**
+  String get createScenarioCloseScheduleRecheck;
+
+  /// Create form: "Schedule recheck".
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule recheck'**
+  String get createScenarioScheduleRecheck;
+
+  /// Create form: "Discard".
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get createScenarioDiscard;
+
+  /// Create form: "Edit prompt".
+  ///
+  /// In en, this message translates to:
+  /// **'Edit prompt'**
+  String get createScenarioEditPrompt;
+
+  /// Create form: "Still unverified".
+  ///
+  /// In en, this message translates to:
+  /// **'Still unverified'**
+  String get createScenarioStillUnverified;
+
+  /// Create form: "Preview readiness: needs your review".
+  ///
+  /// In en, this message translates to:
+  /// **'Preview readiness: needs your review'**
+  String get createScenarioPreviewReadinessNeedsYourReview;
+
+  /// Create form: "Preview readiness: ready to review".
+  ///
+  /// In en, this message translates to:
+  /// **'Preview readiness: ready to review'**
+  String get createScenarioPreviewReadinessReadyReview;
+
+  /// Create form: "Catalog snapshot".
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog snapshot'**
+  String get createScenarioCatalogSnapshot;
+
+  /// Create form: "Proposed stops".
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed stops'**
+  String get createScenarioProposedStops;
+
+  /// Create form: "Generate preview".
+  ///
+  /// In en, this message translates to:
+  /// **'Generate preview'**
+  String get createScenarioGeneratePreview;
+
+  /// Create form: "Building preview…".
+  ///
+  /// In en, this message translates to:
+  /// **'Building preview…'**
+  String get createScenarioBuildingPreview;
+
+  /// Create form: "Use an example".
+  ///
+  /// In en, this message translates to:
+  /// **'Use an example'**
+  String get createScenarioUseExample;
+
+  /// Create form: "A relaxed afternoon in Riga with culture and dinner".
+  ///
+  /// In en, this message translates to:
+  /// **'A relaxed afternoon in Riga with culture and dinner'**
+  String get createScenarioRelaxedAfternoonRigaWithCultureDinner;
+
+  /// Create form: "What would you like to do?".
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like to do?'**
+  String get createScenarioWhatWouldYouLikeDo;
+
+  /// Create form: "Describe the mood and priorities. This demo uses only the lo".
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the mood and priorities. This demo uses only the local Recharge catalog; it does not call an external AI.'**
+  String get createScenarioDescribeMoodPrioritiesDemoUsesOnly;
+
+  /// Create form: "Local demo".
+  ///
+  /// In en, this message translates to:
+  /// **'Local demo'**
+  String get createScenarioLocalDemo;
+
+  /// Create form: "Build with AI".
+  ///
+  /// In en, this message translates to:
+  /// **'Build with AI'**
+  String get createScenarioBuildWithAi;
+
+  /// Create form: "Save travel".
+  ///
+  /// In en, this message translates to:
+  /// **'Save travel'**
+  String get createScenarioSaveTravel;
+
+  /// Create form: "Travel mode".
+  ///
+  /// In en, this message translates to:
+  /// **'Travel mode'**
+  String get createScenarioTravelMode;
+
+  /// Create form: "Manual values stay locked until you edit them.".
+  ///
+  /// In en, this message translates to:
+  /// **'Manual values stay locked until you edit them.'**
+  String get createScenarioManualValuesStayLockedUntilYou;
+
+  /// Create form: "Add to Scenario".
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Scenario'**
+  String get createScenarioAddScenario;
+
+  /// Create form: "Service or route *".
+  ///
+  /// In en, this message translates to:
+  /// **'Service or route *'**
+  String get createScenarioServiceRoute;
+
+  /// Create form: "Transport".
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get createScenarioTransport;
+
+  /// Create form: "Planned schedule · not live. Recheck the service before trav".
+  ///
+  /// In en, this message translates to:
+  /// **'Planned schedule · not live. Recheck the service before travel.'**
+  String get createScenarioPlannedScheduleNotLiveRecheckService;
+
+  /// Create form: "Primary transport".
+  ///
+  /// In en, this message translates to:
+  /// **'Primary transport'**
+  String get createScenarioPrimaryTransport;
+
+  /// Create form: "Own car is fully supported. Public transport uses planned sc".
+  ///
+  /// In en, this message translates to:
+  /// **'Own car is fully supported. Public transport uses planned schedules, not live data.'**
+  String get createScenarioOwnCarFullySupportedPublicTransport;
+
+  /// Create form: "How will you travel?".
+  ///
+  /// In en, this message translates to:
+  /// **'How will you travel?'**
+  String get createScenarioHowWillYouTravel;
+
+  /// Create form: "Budget basis".
+  ///
+  /// In en, this message translates to:
+  /// **'Budget basis'**
+  String get createScenarioBudgetBasis;
+
+  /// Create form: "Pace".
+  ///
+  /// In en, this message translates to:
+  /// **'Pace'**
+  String get createScenarioPace;
+
+  /// Create form: "People".
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get createScenarioPeople;
+
+  /// Create form: "Party".
+  ///
+  /// In en, this message translates to:
+  /// **'Party'**
+  String get createScenarioParty;
+
+  /// Create form: "Dated trip".
+  ///
+  /// In en, this message translates to:
+  /// **'Dated trip'**
+  String get createScenarioDatedTrip;
+
+  /// Create form: "Flexible template".
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible template'**
+  String get createScenarioFlexibleTemplate;
+
+  /// Create form: "Format".
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get createScenarioFormat;
+
+  /// Create form: "Scenario title *".
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario title *'**
+  String get createScenarioScenarioTitle;
+
+  /// Create form: "Public and unlisted Scenario publishing remains disabled unt".
+  ///
+  /// In en, this message translates to:
+  /// **'Public and unlisted Scenario publishing remains disabled until publisher capabilities and moderation are implemented.'**
+  String get createScenarioPublicUnlistedScenarioPublishingRemainsDisabled;
+
+  /// Create form: "Planned schedule · not live. Recheck departures, delays and ".
+  ///
+  /// In en, this message translates to:
+  /// **'Planned schedule · not live. Recheck departures, delays and cancellations before travel.'**
+  String get createScenarioPlannedScheduleNotLiveRecheckDepartures;
+
+  /// Create form: "This action saves a personal Scenario. It does not publish i".
+  ///
+  /// In en, this message translates to:
+  /// **'This action saves a personal Scenario. It does not publish it to the catalog.'**
+  String get createScenarioActionSavesPersonalScenarioDoesNot;
+
+  /// Create form: "Ready for My Scenarios".
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for My Scenarios'**
+  String get createScenarioReadyMyScenarios;
+
+  /// Create form: "Warnings".
+  ///
+  /// In en, this message translates to:
+  /// **'Warnings'**
+  String get createScenarioWarnings;
+
+  /// Create form: "Unknown travel".
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown travel'**
+  String get createScenarioUnknownTravel;
+
+  /// Create form: "Time blocks".
+  ///
+  /// In en, this message translates to:
+  /// **'Time blocks'**
+  String get createScenarioTimeBlocks;
+
+  /// Create form: "Activity".
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get createScenarioActivity;
+
+  /// Create form: "Active stops".
+  ///
+  /// In en, this message translates to:
+  /// **'Active stops'**
+  String get createScenarioActiveStops;
+
+  /// Create form: "Scenario data is unavailable.".
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario data is unavailable.'**
+  String get createScenarioScenarioDataUnavailable;
+
+  /// Create form: "Save to My Scenarios".
+  ///
+  /// In en, this message translates to:
+  /// **'Save to My Scenarios'**
+  String get createScenarioSaveMyScenarios;
+
+  /// Create form: "Back".
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get createScenarioBack;
+
+  /// Create form: "Expanded from a Quick Plan as an independent copy. Legacy st".
+  ///
+  /// In en, this message translates to:
+  /// **'Expanded from a Quick Plan as an independent copy. Legacy stops are private custom locations until you review them.'**
+  String get createScenarioExpandedFromQuickPlanAsIndependent;
+
+  /// Create form: "Build a city, day, weekend or trip plan from independent sto".
+  ///
+  /// In en, this message translates to:
+  /// **'Build a city, day, weekend or trip plan from independent stops. A Scenario is not a Route and does not change a Quick Plan.'**
+  String get createScenarioBuildCityDayWeekendTripPlan;
+
+  /// Create form: "Scenario plan".
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario plan'**
+  String get createScenarioScenarioPlan;
+
+  /// Create form: "Title".
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get createScenarioTitle;
+
+  /// Create form: "Use coordinates for any location in Latvia. The stop stays p".
+  ///
+  /// In en, this message translates to:
+  /// **'Use coordinates for any location in Latvia. The stop stays private by default.'**
+  String get createScenarioUseCoordinatesAnyLocationLatviaStop;
+
+  /// Create form: "Add time block".
+  ///
+  /// In en, this message translates to:
+  /// **'Add time block'**
+  String get createScenarioAddTimeBlock;
+
+  /// Create form: "Feed SHA-256".
+  ///
+  /// In en, this message translates to:
+  /// **'Feed SHA-256'**
+  String get createScenarioFeedSha256;
+
+  /// Create form: "Feed retrieved".
+  ///
+  /// In en, this message translates to:
+  /// **'Feed retrieved'**
+  String get createScenarioFeedRetrieved2;
+
+  /// Create form: "Licence".
+  ///
+  /// In en, this message translates to:
+  /// **'Licence'**
+  String get createScenarioLicence;
+
+  /// Create form: "Stops".
+  ///
+  /// In en, this message translates to:
+  /// **'Stops'**
+  String get createScenarioStops;
+
+  /// Create form: "Planned time".
+  ///
+  /// In en, this message translates to:
+  /// **'Planned time'**
+  String get createScenarioPlannedTime;
+
+  /// Create form: "Service date".
+  ///
+  /// In en, this message translates to:
+  /// **'Service date'**
+  String get createScenarioServiceDate;
+
+  /// Create form: "Provider".
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get createScenarioProvider;
+
+  /// Find People private preview: exact address label.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact address'**
+  String get createFindPeopleExactAddressLabel;
+
+  /// Find People private preview: exact point label.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact point'**
+  String get createFindPeopleExactGeoLabel;
+
+  /// Find People private preview: online access reference label.
+  ///
+  /// In en, this message translates to:
+  /// **'Online access reference'**
+  String get createFindPeopleOnlineAccessLabel;
+
+  /// Find People private preview: value not set.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get createFindPeopleNotSet;
+
+  /// Find People private preview: value configured (hidden).
+  ///
+  /// In en, this message translates to:
+  /// **'Configured'**
+  String get createFindPeopleConfigured;
+
+  /// Scenario transit: the selection is only a preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Selection preview only. Scenario is unchanged.'**
+  String get createScenarioSelectionPreviewUnchanged;
+
+  /// Scenario AI preview: activity time; value is a localized duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity time: {value}'**
+  String createScenarioActivityTime(String value);
+
+  /// Duration in minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String createScenarioDurationMinutes(int count);
+
+  /// Duration in hours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} h'**
+  String createScenarioDurationHours(int count);
+
+  /// Duration in hours (start) and minutes (end).
+  ///
+  /// In en, this message translates to:
+  /// **'{start} h {end} min'**
+  String createScenarioDurationHoursMinutes(int start, int end);
+
+  /// Scenario transit option: duration and the planned/not-live mark.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min · Planned schedule · not live'**
+  String createScenarioMinutesNotLive(int count);
+
+  /// Scenario transit: when the feed was retrieved (UTC as saved).
+  ///
+  /// In en, this message translates to:
+  /// **'Feed retrieved {value}'**
+  String createScenarioFeedRetrievedLine(String value);
+
+  /// Scenario transit cache: current.
+  ///
+  /// In en, this message translates to:
+  /// **'Cached schedule is current.'**
+  String get createScenarioCacheCurrent;
+
+  /// Scenario transit cache: current, retrieved at value (UTC).
+  ///
+  /// In en, this message translates to:
+  /// **'Cached schedule is current · {value}.'**
+  String createScenarioCacheCurrentAt(String value);
+
+  /// Scenario transit cache: stale.
+  ///
+  /// In en, this message translates to:
+  /// **'Cached schedule is stale. You may use it with a warning or update it.'**
+  String get createScenarioCacheStale;
+
+  /// Scenario transit cache: stale, retrieved at value (UTC).
+  ///
+  /// In en, this message translates to:
+  /// **'Cached schedule is stale · {value}. You may use it with a warning or update it.'**
+  String createScenarioCacheStaleAt(String value);
+
+  /// Create findPeople step "activity" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get createStepFindPeopleActivityTitle;
+
+  /// Create findPeople step "activity" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what you want to do and who it suits.'**
+  String get createStepFindPeopleActivityDescription;
+
+  /// Create findPeople step "schedule" title.
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get createStepFindPeopleScheduleTitle;
+
+  /// Create findPeople step "schedule" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one time, a poll, or a finite recurring series.'**
+  String get createStepFindPeopleScheduleDescription;
+
+  /// Create findPeople step "meeting" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Where'**
+  String get createStepFindPeopleMeetingTitle;
+
+  /// Create findPeople step "meeting" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the public area separate from private meeting details.'**
+  String get createStepFindPeopleMeetingDescription;
+
+  /// Create findPeople step "group" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get createStepFindPeopleGroupTitle;
+
+  /// Create findPeople step "group" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Set capacity, applications, verification, waitlist, and costs.'**
+  String get createStepFindPeopleGroupDescription;
+
+  /// Create findPeople step "hosts" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosts & access'**
+  String get createStepFindPeopleHostsTitle;
+
+  /// Create findPeople step "hosts" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure publisher, visibility, communication, and sharing.'**
+  String get createStepFindPeopleHostsDescription;
+
+  /// Create findPeople step "publish" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview & publish'**
+  String get createStepFindPeoplePublishTitle;
+
+  /// Create findPeople step "publish" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Review public/private data and complete safety confirmations.'**
+  String get createStepFindPeoplePublishDescription;
+
+  /// Create route step "method" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get createStepRouteMethodTitle;
+
+  /// Create route step "method" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how the continuous track is created'**
+  String get createStepRouteMethodDescription;
+
+  /// Create route step "profile" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get createStepRouteProfileTitle;
+
+  /// Create route step "profile" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Set movement profile and routing preferences'**
+  String get createStepRouteProfileDescription;
+
+  /// Create route step "editor" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Track'**
+  String get createStepRouteEditorTitle;
+
+  /// Create route step "editor" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit anchors and continuous route segments'**
+  String get createStepRouteEditorDescription;
+
+  /// Create route step "details" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get createStepRouteDetailsTitle;
+
+  /// Create route step "details" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Add route conditions and practical information'**
+  String get createStepRouteDetailsDescription;
+
+  /// Create route step "review" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get createStepRouteReviewTitle;
+
+  /// Create route step "review" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Review geometry, warnings and readiness'**
+  String get createStepRouteReviewDescription;
+
+  /// Create session step "whatWhere" title.
+  ///
+  /// In en, this message translates to:
+  /// **'What and where'**
+  String get createStepSessionWhatWhereTitle;
+
+  /// Create session step "whatWhere" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource, category, media, location, timezone'**
+  String get createStepSessionWhatWhereDescription;
+
+  /// Create session step "when" title.
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get createStepSessionWhenTitle;
+
+  /// Create session step "when" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly schedule, duration, buffer, notice'**
+  String get createStepSessionWhenDescription;
+
+  /// Create session step "priceAndBooking" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Price and booking'**
+  String get createStepSessionPriceAndBookingTitle;
+
+  /// Create session step "priceAndBooking" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Price, max party size, external booking URL'**
+  String get createStepSessionPriceAndBookingDescription;
+
+  /// Create classWorkshop step "basics" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Offering'**
+  String get createStepClassWorkshopBasicsTitle;
+
+  /// Create classWorkshop step "basics" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind, title, descriptions, category, criteria and media'**
+  String get createStepClassWorkshopBasicsDescription;
+
+  /// Create classWorkshop step "learning" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Programme and instructor'**
+  String get createStepClassWorkshopLearningTitle;
+
+  /// Create classWorkshop step "learning" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Outcomes, programme, prerequisites and instructor'**
+  String get createStepClassWorkshopLearningDescription;
+
+  /// Create classWorkshop step "schedule" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates and place'**
+  String get createStepClassWorkshopScheduleTitle;
+
+  /// Create classWorkshop step "schedule" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Single class or fixed series, timezone, delivery, place'**
+  String get createStepClassWorkshopScheduleDescription;
+
+  /// Create classWorkshop step "participation" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Participation'**
+  String get createStepClassWorkshopParticipationTitle;
+
+  /// Create classWorkshop step "participation" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials, requirements, group size, price, enrollment'**
+  String get createStepClassWorkshopParticipationDescription;
+
+  /// Create scenario step "context" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Context'**
+  String get createStepScenarioContextTitle;
+
+  /// Create scenario step "context" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Format, date mode, party, pace and budget'**
+  String get createStepScenarioContextDescription;
+
+  /// Create scenario step "composer" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get createStepScenarioComposerTitle;
+
+  /// Create scenario step "composer" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Independent stops, time blocks and their order'**
+  String get createStepScenarioComposerDescription;
+
+  /// Create scenario step "review" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get createStepScenarioReviewTitle;
+
+  /// Create scenario step "review" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Totals, warnings and personal save readiness'**
+  String get createStepScenarioReviewDescription;
+
+  /// Session schedule preset: every day 9:00–21:00.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day 9:00–21:00'**
+  String get createSessionPresetEveryday;
+
+  /// Session schedule preset: weekdays 9:00–18:00.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekdays 9:00–18:00'**
+  String get createSessionPresetWeekdays;
+
+  /// Find People house rule; value is the stable rule id.
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, be_on_time{Be on time}respect_boundaries{Respect boundaries}no_harassment{No harassment}no_sales{No sales}no_substances{No alcohol or drugs}bring_required_gear{Bring required gear}follow_venue_rules{Follow venue rules}leave_no_trace{Leave no trace} other{Rule}}'**
+  String createFindPeopleHouseRule(String value);
+
+  /// Find People co-host right; value is the stable capability id.
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, review_applications{Review applications}manage_schedule{Manage schedule}manage_participants{Manage participants}moderate_conversation{Moderate conversation} other{Right}}'**
+  String createFindPeopleCohostRight(String value);
+
+  /// Find People co-host invitation accepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get createFindPeopleCohostAccepted;
+
+  /// Find People co-host invitation pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation pending'**
+  String get createFindPeopleCohostPending;
+
+  /// Find People field: seat-fit policy.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat-fit policy'**
+  String get createFindPeopleSeatFitPolicy;
+
+  /// Find People field: visibility (required).
+  ///
+  /// In en, this message translates to:
+  /// **'Visibility *'**
+  String get createFindPeopleVisibilityRequired;
+
+  /// Create field: a date in YYYY-MM-DD.
+  ///
+  /// In en, this message translates to:
+  /// **'Date (YYYY-MM-DD)'**
+  String get createFormDateIso;
+
+  /// Class: ambiguous local time — take the first (summer time) instance.
+  ///
+  /// In en, this message translates to:
+  /// **'First (summer time)'**
+  String get createClassFirstSummerTime;
+
+  /// Route shape: out and back.
+  ///
+  /// In en, this message translates to:
+  /// **'Out & back'**
+  String get createRouteOutAndBack;
+
+  /// Scenario item editor: edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get createScenarioEdit;
+
+  /// Scenario time block title hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Coffee, rest, free time…'**
+  String get createScenarioTimeBlockHint;
+
+  /// Scenario review: private or local travel.
+  ///
+  /// In en, this message translates to:
+  /// **'Private / local travel'**
+  String get createScenarioPrivateLocalTravel;
+
+  /// Scenario recheck field: route.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get createScenarioRouteLabel;
+
+  /// Scenario recheck field: carrier.
+  ///
+  /// In en, this message translates to:
+  /// **'Carrier'**
+  String get createScenarioCarrierLabel;
+
+  /// Scenario stop search: the selected stop; value is the stop name from the feed.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected: {value}'**
+  String createScenarioSelectedStop(String value);
+
+  /// Scenario transport field: departure HH:mm.
+  ///
+  /// In en, this message translates to:
+  /// **'Departure (HH:mm)'**
+  String get createScenarioDepartureHhMm;
+
+  /// Scenario transport field: arrival HH:mm.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrival (HH:mm)'**
+  String get createScenarioArrivalHhMm;
+
+  /// Route moderation: resolve and restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve & restore'**
+  String get createRouteResolveRestore;
+
+  /// Route moderation: resolve.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve'**
+  String get createRouteResolve;
+
+  /// Add to Scenario: notice for a stable intake code.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, targetsUnavailable{Scenarios are unavailable. Retry from Details.}chooseTarget{Choose a Scenario or create a new one.}targetNotEditable{This Scenario is no longer editable.}titleRequired{Enter a Scenario title.}openFailed{Could not open this Scenario.}signInAgain{Sign in again before adding items to Scenario.}confirmDuplicate{Confirm adding another occurrence.}confirmUnavailable{Confirm use of the unavailable saved snapshot.}confirmScheduleAdjustment{Confirm conversion to a flexible template stop.}revisionConflict{Scenario changed. Go back, reopen it and review again.}intentExpired{This selection expired. Return to Details and try again.}targetGone{This Scenario is no longer available. Choose another one.}lockedLegBoundary{A locked logistics leg protects this insertion point.}persistenceUnavailable{Could not save. Your selection is retained; retry Apply.} other{Could not add this object. Review the selection and retry.}}'**
+  String scenarioIntakeNotice(String code);
+
+  /// Add to Scenario: catalog object type of a selected stop (stable value).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, event{Event}place{Place}activity{Activity}route{Route}bookableSession{Session} other{Object}}'**
+  String scenarioIntakeObjectType(String value);
+
+  /// Add to Scenario: source status of a selected stop (stable value).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, ready{Ready}stale{Needs refresh}unresolved{Not resolved}unavailable{Unavailable} other{Unknown}}'**
+  String scenarioIntakeSourceStatus(String value);
+
+  /// Add to Scenario cannot start from this surface or selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Scenario is unavailable.'**
+  String get scenarioIntakeUnavailable;
+
+  /// Add to Scenario sheet title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Scenario'**
+  String get scenarioIntakeTitle;
+
+  /// Add to Scenario: close button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Add to Scenario'**
+  String get scenarioIntakeClose;
+
+  /// Add to Scenario: target step heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a personal Scenario'**
+  String get scenarioIntakeChooseTarget;
+
+  /// Add to Scenario: which targets are listed.
+  ///
+  /// In en, this message translates to:
+  /// **'Only your editable private drafts are shown.'**
+  String get scenarioIntakeOnlyPrivateDrafts;
+
+  /// Add to Scenario: no target yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved Scenario yet. Create one below.'**
+  String get scenarioIntakeNoTargets;
+
+  /// Add to Scenario: target without a title.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get scenarioIntakeUntitled;
+
+  /// Add to Scenario: create a new target.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new Scenario'**
+  String get scenarioIntakeCreateNew;
+
+  /// Add to Scenario: what the new target is.
+  ///
+  /// In en, this message translates to:
+  /// **'Private · one day · saved only with the stop'**
+  String get scenarioIntakeCreateNewHint;
+
+  /// Add to Scenario: new Scenario title field.
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario title'**
+  String get scenarioIntakeTitleField;
+
+  /// Add to Scenario: go to placement.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to placement'**
+  String get scenarioIntakeContinue;
+
+  /// Add to Scenario: target title when none is known.
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario'**
+  String get scenarioIntakeScenarioFallback;
+
+  /// Add to Scenario: day field.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get scenarioIntakeDay;
+
+  /// Add to Scenario: not tied to a day.
+  ///
+  /// In en, this message translates to:
+  /// **'Unscheduled'**
+  String get scenarioIntakeUnscheduled;
+
+  /// Add to Scenario: insertion point field.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert'**
+  String get scenarioIntakeInsert;
+
+  /// Add to Scenario: insert at the end of the day.
+  ///
+  /// In en, this message translates to:
+  /// **'At end'**
+  String get scenarioIntakeAtEnd;
+
+  /// Add to Scenario: stop role heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get scenarioIntakeRole;
+
+  /// Add to Scenario: mandatory stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Mandatory'**
+  String get scenarioIntakeMandatory;
+
+  /// Add to Scenario: optional stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get scenarioIntakeOptional;
+
+  /// Add to Scenario: back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get scenarioIntakeBack;
+
+  /// Add to Scenario: go to review.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get scenarioIntakeReview;
+
+  /// Add to Scenario: confirm a duplicate occurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'Add another occurrence'**
+  String get scenarioIntakeAddAnother;
+
+  /// Add to Scenario: why a duplicate is asked about.
+  ///
+  /// In en, this message translates to:
+  /// **'This exact catalog object already exists in the Scenario.'**
+  String get scenarioIntakeAddAnotherHint;
+
+  /// Add to Scenario: confirm using an unavailable saved snapshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Use saved unavailable snapshot'**
+  String get scenarioIntakeUseUnavailable;
+
+  /// Add to Scenario: confirm converting to a flexible template stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Use as a flexible template stop'**
+  String get scenarioIntakeUseTemplateStop;
+
+  /// Add to Scenario: why a template stop is asked about.
+  ///
+  /// In en, this message translates to:
+  /// **'The source has a fixed date, but this Scenario is a template.'**
+  String get scenarioIntakeUseTemplateStopHint;
+
+  /// Add to Scenario: logistics are not recalculated.
+  ///
+  /// In en, this message translates to:
+  /// **'Logistics are not recalculated live. Existing unlocked boundary estimates will be invalidated safely.'**
+  String get scenarioIntakeLogisticsNotice;
+
+  /// Add to Scenario: apply button with the number of stops.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {count}'**
+  String scenarioIntakeAddCount(int count);
+
+  /// Add to Scenario: stop duration unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration unknown'**
+  String get scenarioIntakeDurationUnknown;
+
+  /// Add to Scenario: fixed start of a stop, formatted in the object zone.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed {time}'**
+  String scenarioIntakeFixedStart(String time);
+
+  /// Add to Scenario: move a stop up.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get scenarioIntakeMoveUp;
+
+  /// Add to Scenario: move a stop down.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get scenarioIntakeMoveDown;
+
+  /// Add to Scenario: screen reader text while stops are added.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding selected stops to Scenario'**
+  String get scenarioIntakeApplyingSemantics;
+
+  /// Add to Scenario: screen reader text while targets load.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your Scenarios'**
+  String get scenarioIntakeLoadingSemantics;
+
+  /// Add to Scenario: progress text while stops are added.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding to Scenario…'**
+  String get scenarioIntakeApplying;
+
+  /// Add to Scenario: progress text while targets load.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your Scenarios…'**
+  String get scenarioIntakeLoading;
+
+  /// Add to Scenario: the same request was already saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Already saved · no duplicate was created.'**
+  String get scenarioIntakeReplayed;
+
+  /// Add to Scenario: stay on the current page.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay here'**
+  String get scenarioIntakeStay;
+
+  /// Add to Scenario: open the target Scenario.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Scenario'**
+  String get scenarioIntakeOpenScenario;
+
+  /// Add to Scenario: the sheet could not be prepared.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare Add to Scenario.'**
+  String get scenarioIntakePrepareFailed;
+
+  /// Add to Scenario: retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get scenarioIntakeRetry;
+
+  /// Add to Scenario target summary: template Scenario without dates.
+  ///
+  /// In en, this message translates to:
+  /// **'Template'**
+  String get scenarioIntakeTemplate;
+
+  /// Add to Scenario target summary: dated Scenario without a known first date.
+  ///
+  /// In en, this message translates to:
+  /// **'Dated'**
+  String get scenarioIntakeDated;
+
+  /// Add to Scenario: progress line for the sheet stage (stable stage name).
+  ///
+  /// In en, this message translates to:
+  /// **'{state, select, target{1 of 3 · Scenario}placement{2 of 3 · Placement}review{3 of 3 · Review}success{Complete}applying{Saving} other{Preparing}}'**
+  String scenarioIntakeStep(String state);
+
+  /// Add to Scenario review: where the stops go (stable value); shown after the Scenario title.
+  ///
+  /// In en, this message translates to:
+  /// **'{state, select, unscheduled{Unscheduled}atEnd{At end} other{After selected stop}}'**
+  String scenarioIntakePlacement(String state);
+
+  /// Add to Scenario: label before a stop title (the title is shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'After:'**
+  String get scenarioIntakeAfterLabel;
+
+  /// Add to Scenario: screen reader label before a selected stop title (the title is shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Selected stop {count}:'**
+  String scenarioIntakeCandidateLabel(int count);
+
+  /// Add to Scenario: success heading; the Scenario title is shown separately as is.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Added {count} stop to the Scenario} other{Added {count} stops to the Scenario}}'**
+  String scenarioIntakeSuccess(int count);
+
+  /// Add to Scenario target summary: number of days (count) and active items (total).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} day} other{{count} days}} · {total, plural, one{{total} active item} other{{total} active items}}'**
+  String scenarioIntakeTargetCounts(int count, int total);
 }
 
 class _AppLocalizationsDelegate

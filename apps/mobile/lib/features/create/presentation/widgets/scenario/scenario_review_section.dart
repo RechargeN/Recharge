@@ -25,7 +25,7 @@ class ScenarioReviewSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final ScenarioReadinessResult? readiness = controller.scenarioReadiness;
     if (readiness == null) {
-      return const Text('Scenario data is unavailable.');
+      return Text(context.l10n.createScenarioScenarioDataUnavailable);
     }
     final ScenarioDraftData data = state.draft.scenarioData!;
     final List<ScenarioItemDraft> plannedTransport = data.items
@@ -48,31 +48,31 @@ class ScenarioReviewSection extends StatelessWidget {
           runSpacing: 8,
           children: <Widget>[
             _Metric(
-              label: 'Active stops',
+              label: context.l10n.createScenarioActiveStops,
               value: '${readiness.totals.activeItemCount}',
             ),
             _Metric(
-              label: 'Activity',
+              label: context.l10n.createScenarioActivity,
               value: '${readiness.totals.activityMinutes} min',
             ),
             _Metric(
-              label: 'Time blocks',
+              label: context.l10n.createScenarioTimeBlocks,
               value: '${readiness.totals.plannedBlockMinutes} min',
             ),
             _Metric(
-              label: 'Private / local travel',
+              label: context.l10n.createScenarioPrivateLocalTravel,
               value: '${readiness.totals.localTravelMinutes} min',
             ),
             _Metric(
-              label: 'Planned transport',
+              label: context.l10n.createScenarioPlannedTransport,
               value: '${readiness.totals.plannedTransportMinutes} min',
             ),
             _Metric(
-              label: 'Unknown travel',
+              label: context.l10n.createScenarioUnknownTravel,
               value: '${readiness.totals.unresolvedLegCount}',
             ),
             _Metric(
-              label: 'Warnings',
+              label: context.l10n.createScenarioWarnings,
               value: '${readiness.validation.warningCount}',
             ),
           ],
@@ -88,16 +88,16 @@ class ScenarioReviewSection extends StatelessWidget {
           ),
           title: Text(
             readiness.canSaveToMyScenarios
-                ? 'Ready for My Scenarios'
+                ? context.l10n.createScenarioReadyMyScenarios
                 : '${blocking.length} blocking issue(s)',
           ),
-          subtitle: const Text(
-            'This action saves a personal Scenario. It does not publish it to the catalog.',
+          subtitle: Text(
+            context.l10n.createScenarioActionSavesPersonalScenarioDoesNot,
           ),
         ),
         if (plannedTransport.isNotEmpty) ...<Widget>[
           const SizedBox(height: 12),
-          const DecoratedBox(
+          DecoratedBox(
             decoration: BoxDecoration(
               color: Color(0xFFFFF5D9),
               borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -111,7 +111,9 @@ class ScenarioReviewSection extends StatelessWidget {
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Planned schedule · not live. Recheck departures, delays and cancellations before travel.',
+                      context
+                          .l10n
+                          .createScenarioPlannedScheduleNotLiveRecheckDepartures,
                     ),
                   ),
                 ],
@@ -139,7 +141,7 @@ class ScenarioReviewSection extends StatelessWidget {
                 ),
               ),
         const SizedBox(height: 8),
-        const DecoratedBox(
+        DecoratedBox(
           decoration: BoxDecoration(
             color: Color(0xFFF3F5F4),
             borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -147,8 +149,9 @@ class ScenarioReviewSection extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.all(12),
             child: Text(
-              'Public and unlisted Scenario publishing remains disabled until '
-              'publisher capabilities and moderation are implemented.',
+              context
+                  .l10n
+                  .createScenarioPublicUnlistedScenarioPublishingRemainsDisabled,
             ),
           ),
         ),

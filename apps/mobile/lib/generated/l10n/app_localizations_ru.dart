@@ -4909,6 +4909,101 @@ class AppLocalizationsRu extends AppLocalizations {
       'PublishStatus_archived': 'В архиве',
       'PublishStatus_hidden': 'Скрыто',
       'PublishStatus_deleted': 'Удалено',
+      'FindPeopleApprovalMode_manual': 'Одобряет организатор',
+      'FindPeopleApprovalMode_automatic': 'Автоматически',
+      'FindPeopleApprovalMode_inviteOnly': 'Только по приглашению',
+      'FindPeopleConversationPolicy_acceptedOnly': 'Только принятые участники',
+      'FindPeopleConversationPolicy_applicantsAndAccepted':
+          'Заявители и принятые',
+      'FindPeopleCostType_free': 'Бесплатно',
+      'FindPeopleCostType_estimated': 'Примерные расходы',
+      'FindPeopleCostType_unknown': 'Неизвестно',
+      'FindPeopleExpenseSplitMode_none': 'Без раздела',
+      'FindPeopleExpenseSplitMode_equal': 'Поровну',
+      'FindPeopleExpenseSplitMode_itemized': 'По статьям',
+      'FindPeopleExpenseSplitMode_settleLater': 'Рассчитаться позже',
+      'FindPeopleMeetingMode_inPerson': 'Очно',
+      'FindPeopleMeetingMode_online': 'Онлайн',
+      'FindPeopleMeetingMode_hybrid': 'Гибрид',
+      'FindPeopleParticipationGoal_social': 'Общение',
+      'FindPeopleParticipationGoal_practice': 'Практика',
+      'FindPeopleParticipationGoal_teamUp': 'Собрать команду',
+      'FindPeopleParticipationGoal_sharedTrip': 'Совместная поездка',
+      'FindPeopleParticipationGoal_accountability': 'Поддерживать друг друга',
+      'FindPeopleParticipationGoal_other': 'Другое',
+      'FindPeoplePublisherType_user': 'Личный профиль',
+      'FindPeoplePublisherType_page': 'Профессиональная страница',
+      'FindPeopleScheduleMode_single': 'Один раз',
+      'FindPeopleScheduleMode_timePoll': 'Опрос по времени',
+      'FindPeopleScheduleMode_recurring': 'Повторяется',
+      'FindPeopleSeatFitPolicy_strictOrder': 'Строго по очереди',
+      'FindPeopleSeatFitPolicy_firstFitting': 'Первый подходящий',
+      'FindPeopleSkillLevel_any': 'Любой уровень',
+      'FindPeopleSkillLevel_beginner': 'Начинающий',
+      'FindPeopleSkillLevel_intermediate': 'Средний',
+      'FindPeopleSkillLevel_advanced': 'Продвинутый',
+      'FindPeopleVerificationLevel_none': 'Без проверки',
+      'FindPeopleVerificationLevel_phone': 'Телефон',
+      'FindPeopleVerificationLevel_identityDocument': 'Документ личности',
+      'FindPeopleVerificationLevel_organization': 'Организация',
+      'FindPeopleVisibility_public': 'Публичный',
+      'FindPeopleVisibility_unlisted': 'По ссылке',
+      'FindPeopleVisibility_inviteOnly': 'Только по приглашению',
+      'FindPeopleWaitlistPolicy_firstCome': 'По очереди',
+      'FindPeopleWaitlistPolicy_hostReview': 'Проверка организатором',
+      'ScenarioBudgetBasis_wholeGroup': 'На всю группу',
+      'ScenarioBudgetBasis_perPerson': 'На человека',
+      'ScenarioFormat_city': 'Город',
+      'ScenarioFormat_day': 'День',
+      'ScenarioFormat_weekend': 'Выходные',
+      'ScenarioFormat_trip': 'Поездка',
+      'ScenarioPace_relaxed': 'Спокойный',
+      'ScenarioPace_balanced': 'Сбалансированный',
+      'ScenarioPace_intensive': 'Насыщенный',
+      'ScenarioPartyKind_solo': 'Один',
+      'ScenarioPartyKind_couple': 'Пара',
+      'ScenarioPartyKind_friends': 'Друзья',
+      'ScenarioPartyKind_family': 'Семья',
+      'ScenarioPartyKind_group': 'Группа',
+      'ScenarioPartyKind_mixed': 'Смешанная',
+      'ScenarioPlannedTransportKind_bus': 'Автобус',
+      'ScenarioPlannedTransportKind_train': 'Поезд',
+      'ScenarioPlannedTransportKind_tram': 'Трамвай',
+      'ScenarioPlannedTransportKind_trolleybus': 'Троллейбус',
+      'ScenarioPlannedTransportKind_ferry': 'Паром',
+      'ScenarioPlannedTransportKind_flight': 'Рейс самолёта',
+      'ScenarioPlannedTransportKind_other': 'Другое',
+      'ScenarioTravelMode_walking': 'Пешком',
+      'ScenarioTravelMode_bicycle': 'Велосипед',
+      'ScenarioTravelMode_car': 'Своя машина',
+      'ScenarioTravelMode_taxi': 'Такси',
+      'ScenarioTravelMode_transit': 'Общественный транспорт',
+      'ScenarioTravelMode_other': 'Другое',
+      'ScenarioDateMode_template': 'Гибкий шаблон',
+      'ScenarioDateMode_dated': 'Поездка с датами',
+      'ScenarioItemKind_visit': 'Посещение',
+      'ScenarioItemKind_event': 'Событие',
+      'ScenarioItemKind_activity': 'Активность',
+      'ScenarioItemKind_route': 'Маршрут',
+      'ScenarioItemKind_bookableSession': 'Сеанс',
+      'ScenarioItemKind_stay': 'Проживание',
+      'ScenarioItemKind_plannedTransport': 'Запланированный транспорт',
+      'ScenarioItemKind_timeBlock': 'Блок времени',
+      'RouteSegmentSource_routed': 'Проложен',
+      'RouteSegmentSource_generated': 'Сгенерирован',
+      'RouteSegmentSource_freehand': 'От руки',
+      'RouteSegmentSource_recordedGps': 'Запись GPS',
+      'RouteSegmentSource_importedGpx': 'Импорт GPX',
+      'RouteSegmentSource_intentionalDirect': 'Намеренная прямая',
+      'RouteSegmentSource_fallbackDirect': 'Прямая (запасной вариант)',
+      'RouteSegmentOperationState_ready': 'Готов',
+      'RouteSegmentOperationState_routing': 'Прокладывается',
+      'RouteSegmentOperationState_failed': 'Ошибка',
+      'RouteSegmentOperationState_stale': 'Нужно обновить',
+      'ScenarioScheduleFreshness_current': 'Актуально на момент сохранения',
+      'ScenarioScheduleFreshness_stale': 'Устарело',
+      'ScenarioScheduleFreshness_unknown': 'Неизвестно',
+      'ScenarioScheduleFreshness_notApplicable': 'Не применимо',
       'other': 'Другое',
     });
     return '$_temp0';
@@ -5187,5 +5282,2287 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String createFormNowStatus(String value) {
     return 'Сейчас: $value.';
+  }
+
+  @override
+  String createFindPeopleFindPeople(int done, int total) {
+    return 'Find People · $done/$total';
+  }
+
+  @override
+  String get createFindPeopleSaveError => 'Ошибка сохранения';
+
+  @override
+  String get createFindPeopleUnsavedChanges => 'Несохранённые изменения';
+
+  @override
+  String get createFindPeopleContinue => 'Продолжить';
+
+  @override
+  String get createFindPeopleSaveDraft => 'Сохранить черновик';
+
+  @override
+  String get createFindPeopleBack => 'Назад';
+
+  @override
+  String get createFindPeoplePublishFindPeopleRequest =>
+      'Опубликовать запрос Find People';
+
+  @override
+  String get createFindPeopleValidationSummary => 'Итоги проверки';
+
+  @override
+  String get createFindPeopleMeetPubliclyDoNotSendMoney =>
+      'Встречайтесь в публичных местах, не переводите деньги незнакомцам и при необходимости используйте «Пожаловаться/Заблокировать».';
+
+  @override
+  String get createFindPeopleIAcceptFindPeopleSafetyRules =>
+      'Я принимаю правила безопасности Find People *';
+
+  @override
+  String get createFindPeopleRequestOnlyAdults18 =>
+      'Этот запрос только для взрослых 18+ *';
+
+  @override
+  String get createFindPeopleSchedulePublicationUtcOptional =>
+      'Плановая публикация UTC (по желанию)';
+
+  @override
+  String get createFindPeopleCoverImageUrlOptional =>
+      'URL обложки (по желанию)';
+
+  @override
+  String get createFindPeopleMediaPublication => 'Медиа и публикация';
+
+  @override
+  String get createFindPeopleTheseFieldsAreNeverIncludedPublic =>
+      'Эти поля никогда не попадают в публичные данные, аналитику или push-уведомления.';
+
+  @override
+  String get createFindPeoplePrivateHostPreview =>
+      'Приватный предпросмотр организатора';
+
+  @override
+  String get createFindPeopleApproximatePublicArea =>
+      'Приблизительная публичная зона';
+
+  @override
+  String get createFindPeopleAddShortDescription =>
+      'Добавьте краткое описание.';
+
+  @override
+  String get createFindPeopleUntitledFindPeopleRequest =>
+      'Запрос Find People без названия';
+
+  @override
+  String get createFindPeopleMirrorsSafePublicDetailsContract =>
+      'Так выглядит безопасная публичная карточка.';
+
+  @override
+  String get createFindPeoplePublicPreview => 'Публичный предпросмотр';
+
+  @override
+  String get createFindPeopleQuietHoursEnd01439 => 'Конец тихих часов (0–1439)';
+
+  @override
+  String get createFindPeopleQuietHoursStart01439 =>
+      'Начало тихих часов (0–1439)';
+
+  @override
+  String get createFindPeopleAllowAcceptedParticipantsInvite =>
+      'Разрешить принятым участникам приглашать';
+
+  @override
+  String get createFindPeopleConversationPolicy => 'Правила переписки *';
+
+  @override
+  String get createFindPeopleInviteCoHost => 'Пригласить соорганизатора';
+
+  @override
+  String get createFindPeopleUserId => 'ID пользователя';
+
+  @override
+  String createFindPeopleResponsibleHostsDataResponsiblehostuseridsJoin(
+    int count,
+  ) {
+    return 'Ответственные организаторы: $count';
+  }
+
+  @override
+  String get createFindPeoplePublisherUserId =>
+      'ID пользователя-публикующего *';
+
+  @override
+  String get createFindPeopleManagedPageId => 'ID управляемой страницы *';
+
+  @override
+  String get createFindPeoplePublishAs => 'Публиковать как *';
+
+  @override
+  String get createFindPeopleAddExpense => 'Добавить расход';
+
+  @override
+  String get createFindPeopleExpenseItem => 'Статья расходов';
+
+  @override
+  String get createFindPeopleExpenseSplitMode => 'Способ раздела расходов *';
+
+  @override
+  String get createFindPeopleCostNote => 'Заметка о расходах';
+
+  @override
+  String createFindPeopleExpectedSpendPerPerson(String value) {
+    return 'Ожидаемые траты на человека ($value) *';
+  }
+
+  @override
+  String get createFindPeopleExpectedCost => 'Ожидаемые расходы *';
+
+  @override
+  String get createFindPeopleAddQuestion => 'Добавить вопрос';
+
+  @override
+  String get createFindPeopleSafeQuestion => 'Безопасный вопрос';
+
+  @override
+  String get createFindPeopleApplicationQuestions => 'Вопросы в заявке';
+
+  @override
+  String get createFindPeopleRequireAttendanceReconfirmation =>
+      'Требовать повторного подтверждения участия';
+
+  @override
+  String get createFindPeopleWaitlistPolicy => 'Правило листа ожидания';
+
+  @override
+  String get createFindPeopleEnableWaitlist => 'Включить лист ожидания';
+
+  @override
+  String get createFindPeopleVerificationRequirement => 'Требование проверки *';
+
+  @override
+  String get createFindPeopleMaximumSeatsPerApplication =>
+      'Максимум мест в заявке';
+
+  @override
+  String get createFindPeopleAllowPartyApplications =>
+      'Разрешить групповые заявки';
+
+  @override
+  String get createFindPeopleApprovalMode => 'Режим одобрения *';
+
+  @override
+  String get createFindPeopleHostSeats => 'Места организаторов';
+
+  @override
+  String get createFindPeopleTargetGroupSize => 'Желаемый размер группы';
+
+  @override
+  String get createFindPeopleGroupSizeIncludesHostsExpectedSpend =>
+      'Размер группы включает организаторов. Ожидаемые траты — справка, а не оплата организатору.';
+
+  @override
+  String get createFindPeopleGroupParticipation => 'Группа и участие';
+
+  @override
+  String get createFindPeopleBackupMeetingPlan => 'Запасной план встречи';
+
+  @override
+  String get createFindPeoplePrivateAccessSecretReference =>
+      'Приватная ссылка на секрет доступа *';
+
+  @override
+  String get createFindPeopleGoogleMeetZoomDiscord =>
+      'Google Meet, Zoom, Discord…';
+
+  @override
+  String get createFindPeopleOnlineProvider => 'Онлайн-платформа *';
+
+  @override
+  String get createFindPeoplePrivateHomesResidentialAccessDetailsAre =>
+      'Частные дома и данные доступа в жилые здания не допускаются.';
+
+  @override
+  String get createFindPeoplePublicMeetingPlace =>
+      'Это публичное место встречи *';
+
+  @override
+  String get createFindPeopleMeetingInstructionsPrivate =>
+      'Как найти место встречи (приватно)';
+
+  @override
+  String get createFindPeopleExactAddressPrivate => 'Точный адрес (приватно) *';
+
+  @override
+  String createFindPeoplePublicMapPoint(String value) {
+    return 'Публичная точка на карте: $value';
+  }
+
+  @override
+  String get createFindPeopleSetExactPointGenerateSafePublic =>
+      'Задать точную точку и создать безопасную публичную';
+
+  @override
+  String get createFindPeopleExactLongitude => 'Точная долгота *';
+
+  @override
+  String get createFindPeopleExactLatitude => 'Точная широта *';
+
+  @override
+  String get createFindPeopleOldTownNearCentralPark =>
+      'Старый город, у центрального парка';
+
+  @override
+  String get createFindPeoplePublicAreaLabel => 'Название публичной зоны *';
+
+  @override
+  String get createFindPeopleMeetingPlaceName => 'Название места встречи *';
+
+  @override
+  String get createFindPeopleMeetingMode => 'Формат встречи *';
+
+  @override
+  String get createFindPeopleOnlyApproximatePublicAreaAppearsDiscover =>
+      'В Discover видна только приблизительная публичная зона. Точные данные остаются приватными.';
+
+  @override
+  String get createFindPeopleMeetingLocation => 'Место встречи';
+
+  @override
+  String get createFindPeopleMaximumOccurrences252 =>
+      'Максимум повторов (2–52)';
+
+  @override
+  String get createFindPeopleSeriesEndUtc => 'Конец серии UTC';
+
+  @override
+  String get createFindPeopleRecurrenceRule => 'Правило повторения *';
+
+  @override
+  String get createFindPeopleApplicationDeadlineUtc => 'Срок заявок UTC *';
+
+  @override
+  String get createFindPeoplePollResponseDeadlineUtc =>
+      'Срок ответа на опрос UTC *';
+
+  @override
+  String get createFindPeopleRemoveSlot => 'Удалить слот';
+
+  @override
+  String get createFindPeopleAddTimeOption => 'Добавить вариант времени';
+
+  @override
+  String get createFindPeopleSetMeetingTime => 'Задать время встречи';
+
+  @override
+  String get createFindPeopleEndUtc => 'Конец UTC *';
+
+  @override
+  String get createFindPeopleStartUtc => 'Начало UTC *';
+
+  @override
+  String get createFindPeopleScheduleMode => 'Режим расписания *';
+
+  @override
+  String createFindPeopleAllTimesAreStoredUtcDisplayed(String value) {
+    return 'Всё время хранится в UTC и показывается в поясе $value.';
+  }
+
+  @override
+  String get createFindPeopleSchedule => 'Расписание';
+
+  @override
+  String get createFindPeopleHouseRulesNote => 'Заметка о правилах';
+
+  @override
+  String get createFindPeopleHouseRules => 'Правила';
+
+  @override
+  String get createFindPeopleAccessibilityNotes => 'Заметки о доступности';
+
+  @override
+  String get createFindPeopleEquipmentNotes => 'Заметки о снаряжении';
+
+  @override
+  String get createFindPeopleExperienceRequirementsOnePerLine =>
+      'Требования к опыту (по одному в строке)';
+
+  @override
+  String get createFindPeopleCommunicationLanguages => 'Языки общения *';
+
+  @override
+  String get createFindPeopleParticipationGoal => 'Цель участия *';
+
+  @override
+  String get createFindPeopleSkillLevel => 'Уровень навыков *';
+
+  @override
+  String get createFindPeopleFullDescription => 'Полное описание *';
+
+  @override
+  String get createFindPeopleShortDescription => 'Краткое описание *';
+
+  @override
+  String get createFindPeoplePublicContentMustDescribeConcreteActivity =>
+      'Публичный текст должен описывать конкретное занятие без контактов и платёжных ссылок.';
+
+  @override
+  String get createFindPeopleActivityDescription => 'Занятие и описание';
+
+  @override
+  String get createFindPeopleFindPeopleDraftDataBeingPrepared =>
+      'Данные черновика Find People готовятся…';
+
+  @override
+  String get createSessionOnlyWhatMarkedRequiredBlocksPublishing =>
+      'Публикацию блокирует только то, что отмечено «обязательно». Остальное можно добавить сейчас или позже.';
+
+  @override
+  String get createSessionPublish => 'Опубликовать';
+
+  @override
+  String get createSessionSaveDraft => 'Сохранить черновик';
+
+  @override
+  String get createSessionNeverRequiredPublishSesD14 =>
+      'Для публикации никогда не обязательно.';
+
+  @override
+  String get createSessionRecommendedDetailsCategory =>
+      'Рекомендуемые детали для этой категории';
+
+  @override
+  String get createSessionAmenities => 'Удобства';
+
+  @override
+  String get createSessionBlock => 'Закрыть';
+
+  @override
+  String get createSessionBlockedDates => 'Закрытые даты';
+
+  @override
+  String get createSessionMaxPartySize => 'Макс. размер группы';
+
+  @override
+  String get createSessionTermsUrlOptionalHttps =>
+      'Ссылка на условия (по желанию, https://…)';
+
+  @override
+  String get createSessionExternalBookingUrlHttps =>
+      'Внешняя ссылка на бронирование (https://…)';
+
+  @override
+  String get createSessionPricePerSlotEur => 'Цена за слот, EUR';
+
+  @override
+  String get createSessionFree => 'Бесплатно';
+
+  @override
+  String get createSessionPriceBooking => 'Цена и бронирование';
+
+  @override
+  String get createSessionNextOffers => 'Ближайшие предложения';
+
+  @override
+  String get createSessionSlotDuration => 'Длительность слота';
+
+  @override
+  String get createSessionNoWeeklyRuleYetPickPreset =>
+      'Недельного правила пока нет — выберите шаблон выше.';
+
+  @override
+  String get createSessionWhen => 'Когда';
+
+  @override
+  String get createSessionConfirmLocation => 'Подтвердить место';
+
+  @override
+  String get createSessionLongitude => 'Долгота';
+
+  @override
+  String get createSessionLatitude => 'Широта';
+
+  @override
+  String get createSessionCity => 'Город';
+
+  @override
+  String get createSessionAddress => 'Адрес';
+
+  @override
+  String get createSessionResourceNameEGSauna1 =>
+      'Название ресурса (например, «Сауна 1»)';
+
+  @override
+  String get createSessionGalleryImageDescription => 'Описание фото галереи';
+
+  @override
+  String get createSessionCoverImageDescription => 'Описание обложки';
+
+  @override
+  String get createSessionContentLanguage => 'Язык контента';
+
+  @override
+  String get createSessionCoverImageUrl => 'URL обложки';
+
+  @override
+  String get createSessionFullDescription => 'Полное описание';
+
+  @override
+  String get createSessionShortDescription => 'Краткое описание';
+
+  @override
+  String get createSessionSubcategory => 'Подкатегория';
+
+  @override
+  String get createSessionCategory => 'Категория';
+
+  @override
+  String get createSessionTitle => 'Название';
+
+  @override
+  String get createSessionWhatWhere => 'Что и где';
+
+  @override
+  String get createSessionLoadingBookableSessionDraft =>
+      'Загружается черновик бронируемого сеанса…';
+
+  @override
+  String get createClassPublish => 'Опубликовать';
+
+  @override
+  String get createClassSaveDraft => 'Сохранить черновик';
+
+  @override
+  String get createClassEnrollmentState => 'Статус записи';
+
+  @override
+  String get createClassEnrollmentLinkHttps => 'Ссылка для записи (https)';
+
+  @override
+  String get createClassEnrollmentOrganiserSite =>
+      'Запись на сайте организатора';
+
+  @override
+  String get createClassPriceCovers => 'Что входит в цену';
+
+  @override
+  String createClassAmountCents(String value) {
+    return 'Сумма в центах ($value)';
+  }
+
+  @override
+  String get createClassPrice => 'Цена';
+
+  @override
+  String get createClassDeclaredGroupSizeOptional =>
+      'Заявленный размер группы (по желанию)';
+
+  @override
+  String get createClassWhatBringKnowOnePerLine =>
+      'Что взять или знать (по одному в строке)';
+
+  @override
+  String get createClassIncludedMaterialsOnePerLine =>
+      'Что входит (по одному в строке)';
+
+  @override
+  String get createClassAddDate => 'Добавить дату';
+
+  @override
+  String get createClassRemoveDate => 'Удалить дату';
+
+  @override
+  String get createClassLocalTimeDoesNotExistAmbiguous =>
+      'Такого местного времени нет или оно неоднозначно';
+
+  @override
+  String get createClassPublicArea => 'Публичная зона';
+
+  @override
+  String get createClassShowOnlyAreaPublicly =>
+      'Публично показывать только район';
+
+  @override
+  String get createClassConfirmLocation => 'Подтвердить место';
+
+  @override
+  String get createClassLocationConfirmed => 'Место подтверждено';
+
+  @override
+  String get createClassOnlineProvider => 'Онлайн-платформа';
+
+  @override
+  String get createClassDelivery => 'Формат проведения';
+
+  @override
+  String createClassTimesAre(String value) {
+    return 'Время указано в поясе $value';
+  }
+
+  @override
+  String get createClassFixedSeries => 'Фиксированная серия';
+
+  @override
+  String get createClassSingleClass => 'Разовое занятие';
+
+  @override
+  String get createClassClear => 'Очистить';
+
+  @override
+  String get createClassNotPublishedClearExplicitly =>
+      'Оно не публикуется; очистите его явно.';
+
+  @override
+  String get createClassDraftHasOldSchedule =>
+      'В этом черновике старое расписание';
+
+  @override
+  String get createClassInstructorBio => 'О преподавателе';
+
+  @override
+  String get createClassInstructorName => 'Имя преподавателя';
+
+  @override
+  String get createClassWhatParticipantsTakeHome =>
+      'Что участники унесут с собой';
+
+  @override
+  String get createClassNoPrerequisites => 'Без требований';
+
+  @override
+  String get createClassProgrammeStepsOnePerLine =>
+      'Шаги программы (по одному в строке)';
+
+  @override
+  String get createClassGalleryImageDescription => 'Описание фото галереи';
+
+  @override
+  String get createClassCoverImageDescription => 'Описание обложки';
+
+  @override
+  String get createClassContentLanguage => 'Язык контента';
+
+  @override
+  String get createClassCoverImage => 'Обложка';
+
+  @override
+  String get createClassFullDescription => 'Полное описание';
+
+  @override
+  String get createClassShortDescription => 'Краткое описание';
+
+  @override
+  String get createClassOfferingKind => 'Тип занятия';
+
+  @override
+  String get createClassClassDraftWasSavedByNewer =>
+      'Этот черновик занятия сохранён более новой версией приложения и доступен только для чтения.';
+
+  @override
+  String get createRouteGpxOperationCouldNotCompleted =>
+      'Не удалось выполнить операцию с GPX.';
+
+  @override
+  String get createRouteChooseOneContinuousTrackRouteDraft =>
+      'Выберите один непрерывный трек для этого черновика.';
+
+  @override
+  String get createRouteSavingGpxFilesNotAvailableDevice =>
+      'Сохранение GPX-файлов на этом устройстве пока недоступно.';
+
+  @override
+  String get createRouteOnlyOneContinuousRouteTrackCan =>
+      'Экспортировать можно только один непрерывный трек.';
+
+  @override
+  String get createRouteGpxTrackContainsTooManyPoints =>
+      'В GPX-треке слишком много точек.';
+
+  @override
+  String get createRouteGpxFileDamagedHasUnsupportedStructure =>
+      'GPX-файл повреждён или имеет неподдерживаемую структуру.';
+
+  @override
+  String get createRouteChooseValidGpxFile => 'Выберите корректный GPX-файл.';
+
+  @override
+  String get createRouteGpxFileTooLarge => 'GPX-файл слишком большой.';
+
+  @override
+  String get createRouteDismiss => 'Закрыть';
+
+  @override
+  String get createRouteImportTrack => 'Импортировать трек';
+
+  @override
+  String get createRouteCancel => 'Отмена';
+
+  @override
+  String get createRouteTheyRemainOffTrackUntilReviewed =>
+      'Они остаются вне трека, пока их не проверят и не разместят.';
+
+  @override
+  String get createRouteReviewTheseConnectorsMapBeforePublishing =>
+      'Перед публикацией проверьте эти соединения на карте.';
+
+  @override
+  String get createRouteChooseOneTrack => 'Выберите один трек';
+
+  @override
+  String get createRoutePrivateMetadataTimestampsWillRemovedDuring =>
+      'При импорте удалятся приватные метаданные и метки времени.';
+
+  @override
+  String get createRouteRouteBuilder => 'Конструктор маршрута';
+
+  @override
+  String get createRouteReplace => 'Заменить';
+
+  @override
+  String get createRouteCurrentGeometryWillRemainAvailableThrough =>
+      'Текущую форму можно будет вернуть через «Отменить».';
+
+  @override
+  String get createRouteReplaceExistingTrack => 'Заменить текущий трек?';
+
+  @override
+  String get createRouteContinue => 'Продолжить';
+
+  @override
+  String get createRouteBack => 'Назад';
+
+  @override
+  String get createRouteMarkedTrail => 'Маркированная тропа';
+
+  @override
+  String get createRouteHard => 'Сложный';
+
+  @override
+  String get createRouteModerate => 'Средний';
+
+  @override
+  String get createRouteEasy => 'Лёгкий';
+
+  @override
+  String get createRouteDifficulty => 'Сложность';
+
+  @override
+  String get createRouteConditions => 'Условия';
+
+  @override
+  String get createRouteSubcategory => 'Подкатегория';
+
+  @override
+  String get createRouteCategory => 'Категория';
+
+  @override
+  String get createRouteTaxonomy => 'Категория';
+
+  @override
+  String get createRouteCoverImageUrl => 'URL обложки';
+
+  @override
+  String get createRouteFullDescription => 'Полное описание';
+
+  @override
+  String get createRouteShortDescription => 'Краткое описание *';
+
+  @override
+  String get createRouteRouteDetails => 'Детали маршрута';
+
+  @override
+  String get createRoutePreferUnpavedTrails => 'Предпочитать грунтовые тропы';
+
+  @override
+  String get createRouteAvoidStairs => 'Избегать лестниц';
+
+  @override
+  String get createRouteRoutingPreferences => 'Настройки прокладки';
+
+  @override
+  String get createRouteLoop => 'Кольцо';
+
+  @override
+  String get createRouteOneWay => 'В одну сторону';
+
+  @override
+  String get createRouteRouteShape => 'Форма маршрута';
+
+  @override
+  String get createRouteProfile => 'Профиль';
+
+  @override
+  String get createRouteBundledMeAparksGraphCurrentlyValidates =>
+      'Встроенная сеть Межапаркса пока локально проверяет пешие маршруты.';
+
+  @override
+  String get createRouteMovementProfile => 'Профиль движения';
+
+  @override
+  String get createRouteSaveFile => 'Сохранить файл';
+
+  @override
+  String get createRoutePrivateMetadataNotesTimestampsAreNever =>
+      'Приватные метаданные, заметки и метки времени никогда не экспортируются.';
+
+  @override
+  String get createRouteIncludeRoutePoi => 'Включить точки интереса';
+
+  @override
+  String get createRouteUnavailableTrack => 'Недоступно для этого трека';
+
+  @override
+  String get createRouteIncludeElevation => 'Включить высоту';
+
+  @override
+  String get createRouteExportGpx => 'Экспорт GPX';
+
+  @override
+  String get createRouteExportOnlyTrackOptionalRoutePoi =>
+      'Экспортируются только трек и, по желанию, точки интереса. ID черновика, заметки, данные безопасности и метки времени не включаются.';
+
+  @override
+  String get createRouteInspectGpxFileLocallyChooseOne =>
+      'Проверьте GPX-файл локально, выберите один трек и удалите приватные метаданные.';
+
+  @override
+  String get createRouteImportGpx => 'Импорт GPX';
+
+  @override
+  String get createRouteRecordMovementDeviceThenReviewAccuracy =>
+      'Запишите движение на этом устройстве, затем проверьте точность, разрывы и обрезку для приватности.';
+
+  @override
+  String get createRouteRecordWithGps => 'Записать по GPS';
+
+  @override
+  String get createRouteDrawOneContinuousLineKeepIts =>
+      'Нарисуйте одну непрерывную линию и сохраните её точную форму.';
+
+  @override
+  String get createRouteFreehand => 'От руки';
+
+  @override
+  String get createRoutePlaceAnchorsConnectThemAlongOffline =>
+      'Расставьте точки и соедините их по офлайн-сети троп.';
+
+  @override
+  String get createRoutePoints => 'Точки';
+
+  @override
+  String get createRouteAllMethodsUseOneCanonicalRoute =>
+      'Все способы используют одну модель маршрута. Это демо позволяет точки и рисование от руки без платных сервисов.';
+
+  @override
+  String get createRouteHowWillYouCreateTrack => 'Как вы создадите трек?';
+
+  @override
+  String get createRouteEditorWillReadyMoment => 'Редактор скоро будет готов.';
+
+  @override
+  String get createRoutePreparingRouteDraft => 'Готовится черновик маршрута…';
+
+  @override
+  String get createRouteRestoringLatestPersistedRevision =>
+      'Восстанавливается последняя сохранённая версия.';
+
+  @override
+  String get createRouteRetry => 'Повторить';
+
+  @override
+  String get createRouteOfflineMapCouldNotLoaded =>
+      'Не удалось загрузить офлайн-карту';
+
+  @override
+  String get createRouteNoNetworkPaidRoutingCallRequired =>
+      'Сеть и платная прокладка маршрута не нужны.';
+
+  @override
+  String get createRouteLoadingOfflineTrailEditor =>
+      'Загружается офлайн-редактор троп…';
+
+  @override
+  String get createRouteGapNeedsTrailRoutingBeforeCan =>
+      'Для этого разрыва сначала нужна прокладка по тропам.';
+
+  @override
+  String get createRouteReviewEveryTrackGapBeforeContinuing =>
+      'Проверьте каждый разрыв трека, прежде чем продолжить.';
+
+  @override
+  String get createRouteProtectedRecordingCouldNotSavedRecording =>
+      'Не удалось сохранить защищённую запись. Запись безопасно остановлена.';
+
+  @override
+  String get createRouteNotEnoughReliableMovementWasRecorded =>
+      'Записано слишком мало надёжного движения. Удалите запись и попробуйте снова.';
+
+  @override
+  String get createRouteSafetyPointLimitWasReachedFinish =>
+      'Достигнут лимит точек. Завершите и проверьте запись.';
+
+  @override
+  String get createRouteDeviceLocationServicesAreSwitchedOff =>
+      'Службы геолокации на устройстве выключены.';
+
+  @override
+  String get createRouteBackgroundAccessWasNotGrantedTurn =>
+      'Доступ в фоне не выдан. Отключите запись при заблокированном экране или разрешите её в настройках.';
+
+  @override
+  String get createRouteLocationAccessDisabledAppSettings =>
+      'Доступ к геолокации отключён в настройках приложения.';
+
+  @override
+  String get createRouteLocationPermissionWasNotGranted =>
+      'Разрешение на геолокацию не выдано.';
+
+  @override
+  String get createRouteYourSavedRecordingPreservedWhenRecovery =>
+      'Сохранённая запись остаётся, если её можно восстановить.';
+
+  @override
+  String get createRouteInspectGapsAccuracyPrivacyTrimmingBefore =>
+      'Перед использованием трека проверьте разрывы, точность и обрезку для приватности.';
+
+  @override
+  String get createRouteFilteringUnsafeNoisyGpsPoints =>
+      'Отфильтровываются ненадёжные и шумные точки GPS.';
+
+  @override
+  String get createRouteReadingProtectedLocalJournal =>
+      'Читается защищённый локальный журнал.';
+
+  @override
+  String get createRoutePauseStaysAsExplicitGapWill =>
+      'Пауза остаётся явным разрывом и никогда не соединяется молча.';
+
+  @override
+  String get createRouteKeepRechargeOpenWhileMovingAlong =>
+      'Держите Recharge открытым, пока двигаетесь по маршруту.';
+
+  @override
+  String get createRouteRecordingContinuesWithVisibleSystemIndicator =>
+      'Запись продолжается с видимым системным индикатором.';
+
+  @override
+  String get createRouteRechargeRequestsLocationOnlyRouteRecording =>
+      'Recharge запрашивает геолокацию только для записи маршрута.';
+
+  @override
+  String get createRouteWalkRunRideRoutePointsStay =>
+      'Идите, бегите или едьте по маршруту. Точки хранятся зашифрованными на устройстве, пока вы не примените трек.';
+
+  @override
+  String get createRouteRecordingReady => 'Запись готова';
+
+  @override
+  String get createRouteProcessingTrack => 'Обрабатывается трек…';
+
+  @override
+  String get createRouteRecoveringRecording => 'Восстанавливается запись…';
+
+  @override
+  String get createRouteRecordingPaused => 'Запись на паузе';
+
+  @override
+  String get createRouteRecordingRoute => 'Запись маршрута';
+
+  @override
+  String get createRouteCheckingGpsAccess => 'Проверяется доступ к GPS…';
+
+  @override
+  String get createRouteOpenAppSettings => 'Открыть настройки приложения';
+
+  @override
+  String get createRouteRecordingActive => 'Идёт запись';
+
+  @override
+  String get createRouteConnectDirectly => 'Соединить напрямую';
+
+  @override
+  String createRouteRecordedRoutePreviewTrackSectionsGaps(
+    int count,
+    int total,
+  ) {
+    return 'Предпросмотр записанного маршрута: участков $count, разрывов $total';
+  }
+
+  @override
+  String get createRouteDelete => 'Удалить';
+
+  @override
+  String get createRouteRecoveryJournalAllRecordedPointsWill =>
+      'Журнал восстановления и все записанные точки будут удалены.';
+
+  @override
+  String get createRouteDeleteGpsRecording => 'Удалить GPS-запись?';
+
+  @override
+  String get createRouteUseTrack => 'Использовать этот трек';
+
+  @override
+  String get createRouteRouteMustStayContinuousConfirmEach =>
+      'Маршрут должен быть непрерывным. Подтвердите каждое прямое соединение или запишите недостающий участок заново.';
+
+  @override
+  String get createRouteTrackGaps => 'Разрывы трека';
+
+  @override
+  String get createRouteHideRouteEnd => 'Скрыть конец маршрута';
+
+  @override
+  String get createRouteHideRouteStart => 'Скрыть начало маршрута';
+
+  @override
+  String get createRoutePrivacyTrim => 'Обрезка для приватности';
+
+  @override
+  String get createRouteReviewRecordedTrack => 'Проверить записанный трек';
+
+  @override
+  String get createRouteDeleteRecording => 'Удалить запись';
+
+  @override
+  String get createRouteFinishReview => 'Завершить и проверить';
+
+  @override
+  String get createRouteResumeRecording => 'Продолжить запись';
+
+  @override
+  String get createRouteFinish => 'Завершить';
+
+  @override
+  String get createRoutePause => 'Пауза';
+
+  @override
+  String get createRouteStartRecording => 'Начать запись';
+
+  @override
+  String get createRouteRequiresBackgroundLocationPermissionShowsSystem =>
+      'Нужно разрешение на геолокацию в фоне; система показывает индикатор.';
+
+  @override
+  String get createRouteContinueWhileScreenLocked =>
+      'Продолжать при заблокированном экране';
+
+  @override
+  String get createRouteRecoveredSafelyAfterPreviousSessionReview =>
+      'Безопасно восстановлено после прошлой сессии. Проверьте перед продолжением.';
+
+  @override
+  String get createRouteRemoveWaypoint => 'Удалить путевую точку';
+
+  @override
+  String get createRouteAttachAnchor => 'Привязать к точке';
+
+  @override
+  String get createRouteAddViewpointFromAnchorMenu =>
+      'Добавьте смотровую точку из меню точки.';
+
+  @override
+  String get createRouteSplitAtMidpoint => 'Разделить посередине';
+
+  @override
+  String get createRouteUseIntentionalDirectLine =>
+      'Использовать намеренную прямую';
+
+  @override
+  String get createRouteRetryRouting => 'Повторить прокладку';
+
+  @override
+  String get createRouteSegmentActions => 'Действия с участком';
+
+  @override
+  String get createRouteRemoveAnchor => 'Удалить точку';
+
+  @override
+  String get createRouteAddViewpoint => 'Добавить смотровую точку';
+
+  @override
+  String get createRouteAnchorActions => 'Действия с точкой';
+
+  @override
+  String get createRouteMoveAnchorEast => 'Сдвинуть точку на восток';
+
+  @override
+  String get createRouteMoveAnchorWest => 'Сдвинуть точку на запад';
+
+  @override
+  String get createRouteMoveAnchorSouth => 'Сдвинуть точку на юг';
+
+  @override
+  String get createRouteMoveAnchorNorth => 'Сдвинуть точку на север';
+
+  @override
+  String get createRouteNoAnchorsYet => 'Точек пока нет.';
+
+  @override
+  String get createRouteEveryActionAvailableAsLabelledControl =>
+      'Каждое действие доступно как подписанный элемент управления.';
+
+  @override
+  String get createRouteAddAnchor => 'Добавить точку';
+
+  @override
+  String get createRouteLongitude => 'Долгота';
+
+  @override
+  String get createRouteLatitude => 'Широта';
+
+  @override
+  String get createRouteCoordinatesProvideKeyboardScreenReaderAlternative =>
+      'Координаты — альтернатива для клавиатуры и экранных дикторов.';
+
+  @override
+  String get createRouteAddAnchorWithoutMapGestures =>
+      'Добавить точку без жестов на карте';
+
+  @override
+  String get createRouteLastSaved => 'Последнее сохранённое';
+
+  @override
+  String get createRouteRedo => 'Повторить';
+
+  @override
+  String get createRouteUndo => 'Отменить';
+
+  @override
+  String get createRouteTapMapAddAnchorsLocalGraph =>
+      'Нажимайте на карту, чтобы добавить точки. Локальная сеть соединит их по доступным тропам.';
+
+  @override
+  String get createRouteDrawOneContinuousLineExistingGeometry =>
+      'Нарисуйте одну непрерывную линию. Текущая форма заменится только после подтверждения.';
+
+  @override
+  String get createRouteOfflineTrailEditor => 'Офлайн-редактор троп';
+
+  @override
+  String get createRouteSelectedDifficultyDiffersFromCalculatedRecommendation =>
+      'Выбранная сложность отличается от рассчитанной рекомендации и требует проверки.';
+
+  @override
+  String get createRouteRouteQuality => 'Качество маршрута';
+
+  @override
+  String get createRouteYourProfileDoesNotHavePermission =>
+      'У вашего профиля нет права отправить этот маршрут.';
+
+  @override
+  String get createRouteSubmitRouteReview => 'Отправить маршрут на проверку';
+
+  @override
+  String get createRoutePublishRoute => 'Опубликовать маршрут';
+
+  @override
+  String get createRouteRestoreLastSavedRevision =>
+      'Восстановить последнюю сохранённую версию';
+
+  @override
+  String get createRouteSaveDraft => 'Сохранить черновик';
+
+  @override
+  String get createRouteRoutingProgress => 'Идёт прокладка…';
+
+  @override
+  String get createRouteInvestorDemoVersionUsesBundledOffline =>
+      'Демо: эта версия использует встроенную офлайн-сеть троп и помечена как демо. Платная прокладка не используется.';
+
+  @override
+  String get createRouteRouteDraftStructurallyReady =>
+      'Черновик маршрута структурно готов';
+
+  @override
+  String get createRouteOfflineTrailMapTapAddRoute =>
+      'Офлайн-карта троп. Нажмите, чтобы добавить точку маршрута.';
+
+  @override
+  String get createRouteOfflineTrailMapDrawContinuousRoute =>
+      'Офлайн-карта троп. Нарисуйте непрерывный маршрут одним пальцем.';
+
+  @override
+  String get createRouteNoRouteVersionsAreWaitingReview =>
+      'Нет версий маршрутов на проверке.';
+
+  @override
+  String get createRouteModerateRouteCapabilityRequired =>
+      'Нужно право модерировать маршруты.';
+
+  @override
+  String get createRouteReject => 'Отклонить';
+
+  @override
+  String get createRouteReasonCodeConciseReason =>
+      'Код причины или краткая причина';
+
+  @override
+  String get createRouteRejectRouteVersion => 'Отклонить версию маршрута';
+
+  @override
+  String get createRouteApprove => 'Одобрить';
+
+  @override
+  String get createRouteAccept => 'Принять';
+
+  @override
+  String get createRouteDefer => 'Отложить';
+
+  @override
+  String get createRouteConfirm => 'Подтвердить';
+
+  @override
+  String get createRouteReasonCode => 'Код причины';
+
+  @override
+  String get createRouteSafetyDecisionReason =>
+      'Причина решения по безопасности';
+
+  @override
+  String get createRouteCandidateDecisionReason =>
+      'Причина решения по кандидату';
+
+  @override
+  String get createRouteNewRouteRevisionDraftWasCreated =>
+      'Создан черновик новой версии маршрута. Опубликованная геометрия не изменена.';
+
+  @override
+  String get createRouteSafetyReports => 'Сообщения о безопасности';
+
+  @override
+  String get createRouteMapUpdateCandidates => 'Кандидаты на обновление карты';
+
+  @override
+  String get createRoutePublicationReview => 'Проверка публикаций';
+
+  @override
+  String get createRouteRefresh => 'Обновить';
+
+  @override
+  String get createRouteRouteModeration => 'Модерация маршрутов';
+
+  @override
+  String get createScenarioPlannedScheduleNotLive =>
+      'Плановое расписание, не в реальном времени.';
+
+  @override
+  String get createScenarioPlannedServiceSelectedPreviewNotApplied =>
+      'Плановый рейс выбран для предпросмотра. К сценарию не применён.';
+
+  @override
+  String get createScenarioNoDirectPlannedServicesFound =>
+      'Прямых плановых рейсов не найдено.';
+
+  @override
+  String get createScenarioSearchingDirectPlannedServices =>
+      'Ищутся прямые плановые рейсы.';
+
+  @override
+  String get createScenarioScheduleSearchFailedTryAgain =>
+      'Поиск по расписанию не удался. Попробуйте ещё раз.';
+
+  @override
+  String get createScenarioStopSearchFailedTryAgain =>
+      'Поиск остановок не удался. Попробуйте ещё раз.';
+
+  @override
+  String get createScenarioCompleteProviderStopsDateTimeSelection =>
+      'Выберите источник, остановки, дату и время.';
+
+  @override
+  String get createScenarioNewScheduleCouldNotSavedExisting =>
+      'Не удалось сохранить новое расписание. Прежнее сохранено.';
+
+  @override
+  String get createScenarioCachedScheduleCouldNotRead2 =>
+      'Не удалось прочитать сохранённое расписание.';
+
+  @override
+  String get createScenarioDownloadedScheduleInvalidWasNotSaved =>
+      'Скачанное расписание некорректно и не сохранено.';
+
+  @override
+  String get createScenarioScheduleCouldNotDownloaded =>
+      'Не удалось скачать расписание.';
+
+  @override
+  String get createScenarioYouAppearOfflineCachedDataRemains =>
+      'Похоже, вы офлайн. Сохранённые данные доступны.';
+
+  @override
+  String get createScenarioScheduleDownloadsAreDisabledCachedData =>
+      'Скачивание расписаний отключено. Сохранённые данные доступны.';
+
+  @override
+  String get createScenarioDownloadSelectUsableCachedScheduleFirst =>
+      'Сначала скачайте или выберите пригодное сохранённое расписание.';
+
+  @override
+  String get createScenarioChooseValidScheduleProvider =>
+      'Выберите корректный источник расписания.';
+
+  @override
+  String get createScenarioNoOfficialScheduleProvidersAreConfigured =>
+      'Источники официальных расписаний не настроены.';
+
+  @override
+  String get createScenarioOfficialScheduleTemporarilyUnavailable =>
+      'Официальное расписание временно недоступно.';
+
+  @override
+  String get createScenarioCachedScheduleCouldNotRead =>
+      'Не удалось прочитать сохранённое расписание.';
+
+  @override
+  String get createScenarioCachedScheduleDamagedCannotUsed =>
+      'Сохранённое расписание повреждено, использовать его нельзя.';
+
+  @override
+  String get createScenarioNoScheduleDownloadedProvider =>
+      'Для этого источника расписание не скачано.';
+
+  @override
+  String get createScenarioCachedScheduleFreshnessUnknownRecheckBefore =>
+      'Актуальность сохранённого расписания неизвестна. Перепроверьте перед поездкой.';
+
+  @override
+  String get createScenarioCheckingCachedSchedule =>
+      'Проверяется сохранённое расписание…';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveSelectionNot =>
+      'Плановое расписание · не в реальном времени. Этот выбор ещё не применён к сценарию.';
+
+  @override
+  String get createScenarioSelectionPreview => 'Предпросмотр выбора';
+
+  @override
+  String get createScenarioScheduleSearchFailed =>
+      'Поиск по расписанию не удался.';
+
+  @override
+  String get createScenarioNoDirectServicesFoundAfterSelected =>
+      'После выбранного времени прямых рейсов нет.';
+
+  @override
+  String get createScenarioChooseDate => 'Выбрать дату';
+
+  @override
+  String get createScenarioScenarioDateMissing => 'Дата сценария не указана';
+
+  @override
+  String get createScenarioRetry => 'Повторить';
+
+  @override
+  String get createScenarioUseCached => 'Использовать сохранённое';
+
+  @override
+  String get createScenarioUpdateSchedule => 'Обновить расписание';
+
+  @override
+  String get createScenarioDownloadSchedule => 'Скачать расписание';
+
+  @override
+  String get createScenarioScheduleProvider => 'Источник расписания';
+
+  @override
+  String get createScenarioOfficialScheduleProvidersAreUnavailable =>
+      'Источники официальных расписаний недоступны.';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveDelaysTickets =>
+      'Плановое расписание · не в реальном времени. Задержки, билеты, цены, места и пересадки не подтверждены. Перепроверьте перед поездкой.';
+
+  @override
+  String get createScenarioEnterScheduleManually => 'Ввести расписание вручную';
+
+  @override
+  String get createScenarioApplyCreatesOneUndoableScenarioChange =>
+      'Применение создаёт одно изменение сценария, которое можно отменить.';
+
+  @override
+  String get createScenarioServiceHasNoValidStopCoordinates =>
+      'У этого рейса нет корректных координат остановок, применить его безопасно нельзя.';
+
+  @override
+  String get createScenarioApplyScenario => 'Применить к сценарию';
+
+  @override
+  String get createScenarioChooseDateCheckOfficialSchedule =>
+      'Выберите дату, чтобы проверить официальное расписание.';
+
+  @override
+  String get createScenarioFindDirectServices => 'Найти прямые рейсы';
+
+  @override
+  String get createScenarioDownloadScheduleBeforeSearchingStops =>
+      'Перед поиском остановок скачайте расписание.';
+
+  @override
+  String get createScenarioDestination => 'Куда';
+
+  @override
+  String get createScenarioOrigin => 'Откуда';
+
+  @override
+  String get createScenarioCloseOfficialSchedule =>
+      'Закрыть официальное расписание';
+
+  @override
+  String get createScenarioOfficialSchedule => 'Официальное расписание';
+
+  @override
+  String get createScenarioStaticTimetableSnapshotNotLive =>
+      'Статический снимок расписания · не в реальном времени.';
+
+  @override
+  String get createScenarioFindOfficialSchedule =>
+      'Найти в официальном расписании';
+
+  @override
+  String get createScenarioWorksOfflineStaysEditable =>
+      'Работает офлайн и остаётся редактируемым.';
+
+  @override
+  String get createScenarioEnterManually => 'Ввести вручную';
+
+  @override
+  String get createScenarioAddPlannedTransport =>
+      'Добавить запланированный транспорт';
+
+  @override
+  String get createScenarioPublicTransport => 'Общественный транспорт';
+
+  @override
+  String get createScenarioOwnCar => 'Своя машина';
+
+  @override
+  String get createScenarioProviderValue => 'Значение источника';
+
+  @override
+  String get createScenarioEstimatedTime => 'Оценочное время';
+
+  @override
+  String get createScenarioEnteredManually => 'Введено вручную';
+
+  @override
+  String get createScenarioPlannedScheduleNotLive2 =>
+      'Плановое расписание · не в реальном времени';
+
+  @override
+  String get createScenarioCustomLocation => 'Своё место';
+
+  @override
+  String get createScenarioPlannedTransport => 'Запланированный транспорт';
+
+  @override
+  String get createScenarioAddAtLeastTwoIndependentStops =>
+      'Добавьте хотя бы две независимые остановки — объекты каталога или свои блоки времени.';
+
+  @override
+  String get createScenarioLocationDataRequiredManualLeg =>
+      'Для ручного отрезка нужны данные мест';
+
+  @override
+  String get createScenarioScenarioChangedRecheckBeforeReplacing =>
+      'Сценарий изменился. Перепроверьте перед заменой.';
+
+  @override
+  String get createScenarioSavedScheduleReplaced =>
+      'Сохранённое расписание заменено.';
+
+  @override
+  String get createScenarioRecheckSchedule => 'Перепроверить расписание';
+
+  @override
+  String get createScenarioScenarioChangedReviewServiceTryAgain =>
+      'Сценарий изменился. Проверьте рейс и попробуйте снова.';
+
+  @override
+  String get createScenarioOfficialScheduleAddedScenario =>
+      'Официальное расписание добавлено в сценарий.';
+
+  @override
+  String get createScenarioReview => 'Проверить';
+
+  @override
+  String get createScenarioUseYourPrimaryTransportEnterHonest =>
+      'Используйте основной транспорт или введите честные значения вручную.';
+
+  @override
+  String get createScenarioTravelBetweenStops => 'Дорога между остановками';
+
+  @override
+  String get createScenarioTimeLock => 'Фиксированное время';
+
+  @override
+  String get createScenarioOrderLock => 'Фиксированный порядок';
+
+  @override
+  String get createScenarioOptional => 'По желанию';
+
+  @override
+  String get createScenarioMandatory => 'Обязательно';
+
+  @override
+  String get createScenarioRemove => 'Удалить';
+
+  @override
+  String get createScenarioMoveDown => 'Ниже';
+
+  @override
+  String get createScenarioMoveUp => 'Выше';
+
+  @override
+  String get createScenarioAddCustomTimeBlock => 'Добавить свой блок времени';
+
+  @override
+  String get createScenarioBusTrainTimesAreStoredAs =>
+      'Время автобусов и поездов хранится как плановое расписание · не в реальном времени.';
+
+  @override
+  String get createScenarioAddCustomStop => 'Добавить свою остановку';
+
+  @override
+  String get createScenarioAdd => 'Добавить';
+
+  @override
+  String get createScenarioFindCatalogPlaceEventActivityRoute =>
+      'Найти в каталоге место, событие, активность или маршрут';
+
+  @override
+  String get createScenarioRedo => 'Повторить';
+
+  @override
+  String get createScenarioUndo => 'Отменить';
+
+  @override
+  String get createScenarioFeedRetrievedAt => 'Данные получены';
+
+  @override
+  String get createScenarioFeedVersion => 'Версия данных';
+
+  @override
+  String get createScenarioServiceLabel => 'Название рейса';
+
+  @override
+  String get createScenarioArrivalTime => 'Время прибытия';
+
+  @override
+  String get createScenarioDepartureTime => 'Время отправления';
+
+  @override
+  String get createScenarioDestinationStop => 'Остановка прибытия';
+
+  @override
+  String get createScenarioOriginStop => 'Остановка отправления';
+
+  @override
+  String get createScenarioServiceCalendar => 'Календарь рейсов';
+
+  @override
+  String get createScenarioSavedItemWasKeptUnchangedCannot =>
+      'Сохранённый пункт не изменён, автоматически перепроверить его нельзя.';
+
+  @override
+  String get createScenarioSavedItemWasKeptUnchangedBecause =>
+      'Сохранённый пункт не изменён: данные сохранённого расписания недоступны.';
+
+  @override
+  String get createScenarioSavedItemWasKeptUnchangedRecheck =>
+      'Сохранённый пункт не изменён. Перепроверьте позже или введите транспорт вручную.';
+
+  @override
+  String get createScenarioReviewEveryDifferenceBeforeReplacingSaved =>
+      'Перед заменой снимка проверьте каждое отличие.';
+
+  @override
+  String get createScenarioCachedOfficialScheduleMatchesSavedSnapshot =>
+      'Сохранённое официальное расписание совпадает со снимком. Это по-прежнему не реальное время.';
+
+  @override
+  String get createScenarioSavedDataIncomplete => 'Сохранённые данные неполные';
+
+  @override
+  String get createScenarioRecheckUnavailable => 'Перепроверка недоступна';
+
+  @override
+  String get createScenarioServiceNotFound => 'Рейс не найден';
+
+  @override
+  String get createScenarioNoScheduleChangesFound =>
+      'Изменений в расписании нет';
+
+  @override
+  String get createScenarioClose => 'Закрыть';
+
+  @override
+  String get createScenarioReplaceSavedSchedule =>
+      'Заменить сохранённое расписание';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveReplaceChanges =>
+      'Плановое расписание · не в реальном времени. Замена меняет только сохранённый снимок и только после подтверждения.';
+
+  @override
+  String get createScenarioChangesCachedOfficialSchedule =>
+      'Изменения в сохранённом официальном расписании';
+
+  @override
+  String get createScenarioCloseScheduleRecheck =>
+      'Закрыть перепроверку расписания';
+
+  @override
+  String get createScenarioScheduleRecheck => 'Перепроверка расписания';
+
+  @override
+  String get createScenarioDiscard => 'Отбросить';
+
+  @override
+  String get createScenarioEditPrompt => 'Изменить запрос';
+
+  @override
+  String get createScenarioStillUnverified => 'Пока не проверено';
+
+  @override
+  String get createScenarioPreviewReadinessNeedsYourReview =>
+      'Готовность предпросмотра: нужна ваша проверка';
+
+  @override
+  String get createScenarioPreviewReadinessReadyReview =>
+      'Готовность предпросмотра: можно проверять';
+
+  @override
+  String get createScenarioCatalogSnapshot => 'Снимок каталога';
+
+  @override
+  String get createScenarioProposedStops => 'Предложенные остановки';
+
+  @override
+  String get createScenarioGeneratePreview => 'Создать предпросмотр';
+
+  @override
+  String get createScenarioBuildingPreview => 'Собирается предпросмотр…';
+
+  @override
+  String get createScenarioUseExample => 'Взять пример';
+
+  @override
+  String get createScenarioRelaxedAfternoonRigaWithCultureDinner =>
+      'Неспешный день в Риге с культурой и ужином';
+
+  @override
+  String get createScenarioWhatWouldYouLikeDo => 'Чем хотите заняться?';
+
+  @override
+  String get createScenarioDescribeMoodPrioritiesDemoUsesOnly =>
+      'Опишите настроение и приоритеты. Это демо использует только локальный каталог Recharge и не обращается к внешнему ИИ.';
+
+  @override
+  String get createScenarioLocalDemo => 'Локальное демо';
+
+  @override
+  String get createScenarioBuildWithAi => 'Собрать с ИИ';
+
+  @override
+  String get createScenarioSaveTravel => 'Сохранить дорогу';
+
+  @override
+  String get createScenarioTravelMode => 'Способ передвижения';
+
+  @override
+  String get createScenarioManualValuesStayLockedUntilYou =>
+      'Значения, введённые вручную, зафиксированы, пока вы их не измените.';
+
+  @override
+  String get createScenarioAddScenario => 'Добавить в сценарий';
+
+  @override
+  String get createScenarioServiceRoute => 'Рейс или маршрут *';
+
+  @override
+  String get createScenarioTransport => 'Транспорт';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveRecheckService =>
+      'Плановое расписание · не в реальном времени. Перепроверьте рейс перед поездкой.';
+
+  @override
+  String get createScenarioPrimaryTransport => 'Основной транспорт';
+
+  @override
+  String get createScenarioOwnCarFullySupportedPublicTransport =>
+      'Своя машина полностью поддерживается. Общественный транспорт использует плановые расписания, а не данные в реальном времени.';
+
+  @override
+  String get createScenarioHowWillYouTravel => 'Как будете передвигаться?';
+
+  @override
+  String get createScenarioBudgetBasis => 'Основа бюджета';
+
+  @override
+  String get createScenarioPace => 'Темп';
+
+  @override
+  String get createScenarioPeople => 'Люди';
+
+  @override
+  String get createScenarioParty => 'Компания';
+
+  @override
+  String get createScenarioDatedTrip => 'Поездка с датами';
+
+  @override
+  String get createScenarioFlexibleTemplate => 'Гибкий шаблон';
+
+  @override
+  String get createScenarioFormat => 'Формат';
+
+  @override
+  String get createScenarioScenarioTitle => 'Название сценария *';
+
+  @override
+  String get createScenarioPublicUnlistedScenarioPublishingRemainsDisabled =>
+      'Публичная публикация и публикация по ссылке выключены, пока не появятся права публикующих и модерация.';
+
+  @override
+  String get createScenarioPlannedScheduleNotLiveRecheckDepartures =>
+      'Плановое расписание · не в реальном времени. Перед поездкой перепроверьте отправление, задержки и отмены.';
+
+  @override
+  String get createScenarioActionSavesPersonalScenarioDoesNot =>
+      'Это сохраняет личный сценарий и не публикует его в каталоге.';
+
+  @override
+  String get createScenarioReadyMyScenarios => 'Готово для «Моих сценариев»';
+
+  @override
+  String get createScenarioWarnings => 'Предупреждения';
+
+  @override
+  String get createScenarioUnknownTravel => 'Неизвестная дорога';
+
+  @override
+  String get createScenarioTimeBlocks => 'Блоки времени';
+
+  @override
+  String get createScenarioActivity => 'Активность';
+
+  @override
+  String get createScenarioActiveStops => 'Активные остановки';
+
+  @override
+  String get createScenarioScenarioDataUnavailable =>
+      'Данные сценария недоступны.';
+
+  @override
+  String get createScenarioSaveMyScenarios => 'Сохранить в «Мои сценарии»';
+
+  @override
+  String get createScenarioBack => 'Назад';
+
+  @override
+  String get createScenarioExpandedFromQuickPlanAsIndependent =>
+      'Развёрнуто из Quick Plan как независимая копия. Старые остановки — личные места, пока вы их не проверите.';
+
+  @override
+  String get createScenarioBuildCityDayWeekendTripPlan =>
+      'Соберите план на город, день, выходные или поездку из независимых остановок. Сценарий — не маршрут и не меняет Quick Plan.';
+
+  @override
+  String get createScenarioScenarioPlan => 'План сценария';
+
+  @override
+  String get createScenarioTitle => 'Название';
+
+  @override
+  String get createScenarioUseCoordinatesAnyLocationLatviaStop =>
+      'Используйте координаты для любого места в Латвии. По умолчанию остановка приватна.';
+
+  @override
+  String get createScenarioAddTimeBlock => 'Добавить блок времени';
+
+  @override
+  String get createScenarioFeedSha256 => 'SHA-256 данных';
+
+  @override
+  String get createScenarioFeedRetrieved2 => 'Данные получены';
+
+  @override
+  String get createScenarioLicence => 'Лицензия';
+
+  @override
+  String get createScenarioStops => 'Остановки';
+
+  @override
+  String get createScenarioPlannedTime => 'Плановое время';
+
+  @override
+  String get createScenarioServiceDate => 'Дата рейса';
+
+  @override
+  String get createScenarioProvider => 'Источник';
+
+  @override
+  String get createFindPeopleExactAddressLabel => 'Точный адрес';
+
+  @override
+  String get createFindPeopleExactGeoLabel => 'Точная точка';
+
+  @override
+  String get createFindPeopleOnlineAccessLabel => 'Ссылка на онлайн-доступ';
+
+  @override
+  String get createFindPeopleNotSet => 'Не задано';
+
+  @override
+  String get createFindPeopleConfigured => 'Настроено';
+
+  @override
+  String get createScenarioSelectionPreviewUnchanged =>
+      'Только предпросмотр выбора. Сценарий не изменён.';
+
+  @override
+  String createScenarioActivityTime(String value) {
+    return 'Время занятий: $value';
+  }
+
+  @override
+  String createScenarioDurationMinutes(int count) {
+    return '$count мин';
+  }
+
+  @override
+  String createScenarioDurationHours(int count) {
+    return '$count ч';
+  }
+
+  @override
+  String createScenarioDurationHoursMinutes(int start, int end) {
+    return '$start ч $end мин';
+  }
+
+  @override
+  String createScenarioMinutesNotLive(int count) {
+    return '$count мин · Плановое расписание · не в реальном времени';
+  }
+
+  @override
+  String createScenarioFeedRetrievedLine(String value) {
+    return 'Данные получены $value';
+  }
+
+  @override
+  String get createScenarioCacheCurrent => 'Сохранённое расписание актуально.';
+
+  @override
+  String createScenarioCacheCurrentAt(String value) {
+    return 'Сохранённое расписание актуально · $value.';
+  }
+
+  @override
+  String get createScenarioCacheStale =>
+      'Сохранённое расписание устарело. Его можно использовать с предупреждением или обновить.';
+
+  @override
+  String createScenarioCacheStaleAt(String value) {
+    return 'Сохранённое расписание устарело · $value. Его можно использовать с предупреждением или обновить.';
+  }
+
+  @override
+  String get createStepFindPeopleActivityTitle => 'Занятие';
+
+  @override
+  String get createStepFindPeopleActivityDescription =>
+      'Опишите, чем хотите заняться и кому это подойдёт.';
+
+  @override
+  String get createStepFindPeopleScheduleTitle => 'Когда';
+
+  @override
+  String get createStepFindPeopleScheduleDescription =>
+      'Выберите одно время, опрос или конечную серию повторов.';
+
+  @override
+  String get createStepFindPeopleMeetingTitle => 'Где';
+
+  @override
+  String get createStepFindPeopleMeetingDescription =>
+      'Отделите публичную зону от приватных деталей встречи.';
+
+  @override
+  String get createStepFindPeopleGroupTitle => 'Группа';
+
+  @override
+  String get createStepFindPeopleGroupDescription =>
+      'Настройте вместимость, заявки, проверку, лист ожидания и расходы.';
+
+  @override
+  String get createStepFindPeopleHostsTitle => 'Организаторы и доступ';
+
+  @override
+  String get createStepFindPeopleHostsDescription =>
+      'Настройте публикующего, видимость, общение и доступ по ссылке.';
+
+  @override
+  String get createStepFindPeoplePublishTitle => 'Предпросмотр и публикация';
+
+  @override
+  String get createStepFindPeoplePublishDescription =>
+      'Проверьте публичные и приватные данные и подтвердите правила безопасности.';
+
+  @override
+  String get createStepRouteMethodTitle => 'Способ';
+
+  @override
+  String get createStepRouteMethodDescription =>
+      'Выберите, как создаётся непрерывный трек';
+
+  @override
+  String get createStepRouteProfileTitle => 'Профиль';
+
+  @override
+  String get createStepRouteProfileDescription =>
+      'Задайте профиль движения и настройки прокладки';
+
+  @override
+  String get createStepRouteEditorTitle => 'Трек';
+
+  @override
+  String get createStepRouteEditorDescription =>
+      'Редактируйте точки и непрерывные участки';
+
+  @override
+  String get createStepRouteDetailsTitle => 'Детали';
+
+  @override
+  String get createStepRouteDetailsDescription =>
+      'Добавьте условия и практическую информацию';
+
+  @override
+  String get createStepRouteReviewTitle => 'Проверка';
+
+  @override
+  String get createStepRouteReviewDescription =>
+      'Проверьте геометрию, предупреждения и готовность';
+
+  @override
+  String get createStepSessionWhatWhereTitle => 'Что и где';
+
+  @override
+  String get createStepSessionWhatWhereDescription =>
+      'Ресурс, категория, медиа, место, часовой пояс';
+
+  @override
+  String get createStepSessionWhenTitle => 'Когда';
+
+  @override
+  String get createStepSessionWhenDescription =>
+      'Недельное расписание, длительность, буфер, срок записи';
+
+  @override
+  String get createStepSessionPriceAndBookingTitle => 'Цена и бронирование';
+
+  @override
+  String get createStepSessionPriceAndBookingDescription =>
+      'Цена, макс. размер группы, внешняя ссылка на бронь';
+
+  @override
+  String get createStepClassWorkshopBasicsTitle => 'Занятие';
+
+  @override
+  String get createStepClassWorkshopBasicsDescription =>
+      'Тип, название, описания, категория, критерии и медиа';
+
+  @override
+  String get createStepClassWorkshopLearningTitle =>
+      'Программа и преподаватель';
+
+  @override
+  String get createStepClassWorkshopLearningDescription =>
+      'Результаты, программа, требования и преподаватель';
+
+  @override
+  String get createStepClassWorkshopScheduleTitle => 'Даты и место';
+
+  @override
+  String get createStepClassWorkshopScheduleDescription =>
+      'Разовое занятие или серия, часовой пояс, формат, место';
+
+  @override
+  String get createStepClassWorkshopParticipationTitle => 'Участие';
+
+  @override
+  String get createStepClassWorkshopParticipationDescription =>
+      'Материалы, требования, размер группы, цена, запись';
+
+  @override
+  String get createStepScenarioContextTitle => 'Контекст';
+
+  @override
+  String get createStepScenarioContextDescription =>
+      'Формат, режим дат, компания, темп и бюджет';
+
+  @override
+  String get createStepScenarioComposerTitle => 'План';
+
+  @override
+  String get createStepScenarioComposerDescription =>
+      'Независимые остановки, блоки времени и их порядок';
+
+  @override
+  String get createStepScenarioReviewTitle => 'Обзор';
+
+  @override
+  String get createStepScenarioReviewDescription =>
+      'Итоги, предупреждения и готовность к сохранению';
+
+  @override
+  String get createSessionPresetEveryday => 'Каждый день 9:00–21:00';
+
+  @override
+  String get createSessionPresetWeekdays => 'По будням 9:00–18:00';
+
+  @override
+  String createFindPeopleHouseRule(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'be_on_time': 'Приходить вовремя',
+      'respect_boundaries': 'Уважать границы',
+      'no_harassment': 'Без домогательств',
+      'no_sales': 'Без продаж',
+      'no_substances': 'Без алкоголя и наркотиков',
+      'bring_required_gear': 'Взять нужное снаряжение',
+      'follow_venue_rules': 'Соблюдать правила места',
+      'leave_no_trace': 'Не оставлять следов',
+      'other': 'Правило',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createFindPeopleCohostRight(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'review_applications': 'Рассматривать заявки',
+      'manage_schedule': 'Управлять расписанием',
+      'manage_participants': 'Управлять участниками',
+      'moderate_conversation': 'Модерировать переписку',
+      'other': 'Право',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFindPeopleCohostAccepted => 'Принято';
+
+  @override
+  String get createFindPeopleCohostPending => 'Приглашение ожидает ответа';
+
+  @override
+  String get createFindPeopleSeatFitPolicy => 'Правило распределения мест';
+
+  @override
+  String get createFindPeopleVisibilityRequired => 'Видимость *';
+
+  @override
+  String get createFormDateIso => 'Дата (ГГГГ-ММ-ДД)';
+
+  @override
+  String get createClassFirstSummerTime => 'Первое (летнее время)';
+
+  @override
+  String get createRouteOutAndBack => 'Туда и обратно';
+
+  @override
+  String get createScenarioEdit => 'Изменить';
+
+  @override
+  String get createScenarioTimeBlockHint => 'Кофе, отдых, свободное время…';
+
+  @override
+  String get createScenarioPrivateLocalTravel => 'Личная / местная дорога';
+
+  @override
+  String get createScenarioRouteLabel => 'Маршрут';
+
+  @override
+  String get createScenarioCarrierLabel => 'Перевозчик';
+
+  @override
+  String createScenarioSelectedStop(String value) {
+    return 'Выбрано: $value';
+  }
+
+  @override
+  String get createScenarioDepartureHhMm => 'Отправление (ЧЧ:мм)';
+
+  @override
+  String get createScenarioArrivalHhMm => 'Прибытие (ЧЧ:мм)';
+
+  @override
+  String get createRouteResolveRestore => 'Решить и восстановить';
+
+  @override
+  String get createRouteResolve => 'Решить';
+
+  @override
+  String scenarioIntakeNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'targetsUnavailable':
+          'Сценарии недоступны. Повторите со страницы объекта.',
+      'chooseTarget': 'Выберите сценарий или создайте новый.',
+      'targetNotEditable': 'Этот сценарий больше нельзя изменить.',
+      'titleRequired': 'Введите название сценария.',
+      'openFailed': 'Не удалось открыть этот сценарий.',
+      'signInAgain': 'Войдите снова, прежде чем добавлять в сценарий.',
+      'confirmDuplicate': 'Подтвердите добавление ещё одного вхождения.',
+      'confirmUnavailable':
+          'Подтвердите использование сохранённой копии недоступного объекта.',
+      'confirmScheduleAdjustment':
+          'Подтвердите превращение в гибкую остановку шаблона.',
+      'revisionConflict':
+          'Сценарий изменился. Вернитесь, откройте его заново и проверьте ещё раз.',
+      'intentExpired':
+          'Срок этого выбора истёк. Вернитесь на страницу объекта и попробуйте снова.',
+      'targetGone': 'Этот сценарий больше недоступен. Выберите другой.',
+      'lockedLegBoundary':
+          'Это место вставки защищено закреплённым участком логистики.',
+      'persistenceUnavailable':
+          'Не удалось сохранить. Ваш выбор сохранён; повторите добавление.',
+      'other': 'Не удалось добавить объект. Проверьте выбор и повторите.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String scenarioIntakeObjectType(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'event': 'Событие',
+      'place': 'Место',
+      'activity': 'Активность',
+      'route': 'Маршрут',
+      'bookableSession': 'Сеанс',
+      'other': 'Объект',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String scenarioIntakeSourceStatus(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'ready': 'Готово',
+      'stale': 'Нужно обновить',
+      'unresolved': 'Не найдено',
+      'unavailable': 'Недоступно',
+      'other': 'Неизвестно',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get scenarioIntakeUnavailable => 'Добавление в сценарий недоступно.';
+
+  @override
+  String get scenarioIntakeTitle => 'Добавить в сценарий';
+
+  @override
+  String get scenarioIntakeClose => 'Закрыть добавление в сценарий';
+
+  @override
+  String get scenarioIntakeChooseTarget => 'Выберите личный сценарий';
+
+  @override
+  String get scenarioIntakeOnlyPrivateDrafts =>
+      'Показаны только ваши личные черновики, которые можно изменить.';
+
+  @override
+  String get scenarioIntakeNoTargets =>
+      'Сохранённых сценариев пока нет. Создайте новый ниже.';
+
+  @override
+  String get scenarioIntakeUntitled => 'Без названия';
+
+  @override
+  String get scenarioIntakeCreateNew => 'Создать новый сценарий';
+
+  @override
+  String get scenarioIntakeCreateNewHint =>
+      'Личный · один день · сохраняется только вместе с остановкой';
+
+  @override
+  String get scenarioIntakeTitleField => 'Название сценария';
+
+  @override
+  String get scenarioIntakeContinue => 'Перейти к размещению';
+
+  @override
+  String get scenarioIntakeScenarioFallback => 'Сценарий';
+
+  @override
+  String get scenarioIntakeDay => 'День';
+
+  @override
+  String get scenarioIntakeUnscheduled => 'Без дня';
+
+  @override
+  String get scenarioIntakeInsert => 'Вставить';
+
+  @override
+  String get scenarioIntakeAtEnd => 'В конце';
+
+  @override
+  String get scenarioIntakeRole => 'Роль';
+
+  @override
+  String get scenarioIntakeMandatory => 'Обязательная';
+
+  @override
+  String get scenarioIntakeOptional => 'Необязательная';
+
+  @override
+  String get scenarioIntakeBack => 'Назад';
+
+  @override
+  String get scenarioIntakeReview => 'Проверить';
+
+  @override
+  String get scenarioIntakeAddAnother => 'Добавить ещё одно вхождение';
+
+  @override
+  String get scenarioIntakeAddAnotherHint =>
+      'Этот объект каталога уже есть в сценарии.';
+
+  @override
+  String get scenarioIntakeUseUnavailable =>
+      'Использовать сохранённую копию недоступного объекта';
+
+  @override
+  String get scenarioIntakeUseTemplateStop =>
+      'Использовать как гибкую остановку шаблона';
+
+  @override
+  String get scenarioIntakeUseTemplateStopHint =>
+      'У источника фиксированная дата, а этот сценарий — шаблон.';
+
+  @override
+  String get scenarioIntakeLogisticsNotice =>
+      'Логистика не пересчитывается на лету. Текущие незакреплённые оценки на стыках будут безопасно сброшены.';
+
+  @override
+  String scenarioIntakeAddCount(int count) {
+    return 'Добавить $count';
+  }
+
+  @override
+  String get scenarioIntakeDurationUnknown => 'Длительность неизвестна';
+
+  @override
+  String scenarioIntakeFixedStart(String time) {
+    return 'Фиксировано: $time';
+  }
+
+  @override
+  String get scenarioIntakeMoveUp => 'Переместить выше';
+
+  @override
+  String get scenarioIntakeMoveDown => 'Переместить ниже';
+
+  @override
+  String get scenarioIntakeApplyingSemantics =>
+      'Выбранные остановки добавляются в сценарий';
+
+  @override
+  String get scenarioIntakeLoadingSemantics => 'Загрузка ваших сценариев';
+
+  @override
+  String get scenarioIntakeApplying => 'Добавление в сценарий…';
+
+  @override
+  String get scenarioIntakeLoading => 'Загрузка ваших сценариев…';
+
+  @override
+  String get scenarioIntakeReplayed => 'Уже сохранено · дубликат не создан.';
+
+  @override
+  String get scenarioIntakeStay => 'Остаться здесь';
+
+  @override
+  String get scenarioIntakeOpenScenario => 'Открыть сценарий';
+
+  @override
+  String get scenarioIntakePrepareFailed =>
+      'Не удалось подготовить добавление в сценарий.';
+
+  @override
+  String get scenarioIntakeRetry => 'Повторить';
+
+  @override
+  String get scenarioIntakeTemplate => 'Шаблон';
+
+  @override
+  String get scenarioIntakeDated => 'С датами';
+
+  @override
+  String scenarioIntakeStep(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'target': '1 из 3 · Сценарий',
+      'placement': '2 из 3 · Место',
+      'review': '3 из 3 · Проверка',
+      'success': 'Готово',
+      'applying': 'Сохранение',
+      'other': 'Подготовка',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String scenarioIntakePlacement(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'unscheduled': 'Без дня',
+      'atEnd': 'В конце',
+      'other': 'После выбранной остановки',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get scenarioIntakeAfterLabel => 'После:';
+
+  @override
+  String scenarioIntakeCandidateLabel(int count) {
+    return 'Выбранная остановка $count:';
+  }
+
+  @override
+  String scenarioIntakeSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'В сценарий добавлено $count остановки',
+      many: 'В сценарий добавлено $count остановок',
+      few: 'В сценарий добавлены $count остановки',
+      one: 'В сценарий добавлена $count остановка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scenarioIntakeTargetCounts(int count, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count дня',
+      many: '$count дней',
+      few: '$count дня',
+      one: '$count день',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total активного пункта',
+      many: '$total активных пунктов',
+      few: '$total активных пункта',
+      one: '$total активный пункт',
+    );
+    return '$_temp0 · $_temp1';
   }
 }

@@ -3,13 +3,15 @@ import '../domain/entities/session_schedule.dart';
 class SessionCreateBlockConfig {
   const SessionCreateBlockConfig({
     required this.id,
-    required this.title,
-    required this.description,
+    required this.titleId,
+    required this.descriptionId,
   });
 
   final String id;
-  final String title;
-  final String description;
+
+  /// ARB message ids; the UI resolves them with `createFormText` (L4).
+  final String titleId;
+  final String descriptionId;
 }
 
 /// Matches BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md §12 v1.1: guard + three
@@ -21,18 +23,18 @@ const List<SessionCreateBlockConfig> sessionCreateBlocks =
     <SessionCreateBlockConfig>[
       SessionCreateBlockConfig(
         id: 'whatWhere',
-        title: 'What and where',
-        description: 'Resource, category, media, location, timezone',
+        titleId: 'createStepSessionWhatWhereTitle',
+        descriptionId: 'createStepSessionWhatWhereDescription',
       ),
       SessionCreateBlockConfig(
         id: 'when',
-        title: 'When',
-        description: 'Weekly schedule, duration, buffer, notice',
+        titleId: 'createStepSessionWhenTitle',
+        descriptionId: 'createStepSessionWhenDescription',
       ),
       SessionCreateBlockConfig(
         id: 'priceAndBooking',
-        title: 'Price and booking',
-        description: 'Price, max party size, external booking URL',
+        titleId: 'createStepSessionPriceAndBookingTitle',
+        descriptionId: 'createStepSessionPriceAndBookingDescription',
       ),
     ];
 
@@ -40,14 +42,16 @@ const List<SessionCreateBlockConfig> sessionCreateBlocks =
 class SessionWeeklyPreset {
   const SessionWeeklyPreset({
     required this.id,
-    required this.label,
+    required this.labelId,
     required this.activeWeekdays,
     required this.startMinuteLocal,
     required this.endMinuteLocalExclusive,
   });
 
   final String id;
-  final String label;
+
+  /// ARB message id; the UI resolves it with `createFormText` (L4).
+  final String labelId;
   final Set<int> activeWeekdays;
   final int startMinuteLocal;
   final int endMinuteLocalExclusive;
@@ -69,14 +73,14 @@ const Set<int> _weekdaysOnly = <int>{1, 2, 3, 4, 5};
 const List<SessionWeeklyPreset> sessionWeeklyPresets = <SessionWeeklyPreset>[
   SessionWeeklyPreset(
     id: 'everyday_9_21',
-    label: 'Every day 9:00–21:00',
+    labelId: 'createSessionPresetEveryday',
     activeWeekdays: _everyDay,
     startMinuteLocal: 9 * 60,
     endMinuteLocalExclusive: 21 * 60,
   ),
   SessionWeeklyPreset(
     id: 'weekdays_9_18',
-    label: 'Weekdays 9:00–18:00',
+    labelId: 'createSessionPresetWeekdays',
     activeWeekdays: _weekdaysOnly,
     startMinuteLocal: 9 * 60,
     endMinuteLocalExclusive: 18 * 60,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/localization/l10n_context.dart';
 import '../../../application/controllers/create_controller.dart';
 import '../../../application/controllers/scenario_transit_picker_controller.dart';
 import '../../../application/scenario_transit_disclosure.dart';
@@ -16,6 +17,7 @@ import 'scenario_transit_schedule_picker_sheet.dart';
 import 'scenario_transit_recheck_sheet.dart';
 import 'scenario_transit_disclosure_card.dart';
 import 'scenario_transport_editor_sheet.dart';
+import '../create_form_texts.dart';
 
 class ScenarioComposerSection extends StatelessWidget {
   const ScenarioComposerSection({
@@ -44,14 +46,14 @@ class ScenarioComposerSection extends StatelessWidget {
               ),
             ),
             IconButton(
-              tooltip: 'Undo',
+              tooltip: context.l10n.createScenarioUndo,
               onPressed: controller.canUndoScenario
                   ? controller.undoScenario
                   : null,
               icon: const Icon(Icons.undo),
             ),
             IconButton(
-              tooltip: 'Redo',
+              tooltip: context.l10n.createScenarioRedo,
               onPressed: controller.canRedoScenario
                   ? controller.redoScenario
                   : null,
@@ -63,7 +65,8 @@ class ScenarioComposerSection extends StatelessWidget {
         TextField(
           key: const ValueKey<String>('scenario-catalog-search'),
           decoration: InputDecoration(
-            labelText: 'Find a catalog place, event, activity or Route',
+            labelText:
+                context.l10n.createScenarioFindCatalogPlaceEventActivityRoute,
             border: const OutlineInputBorder(),
             suffixIcon: state.scenarioCatalogLoading
                 ? const Padding(
@@ -98,7 +101,7 @@ class ScenarioComposerSection extends StatelessWidget {
                       title: Text(candidate.title),
                       subtitle: Text(candidate.subtitle),
                       trailing: IconButton(
-                        tooltip: 'Add',
+                        tooltip: context.l10n.createScenarioAdd,
                         onPressed: () =>
                             controller.addScenarioCatalogItem(candidate),
                         icon: const Icon(Icons.add_circle_outline),
@@ -125,7 +128,7 @@ class ScenarioComposerSection extends StatelessWidget {
             }
           },
           icon: const Icon(Icons.add_location_alt_outlined),
-          label: const Text('Add custom stop'),
+          label: Text(context.l10n.createScenarioAddCustomStop),
         ),
         const SizedBox(height: 8),
         _PlannedTransportEntry(
@@ -133,11 +136,9 @@ class ScenarioComposerSection extends StatelessWidget {
           data: data,
           transitPickerController: transitPickerController,
         ),
-        const Padding(
+        Padding(
           padding: EdgeInsets.only(top: 4),
-          child: Text(
-            'Bus and train times are stored as planned schedule · not live.',
-          ),
+          child: Text(context.l10n.createScenarioBusTrainTimesAreStoredAs),
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
@@ -152,7 +153,7 @@ class ScenarioComposerSection extends StatelessWidget {
             }
           },
           icon: const Icon(Icons.add_alarm_outlined),
-          label: const Text('Add custom time block'),
+          label: Text(context.l10n.createScenarioAddCustomTimeBlock),
         ),
         const SizedBox(height: 12),
         if (data.items.isEmpty)
@@ -183,26 +184,27 @@ class ScenarioComposerSection extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(
-                                _itemTitle(item, data),
+                                _itemTitle(context.l10n, item, data),
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                               Text(
-                                '${item.durationMinutes ?? 0} min · ${item.kind.name}',
+                                '${context.l10n.createScenarioDurationMinutes(item.durationMinutes ?? 0)} · '
+                                '${createOptionText(context.l10n, item.kind)}',
                               ),
                             ],
                           ),
                         ),
                         IconButton(
-                          tooltip: 'Move up',
+                          tooltip: context.l10n.createScenarioMoveUp,
                           onPressed: index == 0 || item.orderLocked
                               ? null
                               : () => controller.moveScenarioItem(item.id, -1),
                           icon: const Icon(Icons.arrow_upward),
                         ),
                         IconButton(
-                          tooltip: 'Move down',
+                          tooltip: context.l10n.createScenarioMoveDown,
                           onPressed:
                               index == data.items.length - 1 || item.orderLocked
                               ? null
@@ -210,7 +212,7 @@ class ScenarioComposerSection extends StatelessWidget {
                           icon: const Icon(Icons.arrow_downward),
                         ),
                         IconButton(
-                          tooltip: 'Remove',
+                          tooltip: context.l10n.createScenarioRemove,
                           onPressed: () =>
                               controller.removeScenarioItem(item.id),
                           icon: const Icon(Icons.delete_outline),
@@ -223,11 +225,11 @@ class ScenarioComposerSection extends StatelessWidget {
                       items: <DropdownMenuItem<ScenarioItemRole>>[
                         DropdownMenuItem<ScenarioItemRole>(
                           value: ScenarioItemRole.mandatory,
-                          child: Text('Mandatory'),
+                          child: Text(context.l10n.createScenarioMandatory),
                         ),
                         DropdownMenuItem<ScenarioItemRole>(
                           value: ScenarioItemRole.optional,
-                          child: Text('Optional'),
+                          child: Text(context.l10n.createScenarioOptional),
                         ),
                       ],
                       onChanged: (ScenarioItemRole? role) {
@@ -243,7 +245,7 @@ class ScenarioComposerSection extends StatelessWidget {
                         runSpacing: 4,
                         children: <Widget>[
                           FilterChip(
-                            label: const Text('Order lock'),
+                            label: Text(context.l10n.createScenarioOrderLock),
                             selected: item.orderLocked,
                             onSelected: (bool value) =>
                                 controller.updateScenarioItem(
@@ -252,7 +254,7 @@ class ScenarioComposerSection extends StatelessWidget {
                                 ),
                           ),
                           FilterChip(
-                            label: const Text('Time lock'),
+                            label: Text(context.l10n.createScenarioTimeLock),
                             selected: item.timeLocked,
                             onSelected: (bool value) => controller
                                 .updateScenarioItem(item.id, timeLocked: value),
@@ -285,13 +287,11 @@ class ScenarioComposerSection extends StatelessWidget {
         if (data.days.first.itemIds.length > 1) ...<Widget>[
           const SizedBox(height: 16),
           Text(
-            'Travel between stops',
+            context.l10n.createScenarioTravelBetweenStops,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Use your primary transport or enter honest manual values.',
-          ),
+          Text(context.l10n.createScenarioUseYourPrimaryTransportEnterHonest),
           const SizedBox(height: 8),
           ...List<Widget>.generate(data.days.first.itemIds.length - 1, (
             int index,
@@ -355,7 +355,7 @@ class _PlannedTransportEntry extends StatelessWidget {
               key: const ValueKey<String>('add-planned-transport'),
               onPressed: () => _chooseSource(context, picker),
               icon: const Icon(Icons.directions_transit_outlined),
-              label: const Text('Add planned transport'),
+              label: Text(context.l10n.createScenarioAddPlannedTransport),
             ),
             if (selected != null) ...<Widget>[
               const SizedBox(height: 8),
@@ -372,12 +372,12 @@ class _PlannedTransportEntry extends StatelessWidget {
                   ),
                   subtitle: Text(
                     '${selected.departure.hhmm} → ${selected.arrival.hhmm} · '
-                    'Planned schedule · not live\n'
-                    'Selection preview only. Scenario is unchanged.',
+                    '${context.l10n.createScenarioPlannedScheduleNotLive2}\n'
+                    '${context.l10n.createScenarioSelectionPreviewUnchanged}',
                   ),
                   trailing: TextButton(
                     onPressed: () => _openOfficial(context, picker),
-                    child: const Text('Review'),
+                    child: Text(context.l10n.createScenarioReview),
                   ),
                 ),
               ),
@@ -441,12 +441,18 @@ class _PlannedTransportEntry extends StatelessWidget {
     if (applied?.accepted == true) {
       picker.clearSelectedServicePreview();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Official schedule added to Scenario.')),
+        SnackBar(
+          content: Text(
+            context.l10n.createScenarioOfficialScheduleAddedScenario,
+          ),
+        ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Scenario changed. Review the service and try again.'),
+        SnackBar(
+          content: Text(
+            context.l10n.createScenarioScenarioChangedReviewServiceTryAgain,
+          ),
         ),
       );
     }
@@ -501,7 +507,11 @@ class _OfficialTransitActions extends StatelessWidget {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.sync_outlined),
-          label: Text(loading ? 'Rechecking…' : 'Recheck schedule'),
+          label: Text(
+            loading
+                ? 'Rechecking…'
+                : context.l10n.createScenarioRecheckSchedule,
+          ),
         ),
       );
     },
@@ -523,13 +533,17 @@ class _OfficialTransitActions extends StatelessWidget {
     if (!context.mounted) return;
     if (mutation?.accepted == true) {
       picker.clearRecheck();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Saved schedule replaced.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.createScenarioSavedScheduleReplaced),
+        ),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Scenario changed. Recheck before replacing.'),
+        SnackBar(
+          content: Text(
+            context.l10n.createScenarioScenarioChangedRecheckBeforeReplacing,
+          ),
         ),
       );
     }
@@ -546,7 +560,7 @@ class _ManualPlannedTransportButton extends StatelessWidget {
     key: const ValueKey<String>('add-planned-transport'),
     onPressed: onPressed,
     icon: const Icon(Icons.directions_transit_outlined),
-    label: const Text('Add planned transport'),
+    label: Text(context.l10n.createScenarioAddPlannedTransport),
   );
 }
 
@@ -577,15 +591,17 @@ class _TransportLegCard extends StatelessWidget {
         leading: Icon(
           _travelModeIcon(leg?.mode ?? data.constraints.primaryTravelMode),
         ),
-        title: Text('${_itemTitle(from, data)} → ${_itemTitle(to, data)}'),
+        title: Text(
+          '${_itemTitle(context.l10n, from, data)} → ${_itemTitle(context.l10n, to, data)}',
+        ),
         subtitle: Text(
           leg == null
               ? canEdit
-                    ? '${_travelModeLabel(data.constraints.primaryTravelMode)} · time not entered'
-                    : 'Location data required for a manual leg'
-              : '${_travelModeLabel(leg.mode)} · '
+                    ? '${_travelModeLabel(context.l10n, data.constraints.primaryTravelMode)} · time not entered'
+                    : context.l10n.createScenarioLocationDataRequiredManualLeg
+              : '${_travelModeLabel(context.l10n, leg.mode)} · '
                     '${leg.durationMinutes ?? 'unknown'} min · '
-                    '${_legSourceLabel(leg.source)}',
+                    '${_legSourceLabel(context.l10n, leg.source)}',
         ),
         trailing: TextButton(
           onPressed: !canEdit
@@ -609,7 +625,11 @@ class _TransportLegCard extends StatelessWidget {
                     );
                   }
                 },
-          child: Text(leg == null ? 'Add' : 'Edit'),
+          child: Text(
+            leg == null
+                ? context.l10n.createScenarioAdd
+                : context.l10n.createScenarioEdit,
+          ),
         ),
       ),
     );
@@ -626,26 +646,33 @@ class _EmptyComposer extends StatelessWidget {
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(12),
     ),
-    child: const Text(
-      'Add at least two independent stops. Use catalog objects or custom time blocks.',
+    child: Text(
+      context.l10n.createScenarioAddAtLeastTwoIndependentStops,
       textAlign: TextAlign.center,
     ),
   );
 }
 
-String _itemTitle(ScenarioItemDraft item, ScenarioDraftData data) =>
-    switch (item.source) {
-      ScenarioCatalogObjectSourceDraft source => source.snapshot.title,
-      ScenarioTimeBlockSourceDraft source => source.title,
-      ScenarioCustomLocationSourceDraft source => _customLocationTitle(
-        source,
-        data,
-      ),
-      ScenarioPlannedTransportSourceDraft source =>
-        source.publicServiceLabel ?? source.carrierName ?? 'Planned transport',
-    };
+String _itemTitle(
+  AppLocalizations l10n,
+  ScenarioItemDraft item,
+  ScenarioDraftData data,
+) => switch (item.source) {
+  ScenarioCatalogObjectSourceDraft source => source.snapshot.title,
+  ScenarioTimeBlockSourceDraft source => source.title,
+  ScenarioCustomLocationSourceDraft source => _customLocationTitle(
+    l10n,
+    source,
+    data,
+  ),
+  ScenarioPlannedTransportSourceDraft source =>
+    source.publicServiceLabel ??
+        source.carrierName ??
+        l10n.createScenarioPlannedTransport,
+};
 
 String _customLocationTitle(
+  AppLocalizations l10n,
   ScenarioCustomLocationSourceDraft source,
   ScenarioDraftData data,
 ) {
@@ -654,25 +681,20 @@ String _customLocationTitle(
       return location.title;
     }
   }
-  return 'Custom location';
+  return l10n.createScenarioCustomLocation;
 }
 
-String _legSourceLabel(ScenarioLegSource source) => switch (source) {
-  ScenarioLegSource.schedule => 'Planned schedule · not live',
-  ScenarioLegSource.manual => 'Entered manually',
-  ScenarioLegSource.estimate => 'Estimated time',
-  ScenarioLegSource.provider => 'Provider value',
-  ScenarioLegSource.unknown => 'Unknown',
-};
+String _legSourceLabel(AppLocalizations l10n, ScenarioLegSource source) =>
+    switch (source) {
+      ScenarioLegSource.schedule => l10n.createScenarioPlannedScheduleNotLive2,
+      ScenarioLegSource.manual => l10n.createScenarioEnteredManually,
+      ScenarioLegSource.estimate => l10n.createScenarioEstimatedTime,
+      ScenarioLegSource.provider => l10n.createScenarioProviderValue,
+      ScenarioLegSource.unknown => 'Unknown',
+    };
 
-String _travelModeLabel(ScenarioTravelMode mode) => switch (mode) {
-  ScenarioTravelMode.walking => 'Walking',
-  ScenarioTravelMode.bicycle => 'Bicycle',
-  ScenarioTravelMode.car => 'Own car',
-  ScenarioTravelMode.taxi => 'Taxi',
-  ScenarioTravelMode.transit => 'Public transport',
-  ScenarioTravelMode.other => 'Other',
-};
+String _travelModeLabel(AppLocalizations l10n, ScenarioTravelMode mode) =>
+    createOptionText(l10n, mode);
 
 IconData _travelModeIcon(ScenarioTravelMode mode) => switch (mode) {
   ScenarioTravelMode.walking => Icons.directions_walk,

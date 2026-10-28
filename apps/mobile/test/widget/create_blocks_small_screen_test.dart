@@ -16,6 +16,9 @@ import 'package:recharge/features/create/domain/usecases/publish_create_draft_us
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
 import 'package:recharge/features/create/presentation/widgets/activity_create_block.dart';
 import 'package:recharge/features/create/presentation/widgets/event_create_block.dart';
+import 'package:recharge/features/create/presentation/widgets/scenario/scenario_create_block.dart';
+import 'package:recharge/features/create/presentation/widgets/route/route_create_block.dart';
+import 'package:recharge/features/create/presentation/widgets/class_workshop_create_block.dart';
 import 'package:recharge/features/create/presentation/widgets/find_people_create_block.dart';
 import 'package:recharge/features/create/presentation/widgets/place_create_block.dart';
 import 'package:recharge/features/create/presentation/widgets/rental_create_block.dart';
@@ -147,6 +150,54 @@ void main() {
             ),
           ),
         };
+    // L4.4: the forms deferred in R1.
+    forms.addAll(<
+      String,
+      (
+        CreateObjectType,
+        int,
+        Widget Function(CreateController, CreateState, int),
+      )
+    >{
+      'Find People': (
+        CreateObjectType.findPeople,
+        findPeopleSteps,
+        (c, s, step) => FindPeopleCreateBlock(
+          controller: c,
+          state: s.copyWith(findPeopleStep: step),
+          onPublished: () {},
+        ),
+      ),
+      'Session': (
+        CreateObjectType.session,
+        1,
+        (c, s, step) =>
+            SessionCreateBlock(controller: c, state: s, onPublished: () {}),
+      ),
+      'Class / Workshop': (
+        CreateObjectType.classWorkshop,
+        1,
+        (c, s, step) => ClassWorkshopCreateBlock(
+          controller: c,
+          state: s,
+          onPublished: () {},
+        ),
+      ),
+      'Route': (
+        CreateObjectType.route,
+        1,
+        (c, s, step) =>
+            RouteCreateBlock(controller: c, state: s, onPublished: () {}),
+      ),
+      'Scenario': (
+        CreateObjectType.scenario,
+        3,
+        (c, s, step) => ScenarioCreateBlock(
+          controller: c,
+          state: s.copyWith(scenarioStep: step),
+        ),
+      ),
+    });
     for (final String language in const <String>['en', 'lv', 'ru']) {
       for (final double scale in const <double>[1, 2]) {
         for (final MapEntry<
@@ -250,6 +301,11 @@ Future<CreateController> _controller(
       'create.rental',
       'create.event',
       'create.collection',
+      'create.route',
+      'create.social_request',
+      'create.session',
+      'create.class_workshop',
+      'create.scenario',
     ],
   );
   controller.setObjectType(type);

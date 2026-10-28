@@ -108,7 +108,7 @@ void main() {
     await tester.tap(find.text('Add 1'));
     await tester.pumpAndSettle();
     expect(find.text('Complete'), findsOneWidget);
-    expect(find.textContaining('Added 1 to'), findsOneWidget);
+    expect(find.textContaining('Added 1 stop to'), findsOneWidget);
     expect(await facade.listTargets('user-1'), hasLength(1));
   });
 
@@ -204,7 +204,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(
-      find.bySemanticsLabel(RegExp('Success.*Added 1 stops')),
+      find.bySemanticsLabel(RegExp('Added 1 stop to the Scenario')),
       findsOneWidget,
     );
     semantics.dispose();

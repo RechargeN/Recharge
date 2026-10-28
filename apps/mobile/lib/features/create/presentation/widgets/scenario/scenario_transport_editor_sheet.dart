@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/localization/l10n_context.dart';
 import '../../../../../core/parsing/input_parsers.dart';
 import '../../../domain/entities/scenario_item_draft.dart';
 import '../../../domain/entities/scenario_logistics_draft.dart';
 import '../../../../../shared/primitives/money/money.dart';
+import '../create_form_texts.dart';
 
 class ScenarioPlannedTransportInput {
   const ScenarioPlannedTransportInput({
@@ -63,18 +65,19 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text(
-                'Add planned transport',
+                context.l10n.createScenarioAddPlannedTransport,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 4),
-              const Text(
-                'Planned schedule · not live. Recheck the service before travel.',
+              Text(
+                context.l10n.createScenarioPlannedScheduleNotLiveRecheckService,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<ScenarioPlannedTransportKind>(
+                isExpanded: true,
                 initialValue: kind,
-                decoration: const InputDecoration(
-                  labelText: 'Transport',
+                decoration: InputDecoration(
+                  labelText: context.l10n.createScenarioTransport,
                   border: OutlineInputBorder(),
                 ),
                 items: ScenarioPlannedTransportKind.values
@@ -82,7 +85,7 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
                       (ScenarioPlannedTransportKind value) =>
                           DropdownMenuItem<ScenarioPlannedTransportKind>(
                             value: value,
-                            child: Text(_enumLabel(value.name)),
+                            child: Text(createOptionText(context.l10n, value)),
                           ),
                     )
                     .toList(growable: false),
@@ -105,8 +108,8 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
               TextFormField(
                 key: const ValueKey<String>('scenario-service-label'),
                 initialValue: service,
-                decoration: const InputDecoration(
-                  labelText: 'Service or route *',
+                decoration: InputDecoration(
+                  labelText: context.l10n.createScenarioServiceRoute,
                   hintText: 'Train 802 / Bus 7480',
                   border: OutlineInputBorder(),
                 ),
@@ -129,8 +132,8 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
                     child: TextFormField(
                       initialValue: departure,
                       keyboardType: TextInputType.datetime,
-                      decoration: const InputDecoration(
-                        labelText: 'Departure (HH:mm)',
+                      decoration: InputDecoration(
+                        labelText: context.l10n.createScenarioDepartureHhMm,
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (String value) => departure = value,
@@ -141,8 +144,8 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
                     child: TextFormField(
                       initialValue: arrival,
                       keyboardType: TextInputType.datetime,
-                      decoration: const InputDecoration(
-                        labelText: 'Arrival (HH:mm)',
+                      decoration: InputDecoration(
+                        labelText: context.l10n.createScenarioArrivalHhMm,
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (String value) => arrival = value,
@@ -171,7 +174,7 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
                     ),
                   );
                 },
-                child: const Text('Add to Scenario'),
+                child: Text(context.l10n.createScenarioAddScenario),
               ),
             ],
           ),
@@ -210,16 +213,17 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text(
-                'Travel between stops',
+                context.l10n.createScenarioTravelBetweenStops,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 4),
-              const Text('Manual values stay locked until you edit them.'),
+              Text(context.l10n.createScenarioManualValuesStayLockedUntilYou),
               const SizedBox(height: 16),
               DropdownButtonFormField<ScenarioTravelMode>(
+                isExpanded: true,
                 initialValue: mode,
-                decoration: const InputDecoration(
-                  labelText: 'Travel mode',
+                decoration: InputDecoration(
+                  labelText: context.l10n.createScenarioTravelMode,
                   border: OutlineInputBorder(),
                 ),
                 items: ScenarioTravelMode.values
@@ -227,7 +231,7 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                       (ScenarioTravelMode value) =>
                           DropdownMenuItem<ScenarioTravelMode>(
                             value: value,
-                            child: Text(_travelModeLabel(value)),
+                            child: Text(_travelModeLabel(context.l10n, value)),
                           ),
                     )
                     .toList(growable: false),
@@ -307,7 +311,7 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                     ),
                   );
                 },
-                child: const Text('Save travel'),
+                child: Text(context.l10n.createScenarioSaveTravel),
               ),
             ],
           ),
@@ -338,18 +342,5 @@ double? _number(String value) {
   return parseLocaleDecimalInput(value);
 }
 
-String _travelModeLabel(ScenarioTravelMode mode) => switch (mode) {
-  ScenarioTravelMode.walking => 'Walking',
-  ScenarioTravelMode.bicycle => 'Bicycle',
-  ScenarioTravelMode.car => 'Own car',
-  ScenarioTravelMode.taxi => 'Taxi',
-  ScenarioTravelMode.transit => 'Public transport',
-  ScenarioTravelMode.other => 'Other',
-};
-
-String _enumLabel(String value) => value
-    .replaceAllMapped(
-      RegExp(r'([a-z])([A-Z])'),
-      (Match match) => '${match.group(1)} ${match.group(2)}',
-    )
-    .replaceAll('_', ' ');
+String _travelModeLabel(AppLocalizations l10n, ScenarioTravelMode mode) =>
+    createOptionText(l10n, mode);

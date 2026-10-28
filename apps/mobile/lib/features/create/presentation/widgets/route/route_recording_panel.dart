@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../../core/localization/l10n_context.dart';
 import '../../../../../core/geo/geo_point.dart';
 import '../../../application/controllers/route_recording_controller.dart';
 import '../../../application/state/route_recording_state.dart';
@@ -49,7 +50,7 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    _statusTitle(state.status),
+                    _statusTitle(context.l10n, state.status),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -60,11 +61,13 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
               ],
             ),
             const SizedBox(height: 6),
-            Text(_statusMessage(state)),
+            Text(_statusMessage(context.l10n, state)),
             if (state.recovered) ...<Widget>[
               const SizedBox(height: 8),
-              const Text(
-                'Recovered safely after the previous session. Review before resuming.',
+              Text(
+                context
+                    .l10n
+                    .createRouteRecoveredSafelyAfterPreviousSessionReview,
               ),
             ],
             if (state.failureCode != null) ...<Widget>[
@@ -94,9 +97,11 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
         type: MaterialType.transparency,
         child: SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Continue while screen is locked'),
-          subtitle: const Text(
-            'Requires background location permission and shows a system indicator.',
+          title: Text(context.l10n.createRouteContinueWhileScreenLocked),
+          subtitle: Text(
+            context
+                .l10n
+                .createRouteRequiresBackgroundLocationPermissionShowsSystem,
           ),
           value: _recordInBackground,
           onChanged: (value) => setState(() => _recordInBackground = value),
@@ -111,7 +116,7 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
           ),
         ),
         icon: const Icon(Icons.fiber_manual_record),
-        label: const Text('Start recording'),
+        label: Text(context.l10n.createRouteStartRecording),
       ),
     ],
     RouteRecordingStatus.requestingPermission ||
@@ -127,7 +132,7 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
               key: const ValueKey<String>('route-gps-pause'),
               onPressed: () => unawaited(widget.controller.pause()),
               icon: const Icon(Icons.pause),
-              label: const Text('Pause'),
+              label: Text(context.l10n.createRoutePause),
             ),
           ),
           const SizedBox(width: 8),
@@ -138,7 +143,7 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
                   ? null
                   : () => unawaited(widget.controller.finish()),
               icon: const Icon(Icons.stop),
-              label: const Text('Finish'),
+              label: Text(context.l10n.createRouteFinish),
             ),
           ),
         ],
@@ -153,7 +158,7 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
           widget.controller.resume(requestBackground: _recordInBackground),
         ),
         icon: const Icon(Icons.play_arrow),
-        label: const Text('Resume recording'),
+        label: Text(context.l10n.createRouteResumeRecording),
       ),
       const SizedBox(height: 8),
       OutlinedButton.icon(
@@ -161,18 +166,18 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
             ? null
             : () => unawaited(widget.controller.finish()),
         icon: const Icon(Icons.stop),
-        label: const Text('Finish and review'),
+        label: Text(context.l10n.createRouteFinishReview),
       ),
       TextButton(
         onPressed: _confirmDelete,
-        child: const Text('Delete recording'),
+        child: Text(context.l10n.createRouteDeleteRecording),
       ),
     ],
     RouteRecordingStatus.completed || RouteRecordingStatus.failed => <Widget>[
       _SampleCounter(state.sampleCount),
       TextButton(
         onPressed: _confirmDelete,
-        child: const Text('Delete recording'),
+        child: Text(context.l10n.createRouteDeleteRecording),
       ),
     ],
     RouteRecordingStatus.idle => const <Widget>[],
@@ -185,7 +190,7 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Text(
-          'Review recorded track',
+          context.l10n.createRouteReviewRecordedTrack,
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -214,19 +219,19 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
         ],
         const SizedBox(height: 14),
         Text(
-          'Privacy trim',
+          context.l10n.createRoutePrivacyTrim,
           style: Theme.of(
             context,
           ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
         ),
         _TrimSlider(
-          label: 'Hide route start',
+          label: context.l10n.createRouteHideRouteStart,
           value: _trimStartMeters,
           onChanged: (value) => setState(() => _trimStartMeters = value),
           onChangeEnd: (_) => _applyTrim(),
         ),
         _TrimSlider(
-          label: 'Hide route end',
+          label: context.l10n.createRouteHideRouteEnd,
           value: _trimEndMeters,
           onChanged: (value) => setState(() => _trimEndMeters = value),
           onChangeEnd: (_) => _applyTrim(),
@@ -234,15 +239,13 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
         if (preview.gaps.isNotEmpty) ...<Widget>[
           const SizedBox(height: 8),
           Text(
-            'Track gaps',
+            context.l10n.createRouteTrackGaps,
             style: Theme.of(
               context,
             ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'A Route must stay continuous. Confirm each straight connection or record the missing section again.',
-          ),
+          Text(context.l10n.createRouteRouteMustStayContinuousConfirmEach),
           const SizedBox(height: 8),
           ...preview.gaps.indexed.map(
             (entry) => _GapDecision(
@@ -262,7 +265,7 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
           key: const ValueKey<String>('route-gps-apply'),
           onPressed: state.hasResolvedEveryGap ? _apply : null,
           icon: const Icon(Icons.check),
-          label: const Text('Use this track'),
+          label: Text(context.l10n.createRouteUseTrack),
         ),
       ],
     );
@@ -285,18 +288,18 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete GPS recording?'),
-        content: const Text(
-          'The recovery journal and all recorded points will be removed.',
+        title: Text(context.l10n.createRouteDeleteGpsRecording),
+        content: Text(
+          context.l10n.createRouteRecoveryJournalAllRecordedPointsWill,
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.createRouteCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: Text(context.l10n.createRouteDelete),
           ),
         ],
       ),
@@ -312,8 +315,10 @@ class RouteRecordingPreviewMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label:
-        'Recorded Route preview, ${preview.tracks.length} track sections and ${preview.gaps.length} gaps',
+    label: context.l10n.createRouteRecordedRoutePreviewTrackSectionsGaps(
+      preview.tracks.length,
+      preview.gaps.length,
+    ),
     image: true,
     child: SizedBox(
       height: 180,
@@ -418,6 +423,7 @@ class _GapDecision extends StatelessWidget {
   Widget build(
     BuildContext context,
   ) => DropdownButtonFormField<RouteRecordingGapResolution>(
+    isExpanded: true,
     key: ValueKey<String>('route-gps-gap-${gap.id}'),
     initialValue: value,
     decoration: InputDecoration(
@@ -427,7 +433,7 @@ class _GapDecision extends StatelessWidget {
     items: <DropdownMenuItem<RouteRecordingGapResolution>>[
       DropdownMenuItem<RouteRecordingGapResolution>(
         value: RouteRecordingGapResolution.connectDirect,
-        child: Text('Connect directly'),
+        child: Text(context.l10n.createRouteConnectDirectly),
       ),
     ],
     onChanged: onChanged,
@@ -482,7 +488,7 @@ class _RecordingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'Recording is active',
+    label: context.l10n.createRouteRecordingActive,
     child: const Icon(Icons.circle, size: 12, color: Colors.red),
   );
 }
@@ -497,62 +503,65 @@ class _FailureMessage extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: <Widget>[
-      Text(_failureMessage(code)),
+      Text(_failureMessage(context.l10n, code)),
       if (code.contains('permission'))
         TextButton(
           onPressed: onSettings,
-          child: const Text('Open app settings'),
+          child: Text(context.l10n.createRouteOpenAppSettings),
         ),
     ],
   );
 }
 
-String _statusTitle(RouteRecordingStatus status) => switch (status) {
-  RouteRecordingStatus.idle => 'Record with GPS',
-  RouteRecordingStatus.requestingPermission => 'Checking GPS access…',
-  RouteRecordingStatus.recording => 'Recording Route',
-  RouteRecordingStatus.paused => 'Recording paused',
-  RouteRecordingStatus.recovering => 'Recovering recording…',
-  RouteRecordingStatus.processing => 'Processing track…',
-  RouteRecordingStatus.completed => 'Recording ready',
-  RouteRecordingStatus.failed => 'GPS needs attention',
-};
+String _statusTitle(AppLocalizations l10n, RouteRecordingStatus status) =>
+    switch (status) {
+      RouteRecordingStatus.idle => l10n.createRouteRecordWithGps,
+      RouteRecordingStatus.requestingPermission =>
+        l10n.createRouteCheckingGpsAccess,
+      RouteRecordingStatus.recording => l10n.createRouteRecordingRoute,
+      RouteRecordingStatus.paused => l10n.createRouteRecordingPaused,
+      RouteRecordingStatus.recovering => l10n.createRouteRecoveringRecording,
+      RouteRecordingStatus.processing => l10n.createRouteProcessingTrack,
+      RouteRecordingStatus.completed => l10n.createRouteRecordingReady,
+      RouteRecordingStatus.failed => 'GPS needs attention',
+    };
 
-String _statusMessage(RouteRecordingState state) => switch (state.status) {
-  RouteRecordingStatus.idle =>
-    'Walk, run or ride the Route. Points stay encrypted on this device until you apply the track.',
-  RouteRecordingStatus.requestingPermission =>
-    'Recharge requests location only for Route recording.',
-  RouteRecordingStatus.recording =>
-    state.backgroundEnabled
-        ? 'Recording continues with a visible system indicator.'
-        : 'Keep Recharge open while moving along the Route.',
-  RouteRecordingStatus.paused =>
-    'The pause stays as an explicit gap and will never be connected silently.',
-  RouteRecordingStatus.recovering => 'Reading the protected local journal.',
-  RouteRecordingStatus.processing => 'Filtering unsafe and noisy GPS points.',
-  RouteRecordingStatus.completed =>
-    'Inspect gaps, accuracy and privacy trimming before using the track.',
-  RouteRecordingStatus.failed =>
-    'Your saved recording is preserved when recovery is possible.',
-};
+String _statusMessage(AppLocalizations l10n, RouteRecordingState state) =>
+    switch (state.status) {
+      RouteRecordingStatus.idle => l10n.createRouteWalkRunRideRoutePointsStay,
+      RouteRecordingStatus.requestingPermission =>
+        l10n.createRouteRechargeRequestsLocationOnlyRouteRecording,
+      RouteRecordingStatus.recording =>
+        state.backgroundEnabled
+            ? l10n.createRouteRecordingContinuesWithVisibleSystemIndicator
+            : l10n.createRouteKeepRechargeOpenWhileMovingAlong,
+      RouteRecordingStatus.paused =>
+        l10n.createRoutePauseStaysAsExplicitGapWill,
+      RouteRecordingStatus.recovering =>
+        l10n.createRouteReadingProtectedLocalJournal,
+      RouteRecordingStatus.processing =>
+        l10n.createRouteFilteringUnsafeNoisyGpsPoints,
+      RouteRecordingStatus.completed =>
+        l10n.createRouteInspectGapsAccuracyPrivacyTrimmingBefore,
+      RouteRecordingStatus.failed =>
+        l10n.createRouteYourSavedRecordingPreservedWhenRecovery,
+    };
 
-String _failureMessage(String code) => switch (code) {
-  'gps_permission_denied' => 'Location permission was not granted.',
+String _failureMessage(AppLocalizations l10n, String code) => switch (code) {
+  'gps_permission_denied' => l10n.createRouteLocationPermissionWasNotGranted,
   'gps_permission_denied_forever' ||
-  'gps_permission_revoked' => 'Location access is disabled in app settings.',
+  'gps_permission_revoked' => l10n.createRouteLocationAccessDisabledAppSettings,
   'gps_background_permission_denied' =>
-    'Background access was not granted. Turn off screen-lock recording or allow it in settings.',
+    l10n.createRouteBackgroundAccessWasNotGrantedTurn,
   'gps_location_service_disabled' =>
-    'Device location services are switched off.',
-  'gps_point_limit_reached' =>
-    'The safety point limit was reached. Finish and review this recording.',
+    l10n.createRouteDeviceLocationServicesAreSwitchedOff,
+  'gps_point_limit_reached' => l10n.createRouteSafetyPointLimitWasReachedFinish,
   'gps_not_enough_accepted_points' =>
-    'Not enough reliable movement was recorded. Delete this recording and try again.',
+    l10n.createRouteNotEnoughReliableMovementWasRecorded,
   'gps_journal_write_failed' =>
-    'The protected recording could not be saved. Recording was stopped safely.',
-  'gps_gap_decision_required' => 'Review every track gap before continuing.',
-  'gps_gap_routing_required' =>
-    'This gap needs trail routing before it can be applied.',
+    l10n.createRouteProtectedRecordingCouldNotSavedRecording,
+  'gps_gap_decision_required' =>
+    l10n.createRouteReviewEveryTrackGapBeforeContinuing,
+  'gps_gap_routing_required' => l10n.createRouteGapNeedsTrailRoutingBeforeCan,
   _ => 'GPS recording could not continue safely ($code).',
 };

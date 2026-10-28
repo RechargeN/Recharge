@@ -4,40 +4,42 @@ import '../domain/usecases/validate_route_draft_usecase.dart';
 class RouteCreateStepConfig {
   const RouteCreateStepConfig({
     required this.id,
-    required this.title,
-    required this.description,
+    required this.titleId,
+    required this.descriptionId,
   });
 
   final String id;
-  final String title;
-  final String description;
+
+  /// ARB message ids; the UI resolves them with `createFormText` (L4).
+  final String titleId;
+  final String descriptionId;
 }
 
 const List<RouteCreateStepConfig> routeCreateSteps = <RouteCreateStepConfig>[
   RouteCreateStepConfig(
     id: 'method',
-    title: 'Method',
-    description: 'Choose how the continuous track is created',
+    titleId: 'createStepRouteMethodTitle',
+    descriptionId: 'createStepRouteMethodDescription',
   ),
   RouteCreateStepConfig(
     id: 'profile',
-    title: 'Profile',
-    description: 'Set movement profile and routing preferences',
+    titleId: 'createStepRouteProfileTitle',
+    descriptionId: 'createStepRouteProfileDescription',
   ),
   RouteCreateStepConfig(
     id: 'editor',
-    title: 'Track',
-    description: 'Edit anchors and continuous route segments',
+    titleId: 'createStepRouteEditorTitle',
+    descriptionId: 'createStepRouteEditorDescription',
   ),
   RouteCreateStepConfig(
     id: 'details',
-    title: 'Details',
-    description: 'Add route conditions and practical information',
+    titleId: 'createStepRouteDetailsTitle',
+    descriptionId: 'createStepRouteDetailsDescription',
   ),
   RouteCreateStepConfig(
     id: 'review',
-    title: 'Review',
-    description: 'Review geometry, warnings and readiness',
+    titleId: 'createStepRouteReviewTitle',
+    descriptionId: 'createStepRouteReviewDescription',
   ),
 ];
 

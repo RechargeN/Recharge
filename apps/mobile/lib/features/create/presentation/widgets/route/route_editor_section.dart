@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../../core/localization/l10n_context.dart';
 import '../../../../../core/geo/geo_bounds.dart';
 import '../../../../../core/geo/geo_point.dart';
 import '../../../../../core/map/map_scene.dart';
@@ -10,6 +11,7 @@ import '../../../application/route_create_coordinator.dart';
 import '../../../application/route_edit_command.dart';
 import '../../../domain/entities/route_draft_data.dart';
 import 'route_map_builder.dart';
+import '../create_form_texts.dart';
 
 class RouteEditorSection extends StatefulWidget {
   const RouteEditorSection({
@@ -69,10 +71,10 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         _Panel(
-          title: 'Offline trail editor',
+          title: context.l10n.createRouteOfflineTrailEditor,
           subtitle: route.creationMethod == RouteCreationMethod.freehand
-              ? 'Draw one continuous line. Existing geometry is replaced only after confirmation.'
-              : 'Tap the map to add anchors. The local graph connects them along available trails.',
+              ? context.l10n.createRouteDrawOneContinuousLineExistingGeometry
+              : context.l10n.createRouteTapMapAddAnchorsLocalGraph,
           child: RouteMapBuilder(
             bounds: widget.bounds,
             graphEdges: widget.graphEdges,
@@ -109,24 +111,26 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
       OutlinedButton.icon(
         onPressed: widget.canUndo ? widget.onUndo : null,
         icon: const Icon(Icons.undo),
-        label: const Text('Undo'),
+        label: Text(context.l10n.createRouteUndo),
       ),
       OutlinedButton.icon(
         onPressed: widget.canRedo ? widget.onRedo : null,
         icon: const Icon(Icons.redo),
-        label: const Text('Redo'),
+        label: Text(context.l10n.createRouteRedo),
       ),
       OutlinedButton.icon(
         onPressed: widget.onRestore,
         icon: const Icon(Icons.restore),
-        label: const Text('Last saved'),
+        label: Text(context.l10n.createRouteLastSaved),
       ),
     ],
   );
 
   Widget _accessibleAnchorInput() => _Panel(
-    title: 'Add anchor without map gestures',
-    subtitle: 'Coordinates provide a keyboard and screen-reader alternative.',
+    title: context.l10n.createRouteAddAnchorWithoutMapGestures,
+    subtitle: context
+        .l10n
+        .createRouteCoordinatesProvideKeyboardScreenReaderAlternative,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -140,7 +144,9 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                   decimal: true,
                   signed: true,
                 ),
-                decoration: const InputDecoration(labelText: 'Latitude'),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createRouteLatitude,
+                ),
               ),
             ),
             const SizedBox(width: 8),
@@ -152,7 +158,9 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                   decimal: true,
                   signed: true,
                 ),
-                decoration: const InputDecoration(labelText: 'Longitude'),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createRouteLongitude,
+                ),
               ),
             ),
           ],
@@ -162,7 +170,7 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
           key: const ValueKey<String>('route-add-anchor-coordinates'),
           onPressed: _addCoordinateAnchor,
           icon: const Icon(Icons.add_location_alt_outlined),
-          label: const Text('Add anchor'),
+          label: Text(context.l10n.createRouteAddAnchor),
         ),
       ],
     ),
@@ -170,9 +178,9 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
 
   Widget _anchorList() => _Panel(
     title: 'Anchors (${widget.route.anchors.length})',
-    subtitle: 'Every action is available as a labelled control.',
+    subtitle: context.l10n.createRouteEveryActionAvailableAsLabelledControl,
     child: widget.route.anchors.isEmpty
-        ? const Text('No anchors yet.')
+        ? Text(context.l10n.createRouteNoAnchorsYet)
         : Column(
             children: widget.route.anchors.indexed
                 .map((entry) {
@@ -195,24 +203,24 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                           spacing: 4,
                           children: <Widget>[
                             IconButton(
-                              tooltip: 'Move anchor north',
+                              tooltip: context.l10n.createRouteMoveAnchorNorth,
                               onPressed: () => _nudge(anchor, latitude: 0.0001),
                               icon: const Icon(Icons.north),
                             ),
                             IconButton(
-                              tooltip: 'Move anchor south',
+                              tooltip: context.l10n.createRouteMoveAnchorSouth,
                               onPressed: () =>
                                   _nudge(anchor, latitude: -0.0001),
                               icon: const Icon(Icons.south),
                             ),
                             IconButton(
-                              tooltip: 'Move anchor west',
+                              tooltip: context.l10n.createRouteMoveAnchorWest,
                               onPressed: () =>
                                   _nudge(anchor, longitude: -0.0001),
                               icon: const Icon(Icons.west),
                             ),
                             IconButton(
-                              tooltip: 'Move anchor east',
+                              tooltip: context.l10n.createRouteMoveAnchorEast,
                               onPressed: () =>
                                   _nudge(anchor, longitude: 0.0001),
                               icon: const Icon(Icons.east),
@@ -220,7 +228,7 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                           ],
                         ),
                         trailing: PopupMenuButton<String>(
-                          tooltip: 'Anchor actions',
+                          tooltip: context.l10n.createRouteAnchorActions,
                           onSelected: (String value) {
                             if (value == 'poi') {
                               unawaited(
@@ -242,11 +250,11 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                           itemBuilder: (_) => <PopupMenuEntry<String>>[
                             PopupMenuItem<String>(
                               value: 'poi',
-                              child: Text('Add viewpoint'),
+                              child: Text(context.l10n.createRouteAddViewpoint),
                             ),
                             PopupMenuItem<String>(
                               value: 'delete',
-                              child: Text('Remove anchor'),
+                              child: Text(context.l10n.createRouteRemoveAnchor),
                             ),
                           ],
                         ),
@@ -280,10 +288,11 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                         '${(segment.distanceMeters / 1000).toStringAsFixed(2)} km',
                       ),
                       subtitle: Text(
-                        '${segment.source.name} • ${segment.operationState.name}',
+                        '${createOptionText(context.l10n, segment.source)} • '
+                        '${createOptionText(context.l10n, segment.operationState)}',
                       ),
                       trailing: PopupMenuButton<String>(
-                        tooltip: 'Segment actions',
+                        tooltip: context.l10n.createRouteSegmentActions,
                         onSelected: (String value) {
                           if (value == 'retry') {
                             unawaited(
@@ -314,18 +323,22 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                         },
                         itemBuilder: (_) => <PopupMenuEntry<String>>[
                           if (failed)
-                            const PopupMenuItem<String>(
+                            PopupMenuItem<String>(
                               value: 'retry',
-                              child: Text('Retry routing'),
+                              child: Text(context.l10n.createRouteRetryRouting),
                             ),
-                          const PopupMenuItem<String>(
+                          PopupMenuItem<String>(
                             value: 'direct',
-                            child: Text('Use intentional direct line'),
+                            child: Text(
+                              context.l10n.createRouteUseIntentionalDirectLine,
+                            ),
                           ),
                           if (segment.geometry.points.length >= 3)
-                            const PopupMenuItem<String>(
+                            PopupMenuItem<String>(
                               value: 'split',
-                              child: Text('Split at midpoint'),
+                              child: Text(
+                                context.l10n.createRouteSplitAtMidpoint,
+                              ),
                             ),
                         ],
                       ),
@@ -339,7 +352,7 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
   Widget _waypointList() => _Panel(
     title: 'Waypoints (${widget.route.waypoints.length})',
     child: widget.route.waypoints.isEmpty
-        ? const Text('Add a viewpoint from an anchor menu.')
+        ? Text(context.l10n.createRouteAddViewpointFromAnchorMenu)
         : Column(
             children: widget.route.waypoints
                 .map((waypoint) {
@@ -351,7 +364,7 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                       title: Text(waypoint.typeId),
                       subtitle: DropdownButton<String>(
                         value: waypoint.anchorId,
-                        hint: const Text('Attach to anchor'),
+                        hint: Text(context.l10n.createRouteAttachAnchor),
                         isExpanded: true,
                         items: widget.route.anchors.indexed
                             .map(
@@ -376,7 +389,7 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                         },
                       ),
                       trailing: IconButton(
-                        tooltip: 'Remove waypoint',
+                        tooltip: context.l10n.createRouteRemoveWaypoint,
                         onPressed: () => unawaited(
                           widget.onCommand(RemoveRouteWaypoint(waypoint.id)),
                         ),

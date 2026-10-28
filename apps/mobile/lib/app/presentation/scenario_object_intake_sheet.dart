@@ -4,12 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/id/id_generator.dart';
+import '../../core/localization/l10n_context.dart';
+import '../../core/localization/recharge_formats.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/auth/application/controllers/auth_controller.dart';
 import '../../features/auth/presentation/widgets/auth_gate_sheet.dart';
+import '../../features/create/domain/entities/scenario_draft_data.dart';
 import '../../features/create/domain/entities/scenario_item_draft.dart';
 import '../../features/create/domain/entities/scenario_object_intake.dart';
 import '../../features/create/domain/repositories/create_draft_collection_repository.dart';
+import '../../features/create/presentation/widgets/create_form_texts.dart';
 import '../../features/discover/domain/entities/discover_item_entity.dart';
 import '../../features/discover/domain/entities/published_event_discovery_entity.dart';
 import '../application/controllers/scenario_object_intake_controller.dart';
@@ -91,7 +95,7 @@ Future<ScenarioObjectIntakeSheetResult?> launchScenarioObjectIntake({
       (items.length > 1 && !config.multiSelectEnabled)) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Add to Scenario is unavailable.')),
+        SnackBar(content: Text(context.l10n.scenarioIntakeUnavailable)),
       );
     }
     return null;
@@ -147,11 +151,15 @@ Future<ScenarioObjectIntakeSheetResult?> showScenarioObjectIntakeSheet({
           requesterId: requesterId,
           checkedAtUtc: DateTime.now().toUtc(),
         );
-  } on FormatException catch (error) {
+  } on FormatException {
     if (context.mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(error.message.toString())));
+        // The adapter's FormatException text is for developers; the user
+        // sees the generic refusal.
+      ).showSnackBar(
+        SnackBar(content: Text(context.l10n.scenarioIntakeUnavailable)),
+      );
     }
     return null;
   }
@@ -184,7 +192,7 @@ Future<ScenarioObjectIntakeSheetResult?> launchScenarioObjectIntakeForEvent({
   if (!config.allowsSurface(ScenarioIntakeSourceSurface.details)) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Add to Scenario is unavailable.')),
+        SnackBar(content: Text(context.l10n.scenarioIntakeUnavailable)),
       );
     }
     return null;
@@ -210,11 +218,15 @@ Future<ScenarioObjectIntakeSheetResult?> launchScenarioObjectIntakeForEvent({
           requesterId: user.id,
           checkedAtUtc: DateTime.now().toUtc(),
         );
-  } on FormatException catch (error) {
+  } on FormatException {
     if (context.mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(error.message.toString())));
+        // The adapter's FormatException text is for developers; the user
+        // sees the generic refusal.
+      ).showSnackBar(
+        SnackBar(content: Text(context.l10n.scenarioIntakeUnavailable)),
+      );
     }
     return null;
   }
@@ -376,14 +388,7 @@ class _SheetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final step = switch (stage) {
-      ScenarioObjectIntakeStage.target => '1 of 3 · Scenario',
-      ScenarioObjectIntakeStage.placement => '2 of 3 · Placement',
-      ScenarioObjectIntakeStage.review => '3 of 3 · Review',
-      ScenarioObjectIntakeStage.success => 'Complete',
-      ScenarioObjectIntakeStage.applying => 'Saving',
-      _ => 'Preparing',
-    };
+    final step = context.l10n.scenarioIntakeStep(stage.name);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 8, 12),
       child: Row(
@@ -393,7 +398,7 @@ class _SheetHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Add to Scenario',
+                  context.l10n.scenarioIntakeTitle,
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
@@ -403,7 +408,7 @@ class _SheetHeader extends StatelessWidget {
             ),
           ),
           IconButton(
-            tooltip: 'Close Add to Scenario',
+            tooltip: context.l10n.scenarioIntakeClose,
             onPressed: onClose,
             icon: const Icon(Icons.close),
           ),
@@ -424,18 +429,18 @@ class _TargetStep extends StatelessWidget {
     return _StepScroll(
       children: <Widget>[
         Text(
-          'Choose a personal Scenario',
+          context.l10n.scenarioIntakeChooseTarget,
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 6),
-        const Text('Only your editable private drafts are shown.'),
+        Text(context.l10n.scenarioIntakeOnlyPrivateDrafts),
         const SizedBox(height: 12),
         if (state.targets.isEmpty)
-          const _Notice(
+          _Notice(
             icon: Icons.inbox_outlined,
-            text: 'No saved Scenario yet. Create one below.',
+            text: context.l10n.scenarioIntakeNoTargets,
           ),
         if (state.targets.isNotEmpty)
           RadioGroup<String>(
@@ -449,9 +454,11 @@ class _TargetStep extends StatelessWidget {
                   RadioListTile<String>(
                     value: target.id,
                     title: Text(
-                      target.title.trim().isEmpty ? 'Untitled' : target.title,
+                      target.title.trim().isEmpty
+                          ? context.l10n.scenarioIntakeUntitled
+                          : target.title,
                     ),
-                    subtitle: Text(_targetSummary(target)),
+                    subtitle: Text(_targetSummary(context, target)),
                   ),
               ],
             ),
@@ -461,10 +468,10 @@ class _TargetStep extends StatelessWidget {
           RadioGroup<bool>(
             groupValue: state.newTargetSelected ? true : null,
             onChanged: (_) => controller.selectNewTarget(),
-            child: const RadioListTile<bool>(
+            child: RadioListTile<bool>(
               value: true,
-              title: Text('Create new Scenario'),
-              subtitle: Text('Private · one Day 1 · saved only with the stop'),
+              title: Text(context.l10n.scenarioIntakeCreateNew),
+              subtitle: Text(context.l10n.scenarioIntakeCreateNewHint),
             ),
           ),
         ],
@@ -473,14 +480,17 @@ class _TargetStep extends StatelessWidget {
             key: ValueKey<String>(state.newTargetTitle),
             initialValue: state.newTargetTitle,
             maxLength: 120,
-            decoration: const InputDecoration(labelText: 'Scenario title'),
+            decoration: InputDecoration(
+              labelText: context.l10n.scenarioIntakeTitleField,
+            ),
             onChanged: controller.updateNewTargetTitle,
           ),
-        if (state.message != null) _ErrorText(state.message!),
+        if (state.message != null)
+          _ErrorText(context.l10n.scenarioIntakeNotice(state.message!.name)),
         const SizedBox(height: 16),
         FilledButton(
           onPressed: controller.continueFromTarget,
-          child: const Text('Continue to placement'),
+          child: Text(context.l10n.scenarioIntakeContinue),
         ),
       ],
     );
@@ -498,7 +508,8 @@ class _PlacementStep extends StatelessWidget {
     return _StepScroll(
       children: <Widget>[
         Text(
-          state.selectedTargetTitle ?? 'Scenario',
+          state.selectedTargetTitle ??
+              context.l10n.scenarioIntakeScenarioFallback,
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
@@ -506,18 +517,22 @@ class _PlacementStep extends StatelessWidget {
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
           initialValue: state.selectedDayId ?? '__unscheduled__',
-          decoration: const InputDecoration(labelText: 'Day'),
+          decoration: InputDecoration(
+            labelText: context.l10n.scenarioIntakeDay,
+          ),
           items: <DropdownMenuItem<String>>[
             for (final day in state.days)
               DropdownMenuItem<String>(
                 value: day.id,
                 child: Text(
-                  '${day.title}${day.dateLabel == null ? '' : ' · ${day.dateLabel}'}',
+                  day.dateLabel == null
+                      ? day.title
+                      : '${day.title} · ${_localDate(context, day.dateLabel!)}',
                 ),
               ),
-            const DropdownMenuItem<String>(
+            DropdownMenuItem<String>(
               value: '__unscheduled__',
-              child: Text('Unscheduled'),
+              child: Text(context.l10n.scenarioIntakeUnscheduled),
             ),
           ],
           onChanged: (value) =>
@@ -527,16 +542,22 @@ class _PlacementStep extends StatelessWidget {
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             initialValue: state.afterItemId ?? '__end__',
-            decoration: const InputDecoration(labelText: 'Insert'),
+            decoration: InputDecoration(
+              labelText: context.l10n.scenarioIntakeInsert,
+            ),
             items: <DropdownMenuItem<String>>[
-              const DropdownMenuItem<String>(
+              DropdownMenuItem<String>(
                 value: '__end__',
-                child: Text('At end'),
+                child: Text(context.l10n.scenarioIntakeAtEnd),
               ),
               for (final anchor in state.anchors)
                 DropdownMenuItem<String>(
                   value: anchor.id,
-                  child: Text('After ${anchor.title}'),
+                  // The stop title is shown as is, after a localized label.
+                  child: Text(
+                    '${context.l10n.scenarioIntakeAfterLabel} '
+                    '${anchor.title ?? createOptionText(context.l10n, anchor.kind)}',
+                  ),
                 ),
             ],
             onChanged: (value) =>
@@ -544,37 +565,41 @@ class _PlacementStep extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 16),
-        Text('Role', style: Theme.of(context).textTheme.titleSmall),
+        Text(
+          context.l10n.scenarioIntakeRole,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
         const SizedBox(height: 8),
         SegmentedButton<ScenarioItemRole>(
-          segments: const <ButtonSegment<ScenarioItemRole>>[
+          segments: <ButtonSegment<ScenarioItemRole>>[
             ButtonSegment<ScenarioItemRole>(
               value: ScenarioItemRole.mandatory,
-              label: Text('Mandatory'),
+              label: Text(context.l10n.scenarioIntakeMandatory),
             ),
             ButtonSegment<ScenarioItemRole>(
               value: ScenarioItemRole.optional,
-              label: Text('Optional'),
+              label: Text(context.l10n.scenarioIntakeOptional),
             ),
           ],
           selected: <ScenarioItemRole>{state.role},
           onSelectionChanged: (value) => controller.setRole(value.single),
         ),
-        if (state.message != null) _ErrorText(state.message!),
+        if (state.message != null)
+          _ErrorText(context.l10n.scenarioIntakeNotice(state.message!.name)),
         const SizedBox(height: 20),
         Row(
           children: <Widget>[
             Expanded(
               child: OutlinedButton(
                 onPressed: controller.back,
-                child: const Text('Back'),
+                child: Text(context.l10n.scenarioIntakeBack),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: FilledButton(
                 onPressed: controller.continueToReview,
-                child: const Text('Review'),
+                child: Text(context.l10n.scenarioIntakeReview),
               ),
             ),
           ],
@@ -605,12 +630,12 @@ class _ReviewStep extends StatelessWidget {
         _Notice(
           icon: Icons.event_note_outlined,
           text:
-              '${state.selectedTargetTitle} · '
-              '${state.selectedDayId == null
-                  ? 'Unscheduled'
+              '${state.selectedTargetTitle ?? context.l10n.scenarioIntakeScenarioFallback} · '
+              '${context.l10n.scenarioIntakePlacement(state.selectedDayId == null
+                  ? 'unscheduled'
                   : state.afterItemId == null
-                  ? 'At end'
-                  : 'After selected stop'}',
+                  ? 'atEnd'
+                  : 'afterStop')}',
         ),
         const SizedBox(height: 12),
         for (
@@ -632,17 +657,15 @@ class _ReviewStep extends StatelessWidget {
           CheckboxListTile(
             value: state.confirmDuplicate,
             onChanged: (value) => controller.confirmDuplicate(value ?? false),
-            title: const Text('Add another occurrence'),
-            subtitle: const Text(
-              'This exact catalog object already exists in the Scenario.',
-            ),
+            title: Text(context.l10n.scenarioIntakeAddAnother),
+            subtitle: Text(context.l10n.scenarioIntakeAddAnotherHint),
             controlAffinity: ListTileControlAffinity.leading,
           ),
         if (controller.unavailableConfirmationRequired)
           CheckboxListTile(
             value: state.confirmUnavailable,
             onChanged: (value) => controller.confirmUnavailable(value ?? false),
-            title: const Text('Use saved unavailable snapshot'),
+            title: Text(context.l10n.scenarioIntakeUseUnavailable),
             controlAffinity: ListTileControlAffinity.leading,
           ),
         if (controller.scheduleAdjustmentConfirmationRequired)
@@ -650,25 +673,23 @@ class _ReviewStep extends StatelessWidget {
             value: state.confirmScheduleAdjustment,
             onChanged: (value) =>
                 controller.confirmScheduleAdjustment(value ?? false),
-            title: const Text('Use as a flexible template stop'),
-            subtitle: const Text(
-              'The source has a fixed date, but this Scenario is a template.',
-            ),
+            title: Text(context.l10n.scenarioIntakeUseTemplateStop),
+            subtitle: Text(context.l10n.scenarioIntakeUseTemplateStopHint),
             controlAffinity: ListTileControlAffinity.leading,
           ),
-        const _Notice(
+        _Notice(
           icon: Icons.route_outlined,
-          text:
-              'Logistics are not recalculated live. Existing unlocked boundary estimates will be invalidated safely.',
+          text: context.l10n.scenarioIntakeLogisticsNotice,
         ),
-        if (state.message != null) _ErrorText(state.message!),
+        if (state.message != null)
+          _ErrorText(context.l10n.scenarioIntakeNotice(state.message!.name)),
         const SizedBox(height: 20),
         Row(
           children: <Widget>[
             Expanded(
               child: OutlinedButton(
                 onPressed: controller.back,
-                child: const Text('Back'),
+                child: Text(context.l10n.scenarioIntakeBack),
               ),
             ),
             const SizedBox(width: 10),
@@ -677,7 +698,9 @@ class _ReviewStep extends StatelessWidget {
                 onPressed: () =>
                     controller.apply(authenticated: isRequesterAuthenticated()),
                 icon: const Icon(Icons.playlist_add_check),
-                label: Text('Add ${state.orderedRefs.length}'),
+                label: Text(
+                  context.l10n.scenarioIntakeAddCount(state.orderedRefs.length),
+                ),
               ),
             ),
           ],
@@ -708,10 +731,13 @@ class _CandidateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final duration = candidate.snapshot.durationMinutes;
     final fixed = candidate.schedule?.planned;
+    final String status = context.l10n.scenarioIntakeSourceStatus(
+      candidate.sourceStatus.name,
+    );
     return Semantics(
       label:
-          'Selected stop ${index + 1} of ${candidate.snapshot.title}. '
-          '${candidate.sourceStatus.name}.',
+          '${context.l10n.scenarioIntakeCandidateLabel(index + 1)} '
+          '${candidate.snapshot.title}. $status.',
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -729,14 +755,20 @@ class _CandidateCard extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                     Text(
-                      '${candidate.ref.objectType.name} · '
-                      '${duration == null ? 'Duration unknown' : '$duration min'} · '
-                      '${candidate.sourceStatus.name}',
+                      '${context.l10n.scenarioIntakeObjectType(candidate.ref.objectType.name)} · '
+                      '${duration == null ? context.l10n.scenarioIntakeDurationUnknown : context.l10n.createScenarioDurationMinutes(duration)} · '
+                      '$status',
                     ),
                     if (fixed is ScenarioDatedPlannedTimeDraft &&
                         fixed.fixedStartAtUtc != null)
                       Text(
-                        'Fixed ${fixed.fixedStartAtUtc!.toUtc().toIso8601String()}',
+                        context.l10n.scenarioIntakeFixedStart(
+                          RechargeFormats.dateTime(
+                            fixed.fixedStartAtUtc!,
+                            fixed.startTimezoneId ?? 'UTC',
+                            Localizations.localeOf(context).languageCode,
+                          ),
+                        ),
                       ),
                   ],
                 ),
@@ -744,12 +776,12 @@ class _CandidateCard extends StatelessWidget {
               Column(
                 children: <Widget>[
                   IconButton(
-                    tooltip: 'Move up',
+                    tooltip: context.l10n.scenarioIntakeMoveUp,
                     onPressed: canMoveUp ? onMoveUp : null,
                     icon: const Icon(Icons.keyboard_arrow_up),
                   ),
                   IconButton(
-                    tooltip: 'Move down',
+                    tooltip: context.l10n.scenarioIntakeMoveDown,
                     onPressed: canMoveDown ? onMoveDown : null,
                     icon: const Icon(Icons.keyboard_arrow_down),
                   ),
@@ -772,15 +804,19 @@ class _LoadingStep extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
     liveRegion: true,
     label: applying
-        ? 'Adding selected stops to Scenario'
-        : 'Loading your Scenarios',
+        ? context.l10n.scenarioIntakeApplyingSemantics
+        : context.l10n.scenarioIntakeLoadingSemantics,
     child: Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           const CircularProgressIndicator(),
           const SizedBox(height: 16),
-          Text(applying ? 'Adding to Scenario…' : 'Loading your Scenarios…'),
+          Text(
+            applying
+                ? context.l10n.scenarioIntakeApplying
+                : context.l10n.scenarioIntakeLoading,
+          ),
         ],
       ),
     ),
@@ -796,8 +832,8 @@ class _SuccessStep extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
     liveRegion: true,
     label:
-        'Success. Added ${state.successItemCount} stops to '
-        '${state.selectedTargetTitle}.',
+        '${context.l10n.scenarioIntakeSuccess(state.successItemCount)}: '
+        '${state.selectedTargetTitle ?? context.l10n.scenarioIntakeScenarioFallback}',
     child: Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -807,15 +843,22 @@ class _SuccessStep extends StatelessWidget {
             const Icon(Icons.check_circle, size: 64, color: Colors.green),
             const SizedBox(height: 16),
             Text(
-              'Added ${state.successItemCount} to ${state.selectedTargetTitle}',
+              context.l10n.scenarioIntakeSuccess(state.successItemCount),
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
+            const SizedBox(height: 4),
+            // The Scenario title is the author's own text, shown as is.
+            Text(
+              state.selectedTargetTitle ??
+                  context.l10n.scenarioIntakeScenarioFallback,
+              textAlign: TextAlign.center,
+            ),
             if (state.replayed) ...<Widget>[
               const SizedBox(height: 8),
-              const Text('Already saved · no duplicate was created.'),
+              Text(context.l10n.scenarioIntakeReplayed),
             ],
           ],
         ),
@@ -845,14 +888,14 @@ class _SuccessActions extends StatelessWidget {
           Expanded(
             child: OutlinedButton(
               onPressed: onStay,
-              child: const Text('Stay here'),
+              child: Text(context.l10n.scenarioIntakeStay),
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: FilledButton(
               onPressed: onOpen,
-              child: const Text('Open Scenario'),
+              child: Text(context.l10n.scenarioIntakeOpenScenario),
             ),
           ),
         ],
@@ -864,13 +907,17 @@ class _SuccessActions extends StatelessWidget {
 class _ErrorStep extends StatelessWidget {
   const _ErrorStep({required this.message, required this.onRetry});
 
-  final String? message;
+  final ScenarioObjectIntakeNotice? message;
   final Future<void> Function() onRetry;
+
+  String _errorText(BuildContext context) => message == null
+      ? context.l10n.scenarioIntakePrepareFailed
+      : context.l10n.scenarioIntakeNotice(message!.name);
 
   @override
   Widget build(BuildContext context) => Semantics(
     liveRegion: true,
-    label: message ?? 'Could not prepare Add to Scenario.',
+    label: _errorText(context),
     child: Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -879,9 +926,12 @@ class _ErrorStep extends StatelessWidget {
           children: <Widget>[
             const Icon(Icons.error_outline, size: 48),
             const SizedBox(height: 12),
-            Text(message ?? 'Could not prepare Add to Scenario.'),
+            Text(_errorText(context)),
             const SizedBox(height: 16),
-            FilledButton(onPressed: onRetry, child: const Text('Retry')),
+            FilledButton(
+              onPressed: onRetry,
+              child: Text(context.l10n.scenarioIntakeRetry),
+            ),
           ],
         ),
       ),
@@ -953,11 +1003,37 @@ class _ErrorText extends StatelessWidget {
   );
 }
 
-String _targetSummary(CreateDraftSummary target) {
-  final dateLabel = target.scenarioDateMode?.name == 'template'
-      ? 'Template'
-      : target.scenarioFirstDate?.iso8601 ?? 'Dated';
-  return '${target.scenarioFormat?.name ?? 'scenario'} · $dateLabel · '
-      '${target.scenarioDayCount ?? 0} days · '
-      '${target.scenarioActiveItemCount ?? 0} active items';
+String _targetSummary(BuildContext context, CreateDraftSummary target) {
+  final l10n = context.l10n;
+  final ScenarioLocalDateDraft? firstDate = target.scenarioFirstDate;
+  final String dateLabel = target.scenarioDateMode == ScenarioDateMode.template
+      ? l10n.scenarioIntakeTemplate
+      : firstDate == null
+      ? l10n.scenarioIntakeDated
+      : _localDate(context, firstDate.iso8601);
+  final ScenarioFormat? format = target.scenarioFormat;
+  return <String>[
+    if (format != null) createOptionText(l10n, format),
+    dateLabel,
+    l10n.scenarioIntakeTargetCounts(
+      target.scenarioDayCount ?? 0,
+      target.scenarioActiveItemCount ?? 0,
+    ),
+  ].join(' · ');
+}
+
+/// A calendar date (YYYY-MM-DD) in the reader's language; it has no instant,
+/// so no zone is applied.
+String _localDate(BuildContext context, String iso8601) {
+  final List<int> parts = iso8601
+      .split('-')
+      .map(int.tryParse)
+      .whereType<int>()
+      .toList(growable: false);
+  if (parts.length != 3) return iso8601;
+  return RechargeFormats.date(
+    DateTime.utc(parts[0], parts[1], parts[2]),
+    'UTC',
+    Localizations.localeOf(context).languageCode,
+  );
 }

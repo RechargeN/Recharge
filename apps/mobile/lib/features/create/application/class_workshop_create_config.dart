@@ -2,13 +2,15 @@
 class ClassWorkshopCreateSectionConfig {
   const ClassWorkshopCreateSectionConfig({
     required this.id,
-    required this.title,
-    required this.description,
+    required this.titleId,
+    required this.descriptionId,
   });
 
   final String id;
-  final String title;
-  final String description;
+
+  /// ARB message ids; the UI resolves them with `createFormText` (L4).
+  final String titleId;
+  final String descriptionId;
 }
 
 /// CW-V1 sections on one scrollable page, rendered by the shared Create page
@@ -17,22 +19,22 @@ const List<ClassWorkshopCreateSectionConfig> classWorkshopCreateSections =
     <ClassWorkshopCreateSectionConfig>[
       ClassWorkshopCreateSectionConfig(
         id: 'basics',
-        title: 'Offering',
-        description: 'Kind, title, descriptions, category, criteria and media',
+        titleId: 'createStepClassWorkshopBasicsTitle',
+        descriptionId: 'createStepClassWorkshopBasicsDescription',
       ),
       ClassWorkshopCreateSectionConfig(
         id: 'learning',
-        title: 'Programme and instructor',
-        description: 'Outcomes, programme, prerequisites and instructor',
+        titleId: 'createStepClassWorkshopLearningTitle',
+        descriptionId: 'createStepClassWorkshopLearningDescription',
       ),
       ClassWorkshopCreateSectionConfig(
         id: 'schedule',
-        title: 'Dates and place',
-        description: 'Single class or fixed series, timezone, delivery, place',
+        titleId: 'createStepClassWorkshopScheduleTitle',
+        descriptionId: 'createStepClassWorkshopScheduleDescription',
       ),
       ClassWorkshopCreateSectionConfig(
         id: 'participation',
-        title: 'Participation',
-        description: 'Materials, requirements, group size, price, enrollment',
+        titleId: 'createStepClassWorkshopParticipationTitle',
+        descriptionId: 'createStepClassWorkshopParticipationDescription',
       ),
     ];

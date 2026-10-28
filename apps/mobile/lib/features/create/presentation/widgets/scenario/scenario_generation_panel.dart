@@ -25,8 +25,9 @@ class ScenarioGenerationPanel extends StatefulWidget {
 }
 
 class _ScenarioGenerationPanelState extends State<ScenarioGenerationPanel> {
+  // l10n-ignore: demo input matched by the local generator's keywords.
   static const String _examplePrompt =
-      'A calm cultural afternoon in Riga with a walk and dinner';
+      'A calm cultural afternoon in Riga with a walk and dinner'; // l10n-ignore
 
   late final TextEditingController _promptController;
 
@@ -79,24 +80,21 @@ class _ScenarioGenerationPanelState extends State<ScenarioGenerationPanel> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Build with AI',
+                    context.l10n.createScenarioBuildWithAi,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
-                const Chip(
+                Chip(
                   key: ValueKey<String>('scenario-generation-mode'),
                   avatar: Icon(Icons.science_outlined, size: 16),
-                  label: Text('Local demo'),
+                  label: Text(context.l10n.createScenarioLocalDemo),
                 ),
               ],
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Describe the mood and priorities. This demo uses only the '
-              'local Recharge catalog; it does not call an external AI.',
-            ),
+            Text(context.l10n.createScenarioDescribeMoodPrioritiesDemoUsesOnly),
             const SizedBox(height: 12),
             TextField(
               key: const ValueKey<String>('scenario-generation-prompt'),
@@ -105,9 +103,11 @@ class _ScenarioGenerationPanelState extends State<ScenarioGenerationPanel> {
               maxLines: 4,
               maxLength: 500,
               textInputAction: TextInputAction.newline,
-              decoration: const InputDecoration(
-                labelText: 'What would you like to do?',
-                hintText: 'A relaxed afternoon in Riga with culture and dinner',
+              decoration: InputDecoration(
+                labelText: context.l10n.createScenarioWhatWouldYouLikeDo,
+                hintText: context
+                    .l10n
+                    .createScenarioRelaxedAfternoonRigaWithCultureDinner,
                 border: OutlineInputBorder(),
               ),
               onChanged: widget.controller.updateScenarioGenerationPrompt,
@@ -117,11 +117,11 @@ class _ScenarioGenerationPanelState extends State<ScenarioGenerationPanel> {
               child: ActionChip(
                 key: const ValueKey<String>('scenario-generation-example'),
                 avatar: const Icon(Icons.lightbulb_outline, size: 16),
-                label: const Text('Use an example'),
+                label: Text(context.l10n.createScenarioUseExample),
                 onPressed: widget.state.scenarioGenerationLoading
                     ? null
                     : () {
-                        _promptController.value = const TextEditingValue(
+                        _promptController.value = TextEditingValue(
                           text: _examplePrompt,
                           selection: TextSelection.collapsed(
                             offset: _examplePrompt.length,
@@ -148,8 +148,8 @@ class _ScenarioGenerationPanelState extends State<ScenarioGenerationPanel> {
                   : const Icon(Icons.auto_awesome),
               label: Text(
                 widget.state.scenarioGenerationLoading
-                    ? 'Building preview…'
-                    : 'Generate preview',
+                    ? context.l10n.createScenarioBuildingPreview
+                    : context.l10n.createScenarioGeneratePreview,
               ),
             ),
             if (widget.state.scenarioGenerationError
@@ -199,7 +199,7 @@ class _ScenarioProposalPreview extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Text(
-          'Proposed stops',
+          context.l10n.createScenarioProposedStops,
           style: Theme.of(
             context,
           ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
@@ -235,16 +235,16 @@ class _ScenarioProposalPreview extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Chip(
+                      Chip(
                         visualDensity: VisualDensity.compact,
-                        label: Text('Catalog snapshot'),
+                        label: Text(context.l10n.createScenarioCatalogSnapshot),
                       ),
                     ],
                   ),
                   if (item.subtitle.isNotEmpty) Text(item.subtitle),
                   const SizedBox(height: 4),
                   Text(
-                    '${_formatMinutes(item.durationMinutes)} · ${item.reason}',
+                    '${_formatMinutes(context.l10n, item.durationMinutes)} · ${item.reason}',
                   ),
                 ],
               ),
@@ -252,15 +252,17 @@ class _ScenarioProposalPreview extends StatelessWidget {
           ),
         const SizedBox(height: 6),
         Text(
-          'Activity time: ${_formatMinutes(proposal.activityMinutes)}',
+          context.l10n.createScenarioActivityTime(
+            _formatMinutes(context.l10n, proposal.activityMinutes),
+          ),
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         Text(
           preview.readiness.canSaveToMyScenarios
-              ? 'Preview readiness: ready to review'
-              : 'Preview readiness: needs your review',
+              ? context.l10n.createScenarioPreviewReadinessReadyReview
+              : context.l10n.createScenarioPreviewReadinessNeedsYourReview,
         ),
         const SizedBox(height: 10),
         DecoratedBox(
@@ -274,7 +276,7 @@ class _ScenarioProposalPreview extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Still unverified',
+                  context.l10n.createScenarioStillUnverified,
                   style: Theme.of(
                     context,
                   ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
@@ -293,7 +295,7 @@ class _ScenarioProposalPreview extends StatelessWidget {
         FilledButton(
           key: const ValueKey<String>('apply-scenario-generation'),
           onPressed: proposal.canApply ? onApply : null,
-          child: const Text('Apply to Scenario'),
+          child: Text(context.l10n.createScenarioApplyScenario),
         ),
         const SizedBox(height: 6),
         Row(
@@ -302,7 +304,7 @@ class _ScenarioProposalPreview extends StatelessWidget {
               child: OutlinedButton(
                 key: const ValueKey<String>('edit-scenario-generation'),
                 onPressed: onEdit,
-                child: const Text('Edit prompt'),
+                child: Text(context.l10n.createScenarioEditPrompt),
               ),
             ),
             const SizedBox(width: 8),
@@ -310,7 +312,7 @@ class _ScenarioProposalPreview extends StatelessWidget {
               child: TextButton(
                 key: const ValueKey<String>('discard-scenario-generation'),
                 onPressed: onDiscard,
-                child: const Text('Discard'),
+                child: Text(context.l10n.createScenarioDiscard),
               ),
             ),
           ],
@@ -319,10 +321,12 @@ class _ScenarioProposalPreview extends StatelessWidget {
     );
   }
 
-  static String _formatMinutes(int minutes) {
-    if (minutes < 60) return '$minutes min';
+  static String _formatMinutes(AppLocalizations l10n, int minutes) {
+    if (minutes < 60) return l10n.createScenarioDurationMinutes(minutes);
     final int hours = minutes ~/ 60;
     final int remainder = minutes % 60;
-    return remainder == 0 ? '$hours h' : '$hours h $remainder min';
+    return remainder == 0
+        ? l10n.createScenarioDurationHours(hours)
+        : l10n.createScenarioDurationHoursMinutes(hours, remainder);
   }
 }
