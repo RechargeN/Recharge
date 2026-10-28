@@ -7502,6 +7502,1615 @@ class AppLocalizationsRu extends AppLocalizations {
   String get scenarioIntakeDated => 'С датами';
 
   @override
+  String get discoverSchedule => 'Расписание';
+
+  @override
+  String get discoverShowOnMap => 'Показать на карте';
+
+  @override
+  String get discoverReadMore => 'Читать далее';
+
+  @override
+  String get discoverShowLess => 'Свернуть';
+
+  @override
+  String get discoverExactAddressNotPublished => 'Точный адрес не опубликован';
+
+  @override
+  String get discoverLocationNotPublished => 'Место не опубликовано';
+
+  @override
+  String get discoverLinkFromBookingService =>
+      'Ссылка предоставляется сервисом бронирования';
+
+  @override
+  String get discoverOnline => 'Онлайн';
+
+  @override
+  String get discoverPartnerConfirmsTime =>
+      'Фактическое время и условия подтверждаются на сайте партнёра.';
+
+  @override
+  String get discoverTimesToBook => 'Время для записи';
+
+  @override
+  String get discoverScheduleNeedsRefresh =>
+      'Расписание требует обновления — проверьте время на сайте.';
+
+  @override
+  String get discoverNoTimeInWindow => 'В текущем окне время не указано.';
+
+  @override
+  String get discoverCoordinatesNotPublic => 'Координаты недоступны публично';
+
+  @override
+  String get discoverAccessDetailsNotPublished =>
+      'Данные доступа не публикуются';
+
+  @override
+  String get discoverApproximateMeetingArea =>
+      'Приблизительная публичная зона встречи';
+
+  @override
+  String get discoverFree => 'Бесплатно';
+
+  @override
+  String get discoverHybrid => 'Гибридный формат';
+
+  @override
+  String get discoverInPerson => 'Офлайн';
+
+  @override
+  String get discoverCheckEnrollmentOnSite => 'Проверить запись на сайте';
+
+  @override
+  String get discoverInAppEnrollmentUnavailable =>
+      'Запись через приложение пока не подключена';
+
+  @override
+  String get discoverEnrollmentMethodUnknown => 'Способ записи пока не указан';
+
+  @override
+  String get discoverTermsOnSite => 'Условия участия уточняются на месте';
+
+  @override
+  String get discoverEnrollmentClosed => 'Запись закрыта';
+
+  @override
+  String get discoverAvailabilityOnOrganizerSite =>
+      'Наличие мест, итоговая стоимость и условия — на сайте организатора';
+
+  @override
+  String get discoverLocationTbc => 'Место уточняется';
+
+  @override
+  String get discoverOrganizerSendsInstructions =>
+      'Инструкции предоставит организатор';
+
+  @override
+  String get discoverOnlineClass => 'Онлайн-занятие';
+
+  @override
+  String get discoverOrganizerVerified => 'Организатор подтверждён';
+
+  @override
+  String get discoverProfileVerified => 'Профиль подтверждён';
+
+  @override
+  String get discoverTeacher => 'Преподаватель';
+
+  @override
+  String get discoverSessionDuration => 'Длительность занятия';
+
+  @override
+  String get discoverCourseDuration => 'Длительность курса';
+
+  @override
+  String get discoverPrice => 'Цена';
+
+  @override
+  String get discoverPricePerPersonCourse => 'Цена за человека / курс';
+
+  @override
+  String get discoverPricePerPersonSession => 'Цена за человека / занятие';
+
+  @override
+  String get discoverDatesTbc => 'Даты уточняются';
+
+  @override
+  String get discoverKindHandsOn => 'Практический опыт';
+
+  @override
+  String get discoverKindCourse => 'Курс';
+
+  @override
+  String get discoverKindMasterclass => 'Мастер-класс';
+
+  @override
+  String get discoverKindWorkshop => 'Воркшоп';
+
+  @override
+  String get discoverKindClass => 'Занятие';
+
+  @override
+  String get discoverRecruitmentClosed => 'Набор завершён';
+
+  @override
+  String get discoverMeetupCancelled => 'Встреча отменена';
+
+  @override
+  String get discoverMeetupEnded => 'Встреча завершена';
+
+  @override
+  String get discoverGroupFull => 'Группа заполнена';
+
+  @override
+  String get discoverWaitlistOnly => 'Только лист ожидания';
+
+  @override
+  String get discoverRecruitmentOpen => 'Набор открыт';
+
+  @override
+  String get discoverCollectingTimeOptions => 'Собираются варианты времени';
+
+  @override
+  String get discoverDeliveryAvailable => 'Есть доставка';
+
+  @override
+  String get discoverDepositRequired => 'Нужен залог';
+
+  @override
+  String get discoverNoDepositRequired => 'Залог не нужен';
+
+  @override
+  String get discoverPriceOnRequest => 'Цена по запросу';
+
+  @override
+  String get discoverSignUp => 'Записаться';
+
+  @override
+  String get discoverAddToCalendar => 'Добавить в календарь';
+
+  @override
+  String get discoverAboutEvent => 'О событии';
+
+  @override
+  String get discoverProfile => 'Профиль';
+
+  @override
+  String get discoverClubProfile => 'Профиль клуба';
+
+  @override
+  String get discoverOrganizer => 'Организатор';
+
+  @override
+  String get discoverDuration => 'Длительность';
+
+  @override
+  String get discoverParticipantCountUnknown =>
+      'Количество участников неизвестно';
+
+  @override
+  String get discoverParticipants => 'Участники';
+
+  @override
+  String get discoverAddToScenario => 'Добавить в сценарий';
+
+  @override
+  String get discoverShare => 'Поделиться';
+
+  @override
+  String get discoverBadgeEvent => 'СОБЫТИЕ';
+
+  @override
+  String get discoverCurrentlyUnavailable => 'Сейчас недоступно';
+
+  @override
+  String get discoverConfirmOnProviderSite => 'Подтвердите на сайте поставщика';
+
+  @override
+  String get discoverRatePlan => 'Тариф';
+
+  @override
+  String get discoverWhatIsRented => 'Что сдаётся';
+
+  @override
+  String get discoverBadgeRental => 'АРЕНДА';
+
+  @override
+  String get discoverFlexible => 'Гибко';
+
+  @override
+  String get discoverAboutClass => 'О занятии';
+
+  @override
+  String get discoverClosed => 'Закрыто';
+
+  @override
+  String get discoverOpeningHours => 'Часы работы';
+
+  @override
+  String get discoverAboutPlace => 'О месте';
+
+  @override
+  String get discoverTime => 'Время';
+
+  @override
+  String get discoverFromYou => 'От вас';
+
+  @override
+  String get discoverAboutService => 'Об услуге';
+
+  @override
+  String get discoverSpecialist => 'Специалист';
+
+  @override
+  String get discoverOrganization => 'Организация';
+
+  @override
+  String get discoverGroupSize => 'Размер группы';
+
+  @override
+  String get discoverRequirements => 'Требования';
+
+  @override
+  String get discoverMaterialsIncluded => 'Материалы и что включено';
+
+  @override
+  String get discoverCostsNotSpecified => 'Расходы не указаны';
+
+  @override
+  String get discoverNoRequiredCosts => 'Без обязательных расходов';
+
+  @override
+  String get discoverDesiredSize => 'Желаемый размер';
+
+  @override
+  String get discoverInGroupNow => 'Сейчас в группе';
+
+  @override
+  String get discoverExpectedCosts => 'Ожидаемые расходы';
+
+  @override
+  String get discoverParticipantRequirements => 'Требования к участникам';
+
+  @override
+  String get discoverMeetupFormat => 'Формат встречи';
+
+  @override
+  String get discoverMeetupTime => 'Время встречи';
+
+  @override
+  String get discoverTimeOptions => 'Варианты времени';
+
+  @override
+  String get discoverAboutMeetup => 'О встрече';
+
+  @override
+  String get discoverPublisher => 'Публикатор';
+
+  @override
+  String get discoverShareAndMore => 'Поделиться и другие действия';
+
+  @override
+  String get discoverMarkVisited => 'Отметить посещённым';
+
+  @override
+  String get discoverCreateRoute => 'Создать маршрут';
+
+  @override
+  String get discoverViewRoute => 'Посмотреть маршрут';
+
+  @override
+  String get discoverCreateSimilar => 'Создать похожее';
+
+  @override
+  String get discoverFindSimilar => 'Найти похожее';
+
+  @override
+  String get discoverCheckTimeOnSite => 'Проверить время на сайте';
+
+  @override
+  String get discoverReviewAndBook => 'Проверить и забронировать';
+
+  @override
+  String get discoverRequestSent => 'Заявка отправлена';
+
+  @override
+  String get discoverDateSet => 'Дата выбрана';
+
+  @override
+  String get discoverAnyDate => 'Любая дата';
+
+  @override
+  String get discoverDone => 'Готово';
+
+  @override
+  String get discoverWindowAsEntered =>
+      'Для подбора по времени используется как введено.';
+
+  @override
+  String get discoverEffectiveWindow => 'Итоговое окно';
+
+  @override
+  String get discoverBufferEachSide => 'Запас с каждой стороны';
+
+  @override
+  String get discoverEnd => 'Конец';
+
+  @override
+  String get discoverStart => 'Начало';
+
+  @override
+  String get discoverChangeDate => 'Изменить дату';
+
+  @override
+  String get discoverFlexibleTime => 'Гибко';
+
+  @override
+  String get discoverExact => 'Точно';
+
+  @override
+  String get discoverBackToFilters => 'Назад к фильтрам';
+
+  @override
+  String get discoverReset => 'Сбросить';
+
+  @override
+  String get discoverExactTime => 'Точное время';
+
+  @override
+  String get discoverApplyFilters => 'Применить фильтры';
+
+  @override
+  String get discoverIncludeReturnTrip => 'Учитывать обратную дорогу';
+
+  @override
+  String get discoverTransit => 'Общественный транспорт';
+
+  @override
+  String get discoverDriving => 'На машине';
+
+  @override
+  String get discoverWalking => 'Пешком';
+
+  @override
+  String get discoverMapPoint => 'Точка на карте';
+
+  @override
+  String get discoverTravel => 'Дорога';
+
+  @override
+  String get discoverNoBuffer => 'Без запаса';
+
+  @override
+  String get discoverChangeFlexibility => 'Изменить гибкость';
+
+  @override
+  String get discoverWindowEdgeBuffer => 'Запас по краям окна';
+
+  @override
+  String get discoverToday => 'Сегодня';
+
+  @override
+  String get discoverWhen => 'Когда';
+
+  @override
+  String get discoverSave => 'Сохранить';
+
+  @override
+  String get discoverCancel => 'Отмена';
+
+  @override
+  String get discoverEnterBudget => 'Введите сумму от 0 до 10 000 €';
+
+  @override
+  String get discoverAmountInEur => 'Сумма в EUR';
+
+  @override
+  String get discoverBudgetPerPerson => 'Бюджет на человека';
+
+  @override
+  String get discoverEnterPeople => 'Введите число от 1 до 99';
+
+  @override
+  String get discoverExampleSix => 'Например, 6';
+
+  @override
+  String get discoverNumberOfPeople => 'Количество человек';
+
+  @override
+  String get discoverAnyArea => 'Любой район';
+
+  @override
+  String get discoverAnyDuration => 'Любая длительность';
+
+  @override
+  String get discoverAnyDistance => 'Любое расстояние';
+
+  @override
+  String get discoverOnlyAvailable => 'Только доступные';
+
+  @override
+  String get discoverOpenNow => 'Открыто сейчас';
+
+  @override
+  String get discoverTimeAvailable => 'Свободное время';
+
+  @override
+  String get discoverSearchFilters => 'Фильтры поиска';
+
+  @override
+  String get discoverSocialEvening => 'Вечер в компании';
+
+  @override
+  String get discoverActiveMorning => 'Активное утро';
+
+  @override
+  String get discoverSunsetBreak => 'Перерыв на закате';
+
+  @override
+  String get discoverAfterWork => 'После работы';
+
+  @override
+  String get discoverRegularSearchesHint =>
+      'Ваши частые поиски появятся здесь автоматически.';
+
+  @override
+  String get discoverCalmEvening => 'Спокойный вечер';
+
+  @override
+  String get discoverLowBudget => 'Небольшой бюджет';
+
+  @override
+  String get discoverForTwo => 'Для двоих';
+
+  @override
+  String get discoverNearMeNow => 'Рядом сейчас';
+
+  @override
+  String get discoverApplyRadius => 'Применить радиус';
+
+  @override
+  String get discoverCustomRadius => 'Свой радиус';
+
+  @override
+  String get discoverSearchRadius => 'Радиус поиска';
+
+  @override
+  String get discoverAnyBudget => 'Любой бюджет';
+
+  @override
+  String get discoverExampleEight => 'Например, 8';
+
+  @override
+  String get discoverJustMe => 'Только я';
+
+  @override
+  String get discoverAnyGroup => 'Любая группа';
+
+  @override
+  String get discoverChooseSearchDates => 'Выберите даты поиска';
+
+  @override
+  String get discoverChooseDates => 'Выбрать даты';
+
+  @override
+  String get discoverThisWeekend => 'В эти выходные';
+
+  @override
+  String get discoverTomorrow => 'Завтра';
+
+  @override
+  String get discoverChooseDate => 'Выбрать дату';
+
+  @override
+  String get discoverUntilEndOfDay => 'До конца дня';
+
+  @override
+  String get discoverRecentSearches => 'Недавние поиски';
+
+  @override
+  String get discoverQuickPlans => 'Быстрые планы';
+
+  @override
+  String get discoverSeeAll => 'Смотреть все';
+
+  @override
+  String get discoverSearchHint => 'Найдите активность, место или план';
+
+  @override
+  String get discoverSearchRecharge => 'Поиск в Recharge';
+
+  @override
+  String get discoverJoinActivity => 'Присоединиться';
+
+  @override
+  String get discoverParticipantsUnknown => 'Участники неизвестны';
+
+  @override
+  String get discoverCapacityUnknown => 'Вместимость неизвестна';
+
+  @override
+  String get discoverOpeningHoursUnknown => 'Часы работы неизвестны';
+
+  @override
+  String get discoverTimeNotConfirmed => 'Время не подтверждено';
+
+  @override
+  String get discoverDoesNotFit => 'Не подходит';
+
+  @override
+  String get discoverPartialAttendance => 'Можно прийти на часть';
+
+  @override
+  String get discoverFitsYourTime => 'Подходит по времени';
+
+  @override
+  String get discoverOptionalContribution => 'Добровольный взнос';
+
+  @override
+  String get discoverNoContribution => 'Взнос не указан';
+
+  @override
+  String get discoverDifficultyNotSet => 'Сложность не указана';
+
+  @override
+  String get discoverAnyTime => 'В любое время';
+
+  @override
+  String get discoverWhatAwaitsYou => 'Что вас ждёт';
+
+  @override
+  String get discoverPerkSaveForLater => 'Сохраните активность на потом';
+
+  @override
+  String get discoverPerkOrganizerDetails =>
+      'Данные организатора видны до записи';
+
+  @override
+  String get discoverPerkMeetingPoint => 'Понятные место и время встречи';
+
+  @override
+  String get discoverDistance => 'Расстояние';
+
+  @override
+  String get discoverLocation => 'Место';
+
+  @override
+  String get discoverRouteGeometry => 'Геометрия маршрута';
+
+  @override
+  String get discoverDateAndTime => 'Дата и время';
+
+  @override
+  String get discoverRouteMap => 'Карта маршрута';
+
+  @override
+  String get discoverRouteFromThis => 'Маршрут отсюда';
+
+  @override
+  String get discoverAddToPrivateHistory => 'Добавить в личную историю';
+
+  @override
+  String get discoverOpenCreateHub => 'Открыть центр создания';
+
+  @override
+  String get discoverSearchThisCategory => 'Искать в этой категории';
+
+  @override
+  String get discoverAddStopToPlan => 'Добавить остановку в личный план';
+
+  @override
+  String get discoverOpenNearbyContext => 'Открыть окрестности';
+
+  @override
+  String get discoverMap => 'Карта';
+
+  @override
+  String get discoverPlanHint =>
+      'Превратите активность в маршрут, сравните похожие варианты или сохраните на потом.';
+
+  @override
+  String get discoverNotSaved => 'Не сохранено';
+
+  @override
+  String get discoverPlanThisRecharge => 'Запланировать этот отдых';
+
+  @override
+  String get discoverSend => 'Отправить';
+
+  @override
+  String get discoverCriticalOnlyImmediateRisk =>
+      'Критическую опасность выбирайте только при непосредственном риске для людей.';
+
+  @override
+  String get discoverDescribeWithoutPersonalData =>
+      'Опишите проблему без личных данных';
+
+  @override
+  String get discoverCommentOptional => 'Комментарий (необязательно)';
+
+  @override
+  String get discoverSeverityCritical => 'Критическая опасность';
+
+  @override
+  String get discoverSeverityDanger => 'Опасно';
+
+  @override
+  String get discoverSeverityWarning => 'Требует внимания';
+
+  @override
+  String get discoverSeverityInfo => 'Информация';
+
+  @override
+  String get discoverSeverity => 'Серьёзность';
+
+  @override
+  String get discoverIssueOther => 'Другое';
+
+  @override
+  String get discoverIssueWrongLine => 'Неверная линия маршрута';
+
+  @override
+  String get discoverIssueObstacle => 'Препятствие';
+
+  @override
+  String get discoverIssueHazardousSurface => 'Опасное покрытие';
+
+  @override
+  String get discoverIssueTrailClosed => 'Тропа закрыта';
+
+  @override
+  String get discoverWhatHappened => 'Что произошло';
+
+  @override
+  String get discoverRouteIssue => 'Проблема на маршруте';
+
+  @override
+  String get discoverReportRouteIssue => 'Сообщить о проблеме на маршруте';
+
+  @override
+  String get discoverElevationUnavailable =>
+      'Данных о высоте нет, и они не показаны как ноль.';
+
+  @override
+  String get discoverElevationPartial =>
+      'Данные о высоте неполные; набор и сброс высоты не показаны как полные.';
+
+  @override
+  String get discoverDemoData => 'Демо-данные';
+
+  @override
+  String get discoverFieldVerified => 'Проверено на месте';
+
+  @override
+  String get discoverPublishedRoute => 'Опубликованный маршрут';
+
+  @override
+  String get discoverOpenDetails => 'Открыть подробности';
+
+  @override
+  String get discoverSelectForScenario => 'Выбрать для сценария';
+
+  @override
+  String get discoverAny => 'Любой';
+
+  @override
+  String get discoverSearchThisArea => 'Искать в этой области';
+
+  @override
+  String get discoverResetRouteProgress => 'Сбросить прогресс маршрута';
+
+  @override
+  String get discoverStartRoute => 'Начать маршрут';
+
+  @override
+  String get discoverNextStop => 'Следующая остановка';
+
+  @override
+  String get discoverReadyToStart => 'Можно начинать';
+
+  @override
+  String get discoverRouteComplete => 'Маршрут пройден';
+
+  @override
+  String get discoverCopy => 'Копировать';
+
+  @override
+  String get discoverCreateRouteListing => 'Создать объявление маршрута';
+
+  @override
+  String get discoverSearchSimilarRoute => 'Найти похожий маршрут';
+
+  @override
+  String get discoverEditRoute => 'Изменить маршрут';
+
+  @override
+  String get discoverScenarioRoute => 'Маршрут сценария';
+
+  @override
+  String get discoverNoActivitiesInArea => 'В этой области нет активностей';
+
+  @override
+  String get discoverRetry => 'Повторить';
+
+  @override
+  String get discoverMapSearchFailed => 'Поиск на карте не удался';
+
+  @override
+  String get discoverMapResults => 'Результаты на карте';
+
+  @override
+  String get discoverApply => 'Применить';
+
+  @override
+  String get discoverSavedOnMap => 'Сохранено на карте';
+
+  @override
+  String get discoverRouteFromSmart => 'Построить маршрут по умному поиску';
+
+  @override
+  String get discoverCreateFromSmart => 'Создать объявление по умному поиску';
+
+  @override
+  String get discoverApplySmartToMap => 'Применить умный поиск к карте';
+
+  @override
+  String get discoverSmart => 'Умный';
+
+  @override
+  String get discoverRouteFromSaved =>
+      'Построить маршрут по сохранённым условиям';
+
+  @override
+  String get discoverCreateFromSaved =>
+      'Создать объявление по сохранённым условиям';
+
+  @override
+  String get discoverApplySavedToMap => 'Применить сохранённые условия к карте';
+
+  @override
+  String get discoverSaved => 'Сохранённые';
+
+  @override
+  String get discoverCreateHere => 'Создать здесь';
+
+  @override
+  String get discoverSearch => 'Поиск';
+
+  @override
+  String get discoverClear => 'Очистить';
+
+  @override
+  String get discoverSearchOnMap => 'Поиск на карте';
+
+  @override
+  String get discoverMapArea => 'Область карты';
+
+  @override
+  String get discoverRechargeIdea => 'Идея для отдыха';
+
+  @override
+  String get discoverMapAreaIdea => 'Идея для области карты';
+
+  @override
+  String get discoverScenarioCopied => 'Сценарий скопирован';
+
+  @override
+  String get discoverScenarioSaved => 'Сценарий сохранён';
+
+  @override
+  String get discoverRecenter => 'Центрировать';
+
+  @override
+  String get discoverUseCurrentLocation =>
+      'Использовать текущее местоположение';
+
+  @override
+  String get discoverCancelScenarioSelection => 'Отменить выбор для сценария';
+
+  @override
+  String get discoverAll => 'Все';
+
+  @override
+  String get discoverSearchFailed => 'Поиск не удался';
+
+  @override
+  String get discoverResetConditions => 'Сбросить условия';
+
+  @override
+  String get discoverNoMatches => 'Нет активностей под эти условия';
+
+  @override
+  String get discoverShowingNearby => 'Показаны активности рядом';
+
+  @override
+  String get discoverRadius => 'Радиус';
+
+  @override
+  String get discoverTonight => 'Сегодня вечером';
+
+  @override
+  String get discoverDate => 'Дата';
+
+  @override
+  String get discoverBudget => 'Бюджет';
+
+  @override
+  String get discoverShowNoTicket => 'Показать активности без билета';
+
+  @override
+  String get discoverFreeOnly => 'Только бесплатные';
+
+  @override
+  String get discoverOutdoor => 'На улице';
+
+  @override
+  String get discoverFreeToday => 'Бесплатно сегодня';
+
+  @override
+  String get discoverSearchConditions => 'Условия поиска';
+
+  @override
+  String get discoverOpenSavedOnMap => 'Открыть сохранённые условия на карте';
+
+  @override
+  String get discoverDeleteSaved => 'Удалить сохранённые условия';
+
+  @override
+  String get discoverNoRecentSearches => 'Недавних поисков пока нет';
+
+  @override
+  String get discoverCreateListingFromSearch =>
+      'Создать объявление по текущему поиску';
+
+  @override
+  String get discoverConditions => 'Условия';
+
+  @override
+  String get discoverViewMap => 'Открыть карту';
+
+  @override
+  String get discoverCategories => 'Категории';
+
+  @override
+  String get discoverQuickScenarios => 'Быстрые сценарии';
+
+  @override
+  String get discoverCreateFromCurrentSearch => 'Создать по текущему поиску';
+
+  @override
+  String get discoverUnderstoodParameters => 'Понятые параметры';
+
+  @override
+  String get discoverTextQuery => 'Текстовый запрос';
+
+  @override
+  String get discoverGotIt => 'Понятно';
+
+  @override
+  String get discoverSmartSearchHow => 'Как работает умный поиск';
+
+  @override
+  String get discoverSayWhatToFind => 'Скажите, что хотите найти';
+
+  @override
+  String get discoverSmartSearchPrompt => 'Напишите или скажите, что найти';
+
+  @override
+  String get discoverStartSearch => 'Начать поиск';
+
+  @override
+  String get discoverDeleteQuery => 'Удалить запрос';
+
+  @override
+  String get discoverRecentSmartSearches => 'Недавние умные поиски';
+
+  @override
+  String get discoverPopularQueries => 'Популярные запросы';
+
+  @override
+  String get discoverChipUpTo20 => 'До 20 €';
+
+  @override
+  String get discoverChipOneTwoHours => '1–2 часа';
+
+  @override
+  String get discoverChipCalmEvening => 'Спокойный вечер';
+
+  @override
+  String get discoverChipForTwo => 'Для двоих';
+
+  @override
+  String get discoverChipNearNow => 'Рядом сейчас';
+
+  @override
+  String get discoverVoiceQuery => 'Голосовой запрос';
+
+  @override
+  String get discoverSmartSearchPromptTwoLines =>
+      'Напишите или скажите,\\nчто хотите найти';
+
+  @override
+  String get discoverSmartSearch => 'Умный поиск';
+
+  @override
+  String get discoverHoursUnknown => 'Часы неизвестны';
+
+  @override
+  String get discoverTimeUnknown => 'Время неизвестно';
+
+  @override
+  String get discoverPartialFit => 'Подходит частично';
+
+  @override
+  String get discoverMatchesYourTime => 'Подходит по времени';
+
+  @override
+  String get discoverOpenSettings => 'Открыть настройки';
+
+  @override
+  String get discoverNoLocationAccess => 'Нет доступа к геопозиции';
+
+  @override
+  String get discoverFeedFailed => 'Не удалось загрузить ленту';
+
+  @override
+  String get discoverRemoveTime => 'Убрать время';
+
+  @override
+  String get discoverNoReturnTrip => 'Без обратной дороги';
+
+  @override
+  String get discoverWidenTime => 'Расширить время';
+
+  @override
+  String get discoverRefresh => 'Обновить';
+
+  @override
+  String get discoverFeedEmpty => 'Пока в ленте ничего нет';
+
+  @override
+  String get discoverFeedLoading => 'Загружаем ленту…';
+
+  @override
+  String get discoverWaypoints => 'Точки на маршруте';
+
+  @override
+  String get discoverElevation => 'Высота';
+
+  @override
+  String get discoverDescent => 'Сброс высоты';
+
+  @override
+  String get discoverAscent => 'Набор высоты';
+
+  @override
+  String get discoverRouteMapFailed => 'Не удалось загрузить карту маршрута';
+
+  @override
+  String get discoverOpenOnMap => 'Открыть на карте';
+
+  @override
+  String get discoverShapeOneWay => 'В одну сторону';
+
+  @override
+  String get discoverShapeOutAndBack => 'Туда и обратно';
+
+  @override
+  String get discoverShapeLoop => 'Кольцевой';
+
+  @override
+  String get discoverPublisherPage => 'Страница';
+
+  @override
+  String get discoverPublisherAuthor => 'Автор';
+
+  @override
+  String get discoverRouteDetails => 'Подробности маршрута';
+
+  @override
+  String discoverDistanceKm(String value) {
+    return '$value км';
+  }
+
+  @override
+  String discoverDistanceFromYou(String value) {
+    return '$value км от вас';
+  }
+
+  @override
+  String discoverStartPointAway(String value) {
+    return 'Старт · $value км от вас';
+  }
+
+  @override
+  String discoverFromStartKm(String value) {
+    return '$value км от старта';
+  }
+
+  @override
+  String discoverMeters(String value) {
+    return '$value м';
+  }
+
+  @override
+  String discoverAscentShort(String value) {
+    return '↑ $value м';
+  }
+
+  @override
+  String discoverElevationRange(String min, String max) {
+    return '$min–$max м';
+  }
+
+  @override
+  String discoverTrackGaps(int count) {
+    return 'Разрывов трека: $count';
+  }
+
+  @override
+  String discoverDirectSegments(int count) {
+    return 'Прямых участков: $count';
+  }
+
+  @override
+  String discoverDirectSegmentsInline(int count) {
+    return 'прямых участков: $count';
+  }
+
+  @override
+  String discoverMinutes(int minutes) {
+    return '$minutes мин';
+  }
+
+  @override
+  String discoverMinutesRange(int min, int max) {
+    return '$min–$max мин';
+  }
+
+  @override
+  String discoverHours(String value) {
+    return '$value ч';
+  }
+
+  @override
+  String discoverHoursMinutes(int hours, int minutes) {
+    return '$hours ч $minutes мин';
+  }
+
+  @override
+  String discoverDays(int days) {
+    return '$days дн.';
+  }
+
+  @override
+  String discoverUpTo(int count) {
+    return 'до $count';
+  }
+
+  @override
+  String discoverUpToPeople(int count) {
+    return 'до $count чел.';
+  }
+
+  @override
+  String discoverAboutPerPerson(String price) {
+    return 'Около $price на человека';
+  }
+
+  @override
+  String discoverCancelledSuffix(String date) {
+    return '$date · Отменено';
+  }
+
+  @override
+  String get discoverRentalQuantitiesDisclaimer =>
+      'Указанное количество заявлено автором — это не гарантия бронирования и не проверенный актуальный остаток. Прежде чем полагаться на него, проверьте на сайте поставщика.';
+
+  @override
+  String discoverDeliveryWithin(String value) {
+    return 'Доставка в радиусе $value км';
+  }
+
+  @override
+  String discoverRentalPeriod(String min, String max) {
+    return 'Срок аренды: $min – $max';
+  }
+
+  @override
+  String discoverMinAge(int age) {
+    return 'Минимальный возраст $age';
+  }
+
+  @override
+  String get discoverIdRequired => 'При передаче нужен документ';
+
+  @override
+  String discoverDeposit(String price) {
+    return 'Залог: $price';
+  }
+
+  @override
+  String discoverTimeOptionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count варианта времени',
+      many: '$count вариантов времени',
+      few: '$count варианта времени',
+      one: '$count вариант времени',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverFirstAndMore(String time, int count) {
+    return '$time · ещё $count';
+  }
+
+  @override
+  String discoverTimeOptionCandidate(String time) {
+    return 'Вариант · $time';
+  }
+
+  @override
+  String discoverDateTimeRange(String date, String start, String end) {
+    return '$date · $start–$end';
+  }
+
+  @override
+  String discoverUpToBudget(String price) {
+    return 'До $price';
+  }
+
+  @override
+  String discoverFlexibilityMinutes(int minutes) {
+    return '±$minutes мин';
+  }
+
+  @override
+  String discoverUsedInsteadOf(String start, String end) {
+    return 'Для подбора используется вместо $start–$end.';
+  }
+
+  @override
+  String discoverTypicalDuration(String value) {
+    return 'Обычная длительность: $value';
+  }
+
+  @override
+  String discoverSuggestedGroup(int min, int max) {
+    return 'Рекомендуемая группа: $min–$max';
+  }
+
+  @override
+  String discoverBestTime(String value) {
+    return 'Лучшее время: $value';
+  }
+
+  @override
+  String discoverAmountHint(String price) {
+    return 'Ориентир по сумме: $price';
+  }
+
+  @override
+  String discoverBookFor(String price) {
+    return 'Забронировать за $price';
+  }
+
+  @override
+  String discoverResultsInArea(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count места и активности в этой области',
+      many: '$count мест и активностей в этой области',
+      few: '$count места и активности в этой области',
+      one: '$count место или активность в этой области',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverStops(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count остановки',
+      many: '$count остановок',
+      few: '$count остановки',
+      one: '$count остановка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverStopOf(int current, int total) {
+    return 'Остановка $current из $total';
+  }
+
+  @override
+  String discoverRadiusKm(String value) {
+    return 'Радиус: $value км';
+  }
+
+  @override
+  String discoverRemoveFromSelection(int order) {
+    return 'Убрать №$order из выбора';
+  }
+
+  @override
+  String discoverMood(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Спокойный',
+      'social': 'Компанейский',
+      'active': 'Активный',
+      'other': 'Свой',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverRouteLabel => 'Маршрут';
+
+  @override
+  String get discoverSmartSearchHowBody =>
+      'Введите текстовый запрос или используйте голосовой ввод. Recharge разберёт время, место, бюджет и настроение и покажет подходящие варианты.';
+
+  @override
+  String get discoverSmartPromptCalmEveningNearby =>
+      'Хочу спокойный вечер рядом';
+
+  @override
+  String get discoverSmartPromptSomethingForTwoHours =>
+      'Найди что-то интересное на 2 часа';
+
+  @override
+  String get discoverSmartPromptForTwoNearby => 'Куда сходить вдвоём недалеко';
+
+  @override
+  String get discoverSmartPromptExample =>
+      'Хочу сегодня вечером что-то спокойное рядом, до 20 EUR';
+
+  @override
+  String get discoverSmartPromptExampleHint =>
+      'Например: «Хочу сегодня вечером что-то спокойное рядом, до 20 €»';
+
+  @override
+  String get discoverSmartPromptNearNow => 'Что-то интересное рядом сейчас';
+
+  @override
+  String get discoverSmartPromptForTwo => 'Куда сходить вдвоём';
+
+  @override
+  String get discoverSmartPromptCalmEvening => 'Хочу спокойный вечер';
+
+  @override
+  String get discoverSmartPromptTwoHours => 'Найди план на 2 часа';
+
+  @override
+  String get discoverSmartPromptUpTo20 => 'Найди что-то до 20 EUR';
+
+  @override
+  String discoverRentalBaseRate(String type, String price) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'hour': '$price / час',
+      'week': '$price / неделя',
+      'other': '$price / день',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverRentalRateStep(String type, String price, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count часа',
+      many: '$count часов',
+      few: '$count часов',
+      one: '$count часа',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count недели',
+      many: '$count недель',
+      few: '$count недель',
+      one: '$count недели',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count дня',
+      many: '$count дней',
+      few: '$count дней',
+      one: '$count дня',
+    );
+    String _temp3 = intl.Intl.selectLogic(type, {
+      'hour': 'От $_temp0: $price / час',
+      'week': 'От $_temp1: $price / неделя',
+      'other': 'От $_temp2: $price / день',
+    });
+    return '$_temp3';
+  }
+
+  @override
+  String discoverRentalUnitsListed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'заявлено $count единицы',
+      many: 'заявлено $count единиц',
+      few: 'заявлено $count единицы',
+      one: 'заявлена $count единица',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverSeason(String value) {
+    return 'Сезон: $value';
+  }
+
+  @override
+  String get discoverLength => 'Длина';
+
+  @override
+  String get discoverPeople => 'Люди';
+
+  @override
+  String get discoverCycling => 'На велосипеде';
+
+  @override
+  String get discoverDifficultyEasy => 'Лёгкий';
+
+  @override
+  String get discoverDifficultyModerate => 'Средний';
+
+  @override
+  String get discoverDifficultyHard => 'Сложный';
+
+  @override
+  String get discoverOpen => 'Открыто';
+
+  @override
+  String discoverAddedToScenario(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'В сценарий добавлено $count остановки',
+      many: 'В сценарий добавлено $count остановок',
+      few: 'В сценарий добавлены $count остановки',
+      one: 'В сценарий добавлена $count остановка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverCompletedDuration(int minutes) {
+    return 'Пройдено · $minutes мин';
+  }
+
+  @override
+  String get discoverRestart => 'Начать заново';
+
+  @override
+  String get discoverFinish => 'Завершить';
+
+  @override
+  String get discoverRadiusAnyArea => 'Радиус: любой район';
+
+  @override
+  String get discoverWaypoint => 'Точка на маршруте';
+
+  @override
+  String discoverFoundCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Найдено $count',
+      many: 'Найдено $count',
+      few: 'Найдено $count',
+      one: 'Найден $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverPeopleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count человека',
+      many: '$count человек',
+      few: '$count человека',
+      one: '$count человек',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverUnder(String value) {
+    return 'До $value';
+  }
+
+  @override
+  String discoverFlexibleWindow(int minutes) {
+    return 'Гибко ±$minutes мин';
+  }
+
+  @override
+  String get discoverCustom => 'Своё';
+
+  @override
+  String discoverCustomValue(String value) {
+    return 'Своё · $value';
+  }
+
+  @override
+  String discoverHoursLong(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count часа',
+      many: '$count часов',
+      few: '$count часа',
+      one: '$count час',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverAboutOneHour => '~ 1 час';
+
+  @override
+  String discoverHoursRange(int min, int max) {
+    return '$min–$max часа';
+  }
+
+  @override
+  String get discoverAvailability => 'Доступность';
+
+  @override
+  String get discoverMoodTitle => 'Настроение';
+
+  @override
+  String discoverTravelMinutes(int minutes) {
+    return '$minutes мин в пути';
+  }
+
+  @override
+  String discoverTravelMinutesEstimated(int minutes) {
+    return '$minutes мин в пути · примерно';
+  }
+
+  @override
+  String get discoverSlotChosen => 'Время выбрано';
+
+  @override
+  String get discoverFits => 'Подходит';
+
+  @override
+  String get discoverUnsave => 'Убрать из сохранённых';
+
+  @override
+  String discoverRecommendedDifficulty(String value) {
+    return 'Рекомендуется: $value';
+  }
+
+  @override
+  String discoverPoiCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count интересной точки',
+      many: '$count интересных точек',
+      few: '$count интересные точки',
+      one: '$count интересная точка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverSurfaceTitle => 'Покрытие';
+
+  @override
+  String discoverSurface(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'asphalt': 'Асфальт',
+      'paved': 'Твёрдое покрытие',
+      'concrete': 'Бетон',
+      'paving_stones': 'Брусчатка',
+      'sett': 'Булыжник',
+      'compacted': 'Утрамбованное покрытие',
+      'fine_gravel': 'Мелкий гравий',
+      'gravel': 'Гравий',
+      'dirt': 'Грунт',
+      'earth': 'Земля',
+      'ground': 'Грунт',
+      'grass': 'Трава',
+      'sand': 'Песок',
+      'unpaved': 'Без покрытия',
+      'wood': 'Дерево',
+      'mixed': 'Смешанное',
+      'other': 'Другое покрытие',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverUnknownSurface(String meters) {
+    return 'Нет данных о покрытии на участке $meters.';
+  }
+
+  @override
+  String get discoverIntakeFindPeopleNotSupported =>
+      'Поиск компании нельзя добавить в сценарий.';
+
+  @override
+  String get discoverIntakeMissingIdentity =>
+      'Этот результат нельзя добавить: у него нет постоянного идентификатора каталога.';
+
+  @override
+  String get discoverIntakeNoLocation =>
+      'У этого результата нет пригодного места в каталоге.';
+
+  @override
+  String discoverIntakeLimitReached(int count) {
+    return 'В сценарий за раз можно добавить не больше $count объектов.';
+  }
+
+  @override
+  String discoverStopsSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Для сценария выбрано $count остановки.',
+      many: 'Для сценария выбрано $count остановок.',
+      few: 'Для сценария выбраны $count остановки.',
+      one: 'Для сценария выбрана $count остановка.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverSelectedCount(int count) {
+    return 'Выбрано: $count';
+  }
+
+  @override
+  String discoverTimeWindowIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'unknownTimezone': 'Часовой пояс этой области неизвестен.',
+      'dayEnded': 'Этот день здесь уже закончился.',
+      'boundsRequired': 'Выберите начало и конец.',
+      'nonexistentLocalTime':
+          'Этого местного времени нет из-за перевода часов.',
+      'endBeforeStart': 'Конец должен быть позже начала.',
+      'invalidTravelContext': 'Настройки дороги некорректны.',
+      'serviceUnavailable': 'Подбор по времени сейчас недоступен.',
+      'other': 'Не удалось применить окно времени.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverFeedNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'emptyArea':
+          'Ничего не найдено в этой зоне. Попробуйте увеличить радиус или снять ограничения.',
+      'loadFailed': 'Не удалось загрузить данные. Попробуйте снова.',
+      'dataUnavailable': 'Данные недоступны.',
+      'offline': 'Нет подключения к интернету.',
+      'other': 'Не удалось загрузить ленту. Попробуйте снова.',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String scenarioIntakeStep(String state) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'target': '1 из 3 · Сценарий',
@@ -7565,4 +9174,245 @@ class AppLocalizationsRu extends AppLocalizations {
     );
     return '$_temp0 · $_temp1';
   }
+
+  @override
+  String discoverHomeIdeaTitle(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'freeToday': 'Бесплатно сегодня',
+      'nearMe': 'Рядом со мной',
+      'eveningPlans': 'Планы на вечер',
+      'coffeeReset': 'Кофейная перезагрузка',
+      'freeCityReset': 'Бесплатная перезагрузка в городе',
+      'socialEvening': 'Вечер в компании',
+      'activeBoost': 'Активный заряд',
+      'other': 'Идея',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverHomeIdeaSubtitle(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'freeToday': 'Активности рядом без билетов',
+      'nearMe': 'Радиус на карте и быстрый список',
+      'eveningPlans': 'Найдите, чем заняться после работы',
+      'coffeeReset': 'Спокойное начало в кафе и лёгкая прогулка по городу.',
+      'freeCityReset': 'Бесплатный спокойный маршрут для быстрой перезагрузки.',
+      'socialEvening': 'Начните в компании, а вечер продолжите неподалёку.',
+      'activeBoost': 'Сначала движение, потом спокойная прогулка.',
+      'other': 'Быстрый план рядом.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverHomeNew => 'Новое';
+
+  @override
+  String get discoverHomeForYou => 'Для вас';
+
+  @override
+  String get discoverHomeQuickEvents => 'Быстрые события';
+
+  @override
+  String get discoverHomeNearby => 'Рядом';
+
+  @override
+  String get discoverHomePopular => 'Популярное';
+
+  @override
+  String get discoverRouteIdeas => 'Идеи маршрутов';
+
+  @override
+  String get discoverBuilder => 'Конструктор';
+
+  @override
+  String get discoverBuild => 'Построить';
+
+  @override
+  String get discoverCreate => 'Создать';
+
+  @override
+  String get discoverResume => 'Продолжить';
+
+  @override
+  String get discoverWalkable => 'Пешком';
+
+  @override
+  String get discoverMixedPrice => 'Смешанно';
+
+  @override
+  String discoverMapTemplateRoute(String message) {
+    return 'Показать маршрут «$message» на карте';
+  }
+
+  @override
+  String discoverCreateTemplateRoute(String message) {
+    return 'Создать маршрут «$message»';
+  }
+
+  @override
+  String get discoverForYouHint =>
+      'Личные подборки, сохранённые идеи и инструменты автора — в одно касание.';
+
+  @override
+  String get discoverSmartSearchIdea => 'Идея из умного поиска';
+
+  @override
+  String get discoverLanguagesLabel => 'Языки:';
+
+  @override
+  String get discoverEquipmentLabel => 'Снаряжение:';
+
+  @override
+  String get discoverAccessibilityLabel => 'Доступность:';
+
+  @override
+  String get discoverListedByPageLabel => 'Опубликовано страницей';
+
+  @override
+  String get discoverListedByLabel => 'Опубликовал';
+
+  @override
+  String get discoverLearningOutcomesLabel => 'Чему научитесь:';
+
+  @override
+  String get discoverOrganizerLabel => 'Организатор:';
+
+  @override
+  String get discoverLinkedPlaceLabel => 'Связанное место:';
+
+  @override
+  String get discoverInformalAccessLabel => 'Неофициальный доступ:';
+
+  @override
+  String discoverCompletedAtStopLabel(int index) {
+    return 'Пройдена остановка $index:';
+  }
+
+  @override
+  String discoverFocusedStopLabel(int index) {
+    return 'Текущая остановка $index:';
+  }
+
+  @override
+  String discoverNowAtStopLabel(int index) {
+    return 'Сейчас: остановка $index ·';
+  }
+
+  @override
+  String discoverSelectedStopLabel(int index) {
+    return 'Выбранная остановка $index:';
+  }
+
+  @override
+  String discoverMoodRoute(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Спокойный маршрут',
+      'social': 'Маршрут в компании',
+      'active': 'Активный маршрут',
+      'other': 'Свой маршрут',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverMoodRechargeRoute(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Спокойный маршрут для отдыха',
+      'social': 'Маршрут для отдыха в компании',
+      'active': 'Активный маршрут для отдыха',
+      'other': 'Свой маршрут для отдыха',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverMoodRechargeScenario(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Спокойный сценарий отдыха',
+      'social': 'Сценарий отдыха в компании',
+      'active': 'Активный сценарий отдыха',
+      'other': 'Свой сценарий отдыха',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverOptionalContributionLabel(String value) {
+    return 'Добровольно — $value:';
+  }
+
+  @override
+  String discoverIdeaForCategory(String type) {
+    return 'Идея: $type';
+  }
+
+  @override
+  String get discoverIntentLabel => 'Задумка:';
+
+  @override
+  String get discoverAppliedLabel => 'Применено:';
+
+  @override
+  String get discoverVersionLabel => 'Версия';
+
+  @override
+  String get discoverRemove => 'Убрать';
+
+  @override
+  String get discoverCouldNotOpenLink => 'Не удалось открыть';
+
+  @override
+  String discoverCollectionMapSemantics(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Карта $count места этой подборки. Чтобы смотреть без карты, используйте список ниже.',
+      many:
+          'Карта $count мест этой подборки. Чтобы смотреть без карты, используйте список ниже.',
+      few:
+          'Карта $count мест этой подборки. Чтобы смотреть без карты, используйте список ниже.',
+      one:
+          'Карта $count места этой подборки. Чтобы смотреть без карты, используйте список ниже.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverRoutePreview(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Превью маршрута: $count участка',
+      many: 'Превью маршрута: $count участков',
+      few: 'Превью маршрута: $count участка',
+      one: 'Превью маршрута: $count участок',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverSearchCategories => 'Поиск категорий';
+
+  @override
+  String get discoverClearSearch => 'Очистить поиск';
+
+  @override
+  String get discoverNoCategories => 'Категории не найдены';
+
+  @override
+  String get discoverCategoryNotFound => 'Категория не найдена';
+
+  @override
+  String get discoverOpenRoute => 'Открыть маршрут';
+
+  @override
+  String discoverTodayDate(String date) {
+    return 'Сегодня, $date';
+  }
+
+  @override
+  String get discoverByLabel => 'Автор:';
 }

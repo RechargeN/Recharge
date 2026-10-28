@@ -103,7 +103,9 @@ Future<BitmapDescriptor> createCustomMarkerFromUrl(
       imagePixelRatio: pixelRatio,
     );
   } catch (e) {
-    if (kDebugMode) print('Error creating HD marker: $e');
+    if (kDebugMode) {
+      print('Error creating HD marker: $e'); // l10n-ignore: debug log
+    }
     return BitmapDescriptor.defaultMarker;
   }
 }

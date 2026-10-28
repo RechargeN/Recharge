@@ -20,6 +20,9 @@ void main() {
       'count', 'seats', 'selected', 'max', 'meters', 'done', 'total',
       // L4.2: the lower length limit of a Create field (a number, like max)
       'min',
+      // L4.5 Discover: durations, an age limit and positions in a list —
+      // numbers the app computes, never text a person typed
+      'minutes', 'hours', 'days', 'age', 'index', 'current', 'order',
       // stable ids / server enum values chosen by select
       'type', 'status', 'state', 'kind', 'value', 'revision', 'contentId',
       // localized or formatted fragments built by the app itself

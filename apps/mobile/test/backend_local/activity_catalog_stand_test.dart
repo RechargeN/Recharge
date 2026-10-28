@@ -133,8 +133,8 @@ void main() {
           ),
         );
         expect(find.text('Typical duration: 60–120 min'), findsOneWidget);
-        expect(find.text('Best time: morning'), findsOneWidget);
-        expect(find.text('Season: any'), findsOneWidget);
+        expect(find.text('Best time: Morning'), findsOneWidget);
+        expect(find.text('Season: Any season'), findsOneWidget);
         expect(find.text('Free'), findsNothing);
         expect(tester.takeException(), isNull);
         final disabled = CatalogDiscoverRepository(

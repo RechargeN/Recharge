@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_query.dart';
@@ -46,8 +47,8 @@ class _CategoryPageState extends ConsumerState<CategoryPage> {
     );
     if (group == null || group.isHidden) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Categories')),
-        body: const Center(child: Text('Category not found')),
+        appBar: AppBar(title: Text(context.l10n.discoverCategories)),
+        body: Center(child: Text(context.l10n.discoverCategoryNotFound)),
       );
     }
 
@@ -73,7 +74,8 @@ class _CategoryPageState extends ConsumerState<CategoryPage> {
         title: Text(group.title),
         actions: <Widget>[
           IconButton(
-            tooltip: 'Map ${group.title}',
+            // The category name is shown as is (G04).
+            tooltip: '${context.l10n.discoverMap}: ${group.title}',
             onPressed: () => context.push(RouteNames.discoverMap),
             icon: const Icon(Icons.map_outlined),
           ),
@@ -113,7 +115,7 @@ class _CategoryPageState extends ConsumerState<CategoryPage> {
                 if (index == 0) {
                   return _SubcategoryTile(
                     key: const Key('subcategory-all'),
-                    label: 'All',
+                    label: context.l10n.discoverAll,
                     icon: Icons.grid_view_rounded,
                     selected: selectedSubcategoryId == null,
                     onTap: () => _selectSubcategory(controller, group.id, null),

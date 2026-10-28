@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../domain/repositories/collection_item_resolution_repository.dart';
 
 /// Mini-map of a Collection's live-resolved items
@@ -54,15 +55,10 @@ class CollectionDetailsMiniMap extends StatelessWidget {
       southwest: LatLng(minLat, minLng),
       northeast: LatLng(maxLat, maxLng),
     );
-    final LatLng center = LatLng(
-      (minLat + maxLat) / 2,
-      (minLng + maxLng) / 2,
-    );
+    final LatLng center = LatLng((minLat + maxLat) / 2, (minLng + maxLng) / 2);
 
     return Semantics(
-      label:
-          'Map of ${withPoints.length} places in this Collection. '
-          'Use the list below to browse them without the map.',
+      label: context.l10n.discoverCollectionMapSemantics(withPoints.length),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: SizedBox(

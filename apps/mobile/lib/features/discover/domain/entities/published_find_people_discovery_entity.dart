@@ -243,7 +243,7 @@ final class PublishedFindPeopleDiscoveryEntity {
                   option.kind != PublishedFindPeopleTimeOptionKind.candidate,
             )) {
           throw ArgumentError(
-            'Time poll requires at least two candidate times.',
+            'Time poll requires at least two candidate times.', // l10n-ignore: developer error
           );
         }
       case PublishedFindPeopleScheduleMode.recurring:
@@ -294,7 +294,7 @@ final class PublishedFindPeopleDiscoveryEntity {
             expectedSpendAmount! <= 0 ||
             currencyCode.trim().isEmpty) {
           throw ArgumentError(
-            'Estimated cost requires a positive amount and currency.',
+            'Estimated cost requires a positive amount and currency.', // l10n-ignore: developer error
           );
         }
       case PublishedFindPeopleCostType.unknown:

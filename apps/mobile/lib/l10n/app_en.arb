@@ -7554,6 +7554,2172 @@
   "@scenarioIntakeDated": {
     "description": "Add to Scenario target summary: dated Scenario without a known first date."
   },
+  "discoverSchedule": "Schedule",
+  "@discoverSchedule": {
+    "description": "Discover: \"Расписание\"."
+  },
+  "discoverShowOnMap": "Show on map",
+  "@discoverShowOnMap": {
+    "description": "Discover: \"Show on map\"."
+  },
+  "discoverReadMore": "Read more",
+  "@discoverReadMore": {
+    "description": "Discover: \"Читать далее\"."
+  },
+  "discoverShowLess": "Show less",
+  "@discoverShowLess": {
+    "description": "Discover: \"Свернуть\"."
+  },
+  "discoverExactAddressNotPublished": "Exact address not published",
+  "@discoverExactAddressNotPublished": {
+    "description": "Discover: \"Точный адрес не опубликован\"."
+  },
+  "discoverLocationNotPublished": "Location not published",
+  "@discoverLocationNotPublished": {
+    "description": "Discover: \"Место не опубликовано\"."
+  },
+  "discoverLinkFromBookingService": "The link comes from the booking service",
+  "@discoverLinkFromBookingService": {
+    "description": "Discover: \"Ссылка предоставляется сервисом бронирования\"."
+  },
+  "discoverOnline": "Online",
+  "@discoverOnline": {
+    "description": "Discover: \"Онлайн\"."
+  },
+  "discoverPartnerConfirmsTime": "The actual time and terms are confirmed on the partner’s website.",
+  "@discoverPartnerConfirmsTime": {
+    "description": "Discover: \"Фактическое время и условия подтверждаются на сайте партнёра\"."
+  },
+  "discoverTimesToBook": "Times to book",
+  "@discoverTimesToBook": {
+    "description": "Discover: \"Время для записи\"."
+  },
+  "discoverScheduleNeedsRefresh": "The schedule needs a refresh — check the time on the website.",
+  "@discoverScheduleNeedsRefresh": {
+    "description": "Discover: \"Расписание требует обновления — проверьте время на сайте.\"."
+  },
+  "discoverNoTimeInWindow": "No time is listed in the current window.",
+  "@discoverNoTimeInWindow": {
+    "description": "Discover: \"В текущем окне время не указано.\"."
+  },
+  "discoverCoordinatesNotPublic": "Coordinates are not public",
+  "@discoverCoordinatesNotPublic": {
+    "description": "Discover: \"Координаты недоступны публично\"."
+  },
+  "discoverAccessDetailsNotPublished": "Access details are not published",
+  "@discoverAccessDetailsNotPublished": {
+    "description": "Discover: \"Данные доступа не публикуются\"."
+  },
+  "discoverApproximateMeetingArea": "Approximate public meeting area",
+  "@discoverApproximateMeetingArea": {
+    "description": "Discover: \"Приблизительная публичная зона встречи\"."
+  },
+  "discoverFree": "Free",
+  "@discoverFree": {
+    "description": "Discover: \"Free\"."
+  },
+  "discoverHybrid": "Hybrid",
+  "@discoverHybrid": {
+    "description": "Discover: \"Гибридный формат\"."
+  },
+  "discoverInPerson": "In person",
+  "@discoverInPerson": {
+    "description": "Discover: \"Оффлайн\"."
+  },
+  "discoverCheckEnrollmentOnSite": "Check enrollment on the website",
+  "@discoverCheckEnrollmentOnSite": {
+    "description": "Discover: \"Проверить запись на сайте\"."
+  },
+  "discoverInAppEnrollmentUnavailable": "In-app enrollment is not connected yet",
+  "@discoverInAppEnrollmentUnavailable": {
+    "description": "Discover: \"Запись через приложение пока не подключена\"."
+  },
+  "discoverEnrollmentMethodUnknown": "Enrollment method not specified yet",
+  "@discoverEnrollmentMethodUnknown": {
+    "description": "Discover: \"Способ записи пока не указан\"."
+  },
+  "discoverTermsOnSite": "Terms of participation are confirmed on site",
+  "@discoverTermsOnSite": {
+    "description": "Discover: \"Условия участия уточняются на месте\"."
+  },
+  "discoverEnrollmentClosed": "Enrollment closed",
+  "@discoverEnrollmentClosed": {
+    "description": "Discover: \"Запись закрыта\"."
+  },
+  "discoverAvailabilityOnOrganizerSite": "Availability, final price and terms are on the organizer’s website",
+  "@discoverAvailabilityOnOrganizerSite": {
+    "description": "Discover: \"Наличие мест, итоговая стоимость и условия — на сайте органи\"."
+  },
+  "discoverLocationTbc": "Location to be confirmed",
+  "@discoverLocationTbc": {
+    "description": "Discover: \"Место уточняется\"."
+  },
+  "discoverOrganizerSendsInstructions": "The organizer will send instructions",
+  "@discoverOrganizerSendsInstructions": {
+    "description": "Discover: \"Инструкции предоставит организатор\"."
+  },
+  "discoverOnlineClass": "Online class",
+  "@discoverOnlineClass": {
+    "description": "Discover: \"Онлайн-занятие\"."
+  },
+  "discoverOrganizerVerified": "Organizer verified",
+  "@discoverOrganizerVerified": {
+    "description": "Discover: \"Организатор подтверждён\"."
+  },
+  "discoverProfileVerified": "Profile verified",
+  "@discoverProfileVerified": {
+    "description": "Discover: \"Профиль подтверждён\"."
+  },
+  "discoverTeacher": "Teacher",
+  "@discoverTeacher": {
+    "description": "Discover: \"Преподаватель\"."
+  },
+  "discoverSessionDuration": "Session duration",
+  "@discoverSessionDuration": {
+    "description": "Discover: \"Длительность занятия\"."
+  },
+  "discoverCourseDuration": "Course duration",
+  "@discoverCourseDuration": {
+    "description": "Discover: \"Длительность курса\"."
+  },
+  "discoverPrice": "Price",
+  "@discoverPrice": {
+    "description": "Discover: \"Цена\"."
+  },
+  "discoverPricePerPersonCourse": "Price per person / course",
+  "@discoverPricePerPersonCourse": {
+    "description": "Discover: \"Цена за человека / курс\"."
+  },
+  "discoverPricePerPersonSession": "Price per person / session",
+  "@discoverPricePerPersonSession": {
+    "description": "Discover: \"Цена за человека / занятие\"."
+  },
+  "discoverDatesTbc": "Dates to be confirmed",
+  "@discoverDatesTbc": {
+    "description": "Discover: \"Даты уточняются\"."
+  },
+  "discoverKindHandsOn": "Hands-on experience",
+  "@discoverKindHandsOn": {
+    "description": "Discover: \"Практический опыт\"."
+  },
+  "discoverKindCourse": "Course",
+  "@discoverKindCourse": {
+    "description": "Discover: \"Курс\"."
+  },
+  "discoverKindMasterclass": "Masterclass",
+  "@discoverKindMasterclass": {
+    "description": "Discover: \"Мастер-класс\"."
+  },
+  "discoverKindWorkshop": "Workshop",
+  "@discoverKindWorkshop": {
+    "description": "Discover: \"Воркшоп\"."
+  },
+  "discoverKindClass": "Class",
+  "@discoverKindClass": {
+    "description": "Discover: \"Занятие\"."
+  },
+  "discoverRecruitmentClosed": "Closed to new people",
+  "@discoverRecruitmentClosed": {
+    "description": "Discover: \"Набор завершён\"."
+  },
+  "discoverMeetupCancelled": "Meetup cancelled",
+  "@discoverMeetupCancelled": {
+    "description": "Discover: \"Встреча отменена\"."
+  },
+  "discoverMeetupEnded": "Meetup ended",
+  "@discoverMeetupEnded": {
+    "description": "Discover: \"Встреча завершена\"."
+  },
+  "discoverGroupFull": "Group is full",
+  "@discoverGroupFull": {
+    "description": "Discover: \"Группа заполнена\"."
+  },
+  "discoverWaitlistOnly": "Waitlist only",
+  "@discoverWaitlistOnly": {
+    "description": "Discover: \"Только лист ожидания\"."
+  },
+  "discoverRecruitmentOpen": "Open to join",
+  "@discoverRecruitmentOpen": {
+    "description": "Discover: \"Набор открыт\"."
+  },
+  "discoverCollectingTimeOptions": "Collecting time options",
+  "@discoverCollectingTimeOptions": {
+    "description": "Discover: \"Собираются варианты времени\"."
+  },
+  "discoverDeliveryAvailable": "Delivery available",
+  "@discoverDeliveryAvailable": {
+    "description": "Discover: \"Delivery available\"."
+  },
+  "discoverDepositRequired": "Deposit required",
+  "@discoverDepositRequired": {
+    "description": "Discover: \"Deposit required\"."
+  },
+  "discoverNoDepositRequired": "No deposit required",
+  "@discoverNoDepositRequired": {
+    "description": "Discover: \"No deposit required\"."
+  },
+  "discoverPriceOnRequest": "Price on request",
+  "@discoverPriceOnRequest": {
+    "description": "Discover: \"Price on request\"."
+  },
+  "discoverSignUp": "Sign up",
+  "@discoverSignUp": {
+    "description": "Discover: \"Записаться\"."
+  },
+  "discoverAddToCalendar": "Add to calendar",
+  "@discoverAddToCalendar": {
+    "description": "Discover: \"Добавить в календарь\"."
+  },
+  "discoverAboutEvent": "About the event",
+  "@discoverAboutEvent": {
+    "description": "Discover: \"О событии\"."
+  },
+  "discoverProfile": "Profile",
+  "@discoverProfile": {
+    "description": "Discover: \"Профиль\"."
+  },
+  "discoverClubProfile": "Club profile",
+  "@discoverClubProfile": {
+    "description": "Discover: \"Профиль клуба\"."
+  },
+  "discoverOrganizer": "Organizer",
+  "@discoverOrganizer": {
+    "description": "Discover: \"Организатор\"."
+  },
+  "discoverDuration": "Duration",
+  "@discoverDuration": {
+    "description": "Discover: \"Duration\"."
+  },
+  "discoverParticipantCountUnknown": "Number of participants unknown",
+  "@discoverParticipantCountUnknown": {
+    "description": "Discover: \"Количество участников неизвестно\"."
+  },
+  "discoverParticipants": "Participants",
+  "@discoverParticipants": {
+    "description": "Discover: \"Участники\"."
+  },
+  "discoverAddToScenario": "Add to Scenario",
+  "@discoverAddToScenario": {
+    "description": "Discover: \"Add to Scenario\"."
+  },
+  "discoverShare": "Share",
+  "@discoverShare": {
+    "description": "Discover: \"Share\"."
+  },
+  "discoverBadgeEvent": "EVENT",
+  "@discoverBadgeEvent": {
+    "description": "Discover: \"EVENT\"."
+  },
+  "discoverCurrentlyUnavailable": "Currently unavailable",
+  "@discoverCurrentlyUnavailable": {
+    "description": "Discover: \"Currently unavailable\"."
+  },
+  "discoverConfirmOnProviderSite": "Confirm on provider site",
+  "@discoverConfirmOnProviderSite": {
+    "description": "Discover: \"Confirm on provider site\"."
+  },
+  "discoverRatePlan": "Rate plan",
+  "@discoverRatePlan": {
+    "description": "Discover: \"Rate plan\"."
+  },
+  "discoverWhatIsRented": "What is rented",
+  "@discoverWhatIsRented": {
+    "description": "Discover: \"What is rented\"."
+  },
+  "discoverBadgeRental": "RENTAL",
+  "@discoverBadgeRental": {
+    "description": "Discover: \"RENTAL\"."
+  },
+  "discoverFlexible": "Flexible",
+  "@discoverFlexible": {
+    "description": "Discover: \"Гибко\"."
+  },
+  "discoverAboutClass": "About the class",
+  "@discoverAboutClass": {
+    "description": "Discover: \"О занятии\"."
+  },
+  "discoverClosed": "Closed",
+  "@discoverClosed": {
+    "description": "Discover: \"Закрыто\"."
+  },
+  "discoverOpeningHours": "Opening hours",
+  "@discoverOpeningHours": {
+    "description": "Discover: \"Часы работы\"."
+  },
+  "discoverAboutPlace": "About the place",
+  "@discoverAboutPlace": {
+    "description": "Discover: \"О месте\"."
+  },
+  "discoverTime": "Time",
+  "@discoverTime": {
+    "description": "Discover: \"Время\"."
+  },
+  "discoverFromYou": "From you",
+  "@discoverFromYou": {
+    "description": "Discover: \"От вас\"."
+  },
+  "discoverAboutService": "About the service",
+  "@discoverAboutService": {
+    "description": "Discover: \"Об услуге\"."
+  },
+  "discoverSpecialist": "Specialist",
+  "@discoverSpecialist": {
+    "description": "Discover: \"Специалист\"."
+  },
+  "discoverOrganization": "Organisation",
+  "@discoverOrganization": {
+    "description": "Discover: \"Организация\"."
+  },
+  "discoverGroupSize": "Group size",
+  "@discoverGroupSize": {
+    "description": "Discover: \"Group size\"."
+  },
+  "discoverRequirements": "Requirements",
+  "@discoverRequirements": {
+    "description": "Discover: \"Требования\"."
+  },
+  "discoverMaterialsIncluded": "Materials and what is included",
+  "@discoverMaterialsIncluded": {
+    "description": "Discover: \"Материалы и что включено\"."
+  },
+  "discoverCostsNotSpecified": "Costs not specified",
+  "@discoverCostsNotSpecified": {
+    "description": "Discover: \"Расходы не указаны\"."
+  },
+  "discoverNoRequiredCosts": "No required costs",
+  "@discoverNoRequiredCosts": {
+    "description": "Discover: \"Без обязательных расходов\"."
+  },
+  "discoverDesiredSize": "Desired size",
+  "@discoverDesiredSize": {
+    "description": "Discover: \"Желаемый размер\"."
+  },
+  "discoverInGroupNow": "In the group now",
+  "@discoverInGroupNow": {
+    "description": "Discover: \"Сейчас в группе\"."
+  },
+  "discoverExpectedCosts": "Expected costs",
+  "@discoverExpectedCosts": {
+    "description": "Discover: \"Ожидаемые расходы\"."
+  },
+  "discoverParticipantRequirements": "Participant requirements",
+  "@discoverParticipantRequirements": {
+    "description": "Discover: \"Требования к участникам\"."
+  },
+  "discoverMeetupFormat": "Meetup format",
+  "@discoverMeetupFormat": {
+    "description": "Discover: \"Формат встречи\"."
+  },
+  "discoverMeetupTime": "Meetup time",
+  "@discoverMeetupTime": {
+    "description": "Discover: \"Время встречи\"."
+  },
+  "discoverTimeOptions": "Time options",
+  "@discoverTimeOptions": {
+    "description": "Discover: \"Варианты времени\"."
+  },
+  "discoverAboutMeetup": "About the meetup",
+  "@discoverAboutMeetup": {
+    "description": "Discover: \"О встрече\"."
+  },
+  "discoverPublisher": "Publisher",
+  "@discoverPublisher": {
+    "description": "Discover: \"Публикатор\"."
+  },
+  "discoverShareAndMore": "Share and more actions",
+  "@discoverShareAndMore": {
+    "description": "Discover: \"Поделиться и другие действия\"."
+  },
+  "discoverMarkVisited": "Mark as visited",
+  "@discoverMarkVisited": {
+    "description": "Discover: \"Mark as visited\"."
+  },
+  "discoverCreateRoute": "Create route",
+  "@discoverCreateRoute": {
+    "description": "Discover: \"Create route\"."
+  },
+  "discoverViewRoute": "View route",
+  "@discoverViewRoute": {
+    "description": "Discover: \"Посмотреть маршрут\"."
+  },
+  "discoverCreateSimilar": "Create similar",
+  "@discoverCreateSimilar": {
+    "description": "Discover: \"Create similar\"."
+  },
+  "discoverFindSimilar": "Find similar",
+  "@discoverFindSimilar": {
+    "description": "Discover: \"Find similar\"."
+  },
+  "discoverCheckTimeOnSite": "Check the time on the website",
+  "@discoverCheckTimeOnSite": {
+    "description": "Discover: \"Проверить время на сайте\"."
+  },
+  "discoverReviewAndBook": "Review and book",
+  "@discoverReviewAndBook": {
+    "description": "Discover: \"Проверить и забронировать\"."
+  },
+  "discoverRequestSent": "Request sent",
+  "@discoverRequestSent": {
+    "description": "Discover: \"Request sent\"."
+  },
+  "discoverDateSet": "Date set",
+  "@discoverDateSet": {
+    "description": "Discover: \"Date set\"."
+  },
+  "discoverAnyDate": "Any date",
+  "@discoverAnyDate": {
+    "description": "Discover: \"Any date\"."
+  },
+  "discoverDone": "Done",
+  "@discoverDone": {
+    "description": "Discover: \"Done\"."
+  },
+  "discoverWindowAsEntered": "Used as entered for time matching.",
+  "@discoverWindowAsEntered": {
+    "description": "Discover: \"Used as entered for time matching.\"."
+  },
+  "discoverEffectiveWindow": "Effective window",
+  "@discoverEffectiveWindow": {
+    "description": "Discover: \"Effective window\"."
+  },
+  "discoverBufferEachSide": "Buffer on each side",
+  "@discoverBufferEachSide": {
+    "description": "Discover: \"Buffer on each side\"."
+  },
+  "discoverEnd": "End",
+  "@discoverEnd": {
+    "description": "Discover: \"End\"."
+  },
+  "discoverStart": "Start",
+  "@discoverStart": {
+    "description": "Discover: \"Start\"."
+  },
+  "discoverChangeDate": "Change date",
+  "@discoverChangeDate": {
+    "description": "Discover: \"Change date\"."
+  },
+  "discoverFlexibleTime": "Flexible",
+  "@discoverFlexibleTime": {
+    "description": "Discover: \"Flexible\"."
+  },
+  "discoverExact": "Exact",
+  "@discoverExact": {
+    "description": "Discover: \"Exact\"."
+  },
+  "discoverBackToFilters": "Back to filters",
+  "@discoverBackToFilters": {
+    "description": "Discover: \"Back to filters\"."
+  },
+  "discoverReset": "Reset",
+  "@discoverReset": {
+    "description": "Discover: \"Reset\"."
+  },
+  "discoverExactTime": "Exact time",
+  "@discoverExactTime": {
+    "description": "Discover: \"Exact time\"."
+  },
+  "discoverApplyFilters": "Apply filters",
+  "@discoverApplyFilters": {
+    "description": "Discover: \"Apply filters\"."
+  },
+  "discoverIncludeReturnTrip": "Include return trip",
+  "@discoverIncludeReturnTrip": {
+    "description": "Discover: \"Include return trip\"."
+  },
+  "discoverTransit": "Public transport",
+  "@discoverTransit": {
+    "description": "Discover: \"Transit\"."
+  },
+  "discoverDriving": "Driving",
+  "@discoverDriving": {
+    "description": "Discover: \"Driving\"."
+  },
+  "discoverWalking": "Walking",
+  "@discoverWalking": {
+    "description": "Discover: \"Walking\"."
+  },
+  "discoverMapPoint": "Map point",
+  "@discoverMapPoint": {
+    "description": "Discover: \"Map point\"."
+  },
+  "discoverTravel": "Travel",
+  "@discoverTravel": {
+    "description": "Discover: \"Travel\"."
+  },
+  "discoverNoBuffer": "No buffer",
+  "@discoverNoBuffer": {
+    "description": "Discover: \"No buffer\"."
+  },
+  "discoverChangeFlexibility": "Change flexibility",
+  "@discoverChangeFlexibility": {
+    "description": "Discover: \"Change flexibility\"."
+  },
+  "discoverWindowEdgeBuffer": "Window edge buffer",
+  "@discoverWindowEdgeBuffer": {
+    "description": "Discover: \"Window edge buffer\"."
+  },
+  "discoverToday": "Today",
+  "@discoverToday": {
+    "description": "Discover: \"Today\"."
+  },
+  "discoverWhen": "When",
+  "@discoverWhen": {
+    "description": "Discover: \"When\"."
+  },
+  "discoverSave": "Save",
+  "@discoverSave": {
+    "description": "Discover: \"Save\"."
+  },
+  "discoverCancel": "Cancel",
+  "@discoverCancel": {
+    "description": "Discover: \"Отмена\"."
+  },
+  "discoverEnterBudget": "Enter an amount from €0 to €10,000",
+  "@discoverEnterBudget": {
+    "description": "Discover: \"Enter an amount from €0 to €10,000\"."
+  },
+  "discoverAmountInEur": "Amount in EUR",
+  "@discoverAmountInEur": {
+    "description": "Discover: \"Amount in EUR\"."
+  },
+  "discoverBudgetPerPerson": "Budget per person",
+  "@discoverBudgetPerPerson": {
+    "description": "Discover: \"Budget per person\"."
+  },
+  "discoverEnterPeople": "Enter a number from 1 to 99",
+  "@discoverEnterPeople": {
+    "description": "Discover: \"Enter a number from 1 to 99\"."
+  },
+  "discoverExampleSix": "For example, 6",
+  "@discoverExampleSix": {
+    "description": "Discover: \"For example, 6\"."
+  },
+  "discoverNumberOfPeople": "Number of people",
+  "@discoverNumberOfPeople": {
+    "description": "Discover: \"Number of people\"."
+  },
+  "discoverAnyArea": "Any area",
+  "@discoverAnyArea": {
+    "description": "Discover: \"Any area\"."
+  },
+  "discoverAnyDuration": "Any duration",
+  "@discoverAnyDuration": {
+    "description": "Discover: \"Any duration\"."
+  },
+  "discoverAnyDistance": "Any distance",
+  "@discoverAnyDistance": {
+    "description": "Discover: \"Any distance\"."
+  },
+  "discoverOnlyAvailable": "Only available",
+  "@discoverOnlyAvailable": {
+    "description": "Discover: \"Only available\"."
+  },
+  "discoverOpenNow": "Open now",
+  "@discoverOpenNow": {
+    "description": "Discover: \"Open now\"."
+  },
+  "discoverTimeAvailable": "Time available",
+  "@discoverTimeAvailable": {
+    "description": "Discover: \"Time available\"."
+  },
+  "discoverSearchFilters": "Search filters",
+  "@discoverSearchFilters": {
+    "description": "Discover: \"Search filters\"."
+  },
+  "discoverSocialEvening": "Social evening",
+  "@discoverSocialEvening": {
+    "description": "Discover: \"Social evening\"."
+  },
+  "discoverActiveMorning": "Active morning",
+  "@discoverActiveMorning": {
+    "description": "Discover: \"Active morning\"."
+  },
+  "discoverSunsetBreak": "Sunset break",
+  "@discoverSunsetBreak": {
+    "description": "Discover: \"Sunset break\"."
+  },
+  "discoverAfterWork": "After work",
+  "@discoverAfterWork": {
+    "description": "Discover: \"After work\"."
+  },
+  "discoverRegularSearchesHint": "Your regular searches will appear here automatically.",
+  "@discoverRegularSearchesHint": {
+    "description": "Discover: \"Your regular searches will appear here automatically.\"."
+  },
+  "discoverCalmEvening": "Calm evening",
+  "@discoverCalmEvening": {
+    "description": "Discover: \"Calm evening\"."
+  },
+  "discoverLowBudget": "Low budget",
+  "@discoverLowBudget": {
+    "description": "Discover: \"Low budget\"."
+  },
+  "discoverForTwo": "For two",
+  "@discoverForTwo": {
+    "description": "Discover: \"For two\"."
+  },
+  "discoverNearMeNow": "Near me now",
+  "@discoverNearMeNow": {
+    "description": "Discover: \"Near me now\"."
+  },
+  "discoverApplyRadius": "Apply radius",
+  "@discoverApplyRadius": {
+    "description": "Discover: \"Apply radius\"."
+  },
+  "discoverCustomRadius": "Custom radius",
+  "@discoverCustomRadius": {
+    "description": "Discover: \"Custom radius\"."
+  },
+  "discoverSearchRadius": "Search radius",
+  "@discoverSearchRadius": {
+    "description": "Discover: \"Search radius\"."
+  },
+  "discoverAnyBudget": "Any budget",
+  "@discoverAnyBudget": {
+    "description": "Discover: \"Any budget\"."
+  },
+  "discoverExampleEight": "For example, 8",
+  "@discoverExampleEight": {
+    "description": "Discover: \"For example, 8\"."
+  },
+  "discoverJustMe": "Just me",
+  "@discoverJustMe": {
+    "description": "Discover: \"Just me\"."
+  },
+  "discoverAnyGroup": "Any group",
+  "@discoverAnyGroup": {
+    "description": "Discover: \"Any group\"."
+  },
+  "discoverChooseSearchDates": "Choose search dates",
+  "@discoverChooseSearchDates": {
+    "description": "Discover: \"Choose search dates\"."
+  },
+  "discoverChooseDates": "Choose dates",
+  "@discoverChooseDates": {
+    "description": "Discover: \"Choose dates\"."
+  },
+  "discoverThisWeekend": "This weekend",
+  "@discoverThisWeekend": {
+    "description": "Discover: \"This weekend\"."
+  },
+  "discoverTomorrow": "Tomorrow",
+  "@discoverTomorrow": {
+    "description": "Discover: \"Tomorrow\"."
+  },
+  "discoverChooseDate": "Choose date",
+  "@discoverChooseDate": {
+    "description": "Discover: \"Choose date\"."
+  },
+  "discoverUntilEndOfDay": "Until end of day",
+  "@discoverUntilEndOfDay": {
+    "description": "Discover: \"Until end of day\"."
+  },
+  "discoverRecentSearches": "Recent searches",
+  "@discoverRecentSearches": {
+    "description": "Discover: \"Recent searches\"."
+  },
+  "discoverQuickPlans": "Quick plans",
+  "@discoverQuickPlans": {
+    "description": "Discover: \"Quick plans\"."
+  },
+  "discoverSeeAll": "See all",
+  "@discoverSeeAll": {
+    "description": "Discover: \"See all\"."
+  },
+  "discoverSearchHint": "Search activity, place or plan",
+  "@discoverSearchHint": {
+    "description": "Discover: \"Search activity, place or plan\"."
+  },
+  "discoverSearchRecharge": "Search Recharge",
+  "@discoverSearchRecharge": {
+    "description": "Discover: \"Search Recharge\"."
+  },
+  "discoverJoinActivity": "Join activity",
+  "@discoverJoinActivity": {
+    "description": "Discover: \"Join activity\"."
+  },
+  "discoverParticipantsUnknown": "Participants unknown",
+  "@discoverParticipantsUnknown": {
+    "description": "Discover: \"Participants unknown\"."
+  },
+  "discoverCapacityUnknown": "Capacity unknown",
+  "@discoverCapacityUnknown": {
+    "description": "Discover: \"Capacity unknown\"."
+  },
+  "discoverOpeningHoursUnknown": "Opening hours unknown",
+  "@discoverOpeningHoursUnknown": {
+    "description": "Discover: \"Opening hours unknown\"."
+  },
+  "discoverTimeNotConfirmed": "Time not confirmed",
+  "@discoverTimeNotConfirmed": {
+    "description": "Discover: \"Time not confirmed\"."
+  },
+  "discoverDoesNotFit": "Does not fit",
+  "@discoverDoesNotFit": {
+    "description": "Discover: \"Does not fit\"."
+  },
+  "discoverPartialAttendance": "Partial attendance possible",
+  "@discoverPartialAttendance": {
+    "description": "Discover: \"Partial attendance possible\"."
+  },
+  "discoverFitsYourTime": "Fits your time",
+  "@discoverFitsYourTime": {
+    "description": "Discover: \"Fits your time\"."
+  },
+  "discoverOptionalContribution": "Optional contribution",
+  "@discoverOptionalContribution": {
+    "description": "Discover: \"Optional contribution\"."
+  },
+  "discoverNoContribution": "No contribution specified",
+  "@discoverNoContribution": {
+    "description": "Discover: \"No contribution specified\"."
+  },
+  "discoverDifficultyNotSet": "Difficulty not set",
+  "@discoverDifficultyNotSet": {
+    "description": "Discover: \"Difficulty not set\"."
+  },
+  "discoverAnyTime": "Any time",
+  "@discoverAnyTime": {
+    "description": "Discover: \"Any time\"."
+  },
+  "discoverWhatAwaitsYou": "What awaits you",
+  "@discoverWhatAwaitsYou": {
+    "description": "Discover: \"What awaits you\"."
+  },
+  "discoverPerkSaveForLater": "Save the activity for later",
+  "@discoverPerkSaveForLater": {
+    "description": "Discover: \"Save the activity for later\"."
+  },
+  "discoverPerkOrganizerDetails": "Organizer details available before joining",
+  "@discoverPerkOrganizerDetails": {
+    "description": "Discover: \"Organizer details available before joining\"."
+  },
+  "discoverPerkMeetingPoint": "Clear meeting point and timing",
+  "@discoverPerkMeetingPoint": {
+    "description": "Discover: \"Clear meeting point and timing\"."
+  },
+  "discoverDistance": "Distance",
+  "@discoverDistance": {
+    "description": "Discover: \"Расстояние\"."
+  },
+  "discoverLocation": "Location",
+  "@discoverLocation": {
+    "description": "Discover: \"Location\"."
+  },
+  "discoverRouteGeometry": "Route geometry",
+  "@discoverRouteGeometry": {
+    "description": "Discover: \"Route geometry\"."
+  },
+  "discoverDateAndTime": "Date and time",
+  "@discoverDateAndTime": {
+    "description": "Discover: \"Date and time\"."
+  },
+  "discoverRouteMap": "Route map",
+  "@discoverRouteMap": {
+    "description": "Discover: \"Route map\"."
+  },
+  "discoverRouteFromThis": "Route from this",
+  "@discoverRouteFromThis": {
+    "description": "Discover: \"Route from this\"."
+  },
+  "discoverAddToPrivateHistory": "Add to private history",
+  "@discoverAddToPrivateHistory": {
+    "description": "Discover: \"Add to private history\"."
+  },
+  "discoverOpenCreateHub": "Open Create Hub",
+  "@discoverOpenCreateHub": {
+    "description": "Discover: \"Open Create Hub\"."
+  },
+  "discoverSearchThisCategory": "Search with this category",
+  "@discoverSearchThisCategory": {
+    "description": "Discover: \"Search with this category\"."
+  },
+  "discoverAddStopToPlan": "Add this stop to a personal plan",
+  "@discoverAddStopToPlan": {
+    "description": "Discover: \"Add this stop to a personal plan\"."
+  },
+  "discoverOpenNearbyContext": "Open nearby context",
+  "@discoverOpenNearbyContext": {
+    "description": "Discover: \"Open nearby context\"."
+  },
+  "discoverMap": "Map",
+  "@discoverMap": {
+    "description": "Discover: \"Map\"."
+  },
+  "discoverPlanHint": "Turn this activity into a route, compare similar options, or save it for later.",
+  "@discoverPlanHint": {
+    "description": "Discover: \"Turn this activity into a route, compare similar options, or\"."
+  },
+  "discoverNotSaved": "Not saved",
+  "@discoverNotSaved": {
+    "description": "Discover: \"Not saved\"."
+  },
+  "discoverPlanThisRecharge": "Plan this recharge",
+  "@discoverPlanThisRecharge": {
+    "description": "Discover: \"Plan this recharge\"."
+  },
+  "discoverSend": "Send",
+  "@discoverSend": {
+    "description": "Discover: \"Отправить\"."
+  },
+  "discoverCriticalOnlyImmediateRisk": "Choose critical danger only when people are at immediate risk.",
+  "@discoverCriticalOnlyImmediateRisk": {
+    "description": "Discover: \"Критическую опасность выбирайте только при непосредственном \"."
+  },
+  "discoverDescribeWithoutPersonalData": "Describe the problem without personal data",
+  "@discoverDescribeWithoutPersonalData": {
+    "description": "Discover: \"Опишите проблему без личных данных\"."
+  },
+  "discoverCommentOptional": "Comment (optional)",
+  "@discoverCommentOptional": {
+    "description": "Discover: \"Комментарий (необязательно)\"."
+  },
+  "discoverSeverityCritical": "Critical danger",
+  "@discoverSeverityCritical": {
+    "description": "Discover: \"Критическая опасность\"."
+  },
+  "discoverSeverityDanger": "Dangerous",
+  "@discoverSeverityDanger": {
+    "description": "Discover: \"Опасно\"."
+  },
+  "discoverSeverityWarning": "Needs attention",
+  "@discoverSeverityWarning": {
+    "description": "Discover: \"Требует внимания\"."
+  },
+  "discoverSeverityInfo": "Information",
+  "@discoverSeverityInfo": {
+    "description": "Discover: \"Информация\"."
+  },
+  "discoverSeverity": "Severity",
+  "@discoverSeverity": {
+    "description": "Discover: \"Серьёзность\"."
+  },
+  "discoverIssueOther": "Other",
+  "@discoverIssueOther": {
+    "description": "Discover: \"Другое\"."
+  },
+  "discoverIssueWrongLine": "Wrong route line",
+  "@discoverIssueWrongLine": {
+    "description": "Discover: \"Неверная линия маршрута\"."
+  },
+  "discoverIssueObstacle": "Obstacle",
+  "@discoverIssueObstacle": {
+    "description": "Discover: \"Препятствие\"."
+  },
+  "discoverIssueHazardousSurface": "Hazardous surface",
+  "@discoverIssueHazardousSurface": {
+    "description": "Discover: \"Опасное покрытие\"."
+  },
+  "discoverIssueTrailClosed": "Trail closed",
+  "@discoverIssueTrailClosed": {
+    "description": "Discover: \"Тропа закрыта\"."
+  },
+  "discoverWhatHappened": "What happened",
+  "@discoverWhatHappened": {
+    "description": "Discover: \"Что произошло\"."
+  },
+  "discoverRouteIssue": "Problem on the route",
+  "@discoverRouteIssue": {
+    "description": "Discover: \"Проблема на маршруте\"."
+  },
+  "discoverReportRouteIssue": "Report a problem on the route",
+  "@discoverReportRouteIssue": {
+    "description": "Discover: \"Сообщить о проблеме на маршруте\"."
+  },
+  "discoverElevationUnavailable": "Elevation data is unavailable and is not shown as zero.",
+  "@discoverElevationUnavailable": {
+    "description": "Discover: \"Elevation data is unavailable and is not shown as zero.\"."
+  },
+  "discoverElevationPartial": "Elevation data is partial; ascent and descent are not presented as complete.",
+  "@discoverElevationPartial": {
+    "description": "Discover: \"Elevation data is partial; ascent and descent are not presen\"."
+  },
+  "discoverDemoData": "Demo data",
+  "@discoverDemoData": {
+    "description": "Discover: \"Demo data\"."
+  },
+  "discoverFieldVerified": "Field verified",
+  "@discoverFieldVerified": {
+    "description": "Discover: \"Field verified\"."
+  },
+  "discoverPublishedRoute": "Published Route",
+  "@discoverPublishedRoute": {
+    "description": "Discover: \"Published Route\"."
+  },
+  "discoverOpenDetails": "Open details",
+  "@discoverOpenDetails": {
+    "description": "Discover: \"Open details\"."
+  },
+  "discoverSelectForScenario": "Select for Scenario",
+  "@discoverSelectForScenario": {
+    "description": "Discover: \"Select for Scenario\"."
+  },
+  "discoverAny": "Any",
+  "@discoverAny": {
+    "description": "Discover: \"Any\"."
+  },
+  "discoverSearchThisArea": "Search this area",
+  "@discoverSearchThisArea": {
+    "description": "Discover: \"Search this area\"."
+  },
+  "discoverResetRouteProgress": "Reset route progress",
+  "@discoverResetRouteProgress": {
+    "description": "Discover: \"Reset route progress\"."
+  },
+  "discoverStartRoute": "Start route",
+  "@discoverStartRoute": {
+    "description": "Discover: \"Start route\"."
+  },
+  "discoverNextStop": "Next stop",
+  "@discoverNextStop": {
+    "description": "Discover: \"Next stop\"."
+  },
+  "discoverReadyToStart": "Ready to start",
+  "@discoverReadyToStart": {
+    "description": "Discover: \"Ready to start\"."
+  },
+  "discoverRouteComplete": "Route complete",
+  "@discoverRouteComplete": {
+    "description": "Discover: \"Route complete\"."
+  },
+  "discoverCopy": "Copy",
+  "@discoverCopy": {
+    "description": "Discover: \"Copy\"."
+  },
+  "discoverCreateRouteListing": "Create route listing",
+  "@discoverCreateRouteListing": {
+    "description": "Discover: \"Create route listing\"."
+  },
+  "discoverSearchSimilarRoute": "Search similar route",
+  "@discoverSearchSimilarRoute": {
+    "description": "Discover: \"Search similar route\"."
+  },
+  "discoverEditRoute": "Edit route",
+  "@discoverEditRoute": {
+    "description": "Discover: \"Edit route\"."
+  },
+  "discoverScenarioRoute": "Scenario route",
+  "@discoverScenarioRoute": {
+    "description": "Discover: \"Scenario route\"."
+  },
+  "discoverNoActivitiesInArea": "No activities in this area",
+  "@discoverNoActivitiesInArea": {
+    "description": "Discover: \"No activities in this area\"."
+  },
+  "discoverRetry": "Retry",
+  "@discoverRetry": {
+    "description": "Discover: \"Повторить\"."
+  },
+  "discoverMapSearchFailed": "Map search failed",
+  "@discoverMapSearchFailed": {
+    "description": "Discover: \"Map search failed\"."
+  },
+  "discoverMapResults": "Map results",
+  "@discoverMapResults": {
+    "description": "Discover: \"Map results\"."
+  },
+  "discoverApply": "Apply",
+  "@discoverApply": {
+    "description": "Discover: \"Apply\"."
+  },
+  "discoverSavedOnMap": "Saved on map",
+  "@discoverSavedOnMap": {
+    "description": "Discover: \"Saved on map\"."
+  },
+  "discoverRouteFromSmart": "Build route from smart search",
+  "@discoverRouteFromSmart": {
+    "description": "Discover: \"Build route from smart search\"."
+  },
+  "discoverCreateFromSmart": "Create listing from smart search",
+  "@discoverCreateFromSmart": {
+    "description": "Discover: \"Create listing from smart search\"."
+  },
+  "discoverApplySmartToMap": "Apply smart search to map",
+  "@discoverApplySmartToMap": {
+    "description": "Discover: \"Apply smart search to map\"."
+  },
+  "discoverSmart": "Smart",
+  "@discoverSmart": {
+    "description": "Discover: \"Smart\"."
+  },
+  "discoverRouteFromSaved": "Build route from saved conditions",
+  "@discoverRouteFromSaved": {
+    "description": "Discover: \"Build route from saved conditions\"."
+  },
+  "discoverCreateFromSaved": "Create listing from saved conditions",
+  "@discoverCreateFromSaved": {
+    "description": "Discover: \"Create listing from saved conditions\"."
+  },
+  "discoverApplySavedToMap": "Apply saved conditions to map",
+  "@discoverApplySavedToMap": {
+    "description": "Discover: \"Apply saved conditions to map\"."
+  },
+  "discoverSaved": "Saved",
+  "@discoverSaved": {
+    "description": "Discover: \"Saved\"."
+  },
+  "discoverCreateHere": "Create here",
+  "@discoverCreateHere": {
+    "description": "Discover: \"Create here\"."
+  },
+  "discoverSearch": "Search",
+  "@discoverSearch": {
+    "description": "Discover: \"Search\"."
+  },
+  "discoverClear": "Clear",
+  "@discoverClear": {
+    "description": "Discover: \"Clear\"."
+  },
+  "discoverSearchOnMap": "Search on map",
+  "@discoverSearchOnMap": {
+    "description": "Discover: \"Search on map\"."
+  },
+  "discoverMapArea": "Map area",
+  "@discoverMapArea": {
+    "description": "Discover: \"Map area\"."
+  },
+  "discoverRechargeIdea": "Recharge idea",
+  "@discoverRechargeIdea": {
+    "description": "Discover: \"Recharge idea\"."
+  },
+  "discoverMapAreaIdea": "Map area idea",
+  "@discoverMapAreaIdea": {
+    "description": "Discover: \"Map area idea\"."
+  },
+  "discoverScenarioCopied": "Scenario copied",
+  "@discoverScenarioCopied": {
+    "description": "Discover: \"Scenario copied\"."
+  },
+  "discoverScenarioSaved": "Scenario saved",
+  "@discoverScenarioSaved": {
+    "description": "Discover: \"Scenario saved\"."
+  },
+  "discoverRecenter": "Recenter",
+  "@discoverRecenter": {
+    "description": "Discover: \"Recenter\"."
+  },
+  "discoverUseCurrentLocation": "Use current location",
+  "@discoverUseCurrentLocation": {
+    "description": "Discover: \"Use current location\"."
+  },
+  "discoverCancelScenarioSelection": "Cancel Scenario selection",
+  "@discoverCancelScenarioSelection": {
+    "description": "Discover: \"Cancel Scenario selection\"."
+  },
+  "discoverAll": "All",
+  "@discoverAll": {
+    "description": "Discover: \"All\"."
+  },
+  "discoverSearchFailed": "Search failed",
+  "@discoverSearchFailed": {
+    "description": "Discover: \"Search failed\"."
+  },
+  "discoverResetConditions": "Reset conditions",
+  "@discoverResetConditions": {
+    "description": "Discover: \"Reset conditions\"."
+  },
+  "discoverNoMatches": "No activities match these conditions",
+  "@discoverNoMatches": {
+    "description": "Discover: \"No activities match these conditions\"."
+  },
+  "discoverShowingNearby": "Showing nearby activities",
+  "@discoverShowingNearby": {
+    "description": "Discover: \"Showing nearby activities\"."
+  },
+  "discoverRadius": "Radius",
+  "@discoverRadius": {
+    "description": "Discover: \"Radius\"."
+  },
+  "discoverTonight": "Tonight",
+  "@discoverTonight": {
+    "description": "Discover: \"Tonight\"."
+  },
+  "discoverDate": "Date",
+  "@discoverDate": {
+    "description": "Discover: \"Date\"."
+  },
+  "discoverBudget": "Budget",
+  "@discoverBudget": {
+    "description": "Discover: \"Budget\"."
+  },
+  "discoverShowNoTicket": "Show no-ticket activities",
+  "@discoverShowNoTicket": {
+    "description": "Discover: \"Show no-ticket activities\"."
+  },
+  "discoverFreeOnly": "Free only",
+  "@discoverFreeOnly": {
+    "description": "Discover: \"Free only\"."
+  },
+  "discoverOutdoor": "Outdoor",
+  "@discoverOutdoor": {
+    "description": "Discover: \"Outdoor\"."
+  },
+  "discoverFreeToday": "Free today",
+  "@discoverFreeToday": {
+    "description": "Discover: \"Free today\"."
+  },
+  "discoverSearchConditions": "Search conditions",
+  "@discoverSearchConditions": {
+    "description": "Discover: \"Search conditions\"."
+  },
+  "discoverOpenSavedOnMap": "Open saved conditions on map",
+  "@discoverOpenSavedOnMap": {
+    "description": "Discover: \"Open saved conditions on map\"."
+  },
+  "discoverDeleteSaved": "Delete saved conditions",
+  "@discoverDeleteSaved": {
+    "description": "Discover: \"Delete saved conditions\"."
+  },
+  "discoverNoRecentSearches": "No recent searches yet",
+  "@discoverNoRecentSearches": {
+    "description": "Discover: \"No recent searches yet\"."
+  },
+  "discoverCreateListingFromSearch": "Create listing from current search",
+  "@discoverCreateListingFromSearch": {
+    "description": "Discover: \"Create listing from current search\"."
+  },
+  "discoverConditions": "Conditions",
+  "@discoverConditions": {
+    "description": "Discover: \"Conditions\"."
+  },
+  "discoverViewMap": "View map",
+  "@discoverViewMap": {
+    "description": "Discover: \"View map\"."
+  },
+  "discoverCategories": "Categories",
+  "@discoverCategories": {
+    "description": "Discover: \"Categories\"."
+  },
+  "discoverQuickScenarios": "Quick scenarios",
+  "@discoverQuickScenarios": {
+    "description": "Discover: \"Quick scenarios\"."
+  },
+  "discoverCreateFromCurrentSearch": "Create from current search",
+  "@discoverCreateFromCurrentSearch": {
+    "description": "Discover: \"Create from current search\"."
+  },
+  "discoverUnderstoodParameters": "Understood parameters",
+  "@discoverUnderstoodParameters": {
+    "description": "Discover: \"Понятые параметры\"."
+  },
+  "discoverTextQuery": "Text query",
+  "@discoverTextQuery": {
+    "description": "Discover: \"Текстовый запрос\"."
+  },
+  "discoverGotIt": "Got it",
+  "@discoverGotIt": {
+    "description": "Discover: \"Понятно\"."
+  },
+  "discoverSmartSearchHow": "How Smart Search works",
+  "@discoverSmartSearchHow": {
+    "description": "Discover: \"Как работает Smart Search\"."
+  },
+  "discoverSayWhatToFind": "Say what you want to find",
+  "@discoverSayWhatToFind": {
+    "description": "Discover: \"Скажите, что хотите найти\"."
+  },
+  "discoverSmartSearchPrompt": "Write or say what to find",
+  "@discoverSmartSearchPrompt": {
+    "description": "Discover: \"Напишите или скажите, что найти\"."
+  },
+  "discoverStartSearch": "Start search",
+  "@discoverStartSearch": {
+    "description": "Discover: \"Начать поиск\"."
+  },
+  "discoverDeleteQuery": "Delete query",
+  "@discoverDeleteQuery": {
+    "description": "Discover: \"Удалить запрос\"."
+  },
+  "discoverRecentSmartSearches": "Recent smart searches",
+  "@discoverRecentSmartSearches": {
+    "description": "Discover: \"Недавние Smart Search\"."
+  },
+  "discoverPopularQueries": "Popular queries",
+  "@discoverPopularQueries": {
+    "description": "Discover: \"Популярные запросы\"."
+  },
+  "discoverChipUpTo20": "Up to €20",
+  "@discoverChipUpTo20": {
+    "description": "Discover: \"До €20\"."
+  },
+  "discoverChipOneTwoHours": "1–2 hours",
+  "@discoverChipOneTwoHours": {
+    "description": "Discover: \"1–2 часа\"."
+  },
+  "discoverChipCalmEvening": "Calm evening",
+  "@discoverChipCalmEvening": {
+    "description": "Discover: \"Спокойный вечер\"."
+  },
+  "discoverChipForTwo": "For two",
+  "@discoverChipForTwo": {
+    "description": "Discover: \"Для двоих\"."
+  },
+  "discoverChipNearNow": "Near me now",
+  "@discoverChipNearNow": {
+    "description": "Discover: \"Рядом сейчас\"."
+  },
+  "discoverVoiceQuery": "Voice query",
+  "@discoverVoiceQuery": {
+    "description": "Discover: \"Голосовой запрос\"."
+  },
+  "discoverSmartSearchPromptTwoLines": "Write or say\\nwhat you want to find",
+  "@discoverSmartSearchPromptTwoLines": {
+    "description": "Discover: \"Напишите или скажите,\\nчто хотите найти\"."
+  },
+  "discoverSmartSearch": "Smart Search",
+  "@discoverSmartSearch": {
+    "description": "Discover: \"Smart Search\"."
+  },
+  "discoverHoursUnknown": "Hours unknown",
+  "@discoverHoursUnknown": {
+    "description": "Discover: \"Hours unknown\"."
+  },
+  "discoverTimeUnknown": "Time unknown",
+  "@discoverTimeUnknown": {
+    "description": "Discover: \"Time unknown\"."
+  },
+  "discoverPartialFit": "Partial fit",
+  "@discoverPartialFit": {
+    "description": "Discover: \"Partial fit\"."
+  },
+  "discoverMatchesYourTime": "Matches your time",
+  "@discoverMatchesYourTime": {
+    "description": "Discover: \"Matches your time\"."
+  },
+  "discoverOpenSettings": "Open settings",
+  "@discoverOpenSettings": {
+    "description": "Discover: \"Открыть настройки\"."
+  },
+  "discoverNoLocationAccess": "No access to location",
+  "@discoverNoLocationAccess": {
+    "description": "Discover: \"Нет доступа к геопозиции\"."
+  },
+  "discoverFeedFailed": "Could not load the feed",
+  "@discoverFeedFailed": {
+    "description": "Discover: \"Не удалось загрузить ленту\"."
+  },
+  "discoverRemoveTime": "Remove the time",
+  "@discoverRemoveTime": {
+    "description": "Discover: \"Убрать время\"."
+  },
+  "discoverNoReturnTrip": "Without the return trip",
+  "@discoverNoReturnTrip": {
+    "description": "Discover: \"Без обратной дороги\"."
+  },
+  "discoverWidenTime": "Widen the time",
+  "@discoverWidenTime": {
+    "description": "Discover: \"Расширить время\"."
+  },
+  "discoverRefresh": "Refresh",
+  "@discoverRefresh": {
+    "description": "Discover: \"Обновить\"."
+  },
+  "discoverFeedEmpty": "Nothing in the feed yet",
+  "@discoverFeedEmpty": {
+    "description": "Discover: \"Пока в ленте ничего нет\"."
+  },
+  "discoverFeedLoading": "Loading the feed…",
+  "@discoverFeedLoading": {
+    "description": "Discover: \"Загружаем ленту...\"."
+  },
+  "discoverWaypoints": "Points on the route",
+  "@discoverWaypoints": {
+    "description": "Discover: \"Точки на маршруте\"."
+  },
+  "discoverElevation": "Elevation",
+  "@discoverElevation": {
+    "description": "Discover: \"Высота\"."
+  },
+  "discoverDescent": "Descent",
+  "@discoverDescent": {
+    "description": "Discover: \"Сброс высоты\"."
+  },
+  "discoverAscent": "Ascent",
+  "@discoverAscent": {
+    "description": "Discover: \"Набор высоты\"."
+  },
+  "discoverRouteMapFailed": "Could not load the route map",
+  "@discoverRouteMapFailed": {
+    "description": "Discover: \"Не удалось загрузить карту маршрута\"."
+  },
+  "discoverOpenOnMap": "Open on map",
+  "@discoverOpenOnMap": {
+    "description": "Discover: \"Открыть на карте\"."
+  },
+  "discoverShapeOneWay": "One way",
+  "@discoverShapeOneWay": {
+    "description": "Discover: \"В одну сторону\"."
+  },
+  "discoverShapeOutAndBack": "Out and back",
+  "@discoverShapeOutAndBack": {
+    "description": "Discover: \"Туда и обратно\"."
+  },
+  "discoverShapeLoop": "Loop",
+  "@discoverShapeLoop": {
+    "description": "Discover: \"Кольцевой\"."
+  },
+  "discoverPublisherPage": "Page",
+  "@discoverPublisherPage": {
+    "description": "Discover: \"Страница\"."
+  },
+  "discoverPublisherAuthor": "Author",
+  "@discoverPublisherAuthor": {
+    "description": "Discover: \"Автор\"."
+  },
+  "discoverRouteDetails": "Route details",
+  "@discoverRouteDetails": {
+    "description": "Discover: \"Route details\"."
+  },
+  "discoverDistanceKm": "{value} km",
+  "@discoverDistanceKm": {
+    "description": "Discover: a distance; value is an already formatted number.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverDistanceFromYou": "{value} km from you",
+  "@discoverDistanceFromYou": {
+    "description": "Discover: distance from the reader.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverStartPointAway": "Start point · {value} km away",
+  "@discoverStartPointAway": {
+    "description": "Discover: distance to a Route start point.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverFromStartKm": "{value} km from the start",
+  "@discoverFromStartKm": {
+    "description": "Discover: waypoint distance from the Route start.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverMeters": "{value} m",
+  "@discoverMeters": {
+    "description": "Discover: a length in metres; value is an already formatted number.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverAscentShort": "↑ {value} m",
+  "@discoverAscentShort": {
+    "description": "Discover: Route ascent with an up arrow.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverElevationRange": "{min}–{max} m",
+  "@discoverElevationRange": {
+    "description": "Discover: Route lowest and highest elevation.",
+    "placeholders": {
+      "min": {
+        "type": "String",
+        "example": "x"
+      },
+      "max": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverTrackGaps": "Track gaps: {count}",
+  "@discoverTrackGaps": {
+    "description": "Discover: number of gaps in a Route track.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverDirectSegments": "Direct segments: {count}",
+  "@discoverDirectSegments": {
+    "description": "Discover: number of straight-line Route segments.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverDirectSegmentsInline": "direct segments: {count}",
+  "@discoverDirectSegmentsInline": {
+    "description": "Discover: number of straight-line Route segments inside a summary line.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverMinutes": "{minutes} min",
+  "@discoverMinutes": {
+    "description": "Discover: a duration in minutes.",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverMinutesRange": "{min}–{max} min",
+  "@discoverMinutesRange": {
+    "description": "Discover: a duration range in minutes.",
+    "placeholders": {
+      "min": {
+        "type": "int",
+        "example": "2"
+      },
+      "max": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverHours": "{value} h",
+  "@discoverHours": {
+    "description": "Discover: a duration in hours; value may be a decimal already formatted.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverHoursMinutes": "{hours} h {minutes} min",
+  "@discoverHoursMinutes": {
+    "description": "Discover: a duration in hours and minutes.",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "2"
+      },
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverDays": "{days} d",
+  "@discoverDays": {
+    "description": "Discover: a duration in days.",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverUpTo": "up to {count}",
+  "@discoverUpTo": {
+    "description": "Discover: an upper bound of a group size.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverUpToPeople": "{count, plural, one{up to {count} person} other{up to {count} people}}",
+  "@discoverUpToPeople": {
+    "description": "Discover: declared group limit.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverAboutPerPerson": "About {price} per person",
+  "@discoverAboutPerPerson": {
+    "description": "Discover: expected cost per person; amount is formatted money.",
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverCancelledSuffix": "{date} · Cancelled",
+  "@discoverCancelledSuffix": {
+    "description": "Discover: a date line of a cancelled occurrence.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverRentalQuantitiesDisclaimer": "Listed quantities are Creator-declared, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.",
+  "@discoverRentalQuantitiesDisclaimer": {
+    "description": "Discover: Rental quantities are declared, not live."
+  },
+  "discoverDeliveryWithin": "Delivery available within {value} km",
+  "@discoverDeliveryWithin": {
+    "description": "Discover: Rental delivery radius.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverRentalPeriod": "Rental period: {min} – {max}",
+  "@discoverRentalPeriod": {
+    "description": "Discover: Rental minimum and maximum period.",
+    "placeholders": {
+      "min": {
+        "type": "String",
+        "example": "x"
+      },
+      "max": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverMinAge": "Min age {age}",
+  "@discoverMinAge": {
+    "description": "Discover: Rental minimum renter age.",
+    "placeholders": {
+      "age": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverIdRequired": "ID required at handover",
+  "@discoverIdRequired": {
+    "description": "Discover: Rental: an ID is checked at handover."
+  },
+  "discoverDeposit": "Deposit: {price}",
+  "@discoverDeposit": {
+    "description": "Discover: Rental deposit; amount is formatted money.",
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverTimeOptionCount": "{count, plural, one{{count} time option} other{{count} time options}}",
+  "@discoverTimeOptionCount": {
+    "description": "Discover: number of proposed times of a meetup.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverFirstAndMore": "{time} · {count} more",
+  "@discoverFirstAndMore": {
+    "description": "Discover: the first time and how many more.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "x"
+      },
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverTimeOptionCandidate": "Option · {time}",
+  "@discoverTimeOptionCandidate": {
+    "description": "Discover: a proposed (not final) meetup time.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverDateTimeRange": "{date} · {start}–{end}",
+  "@discoverDateTimeRange": {
+    "description": "Discover: a date with start and end time, in the object zone.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "x"
+      },
+      "start": {
+        "type": "String",
+        "example": "x"
+      },
+      "end": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverUpToBudget": "Up to {price}",
+  "@discoverUpToBudget": {
+    "description": "Discover: budget limit; amount is formatted money.",
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverFlexibilityMinutes": "±{minutes} min",
+  "@discoverFlexibilityMinutes": {
+    "description": "Discover: time window flexibility.",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverUsedInsteadOf": "Used for matching instead of {start}–{end}.",
+  "@discoverUsedInsteadOf": {
+    "description": "Discover: the effective window replaces the entered one.",
+    "placeholders": {
+      "start": {
+        "type": "String",
+        "example": "x"
+      },
+      "end": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverTypicalDuration": "Typical duration: {value}",
+  "@discoverTypicalDuration": {
+    "description": "Discover: Activity typical duration.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverSuggestedGroup": "Suggested group: {min}–{max}",
+  "@discoverSuggestedGroup": {
+    "description": "Discover: Activity suggested group size.",
+    "placeholders": {
+      "min": {
+        "type": "int",
+        "example": "2"
+      },
+      "max": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverBestTime": "Best time: {value}",
+  "@discoverBestTime": {
+    "description": "Discover: Activity best time of day (already localized).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverAmountHint": "Amount hint: {price}",
+  "@discoverAmountHint": {
+    "description": "Discover: Activity amount hint; amount is formatted money.",
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverBookFor": "Book for {price}",
+  "@discoverBookFor": {
+    "description": "Discover: booking button with the price.",
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverResultsInArea": "{count, plural, one{{count} place or activity in this area} other{{count} places and activities in this area}}",
+  "@discoverResultsInArea": {
+    "description": "Discover: number of map results in the area.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverStops": "{count, plural, one{{count} stop} other{{count} stops}}",
+  "@discoverStops": {
+    "description": "Discover: number of stops.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverStopOf": "Stop {current} of {total}",
+  "@discoverStopOf": {
+    "description": "Discover: current stop of a Route.",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "2"
+      },
+      "total": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverRadiusKm": "Radius: {value} km",
+  "@discoverRadiusKm": {
+    "description": "Discover: search radius.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverRemoveFromSelection": "Remove #{order} from selection",
+  "@discoverRemoveFromSelection": {
+    "description": "Discover: remove an item from the Scenario selection.",
+    "placeholders": {
+      "order": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverMood": "{value, select, calm{Calm} social{Social} active{Active} other{Custom}}",
+  "@discoverMood": {
+    "description": "Discover: mood of a map Route idea; value is the stable mood id.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverRouteLabel": "Route",
+  "@discoverRouteLabel": {
+    "description": "Discover: object type word in a summary line."
+  },
+  "discoverSmartSearchHowBody": "Type a query or use voice input. Recharge reads the time, place, budget and mood and shows suitable options.",
+  "@discoverSmartSearchHowBody": {
+    "description": "Discover: how Smart Search works."
+  },
+  "discoverSmartPromptCalmEveningNearby": "Calm evening nearby",
+  "@discoverSmartPromptCalmEveningNearby": {
+    "description": "Discover: Smart Search popular prompt; sent to the query parser (English or Russian only; lv keeps English)."
+  },
+  "discoverSmartPromptSomethingForTwoHours": "Find something interesting for 2 hours",
+  "@discoverSmartPromptSomethingForTwoHours": {
+    "description": "Discover: Smart Search popular prompt; sent to the query parser (English or Russian only; lv keeps English)."
+  },
+  "discoverSmartPromptForTwoNearby": "Where to go for two nearby",
+  "@discoverSmartPromptForTwoNearby": {
+    "description": "Discover: Smart Search popular prompt; sent to the query parser (English or Russian only; lv keeps English)."
+  },
+  "discoverSmartPromptExample": "Something calm nearby tonight, up to 20 EUR",
+  "@discoverSmartPromptExample": {
+    "description": "Discover: Smart Search example query; sent to the query parser (English or Russian only; lv keeps English)."
+  },
+  "discoverSmartPromptExampleHint": "For example: “Something calm nearby tonight, up to €20”",
+  "@discoverSmartPromptExampleHint": {
+    "description": "Discover: Smart Search example hint shown to the reader; the quoted query is sent to the parser."
+  },
+  "discoverSmartPromptNearNow": "Something interesting nearby now",
+  "@discoverSmartPromptNearNow": {
+    "description": "Discover: Smart Search chip query; sent to the query parser (English or Russian only; lv keeps English)."
+  },
+  "discoverSmartPromptForTwo": "Where to go for two",
+  "@discoverSmartPromptForTwo": {
+    "description": "Discover: Smart Search chip query; sent to the query parser (English or Russian only; lv keeps English)."
+  },
+  "discoverSmartPromptCalmEvening": "Calm evening",
+  "@discoverSmartPromptCalmEvening": {
+    "description": "Discover: Smart Search chip query; sent to the query parser (English or Russian only; lv keeps English)."
+  },
+  "discoverSmartPromptTwoHours": "Find a plan for 2 hours",
+  "@discoverSmartPromptTwoHours": {
+    "description": "Discover: Smart Search chip query; sent to the query parser (English or Russian only; lv keeps English)."
+  },
+  "discoverSmartPromptUpTo20": "Find something up to 20 EUR",
+  "@discoverSmartPromptUpTo20": {
+    "description": "Discover: Smart Search chip query; sent to the query parser (English or Russian only; lv keeps English)."
+  },
+  "discoverRentalBaseRate": "{type, select, hour{{price} / hour} week{{price} / week} other{{price} / day}}",
+  "@discoverRentalBaseRate": {
+    "description": "Discover: Rental base rate; unit is the stable billing unit (hour, day, week), price is formatted money.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "x"
+      },
+      "price": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverRentalRateStep": "{type, select, hour{From {count, plural, one{{count} hour} other{{count} hours}}: {price} / hour} week{From {count, plural, one{{count} week} other{{count} weeks}}: {price} / week} other{From {count, plural, one{{count} day} other{{count} days}}: {price} / day}}",
+  "@discoverRentalRateStep": {
+    "description": "Discover: Rental rate step from a minimum number of billing units; unit is the stable billing unit, price is formatted money.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "x"
+      },
+      "price": {
+        "type": "String",
+        "example": "x"
+      },
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverRentalUnitsListed": "{count, plural, one{{count} unit listed} other{{count} units listed}}",
+  "@discoverRentalUnitsListed": {
+    "description": "Discover: declared Rental quantity (not a live availability).",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverSeason": "Season: {value}",
+  "@discoverSeason": {
+    "description": "Discover: Activity season (already localized).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverLength": "Length",
+  "@discoverLength": {
+    "description": "Discover: Route length metric label."
+  },
+  "discoverPeople": "People",
+  "@discoverPeople": {
+    "description": "Discover: participants metric label."
+  },
+  "discoverCycling": "Cycling",
+  "@discoverCycling": {
+    "description": "Discover: Route profile: cycling."
+  },
+  "discoverDifficultyEasy": "Easy",
+  "@discoverDifficultyEasy": {
+    "description": "Discover: Route difficulty: easy."
+  },
+  "discoverDifficultyModerate": "Moderate",
+  "@discoverDifficultyModerate": {
+    "description": "Discover: Route difficulty: moderate."
+  },
+  "discoverDifficultyHard": "Hard",
+  "@discoverDifficultyHard": {
+    "description": "Discover: Route difficulty: hard."
+  },
+  "discoverOpen": "Open",
+  "@discoverOpen": {
+    "description": "Discover: opening status: open."
+  },
+  "discoverAddedToScenario": "{count, plural, one{Added {count} stop to Scenario} other{Added {count} stops to Scenario}}",
+  "@discoverAddedToScenario": {
+    "description": "Discover: snackbar after adding stops to a Scenario.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverCompletedDuration": "Completed · {minutes} min",
+  "@discoverCompletedDuration": {
+    "description": "Discover: a passed Route stop with its duration.",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverRestart": "Restart",
+  "@discoverRestart": {
+    "description": "Discover: restart a Route walk-through."
+  },
+  "discoverFinish": "Finish",
+  "@discoverFinish": {
+    "description": "Discover: finish a Route walk-through."
+  },
+  "discoverRadiusAnyArea": "Radius: any area",
+  "@discoverRadiusAnyArea": {
+    "description": "Discover: search radius is unlimited."
+  },
+  "discoverWaypoint": "Point on the route",
+  "@discoverWaypoint": {
+    "description": "Discover: a Route point without its own title."
+  },
+  "discoverFoundCount": "{count, plural, one{{count} found} other{{count} found}}",
+  "@discoverFoundCount": {
+    "description": "Discover: number of results found.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverPeopleCount": "{count, plural, one{{count} person} other{{count} people}}",
+  "@discoverPeopleCount": {
+    "description": "Discover: number of people in a search.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverUnder": "Under {value}",
+  "@discoverUnder": {
+    "description": "Discover: budget chip; value is a number in the market currency.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverFlexibleWindow": "Flexible ±{minutes} min",
+  "@discoverFlexibleWindow": {
+    "description": "Discover: a flexible time window.",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverCustom": "Custom",
+  "@discoverCustom": {
+    "description": "Discover: a custom value option."
+  },
+  "discoverCustomValue": "Custom · {value}",
+  "@discoverCustomValue": {
+    "description": "Discover: a chosen custom value; value is already formatted.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverHoursLong": "{count, plural, one{{count} hour} other{{count} hours}}",
+  "@discoverHoursLong": {
+    "description": "Discover: a number of hours.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverAboutOneHour": "~ 1 hour",
+  "@discoverAboutOneHour": {
+    "description": "Discover: about an hour."
+  },
+  "discoverHoursRange": "{min}–{max} hours",
+  "@discoverHoursRange": {
+    "description": "Discover: a range of hours.",
+    "placeholders": {
+      "min": {
+        "type": "int",
+        "example": "2"
+      },
+      "max": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverAvailability": "Availability",
+  "@discoverAvailability": {
+    "description": "Discover: filter title: availability."
+  },
+  "discoverMoodTitle": "Mood",
+  "@discoverMoodTitle": {
+    "description": "Discover: filter title: mood."
+  },
+  "discoverTravelMinutes": "{minutes} min travel",
+  "@discoverTravelMinutes": {
+    "description": "Discover: travel time to an object.",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverTravelMinutesEstimated": "{minutes} min travel · est.",
+  "@discoverTravelMinutesEstimated": {
+    "description": "Discover: estimated travel time to an object.",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverSlotChosen": "Time slot chosen",
+  "@discoverSlotChosen": {
+    "description": "Discover: a time slot was chosen for the reader."
+  },
+  "discoverFits": "Fits",
+  "@discoverFits": {
+    "description": "Discover: time fit: fits."
+  },
+  "discoverUnsave": "Unsave",
+  "@discoverUnsave": {
+    "description": "Discover: remove from saved."
+  },
+  "discoverRecommendedDifficulty": "Recommended {value}",
+  "@discoverRecommendedDifficulty": {
+    "description": "Discover: recommended Route difficulty (already localized).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverPoiCount": "{count, plural, one{{count} point of interest} other{{count} points of interest}}",
+  "@discoverPoiCount": {
+    "description": "Discover: number of points of interest on a Route.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverSurfaceTitle": "Surface",
+  "@discoverSurfaceTitle": {
+    "description": "Discover: Route surface heading."
+  },
+  "discoverSurface": "{value, select, asphalt{Asphalt}paved{Paved}concrete{Concrete}paving_stones{Paving stones}sett{Cobblestones}compacted{Compacted}fine_gravel{Fine gravel}gravel{Gravel}dirt{Dirt}earth{Earth}ground{Ground}grass{Grass}sand{Sand}unpaved{Unpaved}wood{Wood}mixed{Mixed} other{Other surface}}",
+  "@discoverSurface": {
+    "description": "Discover: Route surface; id is the stable surface id (OSM tag value).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverUnknownSurface": "Surface data is unknown for {meters}.",
+  "@discoverUnknownSurface": {
+    "description": "Discover: Route length with unknown surface; length is formatted metres.",
+    "placeholders": {
+      "meters": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverIntakeFindPeopleNotSupported": "A Find People request cannot be added to a Scenario.",
+  "@discoverIntakeFindPeopleNotSupported": {
+    "description": "Discover: a Find People request cannot join a Scenario."
+  },
+  "discoverIntakeMissingIdentity": "This result cannot be added: it has no stable catalog identity.",
+  "@discoverIntakeMissingIdentity": {
+    "description": "Discover: a result has no stable catalog identity."
+  },
+  "discoverIntakeNoLocation": "This result has no usable catalog location.",
+  "@discoverIntakeNoLocation": {
+    "description": "Discover: a result has no usable location."
+  },
+  "discoverIntakeLimitReached": "A Scenario intake can contain up to {count} items.",
+  "@discoverIntakeLimitReached": {
+    "description": "Discover: the Scenario selection is full.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverStopsSelected": "{count, plural, one{{count} stop selected for Scenario.} other{{count} stops selected for Scenario.}}",
+  "@discoverStopsSelected": {
+    "description": "Discover: screen reader text of the Scenario selection tray.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverSelectedCount": "{count} selected",
+  "@discoverSelectedCount": {
+    "description": "Discover: number of selected objects.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverTimeWindowIssue": "{code, select, unknownTimezone{The time zone of this area is unknown.}dayEnded{This day has already ended here.}boundsRequired{Choose a start and an end.}nonexistentLocalTime{This local time does not exist because of the clock change.}endBeforeStart{The end must be after the start.}invalidTravelContext{The travel settings are not valid.}serviceUnavailable{Time matching is unavailable right now.} other{The time window could not be applied.}}",
+  "@discoverTimeWindowIssue": {
+    "description": "Discover: why a search time window was not applied; issue is the stable code.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverFeedNotice": "{code, select, emptyArea{Nothing found in this area. Try a larger radius or fewer filters.}loadFailed{Could not load the data. Try again.}dataUnavailable{The data is unavailable.}offline{No internet connection.} other{Could not load the feed. Try again.}}",
+  "@discoverFeedNotice": {
+    "description": "Discover: feed notice for a stable code.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
   "scenarioIntakeStep": "{state, select, target{1 of 3 · Scenario}placement{2 of 3 · Placement}review{3 of 3 · Review}success{Complete}applying{Saving} other{Preparing}}",
   "@scenarioIntakeStep": {
     "description": "Add to Scenario: progress line for the sheet stage (stable stage name).",
@@ -7611,5 +9777,301 @@
         "example": "2"
       }
     }
+  },
+  "discoverHomeIdeaTitle": "{value, select, freeToday{Free today}nearMe{Near me}eveningPlans{Evening plans}coffeeReset{Coffee reset}freeCityReset{Free city reset}socialEvening{Social evening}activeBoost{Active boost} other{Idea}}",
+  "@discoverHomeIdeaTitle": {
+    "description": "Discover home: quick scenario or route idea title; id is stable.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverHomeIdeaSubtitle": "{value, select, freeToday{Activities nearby without tickets}nearMe{Use the map radius and quick list}eveningPlans{Find something after work}coffeeReset{A calm cafe start with an easy city walk.}freeCityReset{A free low-pressure route for a quick recharge.}socialEvening{Start social, then keep the night nearby.}activeBoost{Move first, then cool down on a walk.} other{A quick plan nearby.}}",
+  "@discoverHomeIdeaSubtitle": {
+    "description": "Discover home: quick scenario or route idea subtitle; id is stable.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverHomeNew": "New",
+  "@discoverHomeNew": {
+    "description": "Discover: home section: new."
+  },
+  "discoverHomeForYou": "For you",
+  "@discoverHomeForYou": {
+    "description": "Discover: home section: for you."
+  },
+  "discoverHomeQuickEvents": "Quick events",
+  "@discoverHomeQuickEvents": {
+    "description": "Discover: home section: quick events."
+  },
+  "discoverHomeNearby": "Nearby",
+  "@discoverHomeNearby": {
+    "description": "Discover: home section: nearby."
+  },
+  "discoverHomePopular": "Popular",
+  "@discoverHomePopular": {
+    "description": "Discover: home section: popular."
+  },
+  "discoverRouteIdeas": "Route ideas",
+  "@discoverRouteIdeas": {
+    "description": "Discover: home section: Route ideas."
+  },
+  "discoverBuilder": "Builder",
+  "@discoverBuilder": {
+    "description": "Discover: open the Scenario builder."
+  },
+  "discoverBuild": "Build",
+  "@discoverBuild": {
+    "description": "Discover: build a Route from a template."
+  },
+  "discoverCreate": "Create",
+  "@discoverCreate": {
+    "description": "Discover: open Create."
+  },
+  "discoverResume": "Resume",
+  "@discoverResume": {
+    "description": "Discover: resume a saved search."
+  },
+  "discoverWalkable": "Walkable",
+  "@discoverWalkable": {
+    "description": "Discover: Route template: walkable."
+  },
+  "discoverMixedPrice": "Mixed",
+  "@discoverMixedPrice": {
+    "description": "Discover: Route template: free and paid stops."
+  },
+  "discoverMapTemplateRoute": "Map {message} route",
+  "@discoverMapTemplateRoute": {
+    "description": "Discover: tooltip: show a Route idea on the map; title is localized.",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverCreateTemplateRoute": "Create {message} route",
+  "@discoverCreateTemplateRoute": {
+    "description": "Discover: tooltip: create a Route from an idea; title is localized.",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverForYouHint": "Personal picks, saved ideas and creator tools stay one tap away.",
+  "@discoverForYouHint": {
+    "description": "Discover: home: what the For you block holds."
+  },
+  "discoverSmartSearchIdea": "Smart search idea",
+  "@discoverSmartSearchIdea": {
+    "description": "Discover: idea title from Smart Search without a query."
+  },
+  "discoverLanguagesLabel": "Languages:",
+  "@discoverLanguagesLabel": {
+    "description": "Discover: label before meetup languages (shown as published)."
+  },
+  "discoverEquipmentLabel": "Equipment:",
+  "@discoverEquipmentLabel": {
+    "description": "Discover: label before the equipment note (user content, shown as is)."
+  },
+  "discoverAccessibilityLabel": "Accessibility:",
+  "@discoverAccessibilityLabel": {
+    "description": "Discover: label before the accessibility note (user content, shown as is)."
+  },
+  "discoverListedByPageLabel": "Listed by page",
+  "@discoverListedByPageLabel": {
+    "description": "Discover: Rental: label before the publishing page id."
+  },
+  "discoverListedByLabel": "Listed by",
+  "@discoverListedByLabel": {
+    "description": "Discover: Rental: label before the publisher id."
+  },
+  "discoverLearningOutcomesLabel": "What you will learn:",
+  "@discoverLearningOutcomesLabel": {
+    "description": "Discover: label before what a class teaches (user content, shown as is)."
+  },
+  "discoverOrganizerLabel": "Organizer:",
+  "@discoverOrganizerLabel": {
+    "description": "Discover: label before the organizer name (shown as is)."
+  },
+  "discoverLinkedPlaceLabel": "Linked Place:",
+  "@discoverLinkedPlaceLabel": {
+    "description": "Discover: label before the linked Place title (shown as is)."
+  },
+  "discoverInformalAccessLabel": "Informal access:",
+  "@discoverInformalAccessLabel": {
+    "description": "Discover: label before the informal access caution (user content, shown as is)."
+  },
+  "discoverCompletedAtStopLabel": "Completed at stop {index}:",
+  "@discoverCompletedAtStopLabel": {
+    "description": "Discover: screen reader label before a passed stop title (shown as is).",
+    "placeholders": {
+      "index": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverFocusedStopLabel": "Focused stop {index}:",
+  "@discoverFocusedStopLabel": {
+    "description": "Discover: screen reader label before the focused stop title (shown as is).",
+    "placeholders": {
+      "index": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverNowAtStopLabel": "Now: stop {index} ·",
+  "@discoverNowAtStopLabel": {
+    "description": "Discover: label before the current stop title (shown as is).",
+    "placeholders": {
+      "index": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverSelectedStopLabel": "Selected stop {index}:",
+  "@discoverSelectedStopLabel": {
+    "description": "Discover: screen reader label before a selected stop title (shown as is).",
+    "placeholders": {
+      "index": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverMoodRoute": "{value, select, calm{Calm route}social{Social route}active{Active route} other{Custom route}}",
+  "@discoverMoodRoute": {
+    "description": "Discover: a Route idea by mood; value is the stable mood id.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverMoodRechargeRoute": "{value, select, calm{Calm recharge route}social{Social recharge route}active{Active recharge route} other{Custom recharge route}}",
+  "@discoverMoodRechargeRoute": {
+    "description": "Discover: a Route idea listing title by mood; value is the stable mood id.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverMoodRechargeScenario": "{value, select, calm{Calm recharge scenario}social{Social recharge scenario}active{Active recharge scenario} other{Custom recharge scenario}}",
+  "@discoverMoodRechargeScenario": {
+    "description": "Discover: a saved Route idea title by mood; value is the stable mood id.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverOptionalContributionLabel": "Optional {value}:",
+  "@discoverOptionalContributionLabel": {
+    "description": "Discover: label before a contribution note; value is the localized contribution kind.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverIdeaForCategory": "{type} idea",
+  "@discoverIdeaForCategory": {
+    "description": "Discover: idea title for a category; type is the category name (G04, not translated).",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverIntentLabel": "Intent:",
+  "@discoverIntentLabel": {
+    "description": "Discover: label before the understood intent (the reader prompt is shown as is)."
+  },
+  "discoverAppliedLabel": "Applied:",
+  "@discoverAppliedLabel": {
+    "description": "Discover: label before the applied search conditions."
+  },
+  "discoverVersionLabel": "Version",
+  "@discoverVersionLabel": {
+    "description": "Discover: label before a Route version id."
+  },
+  "discoverRemove": "Remove",
+  "@discoverRemove": {
+    "description": "Discover: remove an object from a selection (its title follows as is)."
+  },
+  "discoverCouldNotOpenLink": "Could not open",
+  "@discoverCouldNotOpenLink": {
+    "description": "Discover: an external link could not be opened (its host follows as is)."
+  },
+  "discoverCollectionMapSemantics": "{count, plural, one{Map of {count} place in this Collection. Use the list below to browse it without the map.} other{Map of {count} places in this Collection. Use the list below to browse them without the map.}}",
+  "@discoverCollectionMapSemantics": {
+    "description": "Discover: screen reader text of a Collection mini map.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverRoutePreview": "{count, plural, one{Route preview: {count} segment} other{Route preview: {count} segments}}",
+  "@discoverRoutePreview": {
+    "description": "Discover: screen reader text of a Route preview thumbnail.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverSearchCategories": "Search categories",
+  "@discoverSearchCategories": {
+    "description": "Discover: categories search field hint."
+  },
+  "discoverClearSearch": "Clear search",
+  "@discoverClearSearch": {
+    "description": "Discover: clear the search field."
+  },
+  "discoverNoCategories": "No categories found",
+  "@discoverNoCategories": {
+    "description": "Discover: no category matches the search."
+  },
+  "discoverCategoryNotFound": "Category not found",
+  "@discoverCategoryNotFound": {
+    "description": "Discover: a category link points nowhere."
+  },
+  "discoverOpenRoute": "Open Route",
+  "@discoverOpenRoute": {
+    "description": "Discover: open a Route."
+  },
+  "discoverTodayDate": "Today, {date}",
+  "@discoverTodayDate": {
+    "description": "Discover: a picked date that is today; date is formatted.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "discoverByLabel": "By",
+  "@discoverByLabel": {
+    "description": "Discover: label before a publisher name (shown as is)."
   }
 }

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../core/localization/l10n_context.dart';
 import '../../domain/entities/route_catalog_facts.dart';
+import '../discover_formats.dart';
 import '../shell/compatibility_object_renderer.dart';
 import '../widgets/route_catalog_labels.dart';
 import '../widgets/route_segment_polylines.dart';
@@ -94,7 +96,7 @@ class RouteCatalogMapHero extends StatelessWidget {
               key: const Key('route-catalog-open-map'),
               onPressed: onOpenMap,
               icon: const Icon(Icons.map_outlined),
-              label: const Text('Открыть на карте'),
+              label: Text(context.l10n.discoverOpenOnMap),
             ),
           ),
         ),
@@ -112,7 +114,7 @@ class _RouteCatalogMapUnavailable extends StatelessWidget {
       decoration: const BoxDecoration(color: RechargeTheme.travelPanel),
       child: Center(
         child: Text(
-          'Не удалось загрузить карту маршрута',
+          context.l10n.discoverRouteMapFailed,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
@@ -130,16 +132,27 @@ class RouteCatalogSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<(String, String)> rows = <(String, String)>[
-      ('Расстояние', routeCatalogDistanceLabel(facts)),
+      (
+        context.l10n.discoverDistance,
+        routeCatalogDistanceLabel(context.l10n, facts),
+      ),
       if (facts.ascentMeters != null)
-        ('Набор высоты', '${facts.ascentMeters!.round()} м'),
+        (
+          context.l10n.discoverAscent,
+          discoverMetersText(context.l10n, facts.ascentMeters!),
+        ),
       if (facts.descentMeters != null)
-        ('Сброс высоты', '${facts.descentMeters!.round()} м'),
+        (
+          context.l10n.discoverDescent,
+          discoverMetersText(context.l10n, facts.descentMeters!),
+        ),
       if (facts.minElevationMeters != null && facts.maxElevationMeters != null)
         (
-          'Высота',
-          '${facts.minElevationMeters!.round()}–'
-              '${facts.maxElevationMeters!.round()} м',
+          context.l10n.discoverElevation,
+          context.l10n.discoverElevationRange(
+            '${facts.minElevationMeters!.round()}',
+            '${facts.maxElevationMeters!.round()}',
+          ),
         ),
     ];
     return Card(
@@ -190,22 +203,28 @@ class RouteCatalogFactsCard extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: <Widget>[
-            DetailsPill(label: routeCatalogShapeLabel(facts.shape)),
-            DetailsPill(label: routeProfileLabelForDetails(facts.profileId)),
+            DetailsPill(
+              label: routeCatalogShapeLabel(context.l10n, facts.shape),
+            ),
+            DetailsPill(
+              label: routeProfileLabelForDetails(context.l10n, facts.profileId),
+            ),
             DetailsPill(label: rechargeTaxonomyLabel(categoryId)),
             DetailsPill(
               key: const Key('route-catalog-publisher'),
-              label: routeCatalogPublisherLabel(facts),
+              label: routeCatalogPublisherLabel(context.l10n, facts),
             ),
             if (facts.gapCount > 0)
               DetailsPill(
                 key: const Key('route-catalog-gaps'),
-                label: 'Разрывов трека: ${facts.gapCount}',
+                label: context.l10n.discoverTrackGaps(facts.gapCount),
               ),
             if (facts.directSegmentCount > 0)
               DetailsPill(
                 key: const Key('route-catalog-direct'),
-                label: 'Прямых участков: ${facts.directSegmentCount}',
+                label: context.l10n.discoverDirectSegments(
+                  facts.directSegmentCount,
+                ),
               ),
           ],
         ),
@@ -230,7 +249,7 @@ class RouteCatalogWaypointsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              'Точки на маршруте',
+              context.l10n.discoverWaypoints,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
@@ -240,10 +259,16 @@ class RouteCatalogWaypointsCard extends StatelessWidget {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.place_outlined),
-                title: Text(waypoint.title ?? waypoint.typeId),
+                // The type id is a code; a point without a title gets a generic name.
+                title: Text(waypoint.title ?? context.l10n.discoverWaypoint),
                 subtitle: Text(
                   <String>[
-                    '${(waypoint.distanceFromStartMeters / 1000).toStringAsFixed(1)} км от старта',
+                    context.l10n.discoverFromStartKm(
+                      discoverOneDecimal(
+                        context.l10n,
+                        waypoint.distanceFromStartMeters / 1000,
+                      ),
+                    ),
                     ?waypoint.safetyNote,
                   ].join(' · '),
                 ),

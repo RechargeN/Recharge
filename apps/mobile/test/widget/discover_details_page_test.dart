@@ -44,9 +44,37 @@ import 'package:recharge/features/visited/domain/usecases/record_place_visit_use
 import 'package:recharge/features/visited/domain/usecases/remove_visit_usecase.dart';
 
 import '../unit/product_analytics/product_analytics_test_support.dart';
+import 'package:recharge/core/localization/l10n_context.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
+  // L4.5: Discover in lv, en and ru on a 360 dp phone at text scale 1 and 2.
+  group('L4.5: Details in lv, en and ru at 360 dp', () {
+    for (final String language in const <String>['en', 'lv', 'ru']) {
+      for (final double scale in const <double>[1, 2]) {
+        testWidgets('$language at ${scale}x', (WidgetTester tester) async {
+          tester.view
+            ..physicalSize = const Size(360, 800)
+            ..devicePixelRatio = 1;
+          tester.platformDispatcher.textScaleFactorTestValue = scale;
+          addTearDown(() {
+            tester.view
+              ..resetPhysicalSize()
+              ..resetDevicePixelRatio();
+            tester.platformDispatcher.clearTextScaleFactorTestValue();
+          });
+          await tester.pumpWidget(await _detailsApp(locale: Locale(language)));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          final AppLocalizations l10n = lookupAppLocalizations(
+            Locale(language),
+          );
+          // A known interface string is in the reader's language.
+          expect(find.byTooltip(l10n.discoverShareAndMore), findsWidgets);
+        });
+      }
+    }
+  });
   setUp(() async {
     _detailsKindForTest = DiscoverObjectKind.activity;
     await sl.reset();
@@ -76,9 +104,9 @@ void main() {
     await tester.pumpAndSettle();
     await _openUtilityMenu(tester);
 
-    expect(find.text('Добавить в сценарий'), findsNothing);
-    expect(find.text('Найти похожее'), findsOneWidget);
-    expect(find.text('Создать маршрут'), findsOneWidget);
+    expect(find.text('Add to Scenario'), findsNothing);
+    expect(find.text('Find similar'), findsOneWidget);
+    expect(find.text('Create route'), findsOneWidget);
   });
 
   fullPageTestWidgets('PA-T01 Details: opening queues details_opened once', (
@@ -114,20 +142,20 @@ void main() {
     await tester.pumpAndSettle();
 
     await _openUtilityMenu(tester);
-    expect(find.text('Добавить в сценарий'), findsOneWidget);
-    expect(find.text('Найти похожее'), findsOneWidget);
-    expect(find.text('Создать похожее'), findsOneWidget);
-    expect(find.text('Посмотреть маршрут'), findsOneWidget);
-    expect(find.text('Создать маршрут'), findsOneWidget);
+    expect(find.text('Add to Scenario'), findsOneWidget);
+    expect(find.text('Find similar'), findsOneWidget);
+    expect(find.text('Create similar'), findsOneWidget);
+    expect(find.text('View route'), findsOneWidget);
+    expect(find.text('Create route'), findsOneWidget);
     await tester.tapAt(const Offset(4, 4));
     await tester.pumpAndSettle();
 
     await tester.scrollPageUntilVisible(
-      find.text('Показать на карте'),
+      find.text('Show on map'),
       260,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Показать на карте'));
+    await tester.tap(find.text('Show on map'));
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
@@ -143,7 +171,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await _openUtilityMenu(tester);
-    await tester.tap(find.text('Посмотреть маршрут'));
+    await tester.tap(find.text('View route'));
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
@@ -159,7 +187,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await _openUtilityMenu(tester);
-    await tester.tap(find.text('Найти похожее'));
+    await tester.tap(find.text('Find similar'));
     await tester.pumpAndSettle();
 
     expect(find.text('Search page'), findsOneWidget);
@@ -170,7 +198,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await _openUtilityMenu(tester);
-    await tester.tap(find.text('Создать похожее'));
+    await tester.tap(find.text('Create similar'));
     await tester.pumpAndSettle();
 
     expect(find.text('Create page'), findsOneWidget);
@@ -184,7 +212,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await _openUtilityMenu(tester);
-    await tester.tap(find.text('Создать маршрут'));
+    await tester.tap(find.text('Create route'));
     await tester.pumpAndSettle();
 
     expect(find.text('Create page'), findsOneWidget);
@@ -204,7 +232,7 @@ void main() {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
     await _openUtilityMenu(tester);
-    expect(find.text('Отметить посещённым'), findsNothing);
+    expect(find.text('Mark as visited'), findsNothing);
   });
 
   fullPageTestWidgets('an explicit place can be marked as visited', (
@@ -227,7 +255,7 @@ void main() {
     await tester.pumpAndSettle();
     await _openUtilityMenu(tester);
 
-    await tester.tap(find.text('Отметить посещённым'));
+    await tester.tap(find.text('Mark as visited'));
     await tester.pumpAndSettle();
     expect(find.text('When did you visit?'), findsOneWidget);
     await tester.tap(find.text('OK'));
@@ -242,7 +270,7 @@ void main() {
 
 /// Actions moved from the legacy in-body hub into the hero utility menu.
 Future<void> _openUtilityMenu(WidgetTester tester) async {
-  await tester.tap(find.byTooltip('Поделиться и другие действия'));
+  await tester.tap(find.byTooltip('Share and more actions'));
   await tester.pumpAndSettle();
 }
 
@@ -250,6 +278,7 @@ DiscoverObjectKind _detailsKindForTest = DiscoverObjectKind.activity;
 
 Future<Widget> _detailsApp({
   VisitedPlacesController? visitedController,
+  Locale? locale,
   List<Override> additionalOverrides = const <Override>[],
 }) async {
   final AuthController authController = AuthController(
@@ -294,6 +323,13 @@ Future<Widget> _detailsApp({
   return ProviderScope(
     overrides: overrides,
     child: MaterialApp.router(
+      locale: locale,
+      localizationsDelegates: locale == null
+          ? null
+          : AppLocalizations.localizationsDelegates,
+      supportedLocales: locale == null
+          ? const <Locale>[Locale('en', 'US')]
+          : AppLocalizations.supportedLocales,
       routerConfig: GoRouter(
         initialLocation: '${RouteNames.discoverDetails}/evt_1',
         routes: <RouteBase>[

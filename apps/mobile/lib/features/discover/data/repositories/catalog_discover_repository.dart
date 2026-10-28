@@ -99,39 +99,25 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
         // RD-07: the listing showed an older revision. The snapshot is
         // dropped so "Обновить" reads the current revision, never the old one.
         _session.forget();
-        throw const DiscoverException(
-          code: routeRevisionChangedCode,
-          message: 'Маршрут обновился. Обновите, чтобы открыть новую версию.',
-        );
+        throw const DiscoverException(code: routeRevisionChangedCode);
       }
       return _route(details.route!, null);
     }
     if (details.findPeople != null) {
       if (details.changedSinceSnapshot) {
-        throw const DiscoverException(
-          code: 'CATALOG_REVISION_CHANGED',
-          message:
-              'Версия изменилась. Обновите список и откройте объект снова.',
-        );
+        throw const DiscoverException(code: 'CATALOG_REVISION_CHANGED');
       }
       return _findPeople(details.findPeople!, null);
     }
     if (details.activity != null) {
       if (details.changedSinceSnapshot) {
-        throw const DiscoverException(
-          code: 'CATALOG_REVISION_CHANGED',
-          message:
-              'Версия изменилась. Обновите список и откройте объект снова.',
-        );
+        throw const DiscoverException(code: 'CATALOG_REVISION_CHANGED');
       }
       return _activity(details.activity!, null);
     }
     final CatalogEventItem? item = details.item;
     if (item == null) {
-      throw const DiscoverException(
-        code: 'DISCOVER_NOT_FOUND',
-        message: 'Объект не найден',
-      );
+      throw const DiscoverException(code: 'DISCOVER_NOT_FOUND');
     }
     final CatalogOccurrenceWire occurrence = item.occurrences.firstWhere(
       (CatalogOccurrenceWire entry) =>
@@ -163,10 +149,7 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
     try {
       return read();
     } on FormatException {
-      throw const DiscoverException(
-        code: 'CATALOG_CONTRACT_INVALID',
-        message: 'Неподдерживаемый ответ каталога',
-      );
+      throw const DiscoverException(code: 'CATALOG_CONTRACT_INVALID');
     }
   }
 
@@ -180,24 +163,17 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
         'payload': payload,
       });
     } on CatalogTransportFailure catch (failure) {
-      throw DiscoverException(
-        code: 'CATALOG_TRANSPORT_${failure.code}',
-        message: 'Каталог недоступен',
-      );
+      throw DiscoverException(code: 'CATALOG_TRANSPORT_${failure.code}');
     }
     final CatalogAnswer answer;
     try {
       answer = CatalogAnswer.fromWire(raw);
     } on FormatException {
-      throw const DiscoverException(
-        code: 'CATALOG_CONTRACT_INVALID',
-        message: 'Неподдерживаемый ответ каталога',
-      );
+      throw const DiscoverException(code: 'CATALOG_CONTRACT_INVALID');
     }
     if (!answer.succeeded) {
       throw DiscoverException(
         code: 'CATALOG_${answer.kind.toUpperCase()}:${answer.code}',
-        message: 'Каталог отклонил запрос',
       );
     }
     return answer.body;
@@ -231,10 +207,7 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
   /// client never moves it, never refines it and never reads device location.
   DiscoverItemEntity _findPeople(CatalogFindPeopleItem item, double? distance) {
     if (!findPeopleEnabled) {
-      throw const DiscoverException(
-        code: 'CATALOG_FIND_PEOPLE_DISABLED',
-        message: 'Find People Catalog отключён',
-      );
+      throw const DiscoverException(code: 'CATALOG_FIND_PEOPLE_DISABLED');
     }
     final int duration = item.endAtUtc.difference(item.startAtUtc).inMinutes;
     final int? spend = item.expectedSpendMinor;
@@ -274,10 +247,7 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
   /// No date, price, duration or bounds exist for it, and none are invented.
   DiscoverItemEntity _route(CatalogRouteItem item, double? distance) {
     if (!routeEnabled) {
-      throw const DiscoverException(
-        code: 'CATALOG_ROUTE_DISABLED',
-        message: 'Route Catalog отключён',
-      );
+      throw const DiscoverException(code: 'CATALOG_ROUTE_DISABLED');
     }
     return DiscoverItemEntity(
       id: item.contentId,
@@ -301,10 +271,7 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
 
   DiscoverItemEntity _activity(CatalogActivityItem item, double? distance) {
     if (!activityEnabled) {
-      throw const DiscoverException(
-        code: 'CATALOG_ACTIVITY_DISABLED',
-        message: 'Activity Catalog отключён',
-      );
+      throw const DiscoverException(code: 'CATALOG_ACTIVITY_DISABLED');
     }
     return DiscoverItemEntity(
       id: item.contentId,
@@ -408,7 +375,6 @@ Map<String, Object?> catalogWireQuery(
   if (unsupported.isNotEmpty) {
     throw DiscoverException(
       code: 'CATALOG_FILTER_UNSUPPORTED:${unsupported.join(',')}',
-      message: 'Этот фильтр пока не поддерживается каталогом',
     );
   }
   final String text = query.queryText.trim();

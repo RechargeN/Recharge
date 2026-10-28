@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/domain/entities/bookable_session_schedule_evaluation.dart';
 import 'package:recharge/features/discover/domain/entities/published_bookable_session_discovery_entity.dart';
@@ -10,8 +11,11 @@ import 'package:recharge/features/discover/presentation/renderers/object_offer_d
 import 'package:recharge/features/discover/presentation/shell/details_shell.dart';
 
 import '../../../../widget/widget_test_viewport.dart';
+import 'package:recharge/core/localization/l10n_context.dart';
 
 void main() {
+  // L4.5: the date labels below are formatted for ru.
+  setUpAll(() => initializeDateFormatting('ru'));
   final TimezoneRepository timezoneRepository = TimezoneRepositoryImpl();
   const EvaluateBookableSessionScheduleUseCase evaluate =
       EvaluateBookableSessionScheduleUseCase();
@@ -107,6 +111,10 @@ void main() {
     Future<void> Function()? onPrimaryAction,
   }) {
     return MaterialApp(
+      // L4.5: the expectations below are the Russian copy.
+      locale: const Locale('ru'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: DetailsShell(
         state: DetailsScreenAvailable(
           immersiveHero: true,
@@ -132,7 +140,7 @@ void main() {
 
       final List<Finder> inOrder = <Finder>[
         find.text('Индивидуальная тренировка'),
-        find.text('40 EUR'),
+        find.textContaining('40,00'),
         find.text('Recharge Studio'),
         find.text('Об услуге'),
         find.text('Время для записи'),
@@ -160,8 +168,8 @@ void main() {
     bool shared = false;
     await tester.pumpWidget(app(fixture(), onShare: () => shared = true));
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Save'), findsNothing);
-    await tester.tap(find.byTooltip('Share'));
+    expect(find.byTooltip('Сохранить'), findsNothing);
+    await tester.tap(find.byTooltip('Поделиться'));
     expect(shared, isTrue);
   });
 
@@ -257,7 +265,7 @@ void main() {
   ) async {
     await tester.pumpWidget(app(fixture()));
     await tester.pumpAndSettle();
-    expect(find.text('40 EUR'), findsOneWidget);
+    expect(find.textContaining('40,00'), findsOneWidget);
 
     await tester.pumpWidget(
       app(
@@ -307,7 +315,8 @@ void main() {
 
   test('offer crossing local midnight includes the end date', () {
     expect(
-      bookableSessionOfferLabelRu(
+      bookableSessionOfferLabel(
+        lookupAppLocalizations(const Locale('ru')),
         PublishedBookableSessionOffer(
           slotKey: 'overnight',
           startAtUtc: DateTime.utc(2026, 9, 12, 20, 30),
@@ -316,7 +325,7 @@ void main() {
         ),
         timezoneRepository,
       ),
-      '12 сентября, сб · 23:30–13 сентября · 01:00',
+      'сб, 12 сент. · 23:30–вс, 13 сент. · 01:00',
     );
   });
 
@@ -354,6 +363,10 @@ void main() {
         );
         await tester.pumpWidget(
           MaterialApp(
+            // L4.5: the expectations below are the Russian copy.
+            locale: const Locale('ru'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             builder: (BuildContext context, Widget? child) => MediaQuery(
               data: MediaQuery.of(
                 context,

@@ -116,9 +116,7 @@ void main() {
     tester,
   ) async {
     final List<MethodCall> clipboardCalls = <MethodCall>[];
-    TestDefaultBinaryMessengerBinding
-        .instance
-        .defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (call) async {
           if (call.method == 'Clipboard.setData') {
             clipboardCalls.add(call);
@@ -136,7 +134,7 @@ void main() {
     // Share lives in the hero utility popup menu: open it, then pick it.
     await tester.tap(find.byIcon(Icons.ios_share_rounded));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Поделиться'));
+    await tester.tap(find.text('Share'));
     await tester.pumpAndSettle();
 
     expect(find.text('Link copied'), findsOneWidget);
@@ -167,15 +165,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
+        // L4.5: the CTA and its confirmation now share one localized text.
         find.text('Request sent'),
-        findsOneWidget,
+        findsWidgets,
       );
       final _SpyAnalyticsService spy =
           sl<AnalyticsService>() as _SpyAnalyticsService;
       expect(spy.eventNames, contains('discover_details_cta_clicked'));
 
       final FilledButton bottomBarButton = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Заявка отправлена'),
+        find.widgetWithText(FilledButton, 'Request sent'),
       );
       expect(bottomBarButton.onPressed, isNull);
     },
@@ -197,11 +196,11 @@ void main() {
       expect(find.text('Route details'), findsOneWidget);
       expect(find.text('Walking'), findsWidgets);
 
-      await tester.tap(find.text('Сообщить о проблеме на маршруте'));
+      await tester.tap(find.text('Report a problem on the route'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Проблема на маршруте'), findsOneWidget);
-      await tester.tap(find.text('Отправить'));
+      expect(find.text('Problem on the route'), findsOneWidget);
+      await tester.tap(find.text('Send'));
       await tester.pumpAndSettle();
 
       expect(
@@ -211,8 +210,7 @@ void main() {
       final _SpyAnalyticsService spy =
           sl<AnalyticsService>() as _SpyAnalyticsService;
       expect(spy.eventNames, contains('route_safety_report_submitted'));
-      final _FakeRouteSafetyReportingPort port =
-          _fakeRouteSafetyReportingPort!;
+      final _FakeRouteSafetyReportingPort port = _fakeRouteSafetyReportingPort!;
       expect(port.submittedReasonCodes, contains('trail_closed'));
     },
   );
@@ -255,9 +253,7 @@ Future<Widget> _detailsApp() async {
     overrides: <Override>[
       authControllerProvider.overrideWith((ref) => authController),
       favoritesControllerProvider.overrideWith((ref) => favoritesController),
-      visitedPlacesControllerProvider.overrideWith(
-        (ref) => visitedController,
-      ),
+      visitedPlacesControllerProvider.overrideWith((ref) => visitedController),
     ],
     child: MaterialApp.router(
       routerConfig: GoRouter(
@@ -272,21 +268,17 @@ Future<Widget> _detailsApp() async {
           ),
           GoRoute(
             path: RouteNames.discoverMap,
-            builder: (context, state) => const Scaffold(
-              body: Text('Map page'),
-            ),
+            builder: (context, state) => const Scaffold(body: Text('Map page')),
           ),
           GoRoute(
             path: RouteNames.search,
-            builder: (context, state) => const Scaffold(
-              body: Text('Search page'),
-            ),
+            builder: (context, state) =>
+                const Scaffold(body: Text('Search page')),
           ),
           GoRoute(
             path: RouteNames.create,
-            builder: (context, state) => const Scaffold(
-              body: Text('Create page'),
-            ),
+            builder: (context, state) =>
+                const Scaffold(body: Text('Create page')),
           ),
         ],
       ),

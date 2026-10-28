@@ -5,6 +5,8 @@ import 'package:recharge/features/discover/domain/entities/saved_search_entity.d
 import 'package:recharge/features/discover/domain/entities/smart_search_history_entity.dart';
 import 'package:recharge/features/discover/presentation/pages/discover_map_page.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/core/localization/l10n_context.dart';
+import 'package:flutter/widgets.dart';
 
 void main() {
   test('map create route carries current map conditions into create seed', () {
@@ -20,7 +22,12 @@ void main() {
       dateFrom: DateTime.parse('2026-04-20T12:00:00Z'),
     );
 
-    final Uri uri = Uri.parse(mapCreateLocationForQuery(query));
+    final Uri uri = Uri.parse(
+      mapCreateLocationForQuery(
+        lookupAppLocalizations(const Locale('en')),
+        query,
+      ),
+    );
 
     expect(uri.path, RouteNames.create);
     expect(uri.queryParameters['source'], 'map');
@@ -85,7 +92,12 @@ void main() {
       createdAtUtc: DateTime.parse('2026-04-22T08:00:00Z'),
     );
 
-    final Uri createUri = Uri.parse(mapCreateLocationForSmartSearch(item));
+    final Uri createUri = Uri.parse(
+      mapCreateLocationForSmartSearch(
+        lookupAppLocalizations(const Locale('en')),
+        item,
+      ),
+    );
     final Uri routeUri = Uri.parse(
       mapScenarioBuilderLocationForSmartSearch(item),
     );
@@ -118,7 +130,12 @@ void main() {
       createdAtUtc: DateTime.parse('2026-04-23T08:00:00Z'),
     );
 
-    final Uri createUri = Uri.parse(mapCreateLocationForSmartSearch(item));
+    final Uri createUri = Uri.parse(
+      mapCreateLocationForSmartSearch(
+        lookupAppLocalizations(const Locale('en')),
+        item,
+      ),
+    );
     final Uri builderUri = Uri.parse(
       mapScenarioBuilderLocationForSmartSearch(item),
     );

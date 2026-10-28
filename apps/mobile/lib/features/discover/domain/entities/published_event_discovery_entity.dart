@@ -61,7 +61,7 @@ class PublishedEventDiscoveryEntity {
     this.changedSinceListing = false,
   }) : assert(
          eventId != '',
-         'PublishedEventDiscoveryEntity.eventId must not be empty',
+         'PublishedEventDiscoveryEntity.eventId must not be empty', // l10n-ignore: developer error
        ),
        assert(distanceKm >= 0, 'distanceKm must not be negative'),
        assert(priceAmount >= 0),
@@ -75,14 +75,14 @@ class PublishedEventDiscoveryEntity {
     // not just debug-mode sanity checks.
     if (occurrences.isEmpty) {
       throw ArgumentError(
-        'An Event without a confirmed occurrence is not published '
+        'An Event without a confirmed occurrence is not published ' // l10n-ignore: developer error
         '(EVENT_CLASSIFICATION_SPEC.md:70,442) — occurrences must not be '
         'empty.',
       );
     }
     if (!occurrences.any((EventOccurrence o) => o.id == displayOccurrenceId)) {
       throw ArgumentError(
-        'displayOccurrenceId must resolve to an entry in occurrences — a '
+        'displayOccurrenceId must resolve to an entry in occurrences — a ' // l10n-ignore: developer error
         'dangling id is a data bug upstream.',
       );
     }

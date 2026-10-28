@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/discover_providers.dart';
 import '../widgets/discover_category_icon.dart';
 
@@ -40,7 +41,7 @@ class _CategoriesPageState extends ConsumerState<CategoriesPage> {
         .toList(growable: false);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Categories')),
+      appBar: AppBar(title: Text(context.l10n.discoverCategories)),
       body: Column(
         children: <Widget>[
           Padding(
@@ -50,13 +51,13 @@ class _CategoriesPageState extends ConsumerState<CategoriesPage> {
               controller: _searchController,
               onChanged: (String value) => setState(() => _query = value),
               decoration: InputDecoration(
-                hintText: 'Search categories',
+                hintText: context.l10n.discoverSearchCategories,
                 prefixIcon: const Icon(Icons.search_rounded),
                 suffixIcon: _query.isEmpty
                     ? null
                     : IconButton(
                         key: const Key('categories-search-clear'),
-                        tooltip: 'Clear search',
+                        tooltip: context.l10n.discoverClearSearch,
                         onPressed: () {
                           _searchController.clear();
                           setState(() => _query = '');
@@ -190,10 +191,10 @@ class _EmptyCategorySearch extends StatelessWidget {
   const _EmptyCategorySearch();
 
   @override
-  Widget build(BuildContext context) => const Center(
+  Widget build(BuildContext context) => Center(
     child: Padding(
-      padding: EdgeInsets.all(24),
-      child: Text('No categories found'),
+      padding: const EdgeInsets.all(24),
+      child: Text(context.l10n.discoverNoCategories),
     ),
   );
 }

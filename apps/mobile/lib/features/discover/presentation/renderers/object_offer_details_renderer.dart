@@ -1,3 +1,7 @@
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../discover_formats.dart';
 import 'dart:async';
 
 import 'package:design_system/design_system.dart';
@@ -57,9 +61,9 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
                  ObjectOfferProfile.venue ||
              objectOfferProfileFor(item.catalogObjectType) ==
                  ObjectOfferProfile.participation,
-         'ObjectOfferDetailsRenderer.discoverItem is for the venue/'
-         'participation profiles only — Rental is outside this visual system. '
-         'objectOfferProfileFor also throws here for any type outside '
+         'ObjectOfferDetailsRenderer.discoverItem is for the venue/' // l10n-ignore: developer error
+         'participation profiles only — Rental is outside this visual system. ' // l10n-ignore: developer error
+         'objectOfferProfileFor also throws here for any type outside ' // l10n-ignore: developer error
          "this slice's scope (DTL-OBJ-01 §1.1), catching a misrouted "
          'caller instead of silently rendering something generic.',
        ),
@@ -333,14 +337,16 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
     if (delegate != null) {
       if (delegate.item.objectKind == DiscoverObjectKind.place ||
           delegate.item.objectKind == DiscoverObjectKind.activity) {
-        return _buildDiscoverItemAppBarActions(delegate);
+        return _buildDiscoverItemAppBarActions(context, delegate);
       }
       return delegate.buildAppBarActions(context);
     }
     if (_eventProjection != null) {
       return <Widget>[
         ObjectOfferHeroActionButton(
-          tooltip: _eventIsFavorite ? 'Unsave' : 'Save',
+          tooltip: _eventIsFavorite
+              ? context.l10n.discoverUnsave
+              : context.l10n.discoverSave,
           onPressed: _eventOnFavoriteTap,
           icon: _eventIsFavorite ? Icons.favorite : Icons.favorite_border,
         ),
@@ -353,7 +359,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
     if (_findPeopleProjection != null) {
       return <Widget>[
         ObjectOfferHeroActionButton(
-          tooltip: 'Share',
+          tooltip: context.l10n.discoverShare,
           onPressed: _findPeopleOnShareTap,
           icon: Icons.ios_share_rounded,
         ),
@@ -362,7 +368,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
     if (_classWorkshopProps != null) {
       return <Widget>[
         ObjectOfferHeroActionButton(
-          tooltip: 'Share',
+          tooltip: context.l10n.discoverShare,
           onPressed: _classWorkshopOnShareTap,
           icon: Icons.ios_share_rounded,
         ),
@@ -371,7 +377,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
     if (_bookableSessionProjection != null) {
       return <Widget>[
         ObjectOfferHeroActionButton(
-          tooltip: 'Share',
+          tooltip: context.l10n.discoverShare,
           onPressed: _bookableSessionOnShareTap,
           icon: Icons.ios_share_rounded,
         ),
@@ -446,10 +452,10 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
     final CompatibilityObjectRenderer? delegate = _delegate;
     if (delegate != null) {
       if (delegate.item.objectKind == DiscoverObjectKind.place) {
-        return _buildPlaceBody(delegate);
+        return _buildPlaceBody(context, delegate);
       }
       if (delegate.item.objectKind == DiscoverObjectKind.activity) {
-        return _buildActivityBody(delegate);
+        return _buildActivityBody(context, delegate);
       }
       return delegate.buildBody(context);
     }
@@ -458,14 +464,18 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
     }
     if (_findPeopleProjection
         case final PublishedFindPeopleDiscoveryEntity projection) {
-      return _buildFindPeopleBody(projection);
+      return _buildFindPeopleBody(context, projection);
     }
     if (_classWorkshopProps case final _ClassWorkshopDisplay props) {
-      return _buildClassWorkshopBody(props);
+      return _buildClassWorkshopBody(context, props);
     }
     if (_bookableSessionProjection
         case final PublishedBookableSessionDiscoveryEntity projection) {
-      return _buildBookableSessionBody(projection, _bookableSessionEvaluation!);
+      return _buildBookableSessionBody(
+        context,
+        projection,
+        _bookableSessionEvaluation!,
+      );
     }
     final PublishedRentalDiscoveryEntity projection = _rentalProjection!;
     return Padding(
@@ -589,8 +599,8 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
             onPressed: delegate.ctaSubmitted ? null : delegate.onCtaTap,
             child: Text(
               delegate.ctaSubmitted
-                  ? 'Заявка отправлена'
-                  : ctaLabelForDetails(delegate.item),
+                  ? context.l10n.discoverRequestSent
+                  : ctaLabelForDetails(context.l10n, delegate.item),
             ),
           ),
         );
@@ -629,8 +639,8 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
           onPressed: () => unawaited(_bookableSessionOnPrimaryAction!()),
           child: Text(
             state == BookableSessionScheduleState.freshWithOffers
-                ? 'Проверить и забронировать'
-                : 'Проверить время на сайте',
+                ? context.l10n.discoverReviewAndBook
+                : context.l10n.discoverCheckTimeOnSite,
           ),
         ),
       );
@@ -642,70 +652,76 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
   }
 
   List<Widget> _buildDiscoverItemAppBarActions(
+    BuildContext context,
     CompatibilityObjectRenderer delegate,
   ) {
     final List<ObjectOfferUtilityActionData> utilityActions =
         <ObjectOfferUtilityActionData>[
           ObjectOfferUtilityActionData(
-            label: 'Поделиться',
+            label: context.l10n.discoverShare,
             icon: Icons.ios_share_rounded,
             onSelected: delegate.onShareTap,
           ),
           if (delegate.onAddToScenario != null)
             ObjectOfferUtilityActionData(
-              label: 'Добавить в сценарий',
+              label: context.l10n.discoverAddToScenario,
               icon: Icons.playlist_add_outlined,
               onSelected: delegate.onAddToScenario!,
             ),
           ObjectOfferUtilityActionData(
-            label: 'Найти похожее',
+            label: context.l10n.discoverFindSimilar,
             icon: Icons.search,
             onSelected: delegate.onSearch,
           ),
           ObjectOfferUtilityActionData(
-            label: 'Создать похожее',
+            label: context.l10n.discoverCreateSimilar,
             icon: Icons.add_circle_outline,
             onSelected: delegate.onCreateSimilar,
           ),
           ObjectOfferUtilityActionData(
-            label: 'Посмотреть маршрут',
+            label: context.l10n.discoverViewRoute,
             icon: Icons.route_outlined,
             onSelected: delegate.onRouteMap,
           ),
           ObjectOfferUtilityActionData(
-            label: 'Создать маршрут',
+            label: context.l10n.discoverCreateRoute,
             icon: Icons.alt_route,
             onSelected: delegate.onCreateRoute,
           ),
           // Visit History accepts explicit Place visits only (VIS-HIST-01).
           if (delegate.item.objectKind == DiscoverObjectKind.place)
             ObjectOfferUtilityActionData(
-              label: 'Отметить посещённым',
+              label: context.l10n.discoverMarkVisited,
               icon: Icons.history_toggle_off,
               onSelected: delegate.onMarkVisited,
             ),
         ];
     return <Widget>[
       ObjectOfferHeroActionButton(
-        tooltip: delegate.isFavorite ? 'Unsave' : 'Save',
+        tooltip: delegate.isFavorite
+            ? context.l10n.discoverUnsave
+            : context.l10n.discoverSave,
         onPressed: delegate.onFavoriteTap,
         icon: delegate.isFavorite ? Icons.favorite : Icons.favorite_border,
       ),
       ObjectOfferUtilityMenu(
-        tooltip: 'Поделиться и другие действия',
+        tooltip: context.l10n.discoverShareAndMore,
         icon: Icons.ios_share_rounded,
         actions: utilityActions,
       ),
     ];
   }
 
-  Widget _buildPlaceBody(CompatibilityObjectRenderer delegate) {
+  Widget _buildPlaceBody(
+    BuildContext context,
+    CompatibilityObjectRenderer delegate,
+  ) {
     return ObjectOfferContentSheet(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           for (final PlaceDetailsSection section in placeProfileSections)
-            if (_placeBodySectionFor(section, delegate)
+            if (_placeBodySectionFor(context, section, delegate)
                 case final Widget widget) ...<Widget>[
               widget,
               const SizedBox(height: RechargeTheme.objectOfferSectionGap),
@@ -716,6 +732,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
   }
 
   Widget? _placeBodySectionFor(
+    BuildContext context,
     PlaceDetailsSection section,
     CompatibilityObjectRenderer delegate,
   ) {
@@ -732,7 +749,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
             ? null
             : _DiscoverPublisherCard(
                 item: item,
-                label: 'Публикатор',
+                label: context.l10n.discoverPublisher,
                 accentColor: RechargeTheme.placeAccent,
               ),
       PlaceDetailsSection.about =>
@@ -751,13 +768,16 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
     };
   }
 
-  Widget _buildActivityBody(CompatibilityObjectRenderer delegate) {
+  Widget _buildActivityBody(
+    BuildContext context,
+    CompatibilityObjectRenderer delegate,
+  ) {
     return ObjectOfferContentSheet(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           for (final ActivityDetailsSection section in activityProfileSections)
-            if (_activityBodySectionFor(section, delegate)
+            if (_activityBodySectionFor(context, section, delegate)
                 case final Widget widget) ...<Widget>[
               widget,
               const SizedBox(height: RechargeTheme.objectOfferSectionGap),
@@ -768,6 +788,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
   }
 
   Widget? _activityBodySectionFor(
+    BuildContext context,
     ActivityDetailsSection section,
     CompatibilityObjectRenderer delegate,
   ) {
@@ -784,7 +805,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
             ? null
             : _DiscoverPublisherCard(
                 item: item,
-                label: 'Организатор',
+                label: context.l10n.discoverOrganizer,
                 accentColor: RechargeTheme.activityAccent,
               ),
       ActivityDetailsSection.about =>
@@ -801,14 +822,17 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
     };
   }
 
-  Widget _buildFindPeopleBody(PublishedFindPeopleDiscoveryEntity projection) {
+  Widget _buildFindPeopleBody(
+    BuildContext context,
+    PublishedFindPeopleDiscoveryEntity projection,
+  ) {
     return ObjectOfferContentSheet(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           for (final FindPeopleDetailsSection section
               in findPeopleProfileSections)
-            if (_findPeopleBodySectionFor(section, projection)
+            if (_findPeopleBodySectionFor(context, section, projection)
                 case final Widget widget) ...<Widget>[
               widget,
               const SizedBox(height: RechargeTheme.objectOfferSectionGap),
@@ -819,6 +843,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
   }
 
   Widget? _findPeopleBodySectionFor(
+    BuildContext context,
     FindPeopleDetailsSection section,
     PublishedFindPeopleDiscoveryEntity projection,
   ) {
@@ -832,14 +857,17 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
           timezoneRepository: _findPeopleTimezoneRepository!,
         ),
       ),
-      FindPeopleDetailsSection.metrics => _findPeopleMetrics(projection),
+      FindPeopleDetailsSection.metrics => _findPeopleMetrics(
+        context,
+        projection,
+      ),
       FindPeopleDetailsSection.organizer =>
         projection.publisherName.trim().isEmpty
             ? null
             : _PreviewPublisherCard(
                 name: projection.publisherName,
                 handle: projection.publisherHandle,
-                label: 'Организатор',
+                label: context.l10n.discoverOrganizer,
                 accentColor: RechargeTheme.findPeopleAccent,
                 verification: projection.publisherVerification,
               ),
@@ -847,7 +875,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
         projection.fullDescription.trim().isEmpty
             ? null
             : _PreviewAboutCard(
-                title: 'О встрече',
+                title: context.l10n.discoverAboutMeetup,
                 text: projection.fullDescription,
                 accentColor: RechargeTheme.findPeopleAccent,
                 accentIcon: Icons.diversity_3_outlined,
@@ -855,11 +883,12 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
       FindPeopleDetailsSection.schedule => _PreviewBulletListCard(
         title:
             projection.scheduleMode == PublishedFindPeopleScheduleMode.timePoll
-            ? 'Варианты времени'
-            : 'Время встречи',
+            ? context.l10n.discoverTimeOptions
+            : context.l10n.discoverMeetupTime,
         items: projection.timeOptions
             .map(
-              (option) => findPeopleTimeOptionLabelRu(
+              (option) => findPeopleTimeOptionLabel(
+                context.l10n,
                 option,
                 projection.timezoneId,
                 _findPeopleTimezoneRepository!,
@@ -869,23 +898,23 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
         accentColor: RechargeTheme.findPeopleAccent,
       ),
       FindPeopleDetailsSection.meetingFormat =>
-        _findPeopleMeetingFormatText(projection).isEmpty
+        _findPeopleMeetingFormatText(context, projection).isEmpty
             ? null
             : _PreviewLabeledTextCard(
-                title: 'Формат встречи',
-                text: _findPeopleMeetingFormatText(projection),
+                title: context.l10n.discoverMeetupFormat,
+                text: _findPeopleMeetingFormatText(context, projection),
               ),
       FindPeopleDetailsSection.requirements =>
-        _findPeopleRequirements(projection).isEmpty
+        _findPeopleRequirements(context, projection).isEmpty
             ? null
             : _PreviewBulletListCard(
-                title: 'Требования к участникам',
-                items: _findPeopleRequirements(projection),
+                title: context.l10n.discoverParticipantRequirements,
+                items: _findPeopleRequirements(context, projection),
                 accentColor: RechargeTheme.findPeopleAccent,
               ),
       FindPeopleDetailsSection.cost => _PreviewLabeledTextCard(
-        title: 'Ожидаемые расходы',
-        text: _findPeopleCostText(projection),
+        title: context.l10n.discoverExpectedCosts,
+        text: _findPeopleCostText(context, projection),
       ),
       FindPeopleDetailsSection.location => _FindPeopleLocationCard(
         location: projection.publicLocation,
@@ -896,18 +925,24 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
     };
   }
 
-  Widget? _findPeopleMetrics(PublishedFindPeopleDiscoveryEntity projection) {
+  Widget? _findPeopleMetrics(
+    BuildContext context,
+    PublishedFindPeopleDiscoveryEntity projection,
+  ) {
     final List<ObjectOfferMetricData> metrics = <ObjectOfferMetricData>[
       if (projection.currentGroupSize case final int value)
-        ObjectOfferMetricData(value: '$value', label: 'Сейчас в группе'),
+        ObjectOfferMetricData(
+          value: '$value',
+          label: context.l10n.discoverInGroupNow,
+        ),
       ObjectOfferMetricData(
-        value: 'до ${projection.targetGroupSize}',
-        label: 'Желаемый размер',
+        value: context.l10n.discoverUpTo(projection.targetGroupSize),
+        label: context.l10n.discoverDesiredSize,
       ),
       if (projection.durationMinutes case final int value)
         ObjectOfferMetricData(
-          value: _objectOfferDurationLabel(value),
-          label: 'Длительность',
+          value: _objectOfferDurationLabel(context.l10n, value),
+          label: context.l10n.discoverDuration,
         ),
     ];
     // `ObjectOfferMetricsStrip` requires more than one column — with a
@@ -918,12 +953,13 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
   }
 
   String _findPeopleMeetingFormatText(
+    BuildContext context,
     PublishedFindPeopleDiscoveryEntity projection,
   ) {
     final String mode = switch (projection.publicLocation.meetingMode) {
-      PublishedFindPeopleMeetingMode.inPerson => 'Оффлайн',
-      PublishedFindPeopleMeetingMode.online => 'Онлайн',
-      PublishedFindPeopleMeetingMode.hybrid => 'Гибридный формат',
+      PublishedFindPeopleMeetingMode.inPerson => context.l10n.discoverInPerson,
+      PublishedFindPeopleMeetingMode.online => context.l10n.discoverOnline,
+      PublishedFindPeopleMeetingMode.hybrid => context.l10n.discoverHybrid,
     };
     return <String>[
       mode,
@@ -931,12 +967,13 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
         projection.skillLevelLabel.trim(),
       if (projection.paceLabel.trim().isNotEmpty) projection.paceLabel.trim(),
       if (projection.languageLabels.isNotEmpty)
-        'Языки: ${projection.languageLabels.join(', ')}',
-      _findPeopleRecruitmentLabel(projection.recruitmentStatus),
+        '${context.l10n.discoverLanguagesLabel} ${projection.languageLabels.join(', ')}',
+      _findPeopleRecruitmentLabel(context.l10n, projection.recruitmentStatus),
     ].join('\n');
   }
 
   List<String> _findPeopleRequirements(
+    BuildContext context,
     PublishedFindPeopleDiscoveryEntity projection,
   ) {
     return <String>[
@@ -944,32 +981,44 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
           .map((item) => item.trim())
           .where((item) => item.isNotEmpty),
       if (projection.equipmentNote.trim().isNotEmpty)
-        'Снаряжение: ${projection.equipmentNote.trim()}',
+        '${context.l10n.discoverEquipmentLabel} ${projection.equipmentNote.trim()}',
       if (projection.accessibilityNote.trim().isNotEmpty)
-        'Доступность: ${projection.accessibilityNote.trim()}',
+        '${context.l10n.discoverAccessibilityLabel} ${projection.accessibilityNote.trim()}',
     ];
   }
 
-  String _findPeopleCostText(PublishedFindPeopleDiscoveryEntity projection) {
+  String _findPeopleCostText(
+    BuildContext context,
+    PublishedFindPeopleDiscoveryEntity projection,
+  ) {
     final String disclosure = switch (projection.costType) {
-      PublishedFindPeopleCostType.free => 'Без обязательных расходов',
+      PublishedFindPeopleCostType.free => context.l10n.discoverNoRequiredCosts,
       PublishedFindPeopleCostType.estimated =>
-        'Около ${_currencySymbol(projection.currencyCode)}'
-            '${_formatAmount(projection.expectedSpendAmount!)} на человека',
-      PublishedFindPeopleCostType.unknown => 'Расходы не указаны',
+        context.l10n.discoverAboutPerPerson(
+          discoverMoney(
+            context.l10n,
+            projection.expectedSpendAmount!,
+            projection.currencyCode,
+          ),
+        ),
+      PublishedFindPeopleCostType.unknown =>
+        context.l10n.discoverCostsNotSpecified,
     };
     final String note = projection.costNote.trim();
     return note.isEmpty ? disclosure : '$disclosure\n$note';
   }
 
-  Widget _buildClassWorkshopBody(_ClassWorkshopDisplay props) {
+  Widget _buildClassWorkshopBody(
+    BuildContext context,
+    _ClassWorkshopDisplay props,
+  ) {
     return ObjectOfferContentSheet(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           for (final ClassWorkshopDetailsSection section
               in classWorkshopProfileSections)
-            if (_classWorkshopBodySectionFor(section, props)
+            if (_classWorkshopBodySectionFor(context, section, props)
                 case final Widget widget) ...<Widget>[
               widget,
               const SizedBox(height: RechargeTheme.objectOfferSectionGap),
@@ -980,6 +1029,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
   }
 
   Widget? _classWorkshopBodySectionFor(
+    BuildContext context,
     ClassWorkshopDetailsSection section,
     _ClassWorkshopDisplay props,
   ) {
@@ -990,31 +1040,36 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: _ClassWorkshopEssentialsHeader(props: props),
       ),
-      ClassWorkshopDetailsSection.metrics => _classWorkshopMetrics(props),
+      ClassWorkshopDetailsSection.metrics => _classWorkshopMetrics(
+        context,
+        props,
+      ),
       ClassWorkshopDetailsSection.teacher => _ClassWorkshopTeacherCard(
         props: props,
       ),
       ClassWorkshopDetailsSection.about =>
-        props.aboutText.trim().isEmpty
+        props.aboutText(context.l10n).trim().isEmpty
             ? null
             : _PreviewAboutCard(
-                title: 'О занятии',
-                text: props.aboutText,
+                title: context.l10n.discoverAboutClass,
+                text: props.aboutText(context.l10n),
                 accentColor: RechargeTheme.classWorkshopAccent,
                 accentIcon: Icons.school_outlined,
               ),
       ClassWorkshopDetailsSection.schedule =>
-        props.scheduleItems.isEmpty
-            ? const _PreviewLabeledTextCard(
-                title: 'Расписание',
-                text: 'Даты уточняются',
+        props.scheduleItems(context.l10n).isEmpty
+            ? _PreviewLabeledTextCard(
+                title: context.l10n.discoverSchedule,
+                text: context.l10n.discoverDatesTbc,
               )
-            : _ClassWorkshopScheduleCard(items: props.scheduleItems),
+            : _ClassWorkshopScheduleCard(
+                items: props.scheduleItems(context.l10n),
+              ),
       ClassWorkshopDetailsSection.materials =>
         props.includedMaterials.isEmpty
             ? null
             : _PreviewBulletListCard(
-                title: 'Материалы и что включено',
+                title: context.l10n.discoverMaterialsIncluded,
                 items: props.includedMaterials,
                 accentColor: RechargeTheme.classWorkshopAccent,
               ),
@@ -1022,7 +1077,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
         props.requirements.isEmpty
             ? null
             : _PreviewBulletListCard(
-                title: 'Требования',
+                title: context.l10n.discoverRequirements,
                 items: props.requirements,
                 accentColor: RechargeTheme.classWorkshopAccent,
               ),
@@ -1033,22 +1088,36 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
     };
   }
 
-  Widget? _classWorkshopMetrics(_ClassWorkshopDisplay props) {
+  Widget? _classWorkshopMetrics(
+    BuildContext context,
+    _ClassWorkshopDisplay props,
+  ) {
     final List<ObjectOfferMetricData> metrics = <ObjectOfferMetricData>[
-      if (props.priceLabel case final String value when value.trim().isNotEmpty)
-        ObjectOfferMetricData(value: value, label: props.priceUnitLabel),
-      if (props.groupSizeLabel case final String value
+      if (props.priceLabel(context.l10n) case final String value
           when value.trim().isNotEmpty)
-        ObjectOfferMetricData(value: value, label: 'Размер группы'),
-      if (props.durationLabel case final String value
+        ObjectOfferMetricData(
+          value: value,
+          label: props.priceUnitLabel(context.l10n),
+        ),
+      if (props.groupSizeLabel(context.l10n) case final String value
           when value.trim().isNotEmpty)
-        ObjectOfferMetricData(value: value, label: props.durationUnitLabel),
+        ObjectOfferMetricData(
+          value: value,
+          label: context.l10n.discoverGroupSize,
+        ),
+      if (props.durationLabel(context.l10n) case final String value
+          when value.trim().isNotEmpty)
+        ObjectOfferMetricData(
+          value: value,
+          label: props.durationUnitLabel(context.l10n),
+        ),
     ];
     if (metrics.length < 2) return null;
     return ObjectOfferMetricsStrip(metrics: metrics);
   }
 
   Widget _buildBookableSessionBody(
+    BuildContext context,
     PublishedBookableSessionDiscoveryEntity projection,
     BookableSessionScheduleEvaluation evaluation,
   ) {
@@ -1058,7 +1127,12 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
         children: <Widget>[
           for (final BookableSessionDetailsSection section
               in bookableSessionProfileSections)
-            if (_bookableSessionBodySectionFor(section, projection, evaluation)
+            if (_bookableSessionBodySectionFor(
+                  context,
+                  section,
+                  projection,
+                  evaluation,
+                )
                 case final Widget widget) ...<Widget>[
               widget,
               const SizedBox(height: RechargeTheme.objectOfferSectionGap),
@@ -1069,6 +1143,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
   }
 
   Widget? _bookableSessionBodySectionFor(
+    BuildContext context,
     BookableSessionDetailsSection section,
     PublishedBookableSessionDiscoveryEntity projection,
     BookableSessionScheduleEvaluation evaluation,
@@ -1081,14 +1156,15 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
         child: _BookableSessionEssentialsHeader(projection: projection),
       ),
       BookableSessionDetailsSection.metrics => _bookableSessionMetrics(
+        context,
         projection,
       ),
       BookableSessionDetailsSection.provider => _PreviewPublisherCard(
         name: projection.publisherName,
         handle: projection.publisherHandle,
         label: projection.publisherType == 'page'
-            ? 'Организация'
-            : 'Специалист',
+            ? context.l10n.discoverOrganization
+            : context.l10n.discoverSpecialist,
         accentColor: RechargeTheme.bookableSessionAccent,
         verification: projection.publisherVerification,
       ),
@@ -1096,7 +1172,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
         _bookableSessionAboutText(projection).isEmpty
             ? null
             : _PreviewAboutCard(
-                title: 'Об услуге',
+                title: context.l10n.discoverAboutService,
                 text: _bookableSessionAboutText(projection),
                 accentColor: RechargeTheme.bookableSessionAccent,
                 accentIcon: Icons.event_available_outlined,
@@ -1117,17 +1193,21 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
   }
 
   Widget _bookableSessionMetrics(
+    BuildContext context,
     PublishedBookableSessionDiscoveryEntity projection,
   ) {
     return ObjectOfferMetricsStrip(
       metrics: <ObjectOfferMetricData>[
         ObjectOfferMetricData(
-          value: _bookableSessionPriceLabel(projection),
-          label: 'Цена',
+          value: _bookableSessionPriceLabel(context.l10n, projection),
+          label: context.l10n.discoverPrice,
         ),
         ObjectOfferMetricData(
-          value: _objectOfferDurationLabel(projection.durationMinutes),
-          label: 'Длительность',
+          value: _objectOfferDurationLabel(
+            context.l10n,
+            projection.durationMinutes,
+          ),
+          label: context.l10n.discoverDuration,
         ),
       ],
     );
@@ -1204,16 +1284,18 @@ class _PlaceMetrics extends StatelessWidget {
     return ObjectOfferMetricsStrip(
       metrics: <ObjectOfferMetricData>[
         ObjectOfferMetricData(
-          value: item.isFree ? 'Бесплатно' : priceLabelForDetails(item),
-          label: 'Цена',
+          value: item.isFree
+              ? context.l10n.discoverFree
+              : priceLabelForDetails(context.l10n, item),
+          label: context.l10n.discoverPrice,
         ),
         ObjectOfferMetricData(
-          value: '${item.distanceKm.toStringAsFixed(1)} км',
-          label: 'От вас',
+          value: discoverKm(context.l10n, item.distanceKm),
+          label: context.l10n.discoverFromYou,
         ),
         ObjectOfferMetricData(
-          value: _objectOfferDurationLabel(item.durationMinutes),
-          label: 'Время',
+          value: _objectOfferDurationLabel(context.l10n, item.durationMinutes),
+          label: context.l10n.discoverTime,
         ),
       ],
     );
@@ -1305,7 +1387,7 @@ class _PlaceAboutCardState extends State<_PlaceAboutCard> {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  'О месте',
+                  context.l10n.discoverAboutPlace,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontSize: 19,
                     fontWeight: FontWeight.w700,
@@ -1370,11 +1452,15 @@ class _PlaceAboutCardState extends State<_PlaceAboutCard> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Text(
-                    _expanded ? 'Свернуть' : 'Читать далее',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: RechargeTheme.placeAccent,
-                      fontWeight: FontWeight.w600,
+                  Flexible(
+                    child: Text(
+                      _expanded
+                          ? context.l10n.discoverShowLess
+                          : context.l10n.discoverReadMore,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: RechargeTheme.placeAccent,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   Icon(
@@ -1408,7 +1494,7 @@ class _PlaceOpeningHoursCard extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  'Часы работы',
+                  context.l10n.discoverOpeningHours,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontSize: 19,
                     fontWeight: FontWeight.w700,
@@ -1427,7 +1513,10 @@ class _PlaceOpeningHoursCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     child: Text(
-                      openingLabelForDetails(item.timeFitEvaluation!),
+                      openingLabelForDetails(
+                        context.l10n,
+                        item.timeFitEvaluation!,
+                      ),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: RechargeTheme.placeAccent,
                         fontWeight: FontWeight.w700,
@@ -1446,7 +1535,7 @@ class _PlaceOpeningHoursCard extends StatelessWidget {
                   children: <Widget>[
                     Expanded(
                       child: Text(
-                        _openingRuleLabel(rule),
+                        _openingRuleLabel(context.l10n, rule),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: RechargeTheme.objectOfferSecondaryText,
                         ),
@@ -1455,7 +1544,7 @@ class _PlaceOpeningHoursCard extends StatelessWidget {
                     const SizedBox(width: 12),
                     Text(
                       rule.isClosedAllDay
-                          ? 'Закрыто'
+                          ? context.l10n.discoverClosed
                           : '${_placeClockLabel(rule.openMinutesSinceLocalMidnight!)}–${_placeClockLabel(rule.closeMinutesSinceLocalMidnight!)}',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: RechargeTheme.objectOfferPrimaryText,
@@ -1518,7 +1607,7 @@ class _DiscoverLocationCard extends StatelessWidget {
                   children: <Widget>[
                     Flexible(
                       child: Text(
-                        'Показать на карте',
+                        context.l10n.discoverShowOnMap,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelMedium
                             ?.copyWith(
@@ -1539,19 +1628,14 @@ class _DiscoverLocationCard extends StatelessWidget {
   }
 }
 
-String _openingRuleLabel(OpeningHoursRule rule) {
+String _openingRuleLabel(AppLocalizations l10n, OpeningHoursRule rule) {
   if (rule.exceptionDate case final exceptionDate?) {
     return exceptionDate.toString();
   }
-  return switch (rule.dayOfWeek!) {
-    DayOfWeek.monday => 'Понедельник',
-    DayOfWeek.tuesday => 'Вторник',
-    DayOfWeek.wednesday => 'Среда',
-    DayOfWeek.thursday => 'Четверг',
-    DayOfWeek.friday => 'Пятница',
-    DayOfWeek.saturday => 'Суббота',
-    DayOfWeek.sunday => 'Воскресенье',
-  };
+  return RechargeFormats.weekdayLong(
+    rule.dayOfWeek!.index + 1,
+    l10n.localeName,
+  );
 }
 
 String _placeClockLabel(int minutesSinceMidnight) {
@@ -1591,7 +1675,7 @@ class _ActivityEssentialsHeader extends StatelessWidget {
         ],
         _EssentialRow(
           icon: Icons.calendar_month_outlined,
-          text: dateTimeLabelForDetails(item.startsAtUtc),
+          text: dateTimeLabelForDetails(context.l10n, item.startsAtUtc),
         ),
         const SizedBox(height: 9),
         _EssentialRow(
@@ -1613,19 +1697,21 @@ class _ActivityMetrics extends StatelessWidget {
     return ObjectOfferMetricsStrip(
       metrics: <ObjectOfferMetricData>[
         ObjectOfferMetricData(
-          value: item.isFree ? 'Бесплатно' : priceLabelForDetails(item),
-          label: 'Цена',
+          value: item.isFree
+              ? context.l10n.discoverFree
+              : priceLabelForDetails(context.l10n, item),
+          label: context.l10n.discoverPrice,
         ),
         ObjectOfferMetricData(
           value: item.participantsCount?.toString() ?? '—',
-          label: 'Участники',
+          label: context.l10n.discoverParticipants,
           semanticsLabel: item.participantsCount == null
-              ? 'Количество участников неизвестно'
+              ? context.l10n.discoverParticipantCountUnknown
               : null,
         ),
         ObjectOfferMetricData(
-          value: _objectOfferDurationLabel(item.durationMinutes),
-          label: 'Длительность',
+          value: _objectOfferDurationLabel(context.l10n, item.durationMinutes),
+          label: context.l10n.discoverDuration,
         ),
       ],
     );
@@ -1656,7 +1742,7 @@ class _ActivityAboutCardState extends State<_ActivityAboutCard> {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  'О занятии',
+                  context.l10n.discoverAboutClass,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontSize: 19,
                     fontWeight: FontWeight.w700,
@@ -1718,11 +1804,15 @@ class _ActivityAboutCardState extends State<_ActivityAboutCard> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Text(
-                    _expanded ? 'Свернуть' : 'Читать далее',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: RechargeTheme.activityAccent,
-                      fontWeight: FontWeight.w600,
+                  Flexible(
+                    child: Text(
+                      _expanded
+                          ? context.l10n.discoverShowLess
+                          : context.l10n.discoverReadMore,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: RechargeTheme.activityAccent,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   Icon(
@@ -1753,7 +1843,7 @@ class _ActivityScheduleCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Расписание',
+            context.l10n.discoverSchedule,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontSize: 19,
               fontWeight: FontWeight.w700,
@@ -1812,7 +1902,7 @@ class _ActivitySlotRow extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.only(bottom: isLast ? 0 : 14),
               child: Text(
-                _activitySlotLabel(slot),
+                _activitySlotLabel(context.l10n, slot),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: RechargeTheme.objectOfferPrimaryText,
                   fontWeight: FontWeight.w600,
@@ -1826,19 +1916,14 @@ class _ActivitySlotRow extends StatelessWidget {
   }
 }
 
-String _objectOfferDurationLabel(int? durationMinutes) {
-  if (durationMinutes == null) return 'Гибко';
-  if (durationMinutes < 60) return '$durationMinutes мин';
-  final int hours = durationMinutes ~/ 60;
-  final int minutes = durationMinutes % 60;
-  return minutes == 0 ? '$hours ч' : '$hours ч $minutes мин';
-}
+String _objectOfferDurationLabel(AppLocalizations l10n, int? durationMinutes) =>
+    discoverDuration(l10n, durationMinutes);
 
-String _activitySlotLabel(TimeSlot slot) {
+String _activitySlotLabel(AppLocalizations l10n, TimeSlot slot) {
   final DateTime endLocal = slot.endAtUtc.toLocal();
   final String endHour = endLocal.hour.toString().padLeft(2, '0');
   final String endMinute = endLocal.minute.toString().padLeft(2, '0');
-  return '${dateTimeLabelForDetails(slot.startAtUtc)}–$endHour:$endMinute';
+  return '${dateTimeLabelForDetails(l10n, slot.startAtUtc)}–$endHour:$endMinute';
 }
 
 class _RentalHero extends StatelessWidget {
@@ -1864,10 +1949,10 @@ class _RentalHero extends StatelessWidget {
                 )
               else
                 const _RentalCoverFallback(),
-              const Positioned(
+              Positioned(
                 left: 12,
                 top: 12,
-                child: _RentalBadge(label: 'RENTAL'),
+                child: _RentalBadge(label: context.l10n.discoverBadgeRental),
               ),
               if (!projection.hasActiveInventory)
                 const Positioned(
@@ -1894,7 +1979,7 @@ class _RentalHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  rentalBaseRateLabel(projection),
+                  rentalBaseRateLabel(context.l10n, projection),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -1962,7 +2047,7 @@ class _RentalInventoryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'What is rented',
+              context.l10n.discoverWhatIsRented,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
@@ -1987,7 +2072,7 @@ class _RentalInventoryCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        rentalInventoryGroupLabel(group),
+                        rentalInventoryGroupLabel(context.l10n, group),
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),
@@ -2025,9 +2110,7 @@ class _RentalAvailabilityNote extends StatelessWidget {
                 // so this must never claim current/fresh availability —
                 // only that Creator-declared numbers exist and require
                 // confirmation.
-                'Listed quantities are Creator-declared, not a live '
-                'booking guarantee or confirmed-fresh count. Confirm on '
-                'the provider site before relying on them.',
+                context.l10n.discoverRentalQuantitiesDisclaimer,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -2054,7 +2137,7 @@ class _RentalPricingCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Rate plan',
+              context.l10n.discoverRatePlan,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
@@ -2064,13 +2147,13 @@ class _RentalPricingCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
-                  rentalRateStepLabel(projection, step),
+                  rentalRateStepLabel(context.l10n, projection, step),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ),
             const SizedBox(height: 6),
             Text(
-              rentalDepositLabel(projection),
+              rentalDepositLabel(context.l10n, projection),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -2121,7 +2204,7 @@ class _RentalPickupCard extends StatelessWidget {
                   if (projection.deliveryAvailable) ...<Widget>[
                     const SizedBox(height: 4),
                     Text(
-                      rentalDeliveryLabel(projection),
+                      rentalDeliveryLabel(context.l10n, projection),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -2151,7 +2234,7 @@ class _RentalDurationSafetyCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              rentalDurationLabel(projection),
+              rentalDurationLabel(context.l10n, projection),
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -2160,7 +2243,7 @@ class _RentalDurationSafetyCard extends StatelessWidget {
                 projection.idRequiredAtHandover) ...<Widget>[
               const SizedBox(height: 6),
               Text(
-                rentalSafetyRequirementsLabel(projection),
+                rentalSafetyRequirementsLabel(context.l10n, projection),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -2201,8 +2284,8 @@ class _RentalPublisherCard extends StatelessWidget {
             Expanded(
               child: Text(
                 isPage
-                    ? 'Listed by page ${projection.publisherId}'
-                    : 'Listed by ${projection.publisherId}',
+                    ? '${context.l10n.discoverListedByPageLabel} ${projection.publisherId}'
+                    : '${context.l10n.discoverListedByLabel} ${projection.publisherId}',
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -2245,8 +2328,8 @@ class _RentalExternalCtaBar extends StatelessWidget {
                   // carries a freshness/confirmedAt signal (see
                   // _RentalAvailabilityNote), so the "unknown/stale" row
                   // applies unconditionally here, never the "fresh" row.
-                  ? 'Confirm on provider site'
-                  : 'Currently unavailable',
+                  ? context.l10n.discoverConfirmOnProviderSite
+                  : context.l10n.discoverCurrentlyUnavailable,
             ),
           ),
         ),
@@ -2317,7 +2400,7 @@ class _EventHeroState extends State<_EventHero> {
             left: 16,
             bottom: 16,
             child: ObjectOfferTypeBadge(
-              label: 'EVENT',
+              label: context.l10n.discoverBadgeEvent,
               foregroundColor: RechargeTheme.eventLavender,
               backgroundColor: RechargeTheme.eventLavenderSurface,
             ),
@@ -2381,7 +2464,7 @@ class _EventHeroShareMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     if (onAddToScenario == null) {
       return ObjectOfferHeroActionButton(
-        tooltip: 'Share',
+        tooltip: context.l10n.discoverShare,
         icon: Icons.ios_share_rounded,
         onPressed: onShare,
       );
@@ -2389,7 +2472,7 @@ class _EventHeroShareMenu extends StatelessWidget {
     return ObjectOfferHeroActionSurface(
       endPadding: 12,
       child: PopupMenuButton<_EventUtilityAction>(
-        tooltip: 'Share',
+        tooltip: context.l10n.discoverShare,
         icon: const Icon(Icons.ios_share_rounded, size: 21),
         color: RechargeTheme.objectOfferCardSurface,
         onSelected: (_EventUtilityAction action) {
@@ -2401,13 +2484,13 @@ class _EventHeroShareMenu extends StatelessWidget {
           }
         },
         itemBuilder: (BuildContext context) =>
-            const <PopupMenuEntry<_EventUtilityAction>>[
+            <PopupMenuEntry<_EventUtilityAction>>[
               PopupMenuItem<_EventUtilityAction>(
                 value: _EventUtilityAction.share,
                 child: ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(Icons.ios_share_rounded),
-                  title: Text('Поделиться'),
+                  title: Text(context.l10n.discoverShare),
                 ),
               ),
               PopupMenuItem<_EventUtilityAction>(
@@ -2415,7 +2498,7 @@ class _EventHeroShareMenu extends StatelessWidget {
                 child: ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(Icons.playlist_add_outlined),
-                  title: Text('Добавить в сценарий'),
+                  title: Text(context.l10n.discoverAddToScenario),
                 ),
               ),
             ],
@@ -2474,7 +2557,8 @@ class _EventEssentialsHeader extends StatelessWidget {
             icon: Icons.calendar_month_outlined,
             // §7.4: RU-only formatter, same convention as the rest of this
             // screen's hardcoded Russian copy — not a locale-aware system.
-            text: eventDateTimeLabelRu(
+            text: eventDateTimeLabel(
+              context.l10n,
               occurrence,
               projection.timezoneId,
               timezoneRepository,
@@ -2509,7 +2593,7 @@ class _EssentialRow extends StatelessWidget {
         const SizedBox(width: 9),
         Expanded(
           child: Text(
-            cancelled ? '$text · Отменено' : text,
+            cancelled ? context.l10n.discoverCancelledSuffix(text) : text,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: cancelled
                   ? Theme.of(context).colorScheme.error
@@ -2533,19 +2617,19 @@ class _EventCompactMetrics extends StatelessWidget {
     return ObjectOfferMetricsStrip(
       metrics: <ObjectOfferMetricData>[
         ObjectOfferMetricData(
-          value: priceMetricLabel(projection),
-          label: 'Цена',
+          value: priceMetricLabel(context.l10n, projection),
+          label: context.l10n.discoverPrice,
         ),
         ObjectOfferMetricData(
           value: participantsMetricLabel(projection),
-          label: 'Участники',
+          label: context.l10n.discoverParticipants,
           semanticsLabel: projection.participantsCount == null
-              ? 'Количество участников неизвестно'
+              ? context.l10n.discoverParticipantCountUnknown
               : null,
         ),
         ObjectOfferMetricData(
-          value: durationMetricLabel(projection),
-          label: 'Длительность',
+          value: durationMetricLabel(context.l10n, projection),
+          label: context.l10n.discoverDuration,
         ),
       ],
     );
@@ -2587,7 +2671,7 @@ class _EventOrganizerCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Организатор',
+                  context.l10n.discoverOrganizer,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: RechargeTheme.objectOfferSecondaryText,
                   ),
@@ -2637,8 +2721,8 @@ class _EventOrganizerCard extends StatelessWidget {
                   Flexible(
                     child: Text(
                       projection.publisherType == 'page'
-                          ? 'Профиль клуба'
-                          : 'Профиль',
+                          ? context.l10n.discoverClubProfile
+                          : context.l10n.discoverProfile,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         color: RechargeTheme.emerald900,
@@ -2688,7 +2772,7 @@ class _EventAboutCardState extends State<_EventAboutCard> {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  'О событии',
+                  context.l10n.discoverAboutEvent,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontSize: 19,
                     fontWeight: FontWeight.w700,
@@ -2727,11 +2811,15 @@ class _EventAboutCardState extends State<_EventAboutCard> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text(
-                  _expanded ? 'Свернуть' : 'Читать далее',
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: RechargeTheme.emerald900,
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    _expanded
+                        ? context.l10n.discoverShowLess
+                        : context.l10n.discoverReadMore,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: RechargeTheme.emerald900,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 Icon(
@@ -2774,7 +2862,7 @@ class _EventProgramCard extends StatelessWidget {
             runSpacing: 10,
             children: <Widget>[
               Text(
-                'Расписание',
+                context.l10n.discoverSchedule,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontSize: 19,
                   fontWeight: FontWeight.w700,
@@ -2785,7 +2873,7 @@ class _EventProgramCard extends StatelessWidget {
                   onPressed: () => unawaited(onAddToCalendar!()),
                   icon: const Icon(Icons.calendar_month_outlined, size: 16),
                   label: Text(
-                    'Добавить в календарь',
+                    context.l10n.discoverAddToCalendar,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: RechargeTheme.emerald900,
                       fontWeight: FontWeight.w600,
@@ -2874,7 +2962,7 @@ class _ProgramRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    _hm(start),
+                    discoverWallTime(context.l10n, start),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -2932,7 +3020,7 @@ class _EventLocationCard extends StatelessWidget {
                   children: <Widget>[
                     Flexible(
                       child: Text(
-                        'Показать на карте',
+                        context.l10n.discoverShowOnMap,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelMedium
                             ?.copyWith(
@@ -3038,8 +3126,8 @@ class _EventStickyCta extends StatelessWidget {
         // isFree → internal Join-acknowledgement; priced → external booking
         // redirect. Either way the label is the same "Записаться" per §7.5
         // — the behavior differs, not the visual primitive.
-        child: const Text(
-          'Записаться',
+        child: Text(
+          context.l10n.discoverSignUp,
           style: TextStyle(
             color: RechargeTheme.objectOfferOnHero,
             fontWeight: FontWeight.w600,
@@ -3054,115 +3142,113 @@ class _EventStickyCta extends StatelessWidget {
 /// Public: formatting helpers, following `compatibility_object_renderer.dart`'s
 /// own `*ForDetails` naming convention for the equivalent free functions.
 
-String rentalBaseRateLabel(PublishedRentalDiscoveryEntity projection) {
-  if (projection.rateSteps.isEmpty) return 'Price on request';
+String rentalBaseRateLabel(
+  AppLocalizations l10n,
+  PublishedRentalDiscoveryEntity projection,
+) {
+  if (projection.rateSteps.isEmpty) return l10n.discoverPriceOnRequest;
   final PublishedRentalRateStepRef first = projection.rateSteps.first;
-  final String unit = _billingUnitLabel(projection.billingUnit);
-  return '${_moneyLabel(first.unitPriceMinor, projection.currencyCode)} / $unit';
+  return l10n.discoverRentalBaseRate(
+    projection.billingUnit,
+    _moneyLabel(l10n, first.unitPriceMinor, projection.currencyCode),
+  );
 }
 
 /// Canonical §17.3: "Без requested interval card показывает `N units
 /// listed`, а не `N available`" — this Details-page listing has no
 /// requested-interval query either, so the same discipline applies: never
 /// claim a verified-available count, only the declared quantity.
-String rentalInventoryGroupLabel(PublishedRentalInventoryGroupRef group) {
+String rentalInventoryGroupLabel(
+  AppLocalizations l10n,
+  PublishedRentalInventoryGroupRef group,
+) {
+  // Label and variant are the Creator's text; the status code is never shown.
   final String variant = group.sizeOrVariant == null
       ? ''
       : ' · ${group.sizeOrVariant}';
-  final String status = group.isAvailable ? '' : ' · ${group.status}';
-  return '${group.label}$variant — ${group.quantity} units listed$status';
+  final String status = group.isAvailable
+      ? ''
+      : ' · ${l10n.discoverCurrentlyUnavailable}';
+  return '${group.label}$variant — '
+      '${l10n.discoverRentalUnitsListed(group.quantity)}$status';
 }
 
 String rentalRateStepLabel(
+  AppLocalizations l10n,
   PublishedRentalDiscoveryEntity projection,
   PublishedRentalRateStepRef step,
-) {
-  final String unit = _billingUnitLabel(projection.billingUnit);
-  return 'From ${step.minUnits} $unit${step.minUnits == 1 ? '' : 's'}: '
-      '${_moneyLabel(step.unitPriceMinor, projection.currencyCode)} / $unit';
-}
+) => l10n.discoverRentalRateStep(
+  projection.billingUnit,
+  _moneyLabel(l10n, step.unitPriceMinor, projection.currencyCode),
+  step.minUnits,
+);
 
-String rentalDepositLabel(PublishedRentalDiscoveryEntity projection) {
-  if (!projection.hasDeposit) return 'No deposit required';
+String rentalDepositLabel(
+  AppLocalizations l10n,
+  PublishedRentalDiscoveryEntity projection,
+) {
+  if (!projection.hasDeposit) return l10n.discoverNoDepositRequired;
   final int? amount = projection.depositAmountMinor;
   return amount == null
-      ? 'Deposit required'
-      : 'Deposit: ${_moneyLabel(amount, projection.currencyCode)}';
+      ? l10n.discoverDepositRequired
+      : l10n.discoverDeposit(
+          _moneyLabel(l10n, amount, projection.currencyCode),
+        );
 }
 
-String rentalDeliveryLabel(PublishedRentalDiscoveryEntity projection) {
+String rentalDeliveryLabel(
+  AppLocalizations l10n,
+  PublishedRentalDiscoveryEntity projection,
+) {
   final double? radius = projection.deliveryRadiusKm;
   return radius == null
-      ? 'Delivery available'
-      : 'Delivery available within ${radius.toStringAsFixed(1)} km';
+      ? l10n.discoverDeliveryAvailable
+      : l10n.discoverDeliveryWithin(discoverOneDecimal(l10n, radius));
 }
 
-String rentalDurationLabel(PublishedRentalDiscoveryEntity projection) {
-  return 'Rental period: ${_minutesLabel(projection.offeredMinMinutes)} – '
-      '${_minutesLabel(projection.offeredMaxMinutes)}';
-}
+String rentalDurationLabel(
+  AppLocalizations l10n,
+  PublishedRentalDiscoveryEntity projection,
+) => l10n.discoverRentalPeriod(
+  _minutesLabel(l10n, projection.offeredMinMinutes),
+  _minutesLabel(l10n, projection.offeredMaxMinutes),
+);
 
 String rentalSafetyRequirementsLabel(
+  AppLocalizations l10n,
   PublishedRentalDiscoveryEntity projection,
 ) {
   final List<String> parts = <String>[
-    if (projection.minRenterAge != null) 'Min age ${projection.minRenterAge}',
-    if (projection.idRequiredAtHandover) 'ID required at handover',
+    if (projection.minRenterAge case final int age) l10n.discoverMinAge(age),
+    if (projection.idRequiredAtHandover) l10n.discoverIdRequired,
   ];
   return parts.join(' · ');
 }
 
-String _billingUnitLabel(String billingUnit) => switch (billingUnit) {
-  'hour' => 'hour',
-  'week' => 'week',
-  _ => 'day',
-};
+String _moneyLabel(
+  AppLocalizations l10n,
+  int amountMinor,
+  String currencyCode,
+) => RechargeFormats.money(
+  Money(minorUnits: amountMinor, currencyCode: currencyCode),
+  l10n.localeName,
+);
 
-String _moneyLabel(int amountMinor, String currencyCode) {
-  final double amount = amountMinor / 100;
-  return '${amount.toStringAsFixed(amount.truncateToDouble() == amount ? 0 : 2)} $currencyCode';
-}
-
-String _minutesLabel(int minutes) {
-  if (minutes < 60) return '$minutes min';
-  if (minutes < 1440) return '${(minutes / 60).round()} h';
-  return '${(minutes / 1440).round()} d';
+String _minutesLabel(AppLocalizations l10n, int minutes) {
+  if (minutes < 60) return l10n.discoverMinutes(minutes);
+  if (minutes < 1440) return l10n.discoverHours('${(minutes / 60).round()}');
+  return l10n.discoverDays((minutes / 1440).round());
 }
 
 /// Event formatting helpers (`DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §7.4).
-/// RU-only by deliberate, named decision — same convention as every other
-/// hardcoded Russian string on this screen, not a locale-aware system
-/// (localization is out of this slice's scope).
+/// L4.5: dates and times follow the reader's language; the zone is always
+/// the object's own, never the device zone.
 
-const List<String> _ruWeekdayShort = <String>[
-  'пн',
-  'вт',
-  'ср',
-  'чт',
-  'пт',
-  'сб',
-  'вс',
-];
-
-const List<String> _ruMonthGenitive = <String>[
-  'января',
-  'февраля',
-  'марта',
-  'апреля',
-  'мая',
-  'июня',
-  'июля',
-  'августа',
-  'сентября',
-  'октября',
-  'ноября',
-  'декабря',
-];
-
-/// `21 июня 2026, вс · 18:00–20:30` — start date/weekday plus start–end
-/// time, both resolved against the Event's own [timezoneId], never the
-/// viewing device's local timezone (`DTL-EVT-01` EVT-D-AC-20).
-String eventDateTimeLabelRu(
+/// Start date with weekday plus start–end time, both resolved against the
+/// Event's own [timezoneId], never the viewing device's local timezone
+/// (`DTL-EVT-01` EVT-D-AC-20).
+String eventDateTimeLabel(
+  AppLocalizations l10n,
   EventOccurrence occurrence,
   String timezoneId,
   TimezoneRepository timezoneRepository,
@@ -3175,10 +3261,11 @@ String eventDateTimeLabelRu(
     occurrence.endAtUtc,
     timezoneId,
   );
-  final String weekday = _ruWeekdayShort[(start.weekday - 1).clamp(0, 6)];
-  final String month = _ruMonthGenitive[(start.date.month - 1).clamp(0, 11)];
-  return '${start.date.day} $month ${start.date.year}, $weekday · '
-      '${_hm(start)}–${_hm(end)}';
+  return l10n.discoverDateTimeRange(
+    discoverWallDateWithWeekday(l10n, start),
+    discoverWallTime(l10n, start),
+    discoverWallTime(l10n, end),
+  );
 }
 
 class _BookableSessionHero extends StatefulWidget {
@@ -3235,7 +3322,8 @@ class _BookableSessionHeroState extends State<_BookableSessionHero> {
 
 /// Formats one already-approved public Session offer in the listing timezone.
 /// It does not claim provider availability or consult the device timezone.
-String bookableSessionOfferLabelRu(
+String bookableSessionOfferLabel(
+  AppLocalizations l10n,
   PublishedBookableSessionOffer offer,
   TimezoneRepository timezoneRepository,
 ) {
@@ -3247,16 +3335,21 @@ String bookableSessionOfferLabelRu(
     offer.endAtUtc,
     offer.timezoneId,
   );
-  final String weekday = _ruWeekdayShort[(start.weekday - 1).clamp(0, 6)];
-  final String month = _ruMonthGenitive[(start.date.month - 1).clamp(0, 11)];
   final bool sameDay =
       start.date.year == end.date.year &&
       start.date.month == end.date.month &&
       start.date.day == end.date.day;
-  final String endLabel = sameDay
-      ? _hm(end)
-      : '${end.date.day} ${_ruMonthGenitive[end.date.month - 1]} · ${_hm(end)}';
-  return '${start.date.day} $month, $weekday · ${_hm(start)}–$endLabel';
+  return sameDay
+      ? l10n.discoverDateTimeRange(
+          discoverWallDayWithWeekday(l10n, start),
+          discoverWallTime(l10n, start),
+          discoverWallTime(l10n, end),
+        )
+      : l10n.discoverDateTimeRange(
+          discoverWallDayWithWeekday(l10n, start),
+          discoverWallTime(l10n, start),
+          '${discoverWallDayWithWeekday(l10n, end)} · ${discoverWallTime(l10n, end)}',
+        );
 }
 
 /// A venue line is assembled from the fields the projection actually has;
@@ -3294,28 +3387,15 @@ Uri? eventExternalBookingUri(String? raw) {
   return uri;
 }
 
-String _hm(LocalDateTimeValue value) {
-  final int hour = value.minutesSinceMidnight ~/ 60;
-  final int minute = value.minutesSinceMidnight % 60;
-  return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
-}
-
 /// `isFree` → «Бесплатно»; otherwise an amount with currency — never a
 /// bare "0" for a free event (`DTL-EVT-01` EVT-D-AC-07).
-String priceMetricLabel(PublishedEventDiscoveryEntity projection) {
-  if (projection.isFree) return 'Бесплатно';
-  final double amount = projection.priceAmount;
-  final String formatted = amount.truncateToDouble() == amount
-      ? amount.toStringAsFixed(0)
-      : amount.toStringAsFixed(2);
-  return '${_currencySymbol(projection.currencyCode)}$formatted';
+String priceMetricLabel(
+  AppLocalizations l10n,
+  PublishedEventDiscoveryEntity projection,
+) {
+  if (projection.isFree) return l10n.discoverFree;
+  return discoverMoney(l10n, projection.priceAmount, projection.currencyCode);
 }
-
-String _currencySymbol(String currencyCode) => switch (currencyCode) {
-  'EUR' => '€',
-  'USD' => r'$',
-  _ => '$currencyCode ',
-};
 
 /// `null` → visual «—» (honest unknown, never a fake `0`) — the
 /// accompanying `Semantics` label lives in the shared metrics primitive.
@@ -3324,12 +3404,14 @@ String participantsMetricLabel(PublishedEventDiscoveryEntity projection) {
   return count == null ? '—' : '$count';
 }
 
-String durationMetricLabel(PublishedEventDiscoveryEntity projection) {
+String durationMetricLabel(
+  AppLocalizations l10n,
+  PublishedEventDiscoveryEntity projection,
+) {
   final int? minutes = projection.durationMinutes;
   if (minutes == null) return '—';
-  if (minutes % 60 == 0) return '${minutes ~/ 60} ч';
-  final double hours = minutes / 60;
-  return '${hours.toStringAsFixed(1)} ч';
+  if (minutes % 60 == 0) return l10n.discoverHours('${minutes ~/ 60}');
+  return l10n.discoverHours(discoverOneDecimal(l10n, minutes / 60));
 }
 
 // ---------------------------------------------------------------------------
@@ -3373,7 +3455,11 @@ class _FindPeopleEssentialsHeader extends StatelessWidget {
         ],
         _PreviewEssentialLine(
           icon: Icons.calendar_month_outlined,
-          label: _findPeopleScheduleSummary(projection, timezoneRepository),
+          label: _findPeopleScheduleSummary(
+            context.l10n,
+            projection,
+            timezoneRepository,
+          ),
         ),
         const SizedBox(height: 8),
         _PreviewEssentialLine(
@@ -3382,14 +3468,18 @@ class _FindPeopleEssentialsHeader extends StatelessWidget {
                   PublishedFindPeopleMeetingMode.online
               ? Icons.videocam_outlined
               : Icons.location_on_outlined,
-          label: _findPeopleLocationSummary(projection.publicLocation),
+          label: _findPeopleLocationSummary(
+            context.l10n,
+            projection.publicLocation,
+          ),
         ),
       ],
     );
   }
 }
 
-String findPeopleTimeOptionLabelRu(
+String findPeopleTimeOptionLabel(
+  AppLocalizations l10n,
   PublishedFindPeopleTimeOption option,
   String timezoneId,
   TimezoneRepository timezoneRepository,
@@ -3402,65 +3492,73 @@ String findPeopleTimeOptionLabelRu(
     option.endAtUtc,
     timezoneId,
   );
-  final String weekday = _ruWeekdayShort[(start.weekday - 1).clamp(0, 6)];
-  final String month = _ruMonthGenitive[(start.date.month - 1).clamp(0, 11)];
-  final String prefix =
-      option.kind == PublishedFindPeopleTimeOptionKind.candidate
-      ? 'Вариант · '
-      : '';
-  return '$prefix${start.date.day} $month ${start.date.year}, $weekday · '
-      '${_hm(start)}–${_hm(end)}';
+  final String time = l10n.discoverDateTimeRange(
+    discoverWallDateWithWeekday(l10n, start),
+    discoverWallTime(l10n, start),
+    discoverWallTime(l10n, end),
+  );
+  return option.kind == PublishedFindPeopleTimeOptionKind.candidate
+      ? l10n.discoverTimeOptionCandidate(time)
+      : time;
 }
 
 String _findPeopleScheduleSummary(
+  AppLocalizations l10n,
   PublishedFindPeopleDiscoveryEntity projection,
   TimezoneRepository timezoneRepository,
 ) {
-  final String first = findPeopleTimeOptionLabelRu(
+  final String first = findPeopleTimeOptionLabel(
+    l10n,
     projection.timeOptions.first,
     projection.timezoneId,
     timezoneRepository,
   );
   return switch (projection.scheduleMode) {
     PublishedFindPeopleScheduleMode.single => first,
-    PublishedFindPeopleScheduleMode.timePoll =>
-      '${projection.timeOptions.length} варианта времени',
+    PublishedFindPeopleScheduleMode.timePoll => l10n.discoverTimeOptionCount(
+      projection.timeOptions.length,
+    ),
     PublishedFindPeopleScheduleMode.recurring =>
       projection.timeOptions.length == 1
           ? first
-          : '$first · ещё ${projection.timeOptions.length - 1}',
+          : l10n.discoverFirstAndMore(first, projection.timeOptions.length - 1),
   };
 }
 
-String _findPeopleLocationSummary(PublishedFindPeoplePublicLocation location) {
+String _findPeopleLocationSummary(
+  AppLocalizations l10n,
+  PublishedFindPeoplePublicLocation location,
+) {
   return switch (location) {
     PublishedFindPeoplePointLocation(:final areaLabel) => areaLabel,
     PublishedFindPeopleOnlineLocation(:final providerLabel) =>
-      providerLabel.trim().isEmpty ? 'Онлайн' : 'Онлайн · $providerLabel',
+      providerLabel.trim().isEmpty
+          ? l10n.discoverOnline
+          : '${l10n.discoverOnline} · $providerLabel',
     PublishedFindPeopleHiddenLocation(:final safeAreaLabel) =>
-      safeAreaLabel.trim().isEmpty ? 'Место не опубликовано' : safeAreaLabel,
+      safeAreaLabel.trim().isEmpty
+          ? l10n.discoverLocationNotPublished
+          : safeAreaLabel,
   };
 }
 
 String _findPeopleRecruitmentLabel(
+  AppLocalizations l10n,
   PublishedFindPeopleRecruitmentStatus status,
 ) {
   return switch (status) {
     PublishedFindPeopleRecruitmentStatus.collectingAvailability =>
-      'Собираются варианты времени',
-    PublishedFindPeopleRecruitmentStatus.open => 'Набор открыт',
-    PublishedFindPeopleRecruitmentStatus.waitlistOnly => 'Только лист ожидания',
-    PublishedFindPeopleRecruitmentStatus.full => 'Группа заполнена',
-    PublishedFindPeopleRecruitmentStatus.completed => 'Встреча завершена',
-    PublishedFindPeopleRecruitmentStatus.cancelled => 'Встреча отменена',
-    PublishedFindPeopleRecruitmentStatus.expired => 'Набор завершён',
+      l10n.discoverCollectingTimeOptions,
+    PublishedFindPeopleRecruitmentStatus.open => l10n.discoverRecruitmentOpen,
+    PublishedFindPeopleRecruitmentStatus.waitlistOnly =>
+      l10n.discoverWaitlistOnly,
+    PublishedFindPeopleRecruitmentStatus.full => l10n.discoverGroupFull,
+    PublishedFindPeopleRecruitmentStatus.completed => l10n.discoverMeetupEnded,
+    PublishedFindPeopleRecruitmentStatus.cancelled =>
+      l10n.discoverMeetupCancelled,
+    PublishedFindPeopleRecruitmentStatus.expired =>
+      l10n.discoverRecruitmentClosed,
   };
-}
-
-String _formatAmount(double amount) {
-  return amount.truncateToDouble() == amount
-      ? amount.toStringAsFixed(0)
-      : amount.toStringAsFixed(2);
 }
 
 /// Internal formatting adapter only. Public renderer input is always typed.
@@ -3470,27 +3568,31 @@ class _ClassWorkshopDisplay {
   final TimezoneRepository timezone;
   String get title => projection.title;
   String get discipline => projection.disciplineLabel;
-  String get levelOrFormat => [
+  String levelOrFormat(AppLocalizations l10n) => [
     switch (projection.kind) {
-      ClassWorkshopKind.classLesson => 'Занятие',
-      ClassWorkshopKind.workshop => 'Воркшоп',
-      ClassWorkshopKind.masterclass => 'Мастер-класс',
-      ClassWorkshopKind.course => 'Курс',
-      ClassWorkshopKind.experience => 'Практический опыт',
+      ClassWorkshopKind.classLesson => l10n.discoverKindClass,
+      ClassWorkshopKind.workshop => l10n.discoverKindWorkshop,
+      ClassWorkshopKind.masterclass => l10n.discoverKindMasterclass,
+      ClassWorkshopKind.course => l10n.discoverKindCourse,
+      ClassWorkshopKind.experience => l10n.discoverKindHandsOn,
     },
     projection.levelLabel,
     switch (projection.publicLocation.delivery) {
-      ClassWorkshopDelivery.offline => 'Офлайн',
-      ClassWorkshopDelivery.onlineLive => 'Онлайн',
-      ClassWorkshopDelivery.hybrid => 'Гибридный формат',
+      ClassWorkshopDelivery.offline => l10n.discoverInPerson,
+      ClassWorkshopDelivery.onlineLive => l10n.discoverOnline,
+      ClassWorkshopDelivery.hybrid => l10n.discoverHybrid,
     },
     ...projection.languageLabels,
   ].where((s) => s.trim().isNotEmpty).join(' · ');
-  String get dateAndPlaceLabel {
+  String dateAndPlaceLabel(AppLocalizations l10n) {
     final schedule = projection.schedule;
     final date = schedule is ClassWorkshopAnnouncedSchedule
-        ? classWorkshopOccurrenceLabelRu(schedule.occurrences.first, timezone)
-        : 'Даты уточняются';
+        ? classWorkshopOccurrenceLabel(
+            l10n,
+            schedule.occurrences.first,
+            timezone,
+          )
+        : l10n.discoverDatesTbc;
     final area = switch (projection.publicLocation) {
       ClassWorkshopPointLocation(:final venueName) => venueName,
       ClassWorkshopHiddenLocation(:final safeAreaLabel) => safeAreaLabel,
@@ -3499,28 +3601,30 @@ class _ClassWorkshopDisplay {
     return [date, area].where((s) => s.isNotEmpty).join(' · ');
   }
 
-  String? get priceLabel => switch (projection.price) {
+  String? priceLabel(AppLocalizations l10n) => switch (projection.price) {
     ClassWorkshopPriceNotProvided() => null,
-    ClassWorkshopPriceFree() => 'Бесплатно',
+    ClassWorkshopPriceFree() => l10n.discoverFree,
     final ClassWorkshopPriceFixed price => classWorkshopPriceLabel(price),
   };
-  String get priceUnitLabel => switch (projection.price) {
+  String priceUnitLabel(AppLocalizations l10n) => switch (projection.price) {
     ClassWorkshopPriceFixed(:final scope) =>
       scope == ClassWorkshopPriceScope.perPersonPerClass
-          ? 'Цена за человека / занятие'
-          : 'Цена за человека / курс',
-    _ => 'Цена',
+          ? l10n.discoverPricePerPersonSession
+          : l10n.discoverPricePerPersonCourse,
+    _ => l10n.discoverPrice,
   };
-  String? get groupSizeLabel => projection.declaredGroupLimit == null
+  String? groupSizeLabel(AppLocalizations l10n) =>
+      projection.declaredGroupLimit == null
       ? null
-      : 'до ${projection.declaredGroupLimit} чел.';
-  String? get durationLabel => projection.durationMinutes == null
+      : l10n.discoverUpToPeople(projection.declaredGroupLimit!);
+  String? durationLabel(AppLocalizations l10n) =>
+      projection.durationMinutes == null
       ? null
-      : '${projection.durationMinutes} мин';
-  String get durationUnitLabel =>
+      : l10n.discoverMinutes(projection.durationMinutes!);
+  String durationUnitLabel(AppLocalizations l10n) =>
       projection.durationScope == ClassWorkshopDurationScope.wholeSeries
-      ? 'Длительность курса'
-      : 'Длительность занятия';
+      ? l10n.discoverCourseDuration
+      : l10n.discoverSessionDuration;
   String get teacherName => switch (projection.instructor) {
     ClassWorkshopInstructorSameAsPublisher() => projection.publisherName,
     ClassWorkshopGuestInstructor(:final name) => name,
@@ -3529,23 +3633,23 @@ class _ClassWorkshopDisplay {
     ClassWorkshopInstructorSameAsPublisher() => projection.publisherHandle,
     ClassWorkshopGuestInstructor(:final handle) => handle,
   };
-  String get aboutText => [
+  String aboutText(AppLocalizations l10n) => [
     projection.fullDescription.trim().isEmpty
         ? projection.shortDescription.trim()
         : projection.fullDescription.trim(),
     if (projection.learningOutcomes.isNotEmpty)
-      'Чему научитесь:\n${projection.learningOutcomes.map((s) => '• $s').join('\n')}',
+      '${l10n.discoverLearningOutcomesLabel}\n${projection.learningOutcomes.map((s) => '• $s').join('\n')}',
   ].where((s) => s.isNotEmpty).join('\n\n');
   List<String> get includedMaterials => projection.includedMaterials;
   List<String> get requirements => projection.requirements;
-  List<_ClassWorkshopScheduleItem> get scheduleItems =>
+  List<_ClassWorkshopScheduleItem> scheduleItems(AppLocalizations l10n) =>
       switch (projection.schedule) {
         ClassWorkshopDatesNotAnnounced() => const [],
         ClassWorkshopAnnouncedSchedule(:final occurrences) =>
           occurrences
               .map(
                 (row) => _ClassWorkshopScheduleItem(
-                  timeLabel: classWorkshopOccurrenceLabelRu(row, timezone),
+                  timeLabel: classWorkshopOccurrenceLabel(l10n, row, timezone),
                   description: row.title,
                 ),
               )
@@ -3556,20 +3660,30 @@ class _ClassWorkshopDisplay {
 String classWorkshopPriceLabel(ClassWorkshopPriceFixed price) {
   final scale = int.parse('1${'0' * price.minorUnitDigits}');
   final remainder = price.amountMinor % scale;
-  final fraction = remainder == 0 ? '' : '.${remainder.toString().padLeft(price.minorUnitDigits, '0')}';
+  final fraction = remainder == 0
+      ? ''
+      : '.${remainder.toString().padLeft(price.minorUnitDigits, '0')}';
   return '${price.amountMinor ~/ scale}$fraction ${price.currencyCode}';
 }
 
-String classWorkshopOccurrenceLabelRu(
+String classWorkshopOccurrenceLabel(
+  AppLocalizations l10n,
   ClassWorkshopOccurrence row,
   TimezoneRepository timezone,
 ) {
   final start = timezone.toLocal(row.startAtUtc, row.timezoneId);
   final end = timezone.toLocal(row.endAtUtc, row.timezoneId);
-  String date(LocalDateTimeValue value) =>
-      '${value.date.day} ${_ruMonthGenitive[value.date.month - 1]} ${value.date.year}';
-  final sameDate = start.date == end.date;
-  return '${date(start)} · ${_hm(start)}–${sameDate ? '' : '${date(end)} · '}${_hm(end)}';
+  return start.date == end.date
+      ? l10n.discoverDateTimeRange(
+          discoverWallDate(l10n, start),
+          discoverWallTime(l10n, start),
+          discoverWallTime(l10n, end),
+        )
+      : l10n.discoverDateTimeRange(
+          discoverWallDate(l10n, start),
+          discoverWallTime(l10n, start),
+          '${discoverWallDate(l10n, end)} · ${discoverWallTime(l10n, end)}',
+        );
 }
 
 class _ClassWorkshopScheduleItem {
@@ -3606,7 +3720,7 @@ class _ClassWorkshopTeacherCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Преподаватель',
+                  context.l10n.discoverTeacher,
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
                 Text(
@@ -3622,7 +3736,7 @@ class _ClassWorkshopTeacherCard extends StatelessWidget {
                   ),
                 if (!same)
                   Text(
-                    'Организатор: ${props.projection.publisherName}',
+                    '${context.l10n.discoverOrganizerLabel} ${props.projection.publisherName}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 if (props.projection.publisherVerification !=
@@ -3638,8 +3752,8 @@ class _ClassWorkshopTeacherCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           same
-                              ? 'Профиль подтверждён'
-                              : 'Организатор подтверждён',
+                              ? context.l10n.discoverProfileVerified
+                              : context.l10n.discoverOrganizerVerified,
                           style: Theme.of(context).textTheme.labelSmall,
                         ),
                       ),
@@ -3681,13 +3795,16 @@ class _ClassWorkshopLocationCard extends StatelessWidget {
             ),
     ClassWorkshopOnlineLocation(:final providerLabel) =>
       _PreviewLabeledTextCard(
-        title: 'Онлайн-занятие',
+        title: context.l10n.discoverOnlineClass,
         text: providerLabel.trim().isEmpty
-            ? 'Инструкции предоставит организатор'
+            ? context.l10n.discoverOrganizerSendsInstructions
             : providerLabel,
       ),
     ClassWorkshopHiddenLocation(:final safeAreaLabel) =>
-      _PreviewLabeledTextCard(title: 'Место уточняется', text: safeAreaLabel),
+      _PreviewLabeledTextCard(
+        title: context.l10n.discoverLocationTbc,
+        text: safeAreaLabel,
+      ),
   };
 }
 
@@ -3700,15 +3817,16 @@ class _ClassWorkshopFooter extends StatelessWidget {
     final external = enrollment is ClassWorkshopExternalEnrollment;
     final disclosure = switch (enrollment) {
       ClassWorkshopExternalEnrollment() =>
-        'Наличие мест, итоговая стоимость и условия — на сайте организатора',
+        context.l10n.discoverAvailabilityOnOrganizerSite,
       ClassWorkshopInformationOnly(:final reason) => switch (reason) {
-        ClassWorkshopInformationReason.closed => 'Запись закрыта',
+        ClassWorkshopInformationReason.closed =>
+          context.l10n.discoverEnrollmentClosed,
         ClassWorkshopInformationReason.onSite =>
-          'Условия участия уточняются на месте',
+          context.l10n.discoverTermsOnSite,
         ClassWorkshopInformationReason.notProvided =>
-          'Способ записи пока не указан',
+          context.l10n.discoverEnrollmentMethodUnknown,
         ClassWorkshopInformationReason.unsupportedInternal =>
-          'Запись через приложение пока не подключена',
+          context.l10n.discoverInAppEnrollmentUnavailable,
       },
     };
     // The shared action shell has a fixed button height. Keep explanatory
@@ -3739,7 +3857,7 @@ class _ClassWorkshopFooter extends StatelessWidget {
             ObjectOfferStickyActionShell(
               child: FilledButton(
                 onPressed: () => unawaited(onExternal!()),
-                child: const Text('Проверить запись на сайте'),
+                child: Text(context.l10n.discoverCheckEnrollmentOnSite),
               ),
             ),
         ],
@@ -3822,17 +3940,17 @@ class _ClassWorkshopEssentialsHeader extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ],
-        if (props.levelOrFormat.trim().isNotEmpty) ...<Widget>[
+        if (props.levelOrFormat(context.l10n).trim().isNotEmpty) ...<Widget>[
           _PreviewEssentialLine(
             icon: Icons.bar_chart_outlined,
-            label: props.levelOrFormat,
+            label: props.levelOrFormat(context.l10n),
           ),
           const SizedBox(height: 8),
         ],
-        if (props.dateAndPlaceLabel.trim().isNotEmpty)
+        if (props.dateAndPlaceLabel(context.l10n).trim().isNotEmpty)
           _PreviewEssentialLine(
             icon: Icons.calendar_month_outlined,
-            label: props.dateAndPlaceLabel,
+            label: props.dateAndPlaceLabel(context.l10n),
           ),
       ],
     );
@@ -3869,6 +3987,7 @@ class _BookableSessionEssentialsHeader extends StatelessWidget {
               ? Icons.videocam_outlined
               : Icons.location_on_outlined,
           label: _bookableSessionMeetingModeLabel(
+            context.l10n,
             projection.publicLocation.meetingMode,
           ),
         ),
@@ -3878,12 +3997,13 @@ class _BookableSessionEssentialsHeader extends StatelessWidget {
 }
 
 String _bookableSessionMeetingModeLabel(
+  AppLocalizations l10n,
   PublishedBookableSessionMeetingMode mode,
 ) {
   return switch (mode) {
-    PublishedBookableSessionMeetingMode.inPerson => 'Офлайн',
-    PublishedBookableSessionMeetingMode.online => 'Онлайн',
-    PublishedBookableSessionMeetingMode.hybrid => 'Гибридный формат',
+    PublishedBookableSessionMeetingMode.inPerson => l10n.discoverInPerson,
+    PublishedBookableSessionMeetingMode.online => l10n.discoverOnline,
+    PublishedBookableSessionMeetingMode.hybrid => l10n.discoverHybrid,
   };
 }
 
@@ -3895,13 +4015,18 @@ String _bookableSessionAboutText(
 }
 
 String _bookableSessionPriceLabel(
+  AppLocalizations l10n,
   PublishedBookableSessionDiscoveryEntity projection,
 ) {
   return switch (projection.priceType) {
-    PublishedBookableSessionPriceType.free => 'Бесплатно',
-    PublishedBookableSessionPriceType.fixed =>
-      '${_formatAmount(projection.priceAmountMinor! / 100)} '
-          '${projection.currencyCode}',
+    PublishedBookableSessionPriceType.free => l10n.discoverFree,
+    PublishedBookableSessionPriceType.fixed => RechargeFormats.money(
+      Money(
+        minorUnits: projection.priceAmountMinor!,
+        currencyCode: projection.currencyCode,
+      ),
+      l10n.localeName,
+    ),
   };
 }
 
@@ -3947,19 +4072,19 @@ class _FindPeopleLocationCard extends StatelessWidget {
     switch (location) {
       case PublishedFindPeoplePointLocation(:final areaLabel):
         title = areaLabel;
-        detail = 'Приблизительная публичная зона встречи';
+        detail = context.l10n.discoverApproximateMeetingArea;
         fallbackIcon = Icons.location_on_outlined;
       case PublishedFindPeopleOnlineLocation(:final providerLabel):
-        title = 'Онлайн';
+        title = context.l10n.discoverOnline;
         detail = providerLabel.trim().isEmpty
-            ? 'Данные доступа не публикуются'
+            ? context.l10n.discoverAccessDetailsNotPublished
             : providerLabel.trim();
         fallbackIcon = Icons.videocam_outlined;
       case PublishedFindPeopleHiddenLocation(:final safeAreaLabel):
         title = safeAreaLabel.trim().isEmpty
-            ? 'Место не опубликовано'
+            ? context.l10n.discoverLocationNotPublished
             : safeAreaLabel.trim();
-        detail = 'Координаты недоступны публично';
+        detail = context.l10n.discoverCoordinatesNotPublic;
         fallbackIcon = Icons.location_off_outlined;
     }
 
@@ -4013,7 +4138,7 @@ class _FindPeopleLocationCard extends StatelessWidget {
                     children: <Widget>[
                       Flexible(
                         child: Text(
-                          'Показать на карте',
+                          context.l10n.discoverShowOnMap,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.labelMedium
                               ?.copyWith(
@@ -4053,9 +4178,9 @@ class _BookableSessionAvailabilityCard extends StatelessWidget {
     final String stateMessage = switch (evaluation.state) {
       BookableSessionScheduleState.freshWithOffers => '',
       BookableSessionScheduleState.freshEmpty =>
-        'В текущем окне время не указано.',
+        context.l10n.discoverNoTimeInWindow,
       BookableSessionScheduleState.stale =>
-        'Расписание требует обновления — проверьте время на сайте.',
+        context.l10n.discoverScheduleNeedsRefresh,
     };
     return ObjectOfferCard(
       padding: const EdgeInsets.all(18),
@@ -4063,7 +4188,7 @@ class _BookableSessionAvailabilityCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Время для записи',
+            context.l10n.discoverTimesToBook,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontSize: 19,
               fontWeight: FontWeight.w700,
@@ -4089,7 +4214,11 @@ class _BookableSessionAvailabilityCard extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        bookableSessionOfferLabelRu(offer, timezoneRepository),
+                        bookableSessionOfferLabel(
+                          context.l10n,
+                          offer,
+                          timezoneRepository,
+                        ),
                       ),
                     ),
                   ],
@@ -4114,8 +4243,7 @@ class _BookableSessionAvailabilityCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Фактическое время и условия подтверждаются на сайте '
-                  'партнёра.',
+                  context.l10n.discoverPartnerConfirmsTime,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: RechargeTheme.objectOfferSecondaryText,
                   ),
@@ -4154,16 +4282,16 @@ class _BookableSessionLocationCard extends StatelessWidget {
             : areaLabel;
         fallbackIcon = Icons.location_on_outlined;
       case PublishedBookableSessionOnlineLocation(:final providerLabel):
-        title = 'Онлайн';
+        title = context.l10n.discoverOnline;
         detail = providerLabel.trim().isEmpty
-            ? 'Ссылка предоставляется сервисом бронирования'
+            ? context.l10n.discoverLinkFromBookingService
             : providerLabel.trim();
         fallbackIcon = Icons.videocam_outlined;
       case PublishedBookableSessionHiddenLocation(:final safeAreaLabel):
         title = safeAreaLabel.trim().isEmpty
-            ? 'Место не опубликовано'
+            ? context.l10n.discoverLocationNotPublished
             : safeAreaLabel.trim();
-        detail = 'Точный адрес не опубликован';
+        detail = context.l10n.discoverExactAddressNotPublished;
         fallbackIcon = Icons.location_off_outlined;
     }
 
@@ -4217,7 +4345,7 @@ class _BookableSessionLocationCard extends StatelessWidget {
                     children: <Widget>[
                       Flexible(
                         child: Text(
-                          'Показать на карте',
+                          context.l10n.discoverShowOnMap,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.labelMedium
                               ?.copyWith(
@@ -4390,11 +4518,15 @@ class _PreviewAboutCardState extends State<_PreviewAboutCard> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text(
-                  _expanded ? 'Свернуть' : 'Читать далее',
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: widget.accentColor,
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    _expanded
+                        ? context.l10n.discoverShowLess
+                        : context.l10n.discoverReadMore,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: widget.accentColor,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 Icon(
@@ -4539,7 +4671,7 @@ class _PreviewLocationCard extends StatelessWidget {
                   children: <Widget>[
                     Flexible(
                       child: Text(
-                        'Показать на карте',
+                        context.l10n.discoverShowOnMap,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelMedium
                             ?.copyWith(
@@ -4573,7 +4705,7 @@ class _ClassWorkshopScheduleCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Расписание',
+            context.l10n.discoverSchedule,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontSize: 19,
               fontWeight: FontWeight.w700,

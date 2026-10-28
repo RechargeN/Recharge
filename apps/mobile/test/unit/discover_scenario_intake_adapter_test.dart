@@ -6,6 +6,7 @@ import 'package:recharge/features/discover/domain/entities/discover_item_entity.
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/discover/domain/entities/event_occurrence.dart';
 import 'package:recharge/features/discover/domain/entities/published_event_discovery_entity.dart';
+import 'package:recharge/features/discover/application/state/scenario_intake_selection_state.dart';
 
 void main() {
   const adapter = DiscoverScenarioIntakeAdapter();
@@ -120,7 +121,7 @@ void main() {
       isFree: true,
       objectKind: DiscoverObjectKind.place,
     );
-    expect(adapter.supportIssue(invalid), contains('no usable'));
+    expect(adapter.supportIssue(invalid), ScenarioIntakeIssue.noLocation);
   });
 }
 

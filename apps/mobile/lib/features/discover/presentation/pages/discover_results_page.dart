@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
 import '../../../../shared/primitives/money/money.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +20,7 @@ import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/geo_point.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/time_window.dart';
+import '../discover_formats.dart';
 import '../widgets/scenario_intake_selection_tray.dart';
 import '../widgets/route_catalog_labels.dart';
 import '../widgets/route_catalog_preview_thumbnail.dart';
@@ -41,9 +44,10 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
   final GlobalKey _conditionsKey = GlobalKey();
 
   static final List<_CategoryOption> _categories = <_CategoryOption>[
-    const _CategoryOption(
+    _CategoryOption(
       id: null,
-      label: 'All',
+      // The "All" option; its text comes from l10n when shown.
+      label: '',
       icon: Icons.grid_view_rounded,
     ),
     for (final RechargeContentGroup group in rechargeVisibleContentGroups)
@@ -115,30 +119,33 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          selection.active ? 'Select for Scenario' : 'Search Recharge',
+          selection.active
+              ? context.l10n.discoverSelectForScenario
+              : context.l10n.discoverSearchRecharge,
         ),
         actions: <Widget>[
           if (selection.active)
             IconButton(
-              tooltip: 'Cancel Scenario selection',
+              tooltip: context.l10n.discoverCancelScenarioSelection,
               onPressed: _scenarioSelectionController.cancel,
               icon: const Icon(Icons.close),
             )
           else ...<Widget>[
             if (multiSelectEnabled)
               IconButton(
-                tooltip: 'Select for Scenario',
+                tooltip: context.l10n.discoverSelectForScenario,
                 onPressed: _startScenarioSelection,
                 icon: const Icon(Icons.playlist_add_outlined),
               ),
             IconButton(
-              tooltip: 'Map',
+              tooltip: context.l10n.discoverMap,
               onPressed: () => context.go(_mapLocationForQuery(query)),
               icon: const Icon(Icons.map_outlined),
             ),
             IconButton(
-              tooltip: 'Create from current search',
-              onPressed: () => context.go(_createLocationForQuery(query)),
+              tooltip: context.l10n.discoverCreateFromCurrentSearch,
+              onPressed: () =>
+                  context.go(_createLocationForQuery(context.l10n, query)),
               icon: const Icon(Icons.add_circle_outline),
             ),
           ],
@@ -173,8 +180,8 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
           _ActiveConditionChips(query: query),
           const SizedBox(height: 14),
           _SectionTitle(
-            title: 'Quick scenarios',
-            actionLabel: 'Reset',
+            title: context.l10n.discoverQuickScenarios,
+            actionLabel: context.l10n.discoverReset,
             onAction: () {
               _searchController.clear();
               controller.resetSearchConditions();
@@ -235,7 +242,8 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
           _SavedSearchesPanel(
             savedSearches: state.savedSearches,
             onSaveCurrent: controller.saveCurrentSearch,
-            onCreateCurrent: () => context.go(_createLocationForQuery(query)),
+            onCreateCurrent: () =>
+                context.go(_createLocationForQuery(context.l10n, query)),
             onApply: (SavedSearchEntity search) {
               _searchController.text = search.query.queryText;
               controller.applySavedSearch(search);
@@ -245,7 +253,7 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
             },
             onBuildScenario: null,
             onCreateListing: (SavedSearchEntity search) {
-              context.go(_createLocationForSavedSearch(search));
+              context.go(_createLocationForSavedSearch(context.l10n, search));
             },
             onDelete: (SavedSearchEntity search) {
               controller.deleteSavedSearch(search.id);
@@ -253,8 +261,8 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
           ),
           const SizedBox(height: 18),
           _SectionTitle(
-            title: 'Categories',
-            actionLabel: 'View map',
+            title: context.l10n.discoverCategories,
+            actionLabel: context.l10n.discoverViewMap,
             onAction: () => context.go(_mapLocationForQuery(query)),
           ),
           const SizedBox(height: 10),
@@ -275,8 +283,8 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
           ),
           const SizedBox(height: 18),
           _SectionTitle(
-            title: 'Conditions',
-            actionLabel: '${state.resultCount} found',
+            title: context.l10n.discoverConditions,
+            actionLabel: context.l10n.discoverFoundCount(state.resultCount),
           ),
           const SizedBox(height: 10),
           _ConditionPanel(
@@ -413,7 +421,9 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
     }
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Added ${result.itemCount} to Scenario')),
+      SnackBar(
+        content: Text(context.l10n.discoverAddedToScenario(result.itemCount)),
+      ),
     );
   }
 
@@ -509,7 +519,7 @@ class _SavedSearchesPanel extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Recent searches',
+                    context.l10n.discoverRecentSearches,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w800,
@@ -519,11 +529,11 @@ class _SavedSearchesPanel extends StatelessWidget {
                 FilledButton.icon(
                   onPressed: onSaveCurrent,
                   icon: const Icon(Icons.bookmark_add_outlined),
-                  label: const Text('Save'),
+                  label: Text(context.l10n.discoverSave),
                 ),
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
-                  tooltip: 'Create listing from current search',
+                  tooltip: context.l10n.discoverCreateListingFromSearch,
                   onPressed: onCreateCurrent,
                   icon: const Icon(Icons.add_circle_outline),
                 ),
@@ -532,7 +542,7 @@ class _SavedSearchesPanel extends StatelessWidget {
             const SizedBox(height: 10),
             if (savedSearches.isEmpty)
               Text(
-                'No recent searches yet',
+                context.l10n.discoverNoRecentSearches,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
@@ -620,7 +630,7 @@ class _SavedSearchTile extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Delete saved conditions',
+                  tooltip: context.l10n.discoverDeleteSaved,
                   onPressed: onDelete,
                   icon: const Icon(Icons.delete_outline),
                 ),
@@ -633,26 +643,26 @@ class _SavedSearchTile extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onApply,
                     icon: const Icon(Icons.tune),
-                    label: const Text('Apply'),
+                    label: Text(context.l10n.discoverApply),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
-                  tooltip: 'Open saved conditions on map',
+                  tooltip: context.l10n.discoverOpenSavedOnMap,
                   onPressed: onOpenMap,
                   icon: const Icon(Icons.map_outlined),
                 ),
                 if (onBuildScenario != null) ...<Widget>[
                   const SizedBox(width: 4),
                   IconButton.filledTonal(
-                    tooltip: 'Build route from saved conditions',
+                    tooltip: context.l10n.discoverRouteFromSaved,
                     onPressed: onBuildScenario,
                     icon: const Icon(Icons.route_outlined),
                   ),
                 ],
                 const SizedBox(width: 4),
                 IconButton.filledTonal(
-                  tooltip: 'Create listing from saved conditions',
+                  tooltip: context.l10n.discoverCreateFromSaved,
                   onPressed: onCreateListing,
                   icon: const Icon(Icons.add_circle_outline),
                 ),
@@ -683,8 +693,12 @@ String _mapLocationForQuery(DiscoverQuery query) {
   return Uri(path: RouteNames.discoverMap, queryParameters: params).toString();
 }
 
-String _createLocationForSavedSearch(SavedSearchEntity search) {
+String _createLocationForSavedSearch(
+  AppLocalizations l10n,
+  SavedSearchEntity search,
+) {
   return _createLocationForQuery(
+    l10n,
     search.query,
     source: 'saved_search',
     title: search.title,
@@ -693,6 +707,7 @@ String _createLocationForSavedSearch(SavedSearchEntity search) {
 }
 
 String _createLocationForQuery(
+  AppLocalizations l10n,
   DiscoverQuery query, {
   String source = 'search',
   String? title,
@@ -701,7 +716,7 @@ String _createLocationForQuery(
   final Map<String, String> params = <String, String>{
     'source': source,
     'type': 'event',
-    'title': title ?? _createTitleForQuery(query),
+    'title': title ?? _createTitleForQuery(l10n, query),
     if (subtitle != null && subtitle.trim().isNotEmpty)
       'subtitle': subtitle.trim(),
     'q': query.queryText.trim(),
@@ -717,15 +732,17 @@ String _createLocationForQuery(
   return Uri(path: RouteNames.create, queryParameters: params).toString();
 }
 
-String _createTitleForQuery(DiscoverQuery query) {
+String _createTitleForQuery(AppLocalizations l10n, DiscoverQuery query) {
   final String queryText = query.queryText.trim();
   if (queryText.isNotEmpty) {
     return _capitalized(queryText);
   }
   if (query.selectedCategoryIds.isNotEmpty) {
-    return '${query.selectedCategoryIds.first} idea';
+    return l10n.discoverIdeaForCategory(
+      rechargeTaxonomyLabel(query.selectedCategoryIds.first),
+    );
   }
-  return 'Recharge idea';
+  return l10n.discoverRechargeIdea;
 }
 
 String _capitalized(String value) {
@@ -875,7 +892,7 @@ class _SearchField extends StatelessWidget {
       textInputAction: TextInputAction.search,
       onSubmitted: (_) => onSubmit(),
       decoration: InputDecoration(
-        hintText: 'Search activity, place or plan',
+        hintText: context.l10n.discoverSearchHint,
         prefixIcon: const Icon(Icons.search_rounded),
         suffixIcon: SizedBox(
           width: 144,
@@ -883,17 +900,17 @@ class _SearchField extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               IconButton(
-                tooltip: 'Clear',
+                tooltip: context.l10n.discoverClear,
                 onPressed: onClear,
                 icon: const Icon(Icons.close_rounded),
               ),
               IconButton(
-                tooltip: 'Search conditions',
+                tooltip: context.l10n.discoverSearchConditions,
                 onPressed: onFilters,
                 icon: const Icon(Icons.tune_rounded),
               ),
               IconButton(
-                tooltip: 'Search',
+                tooltip: context.l10n.discoverSearch,
                 onPressed: onSubmit,
                 icon: const Icon(Icons.arrow_forward_rounded),
               ),
@@ -914,19 +931,21 @@ class _ActiveConditionChips extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> chips = <Widget>[
       if (query.dateFrom != null || query.dateTo != null)
-        const Chip(
+        Chip(
           avatar: Icon(Icons.calendar_today_outlined, size: 16),
-          label: Text('Date set'),
+          label: Text(context.l10n.discoverDateSet),
         ),
       if (query.peopleCount != null)
         Chip(
           avatar: const Icon(Icons.group_outlined, size: 16),
-          label: Text('${query.peopleCount} people'),
+          label: Text(context.l10n.discoverPeopleCount(query.peopleCount!)),
         ),
       if (query.availableDurationMinutes != null)
         Chip(
           avatar: const Icon(Icons.schedule_outlined, size: 16),
-          label: Text('${query.availableDurationMinutes} min'),
+          label: Text(
+            context.l10n.discoverMinutes(query.availableDurationMinutes!),
+          ),
         ),
       if (query.mood != null)
         Chip(
@@ -934,21 +953,27 @@ class _ActiveConditionChips extends StatelessWidget {
           label: Text(_capitalized(query.mood!)),
         ),
       if (query.freeOnly)
-        const Chip(
+        Chip(
           avatar: Icon(Icons.payments_outlined, size: 16),
-          label: Text('Free'),
+          label: Text(context.l10n.discoverFree),
         )
       else if (query.budgetMax != null)
         Chip(
           avatar: const Icon(Icons.payments_outlined, size: 16),
-          label: Text('Up to €${query.budgetMax!.toStringAsFixed(0)}'),
+          label: Text(
+            context.l10n.discoverUpToBudget(
+              RechargeFormats.money(query.budgetMax!, context.l10n.localeName),
+            ),
+          ),
         ),
       Chip(
         avatar: const Icon(Icons.near_me_outlined, size: 16),
         label: Text(
           query.unlimitedRadius
-              ? 'Any area'
-              : '${(query.radiusMeters / 1000).round()} km',
+              ? context.l10n.discoverAnyArea
+              : context.l10n.discoverDistanceKm(
+                  '${(query.radiusMeters / 1000).round()}',
+                ),
         ),
       ),
     ];
@@ -1028,22 +1053,22 @@ class _ScenarioRow extends StatelessWidget {
       children: <Widget>[
         ActionChip(
           avatar: const Icon(Icons.bolt_outlined),
-          label: const Text('Free today'),
+          label: Text(context.l10n.discoverFreeToday),
           onPressed: onFreeToday,
         ),
         ActionChip(
           avatar: const Icon(Icons.nightlight_outlined),
-          label: const Text('Tonight'),
+          label: Text(context.l10n.discoverTonight),
           onPressed: onTonight,
         ),
         ActionChip(
           avatar: const Icon(Icons.payments_outlined),
-          label: const Text('Under 10'),
+          label: Text(context.l10n.discoverUnder('10')),
           onPressed: onUnderTen,
         ),
         ActionChip(
           avatar: const Icon(Icons.park_outlined),
-          label: const Text('Outdoor'),
+          label: Text(context.l10n.discoverOutdoor),
           onPressed: onOutdoor,
         ),
       ],
@@ -1075,7 +1100,9 @@ class _CategoryRail extends StatelessWidget {
           return ChoiceChip(
             selected: selected,
             avatar: Icon(category.icon, size: 18),
-            label: Text(category.label),
+            label: Text(
+              category.id == null ? context.l10n.discoverAll : category.label,
+            ),
             onSelected: (_) => onSelected(category.id),
           );
         },
@@ -1112,27 +1139,27 @@ class _ConditionPanel extends StatelessWidget {
           children: <Widget>[
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Free only'),
-              subtitle: const Text('Show no-ticket activities'),
+              title: Text(context.l10n.discoverFreeOnly),
+              subtitle: Text(context.l10n.discoverShowNoTicket),
               value: query.freeOnly,
               onChanged: onFreeOnlyChanged,
             ),
             const Divider(height: 20),
             _FilterLine(
-              label: 'Budget',
+              label: context.l10n.discoverBudget,
               children: <Widget>[
                 ChoiceChip(
-                  label: const Text('Any'),
+                  label: Text(context.l10n.discoverAny),
                   selected: query.budgetMax == null && !query.freeOnly,
                   onSelected: (_) => onBudgetSelected(null),
                 ),
                 ChoiceChip(
-                  label: const Text('Under 10'),
+                  label: Text(context.l10n.discoverUnder('10')),
                   selected: query.budgetMax?.minorUnits == 1000,
                   onSelected: (_) => onBudgetSelected(10),
                 ),
                 ChoiceChip(
-                  label: const Text('Under 15'),
+                  label: Text(context.l10n.discoverUnder('15')),
                   selected: query.budgetMax?.minorUnits == 1500,
                   onSelected: (_) => onBudgetSelected(15),
                 ),
@@ -1140,20 +1167,20 @@ class _ConditionPanel extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _FilterLine(
-              label: 'Date',
+              label: context.l10n.discoverDate,
               children: <Widget>[
                 ChoiceChip(
-                  label: const Text('Any'),
+                  label: Text(context.l10n.discoverAny),
                   selected: query.dateFrom == null && query.dateTo == null,
                   onSelected: (_) => onDateSelected(_DateFilter.any),
                 ),
                 ChoiceChip(
-                  label: const Text('Today'),
+                  label: Text(context.l10n.discoverToday),
                   selected: _matchesWindow(query, _todayWindow()),
                   onSelected: (_) => onDateSelected(_DateFilter.today),
                 ),
                 ChoiceChip(
-                  label: const Text('Tonight'),
+                  label: Text(context.l10n.discoverTonight),
                   selected: _matchesWindow(query, _tonightWindow()),
                   onSelected: (_) => onDateSelected(_DateFilter.tonight),
                 ),
@@ -1161,24 +1188,24 @@ class _ConditionPanel extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _FilterLine(
-              label: 'Radius',
+              label: context.l10n.discoverRadius,
               children: <Widget>[
                 ChoiceChip(
-                  label: const Text('5 km'),
+                  label: Text(context.l10n.discoverDistanceKm('5')),
                   selected:
                       !query.unlimitedRadius &&
                       query.radiusMeters.round() == 5000,
                   onSelected: (_) => onRadiusSelected(_RadiusFilter.fiveKm),
                 ),
                 ChoiceChip(
-                  label: const Text('20 km'),
+                  label: Text(context.l10n.discoverDistanceKm('20')),
                   selected:
                       !query.unlimitedRadius &&
                       query.radiusMeters.round() == 20000,
                   onSelected: (_) => onRadiusSelected(_RadiusFilter.twentyKm),
                 ),
                 ChoiceChip(
-                  label: const Text('Any area'),
+                  label: Text(context.l10n.discoverAnyArea),
                   selected: query.unlimitedRadius,
                   onSelected: (_) => onRadiusSelected(_RadiusFilter.anyArea),
                 ),
@@ -1224,20 +1251,26 @@ class _AppliedSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<String> parts = <String>[
       if (query.queryText.isNotEmpty) '"${query.queryText}"',
-      if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
-      if (query.freeOnly) 'free',
+      if (query.selectedCategoryIds.isNotEmpty)
+        rechargeTaxonomyLabel(query.selectedCategoryIds.first),
+      if (query.freeOnly) context.l10n.discoverFree,
       if (query.budgetMax != null)
-        'up to ${query.budgetMax!.toStringAsFixed(0)}',
-      if (query.dateFrom != null || query.dateTo != null) 'date set',
+        context.l10n.discoverUpToBudget(
+          RechargeFormats.money(query.budgetMax!, context.l10n.localeName),
+        ),
+      if (query.dateFrom != null || query.dateTo != null)
+        context.l10n.discoverDateSet,
       query.unlimitedRadius
-          ? 'any area'
-          : '${(query.radiusMeters / 1000).round()} km',
+          ? context.l10n.discoverAnyArea
+          : context.l10n.discoverDistanceKm(
+              '${(query.radiusMeters / 1000).round()}',
+            ),
     ];
 
     return Text(
       parts.isEmpty
-          ? 'Showing nearby activities'
-          : 'Applied: ${parts.join(' · ')}',
+          ? context.l10n.discoverShowingNearby
+          : '${context.l10n.discoverAppliedLabel} ${parts.join(' · ')}',
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
         color: Theme.of(context).colorScheme.onSurfaceVariant,
         fontWeight: FontWeight.w600,
@@ -1277,15 +1310,19 @@ class _ResultsList extends StatelessWidget {
         );
       case DiscoverFeedStatus.empty:
         return _StateMessage(
-          message: state.message ?? 'No activities match these conditions',
-          actionLabel: 'Reset conditions',
+          message:
+              discoverFeedNoticeText(context.l10n, state.message) ??
+              context.l10n.discoverNoMatches,
+          actionLabel: context.l10n.discoverResetConditions,
           onAction: onReset,
         );
       case DiscoverFeedStatus.error:
       case DiscoverFeedStatus.permissionDenied:
         return _StateMessage(
-          message: state.message ?? 'Search failed',
-          actionLabel: 'Retry',
+          message:
+              discoverFeedNoticeText(context.l10n, state.message) ??
+              context.l10n.discoverSearchFailed,
+          actionLabel: context.l10n.discoverRetry,
           onAction: onRetry,
         );
       case DiscoverFeedStatus.ready:
@@ -1333,16 +1370,18 @@ class _SearchResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final String trailingLabel = item.isCatalogRoute
-        ? 'Route'
+        ? context.l10n.discoverRouteLabel
         : item.isPublishedRoute
-        ? _routeDurationLabel(item.durationMinutes)
+        ? _routeDurationLabel(context.l10n, item.durationMinutes)
         : item.activityCatalog != null
         ? (item.activityCatalog!.contributionKind == null
-              ? 'No contribution specified'
-              : 'Optional contribution')
+              ? context.l10n.discoverNoContribution
+              : context.l10n.discoverOptionalContribution)
         : item.isFree
-        ? 'Free'
-        : '${item.priceAmount?.toStringAsFixed(0) ?? '—'} €';
+        ? context.l10n.discoverFree
+        : item.priceAmount == null
+        ? '—'
+        : RechargeFormats.money(item.priceAmount!, context.l10n.localeName);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -1400,15 +1439,15 @@ class _SearchResultCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       item.isCatalogRoute
-                          ? 'Route · '
+                          ? '${context.l10n.discoverRouteLabel} · '
                                 '${rechargeTaxonomyLabel(item.category)} · '
-                                '${routeCatalogMetricLabel(item.routeCatalog!)}'
+                                '${routeCatalogMetricLabel(context.l10n, item.routeCatalog!)}'
                           : item.isPublishedRoute
-                          ? '${item.city} · Route · '
-                                '${_routeDistanceLabel(item)}'
+                          ? '${item.city} · ${context.l10n.discoverRouteLabel} · '
+                                '${_routeDistanceLabel(context.l10n, item)}'
                           : '${item.city} · '
                                 '${rechargeTaxonomyLabel(item.category)} · '
-                                '${item.distanceKm.toStringAsFixed(1)} км',
+                                '${discoverKm(context.l10n, item.distanceKm)}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
@@ -1435,7 +1474,8 @@ class _SearchResultCard extends StatelessWidget {
                     ),
                     if (onAddToScenario != null)
                       IconButton(
-                        tooltip: 'Add ${item.title} to Scenario',
+                        tooltip:
+                            '${context.l10n.discoverAddToScenario}: ${item.title}',
                         onPressed: onAddToScenario,
                         icon: const Icon(Icons.playlist_add_outlined),
                       ),
@@ -1449,18 +1489,14 @@ class _SearchResultCard extends StatelessWidget {
   }
 }
 
-String _routeDistanceLabel(DiscoverItemEntity item) {
+String _routeDistanceLabel(AppLocalizations l10n, DiscoverItemEntity item) {
   final double? meters = item.publishedRoute?.distanceMeters;
-  if (meters == null) return '${item.distanceKm.toStringAsFixed(1)} км';
-  return '${(meters / 1000).toStringAsFixed(1)} км';
+  return discoverKm(l10n, meters == null ? item.distanceKm : meters / 1000);
 }
 
-String _routeDurationLabel(int? durationMinutes) {
-  if (durationMinutes == null) return 'Route';
-  if (durationMinutes < 60) return '$durationMinutes min';
-  final int hours = durationMinutes ~/ 60;
-  final int minutes = durationMinutes % 60;
-  return minutes == 0 ? '$hours h' : '$hours h $minutes min';
+String _routeDurationLabel(AppLocalizations l10n, int? durationMinutes) {
+  if (durationMinutes == null) return l10n.discoverRouteLabel;
+  return discoverDuration(l10n, durationMinutes);
 }
 
 class _StateMessage extends StatelessWidget {

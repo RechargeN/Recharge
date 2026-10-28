@@ -16,10 +16,10 @@ void main() {
   ) async {
     DateTime now = DateTime.utc(2026, 9, 7, 10, 59, 59);
     await tester.pumpWidget(_app(_projection(), clock: () => now));
-    expect(find.text('Проверить и забронировать'), findsOneWidget);
+    expect(find.text('Review and book'), findsOneWidget);
     now = DateTime.utc(2026, 9, 7, 11);
     await tester.pump(const Duration(seconds: 1));
-    expect(find.text('Проверить время на сайте'), findsOneWidget);
+    expect(find.text('Check the time on the website'), findsOneWidget);
   });
 
   fullPageTestWidgets('resume re-evaluates an expired snapshot', (
@@ -31,7 +31,7 @@ void main() {
     now = DateTime.utc(2026, 9, 7, 12);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
-    expect(find.text('Проверить время на сайте'), findsOneWidget);
+    expect(find.text('Check the time on the website'), findsOneWidget);
   });
 
   fullPageTestWidgets('platform launch exception has explicit feedback', (
@@ -45,7 +45,7 @@ void main() {
         },
       ),
     );
-    await tester.tap(find.text('Проверить и забронировать'));
+    await tester.tap(find.text('Review and book'));
     await tester.pumpAndSettle();
     expect(find.text('Could not open the booking site'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -92,11 +92,11 @@ void main() {
     await tester.pumpWidget(_app(_projection()));
     await tester.pumpAndSettle();
     await tester.scrollPageUntilVisible(
-      find.text('Показать на карте'),
+      find.text('Show on map'),
       260,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Показать на карте'));
+    await tester.tap(find.text('Show on map'));
     await tester.pumpAndSettle();
     expect(
       find.text('item=session-1;lat=56.950000;lng=24.100000'),
@@ -113,7 +113,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Показать на карте'), findsNothing);
+    expect(find.text('Show on map'), findsNothing);
   });
 
   fullPageTestWidgets(
@@ -133,8 +133,8 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Проверить время на сайте'), findsOneWidget);
-      await tester.tap(find.text('Проверить время на сайте'));
+      expect(find.text('Check the time on the website'), findsOneWidget);
+      await tester.tap(find.text('Check the time on the website'));
       await tester.pump();
       expect(
         launchedUri,
@@ -151,7 +151,7 @@ void main() {
       _app(_projection(), launcher: (Uri uri) async => false),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Проверить и забронировать'));
+    await tester.tap(find.text('Review and book'));
     await tester.pumpAndSettle();
     expect(find.text('Could not open the booking site'), findsOneWidget);
   });

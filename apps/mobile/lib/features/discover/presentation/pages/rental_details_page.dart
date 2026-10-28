@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../domain/entities/published_rental_discovery_entity.dart';
 import '../renderers/object_offer_details_renderer.dart';
 import '../shell/details_shell.dart';
@@ -43,7 +44,12 @@ class RentalDetailsPage extends StatelessWidget {
       );
       if (!launched && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open ${parsed.host}.')),
+          // The host is shown as is after a localized message.
+          SnackBar(
+            content: Text(
+              '${context.l10n.discoverCouldNotOpenLink} ${parsed.host}',
+            ),
+          ),
         );
       }
     }

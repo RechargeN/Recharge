@@ -214,12 +214,13 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
         isFree: true,
         coverImageUrl: route.coverImage,
         organizerName: route.publisherName,
-        venueName: 'Route start',
+        // L4.5: no display text here; the UI names the start point.
+        venueName: '',
         marketCityId: route.marketCityId,
         timezoneId: route.timezoneId,
         durationMinutes: (route.durationSeconds / 60).ceil(),
         durationConfidence: DurationConfidence.exact,
-        ctaLabel: 'Open Route',
+        ctaLabel: '',
         highlights: <String>[
           '${(route.distanceMeters / 1000).toStringAsFixed(1)} km',
           route.routingProfileId,

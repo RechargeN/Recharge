@@ -36,7 +36,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Утренняя йога в парке'), findsOneWidget);
-    expect(find.textContaining('км'), findsWidgets);
+    expect(find.textContaining('km'), findsWidgets);
   });
 }
 

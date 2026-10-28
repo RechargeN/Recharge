@@ -39,57 +39,63 @@ class CollectionItemResolutionRepositoryImpl
     );
   }
 
-  static final Map<String, _MockResolvedFixture> _defaultFixtures =
-      <String, _MockResolvedFixture>{
-        'place:place_demo_1': _MockResolvedFixture(
-          card: const CollectionResolvedCardProjection(
-            title: 'House of the Blackheads',
-            categoryLabel: 'old_town',
-          ),
-          publicMapPoint: const GeoPoint(latitude: 56.9469, longitude: 24.1064),
-        ),
-        'place:place_demo_2': _MockResolvedFixture(
-          card: const CollectionResolvedCardProjection(
-            title: 'Central Market',
-            categoryLabel: 'old_town',
-          ),
-          publicMapPoint: const GeoPoint(latitude: 56.9459, longitude: 24.1075),
-        ),
-        'route:route_demo_1': _MockResolvedFixture(
-          card: const CollectionResolvedCardProjection(
-            title: 'Old Riga walking loop',
-            categoryLabel: 'old_town',
-          ),
-          publicMapPoint: const GeoPoint(latitude: 56.9475, longitude: 24.1052),
-        ),
-        'bookableSession:session_demo_1': _MockResolvedFixture(
-          card: const CollectionResolvedCardProjection(
-            title: 'Riverside sauna session',
-            categoryLabel: 'agenskalns',
-            priceFromMinorUnits: 3500,
-            currency: 'EUR',
-          ),
-          publicMapPoint: const GeoPoint(latitude: 56.9412, longitude: 24.0876),
-        ),
-        'classWorkshop:workshop_demo_1': _MockResolvedFixture(
-          card: const CollectionResolvedCardProjection(
-            title: 'Ceramics workshop',
-            categoryLabel: 'miera_iela',
-            priceFromMinorUnits: 4500,
-            currency: 'EUR',
-          ),
-          publicMapPoint: const GeoPoint(latitude: 56.9548, longitude: 24.1301),
-        ),
-        'rental:rental_demo_1': _MockResolvedFixture(
-          card: const CollectionResolvedCardProjection(
-            title: 'City bike rental',
-            categoryLabel: 'old_town',
-            priceFromMinorUnits: 1200,
-            currency: 'EUR',
-          ),
-          publicMapPoint: const GeoPoint(latitude: 56.9481, longitude: 24.1058),
-        ),
-      };
+  static final Map<String, _MockResolvedFixture>
+  _defaultFixtures = <String, _MockResolvedFixture>{
+    'place:place_demo_1': _MockResolvedFixture(
+      card: const CollectionResolvedCardProjection(
+        title:
+            'House of the Blackheads', // l10n-ignore: demo catalog object title (content, shown as is)
+        categoryLabel: 'old_town',
+      ),
+      publicMapPoint: const GeoPoint(latitude: 56.9469, longitude: 24.1064),
+    ),
+    'place:place_demo_2': _MockResolvedFixture(
+      card: const CollectionResolvedCardProjection(
+        title:
+            'Central Market', // l10n-ignore: demo catalog object title (content, shown as is)
+        categoryLabel: 'old_town',
+      ),
+      publicMapPoint: const GeoPoint(latitude: 56.9459, longitude: 24.1075),
+    ),
+    'route:route_demo_1': _MockResolvedFixture(
+      card: const CollectionResolvedCardProjection(
+        title:
+            'Old Riga walking loop', // l10n-ignore: demo catalog object title (content, shown as is)
+        categoryLabel: 'old_town',
+      ),
+      publicMapPoint: const GeoPoint(latitude: 56.9475, longitude: 24.1052),
+    ),
+    'bookableSession:session_demo_1': _MockResolvedFixture(
+      card: const CollectionResolvedCardProjection(
+        title:
+            'Riverside sauna session', // l10n-ignore: demo catalog object title (content, shown as is)
+        categoryLabel: 'agenskalns',
+        priceFromMinorUnits: 3500,
+        currency: 'EUR',
+      ),
+      publicMapPoint: const GeoPoint(latitude: 56.9412, longitude: 24.0876),
+    ),
+    'classWorkshop:workshop_demo_1': _MockResolvedFixture(
+      card: const CollectionResolvedCardProjection(
+        title:
+            'Ceramics workshop', // l10n-ignore: demo catalog object title (content, shown as is)
+        categoryLabel: 'miera_iela',
+        priceFromMinorUnits: 4500,
+        currency: 'EUR',
+      ),
+      publicMapPoint: const GeoPoint(latitude: 56.9548, longitude: 24.1301),
+    ),
+    'rental:rental_demo_1': _MockResolvedFixture(
+      card: const CollectionResolvedCardProjection(
+        title:
+            'City bike rental', // l10n-ignore: demo catalog object title (content, shown as is)
+        categoryLabel: 'old_town',
+        priceFromMinorUnits: 1200,
+        currency: 'EUR',
+      ),
+      publicMapPoint: const GeoPoint(latitude: 56.9481, longitude: 24.1058),
+    ),
+  };
 }
 
 class _MockResolvedFixture {

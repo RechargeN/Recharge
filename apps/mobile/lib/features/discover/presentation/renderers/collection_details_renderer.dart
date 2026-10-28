@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/localization/l10n_context.dart';
 import '../../../../shared/models/catalog_object_ref.dart';
 import '../../domain/entities/published_collection_discovery_entity.dart';
 import '../../domain/repositories/collection_item_resolution_repository.dart';
@@ -38,9 +39,7 @@ class CollectionDetailsRenderer implements DetailsRenderer {
   @override
   Widget buildBody(BuildContext context) {
     final List<CollectionResolvedItem> ordered = entity.items
-        .map(
-          (PublishedCollectionItemRef ref) => resolvedItems[ref.stableKey],
-        )
+        .map((PublishedCollectionItemRef ref) => resolvedItems[ref.stableKey])
         .whereType<CollectionResolvedItem>()
         .toList(growable: false);
 
@@ -61,7 +60,11 @@ class CollectionDetailsRenderer implements DetailsRenderer {
               if (entity.budgetTier != null)
                 Chip(label: Text(entity.budgetTier!)),
               Chip(label: Text('${entity.itemCount} items')),
-              Chip(label: Text('By ${entity.publisherName}')),
+              Chip(
+                label: Text(
+                  '${context.l10n.discoverByLabel} ${entity.publisherName}',
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -89,12 +92,11 @@ class CollectionDetailsRenderer implements DetailsRenderer {
           .add(ref);
     }
     final List<Widget> widgets = <Widget>[];
-    final List<PublishedCollectionSectionRef> sortedSections = entity.sections
-        .toList()
-      ..sort(
-        (PublishedCollectionSectionRef a, PublishedCollectionSectionRef b) =>
-            a.order.compareTo(b.order),
-      );
+    final List<PublishedCollectionSectionRef> sortedSections =
+        entity.sections.toList()..sort(
+          (PublishedCollectionSectionRef a, PublishedCollectionSectionRef b) =>
+              a.order.compareTo(b.order),
+        );
     for (final PublishedCollectionSectionRef section in sortedSections) {
       final List<PublishedCollectionItemRef> refs =
           bySection[section.id] ?? const <PublishedCollectionItemRef>[];
@@ -109,11 +111,10 @@ class CollectionDetailsRenderer implements DetailsRenderer {
         ),
       );
       final List<PublishedCollectionItemRef> sortedRefs =
-          List<PublishedCollectionItemRef>.of(refs)
-            ..sort(
-              (PublishedCollectionItemRef a, PublishedCollectionItemRef b) =>
-                  a.order.compareTo(b.order),
-            );
+          List<PublishedCollectionItemRef>.of(refs)..sort(
+            (PublishedCollectionItemRef a, PublishedCollectionItemRef b) =>
+                a.order.compareTo(b.order),
+          );
       for (final PublishedCollectionItemRef ref in sortedRefs) {
         widgets.add(_itemTile(ref, resolvedItems[ref.stableKey], context));
       }

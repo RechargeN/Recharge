@@ -76,7 +76,7 @@ void main() {
 
       await tester.tap(find.byIcon(Icons.ios_share_rounded));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Поделиться'));
+      await tester.tap(find.text('Share'));
       await tester.pumpAndSettle();
 
       expect(clipboardCalls, hasLength(1));
@@ -93,11 +93,11 @@ void main() {
     await tester.pumpWidget(await _app());
     await tester.pumpAndSettle();
     await tester.scrollPageUntilVisible(
-      find.text('Показать на карте'),
+      find.text('Show on map'),
       260,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Показать на карте'));
+    await tester.tap(find.text('Show on map'));
     await tester.pumpAndSettle();
 
     expect(find.text('item=evt-1;lat=56.950000;lng=24.100000'), findsOneWidget);
@@ -124,7 +124,7 @@ void main() {
   ) async {
     await tester.pumpWidget(await _app());
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Записаться').last);
+    await tester.tap(find.text('Sign up').last);
     await tester.pumpAndSettle();
 
     expect(find.text('Interest in the event noted'), findsOneWidget);

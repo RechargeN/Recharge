@@ -114,6 +114,31 @@ abstract final class RechargeFormats {
         _dateLocale(languageCode),
       ).format(DateTime.utc(2024, 1, isoWeekday.clamp(1, 7)));
 
+  /// The full weekday name of ISO [isoWeekday] (1 = Monday … 7 = Sunday).
+  static String weekdayLong(int isoWeekday, String languageCode) =>
+      DateFormat.EEEE(
+        _dateLocale(languageCode),
+      ).format(DateTime.utc(2024, 1, isoWeekday.clamp(1, 7)));
+
+  // A wall-clock value already resolved in the owning object's zone (for
+  // example by Discover's TimezoneRepository) is formatted as is: no zone is
+  // applied a second time.
+
+  static String wallDate(DateTime wall, String languageCode) =>
+      DateFormat.yMMMd(_dateLocale(languageCode)).format(wall);
+
+  static String wallDateWithWeekday(DateTime wall, String languageCode) =>
+      DateFormat.yMMMEd(_dateLocale(languageCode)).format(wall);
+
+  static String wallDayWithWeekday(DateTime wall, String languageCode) =>
+      DateFormat.MMMEd(_dateLocale(languageCode)).format(wall);
+
+  static String wallMonthDay(DateTime wall, String languageCode) =>
+      DateFormat.MMMd(_dateLocale(languageCode)).format(wall);
+
+  static String wallTime(DateTime wall, String languageCode) =>
+      DateFormat.jm(_dateLocale(languageCode)).format(wall);
+
   /// Time only, in the device zone (see [deviceDateTime]).
   static String deviceTime(DateTime instantUtc, String languageCode) =>
       DateFormat.jm(_dateLocale(languageCode)).format(instantUtc.toLocal());

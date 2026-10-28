@@ -42,15 +42,18 @@ final class ClassWorkshopPriceFixed extends ClassWorkshopPrice {
     required this.minorUnitDigits,
     required this.scope,
   }) {
-    if (amountMinor <= 0 || !RegExp(r'^[A-Z]{3}$').hasMatch(currencyCode) ||
-        minorUnitDigits < 0 || minorUnitDigits > 4) {
+    if (amountMinor <= 0 ||
+        !RegExp(r'^[A-Z]{3}$').hasMatch(currencyCode) ||
+        minorUnitDigits < 0 ||
+        minorUnitDigits > 4) {
       throw ArgumentError(
-        'Fixed price requires positive minor units and ISO currency.',
+        'Fixed price requires positive minor units and ISO currency.', // l10n-ignore: developer error
       );
     }
   }
   final int amountMinor;
   final String currencyCode;
+
   /// Source-provided currency metadata; do not assume every currency has cents.
   final int minorUnitDigits;
   final ClassWorkshopPriceScope scope;
@@ -67,7 +70,7 @@ final class ClassWorkshopExternalEnrollment extends ClassWorkshopEnrollment {
         uri.host.isEmpty ||
         uri.userInfo.isNotEmpty) {
       throw ArgumentError(
-        'Enrollment requires absolute HTTPS without user-info.',
+        'Enrollment requires absolute HTTPS without user-info.', // l10n-ignore: developer error
       );
     }
   }
@@ -158,7 +161,7 @@ final class ClassWorkshopAnnouncedSchedule extends ClassWorkshopSchedule {
               (occurrence.startAtUtc.isBefore(previous.endAtUtc) ||
                   occurrence.timezoneId != previous.timezoneId))) {
         throw ArgumentError(
-          'Schedule must be unique, ordered, non-overlapping and use one timezone.',
+          'Schedule must be unique, ordered, non-overlapping and use one timezone.', // l10n-ignore: developer error
         );
       }
       previous = occurrence;
@@ -281,7 +284,7 @@ final class PublishedClassWorkshopDiscoveryEntity {
         (durationMinutes != null && durationMinutes! <= 0) ||
         (durationMinutes == null) != (durationScope == null)) {
       throw ArgumentError(
-        'Declared facts must be positive and duration needs its scope.',
+        'Declared facts must be positive and duration needs its scope.', // l10n-ignore: developer error
       );
     }
     if (schedule case ClassWorkshopAnnouncedSchedule(:final occurrences)) {

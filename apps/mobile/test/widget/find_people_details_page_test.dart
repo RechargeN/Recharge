@@ -49,11 +49,11 @@ void main() {
     await tester.pumpWidget(_app(_projection(), _SpyAnalytics()));
     await tester.pumpAndSettle();
     await tester.scrollPageUntilVisible(
-      find.text('Показать на карте'),
+      find.text('Show on map'),
       260,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Показать на карте'));
+    await tester.tap(find.text('Show on map'));
     await tester.pumpAndSettle();
     expect(find.text('item=fp-1;lat=56.950000;lng=24.100000'), findsOneWidget);
 
@@ -68,7 +68,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Показать на карте'), findsNothing);
+    expect(find.text('Show on map'), findsNothing);
   });
 }
 

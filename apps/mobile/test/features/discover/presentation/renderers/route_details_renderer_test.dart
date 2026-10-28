@@ -16,20 +16,21 @@ import '../../../../widget/widget_test_viewport.dart';
 /// first-class, safety reporting, navigation action — plus parity for the
 /// generic sections reused from `CompatibilityObjectRenderer`.
 void main() {
-  fullPageTestWidgets('renders an interactive map hero with an "open on map" action', (
-    tester,
-  ) async {
-    bool mapOpened = false;
-    await tester.pumpWidget(_app(_renderer(onMap: () => mapOpened = true)));
-    await tester.pumpAndSettle();
+  fullPageTestWidgets(
+    'renders an interactive map hero with an "open on map" action',
+    (tester) async {
+      bool mapOpened = false;
+      await tester.pumpWidget(_app(_renderer(onMap: () => mapOpened = true)));
+      await tester.pumpAndSettle();
 
-    expect(find.byType(GoogleMap), findsOneWidget);
-    expect(find.text('Открыть на карте'), findsOneWidget);
+      expect(find.byType(GoogleMap), findsOneWidget);
+      expect(find.text('Open on map'), findsOneWidget);
 
-    await tester.tap(find.text('Открыть на карте'));
-    await tester.pump();
-    expect(mapOpened, isTrue);
-  });
+      await tester.tap(find.text('Open on map'));
+      await tester.pump();
+      expect(mapOpened, isTrue);
+    },
+  );
 
   fullPageTestWidgets(
     'elevation summary shows ascent/descent and the partial-data note — '
@@ -53,36 +54,32 @@ void main() {
       expect(find.text('80 m'), findsOneWidget);
       expect(find.text('Ascent'), findsOneWidget);
       expect(find.text('Descent'), findsOneWidget);
-      expect(
-        find.textContaining('not presented as complete'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('not presented as complete'), findsOneWidget);
     },
   );
 
-  fullPageTestWidgets(
-    'unavailable elevation data is not shown as zero',
-    (tester) async {
-      await tester.pumpWidget(
-        _app(
-          _renderer(
-            route: _route(
-              ascentMeters: null,
-              descentMeters: null,
-              elevationAvailability: 'unavailable',
-            ),
+  fullPageTestWidgets('unavailable elevation data is not shown as zero', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        _renderer(
+          route: _route(
+            ascentMeters: null,
+            descentMeters: null,
+            elevationAvailability: 'unavailable',
           ),
         ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.text('—'), findsWidgets);
-      expect(
-        find.textContaining('is unavailable and is not shown as zero'),
-        findsOneWidget,
-      );
-    },
-  );
+    expect(find.text('—'), findsWidgets);
+    expect(
+      find.textContaining('is unavailable and is not shown as zero'),
+      findsOneWidget,
+    );
+  });
 
   fullPageTestWidgets(
     'difficulty/profile/POI/field-verified/surface render as a first-class '
@@ -110,7 +107,7 @@ void main() {
       // composition card's own profile pill is among them.
       expect(find.text('Walking'), findsWidgets);
       expect(find.text('Moderate'), findsOneWidget);
-      expect(find.text('5 POI'), findsOneWidget);
+      expect(find.text('5 points of interest'), findsOneWidget);
       expect(find.text('Field verified'), findsOneWidget);
       expect(find.text('Surface'), findsOneWidget);
       expect(find.text('Paved'), findsOneWidget);
@@ -128,7 +125,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Сообщить о проблеме на маршруте'));
+      await tester.tap(find.text('Report a problem on the route'));
       await tester.pump();
       expect(reported, isTrue);
     },

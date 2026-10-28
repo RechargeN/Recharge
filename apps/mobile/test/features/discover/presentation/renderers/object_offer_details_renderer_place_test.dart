@@ -8,6 +8,7 @@ import 'package:recharge/features/discover/presentation/renderers/object_offer_v
 import 'package:recharge/features/discover/presentation/shell/details_shell.dart';
 
 import '../../../../widget/widget_test_viewport.dart';
+import 'package:recharge/core/localization/l10n_context.dart';
 
 void main() {
   DiscoverItemEntity fixture({
@@ -66,6 +67,10 @@ void main() {
     VoidCallback? onCtaTap,
   }) {
     return MaterialApp(
+      // L4.5: the expectations below are the Russian copy.
+      locale: const Locale('ru'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: DetailsShell(
         state: DetailsScreenAvailable(
           immersiveHero: true,
@@ -112,13 +117,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Оранжерея Верманского сада'), findsOneWidget);
-      expect(find.text('7 €'), findsOneWidget);
-      expect(find.text('1.8 км'), findsOneWidget);
+      expect(find.textContaining('7,00'), findsOneWidget);
+      expect(find.text('1,8 км'), findsOneWidget);
       expect(find.text('1 ч 30 мин'), findsOneWidget);
       expect(find.text('Riga City Gardens'), findsOneWidget);
       expect(find.text('О месте'), findsOneWidget);
       expect(find.text('Часы работы'), findsOneWidget);
-      expect(find.text('Понедельник'), findsOneWidget);
+      expect(find.text('понедельник'), findsOneWidget);
       expect(find.text('10:00–19:00'), findsOneWidget);
       expect(find.text('Показать на карте'), findsOneWidget);
     },

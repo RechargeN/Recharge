@@ -11,6 +11,7 @@ import 'package:recharge/features/discover/presentation/renderers/object_offer_v
 import 'package:recharge/features/discover/presentation/shell/details_shell.dart';
 
 import '../../../../widget/widget_test_viewport.dart';
+import 'package:recharge/core/localization/l10n_context.dart';
 
 /// `docs/product/discover/DTL_EVT_01_EVENT_DETAILS_SLICE_SPEC.md` §5 — order,
 /// honest metrics, verified badge, empty-section hiding, honest CTA.
@@ -84,6 +85,10 @@ void main() {
     Future<void> Function()? onPrimaryAction,
   }) {
     return MaterialApp(
+      // L4.5: the expectations below are the Russian copy.
+      locale: const Locale('ru'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: DetailsShell(
         state: DetailsScreenAvailable(
           immersiveHero: true,
@@ -115,7 +120,7 @@ void main() {
     expect(find.textContaining('18:00–20:30'), findsOneWidget);
     expect(find.text('Marine Tennis Club, Дубай, ОАЭ'), findsOneWidget);
     expect(find.text('32'), findsOneWidget);
-    expect(find.text('2.5 ч'), findsOneWidget);
+    expect(find.text('2,5 ч'), findsOneWidget);
   });
 
   fullPageTestWidgets('composes Event through the shared Object / Offer visual '
@@ -419,6 +424,10 @@ void main() {
       });
       await tester.pumpWidget(
         MaterialApp(
+          // L4.5: the expectations below are the Russian copy.
+          locale: const Locale('ru'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           builder: (BuildContext context, Widget? child) {
             return MediaQuery(
               data: MediaQuery.of(

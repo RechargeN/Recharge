@@ -130,7 +130,6 @@ final class DisabledDiscoverRepository
 
   static const DiscoverException _refusal = DiscoverException(
     code: 'DISCOVER_DISABLED',
-    message: 'Discover недоступен',
   );
 
   @override
@@ -190,12 +189,7 @@ final class _DisabledFindPeopleDiscovery
 
   @override
   Future<Never> getActiveFindPeopleRequest(String requestId) =>
-      Future<Never>.error(
-        const DiscoverException(
-          code: 'DISCOVER_DISABLED',
-          message: 'Discover недоступен',
-        ),
-      );
+      Future<Never>.error(const DiscoverException(code: 'DISCOVER_DISABLED'));
 }
 
 /// Event Details for the binding, on the same snapshot as the listing.

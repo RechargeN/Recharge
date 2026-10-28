@@ -2,9 +2,20 @@ import '../entities/local_date.dart';
 import '../entities/time_window.dart';
 import '../repositories/timezone_repository.dart';
 
+/// L4.5: why a time window cannot be built; the UI turns the code into text.
+enum TimeWindowIssue {
+  unknownTimezone,
+  dayEnded,
+  boundsRequired,
+  nonexistentLocalTime,
+  endBeforeStart,
+  invalidTravelContext,
+  serviceUnavailable,
+}
+
 class TimeWindowValidationException implements Exception {
-  const TimeWindowValidationException(this.message);
-  final String message;
+  const TimeWindowValidationException(this.issue);
+  final TimeWindowIssue issue;
 }
 
 class BuildTimeWindowUseCase {
@@ -21,7 +32,9 @@ class BuildTimeWindowUseCase {
     int flexibilityMinutes = 0,
   }) {
     if (!_timezoneRepository.isValidTimezone(timezoneId)) {
-      throw const TimeWindowValidationException('Unknown timezone');
+      throw const TimeWindowValidationException(
+        TimeWindowIssue.unknownTimezone,
+      );
     }
     if (mode == TimeWindowMode.anytimeToday) {
       final LocalDateTimeValue localNow = _timezoneRepository.toLocal(
@@ -35,7 +48,7 @@ class BuildTimeWindowUseCase {
         policy: LocalBoundaryPolicy.userEnd,
       );
       if (!end.isValid || !nowUtc.isBefore(end.instantUtc!)) {
-        throw const TimeWindowValidationException('Local day has ended');
+        throw const TimeWindowValidationException(TimeWindowIssue.dayEnded);
       }
       return TimeWindow(
         startAtUtc: nowUtc.toUtc(),
@@ -47,7 +60,7 @@ class BuildTimeWindowUseCase {
       );
     }
     if (startLocal == null || endLocal == null) {
-      throw const TimeWindowValidationException('Start and end are required');
+      throw const TimeWindowValidationException(TimeWindowIssue.boundsRequired);
     }
     final LocalTimeResolution start = _timezoneRepository.resolveLocal(
       date: LocalDate(startLocal.year, startLocal.month, startLocal.day),
@@ -63,11 +76,11 @@ class BuildTimeWindowUseCase {
     );
     if (!start.isValid || !end.isValid) {
       throw const TimeWindowValidationException(
-        'Selected local time does not exist because of DST',
+        TimeWindowIssue.nonexistentLocalTime,
       );
     }
     if (!start.instantUtc!.isBefore(end.instantUtc!)) {
-      throw const TimeWindowValidationException('End must be after start');
+      throw const TimeWindowValidationException(TimeWindowIssue.endBeforeStart);
     }
     return TimeWindow(
       startAtUtc: start.instantUtc!,

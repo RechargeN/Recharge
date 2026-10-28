@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../domain/entities/published_route_discovery_entity.dart';
 
 /// Honest elevation summary — **not a graph**
@@ -35,14 +36,14 @@ class RouteElevationSummary extends StatelessWidget {
                 Expanded(
                   child: _ElevationStat(
                     icon: Icons.trending_up,
-                    label: 'Ascent',
+                    label: context.l10n.discoverAscent,
                     value: _metersLabel(route.ascentMeters),
                   ),
                 ),
                 Expanded(
                   child: _ElevationStat(
                     icon: Icons.trending_down,
-                    label: 'Descent',
+                    label: context.l10n.discoverDescent,
                     value: _metersLabel(route.descentMeters),
                   ),
                 ),
@@ -52,9 +53,8 @@ class RouteElevationSummary extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 route.elevationAvailability == 'partial'
-                    ? 'Elevation data is partial; ascent and descent are not '
-                          'presented as complete.'
-                    : 'Elevation data is unavailable and is not shown as zero.',
+                    ? context.l10n.discoverElevationPartial
+                    : context.l10n.discoverElevationUnavailable,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],

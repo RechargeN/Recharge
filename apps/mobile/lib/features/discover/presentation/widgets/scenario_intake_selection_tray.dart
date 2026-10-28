@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
+import '../../application/state/scenario_intake_selection_state.dart';
 import '../../domain/entities/discover_item_entity.dart';
 
 class ScenarioIntakeSelectionTray extends StatelessWidget {
@@ -13,7 +15,7 @@ class ScenarioIntakeSelectionTray extends StatelessWidget {
   });
 
   final List<DiscoverItemEntity> selectedItems;
-  final String? message;
+  final ScenarioIntakeIssue? message;
   final ValueChanged<String> onRemove;
   final VoidCallback onCancel;
   final VoidCallback? onReview;
@@ -24,9 +26,10 @@ class ScenarioIntakeSelectionTray extends StatelessWidget {
       container: true,
       explicitChildNodes: true,
       liveRegion: true,
-      label:
-          '${selectedItems.length} stops selected for Scenario.'
-          '${message == null ? '' : ' $message'}',
+      label: <String>[
+        context.l10n.discoverStopsSelected(selectedItems.length),
+        if (message != null) scenarioIntakeIssueText(context.l10n, message!),
+      ].join(' '),
       child: Material(
         elevation: 12,
         color: Theme.of(context).colorScheme.surface,
@@ -49,8 +52,7 @@ class ScenarioIntakeSelectionTray extends StatelessWidget {
                               child: Semantics(
                                 selected: true,
                                 label:
-                                    'Selected stop ${entry.$1 + 1}: '
-                                    '${entry.$2.title}',
+                                    '${context.l10n.discoverSelectedStopLabel(entry.$1 + 1)} ${entry.$2.title}',
                                 child: InputChip(
                                   avatar: CircleAvatar(
                                     child: Text('${entry.$1 + 1}'),
@@ -65,7 +67,8 @@ class ScenarioIntakeSelectionTray extends StatelessWidget {
                                     ),
                                   ),
                                   deleteButtonTooltipMessage:
-                                      'Remove ${entry.$2.title}',
+                                      '${context.l10n.discoverRemove} '
+                                      '${entry.$2.title}',
                                   onDeleted: () => onRemove(entry.$2.id),
                                 ),
                               ),
@@ -77,7 +80,7 @@ class ScenarioIntakeSelectionTray extends StatelessWidget {
                 if (message != null) ...<Widget>[
                   const SizedBox(height: 4),
                   Text(
-                    message!,
+                    scenarioIntakeIssueText(context.l10n, message!),
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.error,
                       fontWeight: FontWeight.w600,
@@ -92,20 +95,20 @@ class ScenarioIntakeSelectionTray extends StatelessWidget {
                   alignment: WrapAlignment.end,
                   children: <Widget>[
                     Text(
-                      '${selectedItems.length} selected',
+                      context.l10n.discoverSelectedCount(selectedItems.length),
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     TextButton(
                       onPressed: onCancel,
-                      child: const Text('Cancel'),
+                      child: Text(context.l10n.discoverCancel),
                     ),
                     const SizedBox(width: 6),
                     FilledButton.icon(
                       onPressed: onReview,
                       icon: const Icon(Icons.playlist_add_check),
-                      label: const Text('Review'),
+                      label: Text(context.l10n.scenarioIntakeReview),
                     ),
                   ],
                 ),
@@ -117,3 +120,14 @@ class ScenarioIntakeSelectionTray extends StatelessWidget {
     );
   }
 }
+
+String scenarioIntakeIssueText(
+  AppLocalizations l10n,
+  ScenarioIntakeIssue issue,
+) => switch (issue) {
+  ScenarioIntakeIssue.findPeopleNotSupported =>
+    l10n.discoverIntakeFindPeopleNotSupported,
+  ScenarioIntakeIssue.missingIdentity => l10n.discoverIntakeMissingIdentity,
+  ScenarioIntakeIssue.noLocation => l10n.discoverIntakeNoLocation,
+  ScenarioIntakeIssue.limitReached => l10n.discoverIntakeLimitReached(20),
+};

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/presentation/widgets/scenario_intake_selection_tray.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/discover/application/state/scenario_intake_selection_state.dart';
 
 void main() {
   testWidgets(
@@ -31,7 +32,7 @@ void main() {
           home: Scaffold(
             bottomNavigationBar: ScenarioIntakeSelectionTray(
               selectedItems: selected,
-              message: 'One selected stop needs review.',
+              message: ScenarioIntakeIssue.noLocation,
               onRemove: (_) {},
               onCancel: () {},
               onReview: () {},
@@ -43,7 +44,8 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(
         find.bySemanticsLabel(
-          '8 stops selected for Scenario. One selected stop needs review.',
+          '8 stops selected for Scenario. '
+          'This result has no usable catalog location.',
         ),
         findsOneWidget,
       );

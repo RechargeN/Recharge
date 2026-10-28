@@ -53,17 +53,13 @@ final class CatalogPublishedEventDiscovery
     if (!answer.succeeded) {
       throw DiscoverException(
         code: 'CATALOG_${answer.kind.toUpperCase()}:${answer.code}',
-        message: 'Каталог отклонил запрос',
       );
     }
     final CatalogDetails details;
     try {
       details = CatalogDetails.fromWire(answer.body);
     } on FormatException {
-      throw const DiscoverException(
-        code: 'CATALOG_CONTRACT_INVALID',
-        message: 'Неподдерживаемый ответ каталога',
-      );
+      throw const DiscoverException(code: 'CATALOG_CONTRACT_INVALID');
     }
     final CatalogEventItem? item = details.item;
     if (item == null) return null;
@@ -81,15 +77,9 @@ final class CatalogPublishedEventDiscovery
         }),
       );
     } on CatalogTransportFailure catch (failure) {
-      throw DiscoverException(
-        code: 'CATALOG_TRANSPORT_${failure.code}',
-        message: 'Каталог недоступен',
-      );
+      throw DiscoverException(code: 'CATALOG_TRANSPORT_${failure.code}');
     } on FormatException {
-      throw const DiscoverException(
-        code: 'CATALOG_CONTRACT_INVALID',
-        message: 'Неподдерживаемый ответ каталога',
-      );
+      throw const DiscoverException(code: 'CATALOG_CONTRACT_INVALID');
     }
   }
 

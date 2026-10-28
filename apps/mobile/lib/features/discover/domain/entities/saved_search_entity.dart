@@ -45,8 +45,12 @@ class SavedSearchEntity {
 
     return SavedSearchEntity(
       id: (map['id'] as String?) ?? 'search_legacy',
-      title: (map['title'] as String?) ?? 'Saved search',
-      subtitle: (map['subtitle'] as String?) ?? 'Nearby activities',
+      title:
+          (map['title'] as String?) ??
+          'Saved search', // l10n-ignore: legacy persisted default; the UI builds text from the query
+      subtitle:
+          (map['subtitle'] as String?) ??
+          'Nearby activities', // l10n-ignore: legacy persisted default; the UI builds text from the query
       query: DiscoverQuery.fromMap(
         queryMap,
         defaultMarketCityId: defaultMarketCityId,

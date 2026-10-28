@@ -9,6 +9,7 @@ import 'package:recharge/features/discover/domain/entities/published_class_works
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import '../../../../fixtures/class_workshop_details_fixture.dart';
 import 'package:recharge/features/discover/presentation/shell/details_shell.dart';
+import 'package:recharge/core/localization/l10n_context.dart';
 
 void main() {
   for (final infoOnly in [false, true]) {
@@ -28,6 +29,10 @@ void main() {
       final ThemeData baseTheme = RechargeTheme.light();
       await tester.pumpWidget(
         MaterialApp(
+          // L4.5: the expectations below are the Russian copy.
+          locale: const Locale('ru'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           theme: baseTheme.copyWith(
             textTheme: baseTheme.textTheme.apply(fontFamily: 'Roboto'),
             primaryTextTheme: baseTheme.primaryTextTheme.apply(

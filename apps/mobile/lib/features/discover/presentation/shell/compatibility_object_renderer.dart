@@ -2,10 +2,14 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../../create/application/create_taxonomy.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/time_fit_evaluation.dart';
 import '../../domain/repositories/route_safety_reporting_port.dart';
+import '../discover_formats.dart';
 import 'details_renderer.dart';
 
 /// [DetailsRenderer] that reproduces, unchanged, the Details layout that
@@ -68,12 +72,14 @@ class CompatibilityObjectRenderer implements DetailsRenderer {
   List<Widget> buildAppBarActions(BuildContext context) {
     return <Widget>[
       IconButton(
-        tooltip: isFavorite ? 'Unsave' : 'Save',
+        tooltip: isFavorite
+            ? context.l10n.discoverUnsave
+            : context.l10n.discoverSave,
         onPressed: onFavoriteTap,
         icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
       ),
       IconButton(
-        tooltip: 'Share',
+        tooltip: context.l10n.discoverShare,
         onPressed: onShareTap,
         icon: const Icon(Icons.ios_share_rounded),
       ),
@@ -100,34 +106,68 @@ class CompatibilityObjectRenderer implements DetailsRenderer {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      'Typical duration: ${item.activityCatalog!.durationLabel}',
+                      context.l10n.discoverTypicalDuration(
+                        activityDurationLabel(
+                          context.l10n,
+                          item.activityCatalog!,
+                        ),
+                      ),
                     ),
                     if (item.activityCatalog!.suggestedGroupMin != null)
                       Text(
-                        'Suggested group: ${item.activityCatalog!.suggestedGroupMin}–${item.activityCatalog!.suggestedGroupMax}',
+                        context.l10n.discoverSuggestedGroup(
+                          item.activityCatalog!.suggestedGroupMin!,
+                          item.activityCatalog!.suggestedGroupMax ??
+                              item.activityCatalog!.suggestedGroupMin!,
+                        ),
                       ),
-                    if (item.activityCatalog!.linkedPlaceTitle != null) Text('Linked Place: ${item.activityCatalog!.linkedPlaceTitle}'),
+                    if (item.activityCatalog!.linkedPlaceTitle != null)
+                      Text(
+                        '${context.l10n.discoverLinkedPlaceLabel} ${item.activityCatalog!.linkedPlaceTitle!}',
+                      ),
                     if (item.activityCatalog!.fullDescription.isNotEmpty)
                       Text(item.activityCatalog!.fullDescription),
                     if (item.activityCatalog!.timeOfDay != null)
-                      Text('Best time: ${item.activityCatalog!.timeOfDay}'),
+                      Text(
+                        context.l10n.discoverBestTime(
+                          context.l10n.createOption(
+                            'ActivityTimeOfDay_${item.activityCatalog!.timeOfDay}',
+                          ),
+                        ),
+                      ),
                     if (item.activityCatalog!.season != null)
-                      Text('Season: ${item.activityCatalog!.season}'),
+                      Text(
+                        context.l10n.discoverSeason(
+                          context.l10n.createOption(
+                            'ActivitySeason_${item.activityCatalog!.season}',
+                          ),
+                        ),
+                      ),
                     if (item.activityCatalog!.addressLine.isNotEmpty)
                       Text(item.activityCatalog!.addressLine),
                     if (item.activityCatalog!.accessNotes.isNotEmpty)
                       Text(item.activityCatalog!.accessNotes),
                     if (item.activityCatalog!.isInformal)
                       Text(
-                        'Informal access: ${item.activityCatalog!.cautionNote}',
+                        '${context.l10n.discoverInformalAccessLabel} ${item.activityCatalog!.cautionNote}',
                       ),
                     if (item.activityCatalog!.contributionKind != null)
                       Text(
-                        'Optional ${item.activityCatalog!.contributionKind}: ${item.activityCatalog!.contributionNote}',
+                        '${context.l10n.discoverOptionalContributionLabel(context.l10n.createOption('ActivityContributionKind_${item.activityCatalog!.contributionKind}'))} ${item.activityCatalog!.contributionNote ?? ''}',
                       ),
-                    if (item.activityCatalog!.amountMinor != null)
+                    // The hint needs its own currency; none is assumed.
+                    if (item.activityCatalog!.amountMinor != null &&
+                        item.activityCatalog!.currencyCode != null)
                       Text(
-                        'Amount hint: ${(item.activityCatalog!.amountMinor! / 100).toStringAsFixed(2)} ${item.activityCatalog!.currencyCode}',
+                        context.l10n.discoverAmountHint(
+                          RechargeFormats.money(
+                            Money(
+                              minorUnits: item.activityCatalog!.amountMinor!,
+                              currencyCode: item.activityCatalog!.currencyCode!,
+                            ),
+                            context.l10n.localeName,
+                          ),
+                        ),
                       ),
                   ],
                 ),
@@ -227,7 +267,7 @@ class _DetailsHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${dateTimeLabelForDetails(item.startsAtUtc)} · ${priceLabelForDetails(item)}',
+                  '${dateTimeLabelForDetails(context.l10n, item.startsAtUtc)} · ${priceLabelForDetails(context.l10n, item)}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -290,10 +330,12 @@ class SummaryCard extends StatelessWidget {
                     icon: route == null
                         ? Icons.payments_outlined
                         : Icons.route_outlined,
-                    label: route == null ? 'Price' : 'Length',
+                    label: route == null
+                        ? context.l10n.discoverPrice
+                        : context.l10n.discoverLength,
                     value: route == null
-                        ? priceLabelForDetails(item)
-                        : '${(route.distanceMeters / 1000).toStringAsFixed(1)} км',
+                        ? priceLabelForDetails(context.l10n, item)
+                        : discoverKm(context.l10n, route.distanceMeters / 1000),
                   ),
                 ),
                 Expanded(
@@ -301,17 +343,22 @@ class SummaryCard extends StatelessWidget {
                     icon: route == null
                         ? Icons.group_outlined
                         : Icons.directions_walk_outlined,
-                    label: route == null ? 'People' : 'Profile',
+                    label: route == null
+                        ? context.l10n.discoverPeople
+                        : context.l10n.discoverProfile,
                     value: route == null
-                        ? participantsLabelForDetails(item)
-                        : routeProfileLabelForDetails(route.routingProfileId),
+                        ? participantsLabelForDetails(context.l10n, item)
+                        : routeProfileLabelForDetails(
+                            context.l10n,
+                            route.routingProfileId,
+                          ),
                   ),
                 ),
                 Expanded(
                   child: MetricTile(
                     icon: Icons.schedule_outlined,
-                    label: 'Duration',
-                    value: durationLabelForDetails(item),
+                    label: context.l10n.discoverDuration,
+                    value: durationLabelForDetails(context.l10n, item),
                   ),
                 ),
               ],
@@ -322,8 +369,12 @@ class SummaryCard extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: <Widget>[
-                  DetailsPill(label: timeFitLabelForDetails(evaluation)),
-                  DetailsPill(label: openingLabelForDetails(evaluation)),
+                  DetailsPill(
+                    label: timeFitLabelForDetails(context.l10n, evaluation),
+                  ),
+                  DetailsPill(
+                    label: openingLabelForDetails(context.l10n, evaluation),
+                  ),
                   if (evaluation.travelMinutes != null)
                     DetailsPill(
                       label:
@@ -358,7 +409,7 @@ class _PublishedRouteCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              'Published Route',
+              context.l10n.discoverPublishedRoute,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
@@ -369,17 +420,23 @@ class _PublishedRouteCard extends StatelessWidget {
               runSpacing: 8,
               children: <Widget>[
                 DetailsPill(
-                  label: routeProfileLabelForDetails(route.routingProfileId),
+                  label: routeProfileLabelForDetails(
+                    context.l10n,
+                    route.routingProfileId,
+                  ),
                 ),
                 DetailsPill(
-                  label: routeDifficultyLabelForDetails(route.difficultyId),
+                  label: routeDifficultyLabelForDetails(
+                    context.l10n,
+                    route.difficultyId,
+                  ),
                 ),
                 if (route.recommendedDifficultyId.isNotEmpty &&
                     route.recommendedDifficultyId != route.difficultyId)
                   DetailsPill(
                     label:
                         'Recommended '
-                        '${routeDifficultyLabelForDetails(route.recommendedDifficultyId)}',
+                        '${routeDifficultyLabelForDetails(context.l10n, route.recommendedDifficultyId)}',
                   ),
                 if (route.ascentMeters != null)
                   DetailsPill(label: '+${route.ascentMeters!.round()} m'),
@@ -387,9 +444,13 @@ class _PublishedRouteCard extends StatelessWidget {
                   DetailsPill(label: '-${route.descentMeters!.round()} m'),
                 DetailsPill(label: '${route.waypointCount} POI'),
                 if (route.fieldVerifiedAtUtc != null)
-                  const DetailsPill(label: 'Field verified'),
-                DetailsPill(label: 'Version ${route.versionId}'),
-                if (route.demoOnly) const DetailsPill(label: 'Demo data'),
+                  DetailsPill(label: context.l10n.discoverFieldVerified),
+                DetailsPill(
+                  label:
+                      '${context.l10n.discoverVersionLabel} ${route.versionId}',
+                ),
+                if (route.demoOnly)
+                  DetailsPill(label: context.l10n.discoverDemoData),
               ],
             ),
             if (route.attributions.isNotEmpty) ...<Widget>[
@@ -405,9 +466,8 @@ class _PublishedRouteCard extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 route.elevationAvailability == 'partial'
-                    ? 'Elevation data is partial; ascent and descent are not '
-                          'presented as complete.'
-                    : 'Elevation data is unavailable and is not shown as zero.',
+                    ? context.l10n.discoverElevationPartial
+                    : context.l10n.discoverElevationUnavailable,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -425,7 +485,7 @@ class _PublishedRouteCard extends StatelessWidget {
               child: TextButton.icon(
                 onPressed: onReport,
                 icon: const Icon(Icons.report_outlined),
-                label: const Text('Сообщить о проблеме на маршруте'),
+                label: Text(context.l10n.discoverReportRouteIssue),
               ),
             ),
           ],
@@ -473,7 +533,7 @@ class _RouteSafetyReportDialogState extends State<RouteSafetyReportDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Проблема на маршруте'),
+      title: Text(context.l10n.discoverRouteIssue),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -481,25 +541,30 @@ class _RouteSafetyReportDialogState extends State<RouteSafetyReportDialog> {
           children: <Widget>[
             DropdownButtonFormField<String>(
               initialValue: _reasonCode,
-              decoration: const InputDecoration(labelText: 'Что произошло'),
-              items: const <DropdownMenuItem<String>>[
+              decoration: InputDecoration(
+                labelText: context.l10n.discoverWhatHappened,
+              ),
+              items: <DropdownMenuItem<String>>[
                 DropdownMenuItem(
                   value: 'trail_closed',
-                  child: Text('Тропа закрыта'),
+                  child: Text(context.l10n.discoverIssueTrailClosed),
                 ),
                 DropdownMenuItem(
                   value: 'dangerous_surface',
-                  child: Text('Опасное покрытие'),
+                  child: Text(context.l10n.discoverIssueHazardousSurface),
                 ),
                 DropdownMenuItem(
                   value: 'obstruction',
-                  child: Text('Препятствие'),
+                  child: Text(context.l10n.discoverIssueObstacle),
                 ),
                 DropdownMenuItem(
                   value: 'incorrect_geometry',
-                  child: Text('Неверная линия маршрута'),
+                  child: Text(context.l10n.discoverIssueWrongLine),
                 ),
-                DropdownMenuItem(value: 'other', child: Text('Другое')),
+                DropdownMenuItem(
+                  value: 'other',
+                  child: Text(context.l10n.discoverIssueOther),
+                ),
               ],
               onChanged: (value) {
                 if (value != null) setState(() => _reasonCode = value);
@@ -508,23 +573,25 @@ class _RouteSafetyReportDialogState extends State<RouteSafetyReportDialog> {
             const SizedBox(height: 12),
             DropdownButtonFormField<DiscoverRouteSafetySeverity>(
               initialValue: _severity,
-              decoration: const InputDecoration(labelText: 'Серьёзность'),
-              items: const <DropdownMenuItem<DiscoverRouteSafetySeverity>>[
+              decoration: InputDecoration(
+                labelText: context.l10n.discoverSeverity,
+              ),
+              items: <DropdownMenuItem<DiscoverRouteSafetySeverity>>[
                 DropdownMenuItem(
                   value: DiscoverRouteSafetySeverity.information,
-                  child: Text('Информация'),
+                  child: Text(context.l10n.discoverSeverityInfo),
                 ),
                 DropdownMenuItem(
                   value: DiscoverRouteSafetySeverity.warning,
-                  child: Text('Требует внимания'),
+                  child: Text(context.l10n.discoverSeverityWarning),
                 ),
                 DropdownMenuItem(
                   value: DiscoverRouteSafetySeverity.high,
-                  child: Text('Опасно'),
+                  child: Text(context.l10n.discoverSeverityDanger),
                 ),
                 DropdownMenuItem(
                   value: DiscoverRouteSafetySeverity.critical,
-                  child: Text('Критическая опасность'),
+                  child: Text(context.l10n.discoverSeverityCritical),
                 ),
               ],
               onChanged: (value) {
@@ -536,23 +603,20 @@ class _RouteSafetyReportDialogState extends State<RouteSafetyReportDialog> {
               controller: _noteController,
               maxLength: 500,
               maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Комментарий (необязательно)',
-                hintText: 'Опишите проблему без личных данных',
+              decoration: InputDecoration(
+                labelText: context.l10n.discoverCommentOptional,
+                hintText: context.l10n.discoverDescribeWithoutPersonalData,
               ),
             ),
             if (_severity == DiscoverRouteSafetySeverity.critical)
-              const Text(
-                'Критическую опасность выбирайте только при непосредственном '
-                'риске для людей.',
-              ),
+              Text(context.l10n.discoverCriticalOnlyImmediateRisk),
           ],
         ),
       ),
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Отмена'),
+          child: Text(context.l10n.discoverCancel),
         ),
         FilledButton(
           onPressed: () {
@@ -565,7 +629,7 @@ class _RouteSafetyReportDialogState extends State<RouteSafetyReportDialog> {
               ),
             );
           },
-          child: const Text('Отправить'),
+          child: Text(context.l10n.discoverSend),
         ),
       ],
     );
@@ -658,19 +722,23 @@ class DetailsActionHub extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Plan this recharge',
+                    context.l10n.discoverPlanThisRecharge,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: RechargeTheme.travelGreenDark,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
-                DetailsPill(label: isFavorite ? 'Saved' : 'Not saved'),
+                DetailsPill(
+                  label: isFavorite
+                      ? context.l10n.discoverSaved
+                      : context.l10n.discoverNotSaved,
+                ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
-              'Turn this activity into a route, compare similar options, or save it for later.',
+              context.l10n.discoverPlanHint,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -681,8 +749,10 @@ class DetailsActionHub extends StatelessWidget {
               runSpacing: 8,
               children: <Widget>[
                 DetailsPill(label: rechargeTaxonomyLabel(item.category)),
-                DetailsPill(label: priceLabelForDetails(item)),
-                DetailsPill(label: participantsLabelForDetails(item)),
+                DetailsPill(label: priceLabelForDetails(context.l10n, item)),
+                DetailsPill(
+                  label: participantsLabelForDetails(context.l10n, item),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -699,13 +769,17 @@ class DetailsActionHub extends StatelessWidget {
                     onPressed: ctaSubmitted ? null : onCtaTap,
                     icon: const Icon(Icons.check_circle_outline),
                     label: Text(
-                      ctaSubmitted ? 'Request sent' : _ctaLabel(item),
+                      ctaSubmitted
+                          ? context.l10n.discoverRequestSent
+                          : _ctaLabel(context.l10n, item),
                     ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 IconButton.outlined(
-                  tooltip: isFavorite ? 'Unsave' : 'Save',
+                  tooltip: isFavorite
+                      ? context.l10n.discoverUnsave
+                      : context.l10n.discoverSave,
                   onPressed: onFavoriteTap,
                   icon: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -724,34 +798,34 @@ class DetailsActionHub extends StatelessWidget {
               children: <Widget>[
                 DetailsActionTile(
                   icon: Icons.map_outlined,
-                  title: 'Map',
-                  subtitle: 'Open nearby context',
+                  title: context.l10n.discoverMap,
+                  subtitle: context.l10n.discoverOpenNearbyContext,
                   onTap: onMap,
                 ),
                 if (onAddToScenario != null)
                   DetailsActionTile(
                     icon: Icons.playlist_add,
-                    title: 'Add to Scenario',
-                    subtitle: 'Add this stop to a personal plan',
+                    title: context.l10n.discoverAddToScenario,
+                    subtitle: context.l10n.discoverAddStopToPlan,
                     onTap: onAddToScenario!,
                   ),
                 DetailsActionTile(
                   icon: Icons.search,
-                  title: 'Find similar',
-                  subtitle: 'Search with this category',
+                  title: context.l10n.discoverFindSimilar,
+                  subtitle: context.l10n.discoverSearchThisCategory,
                   onTap: onSearch,
                 ),
                 DetailsActionTile(
                   icon: Icons.add_circle_outline,
-                  title: 'Create similar',
-                  subtitle: 'Open Create Hub',
+                  title: context.l10n.discoverCreateSimilar,
+                  subtitle: context.l10n.discoverOpenCreateHub,
                   onTap: onCreateSimilar,
                 ),
                 if (item.objectKind == DiscoverObjectKind.place)
                   DetailsActionTile(
                     icon: Icons.history_toggle_off,
-                    title: 'Mark as visited',
-                    subtitle: 'Add to private history',
+                    title: context.l10n.discoverMarkVisited,
+                    subtitle: context.l10n.discoverAddToPrivateHistory,
                     onTap: onMarkVisited,
                   ),
               ],
@@ -856,7 +930,7 @@ class DetailsRoutePreview extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Route from this',
+                    context.l10n.discoverRouteFromThis,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: RechargeTheme.travelGreenDark,
                       fontWeight: FontWeight.w900,
@@ -872,9 +946,13 @@ class DetailsRoutePreview extends StatelessWidget {
               runSpacing: 8,
               children: <Widget>[
                 DetailsPill(label: plan.mood),
-                DetailsPill(label: '${plan.durationMinutes} min'),
-                if (plan.freeOnly) const DetailsPill(label: 'Free'),
-                if (plan.walkingOnly) const DetailsPill(label: 'Walking'),
+                DetailsPill(
+                  label: context.l10n.discoverMinutes(plan.durationMinutes),
+                ),
+                if (plan.freeOnly)
+                  DetailsPill(label: context.l10n.discoverFree),
+                if (plan.walkingOnly)
+                  DetailsPill(label: context.l10n.discoverWalking),
               ],
             ),
             const SizedBox(height: 8),
@@ -894,9 +972,9 @@ class DetailsRoutePreview extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onRouteMap,
                     icon: const Icon(Icons.map_outlined),
-                    label: const FittedBox(
+                    label: FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text('Route map'),
+                      child: Text(context.l10n.discoverRouteMap),
                     ),
                   ),
                 ),
@@ -905,9 +983,9 @@ class DetailsRoutePreview extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onCreateRoute,
                     icon: const Icon(Icons.add_location_alt_outlined),
-                    label: const FittedBox(
+                    label: FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text('Create route'),
+                      child: Text(context.l10n.discoverCreateRoute),
                     ),
                   ),
                 ),
@@ -954,7 +1032,8 @@ class OrganizerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String organizerName = item.organizerName.isEmpty
-        ? 'Recharge ${item.category}'
+        // No organizer: the category name stands in (G04, not translated).
+        ? 'Recharge ${rechargeTaxonomyLabel(item.category)}' // l10n-ignore: brand + category name
         : item.organizerName;
     return Card(
       child: Padding(
@@ -1028,30 +1107,34 @@ class InfoGrid extends StatelessWidget {
             if (route == null)
               InfoRow(
                 icon: Icons.calendar_month_outlined,
-                label: 'Date and time',
-                value: dateTimeLabelForDetails(item.startsAtUtc),
+                label: context.l10n.discoverDateAndTime,
+                value: dateTimeLabelForDetails(context.l10n, item.startsAtUtc),
               )
             else
               InfoRow(
                 icon: Icons.route_outlined,
-                label: 'Route geometry',
+                label: context.l10n.discoverRouteGeometry,
                 value:
-                    '${(route.distanceMeters / 1000).toStringAsFixed(1)} км · '
-                    '${durationFromSecondsForDetails(route.durationSeconds)}',
+                    '${discoverKm(context.l10n, route.distanceMeters / 1000)} · '
+                    '${durationFromSecondsForDetails(context.l10n, route.durationSeconds)}',
               ),
             const Divider(height: 20),
             InfoRow(
               icon: Icons.place_outlined,
-              label: 'Location',
+              label: context.l10n.discoverLocation,
               value: venueLabelForDetails(item),
             ),
             const Divider(height: 20),
             InfoRow(
               icon: Icons.near_me_outlined,
-              label: 'Distance',
+              label: context.l10n.discoverDistance,
               value: route == null
-                  ? '${item.distanceKm.toStringAsFixed(1)} км from you'
-                  : 'Start point · ${item.distanceKm.toStringAsFixed(1)} км away',
+                  ? context.l10n.discoverDistanceFromYou(
+                      discoverOneDecimal(context.l10n, item.distanceKm),
+                    )
+                  : context.l10n.discoverStartPointAway(
+                      discoverOneDecimal(context.l10n, item.distanceKm),
+                    ),
             ),
           ],
         ),
@@ -1113,9 +1196,9 @@ class HighlightsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<String> highlights = item.highlights.isEmpty
         ? <String>[
-            'Clear meeting point and timing',
-            'Organizer details available before joining',
-            'Save the activity for later',
+            context.l10n.discoverPerkMeetingPoint,
+            context.l10n.discoverPerkOrganizerDetails,
+            context.l10n.discoverPerkSaveForLater,
           ]
         : item.highlights;
     return Card(
@@ -1125,7 +1208,7 @@ class HighlightsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'What awaits you',
+              context.l10n.discoverWhatAwaitsYou,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
@@ -1206,7 +1289,7 @@ class LocationCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Show on map',
+                      context.l10n.discoverShowOnMap,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: RechargeTheme.travelGreenDark,
                         fontWeight: FontWeight.w900,
@@ -1259,13 +1342,17 @@ class DetailsBottomBar extends StatelessWidget {
                 child: FilledButton(
                   onPressed: ctaSubmitted ? null : onCtaTap,
                   child: Text(
-                    ctaSubmitted ? 'Заявка отправлена' : _ctaLabel(item),
+                    ctaSubmitted
+                        ? context.l10n.discoverRequestSent
+                        : _ctaLabel(context.l10n, item),
                   ),
                 ),
               ),
               const SizedBox(width: 10),
               IconButton(
-                tooltip: isFavorite ? 'Unsave' : 'Save',
+                tooltip: isFavorite
+                    ? context.l10n.discoverUnsave
+                    : context.l10n.discoverSave,
                 onPressed: onFavoriteTap,
                 icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
               ),
@@ -1304,83 +1391,90 @@ class _CategoryBadge extends StatelessWidget {
   }
 }
 
-String dateTimeLabelForDetails(DateTime? value) {
-  if (value == null) return 'Any time';
-  final DateTime local = value.toLocal();
-  final String day = local.day.toString().padLeft(2, '0');
-  final String month = local.month.toString().padLeft(2, '0');
-  final String hour = local.hour.toString().padLeft(2, '0');
-  final String minute = local.minute.toString().padLeft(2, '0');
-  return '$day.$month.${local.year} · $hour:$minute';
+/// [timezoneId] is the object's zone; a legacy item without one keeps the
+/// device zone it always had.
+String dateTimeLabelForDetails(
+  AppLocalizations l10n,
+  DateTime? value, [
+  String timezoneId = '',
+]) {
+  if (value == null) return l10n.discoverAnyTime;
+  return timezoneId.isEmpty
+      ? RechargeFormats.deviceDateTime(value, l10n.localeName)
+      : RechargeFormats.dateTime(value, timezoneId, l10n.localeName);
 }
 
-String durationFromSecondsForDetails(int seconds) {
-  final int minutes = (seconds / 60).round();
-  if (minutes < 60) return '$minutes min';
-  final int hours = minutes ~/ 60;
-  final int remainder = minutes % 60;
-  return remainder == 0 ? '$hours h' : '$hours h $remainder min';
-}
+String durationFromSecondsForDetails(AppLocalizations l10n, int seconds) =>
+    discoverDuration(l10n, (seconds / 60).round());
 
-String routeProfileLabelForDetails(String profileId) {
+String routeProfileLabelForDetails(AppLocalizations l10n, String profileId) {
   return switch (profileId.trim().toLowerCase()) {
-    'walking' || 'foot' || 'hiking' => 'Walking',
-    'cycling' || 'bike' => 'Cycling',
-    'car' || 'driving' => 'Driving',
-    _ => profileId.isEmpty ? 'Route' : profileId,
+    'walking' || 'foot' || 'hiking' => l10n.discoverWalking,
+    'cycling' || 'bike' => l10n.discoverCycling,
+    'car' || 'driving' => l10n.discoverDriving,
+    // An unknown routing profile id is never shown raw.
+    _ => l10n.discoverRouteLabel,
   };
 }
 
-String routeDifficultyLabelForDetails(String difficultyId) {
+String routeDifficultyLabelForDetails(
+  AppLocalizations l10n,
+  String difficultyId,
+) {
   final String normalized = difficultyId.trim().toLowerCase().split('.').first;
   return switch (normalized) {
-    'easy' => 'Easy',
-    'moderate' || 'medium' => 'Moderate',
-    'hard' || 'difficult' => 'Hard',
-    _ => difficultyId.isEmpty ? 'Difficulty not set' : difficultyId,
+    'easy' => l10n.discoverDifficultyEasy,
+    'moderate' || 'medium' => l10n.discoverDifficultyModerate,
+    'hard' || 'difficult' => l10n.discoverDifficultyHard,
+    // An unknown difficulty id is never shown raw.
+    _ => l10n.discoverDifficultyNotSet,
   };
 }
 
-String priceLabelForDetails(DiscoverItemEntity item) {
+String priceLabelForDetails(AppLocalizations l10n, DiscoverItemEntity item) {
   if (item.activityCatalog != null) {
     return item.activityCatalog!.contributionKind == null
-        ? 'No contribution specified'
-        : 'Optional contribution';
+        ? l10n.discoverNoContribution
+        : l10n.discoverOptionalContribution;
   }
-  if (item.isFree) return 'Free';
-  return '${item.priceAmount?.toStringAsFixed(0) ?? '—'} €';
+  if (item.isFree) return l10n.discoverFree;
+  final Money? price = item.priceAmount;
+  return price == null ? '—' : RechargeFormats.money(price, l10n.localeName);
 }
 
-String timeFitLabelForDetails(TimeFitEvaluation evaluation) =>
-    switch (evaluation.timeFitStatus) {
-      TimeFitStatus.fits => 'Fits your time',
-      TimeFitStatus.partial => 'Partial attendance possible',
-      TimeFitStatus.doesNotFit => 'Does not fit',
-      TimeFitStatus.unknown => 'Time not confirmed',
-    };
+String timeFitLabelForDetails(
+  AppLocalizations l10n,
+  TimeFitEvaluation evaluation,
+) => switch (evaluation.timeFitStatus) {
+  TimeFitStatus.fits => l10n.discoverFitsYourTime,
+  TimeFitStatus.partial => l10n.discoverPartialAttendance,
+  TimeFitStatus.doesNotFit => l10n.discoverDoesNotFit,
+  TimeFitStatus.unknown => l10n.discoverTimeNotConfirmed,
+};
 
-String openingLabelForDetails(TimeFitEvaluation evaluation) =>
-    switch (evaluation.openingStatus) {
-      OpeningStatus.open => 'Open',
-      OpeningStatus.closed => 'Closed',
-      OpeningStatus.unknown => 'Opening hours unknown',
-    };
+String openingLabelForDetails(
+  AppLocalizations l10n,
+  TimeFitEvaluation evaluation,
+) => switch (evaluation.openingStatus) {
+  OpeningStatus.open => l10n.discoverOpen,
+  OpeningStatus.closed => l10n.discoverClosed,
+  OpeningStatus.unknown => l10n.discoverOpeningHoursUnknown,
+};
 
-String participantsLabelForDetails(DiscoverItemEntity item) {
-  if (item.capacity == null) return 'Capacity unknown';
-  if (item.participantsCount == null) return 'Participants unknown';
+String participantsLabelForDetails(
+  AppLocalizations l10n,
+  DiscoverItemEntity item,
+) {
+  if (item.capacity == null) return l10n.discoverCapacityUnknown;
+  if (item.participantsCount == null) return l10n.discoverParticipantsUnknown;
   return '${item.participantsCount}/${item.capacity}';
 }
 
-String durationLabelForDetails(DiscoverItemEntity item) {
-  if (item.activityCatalog != null) return item.activityCatalog!.durationLabel;
-  final int? duration = item.durationMinutes;
-  if (duration == null) return 'Flexible';
-  if (duration < 60) return '$duration min';
-  final int hours = duration ~/ 60;
-  final int minutes = duration % 60;
-  if (minutes == 0) return '$hours h';
-  return '$hours h $minutes min';
+String durationLabelForDetails(AppLocalizations l10n, DiscoverItemEntity item) {
+  if (item.activityCatalog != null) {
+    return activityDurationLabel(l10n, item.activityCatalog!);
+  }
+  return discoverDuration(l10n, item.durationMinutes);
 }
 
 String venueLabelForDetails(DiscoverItemEntity item) {
@@ -1510,15 +1604,17 @@ String scenarioMoodForDetails(DiscoverItemEntity item) {
   return 'calm';
 }
 
-String _ctaLabel(DiscoverItemEntity item) {
+String _ctaLabel(AppLocalizations l10n, DiscoverItemEntity item) {
   if (item.ctaLabel.isNotEmpty) return item.ctaLabel;
-  if (item.isFree) return 'Join activity';
-  return 'Book for ${priceLabelForDetails(item)}';
+  if (item.isRoute) return l10n.discoverOpenRoute;
+  if (item.isFree) return l10n.discoverJoinActivity;
+  return l10n.discoverBookFor(priceLabelForDetails(l10n, item));
 }
 
 /// Public: shared by `DetailsBottomBar`/`DetailsActionHub` in this file
 /// and by `discover_details_page.dart`'s CTA-submitted SnackBar copy.
-String ctaLabelForDetails(DiscoverItemEntity item) => _ctaLabel(item);
+String ctaLabelForDetails(AppLocalizations l10n, DiscoverItemEntity item) =>
+    _ctaLabel(l10n, item);
 
 IconData _categoryIcon(String category) {
   switch (normalizeRechargeContentGroupId(category)) {

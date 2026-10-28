@@ -67,7 +67,7 @@ void main() {
     (tester) async {
       await tester.pumpWidget(app(classWorkshopFixture()));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Показать на карте'));
+      await tester.tap(find.text('Show on map'));
       await tester.pumpAndSettle();
       expect(find.text('map:class-1:56.950000'), findsOneWidget);
       for (final location in <ClassWorkshopPublicLocation>[
@@ -79,7 +79,7 @@ void main() {
       ]) {
         await tester.pumpWidget(app(classWorkshopFixture(location: location)));
         await tester.pumpAndSettle();
-        expect(find.text('Показать на карте'), findsNothing);
+        expect(find.text('Show on map'), findsNothing);
       }
     },
   );
@@ -110,7 +110,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Проверить запись на сайте'));
+      await tester.tap(find.text('Check enrollment on the website'));
       await tester.pump();
       expect(launched, uri);
       expect(analytics.names, contains('discover_details_external_cta_tapped'));
@@ -131,10 +131,10 @@ void main() {
     tester,
   ) async {
     final labels = [
-      'Запись закрыта',
-      'Условия участия уточняются на месте',
-      'Способ записи пока не указан',
-      'Запись через приложение пока не подключена',
+      'Enrollment closed',
+      'Terms of participation are confirmed on site',
+      'Enrollment method not specified yet',
+      'In-app enrollment is not connected yet',
     ];
     int calls = 0;
     for (final reason in ClassWorkshopInformationReason.values) {
@@ -171,10 +171,10 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Проверить запись на сайте'));
+        await tester.tap(find.text('Check enrollment on the website'));
         await tester.pumpAndSettle();
         expect(find.text('Could not open the enrollment site'), findsOneWidget);
-        await tester.tap(find.text('Проверить запись на сайте'));
+        await tester.tap(find.text('Check enrollment on the website'));
         await tester.pump();
         expect(calls, 2);
         expect(tester.takeException(), isNull);

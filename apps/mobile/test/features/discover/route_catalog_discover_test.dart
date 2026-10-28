@@ -20,6 +20,7 @@ import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:recharge/shared/primitives/geo/geometry_encoding.dart';
 
 import '../../widget/widget_test_viewport.dart';
+import 'package:recharge/core/localization/l10n_context.dart';
 
 /// DTL-RTE-02 (`docs/product/discover/DTL_RTE_02_ROUTE_CATALOG_DISCOVER_SLICE_SPEC.md`):
 /// a published J2 Route read from the server Catalog, shown in Discover and
@@ -427,14 +428,25 @@ void main() {
         _projection(),
         card: true,
       ).facts;
-      expect(routeCatalogMetricLabel(without), '2.3 км · прямых участков: 1');
+      final AppLocalizations en = lookupAppLocalizations(const Locale('en'));
+      final AppLocalizations ru = lookupAppLocalizations(const Locale('ru'));
+      expect(
+        routeCatalogMetricLabel(en, without),
+        '2.3 km · direct segments: 1',
+      );
+      expect(
+        routeCatalogMetricLabel(ru, without),
+        '2,3 км · прямых участков: 1',
+      );
       final RouteCatalogFacts withAscent = CatalogRouteItem.fromWire(
         _projection(ascent: 23.6, publisher: 'user'),
         card: true,
       ).facts;
-      expect(routeCatalogMetricLabel(withAscent), contains('↑ 24 м'));
-      expect(routeCatalogPublisherLabel(withAscent), 'Автор');
-      expect(routeCatalogPublisherLabel(without), 'Страница');
+      expect(routeCatalogMetricLabel(en, withAscent), contains('↑ 24 m'));
+      expect(routeCatalogMetricLabel(ru, withAscent), contains('↑ 24 м'));
+      expect(routeCatalogPublisherLabel(en, withAscent), 'Author');
+      expect(routeCatalogPublisherLabel(ru, withAscent), 'Автор');
+      expect(routeCatalogPublisherLabel(ru, without), 'Страница');
     });
 
     fullPageTestWidgets('Details show the track, facts and waypoints only', (
@@ -484,17 +496,17 @@ void main() {
       final GoogleMap map = tester.widget<GoogleMap>(find.byType(GoogleMap));
       expect(map.polylines, hasLength(3));
       expect(find.text('Riverside walk'), findsOneWidget);
-      expect(find.text('2.3 км'), findsOneWidget);
-      expect(find.text('Набор высоты'), findsNothing);
-      expect(find.text('Страница'), findsOneWidget);
-      expect(find.text('Разрывов трека: 1'), findsOneWidget);
-      expect(find.text('Прямых участков: 1'), findsOneWidget);
+      expect(find.text('2.3 km'), findsOneWidget);
+      expect(find.text('Ascent'), findsNothing);
+      expect(find.text('Page'), findsOneWidget);
+      expect(find.text('Track gaps: 1'), findsOneWidget);
+      expect(find.text('Direct segments: 1'), findsOneWidget);
       expect(find.text('Bridge view'), findsOneWidget);
       expect(find.textContaining('Slippery after rain'), findsOneWidget);
       // RD-09: no event cards, CTA, Scenario intake, visit mark or report.
       expect(find.textContaining('Date and time'), findsNothing);
-      expect(find.textContaining('Сообщить'), findsNothing);
-      expect(find.byTooltip('Add Riverside walk to Scenario'), findsNothing);
+      expect(find.textContaining('Report a problem'), findsNothing);
+      expect(find.byTooltip('Add to Scenario: Riverside walk'), findsNothing);
       expect(
         renderer.buildStickyAction(tester.element(find.byType(Scaffold))),
         isNull,

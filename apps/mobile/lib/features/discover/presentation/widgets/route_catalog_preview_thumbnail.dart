@@ -1,3 +1,4 @@
+import '../../../../core/localization/l10n_context.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -23,7 +24,7 @@ class RouteCatalogPreviewThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Превью маршрута: ${facts.preview.length} участков',
+      label: context.l10n.discoverRoutePreview(facts.preview.length),
       child: SizedBox.square(
         dimension: size,
         child: CustomPaint(painter: _PreviewPainter(facts.preview, color)),

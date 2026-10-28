@@ -2,9 +2,11 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/published_route_discovery_entity.dart';
 import '../../domain/entities/route_catalog_facts.dart';
+import '../discover_formats.dart';
 import '../shell/compatibility_object_renderer.dart';
 import '../shell/details_renderer.dart';
 import '../widgets/published_route_polyline_builder.dart';
@@ -42,10 +44,10 @@ class RouteDetailsRenderer implements DetailsRenderer {
     required this.onReportRoute,
   }) : assert(
          item.isRoute,
-         'RouteDetailsRenderer requires a Route: a populated publishedRoute '
-         '(local RTE-08) or routeCatalog (server Catalog, DTL-RTE-02) — the '
-         'registry (discover_details_page.dart) selects it exactly when '
-         'item.catalogObjectType == CatalogObjectType.route.',
+         'RouteDetailsRenderer requires a Route: a populated publishedRoute ' // l10n-ignore: developer assertion
+         '(local RTE-08) or routeCatalog (server Catalog, DTL-RTE-02) — the ' // l10n-ignore: developer assertion
+         'registry (discover_details_page.dart) selects it exactly when ' // l10n-ignore: developer assertion
+         'item.catalogObjectType == CatalogObjectType.route.', // l10n-ignore: developer assertion
        );
 
   final DiscoverItemEntity item;
@@ -69,12 +71,14 @@ class RouteDetailsRenderer implements DetailsRenderer {
   List<Widget> buildAppBarActions(BuildContext context) {
     return <Widget>[
       IconButton(
-        tooltip: isFavorite ? 'Unsave' : 'Save',
+        tooltip: isFavorite
+            ? context.l10n.discoverUnsave
+            : context.l10n.discoverSave,
         onPressed: onFavoriteTap,
         icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
       ),
       IconButton(
-        tooltip: 'Share',
+        tooltip: context.l10n.discoverShare,
         onPressed: onShareTap,
         icon: const Icon(Icons.ios_share_rounded),
       ),
@@ -277,7 +281,7 @@ class _RouteMapHero extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: onOpenMap,
               icon: const Icon(Icons.map_outlined),
-              label: const Text('Открыть на карте'),
+              label: Text(context.l10n.discoverOpenOnMap),
             ),
           ),
         ),
@@ -298,7 +302,7 @@ class _RouteMapUnavailable extends StatelessWidget {
       decoration: const BoxDecoration(color: RechargeTheme.travelPanel),
       child: Center(
         child: Text(
-          'Не удалось загрузить карту маршрута',
+          context.l10n.discoverRouteMapFailed,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
@@ -327,7 +331,7 @@ class _RouteCompositionCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              'Route details',
+              context.l10n.discoverRouteDetails,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
@@ -338,29 +342,44 @@ class _RouteCompositionCard extends StatelessWidget {
               runSpacing: 8,
               children: <Widget>[
                 DetailsPill(
-                  label: routeProfileLabelForDetails(route.routingProfileId),
+                  label: routeProfileLabelForDetails(
+                    context.l10n,
+                    route.routingProfileId,
+                  ),
                 ),
                 DetailsPill(
-                  label: routeDifficultyLabelForDetails(route.difficultyId),
+                  label: routeDifficultyLabelForDetails(
+                    context.l10n,
+                    route.difficultyId,
+                  ),
                 ),
                 if (route.recommendedDifficultyId.isNotEmpty &&
                     route.recommendedDifficultyId != route.difficultyId)
                   DetailsPill(
-                    label:
-                        'Recommended '
-                        '${routeDifficultyLabelForDetails(route.recommendedDifficultyId)}',
+                    label: context.l10n.discoverRecommendedDifficulty(
+                      routeDifficultyLabelForDetails(
+                        context.l10n,
+                        route.recommendedDifficultyId,
+                      ),
+                    ),
                   ),
-                DetailsPill(label: '${route.waypointCount} POI'),
+                DetailsPill(
+                  label: context.l10n.discoverPoiCount(route.waypointCount),
+                ),
                 if (route.fieldVerifiedAtUtc != null)
-                  const DetailsPill(label: 'Field verified'),
-                DetailsPill(label: 'Version ${route.versionId}'),
-                if (route.demoOnly) const DetailsPill(label: 'Demo data'),
+                  DetailsPill(label: context.l10n.discoverFieldVerified),
+                DetailsPill(
+                  label:
+                      '${context.l10n.discoverVersionLabel} ${route.versionId}',
+                ),
+                if (route.demoOnly)
+                  DetailsPill(label: context.l10n.discoverDemoData),
               ],
             ),
             if (route.surfaceIds.isNotEmpty) ...<Widget>[
               const SizedBox(height: 10),
               Text(
-                'Surface',
+                context.l10n.discoverSurfaceTitle,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w700,
@@ -372,8 +391,9 @@ class _RouteCompositionCard extends StatelessWidget {
                 runSpacing: 8,
                 children: route.surfaceIds
                     .map(
-                      (String surfaceId) =>
-                          DetailsPill(label: _surfaceLabel(surfaceId)),
+                      (String surfaceId) => DetailsPill(
+                        label: context.l10n.discoverSurface(surfaceId),
+                      ),
                     )
                     .toList(growable: false),
               ),
@@ -381,8 +401,12 @@ class _RouteCompositionCard extends StatelessWidget {
             if (route.unknownSurfaceDistanceMeters > 0) ...<Widget>[
               const SizedBox(height: 6),
               Text(
-                '${route.unknownSurfaceDistanceMeters.round()} m of surface '
-                'data is unknown.',
+                context.l10n.discoverUnknownSurface(
+                  discoverMetersText(
+                    context.l10n,
+                    route.unknownSurfaceDistanceMeters,
+                  ),
+                ),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -401,7 +425,7 @@ class _RouteCompositionCard extends StatelessWidget {
               child: TextButton.icon(
                 onPressed: onReport,
                 icon: const Icon(Icons.report_outlined),
-                label: const Text('Сообщить о проблеме на маршруте'),
+                label: Text(context.l10n.discoverReportRouteIssue),
               ),
             ),
           ],
@@ -409,10 +433,4 @@ class _RouteCompositionCard extends StatelessWidget {
       ),
     );
   }
-}
-
-String _surfaceLabel(String surfaceId) {
-  final String normalized = surfaceId.trim().replaceAll('_', ' ');
-  if (normalized.isEmpty) return surfaceId;
-  return normalized[0].toUpperCase() + normalized.substring(1);
 }

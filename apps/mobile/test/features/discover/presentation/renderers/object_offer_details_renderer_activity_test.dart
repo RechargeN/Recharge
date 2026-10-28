@@ -8,6 +8,7 @@ import 'package:recharge/features/discover/presentation/renderers/object_offer_v
 import 'package:recharge/features/discover/presentation/shell/details_shell.dart';
 
 import '../../../../widget/widget_test_viewport.dart';
+import 'package:recharge/core/localization/l10n_context.dart';
 
 void main() {
   DiscoverItemEntity fixture({
@@ -64,6 +65,10 @@ void main() {
     VoidCallback? onCtaTap,
   }) {
     return MaterialApp(
+      // L4.5: the expectations below are the Russian copy.
+      locale: const Locale('ru'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: DetailsShell(
         state: DetailsScreenAvailable(
           immersiveHero: true,
@@ -178,7 +183,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byTooltip('Save'));
+    await tester.tap(find.byTooltip('Сохранить'));
     await tester.pump();
     expect(saved, isTrue);
 

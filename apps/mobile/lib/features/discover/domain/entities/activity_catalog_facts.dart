@@ -37,7 +37,4 @@ class ActivityCatalogFacts {
   final int? amountMinor;
   final String? currencyCode;
   final List<String> galleryMediaIds;
-  String get durationLabel => durationMinMinutes == durationMaxMinutes
-      ? '$durationMinMinutes min'
-      : '$durationMinMinutes–$durationMaxMinutes min';
 }

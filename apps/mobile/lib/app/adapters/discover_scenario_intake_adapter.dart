@@ -1,5 +1,6 @@
 import '../../features/create/domain/entities/scenario_item_draft.dart';
 import '../../features/create/domain/entities/scenario_object_intake.dart';
+import '../../features/discover/application/state/scenario_intake_selection_state.dart';
 import '../../features/discover/domain/entities/discover_item_entity.dart';
 import '../../features/discover/domain/entities/event_occurrence.dart';
 import '../../features/discover/domain/entities/published_event_discovery_entity.dart';
@@ -7,15 +8,15 @@ import '../../features/discover/domain/entities/published_event_discovery_entity
 class DiscoverScenarioIntakeAdapter {
   const DiscoverScenarioIntakeAdapter();
 
-  String? supportIssue(DiscoverItemEntity item) {
+  ScenarioIntakeIssue? supportIssue(DiscoverItemEntity item) {
     // A Find People request is not a stop: its point is only an approximate area.
     if (item.objectKind == DiscoverObjectKind.findPeople) {
-      return 'A Find People request cannot be added to a Scenario.';
+      return ScenarioIntakeIssue.findPeopleNotSupported;
     }
     if (item.id.trim().isEmpty ||
         item.id.trim() != item.id ||
         item.title.trim().isEmpty) {
-      return 'This result is missing a stable catalog identity.';
+      return ScenarioIntakeIssue.missingIdentity;
     }
     if (!item.latitude.isFinite ||
         !item.longitude.isFinite ||
@@ -23,7 +24,7 @@ class DiscoverScenarioIntakeAdapter {
         item.latitude > 90 ||
         item.longitude < -180 ||
         item.longitude > 180) {
-      return 'This result has no usable catalog location.';
+      return ScenarioIntakeIssue.noLocation;
     }
     return null;
   }
@@ -36,16 +37,20 @@ class DiscoverScenarioIntakeAdapter {
     required DateTime checkedAtUtc,
   }) {
     if (items.isEmpty || items.length > 20) {
-      throw const FormatException('Scenario intake requires 1 to 20 items.');
+      throw const FormatException(
+        'Scenario intake requires 1 to 20 items.',
+      ); // l10n-ignore: developer exception
     }
     final refs = <ScenarioObjectRef>{};
     final candidates = <ScenarioIntakeCandidate>[];
     for (final item in items) {
       final issue = supportIssue(item);
-      if (issue != null) throw FormatException(issue);
+      if (issue != null) throw FormatException(issue.name);
       final candidate = _toCandidate(item, checkedAtUtc.toUtc());
       if (!refs.add(candidate.ref)) {
-        throw const FormatException('Duplicate Scenario intake object.');
+        throw const FormatException(
+          'Duplicate Scenario intake object.',
+        ); // l10n-ignore: developer exception
       }
       candidates.add(candidate);
     }
@@ -85,8 +90,8 @@ class DiscoverScenarioIntakeAdapter {
     required String requesterId,
     required DateTime checkedAtUtc,
   }) {
-    final String? locationIssue = _eventLocationIssue(event);
-    if (locationIssue != null) throw FormatException(locationIssue);
+    final ScenarioIntakeIssue? locationIssue = _eventLocationIssue(event);
+    if (locationIssue != null) throw FormatException(locationIssue.name);
     return ScenarioObjectIntakeIntent(
       contractVersion: ScenarioObjectIntakeIntent.currentContractVersion,
       intentId: intentId,
@@ -98,9 +103,11 @@ class DiscoverScenarioIntakeAdapter {
     );
   }
 
-  String? _eventLocationIssue(PublishedEventDiscoveryEntity event) {
+  ScenarioIntakeIssue? _eventLocationIssue(
+    PublishedEventDiscoveryEntity event,
+  ) {
     if (event.eventId.trim().isEmpty || event.title.trim().isEmpty) {
-      return 'This event is missing a stable catalog identity.';
+      return ScenarioIntakeIssue.missingIdentity;
     }
     if (!event.latitude.isFinite ||
         !event.longitude.isFinite ||
@@ -108,7 +115,7 @@ class DiscoverScenarioIntakeAdapter {
         event.latitude > 90 ||
         event.longitude < -180 ||
         event.longitude > 180) {
-      return 'This event has no usable catalog location.';
+      return ScenarioIntakeIssue.noLocation;
     }
     return null;
   }
@@ -172,7 +179,7 @@ class DiscoverScenarioIntakeAdapter {
       DiscoverObjectKind.route => ScenarioCatalogObjectType.route,
       DiscoverObjectKind.activity => ScenarioCatalogObjectType.activity,
       DiscoverObjectKind.findPeople => throw const FormatException(
-        'A Find People request cannot be added to a Scenario.',
+        'A Find People request cannot be added to a Scenario.', // l10n-ignore: developer error
       ),
     };
     final duration = item.durationMinutes;

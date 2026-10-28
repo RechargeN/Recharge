@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../application/state/discover_feed_state.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/time_fit_evaluation.dart';
+import '../discover_formats.dart';
 
 class DiscoverFeedSection extends ConsumerStatefulWidget {
   const DiscoverFeedSection({super.key, required this.onOpenDetails});
@@ -38,7 +41,7 @@ class _DiscoverFeedSectionState extends ConsumerState<DiscoverFeedSection> {
       case DiscoverFeedStatus.initial:
       case DiscoverFeedStatus.loading:
       case DiscoverFeedStatus.selectingArea:
-        return const Padding(
+        return Padding(
           padding: EdgeInsets.symmetric(vertical: 20),
           child: Center(
             child: Column(
@@ -46,15 +49,17 @@ class _DiscoverFeedSectionState extends ConsumerState<DiscoverFeedSection> {
               children: <Widget>[
                 CircularProgressIndicator(),
                 SizedBox(height: 12),
-                Text('Загружаем ленту...'),
+                Text(context.l10n.discoverFeedLoading),
               ],
             ),
           ),
         );
       case DiscoverFeedStatus.empty:
         return _StateCard(
-          message: state.message ?? 'Пока в ленте ничего нет',
-          actionLabel: 'Обновить',
+          message:
+              discoverFeedNoticeText(context.l10n, state.message) ??
+              context.l10n.discoverFeedEmpty,
+          actionLabel: context.l10n.discoverRefresh,
           onAction: controller.loadFeed,
           extraActions: state.appliedQuery.timeWindow == null
               ? const <Widget>[]
@@ -63,7 +68,7 @@ class _DiscoverFeedSectionState extends ConsumerState<DiscoverFeedSection> {
                     onPressed: () => controller.applyTimeFitRelaxation(
                       TimeFitRelaxation.widenWindow,
                     ),
-                    child: const Text('Расширить время'),
+                    child: Text(context.l10n.discoverWidenTime),
                   ),
                   if (state.appliedQuery.travelContext?.includeReturnTrip ==
                       true)
@@ -71,26 +76,30 @@ class _DiscoverFeedSectionState extends ConsumerState<DiscoverFeedSection> {
                       onPressed: () => controller.applyTimeFitRelaxation(
                         TimeFitRelaxation.skipReturnTrip,
                       ),
-                      child: const Text('Без обратной дороги'),
+                      child: Text(context.l10n.discoverNoReturnTrip),
                     ),
                   TextButton(
                     onPressed: () => controller.applyTimeFitRelaxation(
                       TimeFitRelaxation.removeTimeFilter,
                     ),
-                    child: const Text('Убрать время'),
+                    child: Text(context.l10n.discoverRemoveTime),
                   ),
                 ],
         );
       case DiscoverFeedStatus.error:
         return _StateCard(
-          message: state.message ?? 'Не удалось загрузить ленту',
-          actionLabel: 'Повторить',
+          message:
+              discoverFeedNoticeText(context.l10n, state.message) ??
+              context.l10n.discoverFeedFailed,
+          actionLabel: context.l10n.discoverRetry,
           onAction: controller.loadFeed,
         );
       case DiscoverFeedStatus.permissionDenied:
         return _StateCard(
-          message: state.message ?? 'Нет доступа к геопозиции',
-          actionLabel: 'Открыть настройки',
+          message:
+              discoverFeedNoticeText(context.l10n, state.message) ??
+              context.l10n.discoverNoLocationAccess,
+          actionLabel: context.l10n.discoverOpenSettings,
           onAction: () async {},
         );
       case DiscoverFeedStatus.ready:
@@ -100,10 +109,10 @@ class _DiscoverFeedSectionState extends ConsumerState<DiscoverFeedSection> {
         final List<Widget> children = <Widget>[];
         if (hasTimeWindow) {
           children.add(
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(bottom: 8),
               child: Text(
-                'Matches your time',
+                context.l10n.discoverMatchesYourTime,
                 style: TextStyle(fontWeight: FontWeight.w800),
               ),
             ),
@@ -115,10 +124,10 @@ class _DiscoverFeedSectionState extends ConsumerState<DiscoverFeedSection> {
               !unknownHeaderAdded) {
             unknownHeaderAdded = true;
             children.add(
-              const Padding(
+              Padding(
                 padding: EdgeInsets.fromLTRB(0, 12, 0, 8),
                 child: Text(
-                  'Time not confirmed',
+                  context.l10n.discoverTimeNotConfirmed,
                   style: TextStyle(fontWeight: FontWeight.w800),
                 ),
               ),
@@ -151,19 +160,25 @@ class _DiscoverFeedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final DateTime? localStart = item.startsAtUtc?.toLocal();
-    final String hour = localStart?.hour.toString().padLeft(2, '0') ?? '';
-    final String minute = localStart?.minute.toString().padLeft(2, '0') ?? '';
-    final String dateLabel = localStart == null
-        ? (item.activityCatalog?.durationLabel ?? 'Any time')
-        : '$hour:$minute';
+    final DateTime? start = item.startsAtUtc;
+    // The object's zone when it has one; a legacy item without one keeps the
+    // device zone it always had.
+    final String dateLabel = start == null
+        ? (item.activityCatalog == null
+              ? context.l10n.discoverAnyTime
+              : activityDurationLabel(context.l10n, item.activityCatalog!))
+        : item.timezoneId.isEmpty
+        ? RechargeFormats.deviceTime(start, context.l10n.localeName)
+        : RechargeFormats.time(start, item.timezoneId, context.l10n.localeName);
     final String priceLabel = item.activityCatalog != null
         ? (item.activityCatalog!.contributionKind == null
-              ? 'No contribution specified'
-              : 'Optional contribution')
+              ? context.l10n.discoverNoContribution
+              : context.l10n.discoverOptionalContribution)
         : item.isFree
-        ? 'Free'
-        : '${item.priceAmount?.toStringAsFixed(0) ?? '—'} €';
+        ? context.l10n.discoverFree
+        : item.priceAmount == null
+        ? '—'
+        : RechargeFormats.money(item.priceAmount!, context.l10n.localeName);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -196,21 +211,33 @@ class _DiscoverFeedCard extends StatelessWidget {
                       runSpacing: 6,
                       children: <Widget>[
                         _MetaChip(label: rechargeTaxonomyLabel(item.category)),
-                        if (item.isFree) const _MetaChip(label: 'Free'),
+                        if (item.isFree)
+                          _MetaChip(label: context.l10n.discoverFree),
                         if (item.timeFitEvaluation
                             case final evaluation?) ...<Widget>[
-                          _MetaChip(label: _timeFitLabel(evaluation)),
-                          _MetaChip(label: _openingLabel(evaluation)),
+                          _MetaChip(
+                            label: _timeFitLabel(context.l10n, evaluation),
+                          ),
+                          _MetaChip(
+                            label: _openingLabel(context.l10n, evaluation),
+                          ),
                           if (evaluation.travelMinutes != null)
                             _MetaChip(
                               label:
-                                  '${evaluation.travelMinutes} min travel'
-                                  '${evaluation.quality == TravelEstimateQuality.fallback || evaluation.quality == TravelEstimateQuality.modeled ? ' · est.' : ''}',
+                                  evaluation.quality ==
+                                          TravelEstimateQuality.fallback ||
+                                      evaluation.quality ==
+                                          TravelEstimateQuality.modeled
+                                  ? context.l10n.discoverTravelMinutesEstimated(
+                                      evaluation.travelMinutes!,
+                                    )
+                                  : context.l10n.discoverTravelMinutes(
+                                      evaluation.travelMinutes!,
+                                    ),
                             ),
                           if (evaluation.selectedSlotId != null)
-                            _MetaChip(
-                              label: 'Slot ${evaluation.selectedSlotId}',
-                            ),
+                            // The slot id is a code; only the fact is shown.
+                            _MetaChip(label: context.l10n.discoverSlotChosen),
                         ],
                       ],
                     ),
@@ -258,7 +285,7 @@ class _DiscoverFeedCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
                   Text(
-                    '${item.distanceKm.toStringAsFixed(1)} км',
+                    discoverKm(context.l10n, item.distanceKm),
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w800,
@@ -282,19 +309,19 @@ class _DiscoverFeedCard extends StatelessWidget {
   }
 }
 
-String _timeFitLabel(TimeFitEvaluation evaluation) =>
+String _timeFitLabel(AppLocalizations l10n, TimeFitEvaluation evaluation) =>
     switch (evaluation.timeFitStatus) {
-      TimeFitStatus.fits => 'Fits',
-      TimeFitStatus.partial => 'Partial fit',
-      TimeFitStatus.doesNotFit => 'Does not fit',
-      TimeFitStatus.unknown => 'Time unknown',
+      TimeFitStatus.fits => l10n.discoverFits,
+      TimeFitStatus.partial => l10n.discoverPartialFit,
+      TimeFitStatus.doesNotFit => l10n.discoverDoesNotFit,
+      TimeFitStatus.unknown => l10n.discoverTimeUnknown,
     };
 
-String _openingLabel(TimeFitEvaluation evaluation) =>
+String _openingLabel(AppLocalizations l10n, TimeFitEvaluation evaluation) =>
     switch (evaluation.openingStatus) {
-      OpeningStatus.open => 'Open',
-      OpeningStatus.closed => 'Closed',
-      OpeningStatus.unknown => 'Hours unknown',
+      OpeningStatus.open => l10n.discoverOpen,
+      OpeningStatus.closed => l10n.discoverClosed,
+      OpeningStatus.unknown => l10n.discoverHoursUnknown,
     };
 
 class _MetaChip extends StatelessWidget {

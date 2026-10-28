@@ -10080,6 +10080,2586 @@ abstract class AppLocalizations {
   /// **'Dated'**
   String get scenarioIntakeDated;
 
+  /// Discover: "Расписание".
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get discoverSchedule;
+
+  /// Discover: "Show on map".
+  ///
+  /// In en, this message translates to:
+  /// **'Show on map'**
+  String get discoverShowOnMap;
+
+  /// Discover: "Читать далее".
+  ///
+  /// In en, this message translates to:
+  /// **'Read more'**
+  String get discoverReadMore;
+
+  /// Discover: "Свернуть".
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get discoverShowLess;
+
+  /// Discover: "Точный адрес не опубликован".
+  ///
+  /// In en, this message translates to:
+  /// **'Exact address not published'**
+  String get discoverExactAddressNotPublished;
+
+  /// Discover: "Место не опубликовано".
+  ///
+  /// In en, this message translates to:
+  /// **'Location not published'**
+  String get discoverLocationNotPublished;
+
+  /// Discover: "Ссылка предоставляется сервисом бронирования".
+  ///
+  /// In en, this message translates to:
+  /// **'The link comes from the booking service'**
+  String get discoverLinkFromBookingService;
+
+  /// Discover: "Онлайн".
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get discoverOnline;
+
+  /// Discover: "Фактическое время и условия подтверждаются на сайте партнёра".
+  ///
+  /// In en, this message translates to:
+  /// **'The actual time and terms are confirmed on the partner’s website.'**
+  String get discoverPartnerConfirmsTime;
+
+  /// Discover: "Время для записи".
+  ///
+  /// In en, this message translates to:
+  /// **'Times to book'**
+  String get discoverTimesToBook;
+
+  /// Discover: "Расписание требует обновления — проверьте время на сайте.".
+  ///
+  /// In en, this message translates to:
+  /// **'The schedule needs a refresh — check the time on the website.'**
+  String get discoverScheduleNeedsRefresh;
+
+  /// Discover: "В текущем окне время не указано.".
+  ///
+  /// In en, this message translates to:
+  /// **'No time is listed in the current window.'**
+  String get discoverNoTimeInWindow;
+
+  /// Discover: "Координаты недоступны публично".
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinates are not public'**
+  String get discoverCoordinatesNotPublic;
+
+  /// Discover: "Данные доступа не публикуются".
+  ///
+  /// In en, this message translates to:
+  /// **'Access details are not published'**
+  String get discoverAccessDetailsNotPublished;
+
+  /// Discover: "Приблизительная публичная зона встречи".
+  ///
+  /// In en, this message translates to:
+  /// **'Approximate public meeting area'**
+  String get discoverApproximateMeetingArea;
+
+  /// Discover: "Free".
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get discoverFree;
+
+  /// Discover: "Гибридный формат".
+  ///
+  /// In en, this message translates to:
+  /// **'Hybrid'**
+  String get discoverHybrid;
+
+  /// Discover: "Оффлайн".
+  ///
+  /// In en, this message translates to:
+  /// **'In person'**
+  String get discoverInPerson;
+
+  /// Discover: "Проверить запись на сайте".
+  ///
+  /// In en, this message translates to:
+  /// **'Check enrollment on the website'**
+  String get discoverCheckEnrollmentOnSite;
+
+  /// Discover: "Запись через приложение пока не подключена".
+  ///
+  /// In en, this message translates to:
+  /// **'In-app enrollment is not connected yet'**
+  String get discoverInAppEnrollmentUnavailable;
+
+  /// Discover: "Способ записи пока не указан".
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment method not specified yet'**
+  String get discoverEnrollmentMethodUnknown;
+
+  /// Discover: "Условия участия уточняются на месте".
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of participation are confirmed on site'**
+  String get discoverTermsOnSite;
+
+  /// Discover: "Запись закрыта".
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment closed'**
+  String get discoverEnrollmentClosed;
+
+  /// Discover: "Наличие мест, итоговая стоимость и условия — на сайте органи".
+  ///
+  /// In en, this message translates to:
+  /// **'Availability, final price and terms are on the organizer’s website'**
+  String get discoverAvailabilityOnOrganizerSite;
+
+  /// Discover: "Место уточняется".
+  ///
+  /// In en, this message translates to:
+  /// **'Location to be confirmed'**
+  String get discoverLocationTbc;
+
+  /// Discover: "Инструкции предоставит организатор".
+  ///
+  /// In en, this message translates to:
+  /// **'The organizer will send instructions'**
+  String get discoverOrganizerSendsInstructions;
+
+  /// Discover: "Онлайн-занятие".
+  ///
+  /// In en, this message translates to:
+  /// **'Online class'**
+  String get discoverOnlineClass;
+
+  /// Discover: "Организатор подтверждён".
+  ///
+  /// In en, this message translates to:
+  /// **'Organizer verified'**
+  String get discoverOrganizerVerified;
+
+  /// Discover: "Профиль подтверждён".
+  ///
+  /// In en, this message translates to:
+  /// **'Profile verified'**
+  String get discoverProfileVerified;
+
+  /// Discover: "Преподаватель".
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get discoverTeacher;
+
+  /// Discover: "Длительность занятия".
+  ///
+  /// In en, this message translates to:
+  /// **'Session duration'**
+  String get discoverSessionDuration;
+
+  /// Discover: "Длительность курса".
+  ///
+  /// In en, this message translates to:
+  /// **'Course duration'**
+  String get discoverCourseDuration;
+
+  /// Discover: "Цена".
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get discoverPrice;
+
+  /// Discover: "Цена за человека / курс".
+  ///
+  /// In en, this message translates to:
+  /// **'Price per person / course'**
+  String get discoverPricePerPersonCourse;
+
+  /// Discover: "Цена за человека / занятие".
+  ///
+  /// In en, this message translates to:
+  /// **'Price per person / session'**
+  String get discoverPricePerPersonSession;
+
+  /// Discover: "Даты уточняются".
+  ///
+  /// In en, this message translates to:
+  /// **'Dates to be confirmed'**
+  String get discoverDatesTbc;
+
+  /// Discover: "Практический опыт".
+  ///
+  /// In en, this message translates to:
+  /// **'Hands-on experience'**
+  String get discoverKindHandsOn;
+
+  /// Discover: "Курс".
+  ///
+  /// In en, this message translates to:
+  /// **'Course'**
+  String get discoverKindCourse;
+
+  /// Discover: "Мастер-класс".
+  ///
+  /// In en, this message translates to:
+  /// **'Masterclass'**
+  String get discoverKindMasterclass;
+
+  /// Discover: "Воркшоп".
+  ///
+  /// In en, this message translates to:
+  /// **'Workshop'**
+  String get discoverKindWorkshop;
+
+  /// Discover: "Занятие".
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get discoverKindClass;
+
+  /// Discover: "Набор завершён".
+  ///
+  /// In en, this message translates to:
+  /// **'Closed to new people'**
+  String get discoverRecruitmentClosed;
+
+  /// Discover: "Встреча отменена".
+  ///
+  /// In en, this message translates to:
+  /// **'Meetup cancelled'**
+  String get discoverMeetupCancelled;
+
+  /// Discover: "Встреча завершена".
+  ///
+  /// In en, this message translates to:
+  /// **'Meetup ended'**
+  String get discoverMeetupEnded;
+
+  /// Discover: "Группа заполнена".
+  ///
+  /// In en, this message translates to:
+  /// **'Group is full'**
+  String get discoverGroupFull;
+
+  /// Discover: "Только лист ожидания".
+  ///
+  /// In en, this message translates to:
+  /// **'Waitlist only'**
+  String get discoverWaitlistOnly;
+
+  /// Discover: "Набор открыт".
+  ///
+  /// In en, this message translates to:
+  /// **'Open to join'**
+  String get discoverRecruitmentOpen;
+
+  /// Discover: "Собираются варианты времени".
+  ///
+  /// In en, this message translates to:
+  /// **'Collecting time options'**
+  String get discoverCollectingTimeOptions;
+
+  /// Discover: "Delivery available".
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery available'**
+  String get discoverDeliveryAvailable;
+
+  /// Discover: "Deposit required".
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit required'**
+  String get discoverDepositRequired;
+
+  /// Discover: "No deposit required".
+  ///
+  /// In en, this message translates to:
+  /// **'No deposit required'**
+  String get discoverNoDepositRequired;
+
+  /// Discover: "Price on request".
+  ///
+  /// In en, this message translates to:
+  /// **'Price on request'**
+  String get discoverPriceOnRequest;
+
+  /// Discover: "Записаться".
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get discoverSignUp;
+
+  /// Discover: "Добавить в календарь".
+  ///
+  /// In en, this message translates to:
+  /// **'Add to calendar'**
+  String get discoverAddToCalendar;
+
+  /// Discover: "О событии".
+  ///
+  /// In en, this message translates to:
+  /// **'About the event'**
+  String get discoverAboutEvent;
+
+  /// Discover: "Профиль".
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get discoverProfile;
+
+  /// Discover: "Профиль клуба".
+  ///
+  /// In en, this message translates to:
+  /// **'Club profile'**
+  String get discoverClubProfile;
+
+  /// Discover: "Организатор".
+  ///
+  /// In en, this message translates to:
+  /// **'Organizer'**
+  String get discoverOrganizer;
+
+  /// Discover: "Duration".
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get discoverDuration;
+
+  /// Discover: "Количество участников неизвестно".
+  ///
+  /// In en, this message translates to:
+  /// **'Number of participants unknown'**
+  String get discoverParticipantCountUnknown;
+
+  /// Discover: "Участники".
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get discoverParticipants;
+
+  /// Discover: "Add to Scenario".
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Scenario'**
+  String get discoverAddToScenario;
+
+  /// Discover: "Share".
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get discoverShare;
+
+  /// Discover: "EVENT".
+  ///
+  /// In en, this message translates to:
+  /// **'EVENT'**
+  String get discoverBadgeEvent;
+
+  /// Discover: "Currently unavailable".
+  ///
+  /// In en, this message translates to:
+  /// **'Currently unavailable'**
+  String get discoverCurrentlyUnavailable;
+
+  /// Discover: "Confirm on provider site".
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm on provider site'**
+  String get discoverConfirmOnProviderSite;
+
+  /// Discover: "Rate plan".
+  ///
+  /// In en, this message translates to:
+  /// **'Rate plan'**
+  String get discoverRatePlan;
+
+  /// Discover: "What is rented".
+  ///
+  /// In en, this message translates to:
+  /// **'What is rented'**
+  String get discoverWhatIsRented;
+
+  /// Discover: "RENTAL".
+  ///
+  /// In en, this message translates to:
+  /// **'RENTAL'**
+  String get discoverBadgeRental;
+
+  /// Discover: "Гибко".
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible'**
+  String get discoverFlexible;
+
+  /// Discover: "О занятии".
+  ///
+  /// In en, this message translates to:
+  /// **'About the class'**
+  String get discoverAboutClass;
+
+  /// Discover: "Закрыто".
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get discoverClosed;
+
+  /// Discover: "Часы работы".
+  ///
+  /// In en, this message translates to:
+  /// **'Opening hours'**
+  String get discoverOpeningHours;
+
+  /// Discover: "О месте".
+  ///
+  /// In en, this message translates to:
+  /// **'About the place'**
+  String get discoverAboutPlace;
+
+  /// Discover: "Время".
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get discoverTime;
+
+  /// Discover: "От вас".
+  ///
+  /// In en, this message translates to:
+  /// **'From you'**
+  String get discoverFromYou;
+
+  /// Discover: "Об услуге".
+  ///
+  /// In en, this message translates to:
+  /// **'About the service'**
+  String get discoverAboutService;
+
+  /// Discover: "Специалист".
+  ///
+  /// In en, this message translates to:
+  /// **'Specialist'**
+  String get discoverSpecialist;
+
+  /// Discover: "Организация".
+  ///
+  /// In en, this message translates to:
+  /// **'Organisation'**
+  String get discoverOrganization;
+
+  /// Discover: "Group size".
+  ///
+  /// In en, this message translates to:
+  /// **'Group size'**
+  String get discoverGroupSize;
+
+  /// Discover: "Требования".
+  ///
+  /// In en, this message translates to:
+  /// **'Requirements'**
+  String get discoverRequirements;
+
+  /// Discover: "Материалы и что включено".
+  ///
+  /// In en, this message translates to:
+  /// **'Materials and what is included'**
+  String get discoverMaterialsIncluded;
+
+  /// Discover: "Расходы не указаны".
+  ///
+  /// In en, this message translates to:
+  /// **'Costs not specified'**
+  String get discoverCostsNotSpecified;
+
+  /// Discover: "Без обязательных расходов".
+  ///
+  /// In en, this message translates to:
+  /// **'No required costs'**
+  String get discoverNoRequiredCosts;
+
+  /// Discover: "Желаемый размер".
+  ///
+  /// In en, this message translates to:
+  /// **'Desired size'**
+  String get discoverDesiredSize;
+
+  /// Discover: "Сейчас в группе".
+  ///
+  /// In en, this message translates to:
+  /// **'In the group now'**
+  String get discoverInGroupNow;
+
+  /// Discover: "Ожидаемые расходы".
+  ///
+  /// In en, this message translates to:
+  /// **'Expected costs'**
+  String get discoverExpectedCosts;
+
+  /// Discover: "Требования к участникам".
+  ///
+  /// In en, this message translates to:
+  /// **'Participant requirements'**
+  String get discoverParticipantRequirements;
+
+  /// Discover: "Формат встречи".
+  ///
+  /// In en, this message translates to:
+  /// **'Meetup format'**
+  String get discoverMeetupFormat;
+
+  /// Discover: "Время встречи".
+  ///
+  /// In en, this message translates to:
+  /// **'Meetup time'**
+  String get discoverMeetupTime;
+
+  /// Discover: "Варианты времени".
+  ///
+  /// In en, this message translates to:
+  /// **'Time options'**
+  String get discoverTimeOptions;
+
+  /// Discover: "О встрече".
+  ///
+  /// In en, this message translates to:
+  /// **'About the meetup'**
+  String get discoverAboutMeetup;
+
+  /// Discover: "Публикатор".
+  ///
+  /// In en, this message translates to:
+  /// **'Publisher'**
+  String get discoverPublisher;
+
+  /// Discover: "Поделиться и другие действия".
+  ///
+  /// In en, this message translates to:
+  /// **'Share and more actions'**
+  String get discoverShareAndMore;
+
+  /// Discover: "Mark as visited".
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as visited'**
+  String get discoverMarkVisited;
+
+  /// Discover: "Create route".
+  ///
+  /// In en, this message translates to:
+  /// **'Create route'**
+  String get discoverCreateRoute;
+
+  /// Discover: "Посмотреть маршрут".
+  ///
+  /// In en, this message translates to:
+  /// **'View route'**
+  String get discoverViewRoute;
+
+  /// Discover: "Create similar".
+  ///
+  /// In en, this message translates to:
+  /// **'Create similar'**
+  String get discoverCreateSimilar;
+
+  /// Discover: "Find similar".
+  ///
+  /// In en, this message translates to:
+  /// **'Find similar'**
+  String get discoverFindSimilar;
+
+  /// Discover: "Проверить время на сайте".
+  ///
+  /// In en, this message translates to:
+  /// **'Check the time on the website'**
+  String get discoverCheckTimeOnSite;
+
+  /// Discover: "Проверить и забронировать".
+  ///
+  /// In en, this message translates to:
+  /// **'Review and book'**
+  String get discoverReviewAndBook;
+
+  /// Discover: "Request sent".
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get discoverRequestSent;
+
+  /// Discover: "Date set".
+  ///
+  /// In en, this message translates to:
+  /// **'Date set'**
+  String get discoverDateSet;
+
+  /// Discover: "Any date".
+  ///
+  /// In en, this message translates to:
+  /// **'Any date'**
+  String get discoverAnyDate;
+
+  /// Discover: "Done".
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get discoverDone;
+
+  /// Discover: "Used as entered for time matching.".
+  ///
+  /// In en, this message translates to:
+  /// **'Used as entered for time matching.'**
+  String get discoverWindowAsEntered;
+
+  /// Discover: "Effective window".
+  ///
+  /// In en, this message translates to:
+  /// **'Effective window'**
+  String get discoverEffectiveWindow;
+
+  /// Discover: "Buffer on each side".
+  ///
+  /// In en, this message translates to:
+  /// **'Buffer on each side'**
+  String get discoverBufferEachSide;
+
+  /// Discover: "End".
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get discoverEnd;
+
+  /// Discover: "Start".
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get discoverStart;
+
+  /// Discover: "Change date".
+  ///
+  /// In en, this message translates to:
+  /// **'Change date'**
+  String get discoverChangeDate;
+
+  /// Discover: "Flexible".
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible'**
+  String get discoverFlexibleTime;
+
+  /// Discover: "Exact".
+  ///
+  /// In en, this message translates to:
+  /// **'Exact'**
+  String get discoverExact;
+
+  /// Discover: "Back to filters".
+  ///
+  /// In en, this message translates to:
+  /// **'Back to filters'**
+  String get discoverBackToFilters;
+
+  /// Discover: "Reset".
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get discoverReset;
+
+  /// Discover: "Exact time".
+  ///
+  /// In en, this message translates to:
+  /// **'Exact time'**
+  String get discoverExactTime;
+
+  /// Discover: "Apply filters".
+  ///
+  /// In en, this message translates to:
+  /// **'Apply filters'**
+  String get discoverApplyFilters;
+
+  /// Discover: "Include return trip".
+  ///
+  /// In en, this message translates to:
+  /// **'Include return trip'**
+  String get discoverIncludeReturnTrip;
+
+  /// Discover: "Transit".
+  ///
+  /// In en, this message translates to:
+  /// **'Public transport'**
+  String get discoverTransit;
+
+  /// Discover: "Driving".
+  ///
+  /// In en, this message translates to:
+  /// **'Driving'**
+  String get discoverDriving;
+
+  /// Discover: "Walking".
+  ///
+  /// In en, this message translates to:
+  /// **'Walking'**
+  String get discoverWalking;
+
+  /// Discover: "Map point".
+  ///
+  /// In en, this message translates to:
+  /// **'Map point'**
+  String get discoverMapPoint;
+
+  /// Discover: "Travel".
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get discoverTravel;
+
+  /// Discover: "No buffer".
+  ///
+  /// In en, this message translates to:
+  /// **'No buffer'**
+  String get discoverNoBuffer;
+
+  /// Discover: "Change flexibility".
+  ///
+  /// In en, this message translates to:
+  /// **'Change flexibility'**
+  String get discoverChangeFlexibility;
+
+  /// Discover: "Window edge buffer".
+  ///
+  /// In en, this message translates to:
+  /// **'Window edge buffer'**
+  String get discoverWindowEdgeBuffer;
+
+  /// Discover: "Today".
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get discoverToday;
+
+  /// Discover: "When".
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get discoverWhen;
+
+  /// Discover: "Save".
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get discoverSave;
+
+  /// Discover: "Отмена".
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get discoverCancel;
+
+  /// Discover: "Enter an amount from €0 to €10,000".
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount from €0 to €10,000'**
+  String get discoverEnterBudget;
+
+  /// Discover: "Amount in EUR".
+  ///
+  /// In en, this message translates to:
+  /// **'Amount in EUR'**
+  String get discoverAmountInEur;
+
+  /// Discover: "Budget per person".
+  ///
+  /// In en, this message translates to:
+  /// **'Budget per person'**
+  String get discoverBudgetPerPerson;
+
+  /// Discover: "Enter a number from 1 to 99".
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number from 1 to 99'**
+  String get discoverEnterPeople;
+
+  /// Discover: "For example, 6".
+  ///
+  /// In en, this message translates to:
+  /// **'For example, 6'**
+  String get discoverExampleSix;
+
+  /// Discover: "Number of people".
+  ///
+  /// In en, this message translates to:
+  /// **'Number of people'**
+  String get discoverNumberOfPeople;
+
+  /// Discover: "Any area".
+  ///
+  /// In en, this message translates to:
+  /// **'Any area'**
+  String get discoverAnyArea;
+
+  /// Discover: "Any duration".
+  ///
+  /// In en, this message translates to:
+  /// **'Any duration'**
+  String get discoverAnyDuration;
+
+  /// Discover: "Any distance".
+  ///
+  /// In en, this message translates to:
+  /// **'Any distance'**
+  String get discoverAnyDistance;
+
+  /// Discover: "Only available".
+  ///
+  /// In en, this message translates to:
+  /// **'Only available'**
+  String get discoverOnlyAvailable;
+
+  /// Discover: "Open now".
+  ///
+  /// In en, this message translates to:
+  /// **'Open now'**
+  String get discoverOpenNow;
+
+  /// Discover: "Time available".
+  ///
+  /// In en, this message translates to:
+  /// **'Time available'**
+  String get discoverTimeAvailable;
+
+  /// Discover: "Search filters".
+  ///
+  /// In en, this message translates to:
+  /// **'Search filters'**
+  String get discoverSearchFilters;
+
+  /// Discover: "Social evening".
+  ///
+  /// In en, this message translates to:
+  /// **'Social evening'**
+  String get discoverSocialEvening;
+
+  /// Discover: "Active morning".
+  ///
+  /// In en, this message translates to:
+  /// **'Active morning'**
+  String get discoverActiveMorning;
+
+  /// Discover: "Sunset break".
+  ///
+  /// In en, this message translates to:
+  /// **'Sunset break'**
+  String get discoverSunsetBreak;
+
+  /// Discover: "After work".
+  ///
+  /// In en, this message translates to:
+  /// **'After work'**
+  String get discoverAfterWork;
+
+  /// Discover: "Your regular searches will appear here automatically.".
+  ///
+  /// In en, this message translates to:
+  /// **'Your regular searches will appear here automatically.'**
+  String get discoverRegularSearchesHint;
+
+  /// Discover: "Calm evening".
+  ///
+  /// In en, this message translates to:
+  /// **'Calm evening'**
+  String get discoverCalmEvening;
+
+  /// Discover: "Low budget".
+  ///
+  /// In en, this message translates to:
+  /// **'Low budget'**
+  String get discoverLowBudget;
+
+  /// Discover: "For two".
+  ///
+  /// In en, this message translates to:
+  /// **'For two'**
+  String get discoverForTwo;
+
+  /// Discover: "Near me now".
+  ///
+  /// In en, this message translates to:
+  /// **'Near me now'**
+  String get discoverNearMeNow;
+
+  /// Discover: "Apply radius".
+  ///
+  /// In en, this message translates to:
+  /// **'Apply radius'**
+  String get discoverApplyRadius;
+
+  /// Discover: "Custom radius".
+  ///
+  /// In en, this message translates to:
+  /// **'Custom radius'**
+  String get discoverCustomRadius;
+
+  /// Discover: "Search radius".
+  ///
+  /// In en, this message translates to:
+  /// **'Search radius'**
+  String get discoverSearchRadius;
+
+  /// Discover: "Any budget".
+  ///
+  /// In en, this message translates to:
+  /// **'Any budget'**
+  String get discoverAnyBudget;
+
+  /// Discover: "For example, 8".
+  ///
+  /// In en, this message translates to:
+  /// **'For example, 8'**
+  String get discoverExampleEight;
+
+  /// Discover: "Just me".
+  ///
+  /// In en, this message translates to:
+  /// **'Just me'**
+  String get discoverJustMe;
+
+  /// Discover: "Any group".
+  ///
+  /// In en, this message translates to:
+  /// **'Any group'**
+  String get discoverAnyGroup;
+
+  /// Discover: "Choose search dates".
+  ///
+  /// In en, this message translates to:
+  /// **'Choose search dates'**
+  String get discoverChooseSearchDates;
+
+  /// Discover: "Choose dates".
+  ///
+  /// In en, this message translates to:
+  /// **'Choose dates'**
+  String get discoverChooseDates;
+
+  /// Discover: "This weekend".
+  ///
+  /// In en, this message translates to:
+  /// **'This weekend'**
+  String get discoverThisWeekend;
+
+  /// Discover: "Tomorrow".
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get discoverTomorrow;
+
+  /// Discover: "Choose date".
+  ///
+  /// In en, this message translates to:
+  /// **'Choose date'**
+  String get discoverChooseDate;
+
+  /// Discover: "Until end of day".
+  ///
+  /// In en, this message translates to:
+  /// **'Until end of day'**
+  String get discoverUntilEndOfDay;
+
+  /// Discover: "Recent searches".
+  ///
+  /// In en, this message translates to:
+  /// **'Recent searches'**
+  String get discoverRecentSearches;
+
+  /// Discover: "Quick plans".
+  ///
+  /// In en, this message translates to:
+  /// **'Quick plans'**
+  String get discoverQuickPlans;
+
+  /// Discover: "See all".
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get discoverSeeAll;
+
+  /// Discover: "Search activity, place or plan".
+  ///
+  /// In en, this message translates to:
+  /// **'Search activity, place or plan'**
+  String get discoverSearchHint;
+
+  /// Discover: "Search Recharge".
+  ///
+  /// In en, this message translates to:
+  /// **'Search Recharge'**
+  String get discoverSearchRecharge;
+
+  /// Discover: "Join activity".
+  ///
+  /// In en, this message translates to:
+  /// **'Join activity'**
+  String get discoverJoinActivity;
+
+  /// Discover: "Participants unknown".
+  ///
+  /// In en, this message translates to:
+  /// **'Participants unknown'**
+  String get discoverParticipantsUnknown;
+
+  /// Discover: "Capacity unknown".
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity unknown'**
+  String get discoverCapacityUnknown;
+
+  /// Discover: "Opening hours unknown".
+  ///
+  /// In en, this message translates to:
+  /// **'Opening hours unknown'**
+  String get discoverOpeningHoursUnknown;
+
+  /// Discover: "Time not confirmed".
+  ///
+  /// In en, this message translates to:
+  /// **'Time not confirmed'**
+  String get discoverTimeNotConfirmed;
+
+  /// Discover: "Does not fit".
+  ///
+  /// In en, this message translates to:
+  /// **'Does not fit'**
+  String get discoverDoesNotFit;
+
+  /// Discover: "Partial attendance possible".
+  ///
+  /// In en, this message translates to:
+  /// **'Partial attendance possible'**
+  String get discoverPartialAttendance;
+
+  /// Discover: "Fits your time".
+  ///
+  /// In en, this message translates to:
+  /// **'Fits your time'**
+  String get discoverFitsYourTime;
+
+  /// Discover: "Optional contribution".
+  ///
+  /// In en, this message translates to:
+  /// **'Optional contribution'**
+  String get discoverOptionalContribution;
+
+  /// Discover: "No contribution specified".
+  ///
+  /// In en, this message translates to:
+  /// **'No contribution specified'**
+  String get discoverNoContribution;
+
+  /// Discover: "Difficulty not set".
+  ///
+  /// In en, this message translates to:
+  /// **'Difficulty not set'**
+  String get discoverDifficultyNotSet;
+
+  /// Discover: "Any time".
+  ///
+  /// In en, this message translates to:
+  /// **'Any time'**
+  String get discoverAnyTime;
+
+  /// Discover: "What awaits you".
+  ///
+  /// In en, this message translates to:
+  /// **'What awaits you'**
+  String get discoverWhatAwaitsYou;
+
+  /// Discover: "Save the activity for later".
+  ///
+  /// In en, this message translates to:
+  /// **'Save the activity for later'**
+  String get discoverPerkSaveForLater;
+
+  /// Discover: "Organizer details available before joining".
+  ///
+  /// In en, this message translates to:
+  /// **'Organizer details available before joining'**
+  String get discoverPerkOrganizerDetails;
+
+  /// Discover: "Clear meeting point and timing".
+  ///
+  /// In en, this message translates to:
+  /// **'Clear meeting point and timing'**
+  String get discoverPerkMeetingPoint;
+
+  /// Discover: "Расстояние".
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get discoverDistance;
+
+  /// Discover: "Location".
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get discoverLocation;
+
+  /// Discover: "Route geometry".
+  ///
+  /// In en, this message translates to:
+  /// **'Route geometry'**
+  String get discoverRouteGeometry;
+
+  /// Discover: "Date and time".
+  ///
+  /// In en, this message translates to:
+  /// **'Date and time'**
+  String get discoverDateAndTime;
+
+  /// Discover: "Route map".
+  ///
+  /// In en, this message translates to:
+  /// **'Route map'**
+  String get discoverRouteMap;
+
+  /// Discover: "Route from this".
+  ///
+  /// In en, this message translates to:
+  /// **'Route from this'**
+  String get discoverRouteFromThis;
+
+  /// Discover: "Add to private history".
+  ///
+  /// In en, this message translates to:
+  /// **'Add to private history'**
+  String get discoverAddToPrivateHistory;
+
+  /// Discover: "Open Create Hub".
+  ///
+  /// In en, this message translates to:
+  /// **'Open Create Hub'**
+  String get discoverOpenCreateHub;
+
+  /// Discover: "Search with this category".
+  ///
+  /// In en, this message translates to:
+  /// **'Search with this category'**
+  String get discoverSearchThisCategory;
+
+  /// Discover: "Add this stop to a personal plan".
+  ///
+  /// In en, this message translates to:
+  /// **'Add this stop to a personal plan'**
+  String get discoverAddStopToPlan;
+
+  /// Discover: "Open nearby context".
+  ///
+  /// In en, this message translates to:
+  /// **'Open nearby context'**
+  String get discoverOpenNearbyContext;
+
+  /// Discover: "Map".
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get discoverMap;
+
+  /// Discover: "Turn this activity into a route, compare similar options, or".
+  ///
+  /// In en, this message translates to:
+  /// **'Turn this activity into a route, compare similar options, or save it for later.'**
+  String get discoverPlanHint;
+
+  /// Discover: "Not saved".
+  ///
+  /// In en, this message translates to:
+  /// **'Not saved'**
+  String get discoverNotSaved;
+
+  /// Discover: "Plan this recharge".
+  ///
+  /// In en, this message translates to:
+  /// **'Plan this recharge'**
+  String get discoverPlanThisRecharge;
+
+  /// Discover: "Отправить".
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get discoverSend;
+
+  /// Discover: "Критическую опасность выбирайте только при непосредственном ".
+  ///
+  /// In en, this message translates to:
+  /// **'Choose critical danger only when people are at immediate risk.'**
+  String get discoverCriticalOnlyImmediateRisk;
+
+  /// Discover: "Опишите проблему без личных данных".
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the problem without personal data'**
+  String get discoverDescribeWithoutPersonalData;
+
+  /// Discover: "Комментарий (необязательно)".
+  ///
+  /// In en, this message translates to:
+  /// **'Comment (optional)'**
+  String get discoverCommentOptional;
+
+  /// Discover: "Критическая опасность".
+  ///
+  /// In en, this message translates to:
+  /// **'Critical danger'**
+  String get discoverSeverityCritical;
+
+  /// Discover: "Опасно".
+  ///
+  /// In en, this message translates to:
+  /// **'Dangerous'**
+  String get discoverSeverityDanger;
+
+  /// Discover: "Требует внимания".
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get discoverSeverityWarning;
+
+  /// Discover: "Информация".
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get discoverSeverityInfo;
+
+  /// Discover: "Серьёзность".
+  ///
+  /// In en, this message translates to:
+  /// **'Severity'**
+  String get discoverSeverity;
+
+  /// Discover: "Другое".
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get discoverIssueOther;
+
+  /// Discover: "Неверная линия маршрута".
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong route line'**
+  String get discoverIssueWrongLine;
+
+  /// Discover: "Препятствие".
+  ///
+  /// In en, this message translates to:
+  /// **'Obstacle'**
+  String get discoverIssueObstacle;
+
+  /// Discover: "Опасное покрытие".
+  ///
+  /// In en, this message translates to:
+  /// **'Hazardous surface'**
+  String get discoverIssueHazardousSurface;
+
+  /// Discover: "Тропа закрыта".
+  ///
+  /// In en, this message translates to:
+  /// **'Trail closed'**
+  String get discoverIssueTrailClosed;
+
+  /// Discover: "Что произошло".
+  ///
+  /// In en, this message translates to:
+  /// **'What happened'**
+  String get discoverWhatHappened;
+
+  /// Discover: "Проблема на маршруте".
+  ///
+  /// In en, this message translates to:
+  /// **'Problem on the route'**
+  String get discoverRouteIssue;
+
+  /// Discover: "Сообщить о проблеме на маршруте".
+  ///
+  /// In en, this message translates to:
+  /// **'Report a problem on the route'**
+  String get discoverReportRouteIssue;
+
+  /// Discover: "Elevation data is unavailable and is not shown as zero.".
+  ///
+  /// In en, this message translates to:
+  /// **'Elevation data is unavailable and is not shown as zero.'**
+  String get discoverElevationUnavailable;
+
+  /// Discover: "Elevation data is partial; ascent and descent are not presen".
+  ///
+  /// In en, this message translates to:
+  /// **'Elevation data is partial; ascent and descent are not presented as complete.'**
+  String get discoverElevationPartial;
+
+  /// Discover: "Demo data".
+  ///
+  /// In en, this message translates to:
+  /// **'Demo data'**
+  String get discoverDemoData;
+
+  /// Discover: "Field verified".
+  ///
+  /// In en, this message translates to:
+  /// **'Field verified'**
+  String get discoverFieldVerified;
+
+  /// Discover: "Published Route".
+  ///
+  /// In en, this message translates to:
+  /// **'Published Route'**
+  String get discoverPublishedRoute;
+
+  /// Discover: "Open details".
+  ///
+  /// In en, this message translates to:
+  /// **'Open details'**
+  String get discoverOpenDetails;
+
+  /// Discover: "Select for Scenario".
+  ///
+  /// In en, this message translates to:
+  /// **'Select for Scenario'**
+  String get discoverSelectForScenario;
+
+  /// Discover: "Any".
+  ///
+  /// In en, this message translates to:
+  /// **'Any'**
+  String get discoverAny;
+
+  /// Discover: "Search this area".
+  ///
+  /// In en, this message translates to:
+  /// **'Search this area'**
+  String get discoverSearchThisArea;
+
+  /// Discover: "Reset route progress".
+  ///
+  /// In en, this message translates to:
+  /// **'Reset route progress'**
+  String get discoverResetRouteProgress;
+
+  /// Discover: "Start route".
+  ///
+  /// In en, this message translates to:
+  /// **'Start route'**
+  String get discoverStartRoute;
+
+  /// Discover: "Next stop".
+  ///
+  /// In en, this message translates to:
+  /// **'Next stop'**
+  String get discoverNextStop;
+
+  /// Discover: "Ready to start".
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to start'**
+  String get discoverReadyToStart;
+
+  /// Discover: "Route complete".
+  ///
+  /// In en, this message translates to:
+  /// **'Route complete'**
+  String get discoverRouteComplete;
+
+  /// Discover: "Copy".
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get discoverCopy;
+
+  /// Discover: "Create route listing".
+  ///
+  /// In en, this message translates to:
+  /// **'Create route listing'**
+  String get discoverCreateRouteListing;
+
+  /// Discover: "Search similar route".
+  ///
+  /// In en, this message translates to:
+  /// **'Search similar route'**
+  String get discoverSearchSimilarRoute;
+
+  /// Discover: "Edit route".
+  ///
+  /// In en, this message translates to:
+  /// **'Edit route'**
+  String get discoverEditRoute;
+
+  /// Discover: "Scenario route".
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario route'**
+  String get discoverScenarioRoute;
+
+  /// Discover: "No activities in this area".
+  ///
+  /// In en, this message translates to:
+  /// **'No activities in this area'**
+  String get discoverNoActivitiesInArea;
+
+  /// Discover: "Повторить".
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get discoverRetry;
+
+  /// Discover: "Map search failed".
+  ///
+  /// In en, this message translates to:
+  /// **'Map search failed'**
+  String get discoverMapSearchFailed;
+
+  /// Discover: "Map results".
+  ///
+  /// In en, this message translates to:
+  /// **'Map results'**
+  String get discoverMapResults;
+
+  /// Discover: "Apply".
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get discoverApply;
+
+  /// Discover: "Saved on map".
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on map'**
+  String get discoverSavedOnMap;
+
+  /// Discover: "Build route from smart search".
+  ///
+  /// In en, this message translates to:
+  /// **'Build route from smart search'**
+  String get discoverRouteFromSmart;
+
+  /// Discover: "Create listing from smart search".
+  ///
+  /// In en, this message translates to:
+  /// **'Create listing from smart search'**
+  String get discoverCreateFromSmart;
+
+  /// Discover: "Apply smart search to map".
+  ///
+  /// In en, this message translates to:
+  /// **'Apply smart search to map'**
+  String get discoverApplySmartToMap;
+
+  /// Discover: "Smart".
+  ///
+  /// In en, this message translates to:
+  /// **'Smart'**
+  String get discoverSmart;
+
+  /// Discover: "Build route from saved conditions".
+  ///
+  /// In en, this message translates to:
+  /// **'Build route from saved conditions'**
+  String get discoverRouteFromSaved;
+
+  /// Discover: "Create listing from saved conditions".
+  ///
+  /// In en, this message translates to:
+  /// **'Create listing from saved conditions'**
+  String get discoverCreateFromSaved;
+
+  /// Discover: "Apply saved conditions to map".
+  ///
+  /// In en, this message translates to:
+  /// **'Apply saved conditions to map'**
+  String get discoverApplySavedToMap;
+
+  /// Discover: "Saved".
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get discoverSaved;
+
+  /// Discover: "Create here".
+  ///
+  /// In en, this message translates to:
+  /// **'Create here'**
+  String get discoverCreateHere;
+
+  /// Discover: "Search".
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get discoverSearch;
+
+  /// Discover: "Clear".
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get discoverClear;
+
+  /// Discover: "Search on map".
+  ///
+  /// In en, this message translates to:
+  /// **'Search on map'**
+  String get discoverSearchOnMap;
+
+  /// Discover: "Map area".
+  ///
+  /// In en, this message translates to:
+  /// **'Map area'**
+  String get discoverMapArea;
+
+  /// Discover: "Recharge idea".
+  ///
+  /// In en, this message translates to:
+  /// **'Recharge idea'**
+  String get discoverRechargeIdea;
+
+  /// Discover: "Map area idea".
+  ///
+  /// In en, this message translates to:
+  /// **'Map area idea'**
+  String get discoverMapAreaIdea;
+
+  /// Discover: "Scenario copied".
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario copied'**
+  String get discoverScenarioCopied;
+
+  /// Discover: "Scenario saved".
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario saved'**
+  String get discoverScenarioSaved;
+
+  /// Discover: "Recenter".
+  ///
+  /// In en, this message translates to:
+  /// **'Recenter'**
+  String get discoverRecenter;
+
+  /// Discover: "Use current location".
+  ///
+  /// In en, this message translates to:
+  /// **'Use current location'**
+  String get discoverUseCurrentLocation;
+
+  /// Discover: "Cancel Scenario selection".
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Scenario selection'**
+  String get discoverCancelScenarioSelection;
+
+  /// Discover: "All".
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get discoverAll;
+
+  /// Discover: "Search failed".
+  ///
+  /// In en, this message translates to:
+  /// **'Search failed'**
+  String get discoverSearchFailed;
+
+  /// Discover: "Reset conditions".
+  ///
+  /// In en, this message translates to:
+  /// **'Reset conditions'**
+  String get discoverResetConditions;
+
+  /// Discover: "No activities match these conditions".
+  ///
+  /// In en, this message translates to:
+  /// **'No activities match these conditions'**
+  String get discoverNoMatches;
+
+  /// Discover: "Showing nearby activities".
+  ///
+  /// In en, this message translates to:
+  /// **'Showing nearby activities'**
+  String get discoverShowingNearby;
+
+  /// Discover: "Radius".
+  ///
+  /// In en, this message translates to:
+  /// **'Radius'**
+  String get discoverRadius;
+
+  /// Discover: "Tonight".
+  ///
+  /// In en, this message translates to:
+  /// **'Tonight'**
+  String get discoverTonight;
+
+  /// Discover: "Date".
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get discoverDate;
+
+  /// Discover: "Budget".
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get discoverBudget;
+
+  /// Discover: "Show no-ticket activities".
+  ///
+  /// In en, this message translates to:
+  /// **'Show no-ticket activities'**
+  String get discoverShowNoTicket;
+
+  /// Discover: "Free only".
+  ///
+  /// In en, this message translates to:
+  /// **'Free only'**
+  String get discoverFreeOnly;
+
+  /// Discover: "Outdoor".
+  ///
+  /// In en, this message translates to:
+  /// **'Outdoor'**
+  String get discoverOutdoor;
+
+  /// Discover: "Free today".
+  ///
+  /// In en, this message translates to:
+  /// **'Free today'**
+  String get discoverFreeToday;
+
+  /// Discover: "Search conditions".
+  ///
+  /// In en, this message translates to:
+  /// **'Search conditions'**
+  String get discoverSearchConditions;
+
+  /// Discover: "Open saved conditions on map".
+  ///
+  /// In en, this message translates to:
+  /// **'Open saved conditions on map'**
+  String get discoverOpenSavedOnMap;
+
+  /// Discover: "Delete saved conditions".
+  ///
+  /// In en, this message translates to:
+  /// **'Delete saved conditions'**
+  String get discoverDeleteSaved;
+
+  /// Discover: "No recent searches yet".
+  ///
+  /// In en, this message translates to:
+  /// **'No recent searches yet'**
+  String get discoverNoRecentSearches;
+
+  /// Discover: "Create listing from current search".
+  ///
+  /// In en, this message translates to:
+  /// **'Create listing from current search'**
+  String get discoverCreateListingFromSearch;
+
+  /// Discover: "Conditions".
+  ///
+  /// In en, this message translates to:
+  /// **'Conditions'**
+  String get discoverConditions;
+
+  /// Discover: "View map".
+  ///
+  /// In en, this message translates to:
+  /// **'View map'**
+  String get discoverViewMap;
+
+  /// Discover: "Categories".
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get discoverCategories;
+
+  /// Discover: "Quick scenarios".
+  ///
+  /// In en, this message translates to:
+  /// **'Quick scenarios'**
+  String get discoverQuickScenarios;
+
+  /// Discover: "Create from current search".
+  ///
+  /// In en, this message translates to:
+  /// **'Create from current search'**
+  String get discoverCreateFromCurrentSearch;
+
+  /// Discover: "Понятые параметры".
+  ///
+  /// In en, this message translates to:
+  /// **'Understood parameters'**
+  String get discoverUnderstoodParameters;
+
+  /// Discover: "Текстовый запрос".
+  ///
+  /// In en, this message translates to:
+  /// **'Text query'**
+  String get discoverTextQuery;
+
+  /// Discover: "Понятно".
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get discoverGotIt;
+
+  /// Discover: "Как работает Smart Search".
+  ///
+  /// In en, this message translates to:
+  /// **'How Smart Search works'**
+  String get discoverSmartSearchHow;
+
+  /// Discover: "Скажите, что хотите найти".
+  ///
+  /// In en, this message translates to:
+  /// **'Say what you want to find'**
+  String get discoverSayWhatToFind;
+
+  /// Discover: "Напишите или скажите, что найти".
+  ///
+  /// In en, this message translates to:
+  /// **'Write or say what to find'**
+  String get discoverSmartSearchPrompt;
+
+  /// Discover: "Начать поиск".
+  ///
+  /// In en, this message translates to:
+  /// **'Start search'**
+  String get discoverStartSearch;
+
+  /// Discover: "Удалить запрос".
+  ///
+  /// In en, this message translates to:
+  /// **'Delete query'**
+  String get discoverDeleteQuery;
+
+  /// Discover: "Недавние Smart Search".
+  ///
+  /// In en, this message translates to:
+  /// **'Recent smart searches'**
+  String get discoverRecentSmartSearches;
+
+  /// Discover: "Популярные запросы".
+  ///
+  /// In en, this message translates to:
+  /// **'Popular queries'**
+  String get discoverPopularQueries;
+
+  /// Discover: "До €20".
+  ///
+  /// In en, this message translates to:
+  /// **'Up to €20'**
+  String get discoverChipUpTo20;
+
+  /// Discover: "1–2 часа".
+  ///
+  /// In en, this message translates to:
+  /// **'1–2 hours'**
+  String get discoverChipOneTwoHours;
+
+  /// Discover: "Спокойный вечер".
+  ///
+  /// In en, this message translates to:
+  /// **'Calm evening'**
+  String get discoverChipCalmEvening;
+
+  /// Discover: "Для двоих".
+  ///
+  /// In en, this message translates to:
+  /// **'For two'**
+  String get discoverChipForTwo;
+
+  /// Discover: "Рядом сейчас".
+  ///
+  /// In en, this message translates to:
+  /// **'Near me now'**
+  String get discoverChipNearNow;
+
+  /// Discover: "Голосовой запрос".
+  ///
+  /// In en, this message translates to:
+  /// **'Voice query'**
+  String get discoverVoiceQuery;
+
+  /// Discover: "Напишите или скажите,\nчто хотите найти".
+  ///
+  /// In en, this message translates to:
+  /// **'Write or say\\nwhat you want to find'**
+  String get discoverSmartSearchPromptTwoLines;
+
+  /// Discover: "Smart Search".
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Search'**
+  String get discoverSmartSearch;
+
+  /// Discover: "Hours unknown".
+  ///
+  /// In en, this message translates to:
+  /// **'Hours unknown'**
+  String get discoverHoursUnknown;
+
+  /// Discover: "Time unknown".
+  ///
+  /// In en, this message translates to:
+  /// **'Time unknown'**
+  String get discoverTimeUnknown;
+
+  /// Discover: "Partial fit".
+  ///
+  /// In en, this message translates to:
+  /// **'Partial fit'**
+  String get discoverPartialFit;
+
+  /// Discover: "Matches your time".
+  ///
+  /// In en, this message translates to:
+  /// **'Matches your time'**
+  String get discoverMatchesYourTime;
+
+  /// Discover: "Открыть настройки".
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get discoverOpenSettings;
+
+  /// Discover: "Нет доступа к геопозиции".
+  ///
+  /// In en, this message translates to:
+  /// **'No access to location'**
+  String get discoverNoLocationAccess;
+
+  /// Discover: "Не удалось загрузить ленту".
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the feed'**
+  String get discoverFeedFailed;
+
+  /// Discover: "Убрать время".
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the time'**
+  String get discoverRemoveTime;
+
+  /// Discover: "Без обратной дороги".
+  ///
+  /// In en, this message translates to:
+  /// **'Without the return trip'**
+  String get discoverNoReturnTrip;
+
+  /// Discover: "Расширить время".
+  ///
+  /// In en, this message translates to:
+  /// **'Widen the time'**
+  String get discoverWidenTime;
+
+  /// Discover: "Обновить".
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get discoverRefresh;
+
+  /// Discover: "Пока в ленте ничего нет".
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in the feed yet'**
+  String get discoverFeedEmpty;
+
+  /// Discover: "Загружаем ленту...".
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the feed…'**
+  String get discoverFeedLoading;
+
+  /// Discover: "Точки на маршруте".
+  ///
+  /// In en, this message translates to:
+  /// **'Points on the route'**
+  String get discoverWaypoints;
+
+  /// Discover: "Высота".
+  ///
+  /// In en, this message translates to:
+  /// **'Elevation'**
+  String get discoverElevation;
+
+  /// Discover: "Сброс высоты".
+  ///
+  /// In en, this message translates to:
+  /// **'Descent'**
+  String get discoverDescent;
+
+  /// Discover: "Набор высоты".
+  ///
+  /// In en, this message translates to:
+  /// **'Ascent'**
+  String get discoverAscent;
+
+  /// Discover: "Не удалось загрузить карту маршрута".
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the route map'**
+  String get discoverRouteMapFailed;
+
+  /// Discover: "Открыть на карте".
+  ///
+  /// In en, this message translates to:
+  /// **'Open on map'**
+  String get discoverOpenOnMap;
+
+  /// Discover: "В одну сторону".
+  ///
+  /// In en, this message translates to:
+  /// **'One way'**
+  String get discoverShapeOneWay;
+
+  /// Discover: "Туда и обратно".
+  ///
+  /// In en, this message translates to:
+  /// **'Out and back'**
+  String get discoverShapeOutAndBack;
+
+  /// Discover: "Кольцевой".
+  ///
+  /// In en, this message translates to:
+  /// **'Loop'**
+  String get discoverShapeLoop;
+
+  /// Discover: "Страница".
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get discoverPublisherPage;
+
+  /// Discover: "Автор".
+  ///
+  /// In en, this message translates to:
+  /// **'Author'**
+  String get discoverPublisherAuthor;
+
+  /// Discover: "Route details".
+  ///
+  /// In en, this message translates to:
+  /// **'Route details'**
+  String get discoverRouteDetails;
+
+  /// Discover: a distance; value is an already formatted number.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} km'**
+  String discoverDistanceKm(String value);
+
+  /// Discover: distance from the reader.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} km from you'**
+  String discoverDistanceFromYou(String value);
+
+  /// Discover: distance to a Route start point.
+  ///
+  /// In en, this message translates to:
+  /// **'Start point · {value} km away'**
+  String discoverStartPointAway(String value);
+
+  /// Discover: waypoint distance from the Route start.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} km from the start'**
+  String discoverFromStartKm(String value);
+
+  /// Discover: a length in metres; value is an already formatted number.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} m'**
+  String discoverMeters(String value);
+
+  /// Discover: Route ascent with an up arrow.
+  ///
+  /// In en, this message translates to:
+  /// **'↑ {value} m'**
+  String discoverAscentShort(String value);
+
+  /// Discover: Route lowest and highest elevation.
+  ///
+  /// In en, this message translates to:
+  /// **'{min}–{max} m'**
+  String discoverElevationRange(String min, String max);
+
+  /// Discover: number of gaps in a Route track.
+  ///
+  /// In en, this message translates to:
+  /// **'Track gaps: {count}'**
+  String discoverTrackGaps(int count);
+
+  /// Discover: number of straight-line Route segments.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct segments: {count}'**
+  String discoverDirectSegments(int count);
+
+  /// Discover: number of straight-line Route segments inside a summary line.
+  ///
+  /// In en, this message translates to:
+  /// **'direct segments: {count}'**
+  String discoverDirectSegmentsInline(int count);
+
+  /// Discover: a duration in minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String discoverMinutes(int minutes);
+
+  /// Discover: a duration range in minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{min}–{max} min'**
+  String discoverMinutesRange(int min, int max);
+
+  /// Discover: a duration in hours; value may be a decimal already formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} h'**
+  String discoverHours(String value);
+
+  /// Discover: a duration in hours and minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes} min'**
+  String discoverHoursMinutes(int hours, int minutes);
+
+  /// Discover: a duration in days.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} d'**
+  String discoverDays(int days);
+
+  /// Discover: an upper bound of a group size.
+  ///
+  /// In en, this message translates to:
+  /// **'up to {count}'**
+  String discoverUpTo(int count);
+
+  /// Discover: declared group limit.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{up to {count} person} other{up to {count} people}}'**
+  String discoverUpToPeople(int count);
+
+  /// Discover: expected cost per person; amount is formatted money.
+  ///
+  /// In en, this message translates to:
+  /// **'About {price} per person'**
+  String discoverAboutPerPerson(String price);
+
+  /// Discover: a date line of a cancelled occurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · Cancelled'**
+  String discoverCancelledSuffix(String date);
+
+  /// Discover: Rental quantities are declared, not live.
+  ///
+  /// In en, this message translates to:
+  /// **'Listed quantities are Creator-declared, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.'**
+  String get discoverRentalQuantitiesDisclaimer;
+
+  /// Discover: Rental delivery radius.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery available within {value} km'**
+  String discoverDeliveryWithin(String value);
+
+  /// Discover: Rental minimum and maximum period.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental period: {min} – {max}'**
+  String discoverRentalPeriod(String min, String max);
+
+  /// Discover: Rental minimum renter age.
+  ///
+  /// In en, this message translates to:
+  /// **'Min age {age}'**
+  String discoverMinAge(int age);
+
+  /// Discover: Rental: an ID is checked at handover.
+  ///
+  /// In en, this message translates to:
+  /// **'ID required at handover'**
+  String get discoverIdRequired;
+
+  /// Discover: Rental deposit; amount is formatted money.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit: {price}'**
+  String discoverDeposit(String price);
+
+  /// Discover: number of proposed times of a meetup.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} time option} other{{count} time options}}'**
+  String discoverTimeOptionCount(int count);
+
+  /// Discover: the first time and how many more.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} · {count} more'**
+  String discoverFirstAndMore(String time, int count);
+
+  /// Discover: a proposed (not final) meetup time.
+  ///
+  /// In en, this message translates to:
+  /// **'Option · {time}'**
+  String discoverTimeOptionCandidate(String time);
+
+  /// Discover: a date with start and end time, in the object zone.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · {start}–{end}'**
+  String discoverDateTimeRange(String date, String start, String end);
+
+  /// Discover: budget limit; amount is formatted money.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {price}'**
+  String discoverUpToBudget(String price);
+
+  /// Discover: time window flexibility.
+  ///
+  /// In en, this message translates to:
+  /// **'±{minutes} min'**
+  String discoverFlexibilityMinutes(int minutes);
+
+  /// Discover: the effective window replaces the entered one.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for matching instead of {start}–{end}.'**
+  String discoverUsedInsteadOf(String start, String end);
+
+  /// Discover: Activity typical duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Typical duration: {value}'**
+  String discoverTypicalDuration(String value);
+
+  /// Discover: Activity suggested group size.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested group: {min}–{max}'**
+  String discoverSuggestedGroup(int min, int max);
+
+  /// Discover: Activity best time of day (already localized).
+  ///
+  /// In en, this message translates to:
+  /// **'Best time: {value}'**
+  String discoverBestTime(String value);
+
+  /// Discover: Activity amount hint; amount is formatted money.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount hint: {price}'**
+  String discoverAmountHint(String price);
+
+  /// Discover: booking button with the price.
+  ///
+  /// In en, this message translates to:
+  /// **'Book for {price}'**
+  String discoverBookFor(String price);
+
+  /// Discover: number of map results in the area.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} place or activity in this area} other{{count} places and activities in this area}}'**
+  String discoverResultsInArea(int count);
+
+  /// Discover: number of stops.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} stop} other{{count} stops}}'**
+  String discoverStops(int count);
+
+  /// Discover: current stop of a Route.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop {current} of {total}'**
+  String discoverStopOf(int current, int total);
+
+  /// Discover: search radius.
+  ///
+  /// In en, this message translates to:
+  /// **'Radius: {value} km'**
+  String discoverRadiusKm(String value);
+
+  /// Discover: remove an item from the Scenario selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove #{order} from selection'**
+  String discoverRemoveFromSelection(int order);
+
+  /// Discover: mood of a map Route idea; value is the stable mood id.
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, calm{Calm} social{Social} active{Active} other{Custom}}'**
+  String discoverMood(String value);
+
+  /// Discover: object type word in a summary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get discoverRouteLabel;
+
+  /// Discover: how Smart Search works.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a query or use voice input. Recharge reads the time, place, budget and mood and shows suitable options.'**
+  String get discoverSmartSearchHowBody;
+
+  /// Discover: Smart Search popular prompt; sent to the query parser (English or Russian only; lv keeps English).
+  ///
+  /// In en, this message translates to:
+  /// **'Calm evening nearby'**
+  String get discoverSmartPromptCalmEveningNearby;
+
+  /// Discover: Smart Search popular prompt; sent to the query parser (English or Russian only; lv keeps English).
+  ///
+  /// In en, this message translates to:
+  /// **'Find something interesting for 2 hours'**
+  String get discoverSmartPromptSomethingForTwoHours;
+
+  /// Discover: Smart Search popular prompt; sent to the query parser (English or Russian only; lv keeps English).
+  ///
+  /// In en, this message translates to:
+  /// **'Where to go for two nearby'**
+  String get discoverSmartPromptForTwoNearby;
+
+  /// Discover: Smart Search example query; sent to the query parser (English or Russian only; lv keeps English).
+  ///
+  /// In en, this message translates to:
+  /// **'Something calm nearby tonight, up to 20 EUR'**
+  String get discoverSmartPromptExample;
+
+  /// Discover: Smart Search example hint shown to the reader; the quoted query is sent to the parser.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: “Something calm nearby tonight, up to €20”'**
+  String get discoverSmartPromptExampleHint;
+
+  /// Discover: Smart Search chip query; sent to the query parser (English or Russian only; lv keeps English).
+  ///
+  /// In en, this message translates to:
+  /// **'Something interesting nearby now'**
+  String get discoverSmartPromptNearNow;
+
+  /// Discover: Smart Search chip query; sent to the query parser (English or Russian only; lv keeps English).
+  ///
+  /// In en, this message translates to:
+  /// **'Where to go for two'**
+  String get discoverSmartPromptForTwo;
+
+  /// Discover: Smart Search chip query; sent to the query parser (English or Russian only; lv keeps English).
+  ///
+  /// In en, this message translates to:
+  /// **'Calm evening'**
+  String get discoverSmartPromptCalmEvening;
+
+  /// Discover: Smart Search chip query; sent to the query parser (English or Russian only; lv keeps English).
+  ///
+  /// In en, this message translates to:
+  /// **'Find a plan for 2 hours'**
+  String get discoverSmartPromptTwoHours;
+
+  /// Discover: Smart Search chip query; sent to the query parser (English or Russian only; lv keeps English).
+  ///
+  /// In en, this message translates to:
+  /// **'Find something up to 20 EUR'**
+  String get discoverSmartPromptUpTo20;
+
+  /// Discover: Rental base rate; unit is the stable billing unit (hour, day, week), price is formatted money.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, hour{{price} / hour} week{{price} / week} other{{price} / day}}'**
+  String discoverRentalBaseRate(String type, String price);
+
+  /// Discover: Rental rate step from a minimum number of billing units; unit is the stable billing unit, price is formatted money.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, hour{From {count, plural, one{{count} hour} other{{count} hours}}: {price} / hour} week{From {count, plural, one{{count} week} other{{count} weeks}}: {price} / week} other{From {count, plural, one{{count} day} other{{count} days}}: {price} / day}}'**
+  String discoverRentalRateStep(String type, String price, int count);
+
+  /// Discover: declared Rental quantity (not a live availability).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} unit listed} other{{count} units listed}}'**
+  String discoverRentalUnitsListed(int count);
+
+  /// Discover: Activity season (already localized).
+  ///
+  /// In en, this message translates to:
+  /// **'Season: {value}'**
+  String discoverSeason(String value);
+
+  /// Discover: Route length metric label.
+  ///
+  /// In en, this message translates to:
+  /// **'Length'**
+  String get discoverLength;
+
+  /// Discover: participants metric label.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get discoverPeople;
+
+  /// Discover: Route profile: cycling.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycling'**
+  String get discoverCycling;
+
+  /// Discover: Route difficulty: easy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get discoverDifficultyEasy;
+
+  /// Discover: Route difficulty: moderate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get discoverDifficultyModerate;
+
+  /// Discover: Route difficulty: hard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get discoverDifficultyHard;
+
+  /// Discover: opening status: open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get discoverOpen;
+
+  /// Discover: snackbar after adding stops to a Scenario.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Added {count} stop to Scenario} other{Added {count} stops to Scenario}}'**
+  String discoverAddedToScenario(int count);
+
+  /// Discover: a passed Route stop with its duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed · {minutes} min'**
+  String discoverCompletedDuration(int minutes);
+
+  /// Discover: restart a Route walk-through.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart'**
+  String get discoverRestart;
+
+  /// Discover: finish a Route walk-through.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get discoverFinish;
+
+  /// Discover: search radius is unlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Radius: any area'**
+  String get discoverRadiusAnyArea;
+
+  /// Discover: a Route point without its own title.
+  ///
+  /// In en, this message translates to:
+  /// **'Point on the route'**
+  String get discoverWaypoint;
+
+  /// Discover: number of results found.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} found} other{{count} found}}'**
+  String discoverFoundCount(int count);
+
+  /// Discover: number of people in a search.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} person} other{{count} people}}'**
+  String discoverPeopleCount(int count);
+
+  /// Discover: budget chip; value is a number in the market currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Under {value}'**
+  String discoverUnder(String value);
+
+  /// Discover: a flexible time window.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible ±{minutes} min'**
+  String discoverFlexibleWindow(int minutes);
+
+  /// Discover: a custom value option.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get discoverCustom;
+
+  /// Discover: a chosen custom value; value is already formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom · {value}'**
+  String discoverCustomValue(String value);
+
+  /// Discover: a number of hours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} hour} other{{count} hours}}'**
+  String discoverHoursLong(int count);
+
+  /// Discover: about an hour.
+  ///
+  /// In en, this message translates to:
+  /// **'~ 1 hour'**
+  String get discoverAboutOneHour;
+
+  /// Discover: a range of hours.
+  ///
+  /// In en, this message translates to:
+  /// **'{min}–{max} hours'**
+  String discoverHoursRange(int min, int max);
+
+  /// Discover: filter title: availability.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability'**
+  String get discoverAvailability;
+
+  /// Discover: filter title: mood.
+  ///
+  /// In en, this message translates to:
+  /// **'Mood'**
+  String get discoverMoodTitle;
+
+  /// Discover: travel time to an object.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min travel'**
+  String discoverTravelMinutes(int minutes);
+
+  /// Discover: estimated travel time to an object.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min travel · est.'**
+  String discoverTravelMinutesEstimated(int minutes);
+
+  /// Discover: a time slot was chosen for the reader.
+  ///
+  /// In en, this message translates to:
+  /// **'Time slot chosen'**
+  String get discoverSlotChosen;
+
+  /// Discover: time fit: fits.
+  ///
+  /// In en, this message translates to:
+  /// **'Fits'**
+  String get discoverFits;
+
+  /// Discover: remove from saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsave'**
+  String get discoverUnsave;
+
+  /// Discover: recommended Route difficulty (already localized).
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended {value}'**
+  String discoverRecommendedDifficulty(String value);
+
+  /// Discover: number of points of interest on a Route.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} point of interest} other{{count} points of interest}}'**
+  String discoverPoiCount(int count);
+
+  /// Discover: Route surface heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Surface'**
+  String get discoverSurfaceTitle;
+
+  /// Discover: Route surface; id is the stable surface id (OSM tag value).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, asphalt{Asphalt}paved{Paved}concrete{Concrete}paving_stones{Paving stones}sett{Cobblestones}compacted{Compacted}fine_gravel{Fine gravel}gravel{Gravel}dirt{Dirt}earth{Earth}ground{Ground}grass{Grass}sand{Sand}unpaved{Unpaved}wood{Wood}mixed{Mixed} other{Other surface}}'**
+  String discoverSurface(String value);
+
+  /// Discover: Route length with unknown surface; length is formatted metres.
+  ///
+  /// In en, this message translates to:
+  /// **'Surface data is unknown for {meters}.'**
+  String discoverUnknownSurface(String meters);
+
+  /// Discover: a Find People request cannot join a Scenario.
+  ///
+  /// In en, this message translates to:
+  /// **'A Find People request cannot be added to a Scenario.'**
+  String get discoverIntakeFindPeopleNotSupported;
+
+  /// Discover: a result has no stable catalog identity.
+  ///
+  /// In en, this message translates to:
+  /// **'This result cannot be added: it has no stable catalog identity.'**
+  String get discoverIntakeMissingIdentity;
+
+  /// Discover: a result has no usable location.
+  ///
+  /// In en, this message translates to:
+  /// **'This result has no usable catalog location.'**
+  String get discoverIntakeNoLocation;
+
+  /// Discover: the Scenario selection is full.
+  ///
+  /// In en, this message translates to:
+  /// **'A Scenario intake can contain up to {count} items.'**
+  String discoverIntakeLimitReached(int count);
+
+  /// Discover: screen reader text of the Scenario selection tray.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} stop selected for Scenario.} other{{count} stops selected for Scenario.}}'**
+  String discoverStopsSelected(int count);
+
+  /// Discover: number of selected objects.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String discoverSelectedCount(int count);
+
+  /// Discover: why a search time window was not applied; issue is the stable code.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, unknownTimezone{The time zone of this area is unknown.}dayEnded{This day has already ended here.}boundsRequired{Choose a start and an end.}nonexistentLocalTime{This local time does not exist because of the clock change.}endBeforeStart{The end must be after the start.}invalidTravelContext{The travel settings are not valid.}serviceUnavailable{Time matching is unavailable right now.} other{The time window could not be applied.}}'**
+  String discoverTimeWindowIssue(String code);
+
+  /// Discover: feed notice for a stable code.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, emptyArea{Nothing found in this area. Try a larger radius or fewer filters.}loadFailed{Could not load the data. Try again.}dataUnavailable{The data is unavailable.}offline{No internet connection.} other{Could not load the feed. Try again.}}'**
+  String discoverFeedNotice(String code);
+
   /// Add to Scenario: progress line for the sheet stage (stable stage name).
   ///
   /// In en, this message translates to:
@@ -10115,6 +12695,306 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, one{{count} day} other{{count} days}} · {total, plural, one{{total} active item} other{{total} active items}}'**
   String scenarioIntakeTargetCounts(int count, int total);
+
+  /// Discover home: quick scenario or route idea title; id is stable.
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, freeToday{Free today}nearMe{Near me}eveningPlans{Evening plans}coffeeReset{Coffee reset}freeCityReset{Free city reset}socialEvening{Social evening}activeBoost{Active boost} other{Idea}}'**
+  String discoverHomeIdeaTitle(String value);
+
+  /// Discover home: quick scenario or route idea subtitle; id is stable.
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, freeToday{Activities nearby without tickets}nearMe{Use the map radius and quick list}eveningPlans{Find something after work}coffeeReset{A calm cafe start with an easy city walk.}freeCityReset{A free low-pressure route for a quick recharge.}socialEvening{Start social, then keep the night nearby.}activeBoost{Move first, then cool down on a walk.} other{A quick plan nearby.}}'**
+  String discoverHomeIdeaSubtitle(String value);
+
+  /// Discover: home section: new.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get discoverHomeNew;
+
+  /// Discover: home section: for you.
+  ///
+  /// In en, this message translates to:
+  /// **'For you'**
+  String get discoverHomeForYou;
+
+  /// Discover: home section: quick events.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick events'**
+  String get discoverHomeQuickEvents;
+
+  /// Discover: home section: nearby.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby'**
+  String get discoverHomeNearby;
+
+  /// Discover: home section: popular.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get discoverHomePopular;
+
+  /// Discover: home section: Route ideas.
+  ///
+  /// In en, this message translates to:
+  /// **'Route ideas'**
+  String get discoverRouteIdeas;
+
+  /// Discover: open the Scenario builder.
+  ///
+  /// In en, this message translates to:
+  /// **'Builder'**
+  String get discoverBuilder;
+
+  /// Discover: build a Route from a template.
+  ///
+  /// In en, this message translates to:
+  /// **'Build'**
+  String get discoverBuild;
+
+  /// Discover: open Create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get discoverCreate;
+
+  /// Discover: resume a saved search.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get discoverResume;
+
+  /// Discover: Route template: walkable.
+  ///
+  /// In en, this message translates to:
+  /// **'Walkable'**
+  String get discoverWalkable;
+
+  /// Discover: Route template: free and paid stops.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed'**
+  String get discoverMixedPrice;
+
+  /// Discover: tooltip: show a Route idea on the map; title is localized.
+  ///
+  /// In en, this message translates to:
+  /// **'Map {message} route'**
+  String discoverMapTemplateRoute(String message);
+
+  /// Discover: tooltip: create a Route from an idea; title is localized.
+  ///
+  /// In en, this message translates to:
+  /// **'Create {message} route'**
+  String discoverCreateTemplateRoute(String message);
+
+  /// Discover: home: what the For you block holds.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal picks, saved ideas and creator tools stay one tap away.'**
+  String get discoverForYouHint;
+
+  /// Discover: idea title from Smart Search without a query.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart search idea'**
+  String get discoverSmartSearchIdea;
+
+  /// Discover: label before meetup languages (shown as published).
+  ///
+  /// In en, this message translates to:
+  /// **'Languages:'**
+  String get discoverLanguagesLabel;
+
+  /// Discover: label before the equipment note (user content, shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment:'**
+  String get discoverEquipmentLabel;
+
+  /// Discover: label before the accessibility note (user content, shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Accessibility:'**
+  String get discoverAccessibilityLabel;
+
+  /// Discover: Rental: label before the publishing page id.
+  ///
+  /// In en, this message translates to:
+  /// **'Listed by page'**
+  String get discoverListedByPageLabel;
+
+  /// Discover: Rental: label before the publisher id.
+  ///
+  /// In en, this message translates to:
+  /// **'Listed by'**
+  String get discoverListedByLabel;
+
+  /// Discover: label before what a class teaches (user content, shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'What you will learn:'**
+  String get discoverLearningOutcomesLabel;
+
+  /// Discover: label before the organizer name (shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Organizer:'**
+  String get discoverOrganizerLabel;
+
+  /// Discover: label before the linked Place title (shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Linked Place:'**
+  String get discoverLinkedPlaceLabel;
+
+  /// Discover: label before the informal access caution (user content, shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Informal access:'**
+  String get discoverInformalAccessLabel;
+
+  /// Discover: screen reader label before a passed stop title (shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Completed at stop {index}:'**
+  String discoverCompletedAtStopLabel(int index);
+
+  /// Discover: screen reader label before the focused stop title (shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Focused stop {index}:'**
+  String discoverFocusedStopLabel(int index);
+
+  /// Discover: label before the current stop title (shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Now: stop {index} ·'**
+  String discoverNowAtStopLabel(int index);
+
+  /// Discover: screen reader label before a selected stop title (shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Selected stop {index}:'**
+  String discoverSelectedStopLabel(int index);
+
+  /// Discover: a Route idea by mood; value is the stable mood id.
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, calm{Calm route}social{Social route}active{Active route} other{Custom route}}'**
+  String discoverMoodRoute(String value);
+
+  /// Discover: a Route idea listing title by mood; value is the stable mood id.
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, calm{Calm recharge route}social{Social recharge route}active{Active recharge route} other{Custom recharge route}}'**
+  String discoverMoodRechargeRoute(String value);
+
+  /// Discover: a saved Route idea title by mood; value is the stable mood id.
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, calm{Calm recharge scenario}social{Social recharge scenario}active{Active recharge scenario} other{Custom recharge scenario}}'**
+  String discoverMoodRechargeScenario(String value);
+
+  /// Discover: label before a contribution note; value is the localized contribution kind.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional {value}:'**
+  String discoverOptionalContributionLabel(String value);
+
+  /// Discover: idea title for a category; type is the category name (G04, not translated).
+  ///
+  /// In en, this message translates to:
+  /// **'{type} idea'**
+  String discoverIdeaForCategory(String type);
+
+  /// Discover: label before the understood intent (the reader prompt is shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Intent:'**
+  String get discoverIntentLabel;
+
+  /// Discover: label before the applied search conditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied:'**
+  String get discoverAppliedLabel;
+
+  /// Discover: label before a Route version id.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get discoverVersionLabel;
+
+  /// Discover: remove an object from a selection (its title follows as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get discoverRemove;
+
+  /// Discover: an external link could not be opened (its host follows as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open'**
+  String get discoverCouldNotOpenLink;
+
+  /// Discover: screen reader text of a Collection mini map.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Map of {count} place in this Collection. Use the list below to browse it without the map.} other{Map of {count} places in this Collection. Use the list below to browse them without the map.}}'**
+  String discoverCollectionMapSemantics(int count);
+
+  /// Discover: screen reader text of a Route preview thumbnail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Route preview: {count} segment} other{Route preview: {count} segments}}'**
+  String discoverRoutePreview(int count);
+
+  /// Discover: categories search field hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search categories'**
+  String get discoverSearchCategories;
+
+  /// Discover: clear the search field.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get discoverClearSearch;
+
+  /// Discover: no category matches the search.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories found'**
+  String get discoverNoCategories;
+
+  /// Discover: a category link points nowhere.
+  ///
+  /// In en, this message translates to:
+  /// **'Category not found'**
+  String get discoverCategoryNotFound;
+
+  /// Discover: open a Route.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Route'**
+  String get discoverOpenRoute;
+
+  /// Discover: a picked date that is today; date is formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, {date}'**
+  String discoverTodayDate(String date);
+
+  /// Discover: label before a publisher name (shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'By'**
+  String get discoverByLabel;
 }
 
 class _AppLocalizationsDelegate

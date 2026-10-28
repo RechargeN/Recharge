@@ -10,6 +10,7 @@ import 'package:recharge/features/discover/domain/entities/published_bookable_se
 import 'package:recharge/features/discover/domain/entities/publisher_verification_display_state.dart';
 import 'package:recharge/features/discover/presentation/renderers/object_offer_details_renderer.dart';
 import 'package:recharge/features/discover/presentation/shell/details_shell.dart';
+import 'package:recharge/core/localization/l10n_context.dart';
 
 void main() {
   testWidgets(
@@ -28,6 +29,10 @@ void main() {
       final ThemeData baseTheme = RechargeTheme.light();
       await tester.pumpWidget(
         MaterialApp(
+          // L4.5: the expectations below are the Russian copy.
+          locale: const Locale('ru'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           theme: baseTheme.copyWith(
             textTheme: baseTheme.textTheme.apply(fontFamily: 'Roboto'),
             primaryTextTheme: baseTheme.primaryTextTheme.apply(

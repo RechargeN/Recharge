@@ -22,8 +22,8 @@ ObjectOfferProfile objectOfferProfileFor(CatalogObjectType type) {
     CatalogObjectType.classWorkshop ||
     CatalogObjectType.collection ||
     CatalogObjectType.rental => throw ArgumentError(
-      '$type has no Object/Offer profile (DTL-OBJ-01 §1.1) — '
-      'ObjectOfferDetailsRenderer must not be reached for it.',
+      '$type has no Object/Offer profile (DTL-OBJ-01 §1.1) — ' // l10n-ignore: developer error
+      'ObjectOfferDetailsRenderer must not be reached for it.', // l10n-ignore: developer error
     ),
   };
 }

@@ -223,14 +223,11 @@ void main() {
           ),
           hasLength(2),
         );
-        expect(find.text('Страница', skipOffstage: false), findsOneWidget);
+        expect(find.text('Page', skipOffstage: false), findsOneWidget);
+        expect(find.text('Track gaps: 1', skipOffstage: false), findsOneWidget);
+        expect(find.text('Ascent', skipOffstage: false), findsNothing);
         expect(
-          find.text('Разрывов трека: 1', skipOffstage: false),
-          findsOneWidget,
-        );
-        expect(find.text('Набор высоты', skipOffstage: false), findsNothing);
-        expect(
-          find.textContaining('Сообщить', skipOffstage: false),
+          find.textContaining('Report a problem', skipOffstage: false),
           findsNothing,
         );
         expect(
@@ -242,8 +239,8 @@ void main() {
         final DiscoverItemEntity personal = (await tester
             .runAsync<DiscoverItemEntity?>(() => lookup.lookup(personalId)))!;
         await show(personal);
-        expect(find.text('Автор', skipOffstage: false), findsOneWidget);
-        expect(find.text('Набор высоты', skipOffstage: false), findsOneWidget);
+        expect(find.text('Author', skipOffstage: false), findsOneWidget);
+        expect(find.text('Ascent', skipOffstage: false), findsOneWidget);
         expect(
           find.textContaining('PRIVATE', skipOffstage: false),
           findsNothing,

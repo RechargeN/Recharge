@@ -1,5 +1,14 @@
 import '../../domain/entities/discover_item_entity.dart';
 
+/// L4.5: why a result cannot join the Scenario selection; the UI turns the
+/// code into text.
+enum ScenarioIntakeIssue {
+  findPeopleNotSupported,
+  missingIdentity,
+  noLocation,
+  limitReached,
+}
+
 class ScenarioIntakeSelectionState {
   ScenarioIntakeSelectionState({
     required this.active,
@@ -16,7 +25,7 @@ class ScenarioIntakeSelectionState {
 
   final bool active;
   final List<DiscoverItemEntity> selectedItems;
-  final String? message;
+  final ScenarioIntakeIssue? message;
 
   int get count => selectedItems.length;
   bool get canReview => active && selectedItems.isNotEmpty;
@@ -29,7 +38,7 @@ class ScenarioIntakeSelectionState {
   ScenarioIntakeSelectionState copyWith({
     bool? active,
     List<DiscoverItemEntity>? selectedItems,
-    String? message,
+    ScenarioIntakeIssue? message,
     bool clearMessage = false,
   }) => ScenarioIntakeSelectionState(
     active: active ?? this.active,

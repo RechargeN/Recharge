@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/domain/entities/published_class_workshop_discovery_entity.dart';
 import 'package:recharge/features/discover/presentation/renderers/object_offer_details_renderer.dart';
@@ -7,12 +8,17 @@ import 'package:recharge/features/discover/presentation/renderers/object_offer_v
 import 'package:recharge/features/discover/presentation/shell/details_shell.dart';
 import '../../../../fixtures/class_workshop_details_fixture.dart';
 import '../../../../widget/widget_test_viewport.dart';
+import 'package:recharge/core/localization/l10n_context.dart';
 
 Widget app(
   PublishedClassWorkshopDiscoveryEntity projection, {
   VoidCallback? onMap,
   Future<void> Function()? onPrimary,
 }) => MaterialApp(
+  // L4.5: the expectations below are the Russian copy.
+  locale: const Locale('ru'),
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
   home: DetailsShell(
     state: DetailsScreenAvailable(
       immersiveHero: true,
@@ -28,13 +34,40 @@ Widget app(
 );
 
 void main() {
+  // L4.5: the date labels below are formatted for ru.
+  setUpAll(() => initializeDateFormatting('ru'));
   test('currency precision comes from the source without float rounding', () {
-    expect(classWorkshopPriceLabel(ClassWorkshopPriceFixed(amountMinor: 2500, currencyCode: 'JPY',
-      minorUnitDigits: 0, scope: ClassWorkshopPriceScope.perPersonPerClass)), '2500 JPY');
-    expect(classWorkshopPriceLabel(ClassWorkshopPriceFixed(amountMinor: 12345, currencyCode: 'KWD',
-      minorUnitDigits: 3, scope: ClassWorkshopPriceScope.perPersonPerClass)), '12.345 KWD');
-    expect(() => ClassWorkshopPriceFixed(amountMinor: 1, currencyCode: 'EUR', minorUnitDigits: -1,
-      scope: ClassWorkshopPriceScope.perPersonPerClass), throwsArgumentError);
+    expect(
+      classWorkshopPriceLabel(
+        ClassWorkshopPriceFixed(
+          amountMinor: 2500,
+          currencyCode: 'JPY',
+          minorUnitDigits: 0,
+          scope: ClassWorkshopPriceScope.perPersonPerClass,
+        ),
+      ),
+      '2500 JPY',
+    );
+    expect(
+      classWorkshopPriceLabel(
+        ClassWorkshopPriceFixed(
+          amountMinor: 12345,
+          currencyCode: 'KWD',
+          minorUnitDigits: 3,
+          scope: ClassWorkshopPriceScope.perPersonPerClass,
+        ),
+      ),
+      '12.345 KWD',
+    );
+    expect(
+      () => ClassWorkshopPriceFixed(
+        amountMinor: 1,
+        currencyCode: 'EUR',
+        minorUnitDigits: -1,
+        scope: ClassWorkshopPriceScope.perPersonPerClass,
+      ),
+      throwsArgumentError,
+    );
   });
   fullPageTestWidgets(
     'typed sections keep their order, units and separate publisher',
@@ -64,8 +97,8 @@ void main() {
       expect(find.text('Организатор: Студия «Глина»'), findsOneWidget);
       expect(find.text('Организатор подтверждён'), findsOneWidget);
       expect(find.text('Профиль подтверждён'), findsNothing);
-      expect(find.byTooltip('Save'), findsNothing);
-      expect(find.byTooltip('Share'), findsOneWidget);
+      expect(find.byTooltip('Сохранить'), findsNothing);
+      expect(find.byTooltip('Поделиться'), findsOneWidget);
       expect(
         tester.getSize(find.byType(FilledButton)).width,
         tester.view.physicalSize.width / tester.view.devicePixelRatio - 32,
@@ -163,7 +196,11 @@ void main() {
       expect(find.text('Длительность курса'), findsOneWidget);
       expect(find.text('Практика за гончарным кругом'), findsNWidgets(20));
       final last = find.text(
-        classWorkshopOccurrenceLabelRu(rows.last, TimezoneRepositoryImpl()),
+        classWorkshopOccurrenceLabel(
+          lookupAppLocalizations(const Locale('ru')),
+          rows.last,
+          TimezoneRepositoryImpl(),
+        ),
       );
       await tester.ensureVisible(last);
       expect(tester.takeException(), isNull);
@@ -269,14 +306,15 @@ void main() {
   );
   test('overnight dates are explicit and use listing timezone', () {
     expect(
-      classWorkshopOccurrenceLabelRu(
+      classWorkshopOccurrenceLabel(
+        lookupAppLocalizations(const Locale('ru')),
         classOccurrence(
           start: DateTime.utc(2026, 9, 12, 20, 30),
           end: DateTime.utc(2026, 9, 12, 22),
         ),
         TimezoneRepositoryImpl(),
       ),
-      '12 сентября 2026 · 23:30–13 сентября 2026 · 01:00',
+      '12 сент. 2026 г. · 23:30–13 сент. 2026 г. · 01:00',
     );
   });
   for (final width in [360.0, 375.0]) {
@@ -312,6 +350,10 @@ void main() {
       );
       await tester.pumpWidget(
         MaterialApp(
+          // L4.5: the expectations below are the Russian copy.
+          locale: const Locale('ru'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(
               context,

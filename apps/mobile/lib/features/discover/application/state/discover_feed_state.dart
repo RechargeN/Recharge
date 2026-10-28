@@ -14,6 +14,9 @@ enum DiscoverFeedStatus {
   denseCluster,
 }
 
+/// L4.5: what the feed tells the reader; the UI turns the code into text.
+enum DiscoverFeedNotice { emptyArea, loadFailed, dataUnavailable, offline }
+
 class DiscoverFeedState {
   const DiscoverFeedState({
     required this.status,
@@ -45,7 +48,7 @@ class DiscoverFeedState {
 
   final DiscoverFeedStatus status;
   final List<DiscoverItemEntity> items;
-  final String? message;
+  final DiscoverFeedNotice? message;
   final DiscoverQuery appliedQuery;
   final DiscoverQuery draftQuery;
   final bool searchAreaDirty;
@@ -68,7 +71,7 @@ class DiscoverFeedState {
   DiscoverFeedState copyWith({
     DiscoverFeedStatus? status,
     List<DiscoverItemEntity>? items,
-    String? message,
+    DiscoverFeedNotice? message,
     bool clearMessage = false,
     DiscoverQuery? appliedQuery,
     DiscoverQuery? draftQuery,

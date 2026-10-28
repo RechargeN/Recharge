@@ -6,8 +6,10 @@ abstract class DiscoverRepository {
   Future<DiscoverItemEntity> getDetails(String itemId);
 }
 
+/// L4.5: a typed Discover failure. The UI turns [code] into text; [message]
+/// is an optional developer note and is never shown.
 class DiscoverException implements Exception {
-  const DiscoverException({required this.code, required this.message});
+  const DiscoverException({required this.code, this.message = ''});
 
   final String code;
   final String message;

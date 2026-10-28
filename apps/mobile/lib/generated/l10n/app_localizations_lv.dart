@@ -7467,6 +7467,1614 @@ class AppLocalizationsLv extends AppLocalizations {
   String get scenarioIntakeDated => 'Ar datumiem';
 
   @override
+  String get discoverSchedule => 'Grafiks';
+
+  @override
+  String get discoverShowOnMap => 'Rādīt kartē';
+
+  @override
+  String get discoverReadMore => 'Lasīt vairāk';
+
+  @override
+  String get discoverShowLess => 'Rādīt mazāk';
+
+  @override
+  String get discoverExactAddressNotPublished => 'Precīza adrese nav publicēta';
+
+  @override
+  String get discoverLocationNotPublished => 'Vieta nav publicēta';
+
+  @override
+  String get discoverLinkFromBookingService =>
+      'Saiti nodrošina rezervēšanas pakalpojums';
+
+  @override
+  String get discoverOnline => 'Tiešsaistē';
+
+  @override
+  String get discoverPartnerConfirmsTime =>
+      'Faktisko laiku un noteikumus apstiprina partnera vietnē.';
+
+  @override
+  String get discoverTimesToBook => 'Laiki pierakstam';
+
+  @override
+  String get discoverScheduleNeedsRefresh =>
+      'Grafiks jāatjauno — pārbaudiet laiku vietnē.';
+
+  @override
+  String get discoverNoTimeInWindow => 'Pašreizējā logā laiks nav norādīts.';
+
+  @override
+  String get discoverCoordinatesNotPublic => 'Koordinātas nav publiskas';
+
+  @override
+  String get discoverAccessDetailsNotPublished =>
+      'Piekļuves dati netiek publicēti';
+
+  @override
+  String get discoverApproximateMeetingArea =>
+      'Aptuvenā publiskā tikšanās zona';
+
+  @override
+  String get discoverFree => 'Bez maksas';
+
+  @override
+  String get discoverHybrid => 'Hibrīds formāts';
+
+  @override
+  String get discoverInPerson => 'Klātienē';
+
+  @override
+  String get discoverCheckEnrollmentOnSite => 'Pārbaudīt pieteikšanos vietnē';
+
+  @override
+  String get discoverInAppEnrollmentUnavailable =>
+      'Pieteikšanās lietotnē vēl nav pieslēgta';
+
+  @override
+  String get discoverEnrollmentMethodUnknown =>
+      'Pieteikšanās veids vēl nav norādīts';
+
+  @override
+  String get discoverTermsOnSite =>
+      'Dalības noteikumi tiek precizēti uz vietas';
+
+  @override
+  String get discoverEnrollmentClosed => 'Pieteikšanās slēgta';
+
+  @override
+  String get discoverAvailabilityOnOrganizerSite =>
+      'Brīvās vietas, galīgā cena un noteikumi — rīkotāja vietnē';
+
+  @override
+  String get discoverLocationTbc => 'Vieta tiek precizēta';
+
+  @override
+  String get discoverOrganizerSendsInstructions =>
+      'Norādījumus nosūtīs rīkotājs';
+
+  @override
+  String get discoverOnlineClass => 'Tiešsaistes nodarbība';
+
+  @override
+  String get discoverOrganizerVerified => 'Rīkotājs apstiprināts';
+
+  @override
+  String get discoverProfileVerified => 'Profils apstiprināts';
+
+  @override
+  String get discoverTeacher => 'Pasniedzējs';
+
+  @override
+  String get discoverSessionDuration => 'Nodarbības ilgums';
+
+  @override
+  String get discoverCourseDuration => 'Kursa ilgums';
+
+  @override
+  String get discoverPrice => 'Cena';
+
+  @override
+  String get discoverPricePerPersonCourse => 'Cena personai / kursam';
+
+  @override
+  String get discoverPricePerPersonSession => 'Cena personai / nodarbībai';
+
+  @override
+  String get discoverDatesTbc => 'Datumi tiek precizēti';
+
+  @override
+  String get discoverKindHandsOn => 'Praktiska pieredze';
+
+  @override
+  String get discoverKindCourse => 'Kurss';
+
+  @override
+  String get discoverKindMasterclass => 'Meistarklase';
+
+  @override
+  String get discoverKindWorkshop => 'Darbnīca';
+
+  @override
+  String get discoverKindClass => 'Nodarbība';
+
+  @override
+  String get discoverRecruitmentClosed => 'Pieteikšanās slēgta';
+
+  @override
+  String get discoverMeetupCancelled => 'Tikšanās atcelta';
+
+  @override
+  String get discoverMeetupEnded => 'Tikšanās beigusies';
+
+  @override
+  String get discoverGroupFull => 'Grupa ir pilna';
+
+  @override
+  String get discoverWaitlistOnly => 'Tikai gaidīšanas saraksts';
+
+  @override
+  String get discoverRecruitmentOpen => 'Var pieteikties';
+
+  @override
+  String get discoverCollectingTimeOptions => 'Tiek vākti laika varianti';
+
+  @override
+  String get discoverDeliveryAvailable => 'Pieejama piegāde';
+
+  @override
+  String get discoverDepositRequired => 'Vajadzīgs depozīts';
+
+  @override
+  String get discoverNoDepositRequired => 'Depozīts nav vajadzīgs';
+
+  @override
+  String get discoverPriceOnRequest => 'Cena pēc pieprasījuma';
+
+  @override
+  String get discoverSignUp => 'Pieteikties';
+
+  @override
+  String get discoverAddToCalendar => 'Pievienot kalendāram';
+
+  @override
+  String get discoverAboutEvent => 'Par pasākumu';
+
+  @override
+  String get discoverProfile => 'Profils';
+
+  @override
+  String get discoverClubProfile => 'Kluba profils';
+
+  @override
+  String get discoverOrganizer => 'Rīkotājs';
+
+  @override
+  String get discoverDuration => 'Ilgums';
+
+  @override
+  String get discoverParticipantCountUnknown => 'Dalībnieku skaits nav zināms';
+
+  @override
+  String get discoverParticipants => 'Dalībnieki';
+
+  @override
+  String get discoverAddToScenario => 'Pievienot scenārijam';
+
+  @override
+  String get discoverShare => 'Kopīgot';
+
+  @override
+  String get discoverBadgeEvent => 'PASĀKUMS';
+
+  @override
+  String get discoverCurrentlyUnavailable => 'Pašlaik nav pieejams';
+
+  @override
+  String get discoverConfirmOnProviderSite =>
+      'Apstipriniet pakalpojuma sniedzēja vietnē';
+
+  @override
+  String get discoverRatePlan => 'Tarifu plāns';
+
+  @override
+  String get discoverWhatIsRented => 'Kas tiek iznomāts';
+
+  @override
+  String get discoverBadgeRental => 'NOMA';
+
+  @override
+  String get discoverFlexible => 'Elastīgi';
+
+  @override
+  String get discoverAboutClass => 'Par nodarbību';
+
+  @override
+  String get discoverClosed => 'Slēgts';
+
+  @override
+  String get discoverOpeningHours => 'Darba laiks';
+
+  @override
+  String get discoverAboutPlace => 'Par vietu';
+
+  @override
+  String get discoverTime => 'Laiks';
+
+  @override
+  String get discoverFromYou => 'No jums';
+
+  @override
+  String get discoverAboutService => 'Par pakalpojumu';
+
+  @override
+  String get discoverSpecialist => 'Speciālists';
+
+  @override
+  String get discoverOrganization => 'Organizācija';
+
+  @override
+  String get discoverGroupSize => 'Grupas lielums';
+
+  @override
+  String get discoverRequirements => 'Prasības';
+
+  @override
+  String get discoverMaterialsIncluded => 'Materiāli un kas iekļauts';
+
+  @override
+  String get discoverCostsNotSpecified => 'Izmaksas nav norādītas';
+
+  @override
+  String get discoverNoRequiredCosts => 'Bez obligātām izmaksām';
+
+  @override
+  String get discoverDesiredSize => 'Vēlamais lielums';
+
+  @override
+  String get discoverInGroupNow => 'Grupā tagad';
+
+  @override
+  String get discoverExpectedCosts => 'Paredzamās izmaksas';
+
+  @override
+  String get discoverParticipantRequirements => 'Prasības dalībniekiem';
+
+  @override
+  String get discoverMeetupFormat => 'Tikšanās formāts';
+
+  @override
+  String get discoverMeetupTime => 'Tikšanās laiks';
+
+  @override
+  String get discoverTimeOptions => 'Laika varianti';
+
+  @override
+  String get discoverAboutMeetup => 'Par tikšanos';
+
+  @override
+  String get discoverPublisher => 'Publicētājs';
+
+  @override
+  String get discoverShareAndMore => 'Kopīgot un citas darbības';
+
+  @override
+  String get discoverMarkVisited => 'Atzīmēt kā apmeklētu';
+
+  @override
+  String get discoverCreateRoute => 'Izveidot maršrutu';
+
+  @override
+  String get discoverViewRoute => 'Skatīt maršrutu';
+
+  @override
+  String get discoverCreateSimilar => 'Izveidot līdzīgu';
+
+  @override
+  String get discoverFindSimilar => 'Atrast līdzīgu';
+
+  @override
+  String get discoverCheckTimeOnSite => 'Pārbaudīt laiku tīmekļa vietnē';
+
+  @override
+  String get discoverReviewAndBook => 'Pārskatīt un rezervēt';
+
+  @override
+  String get discoverRequestSent => 'Pieteikums nosūtīts';
+
+  @override
+  String get discoverDateSet => 'Datums iestatīts';
+
+  @override
+  String get discoverAnyDate => 'Jebkurš datums';
+
+  @override
+  String get discoverDone => 'Gatavs';
+
+  @override
+  String get discoverWindowAsEntered =>
+      'Laika saskaņošanai tiek izmantots, kā ievadīts.';
+
+  @override
+  String get discoverEffectiveWindow => 'Faktiskais logs';
+
+  @override
+  String get discoverBufferEachSide => 'Rezerve katrā pusē';
+
+  @override
+  String get discoverEnd => 'Beigas';
+
+  @override
+  String get discoverStart => 'Sākums';
+
+  @override
+  String get discoverChangeDate => 'Mainīt datumu';
+
+  @override
+  String get discoverFlexibleTime => 'Elastīgi';
+
+  @override
+  String get discoverExact => 'Precīzi';
+
+  @override
+  String get discoverBackToFilters => 'Atpakaļ uz filtriem';
+
+  @override
+  String get discoverReset => 'Atiestatīt';
+
+  @override
+  String get discoverExactTime => 'Precīzs laiks';
+
+  @override
+  String get discoverApplyFilters => 'Lietot filtrus';
+
+  @override
+  String get discoverIncludeReturnTrip => 'Iekļaut atpakaļceļu';
+
+  @override
+  String get discoverTransit => 'Sabiedriskais transports';
+
+  @override
+  String get discoverDriving => 'Ar auto';
+
+  @override
+  String get discoverWalking => 'Kājām';
+
+  @override
+  String get discoverMapPoint => 'Punkts kartē';
+
+  @override
+  String get discoverTravel => 'Ceļš';
+
+  @override
+  String get discoverNoBuffer => 'Bez rezerves';
+
+  @override
+  String get discoverChangeFlexibility => 'Mainīt elastību';
+
+  @override
+  String get discoverWindowEdgeBuffer => 'Rezerve loga malās';
+
+  @override
+  String get discoverToday => 'Šodien';
+
+  @override
+  String get discoverWhen => 'Kad';
+
+  @override
+  String get discoverSave => 'Saglabāt';
+
+  @override
+  String get discoverCancel => 'Atcelt';
+
+  @override
+  String get discoverEnterBudget => 'Ievadiet summu no 0 € līdz 10 000 €';
+
+  @override
+  String get discoverAmountInEur => 'Summa EUR';
+
+  @override
+  String get discoverBudgetPerPerson => 'Budžets vienai personai';
+
+  @override
+  String get discoverEnterPeople => 'Ievadiet skaitli no 1 līdz 99';
+
+  @override
+  String get discoverExampleSix => 'Piemēram, 6';
+
+  @override
+  String get discoverNumberOfPeople => 'Cilvēku skaits';
+
+  @override
+  String get discoverAnyArea => 'Jebkura zona';
+
+  @override
+  String get discoverAnyDuration => 'Jebkurš ilgums';
+
+  @override
+  String get discoverAnyDistance => 'Jebkurš attālums';
+
+  @override
+  String get discoverOnlyAvailable => 'Tikai pieejamie';
+
+  @override
+  String get discoverOpenNow => 'Atvērts tagad';
+
+  @override
+  String get discoverTimeAvailable => 'Pieejamais laiks';
+
+  @override
+  String get discoverSearchFilters => 'Meklēšanas filtri';
+
+  @override
+  String get discoverSocialEvening => 'Vakars kopā ar citiem';
+
+  @override
+  String get discoverActiveMorning => 'Aktīvs rīts';
+
+  @override
+  String get discoverSunsetBreak => 'Pauze saulrietā';
+
+  @override
+  String get discoverAfterWork => 'Pēc darba';
+
+  @override
+  String get discoverRegularSearchesHint =>
+      'Jūsu regulārie meklējumi šeit parādīsies automātiski.';
+
+  @override
+  String get discoverCalmEvening => 'Mierīgs vakars';
+
+  @override
+  String get discoverLowBudget => 'Mazs budžets';
+
+  @override
+  String get discoverForTwo => 'Diviem';
+
+  @override
+  String get discoverNearMeNow => 'Tuvumā tagad';
+
+  @override
+  String get discoverApplyRadius => 'Lietot rādiusu';
+
+  @override
+  String get discoverCustomRadius => 'Savs rādiuss';
+
+  @override
+  String get discoverSearchRadius => 'Meklēšanas rādiuss';
+
+  @override
+  String get discoverAnyBudget => 'Jebkurš budžets';
+
+  @override
+  String get discoverExampleEight => 'Piemēram, 8';
+
+  @override
+  String get discoverJustMe => 'Tikai es';
+
+  @override
+  String get discoverAnyGroup => 'Jebkura grupa';
+
+  @override
+  String get discoverChooseSearchDates => 'Izvēlieties meklēšanas datumus';
+
+  @override
+  String get discoverChooseDates => 'Izvēlēties datumus';
+
+  @override
+  String get discoverThisWeekend => 'Šajā nedēļas nogalē';
+
+  @override
+  String get discoverTomorrow => 'Rīt';
+
+  @override
+  String get discoverChooseDate => 'Izvēlēties datumu';
+
+  @override
+  String get discoverUntilEndOfDay => 'Līdz dienas beigām';
+
+  @override
+  String get discoverRecentSearches => 'Nesenie meklējumi';
+
+  @override
+  String get discoverQuickPlans => 'Ātrie plāni';
+
+  @override
+  String get discoverSeeAll => 'Skatīt visu';
+
+  @override
+  String get discoverSearchHint => 'Meklējiet aktivitāti, vietu vai plānu';
+
+  @override
+  String get discoverSearchRecharge => 'Meklēt Recharge';
+
+  @override
+  String get discoverJoinActivity => 'Pievienoties aktivitātei';
+
+  @override
+  String get discoverParticipantsUnknown => 'Dalībnieki nav zināmi';
+
+  @override
+  String get discoverCapacityUnknown => 'Ietilpība nav zināma';
+
+  @override
+  String get discoverOpeningHoursUnknown => 'Darba laiks nav zināms';
+
+  @override
+  String get discoverTimeNotConfirmed => 'Laiks nav apstiprināts';
+
+  @override
+  String get discoverDoesNotFit => 'Neder';
+
+  @override
+  String get discoverPartialAttendance => 'Iespējama daļēja dalība';
+
+  @override
+  String get discoverFitsYourTime => 'Atbilst jūsu laikam';
+
+  @override
+  String get discoverOptionalContribution => 'Brīvprātīga iemaksa';
+
+  @override
+  String get discoverNoContribution => 'Iemaksa nav norādīta';
+
+  @override
+  String get discoverDifficultyNotSet => 'Grūtība nav norādīta';
+
+  @override
+  String get discoverAnyTime => 'Jebkurā laikā';
+
+  @override
+  String get discoverWhatAwaitsYou => 'Kas jūs sagaida';
+
+  @override
+  String get discoverPerkSaveForLater => 'Saglabājiet aktivitāti vēlākam';
+
+  @override
+  String get discoverPerkOrganizerDetails =>
+      'Rīkotāja informācija pieejama pirms pievienošanās';
+
+  @override
+  String get discoverPerkMeetingPoint => 'Skaidra tikšanās vieta un laiks';
+
+  @override
+  String get discoverDistance => 'Attālums';
+
+  @override
+  String get discoverLocation => 'Atrašanās vieta';
+
+  @override
+  String get discoverRouteGeometry => 'Maršruta ģeometrija';
+
+  @override
+  String get discoverDateAndTime => 'Datums un laiks';
+
+  @override
+  String get discoverRouteMap => 'Maršruta karte';
+
+  @override
+  String get discoverRouteFromThis => 'Maršruts no šejienes';
+
+  @override
+  String get discoverAddToPrivateHistory => 'Pievienot privātajai vēsturei';
+
+  @override
+  String get discoverOpenCreateHub => 'Atvērt veidošanas centru';
+
+  @override
+  String get discoverSearchThisCategory => 'Meklēt šajā kategorijā';
+
+  @override
+  String get discoverAddStopToPlan => 'Pievienot šo pieturu personīgam plānam';
+
+  @override
+  String get discoverOpenNearbyContext => 'Atvērt apkārtni';
+
+  @override
+  String get discoverMap => 'Karte';
+
+  @override
+  String get discoverPlanHint =>
+      'Pārvērtiet šo aktivitāti maršrutā, salīdziniet līdzīgas iespējas vai saglabājiet vēlākam.';
+
+  @override
+  String get discoverNotSaved => 'Nav saglabāts';
+
+  @override
+  String get discoverPlanThisRecharge => 'Plānot šo atpūtu';
+
+  @override
+  String get discoverSend => 'Nosūtīt';
+
+  @override
+  String get discoverCriticalOnlyImmediateRisk =>
+      'Kritiskas briesmas izvēlieties tikai tad, ja cilvēkiem draud tūlītējs risks.';
+
+  @override
+  String get discoverDescribeWithoutPersonalData =>
+      'Aprakstiet problēmu bez personas datiem';
+
+  @override
+  String get discoverCommentOptional => 'Komentārs (neobligāts)';
+
+  @override
+  String get discoverSeverityCritical => 'Kritiskas briesmas';
+
+  @override
+  String get discoverSeverityDanger => 'Bīstami';
+
+  @override
+  String get discoverSeverityWarning => 'Jāpievērš uzmanība';
+
+  @override
+  String get discoverSeverityInfo => 'Informācija';
+
+  @override
+  String get discoverSeverity => 'Nopietnība';
+
+  @override
+  String get discoverIssueOther => 'Cits';
+
+  @override
+  String get discoverIssueWrongLine => 'Nepareiza maršruta līnija';
+
+  @override
+  String get discoverIssueObstacle => 'Šķērslis';
+
+  @override
+  String get discoverIssueHazardousSurface => 'Bīstams segums';
+
+  @override
+  String get discoverIssueTrailClosed => 'Taka slēgta';
+
+  @override
+  String get discoverWhatHappened => 'Kas notika';
+
+  @override
+  String get discoverRouteIssue => 'Problēma maršrutā';
+
+  @override
+  String get discoverReportRouteIssue => 'Ziņot par problēmu maršrutā';
+
+  @override
+  String get discoverElevationUnavailable =>
+      'Augstuma dati nav pieejami un netiek rādīti kā nulle.';
+
+  @override
+  String get discoverElevationPartial =>
+      'Augstuma dati ir daļēji; kāpums un kritums netiek rādīti kā pilnīgi.';
+
+  @override
+  String get discoverDemoData => 'Demonstrācijas dati';
+
+  @override
+  String get discoverFieldVerified => 'Pārbaudīts dabā';
+
+  @override
+  String get discoverPublishedRoute => 'Publicēts maršruts';
+
+  @override
+  String get discoverOpenDetails => 'Atvērt detaļas';
+
+  @override
+  String get discoverSelectForScenario => 'Atlasīt scenārijam';
+
+  @override
+  String get discoverAny => 'Jebkurš';
+
+  @override
+  String get discoverSearchThisArea => 'Meklēt šajā zonā';
+
+  @override
+  String get discoverResetRouteProgress => 'Atiestatīt maršruta progresu';
+
+  @override
+  String get discoverStartRoute => 'Sākt maršrutu';
+
+  @override
+  String get discoverNextStop => 'Nākamā pietura';
+
+  @override
+  String get discoverReadyToStart => 'Gatavs sākt';
+
+  @override
+  String get discoverRouteComplete => 'Maršruts pabeigts';
+
+  @override
+  String get discoverCopy => 'Kopēt';
+
+  @override
+  String get discoverCreateRouteListing => 'Izveidot maršruta sludinājumu';
+
+  @override
+  String get discoverSearchSimilarRoute => 'Meklēt līdzīgu maršrutu';
+
+  @override
+  String get discoverEditRoute => 'Rediģēt maršrutu';
+
+  @override
+  String get discoverScenarioRoute => 'Scenārija maršruts';
+
+  @override
+  String get discoverNoActivitiesInArea => 'Šajā zonā nav aktivitāšu';
+
+  @override
+  String get discoverRetry => 'Mēģināt vēlreiz';
+
+  @override
+  String get discoverMapSearchFailed => 'Meklēšana kartē neizdevās';
+
+  @override
+  String get discoverMapResults => 'Rezultāti kartē';
+
+  @override
+  String get discoverApply => 'Lietot';
+
+  @override
+  String get discoverSavedOnMap => 'Saglabāts kartē';
+
+  @override
+  String get discoverRouteFromSmart => 'Veidot maršrutu no viedās meklēšanas';
+
+  @override
+  String get discoverCreateFromSmart =>
+      'Izveidot sludinājumu no viedās meklēšanas';
+
+  @override
+  String get discoverApplySmartToMap => 'Lietot viedo meklēšanu kartē';
+
+  @override
+  String get discoverSmart => 'Viedais';
+
+  @override
+  String get discoverRouteFromSaved =>
+      'Veidot maršrutu no saglabātajiem nosacījumiem';
+
+  @override
+  String get discoverCreateFromSaved =>
+      'Izveidot sludinājumu no saglabātajiem nosacījumiem';
+
+  @override
+  String get discoverApplySavedToMap => 'Lietot saglabātos nosacījumus kartē';
+
+  @override
+  String get discoverSaved => 'Saglabāts';
+
+  @override
+  String get discoverCreateHere => 'Izveidot šeit';
+
+  @override
+  String get discoverSearch => 'Meklēt';
+
+  @override
+  String get discoverClear => 'Notīrīt';
+
+  @override
+  String get discoverSearchOnMap => 'Meklēt kartē';
+
+  @override
+  String get discoverMapArea => 'Kartes zona';
+
+  @override
+  String get discoverRechargeIdea => 'Atpūtas ideja';
+
+  @override
+  String get discoverMapAreaIdea => 'Ideja kartes zonai';
+
+  @override
+  String get discoverScenarioCopied => 'Scenārijs nokopēts';
+
+  @override
+  String get discoverScenarioSaved => 'Scenārijs saglabāts';
+
+  @override
+  String get discoverRecenter => 'Centrēt';
+
+  @override
+  String get discoverUseCurrentLocation =>
+      'Izmantot pašreizējo atrašanās vietu';
+
+  @override
+  String get discoverCancelScenarioSelection => 'Atcelt atlasi scenārijam';
+
+  @override
+  String get discoverAll => 'Visi';
+
+  @override
+  String get discoverSearchFailed => 'Meklēšana neizdevās';
+
+  @override
+  String get discoverResetConditions => 'Atiestatīt nosacījumus';
+
+  @override
+  String get discoverNoMatches =>
+      'Šiem nosacījumiem neatbilst neviena aktivitāte';
+
+  @override
+  String get discoverShowingNearby => 'Tiek rādītas tuvējās aktivitātes';
+
+  @override
+  String get discoverRadius => 'Rādiuss';
+
+  @override
+  String get discoverTonight => 'Šovakar';
+
+  @override
+  String get discoverDate => 'Datums';
+
+  @override
+  String get discoverBudget => 'Budžets';
+
+  @override
+  String get discoverShowNoTicket => 'Rādīt aktivitātes bez biļetes';
+
+  @override
+  String get discoverFreeOnly => 'Tikai bez maksas';
+
+  @override
+  String get discoverOutdoor => 'Ārā';
+
+  @override
+  String get discoverFreeToday => 'Bez maksas šodien';
+
+  @override
+  String get discoverSearchConditions => 'Meklēšanas nosacījumi';
+
+  @override
+  String get discoverOpenSavedOnMap => 'Atvērt saglabātos nosacījumus kartē';
+
+  @override
+  String get discoverDeleteSaved => 'Dzēst saglabātos nosacījumus';
+
+  @override
+  String get discoverNoRecentSearches => 'Vēl nav nesenu meklējumu';
+
+  @override
+  String get discoverCreateListingFromSearch =>
+      'Izveidot sludinājumu no pašreizējās meklēšanas';
+
+  @override
+  String get discoverConditions => 'Nosacījumi';
+
+  @override
+  String get discoverViewMap => 'Skatīt karti';
+
+  @override
+  String get discoverCategories => 'Kategorijas';
+
+  @override
+  String get discoverQuickScenarios => 'Ātrie scenāriji';
+
+  @override
+  String get discoverCreateFromCurrentSearch =>
+      'Izveidot no pašreizējās meklēšanas';
+
+  @override
+  String get discoverUnderstoodParameters => 'Saprastie parametri';
+
+  @override
+  String get discoverTextQuery => 'Teksta vaicājums';
+
+  @override
+  String get discoverGotIt => 'Skaidrs';
+
+  @override
+  String get discoverSmartSearchHow => 'Kā darbojas viedā meklēšana';
+
+  @override
+  String get discoverSayWhatToFind => 'Pasakiet, ko vēlaties atrast';
+
+  @override
+  String get discoverSmartSearchPrompt => 'Uzrakstiet vai pasakiet, ko atrast';
+
+  @override
+  String get discoverStartSearch => 'Sākt meklēšanu';
+
+  @override
+  String get discoverDeleteQuery => 'Dzēst vaicājumu';
+
+  @override
+  String get discoverRecentSmartSearches => 'Nesenās viedās meklēšanas';
+
+  @override
+  String get discoverPopularQueries => 'Populārie vaicājumi';
+
+  @override
+  String get discoverChipUpTo20 => 'Līdz 20 €';
+
+  @override
+  String get discoverChipOneTwoHours => '1–2 stundas';
+
+  @override
+  String get discoverChipCalmEvening => 'Mierīgs vakars';
+
+  @override
+  String get discoverChipForTwo => 'Diviem';
+
+  @override
+  String get discoverChipNearNow => 'Tuvumā tagad';
+
+  @override
+  String get discoverVoiceQuery => 'Balss vaicājums';
+
+  @override
+  String get discoverSmartSearchPromptTwoLines =>
+      'Uzrakstiet vai pasakiet,\\nko vēlaties atrast';
+
+  @override
+  String get discoverSmartSearch => 'Viedā meklēšana';
+
+  @override
+  String get discoverHoursUnknown => 'Darba laiks nav zināms';
+
+  @override
+  String get discoverTimeUnknown => 'Laiks nav zināms';
+
+  @override
+  String get discoverPartialFit => 'Daļēji der';
+
+  @override
+  String get discoverMatchesYourTime => 'Atbilst jūsu laikam';
+
+  @override
+  String get discoverOpenSettings => 'Atvērt iestatījumus';
+
+  @override
+  String get discoverNoLocationAccess => 'Nav piekļuves atrašanās vietai';
+
+  @override
+  String get discoverFeedFailed => 'Neizdevās ielādēt plūsmu';
+
+  @override
+  String get discoverRemoveTime => 'Noņemt laiku';
+
+  @override
+  String get discoverNoReturnTrip => 'Bez atpakaļceļa';
+
+  @override
+  String get discoverWidenTime => 'Paplašināt laiku';
+
+  @override
+  String get discoverRefresh => 'Atjaunot';
+
+  @override
+  String get discoverFeedEmpty => 'Plūsmā vēl nekā nav';
+
+  @override
+  String get discoverFeedLoading => 'Ielādē plūsmu…';
+
+  @override
+  String get discoverWaypoints => 'Punkti maršrutā';
+
+  @override
+  String get discoverElevation => 'Augstums';
+
+  @override
+  String get discoverDescent => 'Kritums';
+
+  @override
+  String get discoverAscent => 'Kāpums';
+
+  @override
+  String get discoverRouteMapFailed => 'Neizdevās ielādēt maršruta karti';
+
+  @override
+  String get discoverOpenOnMap => 'Atvērt kartē';
+
+  @override
+  String get discoverShapeOneWay => 'Vienā virzienā';
+
+  @override
+  String get discoverShapeOutAndBack => 'Turp un atpakaļ';
+
+  @override
+  String get discoverShapeLoop => 'Aplis';
+
+  @override
+  String get discoverPublisherPage => 'Lapa';
+
+  @override
+  String get discoverPublisherAuthor => 'Autors';
+
+  @override
+  String get discoverRouteDetails => 'Maršruta detaļas';
+
+  @override
+  String discoverDistanceKm(String value) {
+    return '$value km';
+  }
+
+  @override
+  String discoverDistanceFromYou(String value) {
+    return '$value km no jums';
+  }
+
+  @override
+  String discoverStartPointAway(String value) {
+    return 'Sākuma punkts · $value km attālumā';
+  }
+
+  @override
+  String discoverFromStartKm(String value) {
+    return '$value km no starta';
+  }
+
+  @override
+  String discoverMeters(String value) {
+    return '$value m';
+  }
+
+  @override
+  String discoverAscentShort(String value) {
+    return '↑ $value m';
+  }
+
+  @override
+  String discoverElevationRange(String min, String max) {
+    return '$min–$max m';
+  }
+
+  @override
+  String discoverTrackGaps(int count) {
+    return 'Trases pārrāvumi: $count';
+  }
+
+  @override
+  String discoverDirectSegments(int count) {
+    return 'Taisni posmi: $count';
+  }
+
+  @override
+  String discoverDirectSegmentsInline(int count) {
+    return 'taisni posmi: $count';
+  }
+
+  @override
+  String discoverMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String discoverMinutesRange(int min, int max) {
+    return '$min–$max min';
+  }
+
+  @override
+  String discoverHours(String value) {
+    return '$value h';
+  }
+
+  @override
+  String discoverHoursMinutes(int hours, int minutes) {
+    return '$hours h $minutes min';
+  }
+
+  @override
+  String discoverDays(int days) {
+    return '$days d';
+  }
+
+  @override
+  String discoverUpTo(int count) {
+    return 'līdz $count';
+  }
+
+  @override
+  String discoverUpToPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'līdz $count cilvēkiem',
+      one: 'līdz $count cilvēkam',
+      zero: 'līdz $count cilvēkiem',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverAboutPerPerson(String price) {
+    return 'Apmēram $price vienai personai';
+  }
+
+  @override
+  String discoverCancelledSuffix(String date) {
+    return '$date · Atcelts';
+  }
+
+  @override
+  String get discoverRentalQuantitiesDisclaimer =>
+      'Norādītos daudzumus deklarē autors; tā nav reāllaika rezervācijas garantija vai apstiprināts aktuāls skaits. Pirms paļauties uz tiem, pārbaudiet pakalpojuma sniedzēja vietnē.';
+
+  @override
+  String discoverDeliveryWithin(String value) {
+    return 'Piegāde pieejama $value km rādiusā';
+  }
+
+  @override
+  String discoverRentalPeriod(String min, String max) {
+    return 'Nomas periods: $min – $max';
+  }
+
+  @override
+  String discoverMinAge(int age) {
+    return 'Minimālais vecums $age';
+  }
+
+  @override
+  String get discoverIdRequired =>
+      'Nodošanas brīdī vajadzīgs personu apliecinošs dokuments';
+
+  @override
+  String discoverDeposit(String price) {
+    return 'Depozīts: $price';
+  }
+
+  @override
+  String discoverTimeOptionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count laika varianti',
+      one: '$count laika variants',
+      zero: '$count laika varianti',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverFirstAndMore(String time, int count) {
+    return '$time · vēl $count';
+  }
+
+  @override
+  String discoverTimeOptionCandidate(String time) {
+    return 'Variants · $time';
+  }
+
+  @override
+  String discoverDateTimeRange(String date, String start, String end) {
+    return '$date · $start–$end';
+  }
+
+  @override
+  String discoverUpToBudget(String price) {
+    return 'Līdz $price';
+  }
+
+  @override
+  String discoverFlexibilityMinutes(int minutes) {
+    return '±$minutes min';
+  }
+
+  @override
+  String discoverUsedInsteadOf(String start, String end) {
+    return 'Saskaņošanai tiek izmantots $start–$end vietā.';
+  }
+
+  @override
+  String discoverTypicalDuration(String value) {
+    return 'Parastais ilgums: $value';
+  }
+
+  @override
+  String discoverSuggestedGroup(int min, int max) {
+    return 'Ieteicamā grupa: $min–$max';
+  }
+
+  @override
+  String discoverBestTime(String value) {
+    return 'Labākais laiks: $value';
+  }
+
+  @override
+  String discoverAmountHint(String price) {
+    return 'Summas norāde: $price';
+  }
+
+  @override
+  String discoverBookFor(String price) {
+    return 'Rezervēt par $price';
+  }
+
+  @override
+  String discoverResultsInArea(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count vietas un aktivitātes šajā zonā',
+      one: '$count vieta vai aktivitāte šajā zonā',
+      zero: '$count vietu un aktivitāšu šajā zonā',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverStops(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pieturas',
+      one: '$count pietura',
+      zero: '$count pieturas',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverStopOf(int current, int total) {
+    return '$current. pietura no $total';
+  }
+
+  @override
+  String discoverRadiusKm(String value) {
+    return 'Rādiuss: $value km';
+  }
+
+  @override
+  String discoverRemoveFromSelection(int order) {
+    return 'Noņemt #$order no atlases';
+  }
+
+  @override
+  String discoverMood(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Mierīgs',
+      'social': 'Sabiedrisks',
+      'active': 'Aktīvs',
+      'other': 'Savs',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverRouteLabel => 'Maršruts';
+
+  @override
+  String get discoverSmartSearchHowBody =>
+      'Ierakstiet vaicājumu vai izmantojiet balss ievadi. Recharge saprot laiku, vietu, budžetu un noskaņojumu un parāda piemērotas iespējas.';
+
+  @override
+  String get discoverSmartPromptCalmEveningNearby => 'Calm evening nearby';
+
+  @override
+  String get discoverSmartPromptSomethingForTwoHours =>
+      'Find something interesting for 2 hours';
+
+  @override
+  String get discoverSmartPromptForTwoNearby => 'Where to go for two nearby';
+
+  @override
+  String get discoverSmartPromptExample =>
+      'Something calm nearby tonight, up to 20 EUR';
+
+  @override
+  String get discoverSmartPromptExampleHint =>
+      'Piemēram: “Something calm nearby tonight, up to €20”';
+
+  @override
+  String get discoverSmartPromptNearNow => 'Something interesting nearby now';
+
+  @override
+  String get discoverSmartPromptForTwo => 'Where to go for two';
+
+  @override
+  String get discoverSmartPromptCalmEvening => 'Calm evening';
+
+  @override
+  String get discoverSmartPromptTwoHours => 'Find a plan for 2 hours';
+
+  @override
+  String get discoverSmartPromptUpTo20 => 'Find something up to 20 EUR';
+
+  @override
+  String discoverRentalBaseRate(String type, String price) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'hour': '$price / stundā',
+      'week': '$price / nedēļā',
+      'other': '$price / dienā',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverRentalRateStep(String type, String price, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stundām',
+      one: '$count stundas',
+      zero: '$count stundām',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nedēļām',
+      one: '$count nedēļas',
+      zero: '$count nedēļām',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dienām',
+      one: '$count dienas',
+      zero: '$count dienām',
+    );
+    String _temp3 = intl.Intl.selectLogic(type, {
+      'hour': 'No $_temp0: $price / stundā',
+      'week': 'No $_temp1: $price / nedēļā',
+      'other': 'No $_temp2: $price / dienā',
+    });
+    return '$_temp3';
+  }
+
+  @override
+  String discoverRentalUnitsListed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'norādītas $count vienības',
+      one: 'norādīta $count vienība',
+      zero: 'norādītas $count vienības',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverSeason(String value) {
+    return 'Sezona: $value';
+  }
+
+  @override
+  String get discoverLength => 'Garums';
+
+  @override
+  String get discoverPeople => 'Cilvēki';
+
+  @override
+  String get discoverCycling => 'Ar velosipēdu';
+
+  @override
+  String get discoverDifficultyEasy => 'Viegls';
+
+  @override
+  String get discoverDifficultyModerate => 'Vidējs';
+
+  @override
+  String get discoverDifficultyHard => 'Grūts';
+
+  @override
+  String get discoverOpen => 'Atvērts';
+
+  @override
+  String discoverAddedToScenario(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Scenārijam pievienotas $count pieturas',
+      one: 'Scenārijam pievienota $count pietura',
+      zero: 'Scenārijam pievienotas $count pieturas',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverCompletedDuration(int minutes) {
+    return 'Pabeigts · $minutes min';
+  }
+
+  @override
+  String get discoverRestart => 'Sākt no jauna';
+
+  @override
+  String get discoverFinish => 'Pabeigt';
+
+  @override
+  String get discoverRadiusAnyArea => 'Rādiuss: jebkura zona';
+
+  @override
+  String get discoverWaypoint => 'Punkts maršrutā';
+
+  @override
+  String discoverFoundCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Atrasti $count',
+      one: 'Atrasts $count',
+      zero: 'Atrasti $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverPeopleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cilvēki',
+      one: '$count cilvēks',
+      zero: '$count cilvēku',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverUnder(String value) {
+    return 'Līdz $value';
+  }
+
+  @override
+  String discoverFlexibleWindow(int minutes) {
+    return 'Elastīgi ±$minutes min';
+  }
+
+  @override
+  String get discoverCustom => 'Cits';
+
+  @override
+  String discoverCustomValue(String value) {
+    return 'Cits · $value';
+  }
+
+  @override
+  String discoverHoursLong(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stundas',
+      one: '$count stunda',
+      zero: '$count stundas',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverAboutOneHour => '~ 1 stunda';
+
+  @override
+  String discoverHoursRange(int min, int max) {
+    return '$min–$max stundas';
+  }
+
+  @override
+  String get discoverAvailability => 'Pieejamība';
+
+  @override
+  String get discoverMoodTitle => 'Noskaņojums';
+
+  @override
+  String discoverTravelMinutes(int minutes) {
+    return '$minutes min ceļā';
+  }
+
+  @override
+  String discoverTravelMinutesEstimated(int minutes) {
+    return '$minutes min ceļā · aptuveni';
+  }
+
+  @override
+  String get discoverSlotChosen => 'Laiks izvēlēts';
+
+  @override
+  String get discoverFits => 'Der';
+
+  @override
+  String get discoverUnsave => 'Noņemt no saglabātajiem';
+
+  @override
+  String discoverRecommendedDifficulty(String value) {
+    return 'Ieteicams: $value';
+  }
+
+  @override
+  String discoverPoiCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count apskates vietas',
+      one: '$count apskates vieta',
+      zero: '$count apskates vietu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverSurfaceTitle => 'Segums';
+
+  @override
+  String discoverSurface(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'asphalt': 'Asfalts',
+      'paved': 'Segums',
+      'concrete': 'Betons',
+      'paving_stones': 'Bruģakmens',
+      'sett': 'Bruģis',
+      'compacted': 'Blīvēts segums',
+      'fine_gravel': 'Smalka grants',
+      'gravel': 'Grants',
+      'dirt': 'Zemes ceļš',
+      'earth': 'Zeme',
+      'ground': 'Grunts',
+      'grass': 'Zāle',
+      'sand': 'Smiltis',
+      'unpaved': 'Bez seguma',
+      'wood': 'Koks',
+      'mixed': 'Jaukts',
+      'other': 'Cits segums',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverUnknownSurface(String meters) {
+    return 'Seguma dati nav zināmi $meters garumā.';
+  }
+
+  @override
+  String get discoverIntakeFindPeopleNotSupported =>
+      'Cilvēku meklēšanas pieprasījumu nevar pievienot scenārijam.';
+
+  @override
+  String get discoverIntakeMissingIdentity =>
+      'Šo rezultātu nevar pievienot: tam nav stabila kataloga identifikatora.';
+
+  @override
+  String get discoverIntakeNoLocation =>
+      'Šim rezultātam nav izmantojamas atrašanās vietas katalogā.';
+
+  @override
+  String discoverIntakeLimitReached(int count) {
+    return 'Scenārijam vienlaikus var pievienot līdz $count vienībām.';
+  }
+
+  @override
+  String discoverStopsSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Scenārijam atlasītas $count pieturas.',
+      one: 'Scenārijam atlasīta $count pietura.',
+      zero: 'Scenārijam atlasītas $count pieturas.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverSelectedCount(int count) {
+    return 'Atlasīti: $count';
+  }
+
+  @override
+  String discoverTimeWindowIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'unknownTimezone': 'Šīs zonas laika josla nav zināma.',
+      'dayEnded': 'Šī diena šeit jau ir beigusies.',
+      'boundsRequired': 'Izvēlieties sākumu un beigas.',
+      'nonexistentLocalTime':
+          'Šis vietējais laiks neeksistē pulksteņa pārbīdes dēļ.',
+      'endBeforeStart': 'Beigām jābūt pēc sākuma.',
+      'invalidTravelContext': 'Ceļa iestatījumi nav derīgi.',
+      'serviceUnavailable': 'Laika saskaņošana pašlaik nav pieejama.',
+      'other': 'Laika logu neizdevās lietot.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverFeedNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'emptyArea':
+          'Šajā zonā nekas netika atrasts. Palieliniet rādiusu vai noņemiet ierobežojumus.',
+      'loadFailed': 'Neizdevās ielādēt datus. Mēģiniet vēlreiz.',
+      'dataUnavailable': 'Dati nav pieejami.',
+      'offline': 'Nav interneta savienojuma.',
+      'other': 'Neizdevās ielādēt plūsmu. Mēģiniet vēlreiz.',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String scenarioIntakeStep(String state) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'target': '1. no 3 · Scenārijs',
@@ -7527,4 +9135,242 @@ class AppLocalizationsLv extends AppLocalizations {
     );
     return '$_temp0 · $_temp1';
   }
+
+  @override
+  String discoverHomeIdeaTitle(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'freeToday': 'Bez maksas šodien',
+      'nearMe': 'Tuvumā',
+      'eveningPlans': 'Vakara plāni',
+      'coffeeReset': 'Kafijas pauze',
+      'freeCityReset': 'Bezmaksas atpūta pilsētā',
+      'socialEvening': 'Vakars kopā ar citiem',
+      'activeBoost': 'Aktīvs uzrāviens',
+      'other': 'Ideja',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverHomeIdeaSubtitle(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'freeToday': 'Tuvējas aktivitātes bez biļetēm',
+      'nearMe': 'Izmantojiet kartes rādiusu un ātro sarakstu',
+      'eveningPlans': 'Atrodiet ko darīt pēc darba',
+      'coffeeReset': 'Mierīgs sākums kafejnīcā un viegla pastaiga pa pilsētu.',
+      'freeCityReset': 'Bezmaksas mierīgs maršruts ātrai atpūtai.',
+      'socialEvening': 'Sāciet kopā ar citiem un turpiniet vakaru tuvumā.',
+      'activeBoost': 'Vispirms kustība, tad atpūta pastaigā.',
+      'other': 'Ātrs plāns tuvumā.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverHomeNew => 'Jaunumi';
+
+  @override
+  String get discoverHomeForYou => 'Jums';
+
+  @override
+  String get discoverHomeQuickEvents => 'Ātri pasākumi';
+
+  @override
+  String get discoverHomeNearby => 'Tuvumā';
+
+  @override
+  String get discoverHomePopular => 'Populāri';
+
+  @override
+  String get discoverRouteIdeas => 'Maršrutu idejas';
+
+  @override
+  String get discoverBuilder => 'Veidotājs';
+
+  @override
+  String get discoverBuild => 'Veidot';
+
+  @override
+  String get discoverCreate => 'Izveidot';
+
+  @override
+  String get discoverResume => 'Turpināt';
+
+  @override
+  String get discoverWalkable => 'Kājām';
+
+  @override
+  String get discoverMixedPrice => 'Jaukti';
+
+  @override
+  String discoverMapTemplateRoute(String message) {
+    return 'Rādīt maršrutu “$message” kartē';
+  }
+
+  @override
+  String discoverCreateTemplateRoute(String message) {
+    return 'Izveidot maršrutu “$message”';
+  }
+
+  @override
+  String get discoverForYouHint =>
+      'Personīgas izvēles, saglabātas idejas un veidotāja rīki — viena pieskāriena attālumā.';
+
+  @override
+  String get discoverSmartSearchIdea => 'Viedās meklēšanas ideja';
+
+  @override
+  String get discoverLanguagesLabel => 'Valodas:';
+
+  @override
+  String get discoverEquipmentLabel => 'Aprīkojums:';
+
+  @override
+  String get discoverAccessibilityLabel => 'Piekļūstamība:';
+
+  @override
+  String get discoverListedByPageLabel => 'Publicējusi lapa';
+
+  @override
+  String get discoverListedByLabel => 'Publicējis';
+
+  @override
+  String get discoverLearningOutcomesLabel => 'Ko iemācīsieties:';
+
+  @override
+  String get discoverOrganizerLabel => 'Rīkotājs:';
+
+  @override
+  String get discoverLinkedPlaceLabel => 'Saistītā vieta:';
+
+  @override
+  String get discoverInformalAccessLabel => 'Neoficiāla piekļuve:';
+
+  @override
+  String discoverCompletedAtStopLabel(int index) {
+    return 'Pabeigta pietura $index:';
+  }
+
+  @override
+  String discoverFocusedStopLabel(int index) {
+    return 'Pašreizējā pietura $index:';
+  }
+
+  @override
+  String discoverNowAtStopLabel(int index) {
+    return 'Tagad: $index. pietura ·';
+  }
+
+  @override
+  String discoverSelectedStopLabel(int index) {
+    return 'Atlasītā pietura $index:';
+  }
+
+  @override
+  String discoverMoodRoute(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Mierīgs maršruts',
+      'social': 'Sabiedrisks maršruts',
+      'active': 'Aktīvs maršruts',
+      'other': 'Savs maršruts',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverMoodRechargeRoute(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Mierīgs atpūtas maršruts',
+      'social': 'Sabiedrisks atpūtas maršruts',
+      'active': 'Aktīvs atpūtas maršruts',
+      'other': 'Savs atpūtas maršruts',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverMoodRechargeScenario(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Mierīgs atpūtas scenārijs',
+      'social': 'Sabiedrisks atpūtas scenārijs',
+      'active': 'Aktīvs atpūtas scenārijs',
+      'other': 'Savs atpūtas scenārijs',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverOptionalContributionLabel(String value) {
+    return 'Brīvprātīgi — $value:';
+  }
+
+  @override
+  String discoverIdeaForCategory(String type) {
+    return 'Ideja: $type';
+  }
+
+  @override
+  String get discoverIntentLabel => 'Nodoms:';
+
+  @override
+  String get discoverAppliedLabel => 'Lietots:';
+
+  @override
+  String get discoverVersionLabel => 'Versija';
+
+  @override
+  String get discoverRemove => 'Noņemt';
+
+  @override
+  String get discoverCouldNotOpenLink => 'Neizdevās atvērt';
+
+  @override
+  String discoverCollectionMapSemantics(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Šīs kolekcijas $count vietu karte. Izmantojiet sarakstu zemāk, lai tās apskatītu bez kartes.',
+      one:
+          'Šīs kolekcijas $count vietas karte. Izmantojiet sarakstu zemāk, lai to apskatītu bez kartes.',
+      zero:
+          'Šīs kolekcijas $count vietu karte. Izmantojiet sarakstu zemāk, lai tās apskatītu bez kartes.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverRoutePreview(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Maršruta priekšskatījums: $count posmi',
+      one: 'Maršruta priekšskatījums: $count posms',
+      zero: 'Maršruta priekšskatījums: $count posmi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverSearchCategories => 'Meklēt kategorijas';
+
+  @override
+  String get discoverClearSearch => 'Notīrīt meklēšanu';
+
+  @override
+  String get discoverNoCategories => 'Kategorijas nav atrastas';
+
+  @override
+  String get discoverCategoryNotFound => 'Kategorija nav atrasta';
+
+  @override
+  String get discoverOpenRoute => 'Atvērt maršrutu';
+
+  @override
+  String discoverTodayDate(String date) {
+    return 'Šodien, $date';
+  }
+
+  @override
+  String get discoverByLabel => 'Autors:';
 }

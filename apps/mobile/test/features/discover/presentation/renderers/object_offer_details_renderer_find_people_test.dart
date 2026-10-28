@@ -8,6 +8,7 @@ import 'package:recharge/features/discover/presentation/renderers/object_offer_d
 import 'package:recharge/features/discover/presentation/shell/details_shell.dart';
 
 import '../../../../widget/widget_test_viewport.dart';
+import 'package:recharge/core/localization/l10n_context.dart';
 
 void main() {
   final TimezoneRepository timezoneRepository = TimezoneRepositoryImpl();
@@ -90,6 +91,10 @@ void main() {
     VoidCallback? onShare,
   }) {
     return MaterialApp(
+      // L4.5: the expectations below are the Russian copy.
+      locale: const Locale('ru'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: DetailsShell(
         state: DetailsScreenAvailable(
           immersiveHero: true,
@@ -265,7 +270,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('€7.50'), findsOneWidget);
+    expect(find.textContaining('7,50'), findsOneWidget);
 
     await tester.pumpWidget(
       app(fixture(costType: PublishedFindPeopleCostType.unknown)),
@@ -298,6 +303,10 @@ void main() {
       );
       await tester.pumpWidget(
         MaterialApp(
+          // L4.5: the expectations below are the Russian copy.
+          locale: const Locale('ru'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           builder: (BuildContext context, Widget? child) => MediaQuery(
             data: MediaQuery.of(
               context,

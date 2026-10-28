@@ -7373,6 +7373,1593 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scenarioIntakeDated => 'Dated';
 
   @override
+  String get discoverSchedule => 'Schedule';
+
+  @override
+  String get discoverShowOnMap => 'Show on map';
+
+  @override
+  String get discoverReadMore => 'Read more';
+
+  @override
+  String get discoverShowLess => 'Show less';
+
+  @override
+  String get discoverExactAddressNotPublished => 'Exact address not published';
+
+  @override
+  String get discoverLocationNotPublished => 'Location not published';
+
+  @override
+  String get discoverLinkFromBookingService =>
+      'The link comes from the booking service';
+
+  @override
+  String get discoverOnline => 'Online';
+
+  @override
+  String get discoverPartnerConfirmsTime =>
+      'The actual time and terms are confirmed on the partner’s website.';
+
+  @override
+  String get discoverTimesToBook => 'Times to book';
+
+  @override
+  String get discoverScheduleNeedsRefresh =>
+      'The schedule needs a refresh — check the time on the website.';
+
+  @override
+  String get discoverNoTimeInWindow =>
+      'No time is listed in the current window.';
+
+  @override
+  String get discoverCoordinatesNotPublic => 'Coordinates are not public';
+
+  @override
+  String get discoverAccessDetailsNotPublished =>
+      'Access details are not published';
+
+  @override
+  String get discoverApproximateMeetingArea =>
+      'Approximate public meeting area';
+
+  @override
+  String get discoverFree => 'Free';
+
+  @override
+  String get discoverHybrid => 'Hybrid';
+
+  @override
+  String get discoverInPerson => 'In person';
+
+  @override
+  String get discoverCheckEnrollmentOnSite => 'Check enrollment on the website';
+
+  @override
+  String get discoverInAppEnrollmentUnavailable =>
+      'In-app enrollment is not connected yet';
+
+  @override
+  String get discoverEnrollmentMethodUnknown =>
+      'Enrollment method not specified yet';
+
+  @override
+  String get discoverTermsOnSite =>
+      'Terms of participation are confirmed on site';
+
+  @override
+  String get discoverEnrollmentClosed => 'Enrollment closed';
+
+  @override
+  String get discoverAvailabilityOnOrganizerSite =>
+      'Availability, final price and terms are on the organizer’s website';
+
+  @override
+  String get discoverLocationTbc => 'Location to be confirmed';
+
+  @override
+  String get discoverOrganizerSendsInstructions =>
+      'The organizer will send instructions';
+
+  @override
+  String get discoverOnlineClass => 'Online class';
+
+  @override
+  String get discoverOrganizerVerified => 'Organizer verified';
+
+  @override
+  String get discoverProfileVerified => 'Profile verified';
+
+  @override
+  String get discoverTeacher => 'Teacher';
+
+  @override
+  String get discoverSessionDuration => 'Session duration';
+
+  @override
+  String get discoverCourseDuration => 'Course duration';
+
+  @override
+  String get discoverPrice => 'Price';
+
+  @override
+  String get discoverPricePerPersonCourse => 'Price per person / course';
+
+  @override
+  String get discoverPricePerPersonSession => 'Price per person / session';
+
+  @override
+  String get discoverDatesTbc => 'Dates to be confirmed';
+
+  @override
+  String get discoverKindHandsOn => 'Hands-on experience';
+
+  @override
+  String get discoverKindCourse => 'Course';
+
+  @override
+  String get discoverKindMasterclass => 'Masterclass';
+
+  @override
+  String get discoverKindWorkshop => 'Workshop';
+
+  @override
+  String get discoverKindClass => 'Class';
+
+  @override
+  String get discoverRecruitmentClosed => 'Closed to new people';
+
+  @override
+  String get discoverMeetupCancelled => 'Meetup cancelled';
+
+  @override
+  String get discoverMeetupEnded => 'Meetup ended';
+
+  @override
+  String get discoverGroupFull => 'Group is full';
+
+  @override
+  String get discoverWaitlistOnly => 'Waitlist only';
+
+  @override
+  String get discoverRecruitmentOpen => 'Open to join';
+
+  @override
+  String get discoverCollectingTimeOptions => 'Collecting time options';
+
+  @override
+  String get discoverDeliveryAvailable => 'Delivery available';
+
+  @override
+  String get discoverDepositRequired => 'Deposit required';
+
+  @override
+  String get discoverNoDepositRequired => 'No deposit required';
+
+  @override
+  String get discoverPriceOnRequest => 'Price on request';
+
+  @override
+  String get discoverSignUp => 'Sign up';
+
+  @override
+  String get discoverAddToCalendar => 'Add to calendar';
+
+  @override
+  String get discoverAboutEvent => 'About the event';
+
+  @override
+  String get discoverProfile => 'Profile';
+
+  @override
+  String get discoverClubProfile => 'Club profile';
+
+  @override
+  String get discoverOrganizer => 'Organizer';
+
+  @override
+  String get discoverDuration => 'Duration';
+
+  @override
+  String get discoverParticipantCountUnknown =>
+      'Number of participants unknown';
+
+  @override
+  String get discoverParticipants => 'Participants';
+
+  @override
+  String get discoverAddToScenario => 'Add to Scenario';
+
+  @override
+  String get discoverShare => 'Share';
+
+  @override
+  String get discoverBadgeEvent => 'EVENT';
+
+  @override
+  String get discoverCurrentlyUnavailable => 'Currently unavailable';
+
+  @override
+  String get discoverConfirmOnProviderSite => 'Confirm on provider site';
+
+  @override
+  String get discoverRatePlan => 'Rate plan';
+
+  @override
+  String get discoverWhatIsRented => 'What is rented';
+
+  @override
+  String get discoverBadgeRental => 'RENTAL';
+
+  @override
+  String get discoverFlexible => 'Flexible';
+
+  @override
+  String get discoverAboutClass => 'About the class';
+
+  @override
+  String get discoverClosed => 'Closed';
+
+  @override
+  String get discoverOpeningHours => 'Opening hours';
+
+  @override
+  String get discoverAboutPlace => 'About the place';
+
+  @override
+  String get discoverTime => 'Time';
+
+  @override
+  String get discoverFromYou => 'From you';
+
+  @override
+  String get discoverAboutService => 'About the service';
+
+  @override
+  String get discoverSpecialist => 'Specialist';
+
+  @override
+  String get discoverOrganization => 'Organisation';
+
+  @override
+  String get discoverGroupSize => 'Group size';
+
+  @override
+  String get discoverRequirements => 'Requirements';
+
+  @override
+  String get discoverMaterialsIncluded => 'Materials and what is included';
+
+  @override
+  String get discoverCostsNotSpecified => 'Costs not specified';
+
+  @override
+  String get discoverNoRequiredCosts => 'No required costs';
+
+  @override
+  String get discoverDesiredSize => 'Desired size';
+
+  @override
+  String get discoverInGroupNow => 'In the group now';
+
+  @override
+  String get discoverExpectedCosts => 'Expected costs';
+
+  @override
+  String get discoverParticipantRequirements => 'Participant requirements';
+
+  @override
+  String get discoverMeetupFormat => 'Meetup format';
+
+  @override
+  String get discoverMeetupTime => 'Meetup time';
+
+  @override
+  String get discoverTimeOptions => 'Time options';
+
+  @override
+  String get discoverAboutMeetup => 'About the meetup';
+
+  @override
+  String get discoverPublisher => 'Publisher';
+
+  @override
+  String get discoverShareAndMore => 'Share and more actions';
+
+  @override
+  String get discoverMarkVisited => 'Mark as visited';
+
+  @override
+  String get discoverCreateRoute => 'Create route';
+
+  @override
+  String get discoverViewRoute => 'View route';
+
+  @override
+  String get discoverCreateSimilar => 'Create similar';
+
+  @override
+  String get discoverFindSimilar => 'Find similar';
+
+  @override
+  String get discoverCheckTimeOnSite => 'Check the time on the website';
+
+  @override
+  String get discoverReviewAndBook => 'Review and book';
+
+  @override
+  String get discoverRequestSent => 'Request sent';
+
+  @override
+  String get discoverDateSet => 'Date set';
+
+  @override
+  String get discoverAnyDate => 'Any date';
+
+  @override
+  String get discoverDone => 'Done';
+
+  @override
+  String get discoverWindowAsEntered => 'Used as entered for time matching.';
+
+  @override
+  String get discoverEffectiveWindow => 'Effective window';
+
+  @override
+  String get discoverBufferEachSide => 'Buffer on each side';
+
+  @override
+  String get discoverEnd => 'End';
+
+  @override
+  String get discoverStart => 'Start';
+
+  @override
+  String get discoverChangeDate => 'Change date';
+
+  @override
+  String get discoverFlexibleTime => 'Flexible';
+
+  @override
+  String get discoverExact => 'Exact';
+
+  @override
+  String get discoverBackToFilters => 'Back to filters';
+
+  @override
+  String get discoverReset => 'Reset';
+
+  @override
+  String get discoverExactTime => 'Exact time';
+
+  @override
+  String get discoverApplyFilters => 'Apply filters';
+
+  @override
+  String get discoverIncludeReturnTrip => 'Include return trip';
+
+  @override
+  String get discoverTransit => 'Public transport';
+
+  @override
+  String get discoverDriving => 'Driving';
+
+  @override
+  String get discoverWalking => 'Walking';
+
+  @override
+  String get discoverMapPoint => 'Map point';
+
+  @override
+  String get discoverTravel => 'Travel';
+
+  @override
+  String get discoverNoBuffer => 'No buffer';
+
+  @override
+  String get discoverChangeFlexibility => 'Change flexibility';
+
+  @override
+  String get discoverWindowEdgeBuffer => 'Window edge buffer';
+
+  @override
+  String get discoverToday => 'Today';
+
+  @override
+  String get discoverWhen => 'When';
+
+  @override
+  String get discoverSave => 'Save';
+
+  @override
+  String get discoverCancel => 'Cancel';
+
+  @override
+  String get discoverEnterBudget => 'Enter an amount from €0 to €10,000';
+
+  @override
+  String get discoverAmountInEur => 'Amount in EUR';
+
+  @override
+  String get discoverBudgetPerPerson => 'Budget per person';
+
+  @override
+  String get discoverEnterPeople => 'Enter a number from 1 to 99';
+
+  @override
+  String get discoverExampleSix => 'For example, 6';
+
+  @override
+  String get discoverNumberOfPeople => 'Number of people';
+
+  @override
+  String get discoverAnyArea => 'Any area';
+
+  @override
+  String get discoverAnyDuration => 'Any duration';
+
+  @override
+  String get discoverAnyDistance => 'Any distance';
+
+  @override
+  String get discoverOnlyAvailable => 'Only available';
+
+  @override
+  String get discoverOpenNow => 'Open now';
+
+  @override
+  String get discoverTimeAvailable => 'Time available';
+
+  @override
+  String get discoverSearchFilters => 'Search filters';
+
+  @override
+  String get discoverSocialEvening => 'Social evening';
+
+  @override
+  String get discoverActiveMorning => 'Active morning';
+
+  @override
+  String get discoverSunsetBreak => 'Sunset break';
+
+  @override
+  String get discoverAfterWork => 'After work';
+
+  @override
+  String get discoverRegularSearchesHint =>
+      'Your regular searches will appear here automatically.';
+
+  @override
+  String get discoverCalmEvening => 'Calm evening';
+
+  @override
+  String get discoverLowBudget => 'Low budget';
+
+  @override
+  String get discoverForTwo => 'For two';
+
+  @override
+  String get discoverNearMeNow => 'Near me now';
+
+  @override
+  String get discoverApplyRadius => 'Apply radius';
+
+  @override
+  String get discoverCustomRadius => 'Custom radius';
+
+  @override
+  String get discoverSearchRadius => 'Search radius';
+
+  @override
+  String get discoverAnyBudget => 'Any budget';
+
+  @override
+  String get discoverExampleEight => 'For example, 8';
+
+  @override
+  String get discoverJustMe => 'Just me';
+
+  @override
+  String get discoverAnyGroup => 'Any group';
+
+  @override
+  String get discoverChooseSearchDates => 'Choose search dates';
+
+  @override
+  String get discoverChooseDates => 'Choose dates';
+
+  @override
+  String get discoverThisWeekend => 'This weekend';
+
+  @override
+  String get discoverTomorrow => 'Tomorrow';
+
+  @override
+  String get discoverChooseDate => 'Choose date';
+
+  @override
+  String get discoverUntilEndOfDay => 'Until end of day';
+
+  @override
+  String get discoverRecentSearches => 'Recent searches';
+
+  @override
+  String get discoverQuickPlans => 'Quick plans';
+
+  @override
+  String get discoverSeeAll => 'See all';
+
+  @override
+  String get discoverSearchHint => 'Search activity, place or plan';
+
+  @override
+  String get discoverSearchRecharge => 'Search Recharge';
+
+  @override
+  String get discoverJoinActivity => 'Join activity';
+
+  @override
+  String get discoverParticipantsUnknown => 'Participants unknown';
+
+  @override
+  String get discoverCapacityUnknown => 'Capacity unknown';
+
+  @override
+  String get discoverOpeningHoursUnknown => 'Opening hours unknown';
+
+  @override
+  String get discoverTimeNotConfirmed => 'Time not confirmed';
+
+  @override
+  String get discoverDoesNotFit => 'Does not fit';
+
+  @override
+  String get discoverPartialAttendance => 'Partial attendance possible';
+
+  @override
+  String get discoverFitsYourTime => 'Fits your time';
+
+  @override
+  String get discoverOptionalContribution => 'Optional contribution';
+
+  @override
+  String get discoverNoContribution => 'No contribution specified';
+
+  @override
+  String get discoverDifficultyNotSet => 'Difficulty not set';
+
+  @override
+  String get discoverAnyTime => 'Any time';
+
+  @override
+  String get discoverWhatAwaitsYou => 'What awaits you';
+
+  @override
+  String get discoverPerkSaveForLater => 'Save the activity for later';
+
+  @override
+  String get discoverPerkOrganizerDetails =>
+      'Organizer details available before joining';
+
+  @override
+  String get discoverPerkMeetingPoint => 'Clear meeting point and timing';
+
+  @override
+  String get discoverDistance => 'Distance';
+
+  @override
+  String get discoverLocation => 'Location';
+
+  @override
+  String get discoverRouteGeometry => 'Route geometry';
+
+  @override
+  String get discoverDateAndTime => 'Date and time';
+
+  @override
+  String get discoverRouteMap => 'Route map';
+
+  @override
+  String get discoverRouteFromThis => 'Route from this';
+
+  @override
+  String get discoverAddToPrivateHistory => 'Add to private history';
+
+  @override
+  String get discoverOpenCreateHub => 'Open Create Hub';
+
+  @override
+  String get discoverSearchThisCategory => 'Search with this category';
+
+  @override
+  String get discoverAddStopToPlan => 'Add this stop to a personal plan';
+
+  @override
+  String get discoverOpenNearbyContext => 'Open nearby context';
+
+  @override
+  String get discoverMap => 'Map';
+
+  @override
+  String get discoverPlanHint =>
+      'Turn this activity into a route, compare similar options, or save it for later.';
+
+  @override
+  String get discoverNotSaved => 'Not saved';
+
+  @override
+  String get discoverPlanThisRecharge => 'Plan this recharge';
+
+  @override
+  String get discoverSend => 'Send';
+
+  @override
+  String get discoverCriticalOnlyImmediateRisk =>
+      'Choose critical danger only when people are at immediate risk.';
+
+  @override
+  String get discoverDescribeWithoutPersonalData =>
+      'Describe the problem without personal data';
+
+  @override
+  String get discoverCommentOptional => 'Comment (optional)';
+
+  @override
+  String get discoverSeverityCritical => 'Critical danger';
+
+  @override
+  String get discoverSeverityDanger => 'Dangerous';
+
+  @override
+  String get discoverSeverityWarning => 'Needs attention';
+
+  @override
+  String get discoverSeverityInfo => 'Information';
+
+  @override
+  String get discoverSeverity => 'Severity';
+
+  @override
+  String get discoverIssueOther => 'Other';
+
+  @override
+  String get discoverIssueWrongLine => 'Wrong route line';
+
+  @override
+  String get discoverIssueObstacle => 'Obstacle';
+
+  @override
+  String get discoverIssueHazardousSurface => 'Hazardous surface';
+
+  @override
+  String get discoverIssueTrailClosed => 'Trail closed';
+
+  @override
+  String get discoverWhatHappened => 'What happened';
+
+  @override
+  String get discoverRouteIssue => 'Problem on the route';
+
+  @override
+  String get discoverReportRouteIssue => 'Report a problem on the route';
+
+  @override
+  String get discoverElevationUnavailable =>
+      'Elevation data is unavailable and is not shown as zero.';
+
+  @override
+  String get discoverElevationPartial =>
+      'Elevation data is partial; ascent and descent are not presented as complete.';
+
+  @override
+  String get discoverDemoData => 'Demo data';
+
+  @override
+  String get discoverFieldVerified => 'Field verified';
+
+  @override
+  String get discoverPublishedRoute => 'Published Route';
+
+  @override
+  String get discoverOpenDetails => 'Open details';
+
+  @override
+  String get discoverSelectForScenario => 'Select for Scenario';
+
+  @override
+  String get discoverAny => 'Any';
+
+  @override
+  String get discoverSearchThisArea => 'Search this area';
+
+  @override
+  String get discoverResetRouteProgress => 'Reset route progress';
+
+  @override
+  String get discoverStartRoute => 'Start route';
+
+  @override
+  String get discoverNextStop => 'Next stop';
+
+  @override
+  String get discoverReadyToStart => 'Ready to start';
+
+  @override
+  String get discoverRouteComplete => 'Route complete';
+
+  @override
+  String get discoverCopy => 'Copy';
+
+  @override
+  String get discoverCreateRouteListing => 'Create route listing';
+
+  @override
+  String get discoverSearchSimilarRoute => 'Search similar route';
+
+  @override
+  String get discoverEditRoute => 'Edit route';
+
+  @override
+  String get discoverScenarioRoute => 'Scenario route';
+
+  @override
+  String get discoverNoActivitiesInArea => 'No activities in this area';
+
+  @override
+  String get discoverRetry => 'Retry';
+
+  @override
+  String get discoverMapSearchFailed => 'Map search failed';
+
+  @override
+  String get discoverMapResults => 'Map results';
+
+  @override
+  String get discoverApply => 'Apply';
+
+  @override
+  String get discoverSavedOnMap => 'Saved on map';
+
+  @override
+  String get discoverRouteFromSmart => 'Build route from smart search';
+
+  @override
+  String get discoverCreateFromSmart => 'Create listing from smart search';
+
+  @override
+  String get discoverApplySmartToMap => 'Apply smart search to map';
+
+  @override
+  String get discoverSmart => 'Smart';
+
+  @override
+  String get discoverRouteFromSaved => 'Build route from saved conditions';
+
+  @override
+  String get discoverCreateFromSaved => 'Create listing from saved conditions';
+
+  @override
+  String get discoverApplySavedToMap => 'Apply saved conditions to map';
+
+  @override
+  String get discoverSaved => 'Saved';
+
+  @override
+  String get discoverCreateHere => 'Create here';
+
+  @override
+  String get discoverSearch => 'Search';
+
+  @override
+  String get discoverClear => 'Clear';
+
+  @override
+  String get discoverSearchOnMap => 'Search on map';
+
+  @override
+  String get discoverMapArea => 'Map area';
+
+  @override
+  String get discoverRechargeIdea => 'Recharge idea';
+
+  @override
+  String get discoverMapAreaIdea => 'Map area idea';
+
+  @override
+  String get discoverScenarioCopied => 'Scenario copied';
+
+  @override
+  String get discoverScenarioSaved => 'Scenario saved';
+
+  @override
+  String get discoverRecenter => 'Recenter';
+
+  @override
+  String get discoverUseCurrentLocation => 'Use current location';
+
+  @override
+  String get discoverCancelScenarioSelection => 'Cancel Scenario selection';
+
+  @override
+  String get discoverAll => 'All';
+
+  @override
+  String get discoverSearchFailed => 'Search failed';
+
+  @override
+  String get discoverResetConditions => 'Reset conditions';
+
+  @override
+  String get discoverNoMatches => 'No activities match these conditions';
+
+  @override
+  String get discoverShowingNearby => 'Showing nearby activities';
+
+  @override
+  String get discoverRadius => 'Radius';
+
+  @override
+  String get discoverTonight => 'Tonight';
+
+  @override
+  String get discoverDate => 'Date';
+
+  @override
+  String get discoverBudget => 'Budget';
+
+  @override
+  String get discoverShowNoTicket => 'Show no-ticket activities';
+
+  @override
+  String get discoverFreeOnly => 'Free only';
+
+  @override
+  String get discoverOutdoor => 'Outdoor';
+
+  @override
+  String get discoverFreeToday => 'Free today';
+
+  @override
+  String get discoverSearchConditions => 'Search conditions';
+
+  @override
+  String get discoverOpenSavedOnMap => 'Open saved conditions on map';
+
+  @override
+  String get discoverDeleteSaved => 'Delete saved conditions';
+
+  @override
+  String get discoverNoRecentSearches => 'No recent searches yet';
+
+  @override
+  String get discoverCreateListingFromSearch =>
+      'Create listing from current search';
+
+  @override
+  String get discoverConditions => 'Conditions';
+
+  @override
+  String get discoverViewMap => 'View map';
+
+  @override
+  String get discoverCategories => 'Categories';
+
+  @override
+  String get discoverQuickScenarios => 'Quick scenarios';
+
+  @override
+  String get discoverCreateFromCurrentSearch => 'Create from current search';
+
+  @override
+  String get discoverUnderstoodParameters => 'Understood parameters';
+
+  @override
+  String get discoverTextQuery => 'Text query';
+
+  @override
+  String get discoverGotIt => 'Got it';
+
+  @override
+  String get discoverSmartSearchHow => 'How Smart Search works';
+
+  @override
+  String get discoverSayWhatToFind => 'Say what you want to find';
+
+  @override
+  String get discoverSmartSearchPrompt => 'Write or say what to find';
+
+  @override
+  String get discoverStartSearch => 'Start search';
+
+  @override
+  String get discoverDeleteQuery => 'Delete query';
+
+  @override
+  String get discoverRecentSmartSearches => 'Recent smart searches';
+
+  @override
+  String get discoverPopularQueries => 'Popular queries';
+
+  @override
+  String get discoverChipUpTo20 => 'Up to €20';
+
+  @override
+  String get discoverChipOneTwoHours => '1–2 hours';
+
+  @override
+  String get discoverChipCalmEvening => 'Calm evening';
+
+  @override
+  String get discoverChipForTwo => 'For two';
+
+  @override
+  String get discoverChipNearNow => 'Near me now';
+
+  @override
+  String get discoverVoiceQuery => 'Voice query';
+
+  @override
+  String get discoverSmartSearchPromptTwoLines =>
+      'Write or say\\nwhat you want to find';
+
+  @override
+  String get discoverSmartSearch => 'Smart Search';
+
+  @override
+  String get discoverHoursUnknown => 'Hours unknown';
+
+  @override
+  String get discoverTimeUnknown => 'Time unknown';
+
+  @override
+  String get discoverPartialFit => 'Partial fit';
+
+  @override
+  String get discoverMatchesYourTime => 'Matches your time';
+
+  @override
+  String get discoverOpenSettings => 'Open settings';
+
+  @override
+  String get discoverNoLocationAccess => 'No access to location';
+
+  @override
+  String get discoverFeedFailed => 'Could not load the feed';
+
+  @override
+  String get discoverRemoveTime => 'Remove the time';
+
+  @override
+  String get discoverNoReturnTrip => 'Without the return trip';
+
+  @override
+  String get discoverWidenTime => 'Widen the time';
+
+  @override
+  String get discoverRefresh => 'Refresh';
+
+  @override
+  String get discoverFeedEmpty => 'Nothing in the feed yet';
+
+  @override
+  String get discoverFeedLoading => 'Loading the feed…';
+
+  @override
+  String get discoverWaypoints => 'Points on the route';
+
+  @override
+  String get discoverElevation => 'Elevation';
+
+  @override
+  String get discoverDescent => 'Descent';
+
+  @override
+  String get discoverAscent => 'Ascent';
+
+  @override
+  String get discoverRouteMapFailed => 'Could not load the route map';
+
+  @override
+  String get discoverOpenOnMap => 'Open on map';
+
+  @override
+  String get discoverShapeOneWay => 'One way';
+
+  @override
+  String get discoverShapeOutAndBack => 'Out and back';
+
+  @override
+  String get discoverShapeLoop => 'Loop';
+
+  @override
+  String get discoverPublisherPage => 'Page';
+
+  @override
+  String get discoverPublisherAuthor => 'Author';
+
+  @override
+  String get discoverRouteDetails => 'Route details';
+
+  @override
+  String discoverDistanceKm(String value) {
+    return '$value km';
+  }
+
+  @override
+  String discoverDistanceFromYou(String value) {
+    return '$value km from you';
+  }
+
+  @override
+  String discoverStartPointAway(String value) {
+    return 'Start point · $value km away';
+  }
+
+  @override
+  String discoverFromStartKm(String value) {
+    return '$value km from the start';
+  }
+
+  @override
+  String discoverMeters(String value) {
+    return '$value m';
+  }
+
+  @override
+  String discoverAscentShort(String value) {
+    return '↑ $value m';
+  }
+
+  @override
+  String discoverElevationRange(String min, String max) {
+    return '$min–$max m';
+  }
+
+  @override
+  String discoverTrackGaps(int count) {
+    return 'Track gaps: $count';
+  }
+
+  @override
+  String discoverDirectSegments(int count) {
+    return 'Direct segments: $count';
+  }
+
+  @override
+  String discoverDirectSegmentsInline(int count) {
+    return 'direct segments: $count';
+  }
+
+  @override
+  String discoverMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String discoverMinutesRange(int min, int max) {
+    return '$min–$max min';
+  }
+
+  @override
+  String discoverHours(String value) {
+    return '$value h';
+  }
+
+  @override
+  String discoverHoursMinutes(int hours, int minutes) {
+    return '$hours h $minutes min';
+  }
+
+  @override
+  String discoverDays(int days) {
+    return '$days d';
+  }
+
+  @override
+  String discoverUpTo(int count) {
+    return 'up to $count';
+  }
+
+  @override
+  String discoverUpToPeople(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'up to $count people',
+      one: 'up to $count person',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverAboutPerPerson(String price) {
+    return 'About $price per person';
+  }
+
+  @override
+  String discoverCancelledSuffix(String date) {
+    return '$date · Cancelled';
+  }
+
+  @override
+  String get discoverRentalQuantitiesDisclaimer =>
+      'Listed quantities are Creator-declared, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.';
+
+  @override
+  String discoverDeliveryWithin(String value) {
+    return 'Delivery available within $value km';
+  }
+
+  @override
+  String discoverRentalPeriod(String min, String max) {
+    return 'Rental period: $min – $max';
+  }
+
+  @override
+  String discoverMinAge(int age) {
+    return 'Min age $age';
+  }
+
+  @override
+  String get discoverIdRequired => 'ID required at handover';
+
+  @override
+  String discoverDeposit(String price) {
+    return 'Deposit: $price';
+  }
+
+  @override
+  String discoverTimeOptionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count time options',
+      one: '$count time option',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverFirstAndMore(String time, int count) {
+    return '$time · $count more';
+  }
+
+  @override
+  String discoverTimeOptionCandidate(String time) {
+    return 'Option · $time';
+  }
+
+  @override
+  String discoverDateTimeRange(String date, String start, String end) {
+    return '$date · $start–$end';
+  }
+
+  @override
+  String discoverUpToBudget(String price) {
+    return 'Up to $price';
+  }
+
+  @override
+  String discoverFlexibilityMinutes(int minutes) {
+    return '±$minutes min';
+  }
+
+  @override
+  String discoverUsedInsteadOf(String start, String end) {
+    return 'Used for matching instead of $start–$end.';
+  }
+
+  @override
+  String discoverTypicalDuration(String value) {
+    return 'Typical duration: $value';
+  }
+
+  @override
+  String discoverSuggestedGroup(int min, int max) {
+    return 'Suggested group: $min–$max';
+  }
+
+  @override
+  String discoverBestTime(String value) {
+    return 'Best time: $value';
+  }
+
+  @override
+  String discoverAmountHint(String price) {
+    return 'Amount hint: $price';
+  }
+
+  @override
+  String discoverBookFor(String price) {
+    return 'Book for $price';
+  }
+
+  @override
+  String discoverResultsInArea(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count places and activities in this area',
+      one: '$count place or activity in this area',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverStops(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stops',
+      one: '$count stop',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverStopOf(int current, int total) {
+    return 'Stop $current of $total';
+  }
+
+  @override
+  String discoverRadiusKm(String value) {
+    return 'Radius: $value km';
+  }
+
+  @override
+  String discoverRemoveFromSelection(int order) {
+    return 'Remove #$order from selection';
+  }
+
+  @override
+  String discoverMood(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Calm',
+      'social': 'Social',
+      'active': 'Active',
+      'other': 'Custom',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverRouteLabel => 'Route';
+
+  @override
+  String get discoverSmartSearchHowBody =>
+      'Type a query or use voice input. Recharge reads the time, place, budget and mood and shows suitable options.';
+
+  @override
+  String get discoverSmartPromptCalmEveningNearby => 'Calm evening nearby';
+
+  @override
+  String get discoverSmartPromptSomethingForTwoHours =>
+      'Find something interesting for 2 hours';
+
+  @override
+  String get discoverSmartPromptForTwoNearby => 'Where to go for two nearby';
+
+  @override
+  String get discoverSmartPromptExample =>
+      'Something calm nearby tonight, up to 20 EUR';
+
+  @override
+  String get discoverSmartPromptExampleHint =>
+      'For example: “Something calm nearby tonight, up to €20”';
+
+  @override
+  String get discoverSmartPromptNearNow => 'Something interesting nearby now';
+
+  @override
+  String get discoverSmartPromptForTwo => 'Where to go for two';
+
+  @override
+  String get discoverSmartPromptCalmEvening => 'Calm evening';
+
+  @override
+  String get discoverSmartPromptTwoHours => 'Find a plan for 2 hours';
+
+  @override
+  String get discoverSmartPromptUpTo20 => 'Find something up to 20 EUR';
+
+  @override
+  String discoverRentalBaseRate(String type, String price) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'hour': '$price / hour',
+      'week': '$price / week',
+      'other': '$price / day',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverRentalRateStep(String type, String price, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hours',
+      one: '$count hour',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks',
+      one: '$count week',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '$count day',
+    );
+    String _temp3 = intl.Intl.selectLogic(type, {
+      'hour': 'From $_temp0: $price / hour',
+      'week': 'From $_temp1: $price / week',
+      'other': 'From $_temp2: $price / day',
+    });
+    return '$_temp3';
+  }
+
+  @override
+  String discoverRentalUnitsListed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count units listed',
+      one: '$count unit listed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverSeason(String value) {
+    return 'Season: $value';
+  }
+
+  @override
+  String get discoverLength => 'Length';
+
+  @override
+  String get discoverPeople => 'People';
+
+  @override
+  String get discoverCycling => 'Cycling';
+
+  @override
+  String get discoverDifficultyEasy => 'Easy';
+
+  @override
+  String get discoverDifficultyModerate => 'Moderate';
+
+  @override
+  String get discoverDifficultyHard => 'Hard';
+
+  @override
+  String get discoverOpen => 'Open';
+
+  @override
+  String discoverAddedToScenario(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $count stops to Scenario',
+      one: 'Added $count stop to Scenario',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverCompletedDuration(int minutes) {
+    return 'Completed · $minutes min';
+  }
+
+  @override
+  String get discoverRestart => 'Restart';
+
+  @override
+  String get discoverFinish => 'Finish';
+
+  @override
+  String get discoverRadiusAnyArea => 'Radius: any area';
+
+  @override
+  String get discoverWaypoint => 'Point on the route';
+
+  @override
+  String discoverFoundCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count found',
+      one: '$count found',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverPeopleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: '$count person',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverUnder(String value) {
+    return 'Under $value';
+  }
+
+  @override
+  String discoverFlexibleWindow(int minutes) {
+    return 'Flexible ±$minutes min';
+  }
+
+  @override
+  String get discoverCustom => 'Custom';
+
+  @override
+  String discoverCustomValue(String value) {
+    return 'Custom · $value';
+  }
+
+  @override
+  String discoverHoursLong(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hours',
+      one: '$count hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverAboutOneHour => '~ 1 hour';
+
+  @override
+  String discoverHoursRange(int min, int max) {
+    return '$min–$max hours';
+  }
+
+  @override
+  String get discoverAvailability => 'Availability';
+
+  @override
+  String get discoverMoodTitle => 'Mood';
+
+  @override
+  String discoverTravelMinutes(int minutes) {
+    return '$minutes min travel';
+  }
+
+  @override
+  String discoverTravelMinutesEstimated(int minutes) {
+    return '$minutes min travel · est.';
+  }
+
+  @override
+  String get discoverSlotChosen => 'Time slot chosen';
+
+  @override
+  String get discoverFits => 'Fits';
+
+  @override
+  String get discoverUnsave => 'Unsave';
+
+  @override
+  String discoverRecommendedDifficulty(String value) {
+    return 'Recommended $value';
+  }
+
+  @override
+  String discoverPoiCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count points of interest',
+      one: '$count point of interest',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverSurfaceTitle => 'Surface';
+
+  @override
+  String discoverSurface(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'asphalt': 'Asphalt',
+      'paved': 'Paved',
+      'concrete': 'Concrete',
+      'paving_stones': 'Paving stones',
+      'sett': 'Cobblestones',
+      'compacted': 'Compacted',
+      'fine_gravel': 'Fine gravel',
+      'gravel': 'Gravel',
+      'dirt': 'Dirt',
+      'earth': 'Earth',
+      'ground': 'Ground',
+      'grass': 'Grass',
+      'sand': 'Sand',
+      'unpaved': 'Unpaved',
+      'wood': 'Wood',
+      'mixed': 'Mixed',
+      'other': 'Other surface',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverUnknownSurface(String meters) {
+    return 'Surface data is unknown for $meters.';
+  }
+
+  @override
+  String get discoverIntakeFindPeopleNotSupported =>
+      'A Find People request cannot be added to a Scenario.';
+
+  @override
+  String get discoverIntakeMissingIdentity =>
+      'This result cannot be added: it has no stable catalog identity.';
+
+  @override
+  String get discoverIntakeNoLocation =>
+      'This result has no usable catalog location.';
+
+  @override
+  String discoverIntakeLimitReached(int count) {
+    return 'A Scenario intake can contain up to $count items.';
+  }
+
+  @override
+  String discoverStopsSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stops selected for Scenario.',
+      one: '$count stop selected for Scenario.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String discoverTimeWindowIssue(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'unknownTimezone': 'The time zone of this area is unknown.',
+      'dayEnded': 'This day has already ended here.',
+      'boundsRequired': 'Choose a start and an end.',
+      'nonexistentLocalTime':
+          'This local time does not exist because of the clock change.',
+      'endBeforeStart': 'The end must be after the start.',
+      'invalidTravelContext': 'The travel settings are not valid.',
+      'serviceUnavailable': 'Time matching is unavailable right now.',
+      'other': 'The time window could not be applied.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverFeedNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'emptyArea':
+          'Nothing found in this area. Try a larger radius or fewer filters.',
+      'loadFailed': 'Could not load the data. Try again.',
+      'dataUnavailable': 'The data is unavailable.',
+      'offline': 'No internet connection.',
+      'other': 'Could not load the feed. Try again.',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String scenarioIntakeStep(String state) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'target': '1 of 3 · Scenario',
@@ -7430,4 +9017,239 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0 · $_temp1';
   }
+
+  @override
+  String discoverHomeIdeaTitle(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'freeToday': 'Free today',
+      'nearMe': 'Near me',
+      'eveningPlans': 'Evening plans',
+      'coffeeReset': 'Coffee reset',
+      'freeCityReset': 'Free city reset',
+      'socialEvening': 'Social evening',
+      'activeBoost': 'Active boost',
+      'other': 'Idea',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverHomeIdeaSubtitle(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'freeToday': 'Activities nearby without tickets',
+      'nearMe': 'Use the map radius and quick list',
+      'eveningPlans': 'Find something after work',
+      'coffeeReset': 'A calm cafe start with an easy city walk.',
+      'freeCityReset': 'A free low-pressure route for a quick recharge.',
+      'socialEvening': 'Start social, then keep the night nearby.',
+      'activeBoost': 'Move first, then cool down on a walk.',
+      'other': 'A quick plan nearby.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverHomeNew => 'New';
+
+  @override
+  String get discoverHomeForYou => 'For you';
+
+  @override
+  String get discoverHomeQuickEvents => 'Quick events';
+
+  @override
+  String get discoverHomeNearby => 'Nearby';
+
+  @override
+  String get discoverHomePopular => 'Popular';
+
+  @override
+  String get discoverRouteIdeas => 'Route ideas';
+
+  @override
+  String get discoverBuilder => 'Builder';
+
+  @override
+  String get discoverBuild => 'Build';
+
+  @override
+  String get discoverCreate => 'Create';
+
+  @override
+  String get discoverResume => 'Resume';
+
+  @override
+  String get discoverWalkable => 'Walkable';
+
+  @override
+  String get discoverMixedPrice => 'Mixed';
+
+  @override
+  String discoverMapTemplateRoute(String message) {
+    return 'Map $message route';
+  }
+
+  @override
+  String discoverCreateTemplateRoute(String message) {
+    return 'Create $message route';
+  }
+
+  @override
+  String get discoverForYouHint =>
+      'Personal picks, saved ideas and creator tools stay one tap away.';
+
+  @override
+  String get discoverSmartSearchIdea => 'Smart search idea';
+
+  @override
+  String get discoverLanguagesLabel => 'Languages:';
+
+  @override
+  String get discoverEquipmentLabel => 'Equipment:';
+
+  @override
+  String get discoverAccessibilityLabel => 'Accessibility:';
+
+  @override
+  String get discoverListedByPageLabel => 'Listed by page';
+
+  @override
+  String get discoverListedByLabel => 'Listed by';
+
+  @override
+  String get discoverLearningOutcomesLabel => 'What you will learn:';
+
+  @override
+  String get discoverOrganizerLabel => 'Organizer:';
+
+  @override
+  String get discoverLinkedPlaceLabel => 'Linked Place:';
+
+  @override
+  String get discoverInformalAccessLabel => 'Informal access:';
+
+  @override
+  String discoverCompletedAtStopLabel(int index) {
+    return 'Completed at stop $index:';
+  }
+
+  @override
+  String discoverFocusedStopLabel(int index) {
+    return 'Focused stop $index:';
+  }
+
+  @override
+  String discoverNowAtStopLabel(int index) {
+    return 'Now: stop $index ·';
+  }
+
+  @override
+  String discoverSelectedStopLabel(int index) {
+    return 'Selected stop $index:';
+  }
+
+  @override
+  String discoverMoodRoute(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Calm route',
+      'social': 'Social route',
+      'active': 'Active route',
+      'other': 'Custom route',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverMoodRechargeRoute(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Calm recharge route',
+      'social': 'Social recharge route',
+      'active': 'Active recharge route',
+      'other': 'Custom recharge route',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverMoodRechargeScenario(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Calm recharge scenario',
+      'social': 'Social recharge scenario',
+      'active': 'Active recharge scenario',
+      'other': 'Custom recharge scenario',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String discoverOptionalContributionLabel(String value) {
+    return 'Optional $value:';
+  }
+
+  @override
+  String discoverIdeaForCategory(String type) {
+    return '$type idea';
+  }
+
+  @override
+  String get discoverIntentLabel => 'Intent:';
+
+  @override
+  String get discoverAppliedLabel => 'Applied:';
+
+  @override
+  String get discoverVersionLabel => 'Version';
+
+  @override
+  String get discoverRemove => 'Remove';
+
+  @override
+  String get discoverCouldNotOpenLink => 'Could not open';
+
+  @override
+  String discoverCollectionMapSemantics(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Map of $count places in this Collection. Use the list below to browse them without the map.',
+      one:
+          'Map of $count place in this Collection. Use the list below to browse it without the map.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String discoverRoutePreview(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Route preview: $count segments',
+      one: 'Route preview: $count segment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverSearchCategories => 'Search categories';
+
+  @override
+  String get discoverClearSearch => 'Clear search';
+
+  @override
+  String get discoverNoCategories => 'No categories found';
+
+  @override
+  String get discoverCategoryNotFound => 'Category not found';
+
+  @override
+  String get discoverOpenRoute => 'Open Route';
+
+  @override
+  String discoverTodayDate(String date) {
+    return 'Today, $date';
+  }
+
+  @override
+  String get discoverByLabel => 'By';
 }

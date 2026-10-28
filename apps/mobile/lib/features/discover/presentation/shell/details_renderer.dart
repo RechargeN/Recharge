@@ -73,8 +73,8 @@ class DetailsRendererRegistry {
     final DetailsRendererBuilder? builder = _builders[family];
     if (builder == null) {
       throw StateError(
-        'No DetailsRenderer registered for family $family. Every '
-        'DetailsRendererFamily in use must have a builder registered where '
+        'No DetailsRenderer registered for family $family. Every ' // l10n-ignore: developer error
+        'DetailsRendererFamily in use must have a builder registered where ' // l10n-ignore: developer error
         'the registry is constructed.',
       );
     }

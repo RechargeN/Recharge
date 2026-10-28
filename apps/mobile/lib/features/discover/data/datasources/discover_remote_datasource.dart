@@ -20,10 +20,7 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
     await Future<void>.delayed(const Duration(milliseconds: 120));
     final Map<String, Object?> map = _mockFeedRaw.firstWhere(
       (Map<String, Object?> item) => item['id'] == itemId,
-      orElse: () => throw const DiscoverException(
-        code: 'DISCOVER_NOT_FOUND',
-        message: 'Объект не найден',
-      ),
+      orElse: () => throw const DiscoverException(code: 'DISCOVER_NOT_FOUND'),
     );
     return DiscoverItemModel.fromMap(map);
   }

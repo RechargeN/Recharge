@@ -30,9 +30,37 @@ import 'package:recharge/features/discover/domain/usecases/get_discover_feed_use
 import 'package:recharge/features/discover/presentation/pages/discover_results_page.dart';
 import 'package:recharge/features/discover/presentation/pages/search_page.dart';
 
+import 'package:recharge/core/localization/l10n_context.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
+  // L4.5: Discover in lv, en and ru on a 360 dp phone at text scale 1 and 2.
+  group('L4.5: Search results in lv, en and ru at 360 dp', () {
+    for (final String language in const <String>['en', 'lv', 'ru']) {
+      for (final double scale in const <double>[1, 2]) {
+        testWidgets('$language at ${scale}x', (WidgetTester tester) async {
+          tester.view
+            ..physicalSize = const Size(360, 800)
+            ..devicePixelRatio = 1;
+          tester.platformDispatcher.textScaleFactorTestValue = scale;
+          addTearDown(() {
+            tester.view
+              ..resetPhysicalSize()
+              ..resetDevicePixelRatio();
+            tester.platformDispatcher.clearTextScaleFactorTestValue();
+          });
+          await tester.pumpWidget(_SearchTestApp(locale: Locale(language)));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          final AppLocalizations l10n = lookupAppLocalizations(
+            Locale(language),
+          );
+          // A known interface string is in the reader's language.
+          expect(find.text(l10n.discoverSearchRecharge), findsWidgets);
+        });
+      }
+    }
+  });
   fullPageTestWidgets('search intake flag hides single and multi actions', (
     tester,
   ) async {
@@ -53,7 +81,7 @@ void main() {
     );
 
     expect(find.byTooltip('Select for Scenario'), findsNothing);
-    expect(find.byTooltip('Add Утренняя йога to Scenario'), findsNothing);
+    expect(find.byTooltip('Add to Scenario: Утренняя йога'), findsNothing);
   });
 
   fullPageTestWidgets(
@@ -100,7 +128,7 @@ void main() {
         320,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(find.byTooltip('Add Утренняя йога to Scenario'), findsOneWidget);
+      expect(find.byTooltip('Add to Scenario: Утренняя йога'), findsOneWidget);
 
       await tester.tap(find.byTooltip('Select for Scenario'));
       await tester.pump();
@@ -317,13 +345,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Custom · 7'), findsOneWidget);
 
-    expect(find.text('€0'), findsOneWidget);
+    expect(find.text('€0.00'), findsOneWidget);
     await tester.tap(find.byKey(const Key('budget-custom')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('custom-number-input')), '35');
     await tester.tap(find.byKey(const Key('custom-number-save')));
     await tester.pumpAndSettle();
-    expect(find.text('Custom · €35'), findsOneWidget);
+    expect(find.text('Custom · €35.00'), findsOneWidget);
   });
 
   fullPageTestWidgets('renders search controls and results', (tester) async {
@@ -636,6 +664,7 @@ class _SearchLandingTestApp extends StatelessWidget {
 class _SearchTestApp extends StatelessWidget {
   _SearchTestApp({
     this.initialLocation = RouteNames.search,
+    this.locale,
     DiscoverFeedController? controller,
     this.additionalOverrides = const <Override>[],
   }) : _controller =
@@ -657,6 +686,7 @@ class _SearchTestApp extends StatelessWidget {
 
   final String initialLocation;
   final List<Override> additionalOverrides;
+  final Locale? locale;
 
   final DiscoverFeedController _controller;
 
@@ -668,6 +698,13 @@ class _SearchTestApp extends StatelessWidget {
         ...additionalOverrides,
       ],
       child: MaterialApp.router(
+        locale: locale,
+        localizationsDelegates: locale == null
+            ? null
+            : AppLocalizations.localizationsDelegates,
+        supportedLocales: locale == null
+            ? const <Locale>[Locale('en', 'US')]
+            : AppLocalizations.supportedLocales,
         routerConfig: GoRouter(
           initialLocation: initialLocation,
           routes: <RouteBase>[
