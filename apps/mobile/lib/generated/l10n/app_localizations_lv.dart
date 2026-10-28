@@ -3006,4 +3006,2149 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get scenarioTransitPlannedTransport => 'Plānotais transports';
+
+  @override
+  String get createFormHoursNotSelected => 'Darba laiks nav izvēlēts';
+
+  @override
+  String get createFormOpeningHoursUnknown => 'Darba laiks nav zināms';
+
+  @override
+  String get createFormSeasonalHours => 'Sezonāls darba laiks';
+
+  @override
+  String get createFormRegularOpeningHours => 'Regulārs darba laiks';
+
+  @override
+  String get createFormNotSelected => 'Nav izvēlēts';
+
+  @override
+  String get createFormNoEntryTicketConcept => 'Ieejas biļetes nav';
+
+  @override
+  String get createFormFreePaidAreas => 'Bezmaksas un maksas zonas';
+
+  @override
+  String get createFormPaidEntry => 'Maksas ieeja';
+
+  @override
+  String get createFormFreeEntry => 'Bezmaksas ieeja';
+
+  @override
+  String get createFormLocalCurator => 'Vietējais kurators';
+
+  @override
+  String get createFormStaffMember => 'Darbinieks';
+
+  @override
+  String get createFormUntitledPlace => 'Vieta bez nosaukuma';
+
+  @override
+  String get createFormPreview => 'Priekšskatījums';
+
+  @override
+  String get createFormReviewPlace => 'Pārskatīt šo vietu';
+
+  @override
+  String get createFormApplySuggestions => 'Piemērot ieteikumus';
+
+  @override
+  String get createFormDiscard => 'Atmest';
+
+  @override
+  String createFormCouldImproveLaterProposalMissingrecommendedfieldidsJoin(
+    int count,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count detaļas',
+      one: '$count detaļu',
+      zero: '$count detaļas',
+    );
+    return 'Vēlāk var uzlabot: $_temp0';
+  }
+
+  @override
+  String createFormEstimatedVisitMin(int count) {
+    return 'Aptuvenais apmeklējums: $count min';
+  }
+
+  @override
+  String get createFormEditableDescriptionDraft =>
+      'Rediģējams apraksta melnraksts';
+
+  @override
+  String get createFormSuggestedCategory => 'Ieteiktā kategorija';
+
+  @override
+  String get createFormReviewDraftSuggestTaxonomyMatchIdentify =>
+      'Pārskatīt melnrakstu, ieteikt kategoriju un atrast noderīgu trūkstošo informāciju. Nekas netiek publicēts automātiski.';
+
+  @override
+  String get createFormLocalDemo => 'Lokāla demonstrācija';
+
+  @override
+  String get createFormFinishWithAi => 'Pabeigt ar AI';
+
+  @override
+  String get createFormCreatePlace => 'Izveidot vietu';
+
+  @override
+  String get createFormSaveFailedRetryAvailable =>
+      'Neizdevās saglabāt • var mēģināt vēlreiz';
+
+  @override
+  String get createFormUnsavedChanges => 'Nesaglabātas izmaiņas';
+
+  @override
+  String get createFormSendReview => 'Nosūtīt pārbaudei';
+
+  @override
+  String get createFormBack => 'Atpakaļ';
+
+  @override
+  String get createFormDifferentPlace => 'Šī ir cita vieta';
+
+  @override
+  String get createFormCouldPlaceAlreadyExist => 'Vai šī vieta jau varētu būt?';
+
+  @override
+  String get createFormAdd => 'Pievienot';
+
+  @override
+  String get createFormGalleryImageUrlPath => 'Galerijas attēla URL/ceļš';
+
+  @override
+  String get createFormAddGalleryImages => 'Pievienot galerijas attēlus';
+
+  @override
+  String get createFormCoverImageUrlPathRecommended =>
+      'Vāka attēla URL/ceļš (ieteicams)';
+
+  @override
+  String get createFormCoverImageUrlPath => 'Vāka attēla URL/ceļš *';
+
+  @override
+  String get createFormCoverRequiredGalleryOptional =>
+      'Vāks ir obligāts. Galerija — pēc izvēles.';
+
+  @override
+  String get createFormPhotos => 'Fotoattēli';
+
+  @override
+  String get createFormOfficialBookingLandingPage =>
+      'Oficiālā rezervēšanas lapa';
+
+  @override
+  String get createFormPublicEmail => 'Publiskais e-pasts';
+
+  @override
+  String get createFormPublicPhone => 'Publiskais tālrunis';
+
+  @override
+  String get createFormOfficialWebsite => 'Oficiālā vietne';
+
+  @override
+  String get createFormAddOnlyOfficialPublicDetailsHttps =>
+      'Pievienojiet tikai oficiālu publisku informāciju. Saitēm jābūt HTTPS.';
+
+  @override
+  String get createFormOptionalPublicContacts => 'Neobligāti publiski kontakti';
+
+  @override
+  String get createFormOfficialPricingUrlHttps => 'Oficiālā cenu saite (https)';
+
+  @override
+  String get createFormPricingNote => 'Piezīme par cenām';
+
+  @override
+  String get createFormPricingExplanation => 'Cenu skaidrojums *';
+
+  @override
+  String get createFormTypicalSpend => 'Tipiskie tēriņi līdz';
+
+  @override
+  String get createFormTypicalSpendFrom => 'Tipiskie tēriņi no';
+
+  @override
+  String createFormEntry(String value) {
+    return 'Ieeja līdz, $value';
+  }
+
+  @override
+  String createFormEntryFrom(String value) {
+    return 'Ieeja no, $value *';
+  }
+
+  @override
+  String get createFormEntryPriceTypicalSpendAreSeparate =>
+      'Ieejas cena un tipiskie tēriņi ir dažādi jēdzieni.';
+
+  @override
+  String get createFormPrice => 'Cena';
+
+  @override
+  String get createFormUnset => 'Nav iestatīts';
+
+  @override
+  String get createFormYes => 'Jā';
+
+  @override
+  String get createFormChooseYesUnknownUnsetNeverTreated =>
+      'Izvēlieties «Jā» vai «Nav zināms». Neiestatīts nekad nenozīmē «Nē».';
+
+  @override
+  String get createFormAmenities => 'Ērtības';
+
+  @override
+  String get createFormExitBuffer => 'Laiks pēc aiziešanas';
+
+  @override
+  String get createFormArrivalBuffer => 'Laiks pirms ierašanās';
+
+  @override
+  String get createFormWeatherDependent => 'Atkarīgs no laikapstākļiem';
+
+  @override
+  String get createFormMinimumMinutes => 'Minimālās minūtes';
+
+  @override
+  String get createFormRecommendedMinutes => 'Ieteicamās minūtes';
+
+  @override
+  String get createFormTheseValuesImproveTimeFitWithout =>
+      'Šīs vērtības uzlabo laika piemērotību, nemainot darba laiku.';
+
+  @override
+  String get createFormHelpPeoplePlanVisit => 'Palīdziet plānot apmeklējumu';
+
+  @override
+  String get createFormAddInterval => 'Pievienot intervālu';
+
+  @override
+  String get createFormClosesNextDay => 'Slēdz nākamajā dienā';
+
+  @override
+  String get createFormCloseHhMm => 'Slēdz HH:mm';
+
+  @override
+  String get createFormOpenHhMm => 'Atver HH:mm';
+
+  @override
+  String get createFormDay => 'Diena';
+
+  @override
+  String get createFormClosedFrom => 'Slēgts no *';
+
+  @override
+  String get createFormCurrentOperationalStatus =>
+      'Pašreizējais darbības statuss';
+
+  @override
+  String get createFormAddClosedDay => 'Pievienot slēgtu dienu';
+
+  @override
+  String get createFormCustomHours => 'Īpašs laiks';
+
+  @override
+  String get createFormClosedAllDay => 'Slēgts visu dienu';
+
+  @override
+  String get createFormDateExceptions => 'Izņēmuma datumi';
+
+  @override
+  String get createFormRemovePeriod => 'Noņemt periodu';
+
+  @override
+  String get createFormHoursUnknown => 'Laiks nav zināms';
+
+  @override
+  String get createFormRegularSchedule => 'Regulārs grafiks';
+
+  @override
+  String get createFormHoursMode2 => 'Darba laika veids';
+
+  @override
+  String get createFormHoursMode => 'Darba laika veids *';
+
+  @override
+  String get createFormUnknownBetterThanInventedHours =>
+      'Labāk «nav zināms» nekā izdomāts laiks.';
+
+  @override
+  String get createFormWhenCanPeopleVisit => 'Kad var apmeklēt?';
+
+  @override
+  String get createFormAddMoreVisitInformation =>
+      'Pievienot vairāk informācijas par apmeklējumu';
+
+  @override
+  String get createFormAddOnlyInformationThatUsefulPlace =>
+      'Pievienojiet tikai šai vietai noderīgu informāciju.';
+
+  @override
+  String get createFormOptionalVisitDetails =>
+      'Neobligāta informācija par apmeklējumu';
+
+  @override
+  String get createFormAddOpeningAccessHours =>
+      'Pievienot darba vai piekļuves laiku';
+
+  @override
+  String get createFormAddHoursOnlyWhenPlaceReally =>
+      'Pievienojiet darba laiku tikai tad, ja vietai tāds tiešām ir.';
+
+  @override
+  String get createFormAccessRestrictions => 'Piekļuves ierobežojumi';
+
+  @override
+  String get createFormHowFindPlace => 'Kā atrast šo vietu';
+
+  @override
+  String get createFormAddDirections => 'Pievienot norādes';
+
+  @override
+  String get createFormRequiredWhenThereNoPostalAddress =>
+      'Obligāts, ja nav pasta adreses.';
+
+  @override
+  String get createFormLocationLabel => 'Vietas apzīmējums';
+
+  @override
+  String get createFormFormattedAddress => 'Adrese';
+
+  @override
+  String get createFormConfirmPin => 'Apstiprināt atzīmi';
+
+  @override
+  String get createFormPinConfirmed => 'Atzīme apstiprināta';
+
+  @override
+  String get createFormTapMapConfirmRepresentativePoint =>
+      'Pieskarieties kartei un apstipriniet raksturīgo punktu.';
+
+  @override
+  String get createFormWhere => 'Kur tā atrodas?';
+
+  @override
+  String get createFormChange => 'Mainīt';
+
+  @override
+  String get createFormCancel => 'Atcelt';
+
+  @override
+  String get createFormCompatibleCategoryDetailsWillKeptFields =>
+      'Saderīgā kategorijas informācija tiks saglabāta. Lauki, kas neattiecas uz jauno profilu, tiks izņemti no publikācijas.';
+
+  @override
+  String get createFormChangeCategory => 'Mainīt kategoriju?';
+
+  @override
+  String get createFormCategoryDetails => 'Kategorijas informācija';
+
+  @override
+  String get createFormContentLanguage => 'Satura valoda';
+
+  @override
+  String get createFormPublicLandmarksDoNotRequireOwnership =>
+      'Publiskiem orientieriem nav jāapliecina īpašumtiesības.';
+
+  @override
+  String get createFormCommunityContribution => 'Kopienas ieguldījums';
+
+  @override
+  String get createFormYourRelationship => 'Jūsu saistība';
+
+  @override
+  String get createFormDetailedDescription => 'Detalizēts apraksts';
+
+  @override
+  String get createFormOptionalDescriptionLanguageAttribution =>
+      'Neobligāts apraksts, valoda un autorība';
+
+  @override
+  String get createFormMoreAboutPlace => 'Vairāk par šo vietu';
+
+  @override
+  String get createFormYouCanAddImproveLater =>
+      'To var pievienot vai uzlabot vēlāk.';
+
+  @override
+  String get createFormPlaceName => 'Vietas nosaukums *';
+
+  @override
+  String get createFormChooseCategoryFormKeepsOnlyRelevant =>
+      'Izvēlieties kategoriju — forma atstās tikai būtiskos laukus.';
+
+  @override
+  String get createFormWhatPlace => 'Kas ir šī vieta?';
+
+  @override
+  String get createFormCreatePlaceCapabilityRequiredEditPublish =>
+      'Lai rediģētu vai publicētu, vajag tiesības veidot vietas.';
+
+  @override
+  String get createFormPlaceDataBeingPrepared => 'Vietas dati tiek sagatavoti…';
+
+  @override
+  String get createFormScenarioRoute => 'Scenārija maršruts';
+
+  @override
+  String createFormStops(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pieturas',
+      one: '$count pietura',
+      zero: '$count pieturu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormRechargeIdea => 'Recharge ideja';
+
+  @override
+  String get createFormMapRoute => 'Maršruts kartē';
+
+  @override
+  String get createFormEditRoute => 'Rediģēt maršrutu';
+
+  @override
+  String get createFormScenarioRouteSeed => 'Scenārija maršruta sagatave';
+
+  @override
+  String createFormSeededFrom(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'details': 'Sagatavots no detaļām',
+      'saved_search': 'Sagatavots no saglabāta meklējuma',
+      'search': 'Sagatavots no meklēšanas nosacījumiem',
+      'smart_search': 'Sagatavots no viedās meklēšanas',
+      'profile': 'Sagatavots no profila darba vietas',
+      'scenario': 'Sagatavots no scenārija maršruta',
+      'map': 'Sagatavots no kartes apgabala',
+      'other': 'Sagatavots no Recharge',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormNoLimit => 'Bez ierobežojuma';
+
+  @override
+  String get createFormCapacityUnknown => 'Ietilpība nav zināma';
+
+  @override
+  String createFormOnsiteBuffersMin(int start, int end) {
+    return 'Rezerves laiks uz vietas: $start / $end min';
+  }
+
+  @override
+  String get createFormAllowPartialAttendance => 'Atļaut daļēju apmeklējumu';
+
+  @override
+  String get createFormDuration => 'Ilgums';
+
+  @override
+  String get createFormNoOpeningHoursYet => 'Darba laika vēl nav';
+
+  @override
+  String get createFormAddSlot => 'Pievienot laika posmu';
+
+  @override
+  String get createFormScheduleSlots => 'Laika posmi';
+
+  @override
+  String get createFormNone => 'Nav';
+
+  @override
+  String get createFormHours => 'Darba laiks';
+
+  @override
+  String get createFormSchedule => 'Grafiks';
+
+  @override
+  String get createFormNoCategoriesMatchSearch =>
+      'Neviena kategorija neatbilst meklējumam.';
+
+  @override
+  String get createFormActivityCriteria => 'Aktivitātes kritēriji';
+
+  @override
+  String get createFormScenarioTaxonomy => 'Scenārija kategorijas';
+
+  @override
+  String get createFormConvertRental => 'Pārveidot par nomu';
+
+  @override
+  String get createFormKeepSession => 'Paturēt nodarbību';
+
+  @override
+  String get createFormLegacyOfferWasMigratedSafelyAs =>
+      'Šis vecais piedāvājums droši pārveidots par rezervējamu nodarbību. Izvēlieties nomu tikai tad, ja tiek iznomāts aprīkojums vai transports.';
+
+  @override
+  String get createFormCouldRental => 'Vai tā varētu būt noma?';
+
+  @override
+  String get createFormRechargeCreate => 'Recharge Create';
+
+  @override
+  String get createFormSaveDraft => 'Saglabāt melnrakstu';
+
+  @override
+  String get createFormCoverImage => 'Vāka attēls *';
+
+  @override
+  String get createFormFullDescription => 'Pilns apraksts';
+
+  @override
+  String get createFormShortDescription => 'Īss apraksts';
+
+  @override
+  String get createFormAddress => 'Adrese';
+
+  @override
+  String get createFormSubcategory => 'Apakškategorija';
+
+  @override
+  String get createFormMainCategory => 'Galvenā kategorija *';
+
+  @override
+  String get createFormNotSaved => 'Nav saglabāts';
+
+  @override
+  String get createFormText => 'Nepieciešama pieteikšanās';
+
+  @override
+  String get createFormSubmitReview => 'Iesniegt pārbaudei';
+
+  @override
+  String get createFormNotProhibitedUnsafeItem =>
+      'Tas nav aizliegts vai bīstams priekšmets';
+
+  @override
+  String get createFormListingAccurate => 'Šis sludinājums ir precīzs';
+
+  @override
+  String get createFormPublicPreview => 'Publisks priekšskatījums';
+
+  @override
+  String get createFormYouWillLeaveRechargeGoCheck =>
+      'Jūs atstāsiet Recharge un pāriesiet uz ārēju vietni, lai pārbaudītu pieejamību.';
+
+  @override
+  String get createFormExternalBookingUrlHttps =>
+      'Ārējā rezervēšanas saite (https)';
+
+  @override
+  String get createFormLateReturnPolicy => 'Kavētas atdošanas politika';
+
+  @override
+  String get createFormDamagePolicy => 'Bojājumu politika';
+
+  @override
+  String get createFormDepositTerms => 'Depozīta noteikumi';
+
+  @override
+  String get createFormCollectionMethod => 'Iekasēšanas veids';
+
+  @override
+  String get createFormAddRateStep => 'Pievienot cenas soli';
+
+  @override
+  String get createFormBillingUnit => 'Norēķinu vienība';
+
+  @override
+  String get createFormUsageRestrictions => 'Lietošanas ierobežojumi';
+
+  @override
+  String get createFormSafetyNotice => 'Drošības norādījumi';
+
+  @override
+  String get createFormMinimumRenterAge => 'Minimālais nomnieka vecums';
+
+  @override
+  String get createFormMaxDurationMin => 'Maks. ilgums (min)';
+
+  @override
+  String get createFormMinDurationMin => 'Min. ilgums (min)';
+
+  @override
+  String get createFormApply => 'Piemērot';
+
+  @override
+  String get createFormSuggestedDefaultsCategory =>
+      'Ieteiktie noklusējumi šai kategorijai';
+
+  @override
+  String get createFormDeliveryFeeMinorUnits => 'Piegādes maksa (centos)';
+
+  @override
+  String get createFormDeliveryRadiusKm => 'Piegādes rādiuss (km)';
+
+  @override
+  String get createFormOfferDelivery => 'Piedāvāt piegādi';
+
+  @override
+  String get createFormByArrangement => 'Pēc vienošanās';
+
+  @override
+  String get createFormOpeningHours => 'Darba laiks';
+
+  @override
+  String get createFormPickupSchedule => 'Saņemšanas grafiks';
+
+  @override
+  String get createFormPublicBusinessAddress => 'Publiska uzņēmuma adrese';
+
+  @override
+  String get createFormApproximateAreaDefault =>
+      'Aptuvena zona (pēc noklusējuma)';
+
+  @override
+  String get createFormLocationDisclosure => 'Vietas atklāšana';
+
+  @override
+  String get createFormLongitude => 'Garums';
+
+  @override
+  String get createFormLatitude => 'Platums';
+
+  @override
+  String get createFormPublicAreaLabel => 'Publiskās zonas nosaukums';
+
+  @override
+  String get createFormPickupPlaceName => 'Saņemšanas vietas nosaukums';
+
+  @override
+  String get createFormThatWouldExceedGroupCapacity =>
+      'Tas pārsniegtu grupas ietilpību.';
+
+  @override
+  String get createFormBlockDateRange => 'Bloķēt datumu diapazonu';
+
+  @override
+  String get createFormConfirmCalendar => 'Apstiprināt kalendāru';
+
+  @override
+  String get createFormRechargeCannotSeeExternalBookingsConfirm =>
+      'Recharge neredz ārējās rezervācijas — apstipriniet, ka tas ir aktuāls.';
+
+  @override
+  String get createFormCalendarNotConfirmedYet =>
+      'Kalendārs vēl nav apstiprināts';
+
+  @override
+  String get createFormAddAnotherItemType =>
+      'Pievienot vēl vienu priekšmeta veidu';
+
+  @override
+  String get createFormRemove => 'Noņemt';
+
+  @override
+  String get createFormDuplicate => 'Dublēt';
+
+  @override
+  String get createFormCondition => 'Stāvoklis';
+
+  @override
+  String get createFormQuantity => 'Daudzums';
+
+  @override
+  String get createFormLabel => 'Nosaukums';
+
+  @override
+  String get createFormCategory => 'Kategorija';
+
+  @override
+  String get createFormTitle => 'Nosaukums';
+
+  @override
+  String get createFormNext => 'Tālāk';
+
+  @override
+  String get createFormCreateRentalCapabilityRequiredEditPublish =>
+      'Lai rediģētu vai publicētu, vajag tiesības veidot nomas piedāvājumus.';
+
+  @override
+  String get createFormRentalDataBeingPrepared => 'Nomas dati tiek sagatavoti…';
+
+  @override
+  String createFormRemoveGalleryImage(int count) {
+    return 'Noņemt galerijas attēlu $count';
+  }
+
+  @override
+  String createFormGalleryImageDescription(int count) {
+    return 'Galerijas attēla $count apraksts *';
+  }
+
+  @override
+  String get createFormAddGalleryImage => 'Pievienot galerijas attēlu';
+
+  @override
+  String get createFormPublishableLocalMockModerationPipeline =>
+      'Var publicēt lokālajā/testa moderācijā';
+
+  @override
+  String get createFormUntitledEvent => 'Pasākums bez nosaukuma';
+
+  @override
+  String get createFormVisibility => 'Redzamība';
+
+  @override
+  String get createFormExternalHttpsRegistrationUrl =>
+      'Ārējā HTTPS reģistrācijas saite';
+
+  @override
+  String get createFormRegistration => 'Reģistrācija';
+
+  @override
+  String get createFormMaximumParticipants => 'Maksimālais dalībnieku skaits';
+
+  @override
+  String get createFormCapacity => 'Ietilpība';
+
+  @override
+  String get createFormPaymentCollection => 'Maksājuma iekasēšana';
+
+  @override
+  String get createFormPricing => 'Cenas';
+
+  @override
+  String get createFormPartialAttendanceAllowed => 'Atļauts daļējs apmeklējums';
+
+  @override
+  String get createFormPetsAllowed => 'Mājdzīvnieki atļauti';
+
+  @override
+  String get createFormKidsAllowed => 'Bērni atļauti';
+
+  @override
+  String get createFormFamilyFriendly => 'Piemērots ģimenēm';
+
+  @override
+  String get createFormMaximumAge => 'Maksimālais vecums';
+
+  @override
+  String get createFormMinimumAge => 'Minimālais vecums';
+
+  @override
+  String get createFormWhatAttendeesShouldKnowBring =>
+      'Kas dalībniekiem jāzina vai jāņem līdzi';
+
+  @override
+  String get createFormExcludedDatesCommaSeparated =>
+      'Izslēgtie datumi, atdalīti ar komatiem';
+
+  @override
+  String get createFormOccurrenceCount => 'Reižu skaits';
+
+  @override
+  String get createFormUntilLocalDate => 'Līdz vietējam datumam';
+
+  @override
+  String get createFormEnds => 'Beidzas';
+
+  @override
+  String get createFormEveryNPeriods => 'Ik pēc N periodiem';
+
+  @override
+  String get createFormRepeat => 'Atkārtot';
+
+  @override
+  String get createFormDatesSeparatedByCommas => 'Datumi, atdalīti ar komatiem';
+
+  @override
+  String get createFormDurationMinutes => 'Ilgums minūtēs';
+
+  @override
+  String get createFormDurationMinutes14401Day =>
+      'Ilgums minūtēs (1440 = 1 diena)';
+
+  @override
+  String get createFormLocalStartTimeHhMm => 'Vietējais sākuma laiks (HH:mm)';
+
+  @override
+  String get createFormFirstLocalDateYyyyMmDd =>
+      'Pirmais vietējais datums (GGGG-MM-DD)';
+
+  @override
+  String get createFormScheduleMode => 'Grafika veids';
+
+  @override
+  String get createFormPublicHttpsEventUrl => 'Publiska HTTPS pasākuma saite *';
+
+  @override
+  String get createFormOnlineAccess => 'Tiešsaistes piekļuve';
+
+  @override
+  String get createFormConfirmPhysicalLocationPin =>
+      'Apstipriniet vietas atzīmi *';
+
+  @override
+  String get createFormMeetingPointInstructions => 'Norādes par tikšanās vietu';
+
+  @override
+  String get createFormVenue => 'Norises vieta';
+
+  @override
+  String get createFormFormat => 'Formāts';
+
+  @override
+  String get createFormCoverDescriptionScreenReaders =>
+      'Vāka apraksts ekrāna lasītājiem *';
+
+  @override
+  String get createFormShortDescription2 => 'Īss apraksts *';
+
+  @override
+  String get createFormEventTitle => 'Pasākuma nosaukums *';
+
+  @override
+  String get createFormEventDraftUnavailableReopenCreateHub =>
+      'Pasākuma melnraksts nav pieejams. Atveriet Create Hub vēlreiz.';
+
+  @override
+  String get createFormClosesAtUtcIso8601 => 'Aizveras UTC (ISO 8601)';
+
+  @override
+  String get createFormOpensAtUtcIso8601 => 'Atveras UTC (ISO 8601)';
+
+  @override
+  String get createFormCloseMinutesBeforeOccurrence =>
+      'Aizvērt minūtes pirms norises';
+
+  @override
+  String get createFormOpenMinutesBeforeOccurrence =>
+      'Atvērt minūtes pirms norises';
+
+  @override
+  String get createFormWindowType => 'Loga veids';
+
+  @override
+  String get createFormEnableWindow => 'Ieslēgt laika logu';
+
+  @override
+  String get createFormNotConfigured => 'Nav iestatīts';
+
+  @override
+  String get createFormRemoveEligibilityRule => 'Noņemt atbilstības noteikumu';
+
+  @override
+  String get createFormPublicExplanationNoSecrets =>
+      'Publisks skaidrojums (bez noslēpumiem)';
+
+  @override
+  String get createFormAddEligibilityRule => 'Pievienot atbilstības noteikumu';
+
+  @override
+  String get createFormRuleKind => 'Noteikuma veids';
+
+  @override
+  String get createFormNeverEnterAccessCodesIdentitiesPrivate =>
+      'Nekad neievadiet piekļuves kodus, identitātes datus vai privātus dokumentus.';
+
+  @override
+  String get createFormEligibility => 'Atbilstība';
+
+  @override
+  String get createFormSalesAtDoor => 'Pārdošana pie ieejas';
+
+  @override
+  String get createFormRegistrationAtDoor => 'Reģistrācija pie ieejas';
+
+  @override
+  String get createFormOnsiteAdmissionAllowed => 'Ieeja uz vietas atļauta';
+
+  @override
+  String get createFormDoesNotBookReserveInventory =>
+      'Nerada rezervāciju un neaizņem vietas';
+
+  @override
+  String get createFormMaximumGuestsPerRegistration =>
+      'Maksimālais viesu skaits uz reģistrāciju *';
+
+  @override
+  String get createFormGuestPolicy => 'Viesu politika';
+
+  @override
+  String get createFormFuturePromotionPolicy =>
+      'Nākotnes pārvietošanas politika';
+
+  @override
+  String get createFormPreviewOnlyNoQueuePromotionRuns =>
+      'Tikai priekšskatījums — rinda un pārvietošana nedarbojas';
+
+  @override
+  String get createFormConfigureWaitlist => 'Iestatīt gaidīšanas rindu';
+
+  @override
+  String get createFormApplicationWindow => 'Pieteikšanās laiks';
+
+  @override
+  String get createFormCancellationClosesNMinutesBeforeStart =>
+      'Atcelšana beidzas N minūtes pirms sākuma *';
+
+  @override
+  String get createFormRegistrationWindow => 'Reģistrācijas laiks';
+
+  @override
+  String get createFormExternalHttpsRegistrationUrl2 =>
+      'Ārējā HTTPS reģistrācijas saite *';
+
+  @override
+  String get createFormConfirmationMode => 'Apstiprināšanas režīms *';
+
+  @override
+  String get createFormRegistrationMode => 'Reģistrācijas režīms *';
+
+  @override
+  String get createFormAdmissionMode => 'Ieejas režīms *';
+
+  @override
+  String get createFormApplyNormalizedFields => 'Piemērot normalizētos laukus';
+
+  @override
+  String get createFormConfigurationPreset => 'Iestatījumu sagatave';
+
+  @override
+  String get createFormConfirmSuggestion => 'Apstiprināt ieteikumu';
+
+  @override
+  String get createFormLegacyRegistrationPreservedButAdmissionConfirmation =>
+      'Vecā reģistrācija saglabāta, bet ieejai un apstiprināšanai joprojām vajag skaidru izvēli.';
+
+  @override
+  String get createFormOpenEntryWithNoRegistrationConfirmation =>
+      'Brīva ieeja bez reģistrācijas un apstiprināšanas.';
+
+  @override
+  String get createFormLegacyDraftSuggestionNotApplied =>
+      'Vecā melnraksta ieteikums — nav piemērots';
+
+  @override
+  String get createFormAdmissionRegistrationConfirmationAreIndependentLocal =>
+      'Ieeja, reģistrācija un apstiprināšana ir neatkarīgas. Šie lokālie iestatījumi rezervāciju nerada.';
+
+  @override
+  String get createFormAdmission => 'Ieeja';
+
+  @override
+  String get createFormEventAdmissionConfiguration =>
+      'Pasākuma ieejas iestatījumi';
+
+  @override
+  String get createFormSaveDraftReturn => 'Saglabāt melnrakstu un atgriezties';
+
+  @override
+  String get createFormPreviewPublish => 'Priekšskatīt un publicēt';
+
+  @override
+  String get createFormSuggestGroupSize => 'Ieteikt grupas lielumu';
+
+  @override
+  String get createFormTypicalDurationMaxMinutes =>
+      'Tipiskais ilgums, maks. (minūtes)';
+
+  @override
+  String get createFormTypicalDurationMinMinutes =>
+      'Tipiskais ilgums, min. (minūtes)';
+
+  @override
+  String get createFormBestSeasonOptional => 'Labākā sezona (pēc izvēles)';
+
+  @override
+  String get createFormBestTimeDayOptional =>
+      'Labākais dienas laiks (pēc izvēles)';
+
+  @override
+  String get createFormWhenBestHowLongDoesTake =>
+      'Kad labāk doties un cik ilgi tas aizņem?';
+
+  @override
+  String get createFormApproximateAmountOptional =>
+      'Aptuvena summa (pēc izvēles)';
+
+  @override
+  String get createFormEGCoffeeCounterOptional =>
+      'piem., «Kafija uz letes, pēc izvēles»';
+
+  @override
+  String get createFormOther => 'Cits';
+
+  @override
+  String get createFormDonation => 'Ziedojums';
+
+  @override
+  String get createFormContributionKind => 'Ieguldījuma veids';
+
+  @override
+  String get createFormCustomaryLeaveSomethingHere =>
+      'Šeit pieņemts kaut ko atstāt';
+
+  @override
+  String get createFormWhatKnowBeforeYouGo => 'Kas jāzina pirms došanās';
+
+  @override
+  String get createFormNotOfficialSpot => 'Šī nav oficiāla vieta';
+
+  @override
+  String get createFormAccessNotes => 'Piezīmes par piekļuvi';
+
+  @override
+  String get createFormAddressLineOptional => 'Adrese (pēc izvēles)';
+
+  @override
+  String get createFormWhereHowDoIGetThere => 'Kur tā ir un kā tur nokļūt?';
+
+  @override
+  String get createFormMorePlaces => 'Vairāk vietu';
+
+  @override
+  String get createFormNoMatchingPlacesPage =>
+      'Šajā lapā nav atbilstošu vietu.';
+
+  @override
+  String get createFormSearchPlaces => 'Meklēt vietas';
+
+  @override
+  String get createFormSearchPublishedPlaces => 'Meklēt publicētās vietas';
+
+  @override
+  String get createFormLinkedPlaceUnavailableRemoveReplaceLink =>
+      'Saistītā vieta nav pieejama. Noņemiet vai aizstājiet saiti.';
+
+  @override
+  String get createFormRemoveLinkedPlace => 'Noņemt saistīto vietu';
+
+  @override
+  String get createFormSelectedPlace => 'Vieta ir piesaistīta';
+
+  @override
+  String get createFormLinkedPlaceOptional => 'Saistītā vieta (pēc izvēles)';
+
+  @override
+  String get createFormCoverImageUrl => 'Vāka attēla URL';
+
+  @override
+  String get createFormFullDescriptionOptional =>
+      'Pilns apraksts (pēc izvēles)';
+
+  @override
+  String get createFormAboutActivity => 'Par šo aktivitāti';
+
+  @override
+  String get createFormCheckActivityFieldsSubmitAgain =>
+      'Pārbaudiet aktivitātes laukus un iesniedziet vēlreiz.';
+
+  @override
+  String get createFormEditingDraftOnlyPublishedVersionStays =>
+      'Rediģē tikai melnrakstu. Publicētā versija nemainās līdz pārbaudei un publicēšanai.';
+
+  @override
+  String get createFormLoadingRechargeActivityDraft =>
+      'Ielādē Recharge aktivitātes melnrakstu…';
+
+  @override
+  String get createFormPublishedRoute => 'Publicēts maršruts';
+
+  @override
+  String get createFormDraftSummaryUnavailableSession =>
+      'Melnraksta kopsavilkums šajā sesijā nav pieejams.';
+
+  @override
+  String get createFormMapArea => 'Kartes apgabals';
+
+  @override
+  String get createFormSearchSimilar => 'Meklēt līdzīgus';
+
+  @override
+  String get createFormProfile => 'Profils';
+
+  @override
+  String get createFormHome => 'Sākums';
+
+  @override
+  String get createFormNextSteps => 'Nākamie soļi';
+
+  @override
+  String get createFormRouteMap => 'Maršruta karte';
+
+  @override
+  String get createFormWalking => 'Kājām';
+
+  @override
+  String get createFormFree => 'Bez maksas';
+
+  @override
+  String get createFormArchive => 'Arhivēt';
+
+  @override
+  String get createFormCreateNewVersion => 'Izveidot jaunu versiju';
+
+  @override
+  String get createFormReviewRequest => 'Pārbaudes pieprasījums';
+
+  @override
+  String get createFormGeometryHash => 'Ģeometrijas jaucējkods';
+
+  @override
+  String get createFormVersionId => 'Versijas ID';
+
+  @override
+  String get createFormRouteId => 'Maršruta ID';
+
+  @override
+  String get createFormImmutableVersionAwaitingApproval =>
+      'Nemaināma versija gaida apstiprinājumu';
+
+  @override
+  String get createFormActiveImmutableRouteVersion =>
+      'Aktīva nemaināma maršruta versija';
+
+  @override
+  String get createFormYourPublishActionWasHandledCreate =>
+      'Publicēšana apstrādāta. Izveidojiet vēl vienu ierakstu vai atgriezieties sākumā.';
+
+  @override
+  String get createFormSentModeration => 'Nosūtīts moderācijai';
+
+  @override
+  String get createFormPublishProcessed => 'Publicēšana apstrādāta';
+
+  @override
+  String get createFormRoutePublished => 'Maršruts publicēts';
+
+  @override
+  String get createFormCreateAnother => 'Izveidot vēl vienu';
+
+  @override
+  String get createFormCreateAnotherEvent => 'Izveidot vēl vienu pasākumu';
+
+  @override
+  String get createFormCreateAnotherFrom =>
+      'Izveidot vēl vienu no pēdējās veidnes';
+
+  @override
+  String get createFormOpenRouteModerationQueue =>
+      'Atvērt maršrutu moderācijas rindu';
+
+  @override
+  String get createFormPublishStatus => 'Publicēšanas statuss';
+
+  @override
+  String get createFormCouldNotRemove =>
+      'Neizdevās noņemt vienumu. Mēģiniet vēlreiz.';
+
+  @override
+  String get createFormRemoveWithoutReview => 'Noņemt bez pārbaudes';
+
+  @override
+  String get createFormRemovingItemHereAppliesInstantlyNo =>
+      'Vienuma noņemšana šeit stājas spēkā uzreiz, bez moderācijas. Teksta pievienošanai vai labošanai joprojām vajag jaunu pārbaudītu versiju — izmantojiet «Publicēt» augstāk.';
+
+  @override
+  String get createFormPublish => 'Publicēt';
+
+  @override
+  String get createFormAcknowledgeComposition => 'Apstiprināt sastāvu';
+
+  @override
+  String get createFormCompositionReviewed => 'Sastāvs pārskatīts';
+
+  @override
+  String get createFormRefreshLivePreview => 'Atjaunināt priekšskatījumu';
+
+  @override
+  String get createFormSomeItemsAreNoLongerAvailable =>
+      'Daži vienumi vairs nav pieejami — pārskatiet pirms publicēšanas.';
+
+  @override
+  String get createFormNotEnoughPricedItemsYetSuggest =>
+      'Vēl nepietiek vienumu ar cenām, lai ieteiktu budžetu.';
+
+  @override
+  String get createFormSuggestFromItemPrices => 'Ieteikt pēc vienumu cenām';
+
+  @override
+  String get createFormNotSet => 'Nav iestatīts';
+
+  @override
+  String get createFormBudgetIndicator => 'Budžeta rādītājs';
+
+  @override
+  String get createFormCuratorNotes => 'Kuratora piezīmes';
+
+  @override
+  String get createFormItems => 'Vienumi';
+
+  @override
+  String get createFormOneReferencePointWholeGuideNot =>
+      'Viens atskaites punkts visam ceļvedim — nevis vienuma atrašanās vieta.';
+
+  @override
+  String get createFormAreaAnchor => 'Apgabala atskaites punkts';
+
+  @override
+  String get createFormTypeSearchTapMapBelow7 =>
+      'Rakstiet, lai meklētu, vai pieskarieties kartei zemāk';
+
+  @override
+  String get createFormAreaCity => 'Rajons vai pilsēta';
+
+  @override
+  String get createFormShortPitch => 'Īss apraksts';
+
+  @override
+  String get createFormCollectionDraftDataBeingPrepared =>
+      'Kolekcijas melnraksta dati tiek sagatavoti…';
+
+  @override
+  String get createFormCollectionDraftBeingPrepared =>
+      'Kolekcijas melnraksts tiek sagatavots…';
+
+  @override
+  String get createFormPreparingCollectionDraft =>
+      'Sagatavo kolekcijas melnrakstu…';
+
+  @override
+  String get createFormRemovePool => 'Noņemt grupu';
+
+  @override
+  String get createFormMovePoolDown => 'Pārvietot grupu lejup';
+
+  @override
+  String get createFormMovePoolUp => 'Pārvietot grupu augšup';
+
+  @override
+  String get createFormNeutralRoleIdsCommaSeparated =>
+      'Neitrāli lomu ID, atdalīti ar komatiem';
+
+  @override
+  String get createFormCapacityMode => 'Ietilpības režīms';
+
+  @override
+  String get createFormChannel => 'Kanāls';
+
+  @override
+  String get createFormShape => 'Forma';
+
+  @override
+  String get createFormPublicPoolLabel => 'Publisks grupas nosaukums';
+
+  @override
+  String get createFormUnnamedPool => 'Grupa bez nosaukuma';
+
+  @override
+  String get createFormAddPool => 'Pievienot vietu grupu';
+
+  @override
+  String get createFormPoolCapacity => 'Grupas ietilpība';
+
+  @override
+  String get createFormAdditionalViewsSameInventory =>
+      'Papildu skati uz tām pašām vietām';
+
+  @override
+  String get createFormPrimaryInventoryShape => 'Galvenā vietu forma *';
+
+  @override
+  String get createFormInventoryAuthority => 'Vietu pārvaldītājs';
+
+  @override
+  String get createFormMaximumParticipants2 =>
+      'Maksimālais dalībnieku skaits *';
+
+  @override
+  String get createFormEventCapacity => 'Pasākuma ietilpība';
+
+  @override
+  String get createFormCapacityDeclaredLimitNotLiveParticipant =>
+      'Ietilpība ir norādīts limits. Tas nav reāllaika dalībnieku skaits vai brīvo vietu atlikums.';
+
+  @override
+  String get createFormEventInventoryConfiguration =>
+      'Pasākuma vietu iestatījumi';
+
+  @override
+  String get createFormConfirm => 'Apstiprināt';
+
+  @override
+  String get createFormSave => 'Saglabāt';
+
+  @override
+  String get createFormTemplateName => 'Veidnes nosaukums';
+
+  @override
+  String get createFormActiveDraftsPublishedEventsWillNot =>
+      'Aktīvie melnraksti un publicētie pasākumi netiks ietekmēti.';
+
+  @override
+  String get createFormDeleteTemplate => 'Dzēst veidni?';
+
+  @override
+  String get createFormReusableContentWillReplacedWithCurrent =>
+      'Atkārtoti izmantojamais saturs tiks aizstāts ar pašreizējo pasākumu.';
+
+  @override
+  String get createFormReplaceTemplate => 'Aizstāt veidni?';
+
+  @override
+  String get createFormRenameTemplate => 'Pārdēvēt veidni';
+
+  @override
+  String get createFormDelete => 'Dzēst';
+
+  @override
+  String get createFormReplaceWithCurrent => 'Aizstāt ar pašreizējo';
+
+  @override
+  String get createFormRename => 'Pārdēvēt';
+
+  @override
+  String get createFormTemplateActions => 'Darbības ar veidni';
+
+  @override
+  String get createFormLastTemplate => 'Pēdējā veidne';
+
+  @override
+  String get createFormUntitledEvent2 => 'Pasākums bez nosaukuma';
+
+  @override
+  String get createFormNoTemplatesYetSaveCurrentEvent =>
+      'Veidņu vēl nav. Saglabājiet pašreizējo pasākumu, lai to izmantotu atkārtoti.';
+
+  @override
+  String get createFormYourEventTemplates => 'Jūsu pasākumu veidnes';
+
+  @override
+  String get createFormSaveEventTemplate => 'Saglabāt pasākuma veidni';
+
+  @override
+  String get createFormNextCreateAnotherEventWillUse =>
+      'Nākamā «Izveidot vēl vienu pasākumu» izmantos izvēlēto veidni.';
+
+  @override
+  String get createFormSaveCurrent => 'Saglabāt pašreizējo';
+
+  @override
+  String get createFormChooseManage => 'Izvēlēties vai pārvaldīt';
+
+  @override
+  String get createFormEventTemplates => 'Pasākumu veidnes';
+
+  @override
+  String get createFormClearClassification => 'Notīrīt klasifikāciju';
+
+  @override
+  String get createFormAdditionalRolesUp3 => 'Papildu lomas (līdz 3)';
+
+  @override
+  String get createFormPrimaryAttendeeRole => 'Dalībnieka galvenā loma *';
+
+  @override
+  String get createFormExplainEventMechanics =>
+      'Paskaidrojiet, kā notiek pasākums *';
+
+  @override
+  String get createFormEventMechanics => 'Pasākuma norise *';
+
+  @override
+  String get createFormUseSuggestion => 'Izmantot ieteikumu';
+
+  @override
+  String get createFormOnlySuggestionConfirmChooseAnother =>
+      'Tas ir tikai ieteikums. Apstipriniet to vai izvēlieties citu.';
+
+  @override
+  String get createFormMechanicsAttendeeRolesAreIndependentFrom =>
+      'Norise un dalībnieku lomas nav atkarīgas no kategorijas, formāta, piekļuves un cenas.';
+
+  @override
+  String get createFormHowDoesEventWork => 'Kā notiek šis pasākums?';
+
+  @override
+  String get createFormEventClassification => 'Pasākuma klasifikācija';
+
+  @override
+  String get createFormSectionTitle => 'Sadaļas nosaukums';
+
+  @override
+  String get createFormNewSection => 'Jauna sadaļa';
+
+  @override
+  String get createFormNoLongerAvailable => 'Vairs nav pieejams';
+
+  @override
+  String get createFormNoItemsYet => 'Vienumu vēl nav.';
+
+  @override
+  String get createFormRemoveSection => 'Noņemt sadaļu';
+
+  @override
+  String createFormCollection(int count) {
+    return 'Šajā kolekcijā ($count)';
+  }
+
+  @override
+  String get createFormResults => 'Rezultāti';
+
+  @override
+  String get createFormSearch => 'Meklēt';
+
+  @override
+  String get createFormSearchPlaceRouteBookableSessionClass =>
+      'Meklēt vietu, maršrutu, nodarbību, meistarklasi, nomu';
+
+  @override
+  String get createFormChooseTypeOpenItsCreationPage =>
+      'Izvēlieties veidu, lai atvērtu tā izveides lapu.';
+
+  @override
+  String get createFormWhatDoYouWantCreate => 'Ko vēlaties izveidot?';
+
+  @override
+  String get createFormCreateHub => 'Create Hub';
+
+  @override
+  String get createFormRefreshPreview => 'Atjaunināt priekšskatījumu';
+
+  @override
+  String get createFormCheckingLocalFixture => 'Pārbauda lokālos testa datus…';
+
+  @override
+  String get createFormLocalMockPreviewNotLiveAvailability =>
+      'Lokāls testa priekšskatījums — nav reāllaika pieejamība';
+
+  @override
+  String get createFormLocalMockAvailabilityPreview =>
+      'Lokāls testa pieejamības priekšskatījums';
+
+  @override
+  String get createFormDuplicateListing => 'Dublēt šo sludinājumu';
+
+  @override
+  String get createFormSaveCurrentAsTemplate => 'Saglabāt pašreizējo kā veidni';
+
+  @override
+  String get createFormUse => 'Izmantot';
+
+  @override
+  String get createFormNoSavedTemplatesYet => 'Saglabātu veidņu vēl nav.';
+
+  @override
+  String get createFormTemplates => 'Veidnes';
+
+  @override
+  String get createFormWhyHere => 'Kāpēc tas ir šeit?';
+
+  @override
+  String get createFormFeatured => 'Izcelts';
+
+  @override
+  String get createFormAddItemsPreviousStepFirst =>
+      'Vispirms pievienojiet vienumus iepriekšējā solī.';
+
+  @override
+  String createFormUpToPrice(String price) {
+    return 'līdz $price';
+  }
+
+  @override
+  String createFormDistanceKm(String km) {
+    return '$km km';
+  }
+
+  @override
+  String createFormMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
+  String get createFormOwner => 'Īpašnieks';
+
+  @override
+  String get createFormVisitor => 'Apmeklētājs';
+
+  @override
+  String get createFormUnknown => 'Nav zināms';
+
+  @override
+  String get createFormOpen247 => 'Atvērts 24/7';
+
+  @override
+  String get createStepPlaceIdentityTitle => 'Par vietu';
+
+  @override
+  String get createStepPlaceIdentityDescription =>
+      'Nosaukums, kategorija un tikai šai vietai vajadzīgā informācija';
+
+  @override
+  String get createStepPlaceVisitTitle => 'Apmeklējums';
+
+  @override
+  String get createStepPlaceVisitDescription =>
+      'Apstiprināts punkts kartē un būtiska informācija par apmeklējumu';
+
+  @override
+  String get createStepPlacePublishTitle => 'Publicēšana';
+
+  @override
+  String get createStepPlacePublishDescription =>
+      'Gatavība, neobligāti uzlabojumi un pēdējās pārbaudes';
+
+  @override
+  String get createStepEventBasicsMediaTitle => 'Pamati';
+
+  @override
+  String get createStepEventBasicsMediaDescription =>
+      'Nosaukums, kategorija, apraksts un attēli';
+
+  @override
+  String get createStepEventLocationScheduleTitle => 'Kad un kur';
+
+  @override
+  String get createStepEventLocationScheduleDescription =>
+      'Formāts, vieta, laika josla un norises reizes';
+
+  @override
+  String get createStepEventRequirementsTitle => 'Prasības';
+
+  @override
+  String get createStepEventRequirementsDescription =>
+      'Auditorija, ērtības un dalības noteikumi';
+
+  @override
+  String get createStepEventPriceParticipantsTitle => 'Cena un dalībnieki';
+
+  @override
+  String get createStepEventPriceParticipantsDescription =>
+      'Maksa, ieeja, ietilpība un vietas';
+
+  @override
+  String get createStepEventPreviewPublishTitle => 'Publicēšana';
+
+  @override
+  String get createStepEventPreviewPublishDescription =>
+      'Priekšskatījums, gatavība un nosūtīšana moderācijai';
+
+  @override
+  String get createStepActivityBasicsTitle => 'Par aktivitāti';
+
+  @override
+  String get createStepActivityBasicsDescription =>
+      'Nosaukums, kategorija un attēli';
+
+  @override
+  String get createStepActivityLocationTitle => 'Vieta';
+
+  @override
+  String get createStepActivityLocationDescription =>
+      'Kurp doties un kā tur nokļūt';
+
+  @override
+  String get createStepActivityWhenForTitle => 'Kad un kam';
+
+  @override
+  String get createStepActivityWhenForDescription =>
+      'Labākais laiks, ilgums un grupas lielums';
+
+  @override
+  String get createStepActivityPublishTitle => 'Publicēšana';
+
+  @override
+  String get createStepActivityPublishDescription => 'Priekšskatīt un nosūtīt';
+
+  @override
+  String get createStepCollectionBasicsTitle => 'Pamati un attēli';
+
+  @override
+  String get createStepCollectionBasicsDescription =>
+      'Nosaukums, apraksts, vāks un apgabals';
+
+  @override
+  String get createStepCollectionItemsTitle => 'Vienumi';
+
+  @override
+  String get createStepCollectionItemsDescription =>
+      'Meklējiet un pievienojiet esošas vietas, maršrutus un citu';
+
+  @override
+  String get createStepCollectionCuratorNotesTitle => 'Kuratora piezīmes';
+
+  @override
+  String get createStepCollectionCuratorNotesDescription =>
+      'Pastāstiet, kāpēc katrs vienums ir šeit, un izceliet labākos';
+
+  @override
+  String get createStepCollectionBudgetTitle => 'Budžets un publicētājs';
+
+  @override
+  String get createStepCollectionBudgetDescription =>
+      'Norādiet budžetu, publicētāju, tirgu un redzamību';
+
+  @override
+  String get createStepCollectionPublishTitle => 'Priekšskatīt un publicēt';
+
+  @override
+  String get createStepCollectionPublishDescription =>
+      'Pārskatiet sastāvu un nosūtiet';
+
+  @override
+  String get createStepRentalListingTitle => 'Sludinājums un attēli';
+
+  @override
+  String get createStepRentalListingDescription =>
+      'Nosaukums, kategorija un vāks priekšmetam vai parkam';
+
+  @override
+  String get createStepRentalInventoryTitle => 'Inventārs';
+
+  @override
+  String get createStepRentalInventoryDescription =>
+      'Savstarpēji aizvietojamu vienību grupas, stāvoklis un daudzums';
+
+  @override
+  String get createStepRentalAvailabilityTitle => 'Pieejamība';
+
+  @override
+  String get createStepRentalAvailabilityDescription =>
+      'Apstiprināts pieejamības periods un manuāli aizņemtie laiki';
+
+  @override
+  String get createStepRentalHandoverTitle => 'Izsniegšana un vieta';
+
+  @override
+  String get createStepRentalHandoverDescription =>
+      'Saņemšanas vieta, grafiks un piegāde pēc izvēles';
+
+  @override
+  String get createStepRentalTermsTitle => 'Ilgums un drošība';
+
+  @override
+  String get createStepRentalTermsDescription =>
+      'Piedāvātais ilgums, vecums, dokumenti un drošības prasības';
+
+  @override
+  String get createStepRentalPricingTitle => 'Cenas un depozīts';
+
+  @override
+  String get createStepRentalPricingDescription =>
+      'Tarifi, depozīta politika un bojājumu/atcelšanas noteikumi';
+
+  @override
+  String get createStepRentalFulfillmentTitle => 'Ārēja izpilde un noteikumi';
+
+  @override
+  String get createStepRentalFulfillmentDescription =>
+      'Ārējā rezervēšanas saite un brīdinājuma priekšskatījums';
+
+  @override
+  String get createStepRentalReviewTitle => 'Pārskatīt un iesniegt';
+
+  @override
+  String get createStepRentalReviewDescription =>
+      'Publisks/privāts priekšskatījums, apliecinājums un iesniegšana';
+
+  @override
+  String createPlacePolicyLabel(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'simplePoi': 'Vienkāršs apskates objekts',
+      'publicSpace': 'Publiska vieta',
+      'naturalDestination': 'Dabas objekts',
+      'culturalVenue': 'Kultūras vieta',
+      'hospitality': 'Ēdināšanas vai viesmīlības vieta',
+      'activityVenue': 'Aktivitāšu vai pakalpojumu vieta',
+      'paidAttraction': 'Pārvaldīta apskates vieta',
+      'balanced': 'Vispārēja vieta',
+      'other': 'Vispārēja vieta',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createPlacePolicyDescription(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'simplePoi':
+          'Orientieris, ko var atpazīt un apmeklēt bez pārvaldītas piekļuves.',
+      'publicSpace':
+          'Atvērta publiska vieta ar iespējamiem piekļuves ierobežojumiem.',
+      'naturalDestination':
+          'Dabas punkts vai apgabals, kur piekļuves fakti var nebūt zināmi.',
+      'culturalVenue':
+          'Pārvaldīts muzejs, galerija, kinoteātris vai kultūras vieta.',
+      'hospitality': 'Pārvaldīta vieta, kur svarīgi tēriņi, bet ne ieeja.',
+      'activityVenue':
+          'Pārvaldīta vieta ar iespējamu rezervēšanu, tēriņiem un ērtībām.',
+      'paidAttraction':
+          'Pārvaldīta apskates vieta, kur var būt ieeja un ērtības.',
+      'balanced': 'Drošs noklusējums bez izdomātiem darba laikiem vai cenām.',
+      'other': 'Drošs noklusējums bez izdomātiem darba laikiem vai cenām.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createAmenityLabel(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'wheelchair_accessible': 'Pieejams ratiņkrēslā',
+      'accessible_toilet': 'Pieejama tualete',
+      'parking': 'Autostāvvieta',
+      'bike_parking': 'Velo novietne',
+      'public_transport_nearby': 'Tuvumā sabiedriskais transports',
+      'public_transport': 'Tuvumā sabiedriskais transports',
+      'family_friendly': 'Piemērots ģimenēm',
+      'baby_changing': 'Pārtinamais galds',
+      'pets_allowed': 'Mājdzīvnieki atļauti',
+      'toilet': 'Tualete',
+      'wifi': 'Wi-Fi',
+      'drinking_water': 'Dzeramais ūdens',
+      'food_available': 'Ir ēdiens',
+      'outdoor_seating': 'Sēdvietas ārā',
+      'shelter': 'Nojume',
+      'weather_shelter': 'Nojume',
+      'first_aid': 'Pirmā palīdzība',
+      'shower': 'Duša',
+      'towels': 'Dvieļi nodrošināti',
+      'changing_room': 'Ģērbtuve',
+      'equipment_provided': 'Aprīkojums nodrošināts',
+      'other': 'Ērtība',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createAmenityGroup(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'accessibility': 'Pieejamība',
+      'audience': 'Auditorija',
+      'facilities': 'Ērtības',
+      'family': 'Ģimenei',
+      'food': 'Ēdiens',
+      'outdoor': 'Ārā',
+      'pets': 'Mājdzīvnieki',
+      'safety': 'Drošība',
+      'transport': 'Transports',
+      'wellness': 'Labsajūta',
+      'other': 'Cits',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormSaved => 'Saglabāts';
+
+  @override
+  String get createFormSaving => 'Saglabā…';
+
+  @override
+  String createOption(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'EventCapacityMode_known': 'Zināms limits',
+      'EventCapacityMode_unknown': 'Nav zināms',
+      'EventCapacityMode_unlimited': 'Neierobežots',
+      'EventFormat_offline': 'Klātienē',
+      'EventFormat_online': 'Tiešsaistē',
+      'EventFormat_hybrid': 'Hibrīds',
+      'EventOnlineAccessMode_publicLink': 'Publiska saite',
+      'EventOnlineAccessMode_externalRegistration': 'Ārēja reģistrācija',
+      'EventOnlineAccessMode_internalBooking': 'Iekšēja rezervēšana',
+      'EventPaymentCollectionMode_none': 'Bez maksājuma',
+      'EventPaymentCollectionMode_onsite': 'Uz vietas',
+      'EventPaymentCollectionMode_external': 'Ārēji',
+      'EventPaymentCollectionMode_internal': 'Recharge',
+      'EventPricingMode_free': 'Bez maksas',
+      'EventPricingMode_fixed': 'Fiksēta cena',
+      'EventPricingMode_ticketTypes': 'Biļešu veidi',
+      'EventPricingMode_donation': 'Ziedojums',
+      'EventRecurrenceEndMode_never': 'Nekad',
+      'EventRecurrenceEndMode_untilDate': 'Noteiktā datumā',
+      'EventRecurrenceEndMode_occurrenceCount': 'Pēc noteikta reižu skaita',
+      'EventRecurrenceFrequency_daily': 'Katru dienu',
+      'EventRecurrenceFrequency_weekly': 'Katru nedēļu',
+      'EventRecurrenceFrequency_monthly': 'Katru mēnesi',
+      'EventRecurrenceFrequency_yearly': 'Katru gadu',
+      'EventRegistrationMode_none': 'Bez reģistrācijas',
+      'EventRegistrationMode_external': 'Ārēja',
+      'EventRegistrationMode_internal': 'Recharge',
+      'EventScheduleMode_oneTime': 'Vienreiz',
+      'EventScheduleMode_multiDate': 'Vairāki datumi',
+      'EventScheduleMode_recurring': 'Atkārtots',
+      'EventVisibility_public': 'Publisks',
+      'EventVisibility_unlisted': 'Pēc saites',
+      'EventVisibility_private': 'Privāts',
+      'EventAdmissionPreset_noRegistration': 'Bez reģistrācijas',
+      'EventAdmissionPreset_freeRsvp': 'Bezmaksas RSVP',
+      'EventAdmissionPreset_organizerApplication': 'Pieteikums organizatoram',
+      'EventAdmissionPreset_externalRegistration': 'Ārēja reģistrācija',
+      'EventAdmissionPreset_externalTickets': 'Ārējas biļetes',
+      'EventAdmissionPreset_rechargeTickets': 'Recharge biļetes',
+      'EventAdmissionPreset_teamRegistration': 'Komandu reģistrācija',
+      'AdmissionMode_openEntry': 'Brīva ieeja',
+      'AdmissionMode_rsvp': 'RSVP',
+      'AdmissionMode_booking': 'Rezervēšana',
+      'AdmissionMode_application': 'Pieteikums',
+      'AdmissionMode_ticket': 'Biļete',
+      'AdmissionMode_teamRegistration': 'Komandu reģistrācija',
+      'ConfirmationMode_none': 'Bez apstiprināšanas',
+      'ConfirmationMode_instant': 'Uzreiz',
+      'ConfirmationMode_manualApproval': 'Manuāla apstiprināšana',
+      'ConfirmationMode_lottery': 'Izloze',
+      'ConfirmationMode_providerManaged': 'Pakalpojuma sniedzējs',
+      'WaitlistPromotionMode_organizerManaged': 'Organizators',
+      'WaitlistPromotionMode_fifoAutomatic': 'Automātiski, pēc kārtas',
+      'GuestPolicyMode_none': 'Bez viesiem',
+      'GuestPolicyMode_plusOne': 'Plus viens',
+      'GuestPolicyMode_plusN': 'Plus N',
+      'GuestPolicyMode_namedGuestsOnly': 'Tikai norādītie viesi',
+      'EligibilityRuleKind_invitation': 'Ielūgums',
+      'EligibilityRuleKind_accessCode': 'Piekļuves kods',
+      'EligibilityRuleKind_membership': 'Dalība',
+      'EligibilityRuleKind_allowlist': 'Viesu saraksts',
+      'EligibilityRuleKind_qualification': 'Kvalifikācija',
+      'EligibilityRuleKind_accreditation': 'Akreditācija',
+      'EligibilityRuleKind_ageRequirement': 'Vecuma prasība',
+      'EligibilityRuleKind_waiver': 'Atteikuma apliecinājums',
+      'EventAccessWindowKind_absolute': 'Fiksēti datumi',
+      'EventAccessWindowKind_occurrenceRelative': 'Attiecībā pret katru datumu',
+      'InventoryShape_generalCapacity': 'Kopējā ietilpība',
+      'InventoryShape_sharedTicketPool': 'Kopīga biļešu grupa',
+      'InventoryShape_separateTicketPools': 'Atsevišķas biļešu grupas',
+      'InventoryShape_zones': 'Zonas',
+      'InventoryShape_assignedSeating': 'Numurētas vietas',
+      'InventoryShape_teamSlots': 'Komandu vietas',
+      'InventoryShape_participantRoles': 'Dalībnieku lomas',
+      'InventoryShape_roleBalancedSlots': 'Lomām sabalansētas vietas',
+      'InventoryShape_tableInventory': 'Galdi',
+      'InventoryShape_timeSlotInventory': 'Laika posmi',
+      'InventoryChannel_onsite': 'Uz vietas',
+      'InventoryChannel_online': 'Tiešsaistē',
+      'InventoryChannel_any': 'Jebkurš',
+      'InventoryAuthority_none': 'Neviens',
+      'InventoryAuthority_recharge': 'Recharge',
+      'InventoryAuthority_externalProvider': 'Ārējs pakalpojuma sniedzējs',
+      'ActivityContributionKind_purchase': 'Pirkums',
+      'ActivityContributionKind_donation': 'Ziedojums',
+      'ActivityContributionKind_other': 'Cits',
+      'ActivitySeason_winter': 'Ziema',
+      'ActivitySeason_spring': 'Pavasaris',
+      'ActivitySeason_summer': 'Vasara',
+      'ActivitySeason_autumn': 'Rudens',
+      'ActivitySeason_any': 'Jebkura sezona',
+      'ActivityTimeOfDay_morning': 'Rīts',
+      'ActivityTimeOfDay_afternoon': 'Pēcpusdiena',
+      'ActivityTimeOfDay_evening': 'Vakars',
+      'ActivityTimeOfDay_night': 'Nakts',
+      'ActivityTimeOfDay_any': 'Jebkurā laikā',
+      'PlaceOperationalStatus_operating': 'Darbojas',
+      'PlaceOperationalStatus_temporarilyClosed': 'Īslaicīgi slēgts',
+      'PlaceOperationalStatus_permanentlyClosed': 'Slēgts pavisam',
+      'RentalLocationDisclosure_approximateArea':
+          'Aptuvena zona (pēc noklusējuma)',
+      'RentalLocationDisclosure_publicBusinessAddress':
+          'Publiska uzņēmuma adrese',
+      'RentalScheduleMode_openingHours': 'Darba laiks',
+      'RentalScheduleMode_byArrangement': 'Pēc vienošanās',
+      'RentalBillingUnit_hour': 'Par stundu',
+      'RentalBillingUnit_day': 'Par dienu',
+      'RentalBillingUnit_week': 'Par nedēļu',
+      'RentalCondition_rentalNew': 'Jauns',
+      'RentalCondition_likeNew': 'Kā jauns',
+      'RentalCondition_good': 'Labs',
+      'RentalCondition_worn': 'Lietots',
+      'RentalDepositCollectionMethod_none': 'Bez depozīta',
+      'RentalDepositCollectionMethod_atHandover': 'Izsniedzot',
+      'RentalDepositCollectionMethod_externalProvider':
+          'Ārējs pakalpojuma sniedzējs',
+      'RentalDepositCollectionMethod_other': 'Cits',
+      'VisibilityType_public': 'Publisks',
+      'VisibilityType_unlisted': 'Pēc saites',
+      'VisibilityType_private': 'Privāts',
+      'PublishStatus_draft': 'Melnraksts',
+      'PublishStatus_pendingReview': 'Gaida pārbaudi',
+      'PublishStatus_published': 'Publicēts',
+      'PublishStatus_archived': 'Arhivēts',
+      'PublishStatus_hidden': 'Paslēpts',
+      'PublishStatus_deleted': 'Dzēsts',
+      'other': 'Cits',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormCityRequired => 'Pilsēta *';
+
+  @override
+  String get createFormLatitudeRequired => 'Platums *';
+
+  @override
+  String get createFormLongitudeRequired => 'Garums *';
+
+  @override
+  String get createFormCategoryRequired => 'Kategorija *';
+
+  @override
+  String get createFormSubcategoryRequired => 'Apakškategorija *';
+
+  @override
+  String get createFormTitleRequired => 'Nosaukums *';
+
+  @override
+  String createFormOccurrences(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count datumi',
+      one: '$count datums',
+      zero: '$count datumi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createFormAdmissionLine(String value) {
+    return 'Ieeja: $value';
+  }
+
+  @override
+  String createFormVisibilityLine(String value) {
+    return 'Redzamība: $value';
+  }
+
+  @override
+  String createFormBlockingIssues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count problēmas bloķē publicēšanu',
+      one: '$count problēma bloķē publicēšanu',
+      zero: '$count problēmas bloķē publicēšanu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormSending => 'Sūta…';
+
+  @override
+  String get createFormPublishing => 'Publicē…';
+
+  @override
+  String get createFormGroup => 'Grupa';
+
+  @override
+  String get createFormNoTitleYet => '(nosaukuma vēl nav)';
+
+  @override
+  String createFormUnits(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count vienības',
+      one: '$count vienība',
+      zero: '$count vienību',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createFormDepositLine(String price) {
+    return 'Depozīts: $price';
+  }
+
+  @override
+  String get createFormGroupMaxPeople => 'Grupa, maks. cilvēku';
+
+  @override
+  String createFormPublisherLine(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'user': 'Publicētājs: jūsu profils',
+      'page': 'Publicētājs: profesionāla lapa',
+      'other': 'Publicētājs: nav iestatīts',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormDraft => 'Melnraksts';
+
+  @override
+  String get createFormDetails => 'Informācija';
+
+  @override
+  String get createFormAvailability => 'Pieejamība';
+
+  @override
+  String get createFormClosed => 'Slēgts';
+
+  @override
+  String createObjectTypeName(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Pasākums',
+      'activity': 'Recharge aktivitāte',
+      'route': 'Maršruts',
+      'place': 'Vieta',
+      'session': 'Rezervējama nodarbība',
+      'scenario': 'Scenārijs',
+      'quickPlan': 'Vecais Quick Plan',
+      'findPeople': 'Atrast cilvēkus',
+      'classWorkshop': 'Nodarbība / meistarklase',
+      'rental': 'Noma / aprīkojums',
+      'collection': 'Kolekcija / ceļvedis',
+      'other': 'Objekts',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeDescription(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Publiska norise ar laiku, vietu un dalībniekiem',
+      'activity': 'Viegla aktivitāte, piemēram, pastaiga vai atpūta',
+      'route': 'Nepārtraukts maršruts ar punktiem, posmiem un detaļām',
+      'place':
+          'Pastāvīga fiziska vieta, norises vieta, publiska telpa vai orientieris',
+      'session':
+          'Laikā plānots pakalpojums, nodarbība, galds, laukums vai seanss',
+      'scenario':
+          'Pilsētas, dienas, nedēļas nogales vai ceļojuma plāns no neatkarīgām pieturām',
+      'quickPlan': 'Personisks viegls plāns, saglabāts lasīšanas saderībai',
+      'findPeople': 'Atrodiet kompāniju konkrētai aktivitātei',
+      'classWorkshop': 'Vadīta nodarbība, meistarklase vai praktiska pieredze',
+      'rental': 'Iznomājams aprīkojums vai transports',
+      'collection': 'Atlasīta vietu un ideju kolekcija',
+      'other': 'Izveidot objektu',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeLocationLabel(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Norises vieta',
+      'activity': 'Kurp doties',
+      'route': 'Sākuma punkts',
+      'place': 'Vietas nosaukums',
+      'session': 'Rezervējamā vieta',
+      'scenario': 'Rajons vai pilsēta',
+      'quickPlan': 'Tikšanās vieta',
+      'findPeople': 'Tikšanās vieta',
+      'classWorkshop': 'Nodarbības vieta',
+      'rental': 'Saņemšanas vieta',
+      'collection': 'Apgabals',
+      'other': 'Vieta',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypePriceLabel(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Biļetes vai ieejas cena',
+      'activity': '',
+      'route': 'Maršruta budžets',
+      'place': 'Tipiskie tēriņi',
+      'session': 'Rezervācijas cena',
+      'scenario': 'Scenārija budžets',
+      'quickPlan': 'Paredzamie tēriņi',
+      'findPeople': 'Paredzamie tēriņi',
+      'classWorkshop': 'Dalības cena',
+      'rental': 'Nomas cena',
+      'collection': 'Kolekcijas budžets',
+      'other': 'Cena',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeNewTitle(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Jauns: Pasākums',
+      'activity': 'Jauns: Recharge aktivitāte',
+      'route': 'Jauns: Maršruts',
+      'place': 'Jauns: Vieta',
+      'session': 'Jauns: Rezervējama nodarbība',
+      'scenario': 'Jauns: Scenārijs',
+      'quickPlan': 'Jauns: Vecais Quick Plan',
+      'findPeople': 'Jauns: Atrast cilvēkus',
+      'classWorkshop': 'Jauns: Nodarbība / meistarklase',
+      'rental': 'Jauns: Noma / aprīkojums',
+      'collection': 'Jauns: Kolekcija / ceļvedis',
+      'other': 'Jauns objekts',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeCreateTitle(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Izveidot: Pasākums',
+      'activity': 'Izveidot: Recharge aktivitāte',
+      'route': 'Izveidot: Maršruts',
+      'place': 'Izveidot: Vieta',
+      'session': 'Izveidot: Rezervējama nodarbība',
+      'scenario': 'Izveidot: Scenārijs',
+      'quickPlan': 'Izveidot: Vecais Quick Plan',
+      'findPeople': 'Izveidot: Atrast cilvēkus',
+      'classWorkshop': 'Izveidot: Nodarbība / meistarklase',
+      'rental': 'Izveidot: Noma / aprīkojums',
+      'collection': 'Izveidot: Kolekcija / ceļvedis',
+      'other': 'Izveidot',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeFreeToggle(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Bez maksas: Pasākums',
+      'activity': 'Bez maksas: Recharge aktivitāte',
+      'route': 'Bez maksas: Maršruts',
+      'place': 'Bez maksas: Vieta',
+      'session': 'Bez maksas: Rezervējama nodarbība',
+      'scenario': 'Bez maksas: Scenārijs',
+      'quickPlan': 'Bez maksas: Vecais Quick Plan',
+      'findPeople': 'Bez maksas: Atrast cilvēkus',
+      'classWorkshop': 'Bez maksas: Nodarbība / meistarklase',
+      'rental': 'Bez maksas: Noma / aprīkojums',
+      'collection': 'Bez maksas: Kolekcija / ceļvedis',
+      'other': 'Bez maksas',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeStartUtc(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Pasākums: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
+      'activity':
+          'Recharge aktivitāte: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
+      'route': 'Maršruts: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
+      'place': 'Vieta: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
+      'session':
+          'Rezervējama nodarbība: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
+      'scenario':
+          'Scenārijs: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
+      'quickPlan':
+          'Vecais Quick Plan: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
+      'findPeople':
+          'Atrast cilvēkus: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
+      'classWorkshop':
+          'Nodarbība / meistarklase: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
+      'rental':
+          'Noma / aprīkojums: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
+      'collection':
+          'Kolekcija / ceļvedis: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
+      'other': 'Sākuma datums un laiks, UTC *',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createFormNowStatus(String value) {
+    return 'Tagad: $value.';
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/state/collection_create_state.dart';
 import '../../domain/entities/collection_draft_data.dart';
 import '../../domain/entities/collection_item_draft.dart';
@@ -57,17 +58,17 @@ class _ItemsPickerSectionState extends State<ItemsPickerSection> {
             Expanded(
               child: TextField(
                 controller: _searchController,
-                decoration: const InputDecoration(
-                  labelText:
-                      'Search Place, Route, Bookable Session, '
-                      'Class/Workshop, Rental',
+                decoration: InputDecoration(
+                  labelText: context
+                      .l10n
+                      .createFormSearchPlaceRouteBookableSessionClass,
                 ),
                 onSubmitted: widget.onSearch,
               ),
             ),
             const SizedBox(width: 8),
             IconButton(
-              tooltip: 'Search',
+              tooltip: context.l10n.createFormSearch,
               icon: const Icon(Icons.search),
               onPressed: () => widget.onSearch(_searchController.text),
             ),
@@ -80,7 +81,10 @@ class _ItemsPickerSectionState extends State<ItemsPickerSection> {
           ),
         if (state.searchResults.isNotEmpty) ...<Widget>[
           const SizedBox(height: 8),
-          const Text('Results', style: TextStyle(fontWeight: FontWeight.w600)),
+          Text(
+            context.l10n.createFormResults,
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
           ...state.searchResults.map(
             (CollectionCatalogSearchResult result) => ListTile(
               dense: true,
@@ -95,14 +99,18 @@ class _ItemsPickerSectionState extends State<ItemsPickerSection> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Text(
-              'In this Collection (${data.items.length})',
-              style: const TextStyle(fontWeight: FontWeight.w600),
+            Flexible(
+              child: Text(
+                context.l10n.createFormCollection(data.items.length),
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
-            TextButton.icon(
-              icon: const Icon(Icons.create_new_folder_outlined),
-              label: const Text('New section'),
-              onPressed: () => _promptNewSection(context),
+            Flexible(
+              child: TextButton.icon(
+                icon: const Icon(Icons.create_new_folder_outlined),
+                label: Text(context.l10n.createFormNewSection),
+                onPressed: () => _promptNewSection(context),
+              ),
             ),
           ],
         ),
@@ -165,17 +173,17 @@ class _ItemsPickerSectionState extends State<ItemsPickerSection> {
                 ),
                 if (onRemoveSection != null)
                   IconButton(
-                    tooltip: 'Remove section',
+                    tooltip: context.l10n.createFormRemoveSection,
                     icon: const Icon(Icons.close, size: 18),
                     onPressed: onRemoveSection,
                   ),
               ],
             ),
           if (items.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 4),
               child: Text(
-                'No items yet.',
+                context.l10n.createFormNoItemsYet,
                 style: TextStyle(color: Colors.grey),
               ),
             ),
@@ -187,13 +195,13 @@ class _ItemsPickerSectionState extends State<ItemsPickerSection> {
                   : const Icon(Icons.circle_outlined, size: 16),
               title: Text(item.snapshot.title),
               subtitle: item.sourceStatus == CollectionSourceStatus.unavailable
-                  ? const Text(
-                      'No longer available',
+                  ? Text(
+                      context.l10n.createFormNoLongerAvailable,
                       style: TextStyle(color: Colors.red),
                     )
                   : Text(item.ref.objectType.name),
               trailing: IconButton(
-                tooltip: 'Remove',
+                tooltip: context.l10n.createFormRemove,
                 icon: const Icon(Icons.delete_outline),
                 onPressed: () => widget.onRemoveItem(item.id),
               ),
@@ -208,21 +216,23 @@ class _ItemsPickerSectionState extends State<ItemsPickerSection> {
     final String? title = await showDialog<String>(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
-        title: const Text('New section'),
+        title: Text(context.l10n.createFormNewSection),
         content: TextField(
           controller: _sectionTitleController,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Section title'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createFormSectionTitle,
+          ),
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.createFormCancel),
           ),
           FilledButton(
             onPressed: () =>
                 Navigator.pop(dialogContext, _sectionTitleController.text),
-            child: const Text('Add'),
+            child: Text(context.l10n.createFormAdd),
           ),
         ],
       ),

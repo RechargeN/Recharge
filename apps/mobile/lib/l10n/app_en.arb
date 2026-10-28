@@ -2569,5 +2569,2317 @@
   "scenarioTransitPlannedTransport": "Planned transport",
   "@scenarioTransitPlannedTransport": {
     "description": "Scenario: fallback title of a planned transport item without a service label."
+  },
+  "createFormHoursNotSelected": "Hours not selected",
+  "@createFormHoursNotSelected": {
+    "description": "Create form: \"Hours not selected\"."
+  },
+  "createFormOpeningHoursUnknown": "Opening hours unknown",
+  "@createFormOpeningHoursUnknown": {
+    "description": "Create form: \"Opening hours unknown\"."
+  },
+  "createFormSeasonalHours": "Seasonal hours",
+  "@createFormSeasonalHours": {
+    "description": "Create form: \"Seasonal hours\"."
+  },
+  "createFormRegularOpeningHours": "Regular opening hours",
+  "@createFormRegularOpeningHours": {
+    "description": "Create form: \"Regular opening hours\"."
+  },
+  "createFormNotSelected": "Not selected",
+  "@createFormNotSelected": {
+    "description": "Create form: \"Not selected\"."
+  },
+  "createFormNoEntryTicketConcept": "No entry ticket concept",
+  "@createFormNoEntryTicketConcept": {
+    "description": "Create form: \"No entry ticket concept\"."
+  },
+  "createFormFreePaidAreas": "Free and paid areas",
+  "@createFormFreePaidAreas": {
+    "description": "Create form: \"Free and paid areas\"."
+  },
+  "createFormPaidEntry": "Paid entry",
+  "@createFormPaidEntry": {
+    "description": "Create form: \"Paid entry\"."
+  },
+  "createFormFreeEntry": "Free entry",
+  "@createFormFreeEntry": {
+    "description": "Create form: \"Free entry\"."
+  },
+  "createFormLocalCurator": "Local curator",
+  "@createFormLocalCurator": {
+    "description": "Create form: \"Local curator\"."
+  },
+  "createFormStaffMember": "Staff member",
+  "@createFormStaffMember": {
+    "description": "Create form: \"Staff member\"."
+  },
+  "createFormUntitledPlace": "Untitled place",
+  "@createFormUntitledPlace": {
+    "description": "Create form: \"Untitled place\"."
+  },
+  "createFormPreview": "Preview",
+  "@createFormPreview": {
+    "description": "Create form: \"Preview\"."
+  },
+  "createFormReviewPlace": "Review this Place",
+  "@createFormReviewPlace": {
+    "description": "Create form: \"Review this Place\"."
+  },
+  "createFormApplySuggestions": "Apply suggestions",
+  "@createFormApplySuggestions": {
+    "description": "Create form: \"Apply suggestions\"."
+  },
+  "createFormDiscard": "Discard",
+  "@createFormDiscard": {
+    "description": "Create form: \"Discard\"."
+  },
+  "createFormCouldImproveLaterProposalMissingrecommendedfieldidsJoin": "Could improve later: {count, plural, one{{count} detail} other{{count} details}}",
+  "@createFormCouldImproveLaterProposalMissingrecommendedfieldidsJoin": {
+    "description": "Place AI helper: number of recommended details still missing.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "createFormEstimatedVisitMin": "Estimated visit: {count} min",
+  "@createFormEstimatedVisitMin": {
+    "description": "Place AI helper: estimated visit length in minutes.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "45"
+      }
+    }
+  },
+  "createFormEditableDescriptionDraft": "Editable description draft",
+  "@createFormEditableDescriptionDraft": {
+    "description": "Create form: \"Editable description draft\"."
+  },
+  "createFormSuggestedCategory": "Suggested category",
+  "@createFormSuggestedCategory": {
+    "description": "Create form: \"Suggested category\"."
+  },
+  "createFormReviewDraftSuggestTaxonomyMatchIdentify": "Review this draft, suggest a taxonomy match and identify useful missing details. Nothing is published automatically.",
+  "@createFormReviewDraftSuggestTaxonomyMatchIdentify": {
+    "description": "Create form: \"Review this draft, suggest a taxonomy match and identify use\"."
+  },
+  "createFormLocalDemo": "Local demo",
+  "@createFormLocalDemo": {
+    "description": "Create form: \"Local demo\"."
+  },
+  "createFormFinishWithAi": "Finish with AI",
+  "@createFormFinishWithAi": {
+    "description": "Create form: \"Finish with AI\"."
+  },
+  "createFormCreatePlace": "Create a place",
+  "@createFormCreatePlace": {
+    "description": "Create form: \"Create a place\"."
+  },
+  "createFormSaveFailedRetryAvailable": "Save failed • retry available",
+  "@createFormSaveFailedRetryAvailable": {
+    "description": "Create form: \"Save failed • retry available\"."
+  },
+  "createFormUnsavedChanges": "Unsaved changes",
+  "@createFormUnsavedChanges": {
+    "description": "Create form: \"Unsaved changes\"."
+  },
+  "createFormSendReview": "Send for review",
+  "@createFormSendReview": {
+    "description": "Create form: \"Send for review\"."
+  },
+  "createFormBack": "Back",
+  "@createFormBack": {
+    "description": "Create form: \"Back\"."
+  },
+  "createFormDifferentPlace": "This is a different place",
+  "@createFormDifferentPlace": {
+    "description": "Create form: \"This is a different place\"."
+  },
+  "createFormCouldPlaceAlreadyExist": "Could this place already exist?",
+  "@createFormCouldPlaceAlreadyExist": {
+    "description": "Create form: \"Could this place already exist?\"."
+  },
+  "createFormAdd": "Add",
+  "@createFormAdd": {
+    "description": "Create form: \"Add\"."
+  },
+  "createFormGalleryImageUrlPath": "Gallery image URL/path",
+  "@createFormGalleryImageUrlPath": {
+    "description": "Create form: \"Gallery image URL/path\"."
+  },
+  "createFormAddGalleryImages": "Add gallery images",
+  "@createFormAddGalleryImages": {
+    "description": "Create form: \"Add gallery images\"."
+  },
+  "createFormCoverImageUrlPathRecommended": "Cover image URL/path (recommended)",
+  "@createFormCoverImageUrlPathRecommended": {
+    "description": "Create form: \"Cover image URL/path (recommended)\"."
+  },
+  "createFormCoverImageUrlPath": "Cover image URL/path *",
+  "@createFormCoverImageUrlPath": {
+    "description": "Create form: \"Cover image URL/path *\"."
+  },
+  "createFormCoverRequiredGalleryOptional": "A cover is required. Gallery is optional.",
+  "@createFormCoverRequiredGalleryOptional": {
+    "description": "Create form: \"A cover is required. Gallery is optional.\"."
+  },
+  "createFormPhotos": "Photos",
+  "@createFormPhotos": {
+    "description": "Create form: \"Photos\"."
+  },
+  "createFormOfficialBookingLandingPage": "Official booking landing page",
+  "@createFormOfficialBookingLandingPage": {
+    "description": "Create form: \"Official booking landing page\"."
+  },
+  "createFormPublicEmail": "Public email",
+  "@createFormPublicEmail": {
+    "description": "Create form: \"Public email\"."
+  },
+  "createFormPublicPhone": "Public phone",
+  "@createFormPublicPhone": {
+    "description": "Create form: \"Public phone\"."
+  },
+  "createFormOfficialWebsite": "Official website",
+  "@createFormOfficialWebsite": {
+    "description": "Create form: \"Official website\"."
+  },
+  "createFormAddOnlyOfficialPublicDetailsHttps": "Add only official public details. HTTPS links are required.",
+  "@createFormAddOnlyOfficialPublicDetailsHttps": {
+    "description": "Create form: \"Add only official public details. HTTPS links are required.\"."
+  },
+  "createFormOptionalPublicContacts": "Optional public contacts",
+  "@createFormOptionalPublicContacts": {
+    "description": "Create form: \"Optional public contacts\"."
+  },
+  "createFormOfficialPricingUrlHttps": "Official pricing URL (https)",
+  "@createFormOfficialPricingUrlHttps": {
+    "description": "Create form: \"Official pricing URL (https)\"."
+  },
+  "createFormPricingNote": "Pricing note",
+  "@createFormPricingNote": {
+    "description": "Create form: \"Pricing note\"."
+  },
+  "createFormPricingExplanation": "Pricing explanation *",
+  "@createFormPricingExplanation": {
+    "description": "Create form: \"Pricing explanation *\"."
+  },
+  "createFormTypicalSpend": "Typical spend to",
+  "@createFormTypicalSpend": {
+    "description": "Create form: \"Typical spend to\"."
+  },
+  "createFormTypicalSpendFrom": "Typical spend from",
+  "@createFormTypicalSpendFrom": {
+    "description": "Create form: \"Typical spend from\"."
+  },
+  "createFormEntry": "Entry to, {value}",
+  "@createFormEntry": {
+    "description": "Place price: entry to, in the currency code value.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "EUR"
+      }
+    }
+  },
+  "createFormEntryFrom": "Entry from, {value} *",
+  "@createFormEntryFrom": {
+    "description": "Place price: entry from, in the currency code value.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "EUR"
+      }
+    }
+  },
+  "createFormEntryPriceTypicalSpendAreSeparate": "Entry price and typical spend are separate concepts.",
+  "@createFormEntryPriceTypicalSpendAreSeparate": {
+    "description": "Create form: \"Entry price and typical spend are separate concepts.\"."
+  },
+  "createFormPrice": "Price",
+  "@createFormPrice": {
+    "description": "Create form: \"Price\"."
+  },
+  "createFormUnset": "Unset",
+  "@createFormUnset": {
+    "description": "Create form: \"Unset\"."
+  },
+  "createFormYes": "Yes",
+  "@createFormYes": {
+    "description": "Create form: \"Yes\"."
+  },
+  "createFormChooseYesUnknownUnsetNeverTreated": "Choose Yes or Unknown. Unset is never treated as No.",
+  "@createFormChooseYesUnknownUnsetNeverTreated": {
+    "description": "Create form: \"Choose Yes or Unknown. Unset is never treated as No.\"."
+  },
+  "createFormAmenities": "Amenities",
+  "@createFormAmenities": {
+    "description": "Create form: \"Amenities\"."
+  },
+  "createFormExitBuffer": "Exit buffer",
+  "@createFormExitBuffer": {
+    "description": "Create form: \"Exit buffer\"."
+  },
+  "createFormArrivalBuffer": "Arrival buffer",
+  "@createFormArrivalBuffer": {
+    "description": "Create form: \"Arrival buffer\"."
+  },
+  "createFormWeatherDependent": "Weather dependent",
+  "@createFormWeatherDependent": {
+    "description": "Create form: \"Weather dependent\"."
+  },
+  "createFormMinimumMinutes": "Minimum minutes",
+  "@createFormMinimumMinutes": {
+    "description": "Create form: \"Minimum minutes\"."
+  },
+  "createFormRecommendedMinutes": "Recommended minutes",
+  "@createFormRecommendedMinutes": {
+    "description": "Create form: \"Recommended minutes\"."
+  },
+  "createFormTheseValuesImproveTimeFitWithout": "These values improve time-fit without changing opening hours.",
+  "@createFormTheseValuesImproveTimeFitWithout": {
+    "description": "Create form: \"These values improve time-fit without changing opening hours\"."
+  },
+  "createFormHelpPeoplePlanVisit": "Help people plan the visit",
+  "@createFormHelpPeoplePlanVisit": {
+    "description": "Create form: \"Help people plan the visit\"."
+  },
+  "createFormAddInterval": "Add interval",
+  "@createFormAddInterval": {
+    "description": "Create form: \"Add interval\"."
+  },
+  "createFormClosesNextDay": "Closes next day",
+  "@createFormClosesNextDay": {
+    "description": "Create form: \"Closes next day\"."
+  },
+  "createFormCloseHhMm": "Close HH:mm",
+  "@createFormCloseHhMm": {
+    "description": "Create form: \"Close HH:mm\"."
+  },
+  "createFormOpenHhMm": "Open HH:mm",
+  "@createFormOpenHhMm": {
+    "description": "Create form: \"Open HH:mm\"."
+  },
+  "createFormDay": "Day",
+  "@createFormDay": {
+    "description": "Create form: \"Day\"."
+  },
+  "createFormClosedFrom": "Closed from *",
+  "@createFormClosedFrom": {
+    "description": "Create form: \"Closed from *\"."
+  },
+  "createFormCurrentOperationalStatus": "Current operational status",
+  "@createFormCurrentOperationalStatus": {
+    "description": "Create form: \"Current operational status\"."
+  },
+  "createFormAddClosedDay": "Add closed day",
+  "@createFormAddClosedDay": {
+    "description": "Create form: \"Add closed day\"."
+  },
+  "createFormCustomHours": "Custom hours",
+  "@createFormCustomHours": {
+    "description": "Create form: \"Custom hours\"."
+  },
+  "createFormClosedAllDay": "Closed all day",
+  "@createFormClosedAllDay": {
+    "description": "Create form: \"Closed all day\"."
+  },
+  "createFormDateExceptions": "Date exceptions",
+  "@createFormDateExceptions": {
+    "description": "Create form: \"Date exceptions\"."
+  },
+  "createFormRemovePeriod": "Remove period",
+  "@createFormRemovePeriod": {
+    "description": "Create form: \"Remove period\"."
+  },
+  "createFormHoursUnknown": "Hours unknown",
+  "@createFormHoursUnknown": {
+    "description": "Create form: \"Hours unknown\"."
+  },
+  "createFormRegularSchedule": "Regular schedule",
+  "@createFormRegularSchedule": {
+    "description": "Create form: \"Regular schedule\"."
+  },
+  "createFormHoursMode2": "Hours mode",
+  "@createFormHoursMode2": {
+    "description": "Create form: \"Hours mode\"."
+  },
+  "createFormHoursMode": "Hours mode *",
+  "@createFormHoursMode": {
+    "description": "Create form: \"Hours mode *\"."
+  },
+  "createFormUnknownBetterThanInventedHours": "Unknown is better than invented hours.",
+  "@createFormUnknownBetterThanInventedHours": {
+    "description": "Create form: \"Unknown is better than invented hours.\"."
+  },
+  "createFormWhenCanPeopleVisit": "When can people visit?",
+  "@createFormWhenCanPeopleVisit": {
+    "description": "Create form: \"When can people visit?\"."
+  },
+  "createFormAddMoreVisitInformation": "Add more visit information",
+  "@createFormAddMoreVisitInformation": {
+    "description": "Create form: \"Add more visit information\"."
+  },
+  "createFormAddOnlyInformationThatUsefulPlace": "Add only information that is useful for this place.",
+  "@createFormAddOnlyInformationThatUsefulPlace": {
+    "description": "Create form: \"Add only information that is useful for this place.\"."
+  },
+  "createFormOptionalVisitDetails": "Optional visit details",
+  "@createFormOptionalVisitDetails": {
+    "description": "Create form: \"Optional visit details\"."
+  },
+  "createFormAddOpeningAccessHours": "Add opening or access hours",
+  "@createFormAddOpeningAccessHours": {
+    "description": "Create form: \"Add opening or access hours\"."
+  },
+  "createFormAddHoursOnlyWhenPlaceReally": "Add hours only when this place really has them.",
+  "@createFormAddHoursOnlyWhenPlaceReally": {
+    "description": "Create form: \"Add hours only when this place really has them.\"."
+  },
+  "createFormAccessRestrictions": "Access restrictions",
+  "@createFormAccessRestrictions": {
+    "description": "Create form: \"Access restrictions\"."
+  },
+  "createFormHowFindPlace": "How to find this place",
+  "@createFormHowFindPlace": {
+    "description": "Create form: \"How to find this place\"."
+  },
+  "createFormAddDirections": "Add directions",
+  "@createFormAddDirections": {
+    "description": "Create form: \"Add directions\"."
+  },
+  "createFormRequiredWhenThereNoPostalAddress": "Required when there is no postal address.",
+  "@createFormRequiredWhenThereNoPostalAddress": {
+    "description": "Create form: \"Required when there is no postal address.\"."
+  },
+  "createFormLocationLabel": "Location label",
+  "@createFormLocationLabel": {
+    "description": "Create form: \"Location label\"."
+  },
+  "createFormFormattedAddress": "Formatted address",
+  "@createFormFormattedAddress": {
+    "description": "Create form: \"Formatted address\"."
+  },
+  "createFormConfirmPin": "Confirm this pin",
+  "@createFormConfirmPin": {
+    "description": "Create form: \"Confirm this pin\"."
+  },
+  "createFormPinConfirmed": "Pin confirmed",
+  "@createFormPinConfirmed": {
+    "description": "Create form: \"Pin confirmed\"."
+  },
+  "createFormTapMapConfirmRepresentativePoint": "Tap the map and confirm the representative point.",
+  "@createFormTapMapConfirmRepresentativePoint": {
+    "description": "Create form: \"Tap the map and confirm the representative point.\"."
+  },
+  "createFormWhere": "Where is it?",
+  "@createFormWhere": {
+    "description": "Create form: \"Where is it?\"."
+  },
+  "createFormChange": "Change",
+  "@createFormChange": {
+    "description": "Create form: \"Change\"."
+  },
+  "createFormCancel": "Cancel",
+  "@createFormCancel": {
+    "description": "Create form: \"Cancel\"."
+  },
+  "createFormCompatibleCategoryDetailsWillKeptFields": "Compatible category details will be kept. Fields that do not belong to the new profile will be removed from publication.",
+  "@createFormCompatibleCategoryDetailsWillKeptFields": {
+    "description": "Create form: \"Compatible category details will be kept. Fields that do not\"."
+  },
+  "createFormChangeCategory": "Change category?",
+  "@createFormChangeCategory": {
+    "description": "Create form: \"Change category?\"."
+  },
+  "createFormCategoryDetails": "Category details",
+  "@createFormCategoryDetails": {
+    "description": "Create form: \"Category details\"."
+  },
+  "createFormContentLanguage": "Content language",
+  "@createFormContentLanguage": {
+    "description": "Create form: \"Content language\"."
+  },
+  "createFormPublicLandmarksDoNotRequireOwnership": "Public landmarks do not require an ownership claim.",
+  "@createFormPublicLandmarksDoNotRequireOwnership": {
+    "description": "Create form: \"Public landmarks do not require an ownership claim.\"."
+  },
+  "createFormCommunityContribution": "Community contribution",
+  "@createFormCommunityContribution": {
+    "description": "Create form: \"Community contribution\"."
+  },
+  "createFormYourRelationship": "Your relationship",
+  "@createFormYourRelationship": {
+    "description": "Create form: \"Your relationship\"."
+  },
+  "createFormDetailedDescription": "Detailed description",
+  "@createFormDetailedDescription": {
+    "description": "Create form: \"Detailed description\"."
+  },
+  "createFormOptionalDescriptionLanguageAttribution": "Optional description, language and attribution",
+  "@createFormOptionalDescriptionLanguageAttribution": {
+    "description": "Create form: \"Optional description, language and attribution\"."
+  },
+  "createFormMoreAboutPlace": "More about this place",
+  "@createFormMoreAboutPlace": {
+    "description": "Create form: \"More about this place\"."
+  },
+  "createFormYouCanAddImproveLater": "You can add or improve this later.",
+  "@createFormYouCanAddImproveLater": {
+    "description": "Create form: \"You can add or improve this later.\"."
+  },
+  "createFormPlaceName": "Place name *",
+  "@createFormPlaceName": {
+    "description": "Create form: \"Place name *\"."
+  },
+  "createFormChooseCategoryFormKeepsOnlyRelevant": "Choose a category and the form keeps only relevant fields.",
+  "@createFormChooseCategoryFormKeepsOnlyRelevant": {
+    "description": "Create form: \"Choose a category and the form keeps only relevant fields.\"."
+  },
+  "createFormWhatPlace": "What is this place?",
+  "@createFormWhatPlace": {
+    "description": "Create form: \"What is this place?\"."
+  },
+  "createFormCreatePlaceCapabilityRequiredEditPublish": "You need permission to create places to edit or publish.",
+  "@createFormCreatePlaceCapabilityRequiredEditPublish": {
+    "description": "Create form: \"The create.place capability is required to edit or publish.\"."
+  },
+  "createFormPlaceDataBeingPrepared": "Place data is being prepared…",
+  "@createFormPlaceDataBeingPrepared": {
+    "description": "Create form: \"Place data is being prepared…\"."
+  },
+  "createFormScenarioRoute": "Scenario route",
+  "@createFormScenarioRoute": {
+    "description": "Create form: \"Scenario route\"."
+  },
+  "createFormStops": "{count, plural, one{{count} stop} other{{count} stops}}",
+  "@createFormStops": {
+    "description": "Create seed chip: number of stops.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "createFormRechargeIdea": "Recharge idea",
+  "@createFormRechargeIdea": {
+    "description": "Create form: \"Recharge idea\"."
+  },
+  "createFormMapRoute": "Map route",
+  "@createFormMapRoute": {
+    "description": "Create form: \"Map route\"."
+  },
+  "createFormEditRoute": "Edit route",
+  "@createFormEditRoute": {
+    "description": "Create form: \"Edit route\"."
+  },
+  "createFormScenarioRouteSeed": "Scenario route seed",
+  "@createFormScenarioRouteSeed": {
+    "description": "Create form: \"Scenario route seed\"."
+  },
+  "createFormSeededFrom": "{type, select, details{Seeded from details} saved_search{Seeded from saved search} search{Seeded from search conditions} smart_search{Seeded from smart search} profile{Seeded from profile workspace} scenario{Seeded from scenario route} map{Seeded from map area} other{Seeded from Recharge}}",
+  "@createFormSeededFrom": {
+    "description": "Create seed card: where the draft was started; type is the stable seed source code.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "search"
+      }
+    }
+  },
+  "createFormNoLimit": "No limit",
+  "@createFormNoLimit": {
+    "description": "Create form: \"No limit\"."
+  },
+  "createFormCapacityUnknown": "Capacity unknown",
+  "@createFormCapacityUnknown": {
+    "description": "Create form: \"Capacity unknown\"."
+  },
+  "createFormOnsiteBuffersMin": "Onsite buffers: {start} / {end} min",
+  "@createFormOnsiteBuffersMin": {
+    "description": "Create availability: buffer minutes before (start) and after (end) the visit.",
+    "placeholders": {
+      "start": {
+        "type": "int",
+        "example": "10"
+      },
+      "end": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "createFormAllowPartialAttendance": "Allow partial attendance",
+  "@createFormAllowPartialAttendance": {
+    "description": "Create form: \"Allow partial attendance\"."
+  },
+  "createFormDuration": "Duration",
+  "@createFormDuration": {
+    "description": "Create form: \"Duration\"."
+  },
+  "createFormNoOpeningHoursYet": "No opening hours yet",
+  "@createFormNoOpeningHoursYet": {
+    "description": "Create form: \"No opening hours yet\"."
+  },
+  "createFormAddSlot": "Add slot",
+  "@createFormAddSlot": {
+    "description": "Create form: \"Add slot\"."
+  },
+  "createFormScheduleSlots": "Schedule slots",
+  "@createFormScheduleSlots": {
+    "description": "Create form: \"Schedule slots\"."
+  },
+  "createFormNone": "None",
+  "@createFormNone": {
+    "description": "Create form: \"None\"."
+  },
+  "createFormHours": "Hours",
+  "@createFormHours": {
+    "description": "Create form: \"Hours\"."
+  },
+  "createFormSchedule": "Schedule",
+  "@createFormSchedule": {
+    "description": "Create form: \"Schedule\"."
+  },
+  "createFormNoCategoriesMatchSearch": "No categories match this search.",
+  "@createFormNoCategoriesMatchSearch": {
+    "description": "Create form: \"No categories match this search.\"."
+  },
+  "createFormActivityCriteria": "Activity criteria",
+  "@createFormActivityCriteria": {
+    "description": "Create form: \"Activity criteria\"."
+  },
+  "createFormScenarioTaxonomy": "Scenario taxonomy",
+  "@createFormScenarioTaxonomy": {
+    "description": "Create form: \"Scenario taxonomy\"."
+  },
+  "createFormConvertRental": "Convert to rental",
+  "@createFormConvertRental": {
+    "description": "Create form: \"Convert to rental\"."
+  },
+  "createFormKeepSession": "Keep session",
+  "@createFormKeepSession": {
+    "description": "Create form: \"Keep session\"."
+  },
+  "createFormLegacyOfferWasMigratedSafelyAs": "This legacy offer was migrated safely as a Bookable session. Choose Rental only if equipment or transport is being rented.",
+  "@createFormLegacyOfferWasMigratedSafelyAs": {
+    "description": "Create form: \"This legacy offer was migrated safely as a Bookable session.\"."
+  },
+  "createFormCouldRental": "Could this be a rental?",
+  "@createFormCouldRental": {
+    "description": "Create form: \"Could this be a rental?\"."
+  },
+  "createFormRechargeCreate": "Recharge Create",
+  "@createFormRechargeCreate": {
+    "description": "Create form: \"Recharge Create\"."
+  },
+  "createFormSaveDraft": "Save draft",
+  "@createFormSaveDraft": {
+    "description": "Create form: \"Save draft\"."
+  },
+  "createFormCoverImage": "Cover image *",
+  "@createFormCoverImage": {
+    "description": "Create form: \"Cover image *\"."
+  },
+  "createFormFullDescription": "Full description",
+  "@createFormFullDescription": {
+    "description": "Create form: \"Full description\"."
+  },
+  "createFormShortDescription": "Short description",
+  "@createFormShortDescription": {
+    "description": "Create form: \"Short description\"."
+  },
+  "createFormAddress": "Address",
+  "@createFormAddress": {
+    "description": "Create form: \"Address\"."
+  },
+  "createFormSubcategory": "Subcategory",
+  "@createFormSubcategory": {
+    "description": "Create form: \"Subcategory\"."
+  },
+  "createFormMainCategory": "Main category *",
+  "@createFormMainCategory": {
+    "description": "Create form: \"Main category *\"."
+  },
+  "createFormNotSaved": "Not saved",
+  "@createFormNotSaved": {
+    "description": "Create form: \"Not saved\"."
+  },
+  "createFormText": "Sign-in required",
+  "@createFormText": {
+    "description": "Create form: \"Требуется авторизация\"."
+  },
+  "createFormSubmitReview": "Submit for review",
+  "@createFormSubmitReview": {
+    "description": "Create form: \"Submit for review\"."
+  },
+  "createFormNotProhibitedUnsafeItem": "This is not a prohibited/unsafe item",
+  "@createFormNotProhibitedUnsafeItem": {
+    "description": "Create form: \"This is not a prohibited/unsafe item\"."
+  },
+  "createFormListingAccurate": "This listing is accurate",
+  "@createFormListingAccurate": {
+    "description": "Create form: \"This listing is accurate\"."
+  },
+  "createFormPublicPreview": "Public preview",
+  "@createFormPublicPreview": {
+    "description": "Create form: \"Public preview\"."
+  },
+  "createFormYouWillLeaveRechargeGoCheck": "You will leave Recharge and go to an external site to check availability.",
+  "@createFormYouWillLeaveRechargeGoCheck": {
+    "description": "Create form: \"You will leave Recharge and go to $host to check availabilit\"."
+  },
+  "createFormExternalBookingUrlHttps": "External booking URL (https)",
+  "@createFormExternalBookingUrlHttps": {
+    "description": "Create form: \"External booking URL (https)\"."
+  },
+  "createFormLateReturnPolicy": "Late return policy",
+  "@createFormLateReturnPolicy": {
+    "description": "Create form: \"Late return policy\"."
+  },
+  "createFormDamagePolicy": "Damage policy",
+  "@createFormDamagePolicy": {
+    "description": "Create form: \"Damage policy\"."
+  },
+  "createFormDepositTerms": "Deposit terms",
+  "@createFormDepositTerms": {
+    "description": "Create form: \"Deposit terms\"."
+  },
+  "createFormCollectionMethod": "Collection method",
+  "@createFormCollectionMethod": {
+    "description": "Create form: \"Collection method\"."
+  },
+  "createFormAddRateStep": "Add rate step",
+  "@createFormAddRateStep": {
+    "description": "Create form: \"Add rate step\"."
+  },
+  "createFormBillingUnit": "Billing unit",
+  "@createFormBillingUnit": {
+    "description": "Create form: \"Billing unit\"."
+  },
+  "createFormUsageRestrictions": "Usage restrictions",
+  "@createFormUsageRestrictions": {
+    "description": "Create form: \"Usage restrictions\"."
+  },
+  "createFormSafetyNotice": "Safety notice",
+  "@createFormSafetyNotice": {
+    "description": "Create form: \"Safety notice\"."
+  },
+  "createFormMinimumRenterAge": "Minimum renter age",
+  "@createFormMinimumRenterAge": {
+    "description": "Create form: \"Minimum renter age\"."
+  },
+  "createFormMaxDurationMin": "Max duration (min)",
+  "@createFormMaxDurationMin": {
+    "description": "Create form: \"Max duration (min)\"."
+  },
+  "createFormMinDurationMin": "Min duration (min)",
+  "@createFormMinDurationMin": {
+    "description": "Create form: \"Min duration (min)\"."
+  },
+  "createFormApply": "Apply",
+  "@createFormApply": {
+    "description": "Create form: \"Apply\"."
+  },
+  "createFormSuggestedDefaultsCategory": "Suggested defaults for this category",
+  "@createFormSuggestedDefaultsCategory": {
+    "description": "Create form: \"Suggested defaults for this category\"."
+  },
+  "createFormDeliveryFeeMinorUnits": "Delivery fee (minor units)",
+  "@createFormDeliveryFeeMinorUnits": {
+    "description": "Create form: \"Delivery fee (minor units)\"."
+  },
+  "createFormDeliveryRadiusKm": "Delivery radius (km)",
+  "@createFormDeliveryRadiusKm": {
+    "description": "Create form: \"Delivery radius (km)\"."
+  },
+  "createFormOfferDelivery": "Offer delivery",
+  "@createFormOfferDelivery": {
+    "description": "Create form: \"Offer delivery\"."
+  },
+  "createFormByArrangement": "By arrangement",
+  "@createFormByArrangement": {
+    "description": "Create form: \"By arrangement\"."
+  },
+  "createFormOpeningHours": "Opening hours",
+  "@createFormOpeningHours": {
+    "description": "Create form: \"Opening hours\"."
+  },
+  "createFormPickupSchedule": "Pickup schedule",
+  "@createFormPickupSchedule": {
+    "description": "Create form: \"Pickup schedule\"."
+  },
+  "createFormPublicBusinessAddress": "Public business address",
+  "@createFormPublicBusinessAddress": {
+    "description": "Create form: \"Public business address\"."
+  },
+  "createFormApproximateAreaDefault": "Approximate area (default)",
+  "@createFormApproximateAreaDefault": {
+    "description": "Create form: \"Approximate area (default)\"."
+  },
+  "createFormLocationDisclosure": "Location disclosure",
+  "@createFormLocationDisclosure": {
+    "description": "Create form: \"Location disclosure\"."
+  },
+  "createFormLongitude": "Longitude",
+  "@createFormLongitude": {
+    "description": "Create form: \"Longitude\"."
+  },
+  "createFormLatitude": "Latitude",
+  "@createFormLatitude": {
+    "description": "Create form: \"Latitude\"."
+  },
+  "createFormPublicAreaLabel": "Public area label",
+  "@createFormPublicAreaLabel": {
+    "description": "Create form: \"Public area label\"."
+  },
+  "createFormPickupPlaceName": "Pickup place name",
+  "@createFormPickupPlaceName": {
+    "description": "Create form: \"Pickup place name\"."
+  },
+  "createFormThatWouldExceedGroupCapacity": "That would exceed the group capacity.",
+  "@createFormThatWouldExceedGroupCapacity": {
+    "description": "Create form: \"That would exceed the group capacity.\"."
+  },
+  "createFormBlockDateRange": "Block a date range",
+  "@createFormBlockDateRange": {
+    "description": "Create form: \"Block a date range\"."
+  },
+  "createFormConfirmCalendar": "Confirm calendar",
+  "@createFormConfirmCalendar": {
+    "description": "Create form: \"Confirm calendar\"."
+  },
+  "createFormRechargeCannotSeeExternalBookingsConfirm": "Recharge cannot see external bookings — confirm this is up to date.",
+  "@createFormRechargeCannotSeeExternalBookingsConfirm": {
+    "description": "Create form: \"Recharge cannot see external bookings — confirm this is up t\"."
+  },
+  "createFormCalendarNotConfirmedYet": "Calendar not confirmed yet",
+  "@createFormCalendarNotConfirmedYet": {
+    "description": "Create form: \"Calendar not confirmed yet\"."
+  },
+  "createFormAddAnotherItemType": "Add another item type",
+  "@createFormAddAnotherItemType": {
+    "description": "Create form: \"Add another item type\"."
+  },
+  "createFormRemove": "Remove",
+  "@createFormRemove": {
+    "description": "Create form: \"Remove\"."
+  },
+  "createFormDuplicate": "Duplicate",
+  "@createFormDuplicate": {
+    "description": "Create form: \"Duplicate\"."
+  },
+  "createFormCondition": "Condition",
+  "@createFormCondition": {
+    "description": "Create form: \"Condition\"."
+  },
+  "createFormQuantity": "Quantity",
+  "@createFormQuantity": {
+    "description": "Create form: \"Quantity\"."
+  },
+  "createFormLabel": "Label",
+  "@createFormLabel": {
+    "description": "Create form: \"Label\"."
+  },
+  "createFormCategory": "Category",
+  "@createFormCategory": {
+    "description": "Create form: \"Category\"."
+  },
+  "createFormTitle": "Title",
+  "@createFormTitle": {
+    "description": "Create form: \"Title\"."
+  },
+  "createFormNext": "Next",
+  "@createFormNext": {
+    "description": "Create form: \"Next\"."
+  },
+  "createFormCreateRentalCapabilityRequiredEditPublish": "You need permission to create rentals to edit or publish.",
+  "@createFormCreateRentalCapabilityRequiredEditPublish": {
+    "description": "Create form: \"The create.rental capability is required to edit or publish.\"."
+  },
+  "createFormRentalDataBeingPrepared": "Rental data is being prepared…",
+  "@createFormRentalDataBeingPrepared": {
+    "description": "Create form: \"Rental data is being prepared…\"."
+  },
+  "createFormRemoveGalleryImage": "Remove gallery image {count}",
+  "@createFormRemoveGalleryImage": {
+    "description": "Event gallery: remove image number count.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createFormGalleryImageDescription": "Gallery image {count} description *",
+  "@createFormGalleryImageDescription": {
+    "description": "Event gallery: alt-text field label for image number count.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createFormAddGalleryImage": "Add gallery image",
+  "@createFormAddGalleryImage": {
+    "description": "Create form: \"Add gallery image\"."
+  },
+  "createFormPublishableLocalMockModerationPipeline": "Publishable on local/mock moderation pipeline",
+  "@createFormPublishableLocalMockModerationPipeline": {
+    "description": "Create form: \"Publishable on local/mock moderation pipeline\"."
+  },
+  "createFormUntitledEvent": "Untitled event",
+  "@createFormUntitledEvent": {
+    "description": "Create form: \"Untitled event\"."
+  },
+  "createFormVisibility": "Visibility",
+  "@createFormVisibility": {
+    "description": "Create form: \"Visibility\"."
+  },
+  "createFormExternalHttpsRegistrationUrl": "External HTTPS registration URL",
+  "@createFormExternalHttpsRegistrationUrl": {
+    "description": "Create form: \"External HTTPS registration URL\"."
+  },
+  "createFormRegistration": "Registration",
+  "@createFormRegistration": {
+    "description": "Create form: \"Registration\"."
+  },
+  "createFormMaximumParticipants": "Maximum participants",
+  "@createFormMaximumParticipants": {
+    "description": "Create form: \"Maximum participants\"."
+  },
+  "createFormCapacity": "Capacity",
+  "@createFormCapacity": {
+    "description": "Create form: \"Capacity\"."
+  },
+  "createFormPaymentCollection": "Payment collection",
+  "@createFormPaymentCollection": {
+    "description": "Create form: \"Payment collection\"."
+  },
+  "createFormPricing": "Pricing",
+  "@createFormPricing": {
+    "description": "Create form: \"Pricing\"."
+  },
+  "createFormPartialAttendanceAllowed": "Partial attendance allowed",
+  "@createFormPartialAttendanceAllowed": {
+    "description": "Create form: \"Partial attendance allowed\"."
+  },
+  "createFormPetsAllowed": "Pets allowed",
+  "@createFormPetsAllowed": {
+    "description": "Create form: \"Pets allowed\"."
+  },
+  "createFormKidsAllowed": "Kids allowed",
+  "@createFormKidsAllowed": {
+    "description": "Create form: \"Kids allowed\"."
+  },
+  "createFormFamilyFriendly": "Family friendly",
+  "@createFormFamilyFriendly": {
+    "description": "Create form: \"Family friendly\"."
+  },
+  "createFormMaximumAge": "Maximum age",
+  "@createFormMaximumAge": {
+    "description": "Create form: \"Maximum age\"."
+  },
+  "createFormMinimumAge": "Minimum age",
+  "@createFormMinimumAge": {
+    "description": "Create form: \"Minimum age\"."
+  },
+  "createFormWhatAttendeesShouldKnowBring": "What attendees should know or bring",
+  "@createFormWhatAttendeesShouldKnowBring": {
+    "description": "Create form: \"What attendees should know or bring\"."
+  },
+  "createFormExcludedDatesCommaSeparated": "Excluded dates, comma-separated",
+  "@createFormExcludedDatesCommaSeparated": {
+    "description": "Create form: \"Excluded dates, comma-separated\"."
+  },
+  "createFormOccurrenceCount": "Occurrence count",
+  "@createFormOccurrenceCount": {
+    "description": "Create form: \"Occurrence count\"."
+  },
+  "createFormUntilLocalDate": "Until local date",
+  "@createFormUntilLocalDate": {
+    "description": "Create form: \"Until local date\"."
+  },
+  "createFormEnds": "Ends",
+  "@createFormEnds": {
+    "description": "Create form: \"Ends\"."
+  },
+  "createFormEveryNPeriods": "Every N periods",
+  "@createFormEveryNPeriods": {
+    "description": "Create form: \"Every N periods\"."
+  },
+  "createFormRepeat": "Repeat",
+  "@createFormRepeat": {
+    "description": "Create form: \"Repeat\"."
+  },
+  "createFormDatesSeparatedByCommas": "Dates separated by commas",
+  "@createFormDatesSeparatedByCommas": {
+    "description": "Create form: \"Dates separated by commas\"."
+  },
+  "createFormDurationMinutes": "Duration in minutes",
+  "@createFormDurationMinutes": {
+    "description": "Create form: \"Duration in minutes\"."
+  },
+  "createFormDurationMinutes14401Day": "Duration in minutes (1440 = 1 day)",
+  "@createFormDurationMinutes14401Day": {
+    "description": "Create form: \"Duration in minutes (1440 = 1 day)\"."
+  },
+  "createFormLocalStartTimeHhMm": "Local start time (HH:mm)",
+  "@createFormLocalStartTimeHhMm": {
+    "description": "Create form: \"Local start time (HH:mm)\"."
+  },
+  "createFormFirstLocalDateYyyyMmDd": "First local date (YYYY-MM-DD)",
+  "@createFormFirstLocalDateYyyyMmDd": {
+    "description": "Create form: \"First local date (YYYY-MM-DD)\"."
+  },
+  "createFormScheduleMode": "Schedule mode",
+  "@createFormScheduleMode": {
+    "description": "Create form: \"Schedule mode\"."
+  },
+  "createFormPublicHttpsEventUrl": "Public HTTPS event URL *",
+  "@createFormPublicHttpsEventUrl": {
+    "description": "Create form: \"Public HTTPS event URL *\"."
+  },
+  "createFormOnlineAccess": "Online access",
+  "@createFormOnlineAccess": {
+    "description": "Create form: \"Online access\"."
+  },
+  "createFormConfirmPhysicalLocationPin": "Confirm this physical location pin *",
+  "@createFormConfirmPhysicalLocationPin": {
+    "description": "Create form: \"Confirm this physical location pin *\"."
+  },
+  "createFormMeetingPointInstructions": "Meeting point instructions",
+  "@createFormMeetingPointInstructions": {
+    "description": "Create form: \"Meeting point instructions\"."
+  },
+  "createFormVenue": "Venue",
+  "@createFormVenue": {
+    "description": "Create form: \"Venue\"."
+  },
+  "createFormFormat": "Format",
+  "@createFormFormat": {
+    "description": "Create form: \"Format\"."
+  },
+  "createFormCoverDescriptionScreenReaders": "Cover description for screen readers *",
+  "@createFormCoverDescriptionScreenReaders": {
+    "description": "Create form: \"Cover description for screen readers *\"."
+  },
+  "createFormShortDescription2": "Short description *",
+  "@createFormShortDescription2": {
+    "description": "Create form: \"Short description *\"."
+  },
+  "createFormEventTitle": "Event title *",
+  "@createFormEventTitle": {
+    "description": "Create form: \"Event title *\"."
+  },
+  "createFormEventDraftUnavailableReopenCreateHub": "Event draft is unavailable. Reopen Create Hub.",
+  "@createFormEventDraftUnavailableReopenCreateHub": {
+    "description": "Create form: \"Event draft is unavailable. Reopen Create Hub.\"."
+  },
+  "createFormClosesAtUtcIso8601": "Closes at UTC (ISO 8601)",
+  "@createFormClosesAtUtcIso8601": {
+    "description": "Create form: \"Closes at UTC (ISO 8601)\"."
+  },
+  "createFormOpensAtUtcIso8601": "Opens at UTC (ISO 8601)",
+  "@createFormOpensAtUtcIso8601": {
+    "description": "Create form: \"Opens at UTC (ISO 8601)\"."
+  },
+  "createFormCloseMinutesBeforeOccurrence": "Close minutes before occurrence",
+  "@createFormCloseMinutesBeforeOccurrence": {
+    "description": "Create form: \"Close minutes before occurrence\"."
+  },
+  "createFormOpenMinutesBeforeOccurrence": "Open minutes before occurrence",
+  "@createFormOpenMinutesBeforeOccurrence": {
+    "description": "Create form: \"Open minutes before occurrence\"."
+  },
+  "createFormWindowType": "Window type",
+  "@createFormWindowType": {
+    "description": "Create form: \"Window type\"."
+  },
+  "createFormEnableWindow": "Enable window",
+  "@createFormEnableWindow": {
+    "description": "Create form: \"Enable window\"."
+  },
+  "createFormNotConfigured": "Not configured",
+  "@createFormNotConfigured": {
+    "description": "Create form: \"Not configured\"."
+  },
+  "createFormRemoveEligibilityRule": "Remove eligibility rule",
+  "@createFormRemoveEligibilityRule": {
+    "description": "Create form: \"Remove eligibility rule\"."
+  },
+  "createFormPublicExplanationNoSecrets": "Public explanation (no secrets)",
+  "@createFormPublicExplanationNoSecrets": {
+    "description": "Create form: \"Public explanation (no secrets)\"."
+  },
+  "createFormAddEligibilityRule": "Add eligibility rule",
+  "@createFormAddEligibilityRule": {
+    "description": "Create form: \"Add eligibility rule\"."
+  },
+  "createFormRuleKind": "Rule kind",
+  "@createFormRuleKind": {
+    "description": "Create form: \"Rule kind\"."
+  },
+  "createFormNeverEnterAccessCodesIdentitiesPrivate": "Never enter access codes, identities or private documents.",
+  "@createFormNeverEnterAccessCodesIdentitiesPrivate": {
+    "description": "Create form: \"Never enter access codes, identities or private documents.\"."
+  },
+  "createFormEligibility": "Eligibility",
+  "@createFormEligibility": {
+    "description": "Create form: \"Eligibility\"."
+  },
+  "createFormSalesAtDoor": "Sales at the door",
+  "@createFormSalesAtDoor": {
+    "description": "Create form: \"Sales at the door\"."
+  },
+  "createFormRegistrationAtDoor": "Registration at the door",
+  "@createFormRegistrationAtDoor": {
+    "description": "Create form: \"Registration at the door\"."
+  },
+  "createFormOnsiteAdmissionAllowed": "Onsite admission allowed",
+  "@createFormOnsiteAdmissionAllowed": {
+    "description": "Create form: \"Onsite admission allowed\"."
+  },
+  "createFormDoesNotBookReserveInventory": "Does not book or reserve inventory",
+  "@createFormDoesNotBookReserveInventory": {
+    "description": "Create form: \"Does not book or reserve inventory\"."
+  },
+  "createFormMaximumGuestsPerRegistration": "Maximum guests per registration *",
+  "@createFormMaximumGuestsPerRegistration": {
+    "description": "Create form: \"Maximum guests per registration *\"."
+  },
+  "createFormGuestPolicy": "Guest policy",
+  "@createFormGuestPolicy": {
+    "description": "Create form: \"Guest policy\"."
+  },
+  "createFormFuturePromotionPolicy": "Future promotion policy",
+  "@createFormFuturePromotionPolicy": {
+    "description": "Create form: \"Future promotion policy\"."
+  },
+  "createFormPreviewOnlyNoQueuePromotionRuns": "Preview only — no queue or promotion runs",
+  "@createFormPreviewOnlyNoQueuePromotionRuns": {
+    "description": "Create form: \"Preview only — no queue or promotion runs\"."
+  },
+  "createFormConfigureWaitlist": "Configure waitlist",
+  "@createFormConfigureWaitlist": {
+    "description": "Create form: \"Configure waitlist\"."
+  },
+  "createFormApplicationWindow": "Application window",
+  "@createFormApplicationWindow": {
+    "description": "Create form: \"Application window\"."
+  },
+  "createFormCancellationClosesNMinutesBeforeStart": "Cancellation closes N minutes before the start *",
+  "@createFormCancellationClosesNMinutesBeforeStart": {
+    "description": "Create form: \"Cancellation closes N minutes before the start *\"."
+  },
+  "createFormRegistrationWindow": "Registration window",
+  "@createFormRegistrationWindow": {
+    "description": "Create form: \"Registration window\"."
+  },
+  "createFormExternalHttpsRegistrationUrl2": "External HTTPS registration URL *",
+  "@createFormExternalHttpsRegistrationUrl2": {
+    "description": "Create form: \"External HTTPS registration URL *\"."
+  },
+  "createFormConfirmationMode": "Confirmation mode *",
+  "@createFormConfirmationMode": {
+    "description": "Create form: \"Confirmation mode *\"."
+  },
+  "createFormRegistrationMode": "Registration mode *",
+  "@createFormRegistrationMode": {
+    "description": "Create form: \"Registration mode *\"."
+  },
+  "createFormAdmissionMode": "Admission mode *",
+  "@createFormAdmissionMode": {
+    "description": "Create form: \"Admission mode *\"."
+  },
+  "createFormApplyNormalizedFields": "Apply normalized fields",
+  "@createFormApplyNormalizedFields": {
+    "description": "Create form: \"Apply normalized fields\"."
+  },
+  "createFormConfigurationPreset": "Configuration preset",
+  "@createFormConfigurationPreset": {
+    "description": "Create form: \"Configuration preset\"."
+  },
+  "createFormConfirmSuggestion": "Confirm suggestion",
+  "@createFormConfirmSuggestion": {
+    "description": "Create form: \"Confirm suggestion\"."
+  },
+  "createFormLegacyRegistrationPreservedButAdmissionConfirmation": "Legacy registration is preserved, but admission and confirmation still require explicit choices.",
+  "@createFormLegacyRegistrationPreservedButAdmissionConfirmation": {
+    "description": "Create form: \"Legacy registration is preserved, but admission and confirma\"."
+  },
+  "createFormOpenEntryWithNoRegistrationConfirmation": "Open entry with no registration or confirmation.",
+  "@createFormOpenEntryWithNoRegistrationConfirmation": {
+    "description": "Create form: \"Open entry with no registration or confirmation.\"."
+  },
+  "createFormLegacyDraftSuggestionNotApplied": "Legacy draft suggestion — not applied",
+  "@createFormLegacyDraftSuggestionNotApplied": {
+    "description": "Create form: \"Legacy draft suggestion — not applied\"."
+  },
+  "createFormAdmissionRegistrationConfirmationAreIndependentLocal": "Admission, registration and confirmation are independent. This local configuration does not create a booking.",
+  "@createFormAdmissionRegistrationConfirmationAreIndependentLocal": {
+    "description": "Create form: \"Admission, registration and confirmation are independent. Th\"."
+  },
+  "createFormAdmission": "Admission",
+  "@createFormAdmission": {
+    "description": "Create form: \"Admission\"."
+  },
+  "createFormEventAdmissionConfiguration": "Event admission configuration",
+  "@createFormEventAdmissionConfiguration": {
+    "description": "Create form: \"Event admission configuration\"."
+  },
+  "createFormSaveDraftReturn": "Save draft & return",
+  "@createFormSaveDraftReturn": {
+    "description": "Create form: \"Save draft & return\"."
+  },
+  "createFormPreviewPublish": "Preview and publish",
+  "@createFormPreviewPublish": {
+    "description": "Create form: \"Preview and publish\"."
+  },
+  "createFormSuggestGroupSize": "Suggest a group size",
+  "@createFormSuggestGroupSize": {
+    "description": "Create form: \"Suggest a group size\"."
+  },
+  "createFormTypicalDurationMaxMinutes": "Typical duration, max (minutes)",
+  "@createFormTypicalDurationMaxMinutes": {
+    "description": "Create form: \"Typical duration, max (minutes)\"."
+  },
+  "createFormTypicalDurationMinMinutes": "Typical duration, min (minutes)",
+  "@createFormTypicalDurationMinMinutes": {
+    "description": "Create form: \"Typical duration, min (minutes)\"."
+  },
+  "createFormBestSeasonOptional": "Best season (optional)",
+  "@createFormBestSeasonOptional": {
+    "description": "Create form: \"Best season (optional)\"."
+  },
+  "createFormBestTimeDayOptional": "Best time of day (optional)",
+  "@createFormBestTimeDayOptional": {
+    "description": "Create form: \"Best time of day (optional)\"."
+  },
+  "createFormWhenBestHowLongDoesTake": "When is it best, and how long does it take?",
+  "@createFormWhenBestHowLongDoesTake": {
+    "description": "Create form: \"When is it best, and how long does it take?\"."
+  },
+  "createFormApproximateAmountOptional": "Approximate amount (optional)",
+  "@createFormApproximateAmountOptional": {
+    "description": "Create form: \"Approximate amount (optional)\"."
+  },
+  "createFormEGCoffeeCounterOptional": "e.g. “Coffee on the counter, optional”",
+  "@createFormEGCoffeeCounterOptional": {
+    "description": "Create form: \"e.g. 'Coffee on the counter, optional'\"."
+  },
+  "createFormOther": "Other",
+  "@createFormOther": {
+    "description": "Create form: \"Other\"."
+  },
+  "createFormDonation": "Donation",
+  "@createFormDonation": {
+    "description": "Create form: \"Donation\"."
+  },
+  "createFormContributionKind": "Contribution kind",
+  "@createFormContributionKind": {
+    "description": "Create form: \"Contribution kind\"."
+  },
+  "createFormCustomaryLeaveSomethingHere": "It is customary to leave something here",
+  "@createFormCustomaryLeaveSomethingHere": {
+    "description": "Create form: \"It is customary to leave something here\"."
+  },
+  "createFormWhatKnowBeforeYouGo": "What to know before you go",
+  "@createFormWhatKnowBeforeYouGo": {
+    "description": "Create form: \"What to know before you go\"."
+  },
+  "createFormNotOfficialSpot": "This is not an official spot",
+  "@createFormNotOfficialSpot": {
+    "description": "Create form: \"This is not an official spot\"."
+  },
+  "createFormAccessNotes": "Access notes",
+  "@createFormAccessNotes": {
+    "description": "Create form: \"Access notes\"."
+  },
+  "createFormAddressLineOptional": "Address line (optional)",
+  "@createFormAddressLineOptional": {
+    "description": "Create form: \"Address line (optional)\"."
+  },
+  "createFormWhereHowDoIGetThere": "Where is it, and how do I get there?",
+  "@createFormWhereHowDoIGetThere": {
+    "description": "Create form: \"Where is it, and how do I get there?\"."
+  },
+  "createFormMorePlaces": "More Places",
+  "@createFormMorePlaces": {
+    "description": "Create form: \"More Places\"."
+  },
+  "createFormNoMatchingPlacesPage": "No matching Places on this page.",
+  "@createFormNoMatchingPlacesPage": {
+    "description": "Create form: \"No matching Places on this page.\"."
+  },
+  "createFormSearchPlaces": "Search Places",
+  "@createFormSearchPlaces": {
+    "description": "Create form: \"Search Places\"."
+  },
+  "createFormSearchPublishedPlaces": "Search published Places",
+  "@createFormSearchPublishedPlaces": {
+    "description": "Create form: \"Search published Places\"."
+  },
+  "createFormLinkedPlaceUnavailableRemoveReplaceLink": "Linked Place is unavailable. Remove or replace the link.",
+  "@createFormLinkedPlaceUnavailableRemoveReplaceLink": {
+    "description": "Create form: \"Linked Place is unavailable. Remove or replace the link.\"."
+  },
+  "createFormRemoveLinkedPlace": "Remove linked Place",
+  "@createFormRemoveLinkedPlace": {
+    "description": "Create form: \"Remove linked Place\"."
+  },
+  "createFormSelectedPlace": "A Place is linked",
+  "@createFormSelectedPlace": {
+    "description": "Create form: \"Selected Place: ${activity.location.linkedPlaceId}\"."
+  },
+  "createFormLinkedPlaceOptional": "Linked Place (optional)",
+  "@createFormLinkedPlaceOptional": {
+    "description": "Create form: \"Linked Place (optional)\"."
+  },
+  "createFormCoverImageUrl": "Cover image URL",
+  "@createFormCoverImageUrl": {
+    "description": "Create form: \"Cover image URL\"."
+  },
+  "createFormFullDescriptionOptional": "Full description (optional)",
+  "@createFormFullDescriptionOptional": {
+    "description": "Create form: \"Full description (optional)\"."
+  },
+  "createFormAboutActivity": "About this activity",
+  "@createFormAboutActivity": {
+    "description": "Create form: \"About this activity\"."
+  },
+  "createFormCheckActivityFieldsSubmitAgain": "Check the Activity fields and submit again.",
+  "@createFormCheckActivityFieldsSubmitAgain": {
+    "description": "Create form: \"Check the Activity fields and submit again.\"."
+  },
+  "createFormEditingDraftOnlyPublishedVersionStays": "Editing draft only. The published version stays unchanged until review and publication.",
+  "@createFormEditingDraftOnlyPublishedVersionStays": {
+    "description": "Create form: \"Editing draft only. The published version stays unchanged un\"."
+  },
+  "createFormLoadingRechargeActivityDraft": "Loading Recharge Activity draft…",
+  "@createFormLoadingRechargeActivityDraft": {
+    "description": "Create form: \"Loading Recharge Activity draft…\"."
+  },
+  "createFormPublishedRoute": "Published route",
+  "@createFormPublishedRoute": {
+    "description": "Create form: \"Published route\"."
+  },
+  "createFormDraftSummaryUnavailableSession": "Draft summary is unavailable in this session.",
+  "@createFormDraftSummaryUnavailableSession": {
+    "description": "Create form: \"Draft summary is unavailable in this session.\"."
+  },
+  "createFormMapArea": "Map area",
+  "@createFormMapArea": {
+    "description": "Create form: \"Map area\"."
+  },
+  "createFormSearchSimilar": "Search similar",
+  "@createFormSearchSimilar": {
+    "description": "Create form: \"Search similar\"."
+  },
+  "createFormProfile": "Profile",
+  "@createFormProfile": {
+    "description": "Create form: \"Profile\"."
+  },
+  "createFormHome": "Home",
+  "@createFormHome": {
+    "description": "Create form: \"Home\"."
+  },
+  "createFormNextSteps": "Next steps",
+  "@createFormNextSteps": {
+    "description": "Create form: \"Next steps\"."
+  },
+  "createFormRouteMap": "Route map",
+  "@createFormRouteMap": {
+    "description": "Create form: \"Route map\"."
+  },
+  "createFormWalking": "Walking",
+  "@createFormWalking": {
+    "description": "Create form: \"Walking\"."
+  },
+  "createFormFree": "Free",
+  "@createFormFree": {
+    "description": "Create form: \"Free\"."
+  },
+  "createFormArchive": "Archive",
+  "@createFormArchive": {
+    "description": "Create form: \"Archive\"."
+  },
+  "createFormCreateNewVersion": "Create new version",
+  "@createFormCreateNewVersion": {
+    "description": "Create form: \"Create new version\"."
+  },
+  "createFormReviewRequest": "Review request",
+  "@createFormReviewRequest": {
+    "description": "Create form: \"Review request\"."
+  },
+  "createFormGeometryHash": "Geometry hash",
+  "@createFormGeometryHash": {
+    "description": "Create form: \"Geometry hash\"."
+  },
+  "createFormVersionId": "Version ID",
+  "@createFormVersionId": {
+    "description": "Create form: \"Version ID\"."
+  },
+  "createFormRouteId": "Route ID",
+  "@createFormRouteId": {
+    "description": "Create form: \"Route ID\"."
+  },
+  "createFormImmutableVersionAwaitingApproval": "Immutable version awaiting approval",
+  "@createFormImmutableVersionAwaitingApproval": {
+    "description": "Create form: \"Immutable version awaiting approval\"."
+  },
+  "createFormActiveImmutableRouteVersion": "Active immutable Route version",
+  "@createFormActiveImmutableRouteVersion": {
+    "description": "Create form: \"Active immutable Route version\"."
+  },
+  "createFormYourPublishActionWasHandledCreate": "Your publish action was handled. Create another listing or return to Home.",
+  "@createFormYourPublishActionWasHandledCreate": {
+    "description": "Create form: \"Your publish action was handled. Create another listing or r\"."
+  },
+  "createFormSentModeration": "Sent to moderation",
+  "@createFormSentModeration": {
+    "description": "Create form: \"Sent to moderation\"."
+  },
+  "createFormPublishProcessed": "Publish processed",
+  "@createFormPublishProcessed": {
+    "description": "Create form: \"Publish processed\"."
+  },
+  "createFormRoutePublished": "Route published",
+  "@createFormRoutePublished": {
+    "description": "Create form: \"Route published\"."
+  },
+  "createFormCreateAnother": "Create another",
+  "@createFormCreateAnother": {
+    "description": "Create form: \"Create another\"."
+  },
+  "createFormCreateAnotherEvent": "Create another Event",
+  "@createFormCreateAnotherEvent": {
+    "description": "Create form: \"Create another Event\"."
+  },
+  "createFormCreateAnotherFrom": "Create another from the last template",
+  "@createFormCreateAnotherFrom": {
+    "description": "Create form: \"Create another from ${controller.lastEventTemplate!.name}\"."
+  },
+  "createFormOpenRouteModerationQueue": "Open Route moderation queue",
+  "@createFormOpenRouteModerationQueue": {
+    "description": "Create form: \"Open Route moderation queue\"."
+  },
+  "createFormPublishStatus": "Publish status",
+  "@createFormPublishStatus": {
+    "description": "Create form: \"Publish status\"."
+  },
+  "createFormCouldNotRemove": "Could not remove the item. Try again.",
+  "@createFormCouldNotRemove": {
+    "description": "Create form: \"Could not remove: $error\"."
+  },
+  "createFormRemoveWithoutReview": "Remove without review",
+  "@createFormRemoveWithoutReview": {
+    "description": "Create form: \"Remove without review\"."
+  },
+  "createFormRemovingItemHereAppliesInstantlyNo": "Removing an item here applies instantly, with no moderation round trip. Adding or editing text still needs a new reviewed version — use Publish above for that.",
+  "@createFormRemovingItemHereAppliesInstantlyNo": {
+    "description": "Create form: \"Removing an item here applies instantly, no moderation round\"."
+  },
+  "createFormPublish": "Publish",
+  "@createFormPublish": {
+    "description": "Create form: \"Publish\"."
+  },
+  "createFormAcknowledgeComposition": "Acknowledge composition",
+  "@createFormAcknowledgeComposition": {
+    "description": "Create form: \"Acknowledge composition\"."
+  },
+  "createFormCompositionReviewed": "Composition reviewed",
+  "@createFormCompositionReviewed": {
+    "description": "Create form: \"Composition reviewed\"."
+  },
+  "createFormRefreshLivePreview": "Refresh live preview",
+  "@createFormRefreshLivePreview": {
+    "description": "Create form: \"Refresh live preview\"."
+  },
+  "createFormSomeItemsAreNoLongerAvailable": "Some items are no longer available — review before publishing.",
+  "@createFormSomeItemsAreNoLongerAvailable": {
+    "description": "Create form: \"Some items are no longer available — review before publishin\"."
+  },
+  "createFormNotEnoughPricedItemsYetSuggest": "Not enough priced items yet to suggest a budget.",
+  "@createFormNotEnoughPricedItemsYetSuggest": {
+    "description": "Create form: \"Not enough priced items yet to suggest a budget.\"."
+  },
+  "createFormSuggestFromItemPrices": "Suggest from item prices",
+  "@createFormSuggestFromItemPrices": {
+    "description": "Create form: \"Suggest from item prices\"."
+  },
+  "createFormNotSet": "Not set",
+  "@createFormNotSet": {
+    "description": "Create form: \"Not set\"."
+  },
+  "createFormBudgetIndicator": "Budget indicator",
+  "@createFormBudgetIndicator": {
+    "description": "Create form: \"Budget indicator\"."
+  },
+  "createFormCuratorNotes": "Curator notes",
+  "@createFormCuratorNotes": {
+    "description": "Create form: \"Curator notes\"."
+  },
+  "createFormItems": "Items",
+  "@createFormItems": {
+    "description": "Create form: \"Items\"."
+  },
+  "createFormOneReferencePointWholeGuideNot": "One reference point for the whole guide — not an item location.",
+  "@createFormOneReferencePointWholeGuideNot": {
+    "description": "Create form: \"One reference point for the whole guide — not an item locati\"."
+  },
+  "createFormAreaAnchor": "Area anchor",
+  "@createFormAreaAnchor": {
+    "description": "Create form: \"Area anchor\"."
+  },
+  "createFormTypeSearchTapMapBelow7": "Type to search, or tap the map below",
+  "@createFormTypeSearchTapMapBelow7": {
+    "description": "Create form: \"Type to search, or tap the map below (§7 Шаг 1)\"."
+  },
+  "createFormAreaCity": "Area or city",
+  "@createFormAreaCity": {
+    "description": "Create form: \"Area or city\"."
+  },
+  "createFormShortPitch": "Short pitch",
+  "@createFormShortPitch": {
+    "description": "Create form: \"Short pitch\"."
+  },
+  "createFormCollectionDraftDataBeingPrepared": "Collection draft data is being prepared…",
+  "@createFormCollectionDraftDataBeingPrepared": {
+    "description": "Create form: \"Collection draft data is being prepared…\"."
+  },
+  "createFormCollectionDraftBeingPrepared": "Collection draft is being prepared…",
+  "@createFormCollectionDraftBeingPrepared": {
+    "description": "Create form: \"Collection draft is being prepared…\"."
+  },
+  "createFormPreparingCollectionDraft": "Preparing Collection draft…",
+  "@createFormPreparingCollectionDraft": {
+    "description": "Create form: \"Preparing Collection draft…\"."
+  },
+  "createFormRemovePool": "Remove pool",
+  "@createFormRemovePool": {
+    "description": "Create form: \"Remove pool\"."
+  },
+  "createFormMovePoolDown": "Move pool down",
+  "@createFormMovePoolDown": {
+    "description": "Create form: \"Move pool down\"."
+  },
+  "createFormMovePoolUp": "Move pool up",
+  "@createFormMovePoolUp": {
+    "description": "Create form: \"Move pool up\"."
+  },
+  "createFormNeutralRoleIdsCommaSeparated": "Neutral role IDs, comma-separated",
+  "@createFormNeutralRoleIdsCommaSeparated": {
+    "description": "Create form: \"Neutral role IDs, comma-separated\"."
+  },
+  "createFormCapacityMode": "Capacity mode",
+  "@createFormCapacityMode": {
+    "description": "Create form: \"Capacity mode\"."
+  },
+  "createFormChannel": "Channel",
+  "@createFormChannel": {
+    "description": "Create form: \"Channel\"."
+  },
+  "createFormShape": "Shape",
+  "@createFormShape": {
+    "description": "Create form: \"Shape\"."
+  },
+  "createFormPublicPoolLabel": "Public pool label",
+  "@createFormPublicPoolLabel": {
+    "description": "Create form: \"Public pool label\"."
+  },
+  "createFormUnnamedPool": "Unnamed pool",
+  "@createFormUnnamedPool": {
+    "description": "Create form: \"Unnamed pool\"."
+  },
+  "createFormAddPool": "Add pool",
+  "@createFormAddPool": {
+    "description": "Create form: \"Add pool\"."
+  },
+  "createFormPoolCapacity": "Pool capacity",
+  "@createFormPoolCapacity": {
+    "description": "Create form: \"Pool capacity\"."
+  },
+  "createFormAdditionalViewsSameInventory": "Additional views of the same inventory",
+  "@createFormAdditionalViewsSameInventory": {
+    "description": "Create form: \"Additional views of the same inventory\"."
+  },
+  "createFormPrimaryInventoryShape": "Primary inventory shape *",
+  "@createFormPrimaryInventoryShape": {
+    "description": "Create form: \"Primary inventory shape *\"."
+  },
+  "createFormInventoryAuthority": "Inventory authority",
+  "@createFormInventoryAuthority": {
+    "description": "Create form: \"Inventory authority\"."
+  },
+  "createFormMaximumParticipants2": "Maximum participants *",
+  "@createFormMaximumParticipants2": {
+    "description": "Create form: \"Maximum participants *\"."
+  },
+  "createFormEventCapacity": "Event capacity",
+  "@createFormEventCapacity": {
+    "description": "Create form: \"Event capacity\"."
+  },
+  "createFormCapacityDeclaredLimitNotLiveParticipant": "Capacity is a declared limit. It is not a live participant count or transactional inventory balance.",
+  "@createFormCapacityDeclaredLimitNotLiveParticipant": {
+    "description": "Create form: \"Capacity is a declared limit. It is not a live participant c\"."
+  },
+  "createFormEventInventoryConfiguration": "Event inventory configuration",
+  "@createFormEventInventoryConfiguration": {
+    "description": "Create form: \"Event inventory configuration\"."
+  },
+  "createFormConfirm": "Confirm",
+  "@createFormConfirm": {
+    "description": "Create form: \"Confirm\"."
+  },
+  "createFormSave": "Save",
+  "@createFormSave": {
+    "description": "Create form: \"Save\"."
+  },
+  "createFormTemplateName": "Template name",
+  "@createFormTemplateName": {
+    "description": "Create form: \"Template name\"."
+  },
+  "createFormActiveDraftsPublishedEventsWillNot": "Active drafts and published Events will not be affected.",
+  "@createFormActiveDraftsPublishedEventsWillNot": {
+    "description": "Create form: \"Active drafts and published Events will not be affected.\"."
+  },
+  "createFormDeleteTemplate": "Delete template?",
+  "@createFormDeleteTemplate": {
+    "description": "Create form: \"Delete template?\"."
+  },
+  "createFormReusableContentWillReplacedWithCurrent": "The reusable content will be replaced with the current Event.",
+  "@createFormReusableContentWillReplacedWithCurrent": {
+    "description": "Create form: \"The reusable content will be replaced with the current Event\"."
+  },
+  "createFormReplaceTemplate": "Replace template?",
+  "@createFormReplaceTemplate": {
+    "description": "Create form: \"Replace template?\"."
+  },
+  "createFormRenameTemplate": "Rename template",
+  "@createFormRenameTemplate": {
+    "description": "Create form: \"Rename template\"."
+  },
+  "createFormDelete": "Delete",
+  "@createFormDelete": {
+    "description": "Create form: \"Delete\"."
+  },
+  "createFormReplaceWithCurrent": "Replace with current",
+  "@createFormReplaceWithCurrent": {
+    "description": "Create form: \"Replace with current\"."
+  },
+  "createFormRename": "Rename",
+  "@createFormRename": {
+    "description": "Create form: \"Rename\"."
+  },
+  "createFormTemplateActions": "Template actions",
+  "@createFormTemplateActions": {
+    "description": "Create form: \"Template actions\"."
+  },
+  "createFormLastTemplate": "Last template",
+  "@createFormLastTemplate": {
+    "description": "Create form: \"Last template\"."
+  },
+  "createFormUntitledEvent2": "Untitled Event",
+  "@createFormUntitledEvent2": {
+    "description": "Create form: \"Untitled Event\"."
+  },
+  "createFormNoTemplatesYetSaveCurrentEvent": "No templates yet. Save the current Event to reuse it.",
+  "@createFormNoTemplatesYetSaveCurrentEvent": {
+    "description": "Create form: \"No templates yet. Save the current Event to reuse it.\"."
+  },
+  "createFormYourEventTemplates": "Your Event templates",
+  "@createFormYourEventTemplates": {
+    "description": "Create form: \"Your Event templates\"."
+  },
+  "createFormSaveEventTemplate": "Save Event template",
+  "@createFormSaveEventTemplate": {
+    "description": "Create form: \"Save Event template\"."
+  },
+  "createFormNextCreateAnotherEventWillUse": "Next “Create another Event” will use the selected template.",
+  "@createFormNextCreateAnotherEventWillUse": {
+    "description": "Create form: \"Next “Create another Event” will use: ${template.name}\"."
+  },
+  "createFormSaveCurrent": "Save current",
+  "@createFormSaveCurrent": {
+    "description": "Create form: \"Save current\"."
+  },
+  "createFormChooseManage": "Choose or manage",
+  "@createFormChooseManage": {
+    "description": "Create form: \"Choose or manage\"."
+  },
+  "createFormEventTemplates": "Event templates",
+  "@createFormEventTemplates": {
+    "description": "Create form: \"Event templates\"."
+  },
+  "createFormClearClassification": "Clear classification",
+  "@createFormClearClassification": {
+    "description": "Create form: \"Clear classification\"."
+  },
+  "createFormAdditionalRolesUp3": "Additional roles (up to 3)",
+  "@createFormAdditionalRolesUp3": {
+    "description": "Create form: \"Additional roles (up to 3)\"."
+  },
+  "createFormPrimaryAttendeeRole": "Primary attendee role *",
+  "@createFormPrimaryAttendeeRole": {
+    "description": "Create form: \"Primary attendee role *\"."
+  },
+  "createFormExplainEventMechanics": "Explain the event mechanics *",
+  "@createFormExplainEventMechanics": {
+    "description": "Create form: \"Explain the event mechanics *\"."
+  },
+  "createFormEventMechanics": "Event mechanics *",
+  "@createFormEventMechanics": {
+    "description": "Create form: \"Event mechanics *\"."
+  },
+  "createFormUseSuggestion": "Use suggestion",
+  "@createFormUseSuggestion": {
+    "description": "Create form: \"Use suggestion\"."
+  },
+  "createFormOnlySuggestionConfirmChooseAnother": "This is only a suggestion. Confirm it or choose another.",
+  "@createFormOnlySuggestionConfirmChooseAnother": {
+    "description": "Create form: \"This is only a suggestion. Confirm it or choose another.\"."
+  },
+  "createFormMechanicsAttendeeRolesAreIndependentFrom": "Mechanics and attendee roles are independent from the category, format, access and price.",
+  "@createFormMechanicsAttendeeRolesAreIndependentFrom": {
+    "description": "Create form: \"Mechanics and attendee roles are independent from the catego\"."
+  },
+  "createFormHowDoesEventWork": "How does this event work?",
+  "@createFormHowDoesEventWork": {
+    "description": "Create form: \"How does this event work?\"."
+  },
+  "createFormEventClassification": "Event classification",
+  "@createFormEventClassification": {
+    "description": "Create form: \"Event classification\"."
+  },
+  "createFormSectionTitle": "Section title",
+  "@createFormSectionTitle": {
+    "description": "Create form: \"Section title\"."
+  },
+  "createFormNewSection": "New section",
+  "@createFormNewSection": {
+    "description": "Create form: \"New section\"."
+  },
+  "createFormNoLongerAvailable": "No longer available",
+  "@createFormNoLongerAvailable": {
+    "description": "Create form: \"No longer available\"."
+  },
+  "createFormNoItemsYet": "No items yet.",
+  "@createFormNoItemsYet": {
+    "description": "Create form: \"No items yet.\"."
+  },
+  "createFormRemoveSection": "Remove section",
+  "@createFormRemoveSection": {
+    "description": "Create form: \"Remove section\"."
+  },
+  "createFormCollection": "In this Collection ({count})",
+  "@createFormCollection": {
+    "description": "Collection items picker: header with the number of items.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "createFormResults": "Results",
+  "@createFormResults": {
+    "description": "Create form: \"Results\"."
+  },
+  "createFormSearch": "Search",
+  "@createFormSearch": {
+    "description": "Create form: \"Search\"."
+  },
+  "createFormSearchPlaceRouteBookableSessionClass": "Search Place, Route, Bookable Session, Class/Workshop, Rental",
+  "@createFormSearchPlaceRouteBookableSessionClass": {
+    "description": "Create form: \"Search Place, Route, Bookable Session, Class/Workshop, Renta\"."
+  },
+  "createFormChooseTypeOpenItsCreationPage": "Choose a type to open its creation page.",
+  "@createFormChooseTypeOpenItsCreationPage": {
+    "description": "Create form: \"Choose a type to open its creation page.\"."
+  },
+  "createFormWhatDoYouWantCreate": "What do you want to create?",
+  "@createFormWhatDoYouWantCreate": {
+    "description": "Create form: \"What do you want to create?\"."
+  },
+  "createFormCreateHub": "Create Hub",
+  "@createFormCreateHub": {
+    "description": "Create form: \"Create Hub\"."
+  },
+  "createFormRefreshPreview": "Refresh preview",
+  "@createFormRefreshPreview": {
+    "description": "Create form: \"Refresh preview\"."
+  },
+  "createFormCheckingLocalFixture": "Checking local fixture…",
+  "@createFormCheckingLocalFixture": {
+    "description": "Create form: \"Checking local fixture…\"."
+  },
+  "createFormLocalMockPreviewNotLiveAvailability": "Local mock preview — not live availability",
+  "@createFormLocalMockPreviewNotLiveAvailability": {
+    "description": "Create form: \"Local mock preview — not live availability\"."
+  },
+  "createFormLocalMockAvailabilityPreview": "Local mock availability preview",
+  "@createFormLocalMockAvailabilityPreview": {
+    "description": "Create form: \"Local mock availability preview\"."
+  },
+  "createFormDuplicateListing": "Duplicate this listing",
+  "@createFormDuplicateListing": {
+    "description": "Create form: \"Duplicate this listing\"."
+  },
+  "createFormSaveCurrentAsTemplate": "Save current as template",
+  "@createFormSaveCurrentAsTemplate": {
+    "description": "Create form: \"Save current as template\"."
+  },
+  "createFormUse": "Use",
+  "@createFormUse": {
+    "description": "Create form: \"Use\"."
+  },
+  "createFormNoSavedTemplatesYet": "No saved templates yet.",
+  "@createFormNoSavedTemplatesYet": {
+    "description": "Create form: \"No saved templates yet.\"."
+  },
+  "createFormTemplates": "Templates",
+  "@createFormTemplates": {
+    "description": "Create form: \"Templates\"."
+  },
+  "createFormWhyHere": "Why is it here?",
+  "@createFormWhyHere": {
+    "description": "Create form: \"Why is it here?\"."
+  },
+  "createFormFeatured": "Featured",
+  "@createFormFeatured": {
+    "description": "Create form: \"Featured\"."
+  },
+  "createFormAddItemsPreviousStepFirst": "Add items in the previous step first.",
+  "@createFormAddItemsPreviousStepFirst": {
+    "description": "Create form: \"Add items in the previous step first.\"."
+  },
+  "createFormUpToPrice": "up to {price}",
+  "@createFormUpToPrice": {
+    "description": "Create seed chip: budget limit; price is the seed value as given.",
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "20"
+      }
+    }
+  },
+  "createFormDistanceKm": "{km} km",
+  "@createFormDistanceKm": {
+    "description": "Create seed chip: search radius in kilometres.",
+    "placeholders": {
+      "km": {
+        "type": "String",
+        "example": "5"
+      }
+    }
+  },
+  "createFormMinutes": "{count} min",
+  "@createFormMinutes": {
+    "description": "Create seed chip: duration in minutes.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "90"
+      }
+    }
+  },
+  "createFormOwner": "Owner",
+  "@createFormOwner": {
+    "description": "Place relationship: owner."
+  },
+  "createFormVisitor": "Visitor",
+  "@createFormVisitor": {
+    "description": "Place relationship: visitor."
+  },
+  "createFormUnknown": "Unknown",
+  "@createFormUnknown": {
+    "description": "Place entry type: unknown."
+  },
+  "createFormOpen247": "Open 24/7",
+  "@createFormOpen247": {
+    "description": "Place hours mode: always open."
+  },
+  "createStepPlaceIdentityTitle": "About",
+  "@createStepPlaceIdentityTitle": {
+    "description": "Create place step \"identity\" title."
+  },
+  "createStepPlaceIdentityDescription": "Name, category and only the details this place needs",
+  "@createStepPlaceIdentityDescription": {
+    "description": "Create place step \"identity\" description."
+  },
+  "createStepPlaceVisitTitle": "Visit",
+  "@createStepPlaceVisitTitle": {
+    "description": "Create place step \"visit\" title."
+  },
+  "createStepPlaceVisitDescription": "Confirmed map point and relevant visit information",
+  "@createStepPlaceVisitDescription": {
+    "description": "Create place step \"visit\" description."
+  },
+  "createStepPlacePublishTitle": "Publish",
+  "@createStepPlacePublishTitle": {
+    "description": "Create place step \"publish\" title."
+  },
+  "createStepPlacePublishDescription": "Readiness, optional improvements and final checks",
+  "@createStepPlacePublishDescription": {
+    "description": "Create place step \"publish\" description."
+  },
+  "createStepEventBasicsMediaTitle": "Basics",
+  "@createStepEventBasicsMediaTitle": {
+    "description": "Create event step \"basics_media\" title."
+  },
+  "createStepEventBasicsMediaDescription": "Identity, category, description and media",
+  "@createStepEventBasicsMediaDescription": {
+    "description": "Create event step \"basics_media\" description."
+  },
+  "createStepEventLocationScheduleTitle": "When & where",
+  "@createStepEventLocationScheduleTitle": {
+    "description": "Create event step \"location_schedule\" title."
+  },
+  "createStepEventLocationScheduleDescription": "Format, location, timezone and occurrences",
+  "@createStepEventLocationScheduleDescription": {
+    "description": "Create event step \"location_schedule\" description."
+  },
+  "createStepEventRequirementsTitle": "Requirements",
+  "@createStepEventRequirementsTitle": {
+    "description": "Create event step \"requirements\" title."
+  },
+  "createStepEventRequirementsDescription": "Audience, amenities and participation rules",
+  "@createStepEventRequirementsDescription": {
+    "description": "Create event step \"requirements\" description."
+  },
+  "createStepEventPriceParticipantsTitle": "Price & people",
+  "@createStepEventPriceParticipantsTitle": {
+    "description": "Create event step \"price_participants\" title."
+  },
+  "createStepEventPriceParticipantsDescription": "Money, admission, capacity and inventory",
+  "@createStepEventPriceParticipantsDescription": {
+    "description": "Create event step \"price_participants\" description."
+  },
+  "createStepEventPreviewPublishTitle": "Publish",
+  "@createStepEventPreviewPublishTitle": {
+    "description": "Create event step \"preview_publish\" title."
+  },
+  "createStepEventPreviewPublishDescription": "Preview, readiness and moderation submission",
+  "@createStepEventPreviewPublishDescription": {
+    "description": "Create event step \"preview_publish\" description."
+  },
+  "createStepActivityBasicsTitle": "About",
+  "@createStepActivityBasicsTitle": {
+    "description": "Create activity step \"basics\" title."
+  },
+  "createStepActivityBasicsDescription": "Title, category and media",
+  "@createStepActivityBasicsDescription": {
+    "description": "Create activity step \"basics\" description."
+  },
+  "createStepActivityLocationTitle": "Location",
+  "@createStepActivityLocationTitle": {
+    "description": "Create activity step \"location\" title."
+  },
+  "createStepActivityLocationDescription": "Where to go and how to get there",
+  "@createStepActivityLocationDescription": {
+    "description": "Create activity step \"location\" description."
+  },
+  "createStepActivityWhenForTitle": "When & for whom",
+  "@createStepActivityWhenForTitle": {
+    "description": "Create activity step \"whenFor\" title."
+  },
+  "createStepActivityWhenForDescription": "Best time, duration and group size",
+  "@createStepActivityWhenForDescription": {
+    "description": "Create activity step \"whenFor\" description."
+  },
+  "createStepActivityPublishTitle": "Publish",
+  "@createStepActivityPublishTitle": {
+    "description": "Create activity step \"publish\" title."
+  },
+  "createStepActivityPublishDescription": "Preview and send",
+  "@createStepActivityPublishDescription": {
+    "description": "Create activity step \"publish\" description."
+  },
+  "createStepCollectionBasicsTitle": "Basics & media",
+  "@createStepCollectionBasicsTitle": {
+    "description": "Create collection step \"basics\" title."
+  },
+  "createStepCollectionBasicsDescription": "Title, pitch, cover and area",
+  "@createStepCollectionBasicsDescription": {
+    "description": "Create collection step \"basics\" description."
+  },
+  "createStepCollectionItemsTitle": "Items",
+  "@createStepCollectionItemsTitle": {
+    "description": "Create collection step \"items\" title."
+  },
+  "createStepCollectionItemsDescription": "Search and add existing places, routes and more",
+  "@createStepCollectionItemsDescription": {
+    "description": "Create collection step \"items\" description."
+  },
+  "createStepCollectionCuratorNotesTitle": "Curator notes",
+  "@createStepCollectionCuratorNotesTitle": {
+    "description": "Create collection step \"curatorNotes\" title."
+  },
+  "createStepCollectionCuratorNotesDescription": "Say why each item is here and pick your highlights",
+  "@createStepCollectionCuratorNotesDescription": {
+    "description": "Create collection step \"curatorNotes\" description."
+  },
+  "createStepCollectionBudgetTitle": "Budget & publisher",
+  "@createStepCollectionBudgetTitle": {
+    "description": "Create collection step \"budget\" title."
+  },
+  "createStepCollectionBudgetDescription": "Set a budget hint, publisher, market and visibility",
+  "@createStepCollectionBudgetDescription": {
+    "description": "Create collection step \"budget\" description."
+  },
+  "createStepCollectionPublishTitle": "Preview & publish",
+  "@createStepCollectionPublishTitle": {
+    "description": "Create collection step \"publish\" title."
+  },
+  "createStepCollectionPublishDescription": "Review the composition and send",
+  "@createStepCollectionPublishDescription": {
+    "description": "Create collection step \"publish\" description."
+  },
+  "createStepRentalListingTitle": "Listing and media",
+  "@createStepRentalListingTitle": {
+    "description": "Create rental step \"listing\" title."
+  },
+  "createStepRentalListingDescription": "Title, category and cover for the item or fleet",
+  "@createStepRentalListingDescription": {
+    "description": "Create rental step \"listing\" description."
+  },
+  "createStepRentalInventoryTitle": "Inventory",
+  "@createStepRentalInventoryTitle": {
+    "description": "Create rental step \"inventory\" title."
+  },
+  "createStepRentalInventoryDescription": "Groups of interchangeable units, condition and quantity",
+  "@createStepRentalInventoryDescription": {
+    "description": "Create rental step \"inventory\" description."
+  },
+  "createStepRentalAvailabilityTitle": "Availability",
+  "@createStepRentalAvailabilityTitle": {
+    "description": "Create rental step \"availability\" title."
+  },
+  "createStepRentalAvailabilityDescription": "Confirmed coverage window and manual occupancy blocks",
+  "@createStepRentalAvailabilityDescription": {
+    "description": "Create rental step \"availability\" description."
+  },
+  "createStepRentalHandoverTitle": "Handover and location",
+  "@createStepRentalHandoverTitle": {
+    "description": "Create rental step \"handover\" title."
+  },
+  "createStepRentalHandoverDescription": "Pickup area, schedule and optional delivery",
+  "@createStepRentalHandoverDescription": {
+    "description": "Create rental step \"handover\" description."
+  },
+  "createStepRentalTermsTitle": "Duration and safety",
+  "@createStepRentalTermsTitle": {
+    "description": "Create rental step \"terms\" title."
+  },
+  "createStepRentalTermsDescription": "Offered duration range, age, ID and safety requirements",
+  "@createStepRentalTermsDescription": {
+    "description": "Create rental step \"terms\" description."
+  },
+  "createStepRentalPricingTitle": "Pricing and deposit",
+  "@createStepRentalPricingTitle": {
+    "description": "Create rental step \"pricing\" title."
+  },
+  "createStepRentalPricingDescription": "Rate plan, deposit policy and damage/cancellation terms",
+  "@createStepRentalPricingDescription": {
+    "description": "Create rental step \"pricing\" description."
+  },
+  "createStepRentalFulfillmentTitle": "External fulfillment and policies",
+  "@createStepRentalFulfillmentTitle": {
+    "description": "Create rental step \"fulfillment\" title."
+  },
+  "createStepRentalFulfillmentDescription": "External booking link and destination warning preview",
+  "@createStepRentalFulfillmentDescription": {
+    "description": "Create rental step \"fulfillment\" description."
+  },
+  "createStepRentalReviewTitle": "Review and submit",
+  "@createStepRentalReviewTitle": {
+    "description": "Create rental step \"review\" title."
+  },
+  "createStepRentalReviewDescription": "Public/private preview, attestation and submission",
+  "@createStepRentalReviewDescription": {
+    "description": "Create rental step \"review\" description."
+  },
+  "createPlacePolicyLabel": "{type, select, simplePoi{Simple point of interest}publicSpace{Public space}naturalDestination{Natural destination}culturalVenue{Cultural venue}hospitality{Food or hospitality venue}activityVenue{Activity or service venue}paidAttraction{Managed attraction}balanced{General place} other{General place}}",
+  "@createPlacePolicyLabel": {
+    "description": "Place creation profile name; type is the stable PlaceCreationProfileId name.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "publicSpace"
+      }
+    }
+  },
+  "createPlacePolicyDescription": "{type, select, simplePoi{A landmark people can identify and visit without managed access.}publicSpace{An open public area with optional access restrictions.}naturalDestination{A natural point or area where access facts may be unknown.}culturalVenue{A managed museum, gallery, cinema or cultural venue.}hospitality{A managed venue where spend matters but admission does not.}activityVenue{A managed venue with optional booking, spend and facilities.}paidAttraction{A managed attraction that may have admission and facilities.}balanced{A safe fallback with no invented opening or pricing facts.} other{A safe fallback with no invented opening or pricing facts.}}",
+  "@createPlacePolicyDescription": {
+    "description": "Place creation profile explanation; type is the stable PlaceCreationProfileId name.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "publicSpace"
+      }
+    }
+  },
+  "createAmenityLabel": "{value, select, wheelchair_accessible{Wheelchair accessible}accessible_toilet{Accessible toilet}parking{Parking}bike_parking{Bike parking}public_transport_nearby{Public transport nearby}public_transport{Public transport nearby}family_friendly{Family friendly}baby_changing{Baby changing}pets_allowed{Pets allowed}toilet{Toilet}wifi{Wi-Fi}drinking_water{Drinking water}food_available{Food available}outdoor_seating{Outdoor seating}shelter{Weather shelter}weather_shelter{Weather shelter}first_aid{First aid}shower{Shower}towels{Towels provided}changing_room{Changing room}equipment_provided{Equipment provided} other{Amenity}}",
+  "@createAmenityLabel": {
+    "description": "Amenity name; value is the stable amenity id.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "parking"
+      }
+    }
+  },
+  "createAmenityGroup": "{value, select, accessibility{Accessibility}audience{Audience}facilities{Facilities}family{Family}food{Food}outdoor{Outdoor}pets{Pets}safety{Safety}transport{Transport}wellness{Wellness} other{Other}}",
+  "@createAmenityGroup": {
+    "description": "Amenity group name; value is the stable group id.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "transport"
+      }
+    }
+  },
+  "createFormSaved": "Saved",
+  "@createFormSaved": {
+    "description": "Create: the draft is saved."
+  },
+  "createFormSaving": "Saving…",
+  "@createFormSaving": {
+    "description": "Create: the draft is being saved."
+  },
+  "createOption": "{value, select, EventCapacityMode_known{Known limit}EventCapacityMode_unknown{Unknown}EventCapacityMode_unlimited{Unlimited}EventFormat_offline{In person}EventFormat_online{Online}EventFormat_hybrid{Hybrid}EventOnlineAccessMode_publicLink{Public link}EventOnlineAccessMode_externalRegistration{External registration}EventOnlineAccessMode_internalBooking{Internal booking}EventPaymentCollectionMode_none{No payment}EventPaymentCollectionMode_onsite{On site}EventPaymentCollectionMode_external{External}EventPaymentCollectionMode_internal{In Recharge}EventPricingMode_free{Free}EventPricingMode_fixed{Fixed price}EventPricingMode_ticketTypes{Ticket types}EventPricingMode_donation{Donation}EventRecurrenceEndMode_never{Never}EventRecurrenceEndMode_untilDate{On a date}EventRecurrenceEndMode_occurrenceCount{After a number of times}EventRecurrenceFrequency_daily{Daily}EventRecurrenceFrequency_weekly{Weekly}EventRecurrenceFrequency_monthly{Monthly}EventRecurrenceFrequency_yearly{Yearly}EventRegistrationMode_none{No registration}EventRegistrationMode_external{External}EventRegistrationMode_internal{In Recharge}EventScheduleMode_oneTime{One time}EventScheduleMode_multiDate{Several dates}EventScheduleMode_recurring{Recurring}EventVisibility_public{Public}EventVisibility_unlisted{By link}EventVisibility_private{Private}EventAdmissionPreset_noRegistration{No registration}EventAdmissionPreset_freeRsvp{Free RSVP}EventAdmissionPreset_organizerApplication{Application to the organizer}EventAdmissionPreset_externalRegistration{External registration}EventAdmissionPreset_externalTickets{External tickets}EventAdmissionPreset_rechargeTickets{Recharge tickets}EventAdmissionPreset_teamRegistration{Team registration}AdmissionMode_openEntry{Open entry}AdmissionMode_rsvp{RSVP}AdmissionMode_booking{Booking}AdmissionMode_application{Application}AdmissionMode_ticket{Ticket}AdmissionMode_teamRegistration{Team registration}ConfirmationMode_none{No confirmation}ConfirmationMode_instant{Instant}ConfirmationMode_manualApproval{Manual approval}ConfirmationMode_lottery{Lottery}ConfirmationMode_providerManaged{By the provider}WaitlistPromotionMode_organizerManaged{By the organizer}WaitlistPromotionMode_fifoAutomatic{Automatic, first come}GuestPolicyMode_none{No guests}GuestPolicyMode_plusOne{Plus one}GuestPolicyMode_plusN{Plus N}GuestPolicyMode_namedGuestsOnly{Named guests only}EligibilityRuleKind_invitation{Invitation}EligibilityRuleKind_accessCode{Access code}EligibilityRuleKind_membership{Membership}EligibilityRuleKind_allowlist{Guest list}EligibilityRuleKind_qualification{Qualification}EligibilityRuleKind_accreditation{Accreditation}EligibilityRuleKind_ageRequirement{Age requirement}EligibilityRuleKind_waiver{Waiver}EventAccessWindowKind_absolute{Fixed dates}EventAccessWindowKind_occurrenceRelative{Relative to each date}InventoryShape_generalCapacity{General capacity}InventoryShape_sharedTicketPool{Shared ticket pool}InventoryShape_separateTicketPools{Separate ticket pools}InventoryShape_zones{Zones}InventoryShape_assignedSeating{Assigned seats}InventoryShape_teamSlots{Team slots}InventoryShape_participantRoles{Participant roles}InventoryShape_roleBalancedSlots{Role-balanced slots}InventoryShape_tableInventory{Tables}InventoryShape_timeSlotInventory{Time slots}InventoryChannel_onsite{On site}InventoryChannel_online{Online}InventoryChannel_any{Any}InventoryAuthority_none{Nobody}InventoryAuthority_recharge{Recharge}InventoryAuthority_externalProvider{External provider}ActivityContributionKind_purchase{Purchase}ActivityContributionKind_donation{Donation}ActivityContributionKind_other{Other}ActivitySeason_winter{Winter}ActivitySeason_spring{Spring}ActivitySeason_summer{Summer}ActivitySeason_autumn{Autumn}ActivitySeason_any{Any season}ActivityTimeOfDay_morning{Morning}ActivityTimeOfDay_afternoon{Afternoon}ActivityTimeOfDay_evening{Evening}ActivityTimeOfDay_night{Night}ActivityTimeOfDay_any{Any time}PlaceOperationalStatus_operating{Operating}PlaceOperationalStatus_temporarilyClosed{Temporarily closed}PlaceOperationalStatus_permanentlyClosed{Permanently closed}RentalLocationDisclosure_approximateArea{Approximate area (default)}RentalLocationDisclosure_publicBusinessAddress{Public business address}RentalScheduleMode_openingHours{Opening hours}RentalScheduleMode_byArrangement{By arrangement}RentalBillingUnit_hour{Per hour}RentalBillingUnit_day{Per day}RentalBillingUnit_week{Per week}RentalCondition_rentalNew{New}RentalCondition_likeNew{Like new}RentalCondition_good{Good}RentalCondition_worn{Worn}RentalDepositCollectionMethod_none{No deposit}RentalDepositCollectionMethod_atHandover{At handover}RentalDepositCollectionMethod_externalProvider{External provider}RentalDepositCollectionMethod_other{Other}VisibilityType_public{Public}VisibilityType_unlisted{By link}VisibilityType_private{Private}PublishStatus_draft{Draft}PublishStatus_pendingReview{Pending review}PublishStatus_published{Published}PublishStatus_archived{Archived}PublishStatus_hidden{Hidden}PublishStatus_deleted{Deleted} other{Other}}",
+  "@createOption": {
+    "description": "Create form option label; option is \"<EnumType>_<stable value>\".",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "EventFormat_online"
+      }
+    }
+  },
+  "createFormCityRequired": "City *",
+  "@createFormCityRequired": {
+    "description": "Create field: city (required)."
+  },
+  "createFormLatitudeRequired": "Latitude *",
+  "@createFormLatitudeRequired": {
+    "description": "Create field: latitude (required)."
+  },
+  "createFormLongitudeRequired": "Longitude *",
+  "@createFormLongitudeRequired": {
+    "description": "Create field: longitude (required)."
+  },
+  "createFormCategoryRequired": "Category *",
+  "@createFormCategoryRequired": {
+    "description": "Create field: category (required)."
+  },
+  "createFormSubcategoryRequired": "Subcategory *",
+  "@createFormSubcategoryRequired": {
+    "description": "Create field: subcategory (required)."
+  },
+  "createFormTitleRequired": "Title *",
+  "@createFormTitleRequired": {
+    "description": "Create field: title (required)."
+  },
+  "createFormOccurrences": "{count, plural, one{{count} date} other{{count} dates}}",
+  "@createFormOccurrences": {
+    "description": "Event preview: number of dates.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "createFormAdmissionLine": "Admission: {value}",
+  "@createFormAdmissionLine": {
+    "description": "Event preview: admission summary; value is a list of localized option labels.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "Public"
+      }
+    }
+  },
+  "createFormVisibilityLine": "Visibility: {value}",
+  "@createFormVisibilityLine": {
+    "description": "Preview: visibility; value is a localized option label.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "Public"
+      }
+    }
+  },
+  "createFormBlockingIssues": "{count, plural, one{{count} problem blocks publishing} other{{count} problems block publishing}}",
+  "@createFormBlockingIssues": {
+    "description": "Event preview: number of blocking problems.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "createFormSending": "Sending…",
+  "@createFormSending": {
+    "description": "Create: the draft is being sent."
+  },
+  "createFormPublishing": "Publishing…",
+  "@createFormPublishing": {
+    "description": "Create: the draft is being published."
+  },
+  "createFormGroup": "Group",
+  "@createFormGroup": {
+    "description": "Rental: fallback name of an unnamed item group."
+  },
+  "createFormNoTitleYet": "(no title yet)",
+  "@createFormNoTitleYet": {
+    "description": "Preview: no title yet."
+  },
+  "createFormUnits": "{count, plural, one{{count} unit} other{{count} units}}",
+  "@createFormUnits": {
+    "description": "Rental preview: number of units.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "createFormDepositLine": "Deposit: {price}",
+  "@createFormDepositLine": {
+    "description": "Rental preview: deposit amount, formatted with its currency.",
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "€20.00"
+      }
+    }
+  },
+  "createFormGroupMaxPeople": "Group, max people",
+  "@createFormGroupMaxPeople": {
+    "description": "Activity field: group size, maximum people."
+  },
+  "createFormPublisherLine": "{type, select, user{Publisher: your profile} page{Publisher: a professional page} other{Publisher: not set}}",
+  "@createFormPublisherLine": {
+    "description": "Collection preview: who publishes; type is the stable publisher type.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "user"
+      }
+    }
+  },
+  "createFormDraft": "Draft",
+  "@createFormDraft": {
+    "description": "Create: the draft has unsaved state."
+  },
+  "createFormDetails": "Details",
+  "@createFormDetails": {
+    "description": "Create form section: details."
+  },
+  "createFormAvailability": "Availability",
+  "@createFormAvailability": {
+    "description": "Create form section: availability."
+  },
+  "createFormClosed": "Closed",
+  "@createFormClosed": {
+    "description": "Opening hours rule: closed all day."
+  },
+  "createObjectTypeName": "{type, select, event{Event}activity{Recharge activity}route{Route}place{Place}session{Bookable session}scenario{Scenario}quickPlan{Legacy Quick Plan}findPeople{Find people}classWorkshop{Class / workshop}rental{Rental / equipment}collection{Collection / guide} other{Object}}",
+  "@createObjectTypeName": {
+    "description": "Create object type name. type is the stable CreateObjectType name.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "event"
+      }
+    }
+  },
+  "createObjectTypeDescription": "{type, select, event{Public activity with time, place, and attendees}activity{Lightweight activity such as a walk or reset}route{Continuous track with anchors, segments and route details}place{A permanent physical place, venue, public space or landmark}session{Time-based service, class, table, court, or session}scenario{City, day, weekend or trip plan made of independent stops}quickPlan{Personal lightweight plan kept for read compatibility}findPeople{Find company for a specific activity}classWorkshop{A guided class, workshop, or hands-on experience}rental{Equipment or transport available for rent}collection{A curated collection of places and ideas} other{Create an object}}",
+  "@createObjectTypeDescription": {
+    "description": "Create object type explanation. type is the stable CreateObjectType name.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "event"
+      }
+    }
+  },
+  "createObjectTypeLocationLabel": "{type, select, event{Venue}activity{Where to go}route{Start point}place{Place name}session{Bookable venue}scenario{Area or city}quickPlan{Meeting place}findPeople{Meeting place}classWorkshop{Class venue}rental{Pickup place}collection{Area} other{Location}}",
+  "@createObjectTypeLocationLabel": {
+    "description": "Create form location field label. type is the stable CreateObjectType name.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "event"
+      }
+    }
+  },
+  "createObjectTypePriceLabel": "{type, select, event{Ticket or entry price}activity{}route{Route budget}place{Typical spend}session{Booking price}scenario{Scenario budget}quickPlan{Expected spend}findPeople{Expected spend}classWorkshop{Participation price}rental{Rental price}collection{Collection budget} other{Price}}",
+  "@createObjectTypePriceLabel": {
+    "description": "Create form price field label. type is the stable CreateObjectType name.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "event"
+      }
+    }
+  },
+  "createObjectTypeNewTitle": "{type, select, event{New event}activity{New recharge activity}route{New route}place{New place}session{New bookable session}scenario{New scenario}quickPlan{New legacy quick plan}findPeople{New find people}classWorkshop{New class / workshop}rental{New rental / equipment}collection{New collection / guide} other{New object}}",
+  "@createObjectTypeNewTitle": {
+    "description": "Create app bar title for a new object. type is the stable CreateObjectType name.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "event"
+      }
+    }
+  },
+  "createObjectTypeCreateTitle": "{type, select, event{Create Event}activity{Create Recharge activity}route{Create Route}place{Create Place}session{Create Bookable session}scenario{Create Scenario}quickPlan{Create Legacy Quick Plan}findPeople{Create Find people}classWorkshop{Create Class / workshop}rental{Create Rental / equipment}collection{Create Collection / guide} other{Create}}",
+  "@createObjectTypeCreateTitle": {
+    "description": "Create page title. type is the stable CreateObjectType name.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "event"
+      }
+    }
+  },
+  "createObjectTypeFreeToggle": "{type, select, event{Free event}activity{Free recharge activity}route{Free route}place{Free place}session{Free bookable session}scenario{Free scenario}quickPlan{Free legacy quick plan}findPeople{Free find people}classWorkshop{Free class / workshop}rental{Free rental / equipment}collection{Free collection / guide} other{Free}}",
+  "@createObjectTypeFreeToggle": {
+    "description": "Create form: the object is free. type is the stable CreateObjectType name.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "event"
+      }
+    }
+  },
+  "createObjectTypeStartUtc": "{type, select, event{Event start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}activity{Recharge activity start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}route{Route start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}place{Place start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}session{Bookable session start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}scenario{Scenario start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}quickPlan{Legacy Quick Plan start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}findPeople{Find people start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}classWorkshop{Class / workshop start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}rental{Rental / equipment start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}collection{Collection / guide start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *} other{Start date and time, UTC *}}",
+  "@createObjectTypeStartUtc": {
+    "description": "Create form: start instant in UTC. type is the stable CreateObjectType name.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "event"
+      }
+    }
+  },
+  "createFormNowStatus": "Now: {value}.",
+  "@createFormNowStatus": {
+    "description": "Create success: the draft is now in a status; value is a localized status label.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "Published"
+      }
+    }
   }
 }

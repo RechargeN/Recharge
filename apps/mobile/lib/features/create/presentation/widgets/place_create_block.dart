@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
 import '../../../../core/parsing/input_parsers.dart';
 
 import '../../application/controllers/create_controller.dart';
@@ -20,6 +21,7 @@ import '../../domain/entities/place_creation_policy.dart';
 import '../../domain/entities/place_validation_issue.dart';
 import 'location_search_suggestion_list.dart';
 import 'create_texts.dart';
+import 'create_form_texts.dart';
 
 class PlaceCreateBlock extends StatefulWidget {
   const PlaceCreateBlock({
@@ -89,10 +91,10 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
     final CreateDraftEntity draft = widget.state.draft;
     final PlaceDraftData? place = draft.placeData;
     if (place == null) {
-      return const Card(
+      return Card(
         child: Padding(
           padding: EdgeInsets.all(16),
-          child: Text('Place data is being prepared…'),
+          child: Text(context.l10n.createFormPlaceDataBeingPrepared),
         ),
       );
     }
@@ -105,11 +107,11 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
         if (!widget.controller.canManagePlace) ...<Widget>[
           Card(
             color: Theme.of(context).colorScheme.errorContainer,
-            child: const ListTile(
+            child: ListTile(
               leading: Icon(Icons.lock_outline),
               title: Text('Read-only draft'),
               subtitle: Text(
-                'The create.place capability is required to edit or publish.',
+                context.l10n.createFormCreatePlaceCapabilityRequiredEditPublish,
               ),
             ),
           ),
@@ -176,12 +178,12 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
         .where((CreateTaxonomySubcategory item) => item.id == draft.subcategory)
         .firstOrNull;
     return _StepCard(
-      title: 'What is this place?',
-      subtitle: 'Choose a category and the form keeps only relevant fields.',
+      title: context.l10n.createFormWhatPlace,
+      subtitle: context.l10n.createFormChooseCategoryFormKeepsOnlyRelevant,
       children: <Widget>[
         _textField(
           id: 'title',
-          label: 'Place name *',
+          label: context.l10n.createFormPlaceName,
           value: draft.title,
           maxLength: 100,
           onChanged: _onTitleChanged,
@@ -202,7 +204,10 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
         DropdownButtonFormField<CreateTaxonomyCategory>(
           isExpanded: true,
           initialValue: selectedCategory,
-          decoration: _decoration('Category *', 'mainCategory'),
+          decoration: _decoration(
+            context.l10n.createFormCategoryRequired,
+            'mainCategory',
+          ),
           items: categories
               .map(
                 (CreateTaxonomyCategory category) =>
@@ -227,7 +232,10 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
         DropdownButtonFormField<CreateTaxonomySubcategory>(
           isExpanded: true,
           initialValue: selectedSubcategory,
-          decoration: _decoration('Subcategory *', 'subcategory'),
+          decoration: _decoration(
+            context.l10n.createFormSubcategoryRequired,
+            'subcategory',
+          ),
           items:
               (selectedCategory?.subcategories ??
                       const <CreateTaxonomySubcategory>[])
@@ -256,8 +264,10 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             color: Theme.of(context).colorScheme.secondaryContainer,
             child: ListTile(
               leading: const Icon(Icons.auto_awesome_outlined),
-              title: Text(policy.label),
-              subtitle: Text(policy.description),
+              title: Text(context.l10n.createPlacePolicyLabel(policy.id.name)),
+              subtitle: Text(
+                context.l10n.createPlacePolicyDescription(policy.id.name),
+              ),
             ),
           ),
         ],
@@ -275,22 +285,22 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
           maxLines: 3,
           helper: policy.shortDescription.isRequired
               ? '20–180 characters.'
-              : 'You can add or improve this later.',
+              : context.l10n.createFormYouCanAddImproveLater,
           onChanged: widget.controller.updateShortDescription,
         ),
         const SizedBox(height: 4),
         ExpansionTile(
           key: const ValueKey<String>('place-more-about'),
           tilePadding: EdgeInsets.zero,
-          title: const Text('More about this place'),
-          subtitle: const Text(
-            'Optional description, language and attribution',
+          title: Text(context.l10n.createFormMoreAboutPlace),
+          subtitle: Text(
+            context.l10n.createFormOptionalDescriptionLanguageAttribution,
           ),
           children: <Widget>[
             _textField(
               id: 'full-description',
               errorFieldId: 'fullDescription',
-              label: 'Detailed description',
+              label: context.l10n.createFormDetailedDescription,
               value: draft.fullDescription,
               maxLength: 5000,
               maxLines: 5,
@@ -303,7 +313,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                 key: const ValueKey<String>('place-relationship'),
                 initialValue: place.relationshipToPlace,
                 decoration: _decoration(
-                  'Your relationship',
+                  context.l10n.createFormYourRelationship,
                   'relationshipToPlace',
                 ),
                 items: PlaceRelationship.values
@@ -311,7 +321,9 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                       (PlaceRelationship value) =>
                           DropdownMenuItem<PlaceRelationship>(
                             value: value,
-                            child: Text(_relationshipLabel(value)),
+                            child: Text(
+                              _relationshipLabel(context.l10n, value),
+                            ),
                           ),
                     )
                     .toList(growable: false),
@@ -322,19 +334,22 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                 },
               )
             else
-              const ListTile(
+              ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(Icons.people_outline),
-                title: Text('Community contribution'),
+                title: Text(context.l10n.createFormCommunityContribution),
                 subtitle: Text(
-                  'Public landmarks do not require an ownership claim.',
+                  context.l10n.createFormPublicLandmarksDoNotRequireOwnership,
                 ),
               ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               isExpanded: true,
               initialValue: place.contentLocale,
-              decoration: _decoration('Content language', 'contentLocale'),
+              decoration: _decoration(
+                context.l10n.createFormContentLanguage,
+                'contentLocale',
+              ),
               items: widget.controller.supportedContentLocales
                   .map(
                     (String locale) => DropdownMenuItem<String>(
@@ -387,7 +402,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
     return ExpansionTile(
       initiallyExpanded: result.profile.requiredFieldIds.isNotEmpty,
       tilePadding: EdgeInsets.zero,
-      title: const Text('Category details'),
+      title: Text(context.l10n.createFormCategoryDetails),
       subtitle: Text('Profile: ${result.profile.id.replaceAll('_', ' ')}'),
       children: result.fields
           .map((field) {
@@ -436,19 +451,18 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
       final bool? confirmed = await showDialog<bool>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-          title: const Text('Change category?'),
-          content: const Text(
-            'Compatible category details will be kept. Fields that do not '
-            'belong to the new profile will be removed from publication.',
+          title: Text(context.l10n.createFormChangeCategory),
+          content: Text(
+            context.l10n.createFormCompatibleCategoryDetailsWillKeptFields,
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(context.l10n.createFormCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Change'),
+              child: Text(context.l10n.createFormChange),
             ),
           ],
         ),
@@ -466,8 +480,8 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
     return Column(
       children: <Widget>[
         _StepCard(
-          title: 'Where is it?',
-          subtitle: 'Tap the map and confirm the representative point.',
+          title: context.l10n.createFormWhere,
+          subtitle: context.l10n.createFormTapMapConfirmRepresentativePoint,
           children: <Widget>[
             SizedBox(
               height: 220,
@@ -515,14 +529,16 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                 location.pinConfirmed ? Icons.verified : Icons.location_on,
               ),
               label: Text(
-                location.pinConfirmed ? 'Pin confirmed' : 'Confirm this pin',
+                location.pinConfirmed
+                    ? context.l10n.createFormPinConfirmed
+                    : context.l10n.createFormConfirmPin,
               ),
             ),
             const SizedBox(height: 12),
             _textField(
               id: 'formatted-address',
               errorFieldId: 'formattedAddress',
-              label: 'Formatted address',
+              label: context.l10n.createFormFormattedAddress,
               value: location.formattedAddress ?? '',
               onChanged: widget.controller.updatePlaceAddress,
             ),
@@ -530,9 +546,9 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             _textField(
               id: 'location-label',
               errorFieldId: 'locationLabel',
-              label: 'Location label',
+              label: context.l10n.createFormLocationLabel,
               value: location.locationLabel ?? '',
-              helper: 'Required when there is no postal address.',
+              helper: context.l10n.createFormRequiredWhenThereNoPostalAddress,
               onChanged: widget.controller.updatePlaceLocationLabel,
             ),
             if (policy.accessNote.isVisible) ...<Widget>[
@@ -541,14 +557,14 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                 tilePadding: EdgeInsets.zero,
                 initiallyExpanded:
                     (location.entranceHint?.trim().isNotEmpty ?? false),
-                title: const Text('Add directions'),
+                title: Text(context.l10n.createFormAddDirections),
                 subtitle: const Text(
                   'Optional: entrance, path or meeting point',
                 ),
                 children: <Widget>[
                   _textField(
                     id: 'entrance-hint',
-                    label: 'How to find this place',
+                    label: context.l10n.createFormHowFindPlace,
                     value: location.entranceHint ?? '',
                     maxLength: 300,
                     maxLines: 2,
@@ -570,14 +586,14 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
         ] else if (policy.hours.isVisible) ...<Widget>[
           const SizedBox(height: 12),
           _StepCard(
-            title: 'Access restrictions',
-            subtitle: 'Add hours only when this place really has them.',
+            title: context.l10n.createFormAccessRestrictions,
+            subtitle: context.l10n.createFormAddHoursOnlyWhenPlaceReally,
             children: <Widget>[
               ExpansionTile(
                 key: const ValueKey<String>('place-optional-hours'),
                 tilePadding: EdgeInsets.zero,
                 initiallyExpanded: place.hours.mode != null,
-                title: const Text('Add opening or access hours'),
+                title: Text(context.l10n.createFormAddOpeningAccessHours),
                 children: <Widget>[_hoursCard(place, required: false)],
               ),
             ],
@@ -589,13 +605,13 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             policy.typicalSpend.isVisible) ...<Widget>[
           const SizedBox(height: 12),
           _StepCard(
-            title: 'Optional visit details',
-            subtitle: 'Add only information that is useful for this place.',
+            title: context.l10n.createFormOptionalVisitDetails,
+            subtitle: context.l10n.createFormAddOnlyInformationThatUsefulPlace,
             children: <Widget>[
               ExpansionTile(
                 key: const ValueKey<String>('place-optional-visit-details'),
                 tilePadding: EdgeInsets.zero,
-                title: const Text('Add more visit information'),
+                title: Text(context.l10n.createFormAddMoreVisitInformation),
                 children: <Widget>[_additionalVisitDetails(place, policy)],
               ),
             ],
@@ -608,20 +624,22 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
   Widget _hoursCard(PlaceDraftData place, {bool required = true}) {
     final PlaceHoursDraft hours = place.hours;
     return _StepCard(
-      title: 'When can people visit?',
-      subtitle: 'Unknown is better than invented hours.',
+      title: context.l10n.createFormWhenCanPeopleVisit,
+      subtitle: context.l10n.createFormUnknownBetterThanInventedHours,
       children: <Widget>[
         DropdownButtonFormField<PlaceHoursMode>(
           isExpanded: true,
           initialValue: hours.mode,
           decoration: _decoration(
-            required ? 'Hours mode *' : 'Hours mode',
+            required
+                ? context.l10n.createFormHoursMode
+                : context.l10n.createFormHoursMode2,
             'mode',
           ),
-          items: const <DropdownMenuItem<PlaceHoursMode>>[
+          items: <DropdownMenuItem<PlaceHoursMode>>[
             DropdownMenuItem(
               value: PlaceHoursMode.regular,
-              child: Text('Regular schedule'),
+              child: Text(context.l10n.createFormRegularSchedule),
             ),
             DropdownMenuItem(
               value: PlaceHoursMode.alwaysOpen,
@@ -629,7 +647,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             ),
             DropdownMenuItem(
               value: PlaceHoursMode.unknown,
-              child: Text('Hours unknown'),
+              child: Text(context.l10n.createFormHoursUnknown),
             ),
             DropdownMenuItem(
               value: PlaceHoursMode.seasonal,
@@ -647,16 +665,16 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(
-                child: Text(_weekdayShort(period.dayOfWeek)),
+                child: Text(_weekdayShort(context, period.dayOfWeek)),
               ),
               title: Text(
                 '${_minuteLabel(period.openMinute)} – ${_minuteLabel(period.closeMinute)}',
               ),
               subtitle: period.closesNextDay
-                  ? const Text('Closes next day')
+                  ? Text(context.l10n.createFormClosesNextDay)
                   : null,
               trailing: IconButton(
-                tooltip: 'Remove period',
+                tooltip: context.l10n.createFormRemovePeriod,
                 onPressed: () =>
                     widget.controller.removePlaceOpeningPeriod(period.id),
                 icon: const Icon(Icons.delete_outline),
@@ -668,7 +686,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             hours.mode == PlaceHoursMode.alwaysOpen) ...<Widget>[
           const Divider(height: 32),
           Text(
-            'Date exceptions',
+            context.l10n.createFormDateExceptions,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           for (final OpeningException exception in hours.exceptions)
@@ -677,8 +695,8 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               title: Text(exception.localDate),
               subtitle: Text(
                 exception.kind == OpeningExceptionKind.closedAllDay
-                    ? 'Closed all day'
-                    : 'Custom hours',
+                    ? context.l10n.createFormClosedAllDay
+                    : context.l10n.createFormCustomHours,
               ),
               trailing: IconButton(
                 onPressed: () =>
@@ -704,7 +722,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                   );
                   _field('exception-date', '').clear();
                 },
-                child: const Text('Add closed day'),
+                child: Text(context.l10n.createFormAddClosedDay),
               ),
             ],
           ),
@@ -713,8 +731,8 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
         DropdownButtonFormField<PlaceOperationalStatus>(
           isExpanded: true,
           initialValue: place.operationalStatus.status,
-          decoration: const InputDecoration(
-            labelText: 'Current operational status',
+          decoration: InputDecoration(
+            labelText: context.l10n.createFormCurrentOperationalStatus,
             border: OutlineInputBorder(),
           ),
           items: PlaceOperationalStatus.values
@@ -722,12 +740,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                 (PlaceOperationalStatus value) =>
                     DropdownMenuItem<PlaceOperationalStatus>(
                       value: value,
-                      child: Text(
-                        value.name.replaceAllMapped(
-                          RegExp(r'([A-Z])'),
-                          (Match match) => ' ${match.group(1)!.toLowerCase()}',
-                        ),
-                      ),
+                      child: Text(createOptionText(context.l10n, value)),
                     ),
               )
               .toList(growable: false),
@@ -744,7 +757,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               Expanded(
                 child: _textField(
                   id: 'closed-from',
-                  label: 'Closed from *',
+                  label: context.l10n.createFormClosedFrom,
                   value: place.operationalStatus.closedFromLocalDate ?? '',
                   onChanged: (String value) =>
                       widget.controller.updatePlaceOperationalStatus(
@@ -786,15 +799,15 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               child: DropdownButtonFormField<int>(
                 isExpanded: true,
                 initialValue: _periodDay,
-                decoration: const InputDecoration(
-                  labelText: 'Day',
+                decoration: InputDecoration(
+                  labelText: context.l10n.createFormDay,
                   border: OutlineInputBorder(),
                 ),
                 items: List<DropdownMenuItem<int>>.generate(
                   7,
                   (int index) => DropdownMenuItem<int>(
                     value: index + 1,
-                    child: Text(_weekdayShort(index + 1)),
+                    child: Text(_weekdayShort(context, index + 1)),
                   ),
                 ),
                 onChanged: (int? value) =>
@@ -805,7 +818,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             Expanded(
               child: _textField(
                 id: 'period-open',
-                label: 'Open HH:mm',
+                label: context.l10n.createFormOpenHhMm,
                 value: '09:00',
               ),
             ),
@@ -813,7 +826,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             Expanded(
               child: _textField(
                 id: 'period-close',
-                label: 'Close HH:mm',
+                label: context.l10n.createFormCloseHhMm,
                 value: '18:00',
               ),
             ),
@@ -821,7 +834,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Closes next day'),
+          title: Text(context.l10n.createFormClosesNextDay),
           value: _periodOvernight,
           onChanged: (bool value) => setState(() => _periodOvernight = value),
         ),
@@ -844,7 +857,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               );
             },
             icon: const Icon(Icons.add),
-            label: const Text('Add interval'),
+            label: Text(context.l10n.createFormAddInterval),
           ),
         ),
       ],
@@ -861,16 +874,15 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
       children: <Widget>[
         if (policy.visitPlanning.isVisible)
           _StepCard(
-            title: 'Help people plan the visit',
-            subtitle:
-                'These values improve time-fit without changing opening hours.',
+            title: context.l10n.createFormHelpPeoplePlanVisit,
+            subtitle: context.l10n.createFormTheseValuesImproveTimeFitWithout,
             children: <Widget>[
               Row(
                 children: <Widget>[
                   Expanded(
                     child: _textField(
                       id: 'recommended-minutes',
-                      label: 'Recommended minutes',
+                      label: context.l10n.createFormRecommendedMinutes,
                       value: planning.recommendedVisitMinutes?.toString() ?? '',
                       keyboardType: TextInputType.number,
                       onChanged: (String value) => widget.controller
@@ -881,7 +893,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                   Expanded(
                     child: _textField(
                       id: 'minimum-minutes',
-                      label: 'Minimum minutes',
+                      label: context.l10n.createFormMinimumMinutes,
                       value: planning.minimumVisitMinutes?.toString() ?? '',
                       keyboardType: TextInputType.number,
                       onChanged: (String value) => widget.controller
@@ -899,19 +911,19 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Weather dependent'),
+                title: Text(context.l10n.createFormWeatherDependent),
                 value: planning.weatherDependent,
                 onChanged: (bool value) => widget.controller
                     .updatePlaceVisitPlanning(weatherDependent: value),
               ),
               _bufferSlider(
-                label: 'Arrival buffer',
+                label: context.l10n.createFormArrivalBuffer,
                 value: planning.arrivalBufferMinutes,
                 onChanged: (int value) => widget.controller
                     .updatePlaceVisitPlanning(arrivalBufferMinutes: value),
               ),
               _bufferSlider(
-                label: 'Exit buffer',
+                label: context.l10n.createFormExitBuffer,
                 value: planning.exitBufferMinutes,
                 onChanged: (int value) => widget.controller
                     .updatePlaceVisitPlanning(exitBufferMinutes: value),
@@ -921,8 +933,8 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
         if (policy.amenities.isVisible) const SizedBox(height: 12),
         if (policy.amenities.isVisible)
           _StepCard(
-            title: 'Amenities',
-            subtitle: 'Choose Yes or Unknown. Unset is never treated as No.',
+            title: context.l10n.createFormAmenities,
+            subtitle: context.l10n.createFormChooseYesUnknownUnsetNeverTreated,
             children: placeAmenityTaxonomy
                 .map((PlaceAmenityDefinition amenity) {
                   final bool isPresent = place.amenityIds.contains(amenity.id);
@@ -931,12 +943,20 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                   );
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(amenity.label),
-                    subtitle: Text(amenity.group),
+                    title: Text(context.l10n.createAmenityLabel(amenity.id)),
+                    subtitle: Text(
+                      context.l10n.createAmenityGroup(amenity.group),
+                    ),
                     trailing: SegmentedButton<int>(
-                      segments: const <ButtonSegment<int>>[
-                        ButtonSegment<int>(value: 1, label: Text('Yes')),
-                        ButtonSegment<int>(value: 0, label: Text('Unset')),
+                      segments: <ButtonSegment<int>>[
+                        ButtonSegment<int>(
+                          value: 1,
+                          label: Text(context.l10n.createFormYes),
+                        ),
+                        ButtonSegment<int>(
+                          value: 0,
+                          label: Text(context.l10n.createFormUnset),
+                        ),
                         ButtonSegment<int>(value: -1, label: Text('?')),
                       ],
                       selected: <int>{isPresent ? 1 : (isUnknown ? -1 : 0)},
@@ -958,8 +978,8 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
           const SizedBox(height: 12),
         if (policy.admission.isVisible || policy.typicalSpend.isVisible)
           _StepCard(
-            title: 'Price',
-            subtitle: 'Entry price and typical spend are separate concepts.',
+            title: context.l10n.createFormPrice,
+            subtitle: context.l10n.createFormEntryPriceTypicalSpendAreSeparate,
             children: <Widget>[
               if (policy.admission.isVisible)
                 DropdownButtonFormField<PlaceEntryType>(
@@ -977,7 +997,9 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                             (PlaceEntryType value) =>
                                 DropdownMenuItem<PlaceEntryType>(
                                   value: value,
-                                  child: Text(_entryTypeLabel(value)),
+                                  child: Text(
+                                    _entryTypeLabel(context.l10n, value),
+                                  ),
                                 ),
                           )
                           .toList(growable: false),
@@ -997,7 +1019,9 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                       child: _textField(
                         id: 'entry-from',
                         errorFieldId: 'entryPriceFrom',
-                        label: 'Entry from, ${pricing.currencyCode} *',
+                        label: context.l10n.createFormEntryFrom(
+                          pricing.currencyCode,
+                        ),
                         value: pricing.entryPriceFrom?.formatMajor() ?? '',
                         keyboardType: TextInputType.number,
                         onChanged: (String value) => widget.controller
@@ -1009,7 +1033,9 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                       child: _textField(
                         id: 'entry-to',
                         errorFieldId: 'entryPriceTo',
-                        label: 'Entry to, ${pricing.currencyCode}',
+                        label: context.l10n.createFormEntry(
+                          pricing.currencyCode,
+                        ),
                         value: pricing.entryPriceTo?.formatMajor() ?? '',
                         keyboardType: TextInputType.number,
                         onChanged: (String value) => widget.controller
@@ -1026,7 +1052,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                     Expanded(
                       child: _textField(
                         id: 'spend-from',
-                        label: 'Typical spend from',
+                        label: context.l10n.createFormTypicalSpendFrom,
                         value: pricing.typicalSpendFrom?.formatMajor() ?? '',
                         keyboardType: TextInputType.number,
                         onChanged: (String value) => widget.controller
@@ -1037,7 +1063,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                     Expanded(
                       child: _textField(
                         id: 'spend-to',
-                        label: 'Typical spend to',
+                        label: context.l10n.createFormTypicalSpend,
                         value: pricing.typicalSpendTo?.formatMajor() ?? '',
                         keyboardType: TextInputType.number,
                         onChanged: (String value) => widget.controller
@@ -1053,8 +1079,8 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                   id: 'pricing-note',
                   errorFieldId: 'pricingNote',
                   label: pricing.entryType == PlaceEntryType.mixed
-                      ? 'Pricing explanation *'
-                      : 'Pricing note',
+                      ? context.l10n.createFormPricingExplanation
+                      : context.l10n.createFormPricingNote,
                   value: pricing.pricingNote ?? '',
                   maxLength: 300,
                   onChanged: (String value) =>
@@ -1064,7 +1090,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                 _textField(
                   id: 'pricing-url',
                   errorFieldId: 'officialPricingUrl',
-                  label: 'Official pricing URL (https)',
+                  label: context.l10n.createFormOfficialPricingUrlHttps,
                   value: pricing.officialPricingUrl ?? '',
                   keyboardType: TextInputType.url,
                   onChanged: (String value) =>
@@ -1094,14 +1120,13 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
       children: <Widget>[
         if (policy.contacts.isVisible || policy.booking.isVisible)
           _StepCard(
-            title: 'Optional public contacts',
-            subtitle:
-                'Add only official public details. HTTPS links are required.',
+            title: context.l10n.createFormOptionalPublicContacts,
+            subtitle: context.l10n.createFormAddOnlyOfficialPublicDetailsHttps,
             children: <Widget>[
               if (policy.contacts.isVisible) ...<Widget>[
                 _textField(
                   id: 'website-url',
-                  label: 'Official website',
+                  label: context.l10n.createFormOfficialWebsite,
                   value: place.contacts.websiteUrl ?? '',
                   keyboardType: TextInputType.url,
                   onChanged: (String value) =>
@@ -1113,7 +1138,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                     Expanded(
                       child: _textField(
                         id: 'place-phone',
-                        label: 'Public phone',
+                        label: context.l10n.createFormPublicPhone,
                         value: place.contacts.phone ?? '',
                         keyboardType: TextInputType.phone,
                         onChanged: (String value) =>
@@ -1124,7 +1149,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                     Expanded(
                       child: _textField(
                         id: 'place-email',
-                        label: 'Public email',
+                        label: context.l10n.createFormPublicEmail,
                         value: place.contacts.email ?? '',
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (String value) =>
@@ -1138,7 +1163,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                 const SizedBox(height: 12),
                 _textField(
                   id: 'booking-url',
-                  label: 'Official booking landing page',
+                  label: context.l10n.createFormOfficialBookingLandingPage,
                   value: place.contacts.bookingUrl ?? '',
                   keyboardType: TextInputType.url,
                   onChanged: (String value) =>
@@ -1150,17 +1175,17 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
         if (policy.contacts.isVisible || policy.booking.isVisible)
           const SizedBox(height: 12),
         _StepCard(
-          title: 'Photos',
+          title: context.l10n.createFormPhotos,
           subtitle: policy.cover.isRequired
-              ? 'A cover is required. Gallery is optional.'
+              ? context.l10n.createFormCoverRequiredGalleryOptional
               : 'A cover is recommended and can be added later.',
           children: <Widget>[
             _textField(
               id: 'cover-image',
               errorFieldId: 'coverImage',
               label: policy.cover.isRequired
-                  ? 'Cover image URL/path *'
-                  : 'Cover image URL/path (recommended)',
+                  ? context.l10n.createFormCoverImageUrlPath
+                  : context.l10n.createFormCoverImageUrlPathRecommended,
               value: draft.media.coverImage,
               onChanged: widget.controller.updateCoverImage,
             ),
@@ -1168,7 +1193,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               key: const ValueKey<String>('place-gallery-details'),
               tilePadding: EdgeInsets.zero,
               initiallyExpanded: draft.media.gallery.isNotEmpty,
-              title: const Text('Add gallery images'),
+              title: Text(context.l10n.createFormAddGalleryImages),
               subtitle: const Text('Optional · maximum 12'),
               children: <Widget>[
                 Row(
@@ -1176,7 +1201,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                     Expanded(
                       child: _textField(
                         id: 'gallery-image',
-                        label: 'Gallery image URL/path',
+                        label: context.l10n.createFormGalleryImageUrlPath,
                         value: '',
                       ),
                     ),
@@ -1190,7 +1215,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                               );
                               _field('gallery-image', '').clear();
                             },
-                      child: const Text('Add'),
+                      child: Text(context.l10n.createFormAdd),
                     ),
                   ],
                 ),
@@ -1225,7 +1250,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   Text(
-                    'Could this place already exist?',
+                    context.l10n.createFormCouldPlaceAlreadyExist,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
@@ -1242,7 +1267,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                     ),
                   FilledButton.tonal(
                     onPressed: widget.controller.confirmPlaceIsDifferent,
-                    child: const Text('This is a different place'),
+                    child: Text(context.l10n.createFormDifferentPlace),
                   ),
                 ],
               ),
@@ -1280,7 +1305,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               onPressed: busy
                   ? null
                   : () => widget.controller.goToPlaceStep(step - 1),
-              child: const Text('Back'),
+              child: Text(context.l10n.createFormBack),
             ),
           ),
         if (step > 0) const SizedBox(width: 12),
@@ -1304,7 +1329,9 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                           if (published) widget.onPublished();
                         },
                   icon: const Icon(Icons.publish_outlined),
-                  label: Text(busy ? 'Publishing…' : 'Send for review'),
+                  label: Text(
+                    busy ? 'Publishing…' : context.l10n.createFormSendReview,
+                  ),
                 ),
         ),
       ],
@@ -1377,10 +1404,11 @@ class _PlaceProgressHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String saveLabel = switch (state.saveStatus) {
-      CreateSaveStatus.saved => 'Saved',
-      CreateSaveStatus.saving => 'Saving…',
-      CreateSaveStatus.unsaved => 'Unsaved changes',
-      CreateSaveStatus.failed => 'Save failed • retry available',
+      CreateSaveStatus.saved => context.l10n.createFormSaved,
+      CreateSaveStatus.saving => context.l10n.createFormSaving,
+      CreateSaveStatus.unsaved => context.l10n.createFormUnsavedChanges,
+      CreateSaveStatus.failed =>
+        context.l10n.createFormSaveFailedRetryAvailable,
     };
     return Card(
       child: Padding(
@@ -1392,13 +1420,20 @@ class _PlaceProgressHeader extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    'Create a place',
+                    context.l10n.createFormCreatePlace,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
-                Text(saveLabel, style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    saveLabel,
+                    textAlign: TextAlign.end,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -1408,10 +1443,15 @@ class _PlaceProgressHeader extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               '${state.placeStep + 1}/${placeCreateSteps.length} • '
-              '${placeCreateSteps[state.placeStep].title}',
+              '${createFormText(context.l10n, placeCreateSteps[state.placeStep].titleId)}',
               style: Theme.of(context).textTheme.titleSmall,
             ),
-            Text(placeCreateSteps[state.placeStep].description),
+            Text(
+              createFormText(
+                context.l10n,
+                placeCreateSteps[state.placeStep].descriptionId,
+              ),
+            ),
           ],
         ),
       ),
@@ -1448,19 +1488,25 @@ class _PlaceCreatorAssistPanel extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Finish with AI',
+                    context.l10n.createFormFinishWithAi,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
-                const Chip(label: Text('Local demo')),
+                Flexible(
+                  child: Chip(
+                    label: Text(
+                      context.l10n.createFormLocalDemo,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Review this draft, suggest a taxonomy match and identify useful '
-              'missing details. Nothing is published automatically.',
+            Text(
+              context.l10n.createFormReviewDraftSuggestTaxonomyMatchIdentify,
             ),
             if (state.placeEnrichmentError != null) ...<Widget>[
               const SizedBox(height: 8),
@@ -1475,7 +1521,7 @@ class _PlaceCreatorAssistPanel extends StatelessWidget {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.category_outlined),
-                  title: const Text('Suggested category'),
+                  title: Text(context.l10n.createFormSuggestedCategory),
                   subtitle: Text(
                     '${proposal.suggestedCategoryId} / '
                     '${proposal.suggestedSubcategoryId}',
@@ -1485,7 +1531,7 @@ class _PlaceCreatorAssistPanel extends StatelessWidget {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.notes_outlined),
-                  title: const Text('Editable description draft'),
+                  title: Text(context.l10n.createFormEditableDescriptionDraft),
                   subtitle: Text(proposal.suggestedShortDescription!),
                 ),
               if (proposal.suggestedVisitMinutes != null)
@@ -1493,7 +1539,9 @@ class _PlaceCreatorAssistPanel extends StatelessWidget {
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.timelapse_outlined),
                   title: Text(
-                    'Estimated visit: ${proposal.suggestedVisitMinutes} min',
+                    context.l10n.createFormEstimatedVisitMin(
+                      proposal.suggestedVisitMinutes!,
+                    ),
                   ),
                 ),
               if (proposal.clarifyingQuestion != null)
@@ -1504,8 +1552,10 @@ class _PlaceCreatorAssistPanel extends StatelessWidget {
                 ),
               if (proposal.missingRecommendedFieldIds.isNotEmpty)
                 Text(
-                  'Could improve later: '
-                  '${proposal.missingRecommendedFieldIds.join(', ')}',
+                  context.l10n
+                      .createFormCouldImproveLaterProposalMissingrecommendedfieldidsJoin(
+                        proposal.missingRecommendedFieldIds.length,
+                      ),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               const SizedBox(height: 8),
@@ -1520,7 +1570,7 @@ class _PlaceCreatorAssistPanel extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: onDiscard,
-                      child: const Text('Discard'),
+                      child: Text(context.l10n.createFormDiscard),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -1528,7 +1578,7 @@ class _PlaceCreatorAssistPanel extends StatelessWidget {
                     child: FilledButton(
                       key: const ValueKey<String>('apply-place-assist'),
                       onPressed: proposal.canApply ? onApply : null,
-                      child: const Text('Apply suggestions'),
+                      child: Text(context.l10n.createFormApplySuggestions),
                     ),
                   ),
                 ],
@@ -1547,7 +1597,7 @@ class _PlaceCreatorAssistPanel extends StatelessWidget {
                 label: Text(
                   state.placeEnrichmentLoading
                       ? 'Reviewing…'
-                      : 'Review this Place',
+                      : context.l10n.createFormReviewPlace,
                 ),
               ),
             ],
@@ -1620,10 +1670,12 @@ class _PlacePreview extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const Text('Preview'),
+            Text(context.l10n.createFormPreview),
             const SizedBox(height: 8),
             Text(
-              draft.title.isEmpty ? 'Untitled place' : draft.title,
+              draft.title.isEmpty
+                  ? context.l10n.createFormUntitledPlace
+                  : draft.title,
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
@@ -1632,18 +1684,20 @@ class _PlacePreview extends StatelessWidget {
             if (draft.shortDescription.trim().isNotEmpty)
               Text(draft.shortDescription)
             else
-              Text('${policy.label} · ${place.location.city}'),
+              Text(
+                '${context.l10n.createPlacePolicyLabel(policy.id.name)} · ${place.location.city}',
+              ),
             const SizedBox(height: 12),
             _PreviewRow(icon: Icons.route, text: location),
             if (policy.hours.isVisible && place.hours.mode != null)
               _PreviewRow(
                 icon: Icons.schedule,
-                text: _hoursModeLabel(place.hours.mode),
+                text: _hoursModeLabel(context.l10n, place.hours.mode),
               ),
             if (policy.admission.isVisible && place.pricing.entryType != null)
               _PreviewRow(
                 icon: Icons.payments_outlined,
-                text: _entryTypeLabel(place.pricing.entryType),
+                text: _entryTypeLabel(context.l10n, place.pricing.entryType),
               ),
             if (policy.visitPlanning.isVisible &&
                 place.visitPlanning.recommendedVisitMinutes != null)
@@ -1730,39 +1784,38 @@ class _ValidationSummary extends StatelessWidget {
   }
 }
 
-String _relationshipLabel(PlaceRelationship value) => switch (value) {
-  PlaceRelationship.owner => 'Owner',
-  PlaceRelationship.staff => 'Staff member',
-  PlaceRelationship.visitor => 'Visitor',
-  PlaceRelationship.curator => 'Local curator',
-};
+String _relationshipLabel(AppLocalizations l10n, PlaceRelationship value) =>
+    switch (value) {
+      PlaceRelationship.owner => l10n.createFormOwner,
+      PlaceRelationship.staff => l10n.createFormStaffMember,
+      PlaceRelationship.visitor => l10n.createFormVisitor,
+      PlaceRelationship.curator => l10n.createFormLocalCurator,
+    };
 
-String _entryTypeLabel(PlaceEntryType? value) => switch (value) {
-  PlaceEntryType.free => 'Free entry',
-  PlaceEntryType.paid => 'Paid entry',
-  PlaceEntryType.mixed => 'Free and paid areas',
-  PlaceEntryType.notApplicable => 'No entry ticket concept',
-  PlaceEntryType.unknown => 'Unknown',
-  null => 'Not selected',
-};
+String _entryTypeLabel(AppLocalizations l10n, PlaceEntryType? value) =>
+    switch (value) {
+      PlaceEntryType.free => l10n.createFormFreeEntry,
+      PlaceEntryType.paid => l10n.createFormPaidEntry,
+      PlaceEntryType.mixed => l10n.createFormFreePaidAreas,
+      PlaceEntryType.notApplicable => l10n.createFormNoEntryTicketConcept,
+      PlaceEntryType.unknown => l10n.createFormUnknown,
+      null => l10n.createFormNotSelected,
+    };
 
-String _hoursModeLabel(PlaceHoursMode? value) => switch (value) {
-  PlaceHoursMode.regular => 'Regular opening hours',
-  PlaceHoursMode.alwaysOpen => 'Open 24/7',
-  PlaceHoursMode.seasonal => 'Seasonal hours',
-  PlaceHoursMode.unknown => 'Opening hours unknown',
-  null => 'Hours not selected',
-};
+String _hoursModeLabel(AppLocalizations l10n, PlaceHoursMode? value) =>
+    switch (value) {
+      PlaceHoursMode.regular => l10n.createFormRegularOpeningHours,
+      PlaceHoursMode.alwaysOpen => l10n.createFormOpen247,
+      PlaceHoursMode.seasonal => l10n.createFormSeasonalHours,
+      PlaceHoursMode.unknown => l10n.createFormOpeningHoursUnknown,
+      null => l10n.createFormHoursNotSelected,
+    };
 
-String _weekdayShort(int day) => const <String>[
-  'Mon',
-  'Tue',
-  'Wed',
-  'Thu',
-  'Fri',
-  'Sat',
-  'Sun',
-][day.clamp(1, 7) - 1];
+String _weekdayShort(BuildContext context, int day) =>
+    RechargeFormats.weekdayShort(
+      day,
+      Localizations.localeOf(context).languageCode,
+    );
 
 String _minuteLabel(int minute) {
   return '${(minute ~/ 60).toString().padLeft(2, '0')}:'

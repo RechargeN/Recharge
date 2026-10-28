@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/event_inventory_section.dart';
 import '../../domain/entities/event_availability_projection.dart';
 import '../../domain/entities/event_inventory.dart';
@@ -20,7 +21,7 @@ class EventAvailabilityPreview extends StatelessWidget {
     final EventAvailabilityProjection projection = state.availabilityPreview;
     return Semantics(
       container: true,
-      label: 'Local mock availability preview',
+      label: context.l10n.createFormLocalMockAvailabilityPreview,
       child: Card(
         key: const Key('event-availability-preview'),
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -30,7 +31,7 @@ class EventAvailabilityPreview extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text(
-                'Local mock preview — not live availability',
+                context.l10n.createFormLocalMockPreviewNotLiveAvailability,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 4),
@@ -52,8 +53,8 @@ class EventAvailabilityPreview extends StatelessWidget {
                   icon: const Icon(Icons.refresh),
                   label: Text(
                     state.refreshingPreview
-                        ? 'Checking local fixture…'
-                        : 'Refresh preview',
+                        ? context.l10n.createFormCheckingLocalFixture
+                        : context.l10n.createFormRefreshPreview,
                   ),
                 ),
               ),

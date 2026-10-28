@@ -12,6 +12,7 @@ import '../../domain/entities/activity_validation_issue.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import 'create_texts.dart';
 import '../../../../core/localization/l10n_context.dart';
+import 'create_form_texts.dart';
 
 class ActivityCreateBlock extends StatefulWidget {
   const ActivityCreateBlock({
@@ -88,10 +89,10 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
     final CreateDraftEntity draft = widget.state.draft;
     final ActivityDraftData? activity = draft.activityData;
     if (activity == null) {
-      return const Card(
+      return Card(
         child: Padding(
           padding: EdgeInsets.all(16),
-          child: Text('Loading Recharge Activity draft…'),
+          child: Text(context.l10n.createFormLoadingRechargeActivityDraft),
         ),
       );
     }
@@ -99,16 +100,16 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         if (widget.publicationEditing)
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(12),
             child: Text(
-              'Editing draft only. The published version stays unchanged until review and publication.',
+              context.l10n.createFormEditingDraftOnlyPublishedVersionStays,
             ),
           ),
         if (widget.serverValidationFailed)
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(12),
-            child: Text('Check the Activity fields and submit again.'),
+            child: Text(context.l10n.createFormCheckActivityFieldsSubmitAgain),
           ),
         _ActivityProgressHeader(
           steps: activityCreateSteps,
@@ -159,12 +160,12 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         .where((CreateTaxonomySubcategory item) => item.id == draft.subcategory)
         .firstOrNull;
     return _StepCard(
-      title: 'About this activity',
+      title: context.l10n.createFormAboutActivity,
       children: <Widget>[
         TextFormField(
           controller: _field('title', draft.title),
           decoration: InputDecoration(
-            labelText: 'Title',
+            labelText: context.l10n.createFormTitle,
             errorText: _serverError('/body/title'),
           ),
           onChanged: widget.controller.updateTitle,
@@ -177,7 +178,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           // to the field width so the label ellipsizes instead.
           isExpanded: true,
           decoration: InputDecoration(
-            labelText: 'Category',
+            labelText: context.l10n.createFormCategory,
             errorText: _serverError('/body/categoryId'),
           ),
           items: <DropdownMenuItem<CreateTaxonomyCategory>>[
@@ -197,7 +198,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           initialValue: selectedSubcategory,
           isExpanded: true,
           decoration: InputDecoration(
-            labelText: 'Subcategory',
+            labelText: context.l10n.createFormSubcategory,
             errorText: _serverError('/body/subcategoryId'),
           ),
           items: <DropdownMenuItem<CreateTaxonomySubcategory>>[
@@ -220,7 +221,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         TextFormField(
           controller: _field('shortDescription', draft.shortDescription),
           decoration: InputDecoration(
-            labelText: 'Short description',
+            labelText: context.l10n.createFormShortDescription,
             errorText: _serverError('/body/shortDescription'),
           ),
           onChanged: widget.controller.updateShortDescription,
@@ -229,7 +230,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         TextFormField(
           controller: _field('fullDescription', draft.fullDescription),
           decoration: InputDecoration(
-            labelText: 'Full description (optional)',
+            labelText: context.l10n.createFormFullDescriptionOptional,
             errorText: _serverError('/body/fullDescription'),
           ),
           maxLines: 4,
@@ -239,7 +240,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         TextFormField(
           controller: _field('coverImage', draft.media.coverImage),
           decoration: InputDecoration(
-            labelText: 'Cover image URL',
+            labelText: context.l10n.createFormCoverImageUrl,
             errorText: _serverError('/body/media/coverImage'),
           ),
           onChanged: widget.controller.updateCoverImage,
@@ -267,19 +268,16 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
     Widget body() => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Text('Linked Place (optional)'),
+        Text(context.l10n.createFormLinkedPlaceOptional),
         if (activity.location.linkedPlaceId != null)
-          Text(
-            links?.selected?.title ??
-                'Selected Place: ${activity.location.linkedPlaceId}',
-          ),
+          Text(links?.selected?.title ?? context.l10n.createFormSelectedPlace),
         if (activity.location.linkedPlaceId != null)
           TextButton(
             onPressed: () {
               links?.clear();
               widget.controller.updateActivityLinkedPlaceId('');
             },
-            child: const Text('Remove linked Place'),
+            child: Text(context.l10n.createFormRemoveLinkedPlace),
           ),
         if (links == null ||
             <String>[
@@ -287,17 +285,15 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
               'forbidden',
               'unavailable',
             ].contains(links.status))
-          const Text(
-            'Linked Place is unavailable. Remove or replace the link.',
-          ),
+          Text(context.l10n.createFormLinkedPlaceUnavailableRemoveReplaceLink),
         if (_serverError('/body/location/linkedPlaceId')
             case final String error)
           Text(error),
         if (links != null) ...<Widget>[
           TextField(
             controller: _field('placeSearch', ''),
-            decoration: const InputDecoration(
-              labelText: 'Search published Places',
+            decoration: InputDecoration(
+              labelText: context.l10n.createFormSearchPublishedPlaces,
             ),
             onSubmitted: links.search,
           ),
@@ -305,11 +301,11 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
             onPressed: links.status == 'loading'
                 ? null
                 : () => links.search(_fields['placeSearch']!.text),
-            child: const Text('Search Places'),
+            child: Text(context.l10n.createFormSearchPlaces),
           ),
           if (links.status == 'loading') const LinearProgressIndicator(),
           if (links.status == 'available' && links.items.isEmpty)
-            const Text('No matching Places on this page.'),
+            Text(context.l10n.createFormNoMatchingPlacesPage),
           for (final place in links.items)
             ListTile(
               title: Text(place.title),
@@ -324,7 +320,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           if (links.nextCursor != null)
             TextButton(
               onPressed: links.status == 'loading' ? null : links.more,
-              child: const Text('More Places'),
+              child: Text(context.l10n.createFormMorePlaces),
             ),
         ],
       ],
@@ -343,7 +339,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
     final ActivityOptionalContributionDraft? contribution =
         activity.optionalContribution;
     return _StepCard(
-      title: 'Where is it, and how do I get there?',
+      title: context.l10n.createFormWhereHowDoIGetThere,
       children: <Widget>[
         Row(
           children: <Widget>[
@@ -354,7 +350,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                   activity.location.latitude?.toString() ?? '',
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Latitude',
+                  labelText: context.l10n.createFormLatitude,
                   errorText: _serverError('/body/location'),
                 ),
                 keyboardType: const TextInputType.numberWithOptions(
@@ -376,7 +372,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                   activity.location.longitude?.toString() ?? '',
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Longitude',
+                  labelText: context.l10n.createFormLongitude,
                   errorText: _serverError('/body/location'),
                 ),
                 keyboardType: const TextInputType.numberWithOptions(
@@ -403,8 +399,8 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           onPressed: widget.controller.confirmActivityPin,
           child: Text(
             activity.location.pinConfirmed
-                ? 'Pin confirmed'
-                : 'Confirm this pin',
+                ? context.l10n.createFormPinConfirmed
+                : context.l10n.createFormConfirmPin,
           ),
         ),
         const SizedBox(height: 12),
@@ -414,7 +410,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
             activity.location.addressLine ?? '',
           ),
           decoration: InputDecoration(
-            labelText: 'Address line (optional)',
+            labelText: context.l10n.createFormAddressLineOptional,
             errorText: _serverError('/body/location/addressLine'),
           ),
           onChanged: widget.controller.updateActivityAddressLine,
@@ -423,14 +419,14 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         TextFormField(
           controller: _field('accessNotes', activity.location.accessNotes),
           decoration: InputDecoration(
-            labelText: 'Access notes',
+            labelText: context.l10n.createFormAccessNotes,
             errorText: _serverError('/body/location/accessNotes'),
           ),
           maxLines: 2,
           onChanged: widget.controller.updateActivityAccessNotes,
         ),
         SwitchListTile(
-          title: const Text('This is not an official spot'),
+          title: Text(context.l10n.createFormNotOfficialSpot),
           value: isInformal,
           onChanged: (bool value) =>
               widget.controller.updateActivityAccessCaution(
@@ -442,7 +438,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           TextFormField(
             controller: _field('accessCautionNote', caution?.note ?? ''),
             decoration: InputDecoration(
-              labelText: 'What to know before you go',
+              labelText: context.l10n.createFormWhatKnowBeforeYouGo,
               errorText:
                   widget.serverErrors['/body/location/accessCaution/note'],
             ),
@@ -456,7 +452,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         const SizedBox(height: 12),
         _placePicker(activity),
         SwitchListTile(
-          title: const Text('It is customary to leave something here'),
+          title: Text(context.l10n.createFormCustomaryLeaveSomethingHere),
           value: contribution != null,
           onChanged: (bool value) {
             if (value) {
@@ -470,23 +466,24 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         ),
         if (contribution != null) ...<Widget>[
           DropdownButtonFormField<ActivityContributionKind>(
+            isExpanded: true,
             initialValue: contribution.kind,
             decoration: InputDecoration(
-              labelText: 'Contribution kind',
+              labelText: context.l10n.createFormContributionKind,
               errorText: _serverError('/body/optionalContribution/kind'),
             ),
-            items: const <DropdownMenuItem<ActivityContributionKind>>[
+            items: <DropdownMenuItem<ActivityContributionKind>>[
               DropdownMenuItem<ActivityContributionKind>(
                 value: ActivityContributionKind.purchase,
                 child: Text('Purchase (e.g. coffee at the counter)'),
               ),
               DropdownMenuItem<ActivityContributionKind>(
                 value: ActivityContributionKind.donation,
-                child: Text('Donation'),
+                child: Text(context.l10n.createFormDonation),
               ),
               DropdownMenuItem<ActivityContributionKind>(
                 value: ActivityContributionKind.other,
-                child: Text('Other'),
+                child: Text(context.l10n.createFormOther),
               ),
             ],
             onChanged: (ActivityContributionKind? kind) {
@@ -502,7 +499,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           TextFormField(
             controller: _field('contributionNote', contribution.note ?? ''),
             decoration: InputDecoration(
-              labelText: 'e.g. "Coffee on the counter, optional"',
+              labelText: context.l10n.createFormEGCoffeeCounterOptional,
               errorText: _serverError('/body/optionalContribution/note'),
             ),
             onChanged: (String value) =>
@@ -521,7 +518,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                         .toStringAsFixed(2),
             ),
             decoration: InputDecoration(
-              labelText: 'Approximate amount (optional)',
+              labelText: context.l10n.createFormApproximateAmountOptional,
               errorText: widget
                   .serverErrors['/body/optionalContribution/amountHint/amountMinor'],
             ),
@@ -559,19 +556,20 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
     };
     final ActivityIntRangeDraft? groupSize = activity.suggestedGroupSize;
     return _StepCard(
-      title: 'When is it best, and how long does it take?',
+      title: context.l10n.createFormWhenBestHowLongDoesTake,
       children: <Widget>[
         DropdownButtonFormField<ActivityTimeOfDay>(
+          isExpanded: true,
           initialValue: activity.bestTime?.timeOfDay,
           decoration: InputDecoration(
-            labelText: 'Best time of day (optional)',
+            labelText: context.l10n.createFormBestTimeDayOptional,
             errorText: _serverError('/body/bestTime/timeOfDay'),
           ),
           items: <DropdownMenuItem<ActivityTimeOfDay>>[
             for (final ActivityTimeOfDay value in ActivityTimeOfDay.values)
               DropdownMenuItem<ActivityTimeOfDay>(
                 value: value,
-                child: Text(value.name),
+                child: Text(createOptionText(context.l10n, value)),
               ),
           ],
           onChanged: (ActivityTimeOfDay? value) =>
@@ -582,16 +580,17 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<ActivitySeason>(
+          isExpanded: true,
           initialValue: activity.bestTime?.season,
           decoration: InputDecoration(
-            labelText: 'Best season (optional)',
+            labelText: context.l10n.createFormBestSeasonOptional,
             errorText: _serverError('/body/bestTime/season'),
           ),
           items: <DropdownMenuItem<ActivitySeason>>[
             for (final ActivitySeason value in ActivitySeason.values)
               DropdownMenuItem<ActivitySeason>(
                 value: value,
-                child: Text(value.name),
+                child: Text(createOptionText(context.l10n, value)),
               ),
           ],
           onChanged: (ActivitySeason? value) =>
@@ -610,7 +609,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                   activity.typicalDurationMinutes.min.toString(),
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Typical duration, min (minutes)',
+                  labelText: context.l10n.createFormTypicalDurationMinMinutes,
                   errorText:
                       widget.serverErrors['/body/typicalDurationMinutes'],
                 ),
@@ -634,7 +633,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                   activity.typicalDurationMinutes.max.toString(),
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Typical duration, max (minutes)',
+                  labelText: context.l10n.createFormTypicalDurationMaxMinutes,
                   errorText:
                       widget.serverErrors['/body/typicalDurationMinutes'],
                 ),
@@ -653,7 +652,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           ],
         ),
         SwitchListTile(
-          title: const Text('Suggest a group size'),
+          title: Text(context.l10n.createFormSuggestGroupSize),
           value: groupSize != null,
           onChanged: (bool value) {
             if (value) {
@@ -693,7 +692,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                 child: TextFormField(
                   controller: _field('groupMax', groupSize.max.toString()),
                   decoration: InputDecoration(
-                    labelText: 'Group, max people',
+                    labelText: context.l10n.createFormGroupMaxPeople,
                     errorText: _serverError('/body/suggestedGroupSize'),
                   ),
                   keyboardType: TextInputType.number,
@@ -766,7 +765,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
 
   Widget _publishStep(CreateDraftEntity draft, ActivityDraftData activity) {
     return _StepCard(
-      title: 'Preview and publish',
+      title: context.l10n.createFormPreviewPublish,
       children: <Widget>[
         Text(draft.title, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 8),
@@ -806,7 +805,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           if (step > 0)
             TextButton(
               onPressed: () => widget.controller.goToActivityStep(step - 1),
-              child: const Text('Back'),
+              child: Text(context.l10n.createFormBack),
             )
           else
             const SizedBox.shrink(),
@@ -833,8 +832,8 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
               child: Text(
                 isLast
                     ? (widget.publicationEditing
-                          ? 'Save draft & return'
-                          : 'Send for review')
+                          ? context.l10n.createFormSaveDraftReturn
+                          : context.l10n.createFormSendReview)
                     : 'Save & continue',
                 textAlign: TextAlign.center,
               ),
@@ -889,7 +888,7 @@ class _ActivityProgressHeader extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
-            '${currentIndex + 1}/${steps.length} • ${steps[currentIndex].title}',
+            '${currentIndex + 1}/${steps.length} • ${createFormText(context.l10n, steps[currentIndex].titleId)}',
             style: Theme.of(context).textTheme.labelLarge,
           ),
         ),

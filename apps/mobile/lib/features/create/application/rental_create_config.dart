@@ -3,13 +3,15 @@ export '../domain/entities/rental_create_policy.dart';
 class RentalCreateStepConfig {
   const RentalCreateStepConfig({
     required this.id,
-    required this.title,
-    required this.description,
+    required this.titleId,
+    required this.descriptionId,
   });
 
   final String id;
-  final String title;
-  final String description;
+
+  /// ARB message ids; the UI resolves them with `createFormText` (L4).
+  final String titleId;
+  final String descriptionId;
 }
 
 /// Spec §13 — 8 content steps; preflight (auth/eligibility/template offer)
@@ -17,43 +19,43 @@ class RentalCreateStepConfig {
 const List<RentalCreateStepConfig> rentalCreateSteps = <RentalCreateStepConfig>[
   RentalCreateStepConfig(
     id: 'listing',
-    title: 'Listing and media',
-    description: 'Title, category and cover for the item or fleet',
+    titleId: 'createStepRentalListingTitle',
+    descriptionId: 'createStepRentalListingDescription',
   ),
   RentalCreateStepConfig(
     id: 'inventory',
-    title: 'Inventory',
-    description: 'Groups of interchangeable units, condition and quantity',
+    titleId: 'createStepRentalInventoryTitle',
+    descriptionId: 'createStepRentalInventoryDescription',
   ),
   RentalCreateStepConfig(
     id: 'availability',
-    title: 'Availability',
-    description: 'Confirmed coverage window and manual occupancy blocks',
+    titleId: 'createStepRentalAvailabilityTitle',
+    descriptionId: 'createStepRentalAvailabilityDescription',
   ),
   RentalCreateStepConfig(
     id: 'handover',
-    title: 'Handover and location',
-    description: 'Pickup area, schedule and optional delivery',
+    titleId: 'createStepRentalHandoverTitle',
+    descriptionId: 'createStepRentalHandoverDescription',
   ),
   RentalCreateStepConfig(
     id: 'terms',
-    title: 'Duration and safety',
-    description: 'Offered duration range, age, ID and safety requirements',
+    titleId: 'createStepRentalTermsTitle',
+    descriptionId: 'createStepRentalTermsDescription',
   ),
   RentalCreateStepConfig(
     id: 'pricing',
-    title: 'Pricing and deposit',
-    description: 'Rate plan, deposit policy and damage/cancellation terms',
+    titleId: 'createStepRentalPricingTitle',
+    descriptionId: 'createStepRentalPricingDescription',
   ),
   RentalCreateStepConfig(
     id: 'fulfillment',
-    title: 'External fulfillment and policies',
-    description: 'External booking link and destination warning preview',
+    titleId: 'createStepRentalFulfillmentTitle',
+    descriptionId: 'createStepRentalFulfillmentDescription',
   ),
   RentalCreateStepConfig(
     id: 'review',
-    title: 'Review and submit',
-    description: 'Public/private preview, attestation and submission',
+    titleId: 'createStepRentalReviewTitle',
+    descriptionId: 'createStepRentalReviewDescription',
   ),
 ];
 
@@ -96,7 +98,7 @@ const List<RentalAdaptiveHint> rentalAdaptiveHints = <RentalAdaptiveHint>[
     categoryId: 'adrenaline_entertainment',
     suggestedMinRenterAge: 18,
     safetyNoticeTemplate:
-        'Follow all on-site safety briefing and gear requirements.',
+        'Follow all on-site safety briefing and gear requirements.', // l10n-ignore: prefill the owner edits
   ),
   RentalAdaptiveHint(
     categoryId: 'auto_moto',

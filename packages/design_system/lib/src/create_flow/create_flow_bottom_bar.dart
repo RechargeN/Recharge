@@ -44,25 +44,29 @@ class CreateFlowBottomBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               if (onBackPressed != null)
-                TextButton.icon(
-                  key: backKey,
-                  onPressed: onBackPressed,
-                  icon: const Icon(Icons.arrow_back, size: 16),
-                  label: Text(backLabel ?? 'Back'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: RechargeTheme.mutedInk,
+                Flexible(
+                  child: TextButton.icon(
+                    key: backKey,
+                    onPressed: onBackPressed,
+                    icon: const Icon(Icons.arrow_back, size: 16),
+                    label: Text(backLabel ?? 'Back'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: RechargeTheme.mutedInk,
+                    ),
                   ),
                 )
               else
                 const SizedBox.shrink(),
               if (secondaryLabel != null)
-                TextButton(
-                  key: secondaryKey,
-                  onPressed: onSecondaryPressed,
-                  style: TextButton.styleFrom(
-                    foregroundColor: RechargeTheme.emerald900,
+                Flexible(
+                  child: TextButton(
+                    key: secondaryKey,
+                    onPressed: onSecondaryPressed,
+                    style: TextButton.styleFrom(
+                      foregroundColor: RechargeTheme.emerald900,
+                    ),
+                    child: Text(secondaryLabel!, textAlign: TextAlign.end),
                   ),
-                  child: Text(secondaryLabel!),
                 ),
             ],
           ),
@@ -91,7 +95,9 @@ class CreateFlowBottomBar extends StatelessWidget {
                       color: Colors.white,
                     ),
                   )
-                : (primaryIcon == null ? const SizedBox.shrink() : Icon(primaryIcon)),
+                : (primaryIcon == null
+                      ? const SizedBox.shrink()
+                      : Icon(primaryIcon)),
             label: Text(
               primaryLabel,
               style: const TextStyle(fontWeight: FontWeight.w800),

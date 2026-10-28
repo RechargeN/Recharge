@@ -107,6 +107,13 @@ abstract final class RechargeFormats {
         _dateLocale(languageCode),
       ).add_jm().format(instantUtc.toLocal());
 
+  /// The short weekday name of ISO [isoWeekday] (1 = Monday … 7 = Sunday).
+  /// A weekday is a calendar label, not an instant, so no zone applies.
+  static String weekdayShort(int isoWeekday, String languageCode) =>
+      DateFormat.E(
+        _dateLocale(languageCode),
+      ).format(DateTime.utc(2024, 1, isoWeekday.clamp(1, 7)));
+
   /// Time only, in the device zone (see [deviceDateTime]).
   static String deviceTime(DateTime instantUtc, String languageCode) =>
       DateFormat.jm(_dateLocale(languageCode)).format(instantUtc.toLocal());

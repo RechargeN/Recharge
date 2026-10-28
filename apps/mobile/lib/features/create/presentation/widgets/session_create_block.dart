@@ -613,7 +613,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
               children: <Widget>[
                 for (final EventAmenityDefinition amenity in group.value)
                   FilterChip(
-                    label: Text(amenity.label),
+                    label: Text(context.l10n.createAmenityLabel(amenity.id)),
                     selected: session.amenityIds.contains(amenity.id),
                     onSelected: (bool selected) {
                       final Set<String> next = <String>{...session.amenityIds};

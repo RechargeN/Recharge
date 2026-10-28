@@ -6,6 +6,7 @@ import '../../domain/entities/event_admission.dart';
 
 import '../../../../core/localization/l10n_context.dart';
 import 'create_texts.dart';
+import 'create_form_texts.dart';
 
 class EventAdmissionSection extends StatelessWidget {
   const EventAdmissionSection({
@@ -25,16 +26,20 @@ class EventAdmissionSection extends StatelessWidget {
     final EventAdmissionDraft? value = state.admission;
     return Semantics(
       container: true,
-      label: 'Event admission configuration',
+      label: context.l10n.createFormEventAdmissionConfiguration,
       child: Column(
         key: const Key('event-admission-section'),
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Text('Admission', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            context.l10n.createFormAdmission,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 4),
-          const Text(
-            'Admission, registration and confirmation are independent. '
-            'This local configuration does not create a booking.',
+          Text(
+            context
+                .l10n
+                .createFormAdmissionRegistrationConfirmationAreIndependentLocal,
           ),
           if (state.legacySuggestion case final suggestion?) ...<Widget>[
             const SizedBox(height: 12),
@@ -45,13 +50,18 @@ class EventAdmissionSection extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    const Text('Legacy draft suggestion — not applied'),
+                    Text(
+                      context.l10n.createFormLegacyDraftSuggestionNotApplied,
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       suggestion.canConfirm
-                          ? 'Open entry with no registration or confirmation.'
-                          : 'Legacy registration is preserved, but admission and '
-                                'confirmation still require explicit choices.',
+                          ? context
+                                .l10n
+                                .createFormOpenEntryWithNoRegistrationConfirmation
+                          : context
+                                .l10n
+                                .createFormLegacyRegistrationPreservedButAdmissionConfirmation,
                     ),
                     if (suggestion.canConfirm)
                       Align(
@@ -62,7 +72,7 @@ class EventAdmissionSection extends StatelessWidget {
                           ),
                           onPressed:
                               controller.confirmEventAdmissionLegacySuggestion,
-                          child: const Text('Confirm suggestion'),
+                          child: Text(context.l10n.createFormConfirmSuggestion),
                         ),
                       ),
                   ],
@@ -75,14 +85,14 @@ class EventAdmissionSection extends StatelessWidget {
             key: const Key('event-admission-preset'),
             initialValue: state.selectedPreset,
             isExpanded: true,
-            decoration: const InputDecoration(
-              labelText: 'Configuration preset',
+            decoration: InputDecoration(
+              labelText: context.l10n.createFormConfigurationPreset,
             ),
             items: EventAdmissionPreset.values
                 .map(
                   (preset) => DropdownMenuItem<EventAdmissionPreset>(
                     value: preset,
-                    child: Text(_label(preset.name)),
+                    child: Text(createOptionText(context.l10n, preset)),
                   ),
                 )
                 .toList(growable: false),
@@ -99,16 +109,16 @@ class EventAdmissionSection extends StatelessWidget {
           if (state.presetPreview != null) ...<Widget>[
             const SizedBox(height: 8),
             Text(
-              'Preview: ${_label(state.presetPreview!.admissionMode!.name)} · '
-              '${_label(state.presetPreview!.registrationMode!.name)} · '
-              '${_label(state.presetPreview!.confirmationMode!.name)}',
+              'Preview: ${createOptionText(context.l10n, state.presetPreview!.admissionMode!)} · '
+              '${createOptionText(context.l10n, state.presetPreview!.registrationMode!)} · '
+              '${createOptionText(context.l10n, state.presetPreview!.confirmationMode!)}',
             ),
             Align(
               alignment: Alignment.centerLeft,
               child: FilledButton.tonal(
                 key: const Key('event-admission-apply-preset'),
                 onPressed: controller.applyEventAdmissionPreset,
-                child: const Text('Apply normalized fields'),
+                child: Text(context.l10n.createFormApplyNormalizedFields),
               ),
             ),
           ],
@@ -119,7 +129,7 @@ class EventAdmissionSection extends StatelessWidget {
           const SizedBox(height: 12),
           _EnumField<AdmissionMode>(
             key: const Key('event-admission-mode'),
-            label: 'Admission mode *',
+            label: context.l10n.createFormAdmissionMode,
             value: value?.admissionMode,
             values: AdmissionMode.values,
             error: _errorText(context, state, 'admissionMode'),
@@ -128,7 +138,7 @@ class EventAdmissionSection extends StatelessWidget {
           ),
           _EnumField<EventRegistrationMode>(
             key: const Key('event-registration-axis'),
-            label: 'Registration mode *',
+            label: context.l10n.createFormRegistrationMode,
             value: value?.registrationMode,
             values: EventRegistrationMode.values,
             error: _errorText(context, state, 'registrationMode'),
@@ -137,7 +147,7 @@ class EventAdmissionSection extends StatelessWidget {
           ),
           _EnumField<ConfirmationMode>(
             key: const Key('event-confirmation-mode'),
-            label: 'Confirmation mode *',
+            label: context.l10n.createFormConfirmationMode,
             value: value?.confirmationMode,
             values: ConfirmationMode.values,
             error: _errorText(context, state, 'confirmationMode'),
@@ -151,7 +161,7 @@ class EventAdmissionSection extends StatelessWidget {
               ),
               initialValue: externalRegistrationUrl ?? '',
               decoration: InputDecoration(
-                labelText: 'External HTTPS registration URL *',
+                labelText: context.l10n.createFormExternalHttpsRegistrationUrl2,
                 errorText: _errorText(context, state, 'externalBookingUrl'),
               ),
               onChanged: controller.updateEventExternalRegistrationUrl,
@@ -168,7 +178,7 @@ class EventAdmissionSection extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _AccessWindowEditor(
-            title: 'Registration window',
+            title: context.l10n.createFormRegistrationWindow,
             value: value?.registrationWindow,
             error: _errorText(context, state, 'registrationWindow'),
             onChanged: (window) => controller.updateEventAccessWindows(
@@ -188,7 +198,9 @@ class EventAdmissionSection extends StatelessWidget {
                   '',
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: 'Cancellation closes N minutes before the start *',
+                labelText: context
+                    .l10n
+                    .createFormCancellationClosesNMinutesBeforeStart,
                 errorText: _errorText(context, state, 'cancellationDeadline'),
               ),
               onChanged: (raw) => controller.updateEventCancellationDeadline(
@@ -196,7 +208,7 @@ class EventAdmissionSection extends StatelessWidget {
               ),
             ),
           _AccessWindowEditor(
-            title: 'Application window',
+            title: context.l10n.createFormApplicationWindow,
             value: value?.applicationWindow,
             error: _errorText(context, state, 'applicationWindow'),
             onChanged: (window) => controller.updateEventAccessWindows(
@@ -208,8 +220,10 @@ class EventAdmissionSection extends StatelessWidget {
           SwitchListTile(
             key: const Key('event-waitlist-enabled'),
             contentPadding: EdgeInsets.zero,
-            title: const Text('Configure waitlist'),
-            subtitle: const Text('Preview only — no queue or promotion runs'),
+            title: Text(context.l10n.createFormConfigureWaitlist),
+            subtitle: Text(
+              context.l10n.createFormPreviewOnlyNoQueuePromotionRuns,
+            ),
             value: value?.waitlistPolicy?.enabled ?? false,
             onChanged: (enabled) => controller.updateEventWaitlistConfiguration(
               enabled
@@ -222,7 +236,7 @@ class EventAdmissionSection extends StatelessWidget {
           ),
           if (value?.waitlistPolicy?.enabled == true)
             _EnumField<WaitlistPromotionMode>(
-              label: 'Future promotion policy',
+              label: context.l10n.createFormFuturePromotionPolicy,
               value: value!.waitlistPolicy!.promotionMode,
               values: WaitlistPromotionMode.values,
               error: _errorText(context, state, 'waitlistPolicy'),
@@ -262,7 +276,7 @@ class _GuestEditor extends StatelessWidget {
       children: <Widget>[
         _EnumField<GuestPolicyMode>(
           key: const Key('event-guest-mode'),
-          label: 'Guest policy',
+          label: context.l10n.createFormGuestPolicy,
           // No silent default: an unchosen policy shows no value (E2.0).
           value: guest?.mode,
           values: GuestPolicyMode.values,
@@ -285,7 +299,7 @@ class _GuestEditor extends StatelessWidget {
             initialValue: guest?.maxGuests?.toString() ?? '',
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              labelText: 'Maximum guests per registration *',
+              labelText: context.l10n.createFormMaximumGuestsPerRegistration,
               errorText: _errorText(context, state, 'guestMaxGuests'),
             ),
             onChanged: (raw) => controller.updateEventGuestPolicy(
@@ -315,7 +329,7 @@ class _InterestAndOnsiteEditor extends StatelessWidget {
           key: const Key('event-interest-enabled'),
           contentPadding: EdgeInsets.zero,
           title: const Text('Optional “Interested” response'),
-          subtitle: const Text('Does not book or reserve inventory'),
+          subtitle: Text(context.l10n.createFormDoesNotBookReserveInventory),
           value: value?.interestPolicy?.optionalRsvpEnabled ?? false,
           onChanged: (enabled) => controller.updateEventInterestPolicy(
             enabled ? const InterestPolicy(optionalRsvpEnabled: true) : null,
@@ -324,7 +338,7 @@ class _InterestAndOnsiteEditor extends StatelessWidget {
         SwitchListTile(
           key: const Key('event-onsite-enabled'),
           contentPadding: EdgeInsets.zero,
-          title: const Text('Onsite admission allowed'),
+          title: Text(context.l10n.createFormOnsiteAdmissionAllowed),
           value: onsite?.allowed ?? false,
           onChanged: (enabled) => controller.updateEventOnsiteAdmissionPolicy(
             enabled
@@ -340,7 +354,7 @@ class _InterestAndOnsiteEditor extends StatelessWidget {
         if (onsite?.allowed == true) ...<Widget>[
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Registration at the door'),
+            title: Text(context.l10n.createFormRegistrationAtDoor),
             value: onsite!.registrationAtDoor,
             onChanged: (next) => controller.updateEventOnsiteAdmissionPolicy(
               onsite.copyWith(registrationAtDoor: next ?? false),
@@ -348,7 +362,7 @@ class _InterestAndOnsiteEditor extends StatelessWidget {
           ),
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Sales at the door'),
+            title: Text(context.l10n.createFormSalesAtDoor),
             value: onsite.salesAtDoor,
             onChanged: (next) => controller.updateEventOnsiteAdmissionPolicy(
               onsite.copyWith(salesAtDoor: next ?? false),
@@ -382,15 +396,18 @@ class _EligibilityEditorState extends State<_EligibilityEditor> {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: <Widget>[
-      Text('Eligibility', style: Theme.of(context).textTheme.titleSmall),
-      const Text('Never enter access codes, identities or private documents.'),
+      Text(
+        context.l10n.createFormEligibility,
+        style: Theme.of(context).textTheme.titleSmall,
+      ),
+      Text(context.l10n.createFormNeverEnterAccessCodesIdentitiesPrivate),
       const SizedBox(height: 8),
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Expanded(
             child: _EnumField<EligibilityRuleKind>(
-              label: 'Rule kind',
+              label: context.l10n.createFormRuleKind,
               value: _kind,
               values: EligibilityRuleKind.values,
               onChanged: (next) => setState(() => _kind = next),
@@ -399,7 +416,7 @@ class _EligibilityEditorState extends State<_EligibilityEditor> {
           const SizedBox(width: 8),
           IconButton.filledTonal(
             key: const Key('event-eligibility-add'),
-            tooltip: 'Add eligibility rule',
+            tooltip: context.l10n.createFormAddEligibilityRule,
             onPressed: () => widget.controller.addEventEligibilityRule(_kind),
             icon: const Icon(Icons.add),
           ),
@@ -409,12 +426,12 @@ class _EligibilityEditorState extends State<_EligibilityEditor> {
           in widget.value?.eligibilityRules ?? const <EligibilityRule>[]) ...[
         ListTile(
           contentPadding: EdgeInsets.zero,
-          title: Text(_label(rule.kind.name)),
+          title: Text(createOptionText(context.l10n, rule.kind)),
           subtitle: TextFormField(
             key: ValueKey<String>('eligibility-${rule.id}'),
             initialValue: rule.publicExplanation ?? '',
-            decoration: const InputDecoration(
-              labelText: 'Public explanation (no secrets)',
+            decoration: InputDecoration(
+              labelText: context.l10n.createFormPublicExplanationNoSecrets,
             ),
             onChanged: (text) => widget.controller.updateEventEligibilityRule(
               rule.copyWith(
@@ -424,7 +441,7 @@ class _EligibilityEditorState extends State<_EligibilityEditor> {
             ),
           ),
           trailing: IconButton(
-            tooltip: 'Remove eligibility rule',
+            tooltip: context.l10n.createFormRemoveEligibilityRule,
             onPressed: () =>
                 widget.controller.removeEventEligibilityRule(rule.id),
             icon: const Icon(Icons.delete_outline),
@@ -455,11 +472,15 @@ class _AccessWindowEditor extends StatelessWidget {
   Widget build(BuildContext context) => ExpansionTile(
     tilePadding: EdgeInsets.zero,
     title: Text(title),
-    subtitle: Text(value == null ? 'Not configured' : _label(value!.kind.name)),
+    subtitle: Text(
+      value == null
+          ? context.l10n.createFormNotConfigured
+          : createOptionText(context.l10n, value!.kind),
+    ),
     children: <Widget>[
       SwitchListTile(
         contentPadding: EdgeInsets.zero,
-        title: const Text('Enable window'),
+        title: Text(context.l10n.createFormEnableWindow),
         value: value != null,
         onChanged: (enabled) => onChanged(
           enabled
@@ -473,7 +494,7 @@ class _AccessWindowEditor extends StatelessWidget {
       ),
       if (value != null) ...<Widget>[
         _EnumField<EventAccessWindowKind>(
-          label: 'Window type',
+          label: context.l10n.createFormWindowType,
           value: value!.kind,
           values: EventAccessWindowKind.values,
           onChanged: (kind) => onChanged(
@@ -493,8 +514,8 @@ class _AccessWindowEditor extends StatelessWidget {
             ),
             initialValue: value!.opensBeforeOccurrenceMinutes?.toString() ?? '',
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Open minutes before occurrence',
+            decoration: InputDecoration(
+              labelText: context.l10n.createFormOpenMinutesBeforeOccurrence,
             ),
             onChanged: (raw) => onChanged(
               value!.copyWith(opensBeforeOccurrenceMinutes: int.tryParse(raw)),
@@ -508,8 +529,8 @@ class _AccessWindowEditor extends StatelessWidget {
             initialValue:
                 value!.closesBeforeOccurrenceMinutes?.toString() ?? '',
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Close minutes before occurrence',
+            decoration: InputDecoration(
+              labelText: context.l10n.createFormCloseMinutesBeforeOccurrence,
             ),
             onChanged: (raw) => onChanged(
               value!.copyWith(closesBeforeOccurrenceMinutes: int.tryParse(raw)),
@@ -521,8 +542,8 @@ class _AccessWindowEditor extends StatelessWidget {
               '$title-open-utc-${value!.opensAtUtc?.toIso8601String() ?? ''}',
             ),
             initialValue: value!.opensAtUtc?.toIso8601String() ?? '',
-            decoration: const InputDecoration(
-              labelText: 'Opens at UTC (ISO 8601)',
+            decoration: InputDecoration(
+              labelText: context.l10n.createFormOpensAtUtcIso8601,
             ),
             onChanged: (raw) => onChanged(
               value!.copyWith(opensAtUtc: DateTime.tryParse(raw)?.toUtc()),
@@ -534,8 +555,8 @@ class _AccessWindowEditor extends StatelessWidget {
               '$title-close-utc-${value!.closesAtUtc?.toIso8601String() ?? ''}',
             ),
             initialValue: value!.closesAtUtc?.toIso8601String() ?? '',
-            decoration: const InputDecoration(
-              labelText: 'Closes at UTC (ISO 8601)',
+            decoration: InputDecoration(
+              labelText: context.l10n.createFormClosesAtUtcIso8601,
             ),
             onChanged: (raw) => onChanged(
               value!.copyWith(closesAtUtc: DateTime.tryParse(raw)?.toUtc()),
@@ -575,7 +596,7 @@ class _EnumField<T extends Enum> extends StatelessWidget {
           .map(
             (item) => DropdownMenuItem<T>(
               value: item,
-              child: Text(_label(item.name)),
+              child: Text(createOptionText(context.l10n, item)),
             ),
           )
           .toList(growable: false),
@@ -624,14 +645,6 @@ class _IssueText extends StatelessWidget {
     ),
   );
 }
-
-String _label(String value) => value
-    .replaceAllMapped(
-      RegExp(r'([a-z])([A-Z])'),
-      (match) => '${match.group(1)} ${match.group(2)}',
-    )
-    .replaceAll('_', ' ')
-    .toLowerCase();
 
 /// L4: a section field error, resolved from its message id.
 String? _errorText(

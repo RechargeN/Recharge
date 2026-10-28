@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../domain/entities/collection_draft_data.dart';
 import '../../domain/entities/collection_item_draft.dart';
 
@@ -22,7 +23,7 @@ class CollectionCuratorNotesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (data.items.isEmpty) {
-      return const Text('Add items in the previous step first.');
+      return Text(context.l10n.createFormAddItemsPreviousStepFirst);
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -45,7 +46,7 @@ class CollectionCuratorNotesSection extends StatelessWidget {
                           ),
                         ),
                         FilterChip(
-                          label: const Text('Featured'),
+                          label: Text(context.l10n.createFormFeatured),
                           selected: item.highlight,
                           onSelected: (_) => onToggleHighlight(item.id),
                         ),
@@ -56,8 +57,8 @@ class CollectionCuratorNotesSection extends StatelessWidget {
                       key: ValueKey<String>('note_${item.id}'),
                       initialValue: item.curatorNote,
                       maxLength: 300,
-                      decoration: const InputDecoration(
-                        labelText: 'Why is it here?',
+                      decoration: InputDecoration(
+                        labelText: context.l10n.createFormWhyHere,
                       ),
                       maxLines: 2,
                       onChanged: (String value) =>

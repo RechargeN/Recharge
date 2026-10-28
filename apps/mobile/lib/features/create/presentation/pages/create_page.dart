@@ -34,6 +34,7 @@ import '../widgets/server_publication_requirements.dart';
 import '../widgets/route/route_create_block.dart';
 import '../widgets/scenario/scenario_create_block.dart';
 import '../widgets/create_texts.dart';
+import '../../../../core/localization/recharge_formats.dart';
 
 class CreatePage extends ConsumerStatefulWidget {
   const CreatePage({
@@ -107,7 +108,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     final CreateState state = controller.state;
 
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Требуется авторизация')));
+      return Scaffold(body: Center(child: Text(context.l10n.createFormText)));
     }
 
     _scheduleLoad(
@@ -127,10 +128,15 @@ class _CreatePageState extends ConsumerState<CreatePage> {
       state.draft.objectType,
     );
     final _CreateSeedContext? seedContext = _CreateSeedContext.fromParameters(
+      context.l10n,
+
       widget.seedParameters,
     );
     final _ScenarioRouteSeedContext? scenarioSeedContext =
-        _ScenarioRouteSeedContext.fromParameters(widget.seedParameters);
+        _ScenarioRouteSeedContext.fromParameters(
+          context.l10n,
+          widget.seedParameters,
+        );
 
     void goBack() {
       if (context.canPop()) {
@@ -147,13 +153,15 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     return Scaffold(
       appBar: state.draft.objectType == CreateObjectType.event
           ? CreateFlowAppBar(
-              title: 'New ${blockConfig.title.toLowerCase()}',
+              title: context.l10n.createObjectTypeNewTitle(
+                blockConfig.objectType.name,
+              ),
               onBack: onBack,
               statusLabel: switch (state.saveStatus) {
-                CreateSaveStatus.saved => 'Saved',
-                CreateSaveStatus.saving => 'Saving…',
-                CreateSaveStatus.failed => 'Not saved',
-                CreateSaveStatus.unsaved => 'Draft',
+                CreateSaveStatus.saved => context.l10n.createFormSaved,
+                CreateSaveStatus.saving => context.l10n.createFormSaving,
+                CreateSaveStatus.failed => context.l10n.createFormNotSaved,
+                CreateSaveStatus.unsaved => context.l10n.createFormDraft,
               },
               statusIcon: state.saveStatus == CreateSaveStatus.saved
                   ? Icons.check_circle_outline
@@ -161,7 +169,11 @@ class _CreatePageState extends ConsumerState<CreatePage> {
             )
           : AppBar(
               leading: onBack == null ? null : BackButton(onPressed: onBack),
-              title: Text('Create ${blockConfig.title}'),
+              title: Text(
+                context.l10n.createObjectTypeCreateTitle(
+                  blockConfig.objectType.name,
+                ),
+              ),
             ),
       body: switch (state.status) {
         CreateStatus.initial || CreateStatus.loading => const Center(
@@ -406,66 +418,69 @@ class _CreatePageState extends ConsumerState<CreatePage> {
               ],
               const SizedBox(height: 16),
               Text(
-                'Details',
+                context.l10n.createFormDetails,
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 10),
               _LabeledField(
-                label: 'Title *',
+                label: context.l10n.createFormTitleRequired,
                 controller: _titleController,
                 errorText: _fieldError(context, state, 'title'),
                 onChanged: controller.updateTitle,
               ),
               _LabeledField(
-                label: 'Main category *',
+                label: context.l10n.createFormMainCategory,
                 controller: _categoryController,
                 errorText: _fieldError(context, state, 'mainCategory'),
                 onChanged: controller.updateMainCategory,
               ),
               _LabeledField(
-                label: 'Subcategory',
+                label: context.l10n.createFormSubcategory,
                 controller: _subcategoryController,
                 onChanged: controller.updateSubcategory,
               ),
               _LabeledField(
-                label: 'City *',
+                label: context.l10n.createFormCityRequired,
                 controller: _cityController,
                 errorText: _fieldError(context, state, 'city'),
                 onChanged: controller.updateCity,
               ),
               _LabeledField(
-                label: blockConfig.locationLabel,
+                label: context.l10n.createObjectTypeLocationLabel(
+                  blockConfig.objectType.name,
+                ),
                 controller: _venueController,
                 onChanged: controller.updateVenueName,
               ),
               _LabeledField(
-                label: 'Address',
+                label: context.l10n.createFormAddress,
                 controller: _addressController,
                 onChanged: controller.updateAddress,
               ),
               _LabeledField(
-                label: 'Short description',
+                label: context.l10n.createFormShortDescription,
                 controller: _shortDescriptionController,
                 onChanged: controller.updateShortDescription,
               ),
               _LabeledField(
-                label: 'Full description',
+                label: context.l10n.createFormFullDescription,
                 controller: _fullDescriptionController,
                 maxLines: 4,
                 onChanged: controller.updateFullDescription,
               ),
               _LabeledField(
-                label: 'Cover image *',
+                label: context.l10n.createFormCoverImage,
                 controller: _coverController,
                 errorText: _fieldError(context, state, 'coverImage'),
                 onChanged: controller.updateCoverImage,
               ),
               if (blockConfig.requiresStartDateTime)
                 _LabeledField(
-                  label:
-                      '${blockConfig.title} start datetime UTC (YYYY-MM-DDTHH:mm:ssZ) *',
+                  label: context.l10n.createObjectTypeStartUtc(
+                    blockConfig.objectType.name,
+                  ),
                   controller: _startController,
                   errorText: _fieldError(context, state, 'startDateTimeUtc'),
                   onChanged: controller.updateStartDateTime,
@@ -514,8 +529,8 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                   Expanded(
                     child: TextField(
                       controller: _galleryInputController,
-                      decoration: const InputDecoration(
-                        labelText: 'Gallery image URL/path',
+                      decoration: InputDecoration(
+                        labelText: context.l10n.createFormGalleryImageUrlPath,
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -526,7 +541,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                       controller.addGalleryImage(_galleryInputController.text);
                       _galleryInputController.clear();
                     },
-                    child: const Text('Add'),
+                    child: Text(context.l10n.createFormAdd),
                   ),
                 ],
               ),
@@ -548,11 +563,17 @@ class _CreatePageState extends ConsumerState<CreatePage> {
               SwitchListTile(
                 value: state.draft.isFree,
                 onChanged: controller.updateIsFree,
-                title: Text('Free ${blockConfig.title.toLowerCase()}'),
+                title: Text(
+                  context.l10n.createObjectTypeFreeToggle(
+                    blockConfig.objectType.name,
+                  ),
+                ),
               ),
               if (!state.draft.isFree)
                 _LabeledField(
-                  label: blockConfig.priceLabel,
+                  label: context.l10n.createObjectTypePriceLabel(
+                    blockConfig.objectType.name,
+                  ),
                   controller: _priceController,
                   onChanged: controller.updateBasePrice,
                 ),
@@ -567,7 +588,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                           ? null
                           : controller.saveDraft,
                       icon: const Icon(Icons.save_outlined),
-                      label: const Text('Save draft'),
+                      label: Text(context.l10n.createFormSaveDraft),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -588,8 +609,8 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                       icon: const Icon(Icons.publish_outlined),
                       label: Text(
                         state.status == CreateStatus.publishing
-                            ? 'Publishing...'
-                            : 'Publish',
+                            ? context.l10n.createFormPublishing
+                            : context.l10n.createFormPublish,
                       ),
                     ),
                   ),
@@ -789,7 +810,7 @@ class _CreateHubHeader extends StatelessWidget {
                 Icon(Icons.auto_awesome, color: colorScheme.onPrimary),
                 const SizedBox(width: 8),
                 Text(
-                  'Recharge Create',
+                  context.l10n.createFormRechargeCreate,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: colorScheme.onPrimary,
                     fontWeight: FontWeight.w800,
@@ -800,7 +821,9 @@ class _CreateHubHeader extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               draft.title.trim().isEmpty
-                  ? 'New ${config.title.toLowerCase()}'
+                  ? context.l10n.createObjectTypeNewTitle(
+                      config.objectType.name,
+                    )
                   : draft.title,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: colorScheme.onPrimary,
@@ -812,7 +835,12 @@ class _CreateHubHeader extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                _HeaderChip(icon: Icons.layers, label: config.title),
+                _HeaderChip(
+                  icon: Icons.layers,
+                  label: context.l10n.createObjectTypeName(
+                    config.objectType.name,
+                  ),
+                ),
                 if (draft.mainCategory.isNotEmpty)
                   _HeaderChip(
                     icon: Icons.category,
@@ -895,16 +923,13 @@ class _RentalReviewBanner extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Could this be a rental?',
+              context.l10n.createFormCouldRental,
               style: Theme.of(
                 context,
               ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'This legacy offer was migrated safely as a Bookable session. '
-              'Choose Rental only if equipment or transport is being rented.',
-            ),
+            Text(context.l10n.createFormLegacyOfferWasMigratedSafelyAs),
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
@@ -912,11 +937,11 @@ class _RentalReviewBanner extends StatelessWidget {
               children: <Widget>[
                 OutlinedButton(
                   onPressed: onKeepSession,
-                  child: const Text('Keep session'),
+                  child: Text(context.l10n.createFormKeepSession),
                 ),
                 FilledButton(
                   onPressed: onConvertToRental,
-                  child: const Text('Convert to rental'),
+                  child: Text(context.l10n.createFormConvertRental),
                 ),
               ],
             ),
@@ -1027,7 +1052,7 @@ class _CreateTaxonomyPicker extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Scenario taxonomy',
+          context.l10n.createFormScenarioTaxonomy,
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -1097,7 +1122,7 @@ class _DynamicCriteriaSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Activity criteria',
+              context.l10n.createFormActivityCriteria,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
@@ -1210,7 +1235,7 @@ class _TaxonomySubcategoryPickerState
         ),
         const SizedBox(height: 10),
         if (visibleSubcategories.isEmpty)
-          const Text('No categories match this search.')
+          Text(context.l10n.createFormNoCategoriesMatchSearch)
         else
           Wrap(
             spacing: 8,
@@ -1435,7 +1460,7 @@ class _CreateAvailabilitySection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Availability',
+              context.l10n.createFormAvailability,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
@@ -1446,20 +1471,20 @@ class _CreateAvailabilitySection extends StatelessWidget {
             SegmentedButton<CreateAvailabilityKind>(
               segments: <ButtonSegment<CreateAvailabilityKind>>[
                 if (allowed.contains(CreateAvailabilityKind.eventSlots))
-                  const ButtonSegment<CreateAvailabilityKind>(
+                  ButtonSegment<CreateAvailabilityKind>(
                     value: CreateAvailabilityKind.eventSlots,
-                    label: Text('Schedule'),
+                    label: Text(context.l10n.createFormSchedule),
                     icon: Icon(Icons.event_outlined),
                   ),
                 if (allowed.contains(CreateAvailabilityKind.openingHours))
-                  const ButtonSegment<CreateAvailabilityKind>(
+                  ButtonSegment<CreateAvailabilityKind>(
                     value: CreateAvailabilityKind.openingHours,
-                    label: Text('Hours'),
+                    label: Text(context.l10n.createFormHours),
                     icon: Icon(Icons.schedule_outlined),
                   ),
-                const ButtonSegment<CreateAvailabilityKind>(
+                ButtonSegment<CreateAvailabilityKind>(
                   value: CreateAvailabilityKind.none,
-                  label: Text('None'),
+                  label: Text(context.l10n.createFormNone),
                 ),
               ],
               selected: <CreateAvailabilityKind>{
@@ -1475,11 +1500,11 @@ class _CreateAvailabilitySection extends StatelessWidget {
                 CreateAvailabilityKind.eventSlots) ...<Widget>[
               Row(
                 children: <Widget>[
-                  const Expanded(child: Text('Schedule slots')),
+                  Expanded(child: Text(context.l10n.createFormScheduleSlots)),
                   TextButton.icon(
                     onPressed: onAddSlot,
                     icon: const Icon(Icons.add),
-                    label: const Text('Add slot'),
+                    label: Text(context.l10n.createFormAddSlot),
                   ),
                 ],
               ),
@@ -1505,7 +1530,7 @@ class _CreateAvailabilitySection extends StatelessWidget {
                   Expanded(
                     child: Text(
                       draft.openingHours.isEmpty
-                          ? 'No opening hours yet'
+                          ? context.l10n.createFormNoOpeningHoursYet
                           : '${draft.openingHours.length} opening rules',
                     ),
                   ),
@@ -1520,7 +1545,7 @@ class _CreateAvailabilitySection extends StatelessWidget {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   dense: true,
-                  title: Text(_openingRuleLabel(rule)),
+                  title: Text(_openingRuleLabel(context, rule)),
                   trailing: IconButton(
                     onPressed: () => onRemoveOpeningRule(rule),
                     icon: const Icon(Icons.delete_outline),
@@ -1530,7 +1555,7 @@ class _CreateAvailabilitySection extends StatelessWidget {
             if (draft.availabilityKind !=
                 CreateAvailabilityKind.none) ...<Widget>[
               const Divider(height: 24),
-              const Text('Duration'),
+              Text(context.l10n.createFormDuration),
               Wrap(
                 spacing: 8,
                 children: <int>[30, 60, 90, 120]
@@ -1545,7 +1570,7 @@ class _CreateAvailabilitySection extends StatelessWidget {
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Allow partial attendance'),
+                title: Text(context.l10n.createFormAllowPartialAttendance),
                 value: draft.allowsPartialAttendance,
                 onChanged: onPartialChanged,
               ),
@@ -1565,8 +1590,10 @@ class _CreateAvailabilitySection extends StatelessWidget {
                 ),
               const SizedBox(height: 8),
               Text(
-                'Onsite buffers: ${draft.bufferBeforeMinutes} / '
-                '${draft.bufferAfterMinutes} min',
+                context.l10n.createFormOnsiteBuffersMin(
+                  draft.bufferBeforeMinutes,
+                  draft.bufferAfterMinutes,
+                ),
               ),
               Wrap(
                 spacing: 8,
@@ -1586,7 +1613,7 @@ class _CreateAvailabilitySection extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 draft.maxParticipants == null
-                    ? 'Capacity unknown'
+                    ? context.l10n.createFormCapacityUnknown
                     : 'Capacity ${draft.currentParticipants}/'
                           '${draft.maxParticipants}',
               ),
@@ -1595,7 +1622,11 @@ class _CreateAvailabilitySection extends StatelessWidget {
                 children: <int?>[null, 5, 10, 20, 50]
                     .map(
                       (int? maximum) => ChoiceChip(
-                        label: Text(maximum == null ? 'No limit' : '$maximum'),
+                        label: Text(
+                          maximum == null
+                              ? context.l10n.createFormNoLimit
+                              : '$maximum',
+                        ),
                         selected: draft.maxParticipants == maximum,
                         onSelected: (_) => onCapacityChanged(
                           maximum: maximum,
@@ -1651,9 +1682,17 @@ Set<CreateAvailabilityKind> _allowedAvailabilityKinds(CreateObjectType type) {
 String _availabilityDateTime(DateTime value) =>
     value.toUtc().toIso8601String().replaceFirst('.000Z', 'Z');
 
-String _openingRuleLabel(CreateOpeningHoursDraftRule rule) {
-  if (rule.isClosedAllDay) return 'Closed';
-  final String selector = rule.exceptionDateIso ?? 'weekday ${rule.dayOfWeek}';
+String _openingRuleLabel(
+  BuildContext context,
+  CreateOpeningHoursDraftRule rule,
+) {
+  if (rule.isClosedAllDay) return context.l10n.createFormClosed;
+  final String selector =
+      rule.exceptionDateIso ??
+      RechargeFormats.weekdayShort(
+        rule.dayOfWeek ?? 1,
+        Localizations.localeOf(context).languageCode,
+      );
   String time(int? minutes) => minutes == null
       ? '--:--'
       : '${(minutes ~/ 60).toString().padLeft(2, '0')}:'
@@ -1734,7 +1773,7 @@ class _CreateSeedBanner extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Seeded from ${seedContext.sourceLabel}',
+                    context.l10n.createFormSeededFrom(seedContext.sourceCode),
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: colorScheme.tertiary,
                       fontWeight: FontWeight.w800,
@@ -1800,7 +1839,7 @@ class _ScenarioRouteSeedPanel extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Scenario route seed',
+                    context.l10n.createFormScenarioRouteSeed,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w900,
@@ -1837,7 +1876,8 @@ class _ScenarioRouteSeedPanel extends StatelessWidget {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: seedContext.chips
+              children: seedContext
+                  .chips(context.l10n)
                   .map((String chip) => _CreatePill(label: chip))
                   .toList(growable: false),
             ),
@@ -1861,7 +1901,7 @@ class _ScenarioRouteSeedPanel extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onEditRoute,
                     icon: const Icon(Icons.edit_location_alt),
-                    label: const Text('Edit route'),
+                    label: Text(context.l10n.createFormEditRoute),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -1869,7 +1909,7 @@ class _ScenarioRouteSeedPanel extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onMapRoute,
                     icon: const Icon(Icons.map_outlined),
-                    label: const Text('Map route'),
+                    label: Text(context.l10n.createFormMapRoute),
                   ),
                 ),
               ],
@@ -1883,12 +1923,16 @@ class _ScenarioRouteSeedPanel extends StatelessWidget {
 
 class _CreateSeedContext {
   const _CreateSeedContext({
+    required this.sourceCode,
     required this.sourceLabel,
     required this.title,
     required this.chips,
   });
 
-  static _CreateSeedContext? fromParameters(Map<String, String> params) {
+  static _CreateSeedContext? fromParameters(
+    AppLocalizations l10n,
+    Map<String, String> params,
+  ) {
     final String source = _seedParam(params, <String>['source']);
     final String prompt = _seedParam(params, <String>['q', 'prompt', 'query']);
     final String title = _seedParam(params, <String>['title', 'name']);
@@ -1915,25 +1959,30 @@ class _CreateSeedContext {
     if (!hasContext) return null;
 
     return _CreateSeedContext(
+      sourceCode: source.toLowerCase(),
       sourceLabel: _seedSourceLabel(params),
       title: title.isNotEmpty
           ? title
           : prompt.isNotEmpty
           ? prompt
-          : 'Recharge idea',
+          : l10n.createFormRechargeIdea,
       chips: <String>[
         if (category.isNotEmpty) category,
-        if (free == '1' || free.toLowerCase() == 'true') 'Free',
-        if (budget.isNotEmpty) 'up to $budget',
-        if (radiusMeters != null) '${(radiusMeters / 1000).round()} km',
+        if (free == '1' || free.toLowerCase() == 'true') l10n.createFormFree,
+        if (budget.isNotEmpty) l10n.createFormUpToPrice(budget),
+        if (radiusMeters != null)
+          l10n.createFormDistanceKm('${(radiusMeters / 1000).round()}'),
         if (mood.isNotEmpty) mood,
-        if (duration.isNotEmpty) '$duration min',
-        if (walking == '1') 'Walking',
-        if (stepsCount > 0) '$stepsCount stops',
+        if (int.tryParse(duration) case final int minutes)
+          l10n.createFormMinutes(minutes),
+        if (walking == '1') l10n.createFormWalking,
+        if (stepsCount > 0) l10n.createFormStops(stepsCount),
       ],
     );
   }
 
+  /// The stable seed source code (`search`, `map`, …) for the card text.
+  final String sourceCode;
   final String sourceLabel;
   final String title;
   final List<String> chips;
@@ -1950,7 +1999,10 @@ class _ScenarioRouteSeedContext {
     required this.stepCategories,
   });
 
-  static _ScenarioRouteSeedContext? fromParameters(Map<String, String> params) {
+  static _ScenarioRouteSeedContext? fromParameters(
+    AppLocalizations l10n,
+    Map<String, String> params,
+  ) {
     final String source = _seedParam(params, <String>['source']).toLowerCase();
     final String category = _firstSeedValue(
       _seedParam(params, <String>['category', 'mainCategory']),
@@ -1966,7 +2018,7 @@ class _ScenarioRouteSeedContext {
 
     return _ScenarioRouteSeedContext(
       title: _seedParam(params, <String>['title', 'name']).isEmpty
-          ? 'Scenario route'
+          ? l10n.createFormScenarioRoute
           : _seedParam(params, <String>['title', 'name']),
       prompt: _seedParam(params, <String>['q', 'prompt', 'query']),
       mood: _seedParam(params, <String>['mood']),
@@ -1987,12 +2039,14 @@ class _ScenarioRouteSeedContext {
 
   int get stopCount => stepCategories.length;
 
-  List<String> get chips {
+  List<String> chips(AppLocalizations l10n) {
     return <String>[
       if (mood.isNotEmpty) mood,
-      if (duration.isNotEmpty) '$duration min',
-      if (free == '1' || free.toLowerCase() == 'true') 'Free',
-      if (walking == '1' || walking.toLowerCase() == 'true') 'Walking',
+      if (int.tryParse(duration) case final int minutes)
+        l10n.createFormMinutes(minutes),
+      if (free == '1' || free.toLowerCase() == 'true') l10n.createFormFree,
+      if (walking == '1' || walking.toLowerCase() == 'true')
+        l10n.createFormWalking,
     ];
   }
 
@@ -2081,7 +2135,7 @@ class _CreateSeed {
       shortDescription: _seedShortDescription(params, prompt, title),
       fullDescription: _seedFullDescription(params, prompt, title),
       city: _seedParam(params, <String>['city', 'location']).isEmpty
-          ? 'Riga'
+          ? 'Riga' // l10n-ignore: seed prefill data
           : _seedParam(params, <String>['city', 'location']),
       venueName: _seedVenueName(params, objectType, title),
       addressLine1: _seedAddress(params),
@@ -2280,7 +2334,7 @@ String _seedShortDescription(
   ]);
   if (subtitle.isNotEmpty) return subtitle;
   final String subject = prompt.isEmpty ? title : prompt;
-  return 'Drafted from ${_seedSourceLabel(params)} for $subject.';
+  return 'Drafted from ${_seedSourceLabel(params)} for $subject.'; // l10n-ignore: seed prefill data, parsed back
 }
 
 String _seedFullDescription(
@@ -2296,11 +2350,11 @@ String _seedFullDescription(
   final String routeSteps = _seedParam(params, <String>['steps']);
   final String routeStepsSentence = routeSteps.isEmpty
       ? ''
-      : 'Route steps: $routeSteps. ';
-  return 'Seeded from ${_seedSourceLabel(params)}. '
-      'Original context: $subject. '
+      : 'Route steps: $routeSteps. '; // l10n-ignore: seed prefill data, parsed back
+  return 'Seeded from ${_seedSourceLabel(params)}. ' // l10n-ignore: seed prefill data, parsed back
+      'Original context: $subject. ' // l10n-ignore: seed prefill data, parsed back
       '$routeStepsSentence'
-      'Review capacity, schedule, booking, and moderation details before '
+      'Review capacity, schedule, booking, and moderation details before ' // l10n-ignore: seed prefill data, parsed back
       'publishing.';
 }
 
@@ -2322,7 +2376,7 @@ String _seedSourceLabel(Map<String, String> params) {
     case 'map':
       return 'map area';
   }
-  return 'Recharge';
+  return 'Recharge'; // l10n-ignore: seed prefill data
 }
 
 String _seedVenueName(
@@ -2337,8 +2391,10 @@ String _seedVenueName(
       objectType == CreateObjectType.rental) {
     return title;
   }
-  if (objectType == CreateObjectType.route) return 'Route start point';
-  return 'Meeting point';
+  if (objectType == CreateObjectType.route) {
+    return 'Route start point'; // l10n-ignore: seed prefill data, parsed back
+  }
+  return 'Meeting point'; // l10n-ignore: seed prefill data, parsed back
 }
 
 String _seedAddress(Map<String, String> params) {
@@ -2349,7 +2405,9 @@ String _seedAddress(Map<String, String> params) {
   ]);
   if (address.isNotEmpty) return address;
   final String city = _seedParam(params, <String>['city', 'location']);
-  return city.isEmpty ? 'City center' : city;
+  // l10n-ignore: seed prefill data, parsed back
+  if (city.isEmpty) return 'City center'; // l10n-ignore
+  return city;
 }
 
 String _seedCoverImage(Map<String, String> params, String categoryId) {

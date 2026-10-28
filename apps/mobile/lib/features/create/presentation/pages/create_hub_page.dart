@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/create_taxonomy.dart';
 import '../../domain/entities/create_draft_entity.dart';
 
@@ -17,7 +18,7 @@ class CreateHubPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!isAuthenticated) {
-      return const Scaffold(body: Center(child: Text('Требуется авторизация')));
+      return Scaffold(body: Center(child: Text(context.l10n.createFormText)));
     }
 
     final bool canCreatePlace = capabilities.contains('create.place');
@@ -41,19 +42,19 @@ class CreateHubPage extends StatelessWidget {
         .toList(growable: false);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Hub')),
+      appBar: AppBar(title: Text(context.l10n.createFormCreateHub)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: <Widget>[
           Text(
-            'What do you want to create?',
+            context.l10n.createFormWhatDoYouWantCreate,
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 6),
           Text(
-            'Choose a type to open its creation page.',
+            context.l10n.createFormChooseTypeOpenItsCreationPage,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 18),
@@ -119,7 +120,7 @@ class _CreateHubCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              config.title,
+              context.l10n.createObjectTypeName(config.objectType.name),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(
@@ -129,7 +130,9 @@ class _CreateHubCard extends StatelessWidget {
             const SizedBox(height: 4),
             Expanded(
               child: Text(
-                config.description,
+                context.l10n.createObjectTypeDescription(
+                  config.objectType.name,
+                ),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall,

@@ -10,6 +10,9 @@ import '../../domain/entities/rental_validation_issue.dart';
 import 'rental_template_panel.dart';
 import 'create_texts.dart';
 import '../../../../core/localization/l10n_context.dart';
+import 'create_form_texts.dart';
+import '../../../../core/localization/recharge_formats.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 /// Rental / Equipment create block — RNT-CRT-01. A shell + step navigation
 /// (mirrors `PlaceCreateBlock`), with all 8 spec §13 steps rendered as
@@ -64,10 +67,10 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
     final CreateDraftEntity draft = widget.state.draft;
     final RentalDraftData? rental = draft.rentalData;
     if (rental == null) {
-      return const Card(
+      return Card(
         child: Padding(
           padding: EdgeInsets.all(16),
-          child: Text('Rental data is being prepared…'),
+          child: Text(context.l10n.createFormRentalDataBeingPrepared),
         ),
       );
     }
@@ -78,11 +81,13 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         if (!canEdit) ...<Widget>[
           Card(
             color: Theme.of(context).colorScheme.errorContainer,
-            child: const ListTile(
+            child: ListTile(
               leading: Icon(Icons.lock_outline),
               title: Text('Read-only draft'),
               subtitle: Text(
-                'The create.rental capability is required to edit or publish.',
+                context
+                    .l10n
+                    .createFormCreateRentalCapabilityRequiredEditPublish,
               ),
             ),
           ),
@@ -123,15 +128,19 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
     return Row(
       children: <Widget>[
         if (step > 0)
-          OutlinedButton(
-            onPressed: () => widget.controller.goToRentalStep(step - 1),
-            child: const Text('Back'),
+          Flexible(
+            child: OutlinedButton(
+              onPressed: () => widget.controller.goToRentalStep(step - 1),
+              child: Text(context.l10n.createFormBack),
+            ),
           ),
         const Spacer(),
         if (!isLast)
-          ElevatedButton(
-            onPressed: () => widget.controller.goToRentalStep(step + 1),
-            child: const Text('Next'),
+          Flexible(
+            child: ElevatedButton(
+              onPressed: () => widget.controller.goToRentalStep(step + 1),
+              child: Text(context.l10n.createFormNext),
+            ),
           ),
       ],
     );
@@ -151,13 +160,16 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
 
   Widget _listingStep(RentalDraftData rental) {
     return _StepCard(
-      title: rentalCreateSteps[0].title,
-      description: rentalCreateSteps[0].description,
+      title: createFormText(context.l10n, rentalCreateSteps[0].titleId),
+      description: createFormText(
+        context.l10n,
+        rentalCreateSteps[0].descriptionId,
+      ),
       children: <Widget>[
         TextField(
           controller: _field('title', rental.title),
           decoration: InputDecoration(
-            labelText: 'Title',
+            labelText: context.l10n.createFormTitle,
             errorText: _error('title'),
           ),
           onChanged: widget.controller.updateRentalTitle,
@@ -174,7 +186,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         TextField(
           controller: _field('shortDescription', rental.shortDescription),
           decoration: InputDecoration(
-            labelText: 'Short description',
+            labelText: context.l10n.createFormShortDescription,
             errorText: _error('shortDescription'),
           ),
           maxLines: 2,
@@ -184,7 +196,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         TextField(
           controller: _field('fullDescription', rental.fullDescription),
           decoration: InputDecoration(
-            labelText: 'Full description',
+            labelText: context.l10n.createFormFullDescription,
             errorText: _error('fullDescription'),
           ),
           maxLines: 5,
@@ -197,7 +209,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
               child: TextField(
                 controller: _field('categoryId', rental.categoryId),
                 decoration: InputDecoration(
-                  labelText: 'Category',
+                  labelText: context.l10n.createFormCategory,
                   errorText: _error('categoryId'),
                 ),
                 onChanged: (value) => widget.controller.updateRentalCategory(
@@ -210,7 +222,9 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
             Expanded(
               child: TextField(
                 controller: _field('subcategoryId', rental.subcategoryId),
-                decoration: const InputDecoration(labelText: 'Subcategory'),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createFormSubcategory,
+                ),
                 onChanged: (value) => widget.controller.updateRentalCategory(
                   categoryId: rental.categoryId,
                   subcategoryId: value,
@@ -235,8 +249,11 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
 
   Widget _inventoryStep(RentalDraftData rental) {
     return _StepCard(
-      title: rentalCreateSteps[1].title,
-      description: rentalCreateSteps[1].description,
+      title: createFormText(context.l10n, rentalCreateSteps[1].titleId),
+      description: createFormText(
+        context.l10n,
+        rentalCreateSteps[1].descriptionId,
+      ),
       children: <Widget>[
         for (final RentalInventoryGroup group in rental.inventoryGroups)
           Card(
@@ -248,7 +265,9 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                 children: <Widget>[
                   TextField(
                     controller: _field('group_label_${group.id}', group.label),
-                    decoration: const InputDecoration(labelText: 'Label'),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.createFormLabel,
+                    ),
                     onChanged: (value) =>
                         widget.controller.updateRentalInventoryGroup(
                           group.id,
@@ -263,8 +282,8 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                             'group_qty_${group.id}',
                             group.quantity.toString(),
                           ),
-                          decoration: const InputDecoration(
-                            labelText: 'Quantity',
+                          decoration: InputDecoration(
+                            labelText: context.l10n.createFormQuantity,
                           ),
                           keyboardType: TextInputType.number,
                           onChanged: (value) {
@@ -282,14 +301,16 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                         child: DropdownButtonFormField<RentalCondition>(
                           isExpanded: true,
                           initialValue: group.condition,
-                          decoration: const InputDecoration(
-                            labelText: 'Condition',
+                          decoration: InputDecoration(
+                            labelText: context.l10n.createFormCondition,
                           ),
                           items: RentalCondition.values
                               .map(
                                 (c) => DropdownMenuItem<RentalCondition>(
                                   value: c,
-                                  child: Text(c.name),
+                                  child: Text(
+                                    createOptionText(context.l10n, c),
+                                  ),
                                 ),
                               )
                               .toList(growable: false),
@@ -328,12 +349,12 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                         TextButton(
                           onPressed: () => widget.controller
                               .duplicateRentalInventoryGroup(group.id),
-                          child: const Text('Duplicate'),
+                          child: Text(context.l10n.createFormDuplicate),
                         ),
                         TextButton(
                           onPressed: () => widget.controller
                               .removeRentalInventoryGroup(group.id),
-                          child: const Text('Remove'),
+                          child: Text(context.l10n.createFormRemove),
                         ),
                       ],
                     ),
@@ -352,7 +373,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
             ),
           ),
           icon: const Icon(Icons.add),
-          label: const Text('Add another item type'),
+          label: Text(context.l10n.createFormAddAnotherItemType),
         ),
       ],
     );
@@ -363,8 +384,11 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
   Widget _availabilityStep(RentalDraftData rental) {
     final RentalAvailabilityCoverage? coverage = rental.availability.coverage;
     return _StepCard(
-      title: rentalCreateSteps[2].title,
-      description: rentalCreateSteps[2].description,
+      title: createFormText(context.l10n, rentalCreateSteps[2].titleId),
+      description: createFormText(
+        context.l10n,
+        rentalCreateSteps[2].descriptionId,
+      ),
       children: <Widget>[
         ListTile(
           contentPadding: EdgeInsets.zero,
@@ -375,11 +399,11 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
           ),
           title: Text(
             coverage == null
-                ? 'Calendar not confirmed yet'
+                ? context.l10n.createFormCalendarNotConfirmedYet
                 : 'Confirmed ${coverage.confirmedAtUtc.toIso8601String()}',
           ),
-          subtitle: const Text(
-            'Recharge cannot see external bookings — confirm this is up to date.',
+          subtitle: Text(
+            context.l10n.createFormRechargeCannotSeeExternalBookingsConfirm,
           ),
         ),
         Align(
@@ -392,7 +416,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                     const Duration(days: 90),
                   ),
                 ),
-            child: const Text('Confirm calendar'),
+            child: Text(context.l10n.createFormConfirmCalendar),
           ),
         ),
         const Divider(),
@@ -418,7 +442,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
           OutlinedButton.icon(
             onPressed: () => _showAddBlockDialog(rental),
             icon: const Icon(Icons.event_busy),
-            label: const Text('Block a date range'),
+            label: Text(context.l10n.createFormBlockDateRange),
           ),
       ],
     );
@@ -426,9 +450,11 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
 
   String _findGroupLabel(RentalDraftData rental, String groupId) {
     for (final RentalInventoryGroup g in rental.inventoryGroups) {
-      if (g.id == groupId) return g.label.isEmpty ? 'Group' : g.label;
+      if (g.id == groupId) {
+        return g.label.isEmpty ? context.l10n.createFormGroup : g.label;
+      }
     }
-    return 'Group';
+    return context.l10n.createFormGroup;
   }
 
   Future<void> _showAddBlockDialog(RentalDraftData rental) async {
@@ -449,7 +475,9 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
     );
     if (!added && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('That would exceed the group capacity.')),
+        SnackBar(
+          content: Text(context.l10n.createFormThatWouldExceedGroupCapacity),
+        ),
       );
     }
   }
@@ -459,13 +487,16 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
   Widget _handoverStep(RentalDraftData rental) {
     final RentalHandoverDraft h = rental.handover;
     return _StepCard(
-      title: rentalCreateSteps[3].title,
-      description: rentalCreateSteps[3].description,
+      title: createFormText(context.l10n, rentalCreateSteps[3].titleId),
+      description: createFormText(
+        context.l10n,
+        rentalCreateSteps[3].descriptionId,
+      ),
       children: <Widget>[
         TextField(
           controller: _field('pickupPlaceName', h.pickupPlaceName),
           decoration: InputDecoration(
-            labelText: 'Pickup place name',
+            labelText: context.l10n.createFormPickupPlaceName,
             errorText: _error('pickupPlaceName'),
           ),
           onChanged: (value) => widget.controller.updateRentalHandover(
@@ -475,7 +506,9 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         const SizedBox(height: 8),
         TextField(
           controller: _field('publicAreaLabel', h.publicAreaLabel),
-          decoration: const InputDecoration(labelText: 'Public area label'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createFormPublicAreaLabel,
+          ),
           onChanged: (value) => widget.controller.updateRentalHandover(
             (handover) => handover.copyWith(publicAreaLabel: value),
           ),
@@ -489,7 +522,9 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                   'publicLatitude',
                   h.publicLatitude?.toString() ?? '',
                 ),
-                decoration: const InputDecoration(labelText: 'Latitude'),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createFormLatitude,
+                ),
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
                   final double? lat = double.tryParse(value);
@@ -509,7 +544,9 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                   'publicLongitude',
                   h.publicLongitude?.toString() ?? '',
                 ),
-                decoration: const InputDecoration(labelText: 'Longitude'),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createFormLongitude,
+                ),
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
                   final double? lng = double.tryParse(value);
@@ -527,15 +564,17 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         DropdownButtonFormField<RentalLocationDisclosure>(
           isExpanded: true,
           initialValue: h.disclosure,
-          decoration: const InputDecoration(labelText: 'Location disclosure'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createFormLocationDisclosure,
+          ),
           items: RentalLocationDisclosure.values
               .map(
                 (d) => DropdownMenuItem<RentalLocationDisclosure>(
                   value: d,
                   child: Text(
                     d == RentalLocationDisclosure.approximateArea
-                        ? 'Approximate area (default)'
-                        : 'Public business address',
+                        ? context.l10n.createFormApproximateAreaDefault
+                        : context.l10n.createFormPublicBusinessAddress,
                   ),
                 ),
               )
@@ -550,8 +589,8 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         if (h.disclosure == RentalLocationDisclosure.publicBusinessAddress)
           TextField(
             controller: _field('publicAddress', h.publicAddress ?? ''),
-            decoration: const InputDecoration(
-              labelText: 'Public business address',
+            decoration: InputDecoration(
+              labelText: context.l10n.createFormPublicBusinessAddress,
             ),
             onChanged: (value) => widget.controller.updateRentalHandover(
               (handover) => handover.copyWith(
@@ -563,15 +602,17 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         DropdownButtonFormField<RentalScheduleMode>(
           isExpanded: true,
           initialValue: h.scheduleMode,
-          decoration: const InputDecoration(labelText: 'Pickup schedule'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createFormPickupSchedule,
+          ),
           items: RentalScheduleMode.values
               .map(
                 (m) => DropdownMenuItem<RentalScheduleMode>(
                   value: m,
                   child: Text(
                     m == RentalScheduleMode.openingHours
-                        ? 'Opening hours'
-                        : 'By arrangement',
+                        ? context.l10n.createFormOpeningHours
+                        : context.l10n.createFormByArrangement,
                   ),
                 ),
               )
@@ -586,7 +627,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: h.deliveryAvailable,
-          title: const Text('Offer delivery'),
+          title: Text(context.l10n.createFormOfferDelivery),
           onChanged: (value) => widget.controller.updateRentalHandover(
             (handover) => handover.copyWith(deliveryAvailable: value),
           ),
@@ -597,8 +638,8 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
               'deliveryRadiusKm',
               h.deliveryRadiusKm?.toString() ?? '',
             ),
-            decoration: const InputDecoration(
-              labelText: 'Delivery radius (km)',
+            decoration: InputDecoration(
+              labelText: context.l10n.createFormDeliveryRadiusKm,
             ),
             keyboardType: TextInputType.number,
             onChanged: (value) {
@@ -613,8 +654,8 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
               'deliveryFee',
               h.deliveryFee?.amountMinor.toString() ?? '',
             ),
-            decoration: const InputDecoration(
-              labelText: 'Delivery fee (minor units)',
+            decoration: InputDecoration(
+              labelText: context.l10n.createFormDeliveryFeeMinorUnits,
             ),
             keyboardType: TextInputType.number,
             onChanged: (value) {
@@ -641,18 +682,21 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
     final RentalTerms t = rental.terms;
     final RentalAdaptiveHint? hint = rentalAdaptiveHintFor(rental.categoryId);
     return _StepCard(
-      title: rentalCreateSteps[4].title,
-      description: rentalCreateSteps[4].description,
+      title: createFormText(context.l10n, rentalCreateSteps[4].titleId),
+      description: createFormText(
+        context.l10n,
+        rentalCreateSteps[4].descriptionId,
+      ),
       children: <Widget>[
         if (hint != null)
           Card(
             color: Theme.of(context).colorScheme.secondaryContainer,
             child: ListTile(
-              title: const Text('Suggested defaults for this category'),
+              title: Text(context.l10n.createFormSuggestedDefaultsCategory),
               subtitle: const Text('Editable — nothing applies automatically.'),
               trailing: TextButton(
                 onPressed: widget.controller.applyRentalAdaptiveHint,
-                child: const Text('Apply'),
+                child: Text(context.l10n.createFormApply),
               ),
             ),
           ),
@@ -664,8 +708,8 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                   'offeredMinMinutes',
                   t.offeredMinMinutes.toString(),
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'Min duration (min)',
+                decoration: InputDecoration(
+                  labelText: context.l10n.createFormMinDurationMin,
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
@@ -684,8 +728,8 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                   'offeredMaxMinutes',
                   t.offeredMaxMinutes.toString(),
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'Max duration (min)',
+                decoration: InputDecoration(
+                  labelText: context.l10n.createFormMaxDurationMin,
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
@@ -701,7 +745,9 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         ),
         TextField(
           controller: _field('minRenterAge', t.minRenterAge?.toString() ?? ''),
-          decoration: const InputDecoration(labelText: 'Minimum renter age'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createFormMinimumRenterAge,
+          ),
           keyboardType: TextInputType.number,
           onChanged: (value) {
             final int? v = int.tryParse(value);
@@ -722,7 +768,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         TextField(
           controller: _field('safetyNotice', t.safetyNotice ?? ''),
           decoration: InputDecoration(
-            labelText: 'Safety notice',
+            labelText: context.l10n.createFormSafetyNotice,
             errorText: _error('safetyNotice'),
           ),
           maxLines: 3,
@@ -735,7 +781,9 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         ),
         TextField(
           controller: _field('usageRestrictions', t.usageRestrictions ?? ''),
-          decoration: const InputDecoration(labelText: 'Usage restrictions'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createFormUsageRestrictions,
+          ),
           maxLines: 2,
           onChanged: (value) => widget.controller.updateRentalTerms(
             (terms) => terms.copyWith(
@@ -753,8 +801,11 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
   Widget _pricingStep(RentalDraftData rental) {
     final RentalPricingPolicy p = rental.pricing;
     return _StepCard(
-      title: rentalCreateSteps[5].title,
-      description: rentalCreateSteps[5].description,
+      title: createFormText(context.l10n, rentalCreateSteps[5].titleId),
+      description: createFormText(
+        context.l10n,
+        rentalCreateSteps[5].descriptionId,
+      ),
       children: <Widget>[
         Row(
           children: <Widget>[
@@ -777,12 +828,14 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
               child: DropdownButtonFormField<RentalBillingUnit>(
                 isExpanded: true,
                 initialValue: p.billingUnit,
-                decoration: const InputDecoration(labelText: 'Billing unit'),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createFormBillingUnit,
+                ),
                 items: RentalBillingUnit.values
                     .map(
                       (u) => DropdownMenuItem<RentalBillingUnit>(
                         value: u,
-                        child: Text(u.name),
+                        child: Text(createOptionText(context.l10n, u)),
                       ),
                     )
                     .toList(growable: false),
@@ -823,7 +876,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
             ),
           ),
           icon: const Icon(Icons.add),
-          label: const Text('Add rate step'),
+          label: Text(context.l10n.createFormAddRateStep),
         ),
         const Divider(),
         Row(
@@ -865,14 +918,14 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
               child: DropdownButtonFormField<RentalDepositCollectionMethod>(
                 isExpanded: true,
                 initialValue: p.deposit.collectionMethod,
-                decoration: const InputDecoration(
-                  labelText: 'Collection method',
+                decoration: InputDecoration(
+                  labelText: context.l10n.createFormCollectionMethod,
                 ),
                 items: RentalDepositCollectionMethod.values
                     .map(
                       (m) => DropdownMenuItem<RentalDepositCollectionMethod>(
                         value: m,
-                        child: Text(m.name),
+                        child: Text(createOptionText(context.l10n, m)),
                       ),
                     )
                     .toList(growable: false),
@@ -893,7 +946,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         TextField(
           controller: _field('depositTerms', p.deposit.terms ?? ''),
           decoration: InputDecoration(
-            labelText: 'Deposit terms',
+            labelText: context.l10n.createFormDepositTerms,
             errorText: _error('deposit'),
           ),
           onChanged: (value) => widget.controller.updateRentalPricing(
@@ -908,7 +961,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         TextField(
           controller: _field('damagePolicy', p.damagePolicy),
           decoration: InputDecoration(
-            labelText: 'Damage policy',
+            labelText: context.l10n.createFormDamagePolicy,
             errorText: _error('damagePolicy'),
           ),
           maxLines: 2,
@@ -918,7 +971,9 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         ),
         TextField(
           controller: _field('lateReturnPolicy', p.lateReturnPolicy ?? ''),
-          decoration: const InputDecoration(labelText: 'Late return policy'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createFormLateReturnPolicy,
+          ),
           onChanged: (value) => widget.controller.updateRentalPricing(
             (pricing) => pricing.copyWith(
               lateReturnPolicy: value.trim().isEmpty ? null : value,
@@ -936,13 +991,16 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
     final String? url = rental.fulfillment.externalBookingUrl;
     final String? host = url == null ? null : Uri.tryParse(url)?.host;
     return _StepCard(
-      title: rentalCreateSteps[6].title,
-      description: rentalCreateSteps[6].description,
+      title: createFormText(context.l10n, rentalCreateSteps[6].titleId),
+      description: createFormText(
+        context.l10n,
+        rentalCreateSteps[6].descriptionId,
+      ),
       children: <Widget>[
         TextField(
           controller: _field('externalBookingUrl', url ?? ''),
           decoration: InputDecoration(
-            labelText: 'External booking URL (https)',
+            labelText: context.l10n.createFormExternalBookingUrlHttps,
             errorText: _error('externalBookingUrl'),
           ),
           onChanged: widget.controller.updateRentalExternalBookingUrl,
@@ -951,7 +1009,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              'You will leave Recharge and go to $host to check availability.',
+              context.l10n.createFormYouWillLeaveRechargeGoCheck,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
@@ -965,19 +1023,37 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
     final RentalListing? preview = widget.controller.rentalPublicPreview;
     final bool attestationComplete = rental.attestation.isComplete;
     return _StepCard(
-      title: rentalCreateSteps[7].title,
-      description: rentalCreateSteps[7].description,
+      title: createFormText(context.l10n, rentalCreateSteps[7].titleId),
+      description: createFormText(
+        context.l10n,
+        rentalCreateSteps[7].descriptionId,
+      ),
       children: <Widget>[
         if (preview != null) ...<Widget>[
-          Text('Public preview', style: Theme.of(context).textTheme.titleSmall),
-          Text(preview.title.isEmpty ? '(no title yet)' : preview.title),
           Text(
-            '${preview.totalUnitsAggregate} unit(s) · '
-            '${preview.currencyCode} ${preview.billingUnit.name}',
+            context.l10n.createFormPublicPreview,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          Text(
+            preview.title.isEmpty
+                ? context.l10n.createFormNoTitleYet
+                : preview.title,
+          ),
+          Text(
+            '${context.l10n.createFormUnits(preview.totalUnitsAggregate)} · '
+            '${createOptionText(context.l10n, preview.billingUnit)}',
           ),
           if (preview.hasDeposit)
             Text(
-              'Deposit: ${preview.depositAmountMinor} ${preview.currencyCode} minor',
+              context.l10n.createFormDepositLine(
+                RechargeFormats.money(
+                  Money(
+                    minorUnits: preview.depositAmountMinor ?? 0,
+                    currencyCode: preview.currencyCode,
+                  ),
+                  Localizations.localeOf(context).languageCode,
+                ),
+              ),
             ),
           const SizedBox(height: 12),
         ],
@@ -1006,7 +1082,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
           value: rental.attestation.listingAccurate,
-          title: const Text('This listing is accurate'),
+          title: Text(context.l10n.createFormListingAccurate),
           onChanged: (value) => widget.controller.acceptRentalAttestation(
             hasRightToOffer: rental.attestation.hasRightToOffer,
             listingAccurate: value ?? false,
@@ -1017,7 +1093,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
           value: rental.attestation.prohibitedItemsAcknowledged,
-          title: const Text('This is not a prohibited/unsafe item'),
+          title: Text(context.l10n.createFormNotProhibitedUnsafeItem),
           onChanged: (value) => widget.controller.acceptRentalAttestation(
             hasRightToOffer: rental.attestation.hasRightToOffer,
             listingAccurate: rental.attestation.listingAccurate,
@@ -1034,8 +1110,8 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
               : null,
           child: Text(
             widget.controller.canPublishRentalDirect
-                ? 'Publish'
-                : 'Submit for review',
+                ? context.l10n.createFormPublish
+                : context.l10n.createFormSubmitReview,
           ),
         ),
       ],

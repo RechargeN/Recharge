@@ -1,13 +1,15 @@
 class ActivityCreateStepConfig {
   const ActivityCreateStepConfig({
     required this.id,
-    required this.title,
-    required this.description,
+    required this.titleId,
+    required this.descriptionId,
   });
 
   final String id;
-  final String title;
-  final String description;
+
+  /// ARB message ids; the UI resolves them with `createFormText` (L4).
+  final String titleId;
+  final String descriptionId;
 }
 
 /// Matches spec §11: Step 1 (basics + media), Step 2 (location & access),
@@ -19,22 +21,22 @@ const List<ActivityCreateStepConfig> activityCreateSteps =
     <ActivityCreateStepConfig>[
       ActivityCreateStepConfig(
         id: 'basics',
-        title: 'About',
-        description: 'Title, category and media',
+        titleId: 'createStepActivityBasicsTitle',
+        descriptionId: 'createStepActivityBasicsDescription',
       ),
       ActivityCreateStepConfig(
         id: 'location',
-        title: 'Location',
-        description: 'Where to go and how to get there',
+        titleId: 'createStepActivityLocationTitle',
+        descriptionId: 'createStepActivityLocationDescription',
       ),
       ActivityCreateStepConfig(
         id: 'whenFor',
-        title: 'When & for whom',
-        description: 'Best time, duration and group size',
+        titleId: 'createStepActivityWhenForTitle',
+        descriptionId: 'createStepActivityWhenForDescription',
       ),
       ActivityCreateStepConfig(
         id: 'publish',
-        title: 'Publish',
-        description: 'Preview and send',
+        titleId: 'createStepActivityPublishTitle',
+        descriptionId: 'createStepActivityPublishDescription',
       ),
     ];

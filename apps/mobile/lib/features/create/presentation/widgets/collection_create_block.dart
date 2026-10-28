@@ -20,6 +20,7 @@ import 'items_picker_section.dart';
 import 'location_search_suggestion_list.dart';
 import 'create_texts.dart';
 import '../../../../core/localization/l10n_context.dart';
+import 'create_form_texts.dart';
 
 /// Collection / Guide 5-step create flow
 /// (COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md §7). Functionally complete
@@ -97,19 +98,23 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
         widget.controller.attachCollectionCoordinator(coordinator);
         setState(() {});
       });
-      return const _Panel(child: Text('Preparing Collection draft…'));
+      return _Panel(
+        child: Text(context.l10n.createFormPreparingCollectionDraft),
+      );
     }
 
     final CollectionCreateState? collectionState =
         widget.controller.collectionCreateState;
     if (collectionState == null) {
-      return const _Panel(child: Text('Collection draft is being prepared…'));
+      return _Panel(
+        child: Text(context.l10n.createFormCollectionDraftBeingPrepared),
+      );
     }
     final CreateDraftEntity draft = collectionState.createDraft;
     final CollectionDraftData? data = draft.collectionData;
     if (data == null) {
-      return const _Panel(
-        child: Text('Collection draft data is being prepared…'),
+      return _Panel(
+        child: Text(context.l10n.createFormCollectionDraftDataBeingPrepared),
       );
     }
 
@@ -160,26 +165,28 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
     _syncText(_shortDescriptionController, draft.shortDescription);
     _syncText(_areaController, data.areaLabel);
     return _StepCard(
-      title: 'Basics & media',
+      title: createFormText(context.l10n, collectionCreateSteps[0].titleId),
       children: <Widget>[
         TextField(
           controller: _titleController,
-          decoration: const InputDecoration(labelText: 'Title'),
+          decoration: InputDecoration(labelText: context.l10n.createFormTitle),
           onChanged: widget.controller.updateTitle,
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _shortDescriptionController,
-          decoration: const InputDecoration(labelText: 'Short pitch'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createFormShortPitch,
+          ),
           maxLines: 2,
           onChanged: widget.controller.updateShortDescription,
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _areaController,
-          decoration: const InputDecoration(
-            labelText: 'Area or city',
-            helperText: 'Type to search, or tap the map below (§7 Шаг 1)',
+          decoration: InputDecoration(
+            labelText: context.l10n.createFormAreaCity,
+            helperText: context.l10n.createFormTypeSearchTapMapBelow7,
           ),
           onChanged: _onAreaLabelChanged,
         ),
@@ -199,14 +206,14 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
           ),
         const SizedBox(height: 12),
         Text(
-          'Area anchor',
+          context.l10n.createFormAreaAnchor,
           style: Theme.of(
             context,
           ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 4),
         Text(
-          'One reference point for the whole guide — not an item location.',
+          context.l10n.createFormOneReferencePointWholeGuideNot,
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 8),
@@ -256,7 +263,7 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
 
   Widget _itemsStep(CollectionCreateState state, CollectionDraftData data) {
     return _StepCard(
-      title: 'Items',
+      title: context.l10n.createFormItems,
       children: <Widget>[
         ItemsPickerSection(
           state: state,
@@ -277,7 +284,7 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
 
   Widget _curatorNotesStep(CollectionDraftData data) {
     return _StepCard(
-      title: 'Curator notes',
+      title: context.l10n.createFormCuratorNotes,
       children: <Widget>[
         CollectionCuratorNotesSection(
           data: data,
@@ -294,15 +301,19 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
 
   Widget _budgetStep(CreateDraftEntity draft, CollectionDraftData data) {
     return _StepCard(
-      title: 'Budget & publisher',
+      title: createFormText(context.l10n, collectionCreateSteps[3].titleId),
       children: <Widget>[
-        const Text('Budget indicator'),
+        Text(context.l10n.createFormBudgetIndicator),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           children: <Widget>[
-            _budgetChip(null, 'Not set', data.budgetTier),
-            _budgetChip(CollectionBudgetTier.free, 'Free', data.budgetTier),
+            _budgetChip(null, context.l10n.createFormNotSet, data.budgetTier),
+            _budgetChip(
+              CollectionBudgetTier.free,
+              context.l10n.createFormFree,
+              data.budgetTier,
+            ),
             _budgetChip(CollectionBudgetTier.low, r'$', data.budgetTier),
             _budgetChip(CollectionBudgetTier.medium, r'$$', data.budgetTier),
             _budgetChip(CollectionBudgetTier.high, r'$$$', data.budgetTier),
@@ -313,15 +324,15 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
             icon: const Icon(Icons.auto_awesome, size: 18),
-            label: const Text('Suggest from item prices'),
+            label: Text(context.l10n.createFormSuggestFromItemPrices),
             onPressed: () {
               final CollectionBudgetTier? suggestion = widget.controller
                   .suggestCollectionBudgetTier();
               if (suggestion == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text(
-                      'Not enough priced items yet to suggest a budget.',
+                      context.l10n.createFormNotEnoughPricedItemsYetSuggest,
                     ),
                   ),
                 );
@@ -332,9 +343,12 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
           ),
         ),
         const SizedBox(height: 16),
-        Text('Publisher: ${data.publisherRef.id}'),
-        Text('Market: ${draft.marketCityId}'),
-        Text('Visibility: ${draft.visibility.name}'),
+        Text(context.l10n.createFormPublisherLine(data.publisherRef.type.name)),
+        Text(
+          context.l10n.createFormVisibilityLine(
+            createOptionText(context.l10n, draft.visibility),
+          ),
+        ),
       ],
     );
   }
@@ -367,7 +381,7 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
     final bool reviewed =
         data.compositionReview?.draftRevision == state.revision;
     return _StepCard(
-      title: 'Preview & publish',
+      title: createFormText(context.l10n, collectionCreateSteps[4].titleId),
       children: <Widget>[
         Text(
           draft.title.isEmpty ? '(no title yet)' : draft.title,
@@ -377,8 +391,8 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
         const SizedBox(height: 8),
         Text('${data.items.length} items'),
         if (hasUnavailable)
-          const Text(
-            'Some items are no longer available — review before publishing.',
+          Text(
+            context.l10n.createFormSomeItemsAreNoLongerAvailable,
             style: TextStyle(color: Colors.orange),
           ),
         for (final CollectionValidationIssue issue in state.issues)
@@ -393,14 +407,16 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
         const SizedBox(height: 16),
         FilledButton.icon(
           icon: const Icon(Icons.visibility_outlined),
-          label: const Text('Refresh live preview'),
+          label: Text(context.l10n.createFormRefreshLivePreview),
           onPressed: () => widget.controller.buildCollectionPreview(),
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
           icon: const Icon(Icons.fact_check_outlined),
           label: Text(
-            reviewed ? 'Composition reviewed' : 'Acknowledge composition',
+            reviewed
+                ? context.l10n.createFormCompositionReviewed
+                : context.l10n.createFormAcknowledgeComposition,
           ),
           onPressed: reviewed
               ? null
@@ -413,7 +429,7 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
             final bool published = await widget.controller.publishCollection();
             if (published) widget.onPublished();
           },
-          child: const Text('Publish'),
+          child: Text(context.l10n.createFormPublish),
         ),
         if (state.status == CollectionCreateStatus.published) ...<Widget>[
           const Divider(height: 32),
@@ -421,10 +437,8 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
             'Published — remove without review',
             style: TextStyle(fontWeight: FontWeight.w600),
           ),
-          const Text(
-            'Removing an item here applies instantly, no moderation '
-            'round trip (§3.11). Adding or editing text still needs a new '
-            'reviewed version — use Publish above for that.',
+          Text(
+            context.l10n.createFormRemovingItemHereAppliesInstantlyNo,
             style: TextStyle(fontSize: 12, color: Colors.grey),
           ),
           for (final CollectionItemDraft item in data.items)
@@ -432,7 +446,7 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
               dense: true,
               title: Text(item.snapshot.title),
               trailing: IconButton(
-                tooltip: 'Remove without review',
+                tooltip: context.l10n.createFormRemoveWithoutReview,
                 icon: const Icon(Icons.remove_circle_outline),
                 onPressed: () async {
                   try {
@@ -443,7 +457,9 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
                   } catch (error) {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Could not remove: $error')),
+                        SnackBar(
+                          content: Text(context.l10n.createFormCouldNotRemove),
+                        ),
                       );
                     }
                   }
@@ -461,15 +477,19 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
     return Row(
       children: <Widget>[
         if (step > 0)
-          TextButton(
-            onPressed: () => widget.controller.goToCollectionStep(step - 1),
-            child: const Text('Back'),
+          Flexible(
+            child: TextButton(
+              onPressed: () => widget.controller.goToCollectionStep(step - 1),
+              child: Text(context.l10n.createFormBack),
+            ),
           ),
         const Spacer(),
         if (step < collectionCreateSteps.length - 1)
-          FilledButton(
-            onPressed: () => widget.controller.goToCollectionStep(step + 1),
-            child: const Text('Next'),
+          Flexible(
+            child: FilledButton(
+              onPressed: () => widget.controller.goToCollectionStep(step + 1),
+              child: Text(context.l10n.createFormNext),
+            ),
           ),
       ],
     );
@@ -500,8 +520,14 @@ class _StepHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(config.title, style: Theme.of(context).textTheme.titleLarge),
-        Text(config.description, style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          createFormText(context.l10n, config.titleId),
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        Text(
+          createFormText(context.l10n, config.descriptionId),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
         const SizedBox(height: 8),
         Row(
           children: <Widget>[

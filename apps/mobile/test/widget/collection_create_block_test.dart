@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,6 +26,7 @@ import 'package:recharge/features/create/domain/usecases/load_create_draft_useca
 import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
 import 'package:recharge/features/create/presentation/widgets/collection_create_block.dart';
+import 'package:recharge/generated/l10n/app_localizations.dart';
 
 import '../support/event_create_test_support.dart';
 import 'widget_test_viewport.dart';
@@ -209,6 +211,86 @@ void main() {
     // flags a pending Timer after the widget tree is disposed.
     await tester.pump(const Duration(milliseconds: 800));
   });
+
+  // L4.3: every Collection step on lv, en and ru at 360 dp with the text at
+  // 100% and 200%: no overflow, and the step's main action can be reached.
+  for (final String language in const <String>['en', 'lv', 'ru']) {
+    for (final double scale in const <double>[1, 2]) {
+      for (int step = 0; step < 5; step++) {
+        testWidgets('L4.3: step $step on $language at ${scale}x fits 360 dp', (
+          WidgetTester tester,
+        ) async {
+          tester.view
+            ..physicalSize = const Size(360, 800)
+            ..devicePixelRatio = 1;
+          addTearDown(() {
+            tester.view
+              ..resetPhysicalSize()
+              ..resetDevicePixelRatio();
+          });
+          await controller.ensureLoaded(
+            userId: 'user-1',
+            organizerEmail: 'user@example.com',
+            organizerName: 'Creator',
+            capabilities: const <String>['create.collection'],
+          );
+          controller.setObjectType(CreateObjectType.collection);
+          controller.goToCollectionStep(step);
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: <Override>[
+                collectionCreateCoordinatorProvider.overrideWith(
+                  (ref) => coordinator,
+                ),
+              ],
+              child: MaterialApp(
+                locale: Locale(language),
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: const <LocalizationsDelegate<Object>>[
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                builder: (BuildContext context, Widget? child) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: TextScaler.linear(scale)),
+                  child: child!,
+                ),
+                home: Scaffold(
+                  body: SingleChildScrollView(
+                    child: AnimatedBuilder(
+                      animation: controller,
+                      builder: (BuildContext context, Widget? child) =>
+                          CollectionCreateBlock(
+                            controller: controller,
+                            state: controller.state,
+                            onPublished: () {},
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          final Finder actions = find.byWidgetPredicate(
+            (Widget widget) =>
+                widget is FilledButton || widget is ElevatedButton,
+          );
+          if (actions.evaluate().isNotEmpty) {
+            await tester.ensureVisible(actions.last);
+            await tester.pumpAndSettle();
+            expect(actions.last.hitTestable(), findsOneWidget);
+          }
+          expect(tester.takeException(), isNull);
+          await tester.pump(const Duration(milliseconds: 800));
+        });
+      }
+    }
+  }
 }
 
 class _SequentialIdGenerator implements IdGenerator {

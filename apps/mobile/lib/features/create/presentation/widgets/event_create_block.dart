@@ -15,6 +15,10 @@ import 'event_classification_section.dart';
 import 'event_inventory_section.dart';
 import 'create_texts.dart';
 import '../../../../core/localization/l10n_context.dart';
+import 'create_form_texts.dart';
+import '../../../../core/localization/recharge_formats.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../application/create_taxonomy.dart';
 
 class EventCreateBlock extends StatelessWidget {
   const EventCreateBlock({
@@ -35,8 +39,10 @@ class EventCreateBlock extends StatelessWidget {
     final CreateDraftEntity draft = state.draft;
     final EventDraftData? event = draft.eventData;
     if (event == null) {
-      return const _EventCard(
-        child: Text('Event draft is unavailable. Reopen Create Hub.'),
+      return _EventCard(
+        child: Text(
+          context.l10n.createFormEventDraftUnavailableReopenCreateHub,
+        ),
       );
     }
     final int step = state.eventStep;
@@ -55,8 +61,8 @@ class EventCreateBlock extends StatelessWidget {
         CreateFlowStepLabel(
           stepNumber: step + 1,
           stepCount: eventCreateSteps.length,
-          title: stepConfig.title,
-          description: stepConfig.description,
+          title: createFormText(context.l10n, stepConfig.titleId),
+          description: createFormText(context.l10n, stepConfig.descriptionId),
         ),
         const SizedBox(height: 14),
         AnimatedSwitcher(
@@ -72,7 +78,7 @@ class EventCreateBlock extends StatelessWidget {
         const SizedBox(height: 12),
         _issues(context, step),
         const SizedBox(height: 12),
-        _navigation(step),
+        _navigation(context, step),
       ],
     );
   }
@@ -102,14 +108,14 @@ class EventCreateBlock extends StatelessWidget {
         if (controller.eventClassificationEnabled) const SizedBox(height: 12),
         _TextField(
           id: 'event-title',
-          label: 'Event title *',
+          label: context.l10n.createFormEventTitle,
           value: draft.title,
           error: _error(context, 'title'),
           onChanged: controller.updateTitle,
         ),
         _TextField(
           id: 'event-short-description',
-          label: 'Short description *',
+          label: context.l10n.createFormShortDescription2,
           value: draft.shortDescription,
           minLines: 2,
           maxLines: 3,
@@ -118,7 +124,7 @@ class EventCreateBlock extends StatelessWidget {
         ),
         _TextField(
           id: 'event-full-description',
-          label: 'Full description',
+          label: context.l10n.createFormFullDescription,
           value: draft.fullDescription,
           minLines: 3,
           maxLines: 6,
@@ -126,14 +132,14 @@ class EventCreateBlock extends StatelessWidget {
         ),
         _TextField(
           id: 'event-cover',
-          label: 'Cover image URL/path *',
+          label: context.l10n.createFormCoverImageUrlPath,
           value: draft.media.coverImage,
           error: _error(context, 'coverImage'),
           onChanged: controller.updateCoverImage,
         ),
         _TextField(
           id: 'event-cover-alt',
-          label: 'Cover description for screen readers *',
+          label: context.l10n.createFormCoverDescriptionScreenReaders,
           value: event.mediaMetadata.coverAltText,
           error: _error(context, 'coverAltText'),
           onChanged: (String value) =>
@@ -173,7 +179,7 @@ class EventCreateBlock extends StatelessWidget {
       children: <Widget>[
         _EnumDropdown<EventFormat>(
           id: 'event-format',
-          label: 'Format',
+          label: context.l10n.createFormFormat,
           value: event.format,
           values: EventFormat.values,
           onChanged: controller.updateEventFormat,
@@ -181,7 +187,7 @@ class EventCreateBlock extends StatelessWidget {
         if (event.format != EventFormat.online) ...<Widget>[
           _TextField(
             id: 'event-city',
-            label: 'City *',
+            label: context.l10n.createFormCityRequired,
             value: event.location.city,
             error: _error(context, 'city'),
             onChanged: (String value) =>
@@ -189,14 +195,14 @@ class EventCreateBlock extends StatelessWidget {
           ),
           _TextField(
             id: 'event-venue',
-            label: 'Venue',
+            label: context.l10n.createFormVenue,
             value: event.location.venueName ?? '',
             onChanged: (String value) =>
                 controller.updateEventLocation(venueName: value),
           ),
           _TextField(
             id: 'event-address',
-            label: 'Address',
+            label: context.l10n.createFormAddress,
             value: event.location.formattedAddress ?? '',
             error: _error(context, 'location'),
             onChanged: (String value) =>
@@ -204,7 +210,7 @@ class EventCreateBlock extends StatelessWidget {
           ),
           _TextField(
             id: 'event-meeting-point',
-            label: 'Meeting point instructions',
+            label: context.l10n.createFormMeetingPointInstructions,
             value: event.location.meetingPoint ?? '',
             onChanged: (String value) =>
                 controller.updateEventLocation(meetingPoint: value),
@@ -214,7 +220,7 @@ class EventCreateBlock extends StatelessWidget {
               Expanded(
                 child: _TextField(
                   id: 'event-latitude',
-                  label: 'Latitude *',
+                  label: context.l10n.createFormLatitudeRequired,
                   value: event.location.latitude?.toString() ?? '',
                   error: _error(context, 'locationCoordinates'),
                   keyboardType: const TextInputType.numberWithOptions(
@@ -231,7 +237,7 @@ class EventCreateBlock extends StatelessWidget {
               Expanded(
                 child: _TextField(
                   id: 'event-longitude',
-                  label: 'Longitude *',
+                  label: context.l10n.createFormLongitudeRequired,
                   value: event.location.longitude?.toString() ?? '',
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -256,7 +262,7 @@ class EventCreateBlock extends StatelessWidget {
                 : (bool? value) => controller.updateEventLocation(
                     pinConfirmed: value ?? false,
                   ),
-            title: const Text('Confirm this physical location pin *'),
+            title: Text(context.l10n.createFormConfirmPhysicalLocationPin),
             subtitle: _error(context, 'locationPin') == null
                 ? null
                 : Text(
@@ -270,7 +276,7 @@ class EventCreateBlock extends StatelessWidget {
         if (event.format != EventFormat.offline) ...<Widget>[
           _EnumDropdown<EventOnlineAccessMode>(
             id: 'event-online-access',
-            label: 'Online access',
+            label: context.l10n.createFormOnlineAccess,
             value: event.onlineAccessMode,
             values: const <EventOnlineAccessMode>[
               EventOnlineAccessMode.publicLink,
@@ -283,7 +289,7 @@ class EventCreateBlock extends StatelessWidget {
           if (event.onlineAccessMode == EventOnlineAccessMode.publicLink)
             _TextField(
               id: 'event-public-url',
-              label: 'Public HTTPS event URL *',
+              label: context.l10n.createFormPublicHttpsEventUrl,
               value: event.publicOnlineUrl ?? '',
               error: _error(context, 'publicOnlineUrl'),
               onChanged: (String value) =>
@@ -293,7 +299,7 @@ class EventCreateBlock extends StatelessWidget {
         const Divider(height: 28),
         _EnumDropdown<EventScheduleMode>(
           id: 'event-schedule-mode',
-          label: 'Schedule mode',
+          label: context.l10n.createFormScheduleMode,
           value: event.scheduleMode,
           values: EventScheduleMode.values,
           onChanged: (EventScheduleMode value) =>
@@ -309,7 +315,7 @@ class EventCreateBlock extends StatelessWidget {
         ),
         _TextField(
           id: 'event-local-date',
-          label: 'First local date (YYYY-MM-DD)',
+          label: context.l10n.createFormFirstLocalDateYyyyMmDd,
           value: event.localStartDate,
           error: _error(context, 'localStartDate'),
           onChanged: (String value) =>
@@ -318,7 +324,7 @@ class EventCreateBlock extends StatelessWidget {
         if (!event.allDay)
           _TextField(
             id: 'event-local-time',
-            label: 'Local start time (HH:mm)',
+            label: context.l10n.createFormLocalStartTimeHhMm,
             value: _time(event.startMinute),
             error: _error(context, 'startMinute'),
             onChanged: (String value) {
@@ -331,8 +337,8 @@ class EventCreateBlock extends StatelessWidget {
         _TextField(
           id: 'event-duration',
           label: event.allDay
-              ? 'Duration in minutes (1440 = 1 day)'
-              : 'Duration in minutes',
+              ? context.l10n.createFormDurationMinutes14401Day
+              : context.l10n.createFormDurationMinutes,
           value: '${event.durationMinutes}',
           error: _error(context, 'durationMinutes'),
           keyboardType: TextInputType.number,
@@ -351,7 +357,7 @@ class EventCreateBlock extends StatelessWidget {
         if (event.scheduleMode == EventScheduleMode.multiDate)
           _TextField(
             id: 'event-multi-dates',
-            label: 'Dates separated by commas',
+            label: context.l10n.createFormDatesSeparatedByCommas,
             value: event.multiDateLocalDates.join(', '),
             error: _error(context, 'multiDateLocalDates'),
             onChanged: (String value) =>
@@ -390,7 +396,7 @@ class EventCreateBlock extends StatelessWidget {
       children: <Widget>[
         _EnumDropdown<EventRecurrenceFrequency>(
           id: 'event-recurrence-frequency',
-          label: 'Repeat',
+          label: context.l10n.createFormRepeat,
           value: rule.frequency,
           values: EventRecurrenceFrequency.values,
           onChanged: (EventRecurrenceFrequency value) =>
@@ -398,7 +404,7 @@ class EventCreateBlock extends StatelessWidget {
         ),
         _TextField(
           id: 'event-recurrence-interval',
-          label: 'Every N periods',
+          label: context.l10n.createFormEveryNPeriods,
           value: '${rule.interval}',
           keyboardType: TextInputType.number,
           onChanged: (String value) {
@@ -417,15 +423,10 @@ class EventCreateBlock extends StatelessWidget {
               final int weekday = index + 1;
               return CreateFlowChip(
                 key: Key('event-weekday-$weekday'),
-                label: const <String>[
-                  'Mon',
-                  'Tue',
-                  'Wed',
-                  'Thu',
-                  'Fri',
-                  'Sat',
-                  'Sun',
-                ][index],
+                label: RechargeFormats.weekdayShort(
+                  weekday,
+                  Localizations.localeOf(context).languageCode,
+                ),
                 selected: rule.weekdays.contains(weekday),
                 onSelected: (bool selected) {
                   final Set<int> days = <int>{...rule.weekdays};
@@ -439,7 +440,7 @@ class EventCreateBlock extends StatelessWidget {
           ),
         _EnumDropdown<EventRecurrenceEndMode>(
           id: 'event-recurrence-end',
-          label: 'Ends',
+          label: context.l10n.createFormEnds,
           value: rule.endMode,
           values: EventRecurrenceEndMode.values,
           onChanged: (EventRecurrenceEndMode value) =>
@@ -448,7 +449,7 @@ class EventCreateBlock extends StatelessWidget {
         if (rule.endMode == EventRecurrenceEndMode.untilDate)
           _TextField(
             id: 'event-recurrence-until',
-            label: 'Until local date',
+            label: context.l10n.createFormUntilLocalDate,
             value: rule.untilLocalDate ?? '',
             error: _error(context, 'untilLocalDate'),
             onChanged: (String value) => controller.updateEventRecurrence(
@@ -458,7 +459,7 @@ class EventCreateBlock extends StatelessWidget {
         if (rule.endMode == EventRecurrenceEndMode.occurrenceCount)
           _TextField(
             id: 'event-recurrence-count',
-            label: 'Occurrence count',
+            label: context.l10n.createFormOccurrenceCount,
             value: '${rule.occurrenceCount ?? 8}',
             error: _error(context, 'occurrenceCount'),
             keyboardType: TextInputType.number,
@@ -468,7 +469,7 @@ class EventCreateBlock extends StatelessWidget {
           ),
         _TextField(
           id: 'event-recurrence-exceptions',
-          label: 'Excluded dates, comma-separated',
+          label: context.l10n.createFormExcludedDatesCommaSeparated,
           value: rule.exceptionLocalDates.join(', '),
           error: _error(context, 'exceptionLocalDates'),
           onChanged: (String value) => controller.updateEventRecurrence(
@@ -493,7 +494,7 @@ class EventCreateBlock extends StatelessWidget {
           children: <Widget>[
             _TextField(
               id: 'event-requirements',
-              label: 'What attendees should know or bring',
+              label: context.l10n.createFormWhatAttendeesShouldKnowBring,
               value: event.requirements,
               minLines: 2,
               maxLines: 4,
@@ -506,7 +507,7 @@ class EventCreateBlock extends StatelessWidget {
                   .map(
                     (EventAmenityDefinition item) => CreateFlowChip(
                       key: Key('event-amenity-${item.id}'),
-                      label: item.label,
+                      label: context.l10n.createAmenityLabel(item.id),
                       selected: event.amenityIds.contains(item.id),
                       onSelected: (bool selected) =>
                           controller.setEventAmenity(item.id, selected),
@@ -520,7 +521,7 @@ class EventCreateBlock extends StatelessWidget {
                 Expanded(
                   child: _TextField(
                     id: 'event-age-min',
-                    label: 'Minimum age',
+                    label: context.l10n.createFormMinimumAge,
                     value: event.ageMin?.toString() ?? '',
                     error: _error(context, 'ageMin'),
                     keyboardType: TextInputType.number,
@@ -534,7 +535,7 @@ class EventCreateBlock extends StatelessWidget {
                 Expanded(
                   child: _TextField(
                     id: 'event-age-max',
-                    label: 'Maximum age',
+                    label: context.l10n.createFormMaximumAge,
                     value: event.ageMax?.toString() ?? '',
                     error: _error(context, 'ageMax'),
                     keyboardType: TextInputType.number,
@@ -547,25 +548,25 @@ class EventCreateBlock extends StatelessWidget {
               ],
             ),
             _Flag(
-              label: 'Family friendly',
+              label: context.l10n.createFormFamilyFriendly,
               value: event.familyFriendly,
               onChanged: (bool value) =>
                   controller.updateEventAudience(familyFriendly: value),
             ),
             _Flag(
-              label: 'Kids allowed',
+              label: context.l10n.createFormKidsAllowed,
               value: event.kidsAllowed,
               onChanged: (bool value) =>
                   controller.updateEventAudience(kidsAllowed: value),
             ),
             _Flag(
-              label: 'Pets allowed',
+              label: context.l10n.createFormPetsAllowed,
               value: event.petFriendly,
               onChanged: (bool value) =>
                   controller.updateEventAudience(petFriendly: value),
             ),
             _Flag(
-              label: 'Partial attendance allowed',
+              label: context.l10n.createFormPartialAttendanceAllowed,
               value: event.allowsPartialAttendance,
               onChanged: (bool value) => controller.updateEventAudience(
                 allowsPartialAttendance: value,
@@ -582,7 +583,7 @@ class EventCreateBlock extends StatelessWidget {
       children: <Widget>[
         _EnumDropdown<EventPricingMode>(
           id: 'event-pricing-mode',
-          label: 'Pricing',
+          label: context.l10n.createFormPricing,
           value: event.pricingMode,
           values: const <EventPricingMode>[
             EventPricingMode.free,
@@ -613,7 +614,7 @@ class EventCreateBlock extends StatelessWidget {
           ),
           _EnumDropdown<EventPaymentCollectionMode>(
             id: 'event-payment-collection',
-            label: 'Payment collection',
+            label: context.l10n.createFormPaymentCollection,
             value: event.paymentCollectionMode,
             values: const <EventPaymentCollectionMode>[
               EventPaymentCollectionMode.onsite,
@@ -640,7 +641,7 @@ class EventCreateBlock extends StatelessWidget {
         ] else ...<Widget>[
           _EnumDropdown<EventCapacityMode>(
             id: 'event-capacity-mode',
-            label: 'Capacity',
+            label: context.l10n.createFormCapacity,
             value: event.capacityMode,
             values: EventCapacityMode.values,
             onChanged: (EventCapacityMode value) =>
@@ -649,7 +650,7 @@ class EventCreateBlock extends StatelessWidget {
           if (event.capacityMode == EventCapacityMode.known)
             _TextField(
               id: 'event-capacity',
-              label: 'Maximum participants',
+              label: context.l10n.createFormMaximumParticipants,
               value: event.capacity?.toString() ?? '',
               error: _error(context, 'capacity'),
               keyboardType: TextInputType.number,
@@ -660,7 +661,7 @@ class EventCreateBlock extends StatelessWidget {
             ),
           _EnumDropdown<EventRegistrationMode>(
             id: 'event-registration-mode',
-            label: 'Registration',
+            label: context.l10n.createFormRegistration,
             value: event.registrationMode,
             values: const <EventRegistrationMode>[
               EventRegistrationMode.none,
@@ -673,7 +674,7 @@ class EventCreateBlock extends StatelessWidget {
           if (event.registrationMode == EventRegistrationMode.external)
             _TextField(
               id: 'event-booking-url',
-              label: 'External HTTPS registration URL',
+              label: context.l10n.createFormExternalHttpsRegistrationUrl,
               value: event.externalBookingUrl ?? '',
               error: _error(context, 'externalBookingUrl'),
               onChanged: (String value) => controller.updateEventRegistration(
@@ -684,7 +685,7 @@ class EventCreateBlock extends StatelessWidget {
         ],
         _EnumDropdown<EventVisibility>(
           id: 'event-visibility',
-          label: 'Visibility',
+          label: context.l10n.createFormVisibility,
           value: event.visibility,
           values: const <EventVisibility>[
             EventVisibility.public,
@@ -711,31 +712,60 @@ class EventCreateBlock extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            draft.title.isEmpty ? 'Untitled event' : draft.title,
+            draft.title.isEmpty
+                ? context.l10n.createFormUntitledEvent
+                : draft.title,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
-          Text('${draft.mainCategory} / ${draft.subcategory}'),
-          const SizedBox(height: 8),
-          Text('${event.format.name} · ${event.scheduleMode.name}'),
+          // Category names are not translated yet (L4-G04).
           Text(
-            '${event.occurrences.length} occurrence(s) · ${event.timezoneId}',
+            createTaxonomyLabelForPath(
+              '${draft.mainCategory}.${draft.subcategory}',
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${createOptionText(context.l10n, event.format)} · '
+            '${createOptionText(context.l10n, event.scheduleMode)}',
+          ),
+          // The IANA zone id is shown as is: it names the event's zone.
+          Text(
+            '${context.l10n.createFormOccurrences(event.occurrences.length)} · '
+            '${event.timezoneId}',
           ),
           Text(
             event.pricingMode == EventPricingMode.free
-                ? 'Free'
-                : '${event.price?.amountMinor ?? 0} minor ${event.currencyCode}',
+                ? context.l10n.createFormFree
+                : RechargeFormats.money(
+                    Money(
+                      minorUnits: event.price?.amountMinor ?? 0,
+                      currencyCode: event.currencyCode,
+                    ),
+                    Localizations.localeOf(context).languageCode,
+                  ),
           ),
           Text(
-            'Admission: '
-            '${event.admission?.admissionMode?.name ?? 'legacy'} · '
-            '${event.admission?.registrationMode?.name ?? event.registrationMode.name}',
+            context.l10n.createFormAdmissionLine(
+              <String>[
+                if (event.admission?.admissionMode case final mode?)
+                  createOptionText(context.l10n, mode),
+                createOptionText(
+                  context.l10n,
+                  event.admission?.registrationMode ?? event.registrationMode,
+                ),
+              ].join(' · '),
+            ),
           ),
-          Text('Visibility: ${event.visibility.name}'),
+          Text(
+            context.l10n.createFormVisibilityLine(
+              createOptionText(context.l10n, event.visibility),
+            ),
+          ),
           const SizedBox(height: 12),
           Text(
             blocking.isEmpty
-                ? 'Publishable on local/mock moderation pipeline'
-                : '${blocking.length} blocking issue(s)',
+                ? context.l10n.createFormPublishableLocalMockModerationPipeline
+                : context.l10n.createFormBlockingIssues(blocking.length),
             key: const Key('event-publish-readiness'),
             style: TextStyle(
               fontWeight: FontWeight.w700,
@@ -756,8 +786,8 @@ class EventCreateBlock extends StatelessWidget {
             icon: const Icon(Icons.publish_outlined),
             label: Text(
               state.status == CreateStatus.publishing
-                  ? 'Sending…'
-                  : 'Send for review',
+                  ? context.l10n.createFormSending
+                  : context.l10n.createFormSendReview,
             ),
           ),
         ],
@@ -794,13 +824,13 @@ class EventCreateBlock extends StatelessWidget {
 
   // Step 4 (preview) has its own dedicated "Send for review" CTA inside
   // _preview(), so the shared bottom bar only offers Back/Save draft there.
-  Widget _navigation(int step) => step < 4
+  Widget _navigation(BuildContext context, int step) => step < 4
       ? CreateFlowBottomBar(
           onBackPressed: step > 0
               ? () => controller.goToEventStep(step - 1)
               : null,
           backKey: const Key('event-step-back'),
-          secondaryLabel: 'Save draft',
+          secondaryLabel: context.l10n.createFormSaveDraft,
           secondaryKey: const Key('event-save-draft'),
           onSecondaryPressed: state.status == CreateStatus.saving
               ? null
@@ -816,7 +846,7 @@ class EventCreateBlock extends StatelessWidget {
                 key: const Key('event-step-back'),
                 onPressed: () => controller.goToEventStep(step - 1),
                 icon: const Icon(Icons.arrow_back, size: 16),
-                label: const Text('Back'),
+                label: Text(context.l10n.createFormBack),
                 style: TextButton.styleFrom(
                   foregroundColor: RechargeTheme.mutedInk,
                 ),
@@ -831,7 +861,7 @@ class EventCreateBlock extends StatelessWidget {
                 style: TextButton.styleFrom(
                   foregroundColor: RechargeTheme.emerald900,
                 ),
-                child: const Text('Save draft'),
+                child: Text(context.l10n.createFormSaveDraft),
               ),
             ),
           ],
@@ -899,8 +929,8 @@ class _EventGalleryEditorState extends State<_EventGalleryEditor> {
             child: TextField(
               key: const Key('event-gallery-input'),
               controller: _input,
-              decoration: const InputDecoration(
-                labelText: 'Gallery image URL/path',
+              decoration: InputDecoration(
+                labelText: context.l10n.createFormGalleryImageUrlPath,
                 border: OutlineInputBorder(),
               ),
             ),
@@ -908,7 +938,7 @@ class _EventGalleryEditorState extends State<_EventGalleryEditor> {
           const SizedBox(width: 8),
           IconButton.filledTonal(
             key: const Key('event-gallery-add'),
-            tooltip: 'Add gallery image',
+            tooltip: context.l10n.createFormAddGalleryImage,
             onPressed: () {
               final String value = _input.text.trim();
               if (value.isEmpty) return;
@@ -927,7 +957,9 @@ class _EventGalleryEditorState extends State<_EventGalleryEditor> {
             Expanded(
               child: _TextField(
                 id: 'event-gallery-alt-$index',
-                label: 'Gallery image ${index + 1} description *',
+                label: context.l10n.createFormGalleryImageDescription(
+                  index + 1,
+                ),
                 value: widget.altText[widget.gallery[index]] ?? '',
                 error: widget.errorFor('galleryAlt:${widget.gallery[index]}'),
                 onChanged: (String value) =>
@@ -936,7 +968,7 @@ class _EventGalleryEditorState extends State<_EventGalleryEditor> {
             ),
             IconButton(
               key: Key('event-gallery-remove-$index'),
-              tooltip: 'Remove gallery image ${index + 1}',
+              tooltip: context.l10n.createFormRemoveGalleryImage(index + 1),
               onPressed: () => widget.onRemoveAt(index),
               icon: const Icon(Icons.delete_outline),
             ),
@@ -1071,6 +1103,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
     padding: const EdgeInsets.only(bottom: 10),
     child: DropdownButtonFormField<T>(
       key: Key(id),
+      isExpanded: true,
       initialValue: values.contains(value) ? value : null,
       decoration: InputDecoration(
         labelText: label,
@@ -1097,7 +1130,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
           .map(
             (T item) => DropdownMenuItem<T>(
               value: item,
-              child: Text(_enumLabel(item.name)),
+              child: Text(createOptionText(context.l10n, item as Enum)),
             ),
           )
           .toList(growable: false),
@@ -1127,14 +1160,6 @@ class _Flag extends StatelessWidget {
     onChanged: onChanged,
   );
 }
-
-String _enumLabel(String value) => value
-    .replaceAllMapped(
-      RegExp(r'([a-z])([A-Z])'),
-      (Match match) => '${match.group(1)} ${match.group(2)}',
-    )
-    .replaceAll('_', ' ')
-    .toLowerCase();
 
 String _time(int minuteOfDay) =>
     '${(minuteOfDay ~/ 60).toString().padLeft(2, '0')}:'

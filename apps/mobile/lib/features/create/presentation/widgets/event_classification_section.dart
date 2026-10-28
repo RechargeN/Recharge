@@ -32,19 +32,18 @@ class EventClassificationSection extends StatelessWidget {
     final EventClassificationDraft? value = state.classification;
     return Semantics(
       container: true,
-      label: 'Event classification',
+      label: context.l10n.createFormEventClassification,
       child: Column(
         key: const Key('event-classification-section'),
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            'How does this event work?',
+            context.l10n.createFormHowDoesEventWork,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 4),
           Text(
-            'Mechanics and attendee roles are independent from the category, '
-            'format, access and price.',
+            context.l10n.createFormMechanicsAttendeeRolesAreIndependentFrom,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (state.suggestion case final suggestion?) ...<Widget>[
@@ -60,7 +59,7 @@ class EventClassificationSection extends StatelessWidget {
                     Text('Suggested: ${_label(suggestion.archetype.wireName)}'),
                     const SizedBox(height: 4),
                     Text(
-                      'This is only a suggestion. Confirm it or choose another.',
+                      context.l10n.createFormOnlySuggestionConfirmChooseAnother,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     const SizedBox(height: 8),
@@ -71,7 +70,7 @@ class EventClassificationSection extends StatelessWidget {
                           'event-classification-confirm-suggestion',
                         ),
                         onPressed: onConfirmSuggestion,
-                        child: const Text('Use suggestion'),
+                        child: Text(context.l10n.createFormUseSuggestion),
                       ),
                     ),
                   ],
@@ -85,7 +84,7 @@ class EventClassificationSection extends StatelessWidget {
             initialValue: value?.archetype,
             isExpanded: true,
             decoration: InputDecoration(
-              labelText: 'Event mechanics *',
+              labelText: context.l10n.createFormEventMechanics,
               errorText: _errorText(context, state, 'eventArchetype'),
             ),
             items: EventArchetype.values
@@ -111,7 +110,7 @@ class EventClassificationSection extends StatelessWidget {
               minLines: 2,
               maxLines: 4,
               decoration: InputDecoration(
-                labelText: 'Explain the event mechanics *',
+                labelText: context.l10n.createFormExplainEventMechanics,
                 errorText: _errorText(
                   context,
                   state,
@@ -127,7 +126,7 @@ class EventClassificationSection extends StatelessWidget {
             initialValue: value?.primaryParticipationMode,
             isExpanded: true,
             decoration: InputDecoration(
-              labelText: 'Primary attendee role *',
+              labelText: context.l10n.createFormPrimaryAttendeeRole,
               errorText: _errorText(context, state, 'primaryParticipationMode'),
             ),
             items: ParticipationMode.values
@@ -145,7 +144,7 @@ class EventClassificationSection extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Additional roles (up to 3)',
+            context.l10n.createFormAdditionalRolesUp3,
             style: Theme.of(context).textTheme.labelLarge,
           ),
           const SizedBox(height: 8),
@@ -193,7 +192,7 @@ class EventClassificationSection extends StatelessWidget {
               child: TextButton(
                 key: const Key('event-classification-clear'),
                 onPressed: onClear,
-                child: const Text('Clear classification'),
+                child: Text(context.l10n.createFormClearClassification),
               ),
             ),
           ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/controllers/create_controller.dart';
 
 /// Mirrors `EventTemplatePanel` for Rental: save current draft as a
@@ -31,10 +32,13 @@ class _RentalTemplatePanelState extends State<RentalTemplatePanel> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Text('Templates', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              context.l10n.createFormTemplates,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             if (templates.isEmpty)
-              const Text('No saved templates yet.')
+              Text(context.l10n.createFormNoSavedTemplatesYet)
             else
               ...templates.map(
                 (template) => ListTile(
@@ -43,7 +47,7 @@ class _RentalTemplatePanelState extends State<RentalTemplatePanel> {
                   trailing: TextButton(
                     onPressed: () =>
                         widget.controller.applyRentalTemplate(template.id),
-                    child: const Text('Use'),
+                    child: Text(context.l10n.createFormUse),
                   ),
                 ),
               ),
@@ -53,8 +57,8 @@ class _RentalTemplatePanelState extends State<RentalTemplatePanel> {
                 Expanded(
                   child: TextField(
                     controller: _nameField,
-                    decoration: const InputDecoration(
-                      labelText: 'Save current as template',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.createFormSaveCurrentAsTemplate,
                     ),
                   ),
                 ),
@@ -66,7 +70,7 @@ class _RentalTemplatePanelState extends State<RentalTemplatePanel> {
                     widget.controller.saveCurrentRentalAsTemplate(name);
                     _nameField.clear();
                   },
-                  child: const Text('Save'),
+                  child: Text(context.l10n.createFormSave),
                 ),
               ],
             ),
@@ -74,7 +78,7 @@ class _RentalTemplatePanelState extends State<RentalTemplatePanel> {
             OutlinedButton.icon(
               onPressed: widget.controller.duplicateRentalListing,
               icon: const Icon(Icons.copy_all_outlined),
-              label: const Text('Duplicate this listing'),
+              label: Text(context.l10n.createFormDuplicateListing),
             ),
           ],
         ),

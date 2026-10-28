@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
@@ -12,10 +14,13 @@ import 'package:recharge/features/create/domain/usecases/load_create_draft_useca
 import 'package:recharge/features/create/domain/usecases/materialize_session_schedule_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
+import 'package:recharge/features/create/presentation/widgets/activity_create_block.dart';
+import 'package:recharge/features/create/presentation/widgets/event_create_block.dart';
 import 'package:recharge/features/create/presentation/widgets/find_people_create_block.dart';
 import 'package:recharge/features/create/presentation/widgets/place_create_block.dart';
 import 'package:recharge/features/create/presentation/widgets/rental_create_block.dart';
 import 'package:recharge/features/create/presentation/widgets/session_create_block.dart';
+import 'package:recharge/generated/l10n/app_localizations.dart';
 
 import '../support/event_create_test_support.dart';
 
@@ -83,6 +88,109 @@ void main() {
     });
   }
 
+  // L4.3: the localized Create forms on lv, en and ru at 360 dp with the
+  // text at 100% and 200%: no overflow, and the step's main action can be
+  // scrolled into view and tapped.
+  group('L4.3: Create forms in lv, en and ru at 360 dp', () {
+    final Map<
+      String,
+      (
+        CreateObjectType,
+        int,
+        Widget Function(CreateController, CreateState, int),
+      )
+    >
+    forms =
+        <
+          String,
+          (
+            CreateObjectType,
+            int,
+            Widget Function(CreateController, CreateState, int),
+          )
+        >{
+          'Place': (
+            CreateObjectType.place,
+            placeSteps,
+            (c, s, step) => PlaceCreateBlock(
+              controller: c,
+              state: s.copyWith(placeStep: step),
+              onPublished: () {},
+            ),
+          ),
+          'Event': (
+            CreateObjectType.event,
+            5,
+            (c, s, step) => EventCreateBlock(
+              controller: c,
+              state: s.copyWith(eventStep: step),
+              taxonomySection: const SizedBox.shrink(),
+              onPublished: () {},
+            ),
+          ),
+          'Activity': (
+            CreateObjectType.activity,
+            4,
+            (c, s, step) => ActivityCreateBlock(
+              controller: c,
+              state: s.copyWith(activityStep: step),
+              onPublished: () {},
+            ),
+          ),
+          'Rental': (
+            CreateObjectType.rental,
+            rentalSteps,
+            (c, s, step) => RentalCreateBlock(
+              controller: c,
+              state: s.copyWith(rentalStep: step),
+              onPublished: () {},
+            ),
+          ),
+        };
+    for (final String language in const <String>['en', 'lv', 'ru']) {
+      for (final double scale in const <double>[1, 2]) {
+        for (final MapEntry<
+              String,
+              (
+                CreateObjectType,
+                int,
+                Widget Function(CreateController, CreateState, int),
+              )
+            >
+            form
+            in forms.entries) {
+          for (int step = 0; step < form.value.$2; step++) {
+            testWidgets('${form.key} step $step: $language at ${scale}x', (
+              tester,
+            ) async {
+              final CreateController controller = await _controller(
+                tester,
+                form.value.$1,
+              );
+              await _pumpLocalized(
+                tester,
+                controller,
+                (CreateState state) => form.value.$3(controller, state, step),
+                Locale(language),
+                scale,
+              );
+              final Finder actions = find.byWidgetPredicate(
+                (Widget widget) =>
+                    widget is FilledButton || widget is ElevatedButton,
+              );
+              if (actions.evaluate().isNotEmpty) {
+                await tester.ensureVisible(actions.last);
+                await tester.pumpAndSettle();
+                expect(actions.last.hitTestable(), findsOneWidget);
+              }
+              expect(tester.takeException(), isNull);
+            });
+          }
+        }
+      }
+    }
+  });
+
   testWidgets('Session block fits 360 dp at 150% text', (tester) async {
     final CreateController controller = await _controller(
       tester,
@@ -137,6 +245,12 @@ Future<CreateController> _controller(
     userId: 'user-1',
     organizerEmail: 'user@example.com',
     organizerName: 'Creator',
+    capabilities: const <String>[
+      'create.place',
+      'create.rental',
+      'create.event',
+      'create.collection',
+    ],
   );
   controller.setObjectType(type);
   return controller;
@@ -170,6 +284,47 @@ Future<void> _pump(
   // Flush the autosave timer scheduled by the type selection.
   await tester.pump(const Duration(milliseconds: 800));
 
+  expect(tester.takeException(), isNull);
+}
+
+Future<void> _pumpLocalized(
+  WidgetTester tester,
+  CreateController controller,
+  Widget Function(CreateState state) block,
+  Locale locale,
+  double scale,
+) async {
+  await tester.pumpWidget(
+    ProviderScope(
+      child: MaterialApp(
+        locale: locale,
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: const <LocalizationsDelegate<Object>>[
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        builder: (BuildContext context, Widget? child) {
+          final MediaQueryData media = MediaQuery.of(context);
+          return MediaQuery(
+            data: media.copyWith(textScaler: TextScaler.linear(scale)),
+            child: child!,
+          );
+        },
+        home: Scaffold(
+          body: AnimatedBuilder(
+            animation: controller,
+            builder: (BuildContext context, Widget? child) {
+              return SingleChildScrollView(child: block(controller.state));
+            },
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  await tester.pump(const Duration(milliseconds: 800));
   expect(tester.takeException(), isNull);
 }
 

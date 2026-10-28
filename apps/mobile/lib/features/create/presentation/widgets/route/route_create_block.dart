@@ -59,7 +59,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
   Widget build(BuildContext context) {
     final runtime = ref.watch(routeCreateRuntimeProvider);
     return runtime.when(
-      loading: () => const _StatusPanel(
+      loading: () => _StatusPanel(
         icon: Icons.map_outlined,
         title: 'Loading offline trail editor…',
         message: 'No network or paid routing call is required.',
@@ -89,7 +89,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
         _attachedCoordinator = runtime.coordinator;
         widget.controller.attachRouteCoordinator(runtime.coordinator);
       });
-      return const _StatusPanel(
+      return _StatusPanel(
         icon: Icons.route,
         title: 'Preparing Route draft…',
         message: 'Restoring the latest persisted revision.',
@@ -97,7 +97,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
     }
     final routeState = widget.controller.routeCreateState;
     if (routeState == null) {
-      return const _StatusPanel(
+      return _StatusPanel(
         icon: Icons.hourglass_top,
         title: 'Preparing Route draft…',
         message: 'The editor will be ready in a moment.',
@@ -436,7 +436,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
         title: 'Route shape',
         child: SegmentedButton<RouteShape>(
           key: const ValueKey<String>('route-shape'),
-          segments: const <ButtonSegment<RouteShape>>[
+          segments: <ButtonSegment<RouteShape>>[
             ButtonSegment<RouteShape>(
               value: RouteShape.oneWay,
               label: Text('One way'),
@@ -596,7 +596,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
                 key: const ValueKey<String>('route-difficulty'),
                 initialValue: state.route.conditions.difficultyId,
                 decoration: const InputDecoration(labelText: 'Difficulty'),
-                items: const <DropdownMenuItem<String>>[
+                items: <DropdownMenuItem<String>>[
                   DropdownMenuItem<String>(
                     value: 'easy.v1',
                     child: Text('Easy'),

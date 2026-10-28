@@ -1,12 +1,13 @@
 # L4 — локализация Release R1 на lv / en / ru
 
 - ID: **LOCALIZATION-L4**
-- Версия: **0.4 (v0.3 + L4.2: Create — валидаторы и контроллер отдают коды, текст строит UI)**
+- Версия: **0.5 (v0.4 + L4.3: формы Create реализованных типов — Place, Event, Activity, Rental, Collection, хаб и страница успеха)**
 - Дата: **2026-10-27**
 - Статус: **Review — механизм, policy, контракты и миграция серверных R1-поверхностей; языковой review не проведён**
 - База: `codex/recharge-integration` @ `01065f6` (L1–L3 + 01–36), ветка `claude/l4-localization`
   (v0.1–v0.2, вершина `af04b1d`); v0.3 — ветка `claude/l4-1-tails` от `af04b1d`;
-  v0.4 — ветка `claude/l4-2-create-codes` (база — итог L4.1)
+  v0.4 — ветка `claude/l4-2-create-codes` (база — итог L4.1);
+  v0.5 — ветка `claude/l4-3-create-forms` (база — итог L4.2)
 - Расширяет: [BCK-20](REFERENCE_DATA_LOCALIZATION_SPEC.md) §12, §17, §21 (OD-10
   LocalizedText — accepted technical contract), F1 Notifications
   (`notification_templates.ts`, BCK13-OD-05 открыт), Latvia roadmap §2.1–2.2, §3.5
@@ -315,3 +316,44 @@ domain/application; предзаполнение нового черновика
 заход L4.3), названия категорий (G04).
 
 Inventory «только интерфейс»: 2 537 → 2 123 (138 файлов); весь — 2 413.
+
+## 14. v0.5 (L4.3): формы Create реализованных типов
+
+Ветка `claude/l4-3-create-forms`, база — итог L4.2. Формы Place, Event (с
+Admission, Inventory, Classification и шаблонами), Activity, Rental,
+Collection, Create Hub и страница успеха берут текст только через
+`context.l10n`. Движок форм остался config-driven, отдельного flow-кода на
+тип нет.
+
+| Что | Было | Стало |
+|---|---|---|
+| Виджеты форм (16 файлов) | ~500 английских/русских литералов | ARB-ключи `createForm*` (lv/en/ru) |
+| Шаги в `*_create_config.dart` | `title`/`description` — предложения | `titleId`/`descriptionId` (ARB id); один резолвер `createFormText(l10n, id)` |
+| `CreateBlockConfig` (`create_taxonomy.dart`) | название, описание и подписи типа; UI склеивал «New ${title.toLowerCase()}» | полей текста нет; select-сообщения `createObjectType*` по стабильному `CreateObjectType` (название, описание, подписи места и цены, «новый», «создать», «бесплатно», старт UTC) |
+| Профили Place (`PlaceCreationPolicy`) | `label`/`description` в domain | поля удалены; select по `PlaceCreationProfileId` |
+| Удобства Place/Event/Session | `label` + группа-предложение | только `id` и стабильный `group`; select `createAmenityLabel`/`createAmenityGroup` |
+| Варианты enum в выпадающих списках и превью | «очеловеченное» имя enum или сырое `.name` (Rental, Activity, превью Event: `Admission: booking`, `Visibility: public`) | `createOptionText(l10n, value)` — select `createOption` по `Тип_значение`, определение типа через pattern matching (не зависит от обфускации) |
+| Деньги в превью | «`2500 minor EUR`», `basePrice.toStringAsFixed(0) EUR` | `RechargeFormats.money` с валютой из `Money` |
+| Дни недели | «Mon…Sun» | `RechargeFormats.weekdayShort` (intl по языку) |
+| Числа | «occurrence(s)», «unit(s)», «blocking issue(s)» | ICU plural (CLDR lv/en/ru) |
+| Пользовательский контент | имя шаблона и `linkedPlaceId` вставлялись в предложения; хост внешней ссылки в тексте | в сообщения не передаётся: имя шаблона показано отдельной строкой как есть, id не показывается |
+
+Найдено и исправлено тестами 360 dp: переполнения строк навигации Rental и
+Collection, заголовка Place со статусом сохранения, карточки AI, нижней
+панели `CreateFlowBottomBar` (design_system) и выпадающих списков без
+`isExpanded` (Event, Activity).
+
+Проверки: `create_blocks_small_screen_test.dart` (группа L4.3) — Place,
+Event, Activity, Rental на lv/en/ru при 360 dp и шрифте ×1/×2: нет
+overflow, основное действие шага прокручивается в видимую область и
+нажимается; Collection — то же в `collection_create_block_test.dart` (там
+есть фейки координатора). Зелёные тесты не подтверждают качество перевода.
+
+Обоснованные исключения (`// l10n-ignore`): данные предзаполнения seed в
+`create_page.dart` (описания «Drafted from…», маркер `Route steps: `, который
+потом разбирается обратно, адрес/место/город по умолчанию), шаблон памятки
+безопасности Rental (предзаполнение, которое правит владелец). Названия
+категорий по-прежнему не переводятся (G04): превью показывает
+`createTaxonomyLabelForPath`.
+
+Inventory «только интерфейс»: 2 123 → 1 631 (115 файлов); весь — 1 921.

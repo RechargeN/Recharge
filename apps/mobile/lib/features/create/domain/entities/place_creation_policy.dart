@@ -22,8 +22,6 @@ extension PlaceFieldRequirementX on PlaceFieldRequirement {
 class PlaceCreationPolicy {
   const PlaceCreationPolicy({
     required this.id,
-    required this.label,
-    required this.description,
     required this.suggestedKind,
     required this.shortDescription,
     required this.cover,
@@ -38,8 +36,6 @@ class PlaceCreationPolicy {
   });
 
   final PlaceCreationProfileId id;
-  final String label;
-  final String description;
   final PlaceKind suggestedKind;
   final PlaceFieldRequirement shortDescription;
   final PlaceFieldRequirement cover;
@@ -56,8 +52,6 @@ class PlaceCreationPolicy {
 
   static const PlaceCreationPolicy safeFallback = PlaceCreationPolicy(
     id: PlaceCreationProfileId.balanced,
-    label: 'General place',
-    description: 'A safe fallback with no invented opening or pricing facts.',
     suggestedKind: PlaceKind.pointOfInterest,
     shortDescription: PlaceFieldRequirement.recommended,
     cover: PlaceFieldRequirement.recommended,

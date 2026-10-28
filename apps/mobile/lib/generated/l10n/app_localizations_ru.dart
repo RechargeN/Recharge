@@ -3043,4 +3043,2149 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get scenarioTransitPlannedTransport => 'Запланированный транспорт';
+
+  @override
+  String get createFormHoursNotSelected => 'Часы не выбраны';
+
+  @override
+  String get createFormOpeningHoursUnknown => 'Часы работы неизвестны';
+
+  @override
+  String get createFormSeasonalHours => 'Сезонные часы';
+
+  @override
+  String get createFormRegularOpeningHours => 'Обычные часы работы';
+
+  @override
+  String get createFormNotSelected => 'Не выбрано';
+
+  @override
+  String get createFormNoEntryTicketConcept => 'Входных билетов нет';
+
+  @override
+  String get createFormFreePaidAreas => 'Бесплатные и платные зоны';
+
+  @override
+  String get createFormPaidEntry => 'Платный вход';
+
+  @override
+  String get createFormFreeEntry => 'Бесплатный вход';
+
+  @override
+  String get createFormLocalCurator => 'Местный куратор';
+
+  @override
+  String get createFormStaffMember => 'Сотрудник';
+
+  @override
+  String get createFormUntitledPlace => 'Место без названия';
+
+  @override
+  String get createFormPreview => 'Предпросмотр';
+
+  @override
+  String get createFormReviewPlace => 'Проверить это место';
+
+  @override
+  String get createFormApplySuggestions => 'Применить подсказки';
+
+  @override
+  String get createFormDiscard => 'Отбросить';
+
+  @override
+  String createFormCouldImproveLaterProposalMissingrecommendedfieldidsJoin(
+    int count,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count детали',
+      many: '$count деталей',
+      few: '$count детали',
+      one: '$count деталь',
+    );
+    return 'Можно улучшить позже: $_temp0';
+  }
+
+  @override
+  String createFormEstimatedVisitMin(int count) {
+    return 'Примерный визит: $count мин';
+  }
+
+  @override
+  String get createFormEditableDescriptionDraft =>
+      'Черновик описания для правки';
+
+  @override
+  String get createFormSuggestedCategory => 'Предложенная категория';
+
+  @override
+  String get createFormReviewDraftSuggestTaxonomyMatchIdentify =>
+      'Проверить черновик, предложить категорию и найти полезные недостающие детали. Ничего не публикуется автоматически.';
+
+  @override
+  String get createFormLocalDemo => 'Локальное демо';
+
+  @override
+  String get createFormFinishWithAi => 'Доделать с ИИ';
+
+  @override
+  String get createFormCreatePlace => 'Создать место';
+
+  @override
+  String get createFormSaveFailedRetryAvailable =>
+      'Не сохранилось • можно повторить';
+
+  @override
+  String get createFormUnsavedChanges => 'Несохранённые изменения';
+
+  @override
+  String get createFormSendReview => 'Отправить на проверку';
+
+  @override
+  String get createFormBack => 'Назад';
+
+  @override
+  String get createFormDifferentPlace => 'Это другое место';
+
+  @override
+  String get createFormCouldPlaceAlreadyExist => 'Может, это место уже есть?';
+
+  @override
+  String get createFormAdd => 'Добавить';
+
+  @override
+  String get createFormGalleryImageUrlPath => 'URL/путь фото галереи';
+
+  @override
+  String get createFormAddGalleryImages => 'Добавить фото в галерею';
+
+  @override
+  String get createFormCoverImageUrlPathRecommended =>
+      'URL/путь обложки (рекомендуется)';
+
+  @override
+  String get createFormCoverImageUrlPath => 'URL/путь обложки *';
+
+  @override
+  String get createFormCoverRequiredGalleryOptional =>
+      'Обложка обязательна. Галерея — по желанию.';
+
+  @override
+  String get createFormPhotos => 'Фото';
+
+  @override
+  String get createFormOfficialBookingLandingPage =>
+      'Официальная страница бронирования';
+
+  @override
+  String get createFormPublicEmail => 'Публичный e-mail';
+
+  @override
+  String get createFormPublicPhone => 'Публичный телефон';
+
+  @override
+  String get createFormOfficialWebsite => 'Официальный сайт';
+
+  @override
+  String get createFormAddOnlyOfficialPublicDetailsHttps =>
+      'Добавляйте только официальные публичные данные. Ссылки — только HTTPS.';
+
+  @override
+  String get createFormOptionalPublicContacts =>
+      'Необязательные публичные контакты';
+
+  @override
+  String get createFormOfficialPricingUrlHttps =>
+      'Официальная ссылка на цены (https)';
+
+  @override
+  String get createFormPricingNote => 'Заметка о ценах';
+
+  @override
+  String get createFormPricingExplanation => 'Пояснение к ценам *';
+
+  @override
+  String get createFormTypicalSpend => 'Типичные траты до';
+
+  @override
+  String get createFormTypicalSpendFrom => 'Типичные траты от';
+
+  @override
+  String createFormEntry(String value) {
+    return 'Вход до, $value';
+  }
+
+  @override
+  String createFormEntryFrom(String value) {
+    return 'Вход от, $value *';
+  }
+
+  @override
+  String get createFormEntryPriceTypicalSpendAreSeparate =>
+      'Цена входа и типичные траты — разные понятия.';
+
+  @override
+  String get createFormPrice => 'Цена';
+
+  @override
+  String get createFormUnset => 'Не задано';
+
+  @override
+  String get createFormYes => 'Да';
+
+  @override
+  String get createFormChooseYesUnknownUnsetNeverTreated =>
+      'Выберите «Да» или «Неизвестно». Пустое значение никогда не означает «Нет».';
+
+  @override
+  String get createFormAmenities => 'Удобства';
+
+  @override
+  String get createFormExitBuffer => 'Запас после ухода';
+
+  @override
+  String get createFormArrivalBuffer => 'Запас до прихода';
+
+  @override
+  String get createFormWeatherDependent => 'Зависит от погоды';
+
+  @override
+  String get createFormMinimumMinutes => 'Минимум минут';
+
+  @override
+  String get createFormRecommendedMinutes => 'Рекомендуемые минуты';
+
+  @override
+  String get createFormTheseValuesImproveTimeFitWithout =>
+      'Эти значения улучшают подбор по времени, не меняя часы работы.';
+
+  @override
+  String get createFormHelpPeoplePlanVisit => 'Помогите спланировать визит';
+
+  @override
+  String get createFormAddInterval => 'Добавить интервал';
+
+  @override
+  String get createFormClosesNextDay => 'Закрывается на следующий день';
+
+  @override
+  String get createFormCloseHhMm => 'Закрытие ЧЧ:мм';
+
+  @override
+  String get createFormOpenHhMm => 'Открытие ЧЧ:мм';
+
+  @override
+  String get createFormDay => 'День';
+
+  @override
+  String get createFormClosedFrom => 'Закрыто с *';
+
+  @override
+  String get createFormCurrentOperationalStatus => 'Текущий статус работы';
+
+  @override
+  String get createFormAddClosedDay => 'Добавить выходной день';
+
+  @override
+  String get createFormCustomHours => 'Особые часы';
+
+  @override
+  String get createFormClosedAllDay => 'Закрыто весь день';
+
+  @override
+  String get createFormDateExceptions => 'Даты-исключения';
+
+  @override
+  String get createFormRemovePeriod => 'Удалить период';
+
+  @override
+  String get createFormHoursUnknown => 'Часы неизвестны';
+
+  @override
+  String get createFormRegularSchedule => 'Обычный график';
+
+  @override
+  String get createFormHoursMode2 => 'Режим часов';
+
+  @override
+  String get createFormHoursMode => 'Режим часов *';
+
+  @override
+  String get createFormUnknownBetterThanInventedHours =>
+      'Лучше «неизвестно», чем выдуманные часы.';
+
+  @override
+  String get createFormWhenCanPeopleVisit => 'Когда можно прийти?';
+
+  @override
+  String get createFormAddMoreVisitInformation => 'Добавить больше о посещении';
+
+  @override
+  String get createFormAddOnlyInformationThatUsefulPlace =>
+      'Добавляйте только то, что полезно для этого места.';
+
+  @override
+  String get createFormOptionalVisitDetails =>
+      'Необязательные детали посещения';
+
+  @override
+  String get createFormAddOpeningAccessHours =>
+      'Добавить часы работы или доступа';
+
+  @override
+  String get createFormAddHoursOnlyWhenPlaceReally =>
+      'Добавляйте часы, только если у места они действительно есть.';
+
+  @override
+  String get createFormAccessRestrictions => 'Ограничения доступа';
+
+  @override
+  String get createFormHowFindPlace => 'Как найти это место';
+
+  @override
+  String get createFormAddDirections => 'Добавить, как добраться';
+
+  @override
+  String get createFormRequiredWhenThereNoPostalAddress =>
+      'Обязательно, если нет почтового адреса.';
+
+  @override
+  String get createFormLocationLabel => 'Название места на карте';
+
+  @override
+  String get createFormFormattedAddress => 'Адрес';
+
+  @override
+  String get createFormConfirmPin => 'Подтвердить метку';
+
+  @override
+  String get createFormPinConfirmed => 'Метка подтверждена';
+
+  @override
+  String get createFormTapMapConfirmRepresentativePoint =>
+      'Нажмите на карту и подтвердите характерную точку.';
+
+  @override
+  String get createFormWhere => 'Где это?';
+
+  @override
+  String get createFormChange => 'Изменить';
+
+  @override
+  String get createFormCancel => 'Отмена';
+
+  @override
+  String get createFormCompatibleCategoryDetailsWillKeptFields =>
+      'Совместимые детали категории сохранятся. Поля, которых нет в новом профиле, уберутся из публикации.';
+
+  @override
+  String get createFormChangeCategory => 'Сменить категорию?';
+
+  @override
+  String get createFormCategoryDetails => 'Детали категории';
+
+  @override
+  String get createFormContentLanguage => 'Язык контента';
+
+  @override
+  String get createFormPublicLandmarksDoNotRequireOwnership =>
+      'Для общественных достопримечательностей не нужно заявлять права владения.';
+
+  @override
+  String get createFormCommunityContribution => 'Вклад сообщества';
+
+  @override
+  String get createFormYourRelationship => 'Ваша связь с местом';
+
+  @override
+  String get createFormDetailedDescription => 'Подробное описание';
+
+  @override
+  String get createFormOptionalDescriptionLanguageAttribution =>
+      'Необязательные описание, язык и авторство';
+
+  @override
+  String get createFormMoreAboutPlace => 'Подробнее о месте';
+
+  @override
+  String get createFormYouCanAddImproveLater =>
+      'Это можно добавить или улучшить позже.';
+
+  @override
+  String get createFormPlaceName => 'Название места *';
+
+  @override
+  String get createFormChooseCategoryFormKeepsOnlyRelevant =>
+      'Выберите категорию — в форме останутся только нужные поля.';
+
+  @override
+  String get createFormWhatPlace => 'Что это за место?';
+
+  @override
+  String get createFormCreatePlaceCapabilityRequiredEditPublish =>
+      'Чтобы редактировать или публиковать, нужно право создавать места.';
+
+  @override
+  String get createFormPlaceDataBeingPrepared => 'Данные места готовятся…';
+
+  @override
+  String get createFormScenarioRoute => 'Маршрут сценария';
+
+  @override
+  String createFormStops(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count остановки',
+      many: '$count остановок',
+      few: '$count остановки',
+      one: '$count остановка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormRechargeIdea => 'Идея Recharge';
+
+  @override
+  String get createFormMapRoute => 'Маршрут на карте';
+
+  @override
+  String get createFormEditRoute => 'Изменить маршрут';
+
+  @override
+  String get createFormScenarioRouteSeed => 'Заготовка из маршрута сценария';
+
+  @override
+  String createFormSeededFrom(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'details': 'Создано из карточки',
+      'saved_search': 'Создано из сохранённого поиска',
+      'search': 'Создано из условий поиска',
+      'smart_search': 'Создано из умного поиска',
+      'profile': 'Создано из рабочего пространства профиля',
+      'scenario': 'Создано из маршрута сценария',
+      'map': 'Создано из области карты',
+      'other': 'Создано из Recharge',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormNoLimit => 'Без ограничения';
+
+  @override
+  String get createFormCapacityUnknown => 'Вместимость неизвестна';
+
+  @override
+  String createFormOnsiteBuffersMin(int start, int end) {
+    return 'Запас на месте: $start / $end мин';
+  }
+
+  @override
+  String get createFormAllowPartialAttendance =>
+      'Разрешить частичное посещение';
+
+  @override
+  String get createFormDuration => 'Длительность';
+
+  @override
+  String get createFormNoOpeningHoursYet => 'Часов работы пока нет';
+
+  @override
+  String get createFormAddSlot => 'Добавить слот';
+
+  @override
+  String get createFormScheduleSlots => 'Слоты расписания';
+
+  @override
+  String get createFormNone => 'Нет';
+
+  @override
+  String get createFormHours => 'Часы';
+
+  @override
+  String get createFormSchedule => 'Расписание';
+
+  @override
+  String get createFormNoCategoriesMatchSearch =>
+      'Нет категорий по этому запросу.';
+
+  @override
+  String get createFormActivityCriteria => 'Критерии активности';
+
+  @override
+  String get createFormScenarioTaxonomy => 'Категории сценария';
+
+  @override
+  String get createFormConvertRental => 'Сделать прокатом';
+
+  @override
+  String get createFormKeepSession => 'Оставить сеанс';
+
+  @override
+  String get createFormLegacyOfferWasMigratedSafelyAs =>
+      'Это старое предложение безопасно перенесено как бронируемый сеанс. Выбирайте «Прокат», только если сдаётся снаряжение или транспорт.';
+
+  @override
+  String get createFormCouldRental => 'Может, это прокат?';
+
+  @override
+  String get createFormRechargeCreate => 'Recharge Create';
+
+  @override
+  String get createFormSaveDraft => 'Сохранить черновик';
+
+  @override
+  String get createFormCoverImage => 'Обложка *';
+
+  @override
+  String get createFormFullDescription => 'Полное описание';
+
+  @override
+  String get createFormShortDescription => 'Краткое описание';
+
+  @override
+  String get createFormAddress => 'Адрес';
+
+  @override
+  String get createFormSubcategory => 'Подкатегория';
+
+  @override
+  String get createFormMainCategory => 'Основная категория *';
+
+  @override
+  String get createFormNotSaved => 'Не сохранено';
+
+  @override
+  String get createFormText => 'Требуется вход';
+
+  @override
+  String get createFormSubmitReview => 'Отправить на проверку';
+
+  @override
+  String get createFormNotProhibitedUnsafeItem =>
+      'Это не запрещённый и не опасный предмет';
+
+  @override
+  String get createFormListingAccurate => 'Объявление точное';
+
+  @override
+  String get createFormPublicPreview => 'Публичный предпросмотр';
+
+  @override
+  String get createFormYouWillLeaveRechargeGoCheck =>
+      'Вы покинете Recharge и перейдёте на внешний сайт, чтобы проверить наличие.';
+
+  @override
+  String get createFormExternalBookingUrlHttps =>
+      'Внешняя ссылка на бронирование (https)';
+
+  @override
+  String get createFormLateReturnPolicy => 'Правила при опоздании с возвратом';
+
+  @override
+  String get createFormDamagePolicy => 'Правила при повреждениях';
+
+  @override
+  String get createFormDepositTerms => 'Условия залога';
+
+  @override
+  String get createFormCollectionMethod => 'Способ взимания';
+
+  @override
+  String get createFormAddRateStep => 'Добавить ступень цены';
+
+  @override
+  String get createFormBillingUnit => 'Единица оплаты';
+
+  @override
+  String get createFormUsageRestrictions => 'Ограничения использования';
+
+  @override
+  String get createFormSafetyNotice => 'Памятка по безопасности';
+
+  @override
+  String get createFormMinimumRenterAge => 'Минимальный возраст арендатора';
+
+  @override
+  String get createFormMaxDurationMin => 'Макс. длительность (мин)';
+
+  @override
+  String get createFormMinDurationMin => 'Мин. длительность (мин)';
+
+  @override
+  String get createFormApply => 'Применить';
+
+  @override
+  String get createFormSuggestedDefaultsCategory =>
+      'Предложенные значения для этой категории';
+
+  @override
+  String get createFormDeliveryFeeMinorUnits => 'Стоимость доставки (в центах)';
+
+  @override
+  String get createFormDeliveryRadiusKm => 'Радиус доставки (км)';
+
+  @override
+  String get createFormOfferDelivery => 'Предлагать доставку';
+
+  @override
+  String get createFormByArrangement => 'По договорённости';
+
+  @override
+  String get createFormOpeningHours => 'Часы работы';
+
+  @override
+  String get createFormPickupSchedule => 'График выдачи';
+
+  @override
+  String get createFormPublicBusinessAddress => 'Публичный адрес компании';
+
+  @override
+  String get createFormApproximateAreaDefault =>
+      'Приблизительная зона (по умолчанию)';
+
+  @override
+  String get createFormLocationDisclosure => 'Раскрытие места';
+
+  @override
+  String get createFormLongitude => 'Долгота';
+
+  @override
+  String get createFormLatitude => 'Широта';
+
+  @override
+  String get createFormPublicAreaLabel => 'Название публичной зоны';
+
+  @override
+  String get createFormPickupPlaceName => 'Название места выдачи';
+
+  @override
+  String get createFormThatWouldExceedGroupCapacity =>
+      'Это превысит вместимость группы.';
+
+  @override
+  String get createFormBlockDateRange => 'Закрыть диапазон дат';
+
+  @override
+  String get createFormConfirmCalendar => 'Подтвердить календарь';
+
+  @override
+  String get createFormRechargeCannotSeeExternalBookingsConfirm =>
+      'Recharge не видит внешние брони — подтвердите, что данные актуальны.';
+
+  @override
+  String get createFormCalendarNotConfirmedYet =>
+      'Календарь ещё не подтверждён';
+
+  @override
+  String get createFormAddAnotherItemType => 'Добавить ещё тип предмета';
+
+  @override
+  String get createFormRemove => 'Удалить';
+
+  @override
+  String get createFormDuplicate => 'Дублировать';
+
+  @override
+  String get createFormCondition => 'Состояние';
+
+  @override
+  String get createFormQuantity => 'Количество';
+
+  @override
+  String get createFormLabel => 'Название';
+
+  @override
+  String get createFormCategory => 'Категория';
+
+  @override
+  String get createFormTitle => 'Название';
+
+  @override
+  String get createFormNext => 'Далее';
+
+  @override
+  String get createFormCreateRentalCapabilityRequiredEditPublish =>
+      'Чтобы редактировать или публиковать, нужно право создавать прокат.';
+
+  @override
+  String get createFormRentalDataBeingPrepared => 'Данные проката готовятся…';
+
+  @override
+  String createFormRemoveGalleryImage(int count) {
+    return 'Удалить фото галереи $count';
+  }
+
+  @override
+  String createFormGalleryImageDescription(int count) {
+    return 'Описание фото галереи $count *';
+  }
+
+  @override
+  String get createFormAddGalleryImage => 'Добавить фото в галерею';
+
+  @override
+  String get createFormPublishableLocalMockModerationPipeline =>
+      'Можно публиковать через локальную/тестовую модерацию';
+
+  @override
+  String get createFormUntitledEvent => 'Событие без названия';
+
+  @override
+  String get createFormVisibility => 'Видимость';
+
+  @override
+  String get createFormExternalHttpsRegistrationUrl =>
+      'Внешняя HTTPS-ссылка на регистрацию';
+
+  @override
+  String get createFormRegistration => 'Регистрация';
+
+  @override
+  String get createFormMaximumParticipants => 'Максимум участников';
+
+  @override
+  String get createFormCapacity => 'Вместимость';
+
+  @override
+  String get createFormPaymentCollection => 'Приём оплаты';
+
+  @override
+  String get createFormPricing => 'Цены';
+
+  @override
+  String get createFormPartialAttendanceAllowed => 'Можно прийти на часть';
+
+  @override
+  String get createFormPetsAllowed => 'Можно с животными';
+
+  @override
+  String get createFormKidsAllowed => 'Можно с детьми';
+
+  @override
+  String get createFormFamilyFriendly => 'Подходит для семей';
+
+  @override
+  String get createFormMaximumAge => 'Максимальный возраст';
+
+  @override
+  String get createFormMinimumAge => 'Минимальный возраст';
+
+  @override
+  String get createFormWhatAttendeesShouldKnowBring =>
+      'Что участникам нужно знать или взять с собой';
+
+  @override
+  String get createFormExcludedDatesCommaSeparated =>
+      'Исключённые даты через запятую';
+
+  @override
+  String get createFormOccurrenceCount => 'Число повторов';
+
+  @override
+  String get createFormUntilLocalDate => 'До местной даты';
+
+  @override
+  String get createFormEnds => 'Окончание';
+
+  @override
+  String get createFormEveryNPeriods => 'Каждые N периодов';
+
+  @override
+  String get createFormRepeat => 'Повтор';
+
+  @override
+  String get createFormDatesSeparatedByCommas => 'Даты через запятую';
+
+  @override
+  String get createFormDurationMinutes => 'Длительность в минутах';
+
+  @override
+  String get createFormDurationMinutes14401Day =>
+      'Длительность в минутах (1440 = 1 день)';
+
+  @override
+  String get createFormLocalStartTimeHhMm => 'Местное время начала (ЧЧ:мм)';
+
+  @override
+  String get createFormFirstLocalDateYyyyMmDd =>
+      'Первая местная дата (ГГГГ-ММ-ДД)';
+
+  @override
+  String get createFormScheduleMode => 'Режим расписания';
+
+  @override
+  String get createFormPublicHttpsEventUrl =>
+      'Публичная HTTPS-ссылка на событие *';
+
+  @override
+  String get createFormOnlineAccess => 'Онлайн-доступ';
+
+  @override
+  String get createFormConfirmPhysicalLocationPin =>
+      'Подтвердите метку места *';
+
+  @override
+  String get createFormMeetingPointInstructions => 'Как найти место встречи';
+
+  @override
+  String get createFormVenue => 'Площадка';
+
+  @override
+  String get createFormFormat => 'Формат';
+
+  @override
+  String get createFormCoverDescriptionScreenReaders =>
+      'Описание обложки для экранных дикторов *';
+
+  @override
+  String get createFormShortDescription2 => 'Краткое описание *';
+
+  @override
+  String get createFormEventTitle => 'Название события *';
+
+  @override
+  String get createFormEventDraftUnavailableReopenCreateHub =>
+      'Черновик события недоступен. Откройте Create Hub заново.';
+
+  @override
+  String get createFormClosesAtUtcIso8601 => 'Закрывается в UTC (ISO 8601)';
+
+  @override
+  String get createFormOpensAtUtcIso8601 => 'Открывается в UTC (ISO 8601)';
+
+  @override
+  String get createFormCloseMinutesBeforeOccurrence =>
+      'Закрывать за минут до начала';
+
+  @override
+  String get createFormOpenMinutesBeforeOccurrence =>
+      'Открывать за минут до начала';
+
+  @override
+  String get createFormWindowType => 'Тип окна';
+
+  @override
+  String get createFormEnableWindow => 'Включить окно';
+
+  @override
+  String get createFormNotConfigured => 'Не настроено';
+
+  @override
+  String get createFormRemoveEligibilityRule => 'Удалить правило допуска';
+
+  @override
+  String get createFormPublicExplanationNoSecrets =>
+      'Публичное пояснение (без секретов)';
+
+  @override
+  String get createFormAddEligibilityRule => 'Добавить правило допуска';
+
+  @override
+  String get createFormRuleKind => 'Тип правила';
+
+  @override
+  String get createFormNeverEnterAccessCodesIdentitiesPrivate =>
+      'Никогда не вводите коды доступа, личные данные или документы.';
+
+  @override
+  String get createFormEligibility => 'Допуск';
+
+  @override
+  String get createFormSalesAtDoor => 'Продажа на входе';
+
+  @override
+  String get createFormRegistrationAtDoor => 'Регистрация на входе';
+
+  @override
+  String get createFormOnsiteAdmissionAllowed => 'Можно пройти на месте';
+
+  @override
+  String get createFormDoesNotBookReserveInventory =>
+      'Не бронирует и не занимает места';
+
+  @override
+  String get createFormMaximumGuestsPerRegistration =>
+      'Максимум гостей на регистрацию *';
+
+  @override
+  String get createFormGuestPolicy => 'Правило для гостей';
+
+  @override
+  String get createFormFuturePromotionPolicy => 'Будущее правило продвижения';
+
+  @override
+  String get createFormPreviewOnlyNoQueuePromotionRuns =>
+      'Только предпросмотр — очередь и продвижение не работают';
+
+  @override
+  String get createFormConfigureWaitlist => 'Настроить лист ожидания';
+
+  @override
+  String get createFormApplicationWindow => 'Окно заявок';
+
+  @override
+  String get createFormCancellationClosesNMinutesBeforeStart =>
+      'Отмена закрывается за N минут до начала *';
+
+  @override
+  String get createFormRegistrationWindow => 'Окно регистрации';
+
+  @override
+  String get createFormExternalHttpsRegistrationUrl2 =>
+      'Внешняя HTTPS-ссылка на регистрацию *';
+
+  @override
+  String get createFormConfirmationMode => 'Режим подтверждения *';
+
+  @override
+  String get createFormRegistrationMode => 'Режим регистрации *';
+
+  @override
+  String get createFormAdmissionMode => 'Режим входа *';
+
+  @override
+  String get createFormApplyNormalizedFields =>
+      'Применить нормализованные поля';
+
+  @override
+  String get createFormConfigurationPreset => 'Шаблон настроек';
+
+  @override
+  String get createFormConfirmSuggestion => 'Подтвердить предложение';
+
+  @override
+  String get createFormLegacyRegistrationPreservedButAdmissionConfirmation =>
+      'Старая регистрация сохранена, но для входа и подтверждения всё ещё нужен явный выбор.';
+
+  @override
+  String get createFormOpenEntryWithNoRegistrationConfirmation =>
+      'Свободный вход без регистрации и подтверждения.';
+
+  @override
+  String get createFormLegacyDraftSuggestionNotApplied =>
+      'Предложение из старого черновика — не применено';
+
+  @override
+  String get createFormAdmissionRegistrationConfirmationAreIndependentLocal =>
+      'Вход, регистрация и подтверждение независимы. Эта локальная настройка не создаёт бронь.';
+
+  @override
+  String get createFormAdmission => 'Вход';
+
+  @override
+  String get createFormEventAdmissionConfiguration =>
+      'Настройки входа на событие';
+
+  @override
+  String get createFormSaveDraftReturn => 'Сохранить черновик и вернуться';
+
+  @override
+  String get createFormPreviewPublish => 'Предпросмотр и публикация';
+
+  @override
+  String get createFormSuggestGroupSize => 'Предложить размер группы';
+
+  @override
+  String get createFormTypicalDurationMaxMinutes =>
+      'Обычная длительность, макс. (минуты)';
+
+  @override
+  String get createFormTypicalDurationMinMinutes =>
+      'Обычная длительность, мин. (минуты)';
+
+  @override
+  String get createFormBestSeasonOptional => 'Лучший сезон (по желанию)';
+
+  @override
+  String get createFormBestTimeDayOptional => 'Лучшее время дня (по желанию)';
+
+  @override
+  String get createFormWhenBestHowLongDoesTake =>
+      'Когда лучше и сколько это занимает?';
+
+  @override
+  String get createFormApproximateAmountOptional =>
+      'Примерная сумма (по желанию)';
+
+  @override
+  String get createFormEGCoffeeCounterOptional =>
+      'например, «Кофе на стойке, по желанию»';
+
+  @override
+  String get createFormOther => 'Другое';
+
+  @override
+  String get createFormDonation => 'Пожертвование';
+
+  @override
+  String get createFormContributionKind => 'Вид взноса';
+
+  @override
+  String get createFormCustomaryLeaveSomethingHere =>
+      'Здесь принято что-то оставлять';
+
+  @override
+  String get createFormWhatKnowBeforeYouGo => 'Что знать перед походом';
+
+  @override
+  String get createFormNotOfficialSpot => 'Это не официальное место';
+
+  @override
+  String get createFormAccessNotes => 'Как попасть';
+
+  @override
+  String get createFormAddressLineOptional => 'Адрес (по желанию)';
+
+  @override
+  String get createFormWhereHowDoIGetThere => 'Где это и как туда добраться?';
+
+  @override
+  String get createFormMorePlaces => 'Ещё места';
+
+  @override
+  String get createFormNoMatchingPlacesPage =>
+      'На этой странице подходящих мест нет.';
+
+  @override
+  String get createFormSearchPlaces => 'Искать места';
+
+  @override
+  String get createFormSearchPublishedPlaces => 'Искать опубликованные места';
+
+  @override
+  String get createFormLinkedPlaceUnavailableRemoveReplaceLink =>
+      'Связанное место недоступно. Удалите или замените связь.';
+
+  @override
+  String get createFormRemoveLinkedPlace => 'Отвязать место';
+
+  @override
+  String get createFormSelectedPlace => 'Место привязано';
+
+  @override
+  String get createFormLinkedPlaceOptional => 'Связанное место (по желанию)';
+
+  @override
+  String get createFormCoverImageUrl => 'URL обложки';
+
+  @override
+  String get createFormFullDescriptionOptional =>
+      'Полное описание (по желанию)';
+
+  @override
+  String get createFormAboutActivity => 'Об этой активности';
+
+  @override
+  String get createFormCheckActivityFieldsSubmitAgain =>
+      'Проверьте поля активности и отправьте снова.';
+
+  @override
+  String get createFormEditingDraftOnlyPublishedVersionStays =>
+      'Правится только черновик. Опубликованная версия не изменится до проверки и публикации.';
+
+  @override
+  String get createFormLoadingRechargeActivityDraft =>
+      'Загружается черновик активности Recharge…';
+
+  @override
+  String get createFormPublishedRoute => 'Опубликованный маршрут';
+
+  @override
+  String get createFormDraftSummaryUnavailableSession =>
+      'Сводка черновика в этой сессии недоступна.';
+
+  @override
+  String get createFormMapArea => 'Область на карте';
+
+  @override
+  String get createFormSearchSimilar => 'Найти похожее';
+
+  @override
+  String get createFormProfile => 'Профиль';
+
+  @override
+  String get createFormHome => 'Главная';
+
+  @override
+  String get createFormNextSteps => 'Что дальше';
+
+  @override
+  String get createFormRouteMap => 'Карта маршрута';
+
+  @override
+  String get createFormWalking => 'Пешком';
+
+  @override
+  String get createFormFree => 'Бесплатно';
+
+  @override
+  String get createFormArchive => 'В архив';
+
+  @override
+  String get createFormCreateNewVersion => 'Создать новую версию';
+
+  @override
+  String get createFormReviewRequest => 'Запрос на проверку';
+
+  @override
+  String get createFormGeometryHash => 'Хеш геометрии';
+
+  @override
+  String get createFormVersionId => 'ID версии';
+
+  @override
+  String get createFormRouteId => 'ID маршрута';
+
+  @override
+  String get createFormImmutableVersionAwaitingApproval =>
+      'Неизменяемая версия ждёт одобрения';
+
+  @override
+  String get createFormActiveImmutableRouteVersion =>
+      'Активная неизменяемая версия маршрута';
+
+  @override
+  String get createFormYourPublishActionWasHandledCreate =>
+      'Публикация обработана. Создайте ещё объявление или вернитесь на главную.';
+
+  @override
+  String get createFormSentModeration => 'Отправлено на модерацию';
+
+  @override
+  String get createFormPublishProcessed => 'Публикация обработана';
+
+  @override
+  String get createFormRoutePublished => 'Маршрут опубликован';
+
+  @override
+  String get createFormCreateAnother => 'Создать ещё';
+
+  @override
+  String get createFormCreateAnotherEvent => 'Создать ещё событие';
+
+  @override
+  String get createFormCreateAnotherFrom => 'Создать ещё по последнему шаблону';
+
+  @override
+  String get createFormOpenRouteModerationQueue =>
+      'Открыть очередь модерации маршрутов';
+
+  @override
+  String get createFormPublishStatus => 'Статус публикации';
+
+  @override
+  String get createFormCouldNotRemove =>
+      'Не удалось удалить пункт. Попробуйте ещё раз.';
+
+  @override
+  String get createFormRemoveWithoutReview => 'Удалить без проверки';
+
+  @override
+  String get createFormRemovingItemHereAppliesInstantlyNo =>
+      'Удаление пункта здесь срабатывает сразу, без модерации. Чтобы добавить или изменить текст, нужна новая проверенная версия — используйте «Опубликовать» выше.';
+
+  @override
+  String get createFormPublish => 'Опубликовать';
+
+  @override
+  String get createFormAcknowledgeComposition => 'Подтвердить состав';
+
+  @override
+  String get createFormCompositionReviewed => 'Состав проверен';
+
+  @override
+  String get createFormRefreshLivePreview => 'Обновить предпросмотр';
+
+  @override
+  String get createFormSomeItemsAreNoLongerAvailable =>
+      'Некоторые пункты больше недоступны — проверьте перед публикацией.';
+
+  @override
+  String get createFormNotEnoughPricedItemsYetSuggest =>
+      'Пока мало пунктов с ценой, чтобы предложить бюджет.';
+
+  @override
+  String get createFormSuggestFromItemPrices => 'Предложить по ценам пунктов';
+
+  @override
+  String get createFormNotSet => 'Не задано';
+
+  @override
+  String get createFormBudgetIndicator => 'Индикатор бюджета';
+
+  @override
+  String get createFormCuratorNotes => 'Заметки куратора';
+
+  @override
+  String get createFormItems => 'Пункты';
+
+  @override
+  String get createFormOneReferencePointWholeGuideNot =>
+      'Одна опорная точка для всего гида — не место отдельного пункта.';
+
+  @override
+  String get createFormAreaAnchor => 'Опорная точка района';
+
+  @override
+  String get createFormTypeSearchTapMapBelow7 =>
+      'Начните вводить или нажмите на карту ниже';
+
+  @override
+  String get createFormAreaCity => 'Район или город';
+
+  @override
+  String get createFormShortPitch => 'Короткое описание';
+
+  @override
+  String get createFormCollectionDraftDataBeingPrepared =>
+      'Данные черновика подборки готовятся…';
+
+  @override
+  String get createFormCollectionDraftBeingPrepared =>
+      'Черновик подборки готовится…';
+
+  @override
+  String get createFormPreparingCollectionDraft =>
+      'Готовится черновик подборки…';
+
+  @override
+  String get createFormRemovePool => 'Удалить группу';
+
+  @override
+  String get createFormMovePoolDown => 'Переместить группу ниже';
+
+  @override
+  String get createFormMovePoolUp => 'Переместить группу выше';
+
+  @override
+  String get createFormNeutralRoleIdsCommaSeparated =>
+      'Нейтральные ID ролей через запятую';
+
+  @override
+  String get createFormCapacityMode => 'Режим вместимости';
+
+  @override
+  String get createFormChannel => 'Канал';
+
+  @override
+  String get createFormShape => 'Форма';
+
+  @override
+  String get createFormPublicPoolLabel => 'Публичное название группы';
+
+  @override
+  String get createFormUnnamedPool => 'Группа без названия';
+
+  @override
+  String get createFormAddPool => 'Добавить группу мест';
+
+  @override
+  String get createFormPoolCapacity => 'Вместимость группы';
+
+  @override
+  String get createFormAdditionalViewsSameInventory =>
+      'Дополнительные виды тех же мест';
+
+  @override
+  String get createFormPrimaryInventoryShape => 'Основная форма мест *';
+
+  @override
+  String get createFormInventoryAuthority => 'Кто управляет местами';
+
+  @override
+  String get createFormMaximumParticipants2 => 'Максимум участников *';
+
+  @override
+  String get createFormEventCapacity => 'Вместимость события';
+
+  @override
+  String get createFormCapacityDeclaredLimitNotLiveParticipant =>
+      'Вместимость — заявленный лимит. Это не текущее число участников и не остаток мест.';
+
+  @override
+  String get createFormEventInventoryConfiguration => 'Настройки мест события';
+
+  @override
+  String get createFormConfirm => 'Подтвердить';
+
+  @override
+  String get createFormSave => 'Сохранить';
+
+  @override
+  String get createFormTemplateName => 'Название шаблона';
+
+  @override
+  String get createFormActiveDraftsPublishedEventsWillNot =>
+      'Активные черновики и опубликованные события не изменятся.';
+
+  @override
+  String get createFormDeleteTemplate => 'Удалить шаблон?';
+
+  @override
+  String get createFormReusableContentWillReplacedWithCurrent =>
+      'Сохранённое содержимое будет заменено текущим событием.';
+
+  @override
+  String get createFormReplaceTemplate => 'Заменить шаблон?';
+
+  @override
+  String get createFormRenameTemplate => 'Переименовать шаблон';
+
+  @override
+  String get createFormDelete => 'Удалить';
+
+  @override
+  String get createFormReplaceWithCurrent => 'Заменить текущим';
+
+  @override
+  String get createFormRename => 'Переименовать';
+
+  @override
+  String get createFormTemplateActions => 'Действия с шаблоном';
+
+  @override
+  String get createFormLastTemplate => 'Последний шаблон';
+
+  @override
+  String get createFormUntitledEvent2 => 'Событие без названия';
+
+  @override
+  String get createFormNoTemplatesYetSaveCurrentEvent =>
+      'Шаблонов пока нет. Сохраните текущее событие, чтобы использовать его снова.';
+
+  @override
+  String get createFormYourEventTemplates => 'Ваши шаблоны событий';
+
+  @override
+  String get createFormSaveEventTemplate => 'Сохранить шаблон события';
+
+  @override
+  String get createFormNextCreateAnotherEventWillUse =>
+      'Следующее «Создать ещё событие» использует выбранный шаблон.';
+
+  @override
+  String get createFormSaveCurrent => 'Сохранить текущее';
+
+  @override
+  String get createFormChooseManage => 'Выбрать или управлять';
+
+  @override
+  String get createFormEventTemplates => 'Шаблоны событий';
+
+  @override
+  String get createFormClearClassification => 'Очистить классификацию';
+
+  @override
+  String get createFormAdditionalRolesUp3 => 'Дополнительные роли (до 3)';
+
+  @override
+  String get createFormPrimaryAttendeeRole => 'Основная роль участника *';
+
+  @override
+  String get createFormExplainEventMechanics =>
+      'Объясните, как проходит событие *';
+
+  @override
+  String get createFormEventMechanics => 'Механика события *';
+
+  @override
+  String get createFormUseSuggestion => 'Использовать предложение';
+
+  @override
+  String get createFormOnlySuggestionConfirmChooseAnother =>
+      'Это только предложение. Подтвердите его или выберите другое.';
+
+  @override
+  String get createFormMechanicsAttendeeRolesAreIndependentFrom =>
+      'Механика и роли участников не зависят от категории, формата, доступа и цены.';
+
+  @override
+  String get createFormHowDoesEventWork => 'Как устроено событие?';
+
+  @override
+  String get createFormEventClassification => 'Классификация события';
+
+  @override
+  String get createFormSectionTitle => 'Название раздела';
+
+  @override
+  String get createFormNewSection => 'Новый раздел';
+
+  @override
+  String get createFormNoLongerAvailable => 'Больше недоступно';
+
+  @override
+  String get createFormNoItemsYet => 'Пунктов пока нет.';
+
+  @override
+  String get createFormRemoveSection => 'Удалить раздел';
+
+  @override
+  String createFormCollection(int count) {
+    return 'В этой подборке ($count)';
+  }
+
+  @override
+  String get createFormResults => 'Результаты';
+
+  @override
+  String get createFormSearch => 'Искать';
+
+  @override
+  String get createFormSearchPlaceRouteBookableSessionClass =>
+      'Поиск места, маршрута, сеанса, занятия, проката';
+
+  @override
+  String get createFormChooseTypeOpenItsCreationPage =>
+      'Выберите тип, чтобы открыть его страницу создания.';
+
+  @override
+  String get createFormWhatDoYouWantCreate => 'Что хотите создать?';
+
+  @override
+  String get createFormCreateHub => 'Create Hub';
+
+  @override
+  String get createFormRefreshPreview => 'Обновить предпросмотр';
+
+  @override
+  String get createFormCheckingLocalFixture =>
+      'Проверяются локальные тестовые данные…';
+
+  @override
+  String get createFormLocalMockPreviewNotLiveAvailability =>
+      'Локальный тестовый предпросмотр — не текущая доступность';
+
+  @override
+  String get createFormLocalMockAvailabilityPreview =>
+      'Локальный тестовый предпросмотр доступности';
+
+  @override
+  String get createFormDuplicateListing => 'Дублировать объявление';
+
+  @override
+  String get createFormSaveCurrentAsTemplate => 'Сохранить текущее как шаблон';
+
+  @override
+  String get createFormUse => 'Использовать';
+
+  @override
+  String get createFormNoSavedTemplatesYet => 'Сохранённых шаблонов пока нет.';
+
+  @override
+  String get createFormTemplates => 'Шаблоны';
+
+  @override
+  String get createFormWhyHere => 'Почему это здесь?';
+
+  @override
+  String get createFormFeatured => 'Избранное';
+
+  @override
+  String get createFormAddItemsPreviousStepFirst =>
+      'Сначала добавьте пункты на предыдущем шаге.';
+
+  @override
+  String createFormUpToPrice(String price) {
+    return 'до $price';
+  }
+
+  @override
+  String createFormDistanceKm(String km) {
+    return '$km км';
+  }
+
+  @override
+  String createFormMinutes(int count) {
+    return '$count мин';
+  }
+
+  @override
+  String get createFormOwner => 'Владелец';
+
+  @override
+  String get createFormVisitor => 'Посетитель';
+
+  @override
+  String get createFormUnknown => 'Неизвестно';
+
+  @override
+  String get createFormOpen247 => 'Открыто 24/7';
+
+  @override
+  String get createStepPlaceIdentityTitle => 'О месте';
+
+  @override
+  String get createStepPlaceIdentityDescription =>
+      'Название, категория и только нужные этому месту детали';
+
+  @override
+  String get createStepPlaceVisitTitle => 'Посещение';
+
+  @override
+  String get createStepPlaceVisitDescription =>
+      'Подтверждённая точка на карте и полезные сведения о посещении';
+
+  @override
+  String get createStepPlacePublishTitle => 'Публикация';
+
+  @override
+  String get createStepPlacePublishDescription =>
+      'Готовность, необязательные улучшения и финальные проверки';
+
+  @override
+  String get createStepEventBasicsMediaTitle => 'Основное';
+
+  @override
+  String get createStepEventBasicsMediaDescription =>
+      'Название, категория, описание и медиа';
+
+  @override
+  String get createStepEventLocationScheduleTitle => 'Когда и где';
+
+  @override
+  String get createStepEventLocationScheduleDescription =>
+      'Формат, место, часовой пояс и даты';
+
+  @override
+  String get createStepEventRequirementsTitle => 'Требования';
+
+  @override
+  String get createStepEventRequirementsDescription =>
+      'Аудитория, удобства и правила участия';
+
+  @override
+  String get createStepEventPriceParticipantsTitle => 'Цена и участники';
+
+  @override
+  String get createStepEventPriceParticipantsDescription =>
+      'Оплата, вход, вместимость и места';
+
+  @override
+  String get createStepEventPreviewPublishTitle => 'Публикация';
+
+  @override
+  String get createStepEventPreviewPublishDescription =>
+      'Предпросмотр, готовность и отправка на модерацию';
+
+  @override
+  String get createStepActivityBasicsTitle => 'Об активности';
+
+  @override
+  String get createStepActivityBasicsDescription =>
+      'Название, категория и медиа';
+
+  @override
+  String get createStepActivityLocationTitle => 'Место';
+
+  @override
+  String get createStepActivityLocationDescription =>
+      'Куда идти и как добраться';
+
+  @override
+  String get createStepActivityWhenForTitle => 'Когда и для кого';
+
+  @override
+  String get createStepActivityWhenForDescription =>
+      'Лучшее время, длительность и размер группы';
+
+  @override
+  String get createStepActivityPublishTitle => 'Публикация';
+
+  @override
+  String get createStepActivityPublishDescription => 'Предпросмотр и отправка';
+
+  @override
+  String get createStepCollectionBasicsTitle => 'Основное и медиа';
+
+  @override
+  String get createStepCollectionBasicsDescription =>
+      'Название, описание, обложка и район';
+
+  @override
+  String get createStepCollectionItemsTitle => 'Пункты';
+
+  @override
+  String get createStepCollectionItemsDescription =>
+      'Найдите и добавьте существующие места, маршруты и другое';
+
+  @override
+  String get createStepCollectionCuratorNotesTitle => 'Заметки куратора';
+
+  @override
+  String get createStepCollectionCuratorNotesDescription =>
+      'Расскажите, почему каждый пункт здесь, и выделите главное';
+
+  @override
+  String get createStepCollectionBudgetTitle => 'Бюджет и публикующий';
+
+  @override
+  String get createStepCollectionBudgetDescription =>
+      'Укажите бюджет, публикующего, рынок и видимость';
+
+  @override
+  String get createStepCollectionPublishTitle => 'Предпросмотр и публикация';
+
+  @override
+  String get createStepCollectionPublishDescription =>
+      'Проверьте состав и отправьте';
+
+  @override
+  String get createStepRentalListingTitle => 'Объявление и медиа';
+
+  @override
+  String get createStepRentalListingDescription =>
+      'Название, категория и обложка предмета или парка';
+
+  @override
+  String get createStepRentalInventoryTitle => 'Инвентарь';
+
+  @override
+  String get createStepRentalInventoryDescription =>
+      'Группы взаимозаменяемых единиц, состояние и количество';
+
+  @override
+  String get createStepRentalAvailabilityTitle => 'Доступность';
+
+  @override
+  String get createStepRentalAvailabilityDescription =>
+      'Подтверждённый период и вручную закрытые интервалы';
+
+  @override
+  String get createStepRentalHandoverTitle => 'Выдача и место';
+
+  @override
+  String get createStepRentalHandoverDescription =>
+      'Место выдачи, график и доставка по желанию';
+
+  @override
+  String get createStepRentalTermsTitle => 'Срок и безопасность';
+
+  @override
+  String get createStepRentalTermsDescription =>
+      'Срок проката, возраст, документы и требования безопасности';
+
+  @override
+  String get createStepRentalPricingTitle => 'Цены и залог';
+
+  @override
+  String get createStepRentalPricingDescription =>
+      'Тарифы, правила залога, повреждений и отмены';
+
+  @override
+  String get createStepRentalFulfillmentTitle => 'Внешнее оформление и правила';
+
+  @override
+  String get createStepRentalFulfillmentDescription =>
+      'Внешняя ссылка на бронь и предпросмотр предупреждения';
+
+  @override
+  String get createStepRentalReviewTitle => 'Проверка и отправка';
+
+  @override
+  String get createStepRentalReviewDescription =>
+      'Публичный и личный предпросмотр, подтверждение и отправка';
+
+  @override
+  String createPlacePolicyLabel(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'simplePoi': 'Простая достопримечательность',
+      'publicSpace': 'Общественное пространство',
+      'naturalDestination': 'Природное место',
+      'culturalVenue': 'Культурная площадка',
+      'hospitality': 'Кафе, ресторан или гостеприимство',
+      'activityVenue': 'Площадка для занятий или услуг',
+      'paidAttraction': 'Платная достопримечательность',
+      'balanced': 'Обычное место',
+      'other': 'Обычное место',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createPlacePolicyDescription(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'simplePoi':
+          'Ориентир, который можно узнать и посетить без контроля доступа.',
+      'publicSpace':
+          'Открытая общественная зона с возможными ограничениями доступа.',
+      'naturalDestination':
+          'Природная точка или зона, где условия доступа могут быть неизвестны.',
+      'culturalVenue':
+          'Музей, галерея, кинотеатр или другая культурная площадка.',
+      'hospitality': 'Заведение, где важны траты, а не вход.',
+      'activityVenue':
+          'Площадка с возможным бронированием, тратами и удобствами.',
+      'paidAttraction':
+          'Достопримечательность, где может быть вход и удобства.',
+      'balanced': 'Безопасный вариант без выдуманных часов работы и цен.',
+      'other': 'Безопасный вариант без выдуманных часов работы и цен.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createAmenityLabel(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'wheelchair_accessible': 'Доступно на коляске',
+      'accessible_toilet': 'Доступный туалет',
+      'parking': 'Парковка',
+      'bike_parking': 'Велопарковка',
+      'public_transport_nearby': 'Рядом общественный транспорт',
+      'public_transport': 'Рядом общественный транспорт',
+      'family_friendly': 'Подходит для семей',
+      'baby_changing': 'Пеленальный столик',
+      'pets_allowed': 'Можно с животными',
+      'toilet': 'Туалет',
+      'wifi': 'Wi-Fi',
+      'drinking_water': 'Питьевая вода',
+      'food_available': 'Есть еда',
+      'outdoor_seating': 'Места на улице',
+      'shelter': 'Укрытие от непогоды',
+      'weather_shelter': 'Укрытие от непогоды',
+      'first_aid': 'Первая помощь',
+      'shower': 'Душ',
+      'towels': 'Полотенца есть',
+      'changing_room': 'Раздевалка',
+      'equipment_provided': 'Снаряжение предоставляется',
+      'other': 'Удобство',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createAmenityGroup(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'accessibility': 'Доступность',
+      'audience': 'Аудитория',
+      'facilities': 'Удобства',
+      'family': 'Для семьи',
+      'food': 'Еда',
+      'outdoor': 'На улице',
+      'pets': 'Животные',
+      'safety': 'Безопасность',
+      'transport': 'Транспорт',
+      'wellness': 'Здоровье',
+      'other': 'Другое',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormSaved => 'Сохранено';
+
+  @override
+  String get createFormSaving => 'Сохранение…';
+
+  @override
+  String createOption(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'EventCapacityMode_known': 'Известный лимит',
+      'EventCapacityMode_unknown': 'Неизвестно',
+      'EventCapacityMode_unlimited': 'Без ограничений',
+      'EventFormat_offline': 'Очно',
+      'EventFormat_online': 'Онлайн',
+      'EventFormat_hybrid': 'Гибрид',
+      'EventOnlineAccessMode_publicLink': 'Публичная ссылка',
+      'EventOnlineAccessMode_externalRegistration': 'Внешняя регистрация',
+      'EventOnlineAccessMode_internalBooking': 'Внутреннее бронирование',
+      'EventPaymentCollectionMode_none': 'Без оплаты',
+      'EventPaymentCollectionMode_onsite': 'На месте',
+      'EventPaymentCollectionMode_external': 'Внешняя',
+      'EventPaymentCollectionMode_internal': 'В Recharge',
+      'EventPricingMode_free': 'Бесплатно',
+      'EventPricingMode_fixed': 'Фиксированная цена',
+      'EventPricingMode_ticketTypes': 'Типы билетов',
+      'EventPricingMode_donation': 'Пожертвование',
+      'EventRecurrenceEndMode_never': 'Никогда',
+      'EventRecurrenceEndMode_untilDate': 'В дату',
+      'EventRecurrenceEndMode_occurrenceCount': 'После числа повторов',
+      'EventRecurrenceFrequency_daily': 'Ежедневно',
+      'EventRecurrenceFrequency_weekly': 'Еженедельно',
+      'EventRecurrenceFrequency_monthly': 'Ежемесячно',
+      'EventRecurrenceFrequency_yearly': 'Ежегодно',
+      'EventRegistrationMode_none': 'Без регистрации',
+      'EventRegistrationMode_external': 'Внешняя',
+      'EventRegistrationMode_internal': 'В Recharge',
+      'EventScheduleMode_oneTime': 'Один раз',
+      'EventScheduleMode_multiDate': 'Несколько дат',
+      'EventScheduleMode_recurring': 'Повторяется',
+      'EventVisibility_public': 'Публичное',
+      'EventVisibility_unlisted': 'По ссылке',
+      'EventVisibility_private': 'Закрытое',
+      'EventAdmissionPreset_noRegistration': 'Без регистрации',
+      'EventAdmissionPreset_freeRsvp': 'Бесплатный RSVP',
+      'EventAdmissionPreset_organizerApplication': 'Заявка организатору',
+      'EventAdmissionPreset_externalRegistration': 'Внешняя регистрация',
+      'EventAdmissionPreset_externalTickets': 'Внешние билеты',
+      'EventAdmissionPreset_rechargeTickets': 'Билеты Recharge',
+      'EventAdmissionPreset_teamRegistration': 'Регистрация команд',
+      'AdmissionMode_openEntry': 'Свободный вход',
+      'AdmissionMode_rsvp': 'RSVP',
+      'AdmissionMode_booking': 'Бронирование',
+      'AdmissionMode_application': 'Заявка',
+      'AdmissionMode_ticket': 'Билет',
+      'AdmissionMode_teamRegistration': 'Регистрация команд',
+      'ConfirmationMode_none': 'Без подтверждения',
+      'ConfirmationMode_instant': 'Сразу',
+      'ConfirmationMode_manualApproval': 'Ручное одобрение',
+      'ConfirmationMode_lottery': 'Лотерея',
+      'ConfirmationMode_providerManaged': 'Через провайдера',
+      'WaitlistPromotionMode_organizerManaged': 'Организатор',
+      'WaitlistPromotionMode_fifoAutomatic': 'Автоматически, по очереди',
+      'GuestPolicyMode_none': 'Без гостей',
+      'GuestPolicyMode_plusOne': 'Плюс один',
+      'GuestPolicyMode_plusN': 'Плюс N',
+      'GuestPolicyMode_namedGuestsOnly': 'Только указанные гости',
+      'EligibilityRuleKind_invitation': 'Приглашение',
+      'EligibilityRuleKind_accessCode': 'Код доступа',
+      'EligibilityRuleKind_membership': 'Членство',
+      'EligibilityRuleKind_allowlist': 'Список гостей',
+      'EligibilityRuleKind_qualification': 'Квалификация',
+      'EligibilityRuleKind_accreditation': 'Аккредитация',
+      'EligibilityRuleKind_ageRequirement': 'Требование к возрасту',
+      'EligibilityRuleKind_waiver': 'Отказ от претензий',
+      'EventAccessWindowKind_absolute': 'Фиксированные даты',
+      'EventAccessWindowKind_occurrenceRelative': 'Относительно каждой даты',
+      'InventoryShape_generalCapacity': 'Общая вместимость',
+      'InventoryShape_sharedTicketPool': 'Общий пул билетов',
+      'InventoryShape_separateTicketPools': 'Отдельные пулы билетов',
+      'InventoryShape_zones': 'Зоны',
+      'InventoryShape_assignedSeating': 'Места с номерами',
+      'InventoryShape_teamSlots': 'Места для команд',
+      'InventoryShape_participantRoles': 'Роли участников',
+      'InventoryShape_roleBalancedSlots': 'Места с балансом ролей',
+      'InventoryShape_tableInventory': 'Столы',
+      'InventoryShape_timeSlotInventory': 'Временные слоты',
+      'InventoryChannel_onsite': 'Очно',
+      'InventoryChannel_online': 'Онлайн',
+      'InventoryChannel_any': 'Любой',
+      'InventoryAuthority_none': 'Никто',
+      'InventoryAuthority_recharge': 'Recharge',
+      'InventoryAuthority_externalProvider': 'Внешний провайдер',
+      'ActivityContributionKind_purchase': 'Покупка',
+      'ActivityContributionKind_donation': 'Пожертвование',
+      'ActivityContributionKind_other': 'Другое',
+      'ActivitySeason_winter': 'Зима',
+      'ActivitySeason_spring': 'Весна',
+      'ActivitySeason_summer': 'Лето',
+      'ActivitySeason_autumn': 'Осень',
+      'ActivitySeason_any': 'Любой сезон',
+      'ActivityTimeOfDay_morning': 'Утро',
+      'ActivityTimeOfDay_afternoon': 'День',
+      'ActivityTimeOfDay_evening': 'Вечер',
+      'ActivityTimeOfDay_night': 'Ночь',
+      'ActivityTimeOfDay_any': 'Любое время',
+      'PlaceOperationalStatus_operating': 'Работает',
+      'PlaceOperationalStatus_temporarilyClosed': 'Временно закрыто',
+      'PlaceOperationalStatus_permanentlyClosed': 'Закрыто навсегда',
+      'RentalLocationDisclosure_approximateArea':
+          'Приблизительная зона (по умолчанию)',
+      'RentalLocationDisclosure_publicBusinessAddress':
+          'Публичный адрес компании',
+      'RentalScheduleMode_openingHours': 'Часы работы',
+      'RentalScheduleMode_byArrangement': 'По договорённости',
+      'RentalBillingUnit_hour': 'За час',
+      'RentalBillingUnit_day': 'За день',
+      'RentalBillingUnit_week': 'За неделю',
+      'RentalCondition_rentalNew': 'Новое',
+      'RentalCondition_likeNew': 'Как новое',
+      'RentalCondition_good': 'Хорошее',
+      'RentalCondition_worn': 'С износом',
+      'RentalDepositCollectionMethod_none': 'Без залога',
+      'RentalDepositCollectionMethod_atHandover': 'При выдаче',
+      'RentalDepositCollectionMethod_externalProvider': 'Внешний провайдер',
+      'RentalDepositCollectionMethod_other': 'Другое',
+      'VisibilityType_public': 'Публичное',
+      'VisibilityType_unlisted': 'По ссылке',
+      'VisibilityType_private': 'Закрытое',
+      'PublishStatus_draft': 'Черновик',
+      'PublishStatus_pendingReview': 'На проверке',
+      'PublishStatus_published': 'Опубликовано',
+      'PublishStatus_archived': 'В архиве',
+      'PublishStatus_hidden': 'Скрыто',
+      'PublishStatus_deleted': 'Удалено',
+      'other': 'Другое',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormCityRequired => 'Город *';
+
+  @override
+  String get createFormLatitudeRequired => 'Широта *';
+
+  @override
+  String get createFormLongitudeRequired => 'Долгота *';
+
+  @override
+  String get createFormCategoryRequired => 'Категория *';
+
+  @override
+  String get createFormSubcategoryRequired => 'Подкатегория *';
+
+  @override
+  String get createFormTitleRequired => 'Название *';
+
+  @override
+  String createFormOccurrences(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count даты',
+      many: '$count дат',
+      few: '$count даты',
+      one: '$count дата',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createFormAdmissionLine(String value) {
+    return 'Вход: $value';
+  }
+
+  @override
+  String createFormVisibilityLine(String value) {
+    return 'Видимость: $value';
+  }
+
+  @override
+  String createFormBlockingIssues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count проблемы мешают публикации',
+      many: '$count проблем мешают публикации',
+      few: '$count проблемы мешают публикации',
+      one: '$count проблема мешает публикации',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormSending => 'Отправка…';
+
+  @override
+  String get createFormPublishing => 'Публикация…';
+
+  @override
+  String get createFormGroup => 'Группа';
+
+  @override
+  String get createFormNoTitleYet => '(названия пока нет)';
+
+  @override
+  String createFormUnits(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count единицы',
+      many: '$count единиц',
+      few: '$count единицы',
+      one: '$count единица',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createFormDepositLine(String price) {
+    return 'Залог: $price';
+  }
+
+  @override
+  String get createFormGroupMaxPeople => 'Группа, макс. человек';
+
+  @override
+  String createFormPublisherLine(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'user': 'Публикующий: ваш профиль',
+      'page': 'Публикующий: профессиональная страница',
+      'other': 'Публикующий: не задан',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormDraft => 'Черновик';
+
+  @override
+  String get createFormDetails => 'Детали';
+
+  @override
+  String get createFormAvailability => 'Доступность';
+
+  @override
+  String get createFormClosed => 'Закрыто';
+
+  @override
+  String createObjectTypeName(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Событие',
+      'activity': 'Активность Recharge',
+      'route': 'Маршрут',
+      'place': 'Место',
+      'session': 'Бронируемый сеанс',
+      'scenario': 'Сценарий',
+      'quickPlan': 'Старый Quick Plan',
+      'findPeople': 'Найти людей',
+      'classWorkshop': 'Занятие / мастер-класс',
+      'rental': 'Прокат / снаряжение',
+      'collection': 'Подборка / гид',
+      'other': 'Объект',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeDescription(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Публичное событие со временем, местом и участниками',
+      'activity': 'Лёгкая активность, например прогулка или отдых',
+      'route': 'Непрерывный трек с точками, участками и деталями',
+      'place':
+          'Постоянное место: площадка, общественное пространство или достопримечательность',
+      'session': 'Услуга по времени: занятие, стол, корт или сеанс',
+      'scenario':
+          'План на город, день, выходные или поездку из независимых остановок',
+      'quickPlan': 'Личный лёгкий план, сохранённый для совместимости',
+      'findPeople': 'Найдите компанию для конкретного занятия',
+      'classWorkshop': 'Занятие с ведущим, мастер-класс или практика',
+      'rental': 'Снаряжение или транспорт в аренду',
+      'collection': 'Подборка мест и идей',
+      'other': 'Создать объект',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeLocationLabel(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Площадка',
+      'activity': 'Куда идти',
+      'route': 'Точка старта',
+      'place': 'Название места',
+      'session': 'Место для брони',
+      'scenario': 'Район или город',
+      'quickPlan': 'Место встречи',
+      'findPeople': 'Место встречи',
+      'classWorkshop': 'Место занятия',
+      'rental': 'Место выдачи',
+      'collection': 'Район',
+      'other': 'Место',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypePriceLabel(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Цена билета или входа',
+      'activity': '',
+      'route': 'Бюджет маршрута',
+      'place': 'Типичные траты',
+      'session': 'Цена брони',
+      'scenario': 'Бюджет сценария',
+      'quickPlan': 'Ожидаемые траты',
+      'findPeople': 'Ожидаемые траты',
+      'classWorkshop': 'Цена участия',
+      'rental': 'Цена проката',
+      'collection': 'Бюджет подборки',
+      'other': 'Цена',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeNewTitle(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Новое: Событие',
+      'activity': 'Новое: Активность Recharge',
+      'route': 'Новое: Маршрут',
+      'place': 'Новое: Место',
+      'session': 'Новое: Бронируемый сеанс',
+      'scenario': 'Новое: Сценарий',
+      'quickPlan': 'Новое: Старый Quick Plan',
+      'findPeople': 'Новое: Найти людей',
+      'classWorkshop': 'Новое: Занятие / мастер-класс',
+      'rental': 'Новое: Прокат / снаряжение',
+      'collection': 'Новое: Подборка / гид',
+      'other': 'Новый объект',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeCreateTitle(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Создать: Событие',
+      'activity': 'Создать: Активность Recharge',
+      'route': 'Создать: Маршрут',
+      'place': 'Создать: Место',
+      'session': 'Создать: Бронируемый сеанс',
+      'scenario': 'Создать: Сценарий',
+      'quickPlan': 'Создать: Старый Quick Plan',
+      'findPeople': 'Создать: Найти людей',
+      'classWorkshop': 'Создать: Занятие / мастер-класс',
+      'rental': 'Создать: Прокат / снаряжение',
+      'collection': 'Создать: Подборка / гид',
+      'other': 'Создать',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeFreeToggle(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Бесплатно: Событие',
+      'activity': 'Бесплатно: Активность Recharge',
+      'route': 'Бесплатно: Маршрут',
+      'place': 'Бесплатно: Место',
+      'session': 'Бесплатно: Бронируемый сеанс',
+      'scenario': 'Бесплатно: Сценарий',
+      'quickPlan': 'Бесплатно: Старый Quick Plan',
+      'findPeople': 'Бесплатно: Найти людей',
+      'classWorkshop': 'Бесплатно: Занятие / мастер-класс',
+      'rental': 'Бесплатно: Прокат / снаряжение',
+      'collection': 'Бесплатно: Подборка / гид',
+      'other': 'Бесплатно',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeStartUtc(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Событие: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
+      'activity':
+          'Активность Recharge: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
+      'route': 'Маршрут: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
+      'place': 'Место: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
+      'session':
+          'Бронируемый сеанс: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
+      'scenario': 'Сценарий: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
+      'quickPlan':
+          'Старый Quick Plan: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
+      'findPeople':
+          'Найти людей: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
+      'classWorkshop':
+          'Занятие / мастер-класс: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
+      'rental':
+          'Прокат / снаряжение: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
+      'collection':
+          'Подборка / гид: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
+      'other': 'Дата и время начала, UTC *',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createFormNowStatus(String value) {
+    return 'Сейчас: $value.';
+  }
 }

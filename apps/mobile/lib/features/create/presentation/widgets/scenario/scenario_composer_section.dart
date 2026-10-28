@@ -220,7 +220,7 @@ class ScenarioComposerSection extends StatelessWidget {
                     DropdownButton<ScenarioItemRole>(
                       value: item.role,
                       isExpanded: true,
-                      items: const <DropdownMenuItem<ScenarioItemRole>>[
+                      items: <DropdownMenuItem<ScenarioItemRole>>[
                         DropdownMenuItem<ScenarioItemRole>(
                           value: ScenarioItemRole.mandatory,
                           child: Text('Mandatory'),

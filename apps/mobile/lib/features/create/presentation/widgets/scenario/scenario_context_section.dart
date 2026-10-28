@@ -58,7 +58,7 @@ class ScenarioContextSection extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         SegmentedButton<ScenarioDateMode>(
-          segments: const <ButtonSegment<ScenarioDateMode>>[
+          segments: <ButtonSegment<ScenarioDateMode>>[
             ButtonSegment<ScenarioDateMode>(
               value: ScenarioDateMode.template,
               label: Text('Flexible template'),

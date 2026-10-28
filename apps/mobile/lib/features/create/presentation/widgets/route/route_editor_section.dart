@@ -239,7 +239,7 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                               );
                             }
                           },
-                          itemBuilder: (_) => const <PopupMenuEntry<String>>[
+                          itemBuilder: (_) => <PopupMenuEntry<String>>[
                             PopupMenuItem<String>(
                               value: 'poi',
                               child: Text('Add viewpoint'),

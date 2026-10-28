@@ -583,7 +583,7 @@ class _ServiceResults extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (state.serviceSearchStatus == ScenarioTransitPickerStatus.empty) {
-      return const _MessageCard(
+      return _MessageCard(
         text: 'No direct services found after the selected time.',
         icon: Icons.search_off_outlined,
       );

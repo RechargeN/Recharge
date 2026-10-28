@@ -46,8 +46,6 @@ void main() {
     PlaceFieldRequirement accessNote = PlaceFieldRequirement.optional,
   }) => PlaceCreationPolicy(
     id: PlaceCreationProfileId.balanced,
-    label: 'test',
-    description: 'test',
     suggestedKind: PlaceKind.publicSpace,
     shortDescription: PlaceFieldRequirement.optional,
     cover: PlaceFieldRequirement.optional,

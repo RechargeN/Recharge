@@ -255,7 +255,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
         ),
       SegmentedButton<ClassWorkshopContextKind>(
         key: const Key('class-workshop-context'),
-        segments: const <ButtonSegment<ClassWorkshopContextKind>>[
+        segments: <ButtonSegment<ClassWorkshopContextKind>>[
           ButtonSegment(
             value: ClassWorkshopContextKind.singleClass,
             label: Text('Single class'),
@@ -383,7 +383,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
         if (ambiguous)
           SegmentedButton<ClassWorkshopFold>(
             emptySelectionAllowed: true,
-            segments: const <ButtonSegment<ClassWorkshopFold>>[
+            segments: <ButtonSegment<ClassWorkshopFold>>[
               ButtonSegment(
                 value: ClassWorkshopFold.earlier,
                 label: Text('First (summer time)'),

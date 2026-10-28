@@ -1047,10 +1047,10 @@ void main() {
 
       expect(find.text('Sent to moderation'), findsOneWidget);
       expect(find.text('Museum evening route'), findsWidgets);
-      expect(find.text('pendingReview'), findsWidgets);
+      expect(find.text('Pending review'), findsWidgets);
       expect(find.text('Workshops & masterclasses'), findsOneWidget);
       expect(find.text('Workshop'), findsOneWidget);
-      expect(find.text('12 EUR'), findsOneWidget);
+      expect(find.text('€12.00'), findsOneWidget);
 
       await tester.ensureVisible(find.text('Search similar'));
       await tester.tap(find.text('Search similar'));

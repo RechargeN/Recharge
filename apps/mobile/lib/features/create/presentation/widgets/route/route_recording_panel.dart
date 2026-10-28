@@ -116,9 +116,7 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
     ],
     RouteRecordingStatus.requestingPermission ||
     RouteRecordingStatus.recovering ||
-    RouteRecordingStatus.processing => const <Widget>[
-      LinearProgressIndicator(),
-    ],
+    RouteRecordingStatus.processing => <Widget>[LinearProgressIndicator()],
     RouteRecordingStatus.recording => <Widget>[
       _SampleCounter(state.sampleCount),
       const SizedBox(height: 10),
@@ -426,7 +424,7 @@ class _GapDecision extends StatelessWidget {
       labelText:
           'Gap ${index + 1}: ${gap.distanceMeters.round()} m, ${gap.elapsedSeconds} s',
     ),
-    items: const <DropdownMenuItem<RouteRecordingGapResolution>>[
+    items: <DropdownMenuItem<RouteRecordingGapResolution>>[
       DropdownMenuItem<RouteRecordingGapResolution>(
         value: RouteRecordingGapResolution.connectDirect,
         child: Text('Connect directly'),

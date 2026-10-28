@@ -2946,4 +2946,2130 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scenarioTransitPlannedTransport => 'Planned transport';
+
+  @override
+  String get createFormHoursNotSelected => 'Hours not selected';
+
+  @override
+  String get createFormOpeningHoursUnknown => 'Opening hours unknown';
+
+  @override
+  String get createFormSeasonalHours => 'Seasonal hours';
+
+  @override
+  String get createFormRegularOpeningHours => 'Regular opening hours';
+
+  @override
+  String get createFormNotSelected => 'Not selected';
+
+  @override
+  String get createFormNoEntryTicketConcept => 'No entry ticket concept';
+
+  @override
+  String get createFormFreePaidAreas => 'Free and paid areas';
+
+  @override
+  String get createFormPaidEntry => 'Paid entry';
+
+  @override
+  String get createFormFreeEntry => 'Free entry';
+
+  @override
+  String get createFormLocalCurator => 'Local curator';
+
+  @override
+  String get createFormStaffMember => 'Staff member';
+
+  @override
+  String get createFormUntitledPlace => 'Untitled place';
+
+  @override
+  String get createFormPreview => 'Preview';
+
+  @override
+  String get createFormReviewPlace => 'Review this Place';
+
+  @override
+  String get createFormApplySuggestions => 'Apply suggestions';
+
+  @override
+  String get createFormDiscard => 'Discard';
+
+  @override
+  String createFormCouldImproveLaterProposalMissingrecommendedfieldidsJoin(
+    int count,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count details',
+      one: '$count detail',
+    );
+    return 'Could improve later: $_temp0';
+  }
+
+  @override
+  String createFormEstimatedVisitMin(int count) {
+    return 'Estimated visit: $count min';
+  }
+
+  @override
+  String get createFormEditableDescriptionDraft => 'Editable description draft';
+
+  @override
+  String get createFormSuggestedCategory => 'Suggested category';
+
+  @override
+  String get createFormReviewDraftSuggestTaxonomyMatchIdentify =>
+      'Review this draft, suggest a taxonomy match and identify useful missing details. Nothing is published automatically.';
+
+  @override
+  String get createFormLocalDemo => 'Local demo';
+
+  @override
+  String get createFormFinishWithAi => 'Finish with AI';
+
+  @override
+  String get createFormCreatePlace => 'Create a place';
+
+  @override
+  String get createFormSaveFailedRetryAvailable =>
+      'Save failed • retry available';
+
+  @override
+  String get createFormUnsavedChanges => 'Unsaved changes';
+
+  @override
+  String get createFormSendReview => 'Send for review';
+
+  @override
+  String get createFormBack => 'Back';
+
+  @override
+  String get createFormDifferentPlace => 'This is a different place';
+
+  @override
+  String get createFormCouldPlaceAlreadyExist =>
+      'Could this place already exist?';
+
+  @override
+  String get createFormAdd => 'Add';
+
+  @override
+  String get createFormGalleryImageUrlPath => 'Gallery image URL/path';
+
+  @override
+  String get createFormAddGalleryImages => 'Add gallery images';
+
+  @override
+  String get createFormCoverImageUrlPathRecommended =>
+      'Cover image URL/path (recommended)';
+
+  @override
+  String get createFormCoverImageUrlPath => 'Cover image URL/path *';
+
+  @override
+  String get createFormCoverRequiredGalleryOptional =>
+      'A cover is required. Gallery is optional.';
+
+  @override
+  String get createFormPhotos => 'Photos';
+
+  @override
+  String get createFormOfficialBookingLandingPage =>
+      'Official booking landing page';
+
+  @override
+  String get createFormPublicEmail => 'Public email';
+
+  @override
+  String get createFormPublicPhone => 'Public phone';
+
+  @override
+  String get createFormOfficialWebsite => 'Official website';
+
+  @override
+  String get createFormAddOnlyOfficialPublicDetailsHttps =>
+      'Add only official public details. HTTPS links are required.';
+
+  @override
+  String get createFormOptionalPublicContacts => 'Optional public contacts';
+
+  @override
+  String get createFormOfficialPricingUrlHttps =>
+      'Official pricing URL (https)';
+
+  @override
+  String get createFormPricingNote => 'Pricing note';
+
+  @override
+  String get createFormPricingExplanation => 'Pricing explanation *';
+
+  @override
+  String get createFormTypicalSpend => 'Typical spend to';
+
+  @override
+  String get createFormTypicalSpendFrom => 'Typical spend from';
+
+  @override
+  String createFormEntry(String value) {
+    return 'Entry to, $value';
+  }
+
+  @override
+  String createFormEntryFrom(String value) {
+    return 'Entry from, $value *';
+  }
+
+  @override
+  String get createFormEntryPriceTypicalSpendAreSeparate =>
+      'Entry price and typical spend are separate concepts.';
+
+  @override
+  String get createFormPrice => 'Price';
+
+  @override
+  String get createFormUnset => 'Unset';
+
+  @override
+  String get createFormYes => 'Yes';
+
+  @override
+  String get createFormChooseYesUnknownUnsetNeverTreated =>
+      'Choose Yes or Unknown. Unset is never treated as No.';
+
+  @override
+  String get createFormAmenities => 'Amenities';
+
+  @override
+  String get createFormExitBuffer => 'Exit buffer';
+
+  @override
+  String get createFormArrivalBuffer => 'Arrival buffer';
+
+  @override
+  String get createFormWeatherDependent => 'Weather dependent';
+
+  @override
+  String get createFormMinimumMinutes => 'Minimum minutes';
+
+  @override
+  String get createFormRecommendedMinutes => 'Recommended minutes';
+
+  @override
+  String get createFormTheseValuesImproveTimeFitWithout =>
+      'These values improve time-fit without changing opening hours.';
+
+  @override
+  String get createFormHelpPeoplePlanVisit => 'Help people plan the visit';
+
+  @override
+  String get createFormAddInterval => 'Add interval';
+
+  @override
+  String get createFormClosesNextDay => 'Closes next day';
+
+  @override
+  String get createFormCloseHhMm => 'Close HH:mm';
+
+  @override
+  String get createFormOpenHhMm => 'Open HH:mm';
+
+  @override
+  String get createFormDay => 'Day';
+
+  @override
+  String get createFormClosedFrom => 'Closed from *';
+
+  @override
+  String get createFormCurrentOperationalStatus => 'Current operational status';
+
+  @override
+  String get createFormAddClosedDay => 'Add closed day';
+
+  @override
+  String get createFormCustomHours => 'Custom hours';
+
+  @override
+  String get createFormClosedAllDay => 'Closed all day';
+
+  @override
+  String get createFormDateExceptions => 'Date exceptions';
+
+  @override
+  String get createFormRemovePeriod => 'Remove period';
+
+  @override
+  String get createFormHoursUnknown => 'Hours unknown';
+
+  @override
+  String get createFormRegularSchedule => 'Regular schedule';
+
+  @override
+  String get createFormHoursMode2 => 'Hours mode';
+
+  @override
+  String get createFormHoursMode => 'Hours mode *';
+
+  @override
+  String get createFormUnknownBetterThanInventedHours =>
+      'Unknown is better than invented hours.';
+
+  @override
+  String get createFormWhenCanPeopleVisit => 'When can people visit?';
+
+  @override
+  String get createFormAddMoreVisitInformation => 'Add more visit information';
+
+  @override
+  String get createFormAddOnlyInformationThatUsefulPlace =>
+      'Add only information that is useful for this place.';
+
+  @override
+  String get createFormOptionalVisitDetails => 'Optional visit details';
+
+  @override
+  String get createFormAddOpeningAccessHours => 'Add opening or access hours';
+
+  @override
+  String get createFormAddHoursOnlyWhenPlaceReally =>
+      'Add hours only when this place really has them.';
+
+  @override
+  String get createFormAccessRestrictions => 'Access restrictions';
+
+  @override
+  String get createFormHowFindPlace => 'How to find this place';
+
+  @override
+  String get createFormAddDirections => 'Add directions';
+
+  @override
+  String get createFormRequiredWhenThereNoPostalAddress =>
+      'Required when there is no postal address.';
+
+  @override
+  String get createFormLocationLabel => 'Location label';
+
+  @override
+  String get createFormFormattedAddress => 'Formatted address';
+
+  @override
+  String get createFormConfirmPin => 'Confirm this pin';
+
+  @override
+  String get createFormPinConfirmed => 'Pin confirmed';
+
+  @override
+  String get createFormTapMapConfirmRepresentativePoint =>
+      'Tap the map and confirm the representative point.';
+
+  @override
+  String get createFormWhere => 'Where is it?';
+
+  @override
+  String get createFormChange => 'Change';
+
+  @override
+  String get createFormCancel => 'Cancel';
+
+  @override
+  String get createFormCompatibleCategoryDetailsWillKeptFields =>
+      'Compatible category details will be kept. Fields that do not belong to the new profile will be removed from publication.';
+
+  @override
+  String get createFormChangeCategory => 'Change category?';
+
+  @override
+  String get createFormCategoryDetails => 'Category details';
+
+  @override
+  String get createFormContentLanguage => 'Content language';
+
+  @override
+  String get createFormPublicLandmarksDoNotRequireOwnership =>
+      'Public landmarks do not require an ownership claim.';
+
+  @override
+  String get createFormCommunityContribution => 'Community contribution';
+
+  @override
+  String get createFormYourRelationship => 'Your relationship';
+
+  @override
+  String get createFormDetailedDescription => 'Detailed description';
+
+  @override
+  String get createFormOptionalDescriptionLanguageAttribution =>
+      'Optional description, language and attribution';
+
+  @override
+  String get createFormMoreAboutPlace => 'More about this place';
+
+  @override
+  String get createFormYouCanAddImproveLater =>
+      'You can add or improve this later.';
+
+  @override
+  String get createFormPlaceName => 'Place name *';
+
+  @override
+  String get createFormChooseCategoryFormKeepsOnlyRelevant =>
+      'Choose a category and the form keeps only relevant fields.';
+
+  @override
+  String get createFormWhatPlace => 'What is this place?';
+
+  @override
+  String get createFormCreatePlaceCapabilityRequiredEditPublish =>
+      'You need permission to create places to edit or publish.';
+
+  @override
+  String get createFormPlaceDataBeingPrepared =>
+      'Place data is being prepared…';
+
+  @override
+  String get createFormScenarioRoute => 'Scenario route';
+
+  @override
+  String createFormStops(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stops',
+      one: '$count stop',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormRechargeIdea => 'Recharge idea';
+
+  @override
+  String get createFormMapRoute => 'Map route';
+
+  @override
+  String get createFormEditRoute => 'Edit route';
+
+  @override
+  String get createFormScenarioRouteSeed => 'Scenario route seed';
+
+  @override
+  String createFormSeededFrom(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'details': 'Seeded from details',
+      'saved_search': 'Seeded from saved search',
+      'search': 'Seeded from search conditions',
+      'smart_search': 'Seeded from smart search',
+      'profile': 'Seeded from profile workspace',
+      'scenario': 'Seeded from scenario route',
+      'map': 'Seeded from map area',
+      'other': 'Seeded from Recharge',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormNoLimit => 'No limit';
+
+  @override
+  String get createFormCapacityUnknown => 'Capacity unknown';
+
+  @override
+  String createFormOnsiteBuffersMin(int start, int end) {
+    return 'Onsite buffers: $start / $end min';
+  }
+
+  @override
+  String get createFormAllowPartialAttendance => 'Allow partial attendance';
+
+  @override
+  String get createFormDuration => 'Duration';
+
+  @override
+  String get createFormNoOpeningHoursYet => 'No opening hours yet';
+
+  @override
+  String get createFormAddSlot => 'Add slot';
+
+  @override
+  String get createFormScheduleSlots => 'Schedule slots';
+
+  @override
+  String get createFormNone => 'None';
+
+  @override
+  String get createFormHours => 'Hours';
+
+  @override
+  String get createFormSchedule => 'Schedule';
+
+  @override
+  String get createFormNoCategoriesMatchSearch =>
+      'No categories match this search.';
+
+  @override
+  String get createFormActivityCriteria => 'Activity criteria';
+
+  @override
+  String get createFormScenarioTaxonomy => 'Scenario taxonomy';
+
+  @override
+  String get createFormConvertRental => 'Convert to rental';
+
+  @override
+  String get createFormKeepSession => 'Keep session';
+
+  @override
+  String get createFormLegacyOfferWasMigratedSafelyAs =>
+      'This legacy offer was migrated safely as a Bookable session. Choose Rental only if equipment or transport is being rented.';
+
+  @override
+  String get createFormCouldRental => 'Could this be a rental?';
+
+  @override
+  String get createFormRechargeCreate => 'Recharge Create';
+
+  @override
+  String get createFormSaveDraft => 'Save draft';
+
+  @override
+  String get createFormCoverImage => 'Cover image *';
+
+  @override
+  String get createFormFullDescription => 'Full description';
+
+  @override
+  String get createFormShortDescription => 'Short description';
+
+  @override
+  String get createFormAddress => 'Address';
+
+  @override
+  String get createFormSubcategory => 'Subcategory';
+
+  @override
+  String get createFormMainCategory => 'Main category *';
+
+  @override
+  String get createFormNotSaved => 'Not saved';
+
+  @override
+  String get createFormText => 'Sign-in required';
+
+  @override
+  String get createFormSubmitReview => 'Submit for review';
+
+  @override
+  String get createFormNotProhibitedUnsafeItem =>
+      'This is not a prohibited/unsafe item';
+
+  @override
+  String get createFormListingAccurate => 'This listing is accurate';
+
+  @override
+  String get createFormPublicPreview => 'Public preview';
+
+  @override
+  String get createFormYouWillLeaveRechargeGoCheck =>
+      'You will leave Recharge and go to an external site to check availability.';
+
+  @override
+  String get createFormExternalBookingUrlHttps =>
+      'External booking URL (https)';
+
+  @override
+  String get createFormLateReturnPolicy => 'Late return policy';
+
+  @override
+  String get createFormDamagePolicy => 'Damage policy';
+
+  @override
+  String get createFormDepositTerms => 'Deposit terms';
+
+  @override
+  String get createFormCollectionMethod => 'Collection method';
+
+  @override
+  String get createFormAddRateStep => 'Add rate step';
+
+  @override
+  String get createFormBillingUnit => 'Billing unit';
+
+  @override
+  String get createFormUsageRestrictions => 'Usage restrictions';
+
+  @override
+  String get createFormSafetyNotice => 'Safety notice';
+
+  @override
+  String get createFormMinimumRenterAge => 'Minimum renter age';
+
+  @override
+  String get createFormMaxDurationMin => 'Max duration (min)';
+
+  @override
+  String get createFormMinDurationMin => 'Min duration (min)';
+
+  @override
+  String get createFormApply => 'Apply';
+
+  @override
+  String get createFormSuggestedDefaultsCategory =>
+      'Suggested defaults for this category';
+
+  @override
+  String get createFormDeliveryFeeMinorUnits => 'Delivery fee (minor units)';
+
+  @override
+  String get createFormDeliveryRadiusKm => 'Delivery radius (km)';
+
+  @override
+  String get createFormOfferDelivery => 'Offer delivery';
+
+  @override
+  String get createFormByArrangement => 'By arrangement';
+
+  @override
+  String get createFormOpeningHours => 'Opening hours';
+
+  @override
+  String get createFormPickupSchedule => 'Pickup schedule';
+
+  @override
+  String get createFormPublicBusinessAddress => 'Public business address';
+
+  @override
+  String get createFormApproximateAreaDefault => 'Approximate area (default)';
+
+  @override
+  String get createFormLocationDisclosure => 'Location disclosure';
+
+  @override
+  String get createFormLongitude => 'Longitude';
+
+  @override
+  String get createFormLatitude => 'Latitude';
+
+  @override
+  String get createFormPublicAreaLabel => 'Public area label';
+
+  @override
+  String get createFormPickupPlaceName => 'Pickup place name';
+
+  @override
+  String get createFormThatWouldExceedGroupCapacity =>
+      'That would exceed the group capacity.';
+
+  @override
+  String get createFormBlockDateRange => 'Block a date range';
+
+  @override
+  String get createFormConfirmCalendar => 'Confirm calendar';
+
+  @override
+  String get createFormRechargeCannotSeeExternalBookingsConfirm =>
+      'Recharge cannot see external bookings — confirm this is up to date.';
+
+  @override
+  String get createFormCalendarNotConfirmedYet => 'Calendar not confirmed yet';
+
+  @override
+  String get createFormAddAnotherItemType => 'Add another item type';
+
+  @override
+  String get createFormRemove => 'Remove';
+
+  @override
+  String get createFormDuplicate => 'Duplicate';
+
+  @override
+  String get createFormCondition => 'Condition';
+
+  @override
+  String get createFormQuantity => 'Quantity';
+
+  @override
+  String get createFormLabel => 'Label';
+
+  @override
+  String get createFormCategory => 'Category';
+
+  @override
+  String get createFormTitle => 'Title';
+
+  @override
+  String get createFormNext => 'Next';
+
+  @override
+  String get createFormCreateRentalCapabilityRequiredEditPublish =>
+      'You need permission to create rentals to edit or publish.';
+
+  @override
+  String get createFormRentalDataBeingPrepared =>
+      'Rental data is being prepared…';
+
+  @override
+  String createFormRemoveGalleryImage(int count) {
+    return 'Remove gallery image $count';
+  }
+
+  @override
+  String createFormGalleryImageDescription(int count) {
+    return 'Gallery image $count description *';
+  }
+
+  @override
+  String get createFormAddGalleryImage => 'Add gallery image';
+
+  @override
+  String get createFormPublishableLocalMockModerationPipeline =>
+      'Publishable on local/mock moderation pipeline';
+
+  @override
+  String get createFormUntitledEvent => 'Untitled event';
+
+  @override
+  String get createFormVisibility => 'Visibility';
+
+  @override
+  String get createFormExternalHttpsRegistrationUrl =>
+      'External HTTPS registration URL';
+
+  @override
+  String get createFormRegistration => 'Registration';
+
+  @override
+  String get createFormMaximumParticipants => 'Maximum participants';
+
+  @override
+  String get createFormCapacity => 'Capacity';
+
+  @override
+  String get createFormPaymentCollection => 'Payment collection';
+
+  @override
+  String get createFormPricing => 'Pricing';
+
+  @override
+  String get createFormPartialAttendanceAllowed => 'Partial attendance allowed';
+
+  @override
+  String get createFormPetsAllowed => 'Pets allowed';
+
+  @override
+  String get createFormKidsAllowed => 'Kids allowed';
+
+  @override
+  String get createFormFamilyFriendly => 'Family friendly';
+
+  @override
+  String get createFormMaximumAge => 'Maximum age';
+
+  @override
+  String get createFormMinimumAge => 'Minimum age';
+
+  @override
+  String get createFormWhatAttendeesShouldKnowBring =>
+      'What attendees should know or bring';
+
+  @override
+  String get createFormExcludedDatesCommaSeparated =>
+      'Excluded dates, comma-separated';
+
+  @override
+  String get createFormOccurrenceCount => 'Occurrence count';
+
+  @override
+  String get createFormUntilLocalDate => 'Until local date';
+
+  @override
+  String get createFormEnds => 'Ends';
+
+  @override
+  String get createFormEveryNPeriods => 'Every N periods';
+
+  @override
+  String get createFormRepeat => 'Repeat';
+
+  @override
+  String get createFormDatesSeparatedByCommas => 'Dates separated by commas';
+
+  @override
+  String get createFormDurationMinutes => 'Duration in minutes';
+
+  @override
+  String get createFormDurationMinutes14401Day =>
+      'Duration in minutes (1440 = 1 day)';
+
+  @override
+  String get createFormLocalStartTimeHhMm => 'Local start time (HH:mm)';
+
+  @override
+  String get createFormFirstLocalDateYyyyMmDd =>
+      'First local date (YYYY-MM-DD)';
+
+  @override
+  String get createFormScheduleMode => 'Schedule mode';
+
+  @override
+  String get createFormPublicHttpsEventUrl => 'Public HTTPS event URL *';
+
+  @override
+  String get createFormOnlineAccess => 'Online access';
+
+  @override
+  String get createFormConfirmPhysicalLocationPin =>
+      'Confirm this physical location pin *';
+
+  @override
+  String get createFormMeetingPointInstructions => 'Meeting point instructions';
+
+  @override
+  String get createFormVenue => 'Venue';
+
+  @override
+  String get createFormFormat => 'Format';
+
+  @override
+  String get createFormCoverDescriptionScreenReaders =>
+      'Cover description for screen readers *';
+
+  @override
+  String get createFormShortDescription2 => 'Short description *';
+
+  @override
+  String get createFormEventTitle => 'Event title *';
+
+  @override
+  String get createFormEventDraftUnavailableReopenCreateHub =>
+      'Event draft is unavailable. Reopen Create Hub.';
+
+  @override
+  String get createFormClosesAtUtcIso8601 => 'Closes at UTC (ISO 8601)';
+
+  @override
+  String get createFormOpensAtUtcIso8601 => 'Opens at UTC (ISO 8601)';
+
+  @override
+  String get createFormCloseMinutesBeforeOccurrence =>
+      'Close minutes before occurrence';
+
+  @override
+  String get createFormOpenMinutesBeforeOccurrence =>
+      'Open minutes before occurrence';
+
+  @override
+  String get createFormWindowType => 'Window type';
+
+  @override
+  String get createFormEnableWindow => 'Enable window';
+
+  @override
+  String get createFormNotConfigured => 'Not configured';
+
+  @override
+  String get createFormRemoveEligibilityRule => 'Remove eligibility rule';
+
+  @override
+  String get createFormPublicExplanationNoSecrets =>
+      'Public explanation (no secrets)';
+
+  @override
+  String get createFormAddEligibilityRule => 'Add eligibility rule';
+
+  @override
+  String get createFormRuleKind => 'Rule kind';
+
+  @override
+  String get createFormNeverEnterAccessCodesIdentitiesPrivate =>
+      'Never enter access codes, identities or private documents.';
+
+  @override
+  String get createFormEligibility => 'Eligibility';
+
+  @override
+  String get createFormSalesAtDoor => 'Sales at the door';
+
+  @override
+  String get createFormRegistrationAtDoor => 'Registration at the door';
+
+  @override
+  String get createFormOnsiteAdmissionAllowed => 'Onsite admission allowed';
+
+  @override
+  String get createFormDoesNotBookReserveInventory =>
+      'Does not book or reserve inventory';
+
+  @override
+  String get createFormMaximumGuestsPerRegistration =>
+      'Maximum guests per registration *';
+
+  @override
+  String get createFormGuestPolicy => 'Guest policy';
+
+  @override
+  String get createFormFuturePromotionPolicy => 'Future promotion policy';
+
+  @override
+  String get createFormPreviewOnlyNoQueuePromotionRuns =>
+      'Preview only — no queue or promotion runs';
+
+  @override
+  String get createFormConfigureWaitlist => 'Configure waitlist';
+
+  @override
+  String get createFormApplicationWindow => 'Application window';
+
+  @override
+  String get createFormCancellationClosesNMinutesBeforeStart =>
+      'Cancellation closes N minutes before the start *';
+
+  @override
+  String get createFormRegistrationWindow => 'Registration window';
+
+  @override
+  String get createFormExternalHttpsRegistrationUrl2 =>
+      'External HTTPS registration URL *';
+
+  @override
+  String get createFormConfirmationMode => 'Confirmation mode *';
+
+  @override
+  String get createFormRegistrationMode => 'Registration mode *';
+
+  @override
+  String get createFormAdmissionMode => 'Admission mode *';
+
+  @override
+  String get createFormApplyNormalizedFields => 'Apply normalized fields';
+
+  @override
+  String get createFormConfigurationPreset => 'Configuration preset';
+
+  @override
+  String get createFormConfirmSuggestion => 'Confirm suggestion';
+
+  @override
+  String get createFormLegacyRegistrationPreservedButAdmissionConfirmation =>
+      'Legacy registration is preserved, but admission and confirmation still require explicit choices.';
+
+  @override
+  String get createFormOpenEntryWithNoRegistrationConfirmation =>
+      'Open entry with no registration or confirmation.';
+
+  @override
+  String get createFormLegacyDraftSuggestionNotApplied =>
+      'Legacy draft suggestion — not applied';
+
+  @override
+  String get createFormAdmissionRegistrationConfirmationAreIndependentLocal =>
+      'Admission, registration and confirmation are independent. This local configuration does not create a booking.';
+
+  @override
+  String get createFormAdmission => 'Admission';
+
+  @override
+  String get createFormEventAdmissionConfiguration =>
+      'Event admission configuration';
+
+  @override
+  String get createFormSaveDraftReturn => 'Save draft & return';
+
+  @override
+  String get createFormPreviewPublish => 'Preview and publish';
+
+  @override
+  String get createFormSuggestGroupSize => 'Suggest a group size';
+
+  @override
+  String get createFormTypicalDurationMaxMinutes =>
+      'Typical duration, max (minutes)';
+
+  @override
+  String get createFormTypicalDurationMinMinutes =>
+      'Typical duration, min (minutes)';
+
+  @override
+  String get createFormBestSeasonOptional => 'Best season (optional)';
+
+  @override
+  String get createFormBestTimeDayOptional => 'Best time of day (optional)';
+
+  @override
+  String get createFormWhenBestHowLongDoesTake =>
+      'When is it best, and how long does it take?';
+
+  @override
+  String get createFormApproximateAmountOptional =>
+      'Approximate amount (optional)';
+
+  @override
+  String get createFormEGCoffeeCounterOptional =>
+      'e.g. “Coffee on the counter, optional”';
+
+  @override
+  String get createFormOther => 'Other';
+
+  @override
+  String get createFormDonation => 'Donation';
+
+  @override
+  String get createFormContributionKind => 'Contribution kind';
+
+  @override
+  String get createFormCustomaryLeaveSomethingHere =>
+      'It is customary to leave something here';
+
+  @override
+  String get createFormWhatKnowBeforeYouGo => 'What to know before you go';
+
+  @override
+  String get createFormNotOfficialSpot => 'This is not an official spot';
+
+  @override
+  String get createFormAccessNotes => 'Access notes';
+
+  @override
+  String get createFormAddressLineOptional => 'Address line (optional)';
+
+  @override
+  String get createFormWhereHowDoIGetThere =>
+      'Where is it, and how do I get there?';
+
+  @override
+  String get createFormMorePlaces => 'More Places';
+
+  @override
+  String get createFormNoMatchingPlacesPage =>
+      'No matching Places on this page.';
+
+  @override
+  String get createFormSearchPlaces => 'Search Places';
+
+  @override
+  String get createFormSearchPublishedPlaces => 'Search published Places';
+
+  @override
+  String get createFormLinkedPlaceUnavailableRemoveReplaceLink =>
+      'Linked Place is unavailable. Remove or replace the link.';
+
+  @override
+  String get createFormRemoveLinkedPlace => 'Remove linked Place';
+
+  @override
+  String get createFormSelectedPlace => 'A Place is linked';
+
+  @override
+  String get createFormLinkedPlaceOptional => 'Linked Place (optional)';
+
+  @override
+  String get createFormCoverImageUrl => 'Cover image URL';
+
+  @override
+  String get createFormFullDescriptionOptional => 'Full description (optional)';
+
+  @override
+  String get createFormAboutActivity => 'About this activity';
+
+  @override
+  String get createFormCheckActivityFieldsSubmitAgain =>
+      'Check the Activity fields and submit again.';
+
+  @override
+  String get createFormEditingDraftOnlyPublishedVersionStays =>
+      'Editing draft only. The published version stays unchanged until review and publication.';
+
+  @override
+  String get createFormLoadingRechargeActivityDraft =>
+      'Loading Recharge Activity draft…';
+
+  @override
+  String get createFormPublishedRoute => 'Published route';
+
+  @override
+  String get createFormDraftSummaryUnavailableSession =>
+      'Draft summary is unavailable in this session.';
+
+  @override
+  String get createFormMapArea => 'Map area';
+
+  @override
+  String get createFormSearchSimilar => 'Search similar';
+
+  @override
+  String get createFormProfile => 'Profile';
+
+  @override
+  String get createFormHome => 'Home';
+
+  @override
+  String get createFormNextSteps => 'Next steps';
+
+  @override
+  String get createFormRouteMap => 'Route map';
+
+  @override
+  String get createFormWalking => 'Walking';
+
+  @override
+  String get createFormFree => 'Free';
+
+  @override
+  String get createFormArchive => 'Archive';
+
+  @override
+  String get createFormCreateNewVersion => 'Create new version';
+
+  @override
+  String get createFormReviewRequest => 'Review request';
+
+  @override
+  String get createFormGeometryHash => 'Geometry hash';
+
+  @override
+  String get createFormVersionId => 'Version ID';
+
+  @override
+  String get createFormRouteId => 'Route ID';
+
+  @override
+  String get createFormImmutableVersionAwaitingApproval =>
+      'Immutable version awaiting approval';
+
+  @override
+  String get createFormActiveImmutableRouteVersion =>
+      'Active immutable Route version';
+
+  @override
+  String get createFormYourPublishActionWasHandledCreate =>
+      'Your publish action was handled. Create another listing or return to Home.';
+
+  @override
+  String get createFormSentModeration => 'Sent to moderation';
+
+  @override
+  String get createFormPublishProcessed => 'Publish processed';
+
+  @override
+  String get createFormRoutePublished => 'Route published';
+
+  @override
+  String get createFormCreateAnother => 'Create another';
+
+  @override
+  String get createFormCreateAnotherEvent => 'Create another Event';
+
+  @override
+  String get createFormCreateAnotherFrom =>
+      'Create another from the last template';
+
+  @override
+  String get createFormOpenRouteModerationQueue =>
+      'Open Route moderation queue';
+
+  @override
+  String get createFormPublishStatus => 'Publish status';
+
+  @override
+  String get createFormCouldNotRemove =>
+      'Could not remove the item. Try again.';
+
+  @override
+  String get createFormRemoveWithoutReview => 'Remove without review';
+
+  @override
+  String get createFormRemovingItemHereAppliesInstantlyNo =>
+      'Removing an item here applies instantly, with no moderation round trip. Adding or editing text still needs a new reviewed version — use Publish above for that.';
+
+  @override
+  String get createFormPublish => 'Publish';
+
+  @override
+  String get createFormAcknowledgeComposition => 'Acknowledge composition';
+
+  @override
+  String get createFormCompositionReviewed => 'Composition reviewed';
+
+  @override
+  String get createFormRefreshLivePreview => 'Refresh live preview';
+
+  @override
+  String get createFormSomeItemsAreNoLongerAvailable =>
+      'Some items are no longer available — review before publishing.';
+
+  @override
+  String get createFormNotEnoughPricedItemsYetSuggest =>
+      'Not enough priced items yet to suggest a budget.';
+
+  @override
+  String get createFormSuggestFromItemPrices => 'Suggest from item prices';
+
+  @override
+  String get createFormNotSet => 'Not set';
+
+  @override
+  String get createFormBudgetIndicator => 'Budget indicator';
+
+  @override
+  String get createFormCuratorNotes => 'Curator notes';
+
+  @override
+  String get createFormItems => 'Items';
+
+  @override
+  String get createFormOneReferencePointWholeGuideNot =>
+      'One reference point for the whole guide — not an item location.';
+
+  @override
+  String get createFormAreaAnchor => 'Area anchor';
+
+  @override
+  String get createFormTypeSearchTapMapBelow7 =>
+      'Type to search, or tap the map below';
+
+  @override
+  String get createFormAreaCity => 'Area or city';
+
+  @override
+  String get createFormShortPitch => 'Short pitch';
+
+  @override
+  String get createFormCollectionDraftDataBeingPrepared =>
+      'Collection draft data is being prepared…';
+
+  @override
+  String get createFormCollectionDraftBeingPrepared =>
+      'Collection draft is being prepared…';
+
+  @override
+  String get createFormPreparingCollectionDraft =>
+      'Preparing Collection draft…';
+
+  @override
+  String get createFormRemovePool => 'Remove pool';
+
+  @override
+  String get createFormMovePoolDown => 'Move pool down';
+
+  @override
+  String get createFormMovePoolUp => 'Move pool up';
+
+  @override
+  String get createFormNeutralRoleIdsCommaSeparated =>
+      'Neutral role IDs, comma-separated';
+
+  @override
+  String get createFormCapacityMode => 'Capacity mode';
+
+  @override
+  String get createFormChannel => 'Channel';
+
+  @override
+  String get createFormShape => 'Shape';
+
+  @override
+  String get createFormPublicPoolLabel => 'Public pool label';
+
+  @override
+  String get createFormUnnamedPool => 'Unnamed pool';
+
+  @override
+  String get createFormAddPool => 'Add pool';
+
+  @override
+  String get createFormPoolCapacity => 'Pool capacity';
+
+  @override
+  String get createFormAdditionalViewsSameInventory =>
+      'Additional views of the same inventory';
+
+  @override
+  String get createFormPrimaryInventoryShape => 'Primary inventory shape *';
+
+  @override
+  String get createFormInventoryAuthority => 'Inventory authority';
+
+  @override
+  String get createFormMaximumParticipants2 => 'Maximum participants *';
+
+  @override
+  String get createFormEventCapacity => 'Event capacity';
+
+  @override
+  String get createFormCapacityDeclaredLimitNotLiveParticipant =>
+      'Capacity is a declared limit. It is not a live participant count or transactional inventory balance.';
+
+  @override
+  String get createFormEventInventoryConfiguration =>
+      'Event inventory configuration';
+
+  @override
+  String get createFormConfirm => 'Confirm';
+
+  @override
+  String get createFormSave => 'Save';
+
+  @override
+  String get createFormTemplateName => 'Template name';
+
+  @override
+  String get createFormActiveDraftsPublishedEventsWillNot =>
+      'Active drafts and published Events will not be affected.';
+
+  @override
+  String get createFormDeleteTemplate => 'Delete template?';
+
+  @override
+  String get createFormReusableContentWillReplacedWithCurrent =>
+      'The reusable content will be replaced with the current Event.';
+
+  @override
+  String get createFormReplaceTemplate => 'Replace template?';
+
+  @override
+  String get createFormRenameTemplate => 'Rename template';
+
+  @override
+  String get createFormDelete => 'Delete';
+
+  @override
+  String get createFormReplaceWithCurrent => 'Replace with current';
+
+  @override
+  String get createFormRename => 'Rename';
+
+  @override
+  String get createFormTemplateActions => 'Template actions';
+
+  @override
+  String get createFormLastTemplate => 'Last template';
+
+  @override
+  String get createFormUntitledEvent2 => 'Untitled Event';
+
+  @override
+  String get createFormNoTemplatesYetSaveCurrentEvent =>
+      'No templates yet. Save the current Event to reuse it.';
+
+  @override
+  String get createFormYourEventTemplates => 'Your Event templates';
+
+  @override
+  String get createFormSaveEventTemplate => 'Save Event template';
+
+  @override
+  String get createFormNextCreateAnotherEventWillUse =>
+      'Next “Create another Event” will use the selected template.';
+
+  @override
+  String get createFormSaveCurrent => 'Save current';
+
+  @override
+  String get createFormChooseManage => 'Choose or manage';
+
+  @override
+  String get createFormEventTemplates => 'Event templates';
+
+  @override
+  String get createFormClearClassification => 'Clear classification';
+
+  @override
+  String get createFormAdditionalRolesUp3 => 'Additional roles (up to 3)';
+
+  @override
+  String get createFormPrimaryAttendeeRole => 'Primary attendee role *';
+
+  @override
+  String get createFormExplainEventMechanics => 'Explain the event mechanics *';
+
+  @override
+  String get createFormEventMechanics => 'Event mechanics *';
+
+  @override
+  String get createFormUseSuggestion => 'Use suggestion';
+
+  @override
+  String get createFormOnlySuggestionConfirmChooseAnother =>
+      'This is only a suggestion. Confirm it or choose another.';
+
+  @override
+  String get createFormMechanicsAttendeeRolesAreIndependentFrom =>
+      'Mechanics and attendee roles are independent from the category, format, access and price.';
+
+  @override
+  String get createFormHowDoesEventWork => 'How does this event work?';
+
+  @override
+  String get createFormEventClassification => 'Event classification';
+
+  @override
+  String get createFormSectionTitle => 'Section title';
+
+  @override
+  String get createFormNewSection => 'New section';
+
+  @override
+  String get createFormNoLongerAvailable => 'No longer available';
+
+  @override
+  String get createFormNoItemsYet => 'No items yet.';
+
+  @override
+  String get createFormRemoveSection => 'Remove section';
+
+  @override
+  String createFormCollection(int count) {
+    return 'In this Collection ($count)';
+  }
+
+  @override
+  String get createFormResults => 'Results';
+
+  @override
+  String get createFormSearch => 'Search';
+
+  @override
+  String get createFormSearchPlaceRouteBookableSessionClass =>
+      'Search Place, Route, Bookable Session, Class/Workshop, Rental';
+
+  @override
+  String get createFormChooseTypeOpenItsCreationPage =>
+      'Choose a type to open its creation page.';
+
+  @override
+  String get createFormWhatDoYouWantCreate => 'What do you want to create?';
+
+  @override
+  String get createFormCreateHub => 'Create Hub';
+
+  @override
+  String get createFormRefreshPreview => 'Refresh preview';
+
+  @override
+  String get createFormCheckingLocalFixture => 'Checking local fixture…';
+
+  @override
+  String get createFormLocalMockPreviewNotLiveAvailability =>
+      'Local mock preview — not live availability';
+
+  @override
+  String get createFormLocalMockAvailabilityPreview =>
+      'Local mock availability preview';
+
+  @override
+  String get createFormDuplicateListing => 'Duplicate this listing';
+
+  @override
+  String get createFormSaveCurrentAsTemplate => 'Save current as template';
+
+  @override
+  String get createFormUse => 'Use';
+
+  @override
+  String get createFormNoSavedTemplatesYet => 'No saved templates yet.';
+
+  @override
+  String get createFormTemplates => 'Templates';
+
+  @override
+  String get createFormWhyHere => 'Why is it here?';
+
+  @override
+  String get createFormFeatured => 'Featured';
+
+  @override
+  String get createFormAddItemsPreviousStepFirst =>
+      'Add items in the previous step first.';
+
+  @override
+  String createFormUpToPrice(String price) {
+    return 'up to $price';
+  }
+
+  @override
+  String createFormDistanceKm(String km) {
+    return '$km km';
+  }
+
+  @override
+  String createFormMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
+  String get createFormOwner => 'Owner';
+
+  @override
+  String get createFormVisitor => 'Visitor';
+
+  @override
+  String get createFormUnknown => 'Unknown';
+
+  @override
+  String get createFormOpen247 => 'Open 24/7';
+
+  @override
+  String get createStepPlaceIdentityTitle => 'About';
+
+  @override
+  String get createStepPlaceIdentityDescription =>
+      'Name, category and only the details this place needs';
+
+  @override
+  String get createStepPlaceVisitTitle => 'Visit';
+
+  @override
+  String get createStepPlaceVisitDescription =>
+      'Confirmed map point and relevant visit information';
+
+  @override
+  String get createStepPlacePublishTitle => 'Publish';
+
+  @override
+  String get createStepPlacePublishDescription =>
+      'Readiness, optional improvements and final checks';
+
+  @override
+  String get createStepEventBasicsMediaTitle => 'Basics';
+
+  @override
+  String get createStepEventBasicsMediaDescription =>
+      'Identity, category, description and media';
+
+  @override
+  String get createStepEventLocationScheduleTitle => 'When & where';
+
+  @override
+  String get createStepEventLocationScheduleDescription =>
+      'Format, location, timezone and occurrences';
+
+  @override
+  String get createStepEventRequirementsTitle => 'Requirements';
+
+  @override
+  String get createStepEventRequirementsDescription =>
+      'Audience, amenities and participation rules';
+
+  @override
+  String get createStepEventPriceParticipantsTitle => 'Price & people';
+
+  @override
+  String get createStepEventPriceParticipantsDescription =>
+      'Money, admission, capacity and inventory';
+
+  @override
+  String get createStepEventPreviewPublishTitle => 'Publish';
+
+  @override
+  String get createStepEventPreviewPublishDescription =>
+      'Preview, readiness and moderation submission';
+
+  @override
+  String get createStepActivityBasicsTitle => 'About';
+
+  @override
+  String get createStepActivityBasicsDescription => 'Title, category and media';
+
+  @override
+  String get createStepActivityLocationTitle => 'Location';
+
+  @override
+  String get createStepActivityLocationDescription =>
+      'Where to go and how to get there';
+
+  @override
+  String get createStepActivityWhenForTitle => 'When & for whom';
+
+  @override
+  String get createStepActivityWhenForDescription =>
+      'Best time, duration and group size';
+
+  @override
+  String get createStepActivityPublishTitle => 'Publish';
+
+  @override
+  String get createStepActivityPublishDescription => 'Preview and send';
+
+  @override
+  String get createStepCollectionBasicsTitle => 'Basics & media';
+
+  @override
+  String get createStepCollectionBasicsDescription =>
+      'Title, pitch, cover and area';
+
+  @override
+  String get createStepCollectionItemsTitle => 'Items';
+
+  @override
+  String get createStepCollectionItemsDescription =>
+      'Search and add existing places, routes and more';
+
+  @override
+  String get createStepCollectionCuratorNotesTitle => 'Curator notes';
+
+  @override
+  String get createStepCollectionCuratorNotesDescription =>
+      'Say why each item is here and pick your highlights';
+
+  @override
+  String get createStepCollectionBudgetTitle => 'Budget & publisher';
+
+  @override
+  String get createStepCollectionBudgetDescription =>
+      'Set a budget hint, publisher, market and visibility';
+
+  @override
+  String get createStepCollectionPublishTitle => 'Preview & publish';
+
+  @override
+  String get createStepCollectionPublishDescription =>
+      'Review the composition and send';
+
+  @override
+  String get createStepRentalListingTitle => 'Listing and media';
+
+  @override
+  String get createStepRentalListingDescription =>
+      'Title, category and cover for the item or fleet';
+
+  @override
+  String get createStepRentalInventoryTitle => 'Inventory';
+
+  @override
+  String get createStepRentalInventoryDescription =>
+      'Groups of interchangeable units, condition and quantity';
+
+  @override
+  String get createStepRentalAvailabilityTitle => 'Availability';
+
+  @override
+  String get createStepRentalAvailabilityDescription =>
+      'Confirmed coverage window and manual occupancy blocks';
+
+  @override
+  String get createStepRentalHandoverTitle => 'Handover and location';
+
+  @override
+  String get createStepRentalHandoverDescription =>
+      'Pickup area, schedule and optional delivery';
+
+  @override
+  String get createStepRentalTermsTitle => 'Duration and safety';
+
+  @override
+  String get createStepRentalTermsDescription =>
+      'Offered duration range, age, ID and safety requirements';
+
+  @override
+  String get createStepRentalPricingTitle => 'Pricing and deposit';
+
+  @override
+  String get createStepRentalPricingDescription =>
+      'Rate plan, deposit policy and damage/cancellation terms';
+
+  @override
+  String get createStepRentalFulfillmentTitle =>
+      'External fulfillment and policies';
+
+  @override
+  String get createStepRentalFulfillmentDescription =>
+      'External booking link and destination warning preview';
+
+  @override
+  String get createStepRentalReviewTitle => 'Review and submit';
+
+  @override
+  String get createStepRentalReviewDescription =>
+      'Public/private preview, attestation and submission';
+
+  @override
+  String createPlacePolicyLabel(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'simplePoi': 'Simple point of interest',
+      'publicSpace': 'Public space',
+      'naturalDestination': 'Natural destination',
+      'culturalVenue': 'Cultural venue',
+      'hospitality': 'Food or hospitality venue',
+      'activityVenue': 'Activity or service venue',
+      'paidAttraction': 'Managed attraction',
+      'balanced': 'General place',
+      'other': 'General place',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createPlacePolicyDescription(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'simplePoi':
+          'A landmark people can identify and visit without managed access.',
+      'publicSpace': 'An open public area with optional access restrictions.',
+      'naturalDestination':
+          'A natural point or area where access facts may be unknown.',
+      'culturalVenue': 'A managed museum, gallery, cinema or cultural venue.',
+      'hospitality':
+          'A managed venue where spend matters but admission does not.',
+      'activityVenue':
+          'A managed venue with optional booking, spend and facilities.',
+      'paidAttraction':
+          'A managed attraction that may have admission and facilities.',
+      'balanced': 'A safe fallback with no invented opening or pricing facts.',
+      'other': 'A safe fallback with no invented opening or pricing facts.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createAmenityLabel(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'wheelchair_accessible': 'Wheelchair accessible',
+      'accessible_toilet': 'Accessible toilet',
+      'parking': 'Parking',
+      'bike_parking': 'Bike parking',
+      'public_transport_nearby': 'Public transport nearby',
+      'public_transport': 'Public transport nearby',
+      'family_friendly': 'Family friendly',
+      'baby_changing': 'Baby changing',
+      'pets_allowed': 'Pets allowed',
+      'toilet': 'Toilet',
+      'wifi': 'Wi-Fi',
+      'drinking_water': 'Drinking water',
+      'food_available': 'Food available',
+      'outdoor_seating': 'Outdoor seating',
+      'shelter': 'Weather shelter',
+      'weather_shelter': 'Weather shelter',
+      'first_aid': 'First aid',
+      'shower': 'Shower',
+      'towels': 'Towels provided',
+      'changing_room': 'Changing room',
+      'equipment_provided': 'Equipment provided',
+      'other': 'Amenity',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createAmenityGroup(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'accessibility': 'Accessibility',
+      'audience': 'Audience',
+      'facilities': 'Facilities',
+      'family': 'Family',
+      'food': 'Food',
+      'outdoor': 'Outdoor',
+      'pets': 'Pets',
+      'safety': 'Safety',
+      'transport': 'Transport',
+      'wellness': 'Wellness',
+      'other': 'Other',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormSaved => 'Saved';
+
+  @override
+  String get createFormSaving => 'Saving…';
+
+  @override
+  String createOption(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'EventCapacityMode_known': 'Known limit',
+      'EventCapacityMode_unknown': 'Unknown',
+      'EventCapacityMode_unlimited': 'Unlimited',
+      'EventFormat_offline': 'In person',
+      'EventFormat_online': 'Online',
+      'EventFormat_hybrid': 'Hybrid',
+      'EventOnlineAccessMode_publicLink': 'Public link',
+      'EventOnlineAccessMode_externalRegistration': 'External registration',
+      'EventOnlineAccessMode_internalBooking': 'Internal booking',
+      'EventPaymentCollectionMode_none': 'No payment',
+      'EventPaymentCollectionMode_onsite': 'On site',
+      'EventPaymentCollectionMode_external': 'External',
+      'EventPaymentCollectionMode_internal': 'In Recharge',
+      'EventPricingMode_free': 'Free',
+      'EventPricingMode_fixed': 'Fixed price',
+      'EventPricingMode_ticketTypes': 'Ticket types',
+      'EventPricingMode_donation': 'Donation',
+      'EventRecurrenceEndMode_never': 'Never',
+      'EventRecurrenceEndMode_untilDate': 'On a date',
+      'EventRecurrenceEndMode_occurrenceCount': 'After a number of times',
+      'EventRecurrenceFrequency_daily': 'Daily',
+      'EventRecurrenceFrequency_weekly': 'Weekly',
+      'EventRecurrenceFrequency_monthly': 'Monthly',
+      'EventRecurrenceFrequency_yearly': 'Yearly',
+      'EventRegistrationMode_none': 'No registration',
+      'EventRegistrationMode_external': 'External',
+      'EventRegistrationMode_internal': 'In Recharge',
+      'EventScheduleMode_oneTime': 'One time',
+      'EventScheduleMode_multiDate': 'Several dates',
+      'EventScheduleMode_recurring': 'Recurring',
+      'EventVisibility_public': 'Public',
+      'EventVisibility_unlisted': 'By link',
+      'EventVisibility_private': 'Private',
+      'EventAdmissionPreset_noRegistration': 'No registration',
+      'EventAdmissionPreset_freeRsvp': 'Free RSVP',
+      'EventAdmissionPreset_organizerApplication':
+          'Application to the organizer',
+      'EventAdmissionPreset_externalRegistration': 'External registration',
+      'EventAdmissionPreset_externalTickets': 'External tickets',
+      'EventAdmissionPreset_rechargeTickets': 'Recharge tickets',
+      'EventAdmissionPreset_teamRegistration': 'Team registration',
+      'AdmissionMode_openEntry': 'Open entry',
+      'AdmissionMode_rsvp': 'RSVP',
+      'AdmissionMode_booking': 'Booking',
+      'AdmissionMode_application': 'Application',
+      'AdmissionMode_ticket': 'Ticket',
+      'AdmissionMode_teamRegistration': 'Team registration',
+      'ConfirmationMode_none': 'No confirmation',
+      'ConfirmationMode_instant': 'Instant',
+      'ConfirmationMode_manualApproval': 'Manual approval',
+      'ConfirmationMode_lottery': 'Lottery',
+      'ConfirmationMode_providerManaged': 'By the provider',
+      'WaitlistPromotionMode_organizerManaged': 'By the organizer',
+      'WaitlistPromotionMode_fifoAutomatic': 'Automatic, first come',
+      'GuestPolicyMode_none': 'No guests',
+      'GuestPolicyMode_plusOne': 'Plus one',
+      'GuestPolicyMode_plusN': 'Plus N',
+      'GuestPolicyMode_namedGuestsOnly': 'Named guests only',
+      'EligibilityRuleKind_invitation': 'Invitation',
+      'EligibilityRuleKind_accessCode': 'Access code',
+      'EligibilityRuleKind_membership': 'Membership',
+      'EligibilityRuleKind_allowlist': 'Guest list',
+      'EligibilityRuleKind_qualification': 'Qualification',
+      'EligibilityRuleKind_accreditation': 'Accreditation',
+      'EligibilityRuleKind_ageRequirement': 'Age requirement',
+      'EligibilityRuleKind_waiver': 'Waiver',
+      'EventAccessWindowKind_absolute': 'Fixed dates',
+      'EventAccessWindowKind_occurrenceRelative': 'Relative to each date',
+      'InventoryShape_generalCapacity': 'General capacity',
+      'InventoryShape_sharedTicketPool': 'Shared ticket pool',
+      'InventoryShape_separateTicketPools': 'Separate ticket pools',
+      'InventoryShape_zones': 'Zones',
+      'InventoryShape_assignedSeating': 'Assigned seats',
+      'InventoryShape_teamSlots': 'Team slots',
+      'InventoryShape_participantRoles': 'Participant roles',
+      'InventoryShape_roleBalancedSlots': 'Role-balanced slots',
+      'InventoryShape_tableInventory': 'Tables',
+      'InventoryShape_timeSlotInventory': 'Time slots',
+      'InventoryChannel_onsite': 'On site',
+      'InventoryChannel_online': 'Online',
+      'InventoryChannel_any': 'Any',
+      'InventoryAuthority_none': 'Nobody',
+      'InventoryAuthority_recharge': 'Recharge',
+      'InventoryAuthority_externalProvider': 'External provider',
+      'ActivityContributionKind_purchase': 'Purchase',
+      'ActivityContributionKind_donation': 'Donation',
+      'ActivityContributionKind_other': 'Other',
+      'ActivitySeason_winter': 'Winter',
+      'ActivitySeason_spring': 'Spring',
+      'ActivitySeason_summer': 'Summer',
+      'ActivitySeason_autumn': 'Autumn',
+      'ActivitySeason_any': 'Any season',
+      'ActivityTimeOfDay_morning': 'Morning',
+      'ActivityTimeOfDay_afternoon': 'Afternoon',
+      'ActivityTimeOfDay_evening': 'Evening',
+      'ActivityTimeOfDay_night': 'Night',
+      'ActivityTimeOfDay_any': 'Any time',
+      'PlaceOperationalStatus_operating': 'Operating',
+      'PlaceOperationalStatus_temporarilyClosed': 'Temporarily closed',
+      'PlaceOperationalStatus_permanentlyClosed': 'Permanently closed',
+      'RentalLocationDisclosure_approximateArea': 'Approximate area (default)',
+      'RentalLocationDisclosure_publicBusinessAddress':
+          'Public business address',
+      'RentalScheduleMode_openingHours': 'Opening hours',
+      'RentalScheduleMode_byArrangement': 'By arrangement',
+      'RentalBillingUnit_hour': 'Per hour',
+      'RentalBillingUnit_day': 'Per day',
+      'RentalBillingUnit_week': 'Per week',
+      'RentalCondition_rentalNew': 'New',
+      'RentalCondition_likeNew': 'Like new',
+      'RentalCondition_good': 'Good',
+      'RentalCondition_worn': 'Worn',
+      'RentalDepositCollectionMethod_none': 'No deposit',
+      'RentalDepositCollectionMethod_atHandover': 'At handover',
+      'RentalDepositCollectionMethod_externalProvider': 'External provider',
+      'RentalDepositCollectionMethod_other': 'Other',
+      'VisibilityType_public': 'Public',
+      'VisibilityType_unlisted': 'By link',
+      'VisibilityType_private': 'Private',
+      'PublishStatus_draft': 'Draft',
+      'PublishStatus_pendingReview': 'Pending review',
+      'PublishStatus_published': 'Published',
+      'PublishStatus_archived': 'Archived',
+      'PublishStatus_hidden': 'Hidden',
+      'PublishStatus_deleted': 'Deleted',
+      'other': 'Other',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormCityRequired => 'City *';
+
+  @override
+  String get createFormLatitudeRequired => 'Latitude *';
+
+  @override
+  String get createFormLongitudeRequired => 'Longitude *';
+
+  @override
+  String get createFormCategoryRequired => 'Category *';
+
+  @override
+  String get createFormSubcategoryRequired => 'Subcategory *';
+
+  @override
+  String get createFormTitleRequired => 'Title *';
+
+  @override
+  String createFormOccurrences(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dates',
+      one: '$count date',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createFormAdmissionLine(String value) {
+    return 'Admission: $value';
+  }
+
+  @override
+  String createFormVisibilityLine(String value) {
+    return 'Visibility: $value';
+  }
+
+  @override
+  String createFormBlockingIssues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count problems block publishing',
+      one: '$count problem blocks publishing',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormSending => 'Sending…';
+
+  @override
+  String get createFormPublishing => 'Publishing…';
+
+  @override
+  String get createFormGroup => 'Group';
+
+  @override
+  String get createFormNoTitleYet => '(no title yet)';
+
+  @override
+  String createFormUnits(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count units',
+      one: '$count unit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createFormDepositLine(String price) {
+    return 'Deposit: $price';
+  }
+
+  @override
+  String get createFormGroupMaxPeople => 'Group, max people';
+
+  @override
+  String createFormPublisherLine(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'user': 'Publisher: your profile',
+      'page': 'Publisher: a professional page',
+      'other': 'Publisher: not set',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormDraft => 'Draft';
+
+  @override
+  String get createFormDetails => 'Details';
+
+  @override
+  String get createFormAvailability => 'Availability';
+
+  @override
+  String get createFormClosed => 'Closed';
+
+  @override
+  String createObjectTypeName(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Event',
+      'activity': 'Recharge activity',
+      'route': 'Route',
+      'place': 'Place',
+      'session': 'Bookable session',
+      'scenario': 'Scenario',
+      'quickPlan': 'Legacy Quick Plan',
+      'findPeople': 'Find people',
+      'classWorkshop': 'Class / workshop',
+      'rental': 'Rental / equipment',
+      'collection': 'Collection / guide',
+      'other': 'Object',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeDescription(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Public activity with time, place, and attendees',
+      'activity': 'Lightweight activity such as a walk or reset',
+      'route': 'Continuous track with anchors, segments and route details',
+      'place': 'A permanent physical place, venue, public space or landmark',
+      'session': 'Time-based service, class, table, court, or session',
+      'scenario': 'City, day, weekend or trip plan made of independent stops',
+      'quickPlan': 'Personal lightweight plan kept for read compatibility',
+      'findPeople': 'Find company for a specific activity',
+      'classWorkshop': 'A guided class, workshop, or hands-on experience',
+      'rental': 'Equipment or transport available for rent',
+      'collection': 'A curated collection of places and ideas',
+      'other': 'Create an object',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeLocationLabel(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Venue',
+      'activity': 'Where to go',
+      'route': 'Start point',
+      'place': 'Place name',
+      'session': 'Bookable venue',
+      'scenario': 'Area or city',
+      'quickPlan': 'Meeting place',
+      'findPeople': 'Meeting place',
+      'classWorkshop': 'Class venue',
+      'rental': 'Pickup place',
+      'collection': 'Area',
+      'other': 'Location',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypePriceLabel(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Ticket or entry price',
+      'activity': '',
+      'route': 'Route budget',
+      'place': 'Typical spend',
+      'session': 'Booking price',
+      'scenario': 'Scenario budget',
+      'quickPlan': 'Expected spend',
+      'findPeople': 'Expected spend',
+      'classWorkshop': 'Participation price',
+      'rental': 'Rental price',
+      'collection': 'Collection budget',
+      'other': 'Price',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeNewTitle(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'New event',
+      'activity': 'New recharge activity',
+      'route': 'New route',
+      'place': 'New place',
+      'session': 'New bookable session',
+      'scenario': 'New scenario',
+      'quickPlan': 'New legacy quick plan',
+      'findPeople': 'New find people',
+      'classWorkshop': 'New class / workshop',
+      'rental': 'New rental / equipment',
+      'collection': 'New collection / guide',
+      'other': 'New object',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeCreateTitle(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Create Event',
+      'activity': 'Create Recharge activity',
+      'route': 'Create Route',
+      'place': 'Create Place',
+      'session': 'Create Bookable session',
+      'scenario': 'Create Scenario',
+      'quickPlan': 'Create Legacy Quick Plan',
+      'findPeople': 'Create Find people',
+      'classWorkshop': 'Create Class / workshop',
+      'rental': 'Create Rental / equipment',
+      'collection': 'Create Collection / guide',
+      'other': 'Create',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeFreeToggle(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Free event',
+      'activity': 'Free recharge activity',
+      'route': 'Free route',
+      'place': 'Free place',
+      'session': 'Free bookable session',
+      'scenario': 'Free scenario',
+      'quickPlan': 'Free legacy quick plan',
+      'findPeople': 'Free find people',
+      'classWorkshop': 'Free class / workshop',
+      'rental': 'Free rental / equipment',
+      'collection': 'Free collection / guide',
+      'other': 'Free',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createObjectTypeStartUtc(String type) {
+    String _temp0 = intl.Intl.selectLogic(type, {
+      'event': 'Event start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *',
+      'activity':
+          'Recharge activity start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *',
+      'route': 'Route start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *',
+      'place': 'Place start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *',
+      'session':
+          'Bookable session start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *',
+      'scenario': 'Scenario start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *',
+      'quickPlan':
+          'Legacy Quick Plan start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *',
+      'findPeople':
+          'Find people start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *',
+      'classWorkshop':
+          'Class / workshop start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *',
+      'rental':
+          'Rental / equipment start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *',
+      'collection':
+          'Collection / guide start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *',
+      'other': 'Start date and time, UTC *',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createFormNowStatus(String value) {
+    return 'Now: $value.';
+  }
 }

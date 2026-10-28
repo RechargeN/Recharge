@@ -1,13 +1,15 @@
 class CollectionCreateStepConfig {
   const CollectionCreateStepConfig({
     required this.id,
-    required this.title,
-    required this.description,
+    required this.titleId,
+    required this.descriptionId,
   });
 
   final String id;
-  final String title;
-  final String description;
+
+  /// ARB message ids; the UI resolves them with `createFormText` (L4).
+  final String titleId;
+  final String descriptionId;
 }
 
 /// Matches COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md §7: Step 0 (entry guard) is
@@ -18,28 +20,28 @@ const List<CollectionCreateStepConfig> collectionCreateSteps =
     <CollectionCreateStepConfig>[
       CollectionCreateStepConfig(
         id: 'basics',
-        title: 'Basics & media',
-        description: 'Title, pitch, cover and area',
+        titleId: 'createStepCollectionBasicsTitle',
+        descriptionId: 'createStepCollectionBasicsDescription',
       ),
       CollectionCreateStepConfig(
         id: 'items',
-        title: 'Items',
-        description: 'Search and add existing places, routes and more',
+        titleId: 'createStepCollectionItemsTitle',
+        descriptionId: 'createStepCollectionItemsDescription',
       ),
       CollectionCreateStepConfig(
         id: 'curatorNotes',
-        title: 'Curator notes',
-        description: 'Say why each item is here and pick your highlights',
+        titleId: 'createStepCollectionCuratorNotesTitle',
+        descriptionId: 'createStepCollectionCuratorNotesDescription',
       ),
       CollectionCreateStepConfig(
         id: 'budget',
-        title: 'Budget & publisher',
-        description: 'Set a budget hint, publisher, market and visibility',
+        titleId: 'createStepCollectionBudgetTitle',
+        descriptionId: 'createStepCollectionBudgetDescription',
       ),
       CollectionCreateStepConfig(
         id: 'publish',
-        title: 'Preview & publish',
-        description: 'Review the composition and send',
+        titleId: 'createStepCollectionPublishTitle',
+        descriptionId: 'createStepCollectionPublishDescription',
       ),
     ];
 

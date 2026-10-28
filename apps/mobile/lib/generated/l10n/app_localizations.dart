@@ -3145,6 +3145,3164 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Planned transport'**
   String get scenarioTransitPlannedTransport;
+
+  /// Create form: "Hours not selected".
+  ///
+  /// In en, this message translates to:
+  /// **'Hours not selected'**
+  String get createFormHoursNotSelected;
+
+  /// Create form: "Opening hours unknown".
+  ///
+  /// In en, this message translates to:
+  /// **'Opening hours unknown'**
+  String get createFormOpeningHoursUnknown;
+
+  /// Create form: "Seasonal hours".
+  ///
+  /// In en, this message translates to:
+  /// **'Seasonal hours'**
+  String get createFormSeasonalHours;
+
+  /// Create form: "Regular opening hours".
+  ///
+  /// In en, this message translates to:
+  /// **'Regular opening hours'**
+  String get createFormRegularOpeningHours;
+
+  /// Create form: "Not selected".
+  ///
+  /// In en, this message translates to:
+  /// **'Not selected'**
+  String get createFormNotSelected;
+
+  /// Create form: "No entry ticket concept".
+  ///
+  /// In en, this message translates to:
+  /// **'No entry ticket concept'**
+  String get createFormNoEntryTicketConcept;
+
+  /// Create form: "Free and paid areas".
+  ///
+  /// In en, this message translates to:
+  /// **'Free and paid areas'**
+  String get createFormFreePaidAreas;
+
+  /// Create form: "Paid entry".
+  ///
+  /// In en, this message translates to:
+  /// **'Paid entry'**
+  String get createFormPaidEntry;
+
+  /// Create form: "Free entry".
+  ///
+  /// In en, this message translates to:
+  /// **'Free entry'**
+  String get createFormFreeEntry;
+
+  /// Create form: "Local curator".
+  ///
+  /// In en, this message translates to:
+  /// **'Local curator'**
+  String get createFormLocalCurator;
+
+  /// Create form: "Staff member".
+  ///
+  /// In en, this message translates to:
+  /// **'Staff member'**
+  String get createFormStaffMember;
+
+  /// Create form: "Untitled place".
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled place'**
+  String get createFormUntitledPlace;
+
+  /// Create form: "Preview".
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get createFormPreview;
+
+  /// Create form: "Review this Place".
+  ///
+  /// In en, this message translates to:
+  /// **'Review this Place'**
+  String get createFormReviewPlace;
+
+  /// Create form: "Apply suggestions".
+  ///
+  /// In en, this message translates to:
+  /// **'Apply suggestions'**
+  String get createFormApplySuggestions;
+
+  /// Create form: "Discard".
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get createFormDiscard;
+
+  /// Place AI helper: number of recommended details still missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Could improve later: {count, plural, one{{count} detail} other{{count} details}}'**
+  String createFormCouldImproveLaterProposalMissingrecommendedfieldidsJoin(
+    int count,
+  );
+
+  /// Place AI helper: estimated visit length in minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated visit: {count} min'**
+  String createFormEstimatedVisitMin(int count);
+
+  /// Create form: "Editable description draft".
+  ///
+  /// In en, this message translates to:
+  /// **'Editable description draft'**
+  String get createFormEditableDescriptionDraft;
+
+  /// Create form: "Suggested category".
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested category'**
+  String get createFormSuggestedCategory;
+
+  /// Create form: "Review this draft, suggest a taxonomy match and identify use".
+  ///
+  /// In en, this message translates to:
+  /// **'Review this draft, suggest a taxonomy match and identify useful missing details. Nothing is published automatically.'**
+  String get createFormReviewDraftSuggestTaxonomyMatchIdentify;
+
+  /// Create form: "Local demo".
+  ///
+  /// In en, this message translates to:
+  /// **'Local demo'**
+  String get createFormLocalDemo;
+
+  /// Create form: "Finish with AI".
+  ///
+  /// In en, this message translates to:
+  /// **'Finish with AI'**
+  String get createFormFinishWithAi;
+
+  /// Create form: "Create a place".
+  ///
+  /// In en, this message translates to:
+  /// **'Create a place'**
+  String get createFormCreatePlace;
+
+  /// Create form: "Save failed • retry available".
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed • retry available'**
+  String get createFormSaveFailedRetryAvailable;
+
+  /// Create form: "Unsaved changes".
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get createFormUnsavedChanges;
+
+  /// Create form: "Send for review".
+  ///
+  /// In en, this message translates to:
+  /// **'Send for review'**
+  String get createFormSendReview;
+
+  /// Create form: "Back".
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get createFormBack;
+
+  /// Create form: "This is a different place".
+  ///
+  /// In en, this message translates to:
+  /// **'This is a different place'**
+  String get createFormDifferentPlace;
+
+  /// Create form: "Could this place already exist?".
+  ///
+  /// In en, this message translates to:
+  /// **'Could this place already exist?'**
+  String get createFormCouldPlaceAlreadyExist;
+
+  /// Create form: "Add".
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get createFormAdd;
+
+  /// Create form: "Gallery image URL/path".
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery image URL/path'**
+  String get createFormGalleryImageUrlPath;
+
+  /// Create form: "Add gallery images".
+  ///
+  /// In en, this message translates to:
+  /// **'Add gallery images'**
+  String get createFormAddGalleryImages;
+
+  /// Create form: "Cover image URL/path (recommended)".
+  ///
+  /// In en, this message translates to:
+  /// **'Cover image URL/path (recommended)'**
+  String get createFormCoverImageUrlPathRecommended;
+
+  /// Create form: "Cover image URL/path *".
+  ///
+  /// In en, this message translates to:
+  /// **'Cover image URL/path *'**
+  String get createFormCoverImageUrlPath;
+
+  /// Create form: "A cover is required. Gallery is optional.".
+  ///
+  /// In en, this message translates to:
+  /// **'A cover is required. Gallery is optional.'**
+  String get createFormCoverRequiredGalleryOptional;
+
+  /// Create form: "Photos".
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get createFormPhotos;
+
+  /// Create form: "Official booking landing page".
+  ///
+  /// In en, this message translates to:
+  /// **'Official booking landing page'**
+  String get createFormOfficialBookingLandingPage;
+
+  /// Create form: "Public email".
+  ///
+  /// In en, this message translates to:
+  /// **'Public email'**
+  String get createFormPublicEmail;
+
+  /// Create form: "Public phone".
+  ///
+  /// In en, this message translates to:
+  /// **'Public phone'**
+  String get createFormPublicPhone;
+
+  /// Create form: "Official website".
+  ///
+  /// In en, this message translates to:
+  /// **'Official website'**
+  String get createFormOfficialWebsite;
+
+  /// Create form: "Add only official public details. HTTPS links are required.".
+  ///
+  /// In en, this message translates to:
+  /// **'Add only official public details. HTTPS links are required.'**
+  String get createFormAddOnlyOfficialPublicDetailsHttps;
+
+  /// Create form: "Optional public contacts".
+  ///
+  /// In en, this message translates to:
+  /// **'Optional public contacts'**
+  String get createFormOptionalPublicContacts;
+
+  /// Create form: "Official pricing URL (https)".
+  ///
+  /// In en, this message translates to:
+  /// **'Official pricing URL (https)'**
+  String get createFormOfficialPricingUrlHttps;
+
+  /// Create form: "Pricing note".
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing note'**
+  String get createFormPricingNote;
+
+  /// Create form: "Pricing explanation *".
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing explanation *'**
+  String get createFormPricingExplanation;
+
+  /// Create form: "Typical spend to".
+  ///
+  /// In en, this message translates to:
+  /// **'Typical spend to'**
+  String get createFormTypicalSpend;
+
+  /// Create form: "Typical spend from".
+  ///
+  /// In en, this message translates to:
+  /// **'Typical spend from'**
+  String get createFormTypicalSpendFrom;
+
+  /// Place price: entry to, in the currency code value.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry to, {value}'**
+  String createFormEntry(String value);
+
+  /// Place price: entry from, in the currency code value.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry from, {value} *'**
+  String createFormEntryFrom(String value);
+
+  /// Create form: "Entry price and typical spend are separate concepts.".
+  ///
+  /// In en, this message translates to:
+  /// **'Entry price and typical spend are separate concepts.'**
+  String get createFormEntryPriceTypicalSpendAreSeparate;
+
+  /// Create form: "Price".
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get createFormPrice;
+
+  /// Create form: "Unset".
+  ///
+  /// In en, this message translates to:
+  /// **'Unset'**
+  String get createFormUnset;
+
+  /// Create form: "Yes".
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get createFormYes;
+
+  /// Create form: "Choose Yes or Unknown. Unset is never treated as No.".
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Yes or Unknown. Unset is never treated as No.'**
+  String get createFormChooseYesUnknownUnsetNeverTreated;
+
+  /// Create form: "Amenities".
+  ///
+  /// In en, this message translates to:
+  /// **'Amenities'**
+  String get createFormAmenities;
+
+  /// Create form: "Exit buffer".
+  ///
+  /// In en, this message translates to:
+  /// **'Exit buffer'**
+  String get createFormExitBuffer;
+
+  /// Create form: "Arrival buffer".
+  ///
+  /// In en, this message translates to:
+  /// **'Arrival buffer'**
+  String get createFormArrivalBuffer;
+
+  /// Create form: "Weather dependent".
+  ///
+  /// In en, this message translates to:
+  /// **'Weather dependent'**
+  String get createFormWeatherDependent;
+
+  /// Create form: "Minimum minutes".
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum minutes'**
+  String get createFormMinimumMinutes;
+
+  /// Create form: "Recommended minutes".
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended minutes'**
+  String get createFormRecommendedMinutes;
+
+  /// Create form: "These values improve time-fit without changing opening hours".
+  ///
+  /// In en, this message translates to:
+  /// **'These values improve time-fit without changing opening hours.'**
+  String get createFormTheseValuesImproveTimeFitWithout;
+
+  /// Create form: "Help people plan the visit".
+  ///
+  /// In en, this message translates to:
+  /// **'Help people plan the visit'**
+  String get createFormHelpPeoplePlanVisit;
+
+  /// Create form: "Add interval".
+  ///
+  /// In en, this message translates to:
+  /// **'Add interval'**
+  String get createFormAddInterval;
+
+  /// Create form: "Closes next day".
+  ///
+  /// In en, this message translates to:
+  /// **'Closes next day'**
+  String get createFormClosesNextDay;
+
+  /// Create form: "Close HH:mm".
+  ///
+  /// In en, this message translates to:
+  /// **'Close HH:mm'**
+  String get createFormCloseHhMm;
+
+  /// Create form: "Open HH:mm".
+  ///
+  /// In en, this message translates to:
+  /// **'Open HH:mm'**
+  String get createFormOpenHhMm;
+
+  /// Create form: "Day".
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get createFormDay;
+
+  /// Create form: "Closed from *".
+  ///
+  /// In en, this message translates to:
+  /// **'Closed from *'**
+  String get createFormClosedFrom;
+
+  /// Create form: "Current operational status".
+  ///
+  /// In en, this message translates to:
+  /// **'Current operational status'**
+  String get createFormCurrentOperationalStatus;
+
+  /// Create form: "Add closed day".
+  ///
+  /// In en, this message translates to:
+  /// **'Add closed day'**
+  String get createFormAddClosedDay;
+
+  /// Create form: "Custom hours".
+  ///
+  /// In en, this message translates to:
+  /// **'Custom hours'**
+  String get createFormCustomHours;
+
+  /// Create form: "Closed all day".
+  ///
+  /// In en, this message translates to:
+  /// **'Closed all day'**
+  String get createFormClosedAllDay;
+
+  /// Create form: "Date exceptions".
+  ///
+  /// In en, this message translates to:
+  /// **'Date exceptions'**
+  String get createFormDateExceptions;
+
+  /// Create form: "Remove period".
+  ///
+  /// In en, this message translates to:
+  /// **'Remove period'**
+  String get createFormRemovePeriod;
+
+  /// Create form: "Hours unknown".
+  ///
+  /// In en, this message translates to:
+  /// **'Hours unknown'**
+  String get createFormHoursUnknown;
+
+  /// Create form: "Regular schedule".
+  ///
+  /// In en, this message translates to:
+  /// **'Regular schedule'**
+  String get createFormRegularSchedule;
+
+  /// Create form: "Hours mode".
+  ///
+  /// In en, this message translates to:
+  /// **'Hours mode'**
+  String get createFormHoursMode2;
+
+  /// Create form: "Hours mode *".
+  ///
+  /// In en, this message translates to:
+  /// **'Hours mode *'**
+  String get createFormHoursMode;
+
+  /// Create form: "Unknown is better than invented hours.".
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown is better than invented hours.'**
+  String get createFormUnknownBetterThanInventedHours;
+
+  /// Create form: "When can people visit?".
+  ///
+  /// In en, this message translates to:
+  /// **'When can people visit?'**
+  String get createFormWhenCanPeopleVisit;
+
+  /// Create form: "Add more visit information".
+  ///
+  /// In en, this message translates to:
+  /// **'Add more visit information'**
+  String get createFormAddMoreVisitInformation;
+
+  /// Create form: "Add only information that is useful for this place.".
+  ///
+  /// In en, this message translates to:
+  /// **'Add only information that is useful for this place.'**
+  String get createFormAddOnlyInformationThatUsefulPlace;
+
+  /// Create form: "Optional visit details".
+  ///
+  /// In en, this message translates to:
+  /// **'Optional visit details'**
+  String get createFormOptionalVisitDetails;
+
+  /// Create form: "Add opening or access hours".
+  ///
+  /// In en, this message translates to:
+  /// **'Add opening or access hours'**
+  String get createFormAddOpeningAccessHours;
+
+  /// Create form: "Add hours only when this place really has them.".
+  ///
+  /// In en, this message translates to:
+  /// **'Add hours only when this place really has them.'**
+  String get createFormAddHoursOnlyWhenPlaceReally;
+
+  /// Create form: "Access restrictions".
+  ///
+  /// In en, this message translates to:
+  /// **'Access restrictions'**
+  String get createFormAccessRestrictions;
+
+  /// Create form: "How to find this place".
+  ///
+  /// In en, this message translates to:
+  /// **'How to find this place'**
+  String get createFormHowFindPlace;
+
+  /// Create form: "Add directions".
+  ///
+  /// In en, this message translates to:
+  /// **'Add directions'**
+  String get createFormAddDirections;
+
+  /// Create form: "Required when there is no postal address.".
+  ///
+  /// In en, this message translates to:
+  /// **'Required when there is no postal address.'**
+  String get createFormRequiredWhenThereNoPostalAddress;
+
+  /// Create form: "Location label".
+  ///
+  /// In en, this message translates to:
+  /// **'Location label'**
+  String get createFormLocationLabel;
+
+  /// Create form: "Formatted address".
+  ///
+  /// In en, this message translates to:
+  /// **'Formatted address'**
+  String get createFormFormattedAddress;
+
+  /// Create form: "Confirm this pin".
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this pin'**
+  String get createFormConfirmPin;
+
+  /// Create form: "Pin confirmed".
+  ///
+  /// In en, this message translates to:
+  /// **'Pin confirmed'**
+  String get createFormPinConfirmed;
+
+  /// Create form: "Tap the map and confirm the representative point.".
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the map and confirm the representative point.'**
+  String get createFormTapMapConfirmRepresentativePoint;
+
+  /// Create form: "Where is it?".
+  ///
+  /// In en, this message translates to:
+  /// **'Where is it?'**
+  String get createFormWhere;
+
+  /// Create form: "Change".
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get createFormChange;
+
+  /// Create form: "Cancel".
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get createFormCancel;
+
+  /// Create form: "Compatible category details will be kept. Fields that do not".
+  ///
+  /// In en, this message translates to:
+  /// **'Compatible category details will be kept. Fields that do not belong to the new profile will be removed from publication.'**
+  String get createFormCompatibleCategoryDetailsWillKeptFields;
+
+  /// Create form: "Change category?".
+  ///
+  /// In en, this message translates to:
+  /// **'Change category?'**
+  String get createFormChangeCategory;
+
+  /// Create form: "Category details".
+  ///
+  /// In en, this message translates to:
+  /// **'Category details'**
+  String get createFormCategoryDetails;
+
+  /// Create form: "Content language".
+  ///
+  /// In en, this message translates to:
+  /// **'Content language'**
+  String get createFormContentLanguage;
+
+  /// Create form: "Public landmarks do not require an ownership claim.".
+  ///
+  /// In en, this message translates to:
+  /// **'Public landmarks do not require an ownership claim.'**
+  String get createFormPublicLandmarksDoNotRequireOwnership;
+
+  /// Create form: "Community contribution".
+  ///
+  /// In en, this message translates to:
+  /// **'Community contribution'**
+  String get createFormCommunityContribution;
+
+  /// Create form: "Your relationship".
+  ///
+  /// In en, this message translates to:
+  /// **'Your relationship'**
+  String get createFormYourRelationship;
+
+  /// Create form: "Detailed description".
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed description'**
+  String get createFormDetailedDescription;
+
+  /// Create form: "Optional description, language and attribution".
+  ///
+  /// In en, this message translates to:
+  /// **'Optional description, language and attribution'**
+  String get createFormOptionalDescriptionLanguageAttribution;
+
+  /// Create form: "More about this place".
+  ///
+  /// In en, this message translates to:
+  /// **'More about this place'**
+  String get createFormMoreAboutPlace;
+
+  /// Create form: "You can add or improve this later.".
+  ///
+  /// In en, this message translates to:
+  /// **'You can add or improve this later.'**
+  String get createFormYouCanAddImproveLater;
+
+  /// Create form: "Place name *".
+  ///
+  /// In en, this message translates to:
+  /// **'Place name *'**
+  String get createFormPlaceName;
+
+  /// Create form: "Choose a category and the form keeps only relevant fields.".
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a category and the form keeps only relevant fields.'**
+  String get createFormChooseCategoryFormKeepsOnlyRelevant;
+
+  /// Create form: "What is this place?".
+  ///
+  /// In en, this message translates to:
+  /// **'What is this place?'**
+  String get createFormWhatPlace;
+
+  /// Create form: "The create.place capability is required to edit or publish.".
+  ///
+  /// In en, this message translates to:
+  /// **'You need permission to create places to edit or publish.'**
+  String get createFormCreatePlaceCapabilityRequiredEditPublish;
+
+  /// Create form: "Place data is being prepared…".
+  ///
+  /// In en, this message translates to:
+  /// **'Place data is being prepared…'**
+  String get createFormPlaceDataBeingPrepared;
+
+  /// Create form: "Scenario route".
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario route'**
+  String get createFormScenarioRoute;
+
+  /// Create seed chip: number of stops.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} stop} other{{count} stops}}'**
+  String createFormStops(int count);
+
+  /// Create form: "Recharge idea".
+  ///
+  /// In en, this message translates to:
+  /// **'Recharge idea'**
+  String get createFormRechargeIdea;
+
+  /// Create form: "Map route".
+  ///
+  /// In en, this message translates to:
+  /// **'Map route'**
+  String get createFormMapRoute;
+
+  /// Create form: "Edit route".
+  ///
+  /// In en, this message translates to:
+  /// **'Edit route'**
+  String get createFormEditRoute;
+
+  /// Create form: "Scenario route seed".
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario route seed'**
+  String get createFormScenarioRouteSeed;
+
+  /// Create seed card: where the draft was started; type is the stable seed source code.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, details{Seeded from details} saved_search{Seeded from saved search} search{Seeded from search conditions} smart_search{Seeded from smart search} profile{Seeded from profile workspace} scenario{Seeded from scenario route} map{Seeded from map area} other{Seeded from Recharge}}'**
+  String createFormSeededFrom(String type);
+
+  /// Create form: "No limit".
+  ///
+  /// In en, this message translates to:
+  /// **'No limit'**
+  String get createFormNoLimit;
+
+  /// Create form: "Capacity unknown".
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity unknown'**
+  String get createFormCapacityUnknown;
+
+  /// Create availability: buffer minutes before (start) and after (end) the visit.
+  ///
+  /// In en, this message translates to:
+  /// **'Onsite buffers: {start} / {end} min'**
+  String createFormOnsiteBuffersMin(int start, int end);
+
+  /// Create form: "Allow partial attendance".
+  ///
+  /// In en, this message translates to:
+  /// **'Allow partial attendance'**
+  String get createFormAllowPartialAttendance;
+
+  /// Create form: "Duration".
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get createFormDuration;
+
+  /// Create form: "No opening hours yet".
+  ///
+  /// In en, this message translates to:
+  /// **'No opening hours yet'**
+  String get createFormNoOpeningHoursYet;
+
+  /// Create form: "Add slot".
+  ///
+  /// In en, this message translates to:
+  /// **'Add slot'**
+  String get createFormAddSlot;
+
+  /// Create form: "Schedule slots".
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule slots'**
+  String get createFormScheduleSlots;
+
+  /// Create form: "None".
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get createFormNone;
+
+  /// Create form: "Hours".
+  ///
+  /// In en, this message translates to:
+  /// **'Hours'**
+  String get createFormHours;
+
+  /// Create form: "Schedule".
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get createFormSchedule;
+
+  /// Create form: "No categories match this search.".
+  ///
+  /// In en, this message translates to:
+  /// **'No categories match this search.'**
+  String get createFormNoCategoriesMatchSearch;
+
+  /// Create form: "Activity criteria".
+  ///
+  /// In en, this message translates to:
+  /// **'Activity criteria'**
+  String get createFormActivityCriteria;
+
+  /// Create form: "Scenario taxonomy".
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario taxonomy'**
+  String get createFormScenarioTaxonomy;
+
+  /// Create form: "Convert to rental".
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to rental'**
+  String get createFormConvertRental;
+
+  /// Create form: "Keep session".
+  ///
+  /// In en, this message translates to:
+  /// **'Keep session'**
+  String get createFormKeepSession;
+
+  /// Create form: "This legacy offer was migrated safely as a Bookable session.".
+  ///
+  /// In en, this message translates to:
+  /// **'This legacy offer was migrated safely as a Bookable session. Choose Rental only if equipment or transport is being rented.'**
+  String get createFormLegacyOfferWasMigratedSafelyAs;
+
+  /// Create form: "Could this be a rental?".
+  ///
+  /// In en, this message translates to:
+  /// **'Could this be a rental?'**
+  String get createFormCouldRental;
+
+  /// Create form: "Recharge Create".
+  ///
+  /// In en, this message translates to:
+  /// **'Recharge Create'**
+  String get createFormRechargeCreate;
+
+  /// Create form: "Save draft".
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get createFormSaveDraft;
+
+  /// Create form: "Cover image *".
+  ///
+  /// In en, this message translates to:
+  /// **'Cover image *'**
+  String get createFormCoverImage;
+
+  /// Create form: "Full description".
+  ///
+  /// In en, this message translates to:
+  /// **'Full description'**
+  String get createFormFullDescription;
+
+  /// Create form: "Short description".
+  ///
+  /// In en, this message translates to:
+  /// **'Short description'**
+  String get createFormShortDescription;
+
+  /// Create form: "Address".
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get createFormAddress;
+
+  /// Create form: "Subcategory".
+  ///
+  /// In en, this message translates to:
+  /// **'Subcategory'**
+  String get createFormSubcategory;
+
+  /// Create form: "Main category *".
+  ///
+  /// In en, this message translates to:
+  /// **'Main category *'**
+  String get createFormMainCategory;
+
+  /// Create form: "Not saved".
+  ///
+  /// In en, this message translates to:
+  /// **'Not saved'**
+  String get createFormNotSaved;
+
+  /// Create form: "Требуется авторизация".
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in required'**
+  String get createFormText;
+
+  /// Create form: "Submit for review".
+  ///
+  /// In en, this message translates to:
+  /// **'Submit for review'**
+  String get createFormSubmitReview;
+
+  /// Create form: "This is not a prohibited/unsafe item".
+  ///
+  /// In en, this message translates to:
+  /// **'This is not a prohibited/unsafe item'**
+  String get createFormNotProhibitedUnsafeItem;
+
+  /// Create form: "This listing is accurate".
+  ///
+  /// In en, this message translates to:
+  /// **'This listing is accurate'**
+  String get createFormListingAccurate;
+
+  /// Create form: "Public preview".
+  ///
+  /// In en, this message translates to:
+  /// **'Public preview'**
+  String get createFormPublicPreview;
+
+  /// Create form: "You will leave Recharge and go to $host to check availabilit".
+  ///
+  /// In en, this message translates to:
+  /// **'You will leave Recharge and go to an external site to check availability.'**
+  String get createFormYouWillLeaveRechargeGoCheck;
+
+  /// Create form: "External booking URL (https)".
+  ///
+  /// In en, this message translates to:
+  /// **'External booking URL (https)'**
+  String get createFormExternalBookingUrlHttps;
+
+  /// Create form: "Late return policy".
+  ///
+  /// In en, this message translates to:
+  /// **'Late return policy'**
+  String get createFormLateReturnPolicy;
+
+  /// Create form: "Damage policy".
+  ///
+  /// In en, this message translates to:
+  /// **'Damage policy'**
+  String get createFormDamagePolicy;
+
+  /// Create form: "Deposit terms".
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit terms'**
+  String get createFormDepositTerms;
+
+  /// Create form: "Collection method".
+  ///
+  /// In en, this message translates to:
+  /// **'Collection method'**
+  String get createFormCollectionMethod;
+
+  /// Create form: "Add rate step".
+  ///
+  /// In en, this message translates to:
+  /// **'Add rate step'**
+  String get createFormAddRateStep;
+
+  /// Create form: "Billing unit".
+  ///
+  /// In en, this message translates to:
+  /// **'Billing unit'**
+  String get createFormBillingUnit;
+
+  /// Create form: "Usage restrictions".
+  ///
+  /// In en, this message translates to:
+  /// **'Usage restrictions'**
+  String get createFormUsageRestrictions;
+
+  /// Create form: "Safety notice".
+  ///
+  /// In en, this message translates to:
+  /// **'Safety notice'**
+  String get createFormSafetyNotice;
+
+  /// Create form: "Minimum renter age".
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum renter age'**
+  String get createFormMinimumRenterAge;
+
+  /// Create form: "Max duration (min)".
+  ///
+  /// In en, this message translates to:
+  /// **'Max duration (min)'**
+  String get createFormMaxDurationMin;
+
+  /// Create form: "Min duration (min)".
+  ///
+  /// In en, this message translates to:
+  /// **'Min duration (min)'**
+  String get createFormMinDurationMin;
+
+  /// Create form: "Apply".
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get createFormApply;
+
+  /// Create form: "Suggested defaults for this category".
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested defaults for this category'**
+  String get createFormSuggestedDefaultsCategory;
+
+  /// Create form: "Delivery fee (minor units)".
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery fee (minor units)'**
+  String get createFormDeliveryFeeMinorUnits;
+
+  /// Create form: "Delivery radius (km)".
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery radius (km)'**
+  String get createFormDeliveryRadiusKm;
+
+  /// Create form: "Offer delivery".
+  ///
+  /// In en, this message translates to:
+  /// **'Offer delivery'**
+  String get createFormOfferDelivery;
+
+  /// Create form: "By arrangement".
+  ///
+  /// In en, this message translates to:
+  /// **'By arrangement'**
+  String get createFormByArrangement;
+
+  /// Create form: "Opening hours".
+  ///
+  /// In en, this message translates to:
+  /// **'Opening hours'**
+  String get createFormOpeningHours;
+
+  /// Create form: "Pickup schedule".
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup schedule'**
+  String get createFormPickupSchedule;
+
+  /// Create form: "Public business address".
+  ///
+  /// In en, this message translates to:
+  /// **'Public business address'**
+  String get createFormPublicBusinessAddress;
+
+  /// Create form: "Approximate area (default)".
+  ///
+  /// In en, this message translates to:
+  /// **'Approximate area (default)'**
+  String get createFormApproximateAreaDefault;
+
+  /// Create form: "Location disclosure".
+  ///
+  /// In en, this message translates to:
+  /// **'Location disclosure'**
+  String get createFormLocationDisclosure;
+
+  /// Create form: "Longitude".
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude'**
+  String get createFormLongitude;
+
+  /// Create form: "Latitude".
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude'**
+  String get createFormLatitude;
+
+  /// Create form: "Public area label".
+  ///
+  /// In en, this message translates to:
+  /// **'Public area label'**
+  String get createFormPublicAreaLabel;
+
+  /// Create form: "Pickup place name".
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup place name'**
+  String get createFormPickupPlaceName;
+
+  /// Create form: "That would exceed the group capacity.".
+  ///
+  /// In en, this message translates to:
+  /// **'That would exceed the group capacity.'**
+  String get createFormThatWouldExceedGroupCapacity;
+
+  /// Create form: "Block a date range".
+  ///
+  /// In en, this message translates to:
+  /// **'Block a date range'**
+  String get createFormBlockDateRange;
+
+  /// Create form: "Confirm calendar".
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm calendar'**
+  String get createFormConfirmCalendar;
+
+  /// Create form: "Recharge cannot see external bookings — confirm this is up t".
+  ///
+  /// In en, this message translates to:
+  /// **'Recharge cannot see external bookings — confirm this is up to date.'**
+  String get createFormRechargeCannotSeeExternalBookingsConfirm;
+
+  /// Create form: "Calendar not confirmed yet".
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar not confirmed yet'**
+  String get createFormCalendarNotConfirmedYet;
+
+  /// Create form: "Add another item type".
+  ///
+  /// In en, this message translates to:
+  /// **'Add another item type'**
+  String get createFormAddAnotherItemType;
+
+  /// Create form: "Remove".
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get createFormRemove;
+
+  /// Create form: "Duplicate".
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get createFormDuplicate;
+
+  /// Create form: "Condition".
+  ///
+  /// In en, this message translates to:
+  /// **'Condition'**
+  String get createFormCondition;
+
+  /// Create form: "Quantity".
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get createFormQuantity;
+
+  /// Create form: "Label".
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get createFormLabel;
+
+  /// Create form: "Category".
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get createFormCategory;
+
+  /// Create form: "Title".
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get createFormTitle;
+
+  /// Create form: "Next".
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get createFormNext;
+
+  /// Create form: "The create.rental capability is required to edit or publish.".
+  ///
+  /// In en, this message translates to:
+  /// **'You need permission to create rentals to edit or publish.'**
+  String get createFormCreateRentalCapabilityRequiredEditPublish;
+
+  /// Create form: "Rental data is being prepared…".
+  ///
+  /// In en, this message translates to:
+  /// **'Rental data is being prepared…'**
+  String get createFormRentalDataBeingPrepared;
+
+  /// Event gallery: remove image number count.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove gallery image {count}'**
+  String createFormRemoveGalleryImage(int count);
+
+  /// Event gallery: alt-text field label for image number count.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery image {count} description *'**
+  String createFormGalleryImageDescription(int count);
+
+  /// Create form: "Add gallery image".
+  ///
+  /// In en, this message translates to:
+  /// **'Add gallery image'**
+  String get createFormAddGalleryImage;
+
+  /// Create form: "Publishable on local/mock moderation pipeline".
+  ///
+  /// In en, this message translates to:
+  /// **'Publishable on local/mock moderation pipeline'**
+  String get createFormPublishableLocalMockModerationPipeline;
+
+  /// Create form: "Untitled event".
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled event'**
+  String get createFormUntitledEvent;
+
+  /// Create form: "Visibility".
+  ///
+  /// In en, this message translates to:
+  /// **'Visibility'**
+  String get createFormVisibility;
+
+  /// Create form: "External HTTPS registration URL".
+  ///
+  /// In en, this message translates to:
+  /// **'External HTTPS registration URL'**
+  String get createFormExternalHttpsRegistrationUrl;
+
+  /// Create form: "Registration".
+  ///
+  /// In en, this message translates to:
+  /// **'Registration'**
+  String get createFormRegistration;
+
+  /// Create form: "Maximum participants".
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum participants'**
+  String get createFormMaximumParticipants;
+
+  /// Create form: "Capacity".
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity'**
+  String get createFormCapacity;
+
+  /// Create form: "Payment collection".
+  ///
+  /// In en, this message translates to:
+  /// **'Payment collection'**
+  String get createFormPaymentCollection;
+
+  /// Create form: "Pricing".
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing'**
+  String get createFormPricing;
+
+  /// Create form: "Partial attendance allowed".
+  ///
+  /// In en, this message translates to:
+  /// **'Partial attendance allowed'**
+  String get createFormPartialAttendanceAllowed;
+
+  /// Create form: "Pets allowed".
+  ///
+  /// In en, this message translates to:
+  /// **'Pets allowed'**
+  String get createFormPetsAllowed;
+
+  /// Create form: "Kids allowed".
+  ///
+  /// In en, this message translates to:
+  /// **'Kids allowed'**
+  String get createFormKidsAllowed;
+
+  /// Create form: "Family friendly".
+  ///
+  /// In en, this message translates to:
+  /// **'Family friendly'**
+  String get createFormFamilyFriendly;
+
+  /// Create form: "Maximum age".
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum age'**
+  String get createFormMaximumAge;
+
+  /// Create form: "Minimum age".
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum age'**
+  String get createFormMinimumAge;
+
+  /// Create form: "What attendees should know or bring".
+  ///
+  /// In en, this message translates to:
+  /// **'What attendees should know or bring'**
+  String get createFormWhatAttendeesShouldKnowBring;
+
+  /// Create form: "Excluded dates, comma-separated".
+  ///
+  /// In en, this message translates to:
+  /// **'Excluded dates, comma-separated'**
+  String get createFormExcludedDatesCommaSeparated;
+
+  /// Create form: "Occurrence count".
+  ///
+  /// In en, this message translates to:
+  /// **'Occurrence count'**
+  String get createFormOccurrenceCount;
+
+  /// Create form: "Until local date".
+  ///
+  /// In en, this message translates to:
+  /// **'Until local date'**
+  String get createFormUntilLocalDate;
+
+  /// Create form: "Ends".
+  ///
+  /// In en, this message translates to:
+  /// **'Ends'**
+  String get createFormEnds;
+
+  /// Create form: "Every N periods".
+  ///
+  /// In en, this message translates to:
+  /// **'Every N periods'**
+  String get createFormEveryNPeriods;
+
+  /// Create form: "Repeat".
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get createFormRepeat;
+
+  /// Create form: "Dates separated by commas".
+  ///
+  /// In en, this message translates to:
+  /// **'Dates separated by commas'**
+  String get createFormDatesSeparatedByCommas;
+
+  /// Create form: "Duration in minutes".
+  ///
+  /// In en, this message translates to:
+  /// **'Duration in minutes'**
+  String get createFormDurationMinutes;
+
+  /// Create form: "Duration in minutes (1440 = 1 day)".
+  ///
+  /// In en, this message translates to:
+  /// **'Duration in minutes (1440 = 1 day)'**
+  String get createFormDurationMinutes14401Day;
+
+  /// Create form: "Local start time (HH:mm)".
+  ///
+  /// In en, this message translates to:
+  /// **'Local start time (HH:mm)'**
+  String get createFormLocalStartTimeHhMm;
+
+  /// Create form: "First local date (YYYY-MM-DD)".
+  ///
+  /// In en, this message translates to:
+  /// **'First local date (YYYY-MM-DD)'**
+  String get createFormFirstLocalDateYyyyMmDd;
+
+  /// Create form: "Schedule mode".
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule mode'**
+  String get createFormScheduleMode;
+
+  /// Create form: "Public HTTPS event URL *".
+  ///
+  /// In en, this message translates to:
+  /// **'Public HTTPS event URL *'**
+  String get createFormPublicHttpsEventUrl;
+
+  /// Create form: "Online access".
+  ///
+  /// In en, this message translates to:
+  /// **'Online access'**
+  String get createFormOnlineAccess;
+
+  /// Create form: "Confirm this physical location pin *".
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this physical location pin *'**
+  String get createFormConfirmPhysicalLocationPin;
+
+  /// Create form: "Meeting point instructions".
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting point instructions'**
+  String get createFormMeetingPointInstructions;
+
+  /// Create form: "Venue".
+  ///
+  /// In en, this message translates to:
+  /// **'Venue'**
+  String get createFormVenue;
+
+  /// Create form: "Format".
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get createFormFormat;
+
+  /// Create form: "Cover description for screen readers *".
+  ///
+  /// In en, this message translates to:
+  /// **'Cover description for screen readers *'**
+  String get createFormCoverDescriptionScreenReaders;
+
+  /// Create form: "Short description *".
+  ///
+  /// In en, this message translates to:
+  /// **'Short description *'**
+  String get createFormShortDescription2;
+
+  /// Create form: "Event title *".
+  ///
+  /// In en, this message translates to:
+  /// **'Event title *'**
+  String get createFormEventTitle;
+
+  /// Create form: "Event draft is unavailable. Reopen Create Hub.".
+  ///
+  /// In en, this message translates to:
+  /// **'Event draft is unavailable. Reopen Create Hub.'**
+  String get createFormEventDraftUnavailableReopenCreateHub;
+
+  /// Create form: "Closes at UTC (ISO 8601)".
+  ///
+  /// In en, this message translates to:
+  /// **'Closes at UTC (ISO 8601)'**
+  String get createFormClosesAtUtcIso8601;
+
+  /// Create form: "Opens at UTC (ISO 8601)".
+  ///
+  /// In en, this message translates to:
+  /// **'Opens at UTC (ISO 8601)'**
+  String get createFormOpensAtUtcIso8601;
+
+  /// Create form: "Close minutes before occurrence".
+  ///
+  /// In en, this message translates to:
+  /// **'Close minutes before occurrence'**
+  String get createFormCloseMinutesBeforeOccurrence;
+
+  /// Create form: "Open minutes before occurrence".
+  ///
+  /// In en, this message translates to:
+  /// **'Open minutes before occurrence'**
+  String get createFormOpenMinutesBeforeOccurrence;
+
+  /// Create form: "Window type".
+  ///
+  /// In en, this message translates to:
+  /// **'Window type'**
+  String get createFormWindowType;
+
+  /// Create form: "Enable window".
+  ///
+  /// In en, this message translates to:
+  /// **'Enable window'**
+  String get createFormEnableWindow;
+
+  /// Create form: "Not configured".
+  ///
+  /// In en, this message translates to:
+  /// **'Not configured'**
+  String get createFormNotConfigured;
+
+  /// Create form: "Remove eligibility rule".
+  ///
+  /// In en, this message translates to:
+  /// **'Remove eligibility rule'**
+  String get createFormRemoveEligibilityRule;
+
+  /// Create form: "Public explanation (no secrets)".
+  ///
+  /// In en, this message translates to:
+  /// **'Public explanation (no secrets)'**
+  String get createFormPublicExplanationNoSecrets;
+
+  /// Create form: "Add eligibility rule".
+  ///
+  /// In en, this message translates to:
+  /// **'Add eligibility rule'**
+  String get createFormAddEligibilityRule;
+
+  /// Create form: "Rule kind".
+  ///
+  /// In en, this message translates to:
+  /// **'Rule kind'**
+  String get createFormRuleKind;
+
+  /// Create form: "Never enter access codes, identities or private documents.".
+  ///
+  /// In en, this message translates to:
+  /// **'Never enter access codes, identities or private documents.'**
+  String get createFormNeverEnterAccessCodesIdentitiesPrivate;
+
+  /// Create form: "Eligibility".
+  ///
+  /// In en, this message translates to:
+  /// **'Eligibility'**
+  String get createFormEligibility;
+
+  /// Create form: "Sales at the door".
+  ///
+  /// In en, this message translates to:
+  /// **'Sales at the door'**
+  String get createFormSalesAtDoor;
+
+  /// Create form: "Registration at the door".
+  ///
+  /// In en, this message translates to:
+  /// **'Registration at the door'**
+  String get createFormRegistrationAtDoor;
+
+  /// Create form: "Onsite admission allowed".
+  ///
+  /// In en, this message translates to:
+  /// **'Onsite admission allowed'**
+  String get createFormOnsiteAdmissionAllowed;
+
+  /// Create form: "Does not book or reserve inventory".
+  ///
+  /// In en, this message translates to:
+  /// **'Does not book or reserve inventory'**
+  String get createFormDoesNotBookReserveInventory;
+
+  /// Create form: "Maximum guests per registration *".
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum guests per registration *'**
+  String get createFormMaximumGuestsPerRegistration;
+
+  /// Create form: "Guest policy".
+  ///
+  /// In en, this message translates to:
+  /// **'Guest policy'**
+  String get createFormGuestPolicy;
+
+  /// Create form: "Future promotion policy".
+  ///
+  /// In en, this message translates to:
+  /// **'Future promotion policy'**
+  String get createFormFuturePromotionPolicy;
+
+  /// Create form: "Preview only — no queue or promotion runs".
+  ///
+  /// In en, this message translates to:
+  /// **'Preview only — no queue or promotion runs'**
+  String get createFormPreviewOnlyNoQueuePromotionRuns;
+
+  /// Create form: "Configure waitlist".
+  ///
+  /// In en, this message translates to:
+  /// **'Configure waitlist'**
+  String get createFormConfigureWaitlist;
+
+  /// Create form: "Application window".
+  ///
+  /// In en, this message translates to:
+  /// **'Application window'**
+  String get createFormApplicationWindow;
+
+  /// Create form: "Cancellation closes N minutes before the start *".
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation closes N minutes before the start *'**
+  String get createFormCancellationClosesNMinutesBeforeStart;
+
+  /// Create form: "Registration window".
+  ///
+  /// In en, this message translates to:
+  /// **'Registration window'**
+  String get createFormRegistrationWindow;
+
+  /// Create form: "External HTTPS registration URL *".
+  ///
+  /// In en, this message translates to:
+  /// **'External HTTPS registration URL *'**
+  String get createFormExternalHttpsRegistrationUrl2;
+
+  /// Create form: "Confirmation mode *".
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmation mode *'**
+  String get createFormConfirmationMode;
+
+  /// Create form: "Registration mode *".
+  ///
+  /// In en, this message translates to:
+  /// **'Registration mode *'**
+  String get createFormRegistrationMode;
+
+  /// Create form: "Admission mode *".
+  ///
+  /// In en, this message translates to:
+  /// **'Admission mode *'**
+  String get createFormAdmissionMode;
+
+  /// Create form: "Apply normalized fields".
+  ///
+  /// In en, this message translates to:
+  /// **'Apply normalized fields'**
+  String get createFormApplyNormalizedFields;
+
+  /// Create form: "Configuration preset".
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration preset'**
+  String get createFormConfigurationPreset;
+
+  /// Create form: "Confirm suggestion".
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm suggestion'**
+  String get createFormConfirmSuggestion;
+
+  /// Create form: "Legacy registration is preserved, but admission and confirma".
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy registration is preserved, but admission and confirmation still require explicit choices.'**
+  String get createFormLegacyRegistrationPreservedButAdmissionConfirmation;
+
+  /// Create form: "Open entry with no registration or confirmation.".
+  ///
+  /// In en, this message translates to:
+  /// **'Open entry with no registration or confirmation.'**
+  String get createFormOpenEntryWithNoRegistrationConfirmation;
+
+  /// Create form: "Legacy draft suggestion — not applied".
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy draft suggestion — not applied'**
+  String get createFormLegacyDraftSuggestionNotApplied;
+
+  /// Create form: "Admission, registration and confirmation are independent. Th".
+  ///
+  /// In en, this message translates to:
+  /// **'Admission, registration and confirmation are independent. This local configuration does not create a booking.'**
+  String get createFormAdmissionRegistrationConfirmationAreIndependentLocal;
+
+  /// Create form: "Admission".
+  ///
+  /// In en, this message translates to:
+  /// **'Admission'**
+  String get createFormAdmission;
+
+  /// Create form: "Event admission configuration".
+  ///
+  /// In en, this message translates to:
+  /// **'Event admission configuration'**
+  String get createFormEventAdmissionConfiguration;
+
+  /// Create form: "Save draft & return".
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft & return'**
+  String get createFormSaveDraftReturn;
+
+  /// Create form: "Preview and publish".
+  ///
+  /// In en, this message translates to:
+  /// **'Preview and publish'**
+  String get createFormPreviewPublish;
+
+  /// Create form: "Suggest a group size".
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest a group size'**
+  String get createFormSuggestGroupSize;
+
+  /// Create form: "Typical duration, max (minutes)".
+  ///
+  /// In en, this message translates to:
+  /// **'Typical duration, max (minutes)'**
+  String get createFormTypicalDurationMaxMinutes;
+
+  /// Create form: "Typical duration, min (minutes)".
+  ///
+  /// In en, this message translates to:
+  /// **'Typical duration, min (minutes)'**
+  String get createFormTypicalDurationMinMinutes;
+
+  /// Create form: "Best season (optional)".
+  ///
+  /// In en, this message translates to:
+  /// **'Best season (optional)'**
+  String get createFormBestSeasonOptional;
+
+  /// Create form: "Best time of day (optional)".
+  ///
+  /// In en, this message translates to:
+  /// **'Best time of day (optional)'**
+  String get createFormBestTimeDayOptional;
+
+  /// Create form: "When is it best, and how long does it take?".
+  ///
+  /// In en, this message translates to:
+  /// **'When is it best, and how long does it take?'**
+  String get createFormWhenBestHowLongDoesTake;
+
+  /// Create form: "Approximate amount (optional)".
+  ///
+  /// In en, this message translates to:
+  /// **'Approximate amount (optional)'**
+  String get createFormApproximateAmountOptional;
+
+  /// Create form: "e.g. 'Coffee on the counter, optional'".
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. “Coffee on the counter, optional”'**
+  String get createFormEGCoffeeCounterOptional;
+
+  /// Create form: "Other".
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get createFormOther;
+
+  /// Create form: "Donation".
+  ///
+  /// In en, this message translates to:
+  /// **'Donation'**
+  String get createFormDonation;
+
+  /// Create form: "Contribution kind".
+  ///
+  /// In en, this message translates to:
+  /// **'Contribution kind'**
+  String get createFormContributionKind;
+
+  /// Create form: "It is customary to leave something here".
+  ///
+  /// In en, this message translates to:
+  /// **'It is customary to leave something here'**
+  String get createFormCustomaryLeaveSomethingHere;
+
+  /// Create form: "What to know before you go".
+  ///
+  /// In en, this message translates to:
+  /// **'What to know before you go'**
+  String get createFormWhatKnowBeforeYouGo;
+
+  /// Create form: "This is not an official spot".
+  ///
+  /// In en, this message translates to:
+  /// **'This is not an official spot'**
+  String get createFormNotOfficialSpot;
+
+  /// Create form: "Access notes".
+  ///
+  /// In en, this message translates to:
+  /// **'Access notes'**
+  String get createFormAccessNotes;
+
+  /// Create form: "Address line (optional)".
+  ///
+  /// In en, this message translates to:
+  /// **'Address line (optional)'**
+  String get createFormAddressLineOptional;
+
+  /// Create form: "Where is it, and how do I get there?".
+  ///
+  /// In en, this message translates to:
+  /// **'Where is it, and how do I get there?'**
+  String get createFormWhereHowDoIGetThere;
+
+  /// Create form: "More Places".
+  ///
+  /// In en, this message translates to:
+  /// **'More Places'**
+  String get createFormMorePlaces;
+
+  /// Create form: "No matching Places on this page.".
+  ///
+  /// In en, this message translates to:
+  /// **'No matching Places on this page.'**
+  String get createFormNoMatchingPlacesPage;
+
+  /// Create form: "Search Places".
+  ///
+  /// In en, this message translates to:
+  /// **'Search Places'**
+  String get createFormSearchPlaces;
+
+  /// Create form: "Search published Places".
+  ///
+  /// In en, this message translates to:
+  /// **'Search published Places'**
+  String get createFormSearchPublishedPlaces;
+
+  /// Create form: "Linked Place is unavailable. Remove or replace the link.".
+  ///
+  /// In en, this message translates to:
+  /// **'Linked Place is unavailable. Remove or replace the link.'**
+  String get createFormLinkedPlaceUnavailableRemoveReplaceLink;
+
+  /// Create form: "Remove linked Place".
+  ///
+  /// In en, this message translates to:
+  /// **'Remove linked Place'**
+  String get createFormRemoveLinkedPlace;
+
+  /// Create form: "Selected Place: ${activity.location.linkedPlaceId}".
+  ///
+  /// In en, this message translates to:
+  /// **'A Place is linked'**
+  String get createFormSelectedPlace;
+
+  /// Create form: "Linked Place (optional)".
+  ///
+  /// In en, this message translates to:
+  /// **'Linked Place (optional)'**
+  String get createFormLinkedPlaceOptional;
+
+  /// Create form: "Cover image URL".
+  ///
+  /// In en, this message translates to:
+  /// **'Cover image URL'**
+  String get createFormCoverImageUrl;
+
+  /// Create form: "Full description (optional)".
+  ///
+  /// In en, this message translates to:
+  /// **'Full description (optional)'**
+  String get createFormFullDescriptionOptional;
+
+  /// Create form: "About this activity".
+  ///
+  /// In en, this message translates to:
+  /// **'About this activity'**
+  String get createFormAboutActivity;
+
+  /// Create form: "Check the Activity fields and submit again.".
+  ///
+  /// In en, this message translates to:
+  /// **'Check the Activity fields and submit again.'**
+  String get createFormCheckActivityFieldsSubmitAgain;
+
+  /// Create form: "Editing draft only. The published version stays unchanged un".
+  ///
+  /// In en, this message translates to:
+  /// **'Editing draft only. The published version stays unchanged until review and publication.'**
+  String get createFormEditingDraftOnlyPublishedVersionStays;
+
+  /// Create form: "Loading Recharge Activity draft…".
+  ///
+  /// In en, this message translates to:
+  /// **'Loading Recharge Activity draft…'**
+  String get createFormLoadingRechargeActivityDraft;
+
+  /// Create form: "Published route".
+  ///
+  /// In en, this message translates to:
+  /// **'Published route'**
+  String get createFormPublishedRoute;
+
+  /// Create form: "Draft summary is unavailable in this session.".
+  ///
+  /// In en, this message translates to:
+  /// **'Draft summary is unavailable in this session.'**
+  String get createFormDraftSummaryUnavailableSession;
+
+  /// Create form: "Map area".
+  ///
+  /// In en, this message translates to:
+  /// **'Map area'**
+  String get createFormMapArea;
+
+  /// Create form: "Search similar".
+  ///
+  /// In en, this message translates to:
+  /// **'Search similar'**
+  String get createFormSearchSimilar;
+
+  /// Create form: "Profile".
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get createFormProfile;
+
+  /// Create form: "Home".
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get createFormHome;
+
+  /// Create form: "Next steps".
+  ///
+  /// In en, this message translates to:
+  /// **'Next steps'**
+  String get createFormNextSteps;
+
+  /// Create form: "Route map".
+  ///
+  /// In en, this message translates to:
+  /// **'Route map'**
+  String get createFormRouteMap;
+
+  /// Create form: "Walking".
+  ///
+  /// In en, this message translates to:
+  /// **'Walking'**
+  String get createFormWalking;
+
+  /// Create form: "Free".
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get createFormFree;
+
+  /// Create form: "Archive".
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get createFormArchive;
+
+  /// Create form: "Create new version".
+  ///
+  /// In en, this message translates to:
+  /// **'Create new version'**
+  String get createFormCreateNewVersion;
+
+  /// Create form: "Review request".
+  ///
+  /// In en, this message translates to:
+  /// **'Review request'**
+  String get createFormReviewRequest;
+
+  /// Create form: "Geometry hash".
+  ///
+  /// In en, this message translates to:
+  /// **'Geometry hash'**
+  String get createFormGeometryHash;
+
+  /// Create form: "Version ID".
+  ///
+  /// In en, this message translates to:
+  /// **'Version ID'**
+  String get createFormVersionId;
+
+  /// Create form: "Route ID".
+  ///
+  /// In en, this message translates to:
+  /// **'Route ID'**
+  String get createFormRouteId;
+
+  /// Create form: "Immutable version awaiting approval".
+  ///
+  /// In en, this message translates to:
+  /// **'Immutable version awaiting approval'**
+  String get createFormImmutableVersionAwaitingApproval;
+
+  /// Create form: "Active immutable Route version".
+  ///
+  /// In en, this message translates to:
+  /// **'Active immutable Route version'**
+  String get createFormActiveImmutableRouteVersion;
+
+  /// Create form: "Your publish action was handled. Create another listing or r".
+  ///
+  /// In en, this message translates to:
+  /// **'Your publish action was handled. Create another listing or return to Home.'**
+  String get createFormYourPublishActionWasHandledCreate;
+
+  /// Create form: "Sent to moderation".
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to moderation'**
+  String get createFormSentModeration;
+
+  /// Create form: "Publish processed".
+  ///
+  /// In en, this message translates to:
+  /// **'Publish processed'**
+  String get createFormPublishProcessed;
+
+  /// Create form: "Route published".
+  ///
+  /// In en, this message translates to:
+  /// **'Route published'**
+  String get createFormRoutePublished;
+
+  /// Create form: "Create another".
+  ///
+  /// In en, this message translates to:
+  /// **'Create another'**
+  String get createFormCreateAnother;
+
+  /// Create form: "Create another Event".
+  ///
+  /// In en, this message translates to:
+  /// **'Create another Event'**
+  String get createFormCreateAnotherEvent;
+
+  /// Create form: "Create another from ${controller.lastEventTemplate!.name}".
+  ///
+  /// In en, this message translates to:
+  /// **'Create another from the last template'**
+  String get createFormCreateAnotherFrom;
+
+  /// Create form: "Open Route moderation queue".
+  ///
+  /// In en, this message translates to:
+  /// **'Open Route moderation queue'**
+  String get createFormOpenRouteModerationQueue;
+
+  /// Create form: "Publish status".
+  ///
+  /// In en, this message translates to:
+  /// **'Publish status'**
+  String get createFormPublishStatus;
+
+  /// Create form: "Could not remove: $error".
+  ///
+  /// In en, this message translates to:
+  /// **'Could not remove the item. Try again.'**
+  String get createFormCouldNotRemove;
+
+  /// Create form: "Remove without review".
+  ///
+  /// In en, this message translates to:
+  /// **'Remove without review'**
+  String get createFormRemoveWithoutReview;
+
+  /// Create form: "Removing an item here applies instantly, no moderation round".
+  ///
+  /// In en, this message translates to:
+  /// **'Removing an item here applies instantly, with no moderation round trip. Adding or editing text still needs a new reviewed version — use Publish above for that.'**
+  String get createFormRemovingItemHereAppliesInstantlyNo;
+
+  /// Create form: "Publish".
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get createFormPublish;
+
+  /// Create form: "Acknowledge composition".
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledge composition'**
+  String get createFormAcknowledgeComposition;
+
+  /// Create form: "Composition reviewed".
+  ///
+  /// In en, this message translates to:
+  /// **'Composition reviewed'**
+  String get createFormCompositionReviewed;
+
+  /// Create form: "Refresh live preview".
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh live preview'**
+  String get createFormRefreshLivePreview;
+
+  /// Create form: "Some items are no longer available — review before publishin".
+  ///
+  /// In en, this message translates to:
+  /// **'Some items are no longer available — review before publishing.'**
+  String get createFormSomeItemsAreNoLongerAvailable;
+
+  /// Create form: "Not enough priced items yet to suggest a budget.".
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough priced items yet to suggest a budget.'**
+  String get createFormNotEnoughPricedItemsYetSuggest;
+
+  /// Create form: "Suggest from item prices".
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest from item prices'**
+  String get createFormSuggestFromItemPrices;
+
+  /// Create form: "Not set".
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get createFormNotSet;
+
+  /// Create form: "Budget indicator".
+  ///
+  /// In en, this message translates to:
+  /// **'Budget indicator'**
+  String get createFormBudgetIndicator;
+
+  /// Create form: "Curator notes".
+  ///
+  /// In en, this message translates to:
+  /// **'Curator notes'**
+  String get createFormCuratorNotes;
+
+  /// Create form: "Items".
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get createFormItems;
+
+  /// Create form: "One reference point for the whole guide — not an item locati".
+  ///
+  /// In en, this message translates to:
+  /// **'One reference point for the whole guide — not an item location.'**
+  String get createFormOneReferencePointWholeGuideNot;
+
+  /// Create form: "Area anchor".
+  ///
+  /// In en, this message translates to:
+  /// **'Area anchor'**
+  String get createFormAreaAnchor;
+
+  /// Create form: "Type to search, or tap the map below (§7 Шаг 1)".
+  ///
+  /// In en, this message translates to:
+  /// **'Type to search, or tap the map below'**
+  String get createFormTypeSearchTapMapBelow7;
+
+  /// Create form: "Area or city".
+  ///
+  /// In en, this message translates to:
+  /// **'Area or city'**
+  String get createFormAreaCity;
+
+  /// Create form: "Short pitch".
+  ///
+  /// In en, this message translates to:
+  /// **'Short pitch'**
+  String get createFormShortPitch;
+
+  /// Create form: "Collection draft data is being prepared…".
+  ///
+  /// In en, this message translates to:
+  /// **'Collection draft data is being prepared…'**
+  String get createFormCollectionDraftDataBeingPrepared;
+
+  /// Create form: "Collection draft is being prepared…".
+  ///
+  /// In en, this message translates to:
+  /// **'Collection draft is being prepared…'**
+  String get createFormCollectionDraftBeingPrepared;
+
+  /// Create form: "Preparing Collection draft…".
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing Collection draft…'**
+  String get createFormPreparingCollectionDraft;
+
+  /// Create form: "Remove pool".
+  ///
+  /// In en, this message translates to:
+  /// **'Remove pool'**
+  String get createFormRemovePool;
+
+  /// Create form: "Move pool down".
+  ///
+  /// In en, this message translates to:
+  /// **'Move pool down'**
+  String get createFormMovePoolDown;
+
+  /// Create form: "Move pool up".
+  ///
+  /// In en, this message translates to:
+  /// **'Move pool up'**
+  String get createFormMovePoolUp;
+
+  /// Create form: "Neutral role IDs, comma-separated".
+  ///
+  /// In en, this message translates to:
+  /// **'Neutral role IDs, comma-separated'**
+  String get createFormNeutralRoleIdsCommaSeparated;
+
+  /// Create form: "Capacity mode".
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity mode'**
+  String get createFormCapacityMode;
+
+  /// Create form: "Channel".
+  ///
+  /// In en, this message translates to:
+  /// **'Channel'**
+  String get createFormChannel;
+
+  /// Create form: "Shape".
+  ///
+  /// In en, this message translates to:
+  /// **'Shape'**
+  String get createFormShape;
+
+  /// Create form: "Public pool label".
+  ///
+  /// In en, this message translates to:
+  /// **'Public pool label'**
+  String get createFormPublicPoolLabel;
+
+  /// Create form: "Unnamed pool".
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed pool'**
+  String get createFormUnnamedPool;
+
+  /// Create form: "Add pool".
+  ///
+  /// In en, this message translates to:
+  /// **'Add pool'**
+  String get createFormAddPool;
+
+  /// Create form: "Pool capacity".
+  ///
+  /// In en, this message translates to:
+  /// **'Pool capacity'**
+  String get createFormPoolCapacity;
+
+  /// Create form: "Additional views of the same inventory".
+  ///
+  /// In en, this message translates to:
+  /// **'Additional views of the same inventory'**
+  String get createFormAdditionalViewsSameInventory;
+
+  /// Create form: "Primary inventory shape *".
+  ///
+  /// In en, this message translates to:
+  /// **'Primary inventory shape *'**
+  String get createFormPrimaryInventoryShape;
+
+  /// Create form: "Inventory authority".
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory authority'**
+  String get createFormInventoryAuthority;
+
+  /// Create form: "Maximum participants *".
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum participants *'**
+  String get createFormMaximumParticipants2;
+
+  /// Create form: "Event capacity".
+  ///
+  /// In en, this message translates to:
+  /// **'Event capacity'**
+  String get createFormEventCapacity;
+
+  /// Create form: "Capacity is a declared limit. It is not a live participant c".
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity is a declared limit. It is not a live participant count or transactional inventory balance.'**
+  String get createFormCapacityDeclaredLimitNotLiveParticipant;
+
+  /// Create form: "Event inventory configuration".
+  ///
+  /// In en, this message translates to:
+  /// **'Event inventory configuration'**
+  String get createFormEventInventoryConfiguration;
+
+  /// Create form: "Confirm".
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get createFormConfirm;
+
+  /// Create form: "Save".
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get createFormSave;
+
+  /// Create form: "Template name".
+  ///
+  /// In en, this message translates to:
+  /// **'Template name'**
+  String get createFormTemplateName;
+
+  /// Create form: "Active drafts and published Events will not be affected.".
+  ///
+  /// In en, this message translates to:
+  /// **'Active drafts and published Events will not be affected.'**
+  String get createFormActiveDraftsPublishedEventsWillNot;
+
+  /// Create form: "Delete template?".
+  ///
+  /// In en, this message translates to:
+  /// **'Delete template?'**
+  String get createFormDeleteTemplate;
+
+  /// Create form: "The reusable content will be replaced with the current Event".
+  ///
+  /// In en, this message translates to:
+  /// **'The reusable content will be replaced with the current Event.'**
+  String get createFormReusableContentWillReplacedWithCurrent;
+
+  /// Create form: "Replace template?".
+  ///
+  /// In en, this message translates to:
+  /// **'Replace template?'**
+  String get createFormReplaceTemplate;
+
+  /// Create form: "Rename template".
+  ///
+  /// In en, this message translates to:
+  /// **'Rename template'**
+  String get createFormRenameTemplate;
+
+  /// Create form: "Delete".
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get createFormDelete;
+
+  /// Create form: "Replace with current".
+  ///
+  /// In en, this message translates to:
+  /// **'Replace with current'**
+  String get createFormReplaceWithCurrent;
+
+  /// Create form: "Rename".
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get createFormRename;
+
+  /// Create form: "Template actions".
+  ///
+  /// In en, this message translates to:
+  /// **'Template actions'**
+  String get createFormTemplateActions;
+
+  /// Create form: "Last template".
+  ///
+  /// In en, this message translates to:
+  /// **'Last template'**
+  String get createFormLastTemplate;
+
+  /// Create form: "Untitled Event".
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled Event'**
+  String get createFormUntitledEvent2;
+
+  /// Create form: "No templates yet. Save the current Event to reuse it.".
+  ///
+  /// In en, this message translates to:
+  /// **'No templates yet. Save the current Event to reuse it.'**
+  String get createFormNoTemplatesYetSaveCurrentEvent;
+
+  /// Create form: "Your Event templates".
+  ///
+  /// In en, this message translates to:
+  /// **'Your Event templates'**
+  String get createFormYourEventTemplates;
+
+  /// Create form: "Save Event template".
+  ///
+  /// In en, this message translates to:
+  /// **'Save Event template'**
+  String get createFormSaveEventTemplate;
+
+  /// Create form: "Next “Create another Event” will use: ${template.name}".
+  ///
+  /// In en, this message translates to:
+  /// **'Next “Create another Event” will use the selected template.'**
+  String get createFormNextCreateAnotherEventWillUse;
+
+  /// Create form: "Save current".
+  ///
+  /// In en, this message translates to:
+  /// **'Save current'**
+  String get createFormSaveCurrent;
+
+  /// Create form: "Choose or manage".
+  ///
+  /// In en, this message translates to:
+  /// **'Choose or manage'**
+  String get createFormChooseManage;
+
+  /// Create form: "Event templates".
+  ///
+  /// In en, this message translates to:
+  /// **'Event templates'**
+  String get createFormEventTemplates;
+
+  /// Create form: "Clear classification".
+  ///
+  /// In en, this message translates to:
+  /// **'Clear classification'**
+  String get createFormClearClassification;
+
+  /// Create form: "Additional roles (up to 3)".
+  ///
+  /// In en, this message translates to:
+  /// **'Additional roles (up to 3)'**
+  String get createFormAdditionalRolesUp3;
+
+  /// Create form: "Primary attendee role *".
+  ///
+  /// In en, this message translates to:
+  /// **'Primary attendee role *'**
+  String get createFormPrimaryAttendeeRole;
+
+  /// Create form: "Explain the event mechanics *".
+  ///
+  /// In en, this message translates to:
+  /// **'Explain the event mechanics *'**
+  String get createFormExplainEventMechanics;
+
+  /// Create form: "Event mechanics *".
+  ///
+  /// In en, this message translates to:
+  /// **'Event mechanics *'**
+  String get createFormEventMechanics;
+
+  /// Create form: "Use suggestion".
+  ///
+  /// In en, this message translates to:
+  /// **'Use suggestion'**
+  String get createFormUseSuggestion;
+
+  /// Create form: "This is only a suggestion. Confirm it or choose another.".
+  ///
+  /// In en, this message translates to:
+  /// **'This is only a suggestion. Confirm it or choose another.'**
+  String get createFormOnlySuggestionConfirmChooseAnother;
+
+  /// Create form: "Mechanics and attendee roles are independent from the catego".
+  ///
+  /// In en, this message translates to:
+  /// **'Mechanics and attendee roles are independent from the category, format, access and price.'**
+  String get createFormMechanicsAttendeeRolesAreIndependentFrom;
+
+  /// Create form: "How does this event work?".
+  ///
+  /// In en, this message translates to:
+  /// **'How does this event work?'**
+  String get createFormHowDoesEventWork;
+
+  /// Create form: "Event classification".
+  ///
+  /// In en, this message translates to:
+  /// **'Event classification'**
+  String get createFormEventClassification;
+
+  /// Create form: "Section title".
+  ///
+  /// In en, this message translates to:
+  /// **'Section title'**
+  String get createFormSectionTitle;
+
+  /// Create form: "New section".
+  ///
+  /// In en, this message translates to:
+  /// **'New section'**
+  String get createFormNewSection;
+
+  /// Create form: "No longer available".
+  ///
+  /// In en, this message translates to:
+  /// **'No longer available'**
+  String get createFormNoLongerAvailable;
+
+  /// Create form: "No items yet.".
+  ///
+  /// In en, this message translates to:
+  /// **'No items yet.'**
+  String get createFormNoItemsYet;
+
+  /// Create form: "Remove section".
+  ///
+  /// In en, this message translates to:
+  /// **'Remove section'**
+  String get createFormRemoveSection;
+
+  /// Collection items picker: header with the number of items.
+  ///
+  /// In en, this message translates to:
+  /// **'In this Collection ({count})'**
+  String createFormCollection(int count);
+
+  /// Create form: "Results".
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get createFormResults;
+
+  /// Create form: "Search".
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get createFormSearch;
+
+  /// Create form: "Search Place, Route, Bookable Session, Class/Workshop, Renta".
+  ///
+  /// In en, this message translates to:
+  /// **'Search Place, Route, Bookable Session, Class/Workshop, Rental'**
+  String get createFormSearchPlaceRouteBookableSessionClass;
+
+  /// Create form: "Choose a type to open its creation page.".
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a type to open its creation page.'**
+  String get createFormChooseTypeOpenItsCreationPage;
+
+  /// Create form: "What do you want to create?".
+  ///
+  /// In en, this message translates to:
+  /// **'What do you want to create?'**
+  String get createFormWhatDoYouWantCreate;
+
+  /// Create form: "Create Hub".
+  ///
+  /// In en, this message translates to:
+  /// **'Create Hub'**
+  String get createFormCreateHub;
+
+  /// Create form: "Refresh preview".
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh preview'**
+  String get createFormRefreshPreview;
+
+  /// Create form: "Checking local fixture…".
+  ///
+  /// In en, this message translates to:
+  /// **'Checking local fixture…'**
+  String get createFormCheckingLocalFixture;
+
+  /// Create form: "Local mock preview — not live availability".
+  ///
+  /// In en, this message translates to:
+  /// **'Local mock preview — not live availability'**
+  String get createFormLocalMockPreviewNotLiveAvailability;
+
+  /// Create form: "Local mock availability preview".
+  ///
+  /// In en, this message translates to:
+  /// **'Local mock availability preview'**
+  String get createFormLocalMockAvailabilityPreview;
+
+  /// Create form: "Duplicate this listing".
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate this listing'**
+  String get createFormDuplicateListing;
+
+  /// Create form: "Save current as template".
+  ///
+  /// In en, this message translates to:
+  /// **'Save current as template'**
+  String get createFormSaveCurrentAsTemplate;
+
+  /// Create form: "Use".
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get createFormUse;
+
+  /// Create form: "No saved templates yet.".
+  ///
+  /// In en, this message translates to:
+  /// **'No saved templates yet.'**
+  String get createFormNoSavedTemplatesYet;
+
+  /// Create form: "Templates".
+  ///
+  /// In en, this message translates to:
+  /// **'Templates'**
+  String get createFormTemplates;
+
+  /// Create form: "Why is it here?".
+  ///
+  /// In en, this message translates to:
+  /// **'Why is it here?'**
+  String get createFormWhyHere;
+
+  /// Create form: "Featured".
+  ///
+  /// In en, this message translates to:
+  /// **'Featured'**
+  String get createFormFeatured;
+
+  /// Create form: "Add items in the previous step first.".
+  ///
+  /// In en, this message translates to:
+  /// **'Add items in the previous step first.'**
+  String get createFormAddItemsPreviousStepFirst;
+
+  /// Create seed chip: budget limit; price is the seed value as given.
+  ///
+  /// In en, this message translates to:
+  /// **'up to {price}'**
+  String createFormUpToPrice(String price);
+
+  /// Create seed chip: search radius in kilometres.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String createFormDistanceKm(String km);
+
+  /// Create seed chip: duration in minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String createFormMinutes(int count);
+
+  /// Place relationship: owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get createFormOwner;
+
+  /// Place relationship: visitor.
+  ///
+  /// In en, this message translates to:
+  /// **'Visitor'**
+  String get createFormVisitor;
+
+  /// Place entry type: unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get createFormUnknown;
+
+  /// Place hours mode: always open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open 24/7'**
+  String get createFormOpen247;
+
+  /// Create place step "identity" title.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get createStepPlaceIdentityTitle;
+
+  /// Create place step "identity" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, category and only the details this place needs'**
+  String get createStepPlaceIdentityDescription;
+
+  /// Create place step "visit" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit'**
+  String get createStepPlaceVisitTitle;
+
+  /// Create place step "visit" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed map point and relevant visit information'**
+  String get createStepPlaceVisitDescription;
+
+  /// Create place step "publish" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get createStepPlacePublishTitle;
+
+  /// Create place step "publish" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Readiness, optional improvements and final checks'**
+  String get createStepPlacePublishDescription;
+
+  /// Create event step "basics_media" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Basics'**
+  String get createStepEventBasicsMediaTitle;
+
+  /// Create event step "basics_media" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity, category, description and media'**
+  String get createStepEventBasicsMediaDescription;
+
+  /// Create event step "location_schedule" title.
+  ///
+  /// In en, this message translates to:
+  /// **'When & where'**
+  String get createStepEventLocationScheduleTitle;
+
+  /// Create event step "location_schedule" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Format, location, timezone and occurrences'**
+  String get createStepEventLocationScheduleDescription;
+
+  /// Create event step "requirements" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Requirements'**
+  String get createStepEventRequirementsTitle;
+
+  /// Create event step "requirements" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Audience, amenities and participation rules'**
+  String get createStepEventRequirementsDescription;
+
+  /// Create event step "price_participants" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Price & people'**
+  String get createStepEventPriceParticipantsTitle;
+
+  /// Create event step "price_participants" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Money, admission, capacity and inventory'**
+  String get createStepEventPriceParticipantsDescription;
+
+  /// Create event step "preview_publish" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get createStepEventPreviewPublishTitle;
+
+  /// Create event step "preview_publish" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview, readiness and moderation submission'**
+  String get createStepEventPreviewPublishDescription;
+
+  /// Create activity step "basics" title.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get createStepActivityBasicsTitle;
+
+  /// Create activity step "basics" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Title, category and media'**
+  String get createStepActivityBasicsDescription;
+
+  /// Create activity step "location" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get createStepActivityLocationTitle;
+
+  /// Create activity step "location" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to go and how to get there'**
+  String get createStepActivityLocationDescription;
+
+  /// Create activity step "whenFor" title.
+  ///
+  /// In en, this message translates to:
+  /// **'When & for whom'**
+  String get createStepActivityWhenForTitle;
+
+  /// Create activity step "whenFor" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Best time, duration and group size'**
+  String get createStepActivityWhenForDescription;
+
+  /// Create activity step "publish" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get createStepActivityPublishTitle;
+
+  /// Create activity step "publish" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview and send'**
+  String get createStepActivityPublishDescription;
+
+  /// Create collection step "basics" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Basics & media'**
+  String get createStepCollectionBasicsTitle;
+
+  /// Create collection step "basics" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Title, pitch, cover and area'**
+  String get createStepCollectionBasicsDescription;
+
+  /// Create collection step "items" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get createStepCollectionItemsTitle;
+
+  /// Create collection step "items" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Search and add existing places, routes and more'**
+  String get createStepCollectionItemsDescription;
+
+  /// Create collection step "curatorNotes" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Curator notes'**
+  String get createStepCollectionCuratorNotesTitle;
+
+  /// Create collection step "curatorNotes" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Say why each item is here and pick your highlights'**
+  String get createStepCollectionCuratorNotesDescription;
+
+  /// Create collection step "budget" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget & publisher'**
+  String get createStepCollectionBudgetTitle;
+
+  /// Create collection step "budget" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a budget hint, publisher, market and visibility'**
+  String get createStepCollectionBudgetDescription;
+
+  /// Create collection step "publish" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview & publish'**
+  String get createStepCollectionPublishTitle;
+
+  /// Create collection step "publish" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the composition and send'**
+  String get createStepCollectionPublishDescription;
+
+  /// Create rental step "listing" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Listing and media'**
+  String get createStepRentalListingTitle;
+
+  /// Create rental step "listing" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Title, category and cover for the item or fleet'**
+  String get createStepRentalListingDescription;
+
+  /// Create rental step "inventory" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get createStepRentalInventoryTitle;
+
+  /// Create rental step "inventory" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups of interchangeable units, condition and quantity'**
+  String get createStepRentalInventoryDescription;
+
+  /// Create rental step "availability" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability'**
+  String get createStepRentalAvailabilityTitle;
+
+  /// Create rental step "availability" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed coverage window and manual occupancy blocks'**
+  String get createStepRentalAvailabilityDescription;
+
+  /// Create rental step "handover" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Handover and location'**
+  String get createStepRentalHandoverTitle;
+
+  /// Create rental step "handover" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup area, schedule and optional delivery'**
+  String get createStepRentalHandoverDescription;
+
+  /// Create rental step "terms" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration and safety'**
+  String get createStepRentalTermsTitle;
+
+  /// Create rental step "terms" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Offered duration range, age, ID and safety requirements'**
+  String get createStepRentalTermsDescription;
+
+  /// Create rental step "pricing" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing and deposit'**
+  String get createStepRentalPricingTitle;
+
+  /// Create rental step "pricing" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate plan, deposit policy and damage/cancellation terms'**
+  String get createStepRentalPricingDescription;
+
+  /// Create rental step "fulfillment" title.
+  ///
+  /// In en, this message translates to:
+  /// **'External fulfillment and policies'**
+  String get createStepRentalFulfillmentTitle;
+
+  /// Create rental step "fulfillment" description.
+  ///
+  /// In en, this message translates to:
+  /// **'External booking link and destination warning preview'**
+  String get createStepRentalFulfillmentDescription;
+
+  /// Create rental step "review" title.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and submit'**
+  String get createStepRentalReviewTitle;
+
+  /// Create rental step "review" description.
+  ///
+  /// In en, this message translates to:
+  /// **'Public/private preview, attestation and submission'**
+  String get createStepRentalReviewDescription;
+
+  /// Place creation profile name; type is the stable PlaceCreationProfileId name.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, simplePoi{Simple point of interest}publicSpace{Public space}naturalDestination{Natural destination}culturalVenue{Cultural venue}hospitality{Food or hospitality venue}activityVenue{Activity or service venue}paidAttraction{Managed attraction}balanced{General place} other{General place}}'**
+  String createPlacePolicyLabel(String type);
+
+  /// Place creation profile explanation; type is the stable PlaceCreationProfileId name.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, simplePoi{A landmark people can identify and visit without managed access.}publicSpace{An open public area with optional access restrictions.}naturalDestination{A natural point or area where access facts may be unknown.}culturalVenue{A managed museum, gallery, cinema or cultural venue.}hospitality{A managed venue where spend matters but admission does not.}activityVenue{A managed venue with optional booking, spend and facilities.}paidAttraction{A managed attraction that may have admission and facilities.}balanced{A safe fallback with no invented opening or pricing facts.} other{A safe fallback with no invented opening or pricing facts.}}'**
+  String createPlacePolicyDescription(String type);
+
+  /// Amenity name; value is the stable amenity id.
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, wheelchair_accessible{Wheelchair accessible}accessible_toilet{Accessible toilet}parking{Parking}bike_parking{Bike parking}public_transport_nearby{Public transport nearby}public_transport{Public transport nearby}family_friendly{Family friendly}baby_changing{Baby changing}pets_allowed{Pets allowed}toilet{Toilet}wifi{Wi-Fi}drinking_water{Drinking water}food_available{Food available}outdoor_seating{Outdoor seating}shelter{Weather shelter}weather_shelter{Weather shelter}first_aid{First aid}shower{Shower}towels{Towels provided}changing_room{Changing room}equipment_provided{Equipment provided} other{Amenity}}'**
+  String createAmenityLabel(String value);
+
+  /// Amenity group name; value is the stable group id.
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, accessibility{Accessibility}audience{Audience}facilities{Facilities}family{Family}food{Food}outdoor{Outdoor}pets{Pets}safety{Safety}transport{Transport}wellness{Wellness} other{Other}}'**
+  String createAmenityGroup(String value);
+
+  /// Create: the draft is saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get createFormSaved;
+
+  /// Create: the draft is being saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get createFormSaving;
+
+  /// Create form option label; option is "<EnumType>_<stable value>".
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, EventCapacityMode_known{Known limit}EventCapacityMode_unknown{Unknown}EventCapacityMode_unlimited{Unlimited}EventFormat_offline{In person}EventFormat_online{Online}EventFormat_hybrid{Hybrid}EventOnlineAccessMode_publicLink{Public link}EventOnlineAccessMode_externalRegistration{External registration}EventOnlineAccessMode_internalBooking{Internal booking}EventPaymentCollectionMode_none{No payment}EventPaymentCollectionMode_onsite{On site}EventPaymentCollectionMode_external{External}EventPaymentCollectionMode_internal{In Recharge}EventPricingMode_free{Free}EventPricingMode_fixed{Fixed price}EventPricingMode_ticketTypes{Ticket types}EventPricingMode_donation{Donation}EventRecurrenceEndMode_never{Never}EventRecurrenceEndMode_untilDate{On a date}EventRecurrenceEndMode_occurrenceCount{After a number of times}EventRecurrenceFrequency_daily{Daily}EventRecurrenceFrequency_weekly{Weekly}EventRecurrenceFrequency_monthly{Monthly}EventRecurrenceFrequency_yearly{Yearly}EventRegistrationMode_none{No registration}EventRegistrationMode_external{External}EventRegistrationMode_internal{In Recharge}EventScheduleMode_oneTime{One time}EventScheduleMode_multiDate{Several dates}EventScheduleMode_recurring{Recurring}EventVisibility_public{Public}EventVisibility_unlisted{By link}EventVisibility_private{Private}EventAdmissionPreset_noRegistration{No registration}EventAdmissionPreset_freeRsvp{Free RSVP}EventAdmissionPreset_organizerApplication{Application to the organizer}EventAdmissionPreset_externalRegistration{External registration}EventAdmissionPreset_externalTickets{External tickets}EventAdmissionPreset_rechargeTickets{Recharge tickets}EventAdmissionPreset_teamRegistration{Team registration}AdmissionMode_openEntry{Open entry}AdmissionMode_rsvp{RSVP}AdmissionMode_booking{Booking}AdmissionMode_application{Application}AdmissionMode_ticket{Ticket}AdmissionMode_teamRegistration{Team registration}ConfirmationMode_none{No confirmation}ConfirmationMode_instant{Instant}ConfirmationMode_manualApproval{Manual approval}ConfirmationMode_lottery{Lottery}ConfirmationMode_providerManaged{By the provider}WaitlistPromotionMode_organizerManaged{By the organizer}WaitlistPromotionMode_fifoAutomatic{Automatic, first come}GuestPolicyMode_none{No guests}GuestPolicyMode_plusOne{Plus one}GuestPolicyMode_plusN{Plus N}GuestPolicyMode_namedGuestsOnly{Named guests only}EligibilityRuleKind_invitation{Invitation}EligibilityRuleKind_accessCode{Access code}EligibilityRuleKind_membership{Membership}EligibilityRuleKind_allowlist{Guest list}EligibilityRuleKind_qualification{Qualification}EligibilityRuleKind_accreditation{Accreditation}EligibilityRuleKind_ageRequirement{Age requirement}EligibilityRuleKind_waiver{Waiver}EventAccessWindowKind_absolute{Fixed dates}EventAccessWindowKind_occurrenceRelative{Relative to each date}InventoryShape_generalCapacity{General capacity}InventoryShape_sharedTicketPool{Shared ticket pool}InventoryShape_separateTicketPools{Separate ticket pools}InventoryShape_zones{Zones}InventoryShape_assignedSeating{Assigned seats}InventoryShape_teamSlots{Team slots}InventoryShape_participantRoles{Participant roles}InventoryShape_roleBalancedSlots{Role-balanced slots}InventoryShape_tableInventory{Tables}InventoryShape_timeSlotInventory{Time slots}InventoryChannel_onsite{On site}InventoryChannel_online{Online}InventoryChannel_any{Any}InventoryAuthority_none{Nobody}InventoryAuthority_recharge{Recharge}InventoryAuthority_externalProvider{External provider}ActivityContributionKind_purchase{Purchase}ActivityContributionKind_donation{Donation}ActivityContributionKind_other{Other}ActivitySeason_winter{Winter}ActivitySeason_spring{Spring}ActivitySeason_summer{Summer}ActivitySeason_autumn{Autumn}ActivitySeason_any{Any season}ActivityTimeOfDay_morning{Morning}ActivityTimeOfDay_afternoon{Afternoon}ActivityTimeOfDay_evening{Evening}ActivityTimeOfDay_night{Night}ActivityTimeOfDay_any{Any time}PlaceOperationalStatus_operating{Operating}PlaceOperationalStatus_temporarilyClosed{Temporarily closed}PlaceOperationalStatus_permanentlyClosed{Permanently closed}RentalLocationDisclosure_approximateArea{Approximate area (default)}RentalLocationDisclosure_publicBusinessAddress{Public business address}RentalScheduleMode_openingHours{Opening hours}RentalScheduleMode_byArrangement{By arrangement}RentalBillingUnit_hour{Per hour}RentalBillingUnit_day{Per day}RentalBillingUnit_week{Per week}RentalCondition_rentalNew{New}RentalCondition_likeNew{Like new}RentalCondition_good{Good}RentalCondition_worn{Worn}RentalDepositCollectionMethod_none{No deposit}RentalDepositCollectionMethod_atHandover{At handover}RentalDepositCollectionMethod_externalProvider{External provider}RentalDepositCollectionMethod_other{Other}VisibilityType_public{Public}VisibilityType_unlisted{By link}VisibilityType_private{Private}PublishStatus_draft{Draft}PublishStatus_pendingReview{Pending review}PublishStatus_published{Published}PublishStatus_archived{Archived}PublishStatus_hidden{Hidden}PublishStatus_deleted{Deleted} other{Other}}'**
+  String createOption(String value);
+
+  /// Create field: city (required).
+  ///
+  /// In en, this message translates to:
+  /// **'City *'**
+  String get createFormCityRequired;
+
+  /// Create field: latitude (required).
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude *'**
+  String get createFormLatitudeRequired;
+
+  /// Create field: longitude (required).
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude *'**
+  String get createFormLongitudeRequired;
+
+  /// Create field: category (required).
+  ///
+  /// In en, this message translates to:
+  /// **'Category *'**
+  String get createFormCategoryRequired;
+
+  /// Create field: subcategory (required).
+  ///
+  /// In en, this message translates to:
+  /// **'Subcategory *'**
+  String get createFormSubcategoryRequired;
+
+  /// Create field: title (required).
+  ///
+  /// In en, this message translates to:
+  /// **'Title *'**
+  String get createFormTitleRequired;
+
+  /// Event preview: number of dates.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} date} other{{count} dates}}'**
+  String createFormOccurrences(int count);
+
+  /// Event preview: admission summary; value is a list of localized option labels.
+  ///
+  /// In en, this message translates to:
+  /// **'Admission: {value}'**
+  String createFormAdmissionLine(String value);
+
+  /// Preview: visibility; value is a localized option label.
+  ///
+  /// In en, this message translates to:
+  /// **'Visibility: {value}'**
+  String createFormVisibilityLine(String value);
+
+  /// Event preview: number of blocking problems.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} problem blocks publishing} other{{count} problems block publishing}}'**
+  String createFormBlockingIssues(int count);
+
+  /// Create: the draft is being sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending…'**
+  String get createFormSending;
+
+  /// Create: the draft is being published.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing…'**
+  String get createFormPublishing;
+
+  /// Rental: fallback name of an unnamed item group.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get createFormGroup;
+
+  /// Preview: no title yet.
+  ///
+  /// In en, this message translates to:
+  /// **'(no title yet)'**
+  String get createFormNoTitleYet;
+
+  /// Rental preview: number of units.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} unit} other{{count} units}}'**
+  String createFormUnits(int count);
+
+  /// Rental preview: deposit amount, formatted with its currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit: {price}'**
+  String createFormDepositLine(String price);
+
+  /// Activity field: group size, maximum people.
+  ///
+  /// In en, this message translates to:
+  /// **'Group, max people'**
+  String get createFormGroupMaxPeople;
+
+  /// Collection preview: who publishes; type is the stable publisher type.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, user{Publisher: your profile} page{Publisher: a professional page} other{Publisher: not set}}'**
+  String createFormPublisherLine(String type);
+
+  /// Create: the draft has unsaved state.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get createFormDraft;
+
+  /// Create form section: details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get createFormDetails;
+
+  /// Create form section: availability.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability'**
+  String get createFormAvailability;
+
+  /// Opening hours rule: closed all day.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get createFormClosed;
+
+  /// Create object type name. type is the stable CreateObjectType name.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, event{Event}activity{Recharge activity}route{Route}place{Place}session{Bookable session}scenario{Scenario}quickPlan{Legacy Quick Plan}findPeople{Find people}classWorkshop{Class / workshop}rental{Rental / equipment}collection{Collection / guide} other{Object}}'**
+  String createObjectTypeName(String type);
+
+  /// Create object type explanation. type is the stable CreateObjectType name.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, event{Public activity with time, place, and attendees}activity{Lightweight activity such as a walk or reset}route{Continuous track with anchors, segments and route details}place{A permanent physical place, venue, public space or landmark}session{Time-based service, class, table, court, or session}scenario{City, day, weekend or trip plan made of independent stops}quickPlan{Personal lightweight plan kept for read compatibility}findPeople{Find company for a specific activity}classWorkshop{A guided class, workshop, or hands-on experience}rental{Equipment or transport available for rent}collection{A curated collection of places and ideas} other{Create an object}}'**
+  String createObjectTypeDescription(String type);
+
+  /// Create form location field label. type is the stable CreateObjectType name.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, event{Venue}activity{Where to go}route{Start point}place{Place name}session{Bookable venue}scenario{Area or city}quickPlan{Meeting place}findPeople{Meeting place}classWorkshop{Class venue}rental{Pickup place}collection{Area} other{Location}}'**
+  String createObjectTypeLocationLabel(String type);
+
+  /// Create form price field label. type is the stable CreateObjectType name.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, event{Ticket or entry price}activity{}route{Route budget}place{Typical spend}session{Booking price}scenario{Scenario budget}quickPlan{Expected spend}findPeople{Expected spend}classWorkshop{Participation price}rental{Rental price}collection{Collection budget} other{Price}}'**
+  String createObjectTypePriceLabel(String type);
+
+  /// Create app bar title for a new object. type is the stable CreateObjectType name.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, event{New event}activity{New recharge activity}route{New route}place{New place}session{New bookable session}scenario{New scenario}quickPlan{New legacy quick plan}findPeople{New find people}classWorkshop{New class / workshop}rental{New rental / equipment}collection{New collection / guide} other{New object}}'**
+  String createObjectTypeNewTitle(String type);
+
+  /// Create page title. type is the stable CreateObjectType name.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, event{Create Event}activity{Create Recharge activity}route{Create Route}place{Create Place}session{Create Bookable session}scenario{Create Scenario}quickPlan{Create Legacy Quick Plan}findPeople{Create Find people}classWorkshop{Create Class / workshop}rental{Create Rental / equipment}collection{Create Collection / guide} other{Create}}'**
+  String createObjectTypeCreateTitle(String type);
+
+  /// Create form: the object is free. type is the stable CreateObjectType name.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, event{Free event}activity{Free recharge activity}route{Free route}place{Free place}session{Free bookable session}scenario{Free scenario}quickPlan{Free legacy quick plan}findPeople{Free find people}classWorkshop{Free class / workshop}rental{Free rental / equipment}collection{Free collection / guide} other{Free}}'**
+  String createObjectTypeFreeToggle(String type);
+
+  /// Create form: start instant in UTC. type is the stable CreateObjectType name.
+  ///
+  /// In en, this message translates to:
+  /// **'{type, select, event{Event start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}activity{Recharge activity start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}route{Route start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}place{Place start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}session{Bookable session start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}scenario{Scenario start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}quickPlan{Legacy Quick Plan start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}findPeople{Find people start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}classWorkshop{Class / workshop start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}rental{Rental / equipment start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *}collection{Collection / guide start date and time, UTC (YYYY-MM-DDTHH:mm:ssZ) *} other{Start date and time, UTC *}}'**
+  String createObjectTypeStartUtc(String type);
+
+  /// Create success: the draft is now in a status; value is a localized status label.
+  ///
+  /// In en, this message translates to:
+  /// **'Now: {value}.'**
+  String createFormNowStatus(String value);
 }
 
 class _AppLocalizationsDelegate

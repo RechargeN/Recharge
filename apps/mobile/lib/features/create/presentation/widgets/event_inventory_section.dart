@@ -6,6 +6,7 @@ import '../../domain/entities/event_inventory.dart';
 import 'event_availability_preview.dart';
 import '../../../../core/localization/l10n_context.dart';
 import 'create_texts.dart';
+import 'create_form_texts.dart';
 
 class EventInventorySection extends StatelessWidget {
   const EventInventorySection({
@@ -23,7 +24,7 @@ class EventInventorySection extends StatelessWidget {
     final EventInventoryConfiguration? value = state.configuration;
     return Semantics(
       container: true,
-      label: 'Event inventory configuration',
+      label: context.l10n.createFormEventInventoryConfiguration,
       child: Column(
         key: const Key('event-inventory-section'),
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -34,14 +35,11 @@ class EventInventorySection extends StatelessWidget {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Capacity is a declared limit. It is not a live participant count '
-            'or transactional inventory balance.',
-          ),
+          Text(context.l10n.createFormCapacityDeclaredLimitNotLiveParticipant),
           const SizedBox(height: 12),
           _EnumField<EventCapacityMode>(
             key: const Key('event-access-capacity-mode'),
-            label: 'Event capacity',
+            label: context.l10n.createFormEventCapacity,
             value: state.capacityMode,
             values: EventCapacityMode.values,
             error: _errorText(context, state, 'capacity'),
@@ -56,7 +54,7 @@ class EventInventorySection extends StatelessWidget {
               initialValue: state.capacity?.toString() ?? '',
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: 'Maximum participants *',
+                labelText: context.l10n.createFormMaximumParticipants2,
                 errorText: _errorText(context, state, 'capacity'),
               ),
               onChanged: (raw) => controller.updateEventCapacity(
@@ -67,7 +65,7 @@ class EventInventorySection extends StatelessWidget {
           const SizedBox(height: 12),
           _EnumField<InventoryAuthority>(
             key: const Key('event-inventory-authority'),
-            label: 'Inventory authority',
+            label: context.l10n.createFormInventoryAuthority,
             value: value?.authority,
             values: InventoryAuthority.values,
             error: _errorText(context, state, 'inventoryAuthority'),
@@ -77,7 +75,7 @@ class EventInventorySection extends StatelessWidget {
               value.authority != InventoryAuthority.none) ...<Widget>[
             _EnumField<InventoryShape>(
               key: const Key('event-inventory-primary-shape'),
-              label: 'Primary inventory shape *',
+              label: context.l10n.createFormPrimaryInventoryShape,
               value: value.primaryShape,
               values: InventoryShape.values,
               error: _errorText(context, state, 'inventoryPrimaryShape'),
@@ -88,7 +86,7 @@ class EventInventorySection extends StatelessWidget {
             ),
             if (value.primaryShape != null) ...<Widget>[
               Text(
-                'Additional views of the same inventory',
+                context.l10n.createFormAdditionalViewsSameInventory,
                 style: Theme.of(context).textTheme.labelLarge,
               ),
               const SizedBox(height: 6),
@@ -104,7 +102,7 @@ class EventInventorySection extends StatelessWidget {
                       return FilterChip(
                         key: Key('event-inventory-additional-${shape.name}'),
                         selected: selected,
-                        label: Text(_label(shape.name)),
+                        label: Text(createOptionText(context.l10n, shape)),
                         onSelected: (next) {
                           final Set<InventoryShape> shapes = <InventoryShape>{
                             ...value.additionalShapes,
@@ -190,22 +188,27 @@ class _PoolComposerState extends State<_PoolComposer> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Text('Add pool', style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            context.l10n.createFormAddPool,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           TextField(
             key: const Key('event-pool-new-label'),
             controller: _labelController,
-            decoration: const InputDecoration(labelText: 'Public pool label'),
+            decoration: InputDecoration(
+              labelText: context.l10n.createFormPublicPoolLabel,
+            ),
           ),
           const SizedBox(height: 8),
           _EnumField<InventoryChannel>(
-            label: 'Channel',
+            label: context.l10n.createFormChannel,
             value: _channel,
             values: InventoryChannel.values,
             onChanged: (next) => setState(() => _channel = next),
           ),
           _EnumField<EventCapacityMode>(
-            label: 'Pool capacity',
+            label: context.l10n.createFormPoolCapacity,
             value: _capacityMode,
             values: EventCapacityMode.values,
             onChanged: (next) => setState(() {
@@ -217,7 +220,9 @@ class _PoolComposerState extends State<_PoolComposer> {
             TextField(
               key: const Key('event-pool-new-capacity'),
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Capacity'),
+              decoration: InputDecoration(
+                labelText: context.l10n.createFormCapacity,
+              ),
               onChanged: (raw) => _capacity = int.tryParse(raw),
             ),
           const SizedBox(height: 8),
@@ -236,7 +241,7 @@ class _PoolComposerState extends State<_PoolComposer> {
                 _labelController.clear();
               },
               icon: const Icon(Icons.add),
-              label: const Text('Add pool'),
+              label: Text(context.l10n.createFormAddPool),
             ),
           ),
         ],
@@ -262,30 +267,34 @@ class _PoolEditor extends StatelessWidget {
   Widget build(BuildContext context) => Card.outlined(
     key: Key('event-pool-${pool.id}'),
     child: ExpansionTile(
-      title: Text(pool.label.isEmpty ? 'Unnamed pool' : pool.label),
+      title: Text(
+        pool.label.isEmpty ? context.l10n.createFormUnnamedPool : pool.label,
+      ),
       subtitle: Text(
-        '${_label(pool.channel.name)} · ${_label(pool.shape.name)}',
+        '${createOptionText(context.l10n, pool.channel)} · ${createOptionText(context.l10n, pool.shape)}',
       ),
       childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       children: <Widget>[
         TextFormField(
           key: Key('event-pool-label-${pool.id}'),
           initialValue: pool.label,
-          decoration: const InputDecoration(labelText: 'Public pool label'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createFormPublicPoolLabel,
+          ),
           onChanged: (text) => controller.updateEventInventoryPool(
             pool.copyWith(label: text.trim()),
           ),
         ),
         const SizedBox(height: 8),
         _EnumField<InventoryShape>(
-          label: 'Shape',
+          label: context.l10n.createFormShape,
           value: pool.shape,
           values: InventoryShape.values,
           onChanged: (shape) =>
               controller.updateEventInventoryPool(pool.copyWith(shape: shape)),
         ),
         _EnumField<InventoryChannel>(
-          label: 'Channel',
+          label: context.l10n.createFormChannel,
           value: pool.channel,
           values: InventoryChannel.values,
           onChanged: (channel) => controller.updateEventInventoryPool(
@@ -293,7 +302,7 @@ class _PoolEditor extends StatelessWidget {
           ),
         ),
         _EnumField<EventCapacityMode>(
-          label: 'Capacity mode',
+          label: context.l10n.createFormCapacityMode,
           value: pool.capacityMode,
           values: EventCapacityMode.values,
           onChanged: (mode) => controller.updateEventInventoryPool(
@@ -308,7 +317,9 @@ class _PoolEditor extends StatelessWidget {
             key: Key('event-pool-capacity-${pool.id}'),
             initialValue: pool.capacity?.toString() ?? '',
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Capacity'),
+            decoration: InputDecoration(
+              labelText: context.l10n.createFormCapacity,
+            ),
             onChanged: (raw) => controller.updateEventInventoryPool(
               pool.copyWith(capacity: int.tryParse(raw)),
             ),
@@ -318,8 +329,8 @@ class _PoolEditor extends StatelessWidget {
           TextFormField(
             key: Key('event-pool-roles-${pool.id}'),
             initialValue: pool.roleIds.join(', '),
-            decoration: const InputDecoration(
-              labelText: 'Neutral role IDs, comma-separated',
+            decoration: InputDecoration(
+              labelText: context.l10n.createFormNeutralRoleIdsCommaSeparated,
             ),
             onChanged: (raw) => controller.updateEventInventoryPool(
               pool.copyWith(
@@ -349,7 +360,7 @@ class _PoolEditor extends StatelessWidget {
         Row(
           children: <Widget>[
             IconButton(
-              tooltip: 'Move pool up',
+              tooltip: context.l10n.createFormMovePoolUp,
               onPressed: index == 0
                   ? null
                   : () =>
@@ -357,7 +368,7 @@ class _PoolEditor extends StatelessWidget {
               icon: const Icon(Icons.arrow_upward),
             ),
             IconButton(
-              tooltip: 'Move pool down',
+              tooltip: context.l10n.createFormMovePoolDown,
               onPressed: index == total - 1
                   ? null
                   : () =>
@@ -366,7 +377,7 @@ class _PoolEditor extends StatelessWidget {
             ),
             const Spacer(),
             IconButton(
-              tooltip: 'Remove pool',
+              tooltip: context.l10n.createFormRemovePool,
               onPressed: () => controller.removeEventInventoryPool(pool.id),
               icon: const Icon(Icons.delete_outline),
             ),
@@ -404,7 +415,7 @@ class _EnumField<T extends Enum> extends StatelessWidget {
           .map(
             (item) => DropdownMenuItem<T>(
               value: item,
-              child: Text(_label(item.name)),
+              child: Text(createOptionText(context.l10n, item)),
             ),
           )
           .toList(growable: false),
@@ -453,14 +464,6 @@ class _IssueText extends StatelessWidget {
     ),
   );
 }
-
-String _label(String value) => value
-    .replaceAllMapped(
-      RegExp(r'([a-z])([A-Z])'),
-      (match) => '${match.group(1)} ${match.group(2)}',
-    )
-    .replaceAll('_', ' ')
-    .toLowerCase();
 
 /// L4: a section field error, resolved from its message id.
 String? _errorText(

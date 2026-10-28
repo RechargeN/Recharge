@@ -79,8 +79,14 @@ void main() {
     await tester.tap(find.byKey(const Key('open-event-templates')));
     await tester.pumpAndSettle();
     expect(find.text('Your Event templates'), findsOneWidget);
-    expect(find.text('Community reusable'), findsOneWidget);
-    await tester.tap(find.text('Community reusable'));
+    // L4.3: the panel also shows the last template's name under the
+    // sheet; pick the entry inside the opened template list.
+    final Finder listed = find.descendant(
+      of: find.byType(BottomSheet),
+      matching: find.text('Community reusable'),
+    );
+    expect(listed, findsOneWidget);
+    await tester.tap(listed);
     await tester.pumpAndSettle();
 
     expect(controller.state.draft.id, isNot(sourceId));

@@ -56,9 +56,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
     final CreateDraftEntity draft = widget.state.draft;
     final FindPeopleDraftData? data = draft.findPeopleData;
     if (data == null) {
-      return const _Panel(
-        child: Text('Find People draft data is being prepared…'),
-      );
+      return _Panel(child: Text('Find People draft data is being prepared…'));
     }
     final int step = widget.state.findPeopleStep;
     final FindPeopleCreateStepConfig config = findPeopleCreateSteps[step];
