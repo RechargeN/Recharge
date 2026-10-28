@@ -22,6 +22,11 @@ class SignInPage extends ConsumerStatefulWidget {
   final String sourceScreen;
   final String sourceAction;
 
+  /// Stable keys for tests; never derived from the localized labels.
+  static const Key emailFieldKey = ValueKey<String>('sign-in-email');
+  static const Key passwordFieldKey = ValueKey<String>('sign-in-password');
+  static const Key submitButtonKey = ValueKey<String>('sign-in-submit');
+
   @override
   ConsumerState<SignInPage> createState() => _SignInPageState();
 }
@@ -81,6 +86,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               Text(l10n.authSignInBody),
               const SizedBox(height: 24),
               TextFormField(
+                key: SignInPage.emailFieldKey,
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
@@ -91,6 +97,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               ),
               const SizedBox(height: 12),
               TextFormField(
+                key: SignInPage.passwordFieldKey,
                 controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
@@ -101,6 +108,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               ),
               const SizedBox(height: 16),
               FilledButton(
+                key: SignInPage.submitButtonKey,
                 onPressed: _isSubmitting ? null : _onSubmit,
                 child: Text(
                   _isSubmitting ? l10n.authSigningIn : l10n.commonSignIn,

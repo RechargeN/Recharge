@@ -26,8 +26,12 @@ abstract final class PublicationTexts {
   );
 
   /// A server object that could not be read, with its localized reason.
+  /// A missing code is a failed read, not an unconfirmed write, so it gets
+  /// the generic error rather than the "could not confirm" text.
   static String unavailable(AppLocalizations l10n, String? failureCode) =>
       l10n.publicationObjectUnavailable(
-        UserMessageCatalog.publication(l10n, failureCode ?? 'unknown'),
+        failureCode == null
+            ? l10n.errorGeneric
+            : UserMessageCatalog.publication(l10n, failureCode),
       );
 }

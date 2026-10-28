@@ -73,6 +73,7 @@ import '../../features/create/data/datasources/scenario_proposal_mock_datasource
 import '../../features/create/data/datasources/gtfs_cache_datasource.dart';
 import '../../features/create/data/datasources/latvia_gtfs_datasource.dart';
 import '../../features/create/application/create_runtime_defaults.dart';
+import '../../features/create/application/location_search_config.dart';
 import '../../features/create/application/event_create_coordinator.dart';
 import '../../features/create/application/scenario_create_coordinator.dart';
 import '../../features/create/application/scenario_generation_coordinator.dart';
@@ -669,6 +670,11 @@ Future<void> setupDependencies() async {
         server: sl<CatalogCollectionCatalogSearchRepository>(),
         local: CollectionCatalogSearchRepositoryImpl(datasource: sl()),
       ),
+    )
+    // Place/Collection search rollback flag and debounce; the Create
+    // controller reads it (8f53854 dropped the registration).
+    ..registerLazySingleton<LocationSearchRuntimeConfig>(
+      () => const LocationSearchRuntimeConfig(),
     )
     // LOC-SRCH prerequisite: key comes from the gitignored
     // google_maps.properties via --dart-define-from-file (documented in

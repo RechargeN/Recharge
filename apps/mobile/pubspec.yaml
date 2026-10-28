@@ -57,8 +57,8 @@ dependencies:
   geolocator: 14.0.2
   google_maps_flutter: ^2.12.3
   http: ^1.6.0
-  # L4: version pinned by flutter_localizations.
-  intl: any
+  # L4: exact version required by the SDK flutter_localizations (keep in sync on Flutter upgrade).
+  intl: 0.20.2
   path_provider: ^2.1.5
   timezone: ^0.10.1
   url_launcher: ^6.3.0

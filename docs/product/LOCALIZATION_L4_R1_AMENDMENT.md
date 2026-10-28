@@ -1,10 +1,11 @@
 # L4 — локализация Release R1 на lv / en / ru
 
 - ID: **LOCALIZATION-L4**
-- Версия: **0.2 (v0.1 + доработка пробелов G08–G10: валидация Create, Details, главная, сырые коды)**
+- Версия: **0.3 (v0.2 + L4.1: хвосты ревью v0.2, честный inventory «только интерфейс», evidence v0.2)**
 - Дата: **2026-10-27**
 - Статус: **Review — механизм, policy, контракты и миграция серверных R1-поверхностей; языковой review не проведён**
 - База: `codex/recharge-integration` @ `01065f6` (L1–L3 + 01–36), ветка `claude/l4-localization`
+  (v0.1–v0.2, вершина `af04b1d`); v0.3 — ветка `claude/l4-1-tails` от `af04b1d`
 - Расширяет: [BCK-20](REFERENCE_DATA_LOCALIZATION_SPEC.md) §12, §17, §21 (OD-10
   LocalizedText — accepted technical contract), F1 Notifications
   (`notification_templates.ts`, BCK13-OD-05 открыт), Latvia roadmap §2.1–2.2, §3.5
@@ -138,7 +139,7 @@ Localization review (BCK20-OD-02 открыт).
 
 | Файл | Назначение |
 |---|---|
-| `apps/mobile/l10n.yaml`, `pubspec.yaml` (`flutter_localizations`, `intl` из SDK pin, `generate: true`) | конфигурация |
+| `apps/mobile/l10n.yaml`, `pubspec.yaml` (`flutter_localizations`, `intl: 0.20.2` — точная версия, которую требует `flutter_localizations` SDK; при обновлении Flutter меняется вместе с ним, `generate: true`) | конфигурация |
 | `apps/mobile/lib/l10n/app_{en,lv,ru}.arb` | ресурсы (en — шаблон с описаниями) |
 | `apps/mobile/lib/generated/l10n/*` | сгенерировано `flutter gen-l10n`, закоммичено; свежесть проверяет тест |
 | `lib/core/localization/app_locale_policy.dart` | языки, разрешение, wire-mapping уведомлений |
@@ -148,7 +149,7 @@ Localization review (BCK20-OD-02 открыт).
 | `lib/core/localization/recharge_formats.dart` | деньги, числа, даты в зоне объекта |
 | `lib/app/app.dart`, `bootstrap.dart`, `main.dart`, `di/service_locator.dart`, `di/notifications_inbox_composition.dart` | подключение |
 | мигрированные экраны (§2) | замена строк, typed сообщения |
-| `tool/l10n_inventory.dart`, `test/fixtures/l10n/unlocalized_baseline.json` | inventory и ratchet |
+| `tool/l10n_inventory.dart`, `test/fixtures/l10n/unlocalized_baseline.json` | inventory (весь / только интерфейс, по слоям) и ratchet по интерфейсу |
 
 Предложения не собираются конкатенацией переводов: состояния передаются в
 сообщение как placeholders одного шаблона, падежи/числа — через ICU
@@ -166,7 +167,10 @@ Localization review (BCK20-OD-02 открыт).
   приложение», `idempotency_conflict` → общий текст), либо «не ошибка»
   (`eligible`, `rendered`). Каталог не содержит кодов, которых нет в схеме.
 - Неизвестный код → безопасный общий текст; код остаётся в состоянии для
-  диагностики, на экран не выводится.
+  диагностики, на экран не выводится. Отсутствующий код при ошибке чтения
+  объекта (`PublicationTexts.unavailable`) → тот же общий текст `errorGeneric`
+  (v0.3; раньше подставлялся `unknown` → «не удалось подтвердить результат»,
+  что относится к неподтверждённой записи, а не к чтению).
 - Тексты ошибок не называют репортёра, приватные условия брони, другой аккаунт
   или провайдера; параметры сообщений — только числа, stable ids и уже
   локализованные фрагменты (проверено allowlist-тестом).
@@ -224,7 +228,7 @@ ids, revisions, idempotency keys, enum values, schema versions, timestamps и
 | L4-G05 | Тексты Privacy/Terms/Support — обязательная локальная копия; локализованы только названия ссылок | Legal/mandatory-copy manifest (BCK20-OD-05) |
 | L4-G06 | Языковой review lv/ru не проведён | Product Localization owner/носители, BCK20-OD-02 |
 | L4-G07 | Legacy `explore_settings.language` (по аккаунту, `ru`) и выбор валюты EUR/USD в Settings — mock без эффекта; валюта по-прежнему из данных | продуктовое решение об удалении |
-| L4-G08 | Частично закрыт в v0.2 (валидация Create, Details, главная). Осталось ≈ 2 827 литералов в 183 файлах (эвристика): `features/create` 1 521 (тексты форм), `features/discover` 763 (поиск, карта, рендеры; часть — mock-данные и ключевые слова парсера), `identity` 117, `scenarios` 111, `explore` 100 (Profile), `app/presentation` 34 (Scenario intake), `auth` 23 (маркетинговые шаблоны главной; заголовки секций служат ключами виджетов), прочее ≤ 28 | следующие срезы; ratchet запрещает рост |
+| L4-G08 | Частично закрыт в v0.2 (валидация Create, Details, главная). v0.3 отделила не-интерфейс (§12): весь inventory — 2 827 литералов в 183 файлах (эвристика), из них 290 в 19 файлах — mock-данные, сиды, словарь парсера, демо-граф и GTFS; **только интерфейс — 2 537 в 164 файлах**: `features/create` 1 424 (тексты форм), `features/discover` 587 (поиск, карта, рендеры), `identity` 117, `scenarios` 111, `explore` 100 (Profile), `app/presentation` 34 (Scenario intake), `core/config` 28, `auth` 23 (маркетинговые шаблоны главной; заголовки секций служат ключами виджетов), прочее ≤ 22. По слоям (интерфейс): presentation 1 737, application 360, domain 309, data 77, прочее 54 | следующие срезы; ratchet по интерфейсу запрещает рост |
 | L4-G09 | Аудит v0.2: сырых кодов на экранах больше нет (guard-тест). Открыто: Library, Quick Plan, Route/Scenario sync, Privacy intake и Identity Session не перечисляют коды в схемах, поэтому контракт «схема ↔ каталог» для них невозможен; их UI показывает английские предложения, учтённые в inventory | перечислить коды в схемах (владельцы модулей), затем добавить семейства в каталог |
 | L4-G10 | Переквалифицирован в v0.2: строки legacy Scenario-route preview на экран не выводятся (список действий пуст), они только подставляются как данные предзаполнения Create (title/subtitle/q). Переводить их нельзя — это изменило бы данные черновика | migration debt Scenario/Route, не UI-локализация |
 
@@ -240,3 +244,27 @@ F2, I3, J2) запускают изменённые Flutter-клиенты пр�
 Платный или машинный перевод, новые языки и рынки, production/cloud, изменение
 схем и доменной семантики, переписывание сохранённых уведомлений, перевод
 пользовательского контента и официальных названий.
+
+## 12. v0.3 (L4.1): хвосты v0.2 и честный inventory
+
+Ветка `claude/l4-1-tails` от `af04b1d`. Runtime-эффект: одна строка
+отображения (`PublicationTexts.unavailable`), тестовые ключи формы входа и
+регистрация `LocationSearchRuntimeConfig` в DI (исправление дефекта базы);
+backend, схемы, ARB-ключи и сохранённые данные не менялись.
+
+| Что | Изменение | Проверка |
+|---|---|---|
+| Ошибка чтения объекта без кода | `PublicationTexts.unavailable(null)` → «Недоступно: {errorGeneric}» на lv/en/ru вместо `errorUnknownOutcome`; известный код — своё сообщение, неизвестный — общий текст, сам код не выводится | `test/unit/localization/publication_texts_test.dart` (красный до правки, зелёный после); стенды публикации C3, D3.1–D3.7, I3, J2 |
+| Версия `intl` | `intl: any` → `intl: 0.20.2` (pin `flutter_localizations` SDK); `pubspec.lock` не изменился (sha256 до/после совпадает) | `flutter pub get --offline` |
+| `integration_test/auth_flow_test.dart` | сценарий восстановлен по текущей навигации: гость → `bottom-nav-profile` → auth gate роутера (Sign-in с origin `/profile`) → вход mock-учёткой → Profile, выбран в нижнем меню. Язык зафиксирован override `localeControllerProvider` (`en`). Гость получается через repository-обёртку без восстановления сессии: mock-репозиторий на чистой установке сам входит demo-аккаунтом. У Sign-in появились стабильные ключи `sign-in-email`, `sign-in-password`, `sign-in-submit` (не из текста) | Android AVD (Medium Phone API 36): зелёный. Первый прогон нашёл дефект базы (с `01065f6`): `LocationSearchRuntimeConfig` не был зарегистрирован в DI (регистрацию удалил `8f53854`), а `createControllerProvider` читает его через `sl` — Profile и Create реального приложения падали `StateError`. Исправлено регистрацией в `service_locator.dart`; регрессия — `test/unit/app_dependencies_create_controller_test.dart` (реальный `setupDependencies()` собирает Create-контроллер; красный до правки) |
+| Inventory | явный список не-интерфейса `nonInterfaceFiles` с причиной у каждого (mock-данные Discover/Create, `published_*_discovery_local_datasource`, сид уведомлений, `app/testing/`, словарь `smart_search_parser`, демо-граф маршрута, GTFS); разбивка по слоям presentation/application/domain/data; `--json` = baseline только интерфейса | `unlocalized_ratchet_test.dart`: рост по интерфейсу запрещён; baseline без исключённых файлов; каждое исключение существует, имеет причину и не лежит в `presentation`; положительный контроль |
+
+Итог inventory (эвристика, литералы): весь — 2 827 в 183 файлах (как в v0.2);
+не-интерфейс — 290 в 19 файлах; **только интерфейс — 2 537 в 164 файлах**.
+Ratchet теперь считает только интерфейс; переклассификация не перевела ни
+одной строки. В слое data вне списка остаются 77 литералов (например,
+`collection_publication_local_datasource.dart`, адаптеры Google Places): они
+не проверены как не-интерфейс и остаются в счёте.
+
+Evidence прогонов v0.2 на `af04b1d`:
+[L4_LOCALIZATION_VERIFICATION_2026_10_27](../verification/L4_LOCALIZATION_VERIFICATION_2026_10_27.md).
