@@ -9415,4 +9415,19 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get discoverByLabel => 'Автор:';
+
+  @override
+  String get discoverBadgePlace => 'МЕСТО';
+
+  @override
+  String get discoverBadgeActivity => 'АКТИВНОСТЬ';
+
+  @override
+  String get discoverBadgeFindPeople => 'ПОИСК КОМПАНИИ';
+
+  @override
+  String get discoverBadgeSession => 'СЕАНС';
+
+  @override
+  String get discoverBadgeClassWorkshop => 'ЗАНЯТИЕ / ВОРКШОП';
 }

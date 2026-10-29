@@ -105,7 +105,7 @@ void main() {
     expect(find.byType(ObjectOfferMetricsStrip), findsOneWidget);
     expect(find.byType(ObjectOfferCard), findsNWidgets(4));
     expect(find.byType(ObjectOfferStickyActionShell), findsOneWidget);
-    expect(find.text('ACTIVITY'), findsOneWidget);
+    expect(find.text('АКТИВНОСТЬ'), findsOneWidget);
   });
 
   fullPageTestWidgets('Activity renders only data-backed content', (

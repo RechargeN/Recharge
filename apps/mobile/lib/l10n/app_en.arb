@@ -10073,5 +10073,25 @@
   "discoverByLabel": "By",
   "@discoverByLabel": {
     "description": "Discover: label before a publisher name (shown as is)."
+  },
+  "discoverBadgePlace": "PLACE",
+  "@discoverBadgePlace": {
+    "description": "Discover: Details type badge (upper case)."
+  },
+  "discoverBadgeActivity": "ACTIVITY",
+  "@discoverBadgeActivity": {
+    "description": "Discover: Details type badge (upper case)."
+  },
+  "discoverBadgeFindPeople": "FIND PEOPLE",
+  "@discoverBadgeFindPeople": {
+    "description": "Discover: Details type badge (upper case)."
+  },
+  "discoverBadgeSession": "SESSION",
+  "@discoverBadgeSession": {
+    "description": "Discover: Details type badge (upper case)."
+  },
+  "discoverBadgeClassWorkshop": "CLASS / WORKSHOP",
+  "@discoverBadgeClassWorkshop": {
+    "description": "Discover: Details type badge (upper case)."
   }
 }

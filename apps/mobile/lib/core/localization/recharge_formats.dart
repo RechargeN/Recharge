@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
@@ -34,6 +36,22 @@ abstract final class RechargeFormats {
     );
     // Money keeps integer hundredths; the division happens only for display.
     return format.format(value.minorUnits / 100);
+  }
+
+  /// An amount kept in [amountMinor] units of [minorUnitDigits] decimals
+  /// (JPY 0, EUR 2, KWD 3) with its own currency.
+  static String minorUnits(
+    int amountMinor,
+    String currencyCode,
+    int minorUnitDigits,
+    String languageCode,
+  ) {
+    final NumberFormat format = NumberFormat.simpleCurrency(
+      locale: languageCode,
+      name: currencyCode,
+      decimalDigits: minorUnitDigits,
+    );
+    return format.format(amountMinor / math.pow(10, minorUnitDigits));
   }
 
   /// A plain number with up to [maxFractionDigits] decimals.

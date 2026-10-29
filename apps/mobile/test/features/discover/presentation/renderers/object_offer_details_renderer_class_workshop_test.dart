@@ -39,6 +39,7 @@ void main() {
   test('currency precision comes from the source without float rounding', () {
     expect(
       classWorkshopPriceLabel(
+        lookupAppLocalizations(const Locale('en')),
         ClassWorkshopPriceFixed(
           amountMinor: 2500,
           currencyCode: 'JPY',
@@ -46,10 +47,11 @@ void main() {
           scope: ClassWorkshopPriceScope.perPersonPerClass,
         ),
       ),
-      '2500 JPY',
+      '¥2,500',
     );
     expect(
       classWorkshopPriceLabel(
+        lookupAppLocalizations(const Locale('en')),
         ClassWorkshopPriceFixed(
           amountMinor: 12345,
           currencyCode: 'KWD',
@@ -57,7 +59,7 @@ void main() {
           scope: ClassWorkshopPriceScope.perPersonPerClass,
         ),
       ),
-      '12.345 KWD',
+      'din12.345',
     );
     expect(
       () => ClassWorkshopPriceFixed(
@@ -78,7 +80,7 @@ void main() {
       await tester.pumpAndSettle();
       final labels = [
         'Мастер-класс по гончарному делу',
-        '25 EUR',
+        '25,00\u00a0€',
         'Ирина Смирнова',
         'О занятии',
         'Расписание',
@@ -191,7 +193,7 @@ void main() {
           ),
         ),
       );
-      expect(find.text('123.45 EUR'), findsOneWidget);
+      expect(find.textContaining('123,45'), findsOneWidget);
       expect(find.text('Цена за человека / курс'), findsOneWidget);
       expect(find.text('Длительность курса'), findsOneWidget);
       expect(find.text('Практика за гончарным кругом'), findsNWidgets(20));

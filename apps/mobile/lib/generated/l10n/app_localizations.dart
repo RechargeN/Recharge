@@ -12995,6 +12995,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'By'**
   String get discoverByLabel;
+
+  /// Discover: Details type badge (upper case).
+  ///
+  /// In en, this message translates to:
+  /// **'PLACE'**
+  String get discoverBadgePlace;
+
+  /// Discover: Details type badge (upper case).
+  ///
+  /// In en, this message translates to:
+  /// **'ACTIVITY'**
+  String get discoverBadgeActivity;
+
+  /// Discover: Details type badge (upper case).
+  ///
+  /// In en, this message translates to:
+  /// **'FIND PEOPLE'**
+  String get discoverBadgeFindPeople;
+
+  /// Discover: Details type badge (upper case).
+  ///
+  /// In en, this message translates to:
+  /// **'SESSION'**
+  String get discoverBadgeSession;
+
+  /// Discover: Details type badge (upper case).
+  ///
+  /// In en, this message translates to:
+  /// **'CLASS / WORKSHOP'**
+  String get discoverBadgeClassWorkshop;
 }
 
 class _AppLocalizationsDelegate

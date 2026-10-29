@@ -2147,5 +2147,10 @@
   "discoverCategoryNotFound": "Категория не найдена",
   "discoverOpenRoute": "Открыть маршрут",
   "discoverTodayDate": "Сегодня, {date}",
-  "discoverByLabel": "Автор:"
+  "discoverByLabel": "Автор:",
+  "discoverBadgePlace": "МЕСТО",
+  "discoverBadgeActivity": "АКТИВНОСТЬ",
+  "discoverBadgeFindPeople": "ПОИСК КОМПАНИИ",
+  "discoverBadgeSession": "СЕАНС",
+  "discoverBadgeClassWorkshop": "ЗАНЯТИЕ / ВОРКШОП"
 }

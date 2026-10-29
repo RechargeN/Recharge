@@ -2147,5 +2147,10 @@
   "discoverCategoryNotFound": "Kategorija nav atrasta",
   "discoverOpenRoute": "Atvērt maršrutu",
   "discoverTodayDate": "Šodien, {date}",
-  "discoverByLabel": "Autors:"
+  "discoverByLabel": "Autors:",
+  "discoverBadgePlace": "VIETA",
+  "discoverBadgeActivity": "AKTIVITĀTE",
+  "discoverBadgeFindPeople": "MEKLĒ CILVĒKUS",
+  "discoverBadgeSession": "NODARBĪBA",
+  "discoverBadgeClassWorkshop": "NODARBĪBA / DARBNĪCA"
 }

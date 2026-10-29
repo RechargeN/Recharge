@@ -107,7 +107,7 @@ void main() {
     expect(find.byType(ObjectOfferMetricsStrip), findsOneWidget);
     expect(find.byType(ObjectOfferCard), findsNWidgets(4));
     expect(find.byType(ObjectOfferStickyActionShell), findsOneWidget);
-    expect(find.text('PLACE'), findsOneWidget);
+    expect(find.text('МЕСТО'), findsOneWidget);
   });
 
   fullPageTestWidgets(
@@ -123,7 +123,7 @@ void main() {
       expect(find.text('Riga City Gardens'), findsOneWidget);
       expect(find.text('О месте'), findsOneWidget);
       expect(find.text('Часы работы'), findsOneWidget);
-      expect(find.text('понедельник'), findsOneWidget);
+      expect(find.text('Понедельник'), findsOneWidget);
       expect(find.text('10:00–19:00'), findsOneWidget);
       expect(find.text('Показать на карте'), findsOneWidget);
     },

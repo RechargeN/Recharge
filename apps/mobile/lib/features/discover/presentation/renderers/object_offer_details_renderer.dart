@@ -24,6 +24,7 @@ import '../shell/details_renderer.dart';
 import 'object_offer_section_matrix.dart';
 import '../../domain/entities/published_class_workshop_discovery_entity.dart';
 import 'object_offer_visual_primitives.dart';
+import 'package:intl/intl.dart';
 
 /// [DetailsRenderer] for the shared Object/Offer visual profiles. Rental's
 /// legacy constructor remains here only for runtime compatibility while its
@@ -398,7 +399,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
           imageSemanticLabel: delegate.item.title,
           fallbackIcon: Icons.place_outlined,
           fallbackColor: RechargeTheme.emerald900,
-          typeLabel: 'PLACE',
+          typeLabel: context.l10n.discoverBadgePlace,
           typeForegroundColor: RechargeTheme.placeAccent,
           typeBackgroundColor: RechargeTheme.placeAccentSurface,
         ),
@@ -407,7 +408,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
           imageSemanticLabel: delegate.item.title,
           fallbackIcon: Icons.self_improvement_rounded,
           fallbackColor: RechargeTheme.emerald900,
-          typeLabel: 'ACTIVITY',
+          typeLabel: context.l10n.discoverBadgeActivity,
           typeForegroundColor: RechargeTheme.activityAccent,
           typeBackgroundColor: RechargeTheme.activityAccentSurface,
         ),
@@ -426,7 +427,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
         imageSemanticLabel: projection.title,
         fallbackIcon: Icons.diversity_3_outlined,
         fallbackColor: RechargeTheme.emerald900,
-        typeLabel: 'FIND PEOPLE',
+        typeLabel: context.l10n.discoverBadgeFindPeople,
         typeForegroundColor: RechargeTheme.findPeopleAccent,
         typeBackgroundColor: RechargeTheme.findPeopleAccentSurface,
       );
@@ -1632,8 +1633,9 @@ String _openingRuleLabel(AppLocalizations l10n, OpeningHoursRule rule) {
   if (rule.exceptionDate case final exceptionDate?) {
     return exceptionDate.toString();
   }
-  return RechargeFormats.weekdayLong(
-    rule.dayOfWeek!.index + 1,
+  // A weekday heads its table row, so it starts with a capital letter.
+  return toBeginningOfSentenceCase(
+    RechargeFormats.weekdayLong(rule.dayOfWeek!.index + 1, l10n.localeName),
     l10n.localeName,
   );
 }
@@ -3291,7 +3293,7 @@ class _BookableSessionHeroState extends State<_BookableSessionHero> {
       imageSemanticLabel: widget.projection.title,
       fallbackIcon: Icons.event_available_outlined,
       fallbackColor: RechargeTheme.emerald900,
-      typeLabel: 'SESSION',
+      typeLabel: context.l10n.discoverBadgeSession,
       typeForegroundColor: RechargeTheme.bookableSessionAccent,
       typeBackgroundColor: RechargeTheme.bookableSessionAccentSurface,
     );
@@ -3604,7 +3606,7 @@ class _ClassWorkshopDisplay {
   String? priceLabel(AppLocalizations l10n) => switch (projection.price) {
     ClassWorkshopPriceNotProvided() => null,
     ClassWorkshopPriceFree() => l10n.discoverFree,
-    final ClassWorkshopPriceFixed price => classWorkshopPriceLabel(price),
+    final ClassWorkshopPriceFixed price => classWorkshopPriceLabel(l10n, price),
   };
   String priceUnitLabel(AppLocalizations l10n) => switch (projection.price) {
     ClassWorkshopPriceFixed(:final scope) =>
@@ -3657,14 +3659,17 @@ class _ClassWorkshopDisplay {
       };
 }
 
-String classWorkshopPriceLabel(ClassWorkshopPriceFixed price) {
-  final scale = int.parse('1${'0' * price.minorUnitDigits}');
-  final remainder = price.amountMinor % scale;
-  final fraction = remainder == 0
-      ? ''
-      : '.${remainder.toString().padLeft(price.minorUnitDigits, '0')}';
-  return '${price.amountMinor ~/ scale}$fraction ${price.currencyCode}';
-}
+/// The fixed price with the currency's own number of minor digits (JPY 0,
+/// KWD 3), formatted for the reader's language.
+String classWorkshopPriceLabel(
+  AppLocalizations l10n,
+  ClassWorkshopPriceFixed price,
+) => RechargeFormats.minorUnits(
+  price.amountMinor,
+  price.currencyCode,
+  price.minorUnitDigits,
+  l10n.localeName,
+);
 
 String classWorkshopOccurrenceLabel(
   AppLocalizations l10n,
@@ -3886,7 +3891,7 @@ class _ClassWorkshopHeroState extends State<_ClassWorkshopHero> {
       imageSemanticLabel: widget.projection.title,
       fallbackIcon: Icons.school_outlined,
       fallbackColor: RechargeTheme.emerald900,
-      typeLabel: 'CLASS / WORKSHOP',
+      typeLabel: context.l10n.discoverBadgeClassWorkshop,
       typeForegroundColor: RechargeTheme.classWorkshopAccent,
       typeBackgroundColor: RechargeTheme.classWorkshopAccentSurface,
     );

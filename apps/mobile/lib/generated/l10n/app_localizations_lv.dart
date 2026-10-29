@@ -9373,4 +9373,19 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get discoverByLabel => 'Autors:';
+
+  @override
+  String get discoverBadgePlace => 'VIETA';
+
+  @override
+  String get discoverBadgeActivity => 'AKTIVITĀTE';
+
+  @override
+  String get discoverBadgeFindPeople => 'MEKLĒ CILVĒKUS';
+
+  @override
+  String get discoverBadgeSession => 'NODARBĪBA';
+
+  @override
+  String get discoverBadgeClassWorkshop => 'NODARBĪBA / DARBNĪCA';
 }

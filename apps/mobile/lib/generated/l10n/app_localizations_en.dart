@@ -9252,4 +9252,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discoverByLabel => 'By';
+
+  @override
+  String get discoverBadgePlace => 'PLACE';
+
+  @override
+  String get discoverBadgeActivity => 'ACTIVITY';
+
+  @override
+  String get discoverBadgeFindPeople => 'FIND PEOPLE';
+
+  @override
+  String get discoverBadgeSession => 'SESSION';
+
+  @override
+  String get discoverBadgeClassWorkshop => 'CLASS / WORKSHOP';
 }
