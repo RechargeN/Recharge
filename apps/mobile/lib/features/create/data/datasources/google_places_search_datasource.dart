@@ -63,7 +63,8 @@ class GooglePlacesSearchDatasource {
         Uri.parse('$_baseUrl/places/$placeId'),
         headers: <String, String>{
           'X-Goog-Api-Key': _apiKey,
-          'X-Goog-FieldMask': 'formattedAddress,location',
+          'X-Goog-FieldMask':
+              'formattedAddress,location', // l10n-ignore: HTTP header value
         },
       );
       if (response.statusCode != 200) return null;

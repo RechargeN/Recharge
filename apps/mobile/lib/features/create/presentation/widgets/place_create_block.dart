@@ -109,7 +109,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             color: Theme.of(context).colorScheme.errorContainer,
             child: ListTile(
               leading: Icon(Icons.lock_outline),
-              title: Text('Read-only draft'),
+              title: Text(context.l10n.createFormReadOnlyDraft),
               subtitle: Text(
                 context.l10n.createFormCreatePlaceCapabilityRequiredEditPublish,
               ),
@@ -276,15 +276,17 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
           id: 'short-description',
           errorFieldId: 'shortDescription',
           label: switch (policy.shortDescription) {
-            PlaceFieldRequirement.required => 'Description *',
-            PlaceFieldRequirement.recommended => 'Description (recommended)',
-            _ => 'Description',
+            PlaceFieldRequirement.required =>
+              context.l10n.createFormDescriptionRequired,
+            PlaceFieldRequirement.recommended =>
+              context.l10n.createFormDescriptionRecommended,
+            _ => context.l10n.fieldLabelDescription,
           },
           value: draft.shortDescription,
           maxLength: 180,
           maxLines: 3,
           helper: policy.shortDescription.isRequired
-              ? '20–180 characters.'
+              ? context.l10n.createPlaceShortDescHint
               : context.l10n.createFormYouCanAddImproveLater,
           onChanged: widget.controller.updateShortDescription,
         ),
@@ -403,7 +405,11 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
       initiallyExpanded: result.profile.requiredFieldIds.isNotEmpty,
       tilePadding: EdgeInsets.zero,
       title: Text(context.l10n.createFormCategoryDetails),
-      subtitle: Text('Profile: ${result.profile.id.replaceAll('_', ' ')}'),
+      // The profile id is category vocabulary (G04), not translated.
+      subtitle: Text(
+        '${context.l10n.createFormProfile}: '
+        '${result.profile.id.replaceAll('_', ' ')}',
+      ),
       children: result.fields
           .map((field) {
             final bool required = result.profile.requiredFieldIds.contains(
@@ -413,7 +419,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               return SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(
-                  '${field.id.replaceAll('_', ' ')}${required ? ' *' : ''}',
+                  '${field.id.replaceAll('_', ' ')}${required ? ' *' : ''}', // l10n-ignore: G04 criteria field id
                 ),
                 value: values[field.id] as bool? ?? false,
                 onChanged: (bool value) =>
@@ -425,7 +431,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               child: _textField(
                 id: 'criterion-${field.id}',
                 label:
-                    '${field.id.replaceAll('_', ' ')}${required ? ' *' : ''}',
+                    '${field.id.replaceAll('_', ' ')}${required ? ' *' : ''}', // l10n-ignore: G04 criteria field id
                 value: values[field.id]?.toString() ?? '',
                 helper: field.description,
                 onChanged: (String value) =>
@@ -558,9 +564,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                 initiallyExpanded:
                     (location.entranceHint?.trim().isNotEmpty ?? false),
                 title: Text(context.l10n.createFormAddDirections),
-                subtitle: const Text(
-                  'Optional: entrance, path or meeting point',
-                ),
+                subtitle: Text(context.l10n.createPlaceDirectionsHint),
                 children: <Widget>[
                   _textField(
                     id: 'entrance-hint',
@@ -643,7 +647,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             ),
             DropdownMenuItem(
               value: PlaceHoursMode.alwaysOpen,
-              child: Text('Open 24/7'),
+              child: Text(context.l10n.createPlaceOpen247),
             ),
             DropdownMenuItem(
               value: PlaceHoursMode.unknown,
@@ -652,7 +656,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             DropdownMenuItem(
               value: PlaceHoursMode.seasonal,
               enabled: false,
-              child: Text('Seasonal (Phase 2)'),
+              child: Text(context.l10n.createPlaceSeasonalPhase2),
             ),
           ],
           onChanged: (PlaceHoursMode? value) {
@@ -709,7 +713,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               Expanded(
                 child: _textField(
                   id: 'exception-date',
-                  label: 'YYYY-MM-DD',
+                  label: context.l10n.createFormDateFormatHint,
                   value: '',
                 ),
               ),
@@ -772,7 +776,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               Expanded(
                 child: _textField(
                   id: 'closed-until',
-                  label: 'Until (inclusive)',
+                  label: context.l10n.createPlaceUntilInclusive,
                   value: place.operationalStatus.closedUntilLocalDate ?? '',
                   onChanged: (String value) =>
                       widget.controller.updatePlaceOperationalStatus(
@@ -904,7 +908,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('A shorter visit can still work'),
+                title: Text(context.l10n.createPlaceShortVisit),
                 value: planning.allowsShortVisit,
                 onChanged: (bool value) => widget.controller
                     .updatePlaceVisitPlanning(allowsShortVisit: value),
@@ -985,7 +989,10 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                 DropdownButtonFormField<PlaceEntryType>(
                   isExpanded: true,
                   initialValue: pricing.entryType,
-                  decoration: _decoration('Admission', 'entryType'),
+                  decoration: _decoration(
+                    context.l10n.createFormAdmission,
+                    'entryType',
+                  ),
                   items:
                       const <PlaceEntryType>[
                             PlaceEntryType.free,
@@ -1178,7 +1185,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
           title: context.l10n.createFormPhotos,
           subtitle: policy.cover.isRequired
               ? context.l10n.createFormCoverRequiredGalleryOptional
-              : 'A cover is recommended and can be added later.',
+              : context.l10n.createPlaceCoverRecommended,
           children: <Widget>[
             _textField(
               id: 'cover-image',
@@ -1194,7 +1201,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               tilePadding: EdgeInsets.zero,
               initiallyExpanded: draft.media.gallery.isNotEmpty,
               title: Text(context.l10n.createFormAddGalleryImages),
-              subtitle: const Text('Optional · maximum 12'),
+              subtitle: Text(context.l10n.createPlaceGalleryOptional),
               children: <Widget>[
                 Row(
                   children: <Widget>[
@@ -1261,8 +1268,8 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                       leading: const Icon(Icons.content_copy_outlined),
                       title: Text(match.candidate.title),
                       subtitle: Text(
-                        '${match.distanceMeters.round()} m • '
-                        '${match.reasons.join(', ').replaceAll('_', ' ')}',
+                        '${context.l10n.createFormMetersValue('${match.distanceMeters.round()}')} • '
+                        '${match.reasons.map(context.l10n.createPlaceDuplicateReason).join(', ')}',
                       ),
                     ),
                   FilledButton.tonal(
@@ -1285,7 +1292,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               warnings.map((PlaceValidationIssue issue) => issue.code),
             ),
             icon: const Icon(Icons.check_circle_outline),
-            label: const Text('I reviewed these warnings'),
+            label: Text(context.l10n.createPlaceWarningsReviewed),
           ),
         ],
       ],
@@ -1317,7 +1324,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                   onPressed: busy
                       ? null
                       : () => widget.controller.goToPlaceStep(step + 1),
-                  child: const Text('Save & continue'),
+                  child: Text(context.l10n.createFormSaveContinue),
                 )
               : FilledButton.icon(
                   key: const ValueKey<String>('publish-place'),
@@ -1330,7 +1337,9 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                         },
                   icon: const Icon(Icons.publish_outlined),
                   label: Text(
-                    busy ? 'Publishing…' : context.l10n.createFormSendReview,
+                    busy
+                        ? context.l10n.createFormPublishing
+                        : context.l10n.createFormSendReview,
                   ),
                 ),
         ),
@@ -1346,7 +1355,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('$label: $value min'),
+        Text('$label: ${context.l10n.discoverMinutes(value)}'),
         Slider(
           value: value.toDouble(),
           min: 0,
@@ -1596,7 +1605,7 @@ class _PlaceCreatorAssistPanel extends StatelessWidget {
                     : const Icon(Icons.fact_check_outlined),
                 label: Text(
                   state.placeEnrichmentLoading
-                      ? 'Reviewing…'
+                      ? context.l10n.createFormReviewing
                       : context.l10n.createFormReviewPlace,
                 ),
               ),
@@ -1703,14 +1712,15 @@ class _PlacePreview extends StatelessWidget {
                 place.visitPlanning.recommendedVisitMinutes != null)
               _PreviewRow(
                 icon: Icons.timelapse,
-                text:
-                    '${place.visitPlanning.recommendedVisitMinutes} min recommended',
+                text: context.l10n.createPlaceRecommendedMinutes(
+                  place.visitPlanning.recommendedVisitMinutes!,
+                ),
               ),
             const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: null,
               icon: const Icon(Icons.directions_outlined),
-              label: const Text('Route (primary action)'),
+              label: Text(context.l10n.createPlaceRoutePrimary),
             ),
           ],
         ),

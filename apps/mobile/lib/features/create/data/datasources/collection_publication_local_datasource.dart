@@ -116,7 +116,7 @@ class CollectionPublicationLocalDatasource {
       if (existing.payloadHash != payloadHash) {
         throw const CollectionPublicationException(
           CollectionPublicationFailure.idempotencyConflict,
-          'This publish attempt id was already used with a different '
+          'This publish attempt id was already used with a different ' // l10n-ignore: developer error; the UI receives a code
           'payload.',
         );
       }
@@ -167,7 +167,7 @@ class CollectionPublicationLocalDatasource {
       if (existing.payloadHash != payloadHash) {
         throw const CollectionPublicationException(
           CollectionPublicationFailure.idempotencyConflict,
-          'This publish attempt id was already used with a different '
+          'This publish attempt id was already used with a different ' // l10n-ignore: developer error; the UI receives a code
           'payload.',
         );
       }
@@ -200,7 +200,7 @@ class CollectionPublicationLocalDatasource {
           null) {
         throw const CollectionPublicationException(
           CollectionPublicationFailure.persistenceUnavailable,
-          'Moderation request record is corrupt.',
+          'Moderation request record is corrupt.', // l10n-ignore: developer error; the UI receives a code
         );
       }
       // A replay here must NOT be relabelled `replayedIdempotentSuccess` —
@@ -273,7 +273,7 @@ class CollectionPublicationLocalDatasource {
       throw ArgumentError.value(
         rejectionReason,
         'rejectionReason',
-        'Must be null when accepting.',
+        'Must be null when accepting.', // l10n-ignore: developer error; the UI receives a code
       );
     }
     final String key = _moderationKey(requestId);
@@ -281,7 +281,7 @@ class CollectionPublicationLocalDatasource {
     if (raw == null) {
       throw const CollectionPublicationException(
         CollectionPublicationFailure.notFound,
-        'Moderation request not found.',
+        'Moderation request not found.', // l10n-ignore: developer error; the UI receives a code
       );
     }
     final CollectionModerationRequest? request =
@@ -289,7 +289,7 @@ class CollectionPublicationLocalDatasource {
     if (request == null) {
       throw const CollectionPublicationException(
         CollectionPublicationFailure.persistenceUnavailable,
-        'Moderation request record is corrupt.',
+        'Moderation request record is corrupt.', // l10n-ignore: developer error; the UI receives a code
       );
     }
     if (!request.isPending) {
@@ -544,7 +544,7 @@ class CollectionPublicationLocalDatasource {
       if (moderation == null) {
         throw const CollectionPublicationException(
           CollectionPublicationFailure.persistenceUnavailable,
-          'Moderation request record is corrupt.',
+          'Moderation request record is corrupt.', // l10n-ignore: developer error; the UI receives a code
         );
       }
       if (moderation.isPending) return null;

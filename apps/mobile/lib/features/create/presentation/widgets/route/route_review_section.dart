@@ -77,7 +77,10 @@ class RouteReviewSection extends StatelessWidget {
             ),
             _Metric(
               icon: Icons.schedule,
-              label: _duration(route.metrics.effectiveDurationSeconds),
+              label: _duration(
+                context.l10n,
+                route.metrics.effectiveDurationSeconds,
+              ),
             ),
             _Metric(icon: Icons.route, label: route.shape.name),
             _Metric(
@@ -94,7 +97,7 @@ class RouteReviewSection extends StatelessWidget {
         _IssuePanel(
           title: blocking.isEmpty
               ? context.l10n.createRouteRouteDraftStructurallyReady
-              : '${blocking.length} blocking checks',
+              : context.l10n.createRouteBlockingChecks(blocking.length),
           issues: blocking,
           color: blocking.isEmpty
               ? Theme.of(context).colorScheme.primary
@@ -103,7 +106,7 @@ class RouteReviewSection extends StatelessWidget {
         if (warnings.isNotEmpty) ...<Widget>[
           const SizedBox(height: 10),
           _IssuePanel(
-            title: '${warnings.length} warnings to review',
+            title: context.l10n.createRouteWarningsToReview(warnings.length),
             issues: warnings,
             color: Theme.of(context).colorScheme.tertiary,
           ),
@@ -160,10 +163,10 @@ class RouteReviewSection extends StatelessWidget {
     );
   }
 
-  static String _duration(int seconds) {
+  static String _duration(AppLocalizations l10n, int seconds) {
     final minutes = (seconds / 60).round();
-    if (minutes < 60) return '$minutes min';
-    return '${minutes ~/ 60} h ${minutes % 60} min';
+    if (minutes < 60) return l10n.discoverMinutes(minutes);
+    return l10n.discoverHoursMinutes(minutes ~/ 60, minutes % 60);
   }
 }
 
@@ -215,8 +218,9 @@ class _RouteQualityPanel extends StatelessWidget {
                 ),
                 _Metric(
                   icon: Icons.layers_outlined,
-                  label:
-                      '${quality.unknownSurfaceDistanceMeters.round()} m unknown',
+                  label: context.l10n.createRouteUnknownSurfaceMeters(
+                    '${quality.unknownSurfaceDistanceMeters.round()}',
+                  ),
                 ),
                 _Metric(
                   icon: Icons.verified_outlined,

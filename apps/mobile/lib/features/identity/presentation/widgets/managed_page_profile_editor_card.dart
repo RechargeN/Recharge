@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/identity_workspace_providers.dart';
 import '../../application/state/managed_page_profile_editor_state.dart';
 import '../../domain/entities/managed_page_entity.dart';
@@ -80,7 +81,7 @@ class _ManagedPageProfileEditorCardState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Profile',
+              context.l10n.identityProfile,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
@@ -93,7 +94,7 @@ class _ManagedPageProfileEditorCardState
               )
             else ...<Widget>[
               _ProfileFieldRow(
-                label: 'Short description',
+                label: context.l10n.identityShortDescription,
                 fieldKey: ManagedPageModeratedFieldKey.shortDescription,
                 overlay: state.overlayFor(
                   ManagedPageModeratedFieldKey.shortDescription,
@@ -116,7 +117,7 @@ class _ManagedPageProfileEditorCardState
               ),
               const Divider(height: 24),
               _ProfileFieldRow(
-                label: 'Description',
+                label: context.l10n.identityDescription,
                 fieldKey: ManagedPageModeratedFieldKey.description,
                 overlay: state.overlayFor(
                   ManagedPageModeratedFieldKey.description,
@@ -139,7 +140,7 @@ class _ManagedPageProfileEditorCardState
               ),
               const Divider(height: 24),
               _ProfileFieldRow(
-                label: 'Custom activity label',
+                label: context.l10n.identityCustomActivityLabel,
                 fieldKey: ManagedPageModeratedFieldKey.customActivityLabel,
                 overlay: state.overlayFor(
                   ManagedPageModeratedFieldKey.customActivityLabel,
@@ -164,7 +165,7 @@ class _ManagedPageProfileEditorCardState
             if (state.message != null) ...<Widget>[
               const SizedBox(height: 8),
               Text(
-                state.message!,
+                context.l10n.identityProfileNotice(state.message!),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -223,7 +224,7 @@ class _ProfileFieldRow extends StatelessWidget {
               Text(label, style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(height: 2),
               Text(
-                current.isEmpty ? 'Not set.' : current,
+                current.isEmpty ? context.l10n.identityNotSet : current,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
@@ -232,7 +233,7 @@ class _ProfileFieldRow extends StatelessWidget {
         if (canEdit)
           IconButton(
             key: ValueKey<String>('edit-field-${fieldKey.name}'),
-            tooltip: 'Edit $label',
+            tooltip: context.l10n.identityEditField(label),
             icon: const Icon(Icons.edit_outlined),
             onPressed: busy ? null : () => _openEditDialog(context, current),
           ),
@@ -296,7 +297,7 @@ class _FieldEditDialogState extends State<_FieldEditDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Edit ${widget.label}'),
+      title: Text(context.l10n.identityEditField(widget.label)),
       content: TextField(
         key: ValueKey<String>('field-input-${widget.fieldKey.name}'),
         controller: _controller,
@@ -308,12 +309,12 @@ class _FieldEditDialogState extends State<_FieldEditDialog> {
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(context.l10n.identityCancel),
         ),
         FilledButton(
           key: ValueKey<String>('save-field-${widget.fieldKey.name}'),
           onPressed: () => Navigator.of(context).pop(_controller.text),
-          child: const Text('Save'),
+          child: Text(context.l10n.identitySave),
         ),
       ],
     );

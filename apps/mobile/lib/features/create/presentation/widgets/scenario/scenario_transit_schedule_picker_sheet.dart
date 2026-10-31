@@ -479,7 +479,11 @@ class _DateAndTime extends StatelessWidget {
           key: const ValueKey<String>('scenario-transit-depart-after'),
           onPressed: () => _chooseTime(context),
           icon: const Icon(Icons.schedule_outlined),
-          label: Text('After ${_clockLabel(state.departAfter)}'),
+          label: Text(
+            context.l10n.createScenarioAfterTime(
+              _clockLabel(state.departAfter),
+            ),
+          ),
         ),
       ),
     ],
@@ -573,7 +577,7 @@ class _StopSearch extends StatelessWidget {
       ],
       if (status == ScenarioTransitPickerStatus.empty) ...<Widget>[
         const SizedBox(height: 4),
-        Text('No $title stops found.'),
+        Text(context.l10n.createScenarioNoStopsFound),
       ],
       ...results
           .take(6)
@@ -617,9 +621,11 @@ class _ServiceResults extends StatelessWidget {
       children: state.serviceOptions
           .map(
             (option) => Semantics(
-              label:
-                  '${option.departure.hhmm} to ${option.arrival.hhmm}, '
-                  '${option.durationMinutes} minutes, planned schedule not live',
+              label: context.l10n.createScenarioDepartureSemantics(
+                option.departure.hhmm,
+                option.arrival.hhmm,
+                option.durationMinutes,
+              ),
               child: Card.outlined(
                 child: ListTile(
                   key: ValueKey<String>(
@@ -682,7 +688,10 @@ class _SelectedServicePreview extends StatelessWidget {
               '${option.manifest.retrievedAtUtc.toUtc()}',
             ),
           ),
-          Text('Freshness: ${_freshnessLabel(option.manifest.freshness)}'),
+          Text(
+            '${context.l10n.createScenarioFreshnessLabel}: '
+            '${context.l10n.createScenarioFreshness(option.manifest.freshness.name)}',
+          ),
           const SizedBox(height: 6),
           Text(context.l10n.createScenarioPlannedScheduleNotLiveSelectionNot),
         ],
@@ -787,13 +796,6 @@ String _failureLabel(
     l10n.createScenarioStopSearchFailedTryAgain,
   ScenarioTransitPickerFailureCode.serviceSearchFailed =>
     l10n.createScenarioScheduleSearchFailedTryAgain,
-};
-
-String _freshnessLabel(ScenarioTransitFreshness value) => switch (value) {
-  ScenarioTransitFreshness.current => 'current',
-  ScenarioTransitFreshness.stale => 'stale',
-  ScenarioTransitFreshness.unknown => 'unknown',
-  ScenarioTransitFreshness.unavailable => 'unavailable',
 };
 
 String _statusAnnouncement(

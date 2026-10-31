@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/create_taxonomy.dart';
 import '../../application/find_people_create_config.dart';
@@ -187,7 +188,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             onChanged: widget.controller.updateFullDescription,
           ),
           _DraftTextField(
-            label: 'Tags (comma-separated, up to 8)',
+            label: context.l10n.createFindPeopleTagsField,
             value: draft.tags.join(', '),
             onChanged: (String value) =>
                 widget.controller.updateTags(value.split(',')),
@@ -256,7 +257,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 .toList(growable: false),
           ),
           _DraftTextField(
-            label: 'Pace (optional)',
+            label: context.l10n.createFindPeoplePaceOptional,
             value: data.pace ?? '',
             onChanged: (String value) => _update(
               data.copyWith(
@@ -427,9 +428,12 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             (CreateTimeSlotDraft slot) => Card(
               child: ListTile(
                 leading: const Icon(Icons.schedule_outlined),
-                title: Text('${slot.startAtUtc.toIso8601String()} →'),
+                title: Text(
+                  '${RechargeFormats.dateTime(slot.startAtUtc, draft.timezone, context.l10n.localeName)} →',
+                ),
                 subtitle: Text(
-                  '${slot.endAtUtc.toIso8601String()} • ${slot.endAtUtc.difference(slot.startAtUtc).inMinutes} min',
+                  '${RechargeFormats.dateTime(slot.endAtUtc, draft.timezone, context.l10n.localeName)} • '
+                  '${context.l10n.discoverMinutes(slot.endAtUtc.difference(slot.startAtUtc).inMinutes)}',
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
@@ -467,7 +471,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             _DraftTextField(
               label: context.l10n.createFindPeopleRecurrenceRule,
               value: data.recurrenceRule ?? '',
-              hint: 'FREQ=WEEKLY;BYDAY=SA',
+              hint: 'FREQ=WEEKLY;BYDAY=SA', // l10n-ignore: RRULE format example
               onChanged: (String value) => _update(
                 data.copyWith(
                   recurrenceRule: _text(value),
@@ -677,7 +681,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
             _DraftTextField(
               label: context.l10n.createFindPeoplePrivateAccessSecretReference,
               value: data.onlineAccessSecretRef ?? '',
-              hint: 'Session-scoped secure reference; never shown publicly',
+              hint: context.l10n.createFindPeopleSecretRefHint,
               onChanged: (String value) => _update(
                 data.copyWith(
                   onlineAccessSecretRef: _text(value),
@@ -1013,7 +1017,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: _decoration('Amount'),
+                    decoration: _decoration(context.l10n.createFormAmount),
                   ),
                 ),
                 IconButton.filledTonal(
@@ -1054,9 +1058,8 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
 
   Widget _hostsStep(CreateDraftEntity draft, FindPeopleDraftData data) {
     return _Panel(
-      title: 'Hosts, visibility, and communication',
-      subtitle:
-          'Co-host permissions remain inactive until the invited user accepts the role.',
+      title: context.l10n.createFindPeopleHostsTitle,
+      subtitle: context.l10n.createFindPeopleCohostInactive,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -1389,7 +1392,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 value: data.accuracyConfirmed,
                 controlAffinity: ListTileControlAffinity.leading,
                 contentPadding: EdgeInsets.zero,
-                title: const Text('I confirm that all details are accurate *'),
+                title: Text(context.l10n.createFindPeopleAccuracyConfirm),
                 onChanged: (bool? value) =>
                     _update(data.copyWith(accuracyConfirmed: value ?? false)),
               ),
@@ -1434,7 +1437,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 icon: const Icon(Icons.publish_outlined),
                 label: Text(
                   widget.state.status == CreateStatus.publishing
-                      ? 'Publishing…'
+                      ? context.l10n.createFormPublishing
                       : context.l10n.createFindPeoplePublishFindPeopleRequest,
                 ),
               ),

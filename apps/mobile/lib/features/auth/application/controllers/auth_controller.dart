@@ -145,7 +145,8 @@ class AuthController extends ChangeNotifier {
       final result = await _signInUseCase(
         email: email,
         password: password,
-        deviceName: 'Recharge Device',
+        deviceName:
+            'Recharge Device', // l10n-ignore: device label sent to the auth backend, not UI
         platform: defaultTargetPlatform.name,
         appVersion: '1.0.0',
       );

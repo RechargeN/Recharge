@@ -17,7 +17,8 @@ class LocalAiPromptRegistry implements AiPromptRegistry {
       inputSchemaId: 'ai.smart_search.input.v1',
       outputSchemaId: 'ai.smart_search.result.v1',
       maximumInputCharacters: 500,
-      instruction: 'Interpret intent only through deterministic local rules.',
+      instruction:
+          'Interpret intent only through deterministic local rules.', // l10n-ignore: prompt instruction, not UI copy
       allowedReadToolIds: const <String>{},
     ),
     AiAssistPromptDefinition(
@@ -28,7 +29,8 @@ class LocalAiPromptRegistry implements AiPromptRegistry {
       inputSchemaId: 'ai.creator_assist.input.v1',
       outputSchemaId: 'ai.creator_assist.result.v1',
       maximumInputCharacters: 1000,
-      instruction: 'Return bounded local suggestions without publication.',
+      instruction:
+          'Return bounded local suggestions without publication.', // l10n-ignore: prompt instruction, not UI copy
       allowedReadToolIds: const <String>{},
     ),
     AiAssistPromptDefinition(
@@ -39,7 +41,8 @@ class LocalAiPromptRegistry implements AiPromptRegistry {
       inputSchemaId: 'ai.quality_assist.input.v1',
       outputSchemaId: 'ai.quality_assist.result.v1',
       maximumInputCharacters: 1000,
-      instruction: 'Return deterministic quality signals without moderation.',
+      instruction:
+          'Return deterministic quality signals without moderation.', // l10n-ignore: prompt instruction, not UI copy
       allowedReadToolIds: const <String>{},
     ),
     AiAssistPromptDefinition(
@@ -51,7 +54,7 @@ class LocalAiPromptRegistry implements AiPromptRegistry {
       outputSchemaId: 'ai.translation_assist.result.v1',
       maximumInputCharacters: 1500,
       instruction:
-          'Return an empty local translation draft for explicit review.',
+          'Return an empty local translation draft for explicit review.', // l10n-ignore: prompt instruction, not UI copy
       allowedReadToolIds: const <String>{},
     ),
   ];
@@ -78,7 +81,7 @@ class LocalAiPromptRegistry implements AiPromptRegistry {
     for (final AiAssistPromptDefinition definition in source) {
       if (!definition.isValid || result.containsKey(definition.registryKey)) {
         throw ArgumentError(
-          'AI prompt definitions must be valid and uniquely versioned.',
+          'AI prompt definitions must be valid and uniquely versioned.', // l10n-ignore: prompt instruction, not UI copy
         );
       }
       result[definition.registryKey] = definition;

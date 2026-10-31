@@ -64,8 +64,28 @@ import 'package:recharge/features/visited/domain/usecases/get_visited_places_use
 
 import 'widget_test_viewport.dart';
 import '../support/event_create_test_support.dart';
+import '../support/l10n/l10n_screen_harness.dart';
 
 void main() {
+  // L4.6: the personal Profile in lv, en and ru at 360 dp.
+  l10nSmallScreenTestWidgets('Profile personal workspace', (
+    tester,
+    locale,
+    scale,
+  ) async {
+    final Widget app = await _unifiedUserApp(
+      textScaler: TextScaler.linear(scale),
+      locale: locale,
+    );
+    await tester.pumpWidget(app);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(l10nFor(locale).profileRoleTitle('creator')),
+      findsWidgets,
+    );
+    await l10nScrollThrough(tester);
+  });
+
   for (final experience in <AccountExperience?>[
     null,
     AccountExperience.personal,
@@ -1304,10 +1324,10 @@ void main() {
 
     expect(find.text('Creator listing'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
-    expect(find.text('pendingReview'), findsOneWidget);
+    expect(find.text('Pending review'), findsOneWidget);
     expect(find.text('Workshops & masterclasses'), findsOneWidget);
     expect(find.text('Workshop'), findsOneWidget);
-    expect(find.text('12 EUR'), findsOneWidget);
+    expect(find.text('€12.00'), findsOneWidget);
 
     await tester.scrollPageUntilVisible(find.text('Open Create').first, 220);
     await tester.tap(find.text('Open Create').first);
@@ -1670,7 +1690,8 @@ void main() {
       expect(find.text('Creator publications'), findsOneWidget);
       expect(find.text('2 active'), findsOneWidget);
       expect(find.text('Creator listing'), findsNWidgets(2));
-      expect(find.text('Draft'), findsOneWidget);
+      // L4.6: the stage and the status are both localized labels now.
+      expect(find.text('Draft'), findsNWidgets(2));
       expect(find.text('Published'), findsOneWidget);
       expect(find.text('Draft pottery workshop'), findsOneWidget);
       expect(find.text('Published calm route'), findsWidgets);
@@ -1818,7 +1839,7 @@ void main() {
     expect(find.text('1 missing'), findsOneWidget);
     expect(find.text('Creator next steps'), findsOneWidget);
     expect(find.text('Finish draft'), findsOneWidget);
-    expect(find.text('Missing: cover'), findsWidgets);
+    expect(find.text('Missing: cover image'), findsWidgets);
 
     await tester.scrollPageUntilVisible(find.text('Finish draft').first, 220);
     await tester.tap(find.text('Finish draft').first);
@@ -1852,6 +1873,7 @@ Future<Widget> _unifiedUserApp({
   AccountExperience? experience,
   CreateController? createController,
   TextScaler? textScaler,
+  Locale? locale,
 }) async {
   final repository = _NoopAuthRepository(role: 'user', capabilities: const []);
   final auth = AuthController(
@@ -1898,6 +1920,9 @@ Future<Widget> _unifiedUserApp({
       ),
     ],
     child: MaterialApp.router(
+      locale: locale,
+      supportedLocales: l10nTestLocales,
+      localizationsDelegates: locale == null ? null : l10nTestDelegates,
       builder: (context, child) => textScaler == null
           ? child!
           : MediaQuery(

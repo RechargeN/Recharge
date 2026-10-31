@@ -211,7 +211,8 @@ productAnalyticsEventRegistry = <ProductAnalyticsDefinition>[
   ProductAnalyticsDefinition(
     eventName: 'details_opened',
     eventVersion: 1,
-    productQuestion: 'Which object types do people open in Details?',
+    productQuestion:
+        'Which object types do people open in Details?', // l10n-ignore: analytics contract documentation, not UI
     eventOwner: 'product.discover',
     processingOwner: 'data_platform',
     producer:
@@ -223,7 +224,7 @@ productAnalyticsEventRegistry = <ProductAnalyticsDefinition>[
     eventName: 'favorite_added',
     eventVersion: 1,
     productQuestion:
-        'Which object types do people save to Favorites, and from which surface?',
+        'Which object types do people save to Favorites, and from which surface?', // l10n-ignore: analytics contract documentation, not UI
     eventOwner: 'product.library',
     processingOwner: 'data_platform',
     producer:
@@ -238,7 +239,7 @@ productAnalyticsEventRegistry = <ProductAnalyticsDefinition>[
     eventName: 'create_publish_finished',
     eventVersion: 1,
     productQuestion:
-        'For which Create types does a publish attempt end in refusal?',
+        'For which Create types does a publish attempt end in refusal?', // l10n-ignore: analytics contract documentation, not UI
     eventOwner: 'product.create',
     processingOwner: 'data_platform',
     producer:

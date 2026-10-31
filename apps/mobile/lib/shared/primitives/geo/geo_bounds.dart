@@ -24,7 +24,7 @@ class GeoBounds {
       throw ArgumentError.value(
         this,
         'bounds',
-        'Bounds require valid coordinates and south <= north.',
+        'Bounds require valid coordinates and south <= north.', // l10n-ignore: developer error; the UI receives a code
       );
     }
     return this;

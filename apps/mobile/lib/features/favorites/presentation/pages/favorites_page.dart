@@ -1,3 +1,5 @@
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
 import '../../../../shared/models/catalog_object_ref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,13 +66,13 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
         centerTitle: true,
         actions: [
           IconButton(
-            tooltip: 'Refresh favorites',
+            tooltip: context.l10n.favoritesRefresh,
             icon: const Icon(Icons.refresh),
             onPressed: controller.loadFavorites,
           ),
         ],
         title: const Text(
-          'RECHARGE',
+          'RECHARGE', // l10n-ignore: brand wordmark
           style: TextStyle(fontWeight: FontWeight.w900),
         ),
       ),
@@ -79,8 +81,9 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
           child: CircularProgressIndicator(),
         ),
         FavoritesStatus.error => _StateMessage(
-          message: state.message ?? 'Не удалось загрузить избранное',
-          actionLabel: 'Повторить',
+          // L4.6: the controller keeps a code; the page says it in words.
+          message: context.l10n.favoritesLoadFailed,
+          actionLabel: context.l10n.favoritesRetry,
           onAction: controller.loadFavorites,
         ),
         FavoritesStatus.ready => _buildReadyState(
@@ -110,8 +113,8 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
         savedSearches.isEmpty &&
         smartSearchHistory.isEmpty) {
       return _StateMessage(
-        message: 'Пока нет сохраненных событий',
-        actionLabel: 'Открыть Discover',
+        message: context.l10n.favoritesEmpty,
+        actionLabel: context.l10n.favoritesOpenDiscover,
         onAction: () async => context.go(RouteNames.discover),
       );
     }
@@ -194,7 +197,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
               context.go(_mapRouteForSmartSearch(item));
             },
             onCreateSmartSearch: (SmartSearchHistoryEntity item) {
-              context.go(_createRouteForSmartSearch(item));
+              context.go(_createRouteForSmartSearch(context.l10n, item));
             },
             onDeleteSmartSearch: (SmartSearchHistoryEntity item) {
               discoverController.deleteSmartSearchPrompt(item.id);
@@ -252,8 +255,8 @@ class _SavedIntentSection extends StatelessWidget {
       children: <Widget>[
         _SectionTitle(
           icon: Icons.auto_awesome,
-          title: 'Saved intents',
-          subtitle: 'Conditions and prompts ready to continue',
+          title: context.l10n.favoritesSavedIntents,
+          subtitle: context.l10n.favoritesSavedIntentsHint,
         ),
         const SizedBox(height: 10),
         ...savedSearches.map(
@@ -261,12 +264,12 @@ class _SavedIntentSection extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 10),
             child: _SavedIntentCard(
               icon: Icons.tune,
-              label: 'Saved conditions',
+              label: context.l10n.favoritesSavedConditions,
               title: search.title,
               subtitle: search.subtitle,
-              chips: _queryChips(search.query),
-              deleteTooltip: 'Delete saved conditions',
-              createTooltip: 'Create listing from saved conditions',
+              chips: _queryChips(context.l10n, search.query),
+              deleteTooltip: context.l10n.favoritesDeleteSaved,
+              createTooltip: context.l10n.favoritesListingFromSaved,
               onResume: () => onResumeSavedSearch(search),
               onMap: () => onMapSavedSearch(search),
               onCreate: () => onCreateSavedSearch(search),
@@ -279,12 +282,12 @@ class _SavedIntentSection extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 10),
             child: _SavedIntentCard(
               icon: Icons.psychology_alt_outlined,
-              label: 'Smart search',
+              label: context.l10n.favoritesSmartSearch,
               title: item.prompt,
               subtitle: _promptForQuery(item.query),
-              chips: _smartSearchChips(item),
-              deleteTooltip: 'Delete smart search',
-              createTooltip: 'Create listing from smart search',
+              chips: _smartSearchChips(context.l10n, item),
+              deleteTooltip: context.l10n.favoritesDeleteSmart,
+              createTooltip: context.l10n.favoritesListingFromSmart,
               onResume: () => onResumeSmartSearch(item),
               onMap: () => onMapSmartSearch(item),
               onCreate: () => onCreateSmartSearch(item),
@@ -445,7 +448,7 @@ class _SavedIntentCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onResume,
                     icon: const Icon(Icons.search_rounded),
-                    label: const Text('Resume'),
+                    label: Text(context.l10n.favoritesResume),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -453,7 +456,7 @@ class _SavedIntentCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onMap,
                     icon: const Icon(Icons.map_outlined),
-                    label: const Text('Map'),
+                    label: Text(context.l10n.favoritesMap),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -492,28 +495,28 @@ class _FavoritesFilterBar extends StatelessWidget {
         children: <Widget>[
           _FavoriteFilterChip(
             icon: Icons.grid_view_rounded,
-            label: 'All',
+            label: context.l10n.favoritesAll,
             selected: selected == _FavoritesFilter.all,
             onTap: () => onChanged(_FavoritesFilter.all),
           ),
           const SizedBox(width: 8),
           _FavoriteFilterChip(
             icon: Icons.event_available_outlined,
-            label: 'Events',
+            label: context.l10n.favoritesEvents,
             selected: selected == _FavoritesFilter.events,
             onTap: () => onChanged(_FavoritesFilter.events),
           ),
           const SizedBox(width: 8),
           _FavoriteFilterChip(
             icon: Icons.place_outlined,
-            label: 'Places',
+            label: context.l10n.favoritesPlaces,
             selected: selected == _FavoritesFilter.places,
             onTap: () => onChanged(_FavoritesFilter.places),
           ),
           const SizedBox(width: 8),
           _FavoriteFilterChip(
             icon: Icons.route_outlined,
-            label: 'Routes',
+            label: context.l10n.favoritesRoutes,
             selected: selected == _FavoritesFilter.routes,
             onTap: () => onChanged(_FavoritesFilter.routes),
           ),
@@ -592,7 +595,6 @@ class _FavoritePlanCard extends StatelessWidget {
       onTap: onOpen,
       borderRadius: BorderRadius.circular(12),
       child: Ink(
-        height: 126,
         decoration: BoxDecoration(
           color: _favoriteCardGreen,
           borderRadius: BorderRadius.circular(12),
@@ -604,72 +606,83 @@ class _FavoritePlanCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            children: <Widget>[
-              _FavoritePreview(item: item, kind: kind),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        _FavoriteTypeBadge(kind: kind),
-                        const Spacer(),
-                        _FavoriteActionsMenu(
-                          isRoute: kind.isRoute,
-                          onOpen: onOpen,
-                          onMap: onMap,
-                          onRemove: onRemove,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      item.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        height: 1.04,
+        // L4.6: the card grows with long lv/ru labels and large text
+        // instead of a fixed height.
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 126),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              children: <Widget>[
+                _FavoritePreview(item: item, kind: kind),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Flexible(child: _FavoriteTypeBadge(kind: kind)),
+                          _FavoriteActionsMenu(
+                            isRoute: kind.isRoute,
+                            onOpen: onOpen,
+                            onMap: onMap,
+                            onRemove: onRemove,
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _favoriteSubtitle(item, kind),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.82),
-                        fontWeight: FontWeight.w600,
+                      const SizedBox(height: 8),
+                      Text(
+                        item.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                              height: 1.04,
+                            ),
                       ),
-                    ),
-                    const Spacer(),
-                    Row(
-                      children: <Widget>[
-                        const Icon(
-                          Icons.favorite,
-                          size: 15,
-                          color: Colors.white,
+                      const SizedBox(height: 4),
+                      Text(
+                        _favoriteSubtitle(context.l10n, item, kind),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.82),
+                          fontWeight: FontWeight.w600,
                         ),
-                        const SizedBox(width: 5),
-                        Text(
-                          'Избранное',
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: <Widget>[
+                          const Icon(
+                            Icons.favorite,
+                            size: 15,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              context.l10n.favoritesTitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -768,12 +781,16 @@ class _FavoriteTypeBadge extends StatelessWidget {
           children: <Widget>[
             Icon(kind.icon, color: Colors.white, size: 12),
             const SizedBox(width: 4),
-            Text(
-              kind.label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
+            Flexible(
+              child: Text(
+                kind.label(context.l10n),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
           ],
@@ -799,7 +816,7 @@ class _FavoriteActionsMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<_FavoriteAction>(
-      tooltip: 'More actions',
+      tooltip: context.l10n.favoritesMoreActions,
       icon: const Icon(Icons.more_horiz, color: Colors.white),
       color: Colors.white,
       onSelected: (_FavoriteAction action) {
@@ -818,15 +835,19 @@ class _FavoriteActionsMenu extends StatelessWidget {
       itemBuilder: (BuildContext context) => <PopupMenuEntry<_FavoriteAction>>[
         PopupMenuItem<_FavoriteAction>(
           value: _FavoriteAction.open,
-          child: Text(isRoute ? 'Edit' : 'Open'),
+          child: Text(
+            isRoute ? context.l10n.favoritesEdit : context.l10n.favoritesOpen,
+          ),
         ),
         PopupMenuItem<_FavoriteAction>(
           value: _FavoriteAction.map,
-          child: Text(isRoute ? 'Route' : 'Map'),
+          child: Text(
+            isRoute ? context.l10n.favoritesRoute : context.l10n.favoritesMap,
+          ),
         ),
-        const PopupMenuItem<_FavoriteAction>(
+        PopupMenuItem<_FavoriteAction>(
           value: _FavoriteAction.remove,
-          child: Text('Remove'),
+          child: Text(context.l10n.favoritesRemove),
         ),
       ],
     );
@@ -882,9 +903,12 @@ class _FilteredEmptyState extends StatelessWidget {
         children: <Widget>[
           const Icon(Icons.filter_alt_off, size: 36),
           const SizedBox(height: 10),
-          const Text('В этом фильтре пока пусто'),
+          Text(context.l10n.favoritesFilterEmpty),
           const SizedBox(height: 10),
-          OutlinedButton(onPressed: onReset, child: const Text('Показать все')),
+          OutlinedButton(
+            onPressed: onReset,
+            child: Text(context.l10n.favoritesShowAll),
+          ),
         ],
       ),
     );
@@ -899,28 +923,29 @@ class _FavoriteKind {
     required this.isRoute,
   });
 
-  final String label;
+  /// The badge text in the reader's language.
+  final String Function(AppLocalizations l10n) label;
   final IconData icon;
   final List<Color> previewColors;
   final bool isRoute;
 }
 
-const _FavoriteKind _eventFavoriteKind = _FavoriteKind(
-  label: 'EVENT',
+final _FavoriteKind _eventFavoriteKind = _FavoriteKind(
+  label: (AppLocalizations l10n) => l10n.favoritesBadgeEvent,
   icon: Icons.event_available_outlined,
   previewColors: <Color>[Color(0xFF24405F), Color(0xFF0B3028)],
   isRoute: false,
 );
 
-const _FavoriteKind _placeFavoriteKind = _FavoriteKind(
-  label: 'PLACE',
+final _FavoriteKind _placeFavoriteKind = _FavoriteKind(
+  label: (AppLocalizations l10n) => l10n.favoritesBadgePlace,
   icon: Icons.place_outlined,
   previewColors: <Color>[Color(0xFF6F8F87), Color(0xFF0B3028)],
   isRoute: false,
 );
 
-const _FavoriteKind _routeFavoriteKind = _FavoriteKind(
-  label: 'ROUTE',
+final _FavoriteKind _routeFavoriteKind = _FavoriteKind(
+  label: (AppLocalizations l10n) => l10n.favoritesBadgeRoute,
   icon: Icons.route_outlined,
   previewColors: <Color>[Color(0xFF607D5B), Color(0xFF0B3028)],
   isRoute: true,
@@ -963,22 +988,38 @@ bool _isEventFavorite(FavoriteItemEntity item) {
   return !_isRouteFavorite(item) && !_isPlaceFavorite(item);
 }
 
-String _favoriteSubtitle(FavoriteItemEntity item, _FavoriteKind kind) {
+String _favoriteSubtitle(
+  AppLocalizations l10n,
+  FavoriteItemEntity item,
+  _FavoriteKind kind,
+) {
   if (kind.isRoute) {
     final double? distanceKm = item.distanceKm;
     // An unknown distance is omitted rather than rendered as a fake value.
     if (distanceKm == null) return item.city;
     final String distance = distanceKm >= 100
-        ? '${distanceKm.toStringAsFixed(0)} km'
-        : '${distanceKm.toStringAsFixed(1)} km';
+        ? l10n.discoverDistanceKm(
+            RechargeFormats.decimal(
+              distanceKm,
+              l10n.localeName,
+              maxFractionDigits: 0,
+            ),
+          )
+        : l10n.discoverDistanceKm(
+            RechargeFormats.decimal(
+              distanceKm,
+              l10n.localeName,
+              maxFractionDigits: 1,
+            ),
+          );
     return '${item.city} · $distance';
   }
-  final String date = _compactDate(item.startsAtUtc);
+  final String date = _compactDate(l10n, item.startsAtUtc);
   return '$date · ${item.city}';
 }
 
-String _compactDate(DateTime? value) {
-  if (value == null) return 'Any time';
+String _compactDate(AppLocalizations l10n, DateTime? value) {
+  if (value == null) return l10n.favoritesAnyTime;
   final DateTime local = value.toLocal();
   final String day = local.day.toString().padLeft(2, '0');
   final String month = local.month.toString().padLeft(2, '0');
@@ -1072,7 +1113,10 @@ String _mapRouteForSmartSearch(SmartSearchHistoryEntity item) {
   return _discoverRouteForQuery(RouteNames.discoverMap, item.query);
 }
 
-String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
+String _createRouteForSmartSearch(
+  AppLocalizations l10n,
+  SmartSearchHistoryEntity item,
+) {
   final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
     item,
   );
@@ -1084,10 +1128,11 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
         ..._smartRouteParameters(parseResult, includeMode: false),
         'source': 'smart_route_seed',
         'type': 'route',
-        'title': '${_capitalized(routeIntent.mood)} recharge route',
+        'title':
+            '${_capitalized(routeIntent.mood)} recharge route', // l10n-ignore: Create seed prefill data
         'subtitle':
-            '${routeIntent.stepCategories.length} stops · '
-            '${routeIntent.durationMinutes} min · smart route',
+            '${routeIntent.stepCategories.length} stops · ' // l10n-ignore: Create seed prefill data
+            '${routeIntent.durationMinutes} min · smart route', // l10n-ignore: Create seed prefill data
         'q': parseResult.originalText.trim(),
         'category': 'route',
       },
@@ -1097,7 +1142,7 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
     ..._queryParametersForQuery(item.query),
     'source': 'smart_search',
     'type': 'event',
-    'title': _titleForQuery(item.query),
+    'title': _titleForQuery(l10n, item.query),
     'subtitle': item.prompt,
   };
   return Uri(path: RouteNames.create, queryParameters: params).toString();
@@ -1155,15 +1200,16 @@ String _promptForQuery(DiscoverQuery query) {
     if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
     if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.budgetMax != null)
+      'under ${query.budgetMax!.toStringAsFixed(0)}', // l10n-ignore: search prompt text built from the saved query, not UI copy
     query.unlimitedRadius
-        ? 'any area'
-        : 'near ${(query.radiusMeters / 1000).round()} km',
+        ? 'any area' // l10n-ignore: search prompt text built from the saved query, not UI copy
+        : 'near ${(query.radiusMeters / 1000).round()} km', // l10n-ignore: search prompt text built from the saved query, not UI copy
   ];
   return parts.join(' · ');
 }
 
-String _titleForQuery(DiscoverQuery query) {
+String _titleForQuery(AppLocalizations l10n, DiscoverQuery query) {
   final String queryText = query.queryText.trim();
   if (queryText.isNotEmpty) {
     return queryText[0].toUpperCase() + queryText.substring(1);
@@ -1171,7 +1217,7 @@ String _titleForQuery(DiscoverQuery query) {
   if (query.selectedCategoryIds.isNotEmpty) {
     return '${query.selectedCategoryIds.first} idea';
   }
-  return 'Recharge idea';
+  return l10n.favoritesRechargeIdea;
 }
 
 String _capitalized(String value) {
@@ -1180,18 +1226,24 @@ String _capitalized(String value) {
   return trimmed[0].toUpperCase() + trimmed.substring(1);
 }
 
-List<_IntentChipData> _smartSearchChips(SmartSearchHistoryEntity item) {
+List<_IntentChipData> _smartSearchChips(
+  AppLocalizations l10n,
+  SmartSearchHistoryEntity item,
+) {
   final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
     item,
   );
-  final List<_IntentChipData> queryChips = _queryChips(item.query);
+  final List<_IntentChipData> queryChips = _queryChips(l10n, item.query);
   if (parseResult == null) return queryChips;
   final SmartRouteIntent routeIntent = parseResult.routeIntent!;
   return <_IntentChipData>[
-    const _IntentChipData(icon: Icons.route_outlined, label: 'Smart route'),
+    _IntentChipData(
+      icon: Icons.route_outlined,
+      label: l10n.favoritesSmartRoute,
+    ),
     _IntentChipData(
       icon: Icons.timer_outlined,
-      label: '${routeIntent.durationMinutes} min',
+      label: l10n.discoverMinutes(routeIntent.durationMinutes),
     ),
     _IntentChipData(
       icon: Icons.flag_outlined,
@@ -1201,26 +1253,28 @@ List<_IntentChipData> _smartSearchChips(SmartSearchHistoryEntity item) {
   ];
 }
 
-List<_IntentChipData> _queryChips(DiscoverQuery query) {
+List<_IntentChipData> _queryChips(AppLocalizations l10n, DiscoverQuery query) {
   return <_IntentChipData>[
     _IntentChipData(
       icon: Icons.category_outlined,
       label: query.selectedCategoryIds.isEmpty
-          ? 'All'
+          ? l10n.favoritesAll
           : query.selectedCategoryIds.first,
     ),
     _IntentChipData(
       icon: Icons.near_me_outlined,
       label: query.unlimitedRadius
-          ? 'Any area'
-          : '${(query.radiusMeters / 1000).round()} km',
+          ? l10n.favoritesAnyArea
+          : l10n.discoverDistanceKm('${(query.radiusMeters / 1000).round()}'),
     ),
     if (query.freeOnly)
-      const _IntentChipData(icon: Icons.payments_outlined, label: 'Free'),
+      _IntentChipData(icon: Icons.payments_outlined, label: l10n.favoritesFree),
     if (query.budgetMax != null)
       _IntentChipData(
         icon: Icons.savings_outlined,
-        label: 'Under ${query.budgetMax!.toStringAsFixed(0)}',
+        label: l10n.discoverUnder(
+          RechargeFormats.money(query.budgetMax!, l10n.localeName),
+        ),
       ),
   ];
 }

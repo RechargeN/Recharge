@@ -83,7 +83,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
             color: Theme.of(context).colorScheme.errorContainer,
             child: ListTile(
               leading: Icon(Icons.lock_outline),
-              title: Text('Read-only draft'),
+              title: Text(context.l10n.createFormReadOnlyDraft),
               subtitle: Text(
                 context
                     .l10n
@@ -177,8 +177,8 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         const SizedBox(height: 8),
         TextField(
           controller: _field('brandModel', rental.brandModel ?? ''),
-          decoration: const InputDecoration(
-            labelText: 'Brand / model (optional)',
+          decoration: InputDecoration(
+            labelText: context.l10n.createRentalBrandModel,
           ),
           onChanged: widget.controller.updateRentalBrandModel,
         ),
@@ -236,7 +236,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
           value: rental.categoryConfirmed,
-          title: const Text('I confirm this category is correct'),
+          title: Text(context.l10n.createRentalConfirmCategory),
           onChanged: (value) {
             if (value == true) widget.controller.confirmRentalCategory();
           },
@@ -330,8 +330,8 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                       'group_size_${group.id}',
                       group.sizeOrVariant ?? '',
                     ),
-                    decoration: const InputDecoration(
-                      labelText: 'Size / variant',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.createRentalSizeVariant,
                     ),
                     onChanged: (value) =>
                         widget.controller.updateRentalInventoryGroup(
@@ -400,7 +400,13 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
           title: Text(
             coverage == null
                 ? context.l10n.createFormCalendarNotConfirmedYet
-                : 'Confirmed ${coverage.confirmedAtUtc.toIso8601String()}',
+                : context.l10n.createFormConfirmedOn(
+                    RechargeFormats.dateTime(
+                      coverage.confirmedAtUtc,
+                      widget.state.draft.timezone,
+                      context.l10n.localeName,
+                    ),
+                  ),
           ),
           subtitle: Text(
             context.l10n.createFormRechargeCannotSeeExternalBookingsConfirm,
@@ -426,11 +432,11 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
             contentPadding: EdgeInsets.zero,
             title: Text(
               '${_findGroupLabel(rental, block.groupId)}: '
-              '${block.unitsBlocked} unit(s) blocked',
+              '${context.l10n.createRentalUnitsBlocked(block.unitsBlocked)}',
             ),
             subtitle: Text(
-              '${block.startsAtUtc.toIso8601String()} → '
-              '${block.endsAtUtc.toIso8601String()}',
+              '${RechargeFormats.dateTime(block.startsAtUtc, widget.state.draft.timezone, context.l10n.localeName)} → '
+              '${RechargeFormats.dateTime(block.endsAtUtc, widget.state.draft.timezone, context.l10n.localeName)}',
             ),
             trailing: IconButton(
               icon: const Icon(Icons.close),
@@ -693,7 +699,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
             color: Theme.of(context).colorScheme.secondaryContainer,
             child: ListTile(
               title: Text(context.l10n.createFormSuggestedDefaultsCategory),
-              subtitle: const Text('Editable — nothing applies automatically.'),
+              subtitle: Text(context.l10n.createRentalDefaultsEditable),
               trailing: TextButton(
                 onPressed: widget.controller.applyRentalAdaptiveHint,
                 child: Text(context.l10n.createFormApply),
@@ -760,7 +766,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
           value: t.idRequiredAtHandover,
-          title: const Text('ID required at handover'),
+          title: Text(context.l10n.createRentalIdRequired),
           onChanged: (value) => widget.controller.updateRentalTerms(
             (terms) => terms.copyWith(idRequiredAtHandover: value ?? false),
           ),
@@ -813,7 +819,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
               child: TextField(
                 controller: _field('currencyCode', p.currencyCode),
                 decoration: InputDecoration(
-                  labelText: 'Currency (ISO 4217)',
+                  labelText: context.l10n.createRentalCurrencyField,
                   errorText: _error('currencyCode'),
                 ),
                 onChanged: (value) => widget.controller.updateRentalPricing(
@@ -855,8 +861,10 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  'From ${p.rateSteps[i].minUnits} unit(s): '
-                  '${p.rateSteps[i].unitPrice.amountMinor} ${p.currencyCode} minor',
+                  context.l10n.createRentalRateStep(
+                    p.rateSteps[i].minUnits,
+                    '${p.rateSteps[i].unitPrice.amountMinor} ${p.currencyCode}',
+                  ),
                 ),
               ),
               IconButton(
@@ -887,8 +895,8 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                   'depositAmount',
                   p.deposit.amount.amountMinor.toString(),
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'Deposit (minor units, 0 = none)',
+                decoration: InputDecoration(
+                  labelText: context.l10n.createRentalDepositField,
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
@@ -1059,19 +1067,16 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         ],
         Card(
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: const Padding(
-            padding: EdgeInsets.all(8),
-            child: Text(
-              'Private — not public: exact pickup address, geo and handover '
-              'instructions are entered separately and never appear here.',
-            ),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(context.l10n.createRentalPrivateNotice),
           ),
         ),
         const SizedBox(height: 12),
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
           value: rental.attestation.hasRightToOffer,
-          title: const Text('I have the right to offer this for rent'),
+          title: Text(context.l10n.createRentalRightToOffer),
           onChanged: (value) => widget.controller.acceptRentalAttestation(
             hasRightToOffer: value ?? false,
             listingAccurate: rental.attestation.listingAccurate,
@@ -1130,7 +1135,10 @@ class _RentalProgressHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Text(
-          'Step ${state.rentalStep + 1} of ${rentalCreateSteps.length}',
+          context.l10n.createFormStepOf(
+            state.rentalStep + 1,
+            rentalCreateSteps.length,
+          ),
           style: Theme.of(context).textTheme.labelMedium,
         ),
         const SizedBox(height: 4),

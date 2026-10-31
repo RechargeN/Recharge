@@ -153,7 +153,7 @@ class CompatibilityObjectRenderer implements DetailsRenderer {
                       ),
                     if (item.activityCatalog!.contributionKind != null)
                       Text(
-                        '${context.l10n.discoverOptionalContributionLabel(context.l10n.createOption('ActivityContributionKind_${item.activityCatalog!.contributionKind}'))} ${item.activityCatalog!.contributionNote ?? ''}',
+                        '${context.l10n.discoverOptionalContributionLabel(context.l10n.createOption('ActivityContributionKind_${item.activityCatalog!.contributionKind}'))} ${item.activityCatalog!.contributionNote ?? ''}', // l10n-ignore: Create seed prefill data
                       ),
                     // The hint needs its own currency; none is assumed.
                     if (item.activityCatalog!.amountMinor != null &&
@@ -378,11 +378,14 @@ class SummaryCard extends StatelessWidget {
                   if (evaluation.travelMinutes != null)
                     DetailsPill(
                       label:
-                          '${evaluation.travelMinutes} min travel'
-                          '${evaluation.quality == TravelEstimateQuality.fallback || evaluation.quality == TravelEstimateQuality.modeled ? ' · estimated' : ''}',
+                          '${context.l10n.discoverTravelMinutes(evaluation.travelMinutes!)}'
+                          '${evaluation.quality == TravelEstimateQuality.fallback || evaluation.quality == TravelEstimateQuality.modeled ? ' · ${context.l10n.discoverEstimated}' : ''}',
                     ),
                   if (evaluation.selectedSlotId != null)
-                    DetailsPill(label: 'Slot ${evaluation.selectedSlotId}'),
+                    DetailsPill(
+                      label:
+                          '${context.l10n.discoverSlotLabel} ${evaluation.selectedSlotId}',
+                    ),
                 ],
               ),
             ],
@@ -434,9 +437,12 @@ class _PublishedRouteCard extends StatelessWidget {
                 if (route.recommendedDifficultyId.isNotEmpty &&
                     route.recommendedDifficultyId != route.difficultyId)
                   DetailsPill(
-                    label:
-                        'Recommended '
-                        '${routeDifficultyLabelForDetails(context.l10n, route.recommendedDifficultyId)}',
+                    label: context.l10n.discoverRecommendedDifficulty(
+                      routeDifficultyLabelForDetails(
+                        context.l10n,
+                        route.recommendedDifficultyId,
+                      ),
+                    ),
                   ),
                 if (route.ascentMeters != null)
                   DetailsPill(label: '+${route.ascentMeters!.round()} m'),
@@ -474,8 +480,11 @@ class _PublishedRouteCard extends StatelessWidget {
             if (route.unknownSurfaceDistanceMeters > 0) ...<Widget>[
               const SizedBox(height: 6),
               Text(
-                '${route.unknownSurfaceDistanceMeters.round()} m of surface '
-                'data is unknown.',
+                context.l10n.discoverUnknownSurface(
+                  context.l10n.createFormMetersValue(
+                    '${route.unknownSurfaceDistanceMeters.round()}',
+                  ),
+                ),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -1057,7 +1066,7 @@ class OrganizerCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'Organizer',
+                    context.l10n.discoverOrganizer,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w700,
@@ -1584,8 +1593,8 @@ String routeSeedTitle(DiscoverItemEntity item) => '${item.title} route';
 
 String routeSeedSubtitle(DiscoverItemEntity item) {
   final DetailsRoutePlan plan = routePlanForDetails(item);
-  return '${plan.stepCategories.length} stops · '
-      '${plan.durationMinutes} min · from details';
+  return '${plan.stepCategories.length} stops · ' // l10n-ignore: Create seed prefill data
+      '${plan.durationMinutes} min · from details'; // l10n-ignore: Create seed prefill data
 }
 
 String routeSeedPrompt(DiscoverItemEntity item) =>

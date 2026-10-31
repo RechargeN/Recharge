@@ -10093,5 +10093,2687 @@
   "discoverBadgeClassWorkshop": "CLASS / WORKSHOP",
   "@discoverBadgeClassWorkshop": {
     "description": "Discover: Details type badge (upper case)."
+  },
+  "identityProfessionalPage": "Professional Page",
+  "@identityProfessionalPage": {
+    "description": "L4.6: public Professional Page — title."
+  },
+  "identityVerificationRevoked": "Verification revoked",
+  "@identityVerificationRevoked": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityVerificationRejected": "Verification rejected",
+  "@identityVerificationRejected": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityVerificationPending": "Verification pending",
+  "@identityVerificationPending": {
+    "description": "L4.6: public Professional Page — text."
+  },
+  "identityKindPrivateProfessional": "Private professional",
+  "@identityKindPrivateProfessional": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityKindVenueOperator": "Venue operator",
+  "@identityKindVenueOperator": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityKindRepresentativeOffice": "Representative office",
+  "@identityKindRepresentativeOffice": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityRetry": "Retry",
+  "@identityRetry": {
+    "description": "L4.6: public Professional Page — button label."
+  },
+  "identityCreate": "Create",
+  "@identityCreate": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityMinTwoChars": "Enter at least 2 characters",
+  "@identityMinTwoChars": {
+    "description": "L4.6: Profile, workspace switcher — button label."
+  },
+  "identityCancel": "Cancel",
+  "@identityCancel": {
+    "description": "L4.6: Professional Page profile editor — button label."
+  },
+  "identityPageStartsPending": "The page starts in Pending review. Market, locale, timezone and currency come from the active market configuration.",
+  "@identityPageStartsPending": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityPageType": "Page type",
+  "@identityPageType": {
+    "description": "L4.6: Profile, workspace switcher — field label."
+  },
+  "identityPageName": "Page name",
+  "@identityPageName": {
+    "description": "L4.6: Profile, workspace switcher — field label."
+  },
+  "identityCreatePage": "Create Professional Page",
+  "@identityCreatePage": {
+    "description": "L4.6: Profile, workspace switcher — button label."
+  },
+  "identityPreviewOnlyRoles": "Presentation preview only. Roles and permissions do not change.",
+  "@identityPreviewOnlyRoles": {
+    "description": "L4.6: Profile, workspace switcher — title."
+  },
+  "identityViewAs": "View as",
+  "@identityViewAs": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityNoPageYet": "You have not created a Professional Page yet.",
+  "@identityNoPageYet": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityCreateContent": "Create content",
+  "@identityCreateContent": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityManagePage": "Manage page",
+  "@identityManagePage": {
+    "description": "L4.6: public Professional Page — button label."
+  },
+  "identityPersonalRevoked": "Personal profile · Verification revoked",
+  "@identityPersonalRevoked": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityPersonalExpired": "Personal profile · Verification expired",
+  "@identityPersonalExpired": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityPersonalRejected": "Personal profile · Verification rejected",
+  "@identityPersonalRejected": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityVerifiedTools": "Verified · Tools follow your permissions",
+  "@identityVerifiedTools": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityPersonalPending": "Personal profile · Verification pending",
+  "@identityPersonalPending": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityPersonalNotStarted": "Personal profile · Verification not started",
+  "@identityPersonalNotStarted": {
+    "description": "L4.6: Profile, workspace switcher — text."
+  },
+  "identityAdminSeparate": "Admin access active · separate from publishing",
+  "@identityAdminSeparate": {
+    "description": "L4.6: Profile, workspace switcher — secondary line."
+  },
+  "identityAdminTools": "Admin tools",
+  "@identityAdminTools": {
+    "description": "L4.6: Profile, workspace switcher — title."
+  },
+  "identityRequestAdditionalPage": "Request additional page",
+  "@identityRequestAdditionalPage": {
+    "description": "L4.6: Profile, workspace switcher — button label."
+  },
+  "identityModeratorsWillReview": "Moderators will review your request.",
+  "@identityModeratorsWillReview": {
+    "description": "L4.6: Profile, workspace switcher — secondary line."
+  },
+  "identityLimitRequestPending": "Additional page request pending",
+  "@identityLimitRequestPending": {
+    "description": "L4.6: Profile, workspace switcher — title."
+  },
+  "identityCreator": "Creator",
+  "@identityCreator": {
+    "description": "L4.6: Profile, workspace switcher — title."
+  },
+  "identityOk": "OK",
+  "@identityOk": {
+    "description": "L4.6: Profile, workspace switcher — button label."
+  },
+  "identityAdminMockNotice": "This mock account has explicit Admin capabilities. Operational Admin tools are connected in IDP-05A.",
+  "@identityAdminMockNotice": {
+    "description": "L4.6: Profile, workspace switcher — dialog text."
+  },
+  "identityAdminAccessActive": "Admin access active",
+  "@identityAdminAccessActive": {
+    "description": "L4.6: Profile, workspace switcher — dialog text."
+  },
+  "identityPageNotFound": "Page not found",
+  "@identityPageNotFound": {
+    "description": "L4.6: public Professional Page — text."
+  },
+  "identityContentViaProjection": "Content appears here only through an approved publisher projection.",
+  "@identityContentViaProjection": {
+    "description": "L4.6: public Professional Page — secondary line."
+  },
+  "identityNoPublishedContent": "No published content yet",
+  "@identityNoPublishedContent": {
+    "description": "L4.6: public Professional Page — title."
+  },
+  "identityPublishedContent": "Published content",
+  "@identityPublishedContent": {
+    "description": "L4.6: public Professional Page — text."
+  },
+  "identityEditPage": "Edit page",
+  "@identityEditPage": {
+    "description": "L4.6: public Professional Page — button label."
+  },
+  "identityShare": "Share",
+  "@identityShare": {
+    "description": "L4.6: public Professional Page — button label."
+  },
+  "identityVerifiedPage": "Verified Professional Page",
+  "@identityVerifiedPage": {
+    "description": "L4.6: public Professional Page — text."
+  },
+  "identityPreviewDoesNotPublish": "This preview does not publish or verify the page.",
+  "@identityPreviewDoesNotPublish": {
+    "description": "L4.6: public Professional Page — secondary line."
+  },
+  "identityPublicPagePreview": "Public page preview",
+  "@identityPublicPagePreview": {
+    "description": "L4.6: public Professional Page — title."
+  },
+  "identityPreviewNotPublic": "Preview. This page is not publicly visible.",
+  "@identityPreviewNotPublic": {
+    "description": "L4.6: public Professional Page — text."
+  },
+  "identityPageAccountSettings": "Page account, memberships and international settings.",
+  "@identityPageAccountSettings": {
+    "description": "L4.6: Professional Page workspace — text."
+  },
+  "identityContentScoped": "Content is scoped to this exact Professional Page.",
+  "@identityContentScoped": {
+    "description": "L4.6: Professional Page workspace — text."
+  },
+  "identityOverviewModeration": "Professional Page overview and moderation status.",
+  "@identityOverviewModeration": {
+    "description": "L4.6: Professional Page workspace — text."
+  },
+  "identityPreviewUntilVerified": "Preview only. The page is not public until verification is approved.",
+  "@identityPreviewUntilVerified": {
+    "description": "L4.6: Professional Page workspace — button label."
+  },
+  "identityPreviewPublicPage": "Preview public page",
+  "@identityPreviewPublicPage": {
+    "description": "L4.6: Professional Page workspace — button label."
+  },
+  "identityNoPageInvented": "No page is invented for this preview. Create a page to activate its workspace and publisher context.",
+  "@identityNoPageInvented": {
+    "description": "L4.6: Professional Page workspace — text."
+  },
+  "identityContentAfterRealPage": "Content appears only after the user creates or joins a real Professional Page.",
+  "@identityContentAfterRealPage": {
+    "description": "L4.6: Professional Page workspace — text."
+  },
+  "identityPagePreview": "Professional Page preview",
+  "@identityPagePreview": {
+    "description": "L4.6: Professional Page workspace — text."
+  },
+  "identitySwitchPage": "Switch Professional Page",
+  "@identitySwitchPage": {
+    "description": "L4.6: Professional Page workspace — button label."
+  },
+  "identityCreateOrSelectPage": "Create or select Professional Page",
+  "@identityCreateOrSelectPage": {
+    "description": "L4.6: Professional Page workspace — button label."
+  },
+  "identityUserId": "User ID",
+  "@identityUserId": {
+    "description": "L4.6: Professional Page team invitations — text."
+  },
+  "identitySendInvitation": "Send invitation",
+  "@identitySendInvitation": {
+    "description": "L4.6: Professional Page team invitations — text."
+  },
+  "identityCapabilities": "Capabilities",
+  "@identityCapabilities": {
+    "description": "L4.6: Professional Page team invitations — text."
+  },
+  "identityRole": "Role",
+  "@identityRole": {
+    "description": "L4.6: Professional Page team invitations — field label."
+  },
+  "identityInviteBy": "Invite by",
+  "@identityInviteBy": {
+    "description": "L4.6: Professional Page team invitations — field label."
+  },
+  "identityInviteMember": "Invite a team member",
+  "@identityInviteMember": {
+    "description": "L4.6: Professional Page team invitations — button tooltip."
+  },
+  "identityRevoke": "Revoke",
+  "@identityRevoke": {
+    "description": "L4.6: Professional Page team invitations — button label."
+  },
+  "identityNoInvitations": "No invitations sent from this page yet.",
+  "@identityNoInvitations": {
+    "description": "L4.6: Professional Page team invitations — text."
+  },
+  "identityNoTeamPermission": "You do not have permission to manage the team.",
+  "@identityNoTeamPermission": {
+    "description": "L4.6: Professional Page team invitations — text."
+  },
+  "identitySave": "Save",
+  "@identitySave": {
+    "description": "L4.6: Professional Page profile editor — button label."
+  },
+  "identityNotSet": "Not set.",
+  "@identityNotSet": {
+    "description": "L4.6: Professional Page profile editor — text."
+  },
+  "identityCustomActivityLabel": "Custom activity label",
+  "@identityCustomActivityLabel": {
+    "description": "L4.6: Professional Page profile editor — text."
+  },
+  "identityDescription": "Description",
+  "@identityDescription": {
+    "description": "L4.6: Professional Page profile editor — text."
+  },
+  "identityShortDescription": "Short description",
+  "@identityShortDescription": {
+    "description": "L4.6: Professional Page profile editor — text."
+  },
+  "identitySwitchWorkspaceHint": "Personal profile, Professional Pages and Admin access",
+  "@identitySwitchWorkspaceHint": {
+    "description": "L4.6: Profile, workspace switcher — secondary line."
+  },
+  "identitySwitchWorkspace": "Switch workspace",
+  "@identitySwitchWorkspace": {
+    "description": "L4.6: Profile, workspace switcher — title."
+  },
+  "profileDateTbd": "Date to be set",
+  "@profileDateTbd": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileDraftListing": "Draft listing",
+  "@profileDraftListing": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileSmartSearchIdea": "Smart search idea",
+  "@profileSmartSearchIdea": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profilePublishedRoute": "Published route",
+  "@profilePublishedRoute": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileReadyToPublish": "Ready to publish",
+  "@profileReadyToPublish": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileNoCity": "No city",
+  "@profileNoCity": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileUntitledListing": "Untitled listing",
+  "@profileUntitledListing": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileRouteMap": "Route map",
+  "@profileRouteMap": {
+    "description": "L4.6: Profile page — button label."
+  },
+  "profileEditRoute": "Edit route",
+  "@profileEditRoute": {
+    "description": "L4.6: Profile page — button label."
+  },
+  "profileWalking": "Walking",
+  "@profileWalking": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileFree": "Free",
+  "@profileFree": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileOpenQuickPlanNext": "Open Quick Plan for the next generated idea",
+  "@profileOpenQuickPlanNext": {
+    "description": "L4.6: Profile page — secondary line."
+  },
+  "profileBuildNextRoute": "Build next route",
+  "@profileBuildNextRoute": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileMapPublishedListing": "Map published listing",
+  "@profileMapPublishedListing": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileOpenRouteMap": "Open route map",
+  "@profileOpenRouteMap": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileFindDraftAudience": "Find draft audience",
+  "@profileFindDraftAudience": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileFinishDraft": "Finish draft",
+  "@profileFinishDraft": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileCreatorNextSteps": "Creator next steps",
+  "@profileCreatorNextSteps": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileMapListingArea": "Map listing area",
+  "@profileMapListingArea": {
+    "description": "L4.6: Profile page — button tooltip."
+  },
+  "profileSearchSimilarListing": "Search similar listing",
+  "@profileSearchSimilarListing": {
+    "description": "L4.6: Profile page — button tooltip."
+  },
+  "profileContinueDraft": "Continue draft",
+  "@profileContinueDraft": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileOpenCreate": "Open Create",
+  "@profileOpenCreate": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileCreatorListing": "Creator listing",
+  "@profileCreatorListing": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileBuildRoute": "Build route",
+  "@profileBuildRoute": {
+    "description": "L4.6: Profile page — button label."
+  },
+  "profileNewListing": "New listing",
+  "@profileNewListing": {
+    "description": "L4.6: Profile page — button label."
+  },
+  "profileManageDrafts": "Manage drafts and published listings from the same workspace.",
+  "@profileManageDrafts": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileCreatorPublications": "Creator publications",
+  "@profileCreatorPublications": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileListingFromLatestSmart": "Create listing from latest smart search",
+  "@profileListingFromLatestSmart": {
+    "description": "L4.6: Profile page — button tooltip."
+  },
+  "profileRouteFromLatestSmart": "Build route from latest smart search",
+  "@profileRouteFromLatestSmart": {
+    "description": "L4.6: Profile page — button tooltip."
+  },
+  "profileMapSmart": "Map smart",
+  "@profileMapSmart": {
+    "description": "L4.6: Profile page — button label."
+  },
+  "profileResumeSmart": "Resume smart",
+  "@profileResumeSmart": {
+    "description": "L4.6: Profile page — button label."
+  },
+  "profileAnyArea": "Any area",
+  "@profileAnyArea": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileSmartRoute": "Smart route",
+  "@profileSmartRoute": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileSmart": "Smart",
+  "@profileSmart": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileLatestSmartSearch": "Latest smart search",
+  "@profileLatestSmartSearch": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileListingFromLatestSearch": "Create listing from latest search",
+  "@profileListingFromLatestSearch": {
+    "description": "L4.6: Profile page — button tooltip."
+  },
+  "profileRouteFromLatestSearch": "Build route from latest search",
+  "@profileRouteFromLatestSearch": {
+    "description": "L4.6: Profile page — button tooltip."
+  },
+  "profileMapSearch": "Map search",
+  "@profileMapSearch": {
+    "description": "L4.6: Profile page — button label."
+  },
+  "profileResumeSearch": "Resume search",
+  "@profileResumeSearch": {
+    "description": "L4.6: Profile page — button label."
+  },
+  "profileConditions": "Conditions",
+  "@profileConditions": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileLatestSearch": "Latest search",
+  "@profileLatestSearch": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileMapRoute": "Map route",
+  "@profileMapRoute": {
+    "description": "L4.6: Profile page — button label."
+  },
+  "profileScenario": "Scenario",
+  "@profileScenario": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileLatestRoute": "Latest route",
+  "@profileLatestRoute": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profilePersonalScenario": "Create a personal recharge scenario",
+  "@profilePersonalScenario": {
+    "description": "L4.6: Profile page — secondary line."
+  },
+  "profileBuildARoute": "Build a route",
+  "@profileBuildARoute": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileUseSearchMap": "Use Search and Map conditions",
+  "@profileUseSearchMap": {
+    "description": "L4.6: Profile page — secondary line."
+  },
+  "profileFindNextActivity": "Find next activity",
+  "@profileFindNextActivity": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileSavedPlan": "Saved plan",
+  "@profileSavedPlan": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileReviewSavedPlan": "Review saved plan",
+  "@profileReviewSavedPlan": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileUseSavedInspiration": "Use saved searches and scenarios as inspiration",
+  "@profileUseSavedInspiration": {
+    "description": "L4.6: Profile page — secondary line."
+  },
+  "profileBuildRouteIdea": "Build route idea",
+  "@profileBuildRouteIdea": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileDraftFromTaxonomy": "Draft event or place from taxonomy",
+  "@profileDraftFromTaxonomy": {
+    "description": "L4.6: Profile page — secondary line."
+  },
+  "profileCreateHub": "Create Hub",
+  "@profileCreateHub": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileIdeaToHub": "Move from route idea to Create Hub",
+  "@profileIdeaToHub": {
+    "description": "L4.6: Profile page — secondary line."
+  },
+  "profilePublishIdea": "Publish idea",
+  "@profilePublishIdea": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileSmartPrompt": "Smart prompt",
+  "@profileSmartPrompt": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileOpenBuilderControls": "Open Builder with route controls",
+  "@profileOpenBuilderControls": {
+    "description": "L4.6: Profile page — secondary line."
+  },
+  "profileGenerateScenario": "Generate scenario",
+  "@profileGenerateScenario": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileSearches": "Searches",
+  "@profileSearches": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileRoutes": "Routes",
+  "@profileRoutes": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileSaved": "Saved",
+  "@profileSaved": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileUntitledActivity": "Untitled activity",
+  "@profileUntitledActivity": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileContinueInSearch": "Continue in Search conditions",
+  "@profileContinueInSearch": {
+    "description": "L4.6: Profile page — secondary line."
+  },
+  "profileFindPeople": "Find people",
+  "@profileFindPeople": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileOpenScenarioBlock": "Open the Scenario block in Create Hub",
+  "@profileOpenScenarioBlock": {
+    "description": "L4.6: Profile page — secondary line."
+  },
+  "profileCreateScenario": "Create Scenario",
+  "@profileCreateScenario": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileOpenRouteBlock": "Open the Route block in Create Hub",
+  "@profileOpenRouteBlock": {
+    "description": "L4.6: Profile page — secondary line."
+  },
+  "profileCreateRoute": "Create route",
+  "@profileCreateRoute": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileOpenTaxonomyFlow": "Open taxonomy-based creator flow",
+  "@profileOpenTaxonomyFlow": {
+    "description": "L4.6: Profile page — secondary line."
+  },
+  "profileViewAllEvents": "View all events",
+  "@profileViewAllEvents": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileStartFromHub": "Start from Recharge Create Hub",
+  "@profileStartFromHub": {
+    "description": "L4.6: Profile page — secondary line."
+  },
+  "profileNoCreatedEvents": "No created events yet",
+  "@profileNoCreatedEvents": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileCreateFirstEvent": "Create first event",
+  "@profileCreateFirstEvent": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileEventInsights": "Event insights",
+  "@profileEventInsights": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileCreatedEvents": "Created events",
+  "@profileCreatedEvents": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileManagePage": "Manage page",
+  "@profileManagePage": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profilePhotos": "Photos",
+  "@profilePhotos": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileVisited": "Visited",
+  "@profileVisited": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileCreated": "Created",
+  "@profileCreated": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileWorkspace": "Profile workspace",
+  "@profileWorkspace": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileSignInRequired": "Sign-in required",
+  "@profileSignInRequired": {
+    "description": "L4.6: Profile page — text."
+  },
+  "profileCheckVerification": "Check verification and available tools in Settings",
+  "@profileCheckVerification": {
+    "description": "L4.6: Profile page — secondary line."
+  },
+  "profileCreatorTools": "Creator tools",
+  "@profileCreatorTools": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileSavedList": "Saved list",
+  "@profileSavedList": {
+    "description": "L4.6: Profile page — title."
+  },
+  "profileSettings": "Settings",
+  "@profileSettings": {
+    "description": "L4.6: Profile page — button tooltip."
+  },
+  "profileObjectUpdatesOff": "Object updates off",
+  "@profileObjectUpdatesOff": {
+    "description": "L4.6: Profile, Scenario library — secondary line."
+  },
+  "profileObjectUpdatesOn": "Object updates on",
+  "@profileObjectUpdatesOn": {
+    "description": "L4.6: Profile, Scenario library — secondary line."
+  },
+  "profileCompleted": "Completed",
+  "@profileCompleted": {
+    "description": "L4.6: Profile, Scenario library — text."
+  },
+  "profileActiveUpcoming": "Active and upcoming",
+  "@profileActiveUpcoming": {
+    "description": "L4.6: Profile, Scenario library — title."
+  },
+  "quickPlanAnyArea": "Any area",
+  "@quickPlanAnyArea": {
+    "description": "L4.6: Scenario builder (Quick Plan) — chip label."
+  },
+  "quickPlanAnyPrice": "Any price",
+  "@quickPlanAnyPrice": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanAllCategories": "All categories",
+  "@quickPlanAllCategories": {
+    "description": "L4.6: Scenario builder (Quick Plan) — chip label."
+  },
+  "quickPlanSmartRoute": "Smart route",
+  "@quickPlanSmartRoute": {
+    "description": "L4.6: Scenario builder (Quick Plan) — chip label."
+  },
+  "quickPlanRechargeIdea": "Recharge idea",
+  "@quickPlanRechargeIdea": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanTplActiveHint": "Move first, cool down outside, then keep energy steady.",
+  "@quickPlanTplActiveHint": {
+    "description": "L4.6: Scenario builder (Quick Plan) — secondary line."
+  },
+  "quickPlanTplActive": "Active boost",
+  "@quickPlanTplActive": {
+    "description": "L4.6: Scenario builder (Quick Plan) — title."
+  },
+  "quickPlanTplSocialHint": "Meet people first, then keep the evening moving nearby.",
+  "@quickPlanTplSocialHint": {
+    "description": "L4.6: Scenario builder (Quick Plan) — secondary line."
+  },
+  "quickPlanTplSocial": "Social evening",
+  "@quickPlanTplSocial": {
+    "description": "L4.6: Scenario builder (Quick Plan) — title."
+  },
+  "quickPlanTplFreeCity": "Free city reset",
+  "@quickPlanTplFreeCity": {
+    "description": "L4.6: Scenario builder (Quick Plan) — title."
+  },
+  "quickPlanTplCoffeeHint": "Start gently, then take a low-pressure city walk.",
+  "@quickPlanTplCoffeeHint": {
+    "description": "L4.6: Scenario builder (Quick Plan) — secondary line."
+  },
+  "quickPlanTplCoffee": "Coffee reset",
+  "@quickPlanTplCoffee": {
+    "description": "L4.6: Scenario builder (Quick Plan) — title."
+  },
+  "quickPlanResetBuilder": "Reset builder",
+  "@quickPlanResetBuilder": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanNoStopsMatch": "No stops match these conditions",
+  "@quickPlanNoStopsMatch": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanAdd": "Add",
+  "@quickPlanAdd": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanSuggestedStops": "Suggested stops",
+  "@quickPlanSuggestedStops": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanRemoveStop": "Remove stop",
+  "@quickPlanRemoveStop": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button tooltip."
+  },
+  "quickPlanMoveDown": "Move down",
+  "@quickPlanMoveDown": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button tooltip."
+  },
+  "quickPlanMoveUp": "Move up",
+  "@quickPlanMoveUp": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button tooltip."
+  },
+  "quickPlanPublishOptimized": "Publish optimized route",
+  "@quickPlanPublishOptimized": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button tooltip."
+  },
+  "quickPlanMapRoute": "Map route",
+  "@quickPlanMapRoute": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanOptimize": "Optimize",
+  "@quickPlanOptimize": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanFreeOnly": "Free only",
+  "@quickPlanFreeOnly": {
+    "description": "L4.6: Scenario builder (Quick Plan) — title."
+  },
+  "quickPlanRouteFit": "Route fit",
+  "@quickPlanRouteFit": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanWalkingRoute": "Walking route",
+  "@quickPlanWalkingRoute": {
+    "description": "L4.6: Scenario builder (Quick Plan) — title."
+  },
+  "quickPlanMoodActive": "Active",
+  "@quickPlanMoodActive": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanMoodSocial": "Social",
+  "@quickPlanMoodSocial": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanMoodCalm": "Calm",
+  "@quickPlanMoodCalm": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanListingFromSmart": "Create listing from smart search",
+  "@quickPlanListingFromSmart": {
+    "description": "L4.6: Scenario builder (Quick Plan) — chip label."
+  },
+  "quickPlanOpenSmartOnMap": "Open smart search on map",
+  "@quickPlanOpenSmartOnMap": {
+    "description": "L4.6: Scenario builder (Quick Plan) — chip label."
+  },
+  "quickPlanApplySmartToBuilder": "Apply smart search to builder",
+  "@quickPlanApplySmartToBuilder": {
+    "description": "L4.6: Scenario builder (Quick Plan) — chip label."
+  },
+  "quickPlanSmartSearch": "Smart search",
+  "@quickPlanSmartSearch": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanListingFromSaved": "Create listing from saved conditions",
+  "@quickPlanListingFromSaved": {
+    "description": "L4.6: Scenario builder (Quick Plan) — secondary line."
+  },
+  "quickPlanOpenSavedOnMap": "Open saved conditions on map",
+  "@quickPlanOpenSavedOnMap": {
+    "description": "L4.6: Scenario builder (Quick Plan) — secondary line."
+  },
+  "quickPlanApplySavedToBuilder": "Apply saved conditions to builder",
+  "@quickPlanApplySavedToBuilder": {
+    "description": "L4.6: Scenario builder (Quick Plan) — secondary line."
+  },
+  "quickPlanSavedConditions": "Saved conditions",
+  "@quickPlanSavedConditions": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanBuildFromSaved": "Build from saved intent",
+  "@quickPlanBuildFromSaved": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanReadyIdeas": "Ready route ideas",
+  "@quickPlanReadyIdeas": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanPublishRoute": "Publish route",
+  "@quickPlanPublishRoute": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanSearch": "Search",
+  "@quickPlanSearch": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanMap": "Map",
+  "@quickPlanMap": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanCopy": "Copy",
+  "@quickPlanCopy": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanSave": "Save",
+  "@quickPlanSave": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanBuildRechargeRoute": "Build a recharge route",
+  "@quickPlanBuildRechargeRoute": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanRoutePreview": "Route preview",
+  "@quickPlanRoutePreview": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanContinueSnapshot": "Continue with snapshot",
+  "@quickPlanContinueSnapshot": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanRefresh": "Refresh",
+  "@quickPlanRefresh": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button tooltip."
+  },
+  "quickPlanRefreshOrContinue": "Refresh the preview or continue with the latest available snapshot.",
+  "@quickPlanRefreshOrContinue": {
+    "description": "L4.6: Scenario builder (Quick Plan) — dialog text."
+  },
+  "quickPlanChanged": "Quick Plan changed",
+  "@quickPlanChanged": {
+    "description": "L4.6: Scenario builder (Quick Plan) — dialog text."
+  },
+  "quickPlanCreateIndependent": "Create independent Scenario",
+  "@quickPlanCreateIndependent": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanCancel": "Cancel",
+  "@quickPlanCancel": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanNoNotes": "Only your own notes are eligible; this legacy plan has none.",
+  "@quickPlanNoNotes": {
+    "description": "L4.6: Scenario builder (Quick Plan) — secondary line."
+  },
+  "quickPlanCopyNotes": "Copy my private notes",
+  "@quickPlanCopyNotes": {
+    "description": "L4.6: Scenario builder (Quick Plan) — title."
+  },
+  "quickPlanLegacyStopsHint": "Legacy stops have no catalog object IDs, so selected stops will enter Scenario as private custom locations.",
+  "@quickPlanLegacyStopsHint": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanIndependentHint": "A new independent Scenario will be created. Later changes will not sync in either direction.",
+  "@quickPlanIndependentHint": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanExpandToScenario": "Expand to Scenario",
+  "@quickPlanExpandToScenario": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanCopyStopsHint": "Copy selected stops into a new independent Scenario. This Quick Plan stays unchanged.",
+  "@quickPlanCopyStopsHint": {
+    "description": "L4.6: Scenario builder (Quick Plan) — title."
+  },
+  "quickPlanNeedLargerPlan": "Need a larger city or trip plan?",
+  "@quickPlanNeedLargerPlan": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanSavePlan": "Save this plan",
+  "@quickPlanSavePlan": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanOpenMap": "Open map",
+  "@quickPlanOpenMap": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanEditPlan": "Edit plan",
+  "@quickPlanEditPlan": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanNoStopsFit": "No stops fit these conditions yet. Edit the plan to add one.",
+  "@quickPlanNoStopsFit": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanYourRoute": "Your route",
+  "@quickPlanYourRoute": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanExpandFailed": "Could not expand this Quick Plan",
+  "@quickPlanExpandFailed": {
+    "description": "L4.6: Scenario builder (Quick Plan) — snackbar message."
+  },
+  "quickPlanCopied": "Quick Plan copied",
+  "@quickPlanCopied": {
+    "description": "L4.6: Scenario builder (Quick Plan) — snackbar message."
+  },
+  "quickPlanSaved": "Quick Plan saved",
+  "@quickPlanSaved": {
+    "description": "L4.6: Scenario builder (Quick Plan) — snackbar message."
+  },
+  "quickPlanNotSynced": "Not synced. Your local changes are retained; refresh to retry.",
+  "@quickPlanNotSynced": {
+    "description": "L4.6: Scenario builder (Quick Plan) — snackbar message."
+  },
+  "quickPlanLeave": "Leave",
+  "@quickPlanLeave": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanOpenReadOnly": "Open read-only",
+  "@quickPlanOpenReadOnly": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanDecline": "Decline",
+  "@quickPlanDecline": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanAccept": "Accept",
+  "@quickPlanAccept": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanRevoke": "Revoke",
+  "@quickPlanRevoke": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanCancelInvite": "Cancel invite",
+  "@quickPlanCancelInvite": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanDeletePersonal": "Delete current personal plan",
+  "@quickPlanDeletePersonal": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanImportPersonal": "Import personal plan",
+  "@quickPlanImportPersonal": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanImportJson": "Import recharge.quickPlan JSON",
+  "@quickPlanImportJson": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanInviteToSaved": "Invite to current saved plan",
+  "@quickPlanInviteToSaved": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanInviteUserId": "Invite existing user ID",
+  "@quickPlanInviteUserId": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanUseKnownUserId": "Use a known user ID. Pending actions take effect after server confirmation.",
+  "@quickPlanUseKnownUserId": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanInvitations": "Quick Plan invitations",
+  "@quickPlanInvitations": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanContinue": "Continue",
+  "@quickPlanContinue": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanLeavePlan": "Leave plan",
+  "@quickPlanLeavePlan": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanContentHidden": "Content hidden. Refresh to verify access.",
+  "@quickPlanContentHidden": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanRefreshAccess": "Refresh access",
+  "@quickPlanRefreshAccess": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button tooltip."
+  },
+  "quickPlanCloseInvited": "Close invited plan",
+  "@quickPlanCloseInvited": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button tooltip."
+  },
+  "quickPlanInvitedPlan": "Invited Quick Plan",
+  "@quickPlanInvitedPlan": {
+    "description": "L4.6: Scenario builder (Quick Plan) — title."
+  },
+  "quickPlanRouteSteps": "Route steps",
+  "@quickPlanRouteSteps": {
+    "description": "L4.6: Scenario builder (Quick Plan) — text."
+  },
+  "quickPlanYourPlan": "Your recharge plan",
+  "@quickPlanYourPlan": {
+    "description": "L4.6: Scenario builder (Quick Plan) — title."
+  },
+  "quickPlanReset": "Reset",
+  "@quickPlanReset": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button tooltip."
+  },
+  "quickPlanEdit": "Edit",
+  "@quickPlanEdit": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button label."
+  },
+  "quickPlanInvitationsAccess": "Invitations and access",
+  "@quickPlanInvitationsAccess": {
+    "description": "L4.6: Scenario builder (Quick Plan) — button tooltip."
+  },
+  "quickPlanQuickPlan": "Quick Plan",
+  "@quickPlanQuickPlan": {
+    "description": "L4.6: Scenario builder (Quick Plan) — title."
+  },
+  "quickPlanMyQuickPlan": "My quick plan",
+  "@quickPlanMyQuickPlan": {
+    "description": "L4.6: Scenario builder (Quick Plan) — title."
+  },
+  "favoritesFree": "Free",
+  "@favoritesFree": {
+    "description": "L4.6: Favorites — chip label."
+  },
+  "favoritesAnyArea": "Any area",
+  "@favoritesAnyArea": {
+    "description": "L4.6: Favorites — chip label."
+  },
+  "favoritesSmartRoute": "Smart route",
+  "@favoritesSmartRoute": {
+    "description": "L4.6: Favorites — chip label."
+  },
+  "favoritesRechargeIdea": "Recharge idea",
+  "@favoritesRechargeIdea": {
+    "description": "L4.6: Favorites — text."
+  },
+  "favoritesAnyTime": "Any time",
+  "@favoritesAnyTime": {
+    "description": "L4.6: Favorites — text."
+  },
+  "favoritesBadgeRoute": "ROUTE",
+  "@favoritesBadgeRoute": {
+    "description": "L4.6: Favorites — text."
+  },
+  "favoritesBadgePlace": "PLACE",
+  "@favoritesBadgePlace": {
+    "description": "L4.6: Favorites — text."
+  },
+  "favoritesBadgeEvent": "EVENT",
+  "@favoritesBadgeEvent": {
+    "description": "L4.6: Favorites — text."
+  },
+  "favoritesShowAll": "Show all",
+  "@favoritesShowAll": {
+    "description": "L4.6: Favorites — button label."
+  },
+  "favoritesFilterEmpty": "Nothing in this filter yet",
+  "@favoritesFilterEmpty": {
+    "description": "L4.6: Favorites — text."
+  },
+  "favoritesRemove": "Remove",
+  "@favoritesRemove": {
+    "description": "L4.6: Favorites — text."
+  },
+  "favoritesMoreActions": "More actions",
+  "@favoritesMoreActions": {
+    "description": "L4.6: Favorites — button tooltip."
+  },
+  "favoritesTitle": "Favorites",
+  "@favoritesTitle": {
+    "description": "L4.6: Favorites — text."
+  },
+  "favoritesRoutes": "Routes",
+  "@favoritesRoutes": {
+    "description": "L4.6: Favorites — chip label."
+  },
+  "favoritesPlaces": "Places",
+  "@favoritesPlaces": {
+    "description": "L4.6: Favorites — chip label."
+  },
+  "favoritesEvents": "Events",
+  "@favoritesEvents": {
+    "description": "L4.6: Favorites — chip label."
+  },
+  "favoritesAll": "All",
+  "@favoritesAll": {
+    "description": "L4.6: Favorites — chip label."
+  },
+  "favoritesMap": "Map",
+  "@favoritesMap": {
+    "description": "L4.6: Favorites — button label."
+  },
+  "favoritesResume": "Resume",
+  "@favoritesResume": {
+    "description": "L4.6: Favorites — button label."
+  },
+  "favoritesListingFromSmart": "Create listing from smart search",
+  "@favoritesListingFromSmart": {
+    "description": "L4.6: Favorites — chip label."
+  },
+  "favoritesDeleteSmart": "Delete smart search",
+  "@favoritesDeleteSmart": {
+    "description": "L4.6: Favorites — chip label."
+  },
+  "favoritesSmartSearch": "Smart search",
+  "@favoritesSmartSearch": {
+    "description": "L4.6: Favorites — text."
+  },
+  "favoritesListingFromSaved": "Create listing from saved conditions",
+  "@favoritesListingFromSaved": {
+    "description": "L4.6: Favorites — chip label."
+  },
+  "favoritesDeleteSaved": "Delete saved conditions",
+  "@favoritesDeleteSaved": {
+    "description": "L4.6: Favorites — chip label."
+  },
+  "favoritesSavedConditions": "Saved conditions",
+  "@favoritesSavedConditions": {
+    "description": "L4.6: Favorites — text."
+  },
+  "favoritesSavedIntentsHint": "Conditions and prompts ready to continue",
+  "@favoritesSavedIntentsHint": {
+    "description": "L4.6: Favorites — secondary line."
+  },
+  "favoritesSavedIntents": "Saved intents",
+  "@favoritesSavedIntents": {
+    "description": "L4.6: Favorites — title."
+  },
+  "favoritesOpenDiscover": "Open Discover",
+  "@favoritesOpenDiscover": {
+    "description": "L4.6: Favorites — text."
+  },
+  "favoritesEmpty": "No saved events yet",
+  "@favoritesEmpty": {
+    "description": "L4.6: Favorites — text."
+  },
+  "favoritesRetry": "Retry",
+  "@favoritesRetry": {
+    "description": "L4.6: Favorites — text."
+  },
+  "favoritesLoadFailed": "Could not load favorites",
+  "@favoritesLoadFailed": {
+    "description": "L4.6: Favorites — text."
+  },
+  "favoritesRefresh": "Refresh favorites",
+  "@favoritesRefresh": {
+    "description": "L4.6: Favorites — button tooltip."
+  },
+  "visitedRemoveFromHistory": "Remove from history",
+  "@visitedRemoveFromHistory": {
+    "description": "L4.6: Visit history — text."
+  },
+  "visitedActions": "Visit actions",
+  "@visitedActions": {
+    "description": "L4.6: Visit history — button tooltip."
+  },
+  "visitedClearPeriod": "Clear period",
+  "@visitedClearPeriod": {
+    "description": "L4.6: Visit history — button label."
+  },
+  "visitedEmptyPeriod": "No visits in this period",
+  "@visitedEmptyPeriod": {
+    "description": "L4.6: Visit history — text."
+  },
+  "visitedClear": "Clear",
+  "@visitedClear": {
+    "description": "L4.6: Visit history — button label."
+  },
+  "visitedRemoved": "Visit removed",
+  "@visitedRemoved": {
+    "description": "L4.6: Visit history — snackbar message."
+  },
+  "visitedRemove": "Remove",
+  "@visitedRemove": {
+    "description": "L4.6: Visit history — button label."
+  },
+  "visitedCancel": "Cancel",
+  "@visitedCancel": {
+    "description": "L4.6: Visit history — button label."
+  },
+  "visitedRemoveVisit": "Remove visit?",
+  "@visitedRemoveVisit": {
+    "description": "L4.6: Visit history — dialog text."
+  },
+  "visitedSelectDay": "Select visit day",
+  "@visitedSelectDay": {
+    "description": "L4.6: Visit history — text."
+  },
+  "visitedSelectMonth": "Select month",
+  "@visitedSelectMonth": {
+    "description": "L4.6: Visit history — text."
+  },
+  "visitedTitle": "Visit history",
+  "@visitedTitle": {
+    "description": "L4.6: Visit history — title."
+  },
+  "visitedEmptyHint": "Places you explicitly mark as visited will appear here.",
+  "@visitedEmptyHint": {
+    "description": "L4.6: Visit history — title."
+  },
+  "visitedEmpty": "No visits yet",
+  "@visitedEmpty": {
+    "description": "L4.6: Visit history — title."
+  },
+  "visitedRetry": "Retry",
+  "@visitedRetry": {
+    "description": "L4.6: Visit history — title."
+  },
+  "visitedTryAgain": "Try again.",
+  "@visitedTryAgain": {
+    "description": "L4.6: Visit history — title."
+  },
+  "visitedLoadFailed": "Could not load visits",
+  "@visitedLoadFailed": {
+    "description": "L4.6: Visit history — title."
+  },
+  "visitedRefresh": "Refresh visit history",
+  "@visitedRefresh": {
+    "description": "L4.6: Visit history — button tooltip."
+  },
+  "visitedSignInRequired": "Sign-in required",
+  "@visitedSignInRequired": {
+    "description": "L4.6: Visit history — text."
+  },
+  "identityEmail": "Email",
+  "@identityEmail": {
+    "description": "L4.6: invite a team member by email."
+  },
+  "identityPhone": "Phone",
+  "@identityPhone": {
+    "description": "L4.6: invite a team member by phone."
+  },
+  "quickPlanTplFreeCityHint": "A simple free route for a calm recharge window.",
+  "@quickPlanTplFreeCityHint": {
+    "description": "L4.6: Quick Plan template subtitle."
+  },
+  "identityWorkspaceNotice": "{code, select, workspace_recovered{The unavailable page was reset to your personal profile.}workspace_load_failed{Unable to load workspaces.}workspace_switched{Workspace switched.}workspace_access_unavailable{Access to the selected page is unavailable.}workspace_switch_failed{Unable to switch the workspace.}admin_preview_selected{Admin preview selected.}page_created{Professional Page created and sent for review.}self_service_page_limit_reached{You have reached the limit of 3 pages. Send a request to the moderators.}page_create_failed{Unable to create the Professional Page.}page_limit_request_sent{Request for an additional page sent.}page_limit_request_unavailable{The request is available after you create three pages.}page_limit_request_failed{Unable to send the request to the moderators.} other{Unable to load workspaces.}}",
+  "@identityWorkspaceNotice": {
+    "description": "L4.6: workspace controller message for a stable code.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "identityTeamNotice": "{code, select, invitation_sent{Invitation sent.}invitation_send_failed{Unable to send the invitation.}invitation_revoked{Invitation revoked.}invitation_revoke_failed{Unable to revoke the invitation.}invitations_load_failed{Unable to load the team invitations.}invitation_target_invalid{Enter a valid user ID, email or phone number.}owner_relationship_not_invitable{Ownership cannot be granted by invitation.}inviter_not_active_member{Only an active team member can send invitations.}inviter_missing_team_manage_capability{You do not have permission to manage the team.}cannot_delegate_capability_not_held{You cannot grant a capability you do not have yourself.}revoke_actor_not_active_member{Only an active team member can revoke invitations.}invitation_not_found{This invitation no longer exists.} other{Unable to send the invitation.}}",
+  "@identityTeamNotice": {
+    "description": "L4.6: team invitation message for a stable or server code.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "identityProfileNotice": "{code, select, profile_load_failed{Unable to load the page profile.}profile_updated{Profile updated.}profile_update_failed{Unable to update the profile.}default_locale_value_required{Enter a value for the page’s default language.}unsupported_locale{That language is not supported by this page.}value_length_out_of_bounds{That text is empty or too long.}actor_not_active_member{Only an active team member can edit the profile.}actor_missing_page_manage_capability{You do not have permission to edit the page profile.}stale_overlay_revision{This field changed elsewhere. Reload and try again.} other{Unable to update the profile.}}",
+  "@identityProfileNotice": {
+    "description": "L4.6: page profile editor message for a stable or server code.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "identityPublicPageNotice": "{code, select, page_load_failed{Unable to load this page.}page_preview_failed{Unable to load the page preview.} other{Unable to load this page.}}",
+  "@identityPublicPageNotice": {
+    "description": "L4.6: public page load message for a stable code.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "identityInboxTitle": "{code, select, identity_page_created_user{Professional Page created}identity_page_created_moderators{New Professional Page}identity_page_limit_request_user{Request sent}identity_page_limit_request_moderators{Additional page request} other{Notification}}",
+  "@identityInboxTitle": {
+    "description": "L4.6: local inbox notification title for a template code.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "identityInboxBody": "{code, select, identity_page_created_user{Review status: pending.}identity_page_created_moderators{A new page was created and needs review.}identity_page_limit_request_user{Moderators will review the additional Professional Page.} other{}}",
+  "@identityInboxBody": {
+    "description": "L4.6: local inbox notification body for a template code (the page name, if any, is shown separately).",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "identityInboxLimitBody": "The user requested a limit of {count, plural, one{{count} page} other{{count} pages}}.",
+  "@identityInboxLimitBody": {
+    "description": "L4.6: moderators inbox body for a page limit request.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "profileRoleTitle": "{value, select, pro_generator{Pro generator}creator{Creator}user{User} other{Creator}}",
+  "@profileRoleTitle": {
+    "description": "L4.6: profile role title for a stable role id (Creator stays untranslated until the glossary).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "quickPlanFitLevel": "{value, select, needsStops{Needs stops}ready{Ready}goodWithTweaks{Good with tweaks} other{Needs tuning}}",
+  "@quickPlanFitLevel": {
+    "description": "L4.6: Quick Plan route fit level (stable value).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "quickPlanFitSummary": "{value, select, needsStops{Add at least one stop to make this route useful.}ready{This route is ready for map or publishing.}goodWithTweaks{A small optimization can make this route easier to follow.} other{Optimize the route before sending it to Map or Create.}}",
+  "@quickPlanFitSummary": {
+    "description": "L4.6: Quick Plan route fit summary (stable value).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "quickPlanFitNoStops": "No stops selected",
+  "@quickPlanFitNoStops": {
+    "description": "L4.6: route fit insight."
+  },
+  "quickPlanFitTrim": "Trim about {minutes} min",
+  "@quickPlanFitTrim": {
+    "description": "L4.6: route fit insight: minutes over the limit.",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "35"
+      }
+    }
+  },
+  "quickPlanFitFits": "Fits {minutes} min",
+  "@quickPlanFitFits": {
+    "description": "L4.6: route fit insight: the route fits the time limit.",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "35"
+      }
+    }
+  },
+  "quickPlanFitRoom": "Room for one more stop",
+  "@quickPlanFitRoom": {
+    "description": "L4.6: route fit insight."
+  },
+  "quickPlanFitRemovePaid": "Remove paid stops for free-only mode",
+  "@quickPlanFitRemovePaid": {
+    "description": "L4.6: route fit insight."
+  },
+  "quickPlanFitFreeRoute": "Free route",
+  "@quickPlanFitFreeRoute": {
+    "description": "L4.6: route fit insight."
+  },
+  "quickPlanFitTotalPrice": "{price} total",
+  "@quickPlanFitTotalPrice": {
+    "description": "L4.6: route fit insight: total price (formatted money).",
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "quickPlanFitShortenTransfers": "Shorten transfers for walking mode",
+  "@quickPlanFitShortenTransfers": {
+    "description": "L4.6: route fit insight."
+  },
+  "quickPlanFitTotalDistance": "{km} km total",
+  "@quickPlanFitTotalDistance": {
+    "description": "L4.6: route fit insight: total distance (formatted number).",
+    "placeholders": {
+      "km": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "profileOpenSearchWith": "Open Search with",
+  "@profileOpenSearchWith": {
+    "description": "L4.6: label before a draft title (shown as is)."
+  },
+  "quickPlanAccessUnavailable": "Access unavailable. Refresh to retry.",
+  "@quickPlanAccessUnavailable": {
+    "description": "L4.6: an invited Quick Plan could not be verified."
+  },
+  "quickPlanNotConfirmed": "Not confirmed yet. Refresh to retry.",
+  "@quickPlanNotConfirmed": {
+    "description": "L4.6: an invitation action is not confirmed yet."
+  },
+  "quickPlanTemplateApplied": "{message} applied",
+  "@quickPlanTemplateApplied": {
+    "description": "L4.6: a route template was applied; message is the localized template title.",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "quickPlanApplyTemplate": "Apply {message} template",
+  "@quickPlanApplyTemplate": {
+    "description": "L4.6: screen reader label to apply a template; message is the localized template title.",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "quickPlanExpandStops": "{count, plural, one{Expand {count} stop to Scenario} other{Expand {count} stops to Scenario}}",
+  "@quickPlanExpandStops": {
+    "description": "L4.6: expand selected stops into a Scenario.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "identitySectionPage": "Page",
+  "@identitySectionPage": {
+    "description": "L4.6: page workspace section."
+  },
+  "identitySectionContent": "Content",
+  "@identitySectionContent": {
+    "description": "L4.6: page workspace section."
+  },
+  "identitySectionAccount": "Account",
+  "@identitySectionAccount": {
+    "description": "L4.6: page workspace section."
+  },
+  "identityEditField": "Edit {message}",
+  "@identityEditField": {
+    "description": "L4.6: edit a profile field; message is the localized field name.",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "identityInvitationPending": "Pending",
+  "@identityInvitationPending": {
+    "description": "L4.6: team invitation status."
+  },
+  "identityInvitationRevoked": "Revoked",
+  "@identityInvitationRevoked": {
+    "description": "L4.6: team invitation status."
+  },
+  "identityInvitationExpired": "Expired",
+  "@identityInvitationExpired": {
+    "description": "L4.6: team invitation status."
+  },
+  "identityKindCompany": "Company",
+  "@identityKindCompany": {
+    "description": "L4.6: page kind."
+  },
+  "identityKindOrganization": "Organization",
+  "@identityKindOrganization": {
+    "description": "L4.6: page kind."
+  },
+  "identityUnverified": "Unverified",
+  "@identityUnverified": {
+    "description": "L4.6: page verification."
+  },
+  "identityVerified": "Verified",
+  "@identityVerified": {
+    "description": "L4.6: page verification."
+  },
+  "profilePersonal": "Personal",
+  "@profilePersonal": {
+    "description": "L4.6: personal profile label before the city (shown as is)."
+  },
+  "profileBookingsRequests": "Bookings & requests",
+  "@profileBookingsRequests": {
+    "description": "L4.6: profile section."
+  },
+  "profileOneTimeEvent": "One-time event",
+  "@profileOneTimeEvent": {
+    "description": "L4.6: object kind."
+  },
+  "profileMissingFields": "Missing: {message}",
+  "@profileMissingFields": {
+    "description": "L4.6: missing draft fields; message is a localized list.",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "profileMissingField": "{value, select, title{title}category{category}city{city}cover{cover image} other{start time}}",
+  "@profileMissingField": {
+    "description": "L4.6: a missing draft field (stable id).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "profileStagePublished": "Published",
+  "@profileStagePublished": {
+    "description": "L4.6: listing stage."
+  },
+  "profileStageDraft": "Draft",
+  "@profileStageDraft": {
+    "description": "L4.6: listing stage."
+  },
+  "profilePublishedReady": "Published-ready",
+  "@profilePublishedReady": {
+    "description": "L4.6: published listing is complete."
+  },
+  "profileMissingCount": "{count, plural, one{{count} missing} other{{count} missing}}",
+  "@profileMissingCount": {
+    "description": "L4.6: number of missing fields.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "profileAll": "All",
+  "@profileAll": {
+    "description": "L4.6: filter: all."
+  },
+  "quickPlanRetryPending": "Refresh / retry pending",
+  "@quickPlanRetryPending": {
+    "description": "L4.6: retry pending invitation actions."
+  },
+  "quickPlanPlanLabel": "Plan",
+  "@quickPlanPlanLabel": {
+    "description": "L4.6: label before a plan id."
+  },
+  "quickPlanGrantStatus": "{code, select, pending{Pending}active{Active}accepted{Accepted}declined{Declined}revoked{Revoked}left{Left} other{Unknown status}}",
+  "@quickPlanGrantStatus": {
+    "description": "L4.6: Quick Plan invitation status (server code).",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "quickPlanInvitee": "Invitee",
+  "@quickPlanInvitee": {
+    "description": "L4.6: label before an invitee user id."
+  },
+  "quickPlanOwner": "Owner",
+  "@quickPlanOwner": {
+    "description": "L4.6: label before an owner user id."
+  },
+  "quickPlanReinvite": "Re-invite",
+  "@quickPlanReinvite": {
+    "description": "L4.6: invite again."
+  },
+  "quickPlanMoodReady": "{value, select, calm{Calm route, ready to follow or adjust.}social{Social route, ready to follow or adjust.}active{Active route, ready to follow or adjust.} other{Custom route, ready to follow or adjust.}}",
+  "@quickPlanMoodReady": {
+    "description": "L4.6: Quick Plan hero line by mood (stable id).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "quickPlanMoodPlan": "{value, select, calm{Calm plan}social{Social plan}active{Active plan} other{Custom plan}}",
+  "@quickPlanMoodPlan": {
+    "description": "L4.6: Quick Plan heading by mood (stable id).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "quickPlanMoodQuickPlan": "{value, select, calm{Calm quick plan}social{Social quick plan}active{Active quick plan} other{Custom quick plan}}",
+  "@quickPlanMoodQuickPlan": {
+    "description": "L4.6: saved Quick Plan title by mood (stable id).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "quickPlanApplied": "Applied",
+  "@quickPlanApplied": {
+    "description": "L4.6: a template is applied."
+  },
+  "quickPlanUse": "Use",
+  "@quickPlanUse": {
+    "description": "L4.6: use a template."
+  },
+  "favoritesEdit": "Edit",
+  "@favoritesEdit": {
+    "description": "L4.6: favorite action."
+  },
+  "favoritesOpen": "Open",
+  "@favoritesOpen": {
+    "description": "L4.6: favorite action."
+  },
+  "favoritesRoute": "Route",
+  "@favoritesRoute": {
+    "description": "L4.6: favorite action."
+  },
+  "visitedMonth": "Month",
+  "@visitedMonth": {
+    "description": "L4.6: visit filter: month."
+  },
+  "visitedDay": "Day",
+  "@visitedDay": {
+    "description": "L4.6: visit filter: day."
+  },
+  "routeRecordingNotificationTitle": "Route recording is active",
+  "@routeRecordingNotificationTitle": {
+    "description": "L4.6: Android notification while a Route records in the background."
+  },
+  "routeRecordingNotificationText": "Recharge is saving your route while the app is in the background.",
+  "@routeRecordingNotificationText": {
+    "description": "L4.6: Android notification while a Route records in the background (GPS privacy: keep the meaning)."
+  },
+  "createFormSaveContinue": "Save & continue",
+  "@createFormSaveContinue": {
+    "description": "L4.6: Activity form: save the step and go to the next one."
+  },
+  "createClassLeadMyself": "I lead this class myself",
+  "@createClassLeadMyself": {
+    "description": "L4.6: Class / Workshop form: the publisher is the instructor."
+  },
+  "profileControlCenter": "CONTROL CENTER",
+  "@profileControlCenter": {
+    "description": "L4.6: Profile page — section label in capitals."
+  },
+  "profileLatestCreatedEvents": "LATEST CREATED EVENTS",
+  "@profileLatestCreatedEvents": {
+    "description": "L4.6: Profile page — section label in capitals."
+  },
+  "profileQuickActions": "QUICK ACTIONS",
+  "@profileQuickActions": {
+    "description": "L4.6: Profile page — section label in capitals."
+  },
+  "profileWorkspaceHeading": "Workspace",
+  "@profileWorkspaceHeading": {
+    "description": "L4.6: Profile page — heading of the creator workspace block."
+  },
+  "profileSearchContinuations": "{count, plural, one{{count} search to continue} other{{count} searches to continue}}",
+  "@profileSearchContinuations": {
+    "description": "L4.6: Profile page — number of searches the reader can continue.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "profileActivitiesCount": "{count, plural, one{{count} activity} other{{count} activities}}",
+  "@profileActivitiesCount": {
+    "description": "L4.6: Profile page — number of saved activities.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "profileRoutesCount": "{count, plural, one{{count} route} other{{count} routes}}",
+  "@profileRoutesCount": {
+    "description": "L4.6: Profile page — number of saved routes.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "profileSavedIdeasReady": "{count, plural, one{{count} saved idea ready} other{{count} saved ideas ready}}",
+  "@profileSavedIdeasReady": {
+    "description": "L4.6: Profile page — number of saved ideas.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "profileResume": "Resume",
+  "@profileResume": {
+    "description": "L4.6: Profile page — label before the reader's own search text, shown as is after a colon."
+  },
+  "quickPlanReadOnlyOnline": "Read-only · online access required",
+  "@quickPlanReadOnlyOnline": {
+    "description": "L4.6: Scenario builder (Quick Plan) — a shared plan opened without editing rights."
+  },
+  "quickPlanConditions": "Conditions",
+  "@quickPlanConditions": {
+    "description": "L4.6: Scenario builder (Quick Plan) — heading of the plan conditions."
+  },
+  "quickPlanIntentLabel": "Intent",
+  "@quickPlanIntentLabel": {
+    "description": "L4.6: Scenario builder (Quick Plan) — label before the reader's own search text, shown as is after a colon."
+  },
+  "visitedPrivateHint": "Private, self-reported places you visited.",
+  "@visitedPrivateHint": {
+    "description": "L4.6: Visit history — subtitle under the title."
+  },
+  "visitedSelfReported": "Self-reported",
+  "@visitedSelfReported": {
+    "description": "L4.6: Visit history — a visit the reader marked themselves."
+  },
+  "identityProfile": "Profile",
+  "@identityProfile": {
+    "description": "L4.6: Professional Page profile editor — card heading."
+  },
+  "identityTeam": "Team",
+  "@identityTeam": {
+    "description": "L4.6: Professional Page team invitations — card heading."
+  },
+  "identityRequired": "Required.",
+  "@identityRequired": {
+    "description": "L4.6: Professional Page team invitations — the invitee field is empty."
+  },
+  "identitySectionPersonal": "PERSONAL",
+  "@identitySectionPersonal": {
+    "description": "L4.6: Profile, workspace switcher — section label in capitals."
+  },
+  "identitySectionProfessionalPages": "PROFESSIONAL PAGES",
+  "@identitySectionProfessionalPages": {
+    "description": "L4.6: Profile, workspace switcher — section label in capitals; the role term stays in English until the glossary review."
+  },
+  "identitySectionAdministration": "ADMINISTRATION",
+  "@identitySectionAdministration": {
+    "description": "L4.6: Profile, workspace switcher — section label in capitals."
+  },
+  "identityPagesUsed": "{max, plural, one{{count} of {max} self-service page used} other{{count} of {max} self-service pages used}}",
+  "@identityPagesUsed": {
+    "description": "L4.6: Profile, workspace switcher — used self-service pages; count is used, max is the limit.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "max": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "identityPublishedItems": "{count, plural, one{{count} published item} other{{count} published items}}",
+  "@identityPublishedItems": {
+    "description": "L4.6: public Professional Page — number of published items.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "profileScenarioLibrary": "Scenarios",
+  "@profileScenarioLibrary": {
+    "description": "L4.6: Profile, Scenario library — card heading."
+  },
+  "discoverHomeTagline": "VACATION APP",
+  "@discoverHomeTagline": {
+    "description": "L4.6: Home — tagline in capitals under the RECHARGE wordmark."
+  },
+  "createTaxonomySearchCategories": "{count, plural, one{Search {count} category} other{Search {count} categories}}",
+  "@createTaxonomySearchCategories": {
+    "description": "L4.6: Create, category picker — search field; count is the number of subcategories.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createFormOpeningRules": "{count, plural, one{{count} opening rule} other{{count} opening rules}}",
+  "@createFormOpeningRules": {
+    "description": "L4.6: Create, Place — number of opening-hours rules.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createFormAddHours": "Add 09:00–21:00",
+  "@createFormAddHours": {
+    "description": "L4.6: Create, Place — adds the standard opening hours to every day."
+  },
+  "createFormMinimumVisitChip": "Minimum {minutes} min",
+  "@createFormMinimumVisitChip": {
+    "description": "L4.6: Create — minimum visit duration chip.",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createFormCapacityOf": "Capacity {current}/{max}",
+  "@createFormCapacityOf": {
+    "description": "L4.6: Create — participants so far and the limit.",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "2"
+      },
+      "max": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createFormMetersValue": "{value} m",
+  "@createFormMetersValue": {
+    "description": "L4.6: Create — a distance in meters; value is a formatted number.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createFormPointsCount": "{count, plural, one{{count} point} other{{count} points}}",
+  "@createFormPointsCount": {
+    "description": "L4.6: Create, Route — number of track points.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteVersionLabel": "version",
+  "@createRouteVersionLabel": {
+    "description": "L4.6: Route moderation — label before a version id."
+  },
+  "createRouteGeometryLabel": "Geometry",
+  "@createRouteGeometryLabel": {
+    "description": "L4.6: Route moderation — label before a geometry hash."
+  },
+  "createActivityPurchaseHint": "Purchase (e.g. coffee at the counter)",
+  "@createActivityPurchaseHint": {
+    "description": "L4.6: Create, Activity — optional contribution option."
+  },
+  "createActivityGroupMin": "Group, min people",
+  "@createActivityGroupMin": {
+    "description": "L4.6: Create, Activity — smallest suggested group."
+  },
+  "createFormMinutesRange": "{min}–{max} min",
+  "@createFormMinutesRange": {
+    "description": "L4.6: Create — duration range.",
+    "placeholders": {
+      "min": {
+        "type": "int",
+        "example": "2"
+      },
+      "max": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createFormImagesPermission": "I have permission to use these images",
+  "@createFormImagesPermission": {
+    "description": "L4.6: Create — rights confirmation for images."
+  },
+  "createClassOutcomesPerLine": "Outcomes (one per line)",
+  "@createClassOutcomesPerLine": {
+    "description": "L4.6: Create, Class / Workshop — multi-line field."
+  },
+  "createClassPrerequisitesPerLine": "Prerequisites (one per line)",
+  "@createClassPrerequisitesPerLine": {
+    "description": "L4.6: Create, Class / Workshop — multi-line field."
+  },
+  "createClassFoldSecond": "Second (winter time)",
+  "@createClassFoldSecond": {
+    "description": "L4.6: Create, Class / Workshop — the repeated hour when clocks go back."
+  },
+  "createClassStartHhmm": "Start (HH:MM)",
+  "@createClassStartHhmm": {
+    "description": "L4.6: Create, Class / Workshop — start time field with its format."
+  },
+  "createClassEndHhmm": "End (HH:MM)",
+  "@createClassEndHhmm": {
+    "description": "L4.6: Create, Class / Workshop — end time field with its format."
+  },
+  "createCollectionNoTitleYet": "(no title yet)",
+  "@createCollectionNoTitleYet": {
+    "description": "L4.6: Create, Collection review — the title is still empty."
+  },
+  "createCollectionPublishedRemove": "Published — remove without review",
+  "@createCollectionPublishedRemove": {
+    "description": "L4.6: Create, Collection — heading of removing a published item."
+  },
+  "createCollectionObjectType": "{value, select, place{Place}route{Route}bookableSession{Session}classWorkshop{Class / Workshop}rental{Rental} other{Object}}",
+  "@createCollectionObjectType": {
+    "description": "L4.6: Create, Collection — type of a catalog object (stable id).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createEventPreviewLabel": "Preview",
+  "@createEventPreviewLabel": {
+    "description": "L4.6: Create, Event — label before the admission preview."
+  },
+  "createEventInterestedOptional": "Optional “Interested” response",
+  "@createEventInterestedOptional": {
+    "description": "L4.6: Create, Event — switch for the optional response."
+  },
+  "createEventAvailabilityLabel": "State",
+  "@createEventAvailabilityLabel": {
+    "description": "L4.6: Create, Event — label before the availability state."
+  },
+  "createEventAvailabilityState": "{value, select, available{available}lowAvailability{few places left}soldOut{sold out}waitlistAvailable{waitlist open}registrationClosed{registration closed}cancelled{cancelled}stale{out of date} other{unknown}}",
+  "@createEventAvailabilityState": {
+    "description": "L4.6: Create, Event — availability state (stable id).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createEventAvailabilityFreshness": "{value, select, current{current}stale{out of date} other{unknown}}",
+  "@createEventAvailabilityFreshness": {
+    "description": "L4.6: Create, Event — how fresh the availability is (stable id).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createEventSuggestedLabel": "Suggested",
+  "@createEventSuggestedLabel": {
+    "description": "L4.6: Create, Event — label before the suggested event type."
+  },
+  "createEventArchetype": "{value, select, performance{Performance}screening{Screening}exhibition{Exhibition}open_stage{Open stage}meet_greet{Meet and greet}talk{Talk}discussion{Discussion}conference{Conference}networking{Networking}social_meetup{Social meetup}hosted_game{Hosted game}open_play{Open play}competition{Competition}class_session{Class}workshop{Workshop}retreat_camp{Retreat or camp}wellness_session{Wellness session}tasting{Tasting}shared_meal{Shared meal}party{Party}celebration{Celebration}festival{Festival}market_fair{Market or fair}auction{Auction}launch_promotion{Launch or promotion}open_day{Open day}tour_excursion{Tour or excursion}outdoor_gathering{Outdoor gathering}community_action{Community action}volunteering{Volunteering}fundraiser{Fundraiser}family_program{Family program}ceremony{Ceremony} other{Other}}",
+  "@createEventArchetype": {
+    "description": "L4.6: Create, Event — event type (stable wire name).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createEventParticipationMode": "{value, select, mode_watch{Watch}mode_attend{Attend}mode_play{Play}mode_compete{Compete}mode_perform{Perform}mode_practice{Practice}mode_learn{Learn}mode_create{Create}mode_meet_people{Meet people}mode_date{Date}mode_visit{Visit}mode_explore{Explore}mode_eat_drink{Eat and drink}mode_shop{Shop}mode_support{Support}mode_volunteer{Volunteer}mode_travel{Travel} other{Other}}",
+  "@createEventParticipationMode": {
+    "description": "L4.6: Create, Event — what visitors do (stable wire name).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createEventAdditionalRole": "{message}: additional attendee role",
+  "@createEventAdditionalRole": {
+    "description": "L4.6: Create, Event — screen reader label; message is the localized role.",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createEventMediaRights": "I have the right to publish this media *",
+  "@createEventMediaRights": {
+    "description": "L4.6: Create, Event — rights confirmation; the star marks a required field."
+  },
+  "createEventAllDay": "All-day event",
+  "@createEventAllDay": {
+    "description": "L4.6: Create, Event — switch."
+  },
+  "createEventIanaTimezone": "IANA timezone",
+  "@createEventIanaTimezone": {
+    "description": "L4.6: Create, Event — field for an IANA time zone."
+  },
+  "createEventOccurrencesCount": "{count, plural, one{{count} occurrence materialized} other{{count} occurrences materialized}}",
+  "@createEventOccurrencesCount": {
+    "description": "L4.6: Create, Event — dates generated from the schedule.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createEventNextDateLabel": "Next",
+  "@createEventNextDateLabel": {
+    "description": "L4.6: Create, Event — label before the next date."
+  },
+  "createEventPriceIn": "Price ({value})",
+  "@createEventPriceIn": {
+    "description": "L4.6: Create, Event — price field; value is the currency code.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createFormContinue": "Continue",
+  "@createFormContinue": {
+    "description": "L4.6: Create — go to the next step."
+  },
+  "createEventCapacityInventory": "Capacity & inventory",
+  "@createEventCapacityInventory": {
+    "description": "L4.6: Create, Event — section heading."
+  },
+  "createEventPoolsLabel": "Pools",
+  "@createEventPoolsLabel": {
+    "description": "L4.6: Create, Event — label before the per-channel pool counts."
+  },
+  "createEventZoneReference": "Zone/table reference",
+  "@createEventZoneReference": {
+    "description": "L4.6: Create, Event — field."
+  },
+  "createFindPeopleTagsField": "Tags (comma-separated, up to 8)",
+  "@createFindPeopleTagsField": {
+    "description": "L4.6: Create, Find People — field."
+  },
+  "createFindPeoplePaceOptional": "Pace (optional)",
+  "@createFindPeoplePaceOptional": {
+    "description": "L4.6: Create, Find People — field."
+  },
+  "createFindPeopleSecretRefHint": "Session-scoped secure reference; never shown publicly",
+  "@createFindPeopleSecretRefHint": {
+    "description": "L4.6: Create, Find People — hint of the private access reference."
+  },
+  "createFormAmount": "Amount",
+  "@createFormAmount": {
+    "description": "L4.6: Create — money amount field."
+  },
+  "createFindPeopleHostsTitle": "Hosts, visibility, and communication",
+  "@createFindPeopleHostsTitle": {
+    "description": "L4.6: Create, Find People — step title."
+  },
+  "createFindPeopleCohostInactive": "Co-host permissions remain inactive until the invited user accepts the role.",
+  "@createFindPeopleCohostInactive": {
+    "description": "L4.6: Create, Find People — step subtitle."
+  },
+  "createFindPeopleAccuracyConfirm": "I confirm that all details are accurate *",
+  "@createFindPeopleAccuracyConfirm": {
+    "description": "L4.6: Create, Find People — confirmation; the star marks a required field."
+  },
+  "createFormReadOnlyDraft": "Read-only draft",
+  "@createFormReadOnlyDraft": {
+    "description": "L4.6: Create — the reader cannot edit this draft."
+  },
+  "createFormDescriptionRequired": "Description *",
+  "@createFormDescriptionRequired": {
+    "description": "L4.6: Create, Place — required field; the star marks it."
+  },
+  "createFormDescriptionRecommended": "Description (recommended)",
+  "@createFormDescriptionRecommended": {
+    "description": "L4.6: Create, Place — recommended field."
+  },
+  "createPlaceShortDescHint": "20–180 characters.",
+  "@createPlaceShortDescHint": {
+    "description": "L4.6: Create, Place — length hint."
+  },
+  "createPlaceDirectionsHint": "Optional: entrance, path or meeting point",
+  "@createPlaceDirectionsHint": {
+    "description": "L4.6: Create, Place — subtitle of the directions section."
+  },
+  "createPlaceOpen247": "Open 24/7",
+  "@createPlaceOpen247": {
+    "description": "L4.6: Create, Place — opening hours option."
+  },
+  "createPlaceSeasonalPhase2": "Seasonal (Phase 2)",
+  "@createPlaceSeasonalPhase2": {
+    "description": "L4.6: Create, Place — disabled opening hours option."
+  },
+  "createFormDateFormatHint": "YYYY-MM-DD",
+  "@createFormDateFormatHint": {
+    "description": "L4.6: Create — date field showing its format."
+  },
+  "createPlaceUntilInclusive": "Until (inclusive)",
+  "@createPlaceUntilInclusive": {
+    "description": "L4.6: Create, Place — closed-until date field."
+  },
+  "createPlaceShortVisit": "A shorter visit can still work",
+  "@createPlaceShortVisit": {
+    "description": "L4.6: Create, Place — switch."
+  },
+  "createPlaceCoverRecommended": "A cover is recommended and can be added later.",
+  "@createPlaceCoverRecommended": {
+    "description": "L4.6: Create, Place — subtitle of the photos section."
+  },
+  "createPlaceGalleryOptional": "Optional · maximum 12",
+  "@createPlaceGalleryOptional": {
+    "description": "L4.6: Create, Place — subtitle of the gallery section."
+  },
+  "createPlaceWarningsReviewed": "I reviewed these warnings",
+  "@createPlaceWarningsReviewed": {
+    "description": "L4.6: Create, Place — acknowledges the warnings."
+  },
+  "createFormReviewing": "Reviewing…",
+  "@createFormReviewing": {
+    "description": "L4.6: Create — progress of a review."
+  },
+  "createPlaceRecommendedMinutes": "{minutes} min recommended",
+  "@createPlaceRecommendedMinutes": {
+    "description": "L4.6: Create, Place — recommended visit length in the preview.",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createPlaceRoutePrimary": "Route (primary action)",
+  "@createPlaceRoutePrimary": {
+    "description": "L4.6: Create, Place — disabled action in the preview."
+  },
+  "createPlaceDuplicateReason": "{code, select, title_match{similar name}category_match{same category}official_domain_match{same website}phone_match{same phone} other{similar details}}",
+  "@createPlaceDuplicateReason": {
+    "description": "L4.6: Create, Place — why an existing place looks like a duplicate (stable code).",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createRentalBrandModel": "Brand / model (optional)",
+  "@createRentalBrandModel": {
+    "description": "L4.6: Create, Rental — field."
+  },
+  "createRentalConfirmCategory": "I confirm this category is correct",
+  "@createRentalConfirmCategory": {
+    "description": "L4.6: Create, Rental — confirmation."
+  },
+  "createRentalSizeVariant": "Size / variant",
+  "@createRentalSizeVariant": {
+    "description": "L4.6: Create, Rental — field."
+  },
+  "createFormConfirmedOn": "Confirmed {date}",
+  "@createFormConfirmedOn": {
+    "description": "L4.6: Create — when something was confirmed; date is formatted.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createRentalUnitsBlocked": "{count, plural, one{{count} unit blocked} other{{count} units blocked}}",
+  "@createRentalUnitsBlocked": {
+    "description": "L4.6: Create, Rental — blocked units.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRentalDefaultsEditable": "Editable — nothing applies automatically.",
+  "@createRentalDefaultsEditable": {
+    "description": "L4.6: Create, Rental — subtitle of the suggested defaults."
+  },
+  "createRentalIdRequired": "ID required at handover",
+  "@createRentalIdRequired": {
+    "description": "L4.6: Create, Rental — checkbox."
+  },
+  "createRentalCurrencyField": "Currency (ISO 4217)",
+  "@createRentalCurrencyField": {
+    "description": "L4.6: Create, Rental — field."
+  },
+  "createRentalRateStep": "{count, plural, one{From {count} unit: {price} minor} other{From {count} units: {price} minor}}",
+  "@createRentalRateStep": {
+    "description": "L4.6: Create, Rental — a rate step; price is the amount in minor units with its currency code.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "price": {
+        "type": "String",
+        "example": "100 EUR"
+      }
+    }
+  },
+  "createRentalDepositField": "Deposit (minor units, 0 = none)",
+  "@createRentalDepositField": {
+    "description": "L4.6: Create, Rental — field."
+  },
+  "createRentalPrivateNotice": "Private — not public: exact pickup address, geo and handover instructions are entered separately and never appear here.",
+  "@createRentalPrivateNotice": {
+    "description": "L4.6: Create, Rental — notice on the review step."
+  },
+  "createRentalRightToOffer": "I have the right to offer this for rent",
+  "@createRentalRightToOffer": {
+    "description": "L4.6: Create, Rental — attestation."
+  },
+  "createFormStepOf": "Step {current} of {total}",
+  "@createFormStepOf": {
+    "description": "L4.6: Create — progress through the steps.",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "2"
+      },
+      "total": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteGpxExport": "GPX export",
+  "@createRouteGpxExport": {
+    "description": "L4.6: Create, Route — section title."
+  },
+  "createRouteGpxSaved": "GPX file saved.",
+  "@createRouteGpxSaved": {
+    "description": "L4.6: Create, Route — export result."
+  },
+  "createFormBytes": "{value} B",
+  "@createFormBytes": {
+    "description": "L4.6: Create — file size; value is a formatted number.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createFormKilobytes": "{value} KB",
+  "@createFormKilobytes": {
+    "description": "L4.6: Create — file size; value is a formatted number.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createFormMegabytes": "{value} MB",
+  "@createFormMegabytes": {
+    "description": "L4.6: Create — file size; value is a formatted number.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createRouteGpxKind": "{value, select, track{Track} other{Route}}",
+  "@createRouteGpxKind": {
+    "description": "L4.6: Create, Route — kind of a GPX candidate (stable id).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createRouteSegmentsCount": "{count, plural, one{{count} segment} other{{count} segments}}",
+  "@createRouteSegmentsCount": {
+    "description": "L4.6: Create, Route — number of GPX segments.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteConnectGaps": "{count, plural, one{Connect {count} gap with straight lines} other{Connect {count} gaps with straight lines}}",
+  "@createRouteConnectGaps": {
+    "description": "L4.6: Create, Route — checkbox.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteImportPoi": "Import {count} POI",
+  "@createRouteImportPoi": {
+    "description": "L4.6: Create, Route — switch.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteAnchorsTitle": "Anchors ({count})",
+  "@createRouteAnchorsTitle": {
+    "description": "L4.6: Create, Route — list title.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteAnchorSemantics": "Anchor {index}, latitude {start}, longitude {end}",
+  "@createRouteAnchorSemantics": {
+    "description": "L4.6: Create, Route — screen reader label; start is the latitude, end the longitude.",
+    "placeholders": {
+      "index": {
+        "type": "int",
+        "example": "1"
+      },
+      "start": {
+        "type": "String",
+        "example": "56.9"
+      },
+      "end": {
+        "type": "String",
+        "example": "24.1"
+      }
+    }
+  },
+  "createRouteSegmentsTitle": "Segments ({count})",
+  "@createRouteSegmentsTitle": {
+    "description": "L4.6: Create, Route — list title.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteSegmentAppears": "A segment appears after the second anchor.",
+  "@createRouteSegmentAppears": {
+    "description": "L4.6: Create, Route — empty list."
+  },
+  "createRouteSegmentN": "Segment {index}",
+  "@createRouteSegmentN": {
+    "description": "L4.6: Create, Route — list row.",
+    "placeholders": {
+      "index": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteWaypointsTitle": "Waypoints ({count})",
+  "@createRouteWaypointsTitle": {
+    "description": "L4.6: Create, Route — list title.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteAnchorN": "Anchor {index}",
+  "@createRouteAnchorN": {
+    "description": "L4.6: Create, Route — dropdown option.",
+    "placeholders": {
+      "index": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteAcceptedPoints": "{count, plural, one{{count} accepted point} other{{count} accepted points}}",
+  "@createRouteAcceptedPoints": {
+    "description": "L4.6: Create, Route recording — accepted GPS points.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteAverageAccuracy": "{value} m avg",
+  "@createRouteAverageAccuracy": {
+    "description": "L4.6: Create, Route recording — value is a formatted number.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createRouteUnsafePoints": "{count, plural, one{{count} unsafe point excluded.} other{{count} unsafe points excluded.}}",
+  "@createRouteUnsafePoints": {
+    "description": "L4.6: Create, Route recording — excluded GPS points.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteGapLabel": "Gap {index}: {meters} m, {total} s",
+  "@createRouteGapLabel": {
+    "description": "L4.6: Create, Route recording — a gap; total is in seconds.",
+    "placeholders": {
+      "index": {
+        "type": "int",
+        "example": "2"
+      },
+      "meters": {
+        "type": "int",
+        "example": "2"
+      },
+      "total": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteGpsPointsSaved": "{count, plural, one{{count} GPS point saved} other{{count} GPS points saved}}",
+  "@createRouteGpsPointsSaved": {
+    "description": "L4.6: Create, Route recording — saved GPS points.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteGpsAttention": "GPS needs attention",
+  "@createRouteGpsAttention": {
+    "description": "L4.6: Create, Route recording — status."
+  },
+  "createRouteGpsUnsafeStop": "GPS recording could not continue safely.",
+  "@createRouteGpsUnsafeStop": {
+    "description": "L4.6: Create, Route recording — an unknown recording failure; no code is shown."
+  },
+  "createRouteBlockingChecks": "{count, plural, one{{count} blocking check} other{{count} blocking checks}}",
+  "@createRouteBlockingChecks": {
+    "description": "L4.6: Create, Route review.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteWarningsToReview": "{count, plural, one{{count} warning to review} other{{count} warnings to review}}",
+  "@createRouteWarningsToReview": {
+    "description": "L4.6: Create, Route review.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createRouteUnknownSurfaceMeters": "{value} m unknown",
+  "@createRouteUnknownSurfaceMeters": {
+    "description": "L4.6: Create, Route review — value is a formatted number.",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createScenarioDayOne": "Day 1",
+  "@createScenarioDayOne": {
+    "description": "L4.6: Create, Scenario — the single day of the plan."
+  },
+  "createScenarioRechecking": "Rechecking…",
+  "@createScenarioRechecking": {
+    "description": "L4.6: Create, Scenario — progress."
+  },
+  "createScenarioTimeNotEntered": "time not entered",
+  "@createScenarioTimeNotEntered": {
+    "description": "L4.6: Create, Scenario — a leg without a time."
+  },
+  "createScenarioDurationMinutesField": "Duration, minutes",
+  "@createScenarioDurationMinutesField": {
+    "description": "L4.6: Create, Scenario — field."
+  },
+  "createScenarioStopHint": "Park, viewpoint, private address…",
+  "@createScenarioStopHint": {
+    "description": "L4.6: Create, Scenario — hint of a custom stop."
+  },
+  "createScenarioBlockingIssues": "{count, plural, one{{count} blocking issue} other{{count} blocking issues}}",
+  "@createScenarioBlockingIssues": {
+    "description": "L4.6: Create, Scenario review.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createScenarioServiceChanged": "A changed service was found",
+  "@createScenarioServiceChanged": {
+    "description": "L4.6: Create, Scenario — schedule recheck result."
+  },
+  "createScenarioFreshnessLabel": "Freshness",
+  "@createScenarioFreshnessLabel": {
+    "description": "L4.6: Create, Scenario — how recent the schedule data is."
+  },
+  "createScenarioFreshness": "{value, select, current{current}stale{stale}unavailable{unavailable} other{unknown}}",
+  "@createScenarioFreshness": {
+    "description": "L4.6: Create, Scenario — schedule freshness (stable id).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createScenarioAfterTime": "After {time}",
+  "@createScenarioAfterTime": {
+    "description": "L4.6: Create, Scenario — earliest departure; time is formatted.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "createScenarioNoStopsFound": "No stops found.",
+  "@createScenarioNoStopsFound": {
+    "description": "L4.6: Create, Scenario — a stop search found nothing."
+  },
+  "createScenarioDepartureSemantics": "{start} to {end}, {minutes} minutes, planned schedule not live",
+  "@createScenarioDepartureSemantics": {
+    "description": "L4.6: Create, Scenario — screen reader label of a departure; start and end are times.",
+    "placeholders": {
+      "start": {
+        "type": "String",
+        "example": "09:00"
+      },
+      "end": {
+        "type": "String",
+        "example": "10:00"
+      },
+      "minutes": {
+        "type": "int",
+        "example": "60"
+      }
+    }
+  },
+  "createScenarioCarrierOptional": "Carrier (optional)",
+  "@createScenarioCarrierOptional": {
+    "description": "L4.6: Create, Scenario — field."
+  },
+  "createScenarioServiceHint": "Train 802 / Bus 7480",
+  "@createScenarioServiceHint": {
+    "description": "L4.6: Create, Scenario — hint with example services."
+  },
+  "createScenarioDurationMinRequired": "Duration, min *",
+  "@createScenarioDurationMinRequired": {
+    "description": "L4.6: Create, Scenario — required field; the star marks it."
+  },
+  "createScenarioDurationMin": "Duration, min",
+  "@createScenarioDurationMin": {
+    "description": "L4.6: Create, Scenario — field."
+  },
+  "createScenarioDistanceKm": "Distance, km",
+  "@createScenarioDistanceKm": {
+    "description": "L4.6: Create, Scenario — field."
+  },
+  "createScenarioOtherCost": "Parking / ticket / other cost (optional)",
+  "@createScenarioOtherCost": {
+    "description": "L4.6: Create, Scenario — field."
+  },
+  "createSessionTimezoneField": "Timezone (IANA, e.g. Europe/Riga)",
+  "@createSessionTimezoneField": {
+    "description": "L4.6: Create, Session — field."
+  },
+  "createFormConfirmed": "Confirmed",
+  "@createFormConfirmed": {
+    "description": "L4.6: Create — state of a confirmation button."
+  },
+  "createSessionBuffer": "Buffer {minutes} min",
+  "@createSessionBuffer": {
+    "description": "L4.6: Create, Session — pause after a slot.",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createSessionNotice": "notice {minutes} min",
+  "@createSessionNotice": {
+    "description": "L4.6: Create, Session — minimum notice before a slot.",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "createSessionPlatformDefaults": "platform defaults, change anytime",
+  "@createSessionPlatformDefaults": {
+    "description": "L4.6: Create, Session — after the buffer and notice values."
+  },
+  "createSessionPriceFixed": "€ Fixed",
+  "@createSessionPriceFixed": {
+    "description": "L4.6: Create, Session — price chip; Sessions are priced in euro here."
+  },
+  "createSessionOptionalLater": "Optional — add now or after publishing",
+  "@createSessionOptionalLater": {
+    "description": "L4.6: Create, Session — section heading."
+  },
+  "discoverResultsCount": "{count, plural, one{{count} result} other{{count} results}}",
+  "@discoverResultsCount": {
+    "description": "L4.6: Discover, categories — screen reader count.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "discoverSubcategories": "Subcategories",
+  "@discoverSubcategories": {
+    "description": "L4.6: Discover, category page — heading."
+  },
+  "discoverFilterMode": "Mode",
+  "@discoverFilterMode": {
+    "description": "L4.6: Discover, search filters — heading."
+  },
+  "discoverEstimated": "estimated",
+  "@discoverEstimated": {
+    "description": "L4.6: Discover, Details — the travel time is an estimate."
+  },
+  "discoverSlotLabel": "Slot",
+  "@discoverSlotLabel": {
+    "description": "L4.6: Discover, Details — label before a slot id."
+  },
+  "discoverGuides": "Guides",
+  "@discoverGuides": {
+    "description": "L4.6: Discover — section heading."
+  },
+  "discoverItemsCount": "{count, plural, one{{count} item} other{{count} items}}",
+  "@discoverItemsCount": {
+    "description": "L4.6: Discover, guides — number of objects.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "identityVerificationStatus": "{value, select, unverified{Unverified}pending{Verification pending}verified{Verified}rejected{Verification rejected}revoked{Verification revoked} other{Unverified}}",
+  "@identityVerificationStatus": {
+    "description": "L4.6: Professional Page workspace — verification (stable id).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
+  },
+  "identityRelationship": "{value, select, owner{Owner}manager{Manager} other{Editor}}",
+  "@identityRelationship": {
+    "description": "L4.6: Professional Page team — role in the team (stable id).",
+    "placeholders": {
+      "value": {
+        "type": "String",
+        "example": "x"
+      }
+    }
   }
 }

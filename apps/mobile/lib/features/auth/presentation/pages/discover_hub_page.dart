@@ -93,7 +93,8 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
       durationMinutes: 90,
       freeOnly: false,
       walkingOnly: true,
-      prompt: 'coffee reset walk',
+      prompt:
+          'coffee reset walk', // l10n-ignore: search prompt text, not UI copy
       steps: <String>['food_drinks.coffee', 'wellness_recharge.calm_walk'],
     ),
     _HomeRouteTemplate(
@@ -103,7 +104,8 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
       durationMinutes: 90,
       freeOnly: true,
       walkingOnly: true,
-      prompt: 'free calm city walk',
+      prompt:
+          'free calm city walk', // l10n-ignore: search prompt text, not UI copy
       steps: <String>['wellness_recharge.calm_walk'],
     ),
     _HomeRouteTemplate(
@@ -113,7 +115,8 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
       durationMinutes: 150,
       freeOnly: false,
       walkingOnly: true,
-      prompt: 'social evening near me',
+      prompt:
+          'social evening near me', // l10n-ignore: search prompt text, not UI copy
       steps: <String>[
         'games_indoor.board_games',
         'music_nightlife.afterwork_drinks',
@@ -126,7 +129,8 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
       durationMinutes: 120,
       freeOnly: false,
       walkingOnly: true,
-      prompt: 'active tennis and walk',
+      prompt:
+          'active tennis and walk', // l10n-ignore: search prompt text, not UI copy
       steps: <String>['sport.tennis', 'outdoor_nature_walking.city_walk'],
     ),
   ];
@@ -873,7 +877,7 @@ class _HomeHero extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         const Text(
-          'RECHARGE',
+          'RECHARGE', // l10n-ignore: brand wordmark
           style: TextStyle(
             color: Colors.white,
             fontSize: 24,
@@ -882,8 +886,8 @@ class _HomeHero extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 3),
-        const Text(
-          'VACATION APP',
+        Text(
+          context.l10n.discoverHomeTagline,
           style: TextStyle(
             color: RechargeTheme.homeMuted,
             fontSize: 10,
@@ -1106,18 +1110,32 @@ class _HomeActivitySections extends StatelessWidget {
     List<DiscoverItemEntity> items,
   ) {
     return <_HomeChoiceSectionData>[
-      _HomeChoiceSectionData(id: 'Categories', items: _categoryMixItems(items)),
-      _HomeChoiceSectionData(id: 'New', items: _newItems(items)),
+      // Section ids are stable widget keys, not copy; the title comes from
+      // _homeSectionTitle.
       _HomeChoiceSectionData(
-        id: 'For you',
+        id: 'Categories', // l10n-ignore: section id
+        items: _categoryMixItems(items),
+      ),
+      _HomeChoiceSectionData(
+        id: 'New', // l10n-ignore: section id
+        items: _newItems(items),
+      ),
+      _HomeChoiceSectionData(
+        id: 'For you', // l10n-ignore: section id
         items: _forYouItems(items),
-      ), // l10n-ignore: stable section id (widget key)
+      ),
       _HomeChoiceSectionData(
-        id: 'Quick events', // l10n-ignore: stable section id (widget key)
+        id: 'Quick events', // l10n-ignore: section id
         items: _quickEventItems(items),
       ),
-      _HomeChoiceSectionData(id: 'Nearby', items: _nearbyItems(items)),
-      _HomeChoiceSectionData(id: 'Popular', items: _popularItems(items)),
+      _HomeChoiceSectionData(
+        id: 'Nearby', // l10n-ignore: section id
+        items: _nearbyItems(items),
+      ),
+      _HomeChoiceSectionData(
+        id: 'Popular', // l10n-ignore: section id
+        items: _popularItems(items),
+      ),
     ];
   }
 
@@ -1679,7 +1697,7 @@ class _ForYouStrip extends StatelessWidget {
           Text(
             _homeSectionTitle(
               context.l10n,
-              'For you',
+              'For you', // l10n-ignore: stable section id (widget key)
             ), // l10n-ignore: stable section id (widget key)
             style: const TextStyle(
               color: Colors.white,
@@ -1704,7 +1722,10 @@ class _ForYouStrip extends StatelessWidget {
                     width: buttonWidth,
                     onPressed: onPopular,
                     icon: Icons.star_outline_rounded,
-                    label: _homeSectionTitle(context.l10n, 'Popular'),
+                    label: _homeSectionTitle(
+                      context.l10n,
+                      'Popular', // l10n-ignore: section id
+                    ),
                   ),
                   _ForYouButton(
                     width: buttonWidth,
@@ -1976,10 +1997,11 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
         ..._smartRouteParameters(parseResult, includeMode: false),
         'source': 'smart_route_seed',
         'type': 'route',
-        'title': '${_capitalized(routeIntent.mood)} recharge route',
+        'title':
+            '${_capitalized(routeIntent.mood)} recharge route', // l10n-ignore: Create seed prefill data
         'subtitle':
-            '${routeIntent.stepCategories.length} stops · '
-            '${routeIntent.durationMinutes} min · smart route',
+            '${routeIntent.stepCategories.length} stops · ' // l10n-ignore: Create seed prefill data
+            '${routeIntent.durationMinutes} min · smart route', // l10n-ignore: Create seed prefill data
         'q': parseResult.originalText.trim(),
         'category': 'route',
       },
@@ -2107,14 +2129,13 @@ String _capitalized(String value) {
   return trimmed[0].toUpperCase() + trimmed.substring(1);
 }
 
+// The cases are the stable section ids of _homeChoiceSections.
 String _homeSectionTitle(AppLocalizations l10n, String id) => switch (id) {
-  'Categories' => l10n.discoverCategories,
-  'New' => l10n.discoverHomeNew,
-  'For you' =>
-    l10n.discoverHomeForYou, // l10n-ignore: stable section id (widget key)
-  'Quick events' =>
-    l10n.discoverHomeQuickEvents, // l10n-ignore: stable section id (widget key)
-  'Nearby' => l10n.discoverHomeNearby,
+  'Categories' => l10n.discoverCategories, // l10n-ignore: section id
+  'New' => l10n.discoverHomeNew, // l10n-ignore: section id
+  'For you' => l10n.discoverHomeForYou, // l10n-ignore: section id
+  'Quick events' => l10n.discoverHomeQuickEvents, // l10n-ignore: section id
+  'Nearby' => l10n.discoverHomeNearby, // l10n-ignore: section id
   _ => l10n.discoverHomePopular,
 };
 

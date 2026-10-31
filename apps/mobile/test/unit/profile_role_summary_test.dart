@@ -19,7 +19,7 @@ void main() {
     expect(summary.tier, ProfileRoleTier.user);
     expect(summary.canCreate, isFalse);
     expect(summary.canGenerate, isFalse);
-    expect(summary.primaryActionLabel, 'Open Saved');
+    expect(summary.primaryActionId, 'open_saved');
   });
 
   test('does not promote a user from create capabilities alone', () {
@@ -31,7 +31,7 @@ void main() {
     expect(summary.tier, ProfileRoleTier.user);
     expect(summary.canCreate, isFalse);
     expect(summary.canGenerate, isFalse);
-    expect(summary.primaryActionLabel, 'Open Saved');
+    expect(summary.primaryActionId, 'open_saved');
   });
 
   test('maps generator capabilities to Pro generator tier', () {
@@ -43,7 +43,7 @@ void main() {
     expect(summary.tier, ProfileRoleTier.proGenerator);
     expect(summary.canCreate, isTrue);
     expect(summary.canGenerate, isTrue);
-    expect(summary.primaryActionLabel, 'Open Builder');
+    expect(summary.primaryActionId, 'open_builder');
   });
 
   test('one personal title/layout with distinct actual tool hints', () {
@@ -58,7 +58,7 @@ void main() {
     ];
     for (final summary in summaries) {
       final presentation = ProfilePersonalPresentation(accessSummary: summary);
-      expect(presentation.title, 'Creator');
+      expect(presentation.titleId, 'creator');
       expect(presentation.layout, ProfilePersonalLayout.personal);
       expect(presentation.accessSummary, same(summary));
       expect(presentation.canShowCreatorTools, summary?.canCreate ?? false);
@@ -76,7 +76,7 @@ void main() {
       ),
     ]) {
       final presentation = ProfilePersonalPresentation(accessSummary: summary);
-      expect(presentation.title, 'Creator');
+      expect(presentation.titleId, 'creator');
       expect(presentation.canShowCreatorTools, isFalse);
       expect(presentation.canShowGeneratorTools, isFalse);
       for (final tier in ProfileRoleTier.values) {
@@ -134,8 +134,8 @@ void main() {
           accessSummary: actual,
         );
         expect(
-          ProfilePersonalPresentation(accessSummary: preview).title,
-          'Creator',
+          ProfilePersonalPresentation(accessSummary: preview).titleId,
+          'creator',
         );
         final createPage = CreateProfessionalPageUseCase(
           repository: repository,

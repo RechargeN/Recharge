@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/localization/l10n_context.dart';
 import '../../../../shared/models/catalog_object_ref.dart';
 import '../../application/controllers/visited_places_controller.dart';
 import '../../application/state/visited_places_state.dart';
@@ -26,7 +27,9 @@ class _VisitedPlacesPageState extends ConsumerState<VisitedPlacesPage> {
     final ColorScheme colors = Theme.of(context).colorScheme;
 
     if (widget.userId.isEmpty) {
-      return const Scaffold(body: Center(child: Text('Требуется авторизация')));
+      return Scaffold(
+        body: Center(child: Text(context.l10n.visitedSignInRequired)),
+      );
     }
 
     _scheduleLoad(widget.userId);
@@ -38,11 +41,11 @@ class _VisitedPlacesPageState extends ConsumerState<VisitedPlacesPage> {
     return Scaffold(
       backgroundColor: colors.surfaceContainerLowest,
       appBar: AppBar(
-        title: const Text('Visit history'),
+        title: Text(context.l10n.visitedTitle),
         centerTitle: true,
         actions: [
           IconButton(
-            tooltip: 'Refresh visit history',
+            tooltip: context.l10n.visitedRefresh,
             icon: const Icon(Icons.refresh),
             onPressed: () =>
                 controller.loadVisitedPlaces(userId: widget.userId),
@@ -56,29 +59,29 @@ class _VisitedPlacesPageState extends ConsumerState<VisitedPlacesPage> {
           const Center(child: CircularProgressIndicator()),
         VisitedPlacesStatus.error => _MessageState(
           icon: Icons.cloud_off_outlined,
-          title: 'Could not load visits',
-          message: state.message ?? 'Try again.',
-          actionLabel: 'Retry',
+          title: context.l10n.visitedLoadFailed,
+          // L4.6: the controller keeps a code; the page says it in words.
+          message: context.l10n.visitedTryAgain,
+          actionLabel: context.l10n.visitedRetry,
           onAction: () => controller.loadVisitedPlaces(userId: widget.userId),
         ),
-        VisitedPlacesStatus.ready when state.items.isEmpty =>
-          const _MessageState(
-            icon: Icons.place_outlined,
-            title: 'No visits yet',
-            message: 'Places you explicitly mark as visited will appear here.',
-          ),
+        VisitedPlacesStatus.ready when state.items.isEmpty => _MessageState(
+          icon: Icons.place_outlined,
+          title: context.l10n.visitedEmpty,
+          message: context.l10n.visitedEmptyHint,
+        ),
         VisitedPlacesStatus.ready => ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
           children: <Widget>[
             Text(
-              'Visit history',
+              context.l10n.visitedTitle,
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 4),
             Text(
-              'Private, self-reported places you visited.',
+              context.l10n.visitedPrivateHint,
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: colors.onSurfaceVariant),
@@ -141,7 +144,7 @@ class _VisitedPlacesPageState extends ConsumerState<VisitedPlacesPage> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
                 child: Text(
-                  'Select month',
+                  context.l10n.visitedSelectMonth,
                   style: Theme.of(
                     sheetContext,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
@@ -195,7 +198,7 @@ class _VisitedPlacesPageState extends ConsumerState<VisitedPlacesPage> {
       initialDate: _clampDate(initialDate, firstDate, lastDate),
       firstDate: firstDate,
       lastDate: lastDate,
-      helpText: 'Select visit day',
+      helpText: context.l10n.visitedSelectDay,
     );
 
     if (selected != null) {
@@ -223,7 +226,7 @@ class _VisitedPlacesPageState extends ConsumerState<VisitedPlacesPage> {
           context: context,
           builder: (BuildContext dialogContext) {
             return AlertDialog(
-              title: const Text('Remove visit?'),
+              title: Text(context.l10n.visitedRemoveVisit),
               content: Text(
                 '${item.title} · '
                 '${MaterialLocalizations.of(context).formatMediumDate(item.visitedOn)}',
@@ -231,11 +234,11 @@ class _VisitedPlacesPageState extends ConsumerState<VisitedPlacesPage> {
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(false),
-                  child: const Text('Cancel'),
+                  child: Text(context.l10n.visitedCancel),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.of(dialogContext).pop(true),
-                  child: const Text('Remove'),
+                  child: Text(context.l10n.visitedRemove),
                 ),
               ],
             );
@@ -247,7 +250,7 @@ class _VisitedPlacesPageState extends ConsumerState<VisitedPlacesPage> {
     if (!context.mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Visit removed')));
+    ).showSnackBar(SnackBar(content: Text(context.l10n.visitedRemoved)));
   }
 }
 
@@ -281,7 +284,7 @@ class _VisitPeriodFilter extends StatelessWidget {
           icon: const Icon(Icons.calendar_view_month_outlined, size: 18),
           label: Text(
             selectedMonth == null
-                ? 'Month'
+                ? context.l10n.visitedMonth
                 : localizations.formatMonthYear(selectedMonth!),
           ),
         ),
@@ -290,12 +293,15 @@ class _VisitPeriodFilter extends StatelessWidget {
           icon: const Icon(Icons.calendar_today_outlined, size: 17),
           label: Text(
             selectedDay == null
-                ? 'Day'
+                ? context.l10n.visitedDay
                 : localizations.formatMediumDate(selectedDay!),
           ),
         ),
         if (onClear != null)
-          TextButton(onPressed: onClear, child: const Text('Clear')),
+          TextButton(
+            onPressed: onClear,
+            child: Text(context.l10n.visitedClear),
+          ),
       ],
     );
   }
@@ -321,13 +327,16 @@ class _FilteredPeriodEmpty extends StatelessWidget {
             Icon(Icons.event_busy_outlined, color: colors.primary),
             const SizedBox(height: 10),
             Text(
-              'No visits in this period',
+              context.l10n.visitedEmptyPeriod,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 10),
-            TextButton(onPressed: onClear, child: const Text('Clear period')),
+            TextButton(
+              onPressed: onClear,
+              child: Text(context.l10n.visitedClearPeriod),
+            ),
           ],
         ),
       ),
@@ -421,15 +430,17 @@ class _VisitedPlaceCard extends StatelessWidget {
                           ),
                         ),
                         PopupMenuButton<String>(
-                          tooltip: 'Visit actions',
+                          tooltip: context.l10n.visitedActions,
                           onSelected: (String action) {
                             if (action == 'remove') onRemove();
                           },
                           itemBuilder: (BuildContext context) =>
-                              const <PopupMenuEntry<String>>[
+                              <PopupMenuEntry<String>>[
                                 PopupMenuItem<String>(
                                   value: 'remove',
-                                  child: Text('Remove from history'),
+                                  child: Text(
+                                    context.l10n.visitedRemoveFromHistory,
+                                  ),
                                 ),
                               ],
                         ),
@@ -437,7 +448,7 @@ class _VisitedPlaceCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'Self-reported',
+                      context.l10n.visitedSelfReported,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: colors.onSurfaceVariant,
                       ),

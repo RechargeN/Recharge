@@ -222,7 +222,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         ),
         TextFormField(
           controller: _field(
-            'sessionCoverAlt:${widget.controller.sessionContentLocale}',
+            'sessionCoverAlt:${widget.controller.sessionContentLocale}', // l10n-ignore: field id
             widget.controller.sessionMediaAltText(),
           ),
           decoration: InputDecoration(
@@ -234,7 +234,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         for (final reference in draft.media.gallery)
           TextFormField(
             controller: _field(
-              'sessionGalleryAlt:$reference:${widget.controller.sessionContentLocale}',
+              'sessionGalleryAlt:$reference:${widget.controller.sessionContentLocale}', // l10n-ignore: field id
               widget.controller.sessionMediaAltText(reference),
             ),
             decoration: InputDecoration(
@@ -248,7 +248,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         CheckboxListTile(
           value:
               widget.controller.sessionMediaMetadata['rightsConfirmed'] == true,
-          title: const Text('I have permission to use these images'),
+          title: Text(context.l10n.createFormImagesPermission),
           onChanged: (value) => widget.controller.updateSessionMediaMetadata(
             rightsConfirmed: value ?? false,
           ),
@@ -285,19 +285,28 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         Row(
           children: <Widget>[
             Expanded(
+              flex: 3,
               child: TextFormField(
                 controller: _field('timezoneId', session.timezoneId),
-                decoration: const InputDecoration(
-                  labelText: 'Timezone (IANA, e.g. Europe/Riga)',
+                decoration: InputDecoration(
+                  labelText: context.l10n.createSessionTimezoneField,
                 ),
               ),
             ),
             const SizedBox(width: 8),
-            FilledButton(
-              onPressed: () => widget.controller.confirmSessionTimezone(
-                _fields['timezoneId']?.text ?? session.timezoneId,
+            // L4.6: long lv/ru labels wrap at 200% text instead of overflowing.
+            Flexible(
+              flex: 2,
+              child: FilledButton(
+                onPressed: () => widget.controller.confirmSessionTimezone(
+                  _fields['timezoneId']?.text ?? session.timezoneId,
+                ),
+                child: Text(
+                  session.timezoneConfirmed
+                      ? context.l10n.createFormConfirmed
+                      : context.l10n.createFormConfirm,
+                ),
               ),
-              child: Text(session.timezoneConfirmed ? 'Confirmed' : 'Confirm'),
             ),
           ],
         ),
@@ -412,9 +421,9 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Buffer ${session.schedule.bufferAfterSlotMinutes} min · '
-          'notice ${session.schedule.minNoticeMinutes} min — '
-          'platform defaults, change anytime',
+          '${context.l10n.createSessionBuffer(session.schedule.bufferAfterSlotMinutes)} · '
+          '${context.l10n.createSessionNotice(session.schedule.minNoticeMinutes)} — '
+          '${context.l10n.createSessionPlatformDefaults}',
           style: Theme.of(context).textTheme.bodySmall,
         ),
         if (preview.isNotEmpty) ...<Widget>[
@@ -454,7 +463,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
               onSelected: (_) => widget.controller.setSessionPriceFree(),
             ),
             ChoiceChip(
-              label: const Text('€ Fixed'),
+              label: Text(context.l10n.createSessionPriceFixed),
               selected: !isFree,
               onSelected: (_) => widget.controller.setSessionPriceFixed(
                 amountMinor: session.price.amount?.amountMinor ?? 0,
@@ -549,7 +558,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      'Optional — add now or after publishing',
+                      context.l10n.createSessionOptionalLater,
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                   ),

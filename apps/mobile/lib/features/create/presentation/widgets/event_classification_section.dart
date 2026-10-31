@@ -56,7 +56,10 @@ class EventClassificationSection extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    Text('Suggested: ${_label(suggestion.archetype.wireName)}'),
+                    Text(
+                      '${context.l10n.createEventSuggestedLabel}: '
+                      '${context.l10n.createEventArchetype(suggestion.archetype.wireName)}',
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       context.l10n.createFormOnlySuggestionConfirmChooseAnother,
@@ -92,7 +95,9 @@ class EventClassificationSection extends StatelessWidget {
                   (EventArchetype archetype) =>
                       DropdownMenuItem<EventArchetype>(
                         value: archetype,
-                        child: Text(_label(archetype.wireName)),
+                        child: Text(
+                          context.l10n.createEventArchetype(archetype.wireName),
+                        ),
                       ),
                 )
                 .toList(growable: false),
@@ -134,7 +139,11 @@ class EventClassificationSection extends StatelessWidget {
                   (ParticipationMode mode) =>
                       DropdownMenuItem<ParticipationMode>(
                         value: mode,
-                        child: Text(_label(mode.wireName)),
+                        child: Text(
+                          context.l10n.createEventParticipationMode(
+                            'mode_${mode.wireName}',
+                          ),
+                        ),
                       ),
                 )
                 .toList(growable: false),
@@ -161,11 +170,19 @@ class EventClassificationSection extends StatelessWidget {
                   final bool canSelect =
                       selected || (!isPrimary && state.canAddParticipationMode);
                   return Semantics(
-                    label: '${_label(mode.wireName)} additional attendee role',
+                    label: context.l10n.createEventAdditionalRole(
+                      context.l10n.createEventParticipationMode(
+                        'mode_${mode.wireName}',
+                      ),
+                    ),
                     selected: selected,
                     child: FilterChip(
                       key: Key('event-additional-${mode.wireName}'),
-                      label: Text(_label(mode.wireName)),
+                      label: Text(
+                        context.l10n.createEventParticipationMode(
+                          'mode_${mode.wireName}',
+                        ),
+                      ),
                       selected: selected,
                       onSelected: canSelect
                           ? (bool next) =>
@@ -200,17 +217,6 @@ class EventClassificationSection extends StatelessWidget {
       ),
     );
   }
-}
-
-String _label(String wireName) {
-  return wireName
-      .split('_')
-      .map(
-        (String word) => word.isEmpty
-            ? word
-            : '${word.substring(0, 1).toUpperCase()}${word.substring(1)}',
-      )
-      .join(' ');
 }
 
 /// L4: a section field error, resolved from its message id.

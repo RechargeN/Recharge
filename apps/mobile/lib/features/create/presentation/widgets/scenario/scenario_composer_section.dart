@@ -41,7 +41,8 @@ class ScenarioComposerSection extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: Text(
-                'Day 1 · ${data.items.length} stops',
+                '${context.l10n.createScenarioDayOne} · '
+                '${context.l10n.discoverStops(data.items.length)}',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
@@ -509,7 +510,7 @@ class _OfficialTransitActions extends StatelessWidget {
               : const Icon(Icons.sync_outlined),
           label: Text(
             loading
-                ? 'Rechecking…'
+                ? context.l10n.createScenarioRechecking
                 : context.l10n.createScenarioRecheckSchedule,
           ),
         ),
@@ -597,7 +598,8 @@ class _TransportLegCard extends StatelessWidget {
         subtitle: Text(
           leg == null
               ? canEdit
-                    ? '${_travelModeLabel(context.l10n, data.constraints.primaryTravelMode)} · time not entered'
+                    ? '${_travelModeLabel(context.l10n, data.constraints.primaryTravelMode)} · '
+                          '${context.l10n.createScenarioTimeNotEntered}'
                     : context.l10n.createScenarioLocationDataRequiredManualLeg
               : '${_travelModeLabel(context.l10n, leg.mode)} · '
                     '${leg.durationMinutes ?? 'unknown'} min · '
@@ -690,7 +692,7 @@ String _legSourceLabel(AppLocalizations l10n, ScenarioLegSource source) =>
       ScenarioLegSource.manual => l10n.createScenarioEnteredManually,
       ScenarioLegSource.estimate => l10n.createScenarioEstimatedTime,
       ScenarioLegSource.provider => l10n.createScenarioProviderValue,
-      ScenarioLegSource.unknown => 'Unknown',
+      ScenarioLegSource.unknown => l10n.createFormUnknown,
     };
 
 String _travelModeLabel(AppLocalizations l10n, ScenarioTravelMode mode) =>

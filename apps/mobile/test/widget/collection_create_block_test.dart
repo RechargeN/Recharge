@@ -30,6 +30,7 @@ import 'package:recharge/generated/l10n/app_localizations.dart';
 
 import '../support/event_create_test_support.dart';
 import 'widget_test_viewport.dart';
+import '../support/l10n/l10n_screenshot.dart';
 
 CollectionCreateCoordinator _buildCoordinator() {
   return CollectionCreateCoordinator(
@@ -276,6 +277,7 @@ void main() {
           );
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
+          await l10nCaptureScreen(tester);
           final Finder actions = find.byWidgetPredicate(
             (Widget widget) =>
                 widget is FilledButton || widget is ElevatedButton,

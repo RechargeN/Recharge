@@ -1129,7 +1129,9 @@ class _DynamicCriteriaSection extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Profile: ${result.profile.id.replaceAll('_', ' ')}',
+              // The profile id is category vocabulary (G04), not translated.
+              '${context.l10n.createFormProfile}: '
+              '${result.profile.id.replaceAll('_', ' ')}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 12),
@@ -1227,8 +1229,9 @@ class _TaxonomySubcategoryPickerState
         TextField(
           key: const ValueKey<String>('taxonomy-category-search'),
           decoration: InputDecoration(
-            labelText:
-                'Search ${widget.category.subcategories.length} categories',
+            labelText: context.l10n.createTaxonomySearchCategories(
+              widget.category.subcategories.length,
+            ),
             prefixIcon: const Icon(Icons.search),
           ),
           onChanged: (String value) => setState(() => _query = value),
@@ -1531,13 +1534,15 @@ class _CreateAvailabilitySection extends StatelessWidget {
                     child: Text(
                       draft.openingHours.isEmpty
                           ? context.l10n.createFormNoOpeningHoursYet
-                          : '${draft.openingHours.length} opening rules',
+                          : context.l10n.createFormOpeningRules(
+                              draft.openingHours.length,
+                            ),
                     ),
                   ),
                   TextButton.icon(
                     onPressed: onAddWeek,
                     icon: const Icon(Icons.add),
-                    label: const Text('Add 09:00–21:00'),
+                    label: Text(context.l10n.createFormAddHours),
                   ),
                 ],
               ),
@@ -1580,7 +1585,9 @@ class _CreateAvailabilitySection extends StatelessWidget {
                   children: <int>[15, 30, 45, 60]
                       .map(
                         (int minutes) => ChoiceChip(
-                          label: Text('Minimum $minutes min'),
+                          label: Text(
+                            context.l10n.createFormMinimumVisitChip(minutes),
+                          ),
                           selected:
                               draft.minimumVisitDurationMinutes == minutes,
                           onSelected: (_) => onMinimumChanged(minutes),
@@ -1614,8 +1621,10 @@ class _CreateAvailabilitySection extends StatelessWidget {
               Text(
                 draft.maxParticipants == null
                     ? context.l10n.createFormCapacityUnknown
-                    : 'Capacity ${draft.currentParticipants}/'
-                          '${draft.maxParticipants}',
+                    : context.l10n.createFormCapacityOf(
+                        draft.currentParticipants,
+                        draft.maxParticipants!,
+                      ),
               ),
               Wrap(
                 spacing: 8,
@@ -2310,14 +2319,14 @@ String _seedTitle(String rawTitle, String prompt, String categoryId) {
   final CreateTaxonomyCategory? category = createTaxonomyCategoryById(
     categoryId,
   );
-  return '${category?.title ?? 'Recharge'} idea';
+  return '${category?.title ?? 'Recharge'} idea'; // l10n-ignore: Create seed prefill data
 }
 
 String _sentenceTitle(String value) {
   final String cleaned = value.replaceAll(RegExp(r'\s+'), ' ').trim();
   if (cleaned.isEmpty) return '';
   final String capped = cleaned.length > 48
-      ? '${cleaned.substring(0, 48).trim()} idea'
+      ? '${cleaned.substring(0, 48).trim()} idea' // l10n-ignore: Create seed prefill data
       : cleaned;
   return capped[0].toUpperCase() + capped.substring(1);
 }
@@ -2364,17 +2373,17 @@ String _seedSourceLabel(Map<String, String> params) {
     case 'details':
       return 'details';
     case 'saved_search':
-      return 'saved search';
+      return 'saved search'; // l10n-ignore: Create seed prefill data
     case 'search':
-      return 'search conditions';
+      return 'search conditions'; // l10n-ignore: Create seed prefill data
     case 'smart_search':
-      return 'smart search';
+      return 'smart search'; // l10n-ignore: Create seed prefill data
     case 'profile':
-      return 'profile workspace';
+      return 'profile workspace'; // l10n-ignore: Create seed prefill data
     case 'scenario':
-      return 'scenario route';
+      return 'scenario route'; // l10n-ignore: Create seed prefill data
     case 'map':
-      return 'map area';
+      return 'map area'; // l10n-ignore: Create seed prefill data
   }
   return 'Recharge'; // l10n-ignore: seed prefill data
 }

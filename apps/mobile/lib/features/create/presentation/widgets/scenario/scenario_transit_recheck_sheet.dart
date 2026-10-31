@@ -137,7 +137,7 @@ String _statusTitle(
 ) => switch (status) {
   ScenarioTransitRecheckStatus.unchanged =>
     l10n.createScenarioNoScheduleChangesFound,
-  ScenarioTransitRecheckStatus.changed => 'A changed service was found',
+  ScenarioTransitRecheckStatus.changed => l10n.createScenarioServiceChanged,
   ScenarioTransitRecheckStatus.notFound => l10n.createScenarioServiceNotFound,
   ScenarioTransitRecheckStatus.unavailable =>
     l10n.createScenarioRecheckUnavailable,
@@ -179,7 +179,7 @@ String _fieldLabel(AppLocalizations l10n, String code) => switch (code) {
   'carrier' => l10n.createScenarioCarrierLabel,
   'label' => l10n.createScenarioServiceLabel,
   'feed_hash' => l10n.createScenarioFeedVersion,
-  'freshness' => 'Freshness',
+  'freshness' => l10n.createScenarioFreshnessLabel,
   'retrieved_at' => l10n.createScenarioFeedRetrievedAt,
   _ => code,
 };

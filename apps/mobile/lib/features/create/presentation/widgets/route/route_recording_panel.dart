@@ -1,3 +1,4 @@
+import '../../../../../core/localization/recharge_formats.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -202,10 +203,34 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
           spacing: 12,
           runSpacing: 6,
           children: <Widget>[
-            Text('${quality.acceptedSampleCount} accepted points'),
-            Text('${(quality.rawDistanceMeters / 1000).toStringAsFixed(2)} km'),
-            Text('${(quality.recordedDurationSeconds / 60).round()} min'),
-            Text('${quality.averageAccuracyMeters.toStringAsFixed(1)} m avg'),
+            Text(
+              context.l10n.createRouteAcceptedPoints(
+                quality.acceptedSampleCount,
+              ),
+            ),
+            Text(
+              context.l10n.createFormDistanceKm(
+                RechargeFormats.decimal(
+                  quality.rawDistanceMeters / 1000,
+                  context.l10n.localeName,
+                  maxFractionDigits: 2,
+                ),
+              ),
+            ),
+            Text(
+              context.l10n.discoverMinutes(
+                (quality.recordedDurationSeconds / 60).round(),
+              ),
+            ),
+            Text(
+              context.l10n.createRouteAverageAccuracy(
+                RechargeFormats.decimal(
+                  quality.averageAccuracyMeters,
+                  context.l10n.localeName,
+                  maxFractionDigits: 1,
+                ),
+              ),
+            ),
           ],
         ),
         if (quality.rejectedAccuracyCount +
@@ -214,7 +239,11 @@ class _RouteRecordingPanelState extends State<RouteRecordingPanel> {
             0) ...<Widget>[
           const SizedBox(height: 8),
           Text(
-            '${quality.rejectedAccuracyCount + quality.rejectedMockedCount + quality.rejectedMovementCount} unsafe points excluded.',
+            context.l10n.createRouteUnsafePoints(
+              quality.rejectedAccuracyCount +
+                  quality.rejectedMockedCount +
+                  quality.rejectedMovementCount,
+            ),
           ),
         ],
         const SizedBox(height: 14),
@@ -420,24 +449,26 @@ class _GapDecision extends StatelessWidget {
   final ValueChanged<RouteRecordingGapResolution?> onChanged;
 
   @override
-  Widget build(
-    BuildContext context,
-  ) => DropdownButtonFormField<RouteRecordingGapResolution>(
-    isExpanded: true,
-    key: ValueKey<String>('route-gps-gap-${gap.id}'),
-    initialValue: value,
-    decoration: InputDecoration(
-      labelText:
-          'Gap ${index + 1}: ${gap.distanceMeters.round()} m, ${gap.elapsedSeconds} s',
-    ),
-    items: <DropdownMenuItem<RouteRecordingGapResolution>>[
-      DropdownMenuItem<RouteRecordingGapResolution>(
-        value: RouteRecordingGapResolution.connectDirect,
-        child: Text(context.l10n.createRouteConnectDirectly),
-      ),
-    ],
-    onChanged: onChanged,
-  );
+  Widget build(BuildContext context) =>
+      DropdownButtonFormField<RouteRecordingGapResolution>(
+        isExpanded: true,
+        key: ValueKey<String>('route-gps-gap-${gap.id}'),
+        initialValue: value,
+        decoration: InputDecoration(
+          labelText: context.l10n.createRouteGapLabel(
+            index + 1,
+            gap.distanceMeters.round(),
+            gap.elapsedSeconds,
+          ),
+        ),
+        items: <DropdownMenuItem<RouteRecordingGapResolution>>[
+          DropdownMenuItem<RouteRecordingGapResolution>(
+            value: RouteRecordingGapResolution.connectDirect,
+            child: Text(context.l10n.createRouteConnectDirectly),
+          ),
+        ],
+        onChanged: onChanged,
+      );
 }
 
 class _TrimSlider extends StatelessWidget {
@@ -478,7 +509,7 @@ class _SampleCounter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-    '$count GPS points saved',
+    context.l10n.createRouteGpsPointsSaved(count),
     key: const ValueKey<String>('route-gps-sample-count'),
   );
 }
@@ -523,7 +554,7 @@ String _statusTitle(AppLocalizations l10n, RouteRecordingStatus status) =>
       RouteRecordingStatus.recovering => l10n.createRouteRecoveringRecording,
       RouteRecordingStatus.processing => l10n.createRouteProcessingTrack,
       RouteRecordingStatus.completed => l10n.createRouteRecordingReady,
-      RouteRecordingStatus.failed => 'GPS needs attention',
+      RouteRecordingStatus.failed => l10n.createRouteGpsAttention,
     };
 
 String _statusMessage(AppLocalizations l10n, RouteRecordingState state) =>
@@ -563,5 +594,5 @@ String _failureMessage(AppLocalizations l10n, String code) => switch (code) {
   'gps_gap_decision_required' =>
     l10n.createRouteReviewEveryTrackGapBeforeContinuing,
   'gps_gap_routing_required' => l10n.createRouteGapNeedsTrailRoutingBeforeCan,
-  _ => 'GPS recording could not continue safely ($code).',
+  _ => l10n.createRouteGpsUnsafeStop,
 };

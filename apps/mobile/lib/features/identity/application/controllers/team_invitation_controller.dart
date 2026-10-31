@@ -73,7 +73,7 @@ class TeamInvitationController extends ChangeNotifier {
           status: TeamInvitationStatusFlag.ready,
           pageId: normalizedPageId,
           invitations: invitations,
-          message: 'Invitation sent.',
+          message: 'invitation_sent',
         ),
       );
       return true;
@@ -91,7 +91,7 @@ class TeamInvitationController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: TeamInvitationStatusFlag.ready,
-          message: 'Unable to send the invitation.',
+          message: 'invitation_send_failed',
         ),
       );
       return false;
@@ -126,7 +126,7 @@ class TeamInvitationController extends ChangeNotifier {
           status: TeamInvitationStatusFlag.ready,
           pageId: normalizedPageId,
           invitations: invitations,
-          message: 'Invitation revoked.',
+          message: 'invitation_revoked',
         ),
       );
       return true;
@@ -144,7 +144,7 @@ class TeamInvitationController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: TeamInvitationStatusFlag.ready,
-          message: 'Unable to revoke the invitation.',
+          message: 'invitation_revoke_failed',
         ),
       );
       return false;
@@ -175,41 +175,29 @@ class TeamInvitationController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: TeamInvitationStatusFlag.error,
-          message: 'Unable to load the team invitations.',
+          message: 'invitations_load_failed',
         ),
       );
     }
   }
 
-  static String _sendErrorMessage(String code) {
-    switch (code) {
-      case 'invitation_target_invalid':
-        return 'Enter a valid user id, email or phone number.';
-      case 'owner_relationship_not_invitable':
-        return 'Ownership cannot be granted by invitation.';
-      case 'inviter_not_active_member':
-        return 'Only an active team member can send invitations.';
-      case 'inviter_missing_team_manage_capability':
-        return 'You do not have permission to manage the team.';
-      case 'cannot_delegate_capability_not_held':
-        return 'You cannot grant a capability you do not have yourself.';
-      default:
-        return 'Unable to send the invitation.';
-    }
-  }
+  /// L4.6: a stable code; the card turns it into text.
+  static String _sendErrorMessage(String code) => switch (code) {
+    'invitation_target_invalid' ||
+    'owner_relationship_not_invitable' ||
+    'inviter_not_active_member' ||
+    'inviter_missing_team_manage_capability' ||
+    'cannot_delegate_capability_not_held' => code,
+    _ => 'invitation_send_failed',
+  };
 
-  static String _revokeErrorMessage(String code) {
-    switch (code) {
-      case 'actor_not_active_member':
-        return 'Only an active team member can revoke invitations.';
-      case 'actor_missing_team_manage_capability':
-        return 'You do not have permission to manage the team.';
-      case 'invitation_not_found':
-        return 'This invitation no longer exists.';
-      default:
-        return 'Unable to revoke the invitation.';
-    }
-  }
+  static String _revokeErrorMessage(String code) => switch (code) {
+    'actor_not_active_member' => 'revoke_actor_not_active_member',
+    'actor_missing_team_manage_capability' =>
+      'inviter_missing_team_manage_capability',
+    'invitation_not_found' => code,
+    _ => 'invitation_revoke_failed',
+  };
 
   void _setState(TeamInvitationState value) {
     _state = value;

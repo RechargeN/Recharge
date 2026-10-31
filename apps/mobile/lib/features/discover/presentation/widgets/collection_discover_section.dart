@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/application/collection_discover_providers.dart';
+import '../../../../core/localization/l10n_context.dart';
 import '../../domain/entities/published_collection_discovery_entity.dart';
 
 /// A separate "Guides" section listing published Collections
@@ -19,8 +20,8 @@ class CollectionDiscoverSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<List<PublishedCollectionDiscoveryEntity>> collections =
-        ref.watch(activeCollectionsProvider);
+    final AsyncValue<List<PublishedCollectionDiscoveryEntity>> collections = ref
+        .watch(activeCollectionsProvider);
     return collections.when(
       loading: () => const SizedBox.shrink(),
       error: (Object error, StackTrace _) => const SizedBox.shrink(),
@@ -29,10 +30,10 @@ class CollectionDiscoverSection extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const Padding(
-              padding: EdgeInsets.only(bottom: 8),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
               child: Text(
-                'Guides',
+                context.l10n.discoverGuides,
                 style: TextStyle(fontWeight: FontWeight.w800),
               ),
             ),
@@ -88,8 +89,9 @@ class _CollectionCard extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       entity.title,
-                      style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w800),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -111,7 +113,8 @@ class _CollectionCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            '${entity.areaLabel} · ${entity.itemCount} items',
+                            '${entity.areaLabel} · '
+                            '${context.l10n.discoverItemsCount(entity.itemCount)}',
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(

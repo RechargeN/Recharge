@@ -384,7 +384,9 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
       title: createFormText(context.l10n, collectionCreateSteps[4].titleId),
       children: <Widget>[
         Text(
-          draft.title.isEmpty ? '(no title yet)' : draft.title,
+          draft.title.isEmpty
+              ? context.l10n.createCollectionNoTitleYet
+              : draft.title,
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         Text(data.areaLabel),
@@ -433,8 +435,8 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
         ),
         if (state.status == CollectionCreateStatus.published) ...<Widget>[
           const Divider(height: 32),
-          const Text(
-            'Published — remove without review',
+          Text(
+            context.l10n.createCollectionPublishedRemove,
             style: TextStyle(fontWeight: FontWeight.w600),
           ),
           Text(

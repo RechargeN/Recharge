@@ -80,6 +80,15 @@ const Map<String, String> nonInterfaceFiles = <String, String>{
       'GTFS parsing: feed format tokens and parser errors',
   'lib/features/create/data/gtfs/gtfs_schedule_index.dart':
       'GTFS parsing: feed format tokens and parser errors',
+  // L4.6: category names are not translated in R1 (G04).
+  'lib/core/config/recharge_taxonomy.dart':
+      'G04: category names and search vocabulary, not translated in R1',
+  'lib/core/config/recharge_category_criteria.dart':
+      'G04: category criteria and search vocabulary, not translated in R1',
+  'lib/core/config/recharge_taxonomy_seed.dart':
+      'G04: category seed, not translated in R1',
+  'lib/features/create/data/datasources/collection_publication_local_datasource.dart':
+      'local publication store: failures carry a code; messages are developer diagnostics',
 };
 
 /// The architecture layers reported separately; anything else is `other`.
@@ -90,13 +99,40 @@ const List<String> layers = <String>[
   'data',
 ];
 
-/// User-visible literal count of one Dart [source].
-int countUnlocalized(String source) {
+// L4.6: in presentation code any literal with a word is a UI candidate —
+// single words ('Venue'), 'I …', 'Read-only …', 'Optional · …', '${n} items'
+// and capitals slipped past [_sentence]. Ids, paths, MIME types, URLs and
+// short upper-case codes ('UTC', 'EUR') are not counted.
+final RegExp _interpolation = RegExp(r'\$\{[^}]*\}|\$[A-Za-z_]\w*');
+final RegExp _word = RegExp('[A-Za-z]{3,}');
+final RegExp _identifier = RegExp(
+  r'^(?:[a-z0-9_.\-/:+?=&]+|[a-z][A-Za-z0-9]*|[A-Z][A-Za-z0-9]*_[A-Za-z0-9_]*|'
+  r'[A-Z][a-z0-9]+(?:[A-Z][a-z0-9]+)+|[A-Z]{2,5}|[a-z]+://\S*)$',
+);
+
+bool _uiCandidate(String text) {
+  if (text.startsWith('/')) return false;
+  // A literal cut by a quote nested in an interpolation is code, not copy.
+  if ('{'.allMatches(text).length != '}'.allMatches(text).length) {
+    return false;
+  }
+  final String core = text.replaceAll(_interpolation, '').trim();
+  return _word.hasMatch(core) && !_identifier.hasMatch(core);
+}
+
+/// User-visible literal count of one Dart [source]; [presentation] adds the
+/// stricter UI-candidate rule of presentation code.
+int countUnlocalized(String source, {bool presentation = false}) {
   int count = 0;
   for (final String line in const LineSplitter().convert(source)) {
     if (_skipLine.hasMatch(line)) continue;
     for (final RegExpMatch match in _literal.allMatches(line)) {
       final String text = match.group(1)!;
+      final bool raw = match.start > 0 && line[match.start - 1] == 'r';
+      if (presentation && !raw && _uiCandidate(text)) {
+        count += 1;
+        continue;
+      }
       if (text.startsWith('/') || text.contains(r'${')) {
         if (!_cyrillic.hasMatch(text) && !_sentence.hasMatch(text)) continue;
       }
@@ -119,9 +155,13 @@ Map<String, int> scanLib(Directory lib) {
   for (final File file in files) {
     final String path = file.path.replaceAll(r'\', '/');
     if (path.contains('/generated/') || path.contains('/l10n/')) continue;
-    final int count = countUnlocalized(file.readAsStringSync());
+    final String libPath = path.substring(path.indexOf('lib/'));
+    final int count = countUnlocalized(
+      file.readAsStringSync(),
+      presentation: layerOf(libPath) == 'presentation',
+    );
     if (count > 0) {
-      counts[path.substring(path.indexOf('lib/'))] = count;
+      counts[libPath] = count;
     }
   }
   return counts;

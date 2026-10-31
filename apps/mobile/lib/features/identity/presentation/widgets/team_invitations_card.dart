@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/identity_workspace_providers.dart';
 import '../../application/state/team_invitation_state.dart';
 import '../../domain/entities/managed_page_membership_entity.dart';
@@ -79,7 +80,7 @@ class _TeamInvitationsCardState extends ConsumerState<TeamInvitationsCard> {
             Row(
               children: <Widget>[
                 Text(
-                  'Team',
+                  context.l10n.identityTeam,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
@@ -88,7 +89,7 @@ class _TeamInvitationsCardState extends ConsumerState<TeamInvitationsCard> {
                 if (_canManageTeam)
                   IconButton(
                     key: const ValueKey<String>('send-team-invitation'),
-                    tooltip: 'Invite a team member',
+                    tooltip: context.l10n.identityInviteMember,
                     icon: const Icon(Icons.person_add_alt_outlined),
                     onPressed: state.isBusy ? null : _openSendSheet,
                   ),
@@ -96,14 +97,14 @@ class _TeamInvitationsCardState extends ConsumerState<TeamInvitationsCard> {
             ),
             const SizedBox(height: 4),
             if (!_canManageTeam)
-              const Text('You do not have permission to manage the team.')
+              Text(context.l10n.identityNoTeamPermission)
             else if (loading)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
                 child: Center(child: CircularProgressIndicator()),
               )
             else if (state.invitations.isEmpty)
-              const Text('No invitations sent from this page yet.')
+              Text(context.l10n.identityNoInvitations)
             else
               Column(
                 children: state.invitations
@@ -126,7 +127,7 @@ class _TeamInvitationsCardState extends ConsumerState<TeamInvitationsCard> {
             if (state.message != null) ...<Widget>[
               const SizedBox(height: 8),
               Text(
-                state.message!,
+                context.l10n.identityTeamNotice(state.message!),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -182,8 +183,8 @@ class _InvitationRow extends StatelessWidget {
               children: <Widget>[
                 Text(invitation.target.value),
                 Text(
-                  '${invitation.proposedRelationship.name} · '
-                  '${_statusLabel(effective)}',
+                  '${context.l10n.identityRelationship(invitation.proposedRelationship.name)} · '
+                  '${_statusLabel(context, effective)}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
@@ -192,7 +193,7 @@ class _InvitationRow extends StatelessWidget {
           if (canManage && isPending)
             TextButton(
               onPressed: busy ? null : onRevoke,
-              child: const Text('Revoke'),
+              child: Text(context.l10n.identityRevoke),
             ),
         ],
       ),
@@ -207,11 +208,14 @@ class _InvitationRow extends StatelessWidget {
     };
   }
 
-  static String _statusLabel(TeamInvitationStatus status) {
+  static String _statusLabel(
+    BuildContext context,
+    TeamInvitationStatus status,
+  ) {
     return switch (status) {
-      TeamInvitationStatus.pending => 'Pending',
-      TeamInvitationStatus.revoked => 'Revoked',
-      TeamInvitationStatus.expired => 'Expired',
+      TeamInvitationStatus.pending => context.l10n.identityInvitationPending,
+      TeamInvitationStatus.revoked => context.l10n.identityInvitationRevoked,
+      TeamInvitationStatus.expired => context.l10n.identityInvitationExpired,
     };
   }
 }
@@ -260,7 +264,7 @@ class _SendInvitationSheetState extends ConsumerState<_SendInvitationSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Invite a team member',
+            context.l10n.identityInviteMember,
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
@@ -268,13 +272,15 @@ class _SendInvitationSheetState extends ConsumerState<_SendInvitationSheet> {
           const SizedBox(height: 16),
           DropdownButtonFormField<TeamInvitationTargetType>(
             initialValue: _targetType,
-            decoration: const InputDecoration(labelText: 'Invite by'),
+            decoration: InputDecoration(
+              labelText: context.l10n.identityInviteBy,
+            ),
             items: TeamInvitationTargetType.values
                 .map(
                   (TeamInvitationTargetType type) =>
                       DropdownMenuItem<TeamInvitationTargetType>(
                         value: type,
-                        child: Text(_targetTypeLabel(type)),
+                        child: Text(_targetTypeLabel(context.l10n, type)),
                       ),
                 )
                 .toList(growable: false),
@@ -288,7 +294,7 @@ class _SendInvitationSheetState extends ConsumerState<_SendInvitationSheet> {
             key: const ValueKey<String>('team-invitation-target-value'),
             controller: _valueController,
             decoration: InputDecoration(
-              labelText: _targetTypeLabel(_targetType),
+              labelText: _targetTypeLabel(context.l10n, _targetType),
               errorText: _localError,
             ),
             keyboardType: switch (_targetType) {
@@ -300,7 +306,7 @@ class _SendInvitationSheetState extends ConsumerState<_SendInvitationSheet> {
           const SizedBox(height: 12),
           DropdownButtonFormField<ManagedPageRelationship>(
             initialValue: _relationship,
-            decoration: const InputDecoration(labelText: 'Role'),
+            decoration: InputDecoration(labelText: context.l10n.identityRole),
             items:
                 const <ManagedPageRelationship>[
                       ManagedPageRelationship.manager,
@@ -310,7 +316,11 @@ class _SendInvitationSheetState extends ConsumerState<_SendInvitationSheet> {
                       (ManagedPageRelationship relationship) =>
                           DropdownMenuItem<ManagedPageRelationship>(
                             value: relationship,
-                            child: Text(relationship.name),
+                            child: Text(
+                              context.l10n.identityRelationship(
+                                relationship.name,
+                              ),
+                            ),
                           ),
                     )
                     .toList(growable: false),
@@ -321,7 +331,10 @@ class _SendInvitationSheetState extends ConsumerState<_SendInvitationSheet> {
           ),
           const SizedBox(height: 12),
           if (widget.delegableCapabilities.isNotEmpty) ...<Widget>[
-            Text('Capabilities', style: Theme.of(context).textTheme.labelLarge),
+            Text(
+              context.l10n.identityCapabilities,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
             ...widget.delegableCapabilities.map(
               (String capability) => CheckboxListTile(
                 dense: true,
@@ -351,7 +364,7 @@ class _SendInvitationSheetState extends ConsumerState<_SendInvitationSheet> {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Send invitation'),
+                : Text(context.l10n.identitySendInvitation),
           ),
         ],
       ),
@@ -361,7 +374,7 @@ class _SendInvitationSheetState extends ConsumerState<_SendInvitationSheet> {
   Future<void> _submit() async {
     final String value = _valueController.text.trim();
     if (value.isEmpty) {
-      setState(() => _localError = 'Required.');
+      setState(() => _localError = context.l10n.identityRequired);
       return;
     }
     setState(() {
@@ -385,11 +398,14 @@ class _SendInvitationSheetState extends ConsumerState<_SendInvitationSheet> {
     setState(() => _submitting = false);
   }
 
-  static String _targetTypeLabel(TeamInvitationTargetType type) {
+  static String _targetTypeLabel(
+    AppLocalizations l10n,
+    TeamInvitationTargetType type,
+  ) {
     return switch (type) {
-      TeamInvitationTargetType.userId => 'User ID',
-      TeamInvitationTargetType.email => 'Email',
-      TeamInvitationTargetType.phone => 'Phone',
+      TeamInvitationTargetType.userId => l10n.identityUserId,
+      TeamInvitationTargetType.email => l10n.identityEmail,
+      TeamInvitationTargetType.phone => l10n.identityPhone,
     };
   }
 }

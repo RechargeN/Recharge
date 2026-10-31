@@ -227,7 +227,8 @@ class NotificationsController extends ChangeNotifier {
   String _normalizeSearchText(String value) {
     return value
         .toLowerCase()
-        .replaceAll('ё', 'е')
+        // Folds ё into е for ru query matching; not UI copy.
+        .replaceAll('ё', 'е') // l10n-ignore: search normalization
         .replaceAll(RegExp(r'\s*:\s*'), ':')
         .replaceAll(
           RegExp(r'[^a-z0-9а-я:]+', caseSensitive: false, unicode: true),
@@ -239,9 +240,12 @@ class NotificationsController extends ChangeNotifier {
 
   String _typeSearchText(NotificationType type) {
     return switch (type) {
-      NotificationType.system => 'system системное система',
-      NotificationType.reminder => 'reminder напоминание',
-      NotificationType.activity => 'activity активность обновление',
+      NotificationType.system =>
+        'system системное система', // l10n-ignore: search synonyms (lv/ru query matching), not UI copy
+      NotificationType.reminder =>
+        'reminder напоминание', // l10n-ignore: search synonyms (lv/ru query matching), not UI copy
+      NotificationType.activity =>
+        'activity активность обновление', // l10n-ignore: search synonyms (lv/ru query matching), not UI copy
     };
   }
 

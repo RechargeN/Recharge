@@ -1,3 +1,4 @@
+import '../../../../../core/localization/recharge_formats.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -177,7 +178,7 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
   );
 
   Widget _anchorList() => _Panel(
-    title: 'Anchors (${widget.route.anchors.length})',
+    title: context.l10n.createRouteAnchorsTitle(widget.route.anchors.length),
     subtitle: context.l10n.createRouteEveryActionAvailableAsLabelledControl,
     child: widget.route.anchors.isEmpty
         ? Text(context.l10n.createRouteNoAnchorsYet)
@@ -188,8 +189,11 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                   final anchor = entry.$2;
                   return Semantics(
                     container: true,
-                    label:
-                        'Anchor ${index + 1}, latitude ${anchor.position.latitude.toStringAsFixed(5)}, longitude ${anchor.position.longitude.toStringAsFixed(5)}',
+                    label: context.l10n.createRouteAnchorSemantics(
+                      index + 1,
+                      anchor.position.latitude.toStringAsFixed(5),
+                      anchor.position.longitude.toStringAsFixed(5),
+                    ),
                     child: Material(
                       type: MaterialType.transparency,
                       child: ListTile(
@@ -267,9 +271,9 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
   );
 
   Widget _segmentList() => _Panel(
-    title: 'Segments (${widget.route.segments.length})',
+    title: context.l10n.createRouteSegmentsTitle(widget.route.segments.length),
     child: widget.route.orderedSegments.isEmpty
-        ? const Text('A segment appears after the second anchor.')
+        ? Text(context.l10n.createRouteSegmentAppears)
         : Column(
             children: widget.route.orderedSegments
                 .map((segment) {
@@ -284,8 +288,8 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                         failed ? Icons.error_outline : Icons.route_outlined,
                       ),
                       title: Text(
-                        'Segment ${segment.order + 1} • '
-                        '${(segment.distanceMeters / 1000).toStringAsFixed(2)} km',
+                        '${context.l10n.createRouteSegmentN(segment.order + 1)} • '
+                        '${context.l10n.createFormDistanceKm(RechargeFormats.decimal(segment.distanceMeters / 1000, context.l10n.localeName, maxFractionDigits: 2))}',
                       ),
                       subtitle: Text(
                         '${createOptionText(context.l10n, segment.source)} • '
@@ -350,7 +354,9 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
   );
 
   Widget _waypointList() => _Panel(
-    title: 'Waypoints (${widget.route.waypoints.length})',
+    title: context.l10n.createRouteWaypointsTitle(
+      widget.route.waypoints.length,
+    ),
     child: widget.route.waypoints.isEmpty
         ? Text(context.l10n.createRouteAddViewpointFromAnchorMenu)
         : Column(
@@ -370,7 +376,9 @@ class _RouteEditorSectionState extends State<RouteEditorSection> {
                             .map(
                               (entry) => DropdownMenuItem<String>(
                                 value: entry.$2.id,
-                                child: Text('Anchor ${entry.$1 + 1}'),
+                                child: Text(
+                                  context.l10n.createRouteAnchorN(entry.$1 + 1),
+                                ),
                               ),
                             )
                             .toList(growable: false),

@@ -1,13 +1,20 @@
 import 'dart:io';
 
+import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../core/geo/geo_point.dart';
+import '../../core/localization/l10n_context.dart';
 import '../../features/create/domain/entities/route_recording_data.dart';
 import '../../features/create/domain/repositories/route_location_recording_port.dart';
 
 class RouteGeolocatorAdapter implements RouteLocationRecordingPort {
-  const RouteGeolocatorAdapter();
+  /// L4.6: [languageCode] is the app language for the Android background
+  /// recording notification, which is shown outside the widget tree.
+  RouteGeolocatorAdapter({String Function()? languageCode})
+    : _languageCode = languageCode ?? (() => 'en');
+
+  final String Function() _languageCode;
 
   @override
   Future<RouteLocationPermission> checkPermission() async {
@@ -108,6 +115,18 @@ class RouteGeolocatorAdapter implements RouteLocationRecordingPort {
         });
   }
 
+  ForegroundNotificationConfig _backgroundNotification() {
+    final AppLocalizations l10n = lookupAppLocalizations(
+      Locale(_languageCode()),
+    );
+    return ForegroundNotificationConfig(
+      notificationTitle: l10n.routeRecordingNotificationTitle,
+      notificationText: l10n.routeRecordingNotificationText,
+      enableWakeLock: true,
+      setOngoing: true,
+    );
+  }
+
   LocationSettings _platformSettings(RouteLocationRecordingSettings settings) {
     if (Platform.isAndroid) {
       return AndroidSettings(
@@ -115,13 +134,7 @@ class RouteGeolocatorAdapter implements RouteLocationRecordingPort {
         distanceFilter: settings.distanceFilterMeters,
         intervalDuration: settings.minimumInterval,
         foregroundNotificationConfig: settings.backgroundEnabled
-            ? const ForegroundNotificationConfig(
-                notificationTitle: 'Route recording is active',
-                notificationText:
-                    'Recharge is saving your route while the app is in the background.',
-                enableWakeLock: true,
-                setOngoing: true,
-              )
+            ? _backgroundNotification()
             : null,
       );
     }

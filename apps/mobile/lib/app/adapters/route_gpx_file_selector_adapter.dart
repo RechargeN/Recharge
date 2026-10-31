@@ -36,7 +36,8 @@ class RouteGpxFileSelectorAdapter implements RouteGpxFilePickerPort {
   final RouteGpxImportConfig _config;
 
   static const XTypeGroup _gpxType = XTypeGroup(
-    label: 'GPX route',
+    label:
+        'GPX route', // l10n-ignore: file-type filter of the desktop system picker; not shown on Android/iOS
     extensions: <String>['gpx'],
     mimeTypes: <String>['application/gpx+xml', 'application/xml'],
     uniformTypeIdentifiers: <String>['com.topografix.gpx'],
@@ -85,7 +86,8 @@ class RouteGpxFileSelectorAdapter implements RouteGpxFilePickerPort {
       <XFile>[
         XFile.fromData(bytes, mimeType: file.mediaType, name: file.displayName),
       ],
-      subject: 'Recharge Route GPX',
+      subject:
+          'Recharge Route GPX', // l10n-ignore: brand and file type in a share subject
       fileNameOverrides: <String>[file.displayName],
       sharePositionOrigin: const Rect.fromLTWH(0, 0, 1, 1),
     );

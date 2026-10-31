@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
 import '../../application/create_providers.dart';
 import '../../domain/entities/route_publication_data.dart';
 import '../../domain/entities/route_quality_workflow_data.dart';
@@ -276,14 +277,14 @@ class _CandidateCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            'Route ${candidate.routeId}',
+            '${context.l10n.discoverRouteLabel} ${candidate.routeId}',
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
           ),
           Text(
-            '${candidate.diff.distanceDeltaMeters.toStringAsFixed(0)} m · '
-            '${candidate.diff.candidatePointCount} points · '
+            '${context.l10n.createFormMetersValue(RechargeFormats.decimal(candidate.diff.distanceDeltaMeters, context.l10n.localeName, maxFractionDigits: 0))} · '
+            '${context.l10n.createFormPointsCount(candidate.diff.candidatePointCount)} · '
             '${candidate.sourceSnapshotId}',
           ),
           Text(candidate.sourceAttribution),
@@ -335,7 +336,10 @@ class _SafetyReportCard extends StatelessWidget {
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
           ),
-          Text('Route ${report.routeId} · version ${report.versionId}'),
+          Text(
+            '${context.l10n.discoverRouteLabel} ${report.routeId} · '
+            '${context.l10n.createRouteVersionLabel} ${report.versionId}',
+          ),
           if (report.safeNote != null) Text(report.safeNote!),
           const SizedBox(height: 10),
           Row(
@@ -399,8 +403,8 @@ class _RequestCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              'Route ${version.routeId}\n'
-              'Geometry ${version.geometryHash}',
+              '${context.l10n.discoverRouteLabel} ${version.routeId}\n'
+              '${context.l10n.createRouteGeometryLabel} ${version.geometryHash}',
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall,

@@ -1225,7 +1225,7 @@ class _QuickPlanRail extends StatelessWidget {
             '?auto=format&fit=crop&w=600&q=80',
         'calm',
         60,
-        'food_drinks.coffee,wellness_recharge.calm_walk',
+        'food_drinks.coffee,wellness_recharge.calm_walk', // l10n-ignore: category ids
       ),
       _QuickPlanData(
         context.l10n.discoverSunsetBreak,
@@ -1236,7 +1236,7 @@ class _QuickPlanRail extends StatelessWidget {
             '?auto=format&fit=crop&w=600&q=80',
         'calm',
         120,
-        'wellness_recharge.calm_walk,art_culture_museums.museum',
+        'wellness_recharge.calm_walk,art_culture_museums.museum', // l10n-ignore: category ids
       ),
       _QuickPlanData(
         context.l10n.discoverActiveMorning,
@@ -1247,7 +1247,7 @@ class _QuickPlanRail extends StatelessWidget {
             '?auto=format&fit=crop&w=600&q=80',
         'active',
         150,
-        'outdoor_nature_walking.city_walk,sport.tennis',
+        'outdoor_nature_walking.city_walk,sport.tennis', // l10n-ignore: category ids
       ),
       _QuickPlanData(
         context.l10n.discoverSocialEvening,
@@ -1258,7 +1258,7 @@ class _QuickPlanRail extends StatelessWidget {
             '?auto=format&fit=crop&w=600&q=80',
         'social',
         180,
-        'games_indoor.board_games,music_nightlife.afterwork_drinks',
+        'games_indoor.board_games,music_nightlife.afterwork_drinks', // l10n-ignore: category ids
       ),
     ];
     return SizedBox(
@@ -1490,9 +1490,9 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                       children: <Widget>[
                         for (final (String, String) option
                             in <(String, String)>[
-                              ('any', 'Any'),
-                              ('today', 'Today'),
-                              ('tonight', 'Tonight'),
+                              ('any', context.l10n.discoverAny),
+                              ('today', context.l10n.discoverToday),
+                              ('tonight', context.l10n.discoverTonight),
                             ])
                           _FilterPill(
                             label: option.$2,
@@ -1689,9 +1689,7 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
     };
     final String duration = _duration == null
         ? context.l10n.discoverAnyDuration
-        : _duration == 60
-        ? '1 hour'
-        : '${_duration! ~/ 60} hours';
+        : context.l10n.discoverHoursLong(_duration! ~/ 60);
     final String radius = _unlimited
         ? context.l10n.discoverAnyArea
         : '${(_radiusMeters / 1000).round()} km';
@@ -2623,7 +2621,7 @@ class _TimeWindowEditorSheetState extends State<_TimeWindowEditorSheet> {
                   controller: scrollController,
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
                   children: <Widget>[
-                    const _FilterTitle('Mode'),
+                    _FilterTitle(context.l10n.discoverFilterMode),
                     const SizedBox(height: 8),
                     _FilterPillWrap(
                       children: <Widget>[

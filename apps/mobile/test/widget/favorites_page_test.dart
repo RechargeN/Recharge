@@ -24,9 +24,44 @@ import 'package:recharge/features/favorites/domain/usecases/get_favorites_usecas
 import 'package:recharge/features/favorites/domain/usecases/remove_favorite_usecase.dart';
 import 'package:recharge/features/favorites/presentation/pages/favorites_page.dart';
 
+import '../support/l10n/l10n_screen_harness.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
+  // L4.6: Favorites in lv, en and ru at 360 dp; saved titles stay as is.
+  l10nSmallScreenTestWidgets('Favorites lists saved plans', (
+    tester,
+    locale,
+    scale,
+  ) async {
+    final FavoritesController controller = _favoritesController(
+      initial: <FavoriteItemEntity>[
+        _favorite('evt_1', 'Morning yoga'),
+        _favorite('place_1', 'Coffee house', category: 'place'),
+        _favorite('route_1', 'Quiet route', category: 'route'),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          favoritesControllerProvider.overrideWith((ref) => controller),
+          discoverFeedControllerProvider.overrideWith(
+            (ref) => _discoverController(),
+          ),
+        ],
+        child: l10nTestApp(
+          locale: locale,
+          scale: scale,
+          home: const FavoritesPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Morning yoga'), findsOneWidget);
+    expect(find.text(l10nFor(locale).favoritesAll), findsWidgets);
+  });
+
   fullPageTestWidgets('shows empty state when favorites list is empty', (
     tester,
   ) async {
@@ -50,7 +85,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Пока нет сохраненных событий'), findsOneWidget);
+    expect(find.text('No saved events yet'), findsOneWidget);
   });
 
   fullPageTestWidgets('renders favorites item in list', (tester) async {

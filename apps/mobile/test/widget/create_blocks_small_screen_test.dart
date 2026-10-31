@@ -26,6 +26,7 @@ import 'package:recharge/features/create/presentation/widgets/session_create_blo
 import 'package:recharge/generated/l10n/app_localizations.dart';
 
 import '../support/event_create_test_support.dart';
+import '../support/l10n/l10n_screenshot.dart';
 
 /// Stabilization gate: every step of the Place, Find People, Rental and
 /// Session Create blocks must lay out at 360 dp wide and 150% text scale
@@ -382,6 +383,7 @@ Future<void> _pumpLocalized(
   await tester.pumpAndSettle();
   await tester.pump(const Duration(milliseconds: 800));
   expect(tester.takeException(), isNull);
+  await l10nCaptureScreen(tester);
 }
 
 class _NoopAnalyticsService implements AnalyticsService {

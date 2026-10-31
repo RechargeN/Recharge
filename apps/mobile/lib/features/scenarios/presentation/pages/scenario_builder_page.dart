@@ -1,3 +1,5 @@
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -137,17 +139,21 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_previewMode ? 'My quick plan' : 'Quick Plan'),
+        title: Text(
+          _previewMode
+              ? context.l10n.quickPlanMyQuickPlan
+              : context.l10n.quickPlanQuickPlan,
+        ),
         actions: <Widget>[
           if (controller.persistenceEnabled)
             IconButton(
-              tooltip: 'Invitations and access',
+              tooltip: context.l10n.quickPlanInvitationsAccess,
               icon: const Icon(Icons.group_outlined),
               onPressed: () => _showAccess(controller),
             ),
           if (controller.persistenceEnabled)
             IconButton(
-              tooltip: 'Refresh',
+              tooltip: context.l10n.quickPlanRefresh,
               onPressed: controller.syncBusy ? null : () => controller.sync(),
               icon: const Icon(Icons.refresh),
             ),
@@ -155,11 +161,11 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
             TextButton.icon(
               onPressed: () => setState(() => _previewMode = false),
               icon: const Icon(Icons.edit_outlined),
-              label: const Text('Edit'),
+              label: Text(context.l10n.quickPlanEdit),
             )
           else
             IconButton(
-              tooltip: 'Reset',
+              tooltip: context.l10n.quickPlanReset,
               onPressed: controller.reset,
               icon: const Icon(Icons.restart_alt),
             ),
@@ -167,7 +173,9 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
       ),
       body: _previewMode
           ? _ScenarioPreview(
-              title: widget.seedParameters['title'] ?? 'Your recharge plan',
+              title:
+                  widget.seedParameters['title'] ??
+                  context.l10n.quickPlanYourPlan,
               draft: draft,
               routeFit: state.routeFit,
               onEdit: () => setState(() => _previewMode = false),
@@ -182,7 +190,8 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
                   draft: draft,
                   onMap: () => context.go(_mapRouteForScenario(draft)),
                   onSearch: () => context.go(RouteNames.search),
-                  onCreate: () => context.go(_createRouteForScenario(draft)),
+                  onCreate: () =>
+                      context.go(_createRouteForScenario(context.l10n, draft)),
                   onSave: () => _saveScenario(draft),
                   onCopy: () => _copyScenario(draft),
                 ),
@@ -211,8 +220,8 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
                     ),
                     onMapSmart: (SmartSearchHistoryEntity item) =>
                         context.go(_mapRouteForSmartSearch(item)),
-                    onCreateSmart: (SmartSearchHistoryEntity item) =>
-                        context.go(_createRouteForSmartSearch(item)),
+                    onCreateSmart: (SmartSearchHistoryEntity item) => context
+                        .go(_createRouteForSmartSearch(context.l10n, item)),
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -235,11 +244,12 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
                   routeFit: state.routeFit,
                   onOptimize: controller.optimizeRoute,
                   onMap: () => context.go(_mapRouteForScenario(draft)),
-                  onCreate: () => context.go(_createRouteForScenario(draft)),
+                  onCreate: () =>
+                      context.go(_createRouteForScenario(context.l10n, draft)),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Route steps',
+                  context.l10n.quickPlanRouteSteps,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
@@ -279,15 +289,15 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
     final p = c.invitedPlan;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Invited Quick Plan'),
+        title: Text(context.l10n.quickPlanInvitedPlan),
         actions: [
           IconButton(
-            tooltip: 'Close invited plan',
+            tooltip: context.l10n.quickPlanCloseInvited,
             onPressed: c.closeInvited,
             icon: const Icon(Icons.close),
           ),
           IconButton(
-            tooltip: 'Refresh access',
+            tooltip: context.l10n.quickPlanRefreshAccess,
             onPressed: () => c.sync(),
             icon: const Icon(Icons.refresh),
           ),
@@ -296,10 +306,12 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('Read-only · online access required'),
-          if (c.syncError != null) Text('Access unavailable: ${c.syncError}'),
+          Text(context.l10n.quickPlanReadOnlyOnline),
+          // The sync error is a technical object; the reader gets the fact.
+          if (c.syncError != null)
+            Text(context.l10n.quickPlanAccessUnavailable),
           if (p == null)
-            const Text('Content hidden. Refresh to verify access.')
+            Text(context.l10n.quickPlanContentHidden)
           else ...[
             Text(p.sourcePrompt),
             for (final step in p.steps)
@@ -307,7 +319,7 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
           ],
           OutlinedButton(
             onPressed: () => c.actOnInvitation('leave', c.selectedInvitation!),
-            child: const Text('Leave plan'),
+            child: Text(context.l10n.quickPlanLeavePlan),
           ),
         ],
       ),
@@ -325,11 +337,11 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(context.l10n.quickPlanCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, input.text.trim()),
-              child: const Text('Continue'),
+              child: Text(context.l10n.quickPlanContinue),
             ),
           ],
         ),
@@ -353,37 +365,37 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                const Text('Quick Plan invitations'),
-                const Text(
-                  'Use a known user ID. Pending actions take effect after server confirmation.',
-                ),
+                Text(context.l10n.quickPlanInvitations),
+                Text(context.l10n.quickPlanUseKnownUserId),
                 if (c.syncError != null)
-                  Text('Not confirmed: ${c.syncError}. Refresh to retry.'),
+                  Text(context.l10n.quickPlanNotConfirmed),
                 TextButton(
                   onPressed: c.loadInvitations,
-                  child: const Text('Refresh / retry pending'),
+                  child: Text(context.l10n.quickPlanRetryPending),
                 ),
                 TextButton(
                   onPressed: () async {
-                    final id = await _askText('Invite existing user ID');
+                    final id = await _askText(
+                      context.l10n.quickPlanInviteUserId,
+                    );
                     if (id != null && id.isNotEmpty) await c.inviteUser(id);
                   },
-                  child: const Text('Invite to current saved plan'),
+                  child: Text(context.l10n.quickPlanInviteToSaved),
                 ),
                 TextButton(
                   onPressed: () async {
                     final source = await _askText(
-                      'Import recharge.quickPlan JSON',
+                      context.l10n.quickPlanImportJson,
                     );
                     if (source != null && source.isNotEmpty) {
                       await c.importPlan(source);
                     }
                   },
-                  child: const Text('Import personal plan'),
+                  child: Text(context.l10n.quickPlanImportPersonal),
                 ),
                 TextButton(
                   onPressed: c.deletePlan,
-                  child: const Text('Delete current personal plan'),
+                  child: Text(context.l10n.quickPlanDeletePersonal),
                 ),
                 for (final g in c.invitations)
                   Card(
@@ -392,11 +404,15 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Plan ${g.planId} · ${g.status}'),
+                          // Ids are shown as published; the status is a code.
+                          Text(
+                            '${context.l10n.quickPlanPlanLabel} ${g.planId} · '
+                            '${context.l10n.quickPlanGrantStatus(g.status)}',
+                          ),
                           Text(
                             c.ownsInvitation(g)
-                                ? 'Invitee ${g.inviteeId}'
-                                : 'Owner ${g.ownerId}',
+                                ? '${context.l10n.quickPlanInvitee} ${g.inviteeId}'
+                                : '${context.l10n.quickPlanOwner} ${g.ownerId}',
                           ),
                           Wrap(
                             children: [
@@ -405,31 +421,33 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
                                   TextButton(
                                     onPressed: () =>
                                         c.actOnInvitation('cancel', g),
-                                    child: const Text('Cancel invite'),
+                                    child: Text(
+                                      context.l10n.quickPlanCancelInvite,
+                                    ),
                                   ),
                                 if (g.status == 'accepted')
                                   TextButton(
                                     onPressed: () =>
                                         c.actOnInvitation('revoke', g),
-                                    child: const Text('Revoke'),
+                                    child: Text(context.l10n.quickPlanRevoke),
                                   ),
                                 if (!['pending', 'accepted'].contains(g.status))
                                   TextButton(
                                     onPressed: () =>
                                         c.inviteUser(g.inviteeId, previous: g),
-                                    child: const Text('Re-invite'),
+                                    child: Text(context.l10n.quickPlanReinvite),
                                   ),
                               ] else ...[
                                 if (g.status == 'pending') ...[
                                   TextButton(
                                     onPressed: () =>
                                         c.actOnInvitation('accept', g),
-                                    child: const Text('Accept'),
+                                    child: Text(context.l10n.quickPlanAccept),
                                   ),
                                   TextButton(
                                     onPressed: () =>
                                         c.actOnInvitation('decline', g),
-                                    child: const Text('Decline'),
+                                    child: Text(context.l10n.quickPlanDecline),
                                   ),
                                 ],
                                 if (g.status == 'accepted') ...[
@@ -438,12 +456,14 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
                                       Navigator.pop(sheetContext);
                                       c.openInvited(g);
                                     },
-                                    child: const Text('Open read-only'),
+                                    child: Text(
+                                      context.l10n.quickPlanOpenReadOnly,
+                                    ),
                                   ),
                                   TextButton(
                                     onPressed: () =>
                                         c.actOnInvitation('leave', g),
-                                    child: const Text('Leave'),
+                                    child: Text(context.l10n.quickPlanLeave),
                                   ),
                                 ],
                               ],
@@ -511,8 +531,8 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
         RouteNames.quickPlanFor(draft.id),
       );
       context.push(
-        '${RouteNames.signIn}?originRoute=$origin'
-        '&sourceScreen=quick_plan&sourceAction=save_quick_plan',
+        '${RouteNames.signIn}?originRoute=$origin' // l10n-ignore: query string
+        '&sourceScreen=quick_plan&sourceAction=save_quick_plan', // l10n-ignore: query string
       );
       return;
     }
@@ -526,29 +546,34 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
         SnackBar(
           content: Text(
             controller.syncError == null
-                ? 'Quick Plan saved'
-                : 'Not synced. Your local changes are retained; refresh to retry.',
+                ? context.l10n.quickPlanSaved
+                : context.l10n.quickPlanNotSynced,
           ),
         ),
       );
       return;
     }
-    final FavoriteItemEntity favorite = _favoriteFromScenario(draft);
+    final FavoriteItemEntity favorite = _favoriteFromScenario(
+      context.l10n,
+      draft,
+    );
     await ref
         .read(favoritesControllerProvider)
         .addFavorite(favorite, sourceScreen: 'quick_plan');
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Quick Plan saved')));
+    ).showSnackBar(SnackBar(content: Text(context.l10n.quickPlanSaved)));
   }
 
   Future<void> _copyScenario(ScenarioDraftEntity draft) async {
-    await Clipboard.setData(ClipboardData(text: _scenarioSummary(draft)));
+    await Clipboard.setData(
+      ClipboardData(text: _scenarioSummary(context.l10n, draft)),
+    );
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Quick Plan copied')));
+    ).showSnackBar(SnackBar(content: Text(context.l10n.quickPlanCopied)));
   }
 
   Future<void> _expandToScenario(ScenarioDraftEntity draft) async {
@@ -568,7 +593,7 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
     final String title =
         widget.seedParameters['title']?.trim().isNotEmpty == true
         ? widget.seedParameters['title']!.trim()
-        : 'Expanded Quick Plan';
+        : 'Expanded Quick Plan'; // l10n-ignore: default title of the new Scenario, edited by its author
     PlanningConversionOutcome outcome = await ref
         .read(planningConversionFacadeProvider)
         .expand(
@@ -606,7 +631,7 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
     final String? handoffId = outcome.handoffId;
     if (handoffId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not expand this Quick Plan')),
+        SnackBar(content: Text(context.l10n.quickPlanExpandFailed)),
       );
       return;
     }
@@ -629,9 +654,13 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
           sourcePrompt: template.prompt,
           stepCategories: template.stepCategories,
         );
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('${template.title} applied')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          context.l10n.quickPlanTemplateApplied(template.label(context.l10n)),
+        ),
+      ),
+    );
   }
 }
 
@@ -692,7 +721,7 @@ class _ScenarioPreview extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        routeFit.label,
+                        context.l10n.quickPlanFitLevel(routeFit.level.name),
                         style: TextStyle(
                           color: colors.onPrimary,
                           fontWeight: FontWeight.w700,
@@ -703,7 +732,7 @@ class _ScenarioPreview extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${_moodLabel(draft.mood)} route, ready to follow or adjust.',
+                  context.l10n.quickPlanMoodReady(draft.mood.name),
                   style: TextStyle(
                     color: colors.onPrimary.withValues(alpha: 0.82),
                   ),
@@ -724,13 +753,22 @@ class _ScenarioPreview extends StatelessWidget {
                     _PreviewStat(
                       icon: Icons.payments_outlined,
                       value: draft.totalPriceAmount.minorUnits == 0
-                          ? 'Free'
-                          : '€${draft.totalPriceAmount.toStringAsFixed(0)}',
+                          ? context.l10n.discoverFree
+                          : RechargeFormats.money(
+                              draft.totalPriceAmount,
+                              context.l10n.localeName,
+                            ),
                       label: 'budget',
                     ),
                     _PreviewStat(
                       icon: Icons.directions_walk_outlined,
-                      value: '${draft.totalDistanceKm.toStringAsFixed(1)} km',
+                      value: context.l10n.discoverDistanceKm(
+                        RechargeFormats.decimal(
+                          draft.totalDistanceKm,
+                          context.l10n.localeName,
+                          maxFractionDigits: 1,
+                        ),
+                      ),
                       label: 'route',
                     ),
                   ],
@@ -743,19 +781,17 @@ class _ScenarioPreview extends StatelessWidget {
         _ScenarioMapPreview(steps: draft.steps),
         const SizedBox(height: 20),
         Text(
-          'Your route',
+          context.l10n.quickPlanYourRoute,
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 10),
         if (draft.steps.isEmpty)
-          const Card(
+          Card(
             child: Padding(
               padding: EdgeInsets.all(18),
-              child: Text(
-                'No stops fit these conditions yet. Edit the plan to add one.',
-              ),
+              child: Text(context.l10n.quickPlanNoStopsFit),
             ),
           )
         else
@@ -773,7 +809,7 @@ class _ScenarioPreview extends StatelessWidget {
                 key: const Key('scenario-preview-edit'),
                 onPressed: onEdit,
                 icon: const Icon(Icons.tune_outlined),
-                label: const Text('Edit plan'),
+                label: Text(context.l10n.quickPlanEditPlan),
               ),
             ),
             const SizedBox(width: 10),
@@ -782,7 +818,7 @@ class _ScenarioPreview extends StatelessWidget {
                 key: const Key('scenario-preview-map'),
                 onPressed: onMap,
                 icon: const Icon(Icons.map_outlined),
-                label: const Text('Open map'),
+                label: Text(context.l10n.quickPlanOpenMap),
               ),
             ),
           ],
@@ -791,14 +827,14 @@ class _ScenarioPreview extends StatelessWidget {
         TextButton.icon(
           onPressed: () => onSave(),
           icon: const Icon(Icons.bookmark_add_outlined),
-          label: const Text('Save this plan'),
+          label: Text(context.l10n.quickPlanSavePlan),
         ),
         const SizedBox(height: 4),
         FilledButton.tonalIcon(
           key: const Key('quick-plan-expand-to-scenario'),
           onPressed: draft.steps.isEmpty ? null : () => onExpand(),
           icon: const Icon(Icons.account_tree_outlined),
-          label: const Text('Expand to Scenario'),
+          label: Text(context.l10n.quickPlanExpandToScenario),
         ),
       ],
     );
@@ -823,22 +859,19 @@ class _ExpandToScenarioCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              'Need a larger city or trip plan?',
+              context.l10n.quickPlanNeedLargerPlan,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 4),
-            Text(
-              'Copy selected stops into a new independent Scenario. '
-              'This Quick Plan stays unchanged.',
-            ),
+            Text(context.l10n.quickPlanCopyStopsHint),
             const SizedBox(height: 10),
             FilledButton.tonalIcon(
               key: const Key('quick-plan-expand-to-scenario'),
               onPressed: onExpand == null ? null : () => onExpand!(),
               icon: const Icon(Icons.account_tree_outlined),
-              label: Text('Expand $stopCount stops to Scenario'),
+              label: Text(context.l10n.quickPlanExpandStops(stopCount)),
             ),
           ],
         ),
@@ -869,7 +902,7 @@ Future<_ExpandQuickPlanSelection?> _showExpandQuickPlanDialog(
     context: context,
     builder: (BuildContext context) => StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) => AlertDialog(
-        title: const Text('Expand to Scenario'),
+        title: Text(context.l10n.quickPlanExpandToScenario),
         content: SizedBox(
           width: 420,
           child: SingleChildScrollView(
@@ -877,14 +910,10 @@ Future<_ExpandQuickPlanSelection?> _showExpandQuickPlanDialog(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Text(
-                  'A new independent Scenario will be created. Later changes '
-                  'will not sync in either direction.',
-                ),
+                Text(context.l10n.quickPlanIndependentHint),
                 const SizedBox(height: 10),
-                const Text(
-                  'Legacy stops have no catalog object IDs, so selected stops '
-                  'will enter Scenario as private custom locations.',
+                Text(
+                  context.l10n.quickPlanLegacyStopsHint,
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),
@@ -893,7 +922,9 @@ Future<_ExpandQuickPlanSelection?> _showExpandQuickPlanDialog(
                     contentPadding: EdgeInsets.zero,
                     value: selected.contains(step.id),
                     title: Text(step.title),
-                    subtitle: Text('${step.durationMinutes} min'),
+                    subtitle: Text(
+                      context.l10n.discoverMinutes(step.durationMinutes),
+                    ),
                     onChanged: (bool? value) {
                       setState(() {
                         value == true
@@ -905,10 +936,8 @@ Future<_ExpandQuickPlanSelection?> _showExpandQuickPlanDialog(
                 CheckboxListTile(
                   contentPadding: EdgeInsets.zero,
                   value: copyPrivateNotes,
-                  title: const Text('Copy my private notes'),
-                  subtitle: const Text(
-                    'Only your own notes are eligible; this legacy plan has none.',
-                  ),
+                  title: Text(context.l10n.quickPlanCopyNotes),
+                  subtitle: Text(context.l10n.quickPlanNoNotes),
                   onChanged: null,
                 ),
               ],
@@ -918,7 +947,7 @@ Future<_ExpandQuickPlanSelection?> _showExpandQuickPlanDialog(
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.quickPlanCancel),
           ),
           FilledButton(
             key: const Key('confirm-expand-to-scenario'),
@@ -931,7 +960,7 @@ Future<_ExpandQuickPlanSelection?> _showExpandQuickPlanDialog(
                       copyPrivateNotes: copyPrivateNotes,
                     ),
                   ),
-            child: const Text('Create independent Scenario'),
+            child: Text(context.l10n.quickPlanCreateIndependent),
           ),
         ],
       ),
@@ -943,18 +972,16 @@ Future<bool?> _confirmLatestQuickPlanRevision(BuildContext context) {
   return showDialog<bool>(
     context: context,
     builder: (BuildContext context) => AlertDialog(
-      title: const Text('Quick Plan changed'),
-      content: const Text(
-        'Refresh the preview or continue with the latest available snapshot.',
-      ),
+      title: Text(context.l10n.quickPlanChanged),
+      content: Text(context.l10n.quickPlanRefreshOrContinue),
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Refresh'),
+          child: Text(context.l10n.quickPlanRefresh),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context, true),
-          child: const Text('Continue with snapshot'),
+          child: Text(context.l10n.quickPlanContinueSnapshot),
         ),
       ],
     ),
@@ -1040,8 +1067,8 @@ class _ScenarioMapPreview extends StatelessWidget {
                 color: colors.surface,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text(
-                'Route preview',
+              child: Text(
+                context.l10n.quickPlanRoutePreview,
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
             ),
@@ -1147,12 +1174,25 @@ class _PreviewTimelineStep extends StatelessWidget {
                   Wrap(
                     spacing: 6,
                     children: <Widget>[
-                      _TimelinePill('${step.durationMinutes} min'),
-                      _TimelinePill('${step.distanceKm.toStringAsFixed(1)} km'),
+                      _TimelinePill(
+                        context.l10n.discoverMinutes(step.durationMinutes),
+                      ),
+                      _TimelinePill(
+                        context.l10n.discoverDistanceKm(
+                          RechargeFormats.decimal(
+                            step.distanceKm,
+                            context.l10n.localeName,
+                            maxFractionDigits: 1,
+                          ),
+                        ),
+                      ),
                       _TimelinePill(
                         step.isFree
-                            ? 'Free'
-                            : '€${step.priceAmount.toStringAsFixed(0)}',
+                            ? context.l10n.discoverFree
+                            : RechargeFormats.money(
+                                step.priceAmount,
+                                context.l10n.localeName,
+                              ),
                       ),
                     ],
                   ),
@@ -1222,18 +1262,21 @@ class _ScenarioHero extends StatelessWidget {
               children: <Widget>[
                 Icon(Icons.route, color: colorScheme.onPrimary),
                 const SizedBox(width: 8),
-                Text(
-                  'Build a recharge route',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: colorScheme.onPrimary,
-                    fontWeight: FontWeight.w800,
+                Expanded(
+                  child: Text(
+                    context.l10n.quickPlanBuildRechargeRoute,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: colorScheme.onPrimary,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 10),
             Text(
-              '${_moodLabel(draft.mood)} plan with ${draft.steps.length} stops',
+              '${context.l10n.quickPlanMoodPlan(draft.mood.name)} · '
+              '${context.l10n.discoverStops(draft.steps.length)}',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: colorScheme.onPrimary,
                 fontWeight: FontWeight.w600,
@@ -1246,16 +1289,32 @@ class _ScenarioHero extends StatelessWidget {
               children: <Widget>[
                 if (draft.sourcePrompt.isNotEmpty)
                   _HeroPill(
-                    label: 'Intent: ${_shortPrompt(draft.sourcePrompt)}',
+                    // The prompt is the reader's own text, shown as is.
+                    label:
+                        '${context.l10n.quickPlanIntentLabel}: '
+                        '${_shortPrompt(draft.sourcePrompt)}',
                   ),
-                _HeroPill(label: '${draft.totalDurationMinutes} min'),
                 _HeroPill(
-                  label: '${draft.totalDistanceKm.toStringAsFixed(1)} km',
+                  label: context.l10n.discoverMinutes(
+                    draft.totalDurationMinutes,
+                  ),
+                ),
+                _HeroPill(
+                  label: context.l10n.discoverDistanceKm(
+                    RechargeFormats.decimal(
+                      draft.totalDistanceKm,
+                      context.l10n.localeName,
+                      maxFractionDigits: 1,
+                    ),
+                  ),
                 ),
                 _HeroPill(
                   label: draft.totalPriceAmount.minorUnits == 0
-                      ? 'Free'
-                      : '${draft.totalPriceAmount.toStringAsFixed(0)} EUR',
+                      ? context.l10n.discoverFree
+                      : RechargeFormats.money(
+                          draft.totalPriceAmount,
+                          context.l10n.localeName,
+                        ),
                 ),
               ],
             ),
@@ -1268,7 +1327,7 @@ class _ScenarioHero extends StatelessWidget {
                       onSave();
                     },
                     icon: const Icon(Icons.bookmark_add),
-                    label: const Text('Save'),
+                    label: Text(context.l10n.quickPlanSave),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -1278,7 +1337,7 @@ class _ScenarioHero extends StatelessWidget {
                       onCopy();
                     },
                     icon: const Icon(Icons.copy),
-                    label: const Text('Copy'),
+                    label: Text(context.l10n.quickPlanCopy),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: colorScheme.onPrimary,
                       side: BorderSide(
@@ -1296,7 +1355,7 @@ class _ScenarioHero extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onMap,
                     icon: const Icon(Icons.map),
-                    label: const Text('Map'),
+                    label: Text(context.l10n.quickPlanMap),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: colorScheme.onPrimary,
                       side: BorderSide(
@@ -1310,7 +1369,7 @@ class _ScenarioHero extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onSearch,
                     icon: const Icon(Icons.search),
-                    label: const Text('Search'),
+                    label: Text(context.l10n.quickPlanSearch),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: colorScheme.onPrimary,
                       side: BorderSide(
@@ -1325,7 +1384,7 @@ class _ScenarioHero extends StatelessWidget {
             FilledButton.icon(
               onPressed: onCreate,
               icon: const Icon(Icons.add_business_outlined),
-              label: const Text('Publish route'),
+              label: Text(context.l10n.quickPlanPublishRoute),
             ),
           ],
         ),
@@ -1384,11 +1443,13 @@ class _ScenarioTemplateRail extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: 8),
-            Text(
-              'Ready route ideas',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+            Expanded(
+              child: Text(
+                context.l10n.quickPlanReadyIdeas,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+              ),
             ),
           ],
         ),
@@ -1453,7 +1514,7 @@ class _ScenarioTemplateCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      template.title,
+                      template.label(context.l10n),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -1465,7 +1526,7 @@ class _ScenarioTemplateCard extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                template.subtitle,
+                template.subtitle(context.l10n),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -1476,27 +1537,39 @@ class _ScenarioTemplateCard extends StatelessWidget {
                 children: <Widget>[
                   _MetaChip(
                     icon: Icons.schedule,
-                    label: '${template.durationMinutes} min',
+                    label: context.l10n.discoverMinutes(
+                      template.durationMinutes,
+                    ),
                   ),
                   _MetaChip(
                     icon: Icons.directions_walk,
-                    label: template.walkingOnly ? 'Walkable' : 'Flexible',
+                    label: template.walkingOnly
+                        ? context.l10n.discoverWalkable
+                        : context.l10n.discoverFlexibleTime,
                   ),
                   _MetaChip(
                     icon: Icons.payments_outlined,
-                    label: template.freeOnly ? 'Free' : 'Mixed',
+                    label: template.freeOnly
+                        ? context.l10n.discoverFree
+                        : context.l10n.discoverMixedPrice,
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               Tooltip(
-                message: 'Apply ${template.title} template',
+                message: context.l10n.quickPlanApplyTemplate(
+                  template.label(context.l10n),
+                ),
                 child: SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
                     onPressed: onApply,
                     icon: Icon(isActive ? Icons.check : Icons.route),
-                    label: Text(isActive ? 'Applied' : 'Use'),
+                    label: Text(
+                      isActive
+                          ? context.l10n.quickPlanApplied
+                          : context.l10n.quickPlanUse,
+                    ),
                   ),
                 ),
               ),
@@ -1542,7 +1615,7 @@ class _ScenarioSavedIntentPanel extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              'Build from saved intent',
+              context.l10n.quickPlanBuildFromSaved,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
@@ -1555,13 +1628,13 @@ class _ScenarioSavedIntentPanel extends StatelessWidget {
         )) ...<Widget>[
           _ScenarioIntentCard(
             icon: Icons.bookmark_border,
-            typeLabel: 'Saved conditions',
+            typeLabel: context.l10n.quickPlanSavedConditions,
             title: search.title,
             subtitle: search.subtitle,
             query: search.query,
-            applyTooltip: 'Apply saved conditions to builder',
-            mapTooltip: 'Open saved conditions on map',
-            createTooltip: 'Create listing from saved conditions',
+            applyTooltip: context.l10n.quickPlanApplySavedToBuilder,
+            mapTooltip: context.l10n.quickPlanOpenSavedOnMap,
+            createTooltip: context.l10n.quickPlanListingFromSaved,
             onApply: () => onApplySaved(search),
             onMap: () => onMapSaved(search),
             onCreate: () => onCreateSaved(search),
@@ -1573,16 +1646,16 @@ class _ScenarioSavedIntentPanel extends StatelessWidget {
         )) ...<Widget>[
           _ScenarioIntentCard(
             icon: Icons.mic_none,
-            typeLabel: 'Smart search',
+            typeLabel: context.l10n.quickPlanSmartSearch,
             title: item.prompt.trim().isEmpty
-                ? _titleForQuery(item.query)
+                ? _titleForQuery(context.l10n, item.query)
                 : item.prompt.trim(),
             subtitle: _smartSearchIntentSubtitle(item),
             query: item.query,
-            chips: _smartSearchIntentChips(item),
-            applyTooltip: 'Apply smart search to builder',
-            mapTooltip: 'Open smart search on map',
-            createTooltip: 'Create listing from smart search',
+            chips: _smartSearchIntentChips(context.l10n, item),
+            applyTooltip: context.l10n.quickPlanApplySmartToBuilder,
+            mapTooltip: context.l10n.quickPlanOpenSmartOnMap,
+            createTooltip: context.l10n.quickPlanListingFromSmart,
             onApply: () => onApplySmart(item),
             onMap: () => onMapSmart(item),
             onCreate: () => onCreateSmart(item),
@@ -1686,7 +1759,7 @@ class _ScenarioIntentCard extends StatelessWidget {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: (chips ?? _intentChips(query))
+              children: (chips ?? _intentChips(context.l10n, query))
                   .map(
                     (_IntentChipData chip) =>
                         _MetaChip(icon: chip.icon, label: chip.label),
@@ -1743,28 +1816,28 @@ class _BuilderControls extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Conditions',
+          context.l10n.quickPlanConditions,
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 10),
         SegmentedButton<ScenarioMood>(
-          segments: const <ButtonSegment<ScenarioMood>>[
+          segments: <ButtonSegment<ScenarioMood>>[
             ButtonSegment<ScenarioMood>(
               value: ScenarioMood.calm,
               icon: Icon(Icons.self_improvement),
-              label: Text('Calm'),
+              label: Text(context.l10n.quickPlanMoodCalm),
             ),
             ButtonSegment<ScenarioMood>(
               value: ScenarioMood.social,
               icon: Icon(Icons.groups),
-              label: Text('Social'),
+              label: Text(context.l10n.quickPlanMoodSocial),
             ),
             ButtonSegment<ScenarioMood>(
               value: ScenarioMood.active,
               icon: Icon(Icons.directions_run),
-              label: Text('Active'),
+              label: Text(context.l10n.quickPlanMoodActive),
             ),
           ],
           selected: <ScenarioMood>{draft.mood},
@@ -1780,13 +1853,13 @@ class _BuilderControls extends StatelessWidget {
         const SizedBox(height: 8),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Free only'),
+          title: Text(context.l10n.quickPlanFreeOnly),
           value: draft.freeOnly,
           onChanged: onFreeOnlyChanged,
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Walking route'),
+          title: Text(context.l10n.quickPlanWalkingRoute),
           value: draft.walkingOnly,
           onChanged: onWalkingOnlyChanged,
         ),
@@ -1854,7 +1927,7 @@ class _RouteFitPanel extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Route fit',
+                    context.l10n.quickPlanRouteFit,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w900,
@@ -1872,14 +1945,14 @@ class _RouteFitPanel extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              routeFit.label,
+              context.l10n.quickPlanFitLevel(routeFit.level.name),
               style: Theme.of(
                 context,
               ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 3),
             Text(
-              routeFit.summary,
+              context.l10n.quickPlanFitSummary(routeFit.level.name),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -1892,19 +1965,24 @@ class _RouteFitPanel extends StatelessWidget {
                   icon: Icons.schedule,
                   label:
                       '${draft.totalDurationMinutes}/'
-                      '${draft.maxDurationMinutes} min',
+                      '${context.l10n.discoverMinutes(draft.maxDurationMinutes)}',
                 ),
                 _MetaChip(
                   icon: Icons.directions_walk,
-                  label: draft.walkingOnly ? 'Walkable' : 'Flexible',
+                  label: draft.walkingOnly
+                      ? context.l10n.discoverWalkable
+                      : context.l10n.discoverFlexibleTime,
                 ),
                 _MetaChip(
                   icon: Icons.payments_outlined,
                   label: draft.freeOnly
-                      ? 'Free only'
+                      ? context.l10n.quickPlanFreeOnly
                       : draft.totalPriceAmount.minorUnits == 0
-                      ? 'Free'
-                      : '${draft.totalPriceAmount.toStringAsFixed(0)} EUR',
+                      ? context.l10n.discoverFree
+                      : RechargeFormats.money(
+                          draft.totalPriceAmount,
+                          context.l10n.localeName,
+                        ),
                 ),
               ],
             ),
@@ -1914,9 +1992,9 @@ class _RouteFitPanel extends StatelessWidget {
               runSpacing: 8,
               children: routeFit.insights
                   .map(
-                    (String insight) => _MetaChip(
+                    (ScenarioFitInsight insight) => _MetaChip(
                       icon: Icons.check_circle_outline,
-                      label: insight,
+                      label: _fitInsightText(context.l10n, insight),
                     ),
                   )
                   .toList(growable: false),
@@ -1928,9 +2006,9 @@ class _RouteFitPanel extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onOptimize,
                     icon: const Icon(Icons.auto_fix_high),
-                    label: const FittedBox(
+                    label: FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text('Optimize'),
+                      child: Text(context.l10n.quickPlanOptimize),
                     ),
                   ),
                 ),
@@ -1939,15 +2017,15 @@ class _RouteFitPanel extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onMap,
                     icon: const Icon(Icons.map_outlined),
-                    label: const FittedBox(
+                    label: FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text('Map route'),
+                      child: Text(context.l10n.quickPlanMapRoute),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
-                  tooltip: 'Publish optimized route',
+                  tooltip: context.l10n.quickPlanPublishOptimized,
                   onPressed: onCreate,
                   icon: const Icon(Icons.add_business_outlined),
                 ),
@@ -2018,17 +2096,28 @@ class _ScenarioStepCard extends StatelessWidget {
                       ),
                       _MetaChip(
                         icon: Icons.schedule,
-                        label: '${step.durationMinutes} min',
+                        label: context.l10n.discoverMinutes(
+                          step.durationMinutes,
+                        ),
                       ),
                       _MetaChip(
                         icon: Icons.near_me,
-                        label: '${step.distanceKm.toStringAsFixed(1)} km',
+                        label: context.l10n.discoverDistanceKm(
+                          RechargeFormats.decimal(
+                            step.distanceKm,
+                            context.l10n.localeName,
+                            maxFractionDigits: 1,
+                          ),
+                        ),
                       ),
                       _MetaChip(
                         icon: Icons.payments,
                         label: step.isFree
-                            ? 'Free'
-                            : '${step.priceAmount.toStringAsFixed(0)} EUR',
+                            ? context.l10n.discoverFree
+                            : RechargeFormats.money(
+                                step.priceAmount,
+                                context.l10n.localeName,
+                              ),
                       ),
                     ],
                   ),
@@ -2036,19 +2125,19 @@ class _ScenarioStepCard extends StatelessWidget {
                   Row(
                     children: <Widget>[
                       IconButton.outlined(
-                        tooltip: 'Move up',
+                        tooltip: context.l10n.quickPlanMoveUp,
                         onPressed: canMoveUp ? onMoveUp : null,
                         icon: const Icon(Icons.keyboard_arrow_up),
                       ),
                       const SizedBox(width: 8),
                       IconButton.outlined(
-                        tooltip: 'Move down',
+                        tooltip: context.l10n.quickPlanMoveDown,
                         onPressed: canMoveDown ? onMoveDown : null,
                         icon: const Icon(Icons.keyboard_arrow_down),
                       ),
                       const Spacer(),
                       IconButton.outlined(
-                        tooltip: 'Remove stop',
+                        tooltip: context.l10n.quickPlanRemoveStop,
                         onPressed: onRemove,
                         icon: const Icon(Icons.delete_outline),
                       ),
@@ -2076,7 +2165,7 @@ class _SuggestedStopsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Suggested stops',
+          context.l10n.quickPlanSuggestedStops,
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
@@ -2127,7 +2216,7 @@ class _SuggestedStopCard extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     '${createTaxonomyLabelForPath(step.category)} · '
-                    '${step.durationMinutes} min',
+                    '${context.l10n.discoverMinutes(step.durationMinutes)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -2138,7 +2227,7 @@ class _SuggestedStopCard extends StatelessWidget {
             FilledButton.icon(
               onPressed: onAdd,
               icon: const Icon(Icons.add),
-              label: const Text('Add'),
+              label: Text(context.l10n.quickPlanAdd),
             ),
           ],
         ),
@@ -2168,11 +2257,15 @@ class _MetaChip extends StatelessWidget {
           children: <Widget>[
             Icon(icon, size: 15, color: colorScheme.secondary),
             const SizedBox(width: 5),
-            Text(
-              label,
-              style: Theme.of(
-                context,
-              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
             ),
           ],
         ),
@@ -2194,11 +2287,11 @@ class _EmptyScenario extends StatelessWidget {
         children: <Widget>[
           const Icon(Icons.route, size: 36),
           const SizedBox(height: 10),
-          const Text('No stops match these conditions'),
+          Text(context.l10n.quickPlanNoStopsMatch),
           const SizedBox(height: 10),
           OutlinedButton(
             onPressed: onReset,
-            child: const Text('Reset builder'),
+            child: Text(context.l10n.quickPlanResetBuilder),
           ),
         ],
       ),
@@ -2206,66 +2299,70 @@ class _EmptyScenario extends StatelessWidget {
   }
 }
 
-const List<_ScenarioRouteTemplate> _scenarioTemplates =
-    <_ScenarioRouteTemplate>[
-      _ScenarioRouteTemplate(
-        title: 'Coffee reset',
-        subtitle: 'Start gently, then take a low-pressure city walk.',
-        icon: Icons.local_cafe_outlined,
-        mood: ScenarioMood.calm,
-        durationMinutes: 90,
-        freeOnly: false,
-        walkingOnly: true,
-        prompt: 'coffee reset walk',
-        stepCategories: <String>[
-          'food_drinks.coffee',
-          'wellness_recharge.calm_walk',
-        ],
-      ),
-      _ScenarioRouteTemplate(
-        title: 'Free city reset',
-        subtitle: 'A simple free route for a calm recharge window.',
-        icon: Icons.self_improvement,
-        mood: ScenarioMood.calm,
-        durationMinutes: 90,
-        freeOnly: true,
-        walkingOnly: true,
-        prompt: 'free calm city walk',
-        stepCategories: <String>['wellness_recharge.calm_walk'],
-      ),
-      _ScenarioRouteTemplate(
-        title: 'Social evening',
-        subtitle: 'Meet people first, then keep the evening moving nearby.',
-        icon: Icons.groups_outlined,
-        mood: ScenarioMood.social,
-        durationMinutes: 150,
-        freeOnly: false,
-        walkingOnly: true,
-        prompt: 'social evening near me',
-        stepCategories: <String>[
-          'games_indoor.board_games',
-          'music_nightlife.afterwork_drinks',
-        ],
-      ),
-      _ScenarioRouteTemplate(
-        title: 'Active boost',
-        subtitle: 'Move first, cool down outside, then keep energy steady.',
-        icon: Icons.directions_run,
-        mood: ScenarioMood.active,
-        durationMinutes: 120,
-        freeOnly: false,
-        walkingOnly: true,
-        prompt: 'active tennis and walk',
-        stepCategories: <String>[
-          'sport.tennis',
-          'outdoor_nature_walking.city_walk',
-        ],
-      ),
-    ];
+final List<_ScenarioRouteTemplate>
+_scenarioTemplates = <_ScenarioRouteTemplate>[
+  _ScenarioRouteTemplate(
+    label: (AppLocalizations l10n) => l10n.quickPlanTplCoffee,
+    subtitle: (AppLocalizations l10n) => l10n.quickPlanTplCoffeeHint,
+    icon: Icons.local_cafe_outlined,
+    mood: ScenarioMood.calm,
+    durationMinutes: 90,
+    freeOnly: false,
+    walkingOnly: true,
+    prompt:
+        'coffee reset walk', // l10n-ignore: search prompt text built from the saved query, not UI copy
+    stepCategories: <String>[
+      'food_drinks.coffee',
+      'wellness_recharge.calm_walk',
+    ],
+  ),
+  _ScenarioRouteTemplate(
+    label: (AppLocalizations l10n) => l10n.quickPlanTplFreeCity,
+    subtitle: (AppLocalizations l10n) => l10n.quickPlanTplFreeCityHint,
+    icon: Icons.self_improvement,
+    mood: ScenarioMood.calm,
+    durationMinutes: 90,
+    freeOnly: true,
+    walkingOnly: true,
+    prompt:
+        'free calm city walk', // l10n-ignore: search prompt text built from the saved query, not UI copy
+    stepCategories: <String>['wellness_recharge.calm_walk'],
+  ),
+  _ScenarioRouteTemplate(
+    label: (AppLocalizations l10n) => l10n.quickPlanTplSocial,
+    subtitle: (AppLocalizations l10n) => l10n.quickPlanTplSocialHint,
+    icon: Icons.groups_outlined,
+    mood: ScenarioMood.social,
+    durationMinutes: 150,
+    freeOnly: false,
+    walkingOnly: true,
+    prompt:
+        'social evening near me', // l10n-ignore: search prompt text built from the saved query, not UI copy
+    stepCategories: <String>[
+      'games_indoor.board_games',
+      'music_nightlife.afterwork_drinks',
+    ],
+  ),
+  _ScenarioRouteTemplate(
+    label: (AppLocalizations l10n) => l10n.quickPlanTplActive,
+    subtitle: (AppLocalizations l10n) => l10n.quickPlanTplActiveHint,
+    icon: Icons.directions_run,
+    mood: ScenarioMood.active,
+    durationMinutes: 120,
+    freeOnly: false,
+    walkingOnly: true,
+    prompt:
+        'active tennis and walk', // l10n-ignore: search prompt text built from the saved query, not UI copy
+    stepCategories: <String>[
+      'sport.tennis',
+      'outdoor_nature_walking.city_walk',
+    ],
+  ),
+];
 
 class _ScenarioRouteTemplate {
   const _ScenarioRouteTemplate({
-    required this.title,
+    required this.label,
     required this.subtitle,
     required this.icon,
     required this.mood,
@@ -2276,8 +2373,9 @@ class _ScenarioRouteTemplate {
     required this.stepCategories,
   });
 
-  final String title;
-  final String subtitle;
+  /// Label and subtitle in the reader's language.
+  final String Function(AppLocalizations l10n) label;
+  final String Function(AppLocalizations l10n) subtitle;
   final IconData icon;
   final ScenarioMood mood;
   final int durationMinutes;
@@ -2311,9 +2409,9 @@ bool _templateMatchesDraft(
 
 String _moodLabel(ScenarioMood mood) {
   return switch (mood) {
-    ScenarioMood.calm => 'Calm',
-    ScenarioMood.social => 'Social',
-    ScenarioMood.active => 'Active',
+    ScenarioMood.calm => 'Calm', // l10n-ignore: Create seed prefill data
+    ScenarioMood.social => 'Social', // l10n-ignore: Create seed prefill data
+    ScenarioMood.active => 'Active', // l10n-ignore: Create seed prefill data
   };
 }
 
@@ -2347,16 +2445,21 @@ List<String>? _stepsFromParam(String? value) {
       .toList(growable: false);
 }
 
-FavoriteItemEntity _favoriteFromScenario(ScenarioDraftEntity draft) {
+FavoriteItemEntity _favoriteFromScenario(
+  AppLocalizations l10n,
+  ScenarioDraftEntity draft,
+) {
   final DateTime now = DateTime.now().toUtc();
   final String categoryKey = draft.steps
       .map((ScenarioStepEntity step) => step.category.replaceAll('.', '_'))
       .join('_');
   return FavoriteItemEntity(
     id: 'quick_plan_${draft.id}_$categoryKey',
-    title: '${_moodLabel(draft.mood)} quick plan',
-    subtitle: '${draft.steps.length} stops · ${draft.totalDurationMinutes} min',
-    city: 'Riga',
+    title: l10n.quickPlanMoodQuickPlan(draft.mood.name),
+    subtitle:
+        '${l10n.discoverStops(draft.steps.length)} · '
+        '${l10n.discoverMinutes(draft.totalDurationMinutes)}',
+    city: 'Riga', // l10n-ignore: market city name
     category: 'quick_plan',
     startsAtUtc: now,
     distanceKm: draft.totalDistanceKm,
@@ -2404,23 +2507,27 @@ String _mapRouteForScenario(ScenarioDraftEntity draft) {
   ).toString();
 }
 
-String _createRouteForScenario(ScenarioDraftEntity draft) {
+String _createRouteForScenario(
+  AppLocalizations l10n,
+  ScenarioDraftEntity draft,
+) {
   final String steps = draft.steps
       .map((ScenarioStepEntity step) => step.category)
       .join(',');
   final String prompt = draft.sourcePrompt.trim().isEmpty
-      ? '${_moodLabel(draft.mood)} route with ${draft.steps.length} stops'
+      ? '${_moodLabel(draft.mood)} route with ${draft.steps.length} stops' // l10n-ignore: Create seed prefill data
       : draft.sourcePrompt.trim();
   return Uri(
     path: RouteNames.create,
     queryParameters: <String, String>{
       'source': 'quick_plan_route_seed',
       'type': 'route',
-      'title': '${_moodLabel(draft.mood)} recharge route',
+      'title':
+          '${_moodLabel(draft.mood)} recharge route', // l10n-ignore: Create seed prefill data
       'subtitle':
-          '${draft.steps.length} stops · '
-          '${draft.totalDurationMinutes} min · '
-          '${draft.totalDistanceKm.toStringAsFixed(1)} km',
+          '${draft.steps.length} stops · ' // l10n-ignore: Create seed prefill data
+          '${draft.totalDurationMinutes} min · ' // l10n-ignore: Create seed prefill data
+          '${draft.totalDistanceKm.toStringAsFixed(1)} km', // l10n-ignore: Create seed prefill data
       'q': prompt,
       'category': 'route',
       'mood': draft.mood.name,
@@ -2460,7 +2567,10 @@ String _createRouteForSavedSearch(SavedSearchEntity search) {
   );
 }
 
-String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
+String _createRouteForSmartSearch(
+  AppLocalizations l10n,
+  SmartSearchHistoryEntity item,
+) {
   final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
     item,
   );
@@ -2472,10 +2582,11 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
         ..._smartRouteParameters(parseResult, includeMode: false),
         'source': 'smart_route_seed',
         'type': 'route',
-        'title': '${_capitalized(routeIntent.mood)} recharge route',
+        'title':
+            '${_capitalized(routeIntent.mood)} recharge route', // l10n-ignore: Create seed prefill data
         'subtitle':
-            '${routeIntent.stepCategories.length} stops · '
-            '${routeIntent.durationMinutes} min · smart route',
+            '${routeIntent.stepCategories.length} stops · ' // l10n-ignore: Create seed prefill data
+            '${routeIntent.durationMinutes} min · smart route', // l10n-ignore: Create seed prefill data
         'q': parseResult.originalText.trim(),
         'category': 'route',
       },
@@ -2484,7 +2595,7 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
   return _createRouteForQuery(
     item.query,
     source: 'smart_search',
-    title: _titleForQuery(item.query),
+    title: _titleForQuery(l10n, item.query),
     subtitle: item.prompt,
   );
 }
@@ -2625,15 +2736,16 @@ String _promptForQuery(DiscoverQuery query) {
     if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
     if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.budgetMax != null)
+      'under ${query.budgetMax!.toStringAsFixed(0)}', // l10n-ignore: search prompt text built from the saved query, not UI copy
     query.unlimitedRadius
-        ? 'any area'
-        : 'near ${(query.radiusMeters / 1000).round()} km',
+        ? 'any area' // l10n-ignore: search prompt text built from the saved query, not UI copy
+        : 'near ${(query.radiusMeters / 1000).round()} km', // l10n-ignore: search prompt text built from the saved query, not UI copy
   ];
   return parts.join(' · ');
 }
 
-String _titleForQuery(DiscoverQuery query) {
+String _titleForQuery(AppLocalizations l10n, DiscoverQuery query) {
   final String queryText = query.queryText.trim();
   if (queryText.isNotEmpty) {
     return queryText[0].toUpperCase() + queryText.substring(1);
@@ -2641,7 +2753,7 @@ String _titleForQuery(DiscoverQuery query) {
   if (query.selectedCategoryIds.isNotEmpty) {
     return '${query.selectedCategoryIds.first} idea';
   }
-  return 'Recharge idea';
+  return l10n.quickPlanRechargeIdea;
 }
 
 String _capitalized(String value) {
@@ -2660,18 +2772,24 @@ String _smartSearchIntentSubtitle(SmartSearchHistoryEntity item) {
       .join(' · ');
 }
 
-List<_IntentChipData> _smartSearchIntentChips(SmartSearchHistoryEntity item) {
+List<_IntentChipData> _smartSearchIntentChips(
+  AppLocalizations l10n,
+  SmartSearchHistoryEntity item,
+) {
   final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
     item,
   );
-  final List<_IntentChipData> queryChips = _intentChips(item.query);
+  final List<_IntentChipData> queryChips = _intentChips(l10n, item.query);
   if (parseResult == null) return queryChips;
   final SmartRouteIntent routeIntent = parseResult.routeIntent!;
   return <_IntentChipData>[
-    const _IntentChipData(icon: Icons.route_outlined, label: 'Smart route'),
+    _IntentChipData(
+      icon: Icons.route_outlined,
+      label: l10n.quickPlanSmartRoute,
+    ),
     _IntentChipData(
       icon: Icons.timer_outlined,
-      label: '${routeIntent.durationMinutes} min',
+      label: l10n.discoverMinutes(routeIntent.durationMinutes),
     ),
     _IntentChipData(
       icon: Icons.flag_outlined,
@@ -2681,27 +2799,29 @@ List<_IntentChipData> _smartSearchIntentChips(SmartSearchHistoryEntity item) {
   ];
 }
 
-List<_IntentChipData> _intentChips(DiscoverQuery query) {
+List<_IntentChipData> _intentChips(AppLocalizations l10n, DiscoverQuery query) {
   return <_IntentChipData>[
     _IntentChipData(
       icon: Icons.category_outlined,
       label: query.selectedCategoryIds.isEmpty
-          ? 'All categories'
+          ? l10n.quickPlanAllCategories
           : query.selectedCategoryIds.first,
     ),
     _IntentChipData(
       icon: Icons.payments_outlined,
       label: query.freeOnly
-          ? 'Free'
+          ? l10n.discoverFree
           : query.budgetMax == null
-          ? 'Any price'
-          : 'Under ${query.budgetMax!.toStringAsFixed(0)} EUR',
+          ? l10n.quickPlanAnyPrice
+          : l10n.discoverUnder(
+              RechargeFormats.money(query.budgetMax!, l10n.localeName),
+            ),
     ),
     _IntentChipData(
       icon: Icons.radar,
       label: query.unlimitedRadius
-          ? 'Any area'
-          : '${(query.radiusMeters / 1000).round()} km',
+          ? l10n.quickPlanAnyArea
+          : l10n.discoverDistanceKm('${(query.radiusMeters / 1000).round()}'),
     ),
   ];
 }
@@ -2713,21 +2833,45 @@ class _IntentChipData {
   final String label;
 }
 
-String _scenarioSummary(ScenarioDraftEntity draft) {
+String _scenarioSummary(AppLocalizations l10n, ScenarioDraftEntity draft) {
   final List<String> lines = <String>[
-    '${_moodLabel(draft.mood)} recharge scenario',
-    '${draft.steps.length} stops · ${draft.totalDurationMinutes} min · '
-        '${draft.totalDistanceKm.toStringAsFixed(1)} km',
+    l10n.discoverMoodRechargeScenario(draft.mood.name),
+    '${l10n.discoverStops(draft.steps.length)} · '
+        '${l10n.discoverMinutes(draft.totalDurationMinutes)} · '
+        '${l10n.discoverDistanceKm(RechargeFormats.decimal(draft.totalDistanceKm, l10n.localeName, maxFractionDigits: 1))}',
     draft.totalPriceAmount.minorUnits == 0
-        ? 'Free'
-        : '${draft.totalPriceAmount.toStringAsFixed(0)} EUR',
+        ? l10n.discoverFree
+        : RechargeFormats.money(draft.totalPriceAmount, l10n.localeName),
     '',
     ...List<String>.generate(draft.steps.length, (int index) {
       final ScenarioStepEntity step = draft.steps[index];
       return '${index + 1}. ${step.title} - '
           '${createTaxonomyLabelForPath(step.category)}, '
-          '${step.durationMinutes} min';
+          '${l10n.discoverMinutes(step.durationMinutes)}';
     }),
   ];
   return lines.join('\n');
 }
+
+String _fitInsightText(
+  AppLocalizations l10n,
+  ScenarioFitInsight insight,
+) => switch (insight.kind) {
+  ScenarioFitInsightKind.noStops => l10n.quickPlanFitNoStops,
+  ScenarioFitInsightKind.trimMinutes => l10n.quickPlanFitTrim(insight.minutes),
+  ScenarioFitInsightKind.fitsMinutes => l10n.quickPlanFitFits(insight.minutes),
+  ScenarioFitInsightKind.roomForStop => l10n.quickPlanFitRoom,
+  ScenarioFitInsightKind.removePaidStops => l10n.quickPlanFitRemovePaid,
+  ScenarioFitInsightKind.freeRoute => l10n.quickPlanFitFreeRoute,
+  ScenarioFitInsightKind.totalPrice => l10n.quickPlanFitTotalPrice(
+    RechargeFormats.money(insight.price!, l10n.localeName),
+  ),
+  ScenarioFitInsightKind.shortenTransfers => l10n.quickPlanFitShortenTransfers,
+  ScenarioFitInsightKind.totalDistance => l10n.quickPlanFitTotalDistance(
+    RechargeFormats.decimal(
+      insight.distanceKm,
+      l10n.localeName,
+      maxFractionDigits: 1,
+    ),
+  ),
+};

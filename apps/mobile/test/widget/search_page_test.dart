@@ -32,6 +32,7 @@ import 'package:recharge/features/discover/presentation/pages/search_page.dart';
 
 import 'package:recharge/core/localization/l10n_context.dart';
 import 'widget_test_viewport.dart';
+import '../support/l10n/l10n_screenshot.dart';
 
 void main() {
   // L4.5: Discover in lv, en and ru on a 360 dp phone at text scale 1 and 2.
@@ -52,6 +53,7 @@ void main() {
           await tester.pumpWidget(_SearchTestApp(locale: Locale(language)));
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
+          await l10nCaptureScreen(tester);
           final AppLocalizations l10n = lookupAppLocalizations(
             Locale(language),
           );

@@ -68,7 +68,7 @@ class FavoritesController extends ChangeNotifier {
         _state.copyWith(
           status: FavoritesStatus.error,
           items: const [],
-          message: 'Не удалось загрузить избранное',
+          message: 'favorites_load_failed',
         ),
       );
       _analyticsService.track(

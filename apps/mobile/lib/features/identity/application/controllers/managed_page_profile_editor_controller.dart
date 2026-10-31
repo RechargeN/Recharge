@@ -57,7 +57,7 @@ class ManagedPageProfileEditorController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: ManagedPageProfileEditorStatusFlag.error,
-          message: 'Unable to load the page profile.',
+          message: 'profile_load_failed',
         ),
       );
     }
@@ -96,7 +96,7 @@ class ManagedPageProfileEditorController extends ChangeNotifier {
           status: ManagedPageProfileEditorStatusFlag.ready,
           pageId: page.id,
           overlays: overlays,
-          message: 'Profile updated.',
+          message: 'profile_updated',
         ),
       );
       return true;
@@ -129,31 +129,23 @@ class ManagedPageProfileEditorController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: ManagedPageProfileEditorStatusFlag.ready,
-          message: 'Unable to update the profile.',
+          message: 'profile_update_failed',
         ),
       );
       return false;
     }
   }
 
-  static String _errorMessage(String code) {
-    switch (code) {
-      case 'default_locale_value_required':
-        return 'Enter a value for the page\'s default language.';
-      case 'unsupported_locale':
-        return 'That language is not supported by this page.';
-      case 'value_length_out_of_bounds':
-        return 'That text is empty or too long.';
-      case 'actor_not_active_member':
-        return 'Only an active team member can edit the profile.';
-      case 'actor_missing_page_manage_capability':
-        return 'You do not have permission to edit the page profile.';
-      case 'stale_overlay_revision':
-        return 'This field changed elsewhere. Reload and try again.';
-      default:
-        return 'Unable to update the profile.';
-    }
-  }
+  /// L4.6: a stable code; the card turns it into text.
+  static String _errorMessage(String code) => switch (code) {
+    'default_locale_value_required' ||
+    'unsupported_locale' ||
+    'value_length_out_of_bounds' ||
+    'actor_not_active_member' ||
+    'actor_missing_page_manage_capability' ||
+    'stale_overlay_revision' => code,
+    _ => 'profile_update_failed',
+  };
 
   void _setState(ManagedPageProfileEditorState value) {
     _state = value;

@@ -90,7 +90,11 @@ class _ItemsPickerSectionState extends State<ItemsPickerSection> {
               dense: true,
               leading: const Icon(Icons.add_circle_outline),
               title: Text(result.snapshot.title),
-              subtitle: Text(result.ref.objectType.name),
+              subtitle: Text(
+                context.l10n.createCollectionObjectType(
+                  result.ref.objectType.name,
+                ),
+              ),
               onTap: () => widget.onAddItem(result),
             ),
           ),
@@ -199,7 +203,11 @@ class _ItemsPickerSectionState extends State<ItemsPickerSection> {
                       context.l10n.createFormNoLongerAvailable,
                       style: TextStyle(color: Colors.red),
                     )
-                  : Text(item.ref.objectType.name),
+                  : Text(
+                      context.l10n.createCollectionObjectType(
+                        item.ref.objectType.name,
+                      ),
+                    ),
               trailing: IconButton(
                 tooltip: context.l10n.createFormRemove,
                 icon: const Icon(Icons.delete_outline),

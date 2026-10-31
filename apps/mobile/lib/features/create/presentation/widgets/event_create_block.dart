@@ -160,7 +160,7 @@ class EventCreateBlock extends StatelessWidget {
           onChanged: (bool? value) => controller.updateEventMediaMetadata(
             rightsConfirmed: value ?? false,
           ),
-          title: const Text('I have the right to publish this media *'),
+          title: Text(context.l10n.createEventMediaRights),
           subtitle: _error(context, 'mediaRights') == null
               ? null
               : Text(
@@ -311,7 +311,7 @@ class EventCreateBlock extends StatelessWidget {
           value: event.allDay,
           onChanged: (bool value) =>
               controller.updateEventSchedule(allDay: value),
-          title: const Text('All-day event'),
+          title: Text(context.l10n.createEventAllDay),
         ),
         _TextField(
           id: 'event-local-date',
@@ -348,7 +348,7 @@ class EventCreateBlock extends StatelessWidget {
         ),
         _TextField(
           id: 'event-timezone',
-          label: 'IANA timezone',
+          label: context.l10n.createEventIanaTimezone,
           value: event.timezoneId,
           error: _error(context, 'timezoneId'),
           onChanged: (String value) =>
@@ -368,11 +368,12 @@ class EventCreateBlock extends StatelessWidget {
         if (event.occurrences.isNotEmpty) ...<Widget>[
           const SizedBox(height: 8),
           Text(
-            '${event.occurrences.length} occurrence(s) materialized',
+            context.l10n.createEventOccurrencesCount(event.occurrences.length),
             key: const Key('event-occurrence-count'),
           ),
           Text(
-            'Next: ${event.occurrences.first.startAtUtc.toIso8601String()}',
+            '${context.l10n.createEventNextDateLabel}: '
+            '${RechargeFormats.dateTime(event.occurrences.first.startAtUtc, event.timezoneId, context.l10n.localeName)}',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
@@ -600,7 +601,7 @@ class EventCreateBlock extends StatelessWidget {
         if (event.pricingMode == EventPricingMode.fixed) ...<Widget>[
           _TextField(
             id: 'event-price',
-            label: 'Price (${event.currencyCode})',
+            label: context.l10n.createEventPriceIn(event.currencyCode),
             value: event.price == null
                 ? ''
                 : (event.price!.amountMinor / 100).toStringAsFixed(2),
@@ -836,7 +837,7 @@ class EventCreateBlock extends StatelessWidget {
               ? null
               : controller.saveDraft,
           primaryKey: const Key('event-step-next'),
-          primaryLabel: 'Continue',
+          primaryLabel: context.l10n.createFormContinue,
           onPrimaryPressed: () => controller.goToEventStep(step + 1),
         )
       : Row(
@@ -961,7 +962,9 @@ class _EventGalleryEditorState extends State<_EventGalleryEditor> {
                   index + 1,
                 ),
                 value: widget.altText[widget.gallery[index]] ?? '',
-                error: widget.errorFor('galleryAlt:${widget.gallery[index]}'),
+                error: widget.errorFor(
+                  'galleryAlt:${widget.gallery[index]}', // l10n-ignore: field id
+                ),
                 onChanged: (String value) =>
                     widget.onAltChanged(widget.gallery[index], value),
               ),

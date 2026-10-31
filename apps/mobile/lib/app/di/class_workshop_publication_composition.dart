@@ -71,7 +71,7 @@ final class ClassWorkshopPublicationTestEntryGuard
   void assertAllowed() {
     if (!allowed) {
       throw StateError(
-        'Class / Workshop publication test entry is not enabled',
+        'Class / Workshop publication test entry is not enabled', // l10n-ignore: developer error; the UI receives a code
       );
     }
   }

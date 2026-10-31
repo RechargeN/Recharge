@@ -441,7 +441,9 @@ Future<void> setupDependencies() async {
       () => RouteRecordingJournalRepositoryImpl(store: sl()),
     )
     ..registerLazySingleton<RouteLocationRecordingPort>(
-      RouteGeolocatorAdapter.new,
+      () => RouteGeolocatorAdapter(
+        languageCode: () => sl<LocaleController>().languageCode,
+      ),
     )
     ..registerFactory<RouteRecordingController>(
       () => RouteRecordingController(
@@ -508,7 +510,7 @@ Future<void> setupDependencies() async {
       final repository = sl<CreateRepository>();
       if (repository is! CreateDraftCollectionRepository) {
         throw StateError(
-          'Create repository must support draft collection persistence.',
+          'Create repository must support draft collection persistence.', // l10n-ignore: developer error; the UI receives a code
         );
       }
       return repository as CreateDraftCollectionRepository;
@@ -520,7 +522,7 @@ Future<void> setupDependencies() async {
       final repository = sl<CreateRepository>();
       if (repository is! RentalPromotionRepository) {
         throw StateError(
-          'Create repository must support Rental direct-publish promotion.',
+          'Create repository must support Rental direct-publish promotion.', // l10n-ignore: developer error; the UI receives a code
         );
       }
       return repository as RentalPromotionRepository;
@@ -776,7 +778,7 @@ Future<void> setupDependencies() async {
         final repository = sl<CreateRepository>();
         if (repository is! RouteDraftPersistenceRepository) {
           throw StateError(
-            'Create repository must support Route draft persistence.',
+            'Create repository must support Route draft persistence.', // l10n-ignore: developer error; the UI receives a code
           );
         }
         final routeRepository = repository as RouteDraftPersistenceRepository;

@@ -5,6 +5,8 @@ import 'package:design_system/design_system.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../widgets/scenario_library_panel.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../auth/application/auth_providers.dart';
@@ -60,7 +62,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     final AuthUserEntity? user = authState.user;
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Требуется авторизация')));
+      return Scaffold(
+        body: Center(child: Text(context.l10n.profileSignInRequired)),
+      );
     }
 
     _scheduleLoad(
@@ -77,6 +81,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final ProfilePersonalPresentation presentation =
         ProfilePersonalPresentation(accessSummary: accessRoleSummary);
     final _ProfileWorkspaceData workspaceData = _profileWorkspaceDataFor(
+      context.l10n,
       favoritesState.items,
       savedSearches,
       smartSearchHistory,
@@ -87,7 +92,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Scaffold(
       backgroundColor: RechargeTheme.profileBackground,
       appBar: AppBar(
-        title: Text(presentation.title),
+        title: Text(context.l10n.profileRoleTitle(presentation.titleId)),
         backgroundColor: RechargeTheme.profileBackground,
         foregroundColor: RechargeTheme.ink,
         centerTitle: true,
@@ -96,7 +101,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: IconButton.filledTonal(
-              tooltip: 'Настройки',
+              tooltip: context.l10n.profileSettings,
               onPressed: () => context.push(RouteNames.settings),
               icon: const Icon(Icons.settings_outlined),
             ),
@@ -140,14 +145,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             const SizedBox(height: 10),
             _ProfileActionRow(
               icon: Icons.bookmark_border,
-              title: 'Saved list',
+              title: context.l10n.profileSavedList,
               onTap: () => context.push(RouteNames.favorites),
             ),
             if (!presentation.canShowCreatorTools)
               _ProfileActionRow(
                 icon: Icons.workspace_premium_outlined,
-                title: 'Creator tools',
-                subtitle: 'Check verification and available tools in Settings',
+                title: context.l10n.profileCreatorTools,
+                subtitle: context.l10n.profileCheckVerification,
                 onTap: () => context.push(RouteNames.settings),
               ),
             const SizedBox(height: 14),
@@ -238,9 +243,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 }
 
-String _profileContextLine(String city) {
-  final String location = city.trim().isEmpty ? 'Riga' : city.trim();
-  return 'Personal · $location';
+String _profileContextLine(AppLocalizations l10n, String city) {
+  final String location = city.trim().isEmpty
+      ? 'Riga' // l10n-ignore: market city name
+      : city.trim();
+  return '${l10n.profilePersonal} · $location';
 }
 
 class ProfileWorkspacePage extends ConsumerStatefulWidget {
@@ -273,7 +280,9 @@ class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
     final AuthUserEntity? user = authState.user;
 
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Требуется авторизация')));
+      return Scaffold(
+        body: Center(child: Text(context.l10n.profileSignInRequired)),
+      );
     }
 
     _scheduleCreateLoad(user);
@@ -283,6 +292,7 @@ class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
     );
     final ProfileRoleSummary roleSummary = accessRoleSummary;
     final _ProfileWorkspaceData workspaceData = _profileWorkspaceDataFor(
+      context.l10n,
       favoritesState.items,
       discoverState.savedSearches,
       discoverState.smartSearchHistory,
@@ -293,7 +303,7 @@ class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F2),
       appBar: AppBar(
-        title: const Text('Profile workspace'),
+        title: Text(context.l10n.profileWorkspace),
         backgroundColor: const Color(0xFFF4F6F2),
         foregroundColor: const Color(0xFF10231F),
         surfaceTintColor: Colors.transparent,
@@ -406,7 +416,7 @@ class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
   }
 
   void _openSmartSearchCreate(SmartSearchHistoryEntity item) {
-    context.push(_createRouteForSmartSearch(item));
+    context.push(_createRouteForSmartSearch(context.l10n, item));
   }
 
   void _scheduleCreateLoad(AuthUserEntity user) {
@@ -478,7 +488,7 @@ class _ProfileHero extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    '@${email.split('@').first}',
+                    '@${email.split('@').first}', // l10n-ignore: account handle, not copy
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -497,7 +507,7 @@ class _ProfileHero extends StatelessWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          _profileContextLine(city),
+                          _profileContextLine(context.l10n, city),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodySmall
@@ -510,7 +520,11 @@ class _ProfileHero extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  _HeroPill(label: presentation.title.toUpperCase()),
+                  _HeroPill(
+                    label: context.l10n
+                        .profileRoleTitle(presentation.titleId)
+                        .toUpperCase(),
+                  ),
                 ],
               ),
             ),
@@ -538,19 +552,19 @@ class _ProfileDashboardTabs extends StatelessWidget {
         children: <Widget>[
           _ProfileDashboardTab(
             icon: Icons.work_outline,
-            label: 'Created',
+            label: context.l10n.profileCreated,
             active: true,
             onTap: onCreated,
           ),
           _ProfileDashboardTab(
             icon: Icons.place_outlined,
-            label: 'Visited',
+            label: context.l10n.profileVisited,
             active: false,
             onTap: onVisited,
           ),
           _ProfileDashboardTab(
             icon: Icons.image_outlined,
-            label: 'Photos',
+            label: context.l10n.profilePhotos,
             active: false,
             onTap: onPhotos,
           ),
@@ -628,29 +642,29 @@ class _GeneratorToolsPanel extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: <Widget>[
-      const _ProfileSectionLabel('CONTROL CENTER'),
+      _ProfileSectionLabel(context.l10n.profileControlCenter),
       const SizedBox(height: 8),
       _ProfileSurfacePanel(
         child: Column(
           children: <Widget>[
             _ProfileActionRow(
               icon: Icons.edit_square,
-              title: 'Manage page',
+              title: context.l10n.profileManagePage,
               onTap: onManagePage,
             ),
             _ProfileActionRow(
               icon: Icons.event_note_outlined,
-              title: 'Created events',
+              title: context.l10n.profileCreatedEvents,
               onTap: onCreatedEvents,
             ),
             _ProfileActionRow(
               icon: Icons.insights_outlined,
-              title: 'Event insights',
+              title: context.l10n.profileEventInsights,
               onTap: onInsights,
             ),
             _ProfileActionRow(
               icon: Icons.group_outlined,
-              title: 'Bookings & requests',
+              title: context.l10n.profileBookingsRequests,
               onTap: onBookings,
             ),
           ],
@@ -708,7 +722,7 @@ class _LatestCreatedEvents extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        const _ProfileSectionLabel('LATEST CREATED EVENTS'),
+        _ProfileSectionLabel(context.l10n.profileLatestCreatedEvents),
         const SizedBox(height: 8),
         DecoratedBox(
           decoration: BoxDecoration(
@@ -724,10 +738,10 @@ class _LatestCreatedEvents extends StatelessWidget {
                   _ProfileActionRow(
                     icon: Icons.add_box_outlined,
                     title: canCreate
-                        ? 'Create first event'
-                        : 'No created events yet',
+                        ? context.l10n.profileCreateFirstEvent
+                        : context.l10n.profileNoCreatedEvents,
                     subtitle: canCreate
-                        ? 'Start from Recharge Create Hub'
+                        ? context.l10n.profileStartFromHub
                         : null,
                     onTap: canCreate ? onCreate : null,
                   )
@@ -740,9 +754,9 @@ class _LatestCreatedEvents extends StatelessWidget {
                 const Divider(height: 1),
                 ListTile(
                   dense: true,
-                  title: const Center(
+                  title: Center(
                     child: Text(
-                      'View all events',
+                      context.l10n.profileViewAllEvents,
                       style: TextStyle(
                         color: Color(0xFF0B3028),
                         fontSize: 12,
@@ -758,7 +772,7 @@ class _LatestCreatedEvents extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        const _ProfileSectionLabel('QUICK ACTIONS'),
+        _ProfileSectionLabel(context.l10n.profileQuickActions),
         const SizedBox(height: 8),
         DecoratedBox(
           decoration: BoxDecoration(
@@ -773,33 +787,33 @@ class _LatestCreatedEvents extends StatelessWidget {
                 if (canCreate)
                   _ProfileActionRow(
                     icon: Icons.add_box_outlined,
-                    title: 'Create Hub',
-                    subtitle: 'Open taxonomy-based creator flow',
+                    title: context.l10n.profileCreateHub,
+                    subtitle: context.l10n.profileOpenTaxonomyFlow,
                     onTap: onCreate,
                   ),
                 if (canCreate)
                   _ProfileActionRow(
                     icon: Icons.route_outlined,
-                    title: 'Create route',
-                    subtitle: 'Open the Route block in Create Hub',
+                    title: context.l10n.profileCreateRoute,
+                    subtitle: context.l10n.profileOpenRouteBlock,
                     onTap: onCreateRoute,
                   ),
                 _ProfileActionRow(
                   icon: Icons.auto_awesome_outlined,
-                  title: 'Create Scenario',
-                  subtitle: 'Open the Scenario block in Create Hub',
+                  title: context.l10n.profileCreateScenario,
+                  subtitle: context.l10n.profileOpenScenarioBlock,
                   onTap: onScenario,
                 ),
                 if (canCreate)
                   _ProfileActionRow(
                     icon: Icons.calendar_today_outlined,
-                    title: 'One-time event',
+                    title: context.l10n.profileOneTimeEvent,
                     onTap: onCreate,
                   ),
                 _ProfileActionRow(
                   icon: Icons.group_outlined,
-                  title: 'Find people',
-                  subtitle: 'Continue in Search conditions',
+                  title: context.l10n.profileFindPeople,
+                  subtitle: context.l10n.profileContinueInSearch,
                   onTap: onFindPeople,
                 ),
               ],
@@ -829,7 +843,9 @@ class _CreatedEventRow extends StatelessWidget {
           ),
           leading: _CreatedEventThumb(draft: draft),
           title: Text(
-            draft.title.trim().isEmpty ? 'Untitled activity' : draft.title,
+            draft.title.trim().isEmpty
+                ? context.l10n.profileUntitledActivity
+                : draft.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
@@ -842,7 +858,7 @@ class _CreatedEventRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                _createdEventMeta(draft),
+                _createdEventMeta(context.l10n, draft),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -1081,7 +1097,7 @@ class _RoleWorkspace extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Workspace',
+          context.l10n.profileWorkspaceHeading,
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
@@ -1092,7 +1108,7 @@ class _RoleWorkspace extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: _WorkspaceMetric(
-                label: 'Saved',
+                label: context.l10n.profileSaved,
                 value: data.savedCount.toString(),
                 icon: Icons.bookmark,
               ),
@@ -1100,7 +1116,7 @@ class _RoleWorkspace extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: _WorkspaceMetric(
-                label: 'Routes',
+                label: context.l10n.profileRoutes,
                 value: data.scenarioCount.toString(),
                 icon: Icons.route,
               ),
@@ -1108,7 +1124,7 @@ class _RoleWorkspace extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: _WorkspaceMetric(
-                label: 'Searches',
+                label: context.l10n.profileSearches,
                 value: data.searchCount.toString(),
                 icon: Icons.tune,
               ),
@@ -1178,36 +1194,36 @@ class _RoleWorkspace extends StatelessWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.all(12),
-            child: Column(children: _workspaceActions()),
+            child: Column(children: _workspaceActions(context)),
           ),
         ),
       ],
     );
   }
 
-  List<Widget> _workspaceActions() {
+  List<Widget> _workspaceActions(BuildContext context) {
     if (roleSummary.canGenerate) {
       return <Widget>[
         _WorkspaceActionRow(
           icon: Icons.auto_awesome,
-          title: 'Generate scenario',
-          subtitle: 'Open Builder with route controls',
+          title: context.l10n.profileGenerateScenario,
+          subtitle: context.l10n.profileOpenBuilderControls,
           onTap: onScenario,
         ),
         _WorkspaceDivider(),
         _WorkspaceActionRow(
           icon: Icons.psychology,
-          title: 'Smart prompt',
+          title: context.l10n.profileSmartPrompt,
           subtitle: data.latestSmartSearch == null
-              ? '${data.searchCount} search continuations'
+              ? context.l10n.profileSearchContinuations(data.searchCount)
               : data.latestSmartSearch!.prompt,
           onTap: onSearch,
         ),
         _WorkspaceDivider(),
         _WorkspaceActionRow(
           icon: Icons.add_circle,
-          title: 'Publish idea',
-          subtitle: 'Move from route idea to Create Hub',
+          title: context.l10n.profilePublishIdea,
+          subtitle: context.l10n.profileIdeaToHub,
           onTap: onCreate,
         ),
       ];
@@ -1216,23 +1232,24 @@ class _RoleWorkspace extends StatelessWidget {
       return <Widget>[
         _WorkspaceActionRow(
           icon: Icons.add_circle,
-          title: 'Create Hub',
-          subtitle: 'Draft event or place from taxonomy',
+          title: context.l10n.profileCreateHub,
+          subtitle: context.l10n.profileDraftFromTaxonomy,
           onTap: onCreate,
         ),
         _WorkspaceDivider(),
         _WorkspaceActionRow(
           icon: Icons.route,
-          title: 'Build route idea',
-          subtitle: 'Use saved searches and scenarios as inspiration',
+          title: context.l10n.profileBuildRouteIdea,
+          subtitle: context.l10n.profileUseSavedInspiration,
           onTap: onScenario,
         ),
         _WorkspaceDivider(),
         _WorkspaceActionRow(
           icon: Icons.favorite,
-          title: 'Review saved plan',
+          title: context.l10n.profileReviewSavedPlan,
           subtitle:
-              '${data.activityCount} activities, ${data.scenarioCount} routes',
+              '${context.l10n.profileActivitiesCount(data.activityCount)} · '
+              '${context.l10n.profileRoutesCount(data.scenarioCount)}',
           onTap: onSaved,
         ),
       ];
@@ -1240,26 +1257,27 @@ class _RoleWorkspace extends StatelessWidget {
     return <Widget>[
       _WorkspaceActionRow(
         icon: Icons.favorite,
-        title: 'Saved plan',
-        subtitle: '${data.savedCount} saved ideas ready',
+        title: context.l10n.profileSavedPlan,
+        subtitle: context.l10n.profileSavedIdeasReady(data.savedCount),
         onTap: onSaved,
       ),
       _WorkspaceDivider(),
       _WorkspaceActionRow(
         icon: Icons.search,
-        title: 'Find next activity',
+        title: context.l10n.profileFindNextActivity,
         subtitle: data.latestSmartSearch != null
-            ? 'Resume ${data.latestSmartSearch!.prompt}'
+            // The search text is the reader's own, shown as is.
+            ? '${context.l10n.profileResume}: ${data.latestSmartSearch!.prompt}'
             : data.latestSearch == null
-            ? 'Use Search and Map conditions'
-            : 'Resume ${data.latestSearch!.title}',
+            ? context.l10n.profileUseSearchMap
+            : '${context.l10n.profileResume}: ${data.latestSearch!.title}',
         onTap: onSearch,
       ),
       _WorkspaceDivider(),
       _WorkspaceActionRow(
         icon: Icons.route,
-        title: 'Build a route',
-        subtitle: 'Create a personal recharge scenario',
+        title: context.l10n.profileBuildARoute,
+        subtitle: context.l10n.profilePersonalScenario,
         onTap: onScenario,
       ),
     ];
@@ -1346,14 +1364,14 @@ class _LatestScenarioCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Latest route',
+                    context.l10n.profileLatestRoute,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
-                _WorkspacePill(label: 'Scenario'),
+                _WorkspacePill(label: context.l10n.profileScenario),
               ],
             ),
             const SizedBox(height: 8),
@@ -1378,7 +1396,7 @@ class _LatestScenarioCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onEdit,
                     icon: const Icon(Icons.edit_location_alt),
-                    label: const Text('Edit route'),
+                    label: Text(context.l10n.profileEditRoute),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -1386,7 +1404,7 @@ class _LatestScenarioCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onRoute,
                     icon: const Icon(Icons.map),
-                    label: const Text('Map route'),
+                    label: Text(context.l10n.profileMapRoute),
                   ),
                 ),
               ],
@@ -1432,14 +1450,14 @@ class _LatestSearchCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Latest search',
+                    context.l10n.profileLatestSearch,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: colorScheme.secondary,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
-                _WorkspacePill(label: 'Conditions'),
+                _WorkspacePill(label: context.l10n.profileConditions),
               ],
             ),
             const SizedBox(height: 8),
@@ -1460,15 +1478,18 @@ class _LatestSearchCard extends StatelessWidget {
               children: <Widget>[
                 _WorkspacePill(
                   label: search.query.selectedCategoryIds.isEmpty
-                      ? 'All'
+                      ? context.l10n.profileAll
                       : search.query.selectedCategoryIds.first,
                 ),
                 _WorkspacePill(
                   label: search.query.unlimitedRadius
-                      ? 'Any area'
-                      : '${(search.query.radiusMeters / 1000).round()} km',
+                      ? context.l10n.profileAnyArea
+                      : context.l10n.discoverDistanceKm(
+                          '${(search.query.radiusMeters / 1000).round()}',
+                        ),
                 ),
-                if (search.query.freeOnly) _WorkspacePill(label: 'Free'),
+                if (search.query.freeOnly)
+                  _WorkspacePill(label: context.l10n.profileFree),
               ],
             ),
             const SizedBox(height: 10),
@@ -1478,9 +1499,9 @@ class _LatestSearchCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onResume,
                     icon: const Icon(Icons.search),
-                    label: const FittedBox(
+                    label: FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text('Resume search'),
+                      child: Text(context.l10n.profileResumeSearch),
                     ),
                   ),
                 ),
@@ -1489,21 +1510,21 @@ class _LatestSearchCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onMap,
                     icon: const Icon(Icons.map_outlined),
-                    label: const FittedBox(
+                    label: FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text('Map search'),
+                      child: Text(context.l10n.profileMapSearch),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
-                  tooltip: 'Build route from latest search',
+                  tooltip: context.l10n.profileRouteFromLatestSearch,
                   onPressed: onRoute,
                   icon: const Icon(Icons.route_outlined),
                 ),
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
-                  tooltip: 'Create listing from latest search',
+                  tooltip: context.l10n.profileListingFromLatestSearch,
                   onPressed: onCreate,
                   icon: const Icon(Icons.add_circle_outline),
                 ),
@@ -1553,14 +1574,14 @@ class _LatestSmartSearchCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Latest smart search',
+                    context.l10n.profileLatestSmartSearch,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
-                _WorkspacePill(label: 'Smart'),
+                _WorkspacePill(label: context.l10n.profileSmart),
               ],
             ),
             const SizedBox(height: 8),
@@ -1579,24 +1600,35 @@ class _LatestSmartSearchCard extends StatelessWidget {
               children: <Widget>[
                 _WorkspacePill(
                   label: item.query.selectedCategoryIds.isEmpty
-                      ? 'All'
+                      ? context.l10n.profileAll
                       : item.query.selectedCategoryIds.first,
                 ),
                 if (routeIntent != null) ...<Widget>[
-                  const _WorkspacePill(label: 'Smart route'),
-                  _WorkspacePill(label: '${routeIntent.durationMinutes} min'),
+                  _WorkspacePill(label: context.l10n.profileSmartRoute),
+                  _WorkspacePill(
+                    label: context.l10n.discoverMinutes(
+                      routeIntent.durationMinutes,
+                    ),
+                  ),
                   _WorkspacePill(
                     label: '${routeIntent.stepCategories.length} stops',
                   ),
                 ],
                 _WorkspacePill(
                   label: item.query.unlimitedRadius
-                      ? 'Any area'
-                      : '${(item.query.radiusMeters / 1000).round()} km',
+                      ? context.l10n.profileAnyArea
+                      : context.l10n.discoverDistanceKm(
+                          '${(item.query.radiusMeters / 1000).round()}',
+                        ),
                 ),
                 if (item.query.budgetMax != null)
                   _WorkspacePill(
-                    label: 'Under ${item.query.budgetMax!.toStringAsFixed(0)}',
+                    label: context.l10n.discoverUnder(
+                      RechargeFormats.money(
+                        item.query.budgetMax!,
+                        context.l10n.localeName,
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -1607,9 +1639,9 @@ class _LatestSmartSearchCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onResume,
                     icon: const Icon(Icons.psychology_alt_outlined),
-                    label: const FittedBox(
+                    label: FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text('Resume smart'),
+                      child: Text(context.l10n.profileResumeSmart),
                     ),
                   ),
                 ),
@@ -1618,21 +1650,21 @@ class _LatestSmartSearchCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onMap,
                     icon: const Icon(Icons.map_outlined),
-                    label: const FittedBox(
+                    label: FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text('Map smart'),
+                      child: Text(context.l10n.profileMapSmart),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
-                  tooltip: 'Build route from latest smart search',
+                  tooltip: context.l10n.profileRouteFromLatestSmart,
                   onPressed: onRoute,
                   icon: const Icon(Icons.route_outlined),
                 ),
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
-                  tooltip: 'Create listing from latest smart search',
+                  tooltip: context.l10n.profileListingFromLatestSmart,
                   onPressed: onCreate,
                   icon: const Icon(Icons.add_circle_outline),
                 ),
@@ -1678,7 +1710,7 @@ class _CreatorPublicationsPanel extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Creator publications',
+                context.l10n.profileCreatorPublications,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w900,
@@ -1690,7 +1722,7 @@ class _CreatorPublicationsPanel extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          'Manage drafts and published listings from the same workspace.',
+          context.l10n.profileManageDrafts,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(
@@ -1754,9 +1786,9 @@ class _CreatorPublicationsPanel extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: onCreate,
                 icon: const Icon(Icons.add_circle_outline),
-                label: const FittedBox(
+                label: FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text('New listing'),
+                  child: Text(context.l10n.profileNewListing),
                 ),
               ),
             ),
@@ -1765,9 +1797,9 @@ class _CreatorPublicationsPanel extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: onScenario,
                 icon: const Icon(Icons.route_outlined),
-                label: const FittedBox(
+                label: FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text('Build route'),
+                  child: Text(context.l10n.profileBuildRoute),
                 ),
               ),
             ),
@@ -1820,7 +1852,7 @@ class _CreatorPublicationCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Creator listing',
+                    context.l10n.profileCreatorListing,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w900,
@@ -1862,7 +1894,11 @@ class _CreatorPublicationCard extends StatelessWidget {
             if (listing.missingFields.isNotEmpty) ...<Widget>[
               const SizedBox(height: 8),
               Text(
-                'Missing: ${listing.missingFields.join(', ')}',
+                context.l10n.profileMissingFields(
+                  listing.missingFields
+                      .map(context.l10n.profileMissingField)
+                      .join(', '),
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -1881,20 +1917,22 @@ class _CreatorPublicationCard extends StatelessWidget {
                     label: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
-                        listing.isPublished ? 'Open Create' : 'Continue draft',
+                        listing.isPublished
+                            ? context.l10n.profileOpenCreate
+                            : context.l10n.profileContinueDraft,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
-                  tooltip: 'Search similar listing',
+                  tooltip: context.l10n.profileSearchSimilarListing,
                   onPressed: onSearch,
                   icon: const Icon(Icons.search),
                 ),
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
-                  tooltip: 'Map listing area',
+                  tooltip: context.l10n.profileMapListingArea,
                   onPressed: onMap,
                   icon: const Icon(Icons.map_outlined),
                 ),
@@ -1940,7 +1978,7 @@ class _CreatorNextStepsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<_CreatorNextStepData> steps = _steps();
+    final List<_CreatorNextStepData> steps = _steps(context);
     if (steps.isEmpty) return const SizedBox.shrink();
 
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -1961,7 +1999,7 @@ class _CreatorNextStepsPanel extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Creator next steps',
+                    context.l10n.profileCreatorNextSteps,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w900,
@@ -1982,7 +2020,7 @@ class _CreatorNextStepsPanel extends StatelessWidget {
     );
   }
 
-  List<_CreatorNextStepData> _steps() {
+  List<_CreatorNextStepData> _steps(BuildContext context) {
     final List<_CreatorNextStepData> steps = <_CreatorNextStepData>[];
     final _CreatorListingData? draft = data.draftListing;
     final _CreatorListingData? published = data.publishedListing;
@@ -1992,8 +2030,12 @@ class _CreatorNextStepsPanel extends StatelessWidget {
         steps.add(
           _CreatorNextStepData(
             icon: Icons.fact_check_outlined,
-            title: 'Finish draft',
-            subtitle: 'Missing: ${draft.missingFields.join(', ')}',
+            title: context.l10n.profileFinishDraft,
+            subtitle: context.l10n.profileMissingFields(
+              draft.missingFields
+                  .map(context.l10n.profileMissingField)
+                  .join(', '),
+            ),
             onTap: () => onOpenListing!(draft),
           ),
         );
@@ -2001,8 +2043,9 @@ class _CreatorNextStepsPanel extends StatelessWidget {
         steps.add(
           _CreatorNextStepData(
             icon: Icons.campaign_outlined,
-            title: 'Find draft audience',
-            subtitle: 'Open Search with ${draft.title}',
+            title: context.l10n.profileFindDraftAudience,
+            // The draft title is the author's own text, shown as is.
+            subtitle: '${context.l10n.profileOpenSearchWith} ${draft.title}',
             onTap: () => onSearchListing!(draft),
           ),
         );
@@ -2016,9 +2059,10 @@ class _CreatorNextStepsPanel extends StatelessWidget {
         steps.add(
           _CreatorNextStepData(
             icon: Icons.route_outlined,
-            title: 'Open route map',
+            title: context.l10n.profileOpenRouteMap,
             subtitle:
-                '${published.title} · ${routeContext.stepCategories.length} stops',
+                '${published.title} · '
+                '${context.l10n.discoverStops(routeContext.stepCategories.length)}',
             onTap: () => onMapListingRoute!(published),
           ),
         );
@@ -2026,7 +2070,7 @@ class _CreatorNextStepsPanel extends StatelessWidget {
         steps.add(
           _CreatorNextStepData(
             icon: Icons.map_outlined,
-            title: 'Map published listing',
+            title: context.l10n.profileMapPublishedListing,
             subtitle: '${published.categoryLabel} · ${published.city}',
             onTap: () => onMapListing!(published),
           ),
@@ -2038,8 +2082,8 @@ class _CreatorNextStepsPanel extends StatelessWidget {
       steps.add(
         _CreatorNextStepData(
           icon: Icons.auto_awesome,
-          title: 'Build next route',
-          subtitle: 'Open Quick Plan for the next generated idea',
+          title: context.l10n.profileBuildNextRoute,
+          subtitle: context.l10n.profileOpenQuickPlanNext,
           onTap: onScenario,
         ),
       );
@@ -2133,7 +2177,7 @@ class _CreatorPublishedRouteSummary extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Published route',
+                context.l10n.profilePublishedRoute,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: colorScheme.tertiary,
                   fontWeight: FontWeight.w900,
@@ -2160,9 +2204,12 @@ class _CreatorPublishedRouteSummary extends StatelessWidget {
           runSpacing: 8,
           children: <Widget>[
             _WorkspacePill(label: routeContext.mood),
-            _WorkspacePill(label: '${routeContext.durationMinutes} min'),
-            if (routeContext.isFree) const _WorkspacePill(label: 'Free'),
-            const _WorkspacePill(label: 'Walking'),
+            _WorkspacePill(
+              label: context.l10n.discoverMinutes(routeContext.durationMinutes),
+            ),
+            if (routeContext.isFree)
+              _WorkspacePill(label: context.l10n.profileFree),
+            _WorkspacePill(label: context.l10n.profileWalking),
           ],
         ),
         const SizedBox(height: 10),
@@ -2183,9 +2230,9 @@ class _CreatorPublishedRouteSummary extends StatelessWidget {
               child: FilledButton.icon(
                 onPressed: onEditRoute,
                 icon: const Icon(Icons.edit_location_alt),
-                label: const FittedBox(
+                label: FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text('Edit route'),
+                  child: Text(context.l10n.profileEditRoute),
                 ),
               ),
             ),
@@ -2194,9 +2241,9 @@ class _CreatorPublishedRouteSummary extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: onMapRoute,
                 icon: const Icon(Icons.map_outlined),
-                label: const FittedBox(
+                label: FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text('Route map'),
+                  child: Text(context.l10n.profileRouteMap),
                 ),
               ),
             ),
@@ -2392,6 +2439,7 @@ class _CreatorListingData {
 }
 
 _ProfileWorkspaceData _profileWorkspaceDataFor(
+  AppLocalizations l10n,
   List<FavoriteItemEntity> items,
   List<SavedSearchEntity> savedSearches,
   List<SmartSearchHistoryEntity> smartSearchHistory,
@@ -2431,9 +2479,12 @@ _ProfileWorkspaceData _profileWorkspaceDataFor(
   final _CreatorListingData? publishedListing = publishedDraft == null
       ? null
       : _creatorListingDataFor(
+          l10n,
           publishedDraft,
-          stageLabel: 'Published',
-          statusLabel: publishedDraft.publishStatus.name,
+          stageLabel: l10n.profileStagePublished,
+          statusLabel: l10n.createOption(
+            'PublishStatus_${publishedDraft.publishStatus.name}',
+          ),
           isPublished: true,
         );
   final bool currentMatchesPublished =
@@ -2442,9 +2493,13 @@ _ProfileWorkspaceData _profileWorkspaceDataFor(
   final _CreatorListingData? draftListing = currentMatchesPublished
       ? null
       : _creatorListingDataFor(
+          l10n,
           currentDraft,
-          stageLabel: 'Draft',
-          statusLabel: currentDraft.draftStatus.name,
+          stageLabel: l10n.profileStageDraft,
+          // DraftStatus shares the PublishStatus values.
+          statusLabel: l10n.createOption(
+            'PublishStatus_${currentDraft.draftStatus.name}',
+          ),
           isPublished: false,
         );
 
@@ -2466,6 +2521,7 @@ _ProfileWorkspaceData _profileWorkspaceDataFor(
 }
 
 _CreatorListingData? _creatorListingDataFor(
+  AppLocalizations l10n,
   CreateDraftEntity draft, {
   required String stageLabel,
   required String statusLabel,
@@ -2484,9 +2540,11 @@ _CreatorListingData? _creatorListingDataFor(
     draft: draft,
     stageLabel: stageLabel,
     isPublished: isPublished,
-    title: draft.title.trim().isEmpty ? 'Untitled listing' : draft.title,
+    title: draft.title.trim().isEmpty
+        ? l10n.profileUntitledListing
+        : draft.title,
     subtitle: draft.shortDescription.trim().isEmpty
-        ? _listingVenueLabel(draft)
+        ? _listingVenueLabel(l10n, draft)
         : draft.shortDescription,
     statusLabel: statusLabel,
     categoryLabel: category?.title ?? draft.mainCategory,
@@ -2495,15 +2553,21 @@ _CreatorListingData? _creatorListingDataFor(
         : createTaxonomyLabelForPath(
             '${draft.mainCategory}.${draft.subcategory}',
           ),
-    city: draft.city.trim().isEmpty ? 'No city' : draft.city,
+    city: draft.city.trim().isEmpty ? l10n.profileNoCity : draft.city,
     priceLabel: draft.isFree
-        ? 'Free'
-        : '${draft.basePrice?.toStringAsFixed(0) ?? '0'} ${draft.currency}',
+        ? l10n.discoverFree
+        : RechargeFormats.money(
+            draft.basePrice ??
+                Money(minorUnits: 0, currencyCode: draft.currency),
+            l10n.localeName,
+          ),
     readinessLabel: missingFields.isEmpty
-        ? (isPublished ? 'Published-ready' : 'Ready to publish')
-        : '${missingFields.length} missing',
+        ? (isPublished
+              ? l10n.profilePublishedReady
+              : l10n.profileReadyToPublish)
+        : l10n.profileMissingCount(missingFields.length),
     missingFields: missingFields,
-    routeContext: _PublishedRouteListingContext.fromDraft(draft),
+    routeContext: _PublishedRouteListingContext.fromDraft(l10n, draft),
   );
 }
 
@@ -2529,7 +2593,7 @@ List<String> _missingPublishFields(CreateDraftEntity draft) {
     if (draft.media.coverImage.trim().isEmpty) 'cover',
     if (createBlockConfigFor(draft.objectType).requiresStartDateTime &&
         draft.startDateTimeUtc == null)
-      'start time',
+      'start time', // l10n-ignore: stable missing-field id
   ];
 }
 
@@ -2542,7 +2606,10 @@ class _PublishedRouteListingContext {
     required this.stepCategories,
   });
 
-  static _PublishedRouteListingContext? fromDraft(CreateDraftEntity draft) {
+  static _PublishedRouteListingContext? fromDraft(
+    AppLocalizations l10n,
+    CreateDraftEntity draft,
+  ) {
     if (draft.mainCategory != 'travel_tours' ||
         draft.subcategory != 'walking_tour') {
       return null;
@@ -2550,7 +2617,9 @@ class _PublishedRouteListingContext {
     final List<String> steps = _routeStepsFromPublishedDraft(draft);
     if (steps.isEmpty) return null;
     return _PublishedRouteListingContext(
-      prompt: draft.title.trim().isEmpty ? 'Published route' : draft.title,
+      prompt: draft.title.trim().isEmpty
+          ? l10n.profilePublishedRoute
+          : draft.title,
       mood: _scenarioMoodForDraft(draft),
       durationMinutes: _scenarioDurationForDraft(draft),
       isFree: draft.isFree,
@@ -2615,11 +2684,15 @@ String _mapRouteForSavedScenario(FavoriteItemEntity scenario) {
 }
 
 List<String> _routeStepsFromPublishedDraft(CreateDraftEntity draft) {
-  final String marker = 'Route steps: ';
+  final String marker =
+      'Route steps: '; // l10n-ignore: seed marker parsed back from the description
   final int markerIndex = draft.fullDescription.indexOf(marker);
   if (markerIndex >= 0) {
     final int start = markerIndex + marker.length;
-    final int end = draft.fullDescription.indexOf('. Review', start);
+    final int end = draft.fullDescription.indexOf(
+      '. Review', // l10n-ignore: seed marker
+      start,
+    );
     final String rawSteps = end > start
         ? draft.fullDescription.substring(start, end)
         : draft.fullDescription.substring(start);
@@ -2725,7 +2798,10 @@ String _createRouteForSavedSearch(SavedSearchEntity search) {
   return Uri(path: RouteNames.create, queryParameters: params).toString();
 }
 
-String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
+String _createRouteForSmartSearch(
+  AppLocalizations l10n,
+  SmartSearchHistoryEntity item,
+) {
   final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
     item,
   );
@@ -2737,10 +2813,11 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
         ..._smartRouteParameters(parseResult, includeMode: false),
         'source': 'smart_route_seed',
         'type': 'route',
-        'title': '${_capitalized(routeIntent.mood)} recharge route',
+        'title':
+            '${_capitalized(routeIntent.mood)} recharge route', // l10n-ignore: Create seed prefill data
         'subtitle':
-            '${routeIntent.stepCategories.length} stops · '
-            '${routeIntent.durationMinutes} min · smart route',
+            '${routeIntent.stepCategories.length} stops · ' // l10n-ignore: Create seed prefill data
+            '${routeIntent.durationMinutes} min · smart route', // l10n-ignore: Create seed prefill data
         'q': parseResult.originalText.trim(),
         'category': 'route',
       },
@@ -2750,7 +2827,7 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
     ..._queryParametersForSavedSearch(item.query),
     'source': 'smart_search',
     'type': 'event',
-    'title': _titleForSmartSearch(item.query),
+    'title': _titleForSmartSearch(l10n, item.query),
     'subtitle': item.prompt,
   };
   return Uri(path: RouteNames.create, queryParameters: params).toString();
@@ -2852,7 +2929,7 @@ String _scenarioBuilderRouteForQuery(
   ).toString();
 }
 
-String _titleForSmartSearch(DiscoverQuery query) {
+String _titleForSmartSearch(AppLocalizations l10n, DiscoverQuery query) {
   final String queryText = query.queryText.trim();
   if (queryText.isNotEmpty) {
     return queryText[0].toUpperCase() + queryText.substring(1);
@@ -2860,7 +2937,7 @@ String _titleForSmartSearch(DiscoverQuery query) {
   if (query.selectedCategoryIds.isNotEmpty) {
     return '${query.selectedCategoryIds.first} idea';
   }
-  return 'Smart search idea';
+  return l10n.profileSmartSearchIdea;
 }
 
 String _capitalized(String value) {
@@ -2894,31 +2971,28 @@ String _promptForSavedSearch(DiscoverQuery query) {
     if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
     if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.budgetMax != null)
+      'under ${query.budgetMax!.toStringAsFixed(0)}', // l10n-ignore: search prompt text built from the saved query, not UI copy
     query.unlimitedRadius
-        ? 'any area'
-        : 'near ${(query.radiusMeters / 1000).round()} km',
+        ? 'any area' // l10n-ignore: search prompt text built from the saved query, not UI copy
+        : 'near ${(query.radiusMeters / 1000).round()} km', // l10n-ignore: search prompt text built from the saved query, not UI copy
   ];
   return parts.join(' · ');
 }
 
-String _listingVenueLabel(CreateDraftEntity draft) {
+String _listingVenueLabel(AppLocalizations l10n, CreateDraftEntity draft) {
   if (draft.venueName.isNotEmpty && draft.city.isNotEmpty) {
     return '${draft.venueName} · ${draft.city}';
   }
   if (draft.venueName.isNotEmpty) return draft.venueName;
-  return draft.city.isEmpty ? 'Draft listing' : draft.city;
+  return draft.city.isEmpty ? l10n.profileDraftListing : draft.city;
 }
 
-String _createdEventMeta(CreateDraftEntity draft) {
-  final DateTime? startsAt = draft.startDateTimeUtc?.toLocal();
-  final String dateLabel;
-  if (startsAt == null) {
-    dateLabel = 'Date to be set';
-  } else {
-    final String hour = startsAt.hour.toString().padLeft(2, '0');
-    final String minute = startsAt.minute.toString().padLeft(2, '0');
-    dateLabel = 'May ${startsAt.day} · $hour:$minute';
-  }
-  return '$dateLabel · ${draft.city.isEmpty ? 'Riga' : draft.city}';
+String _createdEventMeta(AppLocalizations l10n, CreateDraftEntity draft) {
+  // L4.6: the start in the object's own zone (an unknown zone shows UTC).
+  final DateTime? startsAtUtc = draft.startDateTimeUtc;
+  final String dateLabel = startsAtUtc == null
+      ? l10n.profileDateTbd
+      : RechargeFormats.dateTime(startsAtUtc, draft.timezone, l10n.localeName);
+  return '$dateLabel · ${draft.city.isEmpty ? 'Riga' : draft.city}'; // l10n-ignore: market city name
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/application/planning_navigation_intent.dart';
 import '../../../../app/application/planning_navigation_resolver.dart';
 import '../../../../app/application/scenario_library_facade.dart';
+import '../../../../core/localization/l10n_context.dart';
 
 class ScenarioLibraryPanel extends StatefulWidget {
   const ScenarioLibraryPanel({super.key, required this.userId});
@@ -58,17 +59,17 @@ class _ScenarioLibraryPanelState extends State<ScenarioLibraryPanel> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   Text(
-                    'Scenarios',
+                    context.l10n.profileScenarioLibrary,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
                   if (active.isNotEmpty) ...<Widget>[
-                    const Text('Active and upcoming'),
+                    Text(context.l10n.profileActiveUpcoming),
                     ...active.map((draft) => _tile(context, draft)),
                   ],
                   if (completed.isNotEmpty) ...<Widget>[
                     const Divider(),
-                    const Text('Completed'),
+                    Text(context.l10n.profileCompleted),
                     ...completed.map((draft) => _tile(context, draft)),
                   ],
                 ],
@@ -89,11 +90,17 @@ class _ScenarioLibraryPanelState extends State<ScenarioLibraryPanel> {
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(draft.title.trim().isEmpty ? 'Untitled' : draft.title),
+            child: Text(
+              draft.title.trim().isEmpty
+                  ? context.l10n.scenarioIntakeUntitled
+                  : draft.title,
+            ),
           ),
         ),
         subtitle: Text(
-          draft.updatesEnabled ? 'Object updates on' : 'Object updates off',
+          draft.updatesEnabled
+              ? context.l10n.profileObjectUpdatesOn
+              : context.l10n.profileObjectUpdatesOff,
         ),
       );
 }

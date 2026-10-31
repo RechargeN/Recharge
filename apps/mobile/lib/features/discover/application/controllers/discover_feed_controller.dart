@@ -868,7 +868,7 @@ String _savedSearchSubtitleFor(DiscoverQuery query) {
         : '${(query.radiusMeters / 1000).round()} km', // l10n-ignore: persisted saved-search field; the UI builds text from the query
   ];
   return parts.isEmpty
-      ? 'Nearby activities'
+      ? 'Nearby activities' // l10n-ignore: persisted saved-search field; the UI builds text from the query
       : parts.join(
           ' · ',
         ); // l10n-ignore: persisted saved-search field; the UI builds text from the query

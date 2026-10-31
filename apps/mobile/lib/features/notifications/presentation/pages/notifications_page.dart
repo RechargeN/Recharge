@@ -75,7 +75,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         elevation: 0,
         centerTitle: true,
         title: const Text(
-          'RECHARGE',
+          'RECHARGE', // l10n-ignore: brand wordmark
           style: TextStyle(fontWeight: FontWeight.w900),
         ),
         actions: <Widget>[
@@ -652,23 +652,28 @@ class _NotificationRoutePreview {
   String get promptLabel {
     final String? promptValue = prompt;
     if (promptValue != null && promptValue.isNotEmpty) return promptValue;
-    final String moodValue = moodLabel ?? 'Custom';
+    final String moodValue =
+        moodLabel ?? 'Custom'; // l10n-ignore: Create seed prefill data
     final int stopCount = stepCategories.length;
     return stopCount == 0
-        ? '$moodValue recharge route'
-        : '$moodValue route with $stopCount stops';
+        ? '$moodValue recharge route' // l10n-ignore: Create seed prefill data
+        : '$moodValue route with $stopCount stops'; // l10n-ignore: Create seed prefill data
   }
 
-  String get titleLabel => '${moodLabel ?? 'Custom'} recharge route';
+  String get titleLabel =>
+      '${moodLabel ?? 'Custom'} recharge route'; // l10n-ignore: Create seed prefill data
 
   String get subtitleLabel {
     final List<String> parts = <String>[
-      if (stepLabels.isNotEmpty) '${stepLabels.length} stops',
+      if (stepLabels.isNotEmpty)
+        '${stepLabels.length} stops', // l10n-ignore: Create seed prefill data
       if (durationLabel != null) durationLabel!,
-      if (freeOnly) 'Free',
-      if (walkingOnly) 'Walking',
+      if (freeOnly) 'Free', // l10n-ignore: Create seed prefill data
+      if (walkingOnly) 'Walking', // l10n-ignore: Create seed prefill data
     ];
-    return parts.isEmpty ? 'Scenario route' : parts.join(' · ');
+    return parts.isEmpty
+        ? 'Scenario route' // l10n-ignore: Create seed prefill data
+        : parts.join(' · ');
   }
 
   Map<String, String> _routeParameters({required bool includeMode}) {
@@ -974,12 +979,30 @@ class _StateMessage extends StatelessWidget {
 
 /// L4: a server item whose text could not be rendered in the reader's
 /// language says so; no other language is substituted.
-String _itemTitle(AppLocalizations l10n, NotificationItemEntity item) =>
-    item.contentAvailability == NotificationContentAvailability.rendered
-    ? item.title
-    : l10n.notificationFallbackTitle;
+String _itemTitle(AppLocalizations l10n, NotificationItemEntity item) {
+  if (item.templateCode case final String code) {
+    return l10n.identityInboxTitle(code);
+  }
+  return item.contentAvailability == NotificationContentAvailability.rendered
+      ? item.title
+      : l10n.notificationFallbackTitle;
+}
 
-String _itemBody(AppLocalizations l10n, NotificationItemEntity item) =>
+String _itemBody(AppLocalizations l10n, NotificationItemEntity item) {
+  if (item.templateCode case final String code) {
+    // The page name (user content) is shown as is before the template text.
+    final String text = code == 'identity_page_limit_request_moderators'
+        ? l10n.identityInboxLimitBody(item.templateCount ?? 0)
+        : l10n.identityInboxBody(code);
+    return <String>[
+      if (item.body.trim().isNotEmpty) item.body.trim(),
+      if (text.isNotEmpty) text,
+    ].join(' · ');
+  }
+  return _renderedBody(l10n, item);
+}
+
+String _renderedBody(AppLocalizations l10n, NotificationItemEntity item) =>
     switch (item.contentAvailability) {
       NotificationContentAvailability.rendered => item.body,
       NotificationContentAvailability.unsupportedLocale =>

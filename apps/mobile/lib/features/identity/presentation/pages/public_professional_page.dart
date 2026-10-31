@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/identity_workspace_providers.dart';
 import '../../application/state/public_professional_page_state.dart';
 import '../../domain/entities/public_professional_page.dart';
@@ -82,7 +83,7 @@ class _PublicProfessionalPageState
         .watch(publicProfessionalPageControllerProvider)
         .state;
     return Scaffold(
-      appBar: AppBar(title: const Text('Professional Page')),
+      appBar: AppBar(title: Text(context.l10n.identityProfessionalPage)),
       body: switch (state.status) {
         PublicProfessionalPageStatus.initial ||
         PublicProfessionalPageStatus.loading => const Center(
@@ -96,7 +97,9 @@ class _PublicProfessionalPageState
         PublicProfessionalPageStatus.forbidden =>
           const _PublicPageUnavailable(),
         PublicProfessionalPageStatus.error => _PublicPageError(
-          message: state.message ?? 'Unable to load this page.',
+          message: context.l10n.identityPublicPageNotice(
+            state.message ?? 'page_load_failed',
+          ),
           onRetry: () {
             _loadKey = null;
             _scheduleLoad();
@@ -126,16 +129,14 @@ class PublicProfessionalPageView extends StatelessWidget {
       children: <Widget>[
         if (viewerContext.isPreview) ...<Widget>[
           Semantics(
-            label: 'Preview. This page is not publicly visible.',
+            label: context.l10n.identityPreviewNotPublic,
             child: Card(
               color: colors.secondaryContainer,
-              child: const ListTile(
+              child: ListTile(
                 key: ValueKey<String>('public-page-preview-banner'),
                 leading: Icon(Icons.visibility_outlined),
-                title: Text('Public page preview'),
-                subtitle: Text(
-                  'This preview does not publish or verify the page.',
-                ),
+                title: Text(context.l10n.identityPublicPagePreview),
+                subtitle: Text(context.l10n.identityPreviewDoesNotPublish),
               ),
             ),
           ),
@@ -171,16 +172,16 @@ class PublicProfessionalPageView extends StatelessWidget {
                           ),
                           const SizedBox(height: 5),
                           if (projection.verificationBadge)
-                            const Wrap(
+                            Wrap(
                               crossAxisAlignment: WrapCrossAlignment.center,
                               spacing: 5,
                               children: <Widget>[
                                 Icon(Icons.verified, size: 18),
-                                Text('Verified Professional Page'),
+                                Text(context.l10n.identityVerifiedPage),
                               ],
                             )
                           else
-                            const Text('Verification pending'),
+                            Text(context.l10n.identityVerificationPending),
                           const SizedBox(height: 4),
                           Text(projection.countryCode),
                         ],
@@ -209,7 +210,7 @@ class PublicProfessionalPageView extends StatelessWidget {
                         ),
                       ),
                       icon: const Icon(Icons.share_outlined),
-                      label: const Text('Share'),
+                      label: Text(context.l10n.identityShare),
                     ),
                     if (viewerContext.canOpenPageWorkspace)
                       FilledButton.tonalIcon(
@@ -217,7 +218,7 @@ class PublicProfessionalPageView extends StatelessWidget {
                         onPressed: () =>
                             context.push(RouteNames.professionalPage),
                         icon: const Icon(Icons.dashboard_outlined),
-                        label: const Text('Manage page'),
+                        label: Text(context.l10n.identityManagePage),
                       ),
                     if (viewerContext.canEditPage)
                       OutlinedButton.icon(
@@ -225,7 +226,7 @@ class PublicProfessionalPageView extends StatelessWidget {
                         onPressed: () =>
                             context.push(RouteNames.professionalPageAccount),
                         icon: const Icon(Icons.edit_outlined),
-                        label: const Text('Edit page'),
+                        label: Text(context.l10n.identityEditPage),
                       ),
                   ],
                 ),
@@ -235,22 +236,19 @@ class PublicProfessionalPageView extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          'Published content',
+          context.l10n.identityPublishedContent,
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 8),
         if (projection.contentSummary.publishedCount == 0)
-          const Card(
+          Card(
             child: ListTile(
               key: ValueKey<String>('public-page-empty-content'),
               leading: Icon(Icons.inventory_2_outlined),
-              title: Text('No published content yet'),
-              subtitle: Text(
-                'Content appears here only through an approved publisher '
-                'projection.',
-              ),
+              title: Text(context.l10n.identityNoPublishedContent),
+              subtitle: Text(context.l10n.identityContentViaProjection),
             ),
           )
         else
@@ -258,7 +256,9 @@ class PublicProfessionalPageView extends StatelessWidget {
             child: ListTile(
               leading: const Icon(Icons.grid_view_outlined),
               title: Text(
-                '${projection.contentSummary.publishedCount} published items',
+                context.l10n.identityPublishedItems(
+                  projection.contentSummary.publishedCount,
+                ),
               ),
             ),
           ),
@@ -272,7 +272,7 @@ class _PublicPageUnavailable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Padding(
         padding: EdgeInsets.all(24),
         child: Column(
@@ -281,7 +281,7 @@ class _PublicPageUnavailable extends StatelessWidget {
             Icon(Icons.search_off_outlined, size: 48),
             SizedBox(height: 12),
             Text(
-              'Page not found',
+              context.l10n.identityPageNotFound,
               key: ValueKey<String>('public-page-not-found'),
               textAlign: TextAlign.center,
             ),
@@ -308,7 +308,10 @@ class _PublicPageError extends StatelessWidget {
           children: <Widget>[
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 12),
-            FilledButton.tonal(onPressed: onRetry, child: const Text('Retry')),
+            FilledButton.tonal(
+              onPressed: onRetry,
+              child: Text(context.l10n.identityRetry),
+            ),
           ],
         ),
       ),

@@ -35,7 +35,7 @@ class CollectionDraftMapper {
     final int version = _int(json['schema_version']) ?? 1;
     if (version > CollectionDraftData.currentSchemaVersion) {
       throw const FormatException(
-        'Unsupported Collection draft schema version',
+        'Unsupported Collection draft schema version', // l10n-ignore: developer error; the UI receives a code
       );
     }
     final Map<String, Object?> unknownFields = <String, Object?>{

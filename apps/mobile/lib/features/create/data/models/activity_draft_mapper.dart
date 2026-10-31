@@ -26,7 +26,7 @@ class ActivityDraftMapper {
     final int version = _int(json['schema_version']) ?? 1;
     if (version > ActivityDraftData.currentSchemaVersion) {
       throw const FormatException(
-        'Unsupported Recharge Activity draft schema version',
+        'Unsupported Recharge Activity draft schema version', // l10n-ignore: developer error; the UI receives a code
       );
     }
     final Map<String, Object?> unknownFields = <String, Object?>{

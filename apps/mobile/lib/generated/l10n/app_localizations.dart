@@ -13025,6 +13025,3220 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'CLASS / WORKSHOP'**
   String get discoverBadgeClassWorkshop;
+
+  /// L4.6: public Professional Page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional Page'**
+  String get identityProfessionalPage;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification revoked'**
+  String get identityVerificationRevoked;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification rejected'**
+  String get identityVerificationRejected;
+
+  /// L4.6: public Professional Page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification pending'**
+  String get identityVerificationPending;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Private professional'**
+  String get identityKindPrivateProfessional;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Venue operator'**
+  String get identityKindVenueOperator;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Representative office'**
+  String get identityKindRepresentativeOffice;
+
+  /// L4.6: public Professional Page — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get identityRetry;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get identityCreate;
+
+  /// L4.6: Profile, workspace switcher — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least 2 characters'**
+  String get identityMinTwoChars;
+
+  /// L4.6: Professional Page profile editor — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get identityCancel;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'The page starts in Pending review. Market, locale, timezone and currency come from the active market configuration.'**
+  String get identityPageStartsPending;
+
+  /// L4.6: Profile, workspace switcher — field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Page type'**
+  String get identityPageType;
+
+  /// L4.6: Profile, workspace switcher — field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Page name'**
+  String get identityPageName;
+
+  /// L4.6: Profile, workspace switcher — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Professional Page'**
+  String get identityCreatePage;
+
+  /// L4.6: Profile, workspace switcher — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Presentation preview only. Roles and permissions do not change.'**
+  String get identityPreviewOnlyRoles;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'View as'**
+  String get identityViewAs;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not created a Professional Page yet.'**
+  String get identityNoPageYet;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Create content'**
+  String get identityCreateContent;
+
+  /// L4.6: public Professional Page — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage page'**
+  String get identityManagePage;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal profile · Verification revoked'**
+  String get identityPersonalRevoked;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal profile · Verification expired'**
+  String get identityPersonalExpired;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal profile · Verification rejected'**
+  String get identityPersonalRejected;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified · Tools follow your permissions'**
+  String get identityVerifiedTools;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal profile · Verification pending'**
+  String get identityPersonalPending;
+
+  /// L4.6: Profile, workspace switcher — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal profile · Verification not started'**
+  String get identityPersonalNotStarted;
+
+  /// L4.6: Profile, workspace switcher — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin access active · separate from publishing'**
+  String get identityAdminSeparate;
+
+  /// L4.6: Profile, workspace switcher — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin tools'**
+  String get identityAdminTools;
+
+  /// L4.6: Profile, workspace switcher — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Request additional page'**
+  String get identityRequestAdditionalPage;
+
+  /// L4.6: Profile, workspace switcher — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderators will review your request.'**
+  String get identityModeratorsWillReview;
+
+  /// L4.6: Profile, workspace switcher — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional page request pending'**
+  String get identityLimitRequestPending;
+
+  /// L4.6: Profile, workspace switcher — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Creator'**
+  String get identityCreator;
+
+  /// L4.6: Profile, workspace switcher — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get identityOk;
+
+  /// L4.6: Profile, workspace switcher — dialog text.
+  ///
+  /// In en, this message translates to:
+  /// **'This mock account has explicit Admin capabilities. Operational Admin tools are connected in IDP-05A.'**
+  String get identityAdminMockNotice;
+
+  /// L4.6: Profile, workspace switcher — dialog text.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin access active'**
+  String get identityAdminAccessActive;
+
+  /// L4.6: public Professional Page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Page not found'**
+  String get identityPageNotFound;
+
+  /// L4.6: public Professional Page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Content appears here only through an approved publisher projection.'**
+  String get identityContentViaProjection;
+
+  /// L4.6: public Professional Page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'No published content yet'**
+  String get identityNoPublishedContent;
+
+  /// L4.6: public Professional Page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Published content'**
+  String get identityPublishedContent;
+
+  /// L4.6: public Professional Page — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit page'**
+  String get identityEditPage;
+
+  /// L4.6: public Professional Page — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get identityShare;
+
+  /// L4.6: public Professional Page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified Professional Page'**
+  String get identityVerifiedPage;
+
+  /// L4.6: public Professional Page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'This preview does not publish or verify the page.'**
+  String get identityPreviewDoesNotPublish;
+
+  /// L4.6: public Professional Page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Public page preview'**
+  String get identityPublicPagePreview;
+
+  /// L4.6: public Professional Page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview. This page is not publicly visible.'**
+  String get identityPreviewNotPublic;
+
+  /// L4.6: Professional Page workspace — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Page account, memberships and international settings.'**
+  String get identityPageAccountSettings;
+
+  /// L4.6: Professional Page workspace — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Content is scoped to this exact Professional Page.'**
+  String get identityContentScoped;
+
+  /// L4.6: Professional Page workspace — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional Page overview and moderation status.'**
+  String get identityOverviewModeration;
+
+  /// L4.6: Professional Page workspace — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview only. The page is not public until verification is approved.'**
+  String get identityPreviewUntilVerified;
+
+  /// L4.6: Professional Page workspace — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview public page'**
+  String get identityPreviewPublicPage;
+
+  /// L4.6: Professional Page workspace — text.
+  ///
+  /// In en, this message translates to:
+  /// **'No page is invented for this preview. Create a page to activate its workspace and publisher context.'**
+  String get identityNoPageInvented;
+
+  /// L4.6: Professional Page workspace — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Content appears only after the user creates or joins a real Professional Page.'**
+  String get identityContentAfterRealPage;
+
+  /// L4.6: Professional Page workspace — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional Page preview'**
+  String get identityPagePreview;
+
+  /// L4.6: Professional Page workspace — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch Professional Page'**
+  String get identitySwitchPage;
+
+  /// L4.6: Professional Page workspace — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Create or select Professional Page'**
+  String get identityCreateOrSelectPage;
+
+  /// L4.6: Professional Page team invitations — text.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get identityUserId;
+
+  /// L4.6: Professional Page team invitations — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitation'**
+  String get identitySendInvitation;
+
+  /// L4.6: Professional Page team invitations — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Capabilities'**
+  String get identityCapabilities;
+
+  /// L4.6: Professional Page team invitations — field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get identityRole;
+
+  /// L4.6: Professional Page team invitations — field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite by'**
+  String get identityInviteBy;
+
+  /// L4.6: Professional Page team invitations — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite a team member'**
+  String get identityInviteMember;
+
+  /// L4.6: Professional Page team invitations — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get identityRevoke;
+
+  /// L4.6: Professional Page team invitations — text.
+  ///
+  /// In en, this message translates to:
+  /// **'No invitations sent from this page yet.'**
+  String get identityNoInvitations;
+
+  /// L4.6: Professional Page team invitations — text.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have permission to manage the team.'**
+  String get identityNoTeamPermission;
+
+  /// L4.6: Professional Page profile editor — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get identitySave;
+
+  /// L4.6: Professional Page profile editor — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set.'**
+  String get identityNotSet;
+
+  /// L4.6: Professional Page profile editor — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom activity label'**
+  String get identityCustomActivityLabel;
+
+  /// L4.6: Professional Page profile editor — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get identityDescription;
+
+  /// L4.6: Professional Page profile editor — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Short description'**
+  String get identityShortDescription;
+
+  /// L4.6: Profile, workspace switcher — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal profile, Professional Pages and Admin access'**
+  String get identitySwitchWorkspaceHint;
+
+  /// L4.6: Profile, workspace switcher — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch workspace'**
+  String get identitySwitchWorkspace;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Date to be set'**
+  String get profileDateTbd;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft listing'**
+  String get profileDraftListing;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart search idea'**
+  String get profileSmartSearchIdea;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Published route'**
+  String get profilePublishedRoute;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to publish'**
+  String get profileReadyToPublish;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'No city'**
+  String get profileNoCity;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled listing'**
+  String get profileUntitledListing;
+
+  /// L4.6: Profile page — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Route map'**
+  String get profileRouteMap;
+
+  /// L4.6: Profile page — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit route'**
+  String get profileEditRoute;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Walking'**
+  String get profileWalking;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get profileFree;
+
+  /// L4.6: Profile page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Quick Plan for the next generated idea'**
+  String get profileOpenQuickPlanNext;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Build next route'**
+  String get profileBuildNextRoute;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Map published listing'**
+  String get profileMapPublishedListing;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open route map'**
+  String get profileOpenRouteMap;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Find draft audience'**
+  String get profileFindDraftAudience;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish draft'**
+  String get profileFinishDraft;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Creator next steps'**
+  String get profileCreatorNextSteps;
+
+  /// L4.6: Profile page — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Map listing area'**
+  String get profileMapListingArea;
+
+  /// L4.6: Profile page — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Search similar listing'**
+  String get profileSearchSimilarListing;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue draft'**
+  String get profileContinueDraft;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Create'**
+  String get profileOpenCreate;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Creator listing'**
+  String get profileCreatorListing;
+
+  /// L4.6: Profile page — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Build route'**
+  String get profileBuildRoute;
+
+  /// L4.6: Profile page — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'New listing'**
+  String get profileNewListing;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage drafts and published listings from the same workspace.'**
+  String get profileManageDrafts;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Creator publications'**
+  String get profileCreatorPublications;
+
+  /// L4.6: Profile page — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Create listing from latest smart search'**
+  String get profileListingFromLatestSmart;
+
+  /// L4.6: Profile page — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Build route from latest smart search'**
+  String get profileRouteFromLatestSmart;
+
+  /// L4.6: Profile page — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Map smart'**
+  String get profileMapSmart;
+
+  /// L4.6: Profile page — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume smart'**
+  String get profileResumeSmart;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Any area'**
+  String get profileAnyArea;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart route'**
+  String get profileSmartRoute;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart'**
+  String get profileSmart;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest smart search'**
+  String get profileLatestSmartSearch;
+
+  /// L4.6: Profile page — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Create listing from latest search'**
+  String get profileListingFromLatestSearch;
+
+  /// L4.6: Profile page — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Build route from latest search'**
+  String get profileRouteFromLatestSearch;
+
+  /// L4.6: Profile page — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Map search'**
+  String get profileMapSearch;
+
+  /// L4.6: Profile page — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume search'**
+  String get profileResumeSearch;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Conditions'**
+  String get profileConditions;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest search'**
+  String get profileLatestSearch;
+
+  /// L4.6: Profile page — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Map route'**
+  String get profileMapRoute;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Scenario'**
+  String get profileScenario;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest route'**
+  String get profileLatestRoute;
+
+  /// L4.6: Profile page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a personal recharge scenario'**
+  String get profilePersonalScenario;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Build a route'**
+  String get profileBuildARoute;
+
+  /// L4.6: Profile page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Search and Map conditions'**
+  String get profileUseSearchMap;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Find next activity'**
+  String get profileFindNextActivity;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved plan'**
+  String get profileSavedPlan;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Review saved plan'**
+  String get profileReviewSavedPlan;
+
+  /// L4.6: Profile page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Use saved searches and scenarios as inspiration'**
+  String get profileUseSavedInspiration;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Build route idea'**
+  String get profileBuildRouteIdea;
+
+  /// L4.6: Profile page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft event or place from taxonomy'**
+  String get profileDraftFromTaxonomy;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Hub'**
+  String get profileCreateHub;
+
+  /// L4.6: Profile page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Move from route idea to Create Hub'**
+  String get profileIdeaToHub;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish idea'**
+  String get profilePublishIdea;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart prompt'**
+  String get profileSmartPrompt;
+
+  /// L4.6: Profile page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Builder with route controls'**
+  String get profileOpenBuilderControls;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate scenario'**
+  String get profileGenerateScenario;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Searches'**
+  String get profileSearches;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Routes'**
+  String get profileRoutes;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get profileSaved;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled activity'**
+  String get profileUntitledActivity;
+
+  /// L4.6: Profile page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue in Search conditions'**
+  String get profileContinueInSearch;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Find people'**
+  String get profileFindPeople;
+
+  /// L4.6: Profile page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the Scenario block in Create Hub'**
+  String get profileOpenScenarioBlock;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Scenario'**
+  String get profileCreateScenario;
+
+  /// L4.6: Profile page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the Route block in Create Hub'**
+  String get profileOpenRouteBlock;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Create route'**
+  String get profileCreateRoute;
+
+  /// L4.6: Profile page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Open taxonomy-based creator flow'**
+  String get profileOpenTaxonomyFlow;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'View all events'**
+  String get profileViewAllEvents;
+
+  /// L4.6: Profile page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from Recharge Create Hub'**
+  String get profileStartFromHub;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'No created events yet'**
+  String get profileNoCreatedEvents;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Create first event'**
+  String get profileCreateFirstEvent;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Event insights'**
+  String get profileEventInsights;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Created events'**
+  String get profileCreatedEvents;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage page'**
+  String get profileManagePage;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get profilePhotos;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Visited'**
+  String get profileVisited;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get profileCreated;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile workspace'**
+  String get profileWorkspace;
+
+  /// L4.6: Profile page — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in required'**
+  String get profileSignInRequired;
+
+  /// L4.6: Profile page — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Check verification and available tools in Settings'**
+  String get profileCheckVerification;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Creator tools'**
+  String get profileCreatorTools;
+
+  /// L4.6: Profile page — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved list'**
+  String get profileSavedList;
+
+  /// L4.6: Profile page — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get profileSettings;
+
+  /// L4.6: Profile, Scenario library — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Object updates off'**
+  String get profileObjectUpdatesOff;
+
+  /// L4.6: Profile, Scenario library — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Object updates on'**
+  String get profileObjectUpdatesOn;
+
+  /// L4.6: Profile, Scenario library — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get profileCompleted;
+
+  /// L4.6: Profile, Scenario library — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Active and upcoming'**
+  String get profileActiveUpcoming;
+
+  /// L4.6: Scenario builder (Quick Plan) — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Any area'**
+  String get quickPlanAnyArea;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Any price'**
+  String get quickPlanAnyPrice;
+
+  /// L4.6: Scenario builder (Quick Plan) — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'All categories'**
+  String get quickPlanAllCategories;
+
+  /// L4.6: Scenario builder (Quick Plan) — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart route'**
+  String get quickPlanSmartRoute;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Recharge idea'**
+  String get quickPlanRechargeIdea;
+
+  /// L4.6: Scenario builder (Quick Plan) — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Move first, cool down outside, then keep energy steady.'**
+  String get quickPlanTplActiveHint;
+
+  /// L4.6: Scenario builder (Quick Plan) — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Active boost'**
+  String get quickPlanTplActive;
+
+  /// L4.6: Scenario builder (Quick Plan) — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Meet people first, then keep the evening moving nearby.'**
+  String get quickPlanTplSocialHint;
+
+  /// L4.6: Scenario builder (Quick Plan) — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Social evening'**
+  String get quickPlanTplSocial;
+
+  /// L4.6: Scenario builder (Quick Plan) — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Free city reset'**
+  String get quickPlanTplFreeCity;
+
+  /// L4.6: Scenario builder (Quick Plan) — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Start gently, then take a low-pressure city walk.'**
+  String get quickPlanTplCoffeeHint;
+
+  /// L4.6: Scenario builder (Quick Plan) — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Coffee reset'**
+  String get quickPlanTplCoffee;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset builder'**
+  String get quickPlanResetBuilder;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'No stops match these conditions'**
+  String get quickPlanNoStopsMatch;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get quickPlanAdd;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested stops'**
+  String get quickPlanSuggestedStops;
+
+  /// L4.6: Scenario builder (Quick Plan) — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove stop'**
+  String get quickPlanRemoveStop;
+
+  /// L4.6: Scenario builder (Quick Plan) — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get quickPlanMoveDown;
+
+  /// L4.6: Scenario builder (Quick Plan) — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get quickPlanMoveUp;
+
+  /// L4.6: Scenario builder (Quick Plan) — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish optimized route'**
+  String get quickPlanPublishOptimized;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Map route'**
+  String get quickPlanMapRoute;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Optimize'**
+  String get quickPlanOptimize;
+
+  /// L4.6: Scenario builder (Quick Plan) — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Free only'**
+  String get quickPlanFreeOnly;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Route fit'**
+  String get quickPlanRouteFit;
+
+  /// L4.6: Scenario builder (Quick Plan) — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Walking route'**
+  String get quickPlanWalkingRoute;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get quickPlanMoodActive;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Social'**
+  String get quickPlanMoodSocial;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Calm'**
+  String get quickPlanMoodCalm;
+
+  /// L4.6: Scenario builder (Quick Plan) — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Create listing from smart search'**
+  String get quickPlanListingFromSmart;
+
+  /// L4.6: Scenario builder (Quick Plan) — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Open smart search on map'**
+  String get quickPlanOpenSmartOnMap;
+
+  /// L4.6: Scenario builder (Quick Plan) — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply smart search to builder'**
+  String get quickPlanApplySmartToBuilder;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart search'**
+  String get quickPlanSmartSearch;
+
+  /// L4.6: Scenario builder (Quick Plan) — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Create listing from saved conditions'**
+  String get quickPlanListingFromSaved;
+
+  /// L4.6: Scenario builder (Quick Plan) — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Open saved conditions on map'**
+  String get quickPlanOpenSavedOnMap;
+
+  /// L4.6: Scenario builder (Quick Plan) — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply saved conditions to builder'**
+  String get quickPlanApplySavedToBuilder;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved conditions'**
+  String get quickPlanSavedConditions;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Build from saved intent'**
+  String get quickPlanBuildFromSaved;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready route ideas'**
+  String get quickPlanReadyIdeas;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish route'**
+  String get quickPlanPublishRoute;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get quickPlanSearch;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get quickPlanMap;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get quickPlanCopy;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get quickPlanSave;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Build a recharge route'**
+  String get quickPlanBuildRechargeRoute;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Route preview'**
+  String get quickPlanRoutePreview;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with snapshot'**
+  String get quickPlanContinueSnapshot;
+
+  /// L4.6: Scenario builder (Quick Plan) — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get quickPlanRefresh;
+
+  /// L4.6: Scenario builder (Quick Plan) — dialog text.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh the preview or continue with the latest available snapshot.'**
+  String get quickPlanRefreshOrContinue;
+
+  /// L4.6: Scenario builder (Quick Plan) — dialog text.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Plan changed'**
+  String get quickPlanChanged;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Create independent Scenario'**
+  String get quickPlanCreateIndependent;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get quickPlanCancel;
+
+  /// L4.6: Scenario builder (Quick Plan) — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Only your own notes are eligible; this legacy plan has none.'**
+  String get quickPlanNoNotes;
+
+  /// L4.6: Scenario builder (Quick Plan) — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy my private notes'**
+  String get quickPlanCopyNotes;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy stops have no catalog object IDs, so selected stops will enter Scenario as private custom locations.'**
+  String get quickPlanLegacyStopsHint;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'A new independent Scenario will be created. Later changes will not sync in either direction.'**
+  String get quickPlanIndependentHint;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand to Scenario'**
+  String get quickPlanExpandToScenario;
+
+  /// L4.6: Scenario builder (Quick Plan) — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy selected stops into a new independent Scenario. This Quick Plan stays unchanged.'**
+  String get quickPlanCopyStopsHint;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Need a larger city or trip plan?'**
+  String get quickPlanNeedLargerPlan;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Save this plan'**
+  String get quickPlanSavePlan;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Open map'**
+  String get quickPlanOpenMap;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit plan'**
+  String get quickPlanEditPlan;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'No stops fit these conditions yet. Edit the plan to add one.'**
+  String get quickPlanNoStopsFit;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Your route'**
+  String get quickPlanYourRoute;
+
+  /// L4.6: Scenario builder (Quick Plan) — snackbar message.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not expand this Quick Plan'**
+  String get quickPlanExpandFailed;
+
+  /// L4.6: Scenario builder (Quick Plan) — snackbar message.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Plan copied'**
+  String get quickPlanCopied;
+
+  /// L4.6: Scenario builder (Quick Plan) — snackbar message.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Plan saved'**
+  String get quickPlanSaved;
+
+  /// L4.6: Scenario builder (Quick Plan) — snackbar message.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced. Your local changes are retained; refresh to retry.'**
+  String get quickPlanNotSynced;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get quickPlanLeave;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Open read-only'**
+  String get quickPlanOpenReadOnly;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get quickPlanDecline;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get quickPlanAccept;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get quickPlanRevoke;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel invite'**
+  String get quickPlanCancelInvite;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete current personal plan'**
+  String get quickPlanDeletePersonal;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Import personal plan'**
+  String get quickPlanImportPersonal;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Import recharge.quickPlan JSON'**
+  String get quickPlanImportJson;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite to current saved plan'**
+  String get quickPlanInviteToSaved;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite existing user ID'**
+  String get quickPlanInviteUserId;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a known user ID. Pending actions take effect after server confirmation.'**
+  String get quickPlanUseKnownUserId;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Plan invitations'**
+  String get quickPlanInvitations;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get quickPlanContinue;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave plan'**
+  String get quickPlanLeavePlan;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Content hidden. Refresh to verify access.'**
+  String get quickPlanContentHidden;
+
+  /// L4.6: Scenario builder (Quick Plan) — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh access'**
+  String get quickPlanRefreshAccess;
+
+  /// L4.6: Scenario builder (Quick Plan) — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Close invited plan'**
+  String get quickPlanCloseInvited;
+
+  /// L4.6: Scenario builder (Quick Plan) — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited Quick Plan'**
+  String get quickPlanInvitedPlan;
+
+  /// L4.6: Scenario builder (Quick Plan) — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Route steps'**
+  String get quickPlanRouteSteps;
+
+  /// L4.6: Scenario builder (Quick Plan) — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your recharge plan'**
+  String get quickPlanYourPlan;
+
+  /// L4.6: Scenario builder (Quick Plan) — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get quickPlanReset;
+
+  /// L4.6: Scenario builder (Quick Plan) — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get quickPlanEdit;
+
+  /// L4.6: Scenario builder (Quick Plan) — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations and access'**
+  String get quickPlanInvitationsAccess;
+
+  /// L4.6: Scenario builder (Quick Plan) — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Plan'**
+  String get quickPlanQuickPlan;
+
+  /// L4.6: Scenario builder (Quick Plan) — title.
+  ///
+  /// In en, this message translates to:
+  /// **'My quick plan'**
+  String get quickPlanMyQuickPlan;
+
+  /// L4.6: Favorites — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get favoritesFree;
+
+  /// L4.6: Favorites — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Any area'**
+  String get favoritesAnyArea;
+
+  /// L4.6: Favorites — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart route'**
+  String get favoritesSmartRoute;
+
+  /// L4.6: Favorites — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Recharge idea'**
+  String get favoritesRechargeIdea;
+
+  /// L4.6: Favorites — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Any time'**
+  String get favoritesAnyTime;
+
+  /// L4.6: Favorites — text.
+  ///
+  /// In en, this message translates to:
+  /// **'ROUTE'**
+  String get favoritesBadgeRoute;
+
+  /// L4.6: Favorites — text.
+  ///
+  /// In en, this message translates to:
+  /// **'PLACE'**
+  String get favoritesBadgePlace;
+
+  /// L4.6: Favorites — text.
+  ///
+  /// In en, this message translates to:
+  /// **'EVENT'**
+  String get favoritesBadgeEvent;
+
+  /// L4.6: Favorites — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get favoritesShowAll;
+
+  /// L4.6: Favorites — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in this filter yet'**
+  String get favoritesFilterEmpty;
+
+  /// L4.6: Favorites — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get favoritesRemove;
+
+  /// L4.6: Favorites — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get favoritesMoreActions;
+
+  /// L4.6: Favorites — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get favoritesTitle;
+
+  /// L4.6: Favorites — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Routes'**
+  String get favoritesRoutes;
+
+  /// L4.6: Favorites — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Places'**
+  String get favoritesPlaces;
+
+  /// L4.6: Favorites — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Events'**
+  String get favoritesEvents;
+
+  /// L4.6: Favorites — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get favoritesAll;
+
+  /// L4.6: Favorites — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get favoritesMap;
+
+  /// L4.6: Favorites — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get favoritesResume;
+
+  /// L4.6: Favorites — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Create listing from smart search'**
+  String get favoritesListingFromSmart;
+
+  /// L4.6: Favorites — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete smart search'**
+  String get favoritesDeleteSmart;
+
+  /// L4.6: Favorites — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart search'**
+  String get favoritesSmartSearch;
+
+  /// L4.6: Favorites — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Create listing from saved conditions'**
+  String get favoritesListingFromSaved;
+
+  /// L4.6: Favorites — chip label.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete saved conditions'**
+  String get favoritesDeleteSaved;
+
+  /// L4.6: Favorites — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved conditions'**
+  String get favoritesSavedConditions;
+
+  /// L4.6: Favorites — secondary line.
+  ///
+  /// In en, this message translates to:
+  /// **'Conditions and prompts ready to continue'**
+  String get favoritesSavedIntentsHint;
+
+  /// L4.6: Favorites — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved intents'**
+  String get favoritesSavedIntents;
+
+  /// L4.6: Favorites — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Discover'**
+  String get favoritesOpenDiscover;
+
+  /// L4.6: Favorites — text.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved events yet'**
+  String get favoritesEmpty;
+
+  /// L4.6: Favorites — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get favoritesRetry;
+
+  /// L4.6: Favorites — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load favorites'**
+  String get favoritesLoadFailed;
+
+  /// L4.6: Favorites — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh favorites'**
+  String get favoritesRefresh;
+
+  /// L4.6: Visit history — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from history'**
+  String get visitedRemoveFromHistory;
+
+  /// L4.6: Visit history — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit actions'**
+  String get visitedActions;
+
+  /// L4.6: Visit history — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear period'**
+  String get visitedClearPeriod;
+
+  /// L4.6: Visit history — text.
+  ///
+  /// In en, this message translates to:
+  /// **'No visits in this period'**
+  String get visitedEmptyPeriod;
+
+  /// L4.6: Visit history — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get visitedClear;
+
+  /// L4.6: Visit history — snackbar message.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit removed'**
+  String get visitedRemoved;
+
+  /// L4.6: Visit history — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get visitedRemove;
+
+  /// L4.6: Visit history — button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get visitedCancel;
+
+  /// L4.6: Visit history — dialog text.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove visit?'**
+  String get visitedRemoveVisit;
+
+  /// L4.6: Visit history — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Select visit day'**
+  String get visitedSelectDay;
+
+  /// L4.6: Visit history — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Select month'**
+  String get visitedSelectMonth;
+
+  /// L4.6: Visit history — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit history'**
+  String get visitedTitle;
+
+  /// L4.6: Visit history — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Places you explicitly mark as visited will appear here.'**
+  String get visitedEmptyHint;
+
+  /// L4.6: Visit history — title.
+  ///
+  /// In en, this message translates to:
+  /// **'No visits yet'**
+  String get visitedEmpty;
+
+  /// L4.6: Visit history — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get visitedRetry;
+
+  /// L4.6: Visit history — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again.'**
+  String get visitedTryAgain;
+
+  /// L4.6: Visit history — title.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load visits'**
+  String get visitedLoadFailed;
+
+  /// L4.6: Visit history — button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh visit history'**
+  String get visitedRefresh;
+
+  /// L4.6: Visit history — text.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in required'**
+  String get visitedSignInRequired;
+
+  /// L4.6: invite a team member by email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get identityEmail;
+
+  /// L4.6: invite a team member by phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get identityPhone;
+
+  /// L4.6: Quick Plan template subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A simple free route for a calm recharge window.'**
+  String get quickPlanTplFreeCityHint;
+
+  /// L4.6: workspace controller message for a stable code.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, workspace_recovered{The unavailable page was reset to your personal profile.}workspace_load_failed{Unable to load workspaces.}workspace_switched{Workspace switched.}workspace_access_unavailable{Access to the selected page is unavailable.}workspace_switch_failed{Unable to switch the workspace.}admin_preview_selected{Admin preview selected.}page_created{Professional Page created and sent for review.}self_service_page_limit_reached{You have reached the limit of 3 pages. Send a request to the moderators.}page_create_failed{Unable to create the Professional Page.}page_limit_request_sent{Request for an additional page sent.}page_limit_request_unavailable{The request is available after you create three pages.}page_limit_request_failed{Unable to send the request to the moderators.} other{Unable to load workspaces.}}'**
+  String identityWorkspaceNotice(String code);
+
+  /// L4.6: team invitation message for a stable or server code.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, invitation_sent{Invitation sent.}invitation_send_failed{Unable to send the invitation.}invitation_revoked{Invitation revoked.}invitation_revoke_failed{Unable to revoke the invitation.}invitations_load_failed{Unable to load the team invitations.}invitation_target_invalid{Enter a valid user ID, email or phone number.}owner_relationship_not_invitable{Ownership cannot be granted by invitation.}inviter_not_active_member{Only an active team member can send invitations.}inviter_missing_team_manage_capability{You do not have permission to manage the team.}cannot_delegate_capability_not_held{You cannot grant a capability you do not have yourself.}revoke_actor_not_active_member{Only an active team member can revoke invitations.}invitation_not_found{This invitation no longer exists.} other{Unable to send the invitation.}}'**
+  String identityTeamNotice(String code);
+
+  /// L4.6: page profile editor message for a stable or server code.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, profile_load_failed{Unable to load the page profile.}profile_updated{Profile updated.}profile_update_failed{Unable to update the profile.}default_locale_value_required{Enter a value for the page’s default language.}unsupported_locale{That language is not supported by this page.}value_length_out_of_bounds{That text is empty or too long.}actor_not_active_member{Only an active team member can edit the profile.}actor_missing_page_manage_capability{You do not have permission to edit the page profile.}stale_overlay_revision{This field changed elsewhere. Reload and try again.} other{Unable to update the profile.}}'**
+  String identityProfileNotice(String code);
+
+  /// L4.6: public page load message for a stable code.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, page_load_failed{Unable to load this page.}page_preview_failed{Unable to load the page preview.} other{Unable to load this page.}}'**
+  String identityPublicPageNotice(String code);
+
+  /// L4.6: local inbox notification title for a template code.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, identity_page_created_user{Professional Page created}identity_page_created_moderators{New Professional Page}identity_page_limit_request_user{Request sent}identity_page_limit_request_moderators{Additional page request} other{Notification}}'**
+  String identityInboxTitle(String code);
+
+  /// L4.6: local inbox notification body for a template code (the page name, if any, is shown separately).
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, identity_page_created_user{Review status: pending.}identity_page_created_moderators{A new page was created and needs review.}identity_page_limit_request_user{Moderators will review the additional Professional Page.} other{}}'**
+  String identityInboxBody(String code);
+
+  /// L4.6: moderators inbox body for a page limit request.
+  ///
+  /// In en, this message translates to:
+  /// **'The user requested a limit of {count, plural, one{{count} page} other{{count} pages}}.'**
+  String identityInboxLimitBody(int count);
+
+  /// L4.6: profile role title for a stable role id (Creator stays untranslated until the glossary).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, pro_generator{Pro generator}creator{Creator}user{User} other{Creator}}'**
+  String profileRoleTitle(String value);
+
+  /// L4.6: Quick Plan route fit level (stable value).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, needsStops{Needs stops}ready{Ready}goodWithTweaks{Good with tweaks} other{Needs tuning}}'**
+  String quickPlanFitLevel(String value);
+
+  /// L4.6: Quick Plan route fit summary (stable value).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, needsStops{Add at least one stop to make this route useful.}ready{This route is ready for map or publishing.}goodWithTweaks{A small optimization can make this route easier to follow.} other{Optimize the route before sending it to Map or Create.}}'**
+  String quickPlanFitSummary(String value);
+
+  /// L4.6: route fit insight.
+  ///
+  /// In en, this message translates to:
+  /// **'No stops selected'**
+  String get quickPlanFitNoStops;
+
+  /// L4.6: route fit insight: minutes over the limit.
+  ///
+  /// In en, this message translates to:
+  /// **'Trim about {minutes} min'**
+  String quickPlanFitTrim(int minutes);
+
+  /// L4.6: route fit insight: the route fits the time limit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fits {minutes} min'**
+  String quickPlanFitFits(int minutes);
+
+  /// L4.6: route fit insight.
+  ///
+  /// In en, this message translates to:
+  /// **'Room for one more stop'**
+  String get quickPlanFitRoom;
+
+  /// L4.6: route fit insight.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove paid stops for free-only mode'**
+  String get quickPlanFitRemovePaid;
+
+  /// L4.6: route fit insight.
+  ///
+  /// In en, this message translates to:
+  /// **'Free route'**
+  String get quickPlanFitFreeRoute;
+
+  /// L4.6: route fit insight: total price (formatted money).
+  ///
+  /// In en, this message translates to:
+  /// **'{price} total'**
+  String quickPlanFitTotalPrice(String price);
+
+  /// L4.6: route fit insight.
+  ///
+  /// In en, this message translates to:
+  /// **'Shorten transfers for walking mode'**
+  String get quickPlanFitShortenTransfers;
+
+  /// L4.6: route fit insight: total distance (formatted number).
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km total'**
+  String quickPlanFitTotalDistance(String km);
+
+  /// L4.6: label before a draft title (shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Open Search with'**
+  String get profileOpenSearchWith;
+
+  /// L4.6: an invited Quick Plan could not be verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Access unavailable. Refresh to retry.'**
+  String get quickPlanAccessUnavailable;
+
+  /// L4.6: an invitation action is not confirmed yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed yet. Refresh to retry.'**
+  String get quickPlanNotConfirmed;
+
+  /// L4.6: a route template was applied; message is the localized template title.
+  ///
+  /// In en, this message translates to:
+  /// **'{message} applied'**
+  String quickPlanTemplateApplied(String message);
+
+  /// L4.6: screen reader label to apply a template; message is the localized template title.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply {message} template'**
+  String quickPlanApplyTemplate(String message);
+
+  /// L4.6: expand selected stops into a Scenario.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Expand {count} stop to Scenario} other{Expand {count} stops to Scenario}}'**
+  String quickPlanExpandStops(int count);
+
+  /// L4.6: page workspace section.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get identitySectionPage;
+
+  /// L4.6: page workspace section.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get identitySectionContent;
+
+  /// L4.6: page workspace section.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get identitySectionAccount;
+
+  /// L4.6: edit a profile field; message is the localized field name.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit {message}'**
+  String identityEditField(String message);
+
+  /// L4.6: team invitation status.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get identityInvitationPending;
+
+  /// L4.6: team invitation status.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoked'**
+  String get identityInvitationRevoked;
+
+  /// L4.6: team invitation status.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get identityInvitationExpired;
+
+  /// L4.6: page kind.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get identityKindCompany;
+
+  /// L4.6: page kind.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization'**
+  String get identityKindOrganization;
+
+  /// L4.6: page verification.
+  ///
+  /// In en, this message translates to:
+  /// **'Unverified'**
+  String get identityUnverified;
+
+  /// L4.6: page verification.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get identityVerified;
+
+  /// L4.6: personal profile label before the city (shown as is).
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get profilePersonal;
+
+  /// L4.6: profile section.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookings & requests'**
+  String get profileBookingsRequests;
+
+  /// L4.6: object kind.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time event'**
+  String get profileOneTimeEvent;
+
+  /// L4.6: missing draft fields; message is a localized list.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing: {message}'**
+  String profileMissingFields(String message);
+
+  /// L4.6: a missing draft field (stable id).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, title{title}category{category}city{city}cover{cover image} other{start time}}'**
+  String profileMissingField(String value);
+
+  /// L4.6: listing stage.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get profileStagePublished;
+
+  /// L4.6: listing stage.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get profileStageDraft;
+
+  /// L4.6: published listing is complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Published-ready'**
+  String get profilePublishedReady;
+
+  /// L4.6: number of missing fields.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} missing} other{{count} missing}}'**
+  String profileMissingCount(int count);
+
+  /// L4.6: filter: all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get profileAll;
+
+  /// L4.6: retry pending invitation actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh / retry pending'**
+  String get quickPlanRetryPending;
+
+  /// L4.6: label before a plan id.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get quickPlanPlanLabel;
+
+  /// L4.6: Quick Plan invitation status (server code).
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, pending{Pending}active{Active}accepted{Accepted}declined{Declined}revoked{Revoked}left{Left} other{Unknown status}}'**
+  String quickPlanGrantStatus(String code);
+
+  /// L4.6: label before an invitee user id.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitee'**
+  String get quickPlanInvitee;
+
+  /// L4.6: label before an owner user id.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get quickPlanOwner;
+
+  /// L4.6: invite again.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-invite'**
+  String get quickPlanReinvite;
+
+  /// L4.6: Quick Plan hero line by mood (stable id).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, calm{Calm route, ready to follow or adjust.}social{Social route, ready to follow or adjust.}active{Active route, ready to follow or adjust.} other{Custom route, ready to follow or adjust.}}'**
+  String quickPlanMoodReady(String value);
+
+  /// L4.6: Quick Plan heading by mood (stable id).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, calm{Calm plan}social{Social plan}active{Active plan} other{Custom plan}}'**
+  String quickPlanMoodPlan(String value);
+
+  /// L4.6: saved Quick Plan title by mood (stable id).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, calm{Calm quick plan}social{Social quick plan}active{Active quick plan} other{Custom quick plan}}'**
+  String quickPlanMoodQuickPlan(String value);
+
+  /// L4.6: a template is applied.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied'**
+  String get quickPlanApplied;
+
+  /// L4.6: use a template.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get quickPlanUse;
+
+  /// L4.6: favorite action.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get favoritesEdit;
+
+  /// L4.6: favorite action.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get favoritesOpen;
+
+  /// L4.6: favorite action.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get favoritesRoute;
+
+  /// L4.6: visit filter: month.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get visitedMonth;
+
+  /// L4.6: visit filter: day.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get visitedDay;
+
+  /// L4.6: Android notification while a Route records in the background.
+  ///
+  /// In en, this message translates to:
+  /// **'Route recording is active'**
+  String get routeRecordingNotificationTitle;
+
+  /// L4.6: Android notification while a Route records in the background (GPS privacy: keep the meaning).
+  ///
+  /// In en, this message translates to:
+  /// **'Recharge is saving your route while the app is in the background.'**
+  String get routeRecordingNotificationText;
+
+  /// L4.6: Activity form: save the step and go to the next one.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & continue'**
+  String get createFormSaveContinue;
+
+  /// L4.6: Class / Workshop form: the publisher is the instructor.
+  ///
+  /// In en, this message translates to:
+  /// **'I lead this class myself'**
+  String get createClassLeadMyself;
+
+  /// L4.6: Profile page — section label in capitals.
+  ///
+  /// In en, this message translates to:
+  /// **'CONTROL CENTER'**
+  String get profileControlCenter;
+
+  /// L4.6: Profile page — section label in capitals.
+  ///
+  /// In en, this message translates to:
+  /// **'LATEST CREATED EVENTS'**
+  String get profileLatestCreatedEvents;
+
+  /// L4.6: Profile page — section label in capitals.
+  ///
+  /// In en, this message translates to:
+  /// **'QUICK ACTIONS'**
+  String get profileQuickActions;
+
+  /// L4.6: Profile page — heading of the creator workspace block.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get profileWorkspaceHeading;
+
+  /// L4.6: Profile page — number of searches the reader can continue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} search to continue} other{{count} searches to continue}}'**
+  String profileSearchContinuations(int count);
+
+  /// L4.6: Profile page — number of saved activities.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} activity} other{{count} activities}}'**
+  String profileActivitiesCount(int count);
+
+  /// L4.6: Profile page — number of saved routes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} route} other{{count} routes}}'**
+  String profileRoutesCount(int count);
+
+  /// L4.6: Profile page — number of saved ideas.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} saved idea ready} other{{count} saved ideas ready}}'**
+  String profileSavedIdeasReady(int count);
+
+  /// L4.6: Profile page — label before the reader's own search text, shown as is after a colon.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get profileResume;
+
+  /// L4.6: Scenario builder (Quick Plan) — a shared plan opened without editing rights.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only · online access required'**
+  String get quickPlanReadOnlyOnline;
+
+  /// L4.6: Scenario builder (Quick Plan) — heading of the plan conditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Conditions'**
+  String get quickPlanConditions;
+
+  /// L4.6: Scenario builder (Quick Plan) — label before the reader's own search text, shown as is after a colon.
+  ///
+  /// In en, this message translates to:
+  /// **'Intent'**
+  String get quickPlanIntentLabel;
+
+  /// L4.6: Visit history — subtitle under the title.
+  ///
+  /// In en, this message translates to:
+  /// **'Private, self-reported places you visited.'**
+  String get visitedPrivateHint;
+
+  /// L4.6: Visit history — a visit the reader marked themselves.
+  ///
+  /// In en, this message translates to:
+  /// **'Self-reported'**
+  String get visitedSelfReported;
+
+  /// L4.6: Professional Page profile editor — card heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get identityProfile;
+
+  /// L4.6: Professional Page team invitations — card heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get identityTeam;
+
+  /// L4.6: Professional Page team invitations — the invitee field is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Required.'**
+  String get identityRequired;
+
+  /// L4.6: Profile, workspace switcher — section label in capitals.
+  ///
+  /// In en, this message translates to:
+  /// **'PERSONAL'**
+  String get identitySectionPersonal;
+
+  /// L4.6: Profile, workspace switcher — section label in capitals; the role term stays in English until the glossary review.
+  ///
+  /// In en, this message translates to:
+  /// **'PROFESSIONAL PAGES'**
+  String get identitySectionProfessionalPages;
+
+  /// L4.6: Profile, workspace switcher — section label in capitals.
+  ///
+  /// In en, this message translates to:
+  /// **'ADMINISTRATION'**
+  String get identitySectionAdministration;
+
+  /// L4.6: Profile, workspace switcher — used self-service pages; count is used, max is the limit.
+  ///
+  /// In en, this message translates to:
+  /// **'{max, plural, one{{count} of {max} self-service page used} other{{count} of {max} self-service pages used}}'**
+  String identityPagesUsed(int count, int max);
+
+  /// L4.6: public Professional Page — number of published items.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} published item} other{{count} published items}}'**
+  String identityPublishedItems(int count);
+
+  /// L4.6: Profile, Scenario library — card heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Scenarios'**
+  String get profileScenarioLibrary;
+
+  /// L4.6: Home — tagline in capitals under the RECHARGE wordmark.
+  ///
+  /// In en, this message translates to:
+  /// **'VACATION APP'**
+  String get discoverHomeTagline;
+
+  /// L4.6: Create, category picker — search field; count is the number of subcategories.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Search {count} category} other{Search {count} categories}}'**
+  String createTaxonomySearchCategories(int count);
+
+  /// L4.6: Create, Place — number of opening-hours rules.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} opening rule} other{{count} opening rules}}'**
+  String createFormOpeningRules(int count);
+
+  /// L4.6: Create, Place — adds the standard opening hours to every day.
+  ///
+  /// In en, this message translates to:
+  /// **'Add 09:00–21:00'**
+  String get createFormAddHours;
+
+  /// L4.6: Create — minimum visit duration chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum {minutes} min'**
+  String createFormMinimumVisitChip(int minutes);
+
+  /// L4.6: Create — participants so far and the limit.
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity {current}/{max}'**
+  String createFormCapacityOf(int current, int max);
+
+  /// L4.6: Create — a distance in meters; value is a formatted number.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} m'**
+  String createFormMetersValue(String value);
+
+  /// L4.6: Create, Route — number of track points.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} point} other{{count} points}}'**
+  String createFormPointsCount(int count);
+
+  /// L4.6: Route moderation — label before a version id.
+  ///
+  /// In en, this message translates to:
+  /// **'version'**
+  String get createRouteVersionLabel;
+
+  /// L4.6: Route moderation — label before a geometry hash.
+  ///
+  /// In en, this message translates to:
+  /// **'Geometry'**
+  String get createRouteGeometryLabel;
+
+  /// L4.6: Create, Activity — optional contribution option.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase (e.g. coffee at the counter)'**
+  String get createActivityPurchaseHint;
+
+  /// L4.6: Create, Activity — smallest suggested group.
+  ///
+  /// In en, this message translates to:
+  /// **'Group, min people'**
+  String get createActivityGroupMin;
+
+  /// L4.6: Create — duration range.
+  ///
+  /// In en, this message translates to:
+  /// **'{min}–{max} min'**
+  String createFormMinutesRange(int min, int max);
+
+  /// L4.6: Create — rights confirmation for images.
+  ///
+  /// In en, this message translates to:
+  /// **'I have permission to use these images'**
+  String get createFormImagesPermission;
+
+  /// L4.6: Create, Class / Workshop — multi-line field.
+  ///
+  /// In en, this message translates to:
+  /// **'Outcomes (one per line)'**
+  String get createClassOutcomesPerLine;
+
+  /// L4.6: Create, Class / Workshop — multi-line field.
+  ///
+  /// In en, this message translates to:
+  /// **'Prerequisites (one per line)'**
+  String get createClassPrerequisitesPerLine;
+
+  /// L4.6: Create, Class / Workshop — the repeated hour when clocks go back.
+  ///
+  /// In en, this message translates to:
+  /// **'Second (winter time)'**
+  String get createClassFoldSecond;
+
+  /// L4.6: Create, Class / Workshop — start time field with its format.
+  ///
+  /// In en, this message translates to:
+  /// **'Start (HH:MM)'**
+  String get createClassStartHhmm;
+
+  /// L4.6: Create, Class / Workshop — end time field with its format.
+  ///
+  /// In en, this message translates to:
+  /// **'End (HH:MM)'**
+  String get createClassEndHhmm;
+
+  /// L4.6: Create, Collection review — the title is still empty.
+  ///
+  /// In en, this message translates to:
+  /// **'(no title yet)'**
+  String get createCollectionNoTitleYet;
+
+  /// L4.6: Create, Collection — heading of removing a published item.
+  ///
+  /// In en, this message translates to:
+  /// **'Published — remove without review'**
+  String get createCollectionPublishedRemove;
+
+  /// L4.6: Create, Collection — type of a catalog object (stable id).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, place{Place}route{Route}bookableSession{Session}classWorkshop{Class / Workshop}rental{Rental} other{Object}}'**
+  String createCollectionObjectType(String value);
+
+  /// L4.6: Create, Event — label before the admission preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get createEventPreviewLabel;
+
+  /// L4.6: Create, Event — switch for the optional response.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional “Interested” response'**
+  String get createEventInterestedOptional;
+
+  /// L4.6: Create, Event — label before the availability state.
+  ///
+  /// In en, this message translates to:
+  /// **'State'**
+  String get createEventAvailabilityLabel;
+
+  /// L4.6: Create, Event — availability state (stable id).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, available{available}lowAvailability{few places left}soldOut{sold out}waitlistAvailable{waitlist open}registrationClosed{registration closed}cancelled{cancelled}stale{out of date} other{unknown}}'**
+  String createEventAvailabilityState(String value);
+
+  /// L4.6: Create, Event — how fresh the availability is (stable id).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, current{current}stale{out of date} other{unknown}}'**
+  String createEventAvailabilityFreshness(String value);
+
+  /// L4.6: Create, Event — label before the suggested event type.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested'**
+  String get createEventSuggestedLabel;
+
+  /// L4.6: Create, Event — event type (stable wire name).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, performance{Performance}screening{Screening}exhibition{Exhibition}open_stage{Open stage}meet_greet{Meet and greet}talk{Talk}discussion{Discussion}conference{Conference}networking{Networking}social_meetup{Social meetup}hosted_game{Hosted game}open_play{Open play}competition{Competition}class_session{Class}workshop{Workshop}retreat_camp{Retreat or camp}wellness_session{Wellness session}tasting{Tasting}shared_meal{Shared meal}party{Party}celebration{Celebration}festival{Festival}market_fair{Market or fair}auction{Auction}launch_promotion{Launch or promotion}open_day{Open day}tour_excursion{Tour or excursion}outdoor_gathering{Outdoor gathering}community_action{Community action}volunteering{Volunteering}fundraiser{Fundraiser}family_program{Family program}ceremony{Ceremony} other{Other}}'**
+  String createEventArchetype(String value);
+
+  /// L4.6: Create, Event — what visitors do (stable wire name).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, mode_watch{Watch}mode_attend{Attend}mode_play{Play}mode_compete{Compete}mode_perform{Perform}mode_practice{Practice}mode_learn{Learn}mode_create{Create}mode_meet_people{Meet people}mode_date{Date}mode_visit{Visit}mode_explore{Explore}mode_eat_drink{Eat and drink}mode_shop{Shop}mode_support{Support}mode_volunteer{Volunteer}mode_travel{Travel} other{Other}}'**
+  String createEventParticipationMode(String value);
+
+  /// L4.6: Create, Event — screen reader label; message is the localized role.
+  ///
+  /// In en, this message translates to:
+  /// **'{message}: additional attendee role'**
+  String createEventAdditionalRole(String message);
+
+  /// L4.6: Create, Event — rights confirmation; the star marks a required field.
+  ///
+  /// In en, this message translates to:
+  /// **'I have the right to publish this media *'**
+  String get createEventMediaRights;
+
+  /// L4.6: Create, Event — switch.
+  ///
+  /// In en, this message translates to:
+  /// **'All-day event'**
+  String get createEventAllDay;
+
+  /// L4.6: Create, Event — field for an IANA time zone.
+  ///
+  /// In en, this message translates to:
+  /// **'IANA timezone'**
+  String get createEventIanaTimezone;
+
+  /// L4.6: Create, Event — dates generated from the schedule.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} occurrence materialized} other{{count} occurrences materialized}}'**
+  String createEventOccurrencesCount(int count);
+
+  /// L4.6: Create, Event — label before the next date.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get createEventNextDateLabel;
+
+  /// L4.6: Create, Event — price field; value is the currency code.
+  ///
+  /// In en, this message translates to:
+  /// **'Price ({value})'**
+  String createEventPriceIn(String value);
+
+  /// L4.6: Create — go to the next step.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get createFormContinue;
+
+  /// L4.6: Create, Event — section heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity & inventory'**
+  String get createEventCapacityInventory;
+
+  /// L4.6: Create, Event — label before the per-channel pool counts.
+  ///
+  /// In en, this message translates to:
+  /// **'Pools'**
+  String get createEventPoolsLabel;
+
+  /// L4.6: Create, Event — field.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone/table reference'**
+  String get createEventZoneReference;
+
+  /// L4.6: Create, Find People — field.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags (comma-separated, up to 8)'**
+  String get createFindPeopleTagsField;
+
+  /// L4.6: Create, Find People — field.
+  ///
+  /// In en, this message translates to:
+  /// **'Pace (optional)'**
+  String get createFindPeoplePaceOptional;
+
+  /// L4.6: Create, Find People — hint of the private access reference.
+  ///
+  /// In en, this message translates to:
+  /// **'Session-scoped secure reference; never shown publicly'**
+  String get createFindPeopleSecretRefHint;
+
+  /// L4.6: Create — money amount field.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get createFormAmount;
+
+  /// L4.6: Create, Find People — step title.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosts, visibility, and communication'**
+  String get createFindPeopleHostsTitle;
+
+  /// L4.6: Create, Find People — step subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Co-host permissions remain inactive until the invited user accepts the role.'**
+  String get createFindPeopleCohostInactive;
+
+  /// L4.6: Create, Find People — confirmation; the star marks a required field.
+  ///
+  /// In en, this message translates to:
+  /// **'I confirm that all details are accurate *'**
+  String get createFindPeopleAccuracyConfirm;
+
+  /// L4.6: Create — the reader cannot edit this draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only draft'**
+  String get createFormReadOnlyDraft;
+
+  /// L4.6: Create, Place — required field; the star marks it.
+  ///
+  /// In en, this message translates to:
+  /// **'Description *'**
+  String get createFormDescriptionRequired;
+
+  /// L4.6: Create, Place — recommended field.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (recommended)'**
+  String get createFormDescriptionRecommended;
+
+  /// L4.6: Create, Place — length hint.
+  ///
+  /// In en, this message translates to:
+  /// **'20–180 characters.'**
+  String get createPlaceShortDescHint;
+
+  /// L4.6: Create, Place — subtitle of the directions section.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: entrance, path or meeting point'**
+  String get createPlaceDirectionsHint;
+
+  /// L4.6: Create, Place — opening hours option.
+  ///
+  /// In en, this message translates to:
+  /// **'Open 24/7'**
+  String get createPlaceOpen247;
+
+  /// L4.6: Create, Place — disabled opening hours option.
+  ///
+  /// In en, this message translates to:
+  /// **'Seasonal (Phase 2)'**
+  String get createPlaceSeasonalPhase2;
+
+  /// L4.6: Create — date field showing its format.
+  ///
+  /// In en, this message translates to:
+  /// **'YYYY-MM-DD'**
+  String get createFormDateFormatHint;
+
+  /// L4.6: Create, Place — closed-until date field.
+  ///
+  /// In en, this message translates to:
+  /// **'Until (inclusive)'**
+  String get createPlaceUntilInclusive;
+
+  /// L4.6: Create, Place — switch.
+  ///
+  /// In en, this message translates to:
+  /// **'A shorter visit can still work'**
+  String get createPlaceShortVisit;
+
+  /// L4.6: Create, Place — subtitle of the photos section.
+  ///
+  /// In en, this message translates to:
+  /// **'A cover is recommended and can be added later.'**
+  String get createPlaceCoverRecommended;
+
+  /// L4.6: Create, Place — subtitle of the gallery section.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional · maximum 12'**
+  String get createPlaceGalleryOptional;
+
+  /// L4.6: Create, Place — acknowledges the warnings.
+  ///
+  /// In en, this message translates to:
+  /// **'I reviewed these warnings'**
+  String get createPlaceWarningsReviewed;
+
+  /// L4.6: Create — progress of a review.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewing…'**
+  String get createFormReviewing;
+
+  /// L4.6: Create, Place — recommended visit length in the preview.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min recommended'**
+  String createPlaceRecommendedMinutes(int minutes);
+
+  /// L4.6: Create, Place — disabled action in the preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Route (primary action)'**
+  String get createPlaceRoutePrimary;
+
+  /// L4.6: Create, Place — why an existing place looks like a duplicate (stable code).
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, title_match{similar name}category_match{same category}official_domain_match{same website}phone_match{same phone} other{similar details}}'**
+  String createPlaceDuplicateReason(String code);
+
+  /// L4.6: Create, Rental — field.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand / model (optional)'**
+  String get createRentalBrandModel;
+
+  /// L4.6: Create, Rental — confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'I confirm this category is correct'**
+  String get createRentalConfirmCategory;
+
+  /// L4.6: Create, Rental — field.
+  ///
+  /// In en, this message translates to:
+  /// **'Size / variant'**
+  String get createRentalSizeVariant;
+
+  /// L4.6: Create — when something was confirmed; date is formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed {date}'**
+  String createFormConfirmedOn(String date);
+
+  /// L4.6: Create, Rental — blocked units.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} unit blocked} other{{count} units blocked}}'**
+  String createRentalUnitsBlocked(int count);
+
+  /// L4.6: Create, Rental — subtitle of the suggested defaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Editable — nothing applies automatically.'**
+  String get createRentalDefaultsEditable;
+
+  /// L4.6: Create, Rental — checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'ID required at handover'**
+  String get createRentalIdRequired;
+
+  /// L4.6: Create, Rental — field.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency (ISO 4217)'**
+  String get createRentalCurrencyField;
+
+  /// L4.6: Create, Rental — a rate step; price is the amount in minor units with its currency code.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{From {count} unit: {price} minor} other{From {count} units: {price} minor}}'**
+  String createRentalRateStep(int count, String price);
+
+  /// L4.6: Create, Rental — field.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit (minor units, 0 = none)'**
+  String get createRentalDepositField;
+
+  /// L4.6: Create, Rental — notice on the review step.
+  ///
+  /// In en, this message translates to:
+  /// **'Private — not public: exact pickup address, geo and handover instructions are entered separately and never appear here.'**
+  String get createRentalPrivateNotice;
+
+  /// L4.6: Create, Rental — attestation.
+  ///
+  /// In en, this message translates to:
+  /// **'I have the right to offer this for rent'**
+  String get createRentalRightToOffer;
+
+  /// L4.6: Create — progress through the steps.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String createFormStepOf(int current, int total);
+
+  /// L4.6: Create, Route — section title.
+  ///
+  /// In en, this message translates to:
+  /// **'GPX export'**
+  String get createRouteGpxExport;
+
+  /// L4.6: Create, Route — export result.
+  ///
+  /// In en, this message translates to:
+  /// **'GPX file saved.'**
+  String get createRouteGpxSaved;
+
+  /// L4.6: Create — file size; value is a formatted number.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} B'**
+  String createFormBytes(String value);
+
+  /// L4.6: Create — file size; value is a formatted number.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} KB'**
+  String createFormKilobytes(String value);
+
+  /// L4.6: Create — file size; value is a formatted number.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} MB'**
+  String createFormMegabytes(String value);
+
+  /// L4.6: Create, Route — kind of a GPX candidate (stable id).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, track{Track} other{Route}}'**
+  String createRouteGpxKind(String value);
+
+  /// L4.6: Create, Route — number of GPX segments.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} segment} other{{count} segments}}'**
+  String createRouteSegmentsCount(int count);
+
+  /// L4.6: Create, Route — checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Connect {count} gap with straight lines} other{Connect {count} gaps with straight lines}}'**
+  String createRouteConnectGaps(int count);
+
+  /// L4.6: Create, Route — switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Import {count} POI'**
+  String createRouteImportPoi(int count);
+
+  /// L4.6: Create, Route — list title.
+  ///
+  /// In en, this message translates to:
+  /// **'Anchors ({count})'**
+  String createRouteAnchorsTitle(int count);
+
+  /// L4.6: Create, Route — screen reader label; start is the latitude, end the longitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Anchor {index}, latitude {start}, longitude {end}'**
+  String createRouteAnchorSemantics(int index, String start, String end);
+
+  /// L4.6: Create, Route — list title.
+  ///
+  /// In en, this message translates to:
+  /// **'Segments ({count})'**
+  String createRouteSegmentsTitle(int count);
+
+  /// L4.6: Create, Route — empty list.
+  ///
+  /// In en, this message translates to:
+  /// **'A segment appears after the second anchor.'**
+  String get createRouteSegmentAppears;
+
+  /// L4.6: Create, Route — list row.
+  ///
+  /// In en, this message translates to:
+  /// **'Segment {index}'**
+  String createRouteSegmentN(int index);
+
+  /// L4.6: Create, Route — list title.
+  ///
+  /// In en, this message translates to:
+  /// **'Waypoints ({count})'**
+  String createRouteWaypointsTitle(int count);
+
+  /// L4.6: Create, Route — dropdown option.
+  ///
+  /// In en, this message translates to:
+  /// **'Anchor {index}'**
+  String createRouteAnchorN(int index);
+
+  /// L4.6: Create, Route recording — accepted GPS points.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} accepted point} other{{count} accepted points}}'**
+  String createRouteAcceptedPoints(int count);
+
+  /// L4.6: Create, Route recording — value is a formatted number.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} m avg'**
+  String createRouteAverageAccuracy(String value);
+
+  /// L4.6: Create, Route recording — excluded GPS points.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} unsafe point excluded.} other{{count} unsafe points excluded.}}'**
+  String createRouteUnsafePoints(int count);
+
+  /// L4.6: Create, Route recording — a gap; total is in seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Gap {index}: {meters} m, {total} s'**
+  String createRouteGapLabel(int index, int meters, int total);
+
+  /// L4.6: Create, Route recording — saved GPS points.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} GPS point saved} other{{count} GPS points saved}}'**
+  String createRouteGpsPointsSaved(int count);
+
+  /// L4.6: Create, Route recording — status.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS needs attention'**
+  String get createRouteGpsAttention;
+
+  /// L4.6: Create, Route recording — an unknown recording failure; no code is shown.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS recording could not continue safely.'**
+  String get createRouteGpsUnsafeStop;
+
+  /// L4.6: Create, Route review.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} blocking check} other{{count} blocking checks}}'**
+  String createRouteBlockingChecks(int count);
+
+  /// L4.6: Create, Route review.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} warning to review} other{{count} warnings to review}}'**
+  String createRouteWarningsToReview(int count);
+
+  /// L4.6: Create, Route review — value is a formatted number.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} m unknown'**
+  String createRouteUnknownSurfaceMeters(String value);
+
+  /// L4.6: Create, Scenario — the single day of the plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Day 1'**
+  String get createScenarioDayOne;
+
+  /// L4.6: Create, Scenario — progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Rechecking…'**
+  String get createScenarioRechecking;
+
+  /// L4.6: Create, Scenario — a leg without a time.
+  ///
+  /// In en, this message translates to:
+  /// **'time not entered'**
+  String get createScenarioTimeNotEntered;
+
+  /// L4.6: Create, Scenario — field.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration, minutes'**
+  String get createScenarioDurationMinutesField;
+
+  /// L4.6: Create, Scenario — hint of a custom stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Park, viewpoint, private address…'**
+  String get createScenarioStopHint;
+
+  /// L4.6: Create, Scenario review.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} blocking issue} other{{count} blocking issues}}'**
+  String createScenarioBlockingIssues(int count);
+
+  /// L4.6: Create, Scenario — schedule recheck result.
+  ///
+  /// In en, this message translates to:
+  /// **'A changed service was found'**
+  String get createScenarioServiceChanged;
+
+  /// L4.6: Create, Scenario — how recent the schedule data is.
+  ///
+  /// In en, this message translates to:
+  /// **'Freshness'**
+  String get createScenarioFreshnessLabel;
+
+  /// L4.6: Create, Scenario — schedule freshness (stable id).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, current{current}stale{stale}unavailable{unavailable} other{unknown}}'**
+  String createScenarioFreshness(String value);
+
+  /// L4.6: Create, Scenario — earliest departure; time is formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'After {time}'**
+  String createScenarioAfterTime(String time);
+
+  /// L4.6: Create, Scenario — a stop search found nothing.
+  ///
+  /// In en, this message translates to:
+  /// **'No stops found.'**
+  String get createScenarioNoStopsFound;
+
+  /// L4.6: Create, Scenario — screen reader label of a departure; start and end are times.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} to {end}, {minutes} minutes, planned schedule not live'**
+  String createScenarioDepartureSemantics(
+    String start,
+    String end,
+    int minutes,
+  );
+
+  /// L4.6: Create, Scenario — field.
+  ///
+  /// In en, this message translates to:
+  /// **'Carrier (optional)'**
+  String get createScenarioCarrierOptional;
+
+  /// L4.6: Create, Scenario — hint with example services.
+  ///
+  /// In en, this message translates to:
+  /// **'Train 802 / Bus 7480'**
+  String get createScenarioServiceHint;
+
+  /// L4.6: Create, Scenario — required field; the star marks it.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration, min *'**
+  String get createScenarioDurationMinRequired;
+
+  /// L4.6: Create, Scenario — field.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration, min'**
+  String get createScenarioDurationMin;
+
+  /// L4.6: Create, Scenario — field.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance, km'**
+  String get createScenarioDistanceKm;
+
+  /// L4.6: Create, Scenario — field.
+  ///
+  /// In en, this message translates to:
+  /// **'Parking / ticket / other cost (optional)'**
+  String get createScenarioOtherCost;
+
+  /// L4.6: Create, Session — field.
+  ///
+  /// In en, this message translates to:
+  /// **'Timezone (IANA, e.g. Europe/Riga)'**
+  String get createSessionTimezoneField;
+
+  /// L4.6: Create — state of a confirmation button.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get createFormConfirmed;
+
+  /// L4.6: Create, Session — pause after a slot.
+  ///
+  /// In en, this message translates to:
+  /// **'Buffer {minutes} min'**
+  String createSessionBuffer(int minutes);
+
+  /// L4.6: Create, Session — minimum notice before a slot.
+  ///
+  /// In en, this message translates to:
+  /// **'notice {minutes} min'**
+  String createSessionNotice(int minutes);
+
+  /// L4.6: Create, Session — after the buffer and notice values.
+  ///
+  /// In en, this message translates to:
+  /// **'platform defaults, change anytime'**
+  String get createSessionPlatformDefaults;
+
+  /// L4.6: Create, Session — price chip; Sessions are priced in euro here.
+  ///
+  /// In en, this message translates to:
+  /// **'€ Fixed'**
+  String get createSessionPriceFixed;
+
+  /// L4.6: Create, Session — section heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional — add now or after publishing'**
+  String get createSessionOptionalLater;
+
+  /// L4.6: Discover, categories — screen reader count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} result} other{{count} results}}'**
+  String discoverResultsCount(int count);
+
+  /// L4.6: Discover, category page — heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Subcategories'**
+  String get discoverSubcategories;
+
+  /// L4.6: Discover, search filters — heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode'**
+  String get discoverFilterMode;
+
+  /// L4.6: Discover, Details — the travel time is an estimate.
+  ///
+  /// In en, this message translates to:
+  /// **'estimated'**
+  String get discoverEstimated;
+
+  /// L4.6: Discover, Details — label before a slot id.
+  ///
+  /// In en, this message translates to:
+  /// **'Slot'**
+  String get discoverSlotLabel;
+
+  /// L4.6: Discover — section heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Guides'**
+  String get discoverGuides;
+
+  /// L4.6: Discover, guides — number of objects.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} item} other{{count} items}}'**
+  String discoverItemsCount(int count);
+
+  /// L4.6: Professional Page workspace — verification (stable id).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, unverified{Unverified}pending{Verification pending}verified{Verified}rejected{Verification rejected}revoked{Verification revoked} other{Unverified}}'**
+  String identityVerificationStatus(String value);
+
+  /// L4.6: Professional Page team — role in the team (stable id).
+  ///
+  /// In en, this message translates to:
+  /// **'{value, select, owner{Owner}manager{Manager} other{Editor}}'**
+  String identityRelationship(String value);
 }
 
 class _AppLocalizationsDelegate

@@ -730,7 +730,10 @@ List<String> _routeStepsFromDraft(CreateDraftEntity draft) {
   final int markerIndex = draft.fullDescription.indexOf(marker);
   if (markerIndex >= 0) {
     final int start = markerIndex + marker.length;
-    final int end = draft.fullDescription.indexOf('. Review', start);
+    final int end = draft.fullDescription.indexOf(
+      '. Review', // l10n-ignore: seed marker
+      start,
+    );
     final String rawSteps = end > start
         ? draft.fullDescription.substring(start, end)
         : draft.fullDescription.substring(start);

@@ -43,6 +43,8 @@ class NotificationsRepositoryImpl
       createdAtUtcIso: event.createdAtUtc.toUtc().toIso8601String(),
       isRead: false,
       targetRoute: event.targetRoute,
+      templateCode: event.templateCode,
+      templateCount: event.templateCount,
     );
     await _localDataSource.writeNotifications(
       recipientKey,

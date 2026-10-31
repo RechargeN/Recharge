@@ -31,7 +31,7 @@ class EventInventorySection extends StatelessWidget {
         children: <Widget>[
           const Divider(height: 32),
           Text(
-            'Capacity & inventory',
+            context.l10n.createEventCapacityInventory,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 4),
@@ -126,9 +126,10 @@ class EventInventorySection extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Pools · onsite ${state.channelSummary.onsitePoolCount} · '
-              'online ${state.channelSummary.onlinePoolCount} · '
-              'any ${state.channelSummary.anyPoolCount}',
+              '${context.l10n.createEventPoolsLabel} · '
+              '${context.l10n.createOption('InventoryChannel_onsite')} ${state.channelSummary.onsitePoolCount} · '
+              '${context.l10n.createOption('InventoryChannel_online')} ${state.channelSummary.onlinePoolCount} · '
+              '${context.l10n.createOption('InventoryChannel_any')} ${state.channelSummary.anyPoolCount}',
               style: Theme.of(context).textTheme.titleSmall,
             ),
             for (int index = 0; index < value.pools.length; index++)
@@ -347,8 +348,8 @@ class _PoolEditor extends StatelessWidget {
           TextFormField(
             key: Key('event-pool-zone-${pool.id}'),
             initialValue: pool.zoneRef ?? '',
-            decoration: const InputDecoration(
-              labelText: 'Zone/table reference',
+            decoration: InputDecoration(
+              labelText: context.l10n.createEventZoneReference,
             ),
             onChanged: (raw) => controller.updateEventInventoryPool(
               pool.copyWith(

@@ -5,6 +5,7 @@ import 'package:recharge/generated/l10n/app_localizations.dart';
 import 'package:recharge/features/booking/application/event_booking_controller.dart';
 import 'package:recharge/features/booking/domain/repositories/event_booking_gateway.dart';
 import 'package:recharge/features/booking/presentation/event_booking_section.dart';
+import '../support/l10n/l10n_screenshot.dart';
 
 final class _Gateway implements EventBookingGateway {
   EventBookingView? active;
@@ -234,6 +235,7 @@ void main() {
               textScale: scale,
             );
             expect(tester.takeException(), isNull);
+            await l10nCaptureScreen(tester);
             // The deadline is the same instant, shown in Riga wall time
             // (the DST fall-back hour) in every language.
             expect(find.textContaining(language.value.$1), findsOneWidget);

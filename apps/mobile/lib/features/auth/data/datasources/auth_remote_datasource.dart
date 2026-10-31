@@ -102,7 +102,7 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
     if (email != _allowedEmail || password != _allowedPassword) {
       throw const AuthRemoteException(
         'AUTH_INVALID_CREDENTIALS',
-        'Invalid email or password',
+        'Invalid email or password', // l10n-ignore: developer error; the UI receives a code
       );
     }
 
@@ -134,7 +134,7 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
     if (!refreshToken.startsWith('ref_')) {
       throw const AuthRemoteException(
         'AUTH_REFRESH_INVALID',
-        'Refresh token invalid',
+        'Refresh token invalid', // l10n-ignore: developer error; the UI receives a code
       );
     }
     _sessionToUser[sessionId] = demoUserId;

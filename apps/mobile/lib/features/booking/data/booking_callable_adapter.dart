@@ -34,7 +34,7 @@ final class BookingReconciliationRequest {
     if (callableName != 'getMyBookingV1' ||
         query['queryType'] != 'getMyBooking') {
       throw ArgumentError(
-        'Booking reconciliation must use the authoritative getMyBooking query',
+        'Booking reconciliation must use the authoritative getMyBooking query', // l10n-ignore: developer error; the UI receives a code
       );
     }
     _rejectClientAuthority(query);
@@ -530,7 +530,7 @@ final class BookingBackendEndpoint {
       throw ArgumentError.value(
         emulatorUri,
         'uri',
-        'dev Booking endpoint must be the local demo-recharge/europe-west1 Emulator',
+        'dev Booking endpoint must be the local demo-recharge/europe-west1 Emulator', // l10n-ignore: developer error; the UI receives a code
       );
     }
   }

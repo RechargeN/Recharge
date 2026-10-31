@@ -89,7 +89,7 @@ class ScenarioReviewSection extends StatelessWidget {
           title: Text(
             readiness.canSaveToMyScenarios
                 ? context.l10n.createScenarioReadyMyScenarios
-                : '${blocking.length} blocking issue(s)',
+                : context.l10n.createScenarioBlockingIssues(blocking.length),
           ),
           subtitle: Text(
             context.l10n.createScenarioActionSavesPersonalScenarioDoesNot,

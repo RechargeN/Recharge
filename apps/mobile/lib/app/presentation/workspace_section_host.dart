@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/localization/l10n_context.dart';
 import '../../features/identity/domain/usecases/load_identity_workspace_usecase.dart';
 import '../../features/identity/presentation/widgets/workspace_section.dart';
 import '../di/service_locator.dart';
@@ -15,10 +16,10 @@ class WorkspaceSectionHost extends StatelessWidget {
     if (sl.isRegistered<LoadIdentityWorkspaceUseCase>()) {
       return WorkspaceSection(userId: userId);
     }
-    return const ListTile(
+    return ListTile(
       leading: Icon(Icons.account_tree_outlined),
-      title: Text('Switch workspace'),
-      subtitle: Text('Personal profile, Professional Pages and Admin access'),
+      title: Text(context.l10n.identitySwitchWorkspace),
+      subtitle: Text(context.l10n.identitySwitchWorkspaceHint),
     );
   }
 }

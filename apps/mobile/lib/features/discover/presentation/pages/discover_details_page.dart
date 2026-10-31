@@ -491,7 +491,9 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Added ${result.itemCount} item to Scenario')),
+      SnackBar(
+        content: Text(context.l10n.scenarioIntakeSuccess(result.itemCount)),
+      ),
     );
   }
 

@@ -3,18 +3,19 @@ enum ProfileRoleTier { user, creator, proGenerator }
 class ProfileRoleSummary {
   const ProfileRoleSummary({
     required this.tier,
-    required this.title,
-    required this.subtitle,
-    required this.primaryActionLabel,
+    required this.titleId,
+    required this.subtitleId,
+    required this.primaryActionId,
     required this.capabilities,
     required this.canCreate,
     required this.canGenerate,
   });
 
   final ProfileRoleTier tier;
-  final String title;
-  final String subtitle;
-  final String primaryActionLabel;
+  // L4.6: stable ids; the profile turns them into text.
+  final String titleId;
+  final String subtitleId;
+  final String primaryActionId;
   final List<String> capabilities;
   final bool canCreate;
   final bool canGenerate;
@@ -66,13 +67,13 @@ ProfileRoleSummary profileRoleSummaryForTier(ProfileRoleTier tier) {
     case ProfileRoleTier.proGenerator:
       return const ProfileRoleSummary(
         tier: ProfileRoleTier.proGenerator,
-        title: 'Pro generator',
-        subtitle: 'Build scenarios and routes from intent',
-        primaryActionLabel: 'Open Builder',
+        titleId: 'pro_generator',
+        subtitleId: 'pro_generator',
+        primaryActionId: 'open_builder',
         capabilities: <String>[
-          'Smart scenario prompts',
-          'Route and plan generation',
-          'Creator publishing tools',
+          'smart_prompts',
+          'route_generation',
+          'creator_tools',
         ],
         canCreate: true,
         canGenerate: true,
@@ -80,28 +81,20 @@ ProfileRoleSummary profileRoleSummaryForTier(ProfileRoleTier tier) {
     case ProfileRoleTier.creator:
       return const ProfileRoleSummary(
         tier: ProfileRoleTier.creator,
-        title: 'Creator',
-        subtitle: 'Publish events and places for the community',
-        primaryActionLabel: 'Open Create Hub',
-        capabilities: <String>[
-          'Create event and place drafts',
-          'Publish to moderation',
-          'Manage organizer profile',
-        ],
+        titleId: 'creator',
+        subtitleId: 'creator',
+        primaryActionId: 'open_create_hub',
+        capabilities: <String>['drafts', 'moderation', 'organizer_profile'],
         canCreate: true,
         canGenerate: false,
       );
     case ProfileRoleTier.user:
       return const ProfileRoleSummary(
         tier: ProfileRoleTier.user,
-        title: 'User',
-        subtitle: 'Discover, save, and join recharge moments',
-        primaryActionLabel: 'Open Saved',
-        capabilities: <String>[
-          'Discover activities',
-          'Save favorites',
-          'Manage personal profile',
-        ],
+        titleId: 'user',
+        subtitleId: 'user',
+        primaryActionId: 'open_saved',
+        capabilities: <String>['discover', 'favorites', 'personal_profile'],
         canCreate: false,
         canGenerate: false,
       );
@@ -128,7 +121,8 @@ class ProfilePersonalPresentation {
 
   final ProfileRoleSummary? accessSummary;
 
-  String get title => 'Creator';
+  /// The one personal profile title id (glossary term Creator).
+  String get titleId => 'creator';
   ProfilePersonalLayout get layout => ProfilePersonalLayout.personal;
   bool get canShowCreatorTools => accessSummary?.canCreate ?? false;
   bool get canShowGeneratorTools => accessSummary?.canGenerate ?? false;
@@ -143,9 +137,9 @@ ProfileRoleSummary profileRoleSummaryForPresentation({
   final ProfileRoleSummary presentation = profileRoleSummaryForTier(tier);
   return ProfileRoleSummary(
     tier: presentation.tier,
-    title: presentation.title,
-    subtitle: presentation.subtitle,
-    primaryActionLabel: presentation.primaryActionLabel,
+    titleId: presentation.titleId,
+    subtitleId: presentation.subtitleId,
+    primaryActionId: presentation.primaryActionId,
     capabilities: accessSummary.capabilities,
     canCreate: accessSummary.canCreate,
     canGenerate: accessSummary.canGenerate,

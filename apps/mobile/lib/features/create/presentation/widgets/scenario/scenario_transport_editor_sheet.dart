@@ -98,9 +98,9 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
               const SizedBox(height: 10),
               TextFormField(
                 initialValue: carrier,
-                decoration: const InputDecoration(
-                  labelText: 'Carrier (optional)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createScenarioCarrierOptional,
+                  border: const OutlineInputBorder(),
                 ),
                 onChanged: (String value) => carrier = value,
               ),
@@ -110,7 +110,7 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
                 initialValue: service,
                 decoration: InputDecoration(
                   labelText: context.l10n.createScenarioServiceRoute,
-                  hintText: 'Train 802 / Bus 7480',
+                  hintText: context.l10n.createScenarioServiceHint,
                   border: OutlineInputBorder(),
                 ),
                 onChanged: (String value) => service = value,
@@ -119,9 +119,9 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
               TextFormField(
                 initialValue: duration,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Duration, min *',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createScenarioDurationMinRequired,
+                  border: const OutlineInputBorder(),
                 ),
                 onChanged: (String value) => duration = value,
               ),
@@ -248,9 +248,9 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                     child: TextFormField(
                       initialValue: duration,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Duration, min',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.createScenarioDurationMin,
+                        border: const OutlineInputBorder(),
                       ),
                       onChanged: (String value) => duration = value,
                     ),
@@ -262,9 +262,9 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Distance, km',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.createScenarioDistanceKm,
+                        border: const OutlineInputBorder(),
                       ),
                       onChanged: (String value) => distance = value,
                     ),
@@ -278,7 +278,7 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                   decimal: true,
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Parking / ticket / other cost (optional)',
+                  labelText: context.l10n.createScenarioOtherCost,
                   suffixText: currencyCode,
                   border: const OutlineInputBorder(),
                 ),

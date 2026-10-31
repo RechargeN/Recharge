@@ -71,7 +71,7 @@ class VisitedPlacesController extends ChangeNotifier {
           status: VisitedPlacesStatus.error,
           items: const [],
           visibleItems: const [],
-          message: 'Не удалось загрузить историю посещений',
+          message: 'visits_load_failed',
         ),
       );
       _analyticsService.track(

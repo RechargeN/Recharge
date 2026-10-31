@@ -234,23 +234,23 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
     final String fileName =
         '${projection.eventId.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_')}.ics';
     final String calendar = <String>[
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//Recharge//Event Details//EN',
-      'CALSCALE:GREGORIAN',
-      'METHOD:PUBLISH',
-      'BEGIN:VEVENT',
-      'UID:${_icalEscape(projection.eventId)}-${_icalEscape(occurrence.id)}@recharge.local',
-      'DTSTAMP:${_icalUtc(DateTime.now().toUtc())}',
-      'DTSTART:${_icalUtc(occurrence.startAtUtc)}',
-      'DTEND:${_icalUtc(occurrence.endAtUtc)}',
-      'SUMMARY:${_icalEscape(projection.title)}',
+      'BEGIN:VCALENDAR', // l10n-ignore: iCalendar format token
+      'VERSION:2.0', // l10n-ignore: iCalendar format token
+      'PRODID:-//Recharge//Event Details//EN', // l10n-ignore: iCalendar product id, not UI
+      'CALSCALE:GREGORIAN', // l10n-ignore: iCalendar format token
+      'METHOD:PUBLISH', // l10n-ignore: iCalendar format token
+      'BEGIN:VEVENT', // l10n-ignore: iCalendar format token
+      'UID:${_icalEscape(projection.eventId)}-${_icalEscape(occurrence.id)}@recharge.local', // l10n-ignore: iCalendar format token
+      'DTSTAMP:${_icalUtc(DateTime.now().toUtc())}', // l10n-ignore: iCalendar format token
+      'DTSTART:${_icalUtc(occurrence.startAtUtc)}', // l10n-ignore: iCalendar format token
+      'DTEND:${_icalUtc(occurrence.endAtUtc)}', // l10n-ignore: iCalendar format token
+      'SUMMARY:${_icalEscape(projection.title)}', // l10n-ignore: iCalendar format token
       if (projection.fullDescription.trim().isNotEmpty)
-        'DESCRIPTION:${_icalEscape(projection.fullDescription)}',
+        'DESCRIPTION:${_icalEscape(projection.fullDescription)}', // l10n-ignore: iCalendar format token
       if (eventVenueLabel(projection).isNotEmpty)
-        'LOCATION:${_icalEscape(eventVenueLabel(projection))}',
-      'END:VEVENT',
-      'END:VCALENDAR',
+        'LOCATION:${_icalEscape(eventVenueLabel(projection))}', // l10n-ignore: iCalendar format token
+      'END:VEVENT', // l10n-ignore: iCalendar format token
+      'END:VCALENDAR', // l10n-ignore: iCalendar format token
       '',
     ].join('\r\n');
 
@@ -310,7 +310,9 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Added ${result.itemCount} item to Scenario')),
+      SnackBar(
+        content: Text(context.l10n.scenarioIntakeSuccess(result.itemCount)),
+      ),
     );
   }
 

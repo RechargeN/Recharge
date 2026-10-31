@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/scenarios/application/controllers/scenario_builder_controller.dart';
 import 'package:recharge/features/scenarios/domain/entities/scenario_draft_entity.dart';
+import 'package:recharge/features/scenarios/application/state/scenario_builder_state.dart';
 
 void main() {
   test('legacy Quick Plan runtime has stable identity and revision', () {
@@ -188,11 +189,21 @@ void main() {
     );
 
     expect(controller.state.routeFit.score, lessThan(85));
-    expect(controller.state.routeFit.label, isNot('Ready'));
-    expect(controller.state.routeFit.insights, contains('Trim about 35 min'));
+    expect(controller.state.routeFit.level, isNot(ScenarioFitLevel.ready));
     expect(
       controller.state.routeFit.insights,
-      contains('Remove paid stops for free-only mode'),
+      contains(
+        const ScenarioFitInsight(
+          ScenarioFitInsightKind.trimMinutes,
+          minutes: 35,
+        ),
+      ),
+    );
+    expect(
+      controller.state.routeFit.insights,
+      contains(
+        const ScenarioFitInsight(ScenarioFitInsightKind.removePaidStops),
+      ),
     );
   });
 
@@ -220,6 +231,6 @@ void main() {
       isTrue,
     );
     expect(controller.state.routeFit.score, greaterThanOrEqualTo(85));
-    expect(controller.state.routeFit.label, 'Ready');
+    expect(controller.state.routeFit.level, ScenarioFitLevel.ready);
   });
 }

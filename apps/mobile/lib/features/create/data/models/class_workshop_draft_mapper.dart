@@ -6,7 +6,7 @@ class UnsupportedClassWorkshopSchemaException implements Exception {
   final Object? version;
 
   @override
-  String toString() => 'Unsupported Class / Workshop schema version: $version';
+  String toString() => 'Unsupported Class / Workshop schema version: $version'; // l10n-ignore: developer error; the UI receives a code
 }
 
 /// Strict, lossless persistence mapper for `ClassWorkshopDraftData`

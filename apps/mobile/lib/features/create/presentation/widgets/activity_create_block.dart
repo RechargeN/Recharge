@@ -475,7 +475,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
             items: <DropdownMenuItem<ActivityContributionKind>>[
               DropdownMenuItem<ActivityContributionKind>(
                 value: ActivityContributionKind.purchase,
-                child: Text('Purchase (e.g. coffee at the counter)'),
+                child: Text(context.l10n.createActivityPurchaseHint),
               ),
               DropdownMenuItem<ActivityContributionKind>(
                 value: ActivityContributionKind.donation,
@@ -672,7 +672,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                 child: TextFormField(
                   controller: _field('groupMin', groupSize.min.toString()),
                   decoration: InputDecoration(
-                    labelText: 'Group, min people',
+                    labelText: context.l10n.createActivityGroupMin,
                     errorText: _serverError('/body/suggestedGroupSize'),
                   ),
                   keyboardType: TextInputType.number,
@@ -772,7 +772,10 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
         Text(draft.shortDescription),
         const SizedBox(height: 8),
         Text(
-          '${activity.typicalDurationMinutes.min}–${activity.typicalDurationMinutes.max} min',
+          context.l10n.createFormMinutesRange(
+            activity.typicalDurationMinutes.min,
+            activity.typicalDurationMinutes.max,
+          ),
         ),
         if (activity.location.accessCaution?.isInformal ?? false) ...<Widget>[
           const SizedBox(height: 8),
@@ -834,7 +837,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                     ? (widget.publicationEditing
                           ? context.l10n.createFormSaveDraftReturn
                           : context.l10n.createFormSendReview)
-                    : 'Save & continue',
+                    : context.l10n.createFormSaveContinue,
                 textAlign: TextAlign.center,
               ),
             ),

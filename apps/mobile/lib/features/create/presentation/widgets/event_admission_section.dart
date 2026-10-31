@@ -109,7 +109,7 @@ class EventAdmissionSection extends StatelessWidget {
           if (state.presetPreview != null) ...<Widget>[
             const SizedBox(height: 8),
             Text(
-              'Preview: ${createOptionText(context.l10n, state.presetPreview!.admissionMode!)} · '
+              '${context.l10n.createEventPreviewLabel}: ${createOptionText(context.l10n, state.presetPreview!.admissionMode!)} · '
               '${createOptionText(context.l10n, state.presetPreview!.registrationMode!)} · '
               '${createOptionText(context.l10n, state.presetPreview!.confirmationMode!)}',
             ),
@@ -328,7 +328,7 @@ class _InterestAndOnsiteEditor extends StatelessWidget {
         SwitchListTile(
           key: const Key('event-interest-enabled'),
           contentPadding: EdgeInsets.zero,
-          title: const Text('Optional “Interested” response'),
+          title: Text(context.l10n.createEventInterestedOptional),
           subtitle: Text(context.l10n.createFormDoesNotBookReserveInventory),
           value: value?.interestPolicy?.optionalRsvpEnabled ?? false,
           onChanged: (enabled) => controller.updateEventInterestPolicy(

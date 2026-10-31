@@ -9430,4 +9430,2295 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get discoverBadgeClassWorkshop => 'ЗАНЯТИЕ / ВОРКШОП';
+
+  @override
+  String get identityProfessionalPage => 'Professional Page';
+
+  @override
+  String get identityVerificationRevoked => 'Проверка отозвана';
+
+  @override
+  String get identityVerificationRejected => 'Проверка отклонена';
+
+  @override
+  String get identityVerificationPending => 'Проверка ожидает';
+
+  @override
+  String get identityKindPrivateProfessional => 'Частный специалист';
+
+  @override
+  String get identityKindVenueOperator => 'Оператор площадки';
+
+  @override
+  String get identityKindRepresentativeOffice => 'Представительство';
+
+  @override
+  String get identityRetry => 'Повторить';
+
+  @override
+  String get identityCreate => 'Создать';
+
+  @override
+  String get identityMinTwoChars => 'Введите не меньше 2 символов';
+
+  @override
+  String get identityCancel => 'Отмена';
+
+  @override
+  String get identityPageStartsPending =>
+      'Страница начинается со статуса «На проверке». Рынок, язык, часовой пояс и валюта берутся из настроек активного рынка.';
+
+  @override
+  String get identityPageType => 'Тип страницы';
+
+  @override
+  String get identityPageName => 'Название страницы';
+
+  @override
+  String get identityCreatePage => 'Создать Professional Page';
+
+  @override
+  String get identityPreviewOnlyRoles =>
+      'Только предпросмотр. Роли и права не меняются.';
+
+  @override
+  String get identityViewAs => 'Смотреть как';
+
+  @override
+  String get identityNoPageYet => 'Вы ещё не создали Professional Page.';
+
+  @override
+  String get identityCreateContent => 'Создать контент';
+
+  @override
+  String get identityManagePage => 'Управлять страницей';
+
+  @override
+  String get identityPersonalRevoked => 'Личный профиль · Проверка отозвана';
+
+  @override
+  String get identityPersonalExpired => 'Личный профиль · Срок проверки истёк';
+
+  @override
+  String get identityPersonalRejected => 'Личный профиль · Проверка отклонена';
+
+  @override
+  String get identityVerifiedTools => 'Проверено · Инструменты по вашим правам';
+
+  @override
+  String get identityPersonalPending => 'Личный профиль · Проверка ожидает';
+
+  @override
+  String get identityPersonalNotStarted =>
+      'Личный профиль · Проверка не начата';
+
+  @override
+  String get identityAdminSeparate =>
+      'Доступ Admin активен · отдельно от публикации';
+
+  @override
+  String get identityAdminTools => 'Инструменты Admin';
+
+  @override
+  String get identityRequestAdditionalPage =>
+      'Запросить дополнительную страницу';
+
+  @override
+  String get identityModeratorsWillReview =>
+      'Модераторы рассмотрят вашу заявку.';
+
+  @override
+  String get identityLimitRequestPending =>
+      'Заявка на дополнительную страницу ожидает';
+
+  @override
+  String get identityCreator => 'Creator';
+
+  @override
+  String get identityOk => 'ОК';
+
+  @override
+  String get identityAdminMockNotice =>
+      'У этого тестового аккаунта явные права Admin. Рабочие инструменты Admin подключаются в IDP-05A.';
+
+  @override
+  String get identityAdminAccessActive => 'Доступ Admin активен';
+
+  @override
+  String get identityPageNotFound => 'Страница не найдена';
+
+  @override
+  String get identityContentViaProjection =>
+      'Контент появляется здесь только через одобренную проекцию публикатора.';
+
+  @override
+  String get identityNoPublishedContent => 'Опубликованного контента пока нет';
+
+  @override
+  String get identityPublishedContent => 'Опубликованный контент';
+
+  @override
+  String get identityEditPage => 'Изменить страницу';
+
+  @override
+  String get identityShare => 'Поделиться';
+
+  @override
+  String get identityVerifiedPage => 'Проверенная Professional Page';
+
+  @override
+  String get identityPreviewDoesNotPublish =>
+      'Этот предпросмотр не публикует и не проверяет страницу.';
+
+  @override
+  String get identityPublicPagePreview => 'Предпросмотр публичной страницы';
+
+  @override
+  String get identityPreviewNotPublic =>
+      'Предпросмотр. Эта страница не видна публично.';
+
+  @override
+  String get identityPageAccountSettings =>
+      'Аккаунт страницы, участники и международные настройки.';
+
+  @override
+  String get identityContentScoped =>
+      'Контент относится именно к этой Professional Page.';
+
+  @override
+  String get identityOverviewModeration =>
+      'Обзор Professional Page и статус модерации.';
+
+  @override
+  String get identityPreviewUntilVerified =>
+      'Только предпросмотр. Страница не публична, пока проверка не одобрена.';
+
+  @override
+  String get identityPreviewPublicPage => 'Предпросмотр публичной страницы';
+
+  @override
+  String get identityNoPageInvented =>
+      'Для предпросмотра страница не выдумывается. Создайте страницу, чтобы включить её рабочее пространство и контекст публикатора.';
+
+  @override
+  String get identityContentAfterRealPage =>
+      'Контент появится только после того, как пользователь создаст настоящую Professional Page или присоединится к ней.';
+
+  @override
+  String get identityPagePreview => 'Предпросмотр Professional Page';
+
+  @override
+  String get identitySwitchPage => 'Сменить Professional Page';
+
+  @override
+  String get identityCreateOrSelectPage =>
+      'Создайте или выберите Professional Page';
+
+  @override
+  String get identityUserId => 'ID пользователя';
+
+  @override
+  String get identitySendInvitation => 'Отправить приглашение';
+
+  @override
+  String get identityCapabilities => 'Права';
+
+  @override
+  String get identityRole => 'Роль';
+
+  @override
+  String get identityInviteBy => 'Пригласить по';
+
+  @override
+  String get identityInviteMember => 'Пригласить участника команды';
+
+  @override
+  String get identityRevoke => 'Отозвать';
+
+  @override
+  String get identityNoInvitations =>
+      'С этой страницы ещё не отправлено приглашений.';
+
+  @override
+  String get identityNoTeamPermission => 'У вас нет прав управлять командой.';
+
+  @override
+  String get identitySave => 'Сохранить';
+
+  @override
+  String get identityNotSet => 'Не задано.';
+
+  @override
+  String get identityCustomActivityLabel => 'Своё название деятельности';
+
+  @override
+  String get identityDescription => 'Описание';
+
+  @override
+  String get identityShortDescription => 'Краткое описание';
+
+  @override
+  String get identitySwitchWorkspaceHint =>
+      'Личный профиль, Professional Pages и доступ Admin';
+
+  @override
+  String get identitySwitchWorkspace => 'Сменить рабочий профиль';
+
+  @override
+  String get profileDateTbd => 'Дата будет назначена';
+
+  @override
+  String get profileDraftListing => 'Черновик объявления';
+
+  @override
+  String get profileSmartSearchIdea => 'Идея из умного поиска';
+
+  @override
+  String get profilePublishedRoute => 'Опубликованный маршрут';
+
+  @override
+  String get profileReadyToPublish => 'Готово к публикации';
+
+  @override
+  String get profileNoCity => 'Без города';
+
+  @override
+  String get profileUntitledListing => 'Объявление без названия';
+
+  @override
+  String get profileRouteMap => 'Карта маршрута';
+
+  @override
+  String get profileEditRoute => 'Изменить маршрут';
+
+  @override
+  String get profileWalking => 'Пешком';
+
+  @override
+  String get profileFree => 'Бесплатно';
+
+  @override
+  String get profileOpenQuickPlanNext =>
+      'Открыть Quick Plan для следующей идеи';
+
+  @override
+  String get profileBuildNextRoute => 'Построить следующий маршрут';
+
+  @override
+  String get profileMapPublishedListing => 'Опубликованное объявление на карте';
+
+  @override
+  String get profileOpenRouteMap => 'Открыть карту маршрута';
+
+  @override
+  String get profileFindDraftAudience => 'Найти аудиторию черновика';
+
+  @override
+  String get profileFinishDraft => 'Завершить черновик';
+
+  @override
+  String get profileCreatorNextSteps => 'Следующие шаги Creator';
+
+  @override
+  String get profileMapListingArea => 'Область объявления на карте';
+
+  @override
+  String get profileSearchSimilarListing => 'Найти похожее объявление';
+
+  @override
+  String get profileContinueDraft => 'Продолжить черновик';
+
+  @override
+  String get profileOpenCreate => 'Открыть создание';
+
+  @override
+  String get profileCreatorListing => 'Объявление Creator';
+
+  @override
+  String get profileBuildRoute => 'Построить маршрут';
+
+  @override
+  String get profileNewListing => 'Новое объявление';
+
+  @override
+  String get profileManageDrafts =>
+      'Управляйте черновиками и опубликованными объявлениями в одном месте.';
+
+  @override
+  String get profileCreatorPublications => 'Публикации Creator';
+
+  @override
+  String get profileListingFromLatestSmart =>
+      'Создать объявление по последнему умному поиску';
+
+  @override
+  String get profileRouteFromLatestSmart =>
+      'Построить маршрут по последнему умному поиску';
+
+  @override
+  String get profileMapSmart => 'Умный на карте';
+
+  @override
+  String get profileResumeSmart => 'Продолжить умный';
+
+  @override
+  String get profileAnyArea => 'Любой район';
+
+  @override
+  String get profileSmartRoute => 'Умный маршрут';
+
+  @override
+  String get profileSmart => 'Умный';
+
+  @override
+  String get profileLatestSmartSearch => 'Последний умный поиск';
+
+  @override
+  String get profileListingFromLatestSearch =>
+      'Создать объявление по последнему поиску';
+
+  @override
+  String get profileRouteFromLatestSearch =>
+      'Построить маршрут по последнему поиску';
+
+  @override
+  String get profileMapSearch => 'Поиск на карте';
+
+  @override
+  String get profileResumeSearch => 'Продолжить поиск';
+
+  @override
+  String get profileConditions => 'Условия';
+
+  @override
+  String get profileLatestSearch => 'Последний поиск';
+
+  @override
+  String get profileMapRoute => 'Маршрут на карте';
+
+  @override
+  String get profileScenario => 'Сценарий';
+
+  @override
+  String get profileLatestRoute => 'Последний маршрут';
+
+  @override
+  String get profilePersonalScenario => 'Создать личный сценарий отдыха';
+
+  @override
+  String get profileBuildARoute => 'Построить маршрут';
+
+  @override
+  String get profileUseSearchMap => 'Использовать условия поиска и карты';
+
+  @override
+  String get profileFindNextActivity => 'Найти следующую активность';
+
+  @override
+  String get profileSavedPlan => 'Сохранённый план';
+
+  @override
+  String get profileReviewSavedPlan => 'Посмотреть сохранённый план';
+
+  @override
+  String get profileUseSavedInspiration =>
+      'Вдохновляйтесь сохранёнными поисками и сценариями';
+
+  @override
+  String get profileBuildRouteIdea => 'Построить идею маршрута';
+
+  @override
+  String get profileDraftFromTaxonomy =>
+      'Черновик события или места по категориям';
+
+  @override
+  String get profileCreateHub => 'Центр создания';
+
+  @override
+  String get profileIdeaToHub => 'От идеи маршрута к центру создания';
+
+  @override
+  String get profilePublishIdea => 'Опубликовать идею';
+
+  @override
+  String get profileSmartPrompt => 'Умный запрос';
+
+  @override
+  String get profileOpenBuilderControls =>
+      'Открыть конструктор с настройками маршрута';
+
+  @override
+  String get profileGenerateScenario => 'Сгенерировать сценарий';
+
+  @override
+  String get profileSearches => 'Поиски';
+
+  @override
+  String get profileRoutes => 'Маршруты';
+
+  @override
+  String get profileSaved => 'Сохранённые';
+
+  @override
+  String get profileUntitledActivity => 'Активность без названия';
+
+  @override
+  String get profileContinueInSearch => 'Продолжить в условиях поиска';
+
+  @override
+  String get profileFindPeople => 'Найти компанию';
+
+  @override
+  String get profileOpenScenarioBlock =>
+      'Открыть блок сценария в центре создания';
+
+  @override
+  String get profileCreateScenario => 'Создать сценарий';
+
+  @override
+  String get profileOpenRouteBlock => 'Открыть блок маршрута в центре создания';
+
+  @override
+  String get profileCreateRoute => 'Создать маршрут';
+
+  @override
+  String get profileOpenTaxonomyFlow => 'Открыть создание по категориям';
+
+  @override
+  String get profileViewAllEvents => 'Смотреть все события';
+
+  @override
+  String get profileStartFromHub => 'Начните в центре создания Recharge';
+
+  @override
+  String get profileNoCreatedEvents => 'Созданных событий пока нет';
+
+  @override
+  String get profileCreateFirstEvent => 'Создать первое событие';
+
+  @override
+  String get profileEventInsights => 'Статистика событий';
+
+  @override
+  String get profileCreatedEvents => 'Созданные события';
+
+  @override
+  String get profileManagePage => 'Управлять страницей';
+
+  @override
+  String get profilePhotos => 'Фото';
+
+  @override
+  String get profileVisited => 'Посещено';
+
+  @override
+  String get profileCreated => 'Создано';
+
+  @override
+  String get profileWorkspace => 'Рабочее пространство профиля';
+
+  @override
+  String get profileSignInRequired => 'Требуется авторизация';
+
+  @override
+  String get profileCheckVerification =>
+      'Проверку и доступные инструменты смотрите в настройках';
+
+  @override
+  String get profileCreatorTools => 'Инструменты Creator';
+
+  @override
+  String get profileSavedList => 'Сохранённое';
+
+  @override
+  String get profileSettings => 'Настройки';
+
+  @override
+  String get profileObjectUpdatesOff => 'Обновления объектов выключены';
+
+  @override
+  String get profileObjectUpdatesOn => 'Обновления объектов включены';
+
+  @override
+  String get profileCompleted => 'Завершённые';
+
+  @override
+  String get profileActiveUpcoming => 'Активные и предстоящие';
+
+  @override
+  String get quickPlanAnyArea => 'Любой район';
+
+  @override
+  String get quickPlanAnyPrice => 'Любая цена';
+
+  @override
+  String get quickPlanAllCategories => 'Все категории';
+
+  @override
+  String get quickPlanSmartRoute => 'Умный маршрут';
+
+  @override
+  String get quickPlanRechargeIdea => 'Идея для отдыха';
+
+  @override
+  String get quickPlanTplActiveHint =>
+      'Сначала движение, потом отдых на воздухе и ровная энергия.';
+
+  @override
+  String get quickPlanTplActive => 'Активный заряд';
+
+  @override
+  String get quickPlanTplSocialHint =>
+      'Сначала встреча с людьми, затем вечер продолжается неподалёку.';
+
+  @override
+  String get quickPlanTplSocial => 'Вечер в компании';
+
+  @override
+  String get quickPlanTplFreeCity => 'Бесплатная перезагрузка в городе';
+
+  @override
+  String get quickPlanTplCoffeeHint =>
+      'Начните спокойно, затем — лёгкая прогулка по городу.';
+
+  @override
+  String get quickPlanTplCoffee => 'Кофейная перезагрузка';
+
+  @override
+  String get quickPlanResetBuilder => 'Сбросить конструктор';
+
+  @override
+  String get quickPlanNoStopsMatch => 'Под эти условия нет остановок';
+
+  @override
+  String get quickPlanAdd => 'Добавить';
+
+  @override
+  String get quickPlanSuggestedStops => 'Предлагаемые остановки';
+
+  @override
+  String get quickPlanRemoveStop => 'Убрать остановку';
+
+  @override
+  String get quickPlanMoveDown => 'Переместить ниже';
+
+  @override
+  String get quickPlanMoveUp => 'Переместить выше';
+
+  @override
+  String get quickPlanPublishOptimized =>
+      'Опубликовать оптимизированный маршрут';
+
+  @override
+  String get quickPlanMapRoute => 'Маршрут на карте';
+
+  @override
+  String get quickPlanOptimize => 'Оптимизировать';
+
+  @override
+  String get quickPlanFreeOnly => 'Только бесплатно';
+
+  @override
+  String get quickPlanRouteFit => 'Соответствие маршрута';
+
+  @override
+  String get quickPlanWalkingRoute => 'Пешеходный маршрут';
+
+  @override
+  String get quickPlanMoodActive => 'Активный';
+
+  @override
+  String get quickPlanMoodSocial => 'Компанейский';
+
+  @override
+  String get quickPlanMoodCalm => 'Спокойный';
+
+  @override
+  String get quickPlanListingFromSmart => 'Создать объявление по умному поиску';
+
+  @override
+  String get quickPlanOpenSmartOnMap => 'Открыть умный поиск на карте';
+
+  @override
+  String get quickPlanApplySmartToBuilder =>
+      'Применить умный поиск в конструкторе';
+
+  @override
+  String get quickPlanSmartSearch => 'Умный поиск';
+
+  @override
+  String get quickPlanListingFromSaved =>
+      'Создать объявление по сохранённым условиям';
+
+  @override
+  String get quickPlanOpenSavedOnMap => 'Открыть сохранённые условия на карте';
+
+  @override
+  String get quickPlanApplySavedToBuilder =>
+      'Применить сохранённые условия в конструкторе';
+
+  @override
+  String get quickPlanSavedConditions => 'Сохранённые условия';
+
+  @override
+  String get quickPlanBuildFromSaved => 'Построить по сохранённой задумке';
+
+  @override
+  String get quickPlanReadyIdeas => 'Готовые идеи маршрутов';
+
+  @override
+  String get quickPlanPublishRoute => 'Опубликовать маршрут';
+
+  @override
+  String get quickPlanSearch => 'Поиск';
+
+  @override
+  String get quickPlanMap => 'Карта';
+
+  @override
+  String get quickPlanCopy => 'Копировать';
+
+  @override
+  String get quickPlanSave => 'Сохранить';
+
+  @override
+  String get quickPlanBuildRechargeRoute => 'Построить маршрут отдыха';
+
+  @override
+  String get quickPlanRoutePreview => 'Предпросмотр маршрута';
+
+  @override
+  String get quickPlanContinueSnapshot => 'Продолжить с копией';
+
+  @override
+  String get quickPlanRefresh => 'Обновить';
+
+  @override
+  String get quickPlanRefreshOrContinue =>
+      'Обновите предпросмотр или продолжите с последней доступной копией.';
+
+  @override
+  String get quickPlanChanged => 'Quick Plan изменился';
+
+  @override
+  String get quickPlanCreateIndependent => 'Создать независимый сценарий';
+
+  @override
+  String get quickPlanCancel => 'Отмена';
+
+  @override
+  String get quickPlanNoNotes =>
+      'Подходят только ваши заметки; в этом старом плане их нет.';
+
+  @override
+  String get quickPlanCopyNotes => 'Скопировать мои личные заметки';
+
+  @override
+  String get quickPlanLegacyStopsHint =>
+      'У старых остановок нет ID объектов каталога, поэтому они попадут в сценарий как личные места.';
+
+  @override
+  String get quickPlanIndependentHint =>
+      'Будет создан новый независимый сценарий. Дальнейшие изменения не синхронизируются ни в одну сторону.';
+
+  @override
+  String get quickPlanExpandToScenario => 'Развернуть в сценарий';
+
+  @override
+  String get quickPlanCopyStopsHint =>
+      'Скопируйте выбранные остановки в новый независимый сценарий. Этот Quick Plan не изменится.';
+
+  @override
+  String get quickPlanNeedLargerPlan =>
+      'Нужен план побольше — для города или поездки?';
+
+  @override
+  String get quickPlanSavePlan => 'Сохранить этот план';
+
+  @override
+  String get quickPlanOpenMap => 'Открыть карту';
+
+  @override
+  String get quickPlanEditPlan => 'Изменить план';
+
+  @override
+  String get quickPlanNoStopsFit =>
+      'Под эти условия пока нет остановок. Измените план, чтобы добавить.';
+
+  @override
+  String get quickPlanYourRoute => 'Ваш маршрут';
+
+  @override
+  String get quickPlanExpandFailed => 'Не удалось расширить этот Quick Plan';
+
+  @override
+  String get quickPlanCopied => 'Quick Plan скопирован';
+
+  @override
+  String get quickPlanSaved => 'Quick Plan сохранён';
+
+  @override
+  String get quickPlanNotSynced =>
+      'Не синхронизировано. Локальные изменения сохранены; обновите, чтобы повторить.';
+
+  @override
+  String get quickPlanLeave => 'Покинуть';
+
+  @override
+  String get quickPlanOpenReadOnly => 'Открыть только для чтения';
+
+  @override
+  String get quickPlanDecline => 'Отклонить';
+
+  @override
+  String get quickPlanAccept => 'Принять';
+
+  @override
+  String get quickPlanRevoke => 'Отозвать';
+
+  @override
+  String get quickPlanCancelInvite => 'Отменить приглашение';
+
+  @override
+  String get quickPlanDeletePersonal => 'Удалить текущий личный план';
+
+  @override
+  String get quickPlanImportPersonal => 'Импортировать личный план';
+
+  @override
+  String get quickPlanImportJson => 'Импорт recharge.quickPlan JSON';
+
+  @override
+  String get quickPlanInviteToSaved => 'Пригласить в текущий сохранённый план';
+
+  @override
+  String get quickPlanInviteUserId => 'Пригласить по ID пользователя';
+
+  @override
+  String get quickPlanUseKnownUserId =>
+      'Используйте известный ID пользователя. Ожидающие действия вступают в силу после подтверждения сервера.';
+
+  @override
+  String get quickPlanInvitations => 'Приглашения Quick Plan';
+
+  @override
+  String get quickPlanContinue => 'Продолжить';
+
+  @override
+  String get quickPlanLeavePlan => 'Покинуть план';
+
+  @override
+  String get quickPlanContentHidden =>
+      'Содержимое скрыто. Обновите, чтобы проверить доступ.';
+
+  @override
+  String get quickPlanRefreshAccess => 'Обновить доступ';
+
+  @override
+  String get quickPlanCloseInvited => 'Закрыть план по приглашению';
+
+  @override
+  String get quickPlanInvitedPlan => 'Quick Plan по приглашению';
+
+  @override
+  String get quickPlanRouteSteps => 'Шаги маршрута';
+
+  @override
+  String get quickPlanYourPlan => 'Ваш план отдыха';
+
+  @override
+  String get quickPlanReset => 'Сбросить';
+
+  @override
+  String get quickPlanEdit => 'Изменить';
+
+  @override
+  String get quickPlanInvitationsAccess => 'Приглашения и доступ';
+
+  @override
+  String get quickPlanQuickPlan => 'Quick Plan';
+
+  @override
+  String get quickPlanMyQuickPlan => 'Мой Quick Plan';
+
+  @override
+  String get favoritesFree => 'Бесплатно';
+
+  @override
+  String get favoritesAnyArea => 'Любой район';
+
+  @override
+  String get favoritesSmartRoute => 'Умный маршрут';
+
+  @override
+  String get favoritesRechargeIdea => 'Идея для отдыха';
+
+  @override
+  String get favoritesAnyTime => 'В любое время';
+
+  @override
+  String get favoritesBadgeRoute => 'МАРШРУТ';
+
+  @override
+  String get favoritesBadgePlace => 'МЕСТО';
+
+  @override
+  String get favoritesBadgeEvent => 'СОБЫТИЕ';
+
+  @override
+  String get favoritesShowAll => 'Показать все';
+
+  @override
+  String get favoritesFilterEmpty => 'В этом фильтре пока пусто';
+
+  @override
+  String get favoritesRemove => 'Убрать';
+
+  @override
+  String get favoritesMoreActions => 'Другие действия';
+
+  @override
+  String get favoritesTitle => 'Избранное';
+
+  @override
+  String get favoritesRoutes => 'Маршруты';
+
+  @override
+  String get favoritesPlaces => 'Места';
+
+  @override
+  String get favoritesEvents => 'События';
+
+  @override
+  String get favoritesAll => 'Все';
+
+  @override
+  String get favoritesMap => 'Карта';
+
+  @override
+  String get favoritesResume => 'Продолжить';
+
+  @override
+  String get favoritesListingFromSmart => 'Создать объявление по умному поиску';
+
+  @override
+  String get favoritesDeleteSmart => 'Удалить умный поиск';
+
+  @override
+  String get favoritesSmartSearch => 'Умный поиск';
+
+  @override
+  String get favoritesListingFromSaved =>
+      'Создать объявление по сохранённым условиям';
+
+  @override
+  String get favoritesDeleteSaved => 'Удалить сохранённые условия';
+
+  @override
+  String get favoritesSavedConditions => 'Сохранённые условия';
+
+  @override
+  String get favoritesSavedIntentsHint =>
+      'Условия и запросы готовы к продолжению';
+
+  @override
+  String get favoritesSavedIntents => 'Сохранённые задумки';
+
+  @override
+  String get favoritesOpenDiscover => 'Открыть Discover';
+
+  @override
+  String get favoritesEmpty => 'Пока нет сохранённых событий';
+
+  @override
+  String get favoritesRetry => 'Повторить';
+
+  @override
+  String get favoritesLoadFailed => 'Не удалось загрузить избранное';
+
+  @override
+  String get favoritesRefresh => 'Обновить избранное';
+
+  @override
+  String get visitedRemoveFromHistory => 'Убрать из истории';
+
+  @override
+  String get visitedActions => 'Действия с посещением';
+
+  @override
+  String get visitedClearPeriod => 'Сбросить период';
+
+  @override
+  String get visitedEmptyPeriod => 'В этот период посещений нет';
+
+  @override
+  String get visitedClear => 'Очистить';
+
+  @override
+  String get visitedRemoved => 'Посещение убрано';
+
+  @override
+  String get visitedRemove => 'Убрать';
+
+  @override
+  String get visitedCancel => 'Отмена';
+
+  @override
+  String get visitedRemoveVisit => 'Убрать посещение?';
+
+  @override
+  String get visitedSelectDay => 'Выбрать день посещения';
+
+  @override
+  String get visitedSelectMonth => 'Выбрать месяц';
+
+  @override
+  String get visitedTitle => 'История посещений';
+
+  @override
+  String get visitedEmptyHint =>
+      'Здесь появятся места, которые вы отметите как посещённые.';
+
+  @override
+  String get visitedEmpty => 'Посещений пока нет';
+
+  @override
+  String get visitedRetry => 'Повторить';
+
+  @override
+  String get visitedTryAgain => 'Попробуйте снова.';
+
+  @override
+  String get visitedLoadFailed => 'Не удалось загрузить посещения';
+
+  @override
+  String get visitedRefresh => 'Обновить историю посещений';
+
+  @override
+  String get visitedSignInRequired => 'Требуется авторизация';
+
+  @override
+  String get identityEmail => 'Эл. почта';
+
+  @override
+  String get identityPhone => 'Телефон';
+
+  @override
+  String get quickPlanTplFreeCityHint =>
+      'Простой бесплатный маршрут для спокойного отдыха.';
+
+  @override
+  String identityWorkspaceNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'workspace_recovered': 'Недоступная страница сброшена на личный профиль.',
+      'workspace_load_failed': 'Не удалось загрузить рабочие профили.',
+      'workspace_switched': 'Рабочий профиль переключён.',
+      'workspace_access_unavailable': 'Доступ к выбранной странице недоступен.',
+      'workspace_switch_failed': 'Не удалось переключить рабочий профиль.',
+      'admin_preview_selected': 'Выбран предпросмотр Admin.',
+      'page_created': 'Professional Page создана и отправлена на проверку.',
+      'self_service_page_limit_reached':
+          'Достигнут лимит 3 страниц. Отправьте заявку модераторам.',
+      'page_create_failed': 'Не удалось создать Professional Page.',
+      'page_limit_request_sent':
+          'Заявка на дополнительную страницу отправлена.',
+      'page_limit_request_unavailable':
+          'Заявка доступна после создания трёх страниц.',
+      'page_limit_request_failed': 'Не удалось отправить заявку модераторам.',
+      'other': 'Не удалось загрузить рабочие профили.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityTeamNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'invitation_sent': 'Приглашение отправлено.',
+      'invitation_send_failed': 'Не удалось отправить приглашение.',
+      'invitation_revoked': 'Приглашение отозвано.',
+      'invitation_revoke_failed': 'Не удалось отозвать приглашение.',
+      'invitations_load_failed': 'Не удалось загрузить приглашения в команду.',
+      'invitation_target_invalid':
+          'Введите корректный ID пользователя, почту или телефон.',
+      'owner_relationship_not_invitable':
+          'Права владельца нельзя передать приглашением.',
+      'inviter_not_active_member':
+          'Приглашать может только активный участник команды.',
+      'inviter_missing_team_manage_capability':
+          'У вас нет прав управлять командой.',
+      'cannot_delegate_capability_not_held':
+          'Нельзя передать право, которого нет у вас самого.',
+      'revoke_actor_not_active_member':
+          'Отзывать приглашения может только активный участник команды.',
+      'invitation_not_found': 'Этого приглашения больше нет.',
+      'other': 'Не удалось отправить приглашение.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityProfileNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'profile_load_failed': 'Не удалось загрузить профиль страницы.',
+      'profile_updated': 'Профиль обновлён.',
+      'profile_update_failed': 'Не удалось обновить профиль.',
+      'default_locale_value_required':
+          'Заполните значение на языке страницы по умолчанию.',
+      'unsupported_locale': 'Эта страница не поддерживает этот язык.',
+      'value_length_out_of_bounds': 'Текст пустой или слишком длинный.',
+      'actor_not_active_member':
+          'Менять профиль может только активный участник команды.',
+      'actor_missing_page_manage_capability':
+          'У вас нет прав менять профиль страницы.',
+      'stale_overlay_revision':
+          'Это поле изменено в другом месте. Обновите и попробуйте снова.',
+      'other': 'Не удалось обновить профиль.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityPublicPageNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'page_load_failed': 'Не удалось загрузить эту страницу.',
+      'page_preview_failed': 'Не удалось загрузить предпросмотр страницы.',
+      'other': 'Не удалось загрузить эту страницу.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityInboxTitle(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'identity_page_created_user': 'Professional Page создана',
+      'identity_page_created_moderators': 'Новая Professional Page',
+      'identity_page_limit_request_user': 'Заявка отправлена',
+      'identity_page_limit_request_moderators':
+          'Запрос дополнительной страницы',
+      'other': 'Уведомление',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityInboxBody(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'identity_page_created_user': 'Статус проверки: ожидает.',
+      'identity_page_created_moderators':
+          'Создана новая страница. Требуется проверка.',
+      'identity_page_limit_request_user':
+          'Модераторы рассмотрят дополнительную Professional Page.',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityInboxLimitBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count страницы',
+      many: '$count страниц',
+      few: '$count страницы',
+      one: '$count страница',
+    );
+    return 'Пользователь запросил лимит: $_temp0.';
+  }
+
+  @override
+  String profileRoleTitle(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'pro_generator': 'Pro-генератор',
+      'creator': 'Creator',
+      'user': 'Пользователь',
+      'other': 'Creator',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String quickPlanFitLevel(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'needsStops': 'Нужны остановки',
+      'ready': 'Готово',
+      'goodWithTweaks': 'Хорошо с поправками',
+      'other': 'Нужна настройка',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String quickPlanFitSummary(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'needsStops':
+          'Добавьте хотя бы одну остановку, чтобы маршрут был полезен.',
+      'ready': 'Маршрут готов для карты или публикации.',
+      'goodWithTweaks': 'Небольшая оптимизация сделает маршрут удобнее.',
+      'other': 'Оптимизируйте маршрут перед отправкой на карту или в создание.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get quickPlanFitNoStops => 'Остановки не выбраны';
+
+  @override
+  String quickPlanFitTrim(int minutes) {
+    return 'Сократите примерно на $minutes мин';
+  }
+
+  @override
+  String quickPlanFitFits(int minutes) {
+    return 'Укладывается в $minutes мин';
+  }
+
+  @override
+  String get quickPlanFitRoom => 'Есть место для ещё одной остановки';
+
+  @override
+  String get quickPlanFitRemovePaid =>
+      'Уберите платные остановки для режима «только бесплатно»';
+
+  @override
+  String get quickPlanFitFreeRoute => 'Бесплатный маршрут';
+
+  @override
+  String quickPlanFitTotalPrice(String price) {
+    return 'Всего $price';
+  }
+
+  @override
+  String get quickPlanFitShortenTransfers =>
+      'Сократите переходы для пешего режима';
+
+  @override
+  String quickPlanFitTotalDistance(String km) {
+    return 'Всего $km км';
+  }
+
+  @override
+  String get profileOpenSearchWith => 'Открыть поиск по';
+
+  @override
+  String get quickPlanAccessUnavailable =>
+      'Доступ недоступен. Обновите, чтобы повторить.';
+
+  @override
+  String get quickPlanNotConfirmed =>
+      'Ещё не подтверждено. Обновите, чтобы повторить.';
+
+  @override
+  String quickPlanTemplateApplied(String message) {
+    return 'Применено: $message';
+  }
+
+  @override
+  String quickPlanApplyTemplate(String message) {
+    return 'Применить шаблон «$message»';
+  }
+
+  @override
+  String quickPlanExpandStops(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Развернуть $count остановки в сценарий',
+      many: 'Развернуть $count остановок в сценарий',
+      few: 'Развернуть $count остановки в сценарий',
+      one: 'Развернуть $count остановку в сценарий',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get identitySectionPage => 'Страница';
+
+  @override
+  String get identitySectionContent => 'Контент';
+
+  @override
+  String get identitySectionAccount => 'Аккаунт';
+
+  @override
+  String identityEditField(String message) {
+    return 'Изменить: $message';
+  }
+
+  @override
+  String get identityInvitationPending => 'Ожидает';
+
+  @override
+  String get identityInvitationRevoked => 'Отозвано';
+
+  @override
+  String get identityInvitationExpired => 'Истекло';
+
+  @override
+  String get identityKindCompany => 'Компания';
+
+  @override
+  String get identityKindOrganization => 'Организация';
+
+  @override
+  String get identityUnverified => 'Не проверена';
+
+  @override
+  String get identityVerified => 'Проверена';
+
+  @override
+  String get profilePersonal => 'Личный';
+
+  @override
+  String get profileBookingsRequests => 'Бронирования и заявки';
+
+  @override
+  String get profileOneTimeEvent => 'Разовое событие';
+
+  @override
+  String profileMissingFields(String message) {
+    return 'Не хватает: $message';
+  }
+
+  @override
+  String profileMissingField(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'title': 'название',
+      'category': 'категория',
+      'city': 'город',
+      'cover': 'обложка',
+      'other': 'время начала',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get profileStagePublished => 'Опубликовано';
+
+  @override
+  String get profileStageDraft => 'Черновик';
+
+  @override
+  String get profilePublishedReady => 'Готово к публикации';
+
+  @override
+  String profileMissingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Не хватает $count',
+      many: 'Не хватает $count',
+      few: 'Не хватает $count',
+      one: 'Не хватает $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileAll => 'Все';
+
+  @override
+  String get quickPlanRetryPending => 'Обновить / повторить ожидающие';
+
+  @override
+  String get quickPlanPlanLabel => 'План';
+
+  @override
+  String quickPlanGrantStatus(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'pending': 'Ожидает',
+      'active': 'Активно',
+      'accepted': 'Принято',
+      'declined': 'Отклонено',
+      'revoked': 'Отозвано',
+      'left': 'Покинуто',
+      'other': 'Неизвестный статус',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get quickPlanInvitee => 'Приглашённый';
+
+  @override
+  String get quickPlanOwner => 'Владелец';
+
+  @override
+  String get quickPlanReinvite => 'Пригласить снова';
+
+  @override
+  String quickPlanMoodReady(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Спокойный маршрут — можно идти или подправить.',
+      'social': 'Маршрут в компании — можно идти или подправить.',
+      'active': 'Активный маршрут — можно идти или подправить.',
+      'other': 'Свой маршрут — можно идти или подправить.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String quickPlanMoodPlan(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Спокойный план',
+      'social': 'План в компании',
+      'active': 'Активный план',
+      'other': 'Свой план',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String quickPlanMoodQuickPlan(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Спокойный Quick Plan',
+      'social': 'Quick Plan в компании',
+      'active': 'Активный Quick Plan',
+      'other': 'Свой Quick Plan',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get quickPlanApplied => 'Применён';
+
+  @override
+  String get quickPlanUse => 'Использовать';
+
+  @override
+  String get favoritesEdit => 'Изменить';
+
+  @override
+  String get favoritesOpen => 'Открыть';
+
+  @override
+  String get favoritesRoute => 'Маршрут';
+
+  @override
+  String get visitedMonth => 'Месяц';
+
+  @override
+  String get visitedDay => 'День';
+
+  @override
+  String get routeRecordingNotificationTitle => 'Идёт запись маршрута';
+
+  @override
+  String get routeRecordingNotificationText =>
+      'Recharge сохраняет ваш маршрут, пока приложение работает в фоне.';
+
+  @override
+  String get createFormSaveContinue => 'Сохранить и продолжить';
+
+  @override
+  String get createClassLeadMyself => 'Это занятие веду я';
+
+  @override
+  String get profileControlCenter => 'ЦЕНТР УПРАВЛЕНИЯ';
+
+  @override
+  String get profileLatestCreatedEvents => 'ПОСЛЕДНИЕ СОЗДАННЫЕ СОБЫТИЯ';
+
+  @override
+  String get profileQuickActions => 'БЫСТРЫЕ ДЕЙСТВИЯ';
+
+  @override
+  String get profileWorkspaceHeading => 'Рабочее пространство';
+
+  @override
+  String profileSearchContinuations(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Поиски для продолжения: $count',
+      many: 'Поиски для продолжения: $count',
+      few: 'Поиски для продолжения: $count',
+      one: 'Поиски для продолжения: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profileActivitiesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count активности',
+      many: '$count активностей',
+      few: '$count активности',
+      one: '$count активность',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profileRoutesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count маршрута',
+      many: '$count маршрутов',
+      few: '$count маршрута',
+      one: '$count маршрут',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profileSavedIdeasReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Сохранённые идеи: $count',
+      many: 'Сохранённые идеи: $count',
+      few: 'Сохранённые идеи: $count',
+      one: 'Сохранённые идеи: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileResume => 'Продолжить';
+
+  @override
+  String get quickPlanReadOnlyOnline => 'Только просмотр · нужен доступ к сети';
+
+  @override
+  String get quickPlanConditions => 'Условия';
+
+  @override
+  String get quickPlanIntentLabel => 'Запрос';
+
+  @override
+  String get visitedPrivateHint => 'Личные отметки о посещённых местах.';
+
+  @override
+  String get visitedSelfReported => 'Отмечено вами';
+
+  @override
+  String get identityProfile => 'Профиль';
+
+  @override
+  String get identityTeam => 'Команда';
+
+  @override
+  String get identityRequired => 'Обязательное поле.';
+
+  @override
+  String get identitySectionPersonal => 'ЛИЧНОЕ';
+
+  @override
+  String get identitySectionProfessionalPages => 'PROFESSIONAL PAGES';
+
+  @override
+  String get identitySectionAdministration => 'АДМИНИСТРИРОВАНИЕ';
+
+  @override
+  String identityPagesUsed(int count, int max) {
+    String _temp0 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: 'Использовано $count из $max страницы самообслуживания',
+      many: 'Использовано $count из $max страниц самообслуживания',
+      few: 'Использовано $count из $max страниц самообслуживания',
+      one: 'Использовано $count из $max страницы самообслуживания',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String identityPublishedItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Опубликовано: $count',
+      many: 'Опубликовано: $count',
+      few: 'Опубликовано: $count',
+      one: 'Опубликовано: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileScenarioLibrary => 'Сценарии';
+
+  @override
+  String get discoverHomeTagline => 'ПРИЛОЖЕНИЕ ДЛЯ ОТДЫХА';
+
+  @override
+  String createTaxonomySearchCategories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Поиск по категориям: $count',
+      many: 'Поиск по категориям: $count',
+      few: 'Поиск по категориям: $count',
+      one: 'Поиск по категориям: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createFormOpeningRules(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Правила работы: $count',
+      many: 'Правила работы: $count',
+      few: 'Правила работы: $count',
+      one: 'Правила работы: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormAddHours => 'Добавить 09:00–21:00';
+
+  @override
+  String createFormMinimumVisitChip(int minutes) {
+    return 'Минимум $minutes мин';
+  }
+
+  @override
+  String createFormCapacityOf(int current, int max) {
+    return 'Вместимость $current/$max';
+  }
+
+  @override
+  String createFormMetersValue(String value) {
+    return '$value м';
+  }
+
+  @override
+  String createFormPointsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count точки',
+      many: '$count точек',
+      few: '$count точки',
+      one: '$count точка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createRouteVersionLabel => 'версия';
+
+  @override
+  String get createRouteGeometryLabel => 'Геометрия';
+
+  @override
+  String get createActivityPurchaseHint => 'Покупка (например, кофе на стойке)';
+
+  @override
+  String get createActivityGroupMin => 'Группа, мин. человек';
+
+  @override
+  String createFormMinutesRange(int min, int max) {
+    return '$min–$max мин';
+  }
+
+  @override
+  String get createFormImagesPermission =>
+      'У меня есть разрешение на использование этих изображений';
+
+  @override
+  String get createClassOutcomesPerLine => 'Результаты (каждый с новой строки)';
+
+  @override
+  String get createClassPrerequisitesPerLine =>
+      'Требования (каждое с новой строки)';
+
+  @override
+  String get createClassFoldSecond => 'Второй (зимнее время)';
+
+  @override
+  String get createClassStartHhmm => 'Начало (ЧЧ:ММ)';
+
+  @override
+  String get createClassEndHhmm => 'Конец (ЧЧ:ММ)';
+
+  @override
+  String get createCollectionNoTitleYet => '(названия пока нет)';
+
+  @override
+  String get createCollectionPublishedRemove =>
+      'Опубликовано — удалить без проверки';
+
+  @override
+  String createCollectionObjectType(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'place': 'Место',
+      'route': 'Маршрут',
+      'bookableSession': 'Сеанс',
+      'classWorkshop': 'Занятие / мастер-класс',
+      'rental': 'Аренда',
+      'other': 'Объект',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createEventPreviewLabel => 'Предпросмотр';
+
+  @override
+  String get createEventInterestedOptional =>
+      'Необязательный ответ «Интересно»';
+
+  @override
+  String get createEventAvailabilityLabel => 'Состояние';
+
+  @override
+  String createEventAvailabilityState(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'available': 'доступно',
+      'lowAvailability': 'мало мест',
+      'soldOut': 'мест нет',
+      'waitlistAvailable': 'открыт лист ожидания',
+      'registrationClosed': 'регистрация закрыта',
+      'cancelled': 'отменено',
+      'stale': 'устарело',
+      'other': 'неизвестно',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createEventAvailabilityFreshness(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'current': 'актуально',
+      'stale': 'устарело',
+      'other': 'неизвестно',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createEventSuggestedLabel => 'Предложено';
+
+  @override
+  String createEventArchetype(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'performance': 'Выступление',
+      'screening': 'Показ',
+      'exhibition': 'Выставка',
+      'open_stage': 'Открытая сцена',
+      'meet_greet': 'Встреча с гостем',
+      'talk': 'Лекция',
+      'discussion': 'Дискуссия',
+      'conference': 'Конференция',
+      'networking': 'Нетворкинг',
+      'social_meetup': 'Дружеская встреча',
+      'hosted_game': 'Игра с ведущим',
+      'open_play': 'Свободная игра',
+      'competition': 'Соревнование',
+      'class_session': 'Занятие',
+      'workshop': 'Мастер-класс',
+      'retreat_camp': 'Ретрит или лагерь',
+      'wellness_session': 'Оздоровительное занятие',
+      'tasting': 'Дегустация',
+      'shared_meal': 'Совместная трапеза',
+      'party': 'Вечеринка',
+      'celebration': 'Праздник',
+      'festival': 'Фестиваль',
+      'market_fair': 'Рынок или ярмарка',
+      'auction': 'Аукцион',
+      'launch_promotion': 'Запуск или промоакция',
+      'open_day': 'День открытых дверей',
+      'tour_excursion': 'Тур или экскурсия',
+      'outdoor_gathering': 'Встреча на природе',
+      'community_action': 'Акция сообщества',
+      'volunteering': 'Волонтёрство',
+      'fundraiser': 'Сбор средств',
+      'family_program': 'Семейная программа',
+      'ceremony': 'Церемония',
+      'other': 'Другое',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createEventParticipationMode(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'mode_watch': 'Смотреть',
+      'mode_attend': 'Посетить',
+      'mode_play': 'Играть',
+      'mode_compete': 'Соревноваться',
+      'mode_perform': 'Выступать',
+      'mode_practice': 'Тренироваться',
+      'mode_learn': 'Учиться',
+      'mode_create': 'Создавать',
+      'mode_meet_people': 'Знакомиться',
+      'mode_date': 'Свидание',
+      'mode_visit': 'Посетить место',
+      'mode_explore': 'Исследовать',
+      'mode_eat_drink': 'Есть и пить',
+      'mode_shop': 'Покупать',
+      'mode_support': 'Поддержать',
+      'mode_volunteer': 'Волонтёрить',
+      'mode_travel': 'Путешествовать',
+      'other': 'Другое',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createEventAdditionalRole(String message) {
+    return '$message: дополнительная роль посетителя';
+  }
+
+  @override
+  String get createEventMediaRights =>
+      'У меня есть право публиковать эти материалы *';
+
+  @override
+  String get createEventAllDay => 'Событие на весь день';
+
+  @override
+  String get createEventIanaTimezone => 'Часовой пояс IANA';
+
+  @override
+  String createEventOccurrencesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Создано дат: $count',
+      many: 'Создано дат: $count',
+      few: 'Создано дат: $count',
+      one: 'Создано дат: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createEventNextDateLabel => 'Следующая дата';
+
+  @override
+  String createEventPriceIn(String value) {
+    return 'Цена ($value)';
+  }
+
+  @override
+  String get createFormContinue => 'Продолжить';
+
+  @override
+  String get createEventCapacityInventory => 'Вместимость и учёт мест';
+
+  @override
+  String get createEventPoolsLabel => 'Группы мест';
+
+  @override
+  String get createEventZoneReference => 'Обозначение зоны/стола';
+
+  @override
+  String get createFindPeopleTagsField => 'Теги (через запятую, до 8)';
+
+  @override
+  String get createFindPeoplePaceOptional => 'Темп (необязательно)';
+
+  @override
+  String get createFindPeopleSecretRefHint =>
+      'Защищённая ссылка на эту встречу; публично не показывается';
+
+  @override
+  String get createFormAmount => 'Сумма';
+
+  @override
+  String get createFindPeopleHostsTitle => 'Организаторы, видимость и общение';
+
+  @override
+  String get createFindPeopleCohostInactive =>
+      'Права соорганизатора не действуют, пока приглашённый пользователь не примет роль.';
+
+  @override
+  String get createFindPeopleAccuracyConfirm =>
+      'Подтверждаю, что все данные верны *';
+
+  @override
+  String get createFormReadOnlyDraft => 'Черновик только для чтения';
+
+  @override
+  String get createFormDescriptionRequired => 'Описание *';
+
+  @override
+  String get createFormDescriptionRecommended => 'Описание (рекомендуется)';
+
+  @override
+  String get createPlaceShortDescHint => '20–180 символов.';
+
+  @override
+  String get createPlaceDirectionsHint =>
+      'Необязательно: вход, дорога или место встречи';
+
+  @override
+  String get createPlaceOpen247 => 'Открыто 24/7';
+
+  @override
+  String get createPlaceSeasonalPhase2 => 'Сезонно (этап 2)';
+
+  @override
+  String get createFormDateFormatHint => 'ГГГГ-ММ-ДД';
+
+  @override
+  String get createPlaceUntilInclusive => 'До (включительно)';
+
+  @override
+  String get createPlaceShortVisit => 'Можно заглянуть и ненадолго';
+
+  @override
+  String get createPlaceCoverRecommended =>
+      'Обложка рекомендуется, её можно добавить позже.';
+
+  @override
+  String get createPlaceGalleryOptional => 'Необязательно · не больше 12';
+
+  @override
+  String get createPlaceWarningsReviewed => 'Предупреждения просмотрены';
+
+  @override
+  String get createFormReviewing => 'Проверка…';
+
+  @override
+  String createPlaceRecommendedMinutes(int minutes) {
+    return 'Рекомендуется: $minutes мин';
+  }
+
+  @override
+  String get createPlaceRoutePrimary => 'Маршрут (основное действие)';
+
+  @override
+  String createPlaceDuplicateReason(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'title_match': 'похожее название',
+      'category_match': 'та же категория',
+      'official_domain_match': 'тот же сайт',
+      'phone_match': 'тот же телефон',
+      'other': 'похожие данные',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createRentalBrandModel => 'Бренд / модель (необязательно)';
+
+  @override
+  String get createRentalConfirmCategory => 'Подтверждаю, что категория верна';
+
+  @override
+  String get createRentalSizeVariant => 'Размер / вариант';
+
+  @override
+  String createFormConfirmedOn(String date) {
+    return 'Подтверждено $date';
+  }
+
+  @override
+  String createRentalUnitsBlocked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Заблокировано единиц: $count',
+      many: 'Заблокировано единиц: $count',
+      few: 'Заблокировано единиц: $count',
+      one: 'Заблокировано единиц: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createRentalDefaultsEditable =>
+      'Можно менять — ничего не применяется автоматически.';
+
+  @override
+  String get createRentalIdRequired =>
+      'При передаче нужен документ, удостоверяющий личность';
+
+  @override
+  String get createRentalCurrencyField => 'Валюта (ISO 4217)';
+
+  @override
+  String createRentalRateStep(int count, String price) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'От $count ед.: $price (в младших единицах)',
+      many: 'От $count ед.: $price (в младших единицах)',
+      few: 'От $count ед.: $price (в младших единицах)',
+      one: 'От $count ед.: $price (в младших единицах)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createRentalDepositField => 'Залог (в младших единицах, 0 = нет)';
+
+  @override
+  String get createRentalPrivateNotice =>
+      'Лично, не публикуется: точный адрес выдачи, координаты и инструкции по передаче вводятся отдельно и здесь не появляются.';
+
+  @override
+  String get createRentalRightToOffer =>
+      'У меня есть право сдавать это в аренду';
+
+  @override
+  String createFormStepOf(int current, int total) {
+    return 'Шаг $current из $total';
+  }
+
+  @override
+  String get createRouteGpxExport => 'Экспорт GPX';
+
+  @override
+  String get createRouteGpxSaved => 'Файл GPX сохранён.';
+
+  @override
+  String createFormBytes(String value) {
+    return '$value Б';
+  }
+
+  @override
+  String createFormKilobytes(String value) {
+    return '$value КБ';
+  }
+
+  @override
+  String createFormMegabytes(String value) {
+    return '$value МБ';
+  }
+
+  @override
+  String createRouteGpxKind(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'track': 'Трек',
+      'other': 'Маршрут',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteSegmentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count сегмента',
+      many: '$count сегментов',
+      few: '$count сегмента',
+      one: '$count сегмент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteConnectGaps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Соединить разрывы прямыми: $count',
+      many: 'Соединить разрывы прямыми: $count',
+      few: 'Соединить разрывы прямыми: $count',
+      one: 'Соединить разрывы прямыми: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteImportPoi(int count) {
+    return 'Импортировать POI: $count';
+  }
+
+  @override
+  String createRouteAnchorsTitle(int count) {
+    return 'Опорные точки ($count)';
+  }
+
+  @override
+  String createRouteAnchorSemantics(int index, String start, String end) {
+    return 'Опорная точка $index, широта $start, долгота $end';
+  }
+
+  @override
+  String createRouteSegmentsTitle(int count) {
+    return 'Сегменты ($count)';
+  }
+
+  @override
+  String get createRouteSegmentAppears =>
+      'Сегмент появится после второй опорной точки.';
+
+  @override
+  String createRouteSegmentN(int index) {
+    return 'Сегмент $index';
+  }
+
+  @override
+  String createRouteWaypointsTitle(int count) {
+    return 'Путевые точки ($count)';
+  }
+
+  @override
+  String createRouteAnchorN(int index) {
+    return 'Опорная точка $index';
+  }
+
+  @override
+  String createRouteAcceptedPoints(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Принято точек: $count',
+      many: 'Принято точек: $count',
+      few: 'Принято точек: $count',
+      one: 'Принято точек: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteAverageAccuracy(String value) {
+    return 'в среднем $value м';
+  }
+
+  @override
+  String createRouteUnsafePoints(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Исключено ненадёжных точек: $count.',
+      many: 'Исключено ненадёжных точек: $count.',
+      few: 'Исключено ненадёжных точек: $count.',
+      one: 'Исключено ненадёжных точек: $count.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteGapLabel(int index, int meters, int total) {
+    return 'Разрыв $index: $meters м, $total с';
+  }
+
+  @override
+  String createRouteGpsPointsSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Сохранено точек GPS: $count',
+      many: 'Сохранено точек GPS: $count',
+      few: 'Сохранено точек GPS: $count',
+      one: 'Сохранено точек GPS: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createRouteGpsAttention => 'GPS требует внимания';
+
+  @override
+  String get createRouteGpsUnsafeStop =>
+      'Запись GPS не удалось безопасно продолжить.';
+
+  @override
+  String createRouteBlockingChecks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Блокирующих проверок: $count',
+      many: 'Блокирующих проверок: $count',
+      few: 'Блокирующих проверок: $count',
+      one: 'Блокирующих проверок: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteWarningsToReview(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Предупреждений к просмотру: $count',
+      many: 'Предупреждений к просмотру: $count',
+      few: 'Предупреждений к просмотру: $count',
+      one: 'Предупреждений к просмотру: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteUnknownSurfaceMeters(String value) {
+    return 'неизвестно $value м';
+  }
+
+  @override
+  String get createScenarioDayOne => 'День 1';
+
+  @override
+  String get createScenarioRechecking => 'Повторная проверка…';
+
+  @override
+  String get createScenarioTimeNotEntered => 'время не указано';
+
+  @override
+  String get createScenarioDurationMinutesField => 'Длительность, минуты';
+
+  @override
+  String get createScenarioStopHint =>
+      'Парк, смотровая площадка, частный адрес…';
+
+  @override
+  String createScenarioBlockingIssues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Блокирующих проблем: $count',
+      many: 'Блокирующих проблем: $count',
+      few: 'Блокирующих проблем: $count',
+      one: 'Блокирующих проблем: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createScenarioServiceChanged => 'Найден изменившийся рейс';
+
+  @override
+  String get createScenarioFreshnessLabel => 'Актуальность';
+
+  @override
+  String createScenarioFreshness(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'current': 'актуально',
+      'stale': 'устарело',
+      'unavailable': 'недоступно',
+      'other': 'неизвестно',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createScenarioAfterTime(String time) {
+    return 'После $time';
+  }
+
+  @override
+  String get createScenarioNoStopsFound => 'Остановки не найдены.';
+
+  @override
+  String createScenarioDepartureSemantics(
+    String start,
+    String end,
+    int minutes,
+  ) {
+    return 'С $start до $end, минут: $minutes, плановое расписание, не в реальном времени';
+  }
+
+  @override
+  String get createScenarioCarrierOptional => 'Перевозчик (необязательно)';
+
+  @override
+  String get createScenarioServiceHint => 'Поезд 802 / Автобус 7480';
+
+  @override
+  String get createScenarioDurationMinRequired => 'Длительность, мин *';
+
+  @override
+  String get createScenarioDurationMin => 'Длительность, мин';
+
+  @override
+  String get createScenarioDistanceKm => 'Расстояние, км';
+
+  @override
+  String get createScenarioOtherCost =>
+      'Парковка / билет / другие расходы (необязательно)';
+
+  @override
+  String get createSessionTimezoneField =>
+      'Часовой пояс (IANA, например Europe/Riga)';
+
+  @override
+  String get createFormConfirmed => 'Подтверждено';
+
+  @override
+  String createSessionBuffer(int minutes) {
+    return 'Перерыв $minutes мин';
+  }
+
+  @override
+  String createSessionNotice(int minutes) {
+    return 'предупреждение за $minutes мин';
+  }
+
+  @override
+  String get createSessionPlatformDefaults =>
+      'значения платформы, можно изменить в любой момент';
+
+  @override
+  String get createSessionPriceFixed => '€ Фиксированная';
+
+  @override
+  String get createSessionOptionalLater =>
+      'Необязательно — добавьте сейчас или после публикации';
+
+  @override
+  String discoverResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count результата',
+      many: '$count результатов',
+      few: '$count результата',
+      one: '$count результат',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverSubcategories => 'Подкатегории';
+
+  @override
+  String get discoverFilterMode => 'Режим';
+
+  @override
+  String get discoverEstimated => 'примерно';
+
+  @override
+  String get discoverSlotLabel => 'Слот';
+
+  @override
+  String get discoverGuides => 'Гиды';
+
+  @override
+  String discoverItemsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count объекта',
+      many: '$count объектов',
+      few: '$count объекта',
+      one: '$count объект',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String identityVerificationStatus(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'unverified': 'Не проверена',
+      'pending': 'Ожидает проверки',
+      'verified': 'Проверена',
+      'rejected': 'Проверка отклонена',
+      'revoked': 'Проверка отозвана',
+      'other': 'Не проверена',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityRelationship(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'owner': 'Владелец',
+      'manager': 'Менеджер',
+      'other': 'Редактор',
+    });
+    return '$_temp0';
+  }
 }

@@ -9388,4 +9388,2277 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get discoverBadgeClassWorkshop => 'NODARBĪBA / DARBNĪCA';
+
+  @override
+  String get identityProfessionalPage => 'Professional Page';
+
+  @override
+  String get identityVerificationRevoked => 'Pārbaude atsaukta';
+
+  @override
+  String get identityVerificationRejected => 'Pārbaude noraidīta';
+
+  @override
+  String get identityVerificationPending => 'Pārbaude gaida';
+
+  @override
+  String get identityKindPrivateProfessional => 'Privāts speciālists';
+
+  @override
+  String get identityKindVenueOperator => 'Vietas operators';
+
+  @override
+  String get identityKindRepresentativeOffice => 'Pārstāvniecība';
+
+  @override
+  String get identityRetry => 'Mēģināt vēlreiz';
+
+  @override
+  String get identityCreate => 'Izveidot';
+
+  @override
+  String get identityMinTwoChars => 'Ievadiet vismaz 2 rakstzīmes';
+
+  @override
+  String get identityCancel => 'Atcelt';
+
+  @override
+  String get identityPageStartsPending =>
+      'Lapa sākas statusā “Gaida pārbaudi”. Tirgus, valoda, laika josla un valūta tiek ņemta no aktīvā tirgus iestatījumiem.';
+
+  @override
+  String get identityPageType => 'Lapas veids';
+
+  @override
+  String get identityPageName => 'Lapas nosaukums';
+
+  @override
+  String get identityCreatePage => 'Izveidot Professional Page';
+
+  @override
+  String get identityPreviewOnlyRoles =>
+      'Tikai priekšskatījums. Lomas un tiesības nemainās.';
+
+  @override
+  String get identityViewAs => 'Skatīt kā';
+
+  @override
+  String get identityNoPageYet =>
+      'Jūs vēl neesat izveidojis Professional Page.';
+
+  @override
+  String get identityCreateContent => 'Veidot saturu';
+
+  @override
+  String get identityManagePage => 'Pārvaldīt lapu';
+
+  @override
+  String get identityPersonalRevoked =>
+      'Personīgais profils · Pārbaude atsaukta';
+
+  @override
+  String get identityPersonalExpired =>
+      'Personīgais profils · Pārbaudes termiņš beidzies';
+
+  @override
+  String get identityPersonalRejected =>
+      'Personīgais profils · Pārbaude noraidīta';
+
+  @override
+  String get identityVerifiedTools => 'Pārbaudīts · Rīki atbilst jūsu tiesībām';
+
+  @override
+  String get identityPersonalPending => 'Personīgais profils · Pārbaude gaida';
+
+  @override
+  String get identityPersonalNotStarted =>
+      'Personīgais profils · Pārbaude nav sākta';
+
+  @override
+  String get identityAdminSeparate =>
+      'Admin piekļuve aktīva · atsevišķi no publicēšanas';
+
+  @override
+  String get identityAdminTools => 'Admin rīki';
+
+  @override
+  String get identityRequestAdditionalPage => 'Pieprasīt papildu lapu';
+
+  @override
+  String get identityModeratorsWillReview =>
+      'Moderatori izskatīs jūsu pieprasījumu.';
+
+  @override
+  String get identityLimitRequestPending => 'Papildu lapas pieprasījums gaida';
+
+  @override
+  String get identityCreator => 'Creator';
+
+  @override
+  String get identityOk => 'Labi';
+
+  @override
+  String get identityAdminMockNotice =>
+      'Šim testa kontam ir skaidri piešķirtas Admin tiesības. Darba Admin rīki tiek pieslēgti IDP-05A.';
+
+  @override
+  String get identityAdminAccessActive => 'Admin piekļuve aktīva';
+
+  @override
+  String get identityPageNotFound => 'Lapa nav atrasta';
+
+  @override
+  String get identityContentViaProjection =>
+      'Saturs šeit parādās tikai caur apstiprinātu publicētāja projekciju.';
+
+  @override
+  String get identityNoPublishedContent => 'Publicēta satura vēl nav';
+
+  @override
+  String get identityPublishedContent => 'Publicētais saturs';
+
+  @override
+  String get identityEditPage => 'Rediģēt lapu';
+
+  @override
+  String get identityShare => 'Kopīgot';
+
+  @override
+  String get identityVerifiedPage => 'Pārbaudīta Professional Page';
+
+  @override
+  String get identityPreviewDoesNotPublish =>
+      'Šis priekšskatījums lapu nepublicē un nepārbauda.';
+
+  @override
+  String get identityPublicPagePreview => 'Publiskās lapas priekšskatījums';
+
+  @override
+  String get identityPreviewNotPublic =>
+      'Priekšskatījums. Šī lapa nav publiski redzama.';
+
+  @override
+  String get identityPageAccountSettings =>
+      'Lapas konts, dalība un starptautiskie iestatījumi.';
+
+  @override
+  String get identityContentScoped =>
+      'Saturs attiecas tieši uz šo Professional Page.';
+
+  @override
+  String get identityOverviewModeration =>
+      'Professional Page pārskats un moderācijas statuss.';
+
+  @override
+  String get identityPreviewUntilVerified =>
+      'Tikai priekšskatījums. Lapa nav publiska, kamēr pārbaude nav apstiprināta.';
+
+  @override
+  String get identityPreviewPublicPage => 'Priekšskatīt publisko lapu';
+
+  @override
+  String get identityNoPageInvented =>
+      'Šim priekšskatījumam lapa netiek izdomāta. Izveidojiet lapu, lai aktivizētu tās darba vidi un publicētāja kontekstu.';
+
+  @override
+  String get identityContentAfterRealPage =>
+      'Saturs parādās tikai pēc tam, kad lietotājs izveido īstu Professional Page vai pievienojas tai.';
+
+  @override
+  String get identityPagePreview => 'Professional Page priekšskatījums';
+
+  @override
+  String get identitySwitchPage => 'Pārslēgt Professional Page';
+
+  @override
+  String get identityCreateOrSelectPage =>
+      'Izveidojiet vai izvēlieties Professional Page';
+
+  @override
+  String get identityUserId => 'Lietotāja ID';
+
+  @override
+  String get identitySendInvitation => 'Nosūtīt ielūgumu';
+
+  @override
+  String get identityCapabilities => 'Tiesības';
+
+  @override
+  String get identityRole => 'Loma';
+
+  @override
+  String get identityInviteBy => 'Uzaicināt pēc';
+
+  @override
+  String get identityInviteMember => 'Uzaicināt komandas biedru';
+
+  @override
+  String get identityRevoke => 'Atsaukt';
+
+  @override
+  String get identityNoInvitations =>
+      'No šīs lapas vēl nav nosūtīts neviens ielūgums.';
+
+  @override
+  String get identityNoTeamPermission => 'Jums nav tiesību pārvaldīt komandu.';
+
+  @override
+  String get identitySave => 'Saglabāt';
+
+  @override
+  String get identityNotSet => 'Nav iestatīts.';
+
+  @override
+  String get identityCustomActivityLabel => 'Sava darbības nosaukums';
+
+  @override
+  String get identityDescription => 'Apraksts';
+
+  @override
+  String get identityShortDescription => 'Īss apraksts';
+
+  @override
+  String get identitySwitchWorkspaceHint =>
+      'Personīgais profils, Professional Pages un Admin piekļuve';
+
+  @override
+  String get identitySwitchWorkspace => 'Pārslēgt darba profilu';
+
+  @override
+  String get profileDateTbd => 'Datums tiks noteikts';
+
+  @override
+  String get profileDraftListing => 'Sludinājuma melnraksts';
+
+  @override
+  String get profileSmartSearchIdea => 'Viedās meklēšanas ideja';
+
+  @override
+  String get profilePublishedRoute => 'Publicēts maršruts';
+
+  @override
+  String get profileReadyToPublish => 'Gatavs publicēšanai';
+
+  @override
+  String get profileNoCity => 'Bez pilsētas';
+
+  @override
+  String get profileUntitledListing => 'Sludinājums bez nosaukuma';
+
+  @override
+  String get profileRouteMap => 'Maršruta karte';
+
+  @override
+  String get profileEditRoute => 'Rediģēt maršrutu';
+
+  @override
+  String get profileWalking => 'Kājām';
+
+  @override
+  String get profileFree => 'Bez maksas';
+
+  @override
+  String get profileOpenQuickPlanNext => 'Atvērt Quick Plan nākamajai idejai';
+
+  @override
+  String get profileBuildNextRoute => 'Veidot nākamo maršrutu';
+
+  @override
+  String get profileMapPublishedListing => 'Publicētais sludinājums kartē';
+
+  @override
+  String get profileOpenRouteMap => 'Atvērt maršruta karti';
+
+  @override
+  String get profileFindDraftAudience => 'Atrast melnraksta auditoriju';
+
+  @override
+  String get profileFinishDraft => 'Pabeigt melnrakstu';
+
+  @override
+  String get profileCreatorNextSteps => 'Creator nākamie soļi';
+
+  @override
+  String get profileMapListingArea => 'Sludinājuma zona kartē';
+
+  @override
+  String get profileSearchSimilarListing => 'Meklēt līdzīgu sludinājumu';
+
+  @override
+  String get profileContinueDraft => 'Turpināt melnrakstu';
+
+  @override
+  String get profileOpenCreate => 'Atvērt veidošanu';
+
+  @override
+  String get profileCreatorListing => 'Creator sludinājums';
+
+  @override
+  String get profileBuildRoute => 'Veidot maršrutu';
+
+  @override
+  String get profileNewListing => 'Jauns sludinājums';
+
+  @override
+  String get profileManageDrafts =>
+      'Pārvaldiet melnrakstus un publicētos sludinājumus vienā darba vidē.';
+
+  @override
+  String get profileCreatorPublications => 'Creator publikācijas';
+
+  @override
+  String get profileListingFromLatestSmart =>
+      'Izveidot sludinājumu no pēdējās viedās meklēšanas';
+
+  @override
+  String get profileRouteFromLatestSmart =>
+      'Veidot maršrutu no pēdējās viedās meklēšanas';
+
+  @override
+  String get profileMapSmart => 'Viedais kartē';
+
+  @override
+  String get profileResumeSmart => 'Turpināt viedo';
+
+  @override
+  String get profileAnyArea => 'Jebkura zona';
+
+  @override
+  String get profileSmartRoute => 'Viedais maršruts';
+
+  @override
+  String get profileSmart => 'Viedais';
+
+  @override
+  String get profileLatestSmartSearch => 'Pēdējā viedā meklēšana';
+
+  @override
+  String get profileListingFromLatestSearch =>
+      'Izveidot sludinājumu no pēdējās meklēšanas';
+
+  @override
+  String get profileRouteFromLatestSearch =>
+      'Veidot maršrutu no pēdējās meklēšanas';
+
+  @override
+  String get profileMapSearch => 'Meklēšana kartē';
+
+  @override
+  String get profileResumeSearch => 'Turpināt meklēšanu';
+
+  @override
+  String get profileConditions => 'Nosacījumi';
+
+  @override
+  String get profileLatestSearch => 'Pēdējā meklēšana';
+
+  @override
+  String get profileMapRoute => 'Maršruts kartē';
+
+  @override
+  String get profileScenario => 'Scenārijs';
+
+  @override
+  String get profileLatestRoute => 'Pēdējais maršruts';
+
+  @override
+  String get profilePersonalScenario => 'Izveidot personīgu atpūtas scenāriju';
+
+  @override
+  String get profileBuildARoute => 'Veidot maršrutu';
+
+  @override
+  String get profileUseSearchMap => 'Izmantot meklēšanas un kartes nosacījumus';
+
+  @override
+  String get profileFindNextActivity => 'Atrast nākamo aktivitāti';
+
+  @override
+  String get profileSavedPlan => 'Saglabātais plāns';
+
+  @override
+  String get profileReviewSavedPlan => 'Pārskatīt saglabāto plānu';
+
+  @override
+  String get profileUseSavedInspiration =>
+      'Iedvesmojieties no saglabātiem meklējumiem un scenārijiem';
+
+  @override
+  String get profileBuildRouteIdea => 'Veidot maršruta ideju';
+
+  @override
+  String get profileDraftFromTaxonomy =>
+      'Pasākuma vai vietas melnraksts pēc kategorijām';
+
+  @override
+  String get profileCreateHub => 'Veidošanas centrs';
+
+  @override
+  String get profileIdeaToHub => 'No maršruta idejas uz veidošanas centru';
+
+  @override
+  String get profilePublishIdea => 'Publicēt ideju';
+
+  @override
+  String get profileSmartPrompt => 'Viedais vaicājums';
+
+  @override
+  String get profileOpenBuilderControls =>
+      'Atvērt veidotāju ar maršruta iestatījumiem';
+
+  @override
+  String get profileGenerateScenario => 'Ģenerēt scenāriju';
+
+  @override
+  String get profileSearches => 'Meklējumi';
+
+  @override
+  String get profileRoutes => 'Maršruti';
+
+  @override
+  String get profileSaved => 'Saglabāts';
+
+  @override
+  String get profileUntitledActivity => 'Aktivitāte bez nosaukuma';
+
+  @override
+  String get profileContinueInSearch => 'Turpināt meklēšanas nosacījumos';
+
+  @override
+  String get profileFindPeople => 'Atrast cilvēkus';
+
+  @override
+  String get profileOpenScenarioBlock =>
+      'Atvērt scenārija bloku veidošanas centrā';
+
+  @override
+  String get profileCreateScenario => 'Izveidot scenāriju';
+
+  @override
+  String get profileOpenRouteBlock => 'Atvērt maršruta bloku veidošanas centrā';
+
+  @override
+  String get profileCreateRoute => 'Izveidot maršrutu';
+
+  @override
+  String get profileOpenTaxonomyFlow => 'Atvērt veidošanu pēc kategorijām';
+
+  @override
+  String get profileViewAllEvents => 'Skatīt visus pasākumus';
+
+  @override
+  String get profileStartFromHub => 'Sāciet Recharge veidošanas centrā';
+
+  @override
+  String get profileNoCreatedEvents => 'Izveidotu pasākumu vēl nav';
+
+  @override
+  String get profileCreateFirstEvent => 'Izveidot pirmo pasākumu';
+
+  @override
+  String get profileEventInsights => 'Pasākumu statistika';
+
+  @override
+  String get profileCreatedEvents => 'Izveidotie pasākumi';
+
+  @override
+  String get profileManagePage => 'Pārvaldīt lapu';
+
+  @override
+  String get profilePhotos => 'Foto';
+
+  @override
+  String get profileVisited => 'Apmeklēts';
+
+  @override
+  String get profileCreated => 'Izveidots';
+
+  @override
+  String get profileWorkspace => 'Profila darba vide';
+
+  @override
+  String get profileSignInRequired => 'Nepieciešama pieteikšanās';
+
+  @override
+  String get profileCheckVerification =>
+      'Pārbaudi un pieejamos rīkus skatiet iestatījumos';
+
+  @override
+  String get profileCreatorTools => 'Creator rīki';
+
+  @override
+  String get profileSavedList => 'Saglabātais saraksts';
+
+  @override
+  String get profileSettings => 'Iestatījumi';
+
+  @override
+  String get profileObjectUpdatesOff => 'Objektu atjauninājumi izslēgti';
+
+  @override
+  String get profileObjectUpdatesOn => 'Objektu atjauninājumi ieslēgti';
+
+  @override
+  String get profileCompleted => 'Pabeigtie';
+
+  @override
+  String get profileActiveUpcoming => 'Aktīvie un gaidāmie';
+
+  @override
+  String get quickPlanAnyArea => 'Jebkura zona';
+
+  @override
+  String get quickPlanAnyPrice => 'Jebkura cena';
+
+  @override
+  String get quickPlanAllCategories => 'Visas kategorijas';
+
+  @override
+  String get quickPlanSmartRoute => 'Viedais maršruts';
+
+  @override
+  String get quickPlanRechargeIdea => 'Atpūtas ideja';
+
+  @override
+  String get quickPlanTplActiveHint =>
+      'Vispirms kustība, tad atpūta ārā, un enerģija paliek stabila.';
+
+  @override
+  String get quickPlanTplActive => 'Aktīvs uzrāviens';
+
+  @override
+  String get quickPlanTplSocialHint =>
+      'Vispirms satiecieties ar cilvēkiem, tad turpiniet vakaru tuvumā.';
+
+  @override
+  String get quickPlanTplSocial => 'Vakars kopā ar citiem';
+
+  @override
+  String get quickPlanTplFreeCity => 'Bezmaksas atpūta pilsētā';
+
+  @override
+  String get quickPlanTplCoffeeHint =>
+      'Sāciet mierīgi, tad dodieties vieglā pastaigā pa pilsētu.';
+
+  @override
+  String get quickPlanTplCoffee => 'Kafijas pauze';
+
+  @override
+  String get quickPlanResetBuilder => 'Atiestatīt veidotāju';
+
+  @override
+  String get quickPlanNoStopsMatch =>
+      'Šiem nosacījumiem neatbilst neviena pietura';
+
+  @override
+  String get quickPlanAdd => 'Pievienot';
+
+  @override
+  String get quickPlanSuggestedStops => 'Ieteiktās pieturas';
+
+  @override
+  String get quickPlanRemoveStop => 'Noņemt pieturu';
+
+  @override
+  String get quickPlanMoveDown => 'Pārvietot lejup';
+
+  @override
+  String get quickPlanMoveUp => 'Pārvietot augšup';
+
+  @override
+  String get quickPlanPublishOptimized => 'Publicēt optimizēto maršrutu';
+
+  @override
+  String get quickPlanMapRoute => 'Maršruts kartē';
+
+  @override
+  String get quickPlanOptimize => 'Optimizēt';
+
+  @override
+  String get quickPlanFreeOnly => 'Tikai bez maksas';
+
+  @override
+  String get quickPlanRouteFit => 'Maršruta atbilstība';
+
+  @override
+  String get quickPlanWalkingRoute => 'Pastaigu maršruts';
+
+  @override
+  String get quickPlanMoodActive => 'Aktīvs';
+
+  @override
+  String get quickPlanMoodSocial => 'Sabiedrisks';
+
+  @override
+  String get quickPlanMoodCalm => 'Mierīgs';
+
+  @override
+  String get quickPlanListingFromSmart =>
+      'Izveidot sludinājumu no viedās meklēšanas';
+
+  @override
+  String get quickPlanOpenSmartOnMap => 'Atvērt viedo meklēšanu kartē';
+
+  @override
+  String get quickPlanApplySmartToBuilder => 'Lietot viedo meklēšanu veidotājā';
+
+  @override
+  String get quickPlanSmartSearch => 'Viedā meklēšana';
+
+  @override
+  String get quickPlanListingFromSaved =>
+      'Izveidot sludinājumu no saglabātajiem nosacījumiem';
+
+  @override
+  String get quickPlanOpenSavedOnMap => 'Atvērt saglabātos nosacījumus kartē';
+
+  @override
+  String get quickPlanApplySavedToBuilder =>
+      'Lietot saglabātos nosacījumus veidotājā';
+
+  @override
+  String get quickPlanSavedConditions => 'Saglabātie nosacījumi';
+
+  @override
+  String get quickPlanBuildFromSaved => 'Veidot no saglabātā nodoma';
+
+  @override
+  String get quickPlanReadyIdeas => 'Gatavas maršrutu idejas';
+
+  @override
+  String get quickPlanPublishRoute => 'Publicēt maršrutu';
+
+  @override
+  String get quickPlanSearch => 'Meklēt';
+
+  @override
+  String get quickPlanMap => 'Karte';
+
+  @override
+  String get quickPlanCopy => 'Kopēt';
+
+  @override
+  String get quickPlanSave => 'Saglabāt';
+
+  @override
+  String get quickPlanBuildRechargeRoute => 'Veidot atpūtas maršrutu';
+
+  @override
+  String get quickPlanRoutePreview => 'Maršruta priekšskatījums';
+
+  @override
+  String get quickPlanContinueSnapshot => 'Turpināt ar momentuzņēmumu';
+
+  @override
+  String get quickPlanRefresh => 'Atjaunot';
+
+  @override
+  String get quickPlanRefreshOrContinue =>
+      'Atjaunojiet priekšskatījumu vai turpiniet ar jaunāko pieejamo momentuzņēmumu.';
+
+  @override
+  String get quickPlanChanged => 'Quick Plan ir mainījies';
+
+  @override
+  String get quickPlanCreateIndependent => 'Izveidot neatkarīgu scenāriju';
+
+  @override
+  String get quickPlanCancel => 'Atcelt';
+
+  @override
+  String get quickPlanNoNotes =>
+      'Der tikai jūsu pašu piezīmes; šim vecajam plānam to nav.';
+
+  @override
+  String get quickPlanCopyNotes => 'Kopēt manas privātās piezīmes';
+
+  @override
+  String get quickPlanLegacyStopsHint =>
+      'Vecajām pieturām nav kataloga objektu ID, tāpēc izvēlētās pieturas scenārijā nonāks kā privātas pašu vietas.';
+
+  @override
+  String get quickPlanIndependentHint =>
+      'Tiks izveidots jauns neatkarīgs scenārijs. Vēlākas izmaiņas netiks sinhronizētas ne vienā, ne otrā virzienā.';
+
+  @override
+  String get quickPlanExpandToScenario => 'Paplašināt līdz scenārijam';
+
+  @override
+  String get quickPlanCopyStopsHint =>
+      'Nokopējiet izvēlētās pieturas jaunā neatkarīgā scenārijā. Šis Quick Plan paliek nemainīgs.';
+
+  @override
+  String get quickPlanNeedLargerPlan =>
+      'Vajag lielāku pilsētas vai ceļojuma plānu?';
+
+  @override
+  String get quickPlanSavePlan => 'Saglabāt šo plānu';
+
+  @override
+  String get quickPlanOpenMap => 'Atvērt karti';
+
+  @override
+  String get quickPlanEditPlan => 'Rediģēt plānu';
+
+  @override
+  String get quickPlanNoStopsFit =>
+      'Šiem nosacījumiem vēl neatbilst neviena pietura. Rediģējiet plānu, lai pievienotu.';
+
+  @override
+  String get quickPlanYourRoute => 'Jūsu maršruts';
+
+  @override
+  String get quickPlanExpandFailed => 'Neizdevās paplašināt šo Quick Plan';
+
+  @override
+  String get quickPlanCopied => 'Quick Plan nokopēts';
+
+  @override
+  String get quickPlanSaved => 'Quick Plan saglabāts';
+
+  @override
+  String get quickPlanNotSynced =>
+      'Nav sinhronizēts. Jūsu vietējās izmaiņas saglabātas; atjaunojiet, lai mēģinātu vēlreiz.';
+
+  @override
+  String get quickPlanLeave => 'Pamest';
+
+  @override
+  String get quickPlanOpenReadOnly => 'Atvērt tikai lasīšanai';
+
+  @override
+  String get quickPlanDecline => 'Noraidīt';
+
+  @override
+  String get quickPlanAccept => 'Pieņemt';
+
+  @override
+  String get quickPlanRevoke => 'Atsaukt';
+
+  @override
+  String get quickPlanCancelInvite => 'Atcelt ielūgumu';
+
+  @override
+  String get quickPlanDeletePersonal => 'Dzēst pašreizējo personīgo plānu';
+
+  @override
+  String get quickPlanImportPersonal => 'Importēt personīgo plānu';
+
+  @override
+  String get quickPlanImportJson => 'Importēt recharge.quickPlan JSON';
+
+  @override
+  String get quickPlanInviteToSaved =>
+      'Uzaicināt uz pašreizējo saglabāto plānu';
+
+  @override
+  String get quickPlanInviteUserId => 'Uzaicināt esoša lietotāja ID';
+
+  @override
+  String get quickPlanUseKnownUserId =>
+      'Izmantojiet zināmu lietotāja ID. Gaidošās darbības stājas spēkā pēc servera apstiprinājuma.';
+
+  @override
+  String get quickPlanInvitations => 'Quick Plan ielūgumi';
+
+  @override
+  String get quickPlanContinue => 'Turpināt';
+
+  @override
+  String get quickPlanLeavePlan => 'Pamest plānu';
+
+  @override
+  String get quickPlanContentHidden =>
+      'Saturs paslēpts. Atjaunojiet, lai pārbaudītu piekļuvi.';
+
+  @override
+  String get quickPlanRefreshAccess => 'Atjaunot piekļuvi';
+
+  @override
+  String get quickPlanCloseInvited => 'Aizvērt ielūgto plānu';
+
+  @override
+  String get quickPlanInvitedPlan => 'Ielūgtais Quick Plan';
+
+  @override
+  String get quickPlanRouteSteps => 'Maršruta soļi';
+
+  @override
+  String get quickPlanYourPlan => 'Jūsu atpūtas plāns';
+
+  @override
+  String get quickPlanReset => 'Atiestatīt';
+
+  @override
+  String get quickPlanEdit => 'Rediģēt';
+
+  @override
+  String get quickPlanInvitationsAccess => 'Ielūgumi un piekļuve';
+
+  @override
+  String get quickPlanQuickPlan => 'Quick Plan';
+
+  @override
+  String get quickPlanMyQuickPlan => 'Mans Quick Plan';
+
+  @override
+  String get favoritesFree => 'Bez maksas';
+
+  @override
+  String get favoritesAnyArea => 'Jebkura zona';
+
+  @override
+  String get favoritesSmartRoute => 'Viedais maršruts';
+
+  @override
+  String get favoritesRechargeIdea => 'Atpūtas ideja';
+
+  @override
+  String get favoritesAnyTime => 'Jebkurā laikā';
+
+  @override
+  String get favoritesBadgeRoute => 'MARŠRUTS';
+
+  @override
+  String get favoritesBadgePlace => 'VIETA';
+
+  @override
+  String get favoritesBadgeEvent => 'PASĀKUMS';
+
+  @override
+  String get favoritesShowAll => 'Rādīt visu';
+
+  @override
+  String get favoritesFilterEmpty => 'Šajā filtrā vēl nekā nav';
+
+  @override
+  String get favoritesRemove => 'Noņemt';
+
+  @override
+  String get favoritesMoreActions => 'Citas darbības';
+
+  @override
+  String get favoritesTitle => 'Izlase';
+
+  @override
+  String get favoritesRoutes => 'Maršruti';
+
+  @override
+  String get favoritesPlaces => 'Vietas';
+
+  @override
+  String get favoritesEvents => 'Pasākumi';
+
+  @override
+  String get favoritesAll => 'Visi';
+
+  @override
+  String get favoritesMap => 'Karte';
+
+  @override
+  String get favoritesResume => 'Turpināt';
+
+  @override
+  String get favoritesListingFromSmart =>
+      'Izveidot sludinājumu no viedās meklēšanas';
+
+  @override
+  String get favoritesDeleteSmart => 'Dzēst viedo meklēšanu';
+
+  @override
+  String get favoritesSmartSearch => 'Viedā meklēšana';
+
+  @override
+  String get favoritesListingFromSaved =>
+      'Izveidot sludinājumu no saglabātajiem nosacījumiem';
+
+  @override
+  String get favoritesDeleteSaved => 'Dzēst saglabātos nosacījumus';
+
+  @override
+  String get favoritesSavedConditions => 'Saglabātie nosacījumi';
+
+  @override
+  String get favoritesSavedIntentsHint =>
+      'Nosacījumi un vaicājumi gatavi turpināšanai';
+
+  @override
+  String get favoritesSavedIntents => 'Saglabātie nodomi';
+
+  @override
+  String get favoritesOpenDiscover => 'Atvērt Discover';
+
+  @override
+  String get favoritesEmpty => 'Saglabātu pasākumu vēl nav';
+
+  @override
+  String get favoritesRetry => 'Mēģināt vēlreiz';
+
+  @override
+  String get favoritesLoadFailed => 'Neizdevās ielādēt izlasi';
+
+  @override
+  String get favoritesRefresh => 'Atjaunot izlasi';
+
+  @override
+  String get visitedRemoveFromHistory => 'Noņemt no vēstures';
+
+  @override
+  String get visitedActions => 'Apmeklējuma darbības';
+
+  @override
+  String get visitedClearPeriod => 'Notīrīt periodu';
+
+  @override
+  String get visitedEmptyPeriod => 'Šajā periodā apmeklējumu nav';
+
+  @override
+  String get visitedClear => 'Notīrīt';
+
+  @override
+  String get visitedRemoved => 'Apmeklējums noņemts';
+
+  @override
+  String get visitedRemove => 'Noņemt';
+
+  @override
+  String get visitedCancel => 'Atcelt';
+
+  @override
+  String get visitedRemoveVisit => 'Noņemt apmeklējumu?';
+
+  @override
+  String get visitedSelectDay => 'Izvēlēties apmeklējuma dienu';
+
+  @override
+  String get visitedSelectMonth => 'Izvēlēties mēnesi';
+
+  @override
+  String get visitedTitle => 'Apmeklējumu vēsture';
+
+  @override
+  String get visitedEmptyHint =>
+      'Šeit parādīsies vietas, kuras jūs atzīmēsiet kā apmeklētas.';
+
+  @override
+  String get visitedEmpty => 'Apmeklējumu vēl nav';
+
+  @override
+  String get visitedRetry => 'Mēģināt vēlreiz';
+
+  @override
+  String get visitedTryAgain => 'Mēģiniet vēlreiz.';
+
+  @override
+  String get visitedLoadFailed => 'Neizdevās ielādēt apmeklējumus';
+
+  @override
+  String get visitedRefresh => 'Atjaunot apmeklējumu vēsturi';
+
+  @override
+  String get visitedSignInRequired => 'Nepieciešama pieteikšanās';
+
+  @override
+  String get identityEmail => 'E-pasts';
+
+  @override
+  String get identityPhone => 'Tālrunis';
+
+  @override
+  String get quickPlanTplFreeCityHint =>
+      'Vienkāršs bezmaksas maršruts mierīgai atpūtai.';
+
+  @override
+  String identityWorkspaceNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'workspace_recovered':
+          'Nepieejamā lapa tika atiestatīta uz jūsu personīgo profilu.',
+      'workspace_load_failed': 'Neizdevās ielādēt darba profilus.',
+      'workspace_switched': 'Darba profils pārslēgts.',
+      'workspace_access_unavailable':
+          'Piekļuve izvēlētajai lapai nav pieejama.',
+      'workspace_switch_failed': 'Neizdevās pārslēgt darba profilu.',
+      'admin_preview_selected': 'Admin priekšskatījums izvēlēts.',
+      'page_created': 'Professional Page izveidota un nosūtīta pārbaudei.',
+      'self_service_page_limit_reached':
+          'Sasniegts 3 lapu limits. Nosūtiet pieprasījumu moderatoriem.',
+      'page_create_failed': 'Neizdevās izveidot Professional Page.',
+      'page_limit_request_sent': 'Papildu lapas pieprasījums nosūtīts.',
+      'page_limit_request_unavailable':
+          'Pieprasījums pieejams pēc trīs lapu izveides.',
+      'page_limit_request_failed':
+          'Neizdevās nosūtīt pieprasījumu moderatoriem.',
+      'other': 'Neizdevās ielādēt darba profilus.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityTeamNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'invitation_sent': 'Ielūgums nosūtīts.',
+      'invitation_send_failed': 'Neizdevās nosūtīt ielūgumu.',
+      'invitation_revoked': 'Ielūgums atsaukts.',
+      'invitation_revoke_failed': 'Neizdevās atsaukt ielūgumu.',
+      'invitations_load_failed': 'Neizdevās ielādēt komandas ielūgumus.',
+      'invitation_target_invalid':
+          'Ievadiet derīgu lietotāja ID, e-pastu vai tālruni.',
+      'owner_relationship_not_invitable':
+          'Īpašumtiesības nevar piešķirt ar ielūgumu.',
+      'inviter_not_active_member':
+          'Ielūgumus var sūtīt tikai aktīvs komandas biedrs.',
+      'inviter_missing_team_manage_capability':
+          'Jums nav tiesību pārvaldīt komandu.',
+      'cannot_delegate_capability_not_held':
+          'Nevar piešķirt tiesības, kuru jums pašam nav.',
+      'revoke_actor_not_active_member':
+          'Ielūgumus var atsaukt tikai aktīvs komandas biedrs.',
+      'invitation_not_found': 'Šis ielūgums vairs nepastāv.',
+      'other': 'Neizdevās nosūtīt ielūgumu.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityProfileNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'profile_load_failed': 'Neizdevās ielādēt lapas profilu.',
+      'profile_updated': 'Profils atjaunināts.',
+      'profile_update_failed': 'Neizdevās atjaunināt profilu.',
+      'default_locale_value_required':
+          'Ievadiet vērtību lapas noklusējuma valodā.',
+      'unsupported_locale': 'Šī lapa neatbalsta šo valodu.',
+      'value_length_out_of_bounds': 'Teksts ir tukšs vai pārāk garš.',
+      'actor_not_active_member':
+          'Profilu var rediģēt tikai aktīvs komandas biedrs.',
+      'actor_missing_page_manage_capability':
+          'Jums nav tiesību rediģēt lapas profilu.',
+      'stale_overlay_revision':
+          'Šis lauks mainīts citur. Pārlādējiet un mēģiniet vēlreiz.',
+      'other': 'Neizdevās atjaunināt profilu.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityPublicPageNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'page_load_failed': 'Neizdevās ielādēt šo lapu.',
+      'page_preview_failed': 'Neizdevās ielādēt lapas priekšskatījumu.',
+      'other': 'Neizdevās ielādēt šo lapu.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityInboxTitle(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'identity_page_created_user': 'Professional Page izveidota',
+      'identity_page_created_moderators': 'Jauna Professional Page',
+      'identity_page_limit_request_user': 'Pieprasījums nosūtīts',
+      'identity_page_limit_request_moderators': 'Papildu lapas pieprasījums',
+      'other': 'Paziņojums',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityInboxBody(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'identity_page_created_user': 'Pārbaudes statuss: gaida.',
+      'identity_page_created_moderators':
+          'Izveidota jauna lapa, nepieciešama pārbaude.',
+      'identity_page_limit_request_user':
+          'Moderatori izskatīs papildu Professional Page.',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityInboxLimitBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lapas',
+      one: '$count lapa',
+      zero: '$count lapas',
+    );
+    return 'Lietotājs pieprasīja limitu: $_temp0.';
+  }
+
+  @override
+  String profileRoleTitle(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'pro_generator': 'Pro ģenerators',
+      'creator': 'Creator',
+      'user': 'Lietotājs',
+      'other': 'Creator',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String quickPlanFitLevel(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'needsStops': 'Vajag pieturas',
+      'ready': 'Gatavs',
+      'goodWithTweaks': 'Labi ar nelieliem labojumiem',
+      'other': 'Vajag pielāgot',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String quickPlanFitSummary(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'needsStops':
+          'Pievienojiet vismaz vienu pieturu, lai maršruts būtu noderīgs.',
+      'ready': 'Šis maršruts ir gatavs kartei vai publicēšanai.',
+      'goodWithTweaks':
+          'Neliela optimizācija padarīs maršrutu vieglāk izejamu.',
+      'other': 'Optimizējiet maršrutu pirms sūtīšanas uz karti vai veidošanu.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get quickPlanFitNoStops => 'Nav izvēlētu pieturu';
+
+  @override
+  String quickPlanFitTrim(int minutes) {
+    return 'Saīsiniet par apmēram $minutes min';
+  }
+
+  @override
+  String quickPlanFitFits(int minutes) {
+    return 'Iekļaujas $minutes min';
+  }
+
+  @override
+  String get quickPlanFitRoom => 'Vietas vēl vienai pieturai';
+
+  @override
+  String get quickPlanFitRemovePaid =>
+      'Noņemiet maksas pieturas režīmam “tikai bez maksas”';
+
+  @override
+  String get quickPlanFitFreeRoute => 'Bezmaksas maršruts';
+
+  @override
+  String quickPlanFitTotalPrice(String price) {
+    return 'Kopā $price';
+  }
+
+  @override
+  String get quickPlanFitShortenTransfers =>
+      'Saīsiniet pārejas pastaigu režīmam';
+
+  @override
+  String quickPlanFitTotalDistance(String km) {
+    return 'Kopā $km km';
+  }
+
+  @override
+  String get profileOpenSearchWith => 'Atvērt meklēšanu ar';
+
+  @override
+  String get quickPlanAccessUnavailable =>
+      'Piekļuve nav pieejama. Atjaunojiet, lai mēģinātu vēlreiz.';
+
+  @override
+  String get quickPlanNotConfirmed =>
+      'Vēl nav apstiprināts. Atjaunojiet, lai mēģinātu vēlreiz.';
+
+  @override
+  String quickPlanTemplateApplied(String message) {
+    return 'Lietots: $message';
+  }
+
+  @override
+  String quickPlanApplyTemplate(String message) {
+    return 'Lietot veidni “$message”';
+  }
+
+  @override
+  String quickPlanExpandStops(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Paplašināt $count pieturas līdz scenārijam',
+      one: 'Paplašināt $count pieturu līdz scenārijam',
+      zero: 'Paplašināt $count pieturas līdz scenārijam',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get identitySectionPage => 'Lapa';
+
+  @override
+  String get identitySectionContent => 'Saturs';
+
+  @override
+  String get identitySectionAccount => 'Konts';
+
+  @override
+  String identityEditField(String message) {
+    return 'Rediģēt: $message';
+  }
+
+  @override
+  String get identityInvitationPending => 'Gaida';
+
+  @override
+  String get identityInvitationRevoked => 'Atsaukts';
+
+  @override
+  String get identityInvitationExpired => 'Beidzies';
+
+  @override
+  String get identityKindCompany => 'Uzņēmums';
+
+  @override
+  String get identityKindOrganization => 'Organizācija';
+
+  @override
+  String get identityUnverified => 'Nepārbaudīta';
+
+  @override
+  String get identityVerified => 'Pārbaudīta';
+
+  @override
+  String get profilePersonal => 'Personīgais';
+
+  @override
+  String get profileBookingsRequests => 'Rezervācijas un pieteikumi';
+
+  @override
+  String get profileOneTimeEvent => 'Vienreizējs pasākums';
+
+  @override
+  String profileMissingFields(String message) {
+    return 'Trūkst: $message';
+  }
+
+  @override
+  String profileMissingField(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'title': 'nosaukums',
+      'category': 'kategorija',
+      'city': 'pilsēta',
+      'cover': 'vāka attēls',
+      'other': 'sākuma laiks',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get profileStagePublished => 'Publicēts';
+
+  @override
+  String get profileStageDraft => 'Melnraksts';
+
+  @override
+  String get profilePublishedReady => 'Gatavs publicēšanai';
+
+  @override
+  String profileMissingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Trūkst $count',
+      one: 'Trūkst $count',
+      zero: 'Trūkst $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileAll => 'Visi';
+
+  @override
+  String get quickPlanRetryPending => 'Atjaunot / atkārtot gaidošās';
+
+  @override
+  String get quickPlanPlanLabel => 'Plāns';
+
+  @override
+  String quickPlanGrantStatus(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'pending': 'Gaida',
+      'active': 'Aktīvs',
+      'accepted': 'Pieņemts',
+      'declined': 'Noraidīts',
+      'revoked': 'Atsaukts',
+      'left': 'Pamests',
+      'other': 'Nezināms statuss',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get quickPlanInvitee => 'Uzaicinātais';
+
+  @override
+  String get quickPlanOwner => 'Īpašnieks';
+
+  @override
+  String get quickPlanReinvite => 'Uzaicināt vēlreiz';
+
+  @override
+  String quickPlanMoodReady(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Mierīgs maršruts, gatavs ceļam vai pielāgošanai.',
+      'social': 'Sabiedrisks maršruts, gatavs ceļam vai pielāgošanai.',
+      'active': 'Aktīvs maršruts, gatavs ceļam vai pielāgošanai.',
+      'other': 'Savs maršruts, gatavs ceļam vai pielāgošanai.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String quickPlanMoodPlan(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Mierīgs plāns',
+      'social': 'Sabiedrisks plāns',
+      'active': 'Aktīvs plāns',
+      'other': 'Savs plāns',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String quickPlanMoodQuickPlan(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Mierīgs Quick Plan',
+      'social': 'Sabiedrisks Quick Plan',
+      'active': 'Aktīvs Quick Plan',
+      'other': 'Savs Quick Plan',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get quickPlanApplied => 'Lietots';
+
+  @override
+  String get quickPlanUse => 'Izmantot';
+
+  @override
+  String get favoritesEdit => 'Rediģēt';
+
+  @override
+  String get favoritesOpen => 'Atvērt';
+
+  @override
+  String get favoritesRoute => 'Maršruts';
+
+  @override
+  String get visitedMonth => 'Mēnesis';
+
+  @override
+  String get visitedDay => 'Diena';
+
+  @override
+  String get routeRecordingNotificationTitle => 'Notiek maršruta ierakstīšana';
+
+  @override
+  String get routeRecordingNotificationText =>
+      'Recharge saglabā jūsu maršrutu, kamēr lietotne darbojas fonā.';
+
+  @override
+  String get createFormSaveContinue => 'Saglabāt un turpināt';
+
+  @override
+  String get createClassLeadMyself => 'Šo nodarbību vadu es';
+
+  @override
+  String get profileControlCenter => 'VADĪBAS CENTRS';
+
+  @override
+  String get profileLatestCreatedEvents => 'JAUNĀKIE IZVEIDOTIE PASĀKUMI';
+
+  @override
+  String get profileQuickActions => 'ĀTRĀS DARBĪBAS';
+
+  @override
+  String get profileWorkspaceHeading => 'Darba vide';
+
+  @override
+  String profileSearchContinuations(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Turpināmie meklējumi: $count',
+      one: 'Turpināmie meklējumi: $count',
+      zero: 'Turpināmie meklējumi: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profileActivitiesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count aktivitātes',
+      one: '$count aktivitāte',
+      zero: '$count aktivitāšu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profileRoutesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count maršruti',
+      one: '$count maršruts',
+      zero: '$count maršrutu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profileSavedIdeasReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Saglabātās idejas: $count',
+      one: 'Saglabātās idejas: $count',
+      zero: 'Saglabātās idejas: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileResume => 'Turpināt';
+
+  @override
+  String get quickPlanReadOnlyOnline =>
+      'Tikai skatīšanai · nepieciešams tiešsaistes savienojums';
+
+  @override
+  String get quickPlanConditions => 'Nosacījumi';
+
+  @override
+  String get quickPlanIntentLabel => 'Nolūks';
+
+  @override
+  String get visitedPrivateHint =>
+      'Privātas, pašu atzīmētas apmeklētās vietas.';
+
+  @override
+  String get visitedSelfReported => 'Atzīmēts pašam';
+
+  @override
+  String get identityProfile => 'Profils';
+
+  @override
+  String get identityTeam => 'Komanda';
+
+  @override
+  String get identityRequired => 'Obligāts lauks.';
+
+  @override
+  String get identitySectionPersonal => 'PERSONĪGAIS';
+
+  @override
+  String get identitySectionProfessionalPages => 'PROFESSIONAL PAGES';
+
+  @override
+  String get identitySectionAdministration => 'ADMINISTRĒŠANA';
+
+  @override
+  String identityPagesUsed(int count, int max) {
+    String _temp0 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: 'Izmantotas $count no $max pašapkalpošanās lapām',
+      one: 'Izmantota $count no $max pašapkalpošanās lapas',
+      zero: 'Izmantotas $count no $max pašapkalpošanās lapām',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String identityPublishedItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Publicēts: $count',
+      one: 'Publicēts: $count',
+      zero: 'Publicēts: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileScenarioLibrary => 'Scenāriji';
+
+  @override
+  String get discoverHomeTagline => 'ATPŪTAS LIETOTNE';
+
+  @override
+  String createTaxonomySearchCategories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Meklēt kategorijās: $count',
+      one: 'Meklēt kategorijās: $count',
+      zero: 'Meklēt kategorijās: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createFormOpeningRules(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Darba laika noteikumi: $count',
+      one: 'Darba laika noteikumi: $count',
+      zero: 'Darba laika noteikumi: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormAddHours => 'Pievienot 09:00–21:00';
+
+  @override
+  String createFormMinimumVisitChip(int minutes) {
+    return 'Vismaz $minutes min';
+  }
+
+  @override
+  String createFormCapacityOf(int current, int max) {
+    return 'Ietilpība $current/$max';
+  }
+
+  @override
+  String createFormMetersValue(String value) {
+    return '$value m';
+  }
+
+  @override
+  String createFormPointsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count punkti',
+      one: '$count punkts',
+      zero: '$count punktu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createRouteVersionLabel => 'versija';
+
+  @override
+  String get createRouteGeometryLabel => 'Ģeometrija';
+
+  @override
+  String get createActivityPurchaseHint => 'Pirkums (piem., kafija pie letes)';
+
+  @override
+  String get createActivityGroupMin => 'Grupa, min. cilvēku';
+
+  @override
+  String createFormMinutesRange(int min, int max) {
+    return '$min–$max min';
+  }
+
+  @override
+  String get createFormImagesPermission =>
+      'Man ir atļauja izmantot šos attēlus';
+
+  @override
+  String get createClassOutcomesPerLine => 'Rezultāti (katrs savā rindā)';
+
+  @override
+  String get createClassPrerequisitesPerLine =>
+      'Priekšnosacījumi (katrs savā rindā)';
+
+  @override
+  String get createClassFoldSecond => 'Otrais (ziemas laiks)';
+
+  @override
+  String get createClassStartHhmm => 'Sākums (SS:MM)';
+
+  @override
+  String get createClassEndHhmm => 'Beigas (SS:MM)';
+
+  @override
+  String get createCollectionNoTitleYet => '(nosaukuma vēl nav)';
+
+  @override
+  String get createCollectionPublishedRemove =>
+      'Publicēts — noņemt bez pārbaudes';
+
+  @override
+  String createCollectionObjectType(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'place': 'Vieta',
+      'route': 'Maršruts',
+      'bookableSession': 'Nodarbība',
+      'classWorkshop': 'Nodarbība / darbnīca',
+      'rental': 'Noma',
+      'other': 'Objekts',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createEventPreviewLabel => 'Priekšskatījums';
+
+  @override
+  String get createEventInterestedOptional => 'Neobligāta atbilde “Interesē”';
+
+  @override
+  String get createEventAvailabilityLabel => 'Stāvoklis';
+
+  @override
+  String createEventAvailabilityState(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'available': 'pieejams',
+      'lowAvailability': 'maz vietu',
+      'soldOut': 'vietu nav',
+      'waitlistAvailable': 'atvērts gaidīšanas saraksts',
+      'registrationClosed': 'reģistrācija slēgta',
+      'cancelled': 'atcelts',
+      'stale': 'novecojis',
+      'other': 'nezināms',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createEventAvailabilityFreshness(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'current': 'aktuāls',
+      'stale': 'novecojis',
+      'other': 'nezināms',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createEventSuggestedLabel => 'Ieteikts';
+
+  @override
+  String createEventArchetype(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'performance': 'Uzstāšanās',
+      'screening': 'Seanss',
+      'exhibition': 'Izstāde',
+      'open_stage': 'Atvērtā skatuve',
+      'meet_greet': 'Tikšanās ar viesi',
+      'talk': 'Lekcija',
+      'discussion': 'Diskusija',
+      'conference': 'Konference',
+      'networking': 'Kontaktu veidošana',
+      'social_meetup': 'Draudzīga tikšanās',
+      'hosted_game': 'Vadīta spēle',
+      'open_play': 'Brīvā spēle',
+      'competition': 'Sacensības',
+      'class_session': 'Nodarbība',
+      'workshop': 'Darbnīca',
+      'retreat_camp': 'Retrīts vai nometne',
+      'wellness_session': 'Labsajūtas nodarbība',
+      'tasting': 'Degustācija',
+      'shared_meal': 'Kopīga maltīte',
+      'party': 'Ballīte',
+      'celebration': 'Svinības',
+      'festival': 'Festivāls',
+      'market_fair': 'Tirgus vai gadatirgus',
+      'auction': 'Izsole',
+      'launch_promotion': 'Atklāšana vai akcija',
+      'open_day': 'Atvērto durvju diena',
+      'tour_excursion': 'Tūre vai ekskursija',
+      'outdoor_gathering': 'Tikšanās brīvā dabā',
+      'community_action': 'Kopienas akcija',
+      'volunteering': 'Brīvprātīgais darbs',
+      'fundraiser': 'Līdzekļu vākšana',
+      'family_program': 'Ģimenes programma',
+      'ceremony': 'Ceremonija',
+      'other': 'Cits',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createEventParticipationMode(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'mode_watch': 'Skatīties',
+      'mode_attend': 'Apmeklēt',
+      'mode_play': 'Spēlēt',
+      'mode_compete': 'Sacensties',
+      'mode_perform': 'Uzstāties',
+      'mode_practice': 'Trenēties',
+      'mode_learn': 'Mācīties',
+      'mode_create': 'Radīt',
+      'mode_meet_people': 'Satikt cilvēkus',
+      'mode_date': 'Randiņš',
+      'mode_visit': 'Apciemot',
+      'mode_explore': 'Izzināt',
+      'mode_eat_drink': 'Ēst un dzert',
+      'mode_shop': 'Iepirkties',
+      'mode_support': 'Atbalstīt',
+      'mode_volunteer': 'Palīdzēt brīvprātīgi',
+      'mode_travel': 'Ceļot',
+      'other': 'Cits',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createEventAdditionalRole(String message) {
+    return '$message: papildu apmeklētāja loma';
+  }
+
+  @override
+  String get createEventMediaRights =>
+      'Man ir tiesības publicēt šos materiālus *';
+
+  @override
+  String get createEventAllDay => 'Visas dienas pasākums';
+
+  @override
+  String get createEventIanaTimezone => 'IANA laika josla';
+
+  @override
+  String createEventOccurrencesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Izveidoti datumi: $count',
+      one: 'Izveidoti datumi: $count',
+      zero: 'Izveidoti datumi: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createEventNextDateLabel => 'Nākamais datums';
+
+  @override
+  String createEventPriceIn(String value) {
+    return 'Cena ($value)';
+  }
+
+  @override
+  String get createFormContinue => 'Turpināt';
+
+  @override
+  String get createEventCapacityInventory => 'Ietilpība un vietu uzskaite';
+
+  @override
+  String get createEventPoolsLabel => 'Vietu grupas';
+
+  @override
+  String get createEventZoneReference => 'Zonas/galda apzīmējums';
+
+  @override
+  String get createFindPeopleTagsField =>
+      'Birkas (atdalītas ar komatu, līdz 8)';
+
+  @override
+  String get createFindPeoplePaceOptional => 'Temps (neobligāti)';
+
+  @override
+  String get createFindPeopleSecretRefHint =>
+      'Droša atsauce uz konkrēto tikšanos; publiski netiek rādīta';
+
+  @override
+  String get createFormAmount => 'Summa';
+
+  @override
+  String get createFindPeopleHostsTitle => 'Organizatori, redzamība un saziņa';
+
+  @override
+  String get createFindPeopleCohostInactive =>
+      'Līdzorganizatora tiesības nav aktīvas, kamēr uzaicinātais lietotājs nav pieņēmis lomu.';
+
+  @override
+  String get createFindPeopleAccuracyConfirm =>
+      'Apstiprinu, ka visa informācija ir pareiza *';
+
+  @override
+  String get createFormReadOnlyDraft => 'Melnraksts tikai lasīšanai';
+
+  @override
+  String get createFormDescriptionRequired => 'Apraksts *';
+
+  @override
+  String get createFormDescriptionRecommended => 'Apraksts (ieteicams)';
+
+  @override
+  String get createPlaceShortDescHint => '20–180 rakstzīmes.';
+
+  @override
+  String get createPlaceDirectionsHint =>
+      'Neobligāti: ieeja, ceļš vai tikšanās vieta';
+
+  @override
+  String get createPlaceOpen247 => 'Atvērts 24/7';
+
+  @override
+  String get createPlaceSeasonalPhase2 => 'Sezonāli (2. posms)';
+
+  @override
+  String get createFormDateFormatHint => 'GGGG-MM-DD';
+
+  @override
+  String get createPlaceUntilInclusive => 'Līdz (ieskaitot)';
+
+  @override
+  String get createPlaceShortVisit => 'Der arī īsāks apmeklējums';
+
+  @override
+  String get createPlaceCoverRecommended =>
+      'Vāka attēls ir ieteicams, to var pievienot vēlāk.';
+
+  @override
+  String get createPlaceGalleryOptional => 'Neobligāti · ne vairāk kā 12';
+
+  @override
+  String get createPlaceWarningsReviewed => 'Brīdinājumi ir pārskatīti';
+
+  @override
+  String get createFormReviewing => 'Notiek pārbaude…';
+
+  @override
+  String createPlaceRecommendedMinutes(int minutes) {
+    return 'Ieteicams: $minutes min';
+  }
+
+  @override
+  String get createPlaceRoutePrimary => 'Maršruts (galvenā darbība)';
+
+  @override
+  String createPlaceDuplicateReason(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'title_match': 'līdzīgs nosaukums',
+      'category_match': 'tā pati kategorija',
+      'official_domain_match': 'tā pati vietne',
+      'phone_match': 'tas pats tālrunis',
+      'other': 'līdzīga informācija',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createRentalBrandModel => 'Zīmols / modelis (neobligāti)';
+
+  @override
+  String get createRentalConfirmCategory =>
+      'Apstiprinu, ka kategorija ir pareiza';
+
+  @override
+  String get createRentalSizeVariant => 'Izmērs / variants';
+
+  @override
+  String createFormConfirmedOn(String date) {
+    return 'Apstiprināts $date';
+  }
+
+  @override
+  String createRentalUnitsBlocked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bloķētas vienības: $count',
+      one: 'Bloķētas vienības: $count',
+      zero: 'Bloķētas vienības: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createRentalDefaultsEditable =>
+      'Var mainīt — nekas netiek piemērots automātiski.';
+
+  @override
+  String get createRentalIdRequired =>
+      'Nodošanas brīdī nepieciešams personu apliecinošs dokuments';
+
+  @override
+  String get createRentalCurrencyField => 'Valūta (ISO 4217)';
+
+  @override
+  String createRentalRateStep(int count, String price) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'No $count vienībām: $price (mazākajās vienībās)',
+      one: 'No $count vienības: $price (mazākajās vienībās)',
+      zero: 'No $count vienībām: $price (mazākajās vienībās)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createRentalDepositField =>
+      'Depozīts (mazākajās vienībās, 0 = nav)';
+
+  @override
+  String get createRentalPrivateNotice =>
+      'Privāti, nav publiski: precīza saņemšanas adrese, koordinātas un nodošanas norādes tiek ievadītas atsevišķi un šeit neparādās.';
+
+  @override
+  String get createRentalRightToOffer => 'Man ir tiesības to iznomāt';
+
+  @override
+  String createFormStepOf(int current, int total) {
+    return '$current. solis no $total';
+  }
+
+  @override
+  String get createRouteGpxExport => 'GPX eksports';
+
+  @override
+  String get createRouteGpxSaved => 'GPX fails saglabāts.';
+
+  @override
+  String createFormBytes(String value) {
+    return '$value B';
+  }
+
+  @override
+  String createFormKilobytes(String value) {
+    return '$value KB';
+  }
+
+  @override
+  String createFormMegabytes(String value) {
+    return '$value MB';
+  }
+
+  @override
+  String createRouteGpxKind(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'track': 'Treks',
+      'other': 'Maršruts',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteSegmentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count segmenti',
+      one: '$count segments',
+      zero: '$count segmentu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteConnectGaps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Savienot ar taisnēm pārtraukumus: $count',
+      one: 'Savienot ar taisnēm pārtraukumus: $count',
+      zero: 'Savienot ar taisnēm pārtraukumus: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteImportPoi(int count) {
+    return 'Importēt POI: $count';
+  }
+
+  @override
+  String createRouteAnchorsTitle(int count) {
+    return 'Enkurpunkti ($count)';
+  }
+
+  @override
+  String createRouteAnchorSemantics(int index, String start, String end) {
+    return 'Enkurpunkts $index, platums $start, garums $end';
+  }
+
+  @override
+  String createRouteSegmentsTitle(int count) {
+    return 'Segmenti ($count)';
+  }
+
+  @override
+  String get createRouteSegmentAppears =>
+      'Segments parādās pēc otrā enkurpunkta.';
+
+  @override
+  String createRouteSegmentN(int index) {
+    return '$index. segments';
+  }
+
+  @override
+  String createRouteWaypointsTitle(int count) {
+    return 'Pieturas punkti ($count)';
+  }
+
+  @override
+  String createRouteAnchorN(int index) {
+    return '$index. enkurpunkts';
+  }
+
+  @override
+  String createRouteAcceptedPoints(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pieņemti punkti: $count',
+      one: 'Pieņemti punkti: $count',
+      zero: 'Pieņemti punkti: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteAverageAccuracy(String value) {
+    return 'vidēji $value m';
+  }
+
+  @override
+  String createRouteUnsafePoints(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Izslēgti nedroši punkti: $count.',
+      one: 'Izslēgti nedroši punkti: $count.',
+      zero: 'Izslēgti nedroši punkti: $count.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteGapLabel(int index, int meters, int total) {
+    return '$index. pārtraukums: $meters m, $total s';
+  }
+
+  @override
+  String createRouteGpsPointsSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Saglabāti GPS punkti: $count',
+      one: 'Saglabāti GPS punkti: $count',
+      zero: 'Saglabāti GPS punkti: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createRouteGpsAttention => 'GPS prasa uzmanību';
+
+  @override
+  String get createRouteGpsUnsafeStop =>
+      'GPS ierakstu nevarēja droši turpināt.';
+
+  @override
+  String createRouteBlockingChecks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bloķējošas pārbaudes: $count',
+      one: 'Bloķējošas pārbaudes: $count',
+      zero: 'Bloķējošas pārbaudes: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteWarningsToReview(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pārskatāmi brīdinājumi: $count',
+      one: 'Pārskatāmi brīdinājumi: $count',
+      zero: 'Pārskatāmi brīdinājumi: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteUnknownSurfaceMeters(String value) {
+    return 'nezināmi $value m';
+  }
+
+  @override
+  String get createScenarioDayOne => '1. diena';
+
+  @override
+  String get createScenarioRechecking => 'Notiek atkārtota pārbaude…';
+
+  @override
+  String get createScenarioTimeNotEntered => 'laiks nav ievadīts';
+
+  @override
+  String get createScenarioDurationMinutesField => 'Ilgums, minūtes';
+
+  @override
+  String get createScenarioStopHint => 'Parks, skatu punkts, privāta adrese…';
+
+  @override
+  String createScenarioBlockingIssues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bloķējošas problēmas: $count',
+      one: 'Bloķējošas problēmas: $count',
+      zero: 'Bloķējošas problēmas: $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createScenarioServiceChanged => 'Atrasts mainīts reiss';
+
+  @override
+  String get createScenarioFreshnessLabel => 'Aktualitāte';
+
+  @override
+  String createScenarioFreshness(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'current': 'aktuāls',
+      'stale': 'novecojis',
+      'unavailable': 'nav pieejams',
+      'other': 'nezināms',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createScenarioAfterTime(String time) {
+    return 'Pēc $time';
+  }
+
+  @override
+  String get createScenarioNoStopsFound => 'Pieturas nav atrastas.';
+
+  @override
+  String createScenarioDepartureSemantics(
+    String start,
+    String end,
+    int minutes,
+  ) {
+    return 'No $start līdz $end, $minutes minūtes, plānotais saraksts, ne reāllaikā';
+  }
+
+  @override
+  String get createScenarioCarrierOptional => 'Pārvadātājs (neobligāti)';
+
+  @override
+  String get createScenarioServiceHint => 'Vilciens 802 / Autobuss 7480';
+
+  @override
+  String get createScenarioDurationMinRequired => 'Ilgums, min *';
+
+  @override
+  String get createScenarioDurationMin => 'Ilgums, min';
+
+  @override
+  String get createScenarioDistanceKm => 'Attālums, km';
+
+  @override
+  String get createScenarioOtherCost =>
+      'Stāvvieta / biļete / citas izmaksas (neobligāti)';
+
+  @override
+  String get createSessionTimezoneField =>
+      'Laika josla (IANA, piem., Europe/Riga)';
+
+  @override
+  String get createFormConfirmed => 'Apstiprināts';
+
+  @override
+  String createSessionBuffer(int minutes) {
+    return 'Pauze $minutes min';
+  }
+
+  @override
+  String createSessionNotice(int minutes) {
+    return 'iepriekšējs brīdinājums $minutes min';
+  }
+
+  @override
+  String get createSessionPlatformDefaults =>
+      'platformas noklusējumi, var mainīt jebkurā laikā';
+
+  @override
+  String get createSessionPriceFixed => '€ Fiksēta';
+
+  @override
+  String get createSessionOptionalLater =>
+      'Neobligāti — pievienojiet tagad vai pēc publicēšanas';
+
+  @override
+  String discoverResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rezultāti',
+      one: '$count rezultāts',
+      zero: '$count rezultātu',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverSubcategories => 'Apakškategorijas';
+
+  @override
+  String get discoverFilterMode => 'Režīms';
+
+  @override
+  String get discoverEstimated => 'aptuveni';
+
+  @override
+  String get discoverSlotLabel => 'Laika posms';
+
+  @override
+  String get discoverGuides => 'Gidi';
+
+  @override
+  String discoverItemsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count vienības',
+      one: '$count vienība',
+      zero: '$count vienību',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String identityVerificationStatus(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'unverified': 'Nepārbaudīta',
+      'pending': 'Gaida pārbaudi',
+      'verified': 'Pārbaudīta',
+      'rejected': 'Pārbaude noraidīta',
+      'revoked': 'Pārbaude atsaukta',
+      'other': 'Nepārbaudīta',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityRelationship(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'owner': 'Īpašnieks',
+      'manager': 'Vadītājs',
+      'other': 'Redaktors',
+    });
+    return '$_temp0';
+  }
 }

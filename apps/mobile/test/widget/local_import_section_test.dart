@@ -16,6 +16,7 @@ import 'package:recharge/features/create/domain/repositories/publisher_access_ch
 import 'package:recharge/features/create/presentation/widgets/local_import_section.dart';
 
 import '../fixtures/create/user_place_draft.dart';
+import '../support/l10n/l10n_screenshot.dart';
 
 /// D4.1 §3.4: the import section offers "Roll back import" only for a
 /// verified import, asks for confirmation, and shows the pending state, the
@@ -213,6 +214,7 @@ void main() {
         addTearDown(tester.view.reset);
         await show(tester, locale: Locale(language), textScale: 2);
         expect(tester.takeException(), isNull);
+        await l10nCaptureScreen(tester);
         final AppLocalizations l10n = lookupAppLocalizations(Locale(language));
         expect(find.text(l10n.importSectionTitle), findsOne);
         expect(find.textContaining(l10n.importItemState('verified')), findsOne);

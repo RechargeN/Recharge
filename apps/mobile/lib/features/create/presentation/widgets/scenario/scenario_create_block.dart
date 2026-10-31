@@ -115,7 +115,7 @@ class ScenarioCreateBlock extends StatelessWidget {
                         : controller.saveScenarioToMyScenarios,
                     child: Text(
                       step < scenarioCreateSteps.length - 1
-                          ? 'Continue'
+                          ? context.l10n.createFormContinue
                           : context.l10n.createScenarioSaveMyScenarios,
                     ),
                   ),

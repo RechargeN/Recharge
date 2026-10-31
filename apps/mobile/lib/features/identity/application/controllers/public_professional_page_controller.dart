@@ -71,7 +71,7 @@ class PublicProfessionalPageController extends ChangeNotifier {
       _setState(
         const PublicProfessionalPageState(
           status: PublicProfessionalPageStatus.error,
-          message: 'Unable to load this page.',
+          message: 'page_load_failed',
         ),
       );
     }
@@ -123,7 +123,7 @@ class PublicProfessionalPageController extends ChangeNotifier {
       _setState(
         const PublicProfessionalPageState(
           status: PublicProfessionalPageStatus.error,
-          message: 'Unable to load page preview.',
+          message: 'page_preview_failed',
         ),
       );
     }

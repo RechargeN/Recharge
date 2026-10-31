@@ -16,6 +16,8 @@ import 'package:recharge/features/identity/domain/usecases/revoke_team_invitatio
 import 'package:recharge/features/identity/domain/usecases/send_team_invitation_usecase.dart';
 import 'package:recharge/features/identity/presentation/widgets/team_invitations_card.dart';
 
+import '../support/l10n/l10n_screen_harness.dart';
+
 void main() {
   const String pageId = 'page-1';
   const String ownerId = 'owner-1';
@@ -72,7 +74,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
-          teamInvitationControllerProvider.overrideWith((Ref ref) => controller),
+          teamInvitationControllerProvider.overrideWith(
+            (Ref ref) => controller,
+          ),
         ],
         child: MaterialApp(
           home: Scaffold(
@@ -89,6 +93,39 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  // L4.6: the invitation form in lv, en and ru at 360 dp.
+  l10nSmallScreenTestWidgets('Team invitations', (tester, locale, scale) async {
+    final Set<String> capabilities = <String>{
+      SendTeamInvitationUseCase.teamManageCapability,
+    };
+    final TeamInvitationController controller = buildController(capabilities);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          teamInvitationControllerProvider.overrideWith(
+            (Ref ref) => controller,
+          ),
+        ],
+        child: l10nTestApp(
+          locale: locale,
+          scale: scale,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: TeamInvitationsCard(
+                pageId: pageId,
+                actingUserId: ownerId,
+                ownCapabilities: capabilities,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(l10nFor(locale).identityNoInvitations), findsOneWidget);
+    await l10nScrollThrough(tester);
+  });
 
   testWidgets('a member without team.manage sees a denial, not the form', (
     WidgetTester tester,
@@ -151,13 +188,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('colleague@example.com'), findsOneWidget);
-    expect(find.text('editor · Pending'), findsOneWidget);
+    expect(find.text('Editor · Pending'), findsOneWidget);
     expect(find.text('Revoke'), findsOneWidget);
 
     await tester.tap(find.text('Revoke'));
     await tester.pumpAndSettle();
 
-    expect(find.text('editor · Revoked'), findsOneWidget);
+    expect(find.text('Editor · Revoked'), findsOneWidget);
     expect(find.text('Revoke'), findsNothing);
     expect(tester.takeException(), isNull);
   });

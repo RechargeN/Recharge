@@ -185,7 +185,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
     CheckboxListTile(
       key: const Key('class-workshop-rights'),
       value: _c.classWorkshopMediaMetadata['rightsConfirmed'] == true,
-      title: const Text('I have permission to use these images'),
+      title: Text(context.l10n.createFormImagesPermission),
       onChanged: (bool? value) =>
           _c.updateClassWorkshopMediaMetadata(rightsConfirmed: value ?? false),
     ),
@@ -194,7 +194,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
   List<Widget> _learning(ClassWorkshopDraftData data) => <Widget>[
     _text(
       'class-workshop-outcomes',
-      'Outcomes (one per line)',
+      context.l10n.createClassOutcomesPerLine,
       data.outcomes.join('\n'),
       _c.setClassWorkshopOutcomes,
       lines: 3,
@@ -215,7 +215,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
     if (data.prerequisitesListed == true)
       _text(
         'class-workshop-prerequisites',
-        'Prerequisites (one per line)',
+        context.l10n.createClassPrerequisitesPerLine,
         data.prerequisites.join('\n'),
         (String v) => _c.setClassWorkshopPrerequisites(listed: true, lines: v),
         lines: 2,
@@ -229,7 +229,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
     SwitchListTile(
       key: const Key('class-workshop-instructor-same'),
       value: data.instructor.sameAsPublisher,
-      title: const Text('I lead this class myself'),
+      title: Text(context.l10n.createClassLeadMyself),
       onChanged: (bool value) =>
           _c.setClassWorkshopInstructor(sameAsPublisher: value),
     ),
@@ -316,7 +316,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       if (hasPlace) ...<Widget>[
         _text(
           'class-workshop-venue',
-          'Venue',
+          context.l10n.createFormVenue,
           draft.venueName,
           _c.updateVenueName,
         ),
@@ -412,7 +412,7 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
               ),
               ButtonSegment(
                 value: ClassWorkshopFold.later,
-                label: Text('Second (winter time)'),
+                label: Text(context.l10n.createClassFoldSecond),
               ),
             ],
             selected: <ClassWorkshopFold>{?item.fold},
@@ -435,11 +435,21 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       ),
       const SizedBox(width: 8),
       Expanded(
-        child: _text('class-workshop-new-start', 'Start (HH:MM)', '', (_) {}),
+        child: _text(
+          'class-workshop-new-start',
+          context.l10n.createClassStartHhmm,
+          '',
+          (_) {},
+        ),
       ),
       const SizedBox(width: 8),
       Expanded(
-        child: _text('class-workshop-new-end', 'End (HH:MM)', '', (_) {}),
+        child: _text(
+          'class-workshop-new-end',
+          context.l10n.createClassEndHhmm,
+          '',
+          (_) {},
+        ),
       ),
       IconButton(
         key: const Key('class-workshop-add-date'),

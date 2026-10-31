@@ -16,7 +16,11 @@ class LegacyQuickPlanConversionAdapter {
       id: draft.id,
       revision: draft.revision,
       ownerId: ownerId,
-      title: title.trim().isEmpty ? 'Quick Plan' : title.trim(),
+      title: title.trim().isEmpty
+          // The product term is the default title of the author's new
+          // Scenario, which the author edits.
+          ? 'Quick Plan' // l10n-ignore: product term as a default title
+          : title.trim(),
       timezoneId: timezoneId,
       currencyCode: currencyCode,
       stops: draft.steps

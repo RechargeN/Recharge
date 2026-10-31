@@ -20,7 +20,60 @@ import 'package:recharge/features/identity/domain/usecases/request_page_limit_in
 import 'package:recharge/features/identity/domain/usecases/select_workspace_usecase.dart';
 import 'package:recharge/features/identity/presentation/widgets/workspace_section.dart';
 
+import '../support/l10n/l10n_screen_harness.dart';
+
 void main() {
+  // L4.6: the workspace switcher in lv, en and ru at 360 dp.
+  l10nSmallScreenTestWidgets('Workspace switcher', (
+    tester,
+    locale,
+    scale,
+  ) async {
+    const String userId = 'demo_full_access';
+    final repository = _MemoryIdentityWorkspaceRepository(
+      const MockIdentityFixture().accessForUser(userId),
+    );
+    final ids = _SequenceIdGenerator();
+    final controller = IdentityWorkspaceController(
+      loadIdentityWorkspaceUseCase: LoadIdentityWorkspaceUseCase(repository),
+      selectWorkspaceUseCase: SelectWorkspaceUseCase(repository),
+      createProfessionalPageUseCase: CreateProfessionalPageUseCase(
+        repository: repository,
+        idGenerator: ids,
+      ),
+      requestPageLimitIncreaseUseCase: RequestPageLimitIncreaseUseCase(
+        repository: repository,
+        idGenerator: ids,
+      ),
+      notificationSink: _MemoryNotificationSink(),
+      marketConfig: MarketConfig.riga,
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          identityWorkspaceControllerProvider.overrideWith(
+            (Ref ref) => controller,
+          ),
+        ],
+        child: l10nTestApp(
+          locale: locale,
+          scale: scale,
+          home: const Scaffold(
+            body: SingleChildScrollView(
+              padding: EdgeInsets.all(16),
+              child: WorkspaceSection(userId: userId),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('workspace-personal')), findsOneWidget);
+    expect(find.text(l10nFor(locale).identityCreator), findsWidgets);
+    await l10nScrollThrough(tester);
+  });
+
   testWidgets(
     'ordinary User has one Creator row without Admin preview or tool grants',
     (tester) async {

@@ -9267,4 +9267,2239 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discoverBadgeClassWorkshop => 'CLASS / WORKSHOP';
+
+  @override
+  String get identityProfessionalPage => 'Professional Page';
+
+  @override
+  String get identityVerificationRevoked => 'Verification revoked';
+
+  @override
+  String get identityVerificationRejected => 'Verification rejected';
+
+  @override
+  String get identityVerificationPending => 'Verification pending';
+
+  @override
+  String get identityKindPrivateProfessional => 'Private professional';
+
+  @override
+  String get identityKindVenueOperator => 'Venue operator';
+
+  @override
+  String get identityKindRepresentativeOffice => 'Representative office';
+
+  @override
+  String get identityRetry => 'Retry';
+
+  @override
+  String get identityCreate => 'Create';
+
+  @override
+  String get identityMinTwoChars => 'Enter at least 2 characters';
+
+  @override
+  String get identityCancel => 'Cancel';
+
+  @override
+  String get identityPageStartsPending =>
+      'The page starts in Pending review. Market, locale, timezone and currency come from the active market configuration.';
+
+  @override
+  String get identityPageType => 'Page type';
+
+  @override
+  String get identityPageName => 'Page name';
+
+  @override
+  String get identityCreatePage => 'Create Professional Page';
+
+  @override
+  String get identityPreviewOnlyRoles =>
+      'Presentation preview only. Roles and permissions do not change.';
+
+  @override
+  String get identityViewAs => 'View as';
+
+  @override
+  String get identityNoPageYet =>
+      'You have not created a Professional Page yet.';
+
+  @override
+  String get identityCreateContent => 'Create content';
+
+  @override
+  String get identityManagePage => 'Manage page';
+
+  @override
+  String get identityPersonalRevoked =>
+      'Personal profile · Verification revoked';
+
+  @override
+  String get identityPersonalExpired =>
+      'Personal profile · Verification expired';
+
+  @override
+  String get identityPersonalRejected =>
+      'Personal profile · Verification rejected';
+
+  @override
+  String get identityVerifiedTools =>
+      'Verified · Tools follow your permissions';
+
+  @override
+  String get identityPersonalPending =>
+      'Personal profile · Verification pending';
+
+  @override
+  String get identityPersonalNotStarted =>
+      'Personal profile · Verification not started';
+
+  @override
+  String get identityAdminSeparate =>
+      'Admin access active · separate from publishing';
+
+  @override
+  String get identityAdminTools => 'Admin tools';
+
+  @override
+  String get identityRequestAdditionalPage => 'Request additional page';
+
+  @override
+  String get identityModeratorsWillReview =>
+      'Moderators will review your request.';
+
+  @override
+  String get identityLimitRequestPending => 'Additional page request pending';
+
+  @override
+  String get identityCreator => 'Creator';
+
+  @override
+  String get identityOk => 'OK';
+
+  @override
+  String get identityAdminMockNotice =>
+      'This mock account has explicit Admin capabilities. Operational Admin tools are connected in IDP-05A.';
+
+  @override
+  String get identityAdminAccessActive => 'Admin access active';
+
+  @override
+  String get identityPageNotFound => 'Page not found';
+
+  @override
+  String get identityContentViaProjection =>
+      'Content appears here only through an approved publisher projection.';
+
+  @override
+  String get identityNoPublishedContent => 'No published content yet';
+
+  @override
+  String get identityPublishedContent => 'Published content';
+
+  @override
+  String get identityEditPage => 'Edit page';
+
+  @override
+  String get identityShare => 'Share';
+
+  @override
+  String get identityVerifiedPage => 'Verified Professional Page';
+
+  @override
+  String get identityPreviewDoesNotPublish =>
+      'This preview does not publish or verify the page.';
+
+  @override
+  String get identityPublicPagePreview => 'Public page preview';
+
+  @override
+  String get identityPreviewNotPublic =>
+      'Preview. This page is not publicly visible.';
+
+  @override
+  String get identityPageAccountSettings =>
+      'Page account, memberships and international settings.';
+
+  @override
+  String get identityContentScoped =>
+      'Content is scoped to this exact Professional Page.';
+
+  @override
+  String get identityOverviewModeration =>
+      'Professional Page overview and moderation status.';
+
+  @override
+  String get identityPreviewUntilVerified =>
+      'Preview only. The page is not public until verification is approved.';
+
+  @override
+  String get identityPreviewPublicPage => 'Preview public page';
+
+  @override
+  String get identityNoPageInvented =>
+      'No page is invented for this preview. Create a page to activate its workspace and publisher context.';
+
+  @override
+  String get identityContentAfterRealPage =>
+      'Content appears only after the user creates or joins a real Professional Page.';
+
+  @override
+  String get identityPagePreview => 'Professional Page preview';
+
+  @override
+  String get identitySwitchPage => 'Switch Professional Page';
+
+  @override
+  String get identityCreateOrSelectPage => 'Create or select Professional Page';
+
+  @override
+  String get identityUserId => 'User ID';
+
+  @override
+  String get identitySendInvitation => 'Send invitation';
+
+  @override
+  String get identityCapabilities => 'Capabilities';
+
+  @override
+  String get identityRole => 'Role';
+
+  @override
+  String get identityInviteBy => 'Invite by';
+
+  @override
+  String get identityInviteMember => 'Invite a team member';
+
+  @override
+  String get identityRevoke => 'Revoke';
+
+  @override
+  String get identityNoInvitations => 'No invitations sent from this page yet.';
+
+  @override
+  String get identityNoTeamPermission =>
+      'You do not have permission to manage the team.';
+
+  @override
+  String get identitySave => 'Save';
+
+  @override
+  String get identityNotSet => 'Not set.';
+
+  @override
+  String get identityCustomActivityLabel => 'Custom activity label';
+
+  @override
+  String get identityDescription => 'Description';
+
+  @override
+  String get identityShortDescription => 'Short description';
+
+  @override
+  String get identitySwitchWorkspaceHint =>
+      'Personal profile, Professional Pages and Admin access';
+
+  @override
+  String get identitySwitchWorkspace => 'Switch workspace';
+
+  @override
+  String get profileDateTbd => 'Date to be set';
+
+  @override
+  String get profileDraftListing => 'Draft listing';
+
+  @override
+  String get profileSmartSearchIdea => 'Smart search idea';
+
+  @override
+  String get profilePublishedRoute => 'Published route';
+
+  @override
+  String get profileReadyToPublish => 'Ready to publish';
+
+  @override
+  String get profileNoCity => 'No city';
+
+  @override
+  String get profileUntitledListing => 'Untitled listing';
+
+  @override
+  String get profileRouteMap => 'Route map';
+
+  @override
+  String get profileEditRoute => 'Edit route';
+
+  @override
+  String get profileWalking => 'Walking';
+
+  @override
+  String get profileFree => 'Free';
+
+  @override
+  String get profileOpenQuickPlanNext =>
+      'Open Quick Plan for the next generated idea';
+
+  @override
+  String get profileBuildNextRoute => 'Build next route';
+
+  @override
+  String get profileMapPublishedListing => 'Map published listing';
+
+  @override
+  String get profileOpenRouteMap => 'Open route map';
+
+  @override
+  String get profileFindDraftAudience => 'Find draft audience';
+
+  @override
+  String get profileFinishDraft => 'Finish draft';
+
+  @override
+  String get profileCreatorNextSteps => 'Creator next steps';
+
+  @override
+  String get profileMapListingArea => 'Map listing area';
+
+  @override
+  String get profileSearchSimilarListing => 'Search similar listing';
+
+  @override
+  String get profileContinueDraft => 'Continue draft';
+
+  @override
+  String get profileOpenCreate => 'Open Create';
+
+  @override
+  String get profileCreatorListing => 'Creator listing';
+
+  @override
+  String get profileBuildRoute => 'Build route';
+
+  @override
+  String get profileNewListing => 'New listing';
+
+  @override
+  String get profileManageDrafts =>
+      'Manage drafts and published listings from the same workspace.';
+
+  @override
+  String get profileCreatorPublications => 'Creator publications';
+
+  @override
+  String get profileListingFromLatestSmart =>
+      'Create listing from latest smart search';
+
+  @override
+  String get profileRouteFromLatestSmart =>
+      'Build route from latest smart search';
+
+  @override
+  String get profileMapSmart => 'Map smart';
+
+  @override
+  String get profileResumeSmart => 'Resume smart';
+
+  @override
+  String get profileAnyArea => 'Any area';
+
+  @override
+  String get profileSmartRoute => 'Smart route';
+
+  @override
+  String get profileSmart => 'Smart';
+
+  @override
+  String get profileLatestSmartSearch => 'Latest smart search';
+
+  @override
+  String get profileListingFromLatestSearch =>
+      'Create listing from latest search';
+
+  @override
+  String get profileRouteFromLatestSearch => 'Build route from latest search';
+
+  @override
+  String get profileMapSearch => 'Map search';
+
+  @override
+  String get profileResumeSearch => 'Resume search';
+
+  @override
+  String get profileConditions => 'Conditions';
+
+  @override
+  String get profileLatestSearch => 'Latest search';
+
+  @override
+  String get profileMapRoute => 'Map route';
+
+  @override
+  String get profileScenario => 'Scenario';
+
+  @override
+  String get profileLatestRoute => 'Latest route';
+
+  @override
+  String get profilePersonalScenario => 'Create a personal recharge scenario';
+
+  @override
+  String get profileBuildARoute => 'Build a route';
+
+  @override
+  String get profileUseSearchMap => 'Use Search and Map conditions';
+
+  @override
+  String get profileFindNextActivity => 'Find next activity';
+
+  @override
+  String get profileSavedPlan => 'Saved plan';
+
+  @override
+  String get profileReviewSavedPlan => 'Review saved plan';
+
+  @override
+  String get profileUseSavedInspiration =>
+      'Use saved searches and scenarios as inspiration';
+
+  @override
+  String get profileBuildRouteIdea => 'Build route idea';
+
+  @override
+  String get profileDraftFromTaxonomy => 'Draft event or place from taxonomy';
+
+  @override
+  String get profileCreateHub => 'Create Hub';
+
+  @override
+  String get profileIdeaToHub => 'Move from route idea to Create Hub';
+
+  @override
+  String get profilePublishIdea => 'Publish idea';
+
+  @override
+  String get profileSmartPrompt => 'Smart prompt';
+
+  @override
+  String get profileOpenBuilderControls => 'Open Builder with route controls';
+
+  @override
+  String get profileGenerateScenario => 'Generate scenario';
+
+  @override
+  String get profileSearches => 'Searches';
+
+  @override
+  String get profileRoutes => 'Routes';
+
+  @override
+  String get profileSaved => 'Saved';
+
+  @override
+  String get profileUntitledActivity => 'Untitled activity';
+
+  @override
+  String get profileContinueInSearch => 'Continue in Search conditions';
+
+  @override
+  String get profileFindPeople => 'Find people';
+
+  @override
+  String get profileOpenScenarioBlock =>
+      'Open the Scenario block in Create Hub';
+
+  @override
+  String get profileCreateScenario => 'Create Scenario';
+
+  @override
+  String get profileOpenRouteBlock => 'Open the Route block in Create Hub';
+
+  @override
+  String get profileCreateRoute => 'Create route';
+
+  @override
+  String get profileOpenTaxonomyFlow => 'Open taxonomy-based creator flow';
+
+  @override
+  String get profileViewAllEvents => 'View all events';
+
+  @override
+  String get profileStartFromHub => 'Start from Recharge Create Hub';
+
+  @override
+  String get profileNoCreatedEvents => 'No created events yet';
+
+  @override
+  String get profileCreateFirstEvent => 'Create first event';
+
+  @override
+  String get profileEventInsights => 'Event insights';
+
+  @override
+  String get profileCreatedEvents => 'Created events';
+
+  @override
+  String get profileManagePage => 'Manage page';
+
+  @override
+  String get profilePhotos => 'Photos';
+
+  @override
+  String get profileVisited => 'Visited';
+
+  @override
+  String get profileCreated => 'Created';
+
+  @override
+  String get profileWorkspace => 'Profile workspace';
+
+  @override
+  String get profileSignInRequired => 'Sign-in required';
+
+  @override
+  String get profileCheckVerification =>
+      'Check verification and available tools in Settings';
+
+  @override
+  String get profileCreatorTools => 'Creator tools';
+
+  @override
+  String get profileSavedList => 'Saved list';
+
+  @override
+  String get profileSettings => 'Settings';
+
+  @override
+  String get profileObjectUpdatesOff => 'Object updates off';
+
+  @override
+  String get profileObjectUpdatesOn => 'Object updates on';
+
+  @override
+  String get profileCompleted => 'Completed';
+
+  @override
+  String get profileActiveUpcoming => 'Active and upcoming';
+
+  @override
+  String get quickPlanAnyArea => 'Any area';
+
+  @override
+  String get quickPlanAnyPrice => 'Any price';
+
+  @override
+  String get quickPlanAllCategories => 'All categories';
+
+  @override
+  String get quickPlanSmartRoute => 'Smart route';
+
+  @override
+  String get quickPlanRechargeIdea => 'Recharge idea';
+
+  @override
+  String get quickPlanTplActiveHint =>
+      'Move first, cool down outside, then keep energy steady.';
+
+  @override
+  String get quickPlanTplActive => 'Active boost';
+
+  @override
+  String get quickPlanTplSocialHint =>
+      'Meet people first, then keep the evening moving nearby.';
+
+  @override
+  String get quickPlanTplSocial => 'Social evening';
+
+  @override
+  String get quickPlanTplFreeCity => 'Free city reset';
+
+  @override
+  String get quickPlanTplCoffeeHint =>
+      'Start gently, then take a low-pressure city walk.';
+
+  @override
+  String get quickPlanTplCoffee => 'Coffee reset';
+
+  @override
+  String get quickPlanResetBuilder => 'Reset builder';
+
+  @override
+  String get quickPlanNoStopsMatch => 'No stops match these conditions';
+
+  @override
+  String get quickPlanAdd => 'Add';
+
+  @override
+  String get quickPlanSuggestedStops => 'Suggested stops';
+
+  @override
+  String get quickPlanRemoveStop => 'Remove stop';
+
+  @override
+  String get quickPlanMoveDown => 'Move down';
+
+  @override
+  String get quickPlanMoveUp => 'Move up';
+
+  @override
+  String get quickPlanPublishOptimized => 'Publish optimized route';
+
+  @override
+  String get quickPlanMapRoute => 'Map route';
+
+  @override
+  String get quickPlanOptimize => 'Optimize';
+
+  @override
+  String get quickPlanFreeOnly => 'Free only';
+
+  @override
+  String get quickPlanRouteFit => 'Route fit';
+
+  @override
+  String get quickPlanWalkingRoute => 'Walking route';
+
+  @override
+  String get quickPlanMoodActive => 'Active';
+
+  @override
+  String get quickPlanMoodSocial => 'Social';
+
+  @override
+  String get quickPlanMoodCalm => 'Calm';
+
+  @override
+  String get quickPlanListingFromSmart => 'Create listing from smart search';
+
+  @override
+  String get quickPlanOpenSmartOnMap => 'Open smart search on map';
+
+  @override
+  String get quickPlanApplySmartToBuilder => 'Apply smart search to builder';
+
+  @override
+  String get quickPlanSmartSearch => 'Smart search';
+
+  @override
+  String get quickPlanListingFromSaved =>
+      'Create listing from saved conditions';
+
+  @override
+  String get quickPlanOpenSavedOnMap => 'Open saved conditions on map';
+
+  @override
+  String get quickPlanApplySavedToBuilder =>
+      'Apply saved conditions to builder';
+
+  @override
+  String get quickPlanSavedConditions => 'Saved conditions';
+
+  @override
+  String get quickPlanBuildFromSaved => 'Build from saved intent';
+
+  @override
+  String get quickPlanReadyIdeas => 'Ready route ideas';
+
+  @override
+  String get quickPlanPublishRoute => 'Publish route';
+
+  @override
+  String get quickPlanSearch => 'Search';
+
+  @override
+  String get quickPlanMap => 'Map';
+
+  @override
+  String get quickPlanCopy => 'Copy';
+
+  @override
+  String get quickPlanSave => 'Save';
+
+  @override
+  String get quickPlanBuildRechargeRoute => 'Build a recharge route';
+
+  @override
+  String get quickPlanRoutePreview => 'Route preview';
+
+  @override
+  String get quickPlanContinueSnapshot => 'Continue with snapshot';
+
+  @override
+  String get quickPlanRefresh => 'Refresh';
+
+  @override
+  String get quickPlanRefreshOrContinue =>
+      'Refresh the preview or continue with the latest available snapshot.';
+
+  @override
+  String get quickPlanChanged => 'Quick Plan changed';
+
+  @override
+  String get quickPlanCreateIndependent => 'Create independent Scenario';
+
+  @override
+  String get quickPlanCancel => 'Cancel';
+
+  @override
+  String get quickPlanNoNotes =>
+      'Only your own notes are eligible; this legacy plan has none.';
+
+  @override
+  String get quickPlanCopyNotes => 'Copy my private notes';
+
+  @override
+  String get quickPlanLegacyStopsHint =>
+      'Legacy stops have no catalog object IDs, so selected stops will enter Scenario as private custom locations.';
+
+  @override
+  String get quickPlanIndependentHint =>
+      'A new independent Scenario will be created. Later changes will not sync in either direction.';
+
+  @override
+  String get quickPlanExpandToScenario => 'Expand to Scenario';
+
+  @override
+  String get quickPlanCopyStopsHint =>
+      'Copy selected stops into a new independent Scenario. This Quick Plan stays unchanged.';
+
+  @override
+  String get quickPlanNeedLargerPlan => 'Need a larger city or trip plan?';
+
+  @override
+  String get quickPlanSavePlan => 'Save this plan';
+
+  @override
+  String get quickPlanOpenMap => 'Open map';
+
+  @override
+  String get quickPlanEditPlan => 'Edit plan';
+
+  @override
+  String get quickPlanNoStopsFit =>
+      'No stops fit these conditions yet. Edit the plan to add one.';
+
+  @override
+  String get quickPlanYourRoute => 'Your route';
+
+  @override
+  String get quickPlanExpandFailed => 'Could not expand this Quick Plan';
+
+  @override
+  String get quickPlanCopied => 'Quick Plan copied';
+
+  @override
+  String get quickPlanSaved => 'Quick Plan saved';
+
+  @override
+  String get quickPlanNotSynced =>
+      'Not synced. Your local changes are retained; refresh to retry.';
+
+  @override
+  String get quickPlanLeave => 'Leave';
+
+  @override
+  String get quickPlanOpenReadOnly => 'Open read-only';
+
+  @override
+  String get quickPlanDecline => 'Decline';
+
+  @override
+  String get quickPlanAccept => 'Accept';
+
+  @override
+  String get quickPlanRevoke => 'Revoke';
+
+  @override
+  String get quickPlanCancelInvite => 'Cancel invite';
+
+  @override
+  String get quickPlanDeletePersonal => 'Delete current personal plan';
+
+  @override
+  String get quickPlanImportPersonal => 'Import personal plan';
+
+  @override
+  String get quickPlanImportJson => 'Import recharge.quickPlan JSON';
+
+  @override
+  String get quickPlanInviteToSaved => 'Invite to current saved plan';
+
+  @override
+  String get quickPlanInviteUserId => 'Invite existing user ID';
+
+  @override
+  String get quickPlanUseKnownUserId =>
+      'Use a known user ID. Pending actions take effect after server confirmation.';
+
+  @override
+  String get quickPlanInvitations => 'Quick Plan invitations';
+
+  @override
+  String get quickPlanContinue => 'Continue';
+
+  @override
+  String get quickPlanLeavePlan => 'Leave plan';
+
+  @override
+  String get quickPlanContentHidden =>
+      'Content hidden. Refresh to verify access.';
+
+  @override
+  String get quickPlanRefreshAccess => 'Refresh access';
+
+  @override
+  String get quickPlanCloseInvited => 'Close invited plan';
+
+  @override
+  String get quickPlanInvitedPlan => 'Invited Quick Plan';
+
+  @override
+  String get quickPlanRouteSteps => 'Route steps';
+
+  @override
+  String get quickPlanYourPlan => 'Your recharge plan';
+
+  @override
+  String get quickPlanReset => 'Reset';
+
+  @override
+  String get quickPlanEdit => 'Edit';
+
+  @override
+  String get quickPlanInvitationsAccess => 'Invitations and access';
+
+  @override
+  String get quickPlanQuickPlan => 'Quick Plan';
+
+  @override
+  String get quickPlanMyQuickPlan => 'My quick plan';
+
+  @override
+  String get favoritesFree => 'Free';
+
+  @override
+  String get favoritesAnyArea => 'Any area';
+
+  @override
+  String get favoritesSmartRoute => 'Smart route';
+
+  @override
+  String get favoritesRechargeIdea => 'Recharge idea';
+
+  @override
+  String get favoritesAnyTime => 'Any time';
+
+  @override
+  String get favoritesBadgeRoute => 'ROUTE';
+
+  @override
+  String get favoritesBadgePlace => 'PLACE';
+
+  @override
+  String get favoritesBadgeEvent => 'EVENT';
+
+  @override
+  String get favoritesShowAll => 'Show all';
+
+  @override
+  String get favoritesFilterEmpty => 'Nothing in this filter yet';
+
+  @override
+  String get favoritesRemove => 'Remove';
+
+  @override
+  String get favoritesMoreActions => 'More actions';
+
+  @override
+  String get favoritesTitle => 'Favorites';
+
+  @override
+  String get favoritesRoutes => 'Routes';
+
+  @override
+  String get favoritesPlaces => 'Places';
+
+  @override
+  String get favoritesEvents => 'Events';
+
+  @override
+  String get favoritesAll => 'All';
+
+  @override
+  String get favoritesMap => 'Map';
+
+  @override
+  String get favoritesResume => 'Resume';
+
+  @override
+  String get favoritesListingFromSmart => 'Create listing from smart search';
+
+  @override
+  String get favoritesDeleteSmart => 'Delete smart search';
+
+  @override
+  String get favoritesSmartSearch => 'Smart search';
+
+  @override
+  String get favoritesListingFromSaved =>
+      'Create listing from saved conditions';
+
+  @override
+  String get favoritesDeleteSaved => 'Delete saved conditions';
+
+  @override
+  String get favoritesSavedConditions => 'Saved conditions';
+
+  @override
+  String get favoritesSavedIntentsHint =>
+      'Conditions and prompts ready to continue';
+
+  @override
+  String get favoritesSavedIntents => 'Saved intents';
+
+  @override
+  String get favoritesOpenDiscover => 'Open Discover';
+
+  @override
+  String get favoritesEmpty => 'No saved events yet';
+
+  @override
+  String get favoritesRetry => 'Retry';
+
+  @override
+  String get favoritesLoadFailed => 'Could not load favorites';
+
+  @override
+  String get favoritesRefresh => 'Refresh favorites';
+
+  @override
+  String get visitedRemoveFromHistory => 'Remove from history';
+
+  @override
+  String get visitedActions => 'Visit actions';
+
+  @override
+  String get visitedClearPeriod => 'Clear period';
+
+  @override
+  String get visitedEmptyPeriod => 'No visits in this period';
+
+  @override
+  String get visitedClear => 'Clear';
+
+  @override
+  String get visitedRemoved => 'Visit removed';
+
+  @override
+  String get visitedRemove => 'Remove';
+
+  @override
+  String get visitedCancel => 'Cancel';
+
+  @override
+  String get visitedRemoveVisit => 'Remove visit?';
+
+  @override
+  String get visitedSelectDay => 'Select visit day';
+
+  @override
+  String get visitedSelectMonth => 'Select month';
+
+  @override
+  String get visitedTitle => 'Visit history';
+
+  @override
+  String get visitedEmptyHint =>
+      'Places you explicitly mark as visited will appear here.';
+
+  @override
+  String get visitedEmpty => 'No visits yet';
+
+  @override
+  String get visitedRetry => 'Retry';
+
+  @override
+  String get visitedTryAgain => 'Try again.';
+
+  @override
+  String get visitedLoadFailed => 'Could not load visits';
+
+  @override
+  String get visitedRefresh => 'Refresh visit history';
+
+  @override
+  String get visitedSignInRequired => 'Sign-in required';
+
+  @override
+  String get identityEmail => 'Email';
+
+  @override
+  String get identityPhone => 'Phone';
+
+  @override
+  String get quickPlanTplFreeCityHint =>
+      'A simple free route for a calm recharge window.';
+
+  @override
+  String identityWorkspaceNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'workspace_recovered':
+          'The unavailable page was reset to your personal profile.',
+      'workspace_load_failed': 'Unable to load workspaces.',
+      'workspace_switched': 'Workspace switched.',
+      'workspace_access_unavailable':
+          'Access to the selected page is unavailable.',
+      'workspace_switch_failed': 'Unable to switch the workspace.',
+      'admin_preview_selected': 'Admin preview selected.',
+      'page_created': 'Professional Page created and sent for review.',
+      'self_service_page_limit_reached':
+          'You have reached the limit of 3 pages. Send a request to the moderators.',
+      'page_create_failed': 'Unable to create the Professional Page.',
+      'page_limit_request_sent': 'Request for an additional page sent.',
+      'page_limit_request_unavailable':
+          'The request is available after you create three pages.',
+      'page_limit_request_failed':
+          'Unable to send the request to the moderators.',
+      'other': 'Unable to load workspaces.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityTeamNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'invitation_sent': 'Invitation sent.',
+      'invitation_send_failed': 'Unable to send the invitation.',
+      'invitation_revoked': 'Invitation revoked.',
+      'invitation_revoke_failed': 'Unable to revoke the invitation.',
+      'invitations_load_failed': 'Unable to load the team invitations.',
+      'invitation_target_invalid':
+          'Enter a valid user ID, email or phone number.',
+      'owner_relationship_not_invitable':
+          'Ownership cannot be granted by invitation.',
+      'inviter_not_active_member':
+          'Only an active team member can send invitations.',
+      'inviter_missing_team_manage_capability':
+          'You do not have permission to manage the team.',
+      'cannot_delegate_capability_not_held':
+          'You cannot grant a capability you do not have yourself.',
+      'revoke_actor_not_active_member':
+          'Only an active team member can revoke invitations.',
+      'invitation_not_found': 'This invitation no longer exists.',
+      'other': 'Unable to send the invitation.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityProfileNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'profile_load_failed': 'Unable to load the page profile.',
+      'profile_updated': 'Profile updated.',
+      'profile_update_failed': 'Unable to update the profile.',
+      'default_locale_value_required':
+          'Enter a value for the page’s default language.',
+      'unsupported_locale': 'That language is not supported by this page.',
+      'value_length_out_of_bounds': 'That text is empty or too long.',
+      'actor_not_active_member':
+          'Only an active team member can edit the profile.',
+      'actor_missing_page_manage_capability':
+          'You do not have permission to edit the page profile.',
+      'stale_overlay_revision':
+          'This field changed elsewhere. Reload and try again.',
+      'other': 'Unable to update the profile.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityPublicPageNotice(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'page_load_failed': 'Unable to load this page.',
+      'page_preview_failed': 'Unable to load the page preview.',
+      'other': 'Unable to load this page.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityInboxTitle(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'identity_page_created_user': 'Professional Page created',
+      'identity_page_created_moderators': 'New Professional Page',
+      'identity_page_limit_request_user': 'Request sent',
+      'identity_page_limit_request_moderators': 'Additional page request',
+      'other': 'Notification',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityInboxBody(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'identity_page_created_user': 'Review status: pending.',
+      'identity_page_created_moderators':
+          'A new page was created and needs review.',
+      'identity_page_limit_request_user':
+          'Moderators will review the additional Professional Page.',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityInboxLimitBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages',
+      one: '$count page',
+    );
+    return 'The user requested a limit of $_temp0.';
+  }
+
+  @override
+  String profileRoleTitle(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'pro_generator': 'Pro generator',
+      'creator': 'Creator',
+      'user': 'User',
+      'other': 'Creator',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String quickPlanFitLevel(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'needsStops': 'Needs stops',
+      'ready': 'Ready',
+      'goodWithTweaks': 'Good with tweaks',
+      'other': 'Needs tuning',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String quickPlanFitSummary(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'needsStops': 'Add at least one stop to make this route useful.',
+      'ready': 'This route is ready for map or publishing.',
+      'goodWithTweaks':
+          'A small optimization can make this route easier to follow.',
+      'other': 'Optimize the route before sending it to Map or Create.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get quickPlanFitNoStops => 'No stops selected';
+
+  @override
+  String quickPlanFitTrim(int minutes) {
+    return 'Trim about $minutes min';
+  }
+
+  @override
+  String quickPlanFitFits(int minutes) {
+    return 'Fits $minutes min';
+  }
+
+  @override
+  String get quickPlanFitRoom => 'Room for one more stop';
+
+  @override
+  String get quickPlanFitRemovePaid => 'Remove paid stops for free-only mode';
+
+  @override
+  String get quickPlanFitFreeRoute => 'Free route';
+
+  @override
+  String quickPlanFitTotalPrice(String price) {
+    return '$price total';
+  }
+
+  @override
+  String get quickPlanFitShortenTransfers =>
+      'Shorten transfers for walking mode';
+
+  @override
+  String quickPlanFitTotalDistance(String km) {
+    return '$km km total';
+  }
+
+  @override
+  String get profileOpenSearchWith => 'Open Search with';
+
+  @override
+  String get quickPlanAccessUnavailable =>
+      'Access unavailable. Refresh to retry.';
+
+  @override
+  String get quickPlanNotConfirmed => 'Not confirmed yet. Refresh to retry.';
+
+  @override
+  String quickPlanTemplateApplied(String message) {
+    return '$message applied';
+  }
+
+  @override
+  String quickPlanApplyTemplate(String message) {
+    return 'Apply $message template';
+  }
+
+  @override
+  String quickPlanExpandStops(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Expand $count stops to Scenario',
+      one: 'Expand $count stop to Scenario',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get identitySectionPage => 'Page';
+
+  @override
+  String get identitySectionContent => 'Content';
+
+  @override
+  String get identitySectionAccount => 'Account';
+
+  @override
+  String identityEditField(String message) {
+    return 'Edit $message';
+  }
+
+  @override
+  String get identityInvitationPending => 'Pending';
+
+  @override
+  String get identityInvitationRevoked => 'Revoked';
+
+  @override
+  String get identityInvitationExpired => 'Expired';
+
+  @override
+  String get identityKindCompany => 'Company';
+
+  @override
+  String get identityKindOrganization => 'Organization';
+
+  @override
+  String get identityUnverified => 'Unverified';
+
+  @override
+  String get identityVerified => 'Verified';
+
+  @override
+  String get profilePersonal => 'Personal';
+
+  @override
+  String get profileBookingsRequests => 'Bookings & requests';
+
+  @override
+  String get profileOneTimeEvent => 'One-time event';
+
+  @override
+  String profileMissingFields(String message) {
+    return 'Missing: $message';
+  }
+
+  @override
+  String profileMissingField(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'title': 'title',
+      'category': 'category',
+      'city': 'city',
+      'cover': 'cover image',
+      'other': 'start time',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get profileStagePublished => 'Published';
+
+  @override
+  String get profileStageDraft => 'Draft';
+
+  @override
+  String get profilePublishedReady => 'Published-ready';
+
+  @override
+  String profileMissingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count missing',
+      one: '$count missing',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileAll => 'All';
+
+  @override
+  String get quickPlanRetryPending => 'Refresh / retry pending';
+
+  @override
+  String get quickPlanPlanLabel => 'Plan';
+
+  @override
+  String quickPlanGrantStatus(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'pending': 'Pending',
+      'active': 'Active',
+      'accepted': 'Accepted',
+      'declined': 'Declined',
+      'revoked': 'Revoked',
+      'left': 'Left',
+      'other': 'Unknown status',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get quickPlanInvitee => 'Invitee';
+
+  @override
+  String get quickPlanOwner => 'Owner';
+
+  @override
+  String get quickPlanReinvite => 'Re-invite';
+
+  @override
+  String quickPlanMoodReady(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Calm route, ready to follow or adjust.',
+      'social': 'Social route, ready to follow or adjust.',
+      'active': 'Active route, ready to follow or adjust.',
+      'other': 'Custom route, ready to follow or adjust.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String quickPlanMoodPlan(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Calm plan',
+      'social': 'Social plan',
+      'active': 'Active plan',
+      'other': 'Custom plan',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String quickPlanMoodQuickPlan(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'calm': 'Calm quick plan',
+      'social': 'Social quick plan',
+      'active': 'Active quick plan',
+      'other': 'Custom quick plan',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get quickPlanApplied => 'Applied';
+
+  @override
+  String get quickPlanUse => 'Use';
+
+  @override
+  String get favoritesEdit => 'Edit';
+
+  @override
+  String get favoritesOpen => 'Open';
+
+  @override
+  String get favoritesRoute => 'Route';
+
+  @override
+  String get visitedMonth => 'Month';
+
+  @override
+  String get visitedDay => 'Day';
+
+  @override
+  String get routeRecordingNotificationTitle => 'Route recording is active';
+
+  @override
+  String get routeRecordingNotificationText =>
+      'Recharge is saving your route while the app is in the background.';
+
+  @override
+  String get createFormSaveContinue => 'Save & continue';
+
+  @override
+  String get createClassLeadMyself => 'I lead this class myself';
+
+  @override
+  String get profileControlCenter => 'CONTROL CENTER';
+
+  @override
+  String get profileLatestCreatedEvents => 'LATEST CREATED EVENTS';
+
+  @override
+  String get profileQuickActions => 'QUICK ACTIONS';
+
+  @override
+  String get profileWorkspaceHeading => 'Workspace';
+
+  @override
+  String profileSearchContinuations(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count searches to continue',
+      one: '$count search to continue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profileActivitiesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count activities',
+      one: '$count activity',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profileRoutesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count routes',
+      one: '$count route',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profileSavedIdeasReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count saved ideas ready',
+      one: '$count saved idea ready',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileResume => 'Resume';
+
+  @override
+  String get quickPlanReadOnlyOnline => 'Read-only · online access required';
+
+  @override
+  String get quickPlanConditions => 'Conditions';
+
+  @override
+  String get quickPlanIntentLabel => 'Intent';
+
+  @override
+  String get visitedPrivateHint => 'Private, self-reported places you visited.';
+
+  @override
+  String get visitedSelfReported => 'Self-reported';
+
+  @override
+  String get identityProfile => 'Profile';
+
+  @override
+  String get identityTeam => 'Team';
+
+  @override
+  String get identityRequired => 'Required.';
+
+  @override
+  String get identitySectionPersonal => 'PERSONAL';
+
+  @override
+  String get identitySectionProfessionalPages => 'PROFESSIONAL PAGES';
+
+  @override
+  String get identitySectionAdministration => 'ADMINISTRATION';
+
+  @override
+  String identityPagesUsed(int count, int max) {
+    String _temp0 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: '$count of $max self-service pages used',
+      one: '$count of $max self-service page used',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String identityPublishedItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count published items',
+      one: '$count published item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileScenarioLibrary => 'Scenarios';
+
+  @override
+  String get discoverHomeTagline => 'VACATION APP';
+
+  @override
+  String createTaxonomySearchCategories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Search $count categories',
+      one: 'Search $count category',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createFormOpeningRules(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count opening rules',
+      one: '$count opening rule',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createFormAddHours => 'Add 09:00–21:00';
+
+  @override
+  String createFormMinimumVisitChip(int minutes) {
+    return 'Minimum $minutes min';
+  }
+
+  @override
+  String createFormCapacityOf(int current, int max) {
+    return 'Capacity $current/$max';
+  }
+
+  @override
+  String createFormMetersValue(String value) {
+    return '$value m';
+  }
+
+  @override
+  String createFormPointsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count points',
+      one: '$count point',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createRouteVersionLabel => 'version';
+
+  @override
+  String get createRouteGeometryLabel => 'Geometry';
+
+  @override
+  String get createActivityPurchaseHint =>
+      'Purchase (e.g. coffee at the counter)';
+
+  @override
+  String get createActivityGroupMin => 'Group, min people';
+
+  @override
+  String createFormMinutesRange(int min, int max) {
+    return '$min–$max min';
+  }
+
+  @override
+  String get createFormImagesPermission =>
+      'I have permission to use these images';
+
+  @override
+  String get createClassOutcomesPerLine => 'Outcomes (one per line)';
+
+  @override
+  String get createClassPrerequisitesPerLine => 'Prerequisites (one per line)';
+
+  @override
+  String get createClassFoldSecond => 'Second (winter time)';
+
+  @override
+  String get createClassStartHhmm => 'Start (HH:MM)';
+
+  @override
+  String get createClassEndHhmm => 'End (HH:MM)';
+
+  @override
+  String get createCollectionNoTitleYet => '(no title yet)';
+
+  @override
+  String get createCollectionPublishedRemove =>
+      'Published — remove without review';
+
+  @override
+  String createCollectionObjectType(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'place': 'Place',
+      'route': 'Route',
+      'bookableSession': 'Session',
+      'classWorkshop': 'Class / Workshop',
+      'rental': 'Rental',
+      'other': 'Object',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createEventPreviewLabel => 'Preview';
+
+  @override
+  String get createEventInterestedOptional => 'Optional “Interested” response';
+
+  @override
+  String get createEventAvailabilityLabel => 'State';
+
+  @override
+  String createEventAvailabilityState(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'available': 'available',
+      'lowAvailability': 'few places left',
+      'soldOut': 'sold out',
+      'waitlistAvailable': 'waitlist open',
+      'registrationClosed': 'registration closed',
+      'cancelled': 'cancelled',
+      'stale': 'out of date',
+      'other': 'unknown',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createEventAvailabilityFreshness(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'current': 'current',
+      'stale': 'out of date',
+      'other': 'unknown',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createEventSuggestedLabel => 'Suggested';
+
+  @override
+  String createEventArchetype(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'performance': 'Performance',
+      'screening': 'Screening',
+      'exhibition': 'Exhibition',
+      'open_stage': 'Open stage',
+      'meet_greet': 'Meet and greet',
+      'talk': 'Talk',
+      'discussion': 'Discussion',
+      'conference': 'Conference',
+      'networking': 'Networking',
+      'social_meetup': 'Social meetup',
+      'hosted_game': 'Hosted game',
+      'open_play': 'Open play',
+      'competition': 'Competition',
+      'class_session': 'Class',
+      'workshop': 'Workshop',
+      'retreat_camp': 'Retreat or camp',
+      'wellness_session': 'Wellness session',
+      'tasting': 'Tasting',
+      'shared_meal': 'Shared meal',
+      'party': 'Party',
+      'celebration': 'Celebration',
+      'festival': 'Festival',
+      'market_fair': 'Market or fair',
+      'auction': 'Auction',
+      'launch_promotion': 'Launch or promotion',
+      'open_day': 'Open day',
+      'tour_excursion': 'Tour or excursion',
+      'outdoor_gathering': 'Outdoor gathering',
+      'community_action': 'Community action',
+      'volunteering': 'Volunteering',
+      'fundraiser': 'Fundraiser',
+      'family_program': 'Family program',
+      'ceremony': 'Ceremony',
+      'other': 'Other',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createEventParticipationMode(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'mode_watch': 'Watch',
+      'mode_attend': 'Attend',
+      'mode_play': 'Play',
+      'mode_compete': 'Compete',
+      'mode_perform': 'Perform',
+      'mode_practice': 'Practice',
+      'mode_learn': 'Learn',
+      'mode_create': 'Create',
+      'mode_meet_people': 'Meet people',
+      'mode_date': 'Date',
+      'mode_visit': 'Visit',
+      'mode_explore': 'Explore',
+      'mode_eat_drink': 'Eat and drink',
+      'mode_shop': 'Shop',
+      'mode_support': 'Support',
+      'mode_volunteer': 'Volunteer',
+      'mode_travel': 'Travel',
+      'other': 'Other',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createEventAdditionalRole(String message) {
+    return '$message: additional attendee role';
+  }
+
+  @override
+  String get createEventMediaRights =>
+      'I have the right to publish this media *';
+
+  @override
+  String get createEventAllDay => 'All-day event';
+
+  @override
+  String get createEventIanaTimezone => 'IANA timezone';
+
+  @override
+  String createEventOccurrencesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count occurrences materialized',
+      one: '$count occurrence materialized',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createEventNextDateLabel => 'Next';
+
+  @override
+  String createEventPriceIn(String value) {
+    return 'Price ($value)';
+  }
+
+  @override
+  String get createFormContinue => 'Continue';
+
+  @override
+  String get createEventCapacityInventory => 'Capacity & inventory';
+
+  @override
+  String get createEventPoolsLabel => 'Pools';
+
+  @override
+  String get createEventZoneReference => 'Zone/table reference';
+
+  @override
+  String get createFindPeopleTagsField => 'Tags (comma-separated, up to 8)';
+
+  @override
+  String get createFindPeoplePaceOptional => 'Pace (optional)';
+
+  @override
+  String get createFindPeopleSecretRefHint =>
+      'Session-scoped secure reference; never shown publicly';
+
+  @override
+  String get createFormAmount => 'Amount';
+
+  @override
+  String get createFindPeopleHostsTitle =>
+      'Hosts, visibility, and communication';
+
+  @override
+  String get createFindPeopleCohostInactive =>
+      'Co-host permissions remain inactive until the invited user accepts the role.';
+
+  @override
+  String get createFindPeopleAccuracyConfirm =>
+      'I confirm that all details are accurate *';
+
+  @override
+  String get createFormReadOnlyDraft => 'Read-only draft';
+
+  @override
+  String get createFormDescriptionRequired => 'Description *';
+
+  @override
+  String get createFormDescriptionRecommended => 'Description (recommended)';
+
+  @override
+  String get createPlaceShortDescHint => '20–180 characters.';
+
+  @override
+  String get createPlaceDirectionsHint =>
+      'Optional: entrance, path or meeting point';
+
+  @override
+  String get createPlaceOpen247 => 'Open 24/7';
+
+  @override
+  String get createPlaceSeasonalPhase2 => 'Seasonal (Phase 2)';
+
+  @override
+  String get createFormDateFormatHint => 'YYYY-MM-DD';
+
+  @override
+  String get createPlaceUntilInclusive => 'Until (inclusive)';
+
+  @override
+  String get createPlaceShortVisit => 'A shorter visit can still work';
+
+  @override
+  String get createPlaceCoverRecommended =>
+      'A cover is recommended and can be added later.';
+
+  @override
+  String get createPlaceGalleryOptional => 'Optional · maximum 12';
+
+  @override
+  String get createPlaceWarningsReviewed => 'I reviewed these warnings';
+
+  @override
+  String get createFormReviewing => 'Reviewing…';
+
+  @override
+  String createPlaceRecommendedMinutes(int minutes) {
+    return '$minutes min recommended';
+  }
+
+  @override
+  String get createPlaceRoutePrimary => 'Route (primary action)';
+
+  @override
+  String createPlaceDuplicateReason(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'title_match': 'similar name',
+      'category_match': 'same category',
+      'official_domain_match': 'same website',
+      'phone_match': 'same phone',
+      'other': 'similar details',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get createRentalBrandModel => 'Brand / model (optional)';
+
+  @override
+  String get createRentalConfirmCategory =>
+      'I confirm this category is correct';
+
+  @override
+  String get createRentalSizeVariant => 'Size / variant';
+
+  @override
+  String createFormConfirmedOn(String date) {
+    return 'Confirmed $date';
+  }
+
+  @override
+  String createRentalUnitsBlocked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count units blocked',
+      one: '$count unit blocked',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createRentalDefaultsEditable =>
+      'Editable — nothing applies automatically.';
+
+  @override
+  String get createRentalIdRequired => 'ID required at handover';
+
+  @override
+  String get createRentalCurrencyField => 'Currency (ISO 4217)';
+
+  @override
+  String createRentalRateStep(int count, String price) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'From $count units: $price minor',
+      one: 'From $count unit: $price minor',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createRentalDepositField => 'Deposit (minor units, 0 = none)';
+
+  @override
+  String get createRentalPrivateNotice =>
+      'Private — not public: exact pickup address, geo and handover instructions are entered separately and never appear here.';
+
+  @override
+  String get createRentalRightToOffer =>
+      'I have the right to offer this for rent';
+
+  @override
+  String createFormStepOf(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get createRouteGpxExport => 'GPX export';
+
+  @override
+  String get createRouteGpxSaved => 'GPX file saved.';
+
+  @override
+  String createFormBytes(String value) {
+    return '$value B';
+  }
+
+  @override
+  String createFormKilobytes(String value) {
+    return '$value KB';
+  }
+
+  @override
+  String createFormMegabytes(String value) {
+    return '$value MB';
+  }
+
+  @override
+  String createRouteGpxKind(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'track': 'Track',
+      'other': 'Route',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteSegmentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count segments',
+      one: '$count segment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteConnectGaps(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Connect $count gaps with straight lines',
+      one: 'Connect $count gap with straight lines',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteImportPoi(int count) {
+    return 'Import $count POI';
+  }
+
+  @override
+  String createRouteAnchorsTitle(int count) {
+    return 'Anchors ($count)';
+  }
+
+  @override
+  String createRouteAnchorSemantics(int index, String start, String end) {
+    return 'Anchor $index, latitude $start, longitude $end';
+  }
+
+  @override
+  String createRouteSegmentsTitle(int count) {
+    return 'Segments ($count)';
+  }
+
+  @override
+  String get createRouteSegmentAppears =>
+      'A segment appears after the second anchor.';
+
+  @override
+  String createRouteSegmentN(int index) {
+    return 'Segment $index';
+  }
+
+  @override
+  String createRouteWaypointsTitle(int count) {
+    return 'Waypoints ($count)';
+  }
+
+  @override
+  String createRouteAnchorN(int index) {
+    return 'Anchor $index';
+  }
+
+  @override
+  String createRouteAcceptedPoints(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count accepted points',
+      one: '$count accepted point',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteAverageAccuracy(String value) {
+    return '$value m avg';
+  }
+
+  @override
+  String createRouteUnsafePoints(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count unsafe points excluded.',
+      one: '$count unsafe point excluded.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteGapLabel(int index, int meters, int total) {
+    return 'Gap $index: $meters m, $total s';
+  }
+
+  @override
+  String createRouteGpsPointsSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count GPS points saved',
+      one: '$count GPS point saved',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createRouteGpsAttention => 'GPS needs attention';
+
+  @override
+  String get createRouteGpsUnsafeStop =>
+      'GPS recording could not continue safely.';
+
+  @override
+  String createRouteBlockingChecks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count blocking checks',
+      one: '$count blocking check',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteWarningsToReview(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count warnings to review',
+      one: '$count warning to review',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String createRouteUnknownSurfaceMeters(String value) {
+    return '$value m unknown';
+  }
+
+  @override
+  String get createScenarioDayOne => 'Day 1';
+
+  @override
+  String get createScenarioRechecking => 'Rechecking…';
+
+  @override
+  String get createScenarioTimeNotEntered => 'time not entered';
+
+  @override
+  String get createScenarioDurationMinutesField => 'Duration, minutes';
+
+  @override
+  String get createScenarioStopHint => 'Park, viewpoint, private address…';
+
+  @override
+  String createScenarioBlockingIssues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count blocking issues',
+      one: '$count blocking issue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get createScenarioServiceChanged => 'A changed service was found';
+
+  @override
+  String get createScenarioFreshnessLabel => 'Freshness';
+
+  @override
+  String createScenarioFreshness(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'current': 'current',
+      'stale': 'stale',
+      'unavailable': 'unavailable',
+      'other': 'unknown',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String createScenarioAfterTime(String time) {
+    return 'After $time';
+  }
+
+  @override
+  String get createScenarioNoStopsFound => 'No stops found.';
+
+  @override
+  String createScenarioDepartureSemantics(
+    String start,
+    String end,
+    int minutes,
+  ) {
+    return '$start to $end, $minutes minutes, planned schedule not live';
+  }
+
+  @override
+  String get createScenarioCarrierOptional => 'Carrier (optional)';
+
+  @override
+  String get createScenarioServiceHint => 'Train 802 / Bus 7480';
+
+  @override
+  String get createScenarioDurationMinRequired => 'Duration, min *';
+
+  @override
+  String get createScenarioDurationMin => 'Duration, min';
+
+  @override
+  String get createScenarioDistanceKm => 'Distance, km';
+
+  @override
+  String get createScenarioOtherCost =>
+      'Parking / ticket / other cost (optional)';
+
+  @override
+  String get createSessionTimezoneField => 'Timezone (IANA, e.g. Europe/Riga)';
+
+  @override
+  String get createFormConfirmed => 'Confirmed';
+
+  @override
+  String createSessionBuffer(int minutes) {
+    return 'Buffer $minutes min';
+  }
+
+  @override
+  String createSessionNotice(int minutes) {
+    return 'notice $minutes min';
+  }
+
+  @override
+  String get createSessionPlatformDefaults =>
+      'platform defaults, change anytime';
+
+  @override
+  String get createSessionPriceFixed => '€ Fixed';
+
+  @override
+  String get createSessionOptionalLater =>
+      'Optional — add now or after publishing';
+
+  @override
+  String discoverResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '$count result',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get discoverSubcategories => 'Subcategories';
+
+  @override
+  String get discoverFilterMode => 'Mode';
+
+  @override
+  String get discoverEstimated => 'estimated';
+
+  @override
+  String get discoverSlotLabel => 'Slot';
+
+  @override
+  String get discoverGuides => 'Guides';
+
+  @override
+  String discoverItemsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '$count item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String identityVerificationStatus(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'unverified': 'Unverified',
+      'pending': 'Verification pending',
+      'verified': 'Verified',
+      'rejected': 'Verification rejected',
+      'revoked': 'Verification revoked',
+      'other': 'Unverified',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String identityRelationship(String value) {
+    String _temp0 = intl.Intl.selectLogic(value, {
+      'owner': 'Owner',
+      'manager': 'Manager',
+      'other': 'Editor',
+    });
+    return '$_temp0';
+  }
 }

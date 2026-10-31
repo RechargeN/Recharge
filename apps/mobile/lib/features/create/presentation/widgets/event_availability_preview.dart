@@ -36,14 +36,18 @@ class EventAvailabilityPreview extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'State: ${_label(projection.state.name)} · '
-                '${_label(projection.freshness.name)}',
+                '${context.l10n.createEventAvailabilityLabel}: '
+                '${context.l10n.createEventAvailabilityState(projection.state.name)} · '
+                '${context.l10n.createEventAvailabilityFreshness(projection.freshness.name)}',
                 key: const Key('event-availability-state'),
               ),
               for (final MapEntry<InventoryChannel, EventAvailabilityState>
                   entry
                   in projection.channelStates.entries)
-                Text('${_label(entry.key.name)}: ${_label(entry.value.name)}'),
+                Text(
+                  '${context.l10n.createOption('InventoryChannel_${entry.key.name}')}: '
+                  '${context.l10n.createEventAvailabilityState(entry.value.name)}',
+                ),
               const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerLeft,
@@ -65,11 +69,3 @@ class EventAvailabilityPreview extends StatelessWidget {
     );
   }
 }
-
-String _label(String value) => value
-    .replaceAllMapped(
-      RegExp(r'([a-z])([A-Z])'),
-      (match) => '${match.group(1)} ${match.group(2)}',
-    )
-    .replaceAll('_', ' ')
-    .toLowerCase();

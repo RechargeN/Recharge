@@ -65,9 +65,9 @@ Future<ScenarioTimeBlockDraft?> showScenarioTimeBlockEditor(
               TextField(
                 controller: duration,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Duration, minutes',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createScenarioDurationMinutesField,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 12),
@@ -132,7 +132,7 @@ Future<ScenarioCustomStopDraft?> showScenarioCustomStopEditor(
             autofocus: true,
             decoration: InputDecoration(
               labelText: context.l10n.createScenarioTitle,
-              hintText: 'Park, viewpoint, private address…',
+              hintText: context.l10n.createScenarioStopHint,
               border: OutlineInputBorder(),
             ),
           ),
@@ -140,9 +140,9 @@ Future<ScenarioCustomStopDraft?> showScenarioCustomStopEditor(
           TextField(
             controller: duration,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Duration, minutes',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: context.l10n.createScenarioDurationMinutesField,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 10),

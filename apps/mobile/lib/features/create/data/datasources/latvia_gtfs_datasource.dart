@@ -40,7 +40,8 @@ class LatviaGtfsProviderRegistry {
 const officialLatviaGtfsProviders = <LatviaGtfsProviderConfig>[
   LatviaGtfsProviderConfig(
     code: 'lv_atd_bus',
-    displayName: 'Autotransporta direkcija',
+    displayName:
+        'Autotransporta direkcija', // l10n-ignore: transit agency proper name
     sourceUrl: 'https://www.atd.lv/sites/default/files/GTFS/gtfs-latvia-lv.zip',
     licenseName: 'CC0 1.0',
     freshnessMaxAge: Duration(hours: 48),

@@ -252,7 +252,10 @@ class _DetailsShellAppBar extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     if (!transparent) {
-      return AppBar(title: const Text('RECHARGE'), actions: actions);
+      return AppBar(
+        title: const Text('RECHARGE'), // l10n-ignore: brand wordmark
+        actions: actions,
+      );
     }
     return AppBar(
       backgroundColor: Colors.transparent,

@@ -10,7 +10,7 @@ class UnsupportedRouteSchemaException implements Exception {
   final int version;
 
   @override
-  String toString() => 'Unsupported Route schema version: $version';
+  String toString() => 'Unsupported Route schema version: $version'; // l10n-ignore: developer error; the UI receives a code
 }
 
 class RouteDraftFormatException implements Exception {
@@ -19,7 +19,7 @@ class RouteDraftFormatException implements Exception {
   final String path;
 
   @override
-  String toString() => 'Invalid Route draft payload at $path';
+  String toString() => 'Invalid Route draft payload at $path'; // l10n-ignore: developer error; the UI receives a code
 }
 
 abstract final class RouteDraftMapper {

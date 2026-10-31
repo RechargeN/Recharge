@@ -1102,7 +1102,7 @@ String mapCreateLocationForSmartSearch(
             '${_capitalized(routeIntent.mood)} recharge route', // l10n-ignore: Create seed prefill data
         'subtitle':
             '${routeIntent.stepCategories.length} stops · ' // l10n-ignore: Create seed prefill data
-            '${routeIntent.durationMinutes} min · smart route',
+            '${routeIntent.durationMinutes} min · smart route', // l10n-ignore: Create seed prefill data
         'q': parseResult.originalText.trim(),
         'category': 'route',
       },

@@ -11,7 +11,7 @@ class UnsupportedSessionSchemaException implements Exception {
   final int version;
 
   @override
-  String toString() => 'Unsupported Session schema version: $version';
+  String toString() => 'Unsupported Session schema version: $version'; // l10n-ignore: developer error; the UI receives a code
 }
 
 /// Strict, lossless round-trip mapper for `SessionDraftData`

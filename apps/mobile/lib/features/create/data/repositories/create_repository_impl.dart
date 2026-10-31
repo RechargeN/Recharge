@@ -233,7 +233,7 @@ class CreateRepositoryImpl
   ) async {
     if (draft.objectType == CreateObjectType.route) {
       throw StateError(
-        'Route publication requires RoutePublicationRepository.',
+        'Route publication requires RoutePublicationRepository.', // l10n-ignore: developer error; the UI receives a code
       );
     }
     final CreateDraftEntity? existing = await loadDraft(userId);
@@ -383,12 +383,12 @@ class CreateRepositoryImpl
         return result.persisted!.toEntity();
       case RentalPromotionStatus.conflict:
         throw const RentalPromotionException(
-          'Rental draft changed since publish; direct-publish promotion '
+          'Rental draft changed since publish; direct-publish promotion ' // l10n-ignore: developer error; the UI receives a code
           'was not applied.',
         );
       case RentalPromotionStatus.invalidExistingData:
         throw const RentalPromotionException(
-          'No matching pending_review Rental draft to promote.',
+          'No matching pending_review Rental draft to promote.', // l10n-ignore: developer error; the UI receives a code
         );
     }
   }

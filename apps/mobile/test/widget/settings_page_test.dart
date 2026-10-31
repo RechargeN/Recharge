@@ -31,6 +31,7 @@ import 'package:recharge/features/explore/domain/usecases/load_settings_usecase.
 import 'package:recharge/features/explore/domain/usecases/save_profile_editable_usecase.dart';
 import 'package:recharge/features/explore/domain/usecases/save_settings_usecase.dart';
 import 'package:recharge/features/explore/presentation/pages/settings_page.dart';
+import '../support/l10n/l10n_screenshot.dart';
 
 void main() {
   testWidgets('renders settings controls for authenticated user', (
@@ -296,6 +297,7 @@ void main() {
       expect(locale.languageCode, code);
       expect(await store.read(), AppLocaleChoice.values.byName(code));
       expect(tester.takeException(), isNull);
+      await l10nCaptureScreen(tester, suffix: code);
       // Text only: the legacy currency value, account settings and market
       // are untouched by the language.
       expect(

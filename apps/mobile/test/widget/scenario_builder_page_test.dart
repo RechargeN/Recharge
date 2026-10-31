@@ -48,9 +48,29 @@ import 'package:recharge/features/scenarios/application/scenario_builder_provide
 import 'package:recharge/features/scenarios/data/quick_plan_sync_client.dart';
 import 'package:recharge/features/scenarios/data/quick_plan_codec.dart';
 
+import '../support/l10n/l10n_screen_harness.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
+  // L4.6: the Scenario builder in lv, en and ru at 360 dp.
+  l10nSmallScreenTestWidgets('Scenario builder', (tester, locale, scale) async {
+    await tester.pumpWidget(
+      _scenarioProviderScope(
+        child: l10nTestApp(
+          locale: locale,
+          scale: scale,
+          home: const ScenarioBuilderPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text(l10nFor(locale).quickPlanBuildRechargeRoute),
+      findsOneWidget,
+    );
+    await l10nScrollThrough(tester);
+  });
+
   fullPageTestWidgets(
     'invitation controls open online read-only content and hide it after revoke',
     (tester) async {
@@ -346,7 +366,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Active plan with 1 stops'), findsOneWidget);
+    expect(find.text('Active plan · 1 stop'), findsOneWidget);
     expect(find.text('Intent: tennis near me'), findsOneWidget);
     expect(find.text('Tennis warm-up'), findsOneWidget);
   });
@@ -368,7 +388,7 @@ void main() {
     await tester.tap(find.byTooltip('Apply Social evening template'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Social plan with 2 stops'), findsOneWidget);
+    expect(find.text('Social plan · 2 stops'), findsOneWidget);
     expect(find.text('Intent: social evening near me'), findsOneWidget);
     expect(find.text('Board game table'), findsOneWidget);
     expect(find.text('Afterwork drinks'), findsWidgets);
@@ -395,7 +415,7 @@ void main() {
 
     expect(find.text('Calm city walk'), findsNWidgets(2));
     expect(find.text('Slow coffee start'), findsOneWidget);
-    expect(find.text('Calm plan with 1 stops'), findsOneWidget);
+    expect(find.text('Calm plan · 1 stop'), findsOneWidget);
   });
 
   fullPageTestWidgets('opens map with scenario route parameters', (
@@ -666,7 +686,7 @@ void main() {
 
       await _tapScrollableTooltip(tester, 'Apply saved conditions to builder');
 
-      expect(find.textContaining('Social plan with'), findsOneWidget);
+      expect(find.textContaining('Social plan · '), findsOneWidget);
       expect(find.textContaining('Intent: museum'), findsOneWidget);
 
       await _pumpScenarioIntentHarness(
@@ -715,7 +735,7 @@ void main() {
 
     await _tapScrollableTooltip(tester, 'Apply smart search to builder');
 
-    expect(find.textContaining('Social plan with'), findsOneWidget);
+    expect(find.textContaining('Social plan · '), findsOneWidget);
     expect(find.text('Intent: museum today under 10'), findsOneWidget);
 
     await _pumpScenarioIntentHarness(
@@ -767,7 +787,7 @@ void main() {
 
     await _tapScrollableTooltip(tester, 'Apply smart search to builder');
 
-    expect(find.textContaining('Calm plan with'), findsOneWidget);
+    expect(find.textContaining('Calm plan · '), findsOneWidget);
     expect(find.textContaining('Intent: build a free calm'), findsOneWidget);
     expect(find.textContaining('Coffee'), findsWidgets);
 

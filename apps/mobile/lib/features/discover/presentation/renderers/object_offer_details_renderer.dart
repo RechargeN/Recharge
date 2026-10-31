@@ -66,7 +66,7 @@ class ObjectOfferDetailsRenderer implements DetailsRenderer {
          'participation profiles only — Rental is outside this visual system. ' // l10n-ignore: developer error
          'objectOfferProfileFor also throws here for any type outside ' // l10n-ignore: developer error
          "this slice's scope (DTL-OBJ-01 §1.1), catching a misrouted "
-         'caller instead of silently rendering something generic.',
+         'caller instead of silently rendering something generic.', // l10n-ignore: developer error or list formatting, not copy
        ),
        _delegate = CompatibilityObjectRenderer(
          item: item,
@@ -1957,10 +1957,13 @@ class _RentalHero extends StatelessWidget {
                 child: _RentalBadge(label: context.l10n.discoverBadgeRental),
               ),
               if (!projection.hasActiveInventory)
-                const Positioned(
+                Positioned(
                   right: 12,
                   top: 12,
-                  child: _RentalBadge(label: 'CURRENTLY UNAVAILABLE'),
+                  child: _RentalBadge(
+                    label: context.l10n.discoverCurrentlyUnavailable
+                        .toUpperCase(),
+                  ),
                 ),
             ],
           ),
@@ -3640,7 +3643,7 @@ class _ClassWorkshopDisplay {
         ? projection.shortDescription.trim()
         : projection.fullDescription.trim(),
     if (projection.learningOutcomes.isNotEmpty)
-      '${l10n.discoverLearningOutcomesLabel}\n${projection.learningOutcomes.map((s) => '• $s').join('\n')}',
+      '${l10n.discoverLearningOutcomesLabel}\n${projection.learningOutcomes.map((s) => '• $s').join('\n')}', // l10n-ignore: developer error or list formatting, not copy
   ].where((s) => s.isNotEmpty).join('\n\n');
   List<String> get includedMaterials => projection.includedMaterials;
   List<String> get requirements => projection.requirements;

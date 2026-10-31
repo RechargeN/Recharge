@@ -13,6 +13,8 @@ class NotificationItemModel {
     this.subjectId,
     this.scenarioDraftId,
     this.scenarioItemId,
+    this.templateCode,
+    this.templateCount,
   });
 
   factory NotificationItemModel.fromEntity(NotificationItemEntity entity) {
@@ -28,6 +30,8 @@ class NotificationItemModel {
       subjectId: entity.subjectRef?.id,
       scenarioDraftId: entity.scenarioContext?.scenarioDraftId,
       scenarioItemId: entity.scenarioContext?.scenarioItemId,
+      templateCode: entity.templateCode,
+      templateCount: entity.templateCount,
     );
   }
 
@@ -44,6 +48,8 @@ class NotificationItemModel {
       subjectId: json['subjectId'] as String?,
       scenarioDraftId: json['scenarioDraftId'] as String?,
       scenarioItemId: json['scenarioItemId'] as String?,
+      templateCode: json['templateCode'] as String?,
+      templateCount: json['templateCount'] as int?,
     );
   }
 
@@ -58,6 +64,8 @@ class NotificationItemModel {
   final String? subjectId;
   final String? scenarioDraftId;
   final String? scenarioItemId;
+  final String? templateCode;
+  final int? templateCount;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -72,6 +80,8 @@ class NotificationItemModel {
       if (subjectId != null) 'subjectId': subjectId,
       if (scenarioDraftId != null) 'scenarioDraftId': scenarioDraftId,
       if (scenarioItemId != null) 'scenarioItemId': scenarioItemId,
+      if (templateCode != null) 'templateCode': templateCode,
+      if (templateCount != null) 'templateCount': templateCount,
     };
   }
 
@@ -86,6 +96,8 @@ class NotificationItemModel {
       targetRoute: targetRoute,
       subjectRef: _subjectRef(),
       scenarioContext: _scenarioContext(),
+      templateCode: templateCode,
+      templateCount: templateCount,
     );
   }
 

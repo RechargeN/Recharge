@@ -1,3 +1,4 @@
+import '../../../../core/localization/l10n_context.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -55,7 +56,7 @@ class _ProfessionalPageWorkspacePageState
         : state.accessSnapshot?.pageById(activePageId);
 
     return Scaffold(
-      appBar: AppBar(title: Text(_title(section))),
+      appBar: AppBar(title: Text(_title(context.l10n, section))),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: <Widget>[
@@ -74,8 +75,8 @@ class _ProfessionalPageWorkspacePageState
             icon: const Icon(Icons.switch_account_outlined),
             label: Text(
               page == null
-                  ? 'Create or select Professional Page'
-                  : 'Switch Professional Page',
+                  ? context.l10n.identityCreateOrSelectPage
+                  : context.l10n.identitySwitchPage,
             ),
           ),
         ],
@@ -100,7 +101,7 @@ class _EmptyProfessionalExperience extends StatelessWidget {
             const Icon(Icons.add_business_outlined, size: 36),
             const SizedBox(height: 12),
             Text(
-              'Professional Page preview',
+              context.l10n.identityPagePreview,
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
@@ -108,10 +109,8 @@ class _EmptyProfessionalExperience extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               section == ProfessionalPageSection.content
-                  ? 'Content appears only after the user creates or joins a '
-                        'real Professional Page.'
-                  : 'No page is invented for this preview. Create a page to '
-                        'activate its workspace and publisher context.',
+                  ? context.l10n.identityContentAfterRealPage
+                  : context.l10n.identityNoPageInvented,
             ),
           ],
         ),
@@ -152,11 +151,12 @@ class _ActiveProfessionalPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '${page.verificationStatus.name} · ${page.countryCode} · '
+                  '${context.l10n.identityVerificationStatus(page.verificationStatus.name)} · '
+                  '${page.countryCode} · '
                   '${page.defaultCurrency} · ${page.timezone}',
                 ),
                 const SizedBox(height: 18),
-                Text(_sectionDescription(section)),
+                Text(_sectionDescription(context.l10n, section)),
                 if (section == ProfessionalPageSection.overview) ...<Widget>[
                   const SizedBox(height: 18),
                   OutlinedButton.icon(
@@ -165,14 +165,11 @@ class _ActiveProfessionalPage extends StatelessWidget {
                       RouteNames.professionalPagePreviewFor(page.id),
                     ),
                     icon: const Icon(Icons.visibility_outlined),
-                    label: const Text('Preview public page'),
+                    label: Text(context.l10n.identityPreviewPublicPage),
                   ),
                   if (!page.isPubliclyVisible) ...<Widget>[
                     const SizedBox(height: 8),
-                    const Text(
-                      'Preview only. The page is not public until '
-                      'verification is approved.',
-                    ),
+                    Text(context.l10n.identityPreviewUntilVerified),
                   ],
                 ],
               ],
@@ -204,21 +201,21 @@ class _ActiveProfessionalPage extends StatelessWidget {
   }
 }
 
-String _title(ProfessionalPageSection section) {
+String _title(AppLocalizations l10n, ProfessionalPageSection section) {
   return switch (section) {
-    ProfessionalPageSection.overview => 'Page',
-    ProfessionalPageSection.content => 'Content',
-    ProfessionalPageSection.account => 'Account',
+    ProfessionalPageSection.overview => l10n.identitySectionPage,
+    ProfessionalPageSection.content => l10n.identitySectionContent,
+    ProfessionalPageSection.account => l10n.identitySectionAccount,
   };
 }
 
-String _sectionDescription(ProfessionalPageSection section) {
+String _sectionDescription(
+  AppLocalizations l10n,
+  ProfessionalPageSection section,
+) {
   return switch (section) {
-    ProfessionalPageSection.overview =>
-      'Professional Page overview and moderation status.',
-    ProfessionalPageSection.content =>
-      'Content is scoped to this exact Professional Page.',
-    ProfessionalPageSection.account =>
-      'Page account, memberships and international settings.',
+    ProfessionalPageSection.overview => l10n.identityOverviewModeration,
+    ProfessionalPageSection.content => l10n.identityContentScoped,
+    ProfessionalPageSection.account => l10n.identityPageAccountSettings,
   };
 }

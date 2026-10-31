@@ -25,6 +25,7 @@ import 'package:recharge/features/notifications/presentation/pages/notifications
 import 'package:recharge/generated/l10n/app_localizations.dart';
 
 import 'widget_test_viewport.dart';
+import '../support/l10n/l10n_screenshot.dart';
 
 void main() {
   fullPageTestWidgets('marks notification as read', (tester) async {
@@ -576,6 +577,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        await l10nCaptureScreen(tester);
         final AppLocalizations l10n = lookupAppLocalizations(Locale(language));
         expect(find.text(l10n.notificationFallbackTitle), findsOneWidget);
         expect(find.text(l10n.notificationUnsupportedLocale), findsOneWidget);

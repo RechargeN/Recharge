@@ -107,7 +107,8 @@ class RouteGpxExporter {
             'metadata',
             nest: () => builder.element(
               'desc',
-              nest: 'Exported by Recharge. No private source metadata.',
+              nest:
+                  'Exported by Recharge. No private source metadata.', // l10n-ignore: GPX file metadata, not UI
             ),
           );
           for (final waypoint in waypoints) {
@@ -133,7 +134,10 @@ class RouteGpxExporter {
           builder.element(
             'trk',
             nest: () {
-              builder.element('name', nest: 'Recharge route');
+              builder.element(
+                'name',
+                nest: 'Recharge route', // l10n-ignore: GPX file metadata
+              );
               for (final run in runs) {
                 builder.element(
                   'trkseg',

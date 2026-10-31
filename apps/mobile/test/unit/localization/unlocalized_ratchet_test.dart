@@ -99,4 +99,26 @@ void main() {
     expect(countUnlocalized("final String code = 'sold_out';"), 0);
     expect(countUnlocalized("context.go('/discover/details');"), 0);
   });
+
+  test('positive control: presentation code also counts single words, '
+      '"I …", hyphenated and counted phrases; ids and codes stay out', () {
+    int ui(String line) => countUnlocalized(line, presentation: true);
+    expect(ui("Text('Venue'),"), 1);
+    expect(
+      ui("title: const Text('I have permission to use these images'),"),
+      1,
+    );
+    expect(ui("title: Text('Read-only draft'),"), 1);
+    expect(ui(r"Text('${count} published items'),"), 1);
+    expect(ui("_SectionLabel('PROFESSIONAL PAGES'),"), 1);
+    expect(countUnlocalized("Text('Venue'),"), 0);
+    expect(ui("final String code = 'sold_out';"), 0);
+    expect(ui("type: 'pendingReview',"), 0);
+    expect(ui("l10n.createOption('PublishStatus_draft'),"), 0);
+    expect(ui("currencyCode: 'EUR',"), 0);
+    expect(ui(r"'${a} · ${b}',"), 0);
+    expect(ui("mimeTypes: <String>['application/gpx+xml'],"), 0);
+    expect(ui(r"final RegExp minutes = RegExp(r'(\d+)\s*min');"), 0);
+    expect(ui("Text('Venue'), // l10n-ignore: brand"), 0);
+  });
 }

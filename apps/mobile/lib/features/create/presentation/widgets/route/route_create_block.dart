@@ -1,3 +1,4 @@
+import '../../../../../core/localization/recharge_formats.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -278,15 +279,15 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
     RouteCreateState state,
     RouteGpxTransferController transfer,
   ) => _SectionCard(
-    title: 'GPX export',
+    title: context.l10n.createRouteGpxExport,
     subtitle: context.l10n.createRouteExportOnlyTrackOptionalRoutePoi,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         if (transfer.status == RouteGpxTransferStatus.exported)
-          const Padding(
-            padding: EdgeInsets.only(bottom: 10),
-            child: Text('GPX file saved.'),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(context.l10n.createRouteGpxSaved),
           ),
         if (transfer.status == RouteGpxTransferStatus.failed)
           Padding(
@@ -412,7 +413,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
                   .map(
                     (profile) => DropdownMenuItem<String>(
                       value: profile.id,
-                      child: Text(_label(profile.id)),
+                      child: Text(context.l10n.createOption(profile.id)),
                     ),
                   )
                   .toList(growable: false),
@@ -782,7 +783,10 @@ class _StepHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _SectionCard(
     title: context.l10n.createRouteRouteBuilder,
-    subtitle: 'Step ${activeStep + 1} of ${routeCreateSteps.length}',
+    subtitle: context.l10n.createFormStepOf(
+      activeStep + 1,
+      routeCreateSteps.length,
+    ),
     child: Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -875,9 +879,9 @@ class _GpxPreviewCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '${_formatBytes(inspection.file.sizeBytes)} · '
-              '${inspection.pointCount} points · '
-              '${inspection.waypointCount} POI',
+              '${_formatBytes(context.l10n, inspection.file.sizeBytes)} · '
+              '${context.l10n.createFormPointsCount(inspection.pointCount)} · '
+              '${context.l10n.discoverPoiCount(inspection.waypointCount)}',
             ),
             if (inspection.containsPrivateMetadata ||
                 inspection.candidates.any(
@@ -914,12 +918,12 @@ class _GpxPreviewCard extends StatelessWidget {
                           title: Text(
                             candidate.name?.trim().isNotEmpty == true
                                 ? candidate.name!
-                                : '${_label(candidate.kind.name)} ${candidate.sourceIndex + 1}',
+                                : '${context.l10n.createRouteGpxKind(candidate.kind.name)} ${candidate.sourceIndex + 1}',
                           ),
                           subtitle: Text(
-                            '${(candidate.distanceMeters / 1000).toStringAsFixed(1)} km · '
-                            '${candidate.pointCount} points · '
-                            '${candidate.segmentCount} segment(s)',
+                            '${context.l10n.createFormDistanceKm(RechargeFormats.decimal(candidate.distanceMeters / 1000, context.l10n.localeName, maxFractionDigits: 1))} · '
+                            '${context.l10n.createFormPointsCount(candidate.pointCount)} · '
+                            '${context.l10n.createRouteSegmentsCount(candidate.segmentCount)}',
                           ),
                         ),
                       ),
@@ -939,7 +943,7 @@ class _GpxPreviewCard extends StatelessWidget {
                       : (value) =>
                             controller.setConnectGapsConfirmed(value ?? false),
                   title: Text(
-                    'Connect ${selected.gapCount} gap(s) with straight lines',
+                    context.l10n.createRouteConnectGaps(selected.gapCount),
                   ),
                   subtitle: Text(
                     context
@@ -958,7 +962,9 @@ class _GpxPreviewCard extends StatelessWidget {
                   onChanged: controller.isBusy
                       ? null
                       : controller.setImportWaypoints,
-                  title: Text('Import ${inspection.waypointCount} POI'),
+                  title: Text(
+                    context.l10n.createRouteImportPoi(inspection.waypointCount),
+                  ),
                   subtitle: Text(
                     context.l10n.createRouteTheyRemainOffTrackUntilReviewed,
                   ),
@@ -1148,20 +1154,16 @@ class _MessageBanner extends StatelessWidget {
   );
 }
 
-String _label(String value) => value
-    .replaceAll('_', ' ')
-    .split(' ')
-    .map(
-      (part) => part.isEmpty
-          ? part
-          : '${part.substring(0, 1).toUpperCase()}${part.substring(1)}',
-    )
-    .join(' ');
-
-String _formatBytes(int bytes) {
-  if (bytes < 1024) return '$bytes B';
-  if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-  return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+String _formatBytes(AppLocalizations l10n, int bytes) {
+  String number(double value) =>
+      RechargeFormats.decimal(value, l10n.localeName, maxFractionDigits: 1);
+  if (bytes < 1024) {
+    return l10n.createFormBytes('$bytes');
+  }
+  if (bytes < 1024 * 1024) {
+    return l10n.createFormKilobytes(number(bytes / 1024));
+  }
+  return l10n.createFormMegabytes(number(bytes / (1024 * 1024)));
 }
 
 String _gpxFailureMessage(AppLocalizations l10n, String? code) =>

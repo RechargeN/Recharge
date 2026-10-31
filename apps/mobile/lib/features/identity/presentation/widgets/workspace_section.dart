@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/identity_workspace_providers.dart';
 import '../../application/state/identity_workspace_state.dart';
 import '../../domain/entities/admin_experience_preview.dart';
@@ -8,6 +9,7 @@ import '../../domain/entities/identity_access_snapshot.dart';
 import '../../domain/entities/managed_page_entity.dart';
 import '../../domain/entities/managed_page_membership_entity.dart';
 import '../../domain/entities/workspace_ref.dart';
+import '../../domain/usecases/create_professional_page_usecase.dart';
 
 /// Self-contained "switch workspace" section: personal profile, Professional
 /// Pages, page creation/limit request and admin preview. Designed to be
@@ -57,7 +59,7 @@ class _WorkspaceSectionState extends ConsumerState<WorkspaceSection> {
         child: Center(child: CircularProgressIndicator()),
       ),
       IdentityWorkspaceStatus.error => _WorkspaceError(
-        message: state.message ?? 'Unable to load workspaces',
+        message: identityWorkspaceText(context.l10n, state.message),
         onRetry: () => _scheduleLoad(force: true),
       ),
       IdentityWorkspaceStatus.ready ||
@@ -68,7 +70,9 @@ class _WorkspaceSectionState extends ConsumerState<WorkspaceSection> {
         onSelect: (WorkspaceRef workspace) async {
           final bool selected = await controller.selectWorkspace(workspace);
           if (!context.mounted) return;
-          final String message = controller.state.message ?? '';
+          final String message = controller.state.message == null
+              ? ''
+              : identityWorkspaceText(context.l10n, controller.state.message);
           if (message.isNotEmpty) {
             ScaffoldMessenger.of(
               context,
@@ -100,7 +104,9 @@ class _WorkspaceSectionState extends ConsumerState<WorkspaceSection> {
       kind: draft.kind,
     );
     if (!context.mounted) return;
-    final String message = controller.state.message ?? '';
+    final String message = controller.state.message == null
+        ? ''
+        : identityWorkspaceText(context.l10n, controller.state.message);
     if (message.isNotEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -112,7 +118,9 @@ class _WorkspaceSectionState extends ConsumerState<WorkspaceSection> {
     final controller = ref.read(identityWorkspaceControllerProvider);
     await controller.requestAdditionalPage();
     if (!context.mounted) return;
-    final String message = controller.state.message ?? '';
+    final String message = controller.state.message == null
+        ? ''
+        : identityWorkspaceText(context.l10n, controller.state.message);
     if (message.isNotEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -124,15 +132,12 @@ class _WorkspaceSectionState extends ConsumerState<WorkspaceSection> {
     showDialog<void>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Admin access active'),
-        content: const Text(
-          'This mock account has explicit Admin capabilities. '
-          'Operational Admin tools are connected in IDP-05A.',
-        ),
+        title: Text(context.l10n.identityAdminAccessActive),
+        content: Text(context.l10n.identityAdminMockNotice),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text(context.l10n.identityOk),
           ),
         ],
       ),
@@ -166,19 +171,22 @@ class _WorkspaceList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        const _SectionLabel('PERSONAL'),
+        _SectionLabel(context.l10n.identitySectionPersonal),
         const SizedBox(height: 8),
         _WorkspaceTile(
           key: const ValueKey<String>('workspace-personal'),
           icon: Icons.person_outline,
-          title: 'Creator',
-          subtitle: _personalSubtitle(snapshot.creatorVerificationStatus),
+          title: context.l10n.identityCreator,
+          subtitle: _personalSubtitle(
+            context,
+            snapshot.creatorVerificationStatus,
+          ),
           selected: active == WorkspaceRef.personal(state.userId),
           enabled: !state.isSwitching,
           onTap: () => onSelect(WorkspaceRef.personal(state.userId)),
         ),
         const SizedBox(height: 22),
-        const _SectionLabel('PROFESSIONAL PAGES'),
+        _SectionLabel(context.l10n.identitySectionProfessionalPages),
         const SizedBox(height: 8),
         if (snapshot.availablePages.isEmpty)
           _EmptyPages(enabled: !state.isBusy, onCreatePage: onCreatePage)
@@ -188,7 +196,7 @@ class _WorkspaceList extends StatelessWidget {
               key: ValueKey<String>('workspace-page-${page.id}'),
               icon: _pageIcon(page.kind),
               title: page.displayName,
-              subtitle: _pageSubtitle(snapshot, page),
+              subtitle: _pageSubtitle(context, snapshot, page),
               selected: active == WorkspaceRef.page(page.id),
               enabled: !state.isBusy,
               onTap: () => onSelect(WorkspaceRef.page(page.id)),
@@ -197,7 +205,10 @@ class _WorkspaceList extends StatelessWidget {
           ],
         const SizedBox(height: 8),
         Text(
-          '${snapshot.ownedPages.length} of 3 self-service pages used',
+          context.l10n.identityPagesUsed(
+            snapshot.ownedPages.length,
+            CreateProfessionalPageUseCase.selfServiceOwnedPageLimit,
+          ),
           key: const ValueKey<String>('owned-page-quota'),
           style: Theme.of(context).textTheme.bodySmall,
         ),
@@ -207,15 +218,15 @@ class _WorkspaceList extends StatelessWidget {
             key: const ValueKey<String>('create-professional-page'),
             onPressed: state.isBusy ? null : onCreatePage,
             icon: const Icon(Icons.add_business_outlined),
-            label: const Text('Create Professional Page'),
+            label: Text(context.l10n.identityCreatePage),
           )
         else if (state.pendingLimitRequest != null)
-          const Card(
+          Card(
             child: ListTile(
               key: ValueKey<String>('page-limit-request-pending'),
               leading: Icon(Icons.schedule_outlined),
-              title: Text('Additional page request pending'),
-              subtitle: Text('Moderators will review your request.'),
+              title: Text(context.l10n.identityLimitRequestPending),
+              subtitle: Text(context.l10n.identityModeratorsWillReview),
             ),
           )
         else
@@ -223,11 +234,11 @@ class _WorkspaceList extends StatelessWidget {
             key: const ValueKey<String>('request-additional-page'),
             onPressed: state.isBusy ? null : onRequestAdditionalPage,
             icon: const Icon(Icons.forward_to_inbox_outlined),
-            label: const Text('Request additional page'),
+            label: Text(context.l10n.identityRequestAdditionalPage),
           ),
         if (snapshot.hasGlobalCapability('admin.tools.view')) ...<Widget>[
           const SizedBox(height: 18),
-          const _SectionLabel('ADMINISTRATION'),
+          _SectionLabel(context.l10n.identitySectionAdministration),
           const SizedBox(height: 8),
           if (snapshot.hasGlobalCapability('admin.experience.preview')) ...[
             _AdminPreviewCard(
@@ -240,8 +251,8 @@ class _WorkspaceList extends StatelessWidget {
           _WorkspaceTile(
             key: const ValueKey<String>('admin-tools-entry'),
             icon: Icons.admin_panel_settings_outlined,
-            title: 'Admin tools',
-            subtitle: 'Admin access active · separate from publishing',
+            title: context.l10n.identityAdminTools,
+            subtitle: context.l10n.identityAdminSeparate,
             selected: false,
             enabled: !state.isBusy,
             onTap: onAdminTools,
@@ -255,23 +266,21 @@ class _WorkspaceList extends StatelessWidget {
     );
   }
 
-  static String _personalSubtitle(CreatorVerificationStatus status) =>
-      switch (status) {
-        CreatorVerificationStatus.notStarted =>
-          'Personal profile · Verification not started',
-        CreatorVerificationStatus.pending =>
-          'Personal profile · Verification pending',
-        CreatorVerificationStatus.verified =>
-          'Verified · Tools follow your permissions',
-        CreatorVerificationStatus.rejected =>
-          'Personal profile · Verification rejected',
-        CreatorVerificationStatus.expired =>
-          'Personal profile · Verification expired',
-        CreatorVerificationStatus.revoked =>
-          'Personal profile · Verification revoked',
-      };
+  static String _personalSubtitle(
+    BuildContext context,
+    CreatorVerificationStatus status,
+  ) => switch (status) {
+    CreatorVerificationStatus.notStarted =>
+      context.l10n.identityPersonalNotStarted,
+    CreatorVerificationStatus.pending => context.l10n.identityPersonalPending,
+    CreatorVerificationStatus.verified => context.l10n.identityVerifiedTools,
+    CreatorVerificationStatus.rejected => context.l10n.identityPersonalRejected,
+    CreatorVerificationStatus.expired => context.l10n.identityPersonalExpired,
+    CreatorVerificationStatus.revoked => context.l10n.identityPersonalRevoked,
+  };
 
   static String _pageSubtitle(
+    BuildContext context,
     IdentityAccessSnapshot snapshot,
     ManagedPageEntity page,
   ) {
@@ -279,13 +288,13 @@ class _WorkspaceList extends StatelessWidget {
       page.id,
     );
     final List<String> parts = <String>[
-      _kindLabel(page.kind),
-      _verificationLabel(page.verificationStatus),
+      _kindLabel(context.l10n, page.kind),
+      _verificationLabel(context.l10n, page.verificationStatus),
     ];
     if (membership?.hasCapability('page.manage') ?? false) {
-      parts.add('Manage page');
+      parts.add(context.l10n.identityManagePage);
     } else if (membership?.hasCapability('page.content.create') ?? false) {
-      parts.add('Create content');
+      parts.add(context.l10n.identityCreateContent);
     }
     return parts.join(' · ');
   }
@@ -395,13 +404,13 @@ class _EmptyPages extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const Text('You have not created a Professional Page yet.'),
+            Text(context.l10n.identityNoPageYet),
             const SizedBox(height: 10),
             FilledButton.tonalIcon(
               key: const ValueKey<String>('empty-create-professional-page'),
               onPressed: enabled ? onCreatePage : null,
               icon: const Icon(Icons.add_business_outlined),
-              label: const Text('Create Professional Page'),
+              label: Text(context.l10n.identityCreatePage),
             ),
           ],
         ),
@@ -430,15 +439,13 @@ class _AdminPreviewCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'View as',
+              context.l10n.identityViewAs,
               style: Theme.of(
                 context,
               ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Presentation preview only. Roles and permissions do not change.',
-            ),
+            Text(context.l10n.identityPreviewOnlyRoles),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
@@ -447,7 +454,7 @@ class _AdminPreviewCard extends StatelessWidget {
                   .map(
                     (AdminExperiencePreview preview) => ChoiceChip(
                       key: ValueKey<String>('admin-preview-${preview.name}'),
-                      label: Text(_previewLabel(preview)),
+                      label: Text(_previewLabel(context.l10n, preview)),
                       selected: selected == preview,
                       onSelected: enabled
                           ? (bool value) {
@@ -494,7 +501,7 @@ class _CreatePageDialogState extends State<_CreatePageDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       scrollable: true,
-      title: const Text('Create Professional Page'),
+      title: Text(context.l10n.identityCreatePage),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -502,7 +509,7 @@ class _CreatePageDialogState extends State<_CreatePageDialog> {
             key: const ValueKey<String>('professional-page-name'),
             controller: _nameController,
             decoration: InputDecoration(
-              labelText: 'Page name',
+              labelText: context.l10n.identityPageName,
               errorText: _errorText,
             ),
             textInputAction: TextInputAction.done,
@@ -512,13 +519,15 @@ class _CreatePageDialogState extends State<_CreatePageDialog> {
             key: const ValueKey<String>('professional-page-kind'),
             isExpanded: true,
             initialValue: _kind,
-            decoration: const InputDecoration(labelText: 'Page type'),
+            decoration: InputDecoration(
+              labelText: context.l10n.identityPageType,
+            ),
             items: ManagedPageKind.values
                 .map(
                   (ManagedPageKind kind) => DropdownMenuItem<ManagedPageKind>(
                     value: kind,
                     child: Text(
-                      _kindLabel(kind),
+                      _kindLabel(context.l10n, kind),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -530,30 +539,27 @@ class _CreatePageDialogState extends State<_CreatePageDialog> {
             },
           ),
           const SizedBox(height: 12),
-          const Text(
-            'The page starts in Pending review. Market, locale, timezone and '
-            'currency come from the active market configuration.',
-          ),
+          Text(context.l10n.identityPageStartsPending),
         ],
       ),
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(context.l10n.identityCancel),
         ),
         FilledButton(
           key: const ValueKey<String>('submit-professional-page'),
           onPressed: () {
             final String name = _nameController.text.trim();
             if (name.length < 2) {
-              setState(() => _errorText = 'Enter at least 2 characters');
+              setState(() => _errorText = context.l10n.identityMinTwoChars);
               return;
             }
             Navigator.of(
               context,
             ).pop(_CreatePageDraft(displayName: name, kind: _kind));
           },
-          child: const Text('Create'),
+          child: Text(context.l10n.identityCreate),
         ),
       ],
     );
@@ -576,7 +582,10 @@ class _WorkspaceError extends StatelessWidget {
           children: <Widget>[
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 12),
-            FilledButton.tonal(onPressed: onRetry, child: const Text('Retry')),
+            FilledButton.tonal(
+              onPressed: onRetry,
+              child: Text(context.l10n.identityRetry),
+            ),
           ],
         ),
       ),
@@ -594,29 +603,37 @@ IconData _pageIcon(ManagedPageKind kind) {
   };
 }
 
-String _kindLabel(ManagedPageKind kind) {
+String _kindLabel(AppLocalizations l10n, ManagedPageKind kind) {
   return switch (kind) {
-    ManagedPageKind.company => 'Company',
-    ManagedPageKind.organization => 'Organization',
-    ManagedPageKind.representativeOffice => 'Representative office',
-    ManagedPageKind.venueOperator => 'Venue operator',
-    ManagedPageKind.privateProfessional => 'Private professional',
+    ManagedPageKind.company => l10n.identityKindCompany,
+    ManagedPageKind.organization => l10n.identityKindOrganization,
+    ManagedPageKind.representativeOffice =>
+      l10n.identityKindRepresentativeOffice,
+    ManagedPageKind.venueOperator => l10n.identityKindVenueOperator,
+    ManagedPageKind.privateProfessional => l10n.identityKindPrivateProfessional,
   };
 }
 
-String _verificationLabel(ManagedPageVerificationStatus status) {
+String _verificationLabel(
+  AppLocalizations l10n,
+  ManagedPageVerificationStatus status,
+) {
   return switch (status) {
-    ManagedPageVerificationStatus.unverified => 'Unverified',
-    ManagedPageVerificationStatus.pending => 'Verification pending',
-    ManagedPageVerificationStatus.verified => 'Verified',
-    ManagedPageVerificationStatus.rejected => 'Verification rejected',
-    ManagedPageVerificationStatus.revoked => 'Verification revoked',
+    ManagedPageVerificationStatus.unverified => l10n.identityUnverified,
+    ManagedPageVerificationStatus.pending => l10n.identityVerificationPending,
+    ManagedPageVerificationStatus.verified => l10n.identityVerified,
+    ManagedPageVerificationStatus.rejected => l10n.identityVerificationRejected,
+    ManagedPageVerificationStatus.revoked => l10n.identityVerificationRevoked,
   };
 }
 
-String _previewLabel(AdminExperiencePreview preview) {
+String _previewLabel(AppLocalizations l10n, AdminExperiencePreview preview) {
   return switch (preview) {
-    AdminExperiencePreview.creator => 'Creator',
-    AdminExperiencePreview.professionalPage => 'Professional Page',
+    AdminExperiencePreview.creator => l10n.identityCreator,
+    AdminExperiencePreview.professionalPage => l10n.identityProfessionalPage,
   };
 }
+
+/// L4.6: the workspace controller's message code in the reader's language.
+String identityWorkspaceText(AppLocalizations l10n, String? code) =>
+    l10n.identityWorkspaceNotice(code ?? 'workspace_load_failed');

@@ -38,7 +38,7 @@ class DiscoverScenarioIntakeAdapter {
   }) {
     if (items.isEmpty || items.length > 20) {
       throw const FormatException(
-        'Scenario intake requires 1 to 20 items.',
+        'Scenario intake requires 1 to 20 items.', // l10n-ignore: developer error; the UI receives a code
       ); // l10n-ignore: developer exception
     }
     final refs = <ScenarioObjectRef>{};
@@ -49,7 +49,7 @@ class DiscoverScenarioIntakeAdapter {
       final candidate = _toCandidate(item, checkedAtUtc.toUtc());
       if (!refs.add(candidate.ref)) {
         throw const FormatException(
-          'Duplicate Scenario intake object.',
+          'Duplicate Scenario intake object.', // l10n-ignore: developer error; the UI receives a code
         ); // l10n-ignore: developer exception
       }
       candidates.add(candidate);

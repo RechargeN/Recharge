@@ -52,7 +52,9 @@ class RouteNames {
   static const String discoverMap = '/discover/map';
   static const String discoverResults = '/discover/results';
   static const String legacyScenarioBuilder = '/scenario-builder';
-  @Deprecated('Compatibility-only; use typed Scenario or Quick Plan routes.')
+  @Deprecated(
+    'Compatibility-only; use typed Scenario or Quick Plan routes.', // l10n-ignore: developer deprecation note
+  )
   static const String scenarioBuilder = legacyScenarioBuilder;
   static const String quickPlan = '/quick-plan';
   static const String favorites = '/favorites';
@@ -94,8 +96,8 @@ class RouteNames {
   /// but a call site that already knows the `objectType` should use
   /// [discoverDetailsCanonicalFor] instead of reaching for this.
   @Deprecated(
-    'Prefer discoverDetailsCanonicalFor(ref) when the objectType is '
-    'already known at the call site. This legacy, untyped form remains '
+    'Prefer discoverDetailsCanonicalFor(ref) when the objectType is ' // l10n-ignore: developer deprecation note
+    'already known at the call site. This legacy, untyped form remains ' // l10n-ignore: developer deprecation note
     'fully supported.',
   )
   static String discoverDetailsFor(String itemId) {

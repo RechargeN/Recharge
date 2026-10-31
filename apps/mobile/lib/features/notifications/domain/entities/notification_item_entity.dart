@@ -46,6 +46,8 @@ class NotificationItemEntity {
     this.subjectRef,
     this.scenarioContext,
     this.contentAvailability = NotificationContentAvailability.rendered,
+    this.templateCode,
+    this.templateCount,
   });
 
   final String id;
@@ -59,6 +61,11 @@ class NotificationItemEntity {
   final ScenarioNotificationContext? scenarioContext;
   final NotificationContentAvailability contentAvailability;
 
+  /// L4.6: a local template rendered in the reader's language (see
+  /// `AppNotificationEvent.templateCode`).
+  final String? templateCode;
+  final int? templateCount;
+
   NotificationItemEntity copyWith({bool? isRead}) {
     return NotificationItemEntity(
       id: id,
@@ -71,6 +78,8 @@ class NotificationItemEntity {
       subjectRef: subjectRef,
       scenarioContext: scenarioContext,
       contentAvailability: contentAvailability,
+      templateCode: templateCode,
+      templateCount: templateCount,
     );
   }
 }

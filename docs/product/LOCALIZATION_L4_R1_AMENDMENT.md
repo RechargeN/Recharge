@@ -1,15 +1,17 @@
 # L4 — локализация Release R1 на lv / en / ru
 
 - ID: **LOCALIZATION-L4**
-- Версия: **0.7 (v0.6 + L4.5: Discover — Details, поиск, результаты, карта, лента, домашний экран)**
-- Дата: **2026-10-27**
+- Версия: **0.10 (v0.9 + строки Create и Discover, пропущенные старой эвристикой; review не проведён)**
+- Дата: **2026-10-31**
 - Статус: **Review — механизм, policy, контракты и миграция серверных R1-поверхностей; языковой review не проведён**
 - База: `codex/recharge-integration` @ `01065f6` (L1–L3 + 01–36), ветка `claude/l4-localization`
   (v0.1–v0.2, вершина `af04b1d`); v0.3 — ветка `claude/l4-1-tails` от `af04b1d`;
   v0.4 — ветка `claude/l4-2-create-codes` (база — итог L4.1);
   v0.5 — ветка `claude/l4-3-create-forms` (база — итог L4.2);
   v0.6 — ветка `claude/l4-4-create-forms-deferred` (база — итог L4.3);
-  v0.7 — ветка `claude/l4-5-discover` (база — итог L4.4)
+  v0.7 — ветка `claude/l4-5-discover` (база — итог L4.4);
+  v0.8 — ветка `claude/l4-6-identity-profile` (база — итог L4.5);
+  v0.9, v0.10 — тот же worktree поверх v0.8
 - Расширяет: [BCK-20](REFERENCE_DATA_LOCALIZATION_SPEC.md) §12, §17, §21 (OD-10
   LocalizedText — accepted technical contract), F1 Notifications
   (`notification_templates.ts`, BCK13-OD-05 открыт), Latvia roadmap §2.1–2.2, §3.5
@@ -470,3 +472,139 @@ CLASS / WORKSHOP, FIND PEOPLE) в ru/lv, цена Class/Workshop в виде
 Inventory «только интерфейс»: 1 100 → 485 (53 файла); весь — 774. В Discover
 (без парсера и мок-данных) — 0. Остаток — профиль, workspace страниц,
 Quick Plan, избранное, посещённые места, уведомления.
+
+## 17. v0.8 (L4.6): Identity, Profile, Scenario builder и прочее
+
+Ветка `claude/l4-6-identity-profile`, база — итог L4.5. Workspace switcher,
+Professional Page (workspace, публичная страница, редактор профиля,
+приглашения в команду), Profile, Scenario library, Scenario builder
+(legacy Quick Plan), избранное, посещённые места, входящие уведомления и
+UI-привязка AI assist берут текст только через `context.l10n`
+(398 новых ключей, lv/ru написаны агентом, не проверены носителем).
+
+| Что | Было | Стало |
+|---|---|---|
+| Контроллеры Identity (workspace, приглашения, редактор профиля, публичная страница) | английские предложения в `message` | только коды (`workspace_switched`, `invitation_sent`, серверный код как есть …) → `identity*Notice` в презентации |
+| Локальные уведомления Identity | английский заголовок и текст, собранные в контроллере | `templateCode` + `templateCount` в событии и модели (поля необязательны, старые записи читаются); заголовок и текст строит экран входящих; имя страницы — как есть |
+| `ProfileRoleSummary` | английские заголовки, подзаголовки, действия | стабильные id (`creator`, `smart_prompts` …) → `profileRole*` |
+| Оценка маршрута Scenario builder | английские предложения в state | `ScenarioFitLevel` + `ScenarioFitInsight(kind, minutes, price, distanceKm)` → `quickPlanFit*` |
+| Избранное, посещённые места | русские сообщения ошибок в state | коды `favorites_load_failed` / `visits_load_failed` |
+| Уведомление фоновой записи Route (Android) | английский текст | `lookupAppLocalizations` по языку приложения из `LocaleController` |
+| Числа, деньги, расстояния, даты | `12 EUR`, `Under 20`, `2.3 km`, `May 4 · 10:00` (месяц зашит, зона устройства) | `RechargeFormats.money` / `decimal`, `discoverUnder`, `discoverDistanceKm`; дата созданного события — `RechargeFormats.dateTime` в зоне объекта (неизвестная зона → UTC с пометкой) |
+| Сырые коды на экране | статусы публикации и приглашений Quick Plan (`pendingReview`, `pending`) | select по стабильному значению; неизвестный — нейтральный текст |
+| Описания ключей ARB | — | экран и роль строки («Profile page — button label»), не цитата английского текста |
+
+Роли и термины (Creator, Professional Page, Admin) в lv/ru пока оставлены
+по-английски — до глоссария L4.7. Не переводятся: `recharge_taxonomy.dart`,
+`recharge_category_criteria.dart`, `recharge_taxonomy_seed.dart` (G04),
+сид уведомлений. `// l10n-ignore` с причиной: сообщения разработчика,
+предзаполнение Create, текст запросов-подсказок для поиска, синонимы поиска
+во входящих, промпты и заглушки AI assist, метаданные GPX и iCalendar,
+бренд, названия городов рынка, стабильные id секций и полей.
+
+**Inventory: эвристика была слабее, чем считалось.** Правило «Заглавное
+слово + пробел + буква» пропускало одиночные слова (`'Venue'`), фразы с
+«I», дефисом или скобкой (`'I have permission…'`, `'Read-only draft'`,
+`'Purchase (e.g. …)'`), КАПС и строки, начинающиеся с числа
+(`'${n} published items'`). v0.8 ужесточает правило для presentation-кода:
+считается любой литерал со словом, кроме id, путей, MIME, URL, кодов
+(`UTC`, `EUR`) и составных имён типов (`EventCapacityMode`); контрольные
+примеры — в `unlocalized_ratchet_test.dart`. Тест не ослаблен: baseline
+перестроен по более строгому правилу.
+
+Итог: по прежнему правилу «только интерфейс» 492 → 0. По новому — 0 в
+файлах L4.6 и 183 в 37 файлах вне L4.6: `features/create` 153 (подписи и
+подсказки форм Place, Rental, Find People, Session, Event, Route,
+Scenario, Class/Workshop), `features/discover` 30 (поиск, совместимый
+рендерер Details). Это долг заходов L4.3–L4.5, который прежняя эвристика
+не видела; ratchet запрещает его рост. Весь inventory — 512 (329 —
+файлы-исключения).
+
+Проверки: группы «… : lv/en/ru at 1x/2x 360 dp» (общий хелпер
+`test/support/l10n/l10n_screen_harness.dart`, прокрутка до конца страницы)
+в тестах workspace switcher, Profile, приглашений в команду, Scenario
+builder, избранного и посещённых мест. Найдено и исправлено: карточка
+избранного фиксированной высоты переполнялась при шрифте ×2 (теперь растёт),
+заголовки Scenario builder и чипы условий переполнялись на 360 dp во всех
+языках (теперь `Expanded`/`Flexible`). Зелёные тесты не подтверждают
+качество перевода.
+
+## 18. v0.9 (L4.7): подготовка языкового review (G06)
+
+Тот же worktree, поверх L4.6. Сделано только то, что не требует
+ревьюеров:
+
+- [LOCALIZATION_GLOSSARY.md](LOCALIZATION_GLOSSARY.md) — 19 терминов с
+  определением, предложением lv/ru и фактическим употреблением в ARB.
+  Найдены расхождения: Creator («Creator» и «autors/автор»), Session (ru
+  «сессия», «сеанс», «занятие»), Rental (ru «аренда» и «прокат»),
+  Class/Workshop (ru «мастер-класс» и «воркшоп»), Collection (lv
+  «kolekcija» — коллекция, ru «подборка» — выборка), unlisted
+  («по ссылке» и «ссылка по приглашению»), Details, одна ru-строка с
+  «Личный Scenario». ARB не правился: каждое расхождение ждёт решения
+  ревьюера.
+- `tool/l10n_export.dart <файл.csv>` — выгрузка всех 2 551 ключей: ключ,
+  описание, плейсхолдеры, en, lv, ru, статус (`unreviewed`), файлы, где
+  ключ используется. Пишет только вне репозитория. У 7 ключей нет
+  использований в `lib/` (`commonLoading`, `commonSave`,
+  `createScenarioPublicTransport`, `createScenarioOwnCar`,
+  `discoverMapArea`, `discoverSmartSearchIdea`,
+  `discoverMoodRechargeRoute`) — кандидаты на удаление после review.
+- `tool/l10n_screenshots.dart <папка>` — PNG экранов на lv/en/ru, 360 dp,
+  шрифт ×1 и ×2 (каждый экран прокручивается до конца). Снимки делают
+  существующие 3-языковые виджет-тесты при
+  `--dart-define=L10N_SHOTS_DIR`; без него ничего не пишется и ничего не
+  сравнивается (это не golden). Для съёмки грузятся настоящие Roboto и
+  Material Icons из Flutter SDK. Покрыты: настройки, Booking, импорт,
+  входящие, формы Create, Collection, результаты поиска, Details, Profile,
+  workspace switcher, приглашения в команду, Scenario builder, избранное,
+  посещённые места. Нет 3-языкового теста, а значит и снимка: страница
+  публикации и домашний экран Discover.
+
+Статус review:
+
+| Язык | Ревьюер (BCK20-OD-02) | Глоссарий | Строки | Скриншоты |
+|---|---|---|---|---|
+| lv | не назначен | не проверен | не проверены | не просмотрены |
+| ru | не назначен | не проверен | не проверены | не просмотрены |
+
+Правки переводов по итогам review — отдельным заходом и только с
+ревьюерами. Зелёные тесты не подтверждают качество перевода.
+
+## 19. v0.10: строки Create и Discover, которые не видела старая эвристика
+
+Тот же worktree, поверх v0.9. Закрыт долг из §17: 183 → 0 по строгому
+правилу inventory (весь inventory — 329, все в файлах-исключениях);
+baseline пуст (`{}`), 137 новых ключей (lv/ru написаны агентом, не
+проверены). Кроме литералов на экран выходили сырые значения, теперь они
+проходят через select:
+
+| Было на экране | Стало |
+|---|---|
+| Тип события, роль посетителя, состояние и актуальность доступности (очеловеченные wire names) | `createEventArchetype`, `createEventParticipationMode`, `createEventAvailabilityState`, `createEventAvailabilityFreshness`; контрольный тест `create_enum_labels_test.dart` |
+| Причины дубля Place (`title match`) | `createPlaceDuplicateReason` |
+| Тип объекта Collection, вид и профиль GPX | `createCollectionObjectType`, `createRouteGpxKind`, `createOption` |
+| Статус проверки страницы и роль в команде (L4.6) | `identityVerificationStatus`, `identityRelationship` |
+| Даты ISO (следующая дата Event, слоты Find People, подтверждение и блоки Rental) | `RechargeFormats.dateTime` в зоне объекта |
+| Код ошибки в сообщении GPS (`… safely (code)`) | текст без кода |
+| Числа `toStringAsFixed`, размер файла | `RechargeFormats.decimal`, единицы из ARB |
+
+В ICU-парсере gen-l10n `date` зарезервировано как значение select, поэтому
+у `createEventParticipationMode` значения с префиксом `mode_`.
+
+Найдено тестами и исправлено: кнопка подтверждения зоны Session
+переполнялась на lv/ru при шрифте ×2 (теперь `Flexible`).
+
+Что осталось намеренно, с причиной:
+
+- id полей и профилей критериев категории как подписи (`field.id`,
+  `result.profile.id`) — словарь категорий, G04;
+- редактируемые поля дат Find People и окон регистрации Event показывают и
+  принимают ISO UTC: это формат ввода, не отображение;
+- подпись цены Session `€ Fixed` содержит евро, как и прежняя логика формы;
+- суммы Rental в младших единицах (`… minor`) показаны как есть, потому что
+  форма так их и вводит;
+- предзаполнение Create, запросы-подсказки поиска, название города рынка,
+  бренд, примеры форматов (RRULE) — `// l10n-ignore` с причиной.
+
+Зелёные тесты не подтверждают качество перевода.

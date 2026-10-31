@@ -121,7 +121,9 @@ class _CategoryRow extends StatelessWidget {
     final ColorScheme colors = Theme.of(context).colorScheme;
     return Semantics(
       button: true,
-      label: count == null ? group.title : '${group.title}, $count results',
+      label: count == null
+          ? group.title
+          : '${group.title}, ${context.l10n.discoverResultsCount(count!)}',
       child: Material(
         color: Colors.transparent,
         child: InkWell(

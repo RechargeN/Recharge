@@ -89,7 +89,7 @@ class _CategoryPageState extends ConsumerState<CategoryPage> {
           Row(
             children: <Widget>[
               Text(
-                'Subcategories',
+                context.l10n.discoverSubcategories,
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
