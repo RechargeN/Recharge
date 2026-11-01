@@ -124,6 +124,7 @@ export function standCollectionBody(input: {
   }[];
 }): Record<string, unknown> {
   return {
+    contentLocale: 'en',
     title: 'Quiet corners of central Riga',
     shortDescription: 'Three calm stops a short walk apart',
     categoryId: 'travel_tours',

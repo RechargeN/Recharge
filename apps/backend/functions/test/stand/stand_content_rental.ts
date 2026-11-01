@@ -99,6 +99,7 @@ export function standRentalBody(input: {
   const groupId = input.groupId ?? standSeedRental.groupId;
   const anchor = input.anchorUtc;
   return {
+    contentLocale: 'en',
     title: 'Kipsala sea kayak rental',
     shortDescription: 'Two-seat sea kayaks with paddles and life vests for day trips',
     fullDescription:

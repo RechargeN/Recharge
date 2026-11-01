@@ -2,6 +2,7 @@ import type { ContentBody } from '../../../../contracts/content_v1.js';
 import { isEntityId } from '../../../../shared/ids.js';
 import {
   IssueCollector,
+  validateOptionalContentLocale,
   hasOnlyKeys,
   hasUnreplacedLocalId,
   intervalsOverlap,
@@ -75,6 +76,7 @@ const topLevelKeys = new Set([
   'title',
   'shortDescription',
   'fullDescription',
+  'contentLocale',
   'categoryId',
   'subcategoryId',
   'categoryConfirmed',
@@ -141,6 +143,7 @@ function validateListing(
   context: ContentValidationContext,
 ): RentalMarketPolicy | undefined {
   const limits = rentalDefaultLimits;
+  validateOptionalContentLocale(body, issues, context, 'rental');
   issues.require(isText(body.title, limits.titleMin, limits.titleMax), 'rental.title_length');
   issues.require(
     isText(body.shortDescription, limits.shortDescriptionMin, limits.shortDescriptionMax),

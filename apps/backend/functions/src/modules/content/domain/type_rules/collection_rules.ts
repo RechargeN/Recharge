@@ -2,6 +2,7 @@ import type { ContentBody } from '../../../../contracts/content_v1.js';
 import { isEntityId } from '../../../../shared/ids.js';
 import {
   IssueCollector,
+  validateOptionalContentLocale,
   hasOnlyKeys,
   hasUnreplacedLocalId,
   isEnumValue,
@@ -49,6 +50,7 @@ const topLevelKeys = new Set([
   'title',
   'shortDescription',
   'fullDescription',
+  'contentLocale',
   'categoryId',
   'subcategoryId',
   'media',
@@ -100,6 +102,7 @@ function validateEnvelope(
   issues: IssueCollector,
   context: ContentValidationContext,
 ): void {
+  validateOptionalContentLocale(body, issues, context, 'collection');
   issues.require(isText(body.title, 1, 200), 'collection.title_required');
   issues.require(isText(body.shortDescription, 1, 300), 'collection.short_description_required');
   if (body.fullDescription !== undefined)

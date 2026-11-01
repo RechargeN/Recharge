@@ -2,6 +2,8 @@ import type { ContentValidationViolationV1 } from '../../../contracts/content_v1
 
 // Public allowlist: never send raw issue suffixes, supplied keys or values.
 const activityFields: Readonly<Record<string, string>> = {
+  'activity.locale': '/body/contentLocale',
+  'activity.locale_unavailable': '/body/contentLocale',
   'activity.title_length': '/body/title',
   'activity.short_description_length': '/body/shortDescription',
   'activity.full_description_length': '/body/fullDescription',
@@ -160,6 +162,8 @@ const placeFields: Readonly<Record<string, string>> = {
 };
 
 const rentalFields: Readonly<Record<string, string>> = {
+  'rental.locale': '/body/contentLocale',
+  'rental.locale_unavailable': '/body/contentLocale',
   'rental.title_length': '/body/title',
   'rental.short_description_length': '/body/shortDescription',
   'rental.full_description_length': '/body/fullDescription',
@@ -280,6 +284,8 @@ const rentalFields: Readonly<Record<string, string>> = {
 };
 
 const collectionFields: Readonly<Record<string, string>> = {
+  'collection.locale': '/body/contentLocale',
+  'collection.locale_unavailable': '/body/contentLocale',
   'collection.title_required': '/body/title',
   'collection.short_description_required': '/body/shortDescription',
   'collection.full_description_length': '/body/fullDescription',

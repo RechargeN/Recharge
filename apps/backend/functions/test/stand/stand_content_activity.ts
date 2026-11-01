@@ -77,6 +77,7 @@ export function standActivityBody(input: {
   readonly galleryMediaIds: readonly string[];
 }): Record<string, unknown> {
   return {
+    contentLocale: 'lv',
     title: 'Ķemeri bog boardwalk loop',
     categoryId: 'outdoor_nature_walking',
     subcategoryId: 'forest_walk',

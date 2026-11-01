@@ -1,6 +1,7 @@
 import type { ContentBody } from '../../../../contracts/content_v1.js';
 import {
   IssueCollector,
+  validateOptionalContentLocale,
   hasOnlyKeys,
   hasUnreplacedLocalId,
   isCountryCode,
@@ -180,6 +181,7 @@ const topLevelKeys = new Set([
   'tags',
   'shortDescription',
   'fullDescription',
+  'contentLocale',
   'criteria',
   'media',
   'format',
@@ -274,6 +276,7 @@ function validateNameAndCategory(
   issues: IssueCollector,
   context: ContentValidationContext,
 ): void {
+  validateOptionalContentLocale(body, issues, context, 'event');
   issues.require(isText(body.title, 3, 100), 'event.title_length');
   issues.require(isText(body.shortDescription, 20, 240), 'event.short_description_length');
   issues.require(isText(body.fullDescription, 50, 20000), 'event.full_description_length');

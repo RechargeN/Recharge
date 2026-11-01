@@ -2,6 +2,7 @@ import type { ContentBody } from '../../../../contracts/content_v1.js';
 import { isEntityId } from '../../../../shared/ids.js';
 import {
   IssueCollector,
+  validateOptionalContentLocale,
   hasOnlyKeys,
   hasUnreplacedLocalId,
   isEnumValue,
@@ -36,6 +37,7 @@ const allowedKeys = new Set([
   'subcategoryId',
   'shortDescription',
   'fullDescription',
+  'contentLocale',
   'media',
   'location',
   'typicalDurationMinutes',
@@ -100,6 +102,7 @@ function validateAbout(
   issues: IssueCollector,
   context: ContentValidationContext,
 ): void {
+  validateOptionalContentLocale(body, issues, context, 'activity');
   issues.require(isText(body.title, 5, 80), 'activity.title_length');
   issues.require(isText(body.shortDescription, 20, 180), 'activity.short_description_length');
   if (body.fullDescription !== undefined)

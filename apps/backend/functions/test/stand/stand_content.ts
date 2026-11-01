@@ -21,6 +21,7 @@ export function standEventBody(coverMediaId: string, slotId: string = randomUUID
   return {
     eventArchetype: 'workshop',
     primaryParticipationMode: 'learn',
+    contentLocale: 'en',
     title: 'Ceramics evening',
     categoryId: 'workshops_masterclasses',
     subcategoryId: 'pottery',

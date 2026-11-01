@@ -353,3 +353,25 @@ export function isInstant(value: unknown): value is string {
     Number.isFinite(Date.parse(value))
   );
 }
+
+/**
+ * ADR 0022 (TR-OD-09): the optional declared language of Event, Activity, Rental
+ * and Collection text. Absent stays valid, for published revisions and drafts
+ * that predate it; such text is simply not offered for translation.
+ */
+export function validateOptionalContentLocale(
+  body: Readonly<Record<string, unknown>>,
+  issues: IssueCollector,
+  context: ContentValidationContext,
+  prefix: 'event' | 'activity' | 'rental' | 'collection',
+): void {
+  if (body.contentLocale === undefined) return;
+  const supported =
+    typeof body.contentLocale === 'string'
+      ? context.lookups.supportsLocale(body.contentLocale)
+      : false;
+  issues.require(
+    supported === true,
+    supported === undefined ? `${prefix}.locale_unavailable` : `${prefix}.locale`,
+  );
+}
