@@ -512,6 +512,10 @@ Deferred не равно Implemented. Owner каждой строки — Rechar
 | Event Ingestion runtime (BCK-23) | ADR 0020 Proposed, spec Draft | ADR 0020 Accepted; EVS-LOCAL-01a прошёл Definition of Ready и одобрен владельцем |
 | EE и LT | Release R1 — только Latvia | отдельное owner-решение и независимые Market M0–M5; Latvia evidence не наследуется |
 
+**Машинный перевод контента по запросу (ADR 0022, TR-OD-02):** вне Release R1.
+Этап 1 — local/Emulator с mock-адаптером, выключен; production — только после LV
+GA и отдельным решением. Не входит в критерии Release M2.
+
 #### Безопасный импорт локальных данных
 
 Существующие условия из §3.5 сохраняются без ослабления: локальный оригинал

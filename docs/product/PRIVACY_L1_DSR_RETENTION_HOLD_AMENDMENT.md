@@ -98,8 +98,9 @@ H — Reviews, I — Planning, J — Route. Связанные writers K1–K3
 | W18 | Scenario (I2/I3) | `scenarios` (`ownerId`, soft `deleted`), `scenarioMembers` (`{id}:{user}`), `scenarioInvites` (`ownerId`, `recipientId`), `scenarioCommandReceipts` (`actorId`), `scenarioRevisions`, `scenarioShares` (токен) | `ownerId`, `recipientId`, member key | Content publication, Catalog Scenario | **нет** | BCK-10 retention schedule open |
 | W19 | Route (J1/J2) | `routes` (`{owner}:{routeId}`, геометрия), `routeCommandReceipts` (`ownerId`), `routeRevisions` (обрезанный snapshot) | `ownerId` | Content publication, Catalog Route | **нет** | BCK-11 raw GPS/GPX retention open |
 | W20 | Privacy orchestration | `privacyRequests`, `privacyDomainTasks`, `bookingPrivacyProgress` | `subjectId` | — | — | unresolved |
+| W22 | Перевод контента (ADR 0022) | `contentTranslationAccountUsage` (`accountId`, день, счётчик); `contentTranslations` (общий кэш, производный, без пользователя); `contentTranslationLeases`, `contentTranslationObjectUsage`, `contentTranslationBudgets`, `contentTranslationCostLedger` (без субъекта и текста) | `accountId` | кэш следует за публичной ревизией | **есть**: счётчик удаляется через registry-sweep с legal hold; кэш `derived` | этап 1: заглушки TR-OD-08, счётчик 2 дня, кэш 30 дней |
 
-Покрытие сейчас: **3 из 20 writers** имеют DSR handler (W5, W12, W13).
+Покрытие сейчас: **3 из 20 writers** имеют DSR handler (W5, W12, W13). Строка W22 добавлена позже ADR 0022 и в этот подсчёт не входит.
 
 ### 3.1 Данные вне сервера (описываются отдельно, не «удалено»)
 
@@ -349,7 +350,8 @@ deployment, push, export delivery (BCK04-OD-08), rectification, objection
 | W17 Quick Plan | свои не shared → tombstone; shared и приглашения остаются | L1-T-W17 | blocked PB-12 (shared) |
 | W18 Scenario | свои неопубликованные не shared → deleted; shared/published остаются | L1-T-W18 | blocked PB-02, PB-12 |
 | W19 Route | свои неопубликованные → deleted, снимки стёрты; опубликованный остаётся | L1-T-W19 | blocked PB-02 |
-| Все сразу | один аккаунт через 14 доменов | L1-T-E2E | `partially_completed`; succeeded: booking, library, notifications, quick_plan, route, scenario |
+| W22 Перевод контента | счётчик удалён; hold сохраняет его; кэш остаётся | L1-T-W22 | succeeded |
+| Все сразу | один аккаунт через 15 доменов | L1-T-E2E | `partially_completed`; succeeded: booking, library, notifications, quick_plan, route, scenario |
 
 Сквозные проверки: L1-T-AUTH (authority, чужой субъект, повтор, изменённый
 payload), L1-T-PAGE (страницы, вставка за cursor, удаление впереди, рестарт),

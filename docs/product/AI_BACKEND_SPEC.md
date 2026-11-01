@@ -83,6 +83,10 @@ structured output and returns a typed transient proposal with evidence/issues.
 
 ### 3.2 Non-goals
 
+Машинный перевод публичного контента — не `ai_assist`: это отдельная возможность
+`content_translation` (ADR 0022), которая применяет те же требования к адаптеру,
+секретам, circuit breaker и бюджету.
+
 BCK-15 does not:
 
 - own Scenario, Place, Search, Event, Booking, Review or other aggregates;

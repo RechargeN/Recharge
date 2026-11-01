@@ -404,7 +404,9 @@ dataset revision.
 
 ### 3.2 Non-goals
 
-- no translation management UI or automatic/machine translation;
+- no translation management UI or automatic/machine translation; ADR 0022 is the
+  one exception: a reader's on-demand machine translation of public content,
+  derived data outside this reference-data model (`CONTENT_TRANSLATION_SPEC.md`);
 - no user-generated content ownership or moderation;
 - no country-specific backend forks;
 - no currency conversion, exchange rate or pricing authority;
@@ -853,7 +855,9 @@ resolved locale or success kind.
 
 - UI may display an explicit fallback-language indicator where product policy
   requires it;
-- backend never fabricates/machine-translates text in v1;
+- backend never fabricates/machine-translates text in v1, except the labeled
+  on-demand translation of public content under ADR 0022, which never replaces
+  the source text or its declared language;
 - missing optional label is typed and observable without logging the text;
 - user-authored source language remains explicit and is not changed by requester locale;
 - publication readiness separately checks required market locales by content type;

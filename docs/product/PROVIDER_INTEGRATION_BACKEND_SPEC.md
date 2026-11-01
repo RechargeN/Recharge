@@ -82,6 +82,10 @@ owning Recharge domains retain their aggregates and overlays.
 
 ## 3. Outcome and non-goals
 
+Провайдер машинного перевода контента (`content_translation`, ADR 0022) подчиняется
+требованиям этого документа к адаптеру, секретам, circuit breaker и бюджету. На
+этапе 1 работает только локальный mock; реальный адаптер — отдельным решением.
+
 ### 3.1 Outcome
 
 BCK-16 defines one replaceable integration platform for versioned providers and

@@ -397,6 +397,11 @@
 
 ## 1. Verdict
 
+Новый writer W22 `content_translation` (ADR 0022, этап 1): общий кэш производных
+переводов публичного текста и дневной счётчик аккаунта. Текст не попадает в логи,
+аналитику и ledger. Заключение Legal/Privacy о передаче контента провайдеру
+(TR-OD-07) не получено, поэтому реальный провайдер запрещён.
+
 Recharge использует **один security & privacy standard** для User, Creator,
 Professional Page и Admin/service principals, для всех рынков LV/EE/LT и для
 всех backend-доменов (`BCK-06`–`BCK-22`). Domain-спецификации не создают
