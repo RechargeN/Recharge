@@ -134,6 +134,8 @@ final class RentalContentBodyMapper {
     String groupId(String id) => id.startsWith('loc_') ? scope.groupId(id) : id;
 
     final Map<String, Object?> body = <String, Object?>{
+      if (draft.declaredContentLocale case final String locale)
+        'contentLocale': locale,
       'title': rental.title.trim(),
       'shortDescription': rental.shortDescription.trim(),
       'fullDescription': rental.fullDescription.trim(),

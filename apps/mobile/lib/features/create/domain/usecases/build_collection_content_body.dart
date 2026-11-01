@@ -136,6 +136,8 @@ final class CollectionContentBodyMapper {
     String? text(String value) => value.trim().isEmpty ? null : value.trim();
 
     final Map<String, Object?> body = <String, Object?>{
+      if (draft.declaredContentLocale case final String locale)
+        'contentLocale': locale,
       'title': draft.title.trim(),
       if (text(draft.shortDescription) case final String value)
         'shortDescription': value,

@@ -5,6 +5,7 @@ import '../../../../core/localization/taxonomy_labels.dart';
 import '../../../../core/parsing/input_parsers.dart';
 
 import '../../application/controllers/create_controller.dart';
+import 'content_language_field.dart';
 import '../../application/event_create_config.dart';
 import '../../application/state/create_state.dart';
 import '../../domain/entities/create_draft_entity.dart';
@@ -106,6 +107,8 @@ class EventCreateBlock extends StatelessWidget {
           onClear: controller.clearEventClassification,
         ),
         if (controller.eventClassificationEnabled) const SizedBox(height: 12),
+        ContentLanguageField(controller: controller),
+        const SizedBox(height: 12),
         _TextField(
           id: 'event-title',
           label: context.l10n.createFormEventTitle,

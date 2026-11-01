@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../application/controllers/create_controller.dart';
+import 'content_language_field.dart';
 import '../../application/rental_create_config.dart';
 import '../../application/state/create_state.dart';
 import '../../domain/entities/create_draft_entity.dart';
@@ -166,6 +167,8 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
         rentalCreateSteps[0].descriptionId,
       ),
       children: <Widget>[
+        ContentLanguageField(controller: widget.controller),
+        const SizedBox(height: 12),
         TextField(
           controller: _field('title', rental.title),
           decoration: InputDecoration(

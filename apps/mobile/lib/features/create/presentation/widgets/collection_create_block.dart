@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../application/collection_create_config.dart';
 import '../../application/collection_create_coordinator.dart';
 import '../../application/controllers/create_controller.dart';
+import 'content_language_field.dart';
 import '../../application/create_providers.dart';
 import '../../application/state/collection_create_state.dart';
 import '../../application/state/create_state.dart';
@@ -167,6 +168,8 @@ class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
     return _StepCard(
       title: createFormText(context.l10n, collectionCreateSteps[0].titleId),
       children: <Widget>[
+        ContentLanguageField(controller: widget.controller),
+        const SizedBox(height: 12),
         TextField(
           controller: _titleController,
           decoration: InputDecoration(labelText: context.l10n.createFormTitle),

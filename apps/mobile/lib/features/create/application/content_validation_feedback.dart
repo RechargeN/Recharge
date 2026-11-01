@@ -139,6 +139,14 @@ const Map<String, (String, String)> _place = <String, (String, String)>{
 };
 
 const Map<String, (String, String)> _rental = <String, (String, String)>{
+  'rental.locale': (
+    '/body/contentLocale',
+    'validationThisLanguageIsNotSupportedHere',
+  ),
+  'rental.locale_unavailable': (
+    '/body/contentLocale',
+    'validationThisLanguageIsNotSupportedHere',
+  ),
   'rental.title_length': ('/body/title', 'validationCheckTheTitleLength'),
   'rental.short_description_length': (
     '/body/shortDescription',
@@ -247,6 +255,14 @@ const Map<String, (String, String)> _rental = <String, (String, String)>{
 };
 
 const Map<String, (String, String)> _collection = <String, (String, String)>{
+  'collection.locale': (
+    '/body/contentLocale',
+    'validationThisLanguageIsNotSupportedHere',
+  ),
+  'collection.locale_unavailable': (
+    '/body/contentLocale',
+    'validationThisLanguageIsNotSupportedHere',
+  ),
   'collection.title_required': ('/body/title', 'validationAddATitle'),
   'collection.short_description_required': (
     '/body/shortDescription',

@@ -3808,6 +3808,26 @@ class CreateController extends ChangeNotifier {
         : '';
   }
 
+  /// ADR 0022: Event, Activity, Rental and Collection text language.
+  String? get draftContentLanguage {
+    final String? value = _state.draft.declaredContentLocale;
+    return value != null && supportedContentLocales.contains(value)
+        ? value
+        : null;
+  }
+
+  void updateDraftContentLanguage(String? value) {
+    if (value == null || !supportedContentLocales.contains(value)) return;
+    _updateDraft(
+      _state.draft.copyWith(
+        sectionData: <String, Object?>{
+          ..._state.draft.sectionData,
+          draftContentLanguageSection: value,
+        },
+      ),
+    );
+  }
+
   void updateSessionMediaMetadata({
     String? locale,
     String? coverAltText,

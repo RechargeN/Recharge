@@ -9,6 +9,8 @@ import 'package:recharge/features/create/domain/usecases/load_create_draft_useca
 import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
 import 'package:recharge/features/create/presentation/widgets/activity_create_block.dart';
+import 'package:recharge/features/create/presentation/widgets/content_language_field.dart';
+import 'package:recharge/generated/l10n/app_localizations.dart';
 
 import '../support/event_create_test_support.dart';
 
@@ -73,6 +75,65 @@ void main() {
       expect(find.byType(TextFormField), findsWidgets);
     },
   );
+
+  testWidgets('the author chooses the text language; nothing is preselected', (
+    WidgetTester tester,
+  ) async {
+    final _MemoryRepository repository = _MemoryRepository();
+    final CreateController controller = CreateController(
+      loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+      saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+      publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+      analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: const CreateRuntimeDefaults(
+        marketCityId: 'riga',
+        timezone: 'Europe/Riga',
+        country: 'LV',
+        city: 'Riga',
+        currency: 'EUR',
+      ),
+    );
+    addTearDown(controller.dispose);
+    await controller.ensureLoaded(
+      userId: 'user-1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'Creator',
+    );
+    controller.setObjectType(CreateObjectType.activity);
+    expect(controller.draftContentLanguage, isNull);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: AnimatedBuilder(
+            animation: controller,
+            builder: (BuildContext context, Widget? child) =>
+                SingleChildScrollView(
+                  child: ContentLanguageField(controller: controller),
+                ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Language of this text'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('content-language-field')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Latviešu').last);
+    await tester.pumpAndSettle();
+    expect(controller.draftContentLanguage, 'lv');
+    expect(controller.state.draft.declaredContentLocale, 'lv');
+
+    controller.updateDraftContentLanguage('de');
+    expect(controller.draftContentLanguage, 'lv', reason: 'unsupported');
+    // Let the draft autosave timer finish before the tree is disposed.
+    await tester.pump(const Duration(seconds: 5));
+  });
 
   testWidgets('Basics step fits 360 dp at 1.5 text scale without overflow', (
     WidgetTester tester,

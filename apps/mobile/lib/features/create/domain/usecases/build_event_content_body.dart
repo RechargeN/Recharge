@@ -79,6 +79,8 @@ final class EventContentBodyMapper {
                     .toList()
                   ..sort())
                 .toList(),
+      if (draft.declaredContentLocale case final String locale)
+        'contentLocale': locale,
       'title': draft.title,
       'categoryId': draft.mainCategory,
       'subcategoryId': draft.subcategory,

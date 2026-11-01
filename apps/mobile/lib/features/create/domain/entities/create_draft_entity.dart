@@ -93,6 +93,9 @@ class MediaEntity {
   }
 }
 
+/// ADR 0022: section holding the language the author declared for this text.
+const String draftContentLanguageSection = 'content_language';
+
 class CreateDraftEntity {
   const CreateDraftEntity({
     required this.id,
@@ -173,6 +176,13 @@ class CreateDraftEntity {
   final String id;
   final String? basedOnPublishedVersionId;
   final CreateObjectType objectType;
+
+  /// The author's declared text language, `null` until they choose one; Create
+  /// never fills it in, so a wrong language cannot reach a translation.
+  String? get declaredContentLocale {
+    final Object? value = sectionData[draftContentLanguageSection];
+    return value is String && value.isNotEmpty ? value : null;
+  }
 
   final String title;
   final String eventType;

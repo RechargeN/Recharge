@@ -117,6 +117,8 @@ final class ActivityContentBodyMapper {
 
     final Object? criteria = draft.sectionData['criteria'];
     final Map<String, Object?> body = <String, Object?>{
+      if (draft.declaredContentLocale case final String locale)
+        'contentLocale': locale,
       'title': draft.title.trim(),
       'categoryId': draft.mainCategory,
       'subcategoryId': draft.subcategory,
@@ -136,7 +138,11 @@ final class ActivityContentBodyMapper {
               <String, Object?>{'mediaId': mediaId(item)},
         ],
       },
-      'location': <String,Object?>{..._location(activity.location), if (allowLinkedPlace && _text(activity.location.linkedPlaceId) != null) 'linkedPlaceId': _text(activity.location.linkedPlaceId)},
+      'location': <String, Object?>{
+        ..._location(activity.location),
+        if (allowLinkedPlace && _text(activity.location.linkedPlaceId) != null)
+          'linkedPlaceId': _text(activity.location.linkedPlaceId),
+      },
       'typicalDurationMinutes': _range(activity.typicalDurationMinutes),
       if (activity.suggestedGroupSize case final ActivityIntRangeDraft range)
         'suggestedGroupSize': _range(range),

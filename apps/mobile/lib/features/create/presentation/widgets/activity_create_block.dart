@@ -5,6 +5,7 @@ import '../../application/activity_place_link_controller.dart';
 import '../../../../core/config/recharge_category_criteria.dart';
 import '../../application/activity_create_config.dart';
 import '../../application/controllers/create_controller.dart';
+import 'content_language_field.dart';
 import '../../application/create_taxonomy.dart';
 import '../../application/get_category_criteria_usecase.dart';
 import '../../application/state/create_state.dart';
@@ -163,6 +164,8 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
     return _StepCard(
       title: context.l10n.createFormAboutActivity,
       children: <Widget>[
+        ContentLanguageField(controller: widget.controller),
+        const SizedBox(height: 12),
         TextFormField(
           controller: _field('title', draft.title),
           decoration: InputDecoration(
