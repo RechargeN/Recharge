@@ -52,6 +52,14 @@ export const emulatorTestGroups = Object.freeze([
     tasks: [["lib/test/emulator/library.test.js"]],
   },
   {
+    // ADR 0022 stage 1: on-demand translation with the mock adapter; owns and
+    // removes its fixtures.
+    name: "content-translation",
+    baselineMs: 90000,
+    timeoutMs: 200000,
+    tasks: [["lib/test/emulator/content_translation.test.js"]],
+  },
+  {
     name: "platform",
     baselineMs: 10741,
     timeoutMs: 120000,

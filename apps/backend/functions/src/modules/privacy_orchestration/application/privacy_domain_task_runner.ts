@@ -1,3 +1,4 @@
+import { contentTranslationPrivacyAppliers } from '../../content_translation/content_translation_privacy.js';
 import {
   LibraryPrivacyTaskHandler,
   libraryPrivacyAppliers,
@@ -367,6 +368,7 @@ export class PrivacyDomainTaskRunner {
             ),
         },
       ],
+      ['content_translation', registry('content_translation', contentTranslationPrivacyAppliers)],
       ['identity', registry('identity')],
       ['security', registry('security')],
       ['content', registry('content')],

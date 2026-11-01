@@ -43,6 +43,12 @@ const expected = [
   "notificationsCommandV1",
   "libraryCommandV1",
   "libraryQueryV1",
+  // ADR 0022 stage 1: default-off, Emulator-only translation with the mock adapter.
+  "offerContentTranslationV1",
+  "translateContentV1",
+  "purgeContentTranslationsV1",
+  "purgeContentTranslationsOnHoldV1",
+  "sweepContentTranslationsV1",
   "quickPlanCommandV1",
   "quickPlanQueryV1",
   "routeCommandV1",
@@ -81,6 +87,8 @@ if (
     "reconcileMediaReferencesV1",
     "releaseMissedReconfirmationsV1",
     "retryEventBookingProjectionDeliveriesV1",
+    // ADR 0022 stage 1: Emulator-only removal of expired translations.
+    "sweepContentTranslationsV1",
   ])
 ) {
   throw new Error(

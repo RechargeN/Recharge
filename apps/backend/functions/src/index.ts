@@ -2,6 +2,8 @@ import { FirestoreScenarioService } from './modules/quick_plan/firestore_scenari
 import { handleK2 } from './safety_entry.js';
 import { FirestoreReviewService } from './modules/reviews/firestore_review_service.js';
 import { handleK1 } from './moderation_entry.js';
+import { FirestoreContentTranslationService } from './modules/content_translation/firestore_content_translation_service.js';
+import { MockTranslationProvider } from './modules/content_translation/content_translation_provider.js';
 import { FirestoreLibraryService } from './modules/library/firestore_library_service.js';
 import { FirestoreQuickPlanService } from './modules/quick_plan/firestore_quick_plan_service.js';
 import { FirestoreRouteService } from './modules/route/firestore_route_service.js';
@@ -10,7 +12,7 @@ import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { error as logError } from 'firebase-functions/logger';
 import { onCall, type CallableRequest } from 'firebase-functions/v2/https';
-import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { onDocumentCreated, onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import {
   inspectBookingCommand,
@@ -1245,6 +1247,59 @@ export const libraryQueryV1 = onCall<unknown>(callableOptions, async (request) =
     data,
   );
 });
+
+// ADR 0022 stage 1: default-off, Emulator-only translation with the mock adapter.
+function contentTranslationService(firestore: Firestore): FirestoreContentTranslationService {
+  return new FirestoreContentTranslationService(
+    firestore,
+    systemServerClock,
+    new MockTranslationProvider(),
+  );
+}
+export const offerContentTranslationV1 = onCall<unknown>(callableOptions, async (request) => {
+  const access = prepareTransport(request);
+  if (!access.ok) return access.result;
+  const { sessionContext, ...data } = request.data as Record<string, unknown>;
+  void sessionContext;
+  return contentTranslationService(access.firestore).offer(access.accessHint, data);
+});
+export const translateContentV1 = onCall<unknown>(callableOptions, async (request) => {
+  const access = prepareTransport(request);
+  if (!access.ok) return access.result;
+  const { sessionContext, ...data } = request.data as Record<string, unknown>;
+  void sessionContext;
+  return contentTranslationService(access.firestore).translate(access.accessHint, data);
+});
+// Withdrawal or restriction removes translations at once; deletion never waits for a flag.
+export const purgeContentTranslationsV1 = onDocumentWritten(
+  { document: 'contentPublicationPointers/{contentId}', region: 'europe-west1', retry: false },
+  async (event) => {
+    const firestore = emulatorFirestore();
+    if (firestore === undefined || event.data?.after.get('visibility') === 'visible') return;
+    await contentTranslationService(firestore).purgeContent(event.params.contentId);
+  },
+);
+// A T&S hold never moves the pointer. One naming no object covers the publisher,
+// whose entries are found through their sources: the cache names no user.
+export const purgeContentTranslationsOnHoldV1 = onDocumentWritten(
+  { document: 'contentSafetyHolds/{holdId}', region: 'europe-west1', retry: false },
+  async (event) => {
+    const firestore = emulatorFirestore();
+    const hold = event.data?.after.data();
+    if (firestore === undefined || hold?.desired !== 'active') return;
+    const service = contentTranslationService(firestore);
+    if (typeof hold.contentId === 'string') await service.purgeContent(hold.contentId);
+    else await service.sweep();
+  },
+);
+export const sweepContentTranslationsV1 = onSchedule(
+  { schedule: 'every 24 hours', region: 'europe-west1', retryCount: 0 },
+  async () => {
+    const firestore = emulatorFirestore();
+    if (firestore === undefined) return;
+    await contentTranslationService(firestore).sweep();
+  },
+);
 
 /** I2 persistence plus SCN-PUB-01 publication, with Catalog-owned stop status. */
 function scenarioService(firestore: Firestore): FirestoreScenarioService {

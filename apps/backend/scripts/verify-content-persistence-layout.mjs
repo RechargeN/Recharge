@@ -123,6 +123,14 @@ const approvedOutsideUsers = {
   // or read-only checks of Content pointers, revisions and drafts; none of
   // them writes Content. Reviewed 2026-10-16 when the baseline gate was fixed.
   "modules/library/library_privacy_task_handler.ts": guardOnly,
+  // ADR 0022 stage 1: read-only checks of the published pointer and revision;
+  // it writes only its own contentTranslation* collections, no Content.
+  "modules/content_translation/firestore_content_translation_service.ts": {
+    firestore_content_repository: [
+      "assertContentEmulatorContext",
+      "contentCollections",
+    ],
+  },
   "modules/moderation/application/k1_workflows.ts": guardOnly,
   "modules/moderation/application/report_service.ts": guardOnly,
   "modules/reviews/firestore_review_service.ts": guardOnly,
@@ -211,6 +219,12 @@ const approvedContentExports = [
   "consumeContentEffectV1",
   "contentCommandV1",
   "contentQueryV1",
+  // ADR 0022 stage 1: its own module; these read Content and never write it.
+  "offerContentTranslationV1",
+  "translateContentV1",
+  "purgeContentTranslationsV1",
+  "purgeContentTranslationsOnHoldV1",
+  "sweepContentTranslationsV1",
 ];
 const contentExports = [...entry.matchAll(/export const (\w+)\s*=/gu)]
   .map((match) => match[1])

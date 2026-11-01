@@ -3,6 +3,7 @@ import {
   bookingFlagIds,
   catalogFlagIds,
   contentFlagIds,
+  contentTranslationFlagIds,
   mediaFlagIds,
   notificationsFlagIds,
   operationsEmergencySwitchIds,
@@ -29,7 +30,8 @@ export type OperationalFamilyId =
   | 'TF-11'
   | 'TF-12'
   | 'TF-13'
-  | 'TF-14';
+  | 'TF-14'
+  | 'TF-15';
 
 export type RecoveryMechanism =
   /** Token + generation fence every later write of a lost worker. */
@@ -363,6 +365,26 @@ export const operationalTaskRegistry: readonly OperationalTaskFamily[] = deepFre
     recovery: ['lease_fencing', 'resumable_state', 'owner_receipt'],
     emergencySwitchId: null,
     activationFlagId: null,
+    console: noConsole,
+    blockers: [],
+  },
+  {
+    id: 'TF-15',
+    name: 'Content translation on request and cache purge (ADR 0022)',
+    owner: 'content_translation',
+    producer: 'reader request; contentPublicationPointers or contentSafetyHolds change',
+    consumer: 'content translation provider call and cache purge',
+    effect: 'contentTranslations entry or its removal',
+    receipt: 'cache entry + cost ledger row, under the lease token',
+    sources: [mod('content_translation', 'firestore_content_translation_service.ts')],
+    triggers: [
+      'purgeContentTranslationsV1',
+      'purgeContentTranslationsOnHoldV1',
+      'sweepContentTranslationsV1',
+    ],
+    recovery: ['lease_fencing', 'idempotent_rescan'],
+    emergencySwitchId: operationsEmergencySwitchIds.contentTranslation,
+    activationFlagId: contentTranslationFlagIds.onDemand,
     console: noConsole,
     blockers: [],
   },

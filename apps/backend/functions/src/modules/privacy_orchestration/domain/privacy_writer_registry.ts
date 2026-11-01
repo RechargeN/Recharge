@@ -42,6 +42,7 @@ export const privacyErasureDomainIds = [
   'admin_support',
   'booking',
   'content',
+  'content_translation',
   'identity',
   'library',
   'media',
@@ -261,6 +262,16 @@ export const privacyWriterRegistry: readonly PrivacyRegistryEntry[] = deepFreeze
   ...rows('W21', 'admin_support', [
     ['productAnalyticsAccessAuthority', '$id', blocked('PB-10')],
     ['productAnalyticsAccessAudit', 'actorId', blocked('PB-10')],
+  ]),
+  // ADR 0022: translations are derived from public revisions and follow their
+  // lifecycle; only the daily account counter names a subject.
+  ...rows('W22', 'content_translation', [['contentTranslationAccountUsage', 'accountId', del]]),
+  ...rows('W22', null, [
+    ['contentTranslations', null, derived],
+    ['contentTranslationLeases', null, none],
+    ['contentTranslationObjectUsage', null, none],
+    ['contentTranslationBudgets', null, none],
+    ['contentTranslationCostLedger', null, none],
   ]),
   ...rows('config', null, [
     ['platformFeatureFlagRevisions', null, none],

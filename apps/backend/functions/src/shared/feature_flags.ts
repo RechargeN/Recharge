@@ -89,6 +89,7 @@ export const operationsEmergencySwitchIds = Object.freeze({
   eventProjectionDelivery: 'booking.eventProjection.delivery.incidentDisable',
   reconfirmationDeadlineWorker: 'booking.reconfirmation.deadlineWorker.incidentDisable',
   notificationsConsumeBooking: 'notifications.consume.booking.incidentDisable',
+  contentTranslation: 'contentTranslation.onDemand.incidentDisable',
 });
 
 /**
@@ -98,6 +99,11 @@ export const operationsEmergencySwitchIds = Object.freeze({
 export const productAnalyticsFlagIds = Object.freeze({
   collection: 'productAnalytics.collection',
   aggregation: 'productAnalytics.aggregation',
+});
+
+/** ADR 0022 stage 1: Emulator-only machine translation on request (default off). */
+export const contentTranslationFlagIds = Object.freeze({
+  onDemand: 'contentTranslation.onDemand',
 });
 
 export type BookingFlagId = (typeof bookingFlagIds)[keyof typeof bookingFlagIds];

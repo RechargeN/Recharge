@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/content_translation/v1/content_translation_result.schema.json",
+  "title": "Recharge content translation result union v1 (ADR 0022 stage 1, local stand contract)",
+  "oneOf": [
+    { "$ref": "#/$defs/rejected" },
+    { "$ref": "#/$defs/offered" },
+    { "$ref": "#/$defs/translated" }
+  ],
+  "$defs": {
+    "failureCode": {
+      "enum": [
+        "unauthenticated",
+        "request_invalid",
+        "translation_disabled",
+        "same_language",
+        "unsupported_locale",
+        "source_unavailable",
+        "revision_changed",
+        "quota_exceeded",
+        "budget_exhausted",
+        "provider_unavailable"
+      ]
+    },
+    "rejected": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "rejected" },
+        "code": { "$ref": "#/$defs/failureCode" }
+      },
+      "required": ["schemaVersion", "kind", "code"]
+    },
+    "offered": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "offered" },
+        "contentId": { "type": "string" },
+        "publishedRevisionId": { "type": "string" },
+        "sourceLocale": { "type": "string" },
+        "targetLocale": { "enum": ["lv", "en", "ru"] }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "contentId",
+        "publishedRevisionId",
+        "sourceLocale",
+        "targetLocale"
+      ]
+    },
+    "translated": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "translated" },
+        "contentId": { "type": "string" },
+        "publishedRevisionId": { "type": "string" },
+        "sourceLocale": { "type": "string" },
+        "targetLocale": { "enum": ["lv", "en", "ru"] },
+        "machineTranslated": { "const": true },
+        "fields": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "title": { "type": "string", "minLength": 1 },
+            "shortDescription": { "type": "string", "minLength": 1 },
+            "fullDescription": { "type": "string", "minLength": 1 }
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "contentId",
+        "publishedRevisionId",
+        "sourceLocale",
+        "targetLocale",
+        "machineTranslated",
+        "fields"
+      ]
+    }
+  }
+}

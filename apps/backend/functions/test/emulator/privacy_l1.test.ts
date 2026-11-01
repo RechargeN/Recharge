@@ -34,6 +34,7 @@ import {
 import { privacyProgressCollection } from '../../src/modules/privacy_orchestration/infrastructure/firestore_privacy_subject_sweep.js';
 import { createAccount } from '../../src/modules/identity_publisher/domain/account.js';
 import { identityAuthorityCollections } from '../../src/modules/identity_publisher/infrastructure/firestore_identity_authority_repository.js';
+import { contentTranslationCollections } from '../../src/modules/content_translation/content_translation_contract.js';
 import { libraryCollections } from '../../src/modules/library/library_contract.js';
 import { MediaDeletionService } from '../../src/modules/media/application/media_deletion_service.js';
 import type { ObjectStorePort } from '../../src/modules/media/application/ports/object_store_port.js';
@@ -782,6 +783,46 @@ l1(
 );
 
 l1(
+  'L1-T-W22 Translation: the account counter is erased, a hold keeps it; shared translations stay',
+  async () => {
+    await account(S);
+    const usage = contentTranslationCollections.accountUsage;
+    await seed(usage, `${S}:2026-11-01`, { accountId: S, day: '2026-11-01', count: 3 });
+    await seed(usage, `${O}:2026-11-01`, { accountId: O, day: '2026-11-01', count: 1 });
+    await seed(contentTranslationCollections.entries, 'translation-1', {
+      contentId: 'c',
+      fields: {},
+    });
+    await placeHold('2d1f3b0a-0d0e-4c4e-9a64-0f6e5c0a0022', {
+      domainId: 'content_translation',
+      collection: usage,
+      recordId: `${S}:2026-11-01`,
+    });
+    const held = await request(['content_translation']);
+    assert.equal(await drive(runner(), held.requestId, 'content_translation'), 'succeeded');
+    assert.ok(await doc(usage, `${S}:2026-11-01`), 'a legal hold keeps the counter');
+    assert.equal((await reconcile(held.requestId)).status, 'completedWithRetention');
+    const hold = await doc(privacyHoldCollections.holds, '2d1f3b0a-0d0e-4c4e-9a64-0f6e5c0a0022');
+    assert.ok(
+      (
+        await holds.release({
+          actorId: holdActor,
+          holdId: '2d1f3b0a-0d0e-4c4e-9a64-0f6e5c0a0022',
+          expectedRevision: Number(hold?.revision),
+          nowUtc: at(1),
+        })
+      ).ok,
+    );
+    const r = await request(['content_translation']);
+    assert.equal(await drive(runner(), r.requestId, 'content_translation'), 'succeeded');
+    assert.equal(await doc(usage, `${S}:2026-11-01`), undefined);
+    assert.ok(await doc(usage, `${O}:2026-11-01`), "another account's counter stays");
+    assert.ok(await doc(contentTranslationCollections.entries, 'translation-1'));
+    assert.equal((await reconcile(r.requestId)).status, 'completed');
+  },
+);
+
+l1(
   'L1-T-W14 Reviews: published reviews stay (PB-04); a deleted review never returns to the rating',
   async () => {
     await account(S);
@@ -1353,6 +1394,7 @@ l1(
       admin_support: 'blocked',
       booking: 'succeeded',
       content: 'blocked',
+      content_translation: 'succeeded',
       library: 'succeeded',
       media: 'blocked',
       moderation: 'blocked',

@@ -103,6 +103,12 @@ service cloud.firestore {
     match /bookingReconfirmationDeadlineCheckpoints/{document} { allow read, write: if false; }
     match /bookingReconfirmationDeadlineOperatorAudit/{document} { allow read, write: if false; }
     match /libraryEntries/{document} { allow read, write: if false; }
+    match /contentTranslations/{document} { allow read, write: if false; }
+    match /contentTranslationLeases/{document} { allow read, write: if false; }
+    match /contentTranslationAccountUsage/{document} { allow read, write: if false; }
+    match /contentTranslationObjectUsage/{document} { allow read, write: if false; }
+    match /contentTranslationBudgets/{document} { allow read, write: if false; }
+    match /contentTranslationCostLedger/{document} { allow read, write: if false; }
     match /moderationRemoderationQueue/{document} { allow read, write: if false; }
     match /trustSafetyReports/{document} { allow read, write: if false; }
     match /reviews/{document} { allow read, write: if false; }

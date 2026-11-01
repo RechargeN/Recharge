@@ -92,6 +92,7 @@
     "test:emulator:moderation-k1": "node ../scripts/run-emulator-tests.mjs --group moderation-k1",
     "test:emulator:reviews-safety": "node ../scripts/run-emulator-tests.mjs --group reviews-safety",
     "test:emulator:library": "node ../scripts/run-emulator-tests.mjs --group library",
+    "test:emulator:content-translation": "node ../scripts/run-emulator-tests.mjs --group content-translation",
     "test:emulator:scenario-i2": "node ../scripts/run-emulator-tests.mjs --group scenario-i2",
     "test:emulator:scenario-i3": "node ../scripts/run-emulator-tests.mjs --group scenario-i3",
     "test:emulator:route-j1": "node ../scripts/run-emulator-tests.mjs --group route-j1",
