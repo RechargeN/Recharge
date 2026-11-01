@@ -8,6 +8,7 @@ import '../../../../app/di/service_locator.dart';
 import '../../../../app/application/visit_history_providers.dart';
 import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
+import '../../../../core/localization/user_message_catalog.dart';
 import '../../../../core/product_analytics/product_analytics_contract.dart';
 import '../../../../core/product_analytics/product_analytics_recorder.dart';
 import '../../../../core/telemetry/analytics_service.dart';
@@ -265,10 +266,15 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
     _favoriteHandled = true;
     if (favoritesController.isFavorite(item.id)) return;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await favoritesController.addFavorite(
-        _toFavorite(item),
-        sourceScreen: 'discover_details',
-      );
+      try {
+        await favoritesController.addFavorite(
+          _toFavorite(item),
+          sourceScreen: 'discover_details',
+        );
+      } on CodedRefusal catch (error) {
+        _showRefusal(error);
+        return;
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.detailsSavedToFavorites)),
@@ -308,9 +314,28 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
       return;
     }
 
-    await favoritesController.toggleFavorite(
-      _toFavorite(item),
-      sourceScreen: 'discover_details',
+    try {
+      await favoritesController.toggleFavorite(
+        _toFavorite(item),
+        sourceScreen: 'discover_details',
+      );
+    } on CodedRefusal catch (error) {
+      _showRefusal(error);
+    }
+  }
+
+  void _showRefusal(CodedRefusal error) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          UserMessageCatalog.forError(
+            context.l10n,
+            error,
+            fallback: context.l10n.errorGeneric,
+          ),
+        ),
+      ),
     );
   }
 
@@ -459,11 +484,19 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
           ),
         ),
       );
-    } on Object {
+    } on Object catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(context.l10n.detailsVisitFailed)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            UserMessageCatalog.forError(
+              context.l10n,
+              error,
+              fallback: context.l10n.detailsVisitFailed,
+            ),
+          ),
+        ),
+      );
     }
   }
 

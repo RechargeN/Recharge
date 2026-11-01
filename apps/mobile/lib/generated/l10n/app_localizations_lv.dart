@@ -11661,4 +11661,80 @@ class AppLocalizationsLv extends AppLocalizations {
     });
     return '$_temp0';
   }
+
+  @override
+  String get errorAccountChanged =>
+      'Pierakstītais konts ir mainījies. Atjaunojiet un mēģiniet vēlreiz.';
+
+  @override
+  String get errorProcessingRestricted =>
+      'Šī darbība nav pieejama, kamēr jūsu datu apstrāde ir ierobežota.';
+
+  @override
+  String get errorPublicationActive =>
+      'Vispirms atsauciet publikāciju, tad mēģiniet vēlreiz.';
+
+  @override
+  String get libraryErrorVisitFuture => 'Apmeklējuma datums nevar būt nākotnē.';
+
+  @override
+  String get libraryErrorPlaceTimezone =>
+      'Šai vietai nav derīgas laika joslas, tāpēc apmeklējumu nevar reģistrēt.';
+
+  @override
+  String get quickPlanErrorInviteLimit =>
+      'Šim plānam sasniegts uzaicinājumu ierobežojums.';
+
+  @override
+  String get scenarioErrorLinkExpired => 'Šīs saites derīgums ir beidzies.';
+
+  @override
+  String get routeErrorTooLarge =>
+      'Šis maršruts ir pārāk liels, lai to saglabātu.';
+
+  @override
+  String get routeErrorTooManyPoints => 'Šajā maršrutā ir pārāk daudz punktu.';
+
+  @override
+  String get routeErrorGeometry => 'Maršruta treks nav derīgs.';
+
+  @override
+  String get routeErrorLicense => 'Šī maršruta avota licence to neatļauj.';
+
+  @override
+  String get routeErrorProvenance => 'Šī treka izcelsmi neizdevās apstiprināt.';
+
+  @override
+  String get routeErrorTrimInvalid =>
+      'Maršruta paslēptais sākums un beigas nav derīgi.';
+
+  @override
+  String get routeErrorTitleRequired =>
+      'Vispirms pievienojiet maršruta nosaukumu.';
+
+  @override
+  String get routeErrorDistributionLimit =>
+      'Sasniegts šī maršruta kopīgošanas ierobežojums.';
+
+  @override
+  String get identityErrorAccountBlocked => 'Šis konts ir bloķēts.';
+
+  @override
+  String get identityErrorAccountRestricted => 'Šis konts ir ierobežots.';
+
+  @override
+  String get identityErrorSessionLimit =>
+      'Pārāk daudz aktīvu sesiju. Izrakstieties citā ierīcē un mēģiniet vēlreiz.';
+
+  @override
+  String get identityErrorRecentAuth =>
+      'Lai turpinātu, pierakstieties vēlreiz.';
+
+  @override
+  String get localErrorStorageFull =>
+      'Pārāk daudz nenosūtītu izmaiņu. Izveidojiet savienojumu ar internetu un mēģiniet vēlreiz.';
+
+  @override
+  String get localErrorImportNotReappliable =>
+      'Šo importu nevar atkārtot. Importējiet failu vēlreiz.';
 }

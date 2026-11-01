@@ -15,6 +15,7 @@ import {
   type Point,
   type TrackSegment,
 } from './route_geometry.js';
+import type { GeometryFailureCode } from './route_geometry.js';
 
 /**
  * J2 / RTE-PUB-01 §5: the public distribution of one Route revision. It is built
@@ -105,7 +106,10 @@ export function routeDistributionHash(distribution: unknown): string {
 
 export type DistributionResult =
   | { readonly ok: true; readonly distribution: Stored; readonly contentHash: string }
-  | { readonly ok: false; readonly code: string };
+  | {
+      readonly ok: false;
+      readonly code: GeometryFailureCode | 'privacy_trim_required' | 'title_required';
+    };
 
 /** Builds the public snapshot of one stored J1 Route and its current trim. */
 export function buildRouteDistribution(route: ParsedRoute, trim: PrivacyTrim): DistributionResult {

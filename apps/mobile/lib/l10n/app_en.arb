@@ -12775,5 +12775,89 @@
         "example": "x"
       }
     }
+  },
+  "errorAccountChanged": "The signed-in account changed. Refresh and try again.",
+  "@errorAccountChanged": {
+    "description": "L4.8: server refusal — another account is signed in now."
+  },
+  "errorProcessingRestricted": "This action is unavailable while your data processing is restricted.",
+  "@errorProcessingRestricted": {
+    "description": "L4.8: server refusal — a privacy restriction pauses changes to this data."
+  },
+  "errorPublicationActive": "Withdraw the publication first, then try again.",
+  "@errorPublicationActive": {
+    "description": "L4.8: server refusal — the object is still published."
+  },
+  "libraryErrorVisitFuture": "A visit date cannot be in the future.",
+  "@libraryErrorVisitFuture": {
+    "description": "L4.8: Visit history refusal."
+  },
+  "libraryErrorPlaceTimezone": "This place has no valid time zone, so the visit cannot be recorded.",
+  "@libraryErrorPlaceTimezone": {
+    "description": "L4.8: Visit history refusal — the place has no usable time zone."
+  },
+  "quickPlanErrorInviteLimit": "This plan has reached its invitation limit.",
+  "@quickPlanErrorInviteLimit": {
+    "description": "L4.8: Quick Plan refusal."
+  },
+  "scenarioErrorLinkExpired": "This link has expired.",
+  "@scenarioErrorLinkExpired": {
+    "description": "L4.8: Scenario refusal — a shared link is out of date."
+  },
+  "routeErrorTooLarge": "This route is too large to save.",
+  "@routeErrorTooLarge": {
+    "description": "L4.8: Route refusal."
+  },
+  "routeErrorTooManyPoints": "This route has too many points.",
+  "@routeErrorTooManyPoints": {
+    "description": "L4.8: Route refusal."
+  },
+  "routeErrorGeometry": "The route track is not valid.",
+  "@routeErrorGeometry": {
+    "description": "L4.8: Route refusal."
+  },
+  "routeErrorLicense": "The licence of this route source does not allow this.",
+  "@routeErrorLicense": {
+    "description": "L4.8: Route refusal — the source licence does not allow this."
+  },
+  "routeErrorProvenance": "The origin of this track could not be confirmed.",
+  "@routeErrorProvenance": {
+    "description": "L4.8: Route refusal — the origin of the track cannot be confirmed."
+  },
+  "routeErrorTrimInvalid": "The hidden start and end of the route are not valid.",
+  "@routeErrorTrimInvalid": {
+    "description": "L4.8: Route refusal — privacy trim values."
+  },
+  "routeErrorTitleRequired": "Add a route title first.",
+  "@routeErrorTitleRequired": {
+    "description": "L4.8: Route refusal."
+  },
+  "routeErrorDistributionLimit": "The limit for sharing this route has been reached.",
+  "@routeErrorDistributionLimit": {
+    "description": "L4.8: Route refusal."
+  },
+  "identityErrorAccountBlocked": "This account is blocked.",
+  "@identityErrorAccountBlocked": {
+    "description": "L4.8: sign-in session refusal."
+  },
+  "identityErrorAccountRestricted": "This account is restricted.",
+  "@identityErrorAccountRestricted": {
+    "description": "L4.8: sign-in session refusal."
+  },
+  "identityErrorSessionLimit": "Too many active sessions. Sign out on another device and try again.",
+  "@identityErrorSessionLimit": {
+    "description": "L4.8: sign-in session refusal."
+  },
+  "identityErrorRecentAuth": "Sign in again to continue.",
+  "@identityErrorRecentAuth": {
+    "description": "L4.8: sign-in session refusal."
+  },
+  "localErrorStorageFull": "Too many unsent changes. Connect to the internet and try again.",
+  "@localErrorStorageFull": {
+    "description": "L4.8: client refusal — the local change queue is full."
+  },
+  "localErrorImportNotReappliable": "This import cannot be repeated. Import the file again.",
+  "@localErrorImportNotReappliable": {
+    "description": "L4.8: client refusal — a queued import cannot be repeated."
   }
 }

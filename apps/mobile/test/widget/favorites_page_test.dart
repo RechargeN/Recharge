@@ -23,11 +23,40 @@ import 'package:recharge/features/favorites/domain/usecases/add_favorite_usecase
 import 'package:recharge/features/favorites/domain/usecases/get_favorites_usecase.dart';
 import 'package:recharge/features/favorites/domain/usecases/remove_favorite_usecase.dart';
 import 'package:recharge/features/favorites/presentation/pages/favorites_page.dart';
+import 'package:recharge/features/library/data/library_sync_client.dart';
 
 import '../support/l10n/l10n_screen_harness.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
+  fullPageTestWidgets('L4.8: a coded load failure is said in words, not as a '
+      'code', (tester) async {
+    final repository = _RefusingFavoritesRepository();
+    final controller = FavoritesController(
+      getFavoritesUseCase: GetFavoritesUseCase(repository),
+      addFavoriteUseCase: AddFavoriteUseCase(repository),
+      removeFavoriteUseCase: RemoveFavoriteUseCase(repository),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          favoritesControllerProvider.overrideWith((ref) => controller),
+          discoverFeedControllerProvider.overrideWith(
+            (ref) => _discoverController(),
+          ),
+        ],
+        child: const MaterialApp(home: FavoritesPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text(l10nFor(const Locale('en')).errorProcessingRestricted),
+      findsOneWidget,
+    );
+    expect(find.text('processing_restricted'), findsNothing);
+  });
+
   // L4.6: Favorites in lv, en and ru at 360 dp; saved titles stay as is.
   l10nSmallScreenTestWidgets('Favorites lists saved plans', (
     tester,
@@ -815,4 +844,10 @@ class _FakeFavoritesRepository implements FavoritesRepository {
   Future<void> removeFavorite(String itemId) async {
     _storage.removeWhere((FavoriteItemEntity element) => element.id == itemId);
   }
+}
+
+class _RefusingFavoritesRepository extends _FakeFavoritesRepository {
+  @override
+  Future<List<FavoriteItemEntity>> getFavorites() async =>
+      throw const LibraryFailure('processing_restricted');
 }

@@ -56,7 +56,34 @@ export const importTransformations = Object.freeze([
 const requiredImportTransformations = ['strip-timestamps', 'strip-metadata', 'quantize-e7-dm'];
 
 export type Result = Readonly<Record<string, unknown>>;
-export const reject = (code: string, extra: Result = {}): Result => ({
+/** L4.8: mirrors `route/v1/route_refusal.schema.json`; a contract test compares them. */
+export const routeRefusalCodes = [
+  'app_check_required',
+  'deleted',
+  'distribution_limit',
+  'feature_disabled',
+  'id_collision',
+  'idempotency_conflict',
+  'invalid_geometry',
+  'license_blocked',
+  'not_found',
+  'owner_changed',
+  'payload_too_large',
+  'permission_denied',
+  'point_limit_exceeded',
+  'privacy_trim_empty',
+  'privacy_trim_invalid',
+  'privacy_trim_required',
+  'provenance_unverified',
+  'publication_active',
+  'request_invalid',
+  'revision_conflict',
+  'temporarily_unavailable',
+  'title_required',
+  'unauthenticated',
+] as const;
+export type RouteRefusalCode = (typeof routeRefusalCodes)[number];
+export const reject = (code: RouteRefusalCode, extra: Result = {}): Result => ({
   schemaVersion: 1,
   kind: 'rejected',
   code,
@@ -103,8 +130,11 @@ export interface ParsedRoute {
   readonly segments: readonly ParsedSegment[];
   readonly track: readonly TrackSegment[];
 }
-type Parsed<T> = { ok: true; value: T } | { ok: false; code: string };
-const fail = (code: string): { ok: false; code: string } => ({ ok: false, code });
+type Parsed<T> = { ok: true; value: T } | { ok: false; code: RouteRefusalCode };
+const fail = (code: RouteRefusalCode): { ok: false; code: RouteRefusalCode } => ({
+  ok: false,
+  code,
+});
 
 export function routeJsonBytes(route: unknown): number {
   return Buffer.byteLength(JSON.stringify(route ?? null), 'utf8');
@@ -384,7 +414,7 @@ const samePoint = (a: Point | undefined, b: Point | undefined) =>
  * may contain imported parts and the user-confirmed 2-point direct bridges
  * between them, nothing else; declared transformations must match the data.
  */
-function verifyImport(route: ParsedRoute, source: ImportSource): string | null {
+function verifyImport(route: ParsedRoute, source: ImportSource): RouteRefusalCode | null {
   const segments = route.segments;
   if (segments.length === 0) return 'invalid_geometry';
   let bridges = 0;

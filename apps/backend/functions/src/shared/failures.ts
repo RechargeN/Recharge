@@ -26,6 +26,15 @@ export type BookingFailureCode =
   | 'contention'
   | 'temporarily_unavailable';
 
+/** L4.8: what the shared `prepareTransport` refuses before a module runs. */
+export const moduleTransportRefusalCodes = [
+  'app_check_required',
+  'feature_disabled',
+  'permission_denied',
+  'temporarily_unavailable',
+  'unauthenticated',
+] as const;
+
 export type BookingResult<T> =
   | Readonly<{ kind: 'succeeded'; data: T }>
   | Readonly<{ kind: 'rejected'; code: BookingFailureCode }>

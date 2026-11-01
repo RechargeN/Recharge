@@ -51,7 +51,26 @@ export interface LibraryCommand {
   };
 }
 export type LibraryResult = Readonly<Record<string, unknown>>;
-export const rejected = (code: string, extra: LibraryResult = {}): LibraryResult => ({
+/** L4.8: mirrors `library/v1/library_refusal.schema.json`; a contract test compares them. */
+export const libraryRefusalCodes = [
+  'app_check_required',
+  'cursor_invalid',
+  'feature_disabled',
+  'idempotency_conflict',
+  'object_unavailable',
+  'owner_changed',
+  'permission_denied',
+  'place_timezone_invalid',
+  'processing_restricted',
+  'request_invalid',
+  'revision_conflict',
+  'snapshot_changed',
+  'temporarily_unavailable',
+  'unauthenticated',
+  'visit_date_future',
+] as const;
+export type LibraryRefusalCode = (typeof libraryRefusalCodes)[number];
+export const rejected = (code: LibraryRefusalCode, extra: LibraryResult = {}): LibraryResult => ({
   schemaVersion: 1,
   kind: 'rejected',
   code,

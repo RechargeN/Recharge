@@ -1,4 +1,5 @@
 import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/user_message_catalog.dart';
 import '../../application/create_message_ids.dart';
 import '../../application/state/create_notice.dart';
 import '../../domain/entities/class_workshop_validation_issue.dart';
@@ -13,10 +14,26 @@ import 'validation_texts.dart';
 /// unknown code shows a safe general text, never the code itself.
 abstract final class CreateTexts {
   /// A `CreateState.message` code (see `CreateNotice`).
-  static String notice(AppLocalizations l10n, String code) =>
-      code == CreateNotice.placeGalleryLimit
-      ? l10n.createPlaceGalleryLimit(CreateNotice.placeGalleryMaxPhotos)
-      : l10n.createNotice(code);
+  static String notice(AppLocalizations l10n, String code) {
+    if (code.startsWith(CreateNotice.refusalPrefix)) {
+      final List<String> parts = code.split(':');
+      final UserMessageFamily? family = parts.length == 3
+          ? UserMessageFamily.values.asNameMap()[parts[1]]
+          : null;
+      final String fallback = l10n.createNotice(CreateNotice.draftSaveFailed);
+      return family == null
+          ? fallback
+          : UserMessageCatalog.refusal(
+              l10n,
+              family,
+              parts[2],
+              fallback: fallback,
+            );
+    }
+    return code == CreateNotice.placeGalleryLimit
+        ? l10n.createPlaceGalleryLimit(CreateNotice.placeGalleryMaxPhotos)
+        : l10n.createNotice(code);
+  }
 
   /// A field-error id from `validationErrors` or a section `errorIdFor`.
   static String fieldError(AppLocalizations l10n, String id) {

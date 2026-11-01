@@ -16239,6 +16239,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{value, select, owner{Owner}manager{Manager} other{Editor}}'**
   String identityRelationship(String value);
+
+  /// L4.8: server refusal — another account is signed in now.
+  ///
+  /// In en, this message translates to:
+  /// **'The signed-in account changed. Refresh and try again.'**
+  String get errorAccountChanged;
+
+  /// L4.8: server refusal — a privacy restriction pauses changes to this data.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is unavailable while your data processing is restricted.'**
+  String get errorProcessingRestricted;
+
+  /// L4.8: server refusal — the object is still published.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw the publication first, then try again.'**
+  String get errorPublicationActive;
+
+  /// L4.8: Visit history refusal.
+  ///
+  /// In en, this message translates to:
+  /// **'A visit date cannot be in the future.'**
+  String get libraryErrorVisitFuture;
+
+  /// L4.8: Visit history refusal — the place has no usable time zone.
+  ///
+  /// In en, this message translates to:
+  /// **'This place has no valid time zone, so the visit cannot be recorded.'**
+  String get libraryErrorPlaceTimezone;
+
+  /// L4.8: Quick Plan refusal.
+  ///
+  /// In en, this message translates to:
+  /// **'This plan has reached its invitation limit.'**
+  String get quickPlanErrorInviteLimit;
+
+  /// L4.8: Scenario refusal — a shared link is out of date.
+  ///
+  /// In en, this message translates to:
+  /// **'This link has expired.'**
+  String get scenarioErrorLinkExpired;
+
+  /// L4.8: Route refusal.
+  ///
+  /// In en, this message translates to:
+  /// **'This route is too large to save.'**
+  String get routeErrorTooLarge;
+
+  /// L4.8: Route refusal.
+  ///
+  /// In en, this message translates to:
+  /// **'This route has too many points.'**
+  String get routeErrorTooManyPoints;
+
+  /// L4.8: Route refusal.
+  ///
+  /// In en, this message translates to:
+  /// **'The route track is not valid.'**
+  String get routeErrorGeometry;
+
+  /// L4.8: Route refusal — the source licence does not allow this.
+  ///
+  /// In en, this message translates to:
+  /// **'The licence of this route source does not allow this.'**
+  String get routeErrorLicense;
+
+  /// L4.8: Route refusal — the origin of the track cannot be confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'The origin of this track could not be confirmed.'**
+  String get routeErrorProvenance;
+
+  /// L4.8: Route refusal — privacy trim values.
+  ///
+  /// In en, this message translates to:
+  /// **'The hidden start and end of the route are not valid.'**
+  String get routeErrorTrimInvalid;
+
+  /// L4.8: Route refusal.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a route title first.'**
+  String get routeErrorTitleRequired;
+
+  /// L4.8: Route refusal.
+  ///
+  /// In en, this message translates to:
+  /// **'The limit for sharing this route has been reached.'**
+  String get routeErrorDistributionLimit;
+
+  /// L4.8: sign-in session refusal.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is blocked.'**
+  String get identityErrorAccountBlocked;
+
+  /// L4.8: sign-in session refusal.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is restricted.'**
+  String get identityErrorAccountRestricted;
+
+  /// L4.8: sign-in session refusal.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many active sessions. Sign out on another device and try again.'**
+  String get identityErrorSessionLimit;
+
+  /// L4.8: sign-in session refusal.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again to continue.'**
+  String get identityErrorRecentAuth;
+
+  /// L4.8: client refusal — the local change queue is full.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many unsent changes. Connect to the internet and try again.'**
+  String get localErrorStorageFull;
+
+  /// L4.8: client refusal — a queued import cannot be repeated.
+  ///
+  /// In en, this message translates to:
+  /// **'This import cannot be repeated. Import the file again.'**
+  String get localErrorImportNotReappliable;
 }
 
 class _AppLocalizationsDelegate

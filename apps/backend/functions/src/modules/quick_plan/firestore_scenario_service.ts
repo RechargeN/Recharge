@@ -11,7 +11,12 @@ import {
 import { canonicalJson, sha256Hex } from '../content/domain/published_revision.js';
 import { FirestoreFeatureFlagGate } from '../../platform/config/firestore_feature_flag_gate.js';
 import { exact, record } from '../library/library_contract.js';
-import { quickPlanCollections, quickPlanFlag, reject, type Result } from './quick_plan_contract.js';
+import {
+  quickPlanCollections,
+  quickPlanFlag,
+  rejectScenario as reject,
+  type Result,
+} from './quick_plan_contract.js';
 import { scenarioFlagIds } from '../../shared/feature_flags.js';
 import { relationEffects } from '../../shared/safety_visibility.js';
 import { safetyRestricted } from '../../shared/safety_instruction.js';

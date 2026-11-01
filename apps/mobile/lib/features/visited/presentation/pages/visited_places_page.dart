@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/user_message_catalog.dart';
 import '../../../../shared/models/catalog_object_ref.dart';
 import '../../application/controllers/visited_places_controller.dart';
 import '../../application/state/visited_places_state.dart';
@@ -60,8 +61,12 @@ class _VisitedPlacesPageState extends ConsumerState<VisitedPlacesPage> {
         VisitedPlacesStatus.error => _MessageState(
           icon: Icons.cloud_off_outlined,
           title: context.l10n.visitedLoadFailed,
-          // L4.6: the controller keeps a code; the page says it in words.
-          message: context.l10n.visitedTryAgain,
+          // L4.8: the controller keeps the code; the catalog says it in words.
+          message: UserMessageCatalog.forError(
+            context.l10n,
+            state.failure,
+            fallback: context.l10n.visitedTryAgain,
+          ),
           actionLabel: context.l10n.visitedRetry,
           onAction: () => controller.loadVisitedPlaces(userId: widget.userId),
         ),
@@ -246,7 +251,23 @@ class _VisitedPlacesPageState extends ConsumerState<VisitedPlacesPage> {
         ) ??
         false;
     if (!confirmed) return;
-    await controller.removeVisit(userId: userId, visitId: item.id);
+    try {
+      await controller.removeVisit(userId: userId, visitId: item.id);
+    } on CodedRefusal catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            UserMessageCatalog.forError(
+              context.l10n,
+              error,
+              fallback: context.l10n.errorGeneric,
+            ),
+          ),
+        ),
+      );
+      return;
+    }
     if (!context.mounted) return;
     ScaffoldMessenger.of(
       context,

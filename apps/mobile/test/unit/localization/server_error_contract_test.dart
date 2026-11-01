@@ -42,6 +42,31 @@ const Map<UserMessageFamily, (String, List<String>)> _serverContracts =
         'notifications/v1/notifications_result.schema.json',
         <String>[r'$defs', 'item', 'properties', 'contentStatus', 'enum'],
       ),
+      // L4.8: the module refusal contracts (L4-G09).
+      UserMessageFamily.library: (
+        'library/v1/library_refusal.schema.json',
+        <String>[r'$defs', 'refusalCode', 'enum'],
+      ),
+      UserMessageFamily.quickPlan: (
+        'quick_plan/v1/quick_plan_refusal.schema.json',
+        <String>[r'$defs', 'refusalCode', 'enum'],
+      ),
+      UserMessageFamily.scenario: (
+        'scenario/v1/scenario_refusal.schema.json',
+        <String>[r'$defs', 'refusalCode', 'enum'],
+      ),
+      UserMessageFamily.route: (
+        'route/v1/route_refusal.schema.json',
+        <String>[r'$defs', 'refusalCode', 'enum'],
+      ),
+      UserMessageFamily.privacyIntake: (
+        'privacy/v1/privacy_intake_refusal.schema.json',
+        <String>[r'$defs', 'refusalCode', 'enum'],
+      ),
+      UserMessageFamily.identitySession: (
+        'identity/v1/identity_session_result.schema.json',
+        <String>[r'$defs', 'failureCode', 'enum'],
+      ),
     };
 
 List<String> _schemaCodes(String file, List<String> path) {
@@ -139,6 +164,123 @@ void main() {
         )
         .toList();
     expect(missing, isEmpty);
+  });
+
+  test('L4.8: every code a module sync client raises itself has a message', () {
+    const Map<String, UserMessageFamily> clients = <String, UserMessageFamily>{
+      'LibraryFailure': UserMessageFamily.library,
+      'QuickPlanFailure': UserMessageFamily.quickPlan,
+      'ScenarioSyncFailure': UserMessageFamily.scenario,
+      'RouteSyncFailure': UserMessageFamily.route,
+    };
+    final RegExp raised = RegExp(
+      "(${clients.keys.join('|')})\\(\\s*'([a-z_]+)'",
+    );
+    const String fallback = 'fallback';
+    final List<String> silent = <String>[];
+    int seen = 0;
+    for (final FileSystemEntity entity in Directory(
+      'lib',
+    ).listSync(recursive: true)) {
+      if (entity is! File || !entity.path.endsWith('.dart')) continue;
+      for (final RegExpMatch match in raised.allMatches(
+        entity.readAsStringSync(),
+      )) {
+        seen += 1;
+        final String shown = UserMessageCatalog.refusal(
+          languages.first,
+          clients[match.group(1)]!,
+          match.group(2)!,
+          fallback: fallback,
+        );
+        if (shown == fallback) silent.add(match.group(0)!);
+      }
+    }
+    expect(seen, isNonZero);
+    expect(silent, isEmpty);
+  });
+
+  test('L4.8: a refusal resolves through its family, a Session code, the '
+      'client and the transport; both spellings are one code', () {
+    const String fallback = 'fallback';
+    for (final AppLocalizations l10n in languages) {
+      String say(UserMessageFamily family, String code) =>
+          UserMessageCatalog.refusal(l10n, family, code, fallback: fallback);
+      expect(
+        say(UserMessageFamily.library, 'visit_date_future'),
+        l10n.libraryErrorVisitFuture,
+      );
+      expect(
+        say(UserMessageFamily.library, 'session-expired'),
+        say(UserMessageFamily.library, 'session_expired'),
+      );
+      expect(
+        say(UserMessageFamily.library, 'session_expired'),
+        l10n.errorSessionExpired,
+      );
+      expect(
+        say(UserMessageFamily.route, 'journal_capacity_exceeded'),
+        l10n.localErrorStorageFull,
+      );
+      expect(
+        say(UserMessageFamily.quickPlan, 'unavailable'),
+        l10n.errorOffline,
+      );
+      // Positive control: an unknown code gives the screen's own text.
+      expect(say(UserMessageFamily.scenario, 'brand_new_code'), fallback);
+      expect(
+        UserMessageCatalog.forError(l10n, StateError('x'), fallback: fallback),
+        fallback,
+      );
+      // Route publication reaches the new family and the recorded-GPS texts.
+      expect(
+        UserMessageCatalog.publication(l10n, 'privacy_trim_required'),
+        l10n.routeTrimRequired,
+      );
+      expect(
+        UserMessageCatalog.publication(l10n, 'license_blocked'),
+        l10n.routeErrorLicense,
+      );
+    }
+  });
+
+  test('L4.8: "gone" and "not yours" read the same, so a message never '
+      'reveals that somebody else\'s object exists', () {
+    for (final AppLocalizations l10n in languages) {
+      final Set<String?> texts = <String?>{
+        UserMessageCatalog.message(
+          l10n,
+          UserMessageFamily.scenario,
+          'not_found',
+        ),
+        UserMessageCatalog.message(
+          l10n,
+          UserMessageFamily.scenario,
+          'not_found_or_forbidden',
+        ),
+        UserMessageCatalog.message(
+          l10n,
+          UserMessageFamily.scenario,
+          'recipient_unavailable',
+        ),
+        UserMessageCatalog.message(
+          l10n,
+          UserMessageFamily.quickPlan,
+          'access_denied',
+        ),
+        UserMessageCatalog.message(
+          l10n,
+          UserMessageFamily.quickPlan,
+          'target_unavailable',
+        ),
+        UserMessageCatalog.message(
+          l10n,
+          UserMessageFamily.identitySession,
+          'not_found_or_not_accessible',
+        ),
+      };
+      expect(texts, <String?>{l10n.errorNotFound});
+    }
   });
 
   test('every disposition is real text in lv, en and ru, never the code', () {

@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/errors/coded_refusal.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -9,9 +10,12 @@ import '../models/scenario_draft_mapper.dart';
 typedef ScenarioInvoke =
     Future<Map<String, Object?>> Function(String, Map<String, Object?>);
 
-class ScenarioSyncFailure implements Exception {
+class ScenarioSyncFailure implements CodedRefusal {
   const ScenarioSyncFailure(this.code);
+  @override
   final String code;
+  @override
+  UserMessageFamily get messageFamily => UserMessageFamily.scenario;
   @override
   String toString() => 'ScenarioSyncFailure($code)';
 }

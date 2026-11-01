@@ -171,12 +171,8 @@ class _RouteContentPublicationSectionState
     );
   }
 
-  /// RP-02: the recorded-GPS refusals get a plain explanation; every other
-  /// code goes through the shared catalog, never shown as is.
+  /// RP-02: every code, the recorded-GPS refusals too, goes through the
+  /// shared catalog, never shown as is.
   static String _messageLine(AppLocalizations l10n, String code) =>
-      switch (code) {
-        'privacy_trim_required' => l10n.routeTrimRequired,
-        'privacy_trim_empty' => l10n.routeTrimEmpty,
-        _ => PublicationTexts.message(l10n, code),
-      };
+      PublicationTexts.message(l10n, code);
 }

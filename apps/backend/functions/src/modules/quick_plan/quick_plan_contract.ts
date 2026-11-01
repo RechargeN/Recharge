@@ -8,12 +8,60 @@ export const quickPlanCollections = Object.freeze({
   receipts: 'quickPlanCommandReceipts',
 });
 export type Result = Readonly<Record<string, unknown>>;
-export const reject = (code: string, extra: Result = {}): Result => ({
-  schemaVersion: 1,
-  kind: 'rejected',
-  code,
-  ...extra,
-});
+/** L4.8: mirror `quick_plan/v1` and `scenario/v1` refusal schemas; a contract test compares them. */
+export const quickPlanRefusalCodes = [
+  'access_denied',
+  'access_revoked',
+  'app_check_required',
+  'deleted',
+  'feature_disabled',
+  'id_collision',
+  'idempotency_conflict',
+  'invite_limit',
+  'owner_changed',
+  'permission_denied',
+  'request_invalid',
+  'revision_conflict',
+  'target_unavailable',
+  'temporarily_unavailable',
+  'unauthenticated',
+] as const;
+export type QuickPlanRefusalCode = (typeof quickPlanRefusalCodes)[number];
+export const scenarioRefusalCodes = [
+  'access_revoked',
+  'actor_changed',
+  'app_check_required',
+  'conversion_invalid',
+  'distribution_invalid',
+  'feature_disabled',
+  'id_collision',
+  'idempotency_conflict',
+  'intent_not_found',
+  'membership_conflict',
+  'not_found',
+  'not_found_or_forbidden',
+  'permission_denied',
+  'publication_active',
+  'recipient_unavailable',
+  'request_invalid',
+  'revision_conflict',
+  'source_revision_conflict',
+  'source_unavailable',
+  'temporarily_unavailable',
+  'token_expired',
+  'unauthenticated',
+] as const;
+export type ScenarioRefusalCode = (typeof scenarioRefusalCodes)[number];
+const refusal =
+  <C extends string>() =>
+  (code: C, extra: Result = {}): Result => ({
+    schemaVersion: 1,
+    kind: 'rejected',
+    code,
+    ...extra,
+  });
+export const reject = refusal<QuickPlanRefusalCode>();
+export const rejectScenario = refusal<ScenarioRefusalCode>();
 const text = (v: unknown, n: number) => typeof v === 'string' && v.length <= n;
 const integer = (v: unknown, max: number) =>
   Number.isSafeInteger(v) && Number(v) >= 0 && Number(v) <= max;

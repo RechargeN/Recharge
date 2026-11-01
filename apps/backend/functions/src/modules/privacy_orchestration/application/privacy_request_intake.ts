@@ -8,18 +8,19 @@ import type { PrivacyTaskRepository } from '../domain/repositories.js';
 import { privacyErasureDomainIds } from '../domain/privacy_writer_registry.js';
 import type { PrivacyOrchestrationService } from './privacy_orchestration_service.js';
 
+/** L4.8: mirrors `privacy/v1/privacy_intake_refusal.schema.json`; a contract test compares them. */
+export const privacyIntakeRefusalCodes = [
+  'access_denied',
+  'idempotency_conflict',
+  'invalid_contract',
+  'request_not_found',
+  'revision_conflict',
+  'subject_mismatch',
+] as const;
+export type PrivacyIntakeRefusalCode = (typeof privacyIntakeRefusalCodes)[number];
 export type PrivacyIntakeResult =
   | { readonly ok: true; readonly view: PrivacyRequestView }
-  | {
-      readonly ok: false;
-      readonly code:
-        | 'access_denied'
-        | 'subject_mismatch'
-        | 'invalid_contract'
-        | 'idempotency_conflict'
-        | 'request_not_found'
-        | 'revision_conflict';
-    };
+  | { readonly ok: false; readonly code: PrivacyIntakeRefusalCode };
 
 /**
  * What the requester sees: status, revision and per-domain progress codes.

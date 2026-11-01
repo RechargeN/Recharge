@@ -1,3 +1,45 @@
+import type { IdentityFailureCode } from '../modules/identity_publisher/domain/failures.js';
+
+/**
+ * L4.8: mirrors `$defs/failureCode` of `identity_session_result.schema.json`.
+ * It holds every IdentityFailureCode, because any of them can be mapped to the
+ * answer, plus the transport refusals.
+ */
+export const identitySessionFailureCodes = [
+  'account_blocked',
+  'account_creation_disabled',
+  'account_restricted',
+  'app_check_required',
+  'capability_denied',
+  'contention',
+  'creator_verification_required',
+  'creator_verification_unavailable',
+  'feature_disabled',
+  'invalid_contract',
+  'invalid_transition',
+  'membership_inactive',
+  'not_found_or_not_accessible',
+  'policy_unavailable',
+  'provider_assertion_invalid',
+  'provider_subject_conflict',
+  'publisher_not_accessible',
+  'rate_limited',
+  'recent_auth_required',
+  'revision_conflict',
+  'session_expired',
+  'session_limit_reached',
+  'session_revoked',
+  'snapshot_stale',
+  'temporarily_unavailable',
+  'unauthenticated',
+  'unsupported_schema',
+] as const;
+export type IdentitySessionFailureCode = (typeof identitySessionFailureCodes)[number];
+type _EveryIdentityFailureIsListed = IdentityFailureCode extends IdentitySessionFailureCode
+  ? true
+  : never;
+export const everyIdentityFailureIsListed: _EveryIdentityFailureIsListed = true;
+
 export interface EstablishIdentitySessionCommandV1 {
   readonly schemaVersion: 1;
   readonly commandType: 'establishIdentitySession';

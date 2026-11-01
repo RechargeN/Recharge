@@ -11502,4 +11502,79 @@ class AppLocalizationsEn extends AppLocalizations {
     });
     return '$_temp0';
   }
+
+  @override
+  String get errorAccountChanged =>
+      'The signed-in account changed. Refresh and try again.';
+
+  @override
+  String get errorProcessingRestricted =>
+      'This action is unavailable while your data processing is restricted.';
+
+  @override
+  String get errorPublicationActive =>
+      'Withdraw the publication first, then try again.';
+
+  @override
+  String get libraryErrorVisitFuture => 'A visit date cannot be in the future.';
+
+  @override
+  String get libraryErrorPlaceTimezone =>
+      'This place has no valid time zone, so the visit cannot be recorded.';
+
+  @override
+  String get quickPlanErrorInviteLimit =>
+      'This plan has reached its invitation limit.';
+
+  @override
+  String get scenarioErrorLinkExpired => 'This link has expired.';
+
+  @override
+  String get routeErrorTooLarge => 'This route is too large to save.';
+
+  @override
+  String get routeErrorTooManyPoints => 'This route has too many points.';
+
+  @override
+  String get routeErrorGeometry => 'The route track is not valid.';
+
+  @override
+  String get routeErrorLicense =>
+      'The licence of this route source does not allow this.';
+
+  @override
+  String get routeErrorProvenance =>
+      'The origin of this track could not be confirmed.';
+
+  @override
+  String get routeErrorTrimInvalid =>
+      'The hidden start and end of the route are not valid.';
+
+  @override
+  String get routeErrorTitleRequired => 'Add a route title first.';
+
+  @override
+  String get routeErrorDistributionLimit =>
+      'The limit for sharing this route has been reached.';
+
+  @override
+  String get identityErrorAccountBlocked => 'This account is blocked.';
+
+  @override
+  String get identityErrorAccountRestricted => 'This account is restricted.';
+
+  @override
+  String get identityErrorSessionLimit =>
+      'Too many active sessions. Sign out on another device and try again.';
+
+  @override
+  String get identityErrorRecentAuth => 'Sign in again to continue.';
+
+  @override
+  String get localErrorStorageFull =>
+      'Too many unsent changes. Connect to the internet and try again.';
+
+  @override
+  String get localErrorImportNotReappliable =>
+      'This import cannot be repeated. Import the file again.';
 }

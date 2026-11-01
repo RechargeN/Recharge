@@ -1,5 +1,6 @@
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
+import '../../../../core/localization/user_message_catalog.dart';
 import '../discover_formats.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
@@ -926,10 +927,26 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       return;
     }
 
-    await favoritesController.addFavorite(
-      _toScenarioFavorite(route),
-      sourceScreen: 'discover_map',
-    );
+    try {
+      await favoritesController.addFavorite(
+        _toScenarioFavorite(route),
+        sourceScreen: 'discover_map',
+      );
+    } on CodedRefusal catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            UserMessageCatalog.forError(
+              context.l10n,
+              error,
+              fallback: context.l10n.errorGeneric,
+            ),
+          ),
+        ),
+      );
+      return;
+    }
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,

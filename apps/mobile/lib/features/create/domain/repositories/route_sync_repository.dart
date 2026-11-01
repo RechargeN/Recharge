@@ -1,9 +1,13 @@
+import '../../../../shared/primitives/errors/coded_refusal.dart';
 import '../entities/route_draft_data.dart';
 import '../entities/route_sync_data.dart';
 
-class RouteSyncFailure implements Exception {
+class RouteSyncFailure implements CodedRefusal {
   const RouteSyncFailure(this.code);
+  @override
   final String code;
+  @override
+  UserMessageFamily get messageFamily => UserMessageFamily.route;
   @override
   String toString() => 'RouteSyncFailure($code)';
 }

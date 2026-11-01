@@ -1,37 +1,11 @@
 import '../../generated/l10n/app_localizations.dart';
+import '../../shared/primitives/errors/coded_refusal.dart';
+
+export '../../shared/primitives/errors/coded_refusal.dart';
 
 /// A localized message for one stable code; `null` means the code is not an
 /// error and nothing is shown (for example `eligible` or `rendered`).
 typedef UserMessageOf = String Function(AppLocalizations l10n);
-
-/// L4: the contract families whose stable codes reach the UI. The server
-/// families mirror the enums of `packages/api_contracts/schema`; the client
-/// families are codes the mobile adapters and controllers produce themselves.
-enum UserMessageFamily {
-  /// `booking/v1/booking_error.schema.json#/properties/code`.
-  booking,
-
-  /// `content/v1/content_result.schema.json#/$defs/failureCode`.
-  content,
-
-  /// `media/v1/media_result.schema.json#/$defs/failureCode`.
-  media,
-
-  /// `identity/v1/publisher_eligibility.schema.json#/properties/reason`.
-  publisherEligibility,
-
-  /// `platform/v1/error.schema.json#/properties/code`.
-  platform,
-
-  /// `notifications/v1/notifications_result.schema.json` item `contentStatus`.
-  notificationContent,
-
-  /// Callable transport failures (no server answer, no Session).
-  clientTransport,
-
-  /// Refusals the client decides before any server call.
-  clientLocal,
-}
 
 /// L4: stable code → localized message. It is the only place a code becomes
 /// text. A code missing here is never shown as is: [message] returns the
@@ -198,6 +172,134 @@ abstract final class UserMessageCatalog {
         'template_unavailable': (l) => l.notificationTemplateUnavailable,
       };
 
+  /// L4.8: what the shared callable transport refuses in every module.
+  static final Map<String, UserMessageOf> _moduleTransport =
+      <String, UserMessageOf>{
+        'app_check_required': _updateApp,
+        'feature_disabled': _featureOff,
+        'permission_denied': _notAllowed,
+        'temporarily_unavailable': _unavailable,
+        'unauthenticated': _signIn,
+      };
+
+  static String _accountChanged(AppLocalizations l) => l.errorAccountChanged;
+  static String _publicationActive(AppLocalizations l) =>
+      l.errorPublicationActive;
+
+  // L4.8: "gone" and "not yours" share `errorNotFound` on purpose, so a
+  // message never reveals that somebody else's object exists (BCK-03 §14).
+  static final Map<String, UserMessageOf> _library = <String, UserMessageOf>{
+    ..._moduleTransport,
+    'cursor_invalid': _conflict,
+    'idempotency_conflict': _conflict,
+    'object_unavailable': _notFound,
+    'owner_changed': _accountChanged,
+    'place_timezone_invalid': (l) => l.libraryErrorPlaceTimezone,
+    'processing_restricted': (l) => l.errorProcessingRestricted,
+    'request_invalid': _invalid,
+    'revision_conflict': _conflict,
+    'snapshot_changed': _conflict,
+    'visit_date_future': (l) => l.libraryErrorVisitFuture,
+  };
+
+  static final Map<String, UserMessageOf> _quickPlan = <String, UserMessageOf>{
+    ..._moduleTransport,
+    'access_denied': _notFound,
+    'access_revoked': _notFound,
+    'deleted': _notFound,
+    'id_collision': _conflict,
+    'idempotency_conflict': _conflict,
+    'invite_limit': (l) => l.quickPlanErrorInviteLimit,
+    'owner_changed': _accountChanged,
+    'request_invalid': _invalid,
+    'revision_conflict': _conflict,
+    'target_unavailable': _notFound,
+  };
+
+  static final Map<String, UserMessageOf> _scenario = <String, UserMessageOf>{
+    ..._moduleTransport,
+    'access_revoked': _notFound,
+    'actor_changed': _accountChanged,
+    'conversion_invalid': _invalid,
+    'distribution_invalid': _invalid,
+    'id_collision': _conflict,
+    'idempotency_conflict': _conflict,
+    'intent_not_found': _notFound,
+    'membership_conflict': _conflict,
+    'not_found': _notFound,
+    'not_found_or_forbidden': _notFound,
+    'publication_active': _publicationActive,
+    'recipient_unavailable': _notFound,
+    'request_invalid': _invalid,
+    'revision_conflict': _conflict,
+    'source_revision_conflict': _conflict,
+    'source_unavailable': _notFound,
+    'token_expired': (l) => l.scenarioErrorLinkExpired,
+  };
+
+  static final Map<String, UserMessageOf> _route = <String, UserMessageOf>{
+    ..._moduleTransport,
+    'deleted': _notFound,
+    'distribution_limit': (l) => l.routeErrorDistributionLimit,
+    'id_collision': _conflict,
+    'idempotency_conflict': _conflict,
+    'invalid_geometry': (l) => l.routeErrorGeometry,
+    'license_blocked': (l) => l.routeErrorLicense,
+    'not_found': _notFound,
+    'owner_changed': _accountChanged,
+    'payload_too_large': (l) => l.routeErrorTooLarge,
+    'point_limit_exceeded': (l) => l.routeErrorTooManyPoints,
+    'privacy_trim_empty': (l) => l.routeTrimEmpty,
+    'privacy_trim_invalid': (l) => l.routeErrorTrimInvalid,
+    'privacy_trim_required': (l) => l.routeTrimRequired,
+    'provenance_unverified': (l) => l.routeErrorProvenance,
+    'publication_active': _publicationActive,
+    'request_invalid': _invalid,
+    'revision_conflict': _conflict,
+    'title_required': (l) => l.routeErrorTitleRequired,
+  };
+
+  static final Map<String, UserMessageOf> _privacyIntake =
+      <String, UserMessageOf>{
+        'access_denied': _notAllowed,
+        'idempotency_conflict': _conflict,
+        'invalid_contract': _invalid,
+        'request_not_found': _notFound,
+        'revision_conflict': _conflict,
+        'subject_mismatch': _notAllowed,
+      };
+
+  static final Map<String, UserMessageOf> _identitySession =
+      <String, UserMessageOf>{
+        'account_blocked': (l) => l.identityErrorAccountBlocked,
+        'account_creation_disabled': _featureOff,
+        'account_restricted': (l) => l.identityErrorAccountRestricted,
+        'app_check_required': _updateApp,
+        'capability_denied': _notAllowed,
+        'contention': _unavailable,
+        'creator_verification_required': _verification,
+        'creator_verification_unavailable': _unavailable,
+        'feature_disabled': _featureOff,
+        'invalid_contract': _invalid,
+        'invalid_transition': _conflict,
+        'membership_inactive': _membership,
+        'not_found_or_not_accessible': _notFound,
+        'policy_unavailable': _unavailable,
+        'provider_assertion_invalid': _signIn,
+        'provider_subject_conflict': _notAllowed,
+        'publisher_not_accessible': _publisher,
+        'rate_limited': _rateLimited,
+        'recent_auth_required': (l) => l.identityErrorRecentAuth,
+        'revision_conflict': _conflict,
+        'session_expired': _session,
+        'session_limit_reached': (l) => l.identityErrorSessionLimit,
+        'session_revoked': _session,
+        'snapshot_stale': _conflict,
+        'temporarily_unavailable': _unavailable,
+        'unauthenticated': _signIn,
+        'unsupported_schema': _updateApp,
+      };
+
   /// Firebase callable status names as the transport reports them.
   static final Map<String, UserMessageOf> _clientTransport =
       <String, UserMessageOf>{
@@ -253,6 +355,18 @@ abstract final class UserMessageCatalog {
         'original_missing': (l) => l.importErrorOriginalMissing,
         'local_changed_since_import': (l) => l.importErrorLocalChanged,
         'rollback_not_allowed': (l) => l.importErrorRollbackNotAllowed,
+        // L4.8: what the module sync clients raise themselves.
+        'actor_changed': _accountChanged,
+        'explicit_self_report_required': _invalid,
+        'import_not_reappliable': (l) => l.localErrorImportNotReappliable,
+        'intent_rejected': _conflict,
+        'invalid_response': _invalid,
+        'journal_capacity_exceeded': (l) => l.localErrorStorageFull,
+        'owner_changed': _accountChanged,
+        'page_limit_exceeded': _invalid,
+        'public_object_reference_required': _invalid,
+        'test_entry_disabled': _featureOff,
+        'transport_unavailable': _unavailable,
       };
 
   static Map<String, UserMessageOf?> _family(UserMessageFamily family) =>
@@ -263,6 +377,12 @@ abstract final class UserMessageCatalog {
         UserMessageFamily.publisherEligibility => _publisherEligibility,
         UserMessageFamily.platform => _platform,
         UserMessageFamily.notificationContent => _notificationContent,
+        UserMessageFamily.library => _library,
+        UserMessageFamily.quickPlan => _quickPlan,
+        UserMessageFamily.scenario => _scenario,
+        UserMessageFamily.route => _route,
+        UserMessageFamily.privacyIntake => _privacyIntake,
+        UserMessageFamily.identitySession => _identitySession,
         UserMessageFamily.clientTransport => _clientTransport,
         UserMessageFamily.clientLocal => _clientLocal,
       };
@@ -303,6 +423,47 @@ abstract final class UserMessageCatalog {
     return l10n.bookingErrorGeneric;
   }
 
+  /// L4.8: the session transport writes `session_expired` as `session-expired`
+  /// before module clients see it; both spell the same code.
+  static String? _withoutHyphens(Map<String, Object?> messages, String code) {
+    final String spoken = code.replaceAll('-', '_');
+    return spoken != code && messages.containsKey(spoken) ? spoken : null;
+  }
+
+  /// L4.8: the words for a refusal of [family]: its own code, then a Session
+  /// code, a client-raised code or a transport status. An unknown code gives
+  /// [fallback], the text the screen shows for any other failure.
+  static String refusal(
+    AppLocalizations l10n,
+    UserMessageFamily family,
+    String code, {
+    required String fallback,
+  }) {
+    for (final Map<String, UserMessageOf?> messages
+        in <Map<String, UserMessageOf?>>[
+          _family(family),
+          _identitySession,
+          _clientLocal,
+          _clientTransport,
+        ]) {
+      if (messages.containsKey(code)) {
+        return messages[code]?.call(l10n) ?? fallback;
+      }
+      final String? spoken = _withoutHyphens(messages, code);
+      if (spoken != null) return messages[spoken]?.call(l10n) ?? fallback;
+    }
+    return fallback;
+  }
+
+  /// [refusal] for any caught [error]; anything without a code gives [fallback].
+  static String forError(
+    AppLocalizations l10n,
+    Object? error, {
+    required String fallback,
+  }) => error is CodedRefusal
+      ? refusal(l10n, error.messageFamily, error.code, fallback: fallback)
+      : fallback;
+
   /// A Create publication/import message: the code may come from Content,
   /// Media, the transport or the client itself (in that order).
   static String publication(AppLocalizations l10n, String code) {
@@ -313,10 +474,14 @@ abstract final class UserMessageCatalog {
           _clientLocal,
           _clientTransport,
           _platform,
+          _route,
+          _identitySession,
         ]) {
       if (messages.containsKey(code)) {
         return messages[code]?.call(l10n) ?? _generic(l10n);
       }
+      final String? spoken = _withoutHyphens(messages, code);
+      if (spoken != null) return messages[spoken]?.call(l10n) ?? _generic(l10n);
     }
     if (code.startsWith('cleanup_')) return _importChanged(l10n);
     if (code.startsWith('unsupported_capability')) return _featureOff(l10n);

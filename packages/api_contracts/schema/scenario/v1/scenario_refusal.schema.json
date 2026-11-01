@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/scenario/v1/scenario_refusal.schema.json",
+  "title": "ScenarioRefusalV1",
+  "description": "L4.8: the refusal branch of the scenario callables only; success answers have no schema yet.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "code"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "kind": {
+      "enum": [
+        "rejected",
+        "retryableFailure"
+      ]
+    },
+    "code": {
+      "$ref": "#/$defs/refusalCode"
+    },
+    "retryAfterSeconds": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "serverRevision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "issues": {
+      "type": "array",
+      "maxItems": 64
+    }
+  },
+  "$defs": {
+    "refusalCode": {
+      "enum": [
+        "access_revoked",
+        "actor_changed",
+        "app_check_required",
+        "conversion_invalid",
+        "distribution_invalid",
+        "feature_disabled",
+        "id_collision",
+        "idempotency_conflict",
+        "intent_not_found",
+        "membership_conflict",
+        "not_found",
+        "not_found_or_forbidden",
+        "permission_denied",
+        "publication_active",
+        "recipient_unavailable",
+        "request_invalid",
+        "revision_conflict",
+        "source_revision_conflict",
+        "source_unavailable",
+        "temporarily_unavailable",
+        "token_expired",
+        "unauthenticated"
+      ]
+    }
+  }
+}

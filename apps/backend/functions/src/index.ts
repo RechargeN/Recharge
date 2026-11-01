@@ -47,7 +47,10 @@ import {
   bookingAccessCapability,
   type BookingAccessDecision,
 } from './shared/booking_access_authority.js';
-import { inspectIdentitySessionCommand } from './contracts/identity_session_v1.js';
+import {
+  inspectIdentitySessionCommand,
+  type IdentitySessionFailureCode,
+} from './contracts/identity_session_v1.js';
 import {
   establishEmulatorIdentitySession,
   recoverEmulatorIdentitySessions,
@@ -207,7 +210,7 @@ export const establishIdentitySessionV1 = onCall<unknown>(callableOptions, async
     return identitySessionFailure(
       requestId,
       'establishIdentitySession',
-      classified.code,
+      classified.code === 'contention' ? 'contention' : 'temporarily_unavailable',
       classified.kind === 'retryableFailure',
     );
   }
@@ -771,7 +774,7 @@ function bookingAccessFailure(
 function identitySessionFailure(
   requestId: string,
   commandType: 'establishIdentitySession' | 'refreshIdentitySession' | 'recoverIdentitySessions',
-  code: string,
+  code: IdentitySessionFailureCode,
   retryable: boolean,
   retryAfterSeconds?: number,
 ) {
@@ -830,7 +833,9 @@ function mapIdentitySessionError(
   return identitySessionFailure(
     requestId,
     commandType,
-    classified.kind === 'succeeded' ? 'temporarily_unavailable' : classified.code,
+    classified.kind !== 'succeeded' && classified.code === 'contention'
+      ? 'contention'
+      : 'temporarily_unavailable',
     classified.kind === 'retryableFailure',
   );
 }

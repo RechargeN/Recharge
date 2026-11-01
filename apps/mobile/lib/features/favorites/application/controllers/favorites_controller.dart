@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../shared/primitives/errors/coded_refusal.dart';
 import '../../../../core/product_analytics/product_analytics_contract.dart';
 import '../../../../core/product_analytics/product_analytics_recorder.dart';
 import '../../../../core/telemetry/analytics_service.dart';
@@ -63,12 +64,13 @@ class FavoritesController extends ChangeNotifier {
         'favorites_loaded',
         params: <String, Object?>{'item_count': favorites.length},
       );
-    } on Exception {
+    } on Exception catch (error) {
       _setState(
         _state.copyWith(
           status: FavoritesStatus.error,
           items: const [],
           message: 'favorites_load_failed',
+          failure: error is CodedRefusal ? error : null,
         ),
       );
       _analyticsService.track(

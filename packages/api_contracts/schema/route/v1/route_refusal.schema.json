@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/route/v1/route_refusal.schema.json",
+  "title": "RouteRefusalV1",
+  "description": "L4.8: the refusal branch of the route callables only; success answers have no schema yet.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "code"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "kind": {
+      "enum": [
+        "rejected",
+        "retryableFailure"
+      ]
+    },
+    "code": {
+      "$ref": "#/$defs/refusalCode"
+    },
+    "retryAfterSeconds": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "serverRevision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  },
+  "$defs": {
+    "refusalCode": {
+      "enum": [
+        "app_check_required",
+        "deleted",
+        "distribution_limit",
+        "feature_disabled",
+        "id_collision",
+        "idempotency_conflict",
+        "invalid_geometry",
+        "license_blocked",
+        "not_found",
+        "owner_changed",
+        "payload_too_large",
+        "permission_denied",
+        "point_limit_exceeded",
+        "privacy_trim_empty",
+        "privacy_trim_invalid",
+        "privacy_trim_required",
+        "provenance_unverified",
+        "publication_active",
+        "request_invalid",
+        "revision_conflict",
+        "temporarily_unavailable",
+        "title_required",
+        "unauthenticated"
+      ]
+    }
+  }
+}

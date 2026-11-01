@@ -1,13 +1,17 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
+import '../../../shared/primitives/errors/coded_refusal.dart';
 
 typedef LibraryInvoke =
     Future<Map<String, Object?>> Function(String, Map<String, Object?>);
 
-final class LibraryFailure implements Exception {
+final class LibraryFailure implements CodedRefusal {
   const LibraryFailure(this.code);
+  @override
   final String code;
+  @override
+  UserMessageFamily get messageFamily => UserMessageFamily.library;
   @override
   String toString() => 'LibraryFailure($code)';
 }

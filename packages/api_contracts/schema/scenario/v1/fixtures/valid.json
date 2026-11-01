@@ -1,0 +1,16 @@
+[
+  {
+    "schemaVersion": 1,
+    "kind": "rejected",
+    "code": "request_invalid"
+  },
+  {
+    "kind": "rejected",
+    "code": "unauthenticated"
+  },
+  {
+    "kind": "retryableFailure",
+    "code": "temporarily_unavailable",
+    "retryAfterSeconds": 60
+  }
+]

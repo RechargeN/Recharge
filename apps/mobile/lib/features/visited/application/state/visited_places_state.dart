@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/errors/coded_refusal.dart';
 import '../../domain/entities/visited_place_entity.dart';
 
 enum VisitedPlacesStatus { initial, loading, ready, error }
@@ -10,6 +11,7 @@ class VisitedPlacesState {
     required this.selectedMonth,
     required this.selectedDay,
     required this.message,
+    this.failure,
   });
 
   factory VisitedPlacesState.initial() {
@@ -30,6 +32,9 @@ class VisitedPlacesState {
   final DateTime? selectedDay;
   final String? message;
 
+  /// L4.8: why the last load failed, when it carries a code.
+  final CodedRefusal? failure;
+
   bool get hasTimeFilter => selectedMonth != null || selectedDay != null;
 
   VisitedPlacesState copyWith({
@@ -42,6 +47,7 @@ class VisitedPlacesState {
     bool clearSelectedDay = false,
     String? message,
     bool clearMessage = false,
+    CodedRefusal? failure,
   }) {
     return VisitedPlacesState(
       status: status ?? this.status,
@@ -52,6 +58,7 @@ class VisitedPlacesState {
           : (selectedMonth ?? this.selectedMonth),
       selectedDay: clearSelectedDay ? null : (selectedDay ?? this.selectedDay),
       message: clearMessage ? null : (message ?? this.message),
+      failure: failure,
     );
   }
 }

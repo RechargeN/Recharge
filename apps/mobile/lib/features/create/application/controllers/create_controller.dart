@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/errors/coded_refusal.dart';
 import '../../domain/usecases/build_session_content_body.dart';
 import 'dart:async';
 
@@ -4109,7 +4110,9 @@ class CreateController extends ChangeNotifier {
         _state.copyWith(
           status: CreateStatus.ready,
           saveStatus: CreateSaveStatus.failed,
-          message: CreateNotice.draftSaveFailed,
+          message: error is CodedRefusal
+              ? CreateNotice.forRefusal(error)
+              : CreateNotice.draftSaveFailed,
         ),
       );
     }

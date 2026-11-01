@@ -2,6 +2,39 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://recharge.app/schemas/identity/v1/identity_session_result.schema.json",
   "title": "EstablishIdentitySessionResultV1",
+  "$defs": {
+    "failureCode": {
+      "enum": [
+        "account_blocked",
+        "account_creation_disabled",
+        "account_restricted",
+        "app_check_required",
+        "capability_denied",
+        "contention",
+        "creator_verification_required",
+        "creator_verification_unavailable",
+        "feature_disabled",
+        "invalid_contract",
+        "invalid_transition",
+        "membership_inactive",
+        "not_found_or_not_accessible",
+        "policy_unavailable",
+        "provider_assertion_invalid",
+        "provider_subject_conflict",
+        "publisher_not_accessible",
+        "rate_limited",
+        "recent_auth_required",
+        "revision_conflict",
+        "session_expired",
+        "session_limit_reached",
+        "session_revoked",
+        "snapshot_stale",
+        "temporarily_unavailable",
+        "unauthenticated",
+        "unsupported_schema"
+      ]
+    }
+  },
   "oneOf": [
     {
       "type": "object",
@@ -85,7 +118,7 @@
           "required": ["schemaVersion", "code", "retryable", "correlationId"],
           "properties": {
             "schemaVersion": { "const": 1 },
-            "code": { "type": "string", "minLength": 1 },
+            "code": { "$ref": "#/$defs/failureCode" },
             "retryable": { "type": "boolean" },
             "correlationId": { "type": "string" },
             "details": {

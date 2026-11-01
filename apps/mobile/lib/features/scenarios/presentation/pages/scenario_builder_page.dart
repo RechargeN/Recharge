@@ -1,5 +1,6 @@
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
+import '../../../../core/localization/user_message_catalog.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -307,9 +308,15 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
         padding: const EdgeInsets.all(16),
         children: [
           Text(context.l10n.quickPlanReadOnlyOnline),
-          // The sync error is a technical object; the reader gets the fact.
+          // L4.8: a coded refusal is said in words; anything else gets the fact.
           if (c.syncError != null)
-            Text(context.l10n.quickPlanAccessUnavailable),
+            Text(
+              UserMessageCatalog.forError(
+                context.l10n,
+                c.syncError,
+                fallback: context.l10n.quickPlanAccessUnavailable,
+              ),
+            ),
           if (p == null)
             Text(context.l10n.quickPlanContentHidden)
           else ...[
@@ -368,7 +375,13 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
                 Text(context.l10n.quickPlanInvitations),
                 Text(context.l10n.quickPlanUseKnownUserId),
                 if (c.syncError != null)
-                  Text(context.l10n.quickPlanNotConfirmed),
+                  Text(
+                    UserMessageCatalog.forError(
+                      context.l10n,
+                      c.syncError,
+                      fallback: context.l10n.quickPlanNotConfirmed,
+                    ),
+                  ),
                 TextButton(
                   onPressed: c.loadInvitations,
                   child: Text(context.l10n.quickPlanRetryPending),
@@ -547,7 +560,11 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
           content: Text(
             controller.syncError == null
                 ? context.l10n.quickPlanSaved
-                : context.l10n.quickPlanNotSynced,
+                : UserMessageCatalog.forError(
+                    context.l10n,
+                    controller.syncError,
+                    fallback: context.l10n.quickPlanNotSynced,
+                  ),
           ),
         ),
       );

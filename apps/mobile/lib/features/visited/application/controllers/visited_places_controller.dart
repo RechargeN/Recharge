@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../shared/primitives/errors/coded_refusal.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/visited_place_entity.dart';
 import '../../domain/usecases/get_visited_places_usecase.dart';
@@ -65,13 +66,14 @@ class VisitedPlacesController extends ChangeNotifier {
         'visited_places_loaded',
         params: <String, Object?>{'item_count': items.length},
       );
-    } on Exception {
+    } on Exception catch (error) {
       _setState(
         _state.copyWith(
           status: VisitedPlacesStatus.error,
           items: const [],
           visibleItems: const [],
           message: 'visits_load_failed',
+          failure: error is CodedRefusal ? error : null,
         ),
       );
       _analyticsService.track(

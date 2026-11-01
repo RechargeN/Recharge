@@ -11721,4 +11721,81 @@ class AppLocalizationsRu extends AppLocalizations {
     });
     return '$_temp0';
   }
+
+  @override
+  String get errorAccountChanged =>
+      'Аккаунт изменился. Обновите и попробуйте снова.';
+
+  @override
+  String get errorProcessingRestricted =>
+      'Это действие недоступно, пока обработка ваших данных ограничена.';
+
+  @override
+  String get errorPublicationActive =>
+      'Сначала снимите публикацию, затем попробуйте снова.';
+
+  @override
+  String get libraryErrorVisitFuture =>
+      'Дата посещения не может быть в будущем.';
+
+  @override
+  String get libraryErrorPlaceTimezone =>
+      'У этого места нет корректного часового пояса, поэтому посещение нельзя записать.';
+
+  @override
+  String get quickPlanErrorInviteLimit =>
+      'Для этого плана достигнут лимит приглашений.';
+
+  @override
+  String get scenarioErrorLinkExpired => 'Срок действия этой ссылки истёк.';
+
+  @override
+  String get routeErrorTooLarge =>
+      'Этот маршрут слишком большой для сохранения.';
+
+  @override
+  String get routeErrorTooManyPoints => 'В этом маршруте слишком много точек.';
+
+  @override
+  String get routeErrorGeometry => 'Трек маршрута некорректен.';
+
+  @override
+  String get routeErrorLicense =>
+      'Лицензия источника этого маршрута этого не разрешает.';
+
+  @override
+  String get routeErrorProvenance =>
+      'Не удалось подтвердить происхождение этого трека.';
+
+  @override
+  String get routeErrorTrimInvalid =>
+      'Скрытые начало и конец маршрута заданы некорректно.';
+
+  @override
+  String get routeErrorTitleRequired => 'Сначала добавьте название маршрута.';
+
+  @override
+  String get routeErrorDistributionLimit =>
+      'Достигнут лимит на публикацию этого маршрута.';
+
+  @override
+  String get identityErrorAccountBlocked => 'Этот аккаунт заблокирован.';
+
+  @override
+  String get identityErrorAccountRestricted => 'Этот аккаунт ограничен.';
+
+  @override
+  String get identityErrorSessionLimit =>
+      'Слишком много активных сессий. Выйдите на другом устройстве и попробуйте снова.';
+
+  @override
+  String get identityErrorRecentAuth => 'Чтобы продолжить, войдите снова.';
+
+  @override
+  String get localErrorStorageFull =>
+      'Слишком много неотправленных изменений. Подключитесь к интернету и попробуйте снова.';
+
+  @override
+  String get localErrorImportNotReappliable =>
+      'Этот импорт нельзя повторить. Импортируйте файл заново.';
 }

@@ -1,5 +1,6 @@
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
+import '../../../../core/localization/user_message_catalog.dart';
 import '../../../../shared/models/catalog_object_ref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,8 +82,12 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
           child: CircularProgressIndicator(),
         ),
         FavoritesStatus.error => _StateMessage(
-          // L4.6: the controller keeps a code; the page says it in words.
-          message: context.l10n.favoritesLoadFailed,
+          // L4.8: the controller keeps the code; the catalog says it in words.
+          message: UserMessageCatalog.forError(
+            context.l10n,
+            state.failure,
+            fallback: context.l10n.favoritesLoadFailed,
+          ),
           actionLabel: context.l10n.favoritesRetry,
           onAction: controller.loadFavorites,
         ),
@@ -162,11 +167,28 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                     );
                   },
                   onMap: () => context.go(_mapRouteForFavorite(item)),
-                  onRemove: () {
-                    controller.removeFavorite(
-                      item.id,
-                      sourceScreen: 'favorites',
-                    );
+                  onRemove: () async {
+                    final ScaffoldMessengerState messenger =
+                        ScaffoldMessenger.of(context);
+                    final AppLocalizations l10n = context.l10n;
+                    try {
+                      await controller.removeFavorite(
+                        item.id,
+                        sourceScreen: 'favorites',
+                      );
+                    } on CodedRefusal catch (error) {
+                      messenger.showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            UserMessageCatalog.forError(
+                              l10n,
+                              error,
+                              fallback: l10n.errorGeneric,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
                   },
                 ),
               ),

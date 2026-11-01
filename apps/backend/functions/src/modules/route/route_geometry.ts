@@ -18,8 +18,10 @@ export interface Point {
   readonly lonE7: number;
   readonly eleDm: number | null;
 }
+export type GeometryFailureCode =
+  'invalid_geometry' | 'point_limit_exceeded' | 'privacy_trim_empty';
 export class GeometryError extends Error {
-  constructor(readonly code: string) {
+  constructor(readonly code: GeometryFailureCode) {
     super(code);
   }
 }

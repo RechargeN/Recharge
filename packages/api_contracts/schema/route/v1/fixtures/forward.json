@@ -1,0 +1,12 @@
+[
+  {
+    "schemaVersion": 1,
+    "kind": "rejected",
+    "code": "future_refusal_code"
+  },
+  {
+    "schemaVersion": 2,
+    "kind": "rejected",
+    "code": "request_invalid"
+  }
+]

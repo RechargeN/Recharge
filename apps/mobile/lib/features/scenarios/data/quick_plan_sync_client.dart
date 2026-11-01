@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
+import '../../../shared/primitives/errors/coded_refusal.dart';
 import '../domain/entities/scenario_draft_entity.dart';
 import '../domain/repositories/quick_plan_repository.dart';
 import 'quick_plan_codec.dart';
@@ -8,9 +9,12 @@ import 'quick_plan_codec.dart';
 typedef QuickPlanInvoke =
     Future<Map<String, Object?>> Function(String, Map<String, Object?>);
 
-class QuickPlanFailure implements Exception {
+class QuickPlanFailure implements CodedRefusal {
   const QuickPlanFailure(this.code);
+  @override
   final String code;
+  @override
+  UserMessageFamily get messageFamily => UserMessageFamily.quickPlan;
   @override
   String toString() => 'QuickPlanFailure($code)';
 }

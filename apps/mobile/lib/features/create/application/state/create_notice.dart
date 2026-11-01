@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/errors/coded_refusal.dart';
 import '../../domain/usecases/generate_scenario_proposal_usecase.dart';
 
 /// L4: stable codes the Create controller keeps in `CreateState.message`
@@ -103,6 +104,11 @@ abstract final class CreateNotice {
   static const int placeGalleryMaxPhotos = 12;
 
   /// The code for a local Scenario generation refusal.
+  /// L4.8: a server refusal in `CreateState.message`, read by `CreateTexts`.
+  static const String refusalPrefix = 'refusal:';
+  static String forRefusal(CodedRefusal refusal) =>
+      '$refusalPrefix${refusal.messageFamily.name}:${refusal.code}';
+
   static String forScenarioGeneration(ScenarioGenerationFailureCode code) =>
       switch (code) {
         ScenarioGenerationFailureCode.emptyPrompt =>
