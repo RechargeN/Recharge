@@ -4,6 +4,7 @@ import '../../../app/di/service_locator.dart';
 import '../../../core/telemetry/analytics_service.dart';
 import '../domain/entities/discover_item_entity.dart';
 import '../domain/entities/discover_query.dart';
+import '../domain/repositories/content_translation_port.dart';
 import '../domain/repositories/discover_preferences_repository.dart';
 import '../domain/usecases/get_discover_details_usecase.dart';
 import '../domain/usecases/get_discover_feed_usecase.dart';
@@ -29,6 +30,14 @@ final discoverDetailsProvider =
       final GetDiscoverDetailsUseCase useCase = sl<GetDiscoverDetailsUseCase>();
       return useCase(itemId);
     });
+
+/// ADR 0022: `null` where the app did not compose translation; Details then
+/// shows no button.
+final contentTranslationPortProvider = Provider<ContentTranslationPort?>((ref) {
+  return sl.isRegistered<ContentTranslationPort>()
+      ? sl<ContentTranslationPort>()
+      : null;
+});
 
 final submitRouteSafetyReportProvider =
     Provider<SubmitRouteSafetyReportUseCase>((ref) {

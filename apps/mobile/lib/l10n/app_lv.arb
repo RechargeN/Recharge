@@ -3273,5 +3273,22 @@
   "discoverHomeShortMusic": "Mūzika",
   "discoverHomeShortArt": "Māksla",
   "discoverHomeShortFood": "Ēdiens",
-  "discoverHomeShortWellness": "Labsajūta"
+  "discoverHomeShortWellness": "Labsajūta",
+  "contentTranslationAction": "Tulkot",
+  "contentTranslationShowTranslation": "Rādīt tulkojumu",
+  "contentTranslationLoading": "Tulko…",
+  "contentTranslationLabel": "Tulkots automātiski",
+  "contentTranslationShowOriginal": "Rādīt oriģinālu",
+  "contentTranslationKeptOriginal": "Noteikumi, drošības norādes un nosaukumi paliek oriģinālvalodā.",
+  "contentTranslationErrorSignIn": "Pierakstieties, lai tulkotu.",
+  "contentTranslationErrorDisabled": "Tulkojums pašlaik nav pieejams.",
+  "contentTranslationErrorSameLanguage": "Šis teksts jau ir jūsu valodā.",
+  "contentTranslationErrorUnsupported": "Tulkojums šajā valodā nav pieejams.",
+  "contentTranslationErrorSource": "Šo tekstu nevar iztulkot.",
+  "contentTranslationErrorRevision": "Publikācija ir atjaunināta. Atsvaidziniet lapu.",
+  "contentTranslationErrorQuota": "Šodienas tulkojumu limits ir sasniegts. Mēģiniet rīt.",
+  "contentTranslationErrorBudget": "Tulkojums īslaicīgi nav pieejams.",
+  "contentTranslationErrorProvider": "Neizdevās iztulkot. Redzams oriģināls.",
+  "createContentLanguageLabel": "Šī teksta valoda",
+  "createContentLanguageHelp": "Lasītāji varēs tulkot tekstu tikai tad, ja izvēlēsieties tā valodu."
 }

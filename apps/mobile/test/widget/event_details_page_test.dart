@@ -18,6 +18,7 @@ import 'package:recharge/features/auth/domain/usecases/restore_session_usecase.d
 import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
+import 'package:recharge/features/discover/domain/repositories/content_translation_port.dart';
 import 'package:recharge/features/discover/domain/entities/event_occurrence.dart';
 import 'package:recharge/features/discover/domain/entities/published_event_discovery_entity.dart';
 import 'package:recharge/features/discover/domain/entities/publisher_verification_display_state.dart';
@@ -46,6 +47,39 @@ void main() {
   tearDown(() async {
     await sl.reset();
   });
+
+  fullPageTestWidgets(
+    'ADR 0022: a server revision offers translation and the original stays',
+    (WidgetTester tester) async {
+      sl.registerSingleton<ContentTranslationPort>(_OfferingTranslationPort());
+      await tester.pumpWidget(await _app(revisionRef: 'rev-1'));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('content-translation-action')),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const Key('content-translation-action')));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('content-translation-label')),
+        findsOneWidget,
+      );
+      expect(find.text('Перевод'), findsOneWidget);
+      expect(find.text('Riga sunset meetup'), findsWidgets);
+    },
+  );
+
+  fullPageTestWidgets(
+    'ADR 0022: no server revision means no translation request',
+    (WidgetTester tester) async {
+      final _OfferingTranslationPort port = _OfferingTranslationPort();
+      sl.registerSingleton<ContentTranslationPort>(port);
+      await tester.pumpWidget(await _app());
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('content-translation-action')), findsNothing);
+      expect(port.offers, 0);
+    },
+  );
 
   fullPageTestWidgets(
     'Save and canonical Share work through the real EventDetailsPage',
@@ -134,7 +168,7 @@ void main() {
 
 final DateTime _startAtUtc = DateTime.utc(2026, 9, 5, 15);
 
-Future<Widget> _app() async {
+Future<Widget> _app({String revisionRef = ''}) async {
   final AuthController authController = AuthController(
     signInUseCase: SignInUseCase(_FakeAuthRepository()),
     restoreSessionUseCase: RestoreSessionUseCase(_FakeAuthRepository()),
@@ -161,7 +195,7 @@ Future<Widget> _app() async {
       GoRoute(
         path: '/event',
         builder: (BuildContext context, GoRouterState state) =>
-            EventDetailsPage(projection: _event()),
+            EventDetailsPage(projection: _event(revisionRef: revisionRef)),
       ),
       GoRoute(
         path: RouteNames.discoverMap,
@@ -193,41 +227,43 @@ Future<Widget> _app() async {
 
 late _FakeFavoritesRepository _testFavoritesRepository;
 
-PublishedEventDiscoveryEntity _event() => PublishedEventDiscoveryEntity(
-  eventId: 'evt-1',
-  publisherId: 'page-1',
-  publisherType: 'page',
-  publisherName: 'Recharge Events',
-  publisherHandle: '@recharge-events',
-  publisherVerification: PublisherVerificationDisplayState.verifiedPage,
-  title: 'Riga sunset meetup',
-  subtitle: 'A relaxed evening together',
-  fullDescription: 'Meet, move, and recharge together.',
-  category: 'community',
-  city: 'Riga',
-  venueName: 'Recharge Garden',
-  addressLine: 'Garden Street 1',
-  latitude: 56.95,
-  longitude: 24.1,
-  distanceKm: 1.2,
-  priceAmount: 0,
-  isFree: true,
-  currencyCode: 'EUR',
-  participantsCount: 12,
-  durationMinutes: 90,
-  scheduleMode: EventScheduleMode.oneTime,
-  occurrences: <EventOccurrence>[
-    EventOccurrence(
-      id: 'occ-1',
-      startAtUtc: _startAtUtc,
-      endAtUtc: DateTime.utc(2026, 9, 5, 16, 30),
-      status: EventOccurrenceStatus.scheduled,
-    ),
-  ],
-  displayOccurrenceId: 'occ-1',
-  timezoneId: 'Europe/Riga',
-  publishedAtUtc: DateTime.utc(2026, 8, 30),
-);
+PublishedEventDiscoveryEntity _event({String revisionRef = ''}) =>
+    PublishedEventDiscoveryEntity(
+      eventId: 'evt-1',
+      revisionRef: revisionRef,
+      publisherId: 'page-1',
+      publisherType: 'page',
+      publisherName: 'Recharge Events',
+      publisherHandle: '@recharge-events',
+      publisherVerification: PublisherVerificationDisplayState.verifiedPage,
+      title: 'Riga sunset meetup',
+      subtitle: 'A relaxed evening together',
+      fullDescription: 'Meet, move, and recharge together.',
+      category: 'community',
+      city: 'Riga',
+      venueName: 'Recharge Garden',
+      addressLine: 'Garden Street 1',
+      latitude: 56.95,
+      longitude: 24.1,
+      distanceKm: 1.2,
+      priceAmount: 0,
+      isFree: true,
+      currencyCode: 'EUR',
+      participantsCount: 12,
+      durationMinutes: 90,
+      scheduleMode: EventScheduleMode.oneTime,
+      occurrences: <EventOccurrence>[
+        EventOccurrence(
+          id: 'occ-1',
+          startAtUtc: _startAtUtc,
+          endAtUtc: DateTime.utc(2026, 9, 5, 16, 30),
+          status: EventOccurrenceStatus.scheduled,
+        ),
+      ],
+      displayOccurrenceId: 'occ-1',
+      timezoneId: 'Europe/Riga',
+      publishedAtUtc: DateTime.utc(2026, 8, 30),
+    );
 
 class _SpyAnalyticsService implements AnalyticsService {
   final List<String> eventNames = <String>[];
@@ -286,4 +322,29 @@ class _FakeFavoritesRepository implements FavoritesRepository {
   Future<void> removeFavorite(String itemId) async {
     items.removeWhere((FavoriteItemEntity item) => item.id == itemId);
   }
+}
+
+final class _OfferingTranslationPort implements ContentTranslationPort {
+  int offers = 0;
+
+  @override
+  Future<bool> offer({
+    required String contentId,
+    required String publishedRevisionId,
+    required String targetLocale,
+  }) async {
+    offers += 1;
+    return true;
+  }
+
+  @override
+  Future<ContentTranslation> translate({
+    required String contentId,
+    required String publishedRevisionId,
+    required String targetLocale,
+  }) async => ContentTranslation(
+    sourceLocale: 'lv',
+    targetLocale: targetLocale,
+    title: 'Перевод',
+  );
 }

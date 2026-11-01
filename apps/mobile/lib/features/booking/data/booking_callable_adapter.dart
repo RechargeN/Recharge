@@ -581,6 +581,9 @@ const Set<String> _bookingCallableAllowlist = <String>{
   'notificationsCommandV1',
   'libraryCommandV1',
   'libraryQueryV1',
+  // ADR 0022 stage 1: default-off Emulator-only content translation.
+  'offerContentTranslationV1',
+  'translateContentV1',
   'quickPlanCommandV1',
   'quickPlanQueryV1',
   'scenarioCommandV1',

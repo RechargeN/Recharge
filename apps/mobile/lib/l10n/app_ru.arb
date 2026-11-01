@@ -3273,5 +3273,22 @@
   "discoverHomeShortMusic": "Музыка",
   "discoverHomeShortArt": "Искусство",
   "discoverHomeShortFood": "Еда",
-  "discoverHomeShortWellness": "Отдых"
+  "discoverHomeShortWellness": "Отдых",
+  "contentTranslationAction": "Перевести",
+  "contentTranslationShowTranslation": "Показать перевод",
+  "contentTranslationLoading": "Переводим…",
+  "contentTranslationLabel": "Переведено автоматически",
+  "contentTranslationShowOriginal": "Показать оригинал",
+  "contentTranslationKeptOriginal": "Условия, правила безопасности и названия остаются на языке оригинала.",
+  "contentTranslationErrorSignIn": "Войдите, чтобы перевести.",
+  "contentTranslationErrorDisabled": "Перевод сейчас недоступен.",
+  "contentTranslationErrorSameLanguage": "Этот текст уже на вашем языке.",
+  "contentTranslationErrorUnsupported": "Перевод на этот язык недоступен.",
+  "contentTranslationErrorSource": "Этот текст нельзя перевести.",
+  "contentTranslationErrorRevision": "Публикация обновилась. Обновите страницу.",
+  "contentTranslationErrorQuota": "Лимит переводов на сегодня исчерпан. Попробуйте завтра.",
+  "contentTranslationErrorBudget": "Перевод временно недоступен.",
+  "contentTranslationErrorProvider": "Не удалось перевести. Показан оригинал.",
+  "createContentLanguageLabel": "Язык этого текста",
+  "createContentLanguageHelp": "Читатели смогут перевести текст, только если вы выберете его язык."
 }

@@ -21,6 +21,7 @@ import '../../../favorites/application/favorites_providers.dart';
 import '../../../favorites/domain/entities/favorite_item_entity.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_item_entity.dart';
+import '../widgets/content_translation_panel.dart';
 import '../renderers/route_details_renderer.dart';
 import '../renderers/object_offer_details_renderer.dart';
 import '../shell/compatibility_object_renderer.dart';
@@ -205,6 +206,15 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
             ? DetailsRendererFamily.route
             : DetailsRendererFamily.objectOffer;
         return DetailsScreenAvailable(
+          // ADR 0022: Find People is never offered for translation.
+          supplement: item.catalogObjectType == CatalogObjectType.findPeople
+              ? null
+              : contentTranslationSupplement(
+                  context,
+                  ref,
+                  contentId: item.id,
+                  publishedRevisionId: item.revisionRef,
+                ),
           renderer: registry.build(family),
           immersiveHero:
               item.catalogObjectType == CatalogObjectType.place ||

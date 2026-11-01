@@ -39,6 +39,9 @@ enum UserMessageFamily {
   /// `identity/v1/identity_session_result.schema.json#/$defs/failureCode`.
   identitySession,
 
+  /// `content_translation/v1/content_translation_result.schema.json#/$defs/failureCode`.
+  contentTranslation,
+
   /// Callable transport failures (no server answer, no Session).
   clientTransport,
 

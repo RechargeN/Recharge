@@ -19755,6 +19755,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wellness'**
   String get discoverHomeShortWellness;
+
+  /// Details: button that asks for a machine translation of the publication text.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate'**
+  String get contentTranslationAction;
+
+  /// Details: shows a translation already loaded on this screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Show translation'**
+  String get contentTranslationShowTranslation;
+
+  /// Details: machine translation in progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Translating…'**
+  String get contentTranslationLoading;
+
+  /// Details: mandatory label above a machine translation.
+  ///
+  /// In en, this message translates to:
+  /// **'Translated automatically'**
+  String get contentTranslationLabel;
+
+  /// Details: hides the machine translation and returns to the original.
+  ///
+  /// In en, this message translates to:
+  /// **'Show original'**
+  String get contentTranslationShowOriginal;
+
+  /// Details: explains what machine translation does not cover.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms, safety notes and names stay in the original language.'**
+  String get contentTranslationKeptOriginal;
+
+  /// Details translation refused: the reader has no Session.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to translate.'**
+  String get contentTranslationErrorSignIn;
+
+  /// Details translation refused: the capability is switched off.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation is not available right now.'**
+  String get contentTranslationErrorDisabled;
+
+  /// Details translation refused: source and target language match.
+  ///
+  /// In en, this message translates to:
+  /// **'This text is already in your language.'**
+  String get contentTranslationErrorSameLanguage;
+
+  /// Details translation refused: unsupported target language.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation into this language is not available.'**
+  String get contentTranslationErrorUnsupported;
+
+  /// Details translation refused: the publication cannot be translated now.
+  ///
+  /// In en, this message translates to:
+  /// **'This text cannot be translated.'**
+  String get contentTranslationErrorSource;
+
+  /// Details translation refused: a newer revision of the publication exists.
+  ///
+  /// In en, this message translates to:
+  /// **'This publication has been updated. Refresh the page.'**
+  String get contentTranslationErrorRevision;
+
+  /// Details translation refused: the daily limit is reached.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation limit reached for today. Try again tomorrow.'**
+  String get contentTranslationErrorQuota;
+
+  /// Details translation refused: the monthly budget is used up.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation is temporarily unavailable.'**
+  String get contentTranslationErrorBudget;
+
+  /// Details translation failed; the original stays on screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not translate. The original is shown.'**
+  String get contentTranslationErrorProvider;
+
+  /// Create: picker for the language the author wrote the text in.
+  ///
+  /// In en, this message translates to:
+  /// **'Language of this text'**
+  String get createContentLanguageLabel;
+
+  /// Create: why the author should choose the text language.
+  ///
+  /// In en, this message translates to:
+  /// **'Readers can translate the text only if you choose its language.'**
+  String get createContentLanguageHelp;
 }
 
 class _AppLocalizationsDelegate

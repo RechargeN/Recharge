@@ -15119,5 +15119,73 @@
   "discoverHomeShortWellness": "Wellness",
   "@discoverHomeShortWellness": {
     "description": "L4.9.5: Home — short category chip name (the full name is taxCategory…)."
+  },
+  "contentTranslationAction": "Translate",
+  "@contentTranslationAction": {
+    "description": "Details: button that asks for a machine translation of the publication text."
+  },
+  "contentTranslationShowTranslation": "Show translation",
+  "@contentTranslationShowTranslation": {
+    "description": "Details: shows a translation already loaded on this screen."
+  },
+  "contentTranslationLoading": "Translating…",
+  "@contentTranslationLoading": {
+    "description": "Details: machine translation in progress."
+  },
+  "contentTranslationLabel": "Translated automatically",
+  "@contentTranslationLabel": {
+    "description": "Details: mandatory label above a machine translation."
+  },
+  "contentTranslationShowOriginal": "Show original",
+  "@contentTranslationShowOriginal": {
+    "description": "Details: hides the machine translation and returns to the original."
+  },
+  "contentTranslationKeptOriginal": "Terms, safety notes and names stay in the original language.",
+  "@contentTranslationKeptOriginal": {
+    "description": "Details: explains what machine translation does not cover."
+  },
+  "contentTranslationErrorSignIn": "Sign in to translate.",
+  "@contentTranslationErrorSignIn": {
+    "description": "Details translation refused: the reader has no Session."
+  },
+  "contentTranslationErrorDisabled": "Translation is not available right now.",
+  "@contentTranslationErrorDisabled": {
+    "description": "Details translation refused: the capability is switched off."
+  },
+  "contentTranslationErrorSameLanguage": "This text is already in your language.",
+  "@contentTranslationErrorSameLanguage": {
+    "description": "Details translation refused: source and target language match."
+  },
+  "contentTranslationErrorUnsupported": "Translation into this language is not available.",
+  "@contentTranslationErrorUnsupported": {
+    "description": "Details translation refused: unsupported target language."
+  },
+  "contentTranslationErrorSource": "This text cannot be translated.",
+  "@contentTranslationErrorSource": {
+    "description": "Details translation refused: the publication cannot be translated now."
+  },
+  "contentTranslationErrorRevision": "This publication has been updated. Refresh the page.",
+  "@contentTranslationErrorRevision": {
+    "description": "Details translation refused: a newer revision of the publication exists."
+  },
+  "contentTranslationErrorQuota": "Translation limit reached for today. Try again tomorrow.",
+  "@contentTranslationErrorQuota": {
+    "description": "Details translation refused: the daily limit is reached."
+  },
+  "contentTranslationErrorBudget": "Translation is temporarily unavailable.",
+  "@contentTranslationErrorBudget": {
+    "description": "Details translation refused: the monthly budget is used up."
+  },
+  "contentTranslationErrorProvider": "Could not translate. The original is shown.",
+  "@contentTranslationErrorProvider": {
+    "description": "Details translation failed; the original stays on screen."
+  },
+  "createContentLanguageLabel": "Language of this text",
+  "@createContentLanguageLabel": {
+    "description": "Create: picker for the language the author wrote the text in."
+  },
+  "createContentLanguageHelp": "Readers can translate the text only if you choose its language.",
+  "@createContentLanguageHelp": {
+    "description": "Create: why the author should choose the text language."
   }
 }

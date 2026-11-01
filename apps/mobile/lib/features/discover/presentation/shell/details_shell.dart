@@ -32,9 +32,15 @@ class DetailsScreenAvailable extends DetailsScreenState {
   const DetailsScreenAvailable({
     required this.renderer,
     this.immersiveHero = false,
+    this.supplement,
   });
 
   final DetailsRenderer renderer;
+
+  /// Optional block between the hero and the body (ADR 0022 translation).
+  /// A field here for the same reason as [immersiveHero]: renderers and
+  /// their test fakes need no change.
+  final Widget? supplement;
 
   /// When `true`, [DetailsShell] makes its `AppBar` transparent and
   /// extends the body behind it (edge-to-edge hero, `DTL-EVT-01` §1.1
@@ -98,8 +104,12 @@ class DetailsShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (state) {
       DetailsScreenLoading() => _buildLoading(),
-      DetailsScreenAvailable(:final renderer, :final immersiveHero) =>
-        _buildAvailable(context, renderer, immersiveHero),
+      DetailsScreenAvailable(
+        :final renderer,
+        :final immersiveHero,
+        :final supplement,
+      ) =>
+        _buildAvailable(context, renderer, immersiveHero, supplement),
       DetailsScreenUnavailable(:final reason, :final onRetry, :final notice) =>
         _buildUnavailable(context, reason, onRetry, notice),
     };
@@ -116,6 +126,7 @@ class DetailsShell extends StatelessWidget {
     BuildContext context,
     DetailsRenderer renderer,
     bool immersiveHero,
+    Widget? supplement,
   ) {
     return Scaffold(
       backgroundColor: immersiveHero
@@ -130,6 +141,7 @@ class DetailsShell extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: <Widget>[
           renderer.buildHero(context),
+          if (supplement != null) supplement,
           renderer.buildBody(context),
         ],
       ),

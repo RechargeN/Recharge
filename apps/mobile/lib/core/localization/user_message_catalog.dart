@@ -165,6 +165,20 @@ abstract final class UserMessageCatalog {
     'internal': _generic,
   };
 
+  static final Map<String, UserMessageOf?> _contentTranslation =
+      <String, UserMessageOf?>{
+        'unauthenticated': (l) => l.contentTranslationErrorSignIn,
+        'request_invalid': (l) => l.contentTranslationErrorProvider,
+        'translation_disabled': (l) => l.contentTranslationErrorDisabled,
+        'same_language': (l) => l.contentTranslationErrorSameLanguage,
+        'unsupported_locale': (l) => l.contentTranslationErrorUnsupported,
+        'source_unavailable': (l) => l.contentTranslationErrorSource,
+        'revision_changed': (l) => l.contentTranslationErrorRevision,
+        'quota_exceeded': (l) => l.contentTranslationErrorQuota,
+        'budget_exhausted': (l) => l.contentTranslationErrorBudget,
+        'provider_unavailable': (l) => l.contentTranslationErrorProvider,
+      };
+
   static final Map<String, UserMessageOf?> _notificationContent =
       <String, UserMessageOf?>{
         'rendered': null,
@@ -383,6 +397,7 @@ abstract final class UserMessageCatalog {
         UserMessageFamily.route => _route,
         UserMessageFamily.privacyIntake => _privacyIntake,
         UserMessageFamily.identitySession => _identitySession,
+        UserMessageFamily.contentTranslation => _contentTranslation,
         UserMessageFamily.clientTransport => _clientTransport,
         UserMessageFamily.clientLocal => _clientLocal,
       };

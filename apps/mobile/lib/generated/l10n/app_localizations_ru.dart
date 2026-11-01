@@ -13506,4 +13506,62 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get discoverHomeShortWellness => 'Отдых';
+
+  @override
+  String get contentTranslationAction => 'Перевести';
+
+  @override
+  String get contentTranslationShowTranslation => 'Показать перевод';
+
+  @override
+  String get contentTranslationLoading => 'Переводим…';
+
+  @override
+  String get contentTranslationLabel => 'Переведено автоматически';
+
+  @override
+  String get contentTranslationShowOriginal => 'Показать оригинал';
+
+  @override
+  String get contentTranslationKeptOriginal =>
+      'Условия, правила безопасности и названия остаются на языке оригинала.';
+
+  @override
+  String get contentTranslationErrorSignIn => 'Войдите, чтобы перевести.';
+
+  @override
+  String get contentTranslationErrorDisabled => 'Перевод сейчас недоступен.';
+
+  @override
+  String get contentTranslationErrorSameLanguage =>
+      'Этот текст уже на вашем языке.';
+
+  @override
+  String get contentTranslationErrorUnsupported =>
+      'Перевод на этот язык недоступен.';
+
+  @override
+  String get contentTranslationErrorSource => 'Этот текст нельзя перевести.';
+
+  @override
+  String get contentTranslationErrorRevision =>
+      'Публикация обновилась. Обновите страницу.';
+
+  @override
+  String get contentTranslationErrorQuota =>
+      'Лимит переводов на сегодня исчерпан. Попробуйте завтра.';
+
+  @override
+  String get contentTranslationErrorBudget => 'Перевод временно недоступен.';
+
+  @override
+  String get contentTranslationErrorProvider =>
+      'Не удалось перевести. Показан оригинал.';
+
+  @override
+  String get createContentLanguageLabel => 'Язык этого текста';
+
+  @override
+  String get createContentLanguageHelp =>
+      'Читатели смогут перевести текст, только если вы выберете его язык.';
 }

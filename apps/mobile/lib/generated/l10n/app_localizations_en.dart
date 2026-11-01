@@ -13273,4 +13273,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discoverHomeShortWellness => 'Wellness';
+
+  @override
+  String get contentTranslationAction => 'Translate';
+
+  @override
+  String get contentTranslationShowTranslation => 'Show translation';
+
+  @override
+  String get contentTranslationLoading => 'Translating…';
+
+  @override
+  String get contentTranslationLabel => 'Translated automatically';
+
+  @override
+  String get contentTranslationShowOriginal => 'Show original';
+
+  @override
+  String get contentTranslationKeptOriginal =>
+      'Terms, safety notes and names stay in the original language.';
+
+  @override
+  String get contentTranslationErrorSignIn => 'Sign in to translate.';
+
+  @override
+  String get contentTranslationErrorDisabled =>
+      'Translation is not available right now.';
+
+  @override
+  String get contentTranslationErrorSameLanguage =>
+      'This text is already in your language.';
+
+  @override
+  String get contentTranslationErrorUnsupported =>
+      'Translation into this language is not available.';
+
+  @override
+  String get contentTranslationErrorSource => 'This text cannot be translated.';
+
+  @override
+  String get contentTranslationErrorRevision =>
+      'This publication has been updated. Refresh the page.';
+
+  @override
+  String get contentTranslationErrorQuota =>
+      'Translation limit reached for today. Try again tomorrow.';
+
+  @override
+  String get contentTranslationErrorBudget =>
+      'Translation is temporarily unavailable.';
+
+  @override
+  String get contentTranslationErrorProvider =>
+      'Could not translate. The original is shown.';
+
+  @override
+  String get createContentLanguageLabel => 'Language of this text';
+
+  @override
+  String get createContentLanguageHelp =>
+      'Readers can translate the text only if you choose its language.';
 }

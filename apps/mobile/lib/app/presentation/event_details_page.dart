@@ -16,6 +16,7 @@ import '../../features/discover/domain/entities/event_occurrence.dart';
 import '../../features/discover/domain/entities/published_event_discovery_entity.dart';
 import '../../features/discover/domain/repositories/timezone_repository.dart';
 import '../../features/discover/presentation/renderers/object_offer_details_renderer.dart';
+import '../../features/discover/presentation/widgets/content_translation_panel.dart';
 import '../../features/discover/presentation/shell/details_shell.dart';
 import '../../features/favorites/application/controllers/favorites_controller.dart';
 import '../../features/favorites/application/favorites_providers.dart';
@@ -95,6 +96,12 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
     final Widget shell = DetailsShell(
       state: DetailsScreenAvailable(
         immersiveHero: true,
+        supplement: contentTranslationSupplement(
+          context,
+          ref,
+          contentId: projection.eventId,
+          publishedRevisionId: projection.revisionRef,
+        ),
         renderer: ObjectOfferDetailsRenderer.event(
           projection: projection,
           timezoneRepository: _timezoneRepository,

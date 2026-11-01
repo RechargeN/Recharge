@@ -38,6 +38,10 @@ const Map<UserMessageFamily, (String, List<String>)> _serverContracts =
         'platform/v1/error.schema.json',
         <String>['properties', 'code', 'enum'],
       ),
+      UserMessageFamily.contentTranslation: (
+        'content_translation/v1/content_translation_result.schema.json',
+        <String>[r'$defs', 'failureCode', 'enum'],
+      ),
       UserMessageFamily.notificationContent: (
         'notifications/v1/notifications_result.schema.json',
         <String>[r'$defs', 'item', 'properties', 'contentStatus', 'enum'],

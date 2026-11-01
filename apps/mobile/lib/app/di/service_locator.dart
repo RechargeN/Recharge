@@ -3,6 +3,7 @@ import 'scenario_publication_composition.dart';
 import 'route_content_publication_composition.dart';
 import 'class_workshop_publication_composition.dart';
 import 'find_people_publication_composition.dart';
+import 'content_translation_composition.dart';
 import 'library_composition.dart';
 import '../adapters/server_library_repositories.dart';
 import '../../features/library/data/library_sync_client.dart';
@@ -158,7 +159,9 @@ import '../../features/create/domain/usecases/check_place_duplicates_usecase.dar
 import '../../features/create/domain/usecases/build_route_publication_bundle_usecase.dart';
 import '../../features/create/domain/usecases/inspect_route_gpx_usecase.dart';
 import '../../features/create/domain/usecases/export_route_gpx_usecase.dart';
+import '../../features/discover/data/datasources/content_translation_client.dart';
 import '../../features/discover/data/datasources/discover_remote_datasource.dart';
+import '../../features/discover/domain/repositories/content_translation_port.dart';
 import '../../features/discover/data/datasources/published_collection_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/published_bookable_session_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/published_class_workshop_discovery_local_datasource.dart';
@@ -942,6 +945,14 @@ Future<void> setupDependencies() async {
       () => FavoritesLocalDataSource(
         sl(),
         defaultCurrencyCode: sl<MarketConfig>().currencyCode,
+      ),
+    )
+    ..registerLazySingleton<ContentTranslationPort>(
+      () => ContentTranslationClient(
+        invoke: contentTranslationInvoke(
+          binding: sl(),
+          runtime: () => sl.getAsync<BookingTransportRuntime>(),
+        ),
       ),
     )
     ..registerLazySingleton<LibrarySyncClient>(

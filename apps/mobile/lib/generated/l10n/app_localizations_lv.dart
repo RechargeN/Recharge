@@ -13440,4 +13440,64 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get discoverHomeShortWellness => 'Labsajūta';
+
+  @override
+  String get contentTranslationAction => 'Tulkot';
+
+  @override
+  String get contentTranslationShowTranslation => 'Rādīt tulkojumu';
+
+  @override
+  String get contentTranslationLoading => 'Tulko…';
+
+  @override
+  String get contentTranslationLabel => 'Tulkots automātiski';
+
+  @override
+  String get contentTranslationShowOriginal => 'Rādīt oriģinālu';
+
+  @override
+  String get contentTranslationKeptOriginal =>
+      'Noteikumi, drošības norādes un nosaukumi paliek oriģinālvalodā.';
+
+  @override
+  String get contentTranslationErrorSignIn => 'Pierakstieties, lai tulkotu.';
+
+  @override
+  String get contentTranslationErrorDisabled =>
+      'Tulkojums pašlaik nav pieejams.';
+
+  @override
+  String get contentTranslationErrorSameLanguage =>
+      'Šis teksts jau ir jūsu valodā.';
+
+  @override
+  String get contentTranslationErrorUnsupported =>
+      'Tulkojums šajā valodā nav pieejams.';
+
+  @override
+  String get contentTranslationErrorSource => 'Šo tekstu nevar iztulkot.';
+
+  @override
+  String get contentTranslationErrorRevision =>
+      'Publikācija ir atjaunināta. Atsvaidziniet lapu.';
+
+  @override
+  String get contentTranslationErrorQuota =>
+      'Šodienas tulkojumu limits ir sasniegts. Mēģiniet rīt.';
+
+  @override
+  String get contentTranslationErrorBudget =>
+      'Tulkojums īslaicīgi nav pieejams.';
+
+  @override
+  String get contentTranslationErrorProvider =>
+      'Neizdevās iztulkot. Redzams oriģināls.';
+
+  @override
+  String get createContentLanguageLabel => 'Šī teksta valoda';
+
+  @override
+  String get createContentLanguageHelp =>
+      'Lasītāji varēs tulkot tekstu tikai tad, ja izvēlēsieties tā valodu.';
 }
