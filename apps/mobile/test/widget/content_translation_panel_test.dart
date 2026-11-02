@@ -10,16 +10,16 @@ const String _longTitle =
     'A very long machine translated title that has to wrap on a narrow screen';
 
 final class _FakePort implements ContentTranslationPort {
-  _FakePort({this.offered = true, this.failure});
+  _FakePort({this.offered = const ContentTranslationAvailable(), this.failure});
 
-  final bool offered;
+  final ContentTranslationOffer offered;
   final String? failure;
   int translateCalls = 0;
   Completer<void>? gate;
   final List<String> targets = <String>[];
 
   @override
-  Future<bool> offer({
+  Future<ContentTranslationOffer> offer({
     required String contentId,
     required String publishedRevisionId,
     required String targetLocale,
@@ -90,7 +90,9 @@ void main() {
   const Key failureText = Key('content-translation-failure');
 
   testWidgets('nothing to offer: no button and no space', (tester) async {
-    await tester.pumpWidget(_host(_FakePort(offered: false)));
+    await tester.pumpWidget(
+      _host(_FakePort(offered: const ContentTranslationUnavailable())),
+    );
     await tester.pumpAndSettle();
     expect(find.byKey(action), findsNothing);
     expect(tester.getSize(find.byType(ContentTranslationPanel)).height, 0);
@@ -138,6 +140,33 @@ void main() {
       expect(port.translateCalls, 1);
     });
   }
+
+  testWidgets('a kept publication translation shows at once, labeled', (
+    tester,
+  ) async {
+    final _FakePort port = _FakePort(
+      offered: const ContentTranslationReady(
+        ContentTranslation(
+          sourceLocale: 'lv',
+          targetLocale: 'en',
+          title: 'Kept translation',
+        ),
+      ),
+    );
+    await tester.pumpWidget(_host(port));
+    await tester.pumpAndSettle();
+    expect(find.text('Kept translation'), findsOneWidget);
+    expect(find.byKey(label), findsOneWidget);
+    expect(find.text('Original text'), findsOneWidget);
+    expect(port.translateCalls, 0);
+    await tester.tap(find.byKey(showOriginal));
+    await tester.pumpAndSettle();
+    expect(find.byKey(label), findsNothing);
+    await tester.tap(find.byKey(action));
+    await tester.pumpAndSettle();
+    expect(find.text('Kept translation'), findsOneWidget);
+    expect(port.translateCalls, 0);
+  });
 
   testWidgets('the result is plain text, with no active markup', (
     tester,

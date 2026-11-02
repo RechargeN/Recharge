@@ -328,13 +328,13 @@ final class _OfferingTranslationPort implements ContentTranslationPort {
   int offers = 0;
 
   @override
-  Future<bool> offer({
+  Future<ContentTranslationOffer> offer({
     required String contentId,
     required String publishedRevisionId,
     required String targetLocale,
   }) async {
     offers += 1;
-    return true;
+    return const ContentTranslationAvailable();
   }
 
   @override

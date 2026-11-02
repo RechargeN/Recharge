@@ -27,11 +27,33 @@ final class ContentTranslationFailure implements Exception {
   String toString() => 'ContentTranslationFailure($code)';
 }
 
+/// What Details may show before any tap.
+sealed class ContentTranslationOffer {
+  const ContentTranslationOffer();
+}
+
+/// Nothing to offer: no button, no space.
+final class ContentTranslationUnavailable extends ContentTranslationOffer {
+  const ContentTranslationUnavailable();
+}
+
+/// A reader translation on request: the button.
+final class ContentTranslationAvailable extends ContentTranslationOffer {
+  const ContentTranslationAvailable();
+}
+
+/// Amendment 1: a translation kept at publication, shown at once.
+final class ContentTranslationReady extends ContentTranslationOffer {
+  const ContentTranslationReady(this.translation);
+
+  final ContentTranslation translation;
+}
+
 /// Sends identifiers and the target language only: the client never sends text.
 abstract interface class ContentTranslationPort {
-  /// `true` when Details should offer the button. Spends nothing; any refusal
-  /// or failure is `false`, so the screen stays as it is.
-  Future<bool> offer({
+  /// The button, a kept translation, or nothing. Spends nothing; any refusal or
+  /// failure is [ContentTranslationUnavailable], so the screen stays as it is.
+  Future<ContentTranslationOffer> offer({
     required String contentId,
     required String publishedRevisionId,
     required String targetLocale,

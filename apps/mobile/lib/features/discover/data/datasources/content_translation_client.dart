@@ -29,7 +29,7 @@ final class ContentTranslationClient implements ContentTranslationPort {
   };
 
   @override
-  Future<bool> offer({
+  Future<ContentTranslationOffer> offer({
     required String contentId,
     required String publishedRevisionId,
     required String targetLocale,
@@ -39,9 +39,15 @@ final class ContentTranslationClient implements ContentTranslationPort {
         'offerContentTranslationV1',
         _request(contentId, publishedRevisionId, targetLocale),
       );
-      return answer['kind'] == 'offered';
+      return switch (answer['kind']) {
+        'offered' => const ContentTranslationAvailable(),
+        'translated' => ContentTranslationReady(
+          _translation(answer, targetLocale),
+        ),
+        _ => const ContentTranslationUnavailable(),
+      };
     } on ContentTranslationFailure {
-      return false;
+      return const ContentTranslationUnavailable();
     }
   }
 
@@ -60,6 +66,15 @@ final class ContentTranslationClient implements ContentTranslationPort {
       final Object? code = answer['code'];
       throw ContentTranslationFailure(code is String ? code : 'unknown');
     }
+    return _translation(answer, targetLocale);
+  }
+
+  /// Only a labeled machine translation with text fields is accepted.
+  static ContentTranslation _translation(
+    Map<String, Object?> answer,
+    String targetLocale,
+  ) {
+    final Object? kind = answer['kind'];
     final Object? fields = answer['fields'];
     if (kind != 'translated' ||
         answer['machineTranslated'] != true ||

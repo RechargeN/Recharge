@@ -37,6 +37,47 @@ void main() {
     },
   );
 
+  test('offer: a kept translation is ready; an unlabeled one is not', () async {
+    final ContentTranslationOffer ready =
+        await client(<String, Object?>{
+          'kind': 'translated',
+          'machineTranslated': true,
+          'sourceLocale': 'lv',
+          'fields': <String, Object?>{'title': 'Kept'},
+        }).offer(
+          contentId: contentId,
+          publishedRevisionId: revisionId,
+          targetLocale: 'en',
+        );
+    expect(
+      ready,
+      isA<ContentTranslationReady>().having(
+        (r) => r.translation.title,
+        'title',
+        'Kept',
+      ),
+    );
+    expect(
+      await client(<String, Object?>{
+        'kind': 'translated',
+        'fields': <String, Object?>{'title': 'Unlabeled'},
+      }).offer(
+        contentId: contentId,
+        publishedRevisionId: revisionId,
+        targetLocale: 'en',
+      ),
+      isA<ContentTranslationUnavailable>(),
+    );
+    expect(
+      await client(<String, Object?>{'kind': 'offered'}).offer(
+        contentId: contentId,
+        publishedRevisionId: revisionId,
+        targetLocale: 'en',
+      ),
+      isA<ContentTranslationAvailable>(),
+    );
+  });
+
   test('offer: a refusal or transport failure means no button', () async {
     expect(
       await client(<String, Object?>{
@@ -47,7 +88,7 @@ void main() {
         publishedRevisionId: revisionId,
         targetLocale: 'lv',
       ),
-      isFalse,
+      isA<ContentTranslationUnavailable>(),
     );
     final ContentTranslationClient failing = ContentTranslationClient(
       invoke: (_, _) async =>
@@ -59,7 +100,7 @@ void main() {
         publishedRevisionId: revisionId,
         targetLocale: 'ru',
       ),
-      isFalse,
+      isA<ContentTranslationUnavailable>(),
     );
   });
 

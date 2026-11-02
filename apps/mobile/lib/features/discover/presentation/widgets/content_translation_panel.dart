@@ -65,12 +65,25 @@ class _ContentTranslationPanelState extends State<ContentTranslationPanel> {
   }
 
   Future<void> _check() async {
-    final bool offered = await widget.port.offer(
+    final ContentTranslationOffer offer = await widget.port.offer(
       contentId: widget.contentId,
       publishedRevisionId: widget.publishedRevisionId,
       targetLocale: widget.targetLocale,
     );
-    if (mounted && offered) setState(() => _offered = true);
+    if (!mounted) return;
+    switch (offer) {
+      case ContentTranslationUnavailable():
+        return;
+      case ContentTranslationAvailable():
+        setState(() => _offered = true);
+      case ContentTranslationReady(:final ContentTranslation translation):
+        // Amendment 1: shown at once, still labeled, original one tap away.
+        setState(() {
+          _offered = true;
+          _translation = translation;
+          _showing = true;
+        });
+    }
   }
 
   Future<void> _translate() async {

@@ -54,7 +54,7 @@ void main() {
           publishedRevisionId: revisionId,
           targetLocale: 'ru',
         ),
-        isTrue,
+        isA<ContentTranslationAvailable>(),
       );
       expect(
         await client.offer(
@@ -62,7 +62,7 @@ void main() {
           publishedRevisionId: revisionId,
           targetLocale: 'lv',
         ),
-        isFalse,
+        isA<ContentTranslationUnavailable>(),
         reason: 'the source language needs no translation',
       );
       final translation = await client.translate(
@@ -80,7 +80,7 @@ void main() {
           publishedRevisionId: revisionId,
           targetLocale: 'ru',
         ),
-        isFalse,
+        isA<ContentTranslationUnavailable>(),
         reason: 'without the test entry nothing goes on the wire',
       );
       await expectLater(
