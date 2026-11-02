@@ -122,9 +122,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSectionPreferences => 'PREFERENCES';
 
   @override
-  String get settingsCurrency => 'Currency';
-
-  @override
   String get settingsNotificationPreferences => 'Notification preferences';
 
   @override

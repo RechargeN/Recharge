@@ -162,7 +162,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('PREFERENCES'), findsOneWidget);
     expect(find.text('Language'), findsOneWidget);
-    expect(find.text('Currency'), findsOneWidget);
+    // L4.9.4: the currency that did nothing is gone; currency comes from data.
+    expect(find.text('Currency'), findsNothing);
+    expect(find.text('USD'), findsNothing);
     expect(find.text('Notification preferences'), findsOneWidget);
     await tester.ensureVisible(find.byType(Switch).first);
     await tester.tap(find.byType(Switch).first);
@@ -298,17 +300,13 @@ void main() {
       expect(await store.read(), AppLocaleChoice.values.byName(code));
       expect(tester.takeException(), isNull);
       await l10nCaptureScreen(tester, suffix: code);
-      // Text only: the legacy currency value, account settings and market
-      // are untouched by the language.
+      // Text only: account settings and the market are untouched by the
+      // language, and the choice stays on the device.
       expect(
-        exploreController.state.settings.currency,
-        settingsBefore.currency,
+        exploreController.state.settings.notificationsEnabled,
+        settingsBefore.notificationsEnabled,
       );
-      expect(
-        exploreController.state.settings.language,
-        settingsBefore.language,
-      );
-      expect(exploreRepository.settings['u']?.language, isNot(code));
+      expect(exploreRepository.settings['u'], isNull);
       expect(MarketConfig.riga.currencyCode, 'EUR');
       expect(MarketConfig.riga.timezoneId, 'Europe/Riga');
       expect(MarketConfig.riga.countryCode, 'LV');

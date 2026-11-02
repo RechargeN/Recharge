@@ -322,12 +322,6 @@ abstract class AppLocalizations {
   /// **'PREFERENCES'**
   String get settingsSectionPreferences;
 
-  /// Legacy local currency preference label; prices keep the currency of their data.
-  ///
-  /// In en, this message translates to:
-  /// **'Currency'**
-  String get settingsCurrency;
-
   /// Settings switch.
   ///
   /// In en, this message translates to:

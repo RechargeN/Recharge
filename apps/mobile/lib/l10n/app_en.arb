@@ -148,10 +148,6 @@
   "@settingsSectionPreferences": {
     "description": "Settings section header (upper case)."
   },
-  "settingsCurrency": "Currency",
-  "@settingsCurrency": {
-    "description": "Legacy local currency preference label; prices keep the currency of their data."
-  },
   "settingsNotificationPreferences": "Notification preferences",
   "@settingsNotificationPreferences": {
     "description": "Settings switch."

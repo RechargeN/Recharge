@@ -122,9 +122,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsSectionPreferences => 'ПРЕДПОЧТЕНИЯ';
 
   @override
-  String get settingsCurrency => 'Валюта';
-
-  @override
   String get settingsNotificationPreferences => 'Настройки уведомлений';
 
   @override

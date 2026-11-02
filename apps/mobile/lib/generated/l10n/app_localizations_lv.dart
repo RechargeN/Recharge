@@ -122,9 +122,6 @@ class AppLocalizationsLv extends AppLocalizations {
   String get settingsSectionPreferences => 'IZVĒLES';
 
   @override
-  String get settingsCurrency => 'Valūta';
-
-  @override
   String get settingsNotificationPreferences => 'Paziņojumu iestatījumi';
 
   @override

@@ -130,18 +130,6 @@ class ExploreController extends ChangeNotifier {
     );
   }
 
-  Future<void> updateLanguage(String value) async {
-    final SettingsEntity next = _state.settings.copyWith(language: value);
-    _setState(_state.copyWith(settings: next));
-    await _saveSettings(next);
-  }
-
-  Future<void> updateCurrency(String value) async {
-    final SettingsEntity next = _state.settings.copyWith(currency: value);
-    _setState(_state.copyWith(settings: next));
-    await _saveSettings(next);
-  }
-
   Future<void> updateNotifications(bool enabled) async {
     final SettingsEntity next = _state.settings.copyWith(
       notificationsEnabled: enabled,
@@ -157,8 +145,6 @@ class ExploreController extends ChangeNotifier {
       'explore_settings_updated',
       params: <String, Object?>{
         'user_id': _state.userId,
-        'language': next.language,
-        'currency': next.currency,
         'notifications_enabled': next.notificationsEnabled,
       },
     );

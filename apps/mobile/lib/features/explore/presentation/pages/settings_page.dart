@@ -171,23 +171,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 if (value != null) localeController.select(value);
               },
             ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              initialValue: state.settings.currency,
-              decoration: InputDecoration(
-                labelText: l10n.settingsCurrency,
-                border: const OutlineInputBorder(),
-              ),
-              items: const <DropdownMenuItem<String>>[
-                DropdownMenuItem(value: 'EUR', child: Text('EUR')),
-                DropdownMenuItem(value: 'USD', child: Text('USD')),
-              ],
-              onChanged: (String? value) {
-                if (value != null) {
-                  exploreController.updateCurrency(value);
-                }
-              },
-            ),
             const SizedBox(height: 8),
             SwitchListTile(
               title: Text(l10n.settingsNotificationPreferences),
