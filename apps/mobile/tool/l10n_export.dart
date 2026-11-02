@@ -11,8 +11,8 @@
 //   dart run tool/l10n_export.dart --review <lv|ru> <output.csv>
 //
 // One reviewer's package (BCK20-OD-02): key, screen context, source (en),
-// translation, exact revision, and empty `verdict` (Accept, Amend or Reject)
-// and `comment` columns for the reviewer to fill in.
+// translation, exact revision, and empty `verdict` (Accept, Amend or Reject),
+// `proposed` (the reviewer's text for Amend) and `comment` columns.
 import 'dart:convert';
 import 'dart:io';
 
@@ -174,6 +174,7 @@ void _writeReviewPackage(
         'translation_$language',
         'revision',
         'verdict',
+        'proposed',
         'comment',
       ].map(_cell).join(','),
     );
@@ -189,6 +190,7 @@ void _writeReviewPackage(
         (arbs['en']![key] as String?) ?? '',
         (arbs[language]![key] as String?) ?? '',
         revision,
+        '',
         '',
         '',
       ].map(_cell).join(','),
