@@ -27,10 +27,10 @@ final class LocaleController extends ChangeNotifier {
   String get languageCode =>
       _policy.resolve(choice: _choice, deviceLanguageTags: _deviceLanguageTags);
 
-  /// The notifications wire locale for the current UI language.
-  String get notificationWireLocale =>
-      AppLocalePolicy.notificationWireLocale(languageCode) ??
-      AppLocalePolicy.notificationWireLocale(_policy.fallbackLanguageCode)!;
+  /// The API identifier of the current UI language.
+  String get apiLocale =>
+      AppLocalePolicy.canonicalLocaleOf(languageCode) ??
+      AppLocalePolicy.canonicalLocaleOf(_policy.fallbackLanguageCode)!;
 
   /// Restores the stored choice (app start).
   Future<void> load() async {

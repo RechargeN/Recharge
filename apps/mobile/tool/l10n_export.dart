@@ -7,10 +7,17 @@
 // status and where the key is used (lib/ files). The CSV is UTF-8 with a
 // BOM so spreadsheet apps open lv/ru text correctly. The output must lie
 // outside the repository: the export is a review copy, never committed.
+//
+//   dart run tool/l10n_export.dart --review <lv|ru> <output.csv>
+//
+// One reviewer's package (BCK20-OD-02): key, screen context, source (en),
+// translation, exact revision, and empty `verdict` (Accept, Amend or Reject)
+// and `comment` columns for the reviewer to fill in.
 import 'dart:convert';
 import 'dart:io';
 
 const List<String> _languages = <String>['en', 'lv', 'ru'];
+const List<String> _translated = <String>['lv', 'ru'];
 
 Map<String, dynamic> _arb(String language) =>
     jsonDecode(File('lib/l10n/app_$language.arb').readAsStringSync())
@@ -65,12 +72,15 @@ Map<String, Set<String>> _usages(Iterable<String> keys) {
 String _cell(String value) => '"${value.replaceAll('"', '""')}"';
 
 void main(List<String> args) {
-  if (args.length != 1) {
-    stderr.writeln('usage: dart run tool/l10n_export.dart <output.csv>');
+  final bool review = args.length == 3 && args.first == '--review';
+  if (!(args.length == 1 || (review && _translated.contains(args[1])))) {
+    stderr.writeln(
+      'usage: dart run tool/l10n_export.dart [--review <lv|ru>] <output.csv>',
+    );
     exitCode = 64;
     return;
   }
-  final String output = args.single;
+  final String output = args.last;
   final Directory? root = _repoRoot(Directory.current);
   if (root != null && _isInside(output, root)) {
     stderr.writeln(
@@ -87,6 +97,10 @@ void main(List<String> args) {
       .where((String key) => !key.startsWith('@'))
       .toList();
   final Map<String, Set<String>> usages = _usages(keys);
+  if (review) {
+    _writeReviewPackage(output, args[1], keys, arbs, usages);
+    return;
+  }
   final StringBuffer csv = StringBuffer('﻿')
     ..writeln(
       <String>[
@@ -125,4 +139,63 @@ void main(List<String> args) {
     ..parent.createSync(recursive: true)
     ..writeAsStringSync(csv.toString());
   stdout.writeln('${keys.length} keys → $output');
+}
+
+/// The exact revision the package was cut from: commit and ARB content hash.
+String _revision(String language) {
+  final ProcessResult head = Process.runSync('git', <String>[
+    'rev-parse',
+    '--short',
+    'HEAD',
+  ]);
+  final ProcessResult arb = Process.runSync('git', <String>[
+    'hash-object',
+    'lib/l10n/app_$language.arb',
+  ]);
+  return '${(head.stdout as String).trim()}:'
+      '${(arb.stdout as String).trim().substring(0, 12)}';
+}
+
+void _writeReviewPackage(
+  String output,
+  String language,
+  List<String> keys,
+  Map<String, Map<String, dynamic>> arbs,
+  Map<String, Set<String>> usages,
+) {
+  final String revision = _revision(language);
+  final StringBuffer csv = StringBuffer('\uFEFF')
+    ..writeln(
+      <String>[
+        'key',
+        'context',
+        'used_in',
+        'source_en',
+        'translation_$language',
+        'revision',
+        'verdict',
+        'comment',
+      ].map(_cell).join(','),
+    );
+  for (final String key in keys) {
+    final Object? meta = arbs['en']!['@$key'];
+    csv.writeln(
+      <String>[
+        key,
+        meta is Map<String, dynamic>
+            ? (meta['description'] as String?) ?? ''
+            : '',
+        (usages[key]!.toList()..sort()).join(' '),
+        (arbs['en']![key] as String?) ?? '',
+        (arbs[language]![key] as String?) ?? '',
+        revision,
+        '',
+        '',
+      ].map(_cell).join(','),
+    );
+  }
+  File(output)
+    ..parent.createSync(recursive: true)
+    ..writeAsStringSync(csv.toString());
+  stdout.writeln('${keys.length} keys for $language review → $output');
 }

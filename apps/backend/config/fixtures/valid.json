@@ -55,7 +55,7 @@
       "status": "disabled",
       "currency": "EUR",
       "defaultTimezone": "Europe/Riga",
-      "supportedLocales": ["lv-LV", "en-LV", "ru-LV"],
+      "supportedLocales": ["lv-LV", "en", "ru"],
       "defaultLocale": "lv-LV",
       "policyPointers": {
         "mandatoryCopyManifestRevision": null,

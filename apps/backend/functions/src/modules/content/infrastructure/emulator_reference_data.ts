@@ -17,6 +17,12 @@ import {
 } from './emulator_place_taxonomy.js';
 import { findPeoplePolicy } from '../../../shared/find_people_policy.js';
 
+/**
+ * L4.9.1: `lv-LV`, `en`, `ru` are canonical; `lv` stays accepted for older clients
+ * and saved revisions, which are never rewritten.
+ */
+export const contentLocaleIds: readonly string[] = ['lv-LV', 'en', 'ru', 'lv'];
+
 /** Local demo-recharge composition: synthetic LV market/localization and Place fixture;
  * Activity and Collection use the deterministic immutable BCK-20 artifact derived
  * from the accepted Category System v1.4.3 semantic source. Rental (D3.3) checks
@@ -90,7 +96,7 @@ export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
               }),
             }
           : {}),
-        supportsLocale: (locale: string) => ['en', 'ru', 'lv'].includes(locale),
+        supportsLocale: (locale: string) => contentLocaleIds.includes(locale),
         subcategoryApplies: (typeId: string, categoryId: string, subcategoryId: string) =>
           typeId === 'place'
             ? placeSubcategoryApplies(categoryId, subcategoryId)

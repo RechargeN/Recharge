@@ -83,11 +83,11 @@ void main() {
       );
     });
 
-    test('the notifications wire locale names Latvian lv-LV; others pass', () {
-      expect(AppLocalePolicy.notificationWireLocale('lv'), 'lv-LV');
-      expect(AppLocalePolicy.notificationWireLocale('en'), 'en');
-      expect(AppLocalePolicy.notificationWireLocale('ru'), 'ru');
-      expect(AppLocalePolicy.notificationWireLocale('et'), isNull);
+    test('the API locale names Latvian lv-LV; others pass', () {
+      expect(AppLocalePolicy.canonicalLocaleOf('lv'), 'lv-LV');
+      expect(AppLocalePolicy.canonicalLocaleOf('en'), 'en');
+      expect(AppLocalePolicy.canonicalLocaleOf('ru'), 'ru');
+      expect(AppLocalePolicy.canonicalLocaleOf('et'), isNull);
     });
   });
 
@@ -114,7 +114,7 @@ void main() {
       first.addListener(() => notified += 1);
       await first.select(AppLocaleChoice.ru);
       expect(first.languageCode, 'ru');
-      expect(first.notificationWireLocale, 'ru');
+      expect(first.apiLocale, 'ru');
       expect(notified, 1);
 
       final LocaleController restarted = controller(store);
@@ -130,7 +130,7 @@ void main() {
       await third.load();
       expect(third.choice, AppLocaleChoice.system);
       expect(third.languageCode, 'lv');
-      expect(third.notificationWireLocale, 'lv-LV');
+      expect(third.apiLocale, 'lv-LV');
     });
 
     test(

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../app/config/market_config.dart';
+import '../../../../core/localization/app_locale_policy.dart';
 import '../../../../core/notifications/app_notification_sink.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/admin_experience_preview.dart';
@@ -230,10 +231,14 @@ class IdentityWorkspaceController extends ChangeNotifier {
           displayName: displayName,
           marketId: _marketConfig.marketCityId,
           countryCode: _marketConfig.countryCode,
-          defaultLocale: _marketConfig.defaultLocaleCode,
+          defaultLocale: AppLocalePolicy.canonicalTag(
+            _marketConfig.defaultLocaleCode,
+          ),
           timezone: _marketConfig.timezoneId,
           defaultCurrency: _marketConfig.currencyCode,
-          supportedLocales: _marketConfig.supportedLocaleCodes,
+          supportedLocales: _marketConfig.supportedLocaleCodes
+              .map(AppLocalePolicy.canonicalTag)
+              .toList(growable: false),
         ),
       );
       await _selectWorkspaceUseCase(

@@ -1,3 +1,4 @@
+import 'content_body_locale.dart';
 import '../domain/entities/content_validation_violation.dart';
 import '../domain/entities/event_publication.dart';
 import '../domain/entities/publisher_ref.dart';
@@ -56,7 +57,7 @@ final class FunctionsEventPublicationGateway
         'id': publisherRef.id,
       },
       'marketId': marketId,
-      'body': body,
+      'body': canonicalContentBody(body),
     }),
   );
 
@@ -70,7 +71,7 @@ final class FunctionsEventPublicationGateway
     await _command('updateDraft', idempotencyKey, <String, Object?>{
       'draftId': draftId,
       'expectedRevision': expectedRevision,
-      'body': body,
+      'body': canonicalContentBody(body),
     }),
   );
 

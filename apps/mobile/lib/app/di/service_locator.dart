@@ -981,7 +981,7 @@ Future<void> setupDependencies() async {
           guard: sl(),
         ),
         // L4: the reader's UI language at query time.
-        wireLocale: () => sl<LocaleController>().notificationWireLocale,
+        wireLocale: () => sl<LocaleController>().apiLocale,
       ),
     )
     // Local identity events always land in the local inbox, whatever the binding.

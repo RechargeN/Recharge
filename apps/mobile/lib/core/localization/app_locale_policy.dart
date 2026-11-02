@@ -34,6 +34,9 @@ final class AppLocalePolicy {
   /// The R1 UI languages; `lv` is the Latvian language, not the LV market.
   static const List<String> r1LanguageCodes = <String>['en', 'lv', 'ru'];
 
+  /// The R1 API and data identifiers (owner decision 9.1).
+  static const List<String> r1CanonicalLocales = <String>['lv-LV', 'en', 'ru'];
+
   final List<String> supportedLanguageCodes;
   final String fallbackLanguageCode;
 
@@ -63,14 +66,18 @@ final class AppLocalePolicy {
     return fallbackLanguageCode;
   }
 
-  /// The F1 notifications wire locale for a UI language. The server contract
-  /// (`notifications_query.schema.json`) names Latvian `lv-LV`; the UI uses the
-  /// language-only tag `lv`. Unknown codes return null and are never sent.
-  static String? notificationWireLocale(String languageCode) =>
+  /// L4.9.1: the API and data identifier of a UI language. `lv-LV`, `en`, `ru`
+  /// are canonical; `lv` stays the internal UI and ARB code. This is the one
+  /// mapping. An unknown code returns null and is never sent.
+  static String? canonicalLocaleOf(String languageCode) =>
       switch (languageCode) {
         'lv' => 'lv-LV',
         'en' => 'en',
         'ru' => 'ru',
         _ => null,
       };
+
+  /// [canonicalLocaleOf] for a tag from saved data: an already canonical or
+  /// unknown tag (`other`) passes unchanged.
+  static String canonicalTag(String tag) => canonicalLocaleOf(tag) ?? tag;
 }

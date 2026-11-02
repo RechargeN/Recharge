@@ -1,5 +1,6 @@
 import 'functions_event_publication_gateway.dart'
     show ContentCallablePort, ContentTransportFailure;
+import 'content_body_locale.dart';
 import '../domain/entities/event_publication.dart';
 import '../domain/entities/publisher_ref.dart';
 import '../domain/repositories/local_import_gateway.dart';
@@ -48,7 +49,7 @@ final class FunctionsLocalImportGateway implements LocalImportContentGateway {
     await _command('updateDraft', idempotencyKey, <String, Object?>{
       'draftId': draftId,
       'expectedRevision': expectedRevision,
-      'body': body,
+      'body': canonicalContentBody(body),
     }),
   );
 

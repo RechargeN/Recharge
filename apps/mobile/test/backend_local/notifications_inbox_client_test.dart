@@ -134,7 +134,7 @@ void main() {
           runtime: () async => runtime,
           guard: guard,
         ),
-        wireLocale: () => reader.notificationWireLocale,
+        wireLocale: () => reader.apiLocale,
       );
       Future<List<NotificationItemEntity>> items() =>
           inbox.getNotifications(userId: 'not-sent-to-the-server');
