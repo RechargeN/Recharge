@@ -1,6 +1,7 @@
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../../../core/parsing/input_parsers.dart';
 
 import '../../application/controllers/create_controller.dart';
@@ -18,7 +19,6 @@ import '../../../../core/localization/l10n_context.dart';
 import 'create_form_texts.dart';
 import '../../../../core/localization/recharge_formats.dart';
 import '../../../../shared/primitives/money/money.dart';
-import '../../application/create_taxonomy.dart';
 
 class EventCreateBlock extends StatelessWidget {
   const EventCreateBlock({
@@ -718,9 +718,9 @@ class EventCreateBlock extends StatelessWidget {
                 : draft.title,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
-          // Category names are not translated yet (L4-G04).
           Text(
-            createTaxonomyLabelForPath(
+            taxonomyLabel(
+              context.l10n,
               '${draft.mainCategory}.${draft.subcategory}',
             ),
           ),

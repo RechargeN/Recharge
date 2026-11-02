@@ -11574,4 +11574,1703 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get localErrorImportNotReappliable =>
       'This import cannot be repeated. Import the file again.';
+
+  @override
+  String get taxCategoryMusicNightlife => 'Music & nightlife';
+
+  @override
+  String get taxCategoryComedyTheatrePerformance => 'Comedy & performance';
+
+  @override
+  String get taxCategoryCinemaScreenings => 'Cinema & screenings';
+
+  @override
+  String get taxCategoryArtCultureMuseums => 'Art, culture & museums';
+
+  @override
+  String get taxCategoryEducationTalks => 'Education & talks';
+
+  @override
+  String get taxCategoryBusinessNetworking => 'Business & networking';
+
+  @override
+  String get taxCategoryWorkshopsMasterclasses => 'Workshops & masterclasses';
+
+  @override
+  String get taxCategoryLanguageSocialLearning => 'Languages & social learning';
+
+  @override
+  String get taxCategoryFoodDrinks => 'Food & drinks';
+
+  @override
+  String get taxCategoryGamesIndoor => 'Games & indoor';
+
+  @override
+  String get taxCategorySport => 'Sport';
+
+  @override
+  String get taxCategoryDance => 'Dance';
+
+  @override
+  String get taxCategoryOutdoorNatureWalking => 'Outdoor, nature & walking';
+
+  @override
+  String get taxCategoryWaterActivities => 'Water activities';
+
+  @override
+  String get taxCategoryWinterSeasonal => 'Winter & seasonal';
+
+  @override
+  String get taxCategoryTravelTours => 'Travel & tours';
+
+  @override
+  String get taxCategoryFamilyKids => 'Family & kids';
+
+  @override
+  String get taxCategoryPetsAnimals => 'Pets & animals';
+
+  @override
+  String get taxCategoryCommunityCharity => 'Community & charity';
+
+  @override
+  String get taxCategoryMarketsFairs => 'Markets & fairs';
+
+  @override
+  String get taxCategoryHolidaysSeasonal => 'Holidays & seasonal';
+
+  @override
+  String get taxCategoryWellnessRecharge => 'Wellness & recharge';
+
+  @override
+  String get taxCategoryAdrenalineEntertainment => 'Adrenaline & entertainment';
+
+  @override
+  String get taxCategoryAttractions => 'Attractions';
+
+  @override
+  String get taxCategoryAutoMoto => 'Auto & moto';
+
+  @override
+  String get taxCategoryGeekTech => 'Geek & tech';
+
+  @override
+  String get taxCategoryDatingSingles => 'Dating & singles';
+
+  @override
+  String get taxCategoryOther => 'Other';
+
+  @override
+  String get taxSubcategoryConcert => 'Concert';
+
+  @override
+  String get taxSubcategoryLiveMusic => 'Live music';
+
+  @override
+  String get taxSubcategoryAcousticEvening => 'Acoustic evening';
+
+  @override
+  String get taxSubcategoryJazz => 'Jazz';
+
+  @override
+  String get taxSubcategoryClassicalMusic => 'Classical music';
+
+  @override
+  String get taxSubcategoryRockMusic => 'Rock music';
+
+  @override
+  String get taxSubcategoryPopMusic => 'Pop music';
+
+  @override
+  String get taxSubcategoryElectronicMusic => 'Electronic music';
+
+  @override
+  String get taxSubcategoryTechno => 'Techno';
+
+  @override
+  String get taxSubcategoryHouseMusic => 'House music';
+
+  @override
+  String get taxSubcategoryLatinMusic => 'Latin music';
+
+  @override
+  String get taxSubcategoryDjParty => 'DJ party';
+
+  @override
+  String get taxSubcategoryClubNight => 'Club night';
+
+  @override
+  String get taxSubcategoryKaraoke => 'Karaoke';
+
+  @override
+  String get taxSubcategoryOpenMicMusic => 'Open mic music';
+
+  @override
+  String get taxSubcategoryRooftopParty => 'Rooftop party';
+
+  @override
+  String get taxSubcategoryBeachParty => 'Beach party';
+
+  @override
+  String get taxSubcategoryThemedParty => 'Themed party';
+
+  @override
+  String get taxSubcategoryMusicFestival => 'Music festival';
+
+  @override
+  String get taxSubcategoryListeningParty => 'Listening party';
+
+  @override
+  String get taxSubcategoryJamSession => 'Jam session';
+
+  @override
+  String get taxSubcategoryNightBar => 'Night bar';
+
+  @override
+  String get taxSubcategoryAfterworkDrinks => 'Afterwork drinks';
+
+  @override
+  String get taxSubcategoryLateNightSocial => 'Late night social';
+
+  @override
+  String get taxSubcategoryGroupSinging => 'Group singing';
+
+  @override
+  String get taxSubcategoryOrganConcert => 'Organ concert';
+
+  @override
+  String get taxSubcategoryStandup => 'Stand-up';
+
+  @override
+  String get taxSubcategoryComedyOpenMic => 'Comedy open mic';
+
+  @override
+  String get taxSubcategoryTheatre => 'Theatre';
+
+  @override
+  String get taxSubcategoryImprovisation => 'Improvisation';
+
+  @override
+  String get taxSubcategoryMagicShow => 'Magic show';
+
+  @override
+  String get taxSubcategoryCircus => 'Circus';
+
+  @override
+  String get taxSubcategoryPoetryNight => 'Poetry night';
+
+  @override
+  String get taxSubcategoryStorytelling => 'Storytelling';
+
+  @override
+  String get taxSubcategoryPuppetShow => 'Puppet show';
+
+  @override
+  String get taxSubcategoryBallet => 'Ballet';
+
+  @override
+  String get taxSubcategoryOpera => 'Opera';
+
+  @override
+  String get taxSubcategoryCabaret => 'Cabaret';
+
+  @override
+  String get taxSubcategoryStreetPerformance => 'Street performance';
+
+  @override
+  String get taxSubcategoryPerformanceArt => 'Performance art';
+
+  @override
+  String get taxSubcategoryDragShow => 'Drag show';
+
+  @override
+  String get taxSubcategoryMusical => 'Musical';
+
+  @override
+  String get taxSubcategoryExperimentalTheatre => 'Experimental theatre';
+
+  @override
+  String get taxSubcategoryCinema => 'Cinema';
+
+  @override
+  String get taxSubcategoryMovieScreening => 'Movie screening';
+
+  @override
+  String get taxSubcategoryOpenAirCinema => 'Open-air cinema';
+
+  @override
+  String get taxSubcategoryFilmFestival => 'Film festival';
+
+  @override
+  String get taxSubcategoryDocumentary => 'Documentary';
+
+  @override
+  String get taxSubcategoryShortFilms => 'Short films';
+
+  @override
+  String get taxSubcategoryRetroCinema => 'Retro cinema';
+
+  @override
+  String get taxSubcategoryAnimation => 'Animation';
+
+  @override
+  String get taxSubcategorySportsScreening => 'Sports screening';
+
+  @override
+  String get taxSubcategoryMovieDiscussion => 'Movie discussion';
+
+  @override
+  String get taxSubcategoryPremiere => 'Premiere';
+
+  @override
+  String get taxSubcategoryIndependentFilm => 'Independent film';
+
+  @override
+  String get taxSubcategoryCinemaClub => 'Cinema club';
+
+  @override
+  String get taxSubcategoryExhibition => 'Exhibition';
+
+  @override
+  String get taxSubcategoryGallery => 'Gallery';
+
+  @override
+  String get taxSubcategoryMuseum => 'Museum';
+
+  @override
+  String get taxSubcategoryMuseumNight => 'Museum night';
+
+  @override
+  String get taxSubcategoryGalleryWalk => 'Gallery walk';
+
+  @override
+  String get taxSubcategoryArtistTalk => 'Artist talk';
+
+  @override
+  String get taxSubcategoryArtWalk => 'Art walk';
+
+  @override
+  String get taxSubcategoryPhotographyExhibition => 'Photography exhibition';
+
+  @override
+  String get taxSubcategoryStreetArt => 'Street art';
+
+  @override
+  String get taxSubcategoryArchitecture => 'Architecture';
+
+  @override
+  String get taxSubcategoryCulturalHeritage => 'Cultural heritage';
+
+  @override
+  String get taxSubcategoryMonument => 'Monument';
+
+  @override
+  String get taxSubcategoryMemorial => 'Memorial';
+
+  @override
+  String get taxSubcategorySculpture => 'Sculpture';
+
+  @override
+  String get taxSubcategoryHistoricLandmark => 'Historic landmark';
+
+  @override
+  String get taxSubcategoryLiteratureEvening => 'Literature evening';
+
+  @override
+  String get taxSubcategoryBookReading => 'Book reading';
+
+  @override
+  String get taxSubcategoryHistoryWalk => 'History walk';
+
+  @override
+  String get taxSubcategoryDesignEvent => 'Design event';
+
+  @override
+  String get taxSubcategoryCraftExhibition => 'Craft exhibition';
+
+  @override
+  String get taxSubcategoryPublicArt => 'Public art';
+
+  @override
+  String get taxSubcategoryCreativeMeetup => 'Creative meetup';
+
+  @override
+  String get taxSubcategoryFashionEvent => 'Fashion event';
+
+  @override
+  String get taxSubcategoryLecture => 'Lecture';
+
+  @override
+  String get taxSubcategoryPublicTalk => 'Public talk';
+
+  @override
+  String get taxSubcategoryDiscussion => 'Discussion';
+
+  @override
+  String get taxSubcategoryDebate => 'Debate';
+
+  @override
+  String get taxSubcategoryPanelDiscussion => 'Panel discussion';
+
+  @override
+  String get taxSubcategoryScienceTalk => 'Science talk';
+
+  @override
+  String get taxSubcategoryHistoryLecture => 'History lecture';
+
+  @override
+  String get taxSubcategoryPsychologyTalk => 'Psychology talk';
+
+  @override
+  String get taxSubcategoryFinanceTalk => 'Finance talk';
+
+  @override
+  String get taxSubcategoryCareerTalk => 'Career talk';
+
+  @override
+  String get taxSubcategoryLegalInfoSession => 'Legal info session';
+
+  @override
+  String get taxSubcategoryBookClub => 'Book club';
+
+  @override
+  String get taxSubcategoryPracticalSeminar => 'Practical seminar';
+
+  @override
+  String get taxSubcategorySelfDevelopment => 'Self development';
+
+  @override
+  String get taxSubcategoryHealthTalk => 'Health talk';
+
+  @override
+  String get taxSubcategoryTechnologyTalk => 'Technology talk';
+
+  @override
+  String get taxSubcategoryStartupTalk => 'Startup talk';
+
+  @override
+  String get taxSubcategoryParentingTalk => 'Parenting talk';
+
+  @override
+  String get taxSubcategoryCommunityDiscussion => 'Community discussion';
+
+  @override
+  String get taxSubcategoryNetworking => 'Networking';
+
+  @override
+  String get taxSubcategoryBusinessBreakfast => 'Business breakfast';
+
+  @override
+  String get taxSubcategoryBusinessLunch => 'Business lunch';
+
+  @override
+  String get taxSubcategoryConference => 'Conference';
+
+  @override
+  String get taxSubcategoryProductPresentation => 'Product presentation';
+
+  @override
+  String get taxSubcategoryProductLaunch => 'Product launch';
+
+  @override
+  String get taxSubcategoryStartupMeetup => 'Startup meetup';
+
+  @override
+  String get taxSubcategoryPitchNight => 'Pitch night';
+
+  @override
+  String get taxSubcategoryInvestorMeetup => 'Investor meetup';
+
+  @override
+  String get taxSubcategoryJobFair => 'Job fair';
+
+  @override
+  String get taxSubcategoryPortfolioReview => 'Portfolio review';
+
+  @override
+  String get taxSubcategoryFreelancersMeetup => 'Freelancers meetup';
+
+  @override
+  String get taxSubcategoryDemoDay => 'Demo day';
+
+  @override
+  String get taxSubcategoryExpo => 'Expo';
+
+  @override
+  String get taxSubcategoryFounderMeetup => 'Founder meetup';
+
+  @override
+  String get taxSubcategoryIndustryMeetup => 'Industry meetup';
+
+  @override
+  String get taxSubcategoryCareerNetworking => 'Career networking';
+
+  @override
+  String get taxSubcategoryCoworkingEvent => 'Coworking event';
+
+  @override
+  String get taxSubcategoryBusinessWorkshop => 'Business workshop';
+
+  @override
+  String get taxSubcategoryWorkshop => 'Workshop';
+
+  @override
+  String get taxSubcategoryMasterclass => 'Masterclass';
+
+  @override
+  String get taxSubcategoryCourse => 'Course';
+
+  @override
+  String get taxSubcategoryPottery => 'Pottery';
+
+  @override
+  String get taxSubcategoryCeramics => 'Ceramics';
+
+  @override
+  String get taxSubcategoryDrawing => 'Drawing';
+
+  @override
+  String get taxSubcategoryPainting => 'Painting';
+
+  @override
+  String get taxSubcategoryPhotography => 'Photography';
+
+  @override
+  String get taxSubcategoryCookingClass => 'Cooking class';
+
+  @override
+  String get taxSubcategorySewing => 'Sewing';
+
+  @override
+  String get taxSubcategoryFloristics => 'Floristics';
+
+  @override
+  String get taxSubcategoryCandleMaking => 'Candle making';
+
+  @override
+  String get taxSubcategoryPublicSpeaking => 'Public speaking';
+
+  @override
+  String get taxSubcategoryCreativeClass => 'Creative class';
+
+  @override
+  String get taxSubcategoryCraftWorkshop => 'Craft workshop';
+
+  @override
+  String get taxSubcategoryWritingWorkshop => 'Writing workshop';
+
+  @override
+  String get taxSubcategoryMusicLesson => 'Music lesson';
+
+  @override
+  String get taxSubcategoryDanceWorkshop => 'Dance workshop';
+
+  @override
+  String get taxSubcategoryBeautyWorkshop => 'Beauty workshop';
+
+  @override
+  String get taxSubcategoryWellnessWorkshop => 'Wellness workshop';
+
+  @override
+  String get taxSubcategoryLanguageExchange => 'Language exchange';
+
+  @override
+  String get taxSubcategoryEnglishClub => 'English club';
+
+  @override
+  String get taxSubcategoryDutchClub => 'Dutch club';
+
+  @override
+  String get taxSubcategoryLatvianClub => 'Latvian club';
+
+  @override
+  String get taxSubcategoryConversationClub => 'Conversation club';
+
+  @override
+  String get taxSubcategoryInternationalMeetup => 'International meetup';
+
+  @override
+  String get taxSubcategoryExpatsMeetup => 'Expats meetup';
+
+  @override
+  String get taxSubcategoryTandemMeeting => 'Tandem meeting';
+
+  @override
+  String get taxSubcategoryLanguageCafe => 'Language cafe';
+
+  @override
+  String get taxSubcategoryLanguageWalk => 'Language walk';
+
+  @override
+  String get taxSubcategorySpeedFriending => 'Speed friending';
+
+  @override
+  String get taxSubcategorySpeakingClub => 'Speaking club';
+
+  @override
+  String get taxSubcategoryCultureExchange => 'Culture exchange';
+
+  @override
+  String get taxSubcategoryNewcomersMeetup => 'Newcomers meetup';
+
+  @override
+  String get taxSubcategoryStudyGroup => 'Study group';
+
+  @override
+  String get taxSubcategoryCoffee => 'Coffee';
+
+  @override
+  String get taxSubcategoryBreakfast => 'Breakfast';
+
+  @override
+  String get taxSubcategoryBrunch => 'Brunch';
+
+  @override
+  String get taxSubcategoryLunch => 'Lunch';
+
+  @override
+  String get taxSubcategoryDinner => 'Dinner';
+
+  @override
+  String get taxSubcategoryDessert => 'Dessert';
+
+  @override
+  String get taxSubcategoryStreetFood => 'Street food';
+
+  @override
+  String get taxSubcategoryFoodTasting => 'Food tasting';
+
+  @override
+  String get taxSubcategoryDrinkTasting => 'Drink tasting';
+
+  @override
+  String get taxSubcategoryWineTasting => 'Wine tasting';
+
+  @override
+  String get taxSubcategoryBeerTasting => 'Beer tasting';
+
+  @override
+  String get taxSubcategoryCocktailTasting => 'Cocktail tasting';
+
+  @override
+  String get taxSubcategoryTeaCeremony => 'Tea ceremony';
+
+  @override
+  String get taxSubcategoryBbq => 'BBQ';
+
+  @override
+  String get taxSubcategoryPicnic => 'Picnic';
+
+  @override
+  String get taxSubcategoryFoodTour => 'Food tour';
+
+  @override
+  String get taxSubcategoryBarCrawl => 'Bar crawl';
+
+  @override
+  String get taxSubcategoryPubCrawl => 'Pub crawl';
+
+  @override
+  String get taxSubcategoryHappyHour => 'Happy hour';
+
+  @override
+  String get taxSubcategoryRestaurantVisit => 'Restaurant visit';
+
+  @override
+  String get taxSubcategoryCafeVisit => 'Cafe visit';
+
+  @override
+  String get taxSubcategoryBakeryVisit => 'Bakery visit';
+
+  @override
+  String get taxSubcategoryVeganFood => 'Vegan food';
+
+  @override
+  String get taxSubcategoryLocalFood => 'Local food';
+
+  @override
+  String get taxSubcategoryFineDining => 'Fine dining';
+
+  @override
+  String get taxSubcategoryFamilyMeal => 'Family meal';
+
+  @override
+  String get taxSubcategoryQuiz => 'Quiz';
+
+  @override
+  String get taxSubcategoryBoardGames => 'Board games';
+
+  @override
+  String get taxSubcategoryMafia => 'Mafia';
+
+  @override
+  String get taxSubcategoryPokerNoGambling => 'Poker (no gambling)';
+
+  @override
+  String get taxSubcategoryChess => 'Chess';
+
+  @override
+  String get taxSubcategoryEscapeRoom => 'Escape room';
+
+  @override
+  String get taxSubcategoryQuest => 'Quest';
+
+  @override
+  String get taxSubcategoryCityGame => 'City game';
+
+  @override
+  String get taxSubcategoryTreasureHunt => 'Treasure hunt';
+
+  @override
+  String get taxSubcategoryBowling => 'Bowling';
+
+  @override
+  String get taxSubcategoryBilliards => 'Billiards';
+
+  @override
+  String get taxSubcategoryDarts => 'Darts';
+
+  @override
+  String get taxSubcategoryMiniGolf => 'Mini golf';
+
+  @override
+  String get taxSubcategoryArcade => 'Arcade';
+
+  @override
+  String get taxSubcategoryVrArcade => 'VR arcade';
+
+  @override
+  String get taxSubcategoryVideoGames => 'Video games';
+
+  @override
+  String get taxSubcategoryTableGames => 'Table games';
+
+  @override
+  String get taxSubcategoryCardGames => 'Card games';
+
+  @override
+  String get taxSubcategoryRolePlayingGame => 'Role playing game';
+
+  @override
+  String get taxSubcategoryIndoorCompetition => 'Indoor competition';
+
+  @override
+  String get taxSubcategoryFootball => 'Football';
+
+  @override
+  String get taxSubcategoryBasketball => 'Basketball';
+
+  @override
+  String get taxSubcategoryVolleyball => 'Volleyball';
+
+  @override
+  String get taxSubcategoryBeachVolleyball => 'Beach volleyball';
+
+  @override
+  String get taxSubcategoryTennis => 'Tennis';
+
+  @override
+  String get taxSubcategoryTableTennis => 'Table tennis';
+
+  @override
+  String get taxSubcategoryBadminton => 'Badminton';
+
+  @override
+  String get taxSubcategorySquash => 'Squash';
+
+  @override
+  String get taxSubcategoryPadel => 'Padel';
+
+  @override
+  String get taxSubcategoryRunning => 'Running';
+
+  @override
+  String get taxSubcategoryTrailRunning => 'Trail running';
+
+  @override
+  String get taxSubcategoryCycling => 'Cycling';
+
+  @override
+  String get taxSubcategorySwimming => 'Swimming';
+
+  @override
+  String get taxSubcategoryBoxing => 'Boxing';
+
+  @override
+  String get taxSubcategoryMartialArts => 'Martial arts';
+
+  @override
+  String get taxSubcategoryClimbing => 'Climbing';
+
+  @override
+  String get taxSubcategoryBouldering => 'Bouldering';
+
+  @override
+  String get taxSubcategoryFitness => 'Fitness';
+
+  @override
+  String get taxSubcategoryGym => 'Gym';
+
+  @override
+  String get taxSubcategoryCrossfit => 'Crossfit';
+
+  @override
+  String get taxSubcategoryCalisthenics => 'Calisthenics';
+
+  @override
+  String get taxSubcategoryYoga => 'Yoga';
+
+  @override
+  String get taxSubcategoryPilates => 'Pilates';
+
+  @override
+  String get taxSubcategoryStretching => 'Stretching';
+
+  @override
+  String get taxSubcategoryDanceFitness => 'Dance fitness';
+
+  @override
+  String get taxSubcategoryNordicWalking => 'Nordic walking';
+
+  @override
+  String get taxSubcategorySkating => 'Skating';
+
+  @override
+  String get taxSubcategorySkateboarding => 'Skateboarding';
+
+  @override
+  String get taxSubcategoryRollerblading => 'Rollerblading';
+
+  @override
+  String get taxSubcategoryGolf => 'Golf';
+
+  @override
+  String get taxSubcategoryFrisbee => 'Frisbee';
+
+  @override
+  String get taxSubcategoryDiscGolf => 'Disc golf';
+
+  @override
+  String get taxSubcategoryRunningRace => 'Running race';
+
+  @override
+  String get taxSubcategoryCyclingRace => 'Cycling race';
+
+  @override
+  String get taxSubcategoryFitnessChallenge => 'Fitness challenge';
+
+  @override
+  String get taxSubcategoryAmateurTournament => 'Amateur tournament';
+
+  @override
+  String get taxSubcategorySalsa => 'Salsa';
+
+  @override
+  String get taxSubcategoryBachata => 'Bachata';
+
+  @override
+  String get taxSubcategoryKizomba => 'Kizomba';
+
+  @override
+  String get taxSubcategoryTango => 'Tango';
+
+  @override
+  String get taxSubcategoryHipHop => 'Hip-hop';
+
+  @override
+  String get taxSubcategoryContemporaryDance => 'Contemporary dance';
+
+  @override
+  String get taxSubcategoryBallroomDance => 'Ballroom dance';
+
+  @override
+  String get taxSubcategoryFolkDance => 'Folk dance';
+
+  @override
+  String get taxSubcategoryDanceSocial => 'Dance social';
+
+  @override
+  String get taxSubcategoryDanceBattle => 'Dance battle';
+
+  @override
+  String get taxSubcategoryZumba => 'Zumba';
+
+  @override
+  String get taxSubcategoryPartnerDance => 'Partner dance';
+
+  @override
+  String get taxSubcategoryLatinDance => 'Latin dance';
+
+  @override
+  String get taxSubcategoryHeelsDance => 'Heels dance';
+
+  @override
+  String get taxSubcategoryStreetDance => 'Street dance';
+
+  @override
+  String get taxSubcategoryDanceClass => 'Dance class';
+
+  @override
+  String get taxSubcategoryDancePractice => 'Dance practice';
+
+  @override
+  String get taxSubcategoryDanceShow => 'Dance show';
+
+  @override
+  String get taxSubcategoryHiking => 'Hiking';
+
+  @override
+  String get taxSubcategoryNatureWalk => 'Nature walk';
+
+  @override
+  String get taxSubcategoryCityWalk => 'City walk';
+
+  @override
+  String get taxSubcategoryHistoricalWalk => 'Historical walk';
+
+  @override
+  String get taxSubcategorySunsetWalk => 'Sunset walk';
+
+  @override
+  String get taxSubcategorySunriseWalk => 'Sunrise walk';
+
+  @override
+  String get taxSubcategoryForestWalk => 'Forest walk';
+
+  @override
+  String get taxSubcategoryLakeWalk => 'Lake walk';
+
+  @override
+  String get taxSubcategoryRiverWalk => 'River walk';
+
+  @override
+  String get taxSubcategoryArchitectureWalk => 'Architecture walk';
+
+  @override
+  String get taxSubcategoryHiddenGemsWalk => 'Hidden gems walk';
+
+  @override
+  String get taxSubcategoryPhotographyWalk => 'Photography walk';
+
+  @override
+  String get taxSubcategoryBirdwatching => 'Birdwatching';
+
+  @override
+  String get taxSubcategoryMushroomPicking => 'Mushroom picking';
+
+  @override
+  String get taxSubcategoryBerryPicking => 'Berry picking';
+
+  @override
+  String get taxSubcategoryPicnicWalk => 'Picnic walk';
+
+  @override
+  String get taxSubcategoryParkWalk => 'Park walk';
+
+  @override
+  String get taxSubcategoryBeachWalk => 'Beach walk';
+
+  @override
+  String get taxSubcategoryPromenadeWalk => 'Promenade walk';
+
+  @override
+  String get taxSubcategoryPark => 'Park';
+
+  @override
+  String get taxSubcategoryBeach => 'Beach';
+
+  @override
+  String get taxSubcategoryPromenade => 'Promenade';
+
+  @override
+  String get taxSubcategoryViewpoint => 'Viewpoint';
+
+  @override
+  String get taxSubcategoryForest => 'Forest';
+
+  @override
+  String get taxSubcategoryLake => 'Lake';
+
+  @override
+  String get taxSubcategoryWaterfall => 'Waterfall';
+
+  @override
+  String get taxSubcategoryCave => 'Cave';
+
+  @override
+  String get taxSubcategoryNaturalLandmark => 'Natural landmark';
+
+  @override
+  String get taxSubcategoryOutdoorWorkout => 'Outdoor workout';
+
+  @override
+  String get taxSubcategoryNatureEscape => 'Nature escape';
+
+  @override
+  String get taxSubcategorySlowWalk => 'Slow walk';
+
+  @override
+  String get taxSubcategoryStargazing => 'Stargazing';
+
+  @override
+  String get taxSubcategoryNorthernLightsWatch => 'Northern lights watch';
+
+  @override
+  String get taxSubcategoryMeteorShowerWatch => 'Meteor shower watch';
+
+  @override
+  String get taxSubcategorySup => 'SUP';
+
+  @override
+  String get taxSubcategoryKayak => 'Kayak';
+
+  @override
+  String get taxSubcategoryCanoe => 'Canoe';
+
+  @override
+  String get taxSubcategoryBoatTrip => 'Boat trip';
+
+  @override
+  String get taxSubcategoryCatamaran => 'Catamaran';
+
+  @override
+  String get taxSubcategoryCanalCruise => 'Canal cruise';
+
+  @override
+  String get taxSubcategoryRowing => 'Rowing';
+
+  @override
+  String get taxSubcategorySailing => 'Sailing';
+
+  @override
+  String get taxSubcategoryFishing => 'Fishing';
+
+  @override
+  String get taxSubcategoryWakeboarding => 'Wakeboarding';
+
+  @override
+  String get taxSubcategoryWaterBike => 'Water bike';
+
+  @override
+  String get taxSubcategoryJetSki => 'Jet ski';
+
+  @override
+  String get taxSubcategoryBeachActivity => 'Beach activity';
+
+  @override
+  String get taxSubcategoryWaterTour => 'Water tour';
+
+  @override
+  String get taxSubcategoryDiving => 'Diving';
+
+  @override
+  String get taxSubcategorySnorkeling => 'Snorkeling';
+
+  @override
+  String get taxSubcategorySurfing => 'Surfing';
+
+  @override
+  String get taxSubcategoryWindsurfing => 'Windsurfing';
+
+  @override
+  String get taxSubcategoryKitesurfing => 'Kitesurfing';
+
+  @override
+  String get taxSubcategoryBeachDay => 'Beach day';
+
+  @override
+  String get taxSubcategoryWinterWalk => 'Winter walk';
+
+  @override
+  String get taxSubcategoryIceSkating => 'Ice skating';
+
+  @override
+  String get taxSubcategorySkiing => 'Skiing';
+
+  @override
+  String get taxSubcategorySnowboarding => 'Snowboarding';
+
+  @override
+  String get taxSubcategorySledding => 'Sledding';
+
+  @override
+  String get taxSubcategoryWinterHiking => 'Winter hiking';
+
+  @override
+  String get taxSubcategoryChristmasMarketWalk => 'Christmas market walk';
+
+  @override
+  String get taxSubcategoryWinterPhotoRoute => 'Winter photo route';
+
+  @override
+  String get taxSubcategorySaunaColdPlunge => 'Sauna and cold plunge';
+
+  @override
+  String get taxSubcategoryIceFishing => 'Ice fishing';
+
+  @override
+  String get taxSubcategoryWinterFestival => 'Winter festival';
+
+  @override
+  String get taxSubcategoryAutumnLeafWalk => 'Autumn leaf walk';
+
+  @override
+  String get taxSubcategorySpringBlossomWalk => 'Spring blossom walk';
+
+  @override
+  String get taxSubcategorySummerOutdoor => 'Summer outdoor';
+
+  @override
+  String get taxSubcategorySeasonalWalk => 'Seasonal walk';
+
+  @override
+  String get taxSubcategorySnowActivity => 'Snow activity';
+
+  @override
+  String get taxSubcategoryColdPlunge => 'Cold plunge';
+
+  @override
+  String get taxSubcategoryHolidayLightsWalk => 'Holiday lights walk';
+
+  @override
+  String get taxSubcategoryDayTrip => 'Day trip';
+
+  @override
+  String get taxSubcategoryWeekendTrip => 'Weekend trip';
+
+  @override
+  String get taxSubcategoryLocalExperience => 'Local experience';
+
+  @override
+  String get taxSubcategoryTouristExcursion => 'Tourist excursion';
+
+  @override
+  String get taxSubcategoryCityTour => 'City tour';
+
+  @override
+  String get taxSubcategoryFoodTastingTour => 'Food tasting tour';
+
+  @override
+  String get taxSubcategoryCraftExperience => 'Craft experience';
+
+  @override
+  String get taxSubcategoryFarmExperience => 'Farm experience';
+
+  @override
+  String get taxSubcategoryCastleTour => 'Castle tour';
+
+  @override
+  String get taxSubcategoryNatureReserveTour => 'Nature reserve tour';
+
+  @override
+  String get taxSubcategoryCoastalTrip => 'Coastal trip';
+
+  @override
+  String get taxSubcategoryTrainDayTrip => 'Train day trip';
+
+  @override
+  String get taxSubcategoryLocalGuideExperience => 'Local guide experience';
+
+  @override
+  String get taxSubcategoryBikeTour => 'Bike tour';
+
+  @override
+  String get taxSubcategoryWalkingTour => 'Walking tour';
+
+  @override
+  String get taxSubcategoryHistoricalTour => 'Historical tour';
+
+  @override
+  String get taxSubcategoryArchitectureTour => 'Architecture tour';
+
+  @override
+  String get taxSubcategoryPhotoTour => 'Photo tour';
+
+  @override
+  String get taxSubcategoryHiddenGemsTour => 'Hidden gems tour';
+
+  @override
+  String get taxSubcategoryFamilyActivity => 'Family activity';
+
+  @override
+  String get taxSubcategoryKidsWorkshop => 'Kids workshop';
+
+  @override
+  String get taxSubcategoryPlaygroundEvent => 'Playground event';
+
+  @override
+  String get taxSubcategoryFamilyPicnic => 'Family picnic';
+
+  @override
+  String get taxSubcategoryKidsTheatre => 'Kids theatre';
+
+  @override
+  String get taxSubcategoryKidsMuseumEvent => 'Kids museum event';
+
+  @override
+  String get taxSubcategoryFamilySportsDay => 'Family sports day';
+
+  @override
+  String get taxSubcategoryParentChildClass => 'Parent-child class';
+
+  @override
+  String get taxSubcategoryCreativeKidsClass => 'Creative kids class';
+
+  @override
+  String get taxSubcategoryKidsCookingClass => 'Kids cooking class';
+
+  @override
+  String get taxSubcategoryKidsOutdoorWalk => 'Kids outdoor walk';
+
+  @override
+  String get taxSubcategoryBirthdayActivity => 'Birthday activity';
+
+  @override
+  String get taxSubcategoryFamilyFarmVisit => 'Family farm visit';
+
+  @override
+  String get taxSubcategoryFamilyRoute => 'Family route';
+
+  @override
+  String get taxSubcategoryKidsParty => 'Kids party';
+
+  @override
+  String get taxSubcategoryEducationalKidsEvent => 'Educational kids event';
+
+  @override
+  String get taxSubcategoryBabyFriendlyActivity => 'Baby-friendly activity';
+
+  @override
+  String get taxSubcategoryKidsCamp => 'Kids camp';
+
+  @override
+  String get taxSubcategoryDayCamp => 'Day camp';
+
+  @override
+  String get taxSubcategoryTeenMeetup => 'Teen meetup';
+
+  @override
+  String get taxSubcategoryTeenEvent => 'Teen event';
+
+  @override
+  String get taxSubcategoryKidsQuest => 'Kids quest';
+
+  @override
+  String get taxSubcategoryKidsScienceEvent => 'Kids science event';
+
+  @override
+  String get taxSubcategoryKidsDisco => 'Kids disco';
+
+  @override
+  String get taxSubcategoryDogWalk => 'Dog walk';
+
+  @override
+  String get taxSubcategoryDogMeetup => 'Dog meetup';
+
+  @override
+  String get taxSubcategoryDogParkMeetup => 'Dog park meetup';
+
+  @override
+  String get taxSubcategoryPetFriendlyCafe => 'Pet-friendly cafe';
+
+  @override
+  String get taxSubcategoryDogTraining => 'Dog training';
+
+  @override
+  String get taxSubcategoryPetPhotoSession => 'Pet photo session';
+
+  @override
+  String get taxSubcategoryAnimalShelterVisit => 'Animal shelter visit';
+
+  @override
+  String get taxSubcategoryFarmAnimalExperience => 'Farm animal experience';
+
+  @override
+  String get taxSubcategoryHorseRiding => 'Horse riding';
+
+  @override
+  String get taxSubcategoryPonyRiding => 'Pony riding';
+
+  @override
+  String get taxSubcategoryCatCafe => 'Cat cafe';
+
+  @override
+  String get taxSubcategoryPetAdoption => 'Pet adoption';
+
+  @override
+  String get taxSubcategoryPetCharity => 'Pet charity';
+
+  @override
+  String get taxSubcategoryPetFriendlyWalk => 'Pet-friendly walk';
+
+  @override
+  String get taxSubcategoryDogSport => 'Dog sport';
+
+  @override
+  String get taxSubcategoryPetOwnerMeetup => 'Pet owner meetup';
+
+  @override
+  String get taxSubcategoryDogShow => 'Dog show';
+
+  @override
+  String get taxSubcategoryPetExhibition => 'Pet exhibition';
+
+  @override
+  String get taxSubcategoryPetFair => 'Pet fair';
+
+  @override
+  String get taxSubcategoryPetCareTalk => 'Pet care talk';
+
+  @override
+  String get taxSubcategoryAnimalTherapy => 'Animal therapy';
+
+  @override
+  String get taxSubcategoryCharityEvent => 'Charity event';
+
+  @override
+  String get taxSubcategoryVolunteerActivity => 'Volunteer activity';
+
+  @override
+  String get taxSubcategoryCommunityCleanup => 'Community cleanup';
+
+  @override
+  String get taxSubcategoryDonationEvent => 'Donation event';
+
+  @override
+  String get taxSubcategoryNeighborhoodEvent => 'Neighborhood event';
+
+  @override
+  String get taxSubcategoryFundraisingDinner => 'Fundraising dinner';
+
+  @override
+  String get taxSubcategoryCharityRun => 'Charity run';
+
+  @override
+  String get taxSubcategoryAnimalShelterVolunteering =>
+      'Animal shelter volunteering';
+
+  @override
+  String get taxSubcategoryFoodBankVolunteering => 'Food bank volunteering';
+
+  @override
+  String get taxSubcategoryTreePlanting => 'Tree planting';
+
+  @override
+  String get taxSubcategoryBeachCleanup => 'Beach cleanup';
+
+  @override
+  String get taxSubcategoryParkCleanup => 'Park cleanup';
+
+  @override
+  String get taxSubcategoryCommunityGarden => 'Community garden';
+
+  @override
+  String get taxSubcategoryPublicSquare => 'Public square';
+
+  @override
+  String get taxSubcategoryLocalCommunityMeetup => 'Local community meetup';
+
+  @override
+  String get taxSubcategoryMutualAid => 'Mutual aid';
+
+  @override
+  String get taxSubcategorySocialImpactEvent => 'Social impact event';
+
+  @override
+  String get taxSubcategoryEnvironmentalAction => 'Environmental action';
+
+  @override
+  String get taxSubcategoryLocalMarket => 'Local market';
+
+  @override
+  String get taxSubcategoryFleaMarket => 'Flea market';
+
+  @override
+  String get taxSubcategorySeasonalMarket => 'Seasonal market';
+
+  @override
+  String get taxSubcategoryChristmasMarket => 'Christmas market';
+
+  @override
+  String get taxSubcategoryFarmersMarket => 'Farmers market';
+
+  @override
+  String get taxSubcategoryCraftMarket => 'Craft market';
+
+  @override
+  String get taxSubcategoryDesignMarket => 'Design market';
+
+  @override
+  String get taxSubcategoryVintageMarket => 'Vintage market';
+
+  @override
+  String get taxSubcategoryBookMarket => 'Book market';
+
+  @override
+  String get taxSubcategoryFoodMarket => 'Food market';
+
+  @override
+  String get taxSubcategoryFlowerMarket => 'Flower market';
+
+  @override
+  String get taxSubcategoryArtFair => 'Art fair';
+
+  @override
+  String get taxSubcategoryPopUpShop => 'Pop-up shop';
+
+  @override
+  String get taxSubcategoryStreetMarket => 'Street market';
+
+  @override
+  String get taxSubcategoryHandmadeFair => 'Handmade fair';
+
+  @override
+  String get taxSubcategoryCharityMarket => 'Charity market';
+
+  @override
+  String get taxSubcategoryKidsMarket => 'Kids market';
+
+  @override
+  String get taxSubcategoryNightMarket => 'Night market';
+
+  @override
+  String get taxSubcategoryLocalBrandsMarket => 'Local brands market';
+
+  @override
+  String get taxSubcategoryClothingSwap => 'Clothing swap';
+
+  @override
+  String get taxSubcategoryChristmas => 'Christmas';
+
+  @override
+  String get taxSubcategoryNewYear => 'New Year';
+
+  @override
+  String get taxSubcategoryHalloween => 'Halloween';
+
+  @override
+  String get taxSubcategoryEaster => 'Easter';
+
+  @override
+  String get taxSubcategoryValentinesDay => 'Valentine\'s Day';
+
+  @override
+  String get taxSubcategoryJani => 'Jāņi (Midsummer)';
+
+  @override
+  String get taxSubcategoryCityFestival => 'City festival';
+
+  @override
+  String get taxSubcategorySummerFestival => 'Summer festival';
+
+  @override
+  String get taxSubcategoryAutumnEvent => 'Autumn event';
+
+  @override
+  String get taxSubcategorySpringEvent => 'Spring event';
+
+  @override
+  String get taxSubcategorySchoolHoliday => 'School holiday';
+
+  @override
+  String get taxSubcategoryNationalHoliday => 'National holiday';
+
+  @override
+  String get taxSubcategoryLocalTradition => 'Local tradition';
+
+  @override
+  String get taxSubcategoryMidsummer => 'Midsummer';
+
+  @override
+  String get taxSubcategoryFireworks => 'Fireworks';
+
+  @override
+  String get taxSubcategoryPublicCelebration => 'Public celebration';
+
+  @override
+  String get taxSubcategoryRechargeWalk => 'Recharge walk';
+
+  @override
+  String get taxSubcategoryCalmWalk => 'Calm walk';
+
+  @override
+  String get taxSubcategoryMindfulWalk => 'Mindful walk';
+
+  @override
+  String get taxSubcategoryCoffeeWalk => 'Coffee walk';
+
+  @override
+  String get taxSubcategoryTeaWalk => 'Tea walk';
+
+  @override
+  String get taxSubcategorySunsetReset => 'Sunset reset';
+
+  @override
+  String get taxSubcategoryNatureReset => 'Nature reset';
+
+  @override
+  String get taxSubcategoryDigitalDetox => 'Digital detox';
+
+  @override
+  String get taxSubcategorySlowMorning => 'Slow morning';
+
+  @override
+  String get taxSubcategoryEveningReset => 'Evening reset';
+
+  @override
+  String get taxSubcategorySauna => 'Sauna';
+
+  @override
+  String get taxSubcategorySpa => 'Spa';
+
+  @override
+  String get taxSubcategoryMassage => 'Massage';
+
+  @override
+  String get taxSubcategoryBreathwork => 'Breathwork';
+
+  @override
+  String get taxSubcategoryMeditation => 'Meditation';
+
+  @override
+  String get taxSubcategorySoundHealing => 'Sound healing';
+
+  @override
+  String get taxSubcategoryWellnessClass => 'Wellness class';
+
+  @override
+  String get taxSubcategoryRelaxationSession => 'Relaxation session';
+
+  @override
+  String get taxSubcategoryMentalHealthMeetup => 'Mental health meetup';
+
+  @override
+  String get taxSubcategoryQuietSocial => 'Quiet social';
+
+  @override
+  String get taxSubcategoryCoupleRecharge => 'Couple recharge';
+
+  @override
+  String get taxSubcategorySoloRecharge => 'Solo recharge';
+
+  @override
+  String get taxSubcategoryFriendsRecharge => 'Friends recharge';
+
+  @override
+  String get taxSubcategoryPirtsRitual => 'Pirts ritual (Latvian sauna)';
+
+  @override
+  String get taxSubcategoryRetreat => 'Retreat';
+
+  @override
+  String get taxSubcategoryLaserTag => 'Laser tag';
+
+  @override
+  String get taxSubcategoryPaintball => 'Paintball';
+
+  @override
+  String get taxSubcategoryAirsoft => 'Airsoft';
+
+  @override
+  String get taxSubcategoryKarting => 'Karting';
+
+  @override
+  String get taxSubcategoryShootingRange => 'Shooting range';
+
+  @override
+  String get taxSubcategoryArchery => 'Archery';
+
+  @override
+  String get taxSubcategoryAxeThrowing => 'Axe throwing';
+
+  @override
+  String get taxSubcategoryTrampolinePark => 'Trampoline park';
+
+  @override
+  String get taxSubcategoryRopePark => 'Rope park';
+
+  @override
+  String get taxSubcategoryZipline => 'Zipline';
+
+  @override
+  String get taxSubcategoryWindTunnel => 'Wind tunnel';
+
+  @override
+  String get taxSubcategoryHotAirBalloon => 'Hot air balloon';
+
+  @override
+  String get taxSubcategorySkydiving => 'Skydiving';
+
+  @override
+  String get taxSubcategoryBungeeJumping => 'Bungee jumping';
+
+  @override
+  String get taxSubcategoryParkour => 'Parkour';
+
+  @override
+  String get taxSubcategoryObstacleCourse => 'Obstacle course';
+
+  @override
+  String get taxSubcategoryZoo => 'Zoo';
+
+  @override
+  String get taxSubcategoryPettingZoo => 'Petting zoo';
+
+  @override
+  String get taxSubcategoryAquarium => 'Aquarium';
+
+  @override
+  String get taxSubcategoryAmusementPark => 'Amusement park';
+
+  @override
+  String get taxSubcategoryWaterPark => 'Water park';
+
+  @override
+  String get taxSubcategoryAdventurePark => 'Adventure park';
+
+  @override
+  String get taxSubcategoryBotanicalGarden => 'Botanical garden';
+
+  @override
+  String get taxSubcategoryPlanetarium => 'Planetarium';
+
+  @override
+  String get taxSubcategoryScienceCenter => 'Science center';
+
+  @override
+  String get taxSubcategoryObservationDeck => 'Observation deck';
+
+  @override
+  String get taxSubcategoryFerrisWheel => 'Ferris wheel';
+
+  @override
+  String get taxSubcategorySeasonalAttraction => 'Seasonal attraction';
+
+  @override
+  String get taxSubcategoryCarMeetup => 'Car meetup';
+
+  @override
+  String get taxSubcategoryRetroCars => 'Retro cars';
+
+  @override
+  String get taxSubcategoryCarShow => 'Car show';
+
+  @override
+  String get taxSubcategoryAutoExhibition => 'Auto exhibition';
+
+  @override
+  String get taxSubcategoryTuningMeetup => 'Tuning meetup';
+
+  @override
+  String get taxSubcategoryDriftEvent => 'Drift event';
+
+  @override
+  String get taxSubcategoryOffroadTrip => 'Off-road trip';
+
+  @override
+  String get taxSubcategoryMotorcycleRide => 'Motorcycle ride';
+
+  @override
+  String get taxSubcategoryMotorcycleMeetup => 'Motorcycle meetup';
+
+  @override
+  String get taxSubcategoryScooterMeetup => 'Scooter meetup';
+
+  @override
+  String get taxSubcategoryCarPhotoMeet => 'Car photo meet';
+
+  @override
+  String get taxSubcategoryDriveInCinema => 'Drive-in cinema';
+
+  @override
+  String get taxSubcategoryAnimeMeetup => 'Anime meetup';
+
+  @override
+  String get taxSubcategoryCosplayEvent => 'Cosplay event';
+
+  @override
+  String get taxSubcategoryComicCon => 'Comic Con';
+
+  @override
+  String get taxSubcategoryEsportsTournament => 'Esports tournament';
+
+  @override
+  String get taxSubcategoryLanParty => 'LAN party';
+
+  @override
+  String get taxSubcategoryRetroGaming => 'Retro gaming';
+
+  @override
+  String get taxSubcategoryTabletopWargames => 'Tabletop wargames';
+
+  @override
+  String get taxSubcategoryTradingCardGames => 'Trading card games';
+
+  @override
+  String get taxSubcategoryHackathon => 'Hackathon';
+
+  @override
+  String get taxSubcategoryGameDevMeetup => 'Game dev meetup';
+
+  @override
+  String get taxSubcategoryTechMeetup => 'Tech meetup';
+
+  @override
+  String get taxSubcategoryRoboticsEvent => 'Robotics event';
+
+  @override
+  String get taxSubcategoryFandomMeetup => 'Fandom meetup';
+
+  @override
+  String get taxSubcategoryCollectorsMeetup => 'Collectors meetup';
+
+  @override
+  String get taxSubcategorySpeedDating => 'Speed dating';
+
+  @override
+  String get taxSubcategorySinglesParty => 'Singles party';
+
+  @override
+  String get taxSubcategorySinglesMixer => 'Singles mixer';
+
+  @override
+  String get taxSubcategorySinglesDinner => 'Singles dinner';
+
+  @override
+  String get taxSubcategoryBlindDateEvent => 'Blind date event';
+
+  @override
+  String get taxSubcategoryDatingGameEvent => 'Dating game event';
+
+  @override
+  String get taxSubcategorySinglesActivity => 'Singles activity';
+
+  @override
+  String get taxSubcategoryMatchmakingEvent => 'Matchmaking event';
+
+  @override
+  String get taxSubcategoryOtherEvent => 'Other event';
+
+  @override
+  String get discoverHomeShortSport => 'Sport';
+
+  @override
+  String get discoverHomeShortWalks => 'Walks';
+
+  @override
+  String get discoverHomeShortGames => 'Games';
+
+  @override
+  String get discoverHomeShortDance => 'Dance';
+
+  @override
+  String get discoverHomeShortMusic => 'Music';
+
+  @override
+  String get discoverHomeShortArt => 'Art';
+
+  @override
+  String get discoverHomeShortFood => 'Food';
+
+  @override
+  String get discoverHomeShortWellness => 'Wellness';
 }

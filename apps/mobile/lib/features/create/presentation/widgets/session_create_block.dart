@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/config/recharge_category_criteria.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/create_taxonomy.dart';
 import '../../application/event_create_config.dart';
@@ -143,7 +144,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
             for (final CreateTaxonomyCategory category in categories)
               DropdownMenuItem<CreateTaxonomyCategory>(
                 value: category,
-                child: Text(category.title),
+                child: Text(taxonomyLabel(context.l10n, category.id)),
               ),
           ],
           onChanged: (CreateTaxonomyCategory? category) {

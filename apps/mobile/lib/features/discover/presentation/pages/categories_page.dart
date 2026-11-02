@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../application/discover_providers.dart';
 import '../widgets/discover_category_icon.dart';
 
@@ -100,7 +101,12 @@ class _CategoriesPageState extends ConsumerState<CategoriesPage> {
   bool _matchesQuery(RechargeContentGroup group) {
     final String normalized = _query.trim().toLowerCase();
     if (normalized.isEmpty) return true;
-    return group.title.toLowerCase().contains(normalized) ||
+    // L4.9.5: the reader's language and English both match; ids still do.
+    return taxonomyLabel(
+          context.l10n,
+          group.id,
+        ).toLowerCase().contains(normalized) ||
+        group.title.toLowerCase().contains(normalized) ||
         group.id.replaceAll('_', ' ').contains(normalized);
   }
 }
@@ -122,8 +128,8 @@ class _CategoryRow extends StatelessWidget {
     return Semantics(
       button: true,
       label: count == null
-          ? group.title
-          : '${group.title}, ${context.l10n.discoverResultsCount(count!)}',
+          ? taxonomyLabel(context.l10n, group.id)
+          : '${taxonomyLabel(context.l10n, group.id)}, ${context.l10n.discoverResultsCount(count!)}',
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -152,7 +158,7 @@ class _CategoryRow extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      group.title,
+                      taxonomyLabel(context.l10n, group.id),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(

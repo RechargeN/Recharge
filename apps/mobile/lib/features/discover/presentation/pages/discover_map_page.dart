@@ -1,5 +1,6 @@
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../../../core/localization/user_message_catalog.dart';
 import '../discover_formats.dart';
 import 'dart:async';
@@ -20,7 +21,6 @@ import '../../../../shared/models/catalog_object_ref.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/application/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/auth_gate_sheet.dart';
-import '../../../create/application/create_taxonomy.dart';
 import '../../../favorites/application/controllers/favorites_controller.dart';
 import '../../../favorites/application/favorites_providers.dart';
 import '../../../favorites/domain/entities/favorite_item_entity.dart';
@@ -83,7 +83,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
     for (final RechargeContentGroup group in rechargeVisibleContentGroups)
       _MapFilterOption(
         id: group.id,
-        label: group.title,
+        label: group.id,
         icon: _mapCategoryIcon(group.id),
       ),
   ];
@@ -1324,7 +1324,7 @@ String _mapCreateTitleForQuery(AppLocalizations l10n, DiscoverQuery query) {
   }
   if (query.selectedCategoryIds.isNotEmpty) {
     return l10n.discoverIdeaForCategory(
-      createTaxonomyLabelForPath(query.selectedCategoryIds.first),
+      taxonomyLabel(l10n, query.selectedCategoryIds.first),
     );
   }
   return l10n.discoverMapAreaIdea;
@@ -1337,7 +1337,7 @@ String _mapTitleForQuery(AppLocalizations l10n, DiscoverQuery query) {
   }
   if (query.selectedCategoryIds.isNotEmpty) {
     return l10n.discoverIdeaForCategory(
-      createTaxonomyLabelForPath(query.selectedCategoryIds.first),
+      taxonomyLabel(l10n, query.selectedCategoryIds.first),
     );
   }
   return l10n.discoverRechargeIdea;
@@ -1382,7 +1382,7 @@ String _mapPromptTextForQuery(AppLocalizations l10n, DiscoverQuery query) {
   return <String>[
     if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
     if (query.selectedCategoryIds.isNotEmpty)
-      createTaxonomyLabelForPath(query.selectedCategoryIds.first),
+      taxonomyLabel(l10n, query.selectedCategoryIds.first),
     ...discoverQueryConditionTexts(l10n, query),
   ].join(' · ');
 }
@@ -1402,7 +1402,7 @@ String _mapSmartSearchSubtitle(
   );
   if (parseResult == null) return _mapPromptTextForQuery(l10n, item.query);
   return parseResult.routeIntent!.stepCategories
-      .map(createTaxonomyLabelForPath)
+      .map((String category) => taxonomyLabel(l10n, category))
       .join(' · ');
 }
 
@@ -1559,7 +1559,7 @@ class _MapFilterPanel extends StatelessWidget {
                               label: Text(
                                 filter.id == null
                                     ? context.l10n.discoverAll
-                                    : filter.label,
+                                    : taxonomyLabel(context.l10n, filter.id!),
                               ),
                               onSelected: (_) => onCategorySelected(filter.id),
                             );
@@ -2221,7 +2221,7 @@ class _ScenarioRouteCard extends StatelessWidget {
                                       ? context.l10n.discoverCompletedDuration(
                                           step.durationMinutes,
                                         )
-                                      : '${createTaxonomyLabelForPath(step.category)} · '
+                                      : '${taxonomyLabel(context.l10n, step.category)} · '
                                             '${context.l10n.discoverMinutes(step.durationMinutes)}',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -3234,7 +3234,7 @@ String _metaLabel(AppLocalizations l10n, DiscoverItemEntity item) {
       : item.priceAmount == null
       ? '—'
       : RechargeFormats.money(item.priceAmount!, l10n.localeName);
-  return '${item.city} · ${rechargeTaxonomyLabel(item.category)} · '
+  return '${item.city} · ${taxonomyLabel(l10n, item.category)} · '
       '${discoverKm(l10n, item.distanceKm)} · $price';
 }
 
@@ -3249,7 +3249,7 @@ String _scenarioRouteSummary(AppLocalizations l10n, _ScenarioMapRoute route) {
     ...List<String>.generate(route.stops.length, (int index) {
       final ScenarioStepEntity step = route.stops[index];
       return '${index + 1}. ${step.title} - '
-          '${createTaxonomyLabelForPath(step.category)}, '
+          '${taxonomyLabel(l10n, step.category)}, '
           '${step.durationMinutes} min';
     }),
   ];

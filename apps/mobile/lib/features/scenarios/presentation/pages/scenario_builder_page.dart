@@ -1,5 +1,6 @@
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../../../core/localization/user_message_catalog.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -11,7 +12,6 @@ import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../../app/application/planning_conversion_providers.dart';
-import '../../../create/application/create_taxonomy.dart';
 import '../../../discover/application/controllers/discover_feed_controller.dart';
 import '../../../discover/application/discover_providers.dart';
 import '../../../discover/domain/entities/discover_query.dart';
@@ -1667,7 +1667,7 @@ class _ScenarioSavedIntentPanel extends StatelessWidget {
             title: item.prompt.trim().isEmpty
                 ? _titleForQuery(context.l10n, item.query)
                 : item.prompt.trim(),
-            subtitle: _smartSearchIntentSubtitle(item),
+            subtitle: _smartSearchIntentSubtitle(context.l10n, item),
             query: item.query,
             chips: _smartSearchIntentChips(context.l10n, item),
             applyTooltip: context.l10n.quickPlanApplySmartToBuilder,
@@ -2109,7 +2109,7 @@ class _ScenarioStepCard extends StatelessWidget {
                     children: <Widget>[
                       _MetaChip(
                         icon: Icons.category,
-                        label: createTaxonomyLabelForPath(step.category),
+                        label: taxonomyLabel(context.l10n, step.category),
                       ),
                       _MetaChip(
                         icon: Icons.schedule,
@@ -2232,7 +2232,7 @@ class _SuggestedStopCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    '${createTaxonomyLabelForPath(step.category)} · '
+                    '${taxonomyLabel(context.l10n, step.category)} · '
                     '${context.l10n.discoverMinutes(step.durationMinutes)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -2779,13 +2779,16 @@ String _capitalized(String value) {
   return trimmed[0].toUpperCase() + trimmed.substring(1);
 }
 
-String _smartSearchIntentSubtitle(SmartSearchHistoryEntity item) {
+String _smartSearchIntentSubtitle(
+  AppLocalizations l10n,
+  SmartSearchHistoryEntity item,
+) {
   final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
     item,
   );
   if (parseResult == null) return _promptForQuery(item.query);
   return parseResult.routeIntent!.stepCategories
-      .map(createTaxonomyLabelForPath)
+      .map((String category) => taxonomyLabel(l10n, category))
       .join(' · ');
 }
 
@@ -2863,7 +2866,7 @@ String _scenarioSummary(AppLocalizations l10n, ScenarioDraftEntity draft) {
     ...List<String>.generate(draft.steps.length, (int index) {
       final ScenarioStepEntity step = draft.steps[index];
       return '${index + 1}. ${step.title} - '
-          '${createTaxonomyLabelForPath(step.category)}, '
+          '${taxonomyLabel(l10n, step.category)}, '
           '${l10n.discoverMinutes(step.durationMinutes)}';
     }),
   ];

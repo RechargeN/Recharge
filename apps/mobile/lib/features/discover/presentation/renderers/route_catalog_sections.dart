@@ -2,8 +2,8 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../domain/entities/route_catalog_facts.dart';
 import '../discover_formats.dart';
 import '../shell/compatibility_object_renderer.dart';
@@ -209,7 +209,7 @@ class RouteCatalogFactsCard extends StatelessWidget {
             DetailsPill(
               label: routeProfileLabelForDetails(context.l10n, facts.profileId),
             ),
-            DetailsPill(label: rechargeTaxonomyLabel(categoryId)),
+            DetailsPill(label: taxonomyLabel(context.l10n, categoryId)),
             DetailsPill(
               key: const Key('route-catalog-publisher'),
               label: routeCatalogPublisherLabel(context.l10n, facts),

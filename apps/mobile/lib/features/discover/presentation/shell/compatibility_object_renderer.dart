@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../../../shared/primitives/money/money.dart';
 import '../../../create/application/create_taxonomy.dart';
 import '../../domain/entities/discover_item_entity.dart';
@@ -245,7 +246,10 @@ class _DetailsHero extends StatelessWidget {
                 left: 12,
                 top: 12,
                 child: _CategoryBadge(
-                  label: rechargeTaxonomyLabel(item.category).toUpperCase(),
+                  label: taxonomyLabel(
+                    context.l10n,
+                    item.category,
+                  ).toUpperCase(),
                 ),
               ),
             ],
@@ -757,7 +761,7 @@ class DetailsActionHub extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                DetailsPill(label: rechargeTaxonomyLabel(item.category)),
+                DetailsPill(label: taxonomyLabel(context.l10n, item.category)),
                 DetailsPill(label: priceLabelForDetails(context.l10n, item)),
                 DetailsPill(
                   label: participantsLabelForDetails(context.l10n, item),
@@ -966,7 +970,9 @@ class DetailsRoutePreview extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              plan.stepLabels.join(' · '),
+              plan.stepCategories
+                  .map((String c) => taxonomyLabel(context.l10n, c))
+                  .join(' · '),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -1042,7 +1048,7 @@ class OrganizerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final String organizerName = item.organizerName.isEmpty
         // No organizer: the category name stands in (G04, not translated).
-        ? 'Recharge ${rechargeTaxonomyLabel(item.category)}' // l10n-ignore: brand + category name
+        ? 'Recharge ${taxonomyLabel(context.l10n, item.category)}' // l10n-ignore: brand + category name
         : item.organizerName;
     return Card(
       child: Padding(

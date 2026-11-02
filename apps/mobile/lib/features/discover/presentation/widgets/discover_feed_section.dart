@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../application/state/discover_feed_state.dart';
@@ -210,7 +210,9 @@ class _DiscoverFeedCard extends StatelessWidget {
                       spacing: 6,
                       runSpacing: 6,
                       children: <Widget>[
-                        _MetaChip(label: rechargeTaxonomyLabel(item.category)),
+                        _MetaChip(
+                          label: taxonomyLabel(context.l10n, item.category),
+                        ),
                         if (item.isFree)
                           _MetaChip(label: context.l10n.discoverFree),
                         if (item.timeFitEvaluation

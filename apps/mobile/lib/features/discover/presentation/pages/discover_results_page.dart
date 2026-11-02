@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../../../shared/primitives/money/money.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -53,7 +54,7 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
     for (final RechargeContentGroup group in rechargeVisibleContentGroups)
       _CategoryOption(
         id: group.id,
-        label: group.title,
+        label: group.id,
         icon: _discoverCategoryIcon(group.id),
       ),
   ];
@@ -739,7 +740,7 @@ String _createTitleForQuery(AppLocalizations l10n, DiscoverQuery query) {
   }
   if (query.selectedCategoryIds.isNotEmpty) {
     return l10n.discoverIdeaForCategory(
-      rechargeTaxonomyLabel(query.selectedCategoryIds.first),
+      taxonomyLabel(l10n, query.selectedCategoryIds.first),
     );
   }
   return l10n.discoverRechargeIdea;
@@ -1101,7 +1102,9 @@ class _CategoryRail extends StatelessWidget {
             selected: selected,
             avatar: Icon(category.icon, size: 18),
             label: Text(
-              category.id == null ? context.l10n.discoverAll : category.label,
+              category.id == null
+                  ? context.l10n.discoverAll
+                  : taxonomyLabel(context.l10n, category.id!),
             ),
             onSelected: (_) => onSelected(category.id),
           );
@@ -1252,7 +1255,7 @@ class _AppliedSummary extends StatelessWidget {
     final List<String> parts = <String>[
       if (query.queryText.isNotEmpty) '"${query.queryText}"',
       if (query.selectedCategoryIds.isNotEmpty)
-        rechargeTaxonomyLabel(query.selectedCategoryIds.first),
+        taxonomyLabel(context.l10n, query.selectedCategoryIds.first),
       if (query.freeOnly) context.l10n.discoverFree,
       if (query.budgetMax != null)
         context.l10n.discoverUpToBudget(
@@ -1440,13 +1443,13 @@ class _SearchResultCard extends StatelessWidget {
                     Text(
                       item.isCatalogRoute
                           ? '${context.l10n.discoverRouteLabel} · '
-                                '${rechargeTaxonomyLabel(item.category)} · '
+                                '${taxonomyLabel(context.l10n, item.category)} · '
                                 '${routeCatalogMetricLabel(context.l10n, item.routeCatalog!)}'
                           : item.isPublishedRoute
                           ? '${item.city} · ${context.l10n.discoverRouteLabel} · '
                                 '${_routeDistanceLabel(context.l10n, item)}'
                           : '${item.city} · '
-                                '${rechargeTaxonomyLabel(item.category)} · '
+                                '${taxonomyLabel(context.l10n, item.category)} · '
                                 '${discoverKm(context.l10n, item.distanceKm)}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,

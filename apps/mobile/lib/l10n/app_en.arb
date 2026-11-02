@@ -12855,5 +12855,2269 @@
   "localErrorImportNotReappliable": "This import cannot be repeated. Import the file again.",
   "@localErrorImportNotReappliable": {
     "description": "L4.8: client refusal — a queued import cannot be repeated."
+  },
+  "taxCategoryMusicNightlife": "Music & nightlife",
+  "@taxCategoryMusicNightlife": {
+    "description": "L4.9.5: Category System category `music_nightlife` (stable id; G04)."
+  },
+  "taxCategoryComedyTheatrePerformance": "Comedy & performance",
+  "@taxCategoryComedyTheatrePerformance": {
+    "description": "L4.9.5: Category System category `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxCategoryCinemaScreenings": "Cinema & screenings",
+  "@taxCategoryCinemaScreenings": {
+    "description": "L4.9.5: Category System category `cinema_screenings` (stable id; G04)."
+  },
+  "taxCategoryArtCultureMuseums": "Art, culture & museums",
+  "@taxCategoryArtCultureMuseums": {
+    "description": "L4.9.5: Category System category `art_culture_museums` (stable id; G04)."
+  },
+  "taxCategoryEducationTalks": "Education & talks",
+  "@taxCategoryEducationTalks": {
+    "description": "L4.9.5: Category System category `education_talks` (stable id; G04)."
+  },
+  "taxCategoryBusinessNetworking": "Business & networking",
+  "@taxCategoryBusinessNetworking": {
+    "description": "L4.9.5: Category System category `business_networking` (stable id; G04)."
+  },
+  "taxCategoryWorkshopsMasterclasses": "Workshops & masterclasses",
+  "@taxCategoryWorkshopsMasterclasses": {
+    "description": "L4.9.5: Category System category `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxCategoryLanguageSocialLearning": "Languages & social learning",
+  "@taxCategoryLanguageSocialLearning": {
+    "description": "L4.9.5: Category System category `language_social_learning` (stable id; G04)."
+  },
+  "taxCategoryFoodDrinks": "Food & drinks",
+  "@taxCategoryFoodDrinks": {
+    "description": "L4.9.5: Category System category `food_drinks` (stable id; G04)."
+  },
+  "taxCategoryGamesIndoor": "Games & indoor",
+  "@taxCategoryGamesIndoor": {
+    "description": "L4.9.5: Category System category `games_indoor` (stable id; G04)."
+  },
+  "taxCategorySport": "Sport",
+  "@taxCategorySport": {
+    "description": "L4.9.5: Category System category `sport` (stable id; G04)."
+  },
+  "taxCategoryDance": "Dance",
+  "@taxCategoryDance": {
+    "description": "L4.9.5: Category System category `dance` (stable id; G04)."
+  },
+  "taxCategoryOutdoorNatureWalking": "Outdoor, nature & walking",
+  "@taxCategoryOutdoorNatureWalking": {
+    "description": "L4.9.5: Category System category `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxCategoryWaterActivities": "Water activities",
+  "@taxCategoryWaterActivities": {
+    "description": "L4.9.5: Category System category `water_activities` (stable id; G04)."
+  },
+  "taxCategoryWinterSeasonal": "Winter & seasonal",
+  "@taxCategoryWinterSeasonal": {
+    "description": "L4.9.5: Category System category `winter_seasonal` (stable id; G04)."
+  },
+  "taxCategoryTravelTours": "Travel & tours",
+  "@taxCategoryTravelTours": {
+    "description": "L4.9.5: Category System category `travel_tours` (stable id; G04)."
+  },
+  "taxCategoryFamilyKids": "Family & kids",
+  "@taxCategoryFamilyKids": {
+    "description": "L4.9.5: Category System category `family_kids` (stable id; G04)."
+  },
+  "taxCategoryPetsAnimals": "Pets & animals",
+  "@taxCategoryPetsAnimals": {
+    "description": "L4.9.5: Category System category `pets_animals` (stable id; G04)."
+  },
+  "taxCategoryCommunityCharity": "Community & charity",
+  "@taxCategoryCommunityCharity": {
+    "description": "L4.9.5: Category System category `community_charity` (stable id; G04)."
+  },
+  "taxCategoryMarketsFairs": "Markets & fairs",
+  "@taxCategoryMarketsFairs": {
+    "description": "L4.9.5: Category System category `markets_fairs` (stable id; G04)."
+  },
+  "taxCategoryHolidaysSeasonal": "Holidays & seasonal",
+  "@taxCategoryHolidaysSeasonal": {
+    "description": "L4.9.5: Category System category `holidays_seasonal` (stable id; G04)."
+  },
+  "taxCategoryWellnessRecharge": "Wellness & recharge",
+  "@taxCategoryWellnessRecharge": {
+    "description": "L4.9.5: Category System category `wellness_recharge` (stable id; G04)."
+  },
+  "taxCategoryAdrenalineEntertainment": "Adrenaline & entertainment",
+  "@taxCategoryAdrenalineEntertainment": {
+    "description": "L4.9.5: Category System category `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxCategoryAttractions": "Attractions",
+  "@taxCategoryAttractions": {
+    "description": "L4.9.5: Category System category `attractions` (stable id; G04)."
+  },
+  "taxCategoryAutoMoto": "Auto & moto",
+  "@taxCategoryAutoMoto": {
+    "description": "L4.9.5: Category System category `auto_moto` (stable id; G04)."
+  },
+  "taxCategoryGeekTech": "Geek & tech",
+  "@taxCategoryGeekTech": {
+    "description": "L4.9.5: Category System category `geek_tech` (stable id; G04)."
+  },
+  "taxCategoryDatingSingles": "Dating & singles",
+  "@taxCategoryDatingSingles": {
+    "description": "L4.9.5: Category System category `dating_singles` (stable id; G04)."
+  },
+  "taxCategoryOther": "Other",
+  "@taxCategoryOther": {
+    "description": "L4.9.5: Category System category `other` (stable id; G04)."
+  },
+  "taxSubcategoryConcert": "Concert",
+  "@taxSubcategoryConcert": {
+    "description": "L4.9.5: Category System subcategory `concert` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryLiveMusic": "Live music",
+  "@taxSubcategoryLiveMusic": {
+    "description": "L4.9.5: Category System subcategory `live_music` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryAcousticEvening": "Acoustic evening",
+  "@taxSubcategoryAcousticEvening": {
+    "description": "L4.9.5: Category System subcategory `acoustic_evening` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryJazz": "Jazz",
+  "@taxSubcategoryJazz": {
+    "description": "L4.9.5: Category System subcategory `jazz` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryClassicalMusic": "Classical music",
+  "@taxSubcategoryClassicalMusic": {
+    "description": "L4.9.5: Category System subcategory `classical_music` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryRockMusic": "Rock music",
+  "@taxSubcategoryRockMusic": {
+    "description": "L4.9.5: Category System subcategory `rock_music` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryPopMusic": "Pop music",
+  "@taxSubcategoryPopMusic": {
+    "description": "L4.9.5: Category System subcategory `pop_music` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryElectronicMusic": "Electronic music",
+  "@taxSubcategoryElectronicMusic": {
+    "description": "L4.9.5: Category System subcategory `electronic_music` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryTechno": "Techno",
+  "@taxSubcategoryTechno": {
+    "description": "L4.9.5: Category System subcategory `techno` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryHouseMusic": "House music",
+  "@taxSubcategoryHouseMusic": {
+    "description": "L4.9.5: Category System subcategory `house_music` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryLatinMusic": "Latin music",
+  "@taxSubcategoryLatinMusic": {
+    "description": "L4.9.5: Category System subcategory `latin_music` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryDjParty": "DJ party",
+  "@taxSubcategoryDjParty": {
+    "description": "L4.9.5: Category System subcategory `dj_party` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryClubNight": "Club night",
+  "@taxSubcategoryClubNight": {
+    "description": "L4.9.5: Category System subcategory `club_night` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryKaraoke": "Karaoke",
+  "@taxSubcategoryKaraoke": {
+    "description": "L4.9.5: Category System subcategory `karaoke` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryOpenMicMusic": "Open mic music",
+  "@taxSubcategoryOpenMicMusic": {
+    "description": "L4.9.5: Category System subcategory `open_mic_music` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryRooftopParty": "Rooftop party",
+  "@taxSubcategoryRooftopParty": {
+    "description": "L4.9.5: Category System subcategory `rooftop_party` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryBeachParty": "Beach party",
+  "@taxSubcategoryBeachParty": {
+    "description": "L4.9.5: Category System subcategory `beach_party` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryThemedParty": "Themed party",
+  "@taxSubcategoryThemedParty": {
+    "description": "L4.9.5: Category System subcategory `themed_party` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryMusicFestival": "Music festival",
+  "@taxSubcategoryMusicFestival": {
+    "description": "L4.9.5: Category System subcategory `music_festival` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryListeningParty": "Listening party",
+  "@taxSubcategoryListeningParty": {
+    "description": "L4.9.5: Category System subcategory `listening_party` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryJamSession": "Jam session",
+  "@taxSubcategoryJamSession": {
+    "description": "L4.9.5: Category System subcategory `jam_session` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryNightBar": "Night bar",
+  "@taxSubcategoryNightBar": {
+    "description": "L4.9.5: Category System subcategory `night_bar` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryAfterworkDrinks": "Afterwork drinks",
+  "@taxSubcategoryAfterworkDrinks": {
+    "description": "L4.9.5: Category System subcategory `afterwork_drinks` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryLateNightSocial": "Late night social",
+  "@taxSubcategoryLateNightSocial": {
+    "description": "L4.9.5: Category System subcategory `late_night_social` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryGroupSinging": "Group singing",
+  "@taxSubcategoryGroupSinging": {
+    "description": "L4.9.5: Category System subcategory `group_singing` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryOrganConcert": "Organ concert",
+  "@taxSubcategoryOrganConcert": {
+    "description": "L4.9.5: Category System subcategory `organ_concert` in `music_nightlife` (stable id; G04)."
+  },
+  "taxSubcategoryStandup": "Stand-up",
+  "@taxSubcategoryStandup": {
+    "description": "L4.9.5: Category System subcategory `standup` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryComedyOpenMic": "Comedy open mic",
+  "@taxSubcategoryComedyOpenMic": {
+    "description": "L4.9.5: Category System subcategory `comedy_open_mic` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryTheatre": "Theatre",
+  "@taxSubcategoryTheatre": {
+    "description": "L4.9.5: Category System subcategory `theatre` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryImprovisation": "Improvisation",
+  "@taxSubcategoryImprovisation": {
+    "description": "L4.9.5: Category System subcategory `improvisation` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryMagicShow": "Magic show",
+  "@taxSubcategoryMagicShow": {
+    "description": "L4.9.5: Category System subcategory `magic_show` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryCircus": "Circus",
+  "@taxSubcategoryCircus": {
+    "description": "L4.9.5: Category System subcategory `circus` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryPoetryNight": "Poetry night",
+  "@taxSubcategoryPoetryNight": {
+    "description": "L4.9.5: Category System subcategory `poetry_night` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryStorytelling": "Storytelling",
+  "@taxSubcategoryStorytelling": {
+    "description": "L4.9.5: Category System subcategory `storytelling` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryPuppetShow": "Puppet show",
+  "@taxSubcategoryPuppetShow": {
+    "description": "L4.9.5: Category System subcategory `puppet_show` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryBallet": "Ballet",
+  "@taxSubcategoryBallet": {
+    "description": "L4.9.5: Category System subcategory `ballet` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryOpera": "Opera",
+  "@taxSubcategoryOpera": {
+    "description": "L4.9.5: Category System subcategory `opera` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryCabaret": "Cabaret",
+  "@taxSubcategoryCabaret": {
+    "description": "L4.9.5: Category System subcategory `cabaret` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryStreetPerformance": "Street performance",
+  "@taxSubcategoryStreetPerformance": {
+    "description": "L4.9.5: Category System subcategory `street_performance` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryPerformanceArt": "Performance art",
+  "@taxSubcategoryPerformanceArt": {
+    "description": "L4.9.5: Category System subcategory `performance_art` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryDragShow": "Drag show",
+  "@taxSubcategoryDragShow": {
+    "description": "L4.9.5: Category System subcategory `drag_show` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryMusical": "Musical",
+  "@taxSubcategoryMusical": {
+    "description": "L4.9.5: Category System subcategory `musical` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryExperimentalTheatre": "Experimental theatre",
+  "@taxSubcategoryExperimentalTheatre": {
+    "description": "L4.9.5: Category System subcategory `experimental_theatre` in `comedy_theatre_performance` (stable id; G04)."
+  },
+  "taxSubcategoryCinema": "Cinema",
+  "@taxSubcategoryCinema": {
+    "description": "L4.9.5: Category System subcategory `cinema` in `cinema_screenings` (stable id; G04)."
+  },
+  "taxSubcategoryMovieScreening": "Movie screening",
+  "@taxSubcategoryMovieScreening": {
+    "description": "L4.9.5: Category System subcategory `movie_screening` in `cinema_screenings` (stable id; G04)."
+  },
+  "taxSubcategoryOpenAirCinema": "Open-air cinema",
+  "@taxSubcategoryOpenAirCinema": {
+    "description": "L4.9.5: Category System subcategory `open_air_cinema` in `cinema_screenings` (stable id; G04)."
+  },
+  "taxSubcategoryFilmFestival": "Film festival",
+  "@taxSubcategoryFilmFestival": {
+    "description": "L4.9.5: Category System subcategory `film_festival` in `cinema_screenings` (stable id; G04)."
+  },
+  "taxSubcategoryDocumentary": "Documentary",
+  "@taxSubcategoryDocumentary": {
+    "description": "L4.9.5: Category System subcategory `documentary` in `cinema_screenings` (stable id; G04)."
+  },
+  "taxSubcategoryShortFilms": "Short films",
+  "@taxSubcategoryShortFilms": {
+    "description": "L4.9.5: Category System subcategory `short_films` in `cinema_screenings` (stable id; G04)."
+  },
+  "taxSubcategoryRetroCinema": "Retro cinema",
+  "@taxSubcategoryRetroCinema": {
+    "description": "L4.9.5: Category System subcategory `retro_cinema` in `cinema_screenings` (stable id; G04)."
+  },
+  "taxSubcategoryAnimation": "Animation",
+  "@taxSubcategoryAnimation": {
+    "description": "L4.9.5: Category System subcategory `animation` in `cinema_screenings` (stable id; G04)."
+  },
+  "taxSubcategorySportsScreening": "Sports screening",
+  "@taxSubcategorySportsScreening": {
+    "description": "L4.9.5: Category System subcategory `sports_screening` in `cinema_screenings` (stable id; G04)."
+  },
+  "taxSubcategoryMovieDiscussion": "Movie discussion",
+  "@taxSubcategoryMovieDiscussion": {
+    "description": "L4.9.5: Category System subcategory `movie_discussion` in `cinema_screenings` (stable id; G04)."
+  },
+  "taxSubcategoryPremiere": "Premiere",
+  "@taxSubcategoryPremiere": {
+    "description": "L4.9.5: Category System subcategory `premiere` in `cinema_screenings` (stable id; G04)."
+  },
+  "taxSubcategoryIndependentFilm": "Independent film",
+  "@taxSubcategoryIndependentFilm": {
+    "description": "L4.9.5: Category System subcategory `independent_film` in `cinema_screenings` (stable id; G04)."
+  },
+  "taxSubcategoryCinemaClub": "Cinema club",
+  "@taxSubcategoryCinemaClub": {
+    "description": "L4.9.5: Category System subcategory `cinema_club` in `cinema_screenings` (stable id; G04)."
+  },
+  "taxSubcategoryExhibition": "Exhibition",
+  "@taxSubcategoryExhibition": {
+    "description": "L4.9.5: Category System subcategory `exhibition` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryGallery": "Gallery",
+  "@taxSubcategoryGallery": {
+    "description": "L4.9.5: Category System subcategory `gallery` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryMuseum": "Museum",
+  "@taxSubcategoryMuseum": {
+    "description": "L4.9.5: Category System subcategory `museum` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryMuseumNight": "Museum night",
+  "@taxSubcategoryMuseumNight": {
+    "description": "L4.9.5: Category System subcategory `museum_night` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryGalleryWalk": "Gallery walk",
+  "@taxSubcategoryGalleryWalk": {
+    "description": "L4.9.5: Category System subcategory `gallery_walk` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryArtistTalk": "Artist talk",
+  "@taxSubcategoryArtistTalk": {
+    "description": "L4.9.5: Category System subcategory `artist_talk` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryArtWalk": "Art walk",
+  "@taxSubcategoryArtWalk": {
+    "description": "L4.9.5: Category System subcategory `art_walk` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryPhotographyExhibition": "Photography exhibition",
+  "@taxSubcategoryPhotographyExhibition": {
+    "description": "L4.9.5: Category System subcategory `photography_exhibition` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryStreetArt": "Street art",
+  "@taxSubcategoryStreetArt": {
+    "description": "L4.9.5: Category System subcategory `street_art` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryArchitecture": "Architecture",
+  "@taxSubcategoryArchitecture": {
+    "description": "L4.9.5: Category System subcategory `architecture` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryCulturalHeritage": "Cultural heritage",
+  "@taxSubcategoryCulturalHeritage": {
+    "description": "L4.9.5: Category System subcategory `cultural_heritage` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryMonument": "Monument",
+  "@taxSubcategoryMonument": {
+    "description": "L4.9.5: Category System subcategory `monument` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryMemorial": "Memorial",
+  "@taxSubcategoryMemorial": {
+    "description": "L4.9.5: Category System subcategory `memorial` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategorySculpture": "Sculpture",
+  "@taxSubcategorySculpture": {
+    "description": "L4.9.5: Category System subcategory `sculpture` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryHistoricLandmark": "Historic landmark",
+  "@taxSubcategoryHistoricLandmark": {
+    "description": "L4.9.5: Category System subcategory `historic_landmark` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryLiteratureEvening": "Literature evening",
+  "@taxSubcategoryLiteratureEvening": {
+    "description": "L4.9.5: Category System subcategory `literature_evening` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryBookReading": "Book reading",
+  "@taxSubcategoryBookReading": {
+    "description": "L4.9.5: Category System subcategory `book_reading` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryHistoryWalk": "History walk",
+  "@taxSubcategoryHistoryWalk": {
+    "description": "L4.9.5: Category System subcategory `history_walk` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryDesignEvent": "Design event",
+  "@taxSubcategoryDesignEvent": {
+    "description": "L4.9.5: Category System subcategory `design_event` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryCraftExhibition": "Craft exhibition",
+  "@taxSubcategoryCraftExhibition": {
+    "description": "L4.9.5: Category System subcategory `craft_exhibition` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryPublicArt": "Public art",
+  "@taxSubcategoryPublicArt": {
+    "description": "L4.9.5: Category System subcategory `public_art` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryCreativeMeetup": "Creative meetup",
+  "@taxSubcategoryCreativeMeetup": {
+    "description": "L4.9.5: Category System subcategory `creative_meetup` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryFashionEvent": "Fashion event",
+  "@taxSubcategoryFashionEvent": {
+    "description": "L4.9.5: Category System subcategory `fashion_event` in `art_culture_museums` (stable id; G04)."
+  },
+  "taxSubcategoryLecture": "Lecture",
+  "@taxSubcategoryLecture": {
+    "description": "L4.9.5: Category System subcategory `lecture` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryPublicTalk": "Public talk",
+  "@taxSubcategoryPublicTalk": {
+    "description": "L4.9.5: Category System subcategory `public_talk` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryDiscussion": "Discussion",
+  "@taxSubcategoryDiscussion": {
+    "description": "L4.9.5: Category System subcategory `discussion` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryDebate": "Debate",
+  "@taxSubcategoryDebate": {
+    "description": "L4.9.5: Category System subcategory `debate` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryPanelDiscussion": "Panel discussion",
+  "@taxSubcategoryPanelDiscussion": {
+    "description": "L4.9.5: Category System subcategory `panel_discussion` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryScienceTalk": "Science talk",
+  "@taxSubcategoryScienceTalk": {
+    "description": "L4.9.5: Category System subcategory `science_talk` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryHistoryLecture": "History lecture",
+  "@taxSubcategoryHistoryLecture": {
+    "description": "L4.9.5: Category System subcategory `history_lecture` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryPsychologyTalk": "Psychology talk",
+  "@taxSubcategoryPsychologyTalk": {
+    "description": "L4.9.5: Category System subcategory `psychology_talk` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryFinanceTalk": "Finance talk",
+  "@taxSubcategoryFinanceTalk": {
+    "description": "L4.9.5: Category System subcategory `finance_talk` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryCareerTalk": "Career talk",
+  "@taxSubcategoryCareerTalk": {
+    "description": "L4.9.5: Category System subcategory `career_talk` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryLegalInfoSession": "Legal info session",
+  "@taxSubcategoryLegalInfoSession": {
+    "description": "L4.9.5: Category System subcategory `legal_info_session` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryBookClub": "Book club",
+  "@taxSubcategoryBookClub": {
+    "description": "L4.9.5: Category System subcategory `book_club` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryPracticalSeminar": "Practical seminar",
+  "@taxSubcategoryPracticalSeminar": {
+    "description": "L4.9.5: Category System subcategory `practical_seminar` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategorySelfDevelopment": "Self development",
+  "@taxSubcategorySelfDevelopment": {
+    "description": "L4.9.5: Category System subcategory `self_development` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryHealthTalk": "Health talk",
+  "@taxSubcategoryHealthTalk": {
+    "description": "L4.9.5: Category System subcategory `health_talk` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryTechnologyTalk": "Technology talk",
+  "@taxSubcategoryTechnologyTalk": {
+    "description": "L4.9.5: Category System subcategory `technology_talk` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryStartupTalk": "Startup talk",
+  "@taxSubcategoryStartupTalk": {
+    "description": "L4.9.5: Category System subcategory `startup_talk` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryParentingTalk": "Parenting talk",
+  "@taxSubcategoryParentingTalk": {
+    "description": "L4.9.5: Category System subcategory `parenting_talk` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryCommunityDiscussion": "Community discussion",
+  "@taxSubcategoryCommunityDiscussion": {
+    "description": "L4.9.5: Category System subcategory `community_discussion` in `education_talks` (stable id; G04)."
+  },
+  "taxSubcategoryNetworking": "Networking",
+  "@taxSubcategoryNetworking": {
+    "description": "L4.9.5: Category System subcategory `networking` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryBusinessBreakfast": "Business breakfast",
+  "@taxSubcategoryBusinessBreakfast": {
+    "description": "L4.9.5: Category System subcategory `business_breakfast` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryBusinessLunch": "Business lunch",
+  "@taxSubcategoryBusinessLunch": {
+    "description": "L4.9.5: Category System subcategory `business_lunch` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryConference": "Conference",
+  "@taxSubcategoryConference": {
+    "description": "L4.9.5: Category System subcategory `conference` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryProductPresentation": "Product presentation",
+  "@taxSubcategoryProductPresentation": {
+    "description": "L4.9.5: Category System subcategory `product_presentation` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryProductLaunch": "Product launch",
+  "@taxSubcategoryProductLaunch": {
+    "description": "L4.9.5: Category System subcategory `product_launch` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryStartupMeetup": "Startup meetup",
+  "@taxSubcategoryStartupMeetup": {
+    "description": "L4.9.5: Category System subcategory `startup_meetup` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryPitchNight": "Pitch night",
+  "@taxSubcategoryPitchNight": {
+    "description": "L4.9.5: Category System subcategory `pitch_night` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryInvestorMeetup": "Investor meetup",
+  "@taxSubcategoryInvestorMeetup": {
+    "description": "L4.9.5: Category System subcategory `investor_meetup` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryJobFair": "Job fair",
+  "@taxSubcategoryJobFair": {
+    "description": "L4.9.5: Category System subcategory `job_fair` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryPortfolioReview": "Portfolio review",
+  "@taxSubcategoryPortfolioReview": {
+    "description": "L4.9.5: Category System subcategory `portfolio_review` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryFreelancersMeetup": "Freelancers meetup",
+  "@taxSubcategoryFreelancersMeetup": {
+    "description": "L4.9.5: Category System subcategory `freelancers_meetup` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryDemoDay": "Demo day",
+  "@taxSubcategoryDemoDay": {
+    "description": "L4.9.5: Category System subcategory `demo_day` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryExpo": "Expo",
+  "@taxSubcategoryExpo": {
+    "description": "L4.9.5: Category System subcategory `expo` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryFounderMeetup": "Founder meetup",
+  "@taxSubcategoryFounderMeetup": {
+    "description": "L4.9.5: Category System subcategory `founder_meetup` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryIndustryMeetup": "Industry meetup",
+  "@taxSubcategoryIndustryMeetup": {
+    "description": "L4.9.5: Category System subcategory `industry_meetup` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryCareerNetworking": "Career networking",
+  "@taxSubcategoryCareerNetworking": {
+    "description": "L4.9.5: Category System subcategory `career_networking` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryCoworkingEvent": "Coworking event",
+  "@taxSubcategoryCoworkingEvent": {
+    "description": "L4.9.5: Category System subcategory `coworking_event` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryBusinessWorkshop": "Business workshop",
+  "@taxSubcategoryBusinessWorkshop": {
+    "description": "L4.9.5: Category System subcategory `business_workshop` in `business_networking` (stable id; G04)."
+  },
+  "taxSubcategoryWorkshop": "Workshop",
+  "@taxSubcategoryWorkshop": {
+    "description": "L4.9.5: Category System subcategory `workshop` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryMasterclass": "Masterclass",
+  "@taxSubcategoryMasterclass": {
+    "description": "L4.9.5: Category System subcategory `masterclass` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryCourse": "Course",
+  "@taxSubcategoryCourse": {
+    "description": "L4.9.5: Category System subcategory `course` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryPottery": "Pottery",
+  "@taxSubcategoryPottery": {
+    "description": "L4.9.5: Category System subcategory `pottery` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryCeramics": "Ceramics",
+  "@taxSubcategoryCeramics": {
+    "description": "L4.9.5: Category System subcategory `ceramics` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryDrawing": "Drawing",
+  "@taxSubcategoryDrawing": {
+    "description": "L4.9.5: Category System subcategory `drawing` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryPainting": "Painting",
+  "@taxSubcategoryPainting": {
+    "description": "L4.9.5: Category System subcategory `painting` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryPhotography": "Photography",
+  "@taxSubcategoryPhotography": {
+    "description": "L4.9.5: Category System subcategory `photography` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryCookingClass": "Cooking class",
+  "@taxSubcategoryCookingClass": {
+    "description": "L4.9.5: Category System subcategory `cooking_class` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategorySewing": "Sewing",
+  "@taxSubcategorySewing": {
+    "description": "L4.9.5: Category System subcategory `sewing` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryFloristics": "Floristics",
+  "@taxSubcategoryFloristics": {
+    "description": "L4.9.5: Category System subcategory `floristics` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryCandleMaking": "Candle making",
+  "@taxSubcategoryCandleMaking": {
+    "description": "L4.9.5: Category System subcategory `candle_making` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryPublicSpeaking": "Public speaking",
+  "@taxSubcategoryPublicSpeaking": {
+    "description": "L4.9.5: Category System subcategory `public_speaking` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryCreativeClass": "Creative class",
+  "@taxSubcategoryCreativeClass": {
+    "description": "L4.9.5: Category System subcategory `creative_class` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryCraftWorkshop": "Craft workshop",
+  "@taxSubcategoryCraftWorkshop": {
+    "description": "L4.9.5: Category System subcategory `craft_workshop` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryWritingWorkshop": "Writing workshop",
+  "@taxSubcategoryWritingWorkshop": {
+    "description": "L4.9.5: Category System subcategory `writing_workshop` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryMusicLesson": "Music lesson",
+  "@taxSubcategoryMusicLesson": {
+    "description": "L4.9.5: Category System subcategory `music_lesson` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryDanceWorkshop": "Dance workshop",
+  "@taxSubcategoryDanceWorkshop": {
+    "description": "L4.9.5: Category System subcategory `dance_workshop` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryBeautyWorkshop": "Beauty workshop",
+  "@taxSubcategoryBeautyWorkshop": {
+    "description": "L4.9.5: Category System subcategory `beauty_workshop` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryWellnessWorkshop": "Wellness workshop",
+  "@taxSubcategoryWellnessWorkshop": {
+    "description": "L4.9.5: Category System subcategory `wellness_workshop` in `workshops_masterclasses` (stable id; G04)."
+  },
+  "taxSubcategoryLanguageExchange": "Language exchange",
+  "@taxSubcategoryLanguageExchange": {
+    "description": "L4.9.5: Category System subcategory `language_exchange` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategoryEnglishClub": "English club",
+  "@taxSubcategoryEnglishClub": {
+    "description": "L4.9.5: Category System subcategory `english_club` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategoryDutchClub": "Dutch club",
+  "@taxSubcategoryDutchClub": {
+    "description": "L4.9.5: Category System subcategory `dutch_club` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategoryLatvianClub": "Latvian club",
+  "@taxSubcategoryLatvianClub": {
+    "description": "L4.9.5: Category System subcategory `latvian_club` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategoryConversationClub": "Conversation club",
+  "@taxSubcategoryConversationClub": {
+    "description": "L4.9.5: Category System subcategory `conversation_club` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategoryInternationalMeetup": "International meetup",
+  "@taxSubcategoryInternationalMeetup": {
+    "description": "L4.9.5: Category System subcategory `international_meetup` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategoryExpatsMeetup": "Expats meetup",
+  "@taxSubcategoryExpatsMeetup": {
+    "description": "L4.9.5: Category System subcategory `expats_meetup` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategoryTandemMeeting": "Tandem meeting",
+  "@taxSubcategoryTandemMeeting": {
+    "description": "L4.9.5: Category System subcategory `tandem_meeting` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategoryLanguageCafe": "Language cafe",
+  "@taxSubcategoryLanguageCafe": {
+    "description": "L4.9.5: Category System subcategory `language_cafe` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategoryLanguageWalk": "Language walk",
+  "@taxSubcategoryLanguageWalk": {
+    "description": "L4.9.5: Category System subcategory `language_walk` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategorySpeedFriending": "Speed friending",
+  "@taxSubcategorySpeedFriending": {
+    "description": "L4.9.5: Category System subcategory `speed_friending` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategorySpeakingClub": "Speaking club",
+  "@taxSubcategorySpeakingClub": {
+    "description": "L4.9.5: Category System subcategory `speaking_club` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategoryCultureExchange": "Culture exchange",
+  "@taxSubcategoryCultureExchange": {
+    "description": "L4.9.5: Category System subcategory `culture_exchange` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategoryNewcomersMeetup": "Newcomers meetup",
+  "@taxSubcategoryNewcomersMeetup": {
+    "description": "L4.9.5: Category System subcategory `newcomers_meetup` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategoryStudyGroup": "Study group",
+  "@taxSubcategoryStudyGroup": {
+    "description": "L4.9.5: Category System subcategory `study_group` in `language_social_learning` (stable id; G04)."
+  },
+  "taxSubcategoryCoffee": "Coffee",
+  "@taxSubcategoryCoffee": {
+    "description": "L4.9.5: Category System subcategory `coffee` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryBreakfast": "Breakfast",
+  "@taxSubcategoryBreakfast": {
+    "description": "L4.9.5: Category System subcategory `breakfast` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryBrunch": "Brunch",
+  "@taxSubcategoryBrunch": {
+    "description": "L4.9.5: Category System subcategory `brunch` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryLunch": "Lunch",
+  "@taxSubcategoryLunch": {
+    "description": "L4.9.5: Category System subcategory `lunch` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryDinner": "Dinner",
+  "@taxSubcategoryDinner": {
+    "description": "L4.9.5: Category System subcategory `dinner` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryDessert": "Dessert",
+  "@taxSubcategoryDessert": {
+    "description": "L4.9.5: Category System subcategory `dessert` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryStreetFood": "Street food",
+  "@taxSubcategoryStreetFood": {
+    "description": "L4.9.5: Category System subcategory `street_food` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryFoodTasting": "Food tasting",
+  "@taxSubcategoryFoodTasting": {
+    "description": "L4.9.5: Category System subcategory `food_tasting` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryDrinkTasting": "Drink tasting",
+  "@taxSubcategoryDrinkTasting": {
+    "description": "L4.9.5: Category System subcategory `drink_tasting` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryWineTasting": "Wine tasting",
+  "@taxSubcategoryWineTasting": {
+    "description": "L4.9.5: Category System subcategory `wine_tasting` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryBeerTasting": "Beer tasting",
+  "@taxSubcategoryBeerTasting": {
+    "description": "L4.9.5: Category System subcategory `beer_tasting` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryCocktailTasting": "Cocktail tasting",
+  "@taxSubcategoryCocktailTasting": {
+    "description": "L4.9.5: Category System subcategory `cocktail_tasting` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryTeaCeremony": "Tea ceremony",
+  "@taxSubcategoryTeaCeremony": {
+    "description": "L4.9.5: Category System subcategory `tea_ceremony` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryBbq": "BBQ",
+  "@taxSubcategoryBbq": {
+    "description": "L4.9.5: Category System subcategory `bbq` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryPicnic": "Picnic",
+  "@taxSubcategoryPicnic": {
+    "description": "L4.9.5: Category System subcategory `picnic` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryFoodTour": "Food tour",
+  "@taxSubcategoryFoodTour": {
+    "description": "L4.9.5: Category System subcategory `food_tour` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryBarCrawl": "Bar crawl",
+  "@taxSubcategoryBarCrawl": {
+    "description": "L4.9.5: Category System subcategory `bar_crawl` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryPubCrawl": "Pub crawl",
+  "@taxSubcategoryPubCrawl": {
+    "description": "L4.9.5: Category System subcategory `pub_crawl` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryHappyHour": "Happy hour",
+  "@taxSubcategoryHappyHour": {
+    "description": "L4.9.5: Category System subcategory `happy_hour` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryRestaurantVisit": "Restaurant visit",
+  "@taxSubcategoryRestaurantVisit": {
+    "description": "L4.9.5: Category System subcategory `restaurant_visit` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryCafeVisit": "Cafe visit",
+  "@taxSubcategoryCafeVisit": {
+    "description": "L4.9.5: Category System subcategory `cafe_visit` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryBakeryVisit": "Bakery visit",
+  "@taxSubcategoryBakeryVisit": {
+    "description": "L4.9.5: Category System subcategory `bakery_visit` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryVeganFood": "Vegan food",
+  "@taxSubcategoryVeganFood": {
+    "description": "L4.9.5: Category System subcategory `vegan_food` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryLocalFood": "Local food",
+  "@taxSubcategoryLocalFood": {
+    "description": "L4.9.5: Category System subcategory `local_food` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryFineDining": "Fine dining",
+  "@taxSubcategoryFineDining": {
+    "description": "L4.9.5: Category System subcategory `fine_dining` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryFamilyMeal": "Family meal",
+  "@taxSubcategoryFamilyMeal": {
+    "description": "L4.9.5: Category System subcategory `family_meal` in `food_drinks` (stable id; G04)."
+  },
+  "taxSubcategoryQuiz": "Quiz",
+  "@taxSubcategoryQuiz": {
+    "description": "L4.9.5: Category System subcategory `quiz` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryBoardGames": "Board games",
+  "@taxSubcategoryBoardGames": {
+    "description": "L4.9.5: Category System subcategory `board_games` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryMafia": "Mafia",
+  "@taxSubcategoryMafia": {
+    "description": "L4.9.5: Category System subcategory `mafia` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryPokerNoGambling": "Poker (no gambling)",
+  "@taxSubcategoryPokerNoGambling": {
+    "description": "L4.9.5: Category System subcategory `poker_no_gambling` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryChess": "Chess",
+  "@taxSubcategoryChess": {
+    "description": "L4.9.5: Category System subcategory `chess` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryEscapeRoom": "Escape room",
+  "@taxSubcategoryEscapeRoom": {
+    "description": "L4.9.5: Category System subcategory `escape_room` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryQuest": "Quest",
+  "@taxSubcategoryQuest": {
+    "description": "L4.9.5: Category System subcategory `quest` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryCityGame": "City game",
+  "@taxSubcategoryCityGame": {
+    "description": "L4.9.5: Category System subcategory `city_game` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryTreasureHunt": "Treasure hunt",
+  "@taxSubcategoryTreasureHunt": {
+    "description": "L4.9.5: Category System subcategory `treasure_hunt` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryBowling": "Bowling",
+  "@taxSubcategoryBowling": {
+    "description": "L4.9.5: Category System subcategory `bowling` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryBilliards": "Billiards",
+  "@taxSubcategoryBilliards": {
+    "description": "L4.9.5: Category System subcategory `billiards` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryDarts": "Darts",
+  "@taxSubcategoryDarts": {
+    "description": "L4.9.5: Category System subcategory `darts` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryMiniGolf": "Mini golf",
+  "@taxSubcategoryMiniGolf": {
+    "description": "L4.9.5: Category System subcategory `mini_golf` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryArcade": "Arcade",
+  "@taxSubcategoryArcade": {
+    "description": "L4.9.5: Category System subcategory `arcade` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryVrArcade": "VR arcade",
+  "@taxSubcategoryVrArcade": {
+    "description": "L4.9.5: Category System subcategory `vr_arcade` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryVideoGames": "Video games",
+  "@taxSubcategoryVideoGames": {
+    "description": "L4.9.5: Category System subcategory `video_games` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryTableGames": "Table games",
+  "@taxSubcategoryTableGames": {
+    "description": "L4.9.5: Category System subcategory `table_games` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryCardGames": "Card games",
+  "@taxSubcategoryCardGames": {
+    "description": "L4.9.5: Category System subcategory `card_games` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryRolePlayingGame": "Role playing game",
+  "@taxSubcategoryRolePlayingGame": {
+    "description": "L4.9.5: Category System subcategory `role_playing_game` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryIndoorCompetition": "Indoor competition",
+  "@taxSubcategoryIndoorCompetition": {
+    "description": "L4.9.5: Category System subcategory `indoor_competition` in `games_indoor` (stable id; G04)."
+  },
+  "taxSubcategoryFootball": "Football",
+  "@taxSubcategoryFootball": {
+    "description": "L4.9.5: Category System subcategory `football` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryBasketball": "Basketball",
+  "@taxSubcategoryBasketball": {
+    "description": "L4.9.5: Category System subcategory `basketball` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryVolleyball": "Volleyball",
+  "@taxSubcategoryVolleyball": {
+    "description": "L4.9.5: Category System subcategory `volleyball` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryBeachVolleyball": "Beach volleyball",
+  "@taxSubcategoryBeachVolleyball": {
+    "description": "L4.9.5: Category System subcategory `beach_volleyball` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryTennis": "Tennis",
+  "@taxSubcategoryTennis": {
+    "description": "L4.9.5: Category System subcategory `tennis` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryTableTennis": "Table tennis",
+  "@taxSubcategoryTableTennis": {
+    "description": "L4.9.5: Category System subcategory `table_tennis` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryBadminton": "Badminton",
+  "@taxSubcategoryBadminton": {
+    "description": "L4.9.5: Category System subcategory `badminton` in `sport` (stable id; G04)."
+  },
+  "taxSubcategorySquash": "Squash",
+  "@taxSubcategorySquash": {
+    "description": "L4.9.5: Category System subcategory `squash` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryPadel": "Padel",
+  "@taxSubcategoryPadel": {
+    "description": "L4.9.5: Category System subcategory `padel` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryRunning": "Running",
+  "@taxSubcategoryRunning": {
+    "description": "L4.9.5: Category System subcategory `running` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryTrailRunning": "Trail running",
+  "@taxSubcategoryTrailRunning": {
+    "description": "L4.9.5: Category System subcategory `trail_running` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryCycling": "Cycling",
+  "@taxSubcategoryCycling": {
+    "description": "L4.9.5: Category System subcategory `cycling` in `sport` (stable id; G04)."
+  },
+  "taxSubcategorySwimming": "Swimming",
+  "@taxSubcategorySwimming": {
+    "description": "L4.9.5: Category System subcategory `swimming` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryBoxing": "Boxing",
+  "@taxSubcategoryBoxing": {
+    "description": "L4.9.5: Category System subcategory `boxing` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryMartialArts": "Martial arts",
+  "@taxSubcategoryMartialArts": {
+    "description": "L4.9.5: Category System subcategory `martial_arts` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryClimbing": "Climbing",
+  "@taxSubcategoryClimbing": {
+    "description": "L4.9.5: Category System subcategory `climbing` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryBouldering": "Bouldering",
+  "@taxSubcategoryBouldering": {
+    "description": "L4.9.5: Category System subcategory `bouldering` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryFitness": "Fitness",
+  "@taxSubcategoryFitness": {
+    "description": "L4.9.5: Category System subcategory `fitness` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryGym": "Gym",
+  "@taxSubcategoryGym": {
+    "description": "L4.9.5: Category System subcategory `gym` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryCrossfit": "Crossfit",
+  "@taxSubcategoryCrossfit": {
+    "description": "L4.9.5: Category System subcategory `crossfit` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryCalisthenics": "Calisthenics",
+  "@taxSubcategoryCalisthenics": {
+    "description": "L4.9.5: Category System subcategory `calisthenics` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryYoga": "Yoga",
+  "@taxSubcategoryYoga": {
+    "description": "L4.9.5: Category System subcategory `yoga` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryPilates": "Pilates",
+  "@taxSubcategoryPilates": {
+    "description": "L4.9.5: Category System subcategory `pilates` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryStretching": "Stretching",
+  "@taxSubcategoryStretching": {
+    "description": "L4.9.5: Category System subcategory `stretching` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryDanceFitness": "Dance fitness",
+  "@taxSubcategoryDanceFitness": {
+    "description": "L4.9.5: Category System subcategory `dance_fitness` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryNordicWalking": "Nordic walking",
+  "@taxSubcategoryNordicWalking": {
+    "description": "L4.9.5: Category System subcategory `nordic_walking` in `sport` (stable id; G04)."
+  },
+  "taxSubcategorySkating": "Skating",
+  "@taxSubcategorySkating": {
+    "description": "L4.9.5: Category System subcategory `skating` in `sport` (stable id; G04)."
+  },
+  "taxSubcategorySkateboarding": "Skateboarding",
+  "@taxSubcategorySkateboarding": {
+    "description": "L4.9.5: Category System subcategory `skateboarding` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryRollerblading": "Rollerblading",
+  "@taxSubcategoryRollerblading": {
+    "description": "L4.9.5: Category System subcategory `rollerblading` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryGolf": "Golf",
+  "@taxSubcategoryGolf": {
+    "description": "L4.9.5: Category System subcategory `golf` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryFrisbee": "Frisbee",
+  "@taxSubcategoryFrisbee": {
+    "description": "L4.9.5: Category System subcategory `frisbee` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryDiscGolf": "Disc golf",
+  "@taxSubcategoryDiscGolf": {
+    "description": "L4.9.5: Category System subcategory `disc_golf` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryRunningRace": "Running race",
+  "@taxSubcategoryRunningRace": {
+    "description": "L4.9.5: Category System subcategory `running_race` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryCyclingRace": "Cycling race",
+  "@taxSubcategoryCyclingRace": {
+    "description": "L4.9.5: Category System subcategory `cycling_race` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryFitnessChallenge": "Fitness challenge",
+  "@taxSubcategoryFitnessChallenge": {
+    "description": "L4.9.5: Category System subcategory `fitness_challenge` in `sport` (stable id; G04)."
+  },
+  "taxSubcategoryAmateurTournament": "Amateur tournament",
+  "@taxSubcategoryAmateurTournament": {
+    "description": "L4.9.5: Category System subcategory `amateur_tournament` in `sport` (stable id; G04)."
+  },
+  "taxSubcategorySalsa": "Salsa",
+  "@taxSubcategorySalsa": {
+    "description": "L4.9.5: Category System subcategory `salsa` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryBachata": "Bachata",
+  "@taxSubcategoryBachata": {
+    "description": "L4.9.5: Category System subcategory `bachata` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryKizomba": "Kizomba",
+  "@taxSubcategoryKizomba": {
+    "description": "L4.9.5: Category System subcategory `kizomba` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryTango": "Tango",
+  "@taxSubcategoryTango": {
+    "description": "L4.9.5: Category System subcategory `tango` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryHipHop": "Hip-hop",
+  "@taxSubcategoryHipHop": {
+    "description": "L4.9.5: Category System subcategory `hip_hop` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryContemporaryDance": "Contemporary dance",
+  "@taxSubcategoryContemporaryDance": {
+    "description": "L4.9.5: Category System subcategory `contemporary_dance` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryBallroomDance": "Ballroom dance",
+  "@taxSubcategoryBallroomDance": {
+    "description": "L4.9.5: Category System subcategory `ballroom_dance` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryFolkDance": "Folk dance",
+  "@taxSubcategoryFolkDance": {
+    "description": "L4.9.5: Category System subcategory `folk_dance` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryDanceSocial": "Dance social",
+  "@taxSubcategoryDanceSocial": {
+    "description": "L4.9.5: Category System subcategory `dance_social` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryDanceBattle": "Dance battle",
+  "@taxSubcategoryDanceBattle": {
+    "description": "L4.9.5: Category System subcategory `dance_battle` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryZumba": "Zumba",
+  "@taxSubcategoryZumba": {
+    "description": "L4.9.5: Category System subcategory `zumba` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryPartnerDance": "Partner dance",
+  "@taxSubcategoryPartnerDance": {
+    "description": "L4.9.5: Category System subcategory `partner_dance` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryLatinDance": "Latin dance",
+  "@taxSubcategoryLatinDance": {
+    "description": "L4.9.5: Category System subcategory `latin_dance` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryHeelsDance": "Heels dance",
+  "@taxSubcategoryHeelsDance": {
+    "description": "L4.9.5: Category System subcategory `heels_dance` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryStreetDance": "Street dance",
+  "@taxSubcategoryStreetDance": {
+    "description": "L4.9.5: Category System subcategory `street_dance` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryDanceClass": "Dance class",
+  "@taxSubcategoryDanceClass": {
+    "description": "L4.9.5: Category System subcategory `dance_class` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryDancePractice": "Dance practice",
+  "@taxSubcategoryDancePractice": {
+    "description": "L4.9.5: Category System subcategory `dance_practice` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryDanceShow": "Dance show",
+  "@taxSubcategoryDanceShow": {
+    "description": "L4.9.5: Category System subcategory `dance_show` in `dance` (stable id; G04)."
+  },
+  "taxSubcategoryHiking": "Hiking",
+  "@taxSubcategoryHiking": {
+    "description": "L4.9.5: Category System subcategory `hiking` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryNatureWalk": "Nature walk",
+  "@taxSubcategoryNatureWalk": {
+    "description": "L4.9.5: Category System subcategory `nature_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryCityWalk": "City walk",
+  "@taxSubcategoryCityWalk": {
+    "description": "L4.9.5: Category System subcategory `city_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryHistoricalWalk": "Historical walk",
+  "@taxSubcategoryHistoricalWalk": {
+    "description": "L4.9.5: Category System subcategory `historical_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategorySunsetWalk": "Sunset walk",
+  "@taxSubcategorySunsetWalk": {
+    "description": "L4.9.5: Category System subcategory `sunset_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategorySunriseWalk": "Sunrise walk",
+  "@taxSubcategorySunriseWalk": {
+    "description": "L4.9.5: Category System subcategory `sunrise_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryForestWalk": "Forest walk",
+  "@taxSubcategoryForestWalk": {
+    "description": "L4.9.5: Category System subcategory `forest_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryLakeWalk": "Lake walk",
+  "@taxSubcategoryLakeWalk": {
+    "description": "L4.9.5: Category System subcategory `lake_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryRiverWalk": "River walk",
+  "@taxSubcategoryRiverWalk": {
+    "description": "L4.9.5: Category System subcategory `river_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryArchitectureWalk": "Architecture walk",
+  "@taxSubcategoryArchitectureWalk": {
+    "description": "L4.9.5: Category System subcategory `architecture_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryHiddenGemsWalk": "Hidden gems walk",
+  "@taxSubcategoryHiddenGemsWalk": {
+    "description": "L4.9.5: Category System subcategory `hidden_gems_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryPhotographyWalk": "Photography walk",
+  "@taxSubcategoryPhotographyWalk": {
+    "description": "L4.9.5: Category System subcategory `photography_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryBirdwatching": "Birdwatching",
+  "@taxSubcategoryBirdwatching": {
+    "description": "L4.9.5: Category System subcategory `birdwatching` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryMushroomPicking": "Mushroom picking",
+  "@taxSubcategoryMushroomPicking": {
+    "description": "L4.9.5: Category System subcategory `mushroom_picking` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryBerryPicking": "Berry picking",
+  "@taxSubcategoryBerryPicking": {
+    "description": "L4.9.5: Category System subcategory `berry_picking` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryPicnicWalk": "Picnic walk",
+  "@taxSubcategoryPicnicWalk": {
+    "description": "L4.9.5: Category System subcategory `picnic_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryParkWalk": "Park walk",
+  "@taxSubcategoryParkWalk": {
+    "description": "L4.9.5: Category System subcategory `park_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryBeachWalk": "Beach walk",
+  "@taxSubcategoryBeachWalk": {
+    "description": "L4.9.5: Category System subcategory `beach_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryPromenadeWalk": "Promenade walk",
+  "@taxSubcategoryPromenadeWalk": {
+    "description": "L4.9.5: Category System subcategory `promenade_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryPark": "Park",
+  "@taxSubcategoryPark": {
+    "description": "L4.9.5: Category System subcategory `park` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryBeach": "Beach",
+  "@taxSubcategoryBeach": {
+    "description": "L4.9.5: Category System subcategory `beach` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryPromenade": "Promenade",
+  "@taxSubcategoryPromenade": {
+    "description": "L4.9.5: Category System subcategory `promenade` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryViewpoint": "Viewpoint",
+  "@taxSubcategoryViewpoint": {
+    "description": "L4.9.5: Category System subcategory `viewpoint` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryForest": "Forest",
+  "@taxSubcategoryForest": {
+    "description": "L4.9.5: Category System subcategory `forest` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryLake": "Lake",
+  "@taxSubcategoryLake": {
+    "description": "L4.9.5: Category System subcategory `lake` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryWaterfall": "Waterfall",
+  "@taxSubcategoryWaterfall": {
+    "description": "L4.9.5: Category System subcategory `waterfall` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryCave": "Cave",
+  "@taxSubcategoryCave": {
+    "description": "L4.9.5: Category System subcategory `cave` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryNaturalLandmark": "Natural landmark",
+  "@taxSubcategoryNaturalLandmark": {
+    "description": "L4.9.5: Category System subcategory `natural_landmark` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryOutdoorWorkout": "Outdoor workout",
+  "@taxSubcategoryOutdoorWorkout": {
+    "description": "L4.9.5: Category System subcategory `outdoor_workout` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryNatureEscape": "Nature escape",
+  "@taxSubcategoryNatureEscape": {
+    "description": "L4.9.5: Category System subcategory `nature_escape` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategorySlowWalk": "Slow walk",
+  "@taxSubcategorySlowWalk": {
+    "description": "L4.9.5: Category System subcategory `slow_walk` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryStargazing": "Stargazing",
+  "@taxSubcategoryStargazing": {
+    "description": "L4.9.5: Category System subcategory `stargazing` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryNorthernLightsWatch": "Northern lights watch",
+  "@taxSubcategoryNorthernLightsWatch": {
+    "description": "L4.9.5: Category System subcategory `northern_lights_watch` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategoryMeteorShowerWatch": "Meteor shower watch",
+  "@taxSubcategoryMeteorShowerWatch": {
+    "description": "L4.9.5: Category System subcategory `meteor_shower_watch` in `outdoor_nature_walking` (stable id; G04)."
+  },
+  "taxSubcategorySup": "SUP",
+  "@taxSubcategorySup": {
+    "description": "L4.9.5: Category System subcategory `sup` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryKayak": "Kayak",
+  "@taxSubcategoryKayak": {
+    "description": "L4.9.5: Category System subcategory `kayak` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryCanoe": "Canoe",
+  "@taxSubcategoryCanoe": {
+    "description": "L4.9.5: Category System subcategory `canoe` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryBoatTrip": "Boat trip",
+  "@taxSubcategoryBoatTrip": {
+    "description": "L4.9.5: Category System subcategory `boat_trip` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryCatamaran": "Catamaran",
+  "@taxSubcategoryCatamaran": {
+    "description": "L4.9.5: Category System subcategory `catamaran` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryCanalCruise": "Canal cruise",
+  "@taxSubcategoryCanalCruise": {
+    "description": "L4.9.5: Category System subcategory `canal_cruise` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryRowing": "Rowing",
+  "@taxSubcategoryRowing": {
+    "description": "L4.9.5: Category System subcategory `rowing` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategorySailing": "Sailing",
+  "@taxSubcategorySailing": {
+    "description": "L4.9.5: Category System subcategory `sailing` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryFishing": "Fishing",
+  "@taxSubcategoryFishing": {
+    "description": "L4.9.5: Category System subcategory `fishing` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryWakeboarding": "Wakeboarding",
+  "@taxSubcategoryWakeboarding": {
+    "description": "L4.9.5: Category System subcategory `wakeboarding` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryWaterBike": "Water bike",
+  "@taxSubcategoryWaterBike": {
+    "description": "L4.9.5: Category System subcategory `water_bike` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryJetSki": "Jet ski",
+  "@taxSubcategoryJetSki": {
+    "description": "L4.9.5: Category System subcategory `jet_ski` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryBeachActivity": "Beach activity",
+  "@taxSubcategoryBeachActivity": {
+    "description": "L4.9.5: Category System subcategory `beach_activity` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryWaterTour": "Water tour",
+  "@taxSubcategoryWaterTour": {
+    "description": "L4.9.5: Category System subcategory `water_tour` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryDiving": "Diving",
+  "@taxSubcategoryDiving": {
+    "description": "L4.9.5: Category System subcategory `diving` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategorySnorkeling": "Snorkeling",
+  "@taxSubcategorySnorkeling": {
+    "description": "L4.9.5: Category System subcategory `snorkeling` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategorySurfing": "Surfing",
+  "@taxSubcategorySurfing": {
+    "description": "L4.9.5: Category System subcategory `surfing` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryWindsurfing": "Windsurfing",
+  "@taxSubcategoryWindsurfing": {
+    "description": "L4.9.5: Category System subcategory `windsurfing` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryKitesurfing": "Kitesurfing",
+  "@taxSubcategoryKitesurfing": {
+    "description": "L4.9.5: Category System subcategory `kitesurfing` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryBeachDay": "Beach day",
+  "@taxSubcategoryBeachDay": {
+    "description": "L4.9.5: Category System subcategory `beach_day` in `water_activities` (stable id; G04)."
+  },
+  "taxSubcategoryWinterWalk": "Winter walk",
+  "@taxSubcategoryWinterWalk": {
+    "description": "L4.9.5: Category System subcategory `winter_walk` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryIceSkating": "Ice skating",
+  "@taxSubcategoryIceSkating": {
+    "description": "L4.9.5: Category System subcategory `ice_skating` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategorySkiing": "Skiing",
+  "@taxSubcategorySkiing": {
+    "description": "L4.9.5: Category System subcategory `skiing` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategorySnowboarding": "Snowboarding",
+  "@taxSubcategorySnowboarding": {
+    "description": "L4.9.5: Category System subcategory `snowboarding` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategorySledding": "Sledding",
+  "@taxSubcategorySledding": {
+    "description": "L4.9.5: Category System subcategory `sledding` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryWinterHiking": "Winter hiking",
+  "@taxSubcategoryWinterHiking": {
+    "description": "L4.9.5: Category System subcategory `winter_hiking` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryChristmasMarketWalk": "Christmas market walk",
+  "@taxSubcategoryChristmasMarketWalk": {
+    "description": "L4.9.5: Category System subcategory `christmas_market_walk` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryWinterPhotoRoute": "Winter photo route",
+  "@taxSubcategoryWinterPhotoRoute": {
+    "description": "L4.9.5: Category System subcategory `winter_photo_route` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategorySaunaColdPlunge": "Sauna and cold plunge",
+  "@taxSubcategorySaunaColdPlunge": {
+    "description": "L4.9.5: Category System subcategory `sauna_cold_plunge` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryIceFishing": "Ice fishing",
+  "@taxSubcategoryIceFishing": {
+    "description": "L4.9.5: Category System subcategory `ice_fishing` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryWinterFestival": "Winter festival",
+  "@taxSubcategoryWinterFestival": {
+    "description": "L4.9.5: Category System subcategory `winter_festival` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryAutumnLeafWalk": "Autumn leaf walk",
+  "@taxSubcategoryAutumnLeafWalk": {
+    "description": "L4.9.5: Category System subcategory `autumn_leaf_walk` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategorySpringBlossomWalk": "Spring blossom walk",
+  "@taxSubcategorySpringBlossomWalk": {
+    "description": "L4.9.5: Category System subcategory `spring_blossom_walk` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategorySummerOutdoor": "Summer outdoor",
+  "@taxSubcategorySummerOutdoor": {
+    "description": "L4.9.5: Category System subcategory `summer_outdoor` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategorySeasonalWalk": "Seasonal walk",
+  "@taxSubcategorySeasonalWalk": {
+    "description": "L4.9.5: Category System subcategory `seasonal_walk` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategorySnowActivity": "Snow activity",
+  "@taxSubcategorySnowActivity": {
+    "description": "L4.9.5: Category System subcategory `snow_activity` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryColdPlunge": "Cold plunge",
+  "@taxSubcategoryColdPlunge": {
+    "description": "L4.9.5: Category System subcategory `cold_plunge` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryHolidayLightsWalk": "Holiday lights walk",
+  "@taxSubcategoryHolidayLightsWalk": {
+    "description": "L4.9.5: Category System subcategory `holiday_lights_walk` in `winter_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryDayTrip": "Day trip",
+  "@taxSubcategoryDayTrip": {
+    "description": "L4.9.5: Category System subcategory `day_trip` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryWeekendTrip": "Weekend trip",
+  "@taxSubcategoryWeekendTrip": {
+    "description": "L4.9.5: Category System subcategory `weekend_trip` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryLocalExperience": "Local experience",
+  "@taxSubcategoryLocalExperience": {
+    "description": "L4.9.5: Category System subcategory `local_experience` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryTouristExcursion": "Tourist excursion",
+  "@taxSubcategoryTouristExcursion": {
+    "description": "L4.9.5: Category System subcategory `tourist_excursion` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryCityTour": "City tour",
+  "@taxSubcategoryCityTour": {
+    "description": "L4.9.5: Category System subcategory `city_tour` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryFoodTastingTour": "Food tasting tour",
+  "@taxSubcategoryFoodTastingTour": {
+    "description": "L4.9.5: Category System subcategory `food_tasting_tour` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryCraftExperience": "Craft experience",
+  "@taxSubcategoryCraftExperience": {
+    "description": "L4.9.5: Category System subcategory `craft_experience` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryFarmExperience": "Farm experience",
+  "@taxSubcategoryFarmExperience": {
+    "description": "L4.9.5: Category System subcategory `farm_experience` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryCastleTour": "Castle tour",
+  "@taxSubcategoryCastleTour": {
+    "description": "L4.9.5: Category System subcategory `castle_tour` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryNatureReserveTour": "Nature reserve tour",
+  "@taxSubcategoryNatureReserveTour": {
+    "description": "L4.9.5: Category System subcategory `nature_reserve_tour` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryCoastalTrip": "Coastal trip",
+  "@taxSubcategoryCoastalTrip": {
+    "description": "L4.9.5: Category System subcategory `coastal_trip` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryTrainDayTrip": "Train day trip",
+  "@taxSubcategoryTrainDayTrip": {
+    "description": "L4.9.5: Category System subcategory `train_day_trip` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryLocalGuideExperience": "Local guide experience",
+  "@taxSubcategoryLocalGuideExperience": {
+    "description": "L4.9.5: Category System subcategory `local_guide_experience` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryBikeTour": "Bike tour",
+  "@taxSubcategoryBikeTour": {
+    "description": "L4.9.5: Category System subcategory `bike_tour` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryWalkingTour": "Walking tour",
+  "@taxSubcategoryWalkingTour": {
+    "description": "L4.9.5: Category System subcategory `walking_tour` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryHistoricalTour": "Historical tour",
+  "@taxSubcategoryHistoricalTour": {
+    "description": "L4.9.5: Category System subcategory `historical_tour` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryArchitectureTour": "Architecture tour",
+  "@taxSubcategoryArchitectureTour": {
+    "description": "L4.9.5: Category System subcategory `architecture_tour` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryPhotoTour": "Photo tour",
+  "@taxSubcategoryPhotoTour": {
+    "description": "L4.9.5: Category System subcategory `photo_tour` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryHiddenGemsTour": "Hidden gems tour",
+  "@taxSubcategoryHiddenGemsTour": {
+    "description": "L4.9.5: Category System subcategory `hidden_gems_tour` in `travel_tours` (stable id; G04)."
+  },
+  "taxSubcategoryFamilyActivity": "Family activity",
+  "@taxSubcategoryFamilyActivity": {
+    "description": "L4.9.5: Category System subcategory `family_activity` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryKidsWorkshop": "Kids workshop",
+  "@taxSubcategoryKidsWorkshop": {
+    "description": "L4.9.5: Category System subcategory `kids_workshop` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryPlaygroundEvent": "Playground event",
+  "@taxSubcategoryPlaygroundEvent": {
+    "description": "L4.9.5: Category System subcategory `playground_event` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryFamilyPicnic": "Family picnic",
+  "@taxSubcategoryFamilyPicnic": {
+    "description": "L4.9.5: Category System subcategory `family_picnic` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryKidsTheatre": "Kids theatre",
+  "@taxSubcategoryKidsTheatre": {
+    "description": "L4.9.5: Category System subcategory `kids_theatre` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryKidsMuseumEvent": "Kids museum event",
+  "@taxSubcategoryKidsMuseumEvent": {
+    "description": "L4.9.5: Category System subcategory `kids_museum_event` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryFamilySportsDay": "Family sports day",
+  "@taxSubcategoryFamilySportsDay": {
+    "description": "L4.9.5: Category System subcategory `family_sports_day` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryParentChildClass": "Parent-child class",
+  "@taxSubcategoryParentChildClass": {
+    "description": "L4.9.5: Category System subcategory `parent_child_class` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryCreativeKidsClass": "Creative kids class",
+  "@taxSubcategoryCreativeKidsClass": {
+    "description": "L4.9.5: Category System subcategory `creative_kids_class` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryKidsCookingClass": "Kids cooking class",
+  "@taxSubcategoryKidsCookingClass": {
+    "description": "L4.9.5: Category System subcategory `kids_cooking_class` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryKidsOutdoorWalk": "Kids outdoor walk",
+  "@taxSubcategoryKidsOutdoorWalk": {
+    "description": "L4.9.5: Category System subcategory `kids_outdoor_walk` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryBirthdayActivity": "Birthday activity",
+  "@taxSubcategoryBirthdayActivity": {
+    "description": "L4.9.5: Category System subcategory `birthday_activity` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryFamilyFarmVisit": "Family farm visit",
+  "@taxSubcategoryFamilyFarmVisit": {
+    "description": "L4.9.5: Category System subcategory `family_farm_visit` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryFamilyRoute": "Family route",
+  "@taxSubcategoryFamilyRoute": {
+    "description": "L4.9.5: Category System subcategory `family_route` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryKidsParty": "Kids party",
+  "@taxSubcategoryKidsParty": {
+    "description": "L4.9.5: Category System subcategory `kids_party` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryEducationalKidsEvent": "Educational kids event",
+  "@taxSubcategoryEducationalKidsEvent": {
+    "description": "L4.9.5: Category System subcategory `educational_kids_event` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryBabyFriendlyActivity": "Baby-friendly activity",
+  "@taxSubcategoryBabyFriendlyActivity": {
+    "description": "L4.9.5: Category System subcategory `baby_friendly_activity` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryKidsCamp": "Kids camp",
+  "@taxSubcategoryKidsCamp": {
+    "description": "L4.9.5: Category System subcategory `kids_camp` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryDayCamp": "Day camp",
+  "@taxSubcategoryDayCamp": {
+    "description": "L4.9.5: Category System subcategory `day_camp` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryTeenMeetup": "Teen meetup",
+  "@taxSubcategoryTeenMeetup": {
+    "description": "L4.9.5: Category System subcategory `teen_meetup` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryTeenEvent": "Teen event",
+  "@taxSubcategoryTeenEvent": {
+    "description": "L4.9.5: Category System subcategory `teen_event` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryKidsQuest": "Kids quest",
+  "@taxSubcategoryKidsQuest": {
+    "description": "L4.9.5: Category System subcategory `kids_quest` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryKidsScienceEvent": "Kids science event",
+  "@taxSubcategoryKidsScienceEvent": {
+    "description": "L4.9.5: Category System subcategory `kids_science_event` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryKidsDisco": "Kids disco",
+  "@taxSubcategoryKidsDisco": {
+    "description": "L4.9.5: Category System subcategory `kids_disco` in `family_kids` (stable id; G04)."
+  },
+  "taxSubcategoryDogWalk": "Dog walk",
+  "@taxSubcategoryDogWalk": {
+    "description": "L4.9.5: Category System subcategory `dog_walk` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryDogMeetup": "Dog meetup",
+  "@taxSubcategoryDogMeetup": {
+    "description": "L4.9.5: Category System subcategory `dog_meetup` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryDogParkMeetup": "Dog park meetup",
+  "@taxSubcategoryDogParkMeetup": {
+    "description": "L4.9.5: Category System subcategory `dog_park_meetup` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryPetFriendlyCafe": "Pet-friendly cafe",
+  "@taxSubcategoryPetFriendlyCafe": {
+    "description": "L4.9.5: Category System subcategory `pet_friendly_cafe` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryDogTraining": "Dog training",
+  "@taxSubcategoryDogTraining": {
+    "description": "L4.9.5: Category System subcategory `dog_training` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryPetPhotoSession": "Pet photo session",
+  "@taxSubcategoryPetPhotoSession": {
+    "description": "L4.9.5: Category System subcategory `pet_photo_session` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryAnimalShelterVisit": "Animal shelter visit",
+  "@taxSubcategoryAnimalShelterVisit": {
+    "description": "L4.9.5: Category System subcategory `animal_shelter_visit` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryFarmAnimalExperience": "Farm animal experience",
+  "@taxSubcategoryFarmAnimalExperience": {
+    "description": "L4.9.5: Category System subcategory `farm_animal_experience` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryHorseRiding": "Horse riding",
+  "@taxSubcategoryHorseRiding": {
+    "description": "L4.9.5: Category System subcategory `horse_riding` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryPonyRiding": "Pony riding",
+  "@taxSubcategoryPonyRiding": {
+    "description": "L4.9.5: Category System subcategory `pony_riding` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryCatCafe": "Cat cafe",
+  "@taxSubcategoryCatCafe": {
+    "description": "L4.9.5: Category System subcategory `cat_cafe` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryPetAdoption": "Pet adoption",
+  "@taxSubcategoryPetAdoption": {
+    "description": "L4.9.5: Category System subcategory `pet_adoption` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryPetCharity": "Pet charity",
+  "@taxSubcategoryPetCharity": {
+    "description": "L4.9.5: Category System subcategory `pet_charity` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryPetFriendlyWalk": "Pet-friendly walk",
+  "@taxSubcategoryPetFriendlyWalk": {
+    "description": "L4.9.5: Category System subcategory `pet_friendly_walk` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryDogSport": "Dog sport",
+  "@taxSubcategoryDogSport": {
+    "description": "L4.9.5: Category System subcategory `dog_sport` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryPetOwnerMeetup": "Pet owner meetup",
+  "@taxSubcategoryPetOwnerMeetup": {
+    "description": "L4.9.5: Category System subcategory `pet_owner_meetup` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryDogShow": "Dog show",
+  "@taxSubcategoryDogShow": {
+    "description": "L4.9.5: Category System subcategory `dog_show` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryPetExhibition": "Pet exhibition",
+  "@taxSubcategoryPetExhibition": {
+    "description": "L4.9.5: Category System subcategory `pet_exhibition` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryPetFair": "Pet fair",
+  "@taxSubcategoryPetFair": {
+    "description": "L4.9.5: Category System subcategory `pet_fair` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryPetCareTalk": "Pet care talk",
+  "@taxSubcategoryPetCareTalk": {
+    "description": "L4.9.5: Category System subcategory `pet_care_talk` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryAnimalTherapy": "Animal therapy",
+  "@taxSubcategoryAnimalTherapy": {
+    "description": "L4.9.5: Category System subcategory `animal_therapy` in `pets_animals` (stable id; G04)."
+  },
+  "taxSubcategoryCharityEvent": "Charity event",
+  "@taxSubcategoryCharityEvent": {
+    "description": "L4.9.5: Category System subcategory `charity_event` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryVolunteerActivity": "Volunteer activity",
+  "@taxSubcategoryVolunteerActivity": {
+    "description": "L4.9.5: Category System subcategory `volunteer_activity` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryCommunityCleanup": "Community cleanup",
+  "@taxSubcategoryCommunityCleanup": {
+    "description": "L4.9.5: Category System subcategory `community_cleanup` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryDonationEvent": "Donation event",
+  "@taxSubcategoryDonationEvent": {
+    "description": "L4.9.5: Category System subcategory `donation_event` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryNeighborhoodEvent": "Neighborhood event",
+  "@taxSubcategoryNeighborhoodEvent": {
+    "description": "L4.9.5: Category System subcategory `neighborhood_event` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryFundraisingDinner": "Fundraising dinner",
+  "@taxSubcategoryFundraisingDinner": {
+    "description": "L4.9.5: Category System subcategory `fundraising_dinner` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryCharityRun": "Charity run",
+  "@taxSubcategoryCharityRun": {
+    "description": "L4.9.5: Category System subcategory `charity_run` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryAnimalShelterVolunteering": "Animal shelter volunteering",
+  "@taxSubcategoryAnimalShelterVolunteering": {
+    "description": "L4.9.5: Category System subcategory `animal_shelter_volunteering` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryFoodBankVolunteering": "Food bank volunteering",
+  "@taxSubcategoryFoodBankVolunteering": {
+    "description": "L4.9.5: Category System subcategory `food_bank_volunteering` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryTreePlanting": "Tree planting",
+  "@taxSubcategoryTreePlanting": {
+    "description": "L4.9.5: Category System subcategory `tree_planting` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryBeachCleanup": "Beach cleanup",
+  "@taxSubcategoryBeachCleanup": {
+    "description": "L4.9.5: Category System subcategory `beach_cleanup` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryParkCleanup": "Park cleanup",
+  "@taxSubcategoryParkCleanup": {
+    "description": "L4.9.5: Category System subcategory `park_cleanup` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryCommunityGarden": "Community garden",
+  "@taxSubcategoryCommunityGarden": {
+    "description": "L4.9.5: Category System subcategory `community_garden` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryPublicSquare": "Public square",
+  "@taxSubcategoryPublicSquare": {
+    "description": "L4.9.5: Category System subcategory `public_square` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryLocalCommunityMeetup": "Local community meetup",
+  "@taxSubcategoryLocalCommunityMeetup": {
+    "description": "L4.9.5: Category System subcategory `local_community_meetup` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryMutualAid": "Mutual aid",
+  "@taxSubcategoryMutualAid": {
+    "description": "L4.9.5: Category System subcategory `mutual_aid` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategorySocialImpactEvent": "Social impact event",
+  "@taxSubcategorySocialImpactEvent": {
+    "description": "L4.9.5: Category System subcategory `social_impact_event` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryEnvironmentalAction": "Environmental action",
+  "@taxSubcategoryEnvironmentalAction": {
+    "description": "L4.9.5: Category System subcategory `environmental_action` in `community_charity` (stable id; G04)."
+  },
+  "taxSubcategoryLocalMarket": "Local market",
+  "@taxSubcategoryLocalMarket": {
+    "description": "L4.9.5: Category System subcategory `local_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryFleaMarket": "Flea market",
+  "@taxSubcategoryFleaMarket": {
+    "description": "L4.9.5: Category System subcategory `flea_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategorySeasonalMarket": "Seasonal market",
+  "@taxSubcategorySeasonalMarket": {
+    "description": "L4.9.5: Category System subcategory `seasonal_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryChristmasMarket": "Christmas market",
+  "@taxSubcategoryChristmasMarket": {
+    "description": "L4.9.5: Category System subcategory `christmas_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryFarmersMarket": "Farmers market",
+  "@taxSubcategoryFarmersMarket": {
+    "description": "L4.9.5: Category System subcategory `farmers_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryCraftMarket": "Craft market",
+  "@taxSubcategoryCraftMarket": {
+    "description": "L4.9.5: Category System subcategory `craft_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryDesignMarket": "Design market",
+  "@taxSubcategoryDesignMarket": {
+    "description": "L4.9.5: Category System subcategory `design_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryVintageMarket": "Vintage market",
+  "@taxSubcategoryVintageMarket": {
+    "description": "L4.9.5: Category System subcategory `vintage_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryBookMarket": "Book market",
+  "@taxSubcategoryBookMarket": {
+    "description": "L4.9.5: Category System subcategory `book_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryFoodMarket": "Food market",
+  "@taxSubcategoryFoodMarket": {
+    "description": "L4.9.5: Category System subcategory `food_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryFlowerMarket": "Flower market",
+  "@taxSubcategoryFlowerMarket": {
+    "description": "L4.9.5: Category System subcategory `flower_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryArtFair": "Art fair",
+  "@taxSubcategoryArtFair": {
+    "description": "L4.9.5: Category System subcategory `art_fair` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryPopUpShop": "Pop-up shop",
+  "@taxSubcategoryPopUpShop": {
+    "description": "L4.9.5: Category System subcategory `pop_up_shop` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryStreetMarket": "Street market",
+  "@taxSubcategoryStreetMarket": {
+    "description": "L4.9.5: Category System subcategory `street_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryHandmadeFair": "Handmade fair",
+  "@taxSubcategoryHandmadeFair": {
+    "description": "L4.9.5: Category System subcategory `handmade_fair` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryCharityMarket": "Charity market",
+  "@taxSubcategoryCharityMarket": {
+    "description": "L4.9.5: Category System subcategory `charity_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryKidsMarket": "Kids market",
+  "@taxSubcategoryKidsMarket": {
+    "description": "L4.9.5: Category System subcategory `kids_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryNightMarket": "Night market",
+  "@taxSubcategoryNightMarket": {
+    "description": "L4.9.5: Category System subcategory `night_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryLocalBrandsMarket": "Local brands market",
+  "@taxSubcategoryLocalBrandsMarket": {
+    "description": "L4.9.5: Category System subcategory `local_brands_market` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryClothingSwap": "Clothing swap",
+  "@taxSubcategoryClothingSwap": {
+    "description": "L4.9.5: Category System subcategory `clothing_swap` in `markets_fairs` (stable id; G04)."
+  },
+  "taxSubcategoryChristmas": "Christmas",
+  "@taxSubcategoryChristmas": {
+    "description": "L4.9.5: Category System subcategory `christmas` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryNewYear": "New Year",
+  "@taxSubcategoryNewYear": {
+    "description": "L4.9.5: Category System subcategory `new_year` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryHalloween": "Halloween",
+  "@taxSubcategoryHalloween": {
+    "description": "L4.9.5: Category System subcategory `halloween` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryEaster": "Easter",
+  "@taxSubcategoryEaster": {
+    "description": "L4.9.5: Category System subcategory `easter` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryValentinesDay": "Valentine's Day",
+  "@taxSubcategoryValentinesDay": {
+    "description": "L4.9.5: Category System subcategory `valentines_day` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryJani": "Jāņi (Midsummer)",
+  "@taxSubcategoryJani": {
+    "description": "L4.9.5: Category System subcategory `jani` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryCityFestival": "City festival",
+  "@taxSubcategoryCityFestival": {
+    "description": "L4.9.5: Category System subcategory `city_festival` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategorySummerFestival": "Summer festival",
+  "@taxSubcategorySummerFestival": {
+    "description": "L4.9.5: Category System subcategory `summer_festival` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryAutumnEvent": "Autumn event",
+  "@taxSubcategoryAutumnEvent": {
+    "description": "L4.9.5: Category System subcategory `autumn_event` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategorySpringEvent": "Spring event",
+  "@taxSubcategorySpringEvent": {
+    "description": "L4.9.5: Category System subcategory `spring_event` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategorySchoolHoliday": "School holiday",
+  "@taxSubcategorySchoolHoliday": {
+    "description": "L4.9.5: Category System subcategory `school_holiday` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryNationalHoliday": "National holiday",
+  "@taxSubcategoryNationalHoliday": {
+    "description": "L4.9.5: Category System subcategory `national_holiday` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryLocalTradition": "Local tradition",
+  "@taxSubcategoryLocalTradition": {
+    "description": "L4.9.5: Category System subcategory `local_tradition` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryMidsummer": "Midsummer",
+  "@taxSubcategoryMidsummer": {
+    "description": "L4.9.5: Category System subcategory `midsummer` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryFireworks": "Fireworks",
+  "@taxSubcategoryFireworks": {
+    "description": "L4.9.5: Category System subcategory `fireworks` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryPublicCelebration": "Public celebration",
+  "@taxSubcategoryPublicCelebration": {
+    "description": "L4.9.5: Category System subcategory `public_celebration` in `holidays_seasonal` (stable id; G04)."
+  },
+  "taxSubcategoryRechargeWalk": "Recharge walk",
+  "@taxSubcategoryRechargeWalk": {
+    "description": "L4.9.5: Category System subcategory `recharge_walk` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryCalmWalk": "Calm walk",
+  "@taxSubcategoryCalmWalk": {
+    "description": "L4.9.5: Category System subcategory `calm_walk` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryMindfulWalk": "Mindful walk",
+  "@taxSubcategoryMindfulWalk": {
+    "description": "L4.9.5: Category System subcategory `mindful_walk` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryCoffeeWalk": "Coffee walk",
+  "@taxSubcategoryCoffeeWalk": {
+    "description": "L4.9.5: Category System subcategory `coffee_walk` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryTeaWalk": "Tea walk",
+  "@taxSubcategoryTeaWalk": {
+    "description": "L4.9.5: Category System subcategory `tea_walk` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategorySunsetReset": "Sunset reset",
+  "@taxSubcategorySunsetReset": {
+    "description": "L4.9.5: Category System subcategory `sunset_reset` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryNatureReset": "Nature reset",
+  "@taxSubcategoryNatureReset": {
+    "description": "L4.9.5: Category System subcategory `nature_reset` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryDigitalDetox": "Digital detox",
+  "@taxSubcategoryDigitalDetox": {
+    "description": "L4.9.5: Category System subcategory `digital_detox` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategorySlowMorning": "Slow morning",
+  "@taxSubcategorySlowMorning": {
+    "description": "L4.9.5: Category System subcategory `slow_morning` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryEveningReset": "Evening reset",
+  "@taxSubcategoryEveningReset": {
+    "description": "L4.9.5: Category System subcategory `evening_reset` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategorySauna": "Sauna",
+  "@taxSubcategorySauna": {
+    "description": "L4.9.5: Category System subcategory `sauna` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategorySpa": "Spa",
+  "@taxSubcategorySpa": {
+    "description": "L4.9.5: Category System subcategory `spa` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryMassage": "Massage",
+  "@taxSubcategoryMassage": {
+    "description": "L4.9.5: Category System subcategory `massage` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryBreathwork": "Breathwork",
+  "@taxSubcategoryBreathwork": {
+    "description": "L4.9.5: Category System subcategory `breathwork` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryMeditation": "Meditation",
+  "@taxSubcategoryMeditation": {
+    "description": "L4.9.5: Category System subcategory `meditation` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategorySoundHealing": "Sound healing",
+  "@taxSubcategorySoundHealing": {
+    "description": "L4.9.5: Category System subcategory `sound_healing` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryWellnessClass": "Wellness class",
+  "@taxSubcategoryWellnessClass": {
+    "description": "L4.9.5: Category System subcategory `wellness_class` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryRelaxationSession": "Relaxation session",
+  "@taxSubcategoryRelaxationSession": {
+    "description": "L4.9.5: Category System subcategory `relaxation_session` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryMentalHealthMeetup": "Mental health meetup",
+  "@taxSubcategoryMentalHealthMeetup": {
+    "description": "L4.9.5: Category System subcategory `mental_health_meetup` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryQuietSocial": "Quiet social",
+  "@taxSubcategoryQuietSocial": {
+    "description": "L4.9.5: Category System subcategory `quiet_social` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryCoupleRecharge": "Couple recharge",
+  "@taxSubcategoryCoupleRecharge": {
+    "description": "L4.9.5: Category System subcategory `couple_recharge` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategorySoloRecharge": "Solo recharge",
+  "@taxSubcategorySoloRecharge": {
+    "description": "L4.9.5: Category System subcategory `solo_recharge` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryFriendsRecharge": "Friends recharge",
+  "@taxSubcategoryFriendsRecharge": {
+    "description": "L4.9.5: Category System subcategory `friends_recharge` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryPirtsRitual": "Pirts ritual (Latvian sauna)",
+  "@taxSubcategoryPirtsRitual": {
+    "description": "L4.9.5: Category System subcategory `pirts_ritual` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryRetreat": "Retreat",
+  "@taxSubcategoryRetreat": {
+    "description": "L4.9.5: Category System subcategory `retreat` in `wellness_recharge` (stable id; G04)."
+  },
+  "taxSubcategoryLaserTag": "Laser tag",
+  "@taxSubcategoryLaserTag": {
+    "description": "L4.9.5: Category System subcategory `laser_tag` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryPaintball": "Paintball",
+  "@taxSubcategoryPaintball": {
+    "description": "L4.9.5: Category System subcategory `paintball` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryAirsoft": "Airsoft",
+  "@taxSubcategoryAirsoft": {
+    "description": "L4.9.5: Category System subcategory `airsoft` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryKarting": "Karting",
+  "@taxSubcategoryKarting": {
+    "description": "L4.9.5: Category System subcategory `karting` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryShootingRange": "Shooting range",
+  "@taxSubcategoryShootingRange": {
+    "description": "L4.9.5: Category System subcategory `shooting_range` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryArchery": "Archery",
+  "@taxSubcategoryArchery": {
+    "description": "L4.9.5: Category System subcategory `archery` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryAxeThrowing": "Axe throwing",
+  "@taxSubcategoryAxeThrowing": {
+    "description": "L4.9.5: Category System subcategory `axe_throwing` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryTrampolinePark": "Trampoline park",
+  "@taxSubcategoryTrampolinePark": {
+    "description": "L4.9.5: Category System subcategory `trampoline_park` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryRopePark": "Rope park",
+  "@taxSubcategoryRopePark": {
+    "description": "L4.9.5: Category System subcategory `rope_park` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryZipline": "Zipline",
+  "@taxSubcategoryZipline": {
+    "description": "L4.9.5: Category System subcategory `zipline` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryWindTunnel": "Wind tunnel",
+  "@taxSubcategoryWindTunnel": {
+    "description": "L4.9.5: Category System subcategory `wind_tunnel` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryHotAirBalloon": "Hot air balloon",
+  "@taxSubcategoryHotAirBalloon": {
+    "description": "L4.9.5: Category System subcategory `hot_air_balloon` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategorySkydiving": "Skydiving",
+  "@taxSubcategorySkydiving": {
+    "description": "L4.9.5: Category System subcategory `skydiving` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryBungeeJumping": "Bungee jumping",
+  "@taxSubcategoryBungeeJumping": {
+    "description": "L4.9.5: Category System subcategory `bungee_jumping` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryParkour": "Parkour",
+  "@taxSubcategoryParkour": {
+    "description": "L4.9.5: Category System subcategory `parkour` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryObstacleCourse": "Obstacle course",
+  "@taxSubcategoryObstacleCourse": {
+    "description": "L4.9.5: Category System subcategory `obstacle_course` in `adrenaline_entertainment` (stable id; G04)."
+  },
+  "taxSubcategoryZoo": "Zoo",
+  "@taxSubcategoryZoo": {
+    "description": "L4.9.5: Category System subcategory `zoo` in `attractions` (stable id; G04)."
+  },
+  "taxSubcategoryPettingZoo": "Petting zoo",
+  "@taxSubcategoryPettingZoo": {
+    "description": "L4.9.5: Category System subcategory `petting_zoo` in `attractions` (stable id; G04)."
+  },
+  "taxSubcategoryAquarium": "Aquarium",
+  "@taxSubcategoryAquarium": {
+    "description": "L4.9.5: Category System subcategory `aquarium` in `attractions` (stable id; G04)."
+  },
+  "taxSubcategoryAmusementPark": "Amusement park",
+  "@taxSubcategoryAmusementPark": {
+    "description": "L4.9.5: Category System subcategory `amusement_park` in `attractions` (stable id; G04)."
+  },
+  "taxSubcategoryWaterPark": "Water park",
+  "@taxSubcategoryWaterPark": {
+    "description": "L4.9.5: Category System subcategory `water_park` in `attractions` (stable id; G04)."
+  },
+  "taxSubcategoryAdventurePark": "Adventure park",
+  "@taxSubcategoryAdventurePark": {
+    "description": "L4.9.5: Category System subcategory `adventure_park` in `attractions` (stable id; G04)."
+  },
+  "taxSubcategoryBotanicalGarden": "Botanical garden",
+  "@taxSubcategoryBotanicalGarden": {
+    "description": "L4.9.5: Category System subcategory `botanical_garden` in `attractions` (stable id; G04)."
+  },
+  "taxSubcategoryPlanetarium": "Planetarium",
+  "@taxSubcategoryPlanetarium": {
+    "description": "L4.9.5: Category System subcategory `planetarium` in `attractions` (stable id; G04)."
+  },
+  "taxSubcategoryScienceCenter": "Science center",
+  "@taxSubcategoryScienceCenter": {
+    "description": "L4.9.5: Category System subcategory `science_center` in `attractions` (stable id; G04)."
+  },
+  "taxSubcategoryObservationDeck": "Observation deck",
+  "@taxSubcategoryObservationDeck": {
+    "description": "L4.9.5: Category System subcategory `observation_deck` in `attractions` (stable id; G04)."
+  },
+  "taxSubcategoryFerrisWheel": "Ferris wheel",
+  "@taxSubcategoryFerrisWheel": {
+    "description": "L4.9.5: Category System subcategory `ferris_wheel` in `attractions` (stable id; G04)."
+  },
+  "taxSubcategorySeasonalAttraction": "Seasonal attraction",
+  "@taxSubcategorySeasonalAttraction": {
+    "description": "L4.9.5: Category System subcategory `seasonal_attraction` in `attractions` (stable id; G04)."
+  },
+  "taxSubcategoryCarMeetup": "Car meetup",
+  "@taxSubcategoryCarMeetup": {
+    "description": "L4.9.5: Category System subcategory `car_meetup` in `auto_moto` (stable id; G04)."
+  },
+  "taxSubcategoryRetroCars": "Retro cars",
+  "@taxSubcategoryRetroCars": {
+    "description": "L4.9.5: Category System subcategory `retro_cars` in `auto_moto` (stable id; G04)."
+  },
+  "taxSubcategoryCarShow": "Car show",
+  "@taxSubcategoryCarShow": {
+    "description": "L4.9.5: Category System subcategory `car_show` in `auto_moto` (stable id; G04)."
+  },
+  "taxSubcategoryAutoExhibition": "Auto exhibition",
+  "@taxSubcategoryAutoExhibition": {
+    "description": "L4.9.5: Category System subcategory `auto_exhibition` in `auto_moto` (stable id; G04)."
+  },
+  "taxSubcategoryTuningMeetup": "Tuning meetup",
+  "@taxSubcategoryTuningMeetup": {
+    "description": "L4.9.5: Category System subcategory `tuning_meetup` in `auto_moto` (stable id; G04)."
+  },
+  "taxSubcategoryDriftEvent": "Drift event",
+  "@taxSubcategoryDriftEvent": {
+    "description": "L4.9.5: Category System subcategory `drift_event` in `auto_moto` (stable id; G04)."
+  },
+  "taxSubcategoryOffroadTrip": "Off-road trip",
+  "@taxSubcategoryOffroadTrip": {
+    "description": "L4.9.5: Category System subcategory `offroad_trip` in `auto_moto` (stable id; G04)."
+  },
+  "taxSubcategoryMotorcycleRide": "Motorcycle ride",
+  "@taxSubcategoryMotorcycleRide": {
+    "description": "L4.9.5: Category System subcategory `motorcycle_ride` in `auto_moto` (stable id; G04)."
+  },
+  "taxSubcategoryMotorcycleMeetup": "Motorcycle meetup",
+  "@taxSubcategoryMotorcycleMeetup": {
+    "description": "L4.9.5: Category System subcategory `motorcycle_meetup` in `auto_moto` (stable id; G04)."
+  },
+  "taxSubcategoryScooterMeetup": "Scooter meetup",
+  "@taxSubcategoryScooterMeetup": {
+    "description": "L4.9.5: Category System subcategory `scooter_meetup` in `auto_moto` (stable id; G04)."
+  },
+  "taxSubcategoryCarPhotoMeet": "Car photo meet",
+  "@taxSubcategoryCarPhotoMeet": {
+    "description": "L4.9.5: Category System subcategory `car_photo_meet` in `auto_moto` (stable id; G04)."
+  },
+  "taxSubcategoryDriveInCinema": "Drive-in cinema",
+  "@taxSubcategoryDriveInCinema": {
+    "description": "L4.9.5: Category System subcategory `drive_in_cinema` in `auto_moto` (stable id; G04)."
+  },
+  "taxSubcategoryAnimeMeetup": "Anime meetup",
+  "@taxSubcategoryAnimeMeetup": {
+    "description": "L4.9.5: Category System subcategory `anime_meetup` in `geek_tech` (stable id; G04)."
+  },
+  "taxSubcategoryCosplayEvent": "Cosplay event",
+  "@taxSubcategoryCosplayEvent": {
+    "description": "L4.9.5: Category System subcategory `cosplay_event` in `geek_tech` (stable id; G04)."
+  },
+  "taxSubcategoryComicCon": "Comic Con",
+  "@taxSubcategoryComicCon": {
+    "description": "L4.9.5: Category System subcategory `comic_con` in `geek_tech` (stable id; G04)."
+  },
+  "taxSubcategoryEsportsTournament": "Esports tournament",
+  "@taxSubcategoryEsportsTournament": {
+    "description": "L4.9.5: Category System subcategory `esports_tournament` in `geek_tech` (stable id; G04)."
+  },
+  "taxSubcategoryLanParty": "LAN party",
+  "@taxSubcategoryLanParty": {
+    "description": "L4.9.5: Category System subcategory `lan_party` in `geek_tech` (stable id; G04)."
+  },
+  "taxSubcategoryRetroGaming": "Retro gaming",
+  "@taxSubcategoryRetroGaming": {
+    "description": "L4.9.5: Category System subcategory `retro_gaming` in `geek_tech` (stable id; G04)."
+  },
+  "taxSubcategoryTabletopWargames": "Tabletop wargames",
+  "@taxSubcategoryTabletopWargames": {
+    "description": "L4.9.5: Category System subcategory `tabletop_wargames` in `geek_tech` (stable id; G04)."
+  },
+  "taxSubcategoryTradingCardGames": "Trading card games",
+  "@taxSubcategoryTradingCardGames": {
+    "description": "L4.9.5: Category System subcategory `trading_card_games` in `geek_tech` (stable id; G04)."
+  },
+  "taxSubcategoryHackathon": "Hackathon",
+  "@taxSubcategoryHackathon": {
+    "description": "L4.9.5: Category System subcategory `hackathon` in `geek_tech` (stable id; G04)."
+  },
+  "taxSubcategoryGameDevMeetup": "Game dev meetup",
+  "@taxSubcategoryGameDevMeetup": {
+    "description": "L4.9.5: Category System subcategory `game_dev_meetup` in `geek_tech` (stable id; G04)."
+  },
+  "taxSubcategoryTechMeetup": "Tech meetup",
+  "@taxSubcategoryTechMeetup": {
+    "description": "L4.9.5: Category System subcategory `tech_meetup` in `geek_tech` (stable id; G04)."
+  },
+  "taxSubcategoryRoboticsEvent": "Robotics event",
+  "@taxSubcategoryRoboticsEvent": {
+    "description": "L4.9.5: Category System subcategory `robotics_event` in `geek_tech` (stable id; G04)."
+  },
+  "taxSubcategoryFandomMeetup": "Fandom meetup",
+  "@taxSubcategoryFandomMeetup": {
+    "description": "L4.9.5: Category System subcategory `fandom_meetup` in `geek_tech` (stable id; G04)."
+  },
+  "taxSubcategoryCollectorsMeetup": "Collectors meetup",
+  "@taxSubcategoryCollectorsMeetup": {
+    "description": "L4.9.5: Category System subcategory `collectors_meetup` in `geek_tech` (stable id; G04)."
+  },
+  "taxSubcategorySpeedDating": "Speed dating",
+  "@taxSubcategorySpeedDating": {
+    "description": "L4.9.5: Category System subcategory `speed_dating` in `dating_singles` (stable id; G04)."
+  },
+  "taxSubcategorySinglesParty": "Singles party",
+  "@taxSubcategorySinglesParty": {
+    "description": "L4.9.5: Category System subcategory `singles_party` in `dating_singles` (stable id; G04)."
+  },
+  "taxSubcategorySinglesMixer": "Singles mixer",
+  "@taxSubcategorySinglesMixer": {
+    "description": "L4.9.5: Category System subcategory `singles_mixer` in `dating_singles` (stable id; G04)."
+  },
+  "taxSubcategorySinglesDinner": "Singles dinner",
+  "@taxSubcategorySinglesDinner": {
+    "description": "L4.9.5: Category System subcategory `singles_dinner` in `dating_singles` (stable id; G04)."
+  },
+  "taxSubcategoryBlindDateEvent": "Blind date event",
+  "@taxSubcategoryBlindDateEvent": {
+    "description": "L4.9.5: Category System subcategory `blind_date_event` in `dating_singles` (stable id; G04)."
+  },
+  "taxSubcategoryDatingGameEvent": "Dating game event",
+  "@taxSubcategoryDatingGameEvent": {
+    "description": "L4.9.5: Category System subcategory `dating_game_event` in `dating_singles` (stable id; G04)."
+  },
+  "taxSubcategorySinglesActivity": "Singles activity",
+  "@taxSubcategorySinglesActivity": {
+    "description": "L4.9.5: Category System subcategory `singles_activity` in `dating_singles` (stable id; G04)."
+  },
+  "taxSubcategoryMatchmakingEvent": "Matchmaking event",
+  "@taxSubcategoryMatchmakingEvent": {
+    "description": "L4.9.5: Category System subcategory `matchmaking_event` in `dating_singles` (stable id; G04)."
+  },
+  "taxSubcategoryOtherEvent": "Other event",
+  "@taxSubcategoryOtherEvent": {
+    "description": "L4.9.5: Category System subcategory `other_event` in `other` (stable id; G04)."
+  },
+  "discoverHomeShortSport": "Sport",
+  "@discoverHomeShortSport": {
+    "description": "L4.9.5: Home — short category chip name (the full name is taxCategory…)."
+  },
+  "discoverHomeShortWalks": "Walks",
+  "@discoverHomeShortWalks": {
+    "description": "L4.9.5: Home — short category chip name (the full name is taxCategory…)."
+  },
+  "discoverHomeShortGames": "Games",
+  "@discoverHomeShortGames": {
+    "description": "L4.9.5: Home — short category chip name (the full name is taxCategory…)."
+  },
+  "discoverHomeShortDance": "Dance",
+  "@discoverHomeShortDance": {
+    "description": "L4.9.5: Home — short category chip name (the full name is taxCategory…)."
+  },
+  "discoverHomeShortMusic": "Music",
+  "@discoverHomeShortMusic": {
+    "description": "L4.9.5: Home — short category chip name (the full name is taxCategory…)."
+  },
+  "discoverHomeShortArt": "Art",
+  "@discoverHomeShortArt": {
+    "description": "L4.9.5: Home — short category chip name (the full name is taxCategory…)."
+  },
+  "discoverHomeShortFood": "Food",
+  "@discoverHomeShortFood": {
+    "description": "L4.9.5: Home — short category chip name (the full name is taxCategory…)."
+  },
+  "discoverHomeShortWellness": "Wellness",
+  "@discoverHomeShortWellness": {
+    "description": "L4.9.5: Home — short category chip name (the full name is taxCategory…)."
   }
 }

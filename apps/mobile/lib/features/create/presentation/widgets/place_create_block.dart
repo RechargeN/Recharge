@@ -1,3 +1,4 @@
+import '../../../../core/localization/taxonomy_labels.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -213,7 +214,7 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                 (CreateTaxonomyCategory category) =>
                     DropdownMenuItem<CreateTaxonomyCategory>(
                       value: category,
-                      child: Text(category.title),
+                      child: Text(taxonomyLabel(context.l10n, category.id)),
                     ),
               )
               .toList(growable: false),
@@ -243,7 +244,9 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                     (CreateTaxonomySubcategory subcategory) =>
                         DropdownMenuItem<CreateTaxonomySubcategory>(
                           value: subcategory,
-                          child: Text(subcategory.title),
+                          child: Text(
+                            taxonomyLabel(context.l10n, subcategory.id),
+                          ),
                         ),
                   )
                   .toList(growable: false),

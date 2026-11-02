@@ -7,6 +7,7 @@ import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../../../shared/models/catalog_object_ref.dart';
 import '../../../discover/application/discover_providers.dart';
 import '../../../discover/domain/entities/discover_query.dart';
@@ -55,14 +56,14 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
       if (rechargeContentGroupById(categoryId) case final group?)
         _HomeCategory(
           id: group.id,
-          label: _homeCategoryLabel(group.id, group.title),
+          label: group.id,
           icon: _homeCategoryIcon(group.id),
         ),
     for (final RechargeContentGroup group in rechargeVisibleContentGroups)
       if (!_homeCategoryPriority.contains(group.id))
         _HomeCategory(
           id: group.id,
-          label: group.title,
+          label: group.id,
           icon: _homeCategoryIcon(group.id),
         ),
   ];
@@ -651,7 +652,8 @@ class _SavedSearchPanel extends StatelessWidget {
                 if (search.query.selectedCategoryIds.isNotEmpty)
                   _SavedScenarioChip(
                     icon: Icons.category_outlined,
-                    label: rechargeTaxonomyLabel(
+                    label: taxonomyLabel(
+                      context.l10n,
                       search.query.selectedCategoryIds.first,
                     ),
                   ),
@@ -804,7 +806,8 @@ class _SmartSearchPanel extends StatelessWidget {
                 if (item.query.selectedCategoryIds.isNotEmpty)
                   _SavedScenarioChip(
                     icon: Icons.category_outlined,
-                    label: rechargeTaxonomyLabel(
+                    label: taxonomyLabel(
+                      context.l10n,
                       item.query.selectedCategoryIds.first,
                     ),
                   ),
@@ -1046,7 +1049,9 @@ class _CategoryPill extends StatelessWidget {
             ),
             const SizedBox(height: 7),
             Text(
-              category.id == null ? context.l10n.discoverAll : category.label,
+              category.id == null
+                  ? context.l10n.discoverAll
+                  : _homeCategoryLabel(context.l10n, category.id!),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
@@ -1807,17 +1812,18 @@ IconData _homeCategoryIcon(String categoryId) {
   };
 }
 
-String _homeCategoryLabel(String categoryId, String fallback) {
+/// L4.9.5: the short home chip name; other categories use their full name.
+String _homeCategoryLabel(AppLocalizations l10n, String categoryId) {
   return switch (normalizeRechargeContentGroupId(categoryId)) {
-    'sport' => 'Sport', // l10n-ignore: category name (G04)
-    'outdoor_nature_walking' => 'Walks', // l10n-ignore: category name (G04)
-    'games_indoor' => 'Games', // l10n-ignore: category name (G04)
-    'dance' => 'Dance', // l10n-ignore: category name (G04)
-    'music_nightlife' => 'Music', // l10n-ignore: category name (G04)
-    'art_culture_museums' => 'Art', // l10n-ignore: category name (G04)
-    'food_drinks' => 'Food', // l10n-ignore: category name (G04)
-    'wellness_recharge' => 'Wellness', // l10n-ignore: category name (G04)
-    _ => fallback,
+    'sport' => l10n.discoverHomeShortSport,
+    'outdoor_nature_walking' => l10n.discoverHomeShortWalks,
+    'games_indoor' => l10n.discoverHomeShortGames,
+    'dance' => l10n.discoverHomeShortDance,
+    'music_nightlife' => l10n.discoverHomeShortMusic,
+    'art_culture_museums' => l10n.discoverHomeShortArt,
+    'food_drinks' => l10n.discoverHomeShortFood,
+    'wellness_recharge' => l10n.discoverHomeShortWellness,
+    final String id => taxonomyLabel(l10n, id),
   };
 }
 

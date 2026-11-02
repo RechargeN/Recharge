@@ -6,6 +6,7 @@ import 'package:design_system/design_system.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../../../shared/primitives/money/money.dart';
 import '../widgets/scenario_library_panel.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
@@ -2219,7 +2220,7 @@ class _CreatorPublishedRouteSummary extends StatelessWidget {
           children: routeContext.stepCategories
               .map(
                 (String step) =>
-                    _WorkspacePill(label: createTaxonomyLabelForPath(step)),
+                    _WorkspacePill(label: taxonomyLabel(context.l10n, step)),
               )
               .toList(growable: false),
         ),
@@ -2547,12 +2548,12 @@ _CreatorListingData? _creatorListingDataFor(
         ? _listingVenueLabel(l10n, draft)
         : draft.shortDescription,
     statusLabel: statusLabel,
-    categoryLabel: category?.title ?? draft.mainCategory,
+    categoryLabel: category == null
+        ? draft.mainCategory
+        : taxonomyLabel(l10n, category.id),
     subcategory: draft.subcategory.trim().isEmpty
         ? ''
-        : createTaxonomyLabelForPath(
-            '${draft.mainCategory}.${draft.subcategory}',
-          ),
+        : taxonomyLabel(l10n, '${draft.mainCategory}.${draft.subcategory}'),
     city: draft.city.trim().isEmpty ? l10n.profileNoCity : draft.city,
     priceLabel: draft.isFree
         ? l10n.discoverFree

@@ -16359,6 +16359,3402 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This import cannot be repeated. Import the file again.'**
   String get localErrorImportNotReappliable;
+
+  /// L4.9.5: Category System category `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Music & nightlife'**
+  String get taxCategoryMusicNightlife;
+
+  /// L4.9.5: Category System category `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Comedy & performance'**
+  String get taxCategoryComedyTheatrePerformance;
+
+  /// L4.9.5: Category System category `cinema_screenings` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Cinema & screenings'**
+  String get taxCategoryCinemaScreenings;
+
+  /// L4.9.5: Category System category `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Art, culture & museums'**
+  String get taxCategoryArtCultureMuseums;
+
+  /// L4.9.5: Category System category `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Education & talks'**
+  String get taxCategoryEducationTalks;
+
+  /// L4.9.5: Category System category `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Business & networking'**
+  String get taxCategoryBusinessNetworking;
+
+  /// L4.9.5: Category System category `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Workshops & masterclasses'**
+  String get taxCategoryWorkshopsMasterclasses;
+
+  /// L4.9.5: Category System category `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Languages & social learning'**
+  String get taxCategoryLanguageSocialLearning;
+
+  /// L4.9.5: Category System category `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Food & drinks'**
+  String get taxCategoryFoodDrinks;
+
+  /// L4.9.5: Category System category `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Games & indoor'**
+  String get taxCategoryGamesIndoor;
+
+  /// L4.9.5: Category System category `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Sport'**
+  String get taxCategorySport;
+
+  /// L4.9.5: Category System category `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dance'**
+  String get taxCategoryDance;
+
+  /// L4.9.5: Category System category `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Outdoor, nature & walking'**
+  String get taxCategoryOutdoorNatureWalking;
+
+  /// L4.9.5: Category System category `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Water activities'**
+  String get taxCategoryWaterActivities;
+
+  /// L4.9.5: Category System category `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Winter & seasonal'**
+  String get taxCategoryWinterSeasonal;
+
+  /// L4.9.5: Category System category `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Travel & tours'**
+  String get taxCategoryTravelTours;
+
+  /// L4.9.5: Category System category `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Family & kids'**
+  String get taxCategoryFamilyKids;
+
+  /// L4.9.5: Category System category `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pets & animals'**
+  String get taxCategoryPetsAnimals;
+
+  /// L4.9.5: Category System category `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Community & charity'**
+  String get taxCategoryCommunityCharity;
+
+  /// L4.9.5: Category System category `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Markets & fairs'**
+  String get taxCategoryMarketsFairs;
+
+  /// L4.9.5: Category System category `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Holidays & seasonal'**
+  String get taxCategoryHolidaysSeasonal;
+
+  /// L4.9.5: Category System category `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Wellness & recharge'**
+  String get taxCategoryWellnessRecharge;
+
+  /// L4.9.5: Category System category `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Adrenaline & entertainment'**
+  String get taxCategoryAdrenalineEntertainment;
+
+  /// L4.9.5: Category System category `attractions` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Attractions'**
+  String get taxCategoryAttractions;
+
+  /// L4.9.5: Category System category `auto_moto` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Auto & moto'**
+  String get taxCategoryAutoMoto;
+
+  /// L4.9.5: Category System category `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Geek & tech'**
+  String get taxCategoryGeekTech;
+
+  /// L4.9.5: Category System category `dating_singles` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dating & singles'**
+  String get taxCategoryDatingSingles;
+
+  /// L4.9.5: Category System category `other` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get taxCategoryOther;
+
+  /// L4.9.5: Category System subcategory `concert` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Concert'**
+  String get taxSubcategoryConcert;
+
+  /// L4.9.5: Category System subcategory `live_music` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Live music'**
+  String get taxSubcategoryLiveMusic;
+
+  /// L4.9.5: Category System subcategory `acoustic_evening` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Acoustic evening'**
+  String get taxSubcategoryAcousticEvening;
+
+  /// L4.9.5: Category System subcategory `jazz` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Jazz'**
+  String get taxSubcategoryJazz;
+
+  /// L4.9.5: Category System subcategory `classical_music` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Classical music'**
+  String get taxSubcategoryClassicalMusic;
+
+  /// L4.9.5: Category System subcategory `rock_music` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Rock music'**
+  String get taxSubcategoryRockMusic;
+
+  /// L4.9.5: Category System subcategory `pop_music` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pop music'**
+  String get taxSubcategoryPopMusic;
+
+  /// L4.9.5: Category System subcategory `electronic_music` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Electronic music'**
+  String get taxSubcategoryElectronicMusic;
+
+  /// L4.9.5: Category System subcategory `techno` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Techno'**
+  String get taxSubcategoryTechno;
+
+  /// L4.9.5: Category System subcategory `house_music` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'House music'**
+  String get taxSubcategoryHouseMusic;
+
+  /// L4.9.5: Category System subcategory `latin_music` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Latin music'**
+  String get taxSubcategoryLatinMusic;
+
+  /// L4.9.5: Category System subcategory `dj_party` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'DJ party'**
+  String get taxSubcategoryDjParty;
+
+  /// L4.9.5: Category System subcategory `club_night` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Club night'**
+  String get taxSubcategoryClubNight;
+
+  /// L4.9.5: Category System subcategory `karaoke` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Karaoke'**
+  String get taxSubcategoryKaraoke;
+
+  /// L4.9.5: Category System subcategory `open_mic_music` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Open mic music'**
+  String get taxSubcategoryOpenMicMusic;
+
+  /// L4.9.5: Category System subcategory `rooftop_party` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Rooftop party'**
+  String get taxSubcategoryRooftopParty;
+
+  /// L4.9.5: Category System subcategory `beach_party` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Beach party'**
+  String get taxSubcategoryBeachParty;
+
+  /// L4.9.5: Category System subcategory `themed_party` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Themed party'**
+  String get taxSubcategoryThemedParty;
+
+  /// L4.9.5: Category System subcategory `music_festival` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Music festival'**
+  String get taxSubcategoryMusicFestival;
+
+  /// L4.9.5: Category System subcategory `listening_party` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Listening party'**
+  String get taxSubcategoryListeningParty;
+
+  /// L4.9.5: Category System subcategory `jam_session` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Jam session'**
+  String get taxSubcategoryJamSession;
+
+  /// L4.9.5: Category System subcategory `night_bar` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Night bar'**
+  String get taxSubcategoryNightBar;
+
+  /// L4.9.5: Category System subcategory `afterwork_drinks` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Afterwork drinks'**
+  String get taxSubcategoryAfterworkDrinks;
+
+  /// L4.9.5: Category System subcategory `late_night_social` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Late night social'**
+  String get taxSubcategoryLateNightSocial;
+
+  /// L4.9.5: Category System subcategory `group_singing` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Group singing'**
+  String get taxSubcategoryGroupSinging;
+
+  /// L4.9.5: Category System subcategory `organ_concert` in `music_nightlife` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Organ concert'**
+  String get taxSubcategoryOrganConcert;
+
+  /// L4.9.5: Category System subcategory `standup` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Stand-up'**
+  String get taxSubcategoryStandup;
+
+  /// L4.9.5: Category System subcategory `comedy_open_mic` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Comedy open mic'**
+  String get taxSubcategoryComedyOpenMic;
+
+  /// L4.9.5: Category System subcategory `theatre` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Theatre'**
+  String get taxSubcategoryTheatre;
+
+  /// L4.9.5: Category System subcategory `improvisation` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Improvisation'**
+  String get taxSubcategoryImprovisation;
+
+  /// L4.9.5: Category System subcategory `magic_show` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Magic show'**
+  String get taxSubcategoryMagicShow;
+
+  /// L4.9.5: Category System subcategory `circus` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Circus'**
+  String get taxSubcategoryCircus;
+
+  /// L4.9.5: Category System subcategory `poetry_night` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Poetry night'**
+  String get taxSubcategoryPoetryNight;
+
+  /// L4.9.5: Category System subcategory `storytelling` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Storytelling'**
+  String get taxSubcategoryStorytelling;
+
+  /// L4.9.5: Category System subcategory `puppet_show` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Puppet show'**
+  String get taxSubcategoryPuppetShow;
+
+  /// L4.9.5: Category System subcategory `ballet` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Ballet'**
+  String get taxSubcategoryBallet;
+
+  /// L4.9.5: Category System subcategory `opera` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Opera'**
+  String get taxSubcategoryOpera;
+
+  /// L4.9.5: Category System subcategory `cabaret` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Cabaret'**
+  String get taxSubcategoryCabaret;
+
+  /// L4.9.5: Category System subcategory `street_performance` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Street performance'**
+  String get taxSubcategoryStreetPerformance;
+
+  /// L4.9.5: Category System subcategory `performance_art` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Performance art'**
+  String get taxSubcategoryPerformanceArt;
+
+  /// L4.9.5: Category System subcategory `drag_show` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Drag show'**
+  String get taxSubcategoryDragShow;
+
+  /// L4.9.5: Category System subcategory `musical` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Musical'**
+  String get taxSubcategoryMusical;
+
+  /// L4.9.5: Category System subcategory `experimental_theatre` in `comedy_theatre_performance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Experimental theatre'**
+  String get taxSubcategoryExperimentalTheatre;
+
+  /// L4.9.5: Category System subcategory `cinema` in `cinema_screenings` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Cinema'**
+  String get taxSubcategoryCinema;
+
+  /// L4.9.5: Category System subcategory `movie_screening` in `cinema_screenings` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Movie screening'**
+  String get taxSubcategoryMovieScreening;
+
+  /// L4.9.5: Category System subcategory `open_air_cinema` in `cinema_screenings` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Open-air cinema'**
+  String get taxSubcategoryOpenAirCinema;
+
+  /// L4.9.5: Category System subcategory `film_festival` in `cinema_screenings` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Film festival'**
+  String get taxSubcategoryFilmFestival;
+
+  /// L4.9.5: Category System subcategory `documentary` in `cinema_screenings` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Documentary'**
+  String get taxSubcategoryDocumentary;
+
+  /// L4.9.5: Category System subcategory `short_films` in `cinema_screenings` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Short films'**
+  String get taxSubcategoryShortFilms;
+
+  /// L4.9.5: Category System subcategory `retro_cinema` in `cinema_screenings` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Retro cinema'**
+  String get taxSubcategoryRetroCinema;
+
+  /// L4.9.5: Category System subcategory `animation` in `cinema_screenings` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Animation'**
+  String get taxSubcategoryAnimation;
+
+  /// L4.9.5: Category System subcategory `sports_screening` in `cinema_screenings` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Sports screening'**
+  String get taxSubcategorySportsScreening;
+
+  /// L4.9.5: Category System subcategory `movie_discussion` in `cinema_screenings` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Movie discussion'**
+  String get taxSubcategoryMovieDiscussion;
+
+  /// L4.9.5: Category System subcategory `premiere` in `cinema_screenings` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Premiere'**
+  String get taxSubcategoryPremiere;
+
+  /// L4.9.5: Category System subcategory `independent_film` in `cinema_screenings` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Independent film'**
+  String get taxSubcategoryIndependentFilm;
+
+  /// L4.9.5: Category System subcategory `cinema_club` in `cinema_screenings` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Cinema club'**
+  String get taxSubcategoryCinemaClub;
+
+  /// L4.9.5: Category System subcategory `exhibition` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Exhibition'**
+  String get taxSubcategoryExhibition;
+
+  /// L4.9.5: Category System subcategory `gallery` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get taxSubcategoryGallery;
+
+  /// L4.9.5: Category System subcategory `museum` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Museum'**
+  String get taxSubcategoryMuseum;
+
+  /// L4.9.5: Category System subcategory `museum_night` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Museum night'**
+  String get taxSubcategoryMuseumNight;
+
+  /// L4.9.5: Category System subcategory `gallery_walk` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery walk'**
+  String get taxSubcategoryGalleryWalk;
+
+  /// L4.9.5: Category System subcategory `artist_talk` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Artist talk'**
+  String get taxSubcategoryArtistTalk;
+
+  /// L4.9.5: Category System subcategory `art_walk` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Art walk'**
+  String get taxSubcategoryArtWalk;
+
+  /// L4.9.5: Category System subcategory `photography_exhibition` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Photography exhibition'**
+  String get taxSubcategoryPhotographyExhibition;
+
+  /// L4.9.5: Category System subcategory `street_art` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Street art'**
+  String get taxSubcategoryStreetArt;
+
+  /// L4.9.5: Category System subcategory `architecture` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Architecture'**
+  String get taxSubcategoryArchitecture;
+
+  /// L4.9.5: Category System subcategory `cultural_heritage` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Cultural heritage'**
+  String get taxSubcategoryCulturalHeritage;
+
+  /// L4.9.5: Category System subcategory `monument` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Monument'**
+  String get taxSubcategoryMonument;
+
+  /// L4.9.5: Category System subcategory `memorial` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Memorial'**
+  String get taxSubcategoryMemorial;
+
+  /// L4.9.5: Category System subcategory `sculpture` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Sculpture'**
+  String get taxSubcategorySculpture;
+
+  /// L4.9.5: Category System subcategory `historic_landmark` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Historic landmark'**
+  String get taxSubcategoryHistoricLandmark;
+
+  /// L4.9.5: Category System subcategory `literature_evening` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Literature evening'**
+  String get taxSubcategoryLiteratureEvening;
+
+  /// L4.9.5: Category System subcategory `book_reading` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Book reading'**
+  String get taxSubcategoryBookReading;
+
+  /// L4.9.5: Category System subcategory `history_walk` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'History walk'**
+  String get taxSubcategoryHistoryWalk;
+
+  /// L4.9.5: Category System subcategory `design_event` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Design event'**
+  String get taxSubcategoryDesignEvent;
+
+  /// L4.9.5: Category System subcategory `craft_exhibition` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Craft exhibition'**
+  String get taxSubcategoryCraftExhibition;
+
+  /// L4.9.5: Category System subcategory `public_art` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Public art'**
+  String get taxSubcategoryPublicArt;
+
+  /// L4.9.5: Category System subcategory `creative_meetup` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Creative meetup'**
+  String get taxSubcategoryCreativeMeetup;
+
+  /// L4.9.5: Category System subcategory `fashion_event` in `art_culture_museums` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Fashion event'**
+  String get taxSubcategoryFashionEvent;
+
+  /// L4.9.5: Category System subcategory `lecture` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture'**
+  String get taxSubcategoryLecture;
+
+  /// L4.9.5: Category System subcategory `public_talk` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Public talk'**
+  String get taxSubcategoryPublicTalk;
+
+  /// L4.9.5: Category System subcategory `discussion` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Discussion'**
+  String get taxSubcategoryDiscussion;
+
+  /// L4.9.5: Category System subcategory `debate` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Debate'**
+  String get taxSubcategoryDebate;
+
+  /// L4.9.5: Category System subcategory `panel_discussion` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Panel discussion'**
+  String get taxSubcategoryPanelDiscussion;
+
+  /// L4.9.5: Category System subcategory `science_talk` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Science talk'**
+  String get taxSubcategoryScienceTalk;
+
+  /// L4.9.5: Category System subcategory `history_lecture` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'History lecture'**
+  String get taxSubcategoryHistoryLecture;
+
+  /// L4.9.5: Category System subcategory `psychology_talk` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Psychology talk'**
+  String get taxSubcategoryPsychologyTalk;
+
+  /// L4.9.5: Category System subcategory `finance_talk` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Finance talk'**
+  String get taxSubcategoryFinanceTalk;
+
+  /// L4.9.5: Category System subcategory `career_talk` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Career talk'**
+  String get taxSubcategoryCareerTalk;
+
+  /// L4.9.5: Category System subcategory `legal_info_session` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Legal info session'**
+  String get taxSubcategoryLegalInfoSession;
+
+  /// L4.9.5: Category System subcategory `book_club` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Book club'**
+  String get taxSubcategoryBookClub;
+
+  /// L4.9.5: Category System subcategory `practical_seminar` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Practical seminar'**
+  String get taxSubcategoryPracticalSeminar;
+
+  /// L4.9.5: Category System subcategory `self_development` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Self development'**
+  String get taxSubcategorySelfDevelopment;
+
+  /// L4.9.5: Category System subcategory `health_talk` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Health talk'**
+  String get taxSubcategoryHealthTalk;
+
+  /// L4.9.5: Category System subcategory `technology_talk` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Technology talk'**
+  String get taxSubcategoryTechnologyTalk;
+
+  /// L4.9.5: Category System subcategory `startup_talk` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Startup talk'**
+  String get taxSubcategoryStartupTalk;
+
+  /// L4.9.5: Category System subcategory `parenting_talk` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Parenting talk'**
+  String get taxSubcategoryParentingTalk;
+
+  /// L4.9.5: Category System subcategory `community_discussion` in `education_talks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Community discussion'**
+  String get taxSubcategoryCommunityDiscussion;
+
+  /// L4.9.5: Category System subcategory `networking` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Networking'**
+  String get taxSubcategoryNetworking;
+
+  /// L4.9.5: Category System subcategory `business_breakfast` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Business breakfast'**
+  String get taxSubcategoryBusinessBreakfast;
+
+  /// L4.9.5: Category System subcategory `business_lunch` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Business lunch'**
+  String get taxSubcategoryBusinessLunch;
+
+  /// L4.9.5: Category System subcategory `conference` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Conference'**
+  String get taxSubcategoryConference;
+
+  /// L4.9.5: Category System subcategory `product_presentation` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Product presentation'**
+  String get taxSubcategoryProductPresentation;
+
+  /// L4.9.5: Category System subcategory `product_launch` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Product launch'**
+  String get taxSubcategoryProductLaunch;
+
+  /// L4.9.5: Category System subcategory `startup_meetup` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Startup meetup'**
+  String get taxSubcategoryStartupMeetup;
+
+  /// L4.9.5: Category System subcategory `pitch_night` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pitch night'**
+  String get taxSubcategoryPitchNight;
+
+  /// L4.9.5: Category System subcategory `investor_meetup` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Investor meetup'**
+  String get taxSubcategoryInvestorMeetup;
+
+  /// L4.9.5: Category System subcategory `job_fair` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Job fair'**
+  String get taxSubcategoryJobFair;
+
+  /// L4.9.5: Category System subcategory `portfolio_review` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Portfolio review'**
+  String get taxSubcategoryPortfolioReview;
+
+  /// L4.9.5: Category System subcategory `freelancers_meetup` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Freelancers meetup'**
+  String get taxSubcategoryFreelancersMeetup;
+
+  /// L4.9.5: Category System subcategory `demo_day` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Demo day'**
+  String get taxSubcategoryDemoDay;
+
+  /// L4.9.5: Category System subcategory `expo` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Expo'**
+  String get taxSubcategoryExpo;
+
+  /// L4.9.5: Category System subcategory `founder_meetup` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Founder meetup'**
+  String get taxSubcategoryFounderMeetup;
+
+  /// L4.9.5: Category System subcategory `industry_meetup` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Industry meetup'**
+  String get taxSubcategoryIndustryMeetup;
+
+  /// L4.9.5: Category System subcategory `career_networking` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Career networking'**
+  String get taxSubcategoryCareerNetworking;
+
+  /// L4.9.5: Category System subcategory `coworking_event` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Coworking event'**
+  String get taxSubcategoryCoworkingEvent;
+
+  /// L4.9.5: Category System subcategory `business_workshop` in `business_networking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Business workshop'**
+  String get taxSubcategoryBusinessWorkshop;
+
+  /// L4.9.5: Category System subcategory `workshop` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Workshop'**
+  String get taxSubcategoryWorkshop;
+
+  /// L4.9.5: Category System subcategory `masterclass` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Masterclass'**
+  String get taxSubcategoryMasterclass;
+
+  /// L4.9.5: Category System subcategory `course` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Course'**
+  String get taxSubcategoryCourse;
+
+  /// L4.9.5: Category System subcategory `pottery` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pottery'**
+  String get taxSubcategoryPottery;
+
+  /// L4.9.5: Category System subcategory `ceramics` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Ceramics'**
+  String get taxSubcategoryCeramics;
+
+  /// L4.9.5: Category System subcategory `drawing` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Drawing'**
+  String get taxSubcategoryDrawing;
+
+  /// L4.9.5: Category System subcategory `painting` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Painting'**
+  String get taxSubcategoryPainting;
+
+  /// L4.9.5: Category System subcategory `photography` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Photography'**
+  String get taxSubcategoryPhotography;
+
+  /// L4.9.5: Category System subcategory `cooking_class` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking class'**
+  String get taxSubcategoryCookingClass;
+
+  /// L4.9.5: Category System subcategory `sewing` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Sewing'**
+  String get taxSubcategorySewing;
+
+  /// L4.9.5: Category System subcategory `floristics` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Floristics'**
+  String get taxSubcategoryFloristics;
+
+  /// L4.9.5: Category System subcategory `candle_making` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Candle making'**
+  String get taxSubcategoryCandleMaking;
+
+  /// L4.9.5: Category System subcategory `public_speaking` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Public speaking'**
+  String get taxSubcategoryPublicSpeaking;
+
+  /// L4.9.5: Category System subcategory `creative_class` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Creative class'**
+  String get taxSubcategoryCreativeClass;
+
+  /// L4.9.5: Category System subcategory `craft_workshop` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Craft workshop'**
+  String get taxSubcategoryCraftWorkshop;
+
+  /// L4.9.5: Category System subcategory `writing_workshop` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Writing workshop'**
+  String get taxSubcategoryWritingWorkshop;
+
+  /// L4.9.5: Category System subcategory `music_lesson` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Music lesson'**
+  String get taxSubcategoryMusicLesson;
+
+  /// L4.9.5: Category System subcategory `dance_workshop` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dance workshop'**
+  String get taxSubcategoryDanceWorkshop;
+
+  /// L4.9.5: Category System subcategory `beauty_workshop` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Beauty workshop'**
+  String get taxSubcategoryBeautyWorkshop;
+
+  /// L4.9.5: Category System subcategory `wellness_workshop` in `workshops_masterclasses` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Wellness workshop'**
+  String get taxSubcategoryWellnessWorkshop;
+
+  /// L4.9.5: Category System subcategory `language_exchange` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Language exchange'**
+  String get taxSubcategoryLanguageExchange;
+
+  /// L4.9.5: Category System subcategory `english_club` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'English club'**
+  String get taxSubcategoryEnglishClub;
+
+  /// L4.9.5: Category System subcategory `dutch_club` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dutch club'**
+  String get taxSubcategoryDutchClub;
+
+  /// L4.9.5: Category System subcategory `latvian_club` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Latvian club'**
+  String get taxSubcategoryLatvianClub;
+
+  /// L4.9.5: Category System subcategory `conversation_club` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation club'**
+  String get taxSubcategoryConversationClub;
+
+  /// L4.9.5: Category System subcategory `international_meetup` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'International meetup'**
+  String get taxSubcategoryInternationalMeetup;
+
+  /// L4.9.5: Category System subcategory `expats_meetup` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Expats meetup'**
+  String get taxSubcategoryExpatsMeetup;
+
+  /// L4.9.5: Category System subcategory `tandem_meeting` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Tandem meeting'**
+  String get taxSubcategoryTandemMeeting;
+
+  /// L4.9.5: Category System subcategory `language_cafe` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Language cafe'**
+  String get taxSubcategoryLanguageCafe;
+
+  /// L4.9.5: Category System subcategory `language_walk` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Language walk'**
+  String get taxSubcategoryLanguageWalk;
+
+  /// L4.9.5: Category System subcategory `speed_friending` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Speed friending'**
+  String get taxSubcategorySpeedFriending;
+
+  /// L4.9.5: Category System subcategory `speaking_club` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Speaking club'**
+  String get taxSubcategorySpeakingClub;
+
+  /// L4.9.5: Category System subcategory `culture_exchange` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Culture exchange'**
+  String get taxSubcategoryCultureExchange;
+
+  /// L4.9.5: Category System subcategory `newcomers_meetup` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Newcomers meetup'**
+  String get taxSubcategoryNewcomersMeetup;
+
+  /// L4.9.5: Category System subcategory `study_group` in `language_social_learning` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Study group'**
+  String get taxSubcategoryStudyGroup;
+
+  /// L4.9.5: Category System subcategory `coffee` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Coffee'**
+  String get taxSubcategoryCoffee;
+
+  /// L4.9.5: Category System subcategory `breakfast` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Breakfast'**
+  String get taxSubcategoryBreakfast;
+
+  /// L4.9.5: Category System subcategory `brunch` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Brunch'**
+  String get taxSubcategoryBrunch;
+
+  /// L4.9.5: Category System subcategory `lunch` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Lunch'**
+  String get taxSubcategoryLunch;
+
+  /// L4.9.5: Category System subcategory `dinner` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dinner'**
+  String get taxSubcategoryDinner;
+
+  /// L4.9.5: Category System subcategory `dessert` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dessert'**
+  String get taxSubcategoryDessert;
+
+  /// L4.9.5: Category System subcategory `street_food` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Street food'**
+  String get taxSubcategoryStreetFood;
+
+  /// L4.9.5: Category System subcategory `food_tasting` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Food tasting'**
+  String get taxSubcategoryFoodTasting;
+
+  /// L4.9.5: Category System subcategory `drink_tasting` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Drink tasting'**
+  String get taxSubcategoryDrinkTasting;
+
+  /// L4.9.5: Category System subcategory `wine_tasting` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Wine tasting'**
+  String get taxSubcategoryWineTasting;
+
+  /// L4.9.5: Category System subcategory `beer_tasting` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Beer tasting'**
+  String get taxSubcategoryBeerTasting;
+
+  /// L4.9.5: Category System subcategory `cocktail_tasting` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Cocktail tasting'**
+  String get taxSubcategoryCocktailTasting;
+
+  /// L4.9.5: Category System subcategory `tea_ceremony` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Tea ceremony'**
+  String get taxSubcategoryTeaCeremony;
+
+  /// L4.9.5: Category System subcategory `bbq` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'BBQ'**
+  String get taxSubcategoryBbq;
+
+  /// L4.9.5: Category System subcategory `picnic` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Picnic'**
+  String get taxSubcategoryPicnic;
+
+  /// L4.9.5: Category System subcategory `food_tour` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Food tour'**
+  String get taxSubcategoryFoodTour;
+
+  /// L4.9.5: Category System subcategory `bar_crawl` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Bar crawl'**
+  String get taxSubcategoryBarCrawl;
+
+  /// L4.9.5: Category System subcategory `pub_crawl` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pub crawl'**
+  String get taxSubcategoryPubCrawl;
+
+  /// L4.9.5: Category System subcategory `happy_hour` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Happy hour'**
+  String get taxSubcategoryHappyHour;
+
+  /// L4.9.5: Category System subcategory `restaurant_visit` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant visit'**
+  String get taxSubcategoryRestaurantVisit;
+
+  /// L4.9.5: Category System subcategory `cafe_visit` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Cafe visit'**
+  String get taxSubcategoryCafeVisit;
+
+  /// L4.9.5: Category System subcategory `bakery_visit` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Bakery visit'**
+  String get taxSubcategoryBakeryVisit;
+
+  /// L4.9.5: Category System subcategory `vegan_food` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Vegan food'**
+  String get taxSubcategoryVeganFood;
+
+  /// L4.9.5: Category System subcategory `local_food` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Local food'**
+  String get taxSubcategoryLocalFood;
+
+  /// L4.9.5: Category System subcategory `fine_dining` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Fine dining'**
+  String get taxSubcategoryFineDining;
+
+  /// L4.9.5: Category System subcategory `family_meal` in `food_drinks` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Family meal'**
+  String get taxSubcategoryFamilyMeal;
+
+  /// L4.9.5: Category System subcategory `quiz` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz'**
+  String get taxSubcategoryQuiz;
+
+  /// L4.9.5: Category System subcategory `board_games` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Board games'**
+  String get taxSubcategoryBoardGames;
+
+  /// L4.9.5: Category System subcategory `mafia` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Mafia'**
+  String get taxSubcategoryMafia;
+
+  /// L4.9.5: Category System subcategory `poker_no_gambling` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Poker (no gambling)'**
+  String get taxSubcategoryPokerNoGambling;
+
+  /// L4.9.5: Category System subcategory `chess` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Chess'**
+  String get taxSubcategoryChess;
+
+  /// L4.9.5: Category System subcategory `escape_room` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Escape room'**
+  String get taxSubcategoryEscapeRoom;
+
+  /// L4.9.5: Category System subcategory `quest` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Quest'**
+  String get taxSubcategoryQuest;
+
+  /// L4.9.5: Category System subcategory `city_game` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'City game'**
+  String get taxSubcategoryCityGame;
+
+  /// L4.9.5: Category System subcategory `treasure_hunt` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Treasure hunt'**
+  String get taxSubcategoryTreasureHunt;
+
+  /// L4.9.5: Category System subcategory `bowling` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Bowling'**
+  String get taxSubcategoryBowling;
+
+  /// L4.9.5: Category System subcategory `billiards` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Billiards'**
+  String get taxSubcategoryBilliards;
+
+  /// L4.9.5: Category System subcategory `darts` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Darts'**
+  String get taxSubcategoryDarts;
+
+  /// L4.9.5: Category System subcategory `mini_golf` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Mini golf'**
+  String get taxSubcategoryMiniGolf;
+
+  /// L4.9.5: Category System subcategory `arcade` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Arcade'**
+  String get taxSubcategoryArcade;
+
+  /// L4.9.5: Category System subcategory `vr_arcade` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'VR arcade'**
+  String get taxSubcategoryVrArcade;
+
+  /// L4.9.5: Category System subcategory `video_games` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Video games'**
+  String get taxSubcategoryVideoGames;
+
+  /// L4.9.5: Category System subcategory `table_games` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Table games'**
+  String get taxSubcategoryTableGames;
+
+  /// L4.9.5: Category System subcategory `card_games` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Card games'**
+  String get taxSubcategoryCardGames;
+
+  /// L4.9.5: Category System subcategory `role_playing_game` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Role playing game'**
+  String get taxSubcategoryRolePlayingGame;
+
+  /// L4.9.5: Category System subcategory `indoor_competition` in `games_indoor` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Indoor competition'**
+  String get taxSubcategoryIndoorCompetition;
+
+  /// L4.9.5: Category System subcategory `football` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Football'**
+  String get taxSubcategoryFootball;
+
+  /// L4.9.5: Category System subcategory `basketball` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Basketball'**
+  String get taxSubcategoryBasketball;
+
+  /// L4.9.5: Category System subcategory `volleyball` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Volleyball'**
+  String get taxSubcategoryVolleyball;
+
+  /// L4.9.5: Category System subcategory `beach_volleyball` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Beach volleyball'**
+  String get taxSubcategoryBeachVolleyball;
+
+  /// L4.9.5: Category System subcategory `tennis` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Tennis'**
+  String get taxSubcategoryTennis;
+
+  /// L4.9.5: Category System subcategory `table_tennis` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Table tennis'**
+  String get taxSubcategoryTableTennis;
+
+  /// L4.9.5: Category System subcategory `badminton` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Badminton'**
+  String get taxSubcategoryBadminton;
+
+  /// L4.9.5: Category System subcategory `squash` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Squash'**
+  String get taxSubcategorySquash;
+
+  /// L4.9.5: Category System subcategory `padel` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Padel'**
+  String get taxSubcategoryPadel;
+
+  /// L4.9.5: Category System subcategory `running` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get taxSubcategoryRunning;
+
+  /// L4.9.5: Category System subcategory `trail_running` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Trail running'**
+  String get taxSubcategoryTrailRunning;
+
+  /// L4.9.5: Category System subcategory `cycling` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Cycling'**
+  String get taxSubcategoryCycling;
+
+  /// L4.9.5: Category System subcategory `swimming` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Swimming'**
+  String get taxSubcategorySwimming;
+
+  /// L4.9.5: Category System subcategory `boxing` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Boxing'**
+  String get taxSubcategoryBoxing;
+
+  /// L4.9.5: Category System subcategory `martial_arts` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Martial arts'**
+  String get taxSubcategoryMartialArts;
+
+  /// L4.9.5: Category System subcategory `climbing` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Climbing'**
+  String get taxSubcategoryClimbing;
+
+  /// L4.9.5: Category System subcategory `bouldering` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Bouldering'**
+  String get taxSubcategoryBouldering;
+
+  /// L4.9.5: Category System subcategory `fitness` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Fitness'**
+  String get taxSubcategoryFitness;
+
+  /// L4.9.5: Category System subcategory `gym` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Gym'**
+  String get taxSubcategoryGym;
+
+  /// L4.9.5: Category System subcategory `crossfit` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Crossfit'**
+  String get taxSubcategoryCrossfit;
+
+  /// L4.9.5: Category System subcategory `calisthenics` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Calisthenics'**
+  String get taxSubcategoryCalisthenics;
+
+  /// L4.9.5: Category System subcategory `yoga` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Yoga'**
+  String get taxSubcategoryYoga;
+
+  /// L4.9.5: Category System subcategory `pilates` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pilates'**
+  String get taxSubcategoryPilates;
+
+  /// L4.9.5: Category System subcategory `stretching` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Stretching'**
+  String get taxSubcategoryStretching;
+
+  /// L4.9.5: Category System subcategory `dance_fitness` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dance fitness'**
+  String get taxSubcategoryDanceFitness;
+
+  /// L4.9.5: Category System subcategory `nordic_walking` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Nordic walking'**
+  String get taxSubcategoryNordicWalking;
+
+  /// L4.9.5: Category System subcategory `skating` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Skating'**
+  String get taxSubcategorySkating;
+
+  /// L4.9.5: Category System subcategory `skateboarding` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Skateboarding'**
+  String get taxSubcategorySkateboarding;
+
+  /// L4.9.5: Category System subcategory `rollerblading` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Rollerblading'**
+  String get taxSubcategoryRollerblading;
+
+  /// L4.9.5: Category System subcategory `golf` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Golf'**
+  String get taxSubcategoryGolf;
+
+  /// L4.9.5: Category System subcategory `frisbee` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Frisbee'**
+  String get taxSubcategoryFrisbee;
+
+  /// L4.9.5: Category System subcategory `disc_golf` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Disc golf'**
+  String get taxSubcategoryDiscGolf;
+
+  /// L4.9.5: Category System subcategory `running_race` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Running race'**
+  String get taxSubcategoryRunningRace;
+
+  /// L4.9.5: Category System subcategory `cycling_race` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Cycling race'**
+  String get taxSubcategoryCyclingRace;
+
+  /// L4.9.5: Category System subcategory `fitness_challenge` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Fitness challenge'**
+  String get taxSubcategoryFitnessChallenge;
+
+  /// L4.9.5: Category System subcategory `amateur_tournament` in `sport` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Amateur tournament'**
+  String get taxSubcategoryAmateurTournament;
+
+  /// L4.9.5: Category System subcategory `salsa` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Salsa'**
+  String get taxSubcategorySalsa;
+
+  /// L4.9.5: Category System subcategory `bachata` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Bachata'**
+  String get taxSubcategoryBachata;
+
+  /// L4.9.5: Category System subcategory `kizomba` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Kizomba'**
+  String get taxSubcategoryKizomba;
+
+  /// L4.9.5: Category System subcategory `tango` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Tango'**
+  String get taxSubcategoryTango;
+
+  /// L4.9.5: Category System subcategory `hip_hop` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Hip-hop'**
+  String get taxSubcategoryHipHop;
+
+  /// L4.9.5: Category System subcategory `contemporary_dance` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Contemporary dance'**
+  String get taxSubcategoryContemporaryDance;
+
+  /// L4.9.5: Category System subcategory `ballroom_dance` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Ballroom dance'**
+  String get taxSubcategoryBallroomDance;
+
+  /// L4.9.5: Category System subcategory `folk_dance` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Folk dance'**
+  String get taxSubcategoryFolkDance;
+
+  /// L4.9.5: Category System subcategory `dance_social` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dance social'**
+  String get taxSubcategoryDanceSocial;
+
+  /// L4.9.5: Category System subcategory `dance_battle` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dance battle'**
+  String get taxSubcategoryDanceBattle;
+
+  /// L4.9.5: Category System subcategory `zumba` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Zumba'**
+  String get taxSubcategoryZumba;
+
+  /// L4.9.5: Category System subcategory `partner_dance` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Partner dance'**
+  String get taxSubcategoryPartnerDance;
+
+  /// L4.9.5: Category System subcategory `latin_dance` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Latin dance'**
+  String get taxSubcategoryLatinDance;
+
+  /// L4.9.5: Category System subcategory `heels_dance` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Heels dance'**
+  String get taxSubcategoryHeelsDance;
+
+  /// L4.9.5: Category System subcategory `street_dance` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Street dance'**
+  String get taxSubcategoryStreetDance;
+
+  /// L4.9.5: Category System subcategory `dance_class` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dance class'**
+  String get taxSubcategoryDanceClass;
+
+  /// L4.9.5: Category System subcategory `dance_practice` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dance practice'**
+  String get taxSubcategoryDancePractice;
+
+  /// L4.9.5: Category System subcategory `dance_show` in `dance` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dance show'**
+  String get taxSubcategoryDanceShow;
+
+  /// L4.9.5: Category System subcategory `hiking` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Hiking'**
+  String get taxSubcategoryHiking;
+
+  /// L4.9.5: Category System subcategory `nature_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Nature walk'**
+  String get taxSubcategoryNatureWalk;
+
+  /// L4.9.5: Category System subcategory `city_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'City walk'**
+  String get taxSubcategoryCityWalk;
+
+  /// L4.9.5: Category System subcategory `historical_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Historical walk'**
+  String get taxSubcategoryHistoricalWalk;
+
+  /// L4.9.5: Category System subcategory `sunset_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Sunset walk'**
+  String get taxSubcategorySunsetWalk;
+
+  /// L4.9.5: Category System subcategory `sunrise_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Sunrise walk'**
+  String get taxSubcategorySunriseWalk;
+
+  /// L4.9.5: Category System subcategory `forest_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Forest walk'**
+  String get taxSubcategoryForestWalk;
+
+  /// L4.9.5: Category System subcategory `lake_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Lake walk'**
+  String get taxSubcategoryLakeWalk;
+
+  /// L4.9.5: Category System subcategory `river_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'River walk'**
+  String get taxSubcategoryRiverWalk;
+
+  /// L4.9.5: Category System subcategory `architecture_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Architecture walk'**
+  String get taxSubcategoryArchitectureWalk;
+
+  /// L4.9.5: Category System subcategory `hidden_gems_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden gems walk'**
+  String get taxSubcategoryHiddenGemsWalk;
+
+  /// L4.9.5: Category System subcategory `photography_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Photography walk'**
+  String get taxSubcategoryPhotographyWalk;
+
+  /// L4.9.5: Category System subcategory `birdwatching` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Birdwatching'**
+  String get taxSubcategoryBirdwatching;
+
+  /// L4.9.5: Category System subcategory `mushroom_picking` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Mushroom picking'**
+  String get taxSubcategoryMushroomPicking;
+
+  /// L4.9.5: Category System subcategory `berry_picking` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Berry picking'**
+  String get taxSubcategoryBerryPicking;
+
+  /// L4.9.5: Category System subcategory `picnic_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Picnic walk'**
+  String get taxSubcategoryPicnicWalk;
+
+  /// L4.9.5: Category System subcategory `park_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Park walk'**
+  String get taxSubcategoryParkWalk;
+
+  /// L4.9.5: Category System subcategory `beach_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Beach walk'**
+  String get taxSubcategoryBeachWalk;
+
+  /// L4.9.5: Category System subcategory `promenade_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Promenade walk'**
+  String get taxSubcategoryPromenadeWalk;
+
+  /// L4.9.5: Category System subcategory `park` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Park'**
+  String get taxSubcategoryPark;
+
+  /// L4.9.5: Category System subcategory `beach` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Beach'**
+  String get taxSubcategoryBeach;
+
+  /// L4.9.5: Category System subcategory `promenade` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Promenade'**
+  String get taxSubcategoryPromenade;
+
+  /// L4.9.5: Category System subcategory `viewpoint` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Viewpoint'**
+  String get taxSubcategoryViewpoint;
+
+  /// L4.9.5: Category System subcategory `forest` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Forest'**
+  String get taxSubcategoryForest;
+
+  /// L4.9.5: Category System subcategory `lake` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Lake'**
+  String get taxSubcategoryLake;
+
+  /// L4.9.5: Category System subcategory `waterfall` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Waterfall'**
+  String get taxSubcategoryWaterfall;
+
+  /// L4.9.5: Category System subcategory `cave` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Cave'**
+  String get taxSubcategoryCave;
+
+  /// L4.9.5: Category System subcategory `natural_landmark` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Natural landmark'**
+  String get taxSubcategoryNaturalLandmark;
+
+  /// L4.9.5: Category System subcategory `outdoor_workout` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Outdoor workout'**
+  String get taxSubcategoryOutdoorWorkout;
+
+  /// L4.9.5: Category System subcategory `nature_escape` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Nature escape'**
+  String get taxSubcategoryNatureEscape;
+
+  /// L4.9.5: Category System subcategory `slow_walk` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Slow walk'**
+  String get taxSubcategorySlowWalk;
+
+  /// L4.9.5: Category System subcategory `stargazing` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Stargazing'**
+  String get taxSubcategoryStargazing;
+
+  /// L4.9.5: Category System subcategory `northern_lights_watch` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Northern lights watch'**
+  String get taxSubcategoryNorthernLightsWatch;
+
+  /// L4.9.5: Category System subcategory `meteor_shower_watch` in `outdoor_nature_walking` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Meteor shower watch'**
+  String get taxSubcategoryMeteorShowerWatch;
+
+  /// L4.9.5: Category System subcategory `sup` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'SUP'**
+  String get taxSubcategorySup;
+
+  /// L4.9.5: Category System subcategory `kayak` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Kayak'**
+  String get taxSubcategoryKayak;
+
+  /// L4.9.5: Category System subcategory `canoe` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Canoe'**
+  String get taxSubcategoryCanoe;
+
+  /// L4.9.5: Category System subcategory `boat_trip` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Boat trip'**
+  String get taxSubcategoryBoatTrip;
+
+  /// L4.9.5: Category System subcategory `catamaran` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Catamaran'**
+  String get taxSubcategoryCatamaran;
+
+  /// L4.9.5: Category System subcategory `canal_cruise` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Canal cruise'**
+  String get taxSubcategoryCanalCruise;
+
+  /// L4.9.5: Category System subcategory `rowing` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Rowing'**
+  String get taxSubcategoryRowing;
+
+  /// L4.9.5: Category System subcategory `sailing` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Sailing'**
+  String get taxSubcategorySailing;
+
+  /// L4.9.5: Category System subcategory `fishing` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Fishing'**
+  String get taxSubcategoryFishing;
+
+  /// L4.9.5: Category System subcategory `wakeboarding` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Wakeboarding'**
+  String get taxSubcategoryWakeboarding;
+
+  /// L4.9.5: Category System subcategory `water_bike` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Water bike'**
+  String get taxSubcategoryWaterBike;
+
+  /// L4.9.5: Category System subcategory `jet_ski` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Jet ski'**
+  String get taxSubcategoryJetSki;
+
+  /// L4.9.5: Category System subcategory `beach_activity` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Beach activity'**
+  String get taxSubcategoryBeachActivity;
+
+  /// L4.9.5: Category System subcategory `water_tour` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Water tour'**
+  String get taxSubcategoryWaterTour;
+
+  /// L4.9.5: Category System subcategory `diving` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Diving'**
+  String get taxSubcategoryDiving;
+
+  /// L4.9.5: Category System subcategory `snorkeling` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Snorkeling'**
+  String get taxSubcategorySnorkeling;
+
+  /// L4.9.5: Category System subcategory `surfing` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Surfing'**
+  String get taxSubcategorySurfing;
+
+  /// L4.9.5: Category System subcategory `windsurfing` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Windsurfing'**
+  String get taxSubcategoryWindsurfing;
+
+  /// L4.9.5: Category System subcategory `kitesurfing` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Kitesurfing'**
+  String get taxSubcategoryKitesurfing;
+
+  /// L4.9.5: Category System subcategory `beach_day` in `water_activities` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Beach day'**
+  String get taxSubcategoryBeachDay;
+
+  /// L4.9.5: Category System subcategory `winter_walk` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Winter walk'**
+  String get taxSubcategoryWinterWalk;
+
+  /// L4.9.5: Category System subcategory `ice_skating` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Ice skating'**
+  String get taxSubcategoryIceSkating;
+
+  /// L4.9.5: Category System subcategory `skiing` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Skiing'**
+  String get taxSubcategorySkiing;
+
+  /// L4.9.5: Category System subcategory `snowboarding` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Snowboarding'**
+  String get taxSubcategorySnowboarding;
+
+  /// L4.9.5: Category System subcategory `sledding` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Sledding'**
+  String get taxSubcategorySledding;
+
+  /// L4.9.5: Category System subcategory `winter_hiking` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Winter hiking'**
+  String get taxSubcategoryWinterHiking;
+
+  /// L4.9.5: Category System subcategory `christmas_market_walk` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Christmas market walk'**
+  String get taxSubcategoryChristmasMarketWalk;
+
+  /// L4.9.5: Category System subcategory `winter_photo_route` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Winter photo route'**
+  String get taxSubcategoryWinterPhotoRoute;
+
+  /// L4.9.5: Category System subcategory `sauna_cold_plunge` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Sauna and cold plunge'**
+  String get taxSubcategorySaunaColdPlunge;
+
+  /// L4.9.5: Category System subcategory `ice_fishing` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Ice fishing'**
+  String get taxSubcategoryIceFishing;
+
+  /// L4.9.5: Category System subcategory `winter_festival` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Winter festival'**
+  String get taxSubcategoryWinterFestival;
+
+  /// L4.9.5: Category System subcategory `autumn_leaf_walk` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Autumn leaf walk'**
+  String get taxSubcategoryAutumnLeafWalk;
+
+  /// L4.9.5: Category System subcategory `spring_blossom_walk` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Spring blossom walk'**
+  String get taxSubcategorySpringBlossomWalk;
+
+  /// L4.9.5: Category System subcategory `summer_outdoor` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Summer outdoor'**
+  String get taxSubcategorySummerOutdoor;
+
+  /// L4.9.5: Category System subcategory `seasonal_walk` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Seasonal walk'**
+  String get taxSubcategorySeasonalWalk;
+
+  /// L4.9.5: Category System subcategory `snow_activity` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Snow activity'**
+  String get taxSubcategorySnowActivity;
+
+  /// L4.9.5: Category System subcategory `cold_plunge` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Cold plunge'**
+  String get taxSubcategoryColdPlunge;
+
+  /// L4.9.5: Category System subcategory `holiday_lights_walk` in `winter_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday lights walk'**
+  String get taxSubcategoryHolidayLightsWalk;
+
+  /// L4.9.5: Category System subcategory `day_trip` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Day trip'**
+  String get taxSubcategoryDayTrip;
+
+  /// L4.9.5: Category System subcategory `weekend_trip` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Weekend trip'**
+  String get taxSubcategoryWeekendTrip;
+
+  /// L4.9.5: Category System subcategory `local_experience` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Local experience'**
+  String get taxSubcategoryLocalExperience;
+
+  /// L4.9.5: Category System subcategory `tourist_excursion` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Tourist excursion'**
+  String get taxSubcategoryTouristExcursion;
+
+  /// L4.9.5: Category System subcategory `city_tour` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'City tour'**
+  String get taxSubcategoryCityTour;
+
+  /// L4.9.5: Category System subcategory `food_tasting_tour` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Food tasting tour'**
+  String get taxSubcategoryFoodTastingTour;
+
+  /// L4.9.5: Category System subcategory `craft_experience` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Craft experience'**
+  String get taxSubcategoryCraftExperience;
+
+  /// L4.9.5: Category System subcategory `farm_experience` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Farm experience'**
+  String get taxSubcategoryFarmExperience;
+
+  /// L4.9.5: Category System subcategory `castle_tour` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Castle tour'**
+  String get taxSubcategoryCastleTour;
+
+  /// L4.9.5: Category System subcategory `nature_reserve_tour` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Nature reserve tour'**
+  String get taxSubcategoryNatureReserveTour;
+
+  /// L4.9.5: Category System subcategory `coastal_trip` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Coastal trip'**
+  String get taxSubcategoryCoastalTrip;
+
+  /// L4.9.5: Category System subcategory `train_day_trip` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Train day trip'**
+  String get taxSubcategoryTrainDayTrip;
+
+  /// L4.9.5: Category System subcategory `local_guide_experience` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Local guide experience'**
+  String get taxSubcategoryLocalGuideExperience;
+
+  /// L4.9.5: Category System subcategory `bike_tour` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Bike tour'**
+  String get taxSubcategoryBikeTour;
+
+  /// L4.9.5: Category System subcategory `walking_tour` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Walking tour'**
+  String get taxSubcategoryWalkingTour;
+
+  /// L4.9.5: Category System subcategory `historical_tour` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Historical tour'**
+  String get taxSubcategoryHistoricalTour;
+
+  /// L4.9.5: Category System subcategory `architecture_tour` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Architecture tour'**
+  String get taxSubcategoryArchitectureTour;
+
+  /// L4.9.5: Category System subcategory `photo_tour` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Photo tour'**
+  String get taxSubcategoryPhotoTour;
+
+  /// L4.9.5: Category System subcategory `hidden_gems_tour` in `travel_tours` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden gems tour'**
+  String get taxSubcategoryHiddenGemsTour;
+
+  /// L4.9.5: Category System subcategory `family_activity` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Family activity'**
+  String get taxSubcategoryFamilyActivity;
+
+  /// L4.9.5: Category System subcategory `kids_workshop` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Kids workshop'**
+  String get taxSubcategoryKidsWorkshop;
+
+  /// L4.9.5: Category System subcategory `playground_event` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Playground event'**
+  String get taxSubcategoryPlaygroundEvent;
+
+  /// L4.9.5: Category System subcategory `family_picnic` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Family picnic'**
+  String get taxSubcategoryFamilyPicnic;
+
+  /// L4.9.5: Category System subcategory `kids_theatre` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Kids theatre'**
+  String get taxSubcategoryKidsTheatre;
+
+  /// L4.9.5: Category System subcategory `kids_museum_event` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Kids museum event'**
+  String get taxSubcategoryKidsMuseumEvent;
+
+  /// L4.9.5: Category System subcategory `family_sports_day` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Family sports day'**
+  String get taxSubcategoryFamilySportsDay;
+
+  /// L4.9.5: Category System subcategory `parent_child_class` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Parent-child class'**
+  String get taxSubcategoryParentChildClass;
+
+  /// L4.9.5: Category System subcategory `creative_kids_class` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Creative kids class'**
+  String get taxSubcategoryCreativeKidsClass;
+
+  /// L4.9.5: Category System subcategory `kids_cooking_class` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Kids cooking class'**
+  String get taxSubcategoryKidsCookingClass;
+
+  /// L4.9.5: Category System subcategory `kids_outdoor_walk` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Kids outdoor walk'**
+  String get taxSubcategoryKidsOutdoorWalk;
+
+  /// L4.9.5: Category System subcategory `birthday_activity` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Birthday activity'**
+  String get taxSubcategoryBirthdayActivity;
+
+  /// L4.9.5: Category System subcategory `family_farm_visit` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Family farm visit'**
+  String get taxSubcategoryFamilyFarmVisit;
+
+  /// L4.9.5: Category System subcategory `family_route` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Family route'**
+  String get taxSubcategoryFamilyRoute;
+
+  /// L4.9.5: Category System subcategory `kids_party` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Kids party'**
+  String get taxSubcategoryKidsParty;
+
+  /// L4.9.5: Category System subcategory `educational_kids_event` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Educational kids event'**
+  String get taxSubcategoryEducationalKidsEvent;
+
+  /// L4.9.5: Category System subcategory `baby_friendly_activity` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Baby-friendly activity'**
+  String get taxSubcategoryBabyFriendlyActivity;
+
+  /// L4.9.5: Category System subcategory `kids_camp` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Kids camp'**
+  String get taxSubcategoryKidsCamp;
+
+  /// L4.9.5: Category System subcategory `day_camp` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Day camp'**
+  String get taxSubcategoryDayCamp;
+
+  /// L4.9.5: Category System subcategory `teen_meetup` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Teen meetup'**
+  String get taxSubcategoryTeenMeetup;
+
+  /// L4.9.5: Category System subcategory `teen_event` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Teen event'**
+  String get taxSubcategoryTeenEvent;
+
+  /// L4.9.5: Category System subcategory `kids_quest` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Kids quest'**
+  String get taxSubcategoryKidsQuest;
+
+  /// L4.9.5: Category System subcategory `kids_science_event` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Kids science event'**
+  String get taxSubcategoryKidsScienceEvent;
+
+  /// L4.9.5: Category System subcategory `kids_disco` in `family_kids` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Kids disco'**
+  String get taxSubcategoryKidsDisco;
+
+  /// L4.9.5: Category System subcategory `dog_walk` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dog walk'**
+  String get taxSubcategoryDogWalk;
+
+  /// L4.9.5: Category System subcategory `dog_meetup` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dog meetup'**
+  String get taxSubcategoryDogMeetup;
+
+  /// L4.9.5: Category System subcategory `dog_park_meetup` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dog park meetup'**
+  String get taxSubcategoryDogParkMeetup;
+
+  /// L4.9.5: Category System subcategory `pet_friendly_cafe` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pet-friendly cafe'**
+  String get taxSubcategoryPetFriendlyCafe;
+
+  /// L4.9.5: Category System subcategory `dog_training` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dog training'**
+  String get taxSubcategoryDogTraining;
+
+  /// L4.9.5: Category System subcategory `pet_photo_session` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pet photo session'**
+  String get taxSubcategoryPetPhotoSession;
+
+  /// L4.9.5: Category System subcategory `animal_shelter_visit` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Animal shelter visit'**
+  String get taxSubcategoryAnimalShelterVisit;
+
+  /// L4.9.5: Category System subcategory `farm_animal_experience` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Farm animal experience'**
+  String get taxSubcategoryFarmAnimalExperience;
+
+  /// L4.9.5: Category System subcategory `horse_riding` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Horse riding'**
+  String get taxSubcategoryHorseRiding;
+
+  /// L4.9.5: Category System subcategory `pony_riding` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pony riding'**
+  String get taxSubcategoryPonyRiding;
+
+  /// L4.9.5: Category System subcategory `cat_cafe` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Cat cafe'**
+  String get taxSubcategoryCatCafe;
+
+  /// L4.9.5: Category System subcategory `pet_adoption` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pet adoption'**
+  String get taxSubcategoryPetAdoption;
+
+  /// L4.9.5: Category System subcategory `pet_charity` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pet charity'**
+  String get taxSubcategoryPetCharity;
+
+  /// L4.9.5: Category System subcategory `pet_friendly_walk` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pet-friendly walk'**
+  String get taxSubcategoryPetFriendlyWalk;
+
+  /// L4.9.5: Category System subcategory `dog_sport` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dog sport'**
+  String get taxSubcategoryDogSport;
+
+  /// L4.9.5: Category System subcategory `pet_owner_meetup` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pet owner meetup'**
+  String get taxSubcategoryPetOwnerMeetup;
+
+  /// L4.9.5: Category System subcategory `dog_show` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dog show'**
+  String get taxSubcategoryDogShow;
+
+  /// L4.9.5: Category System subcategory `pet_exhibition` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pet exhibition'**
+  String get taxSubcategoryPetExhibition;
+
+  /// L4.9.5: Category System subcategory `pet_fair` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pet fair'**
+  String get taxSubcategoryPetFair;
+
+  /// L4.9.5: Category System subcategory `pet_care_talk` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pet care talk'**
+  String get taxSubcategoryPetCareTalk;
+
+  /// L4.9.5: Category System subcategory `animal_therapy` in `pets_animals` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Animal therapy'**
+  String get taxSubcategoryAnimalTherapy;
+
+  /// L4.9.5: Category System subcategory `charity_event` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Charity event'**
+  String get taxSubcategoryCharityEvent;
+
+  /// L4.9.5: Category System subcategory `volunteer_activity` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteer activity'**
+  String get taxSubcategoryVolunteerActivity;
+
+  /// L4.9.5: Category System subcategory `community_cleanup` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Community cleanup'**
+  String get taxSubcategoryCommunityCleanup;
+
+  /// L4.9.5: Category System subcategory `donation_event` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Donation event'**
+  String get taxSubcategoryDonationEvent;
+
+  /// L4.9.5: Category System subcategory `neighborhood_event` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Neighborhood event'**
+  String get taxSubcategoryNeighborhoodEvent;
+
+  /// L4.9.5: Category System subcategory `fundraising_dinner` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Fundraising dinner'**
+  String get taxSubcategoryFundraisingDinner;
+
+  /// L4.9.5: Category System subcategory `charity_run` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Charity run'**
+  String get taxSubcategoryCharityRun;
+
+  /// L4.9.5: Category System subcategory `animal_shelter_volunteering` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Animal shelter volunteering'**
+  String get taxSubcategoryAnimalShelterVolunteering;
+
+  /// L4.9.5: Category System subcategory `food_bank_volunteering` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Food bank volunteering'**
+  String get taxSubcategoryFoodBankVolunteering;
+
+  /// L4.9.5: Category System subcategory `tree_planting` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Tree planting'**
+  String get taxSubcategoryTreePlanting;
+
+  /// L4.9.5: Category System subcategory `beach_cleanup` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Beach cleanup'**
+  String get taxSubcategoryBeachCleanup;
+
+  /// L4.9.5: Category System subcategory `park_cleanup` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Park cleanup'**
+  String get taxSubcategoryParkCleanup;
+
+  /// L4.9.5: Category System subcategory `community_garden` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Community garden'**
+  String get taxSubcategoryCommunityGarden;
+
+  /// L4.9.5: Category System subcategory `public_square` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Public square'**
+  String get taxSubcategoryPublicSquare;
+
+  /// L4.9.5: Category System subcategory `local_community_meetup` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Local community meetup'**
+  String get taxSubcategoryLocalCommunityMeetup;
+
+  /// L4.9.5: Category System subcategory `mutual_aid` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Mutual aid'**
+  String get taxSubcategoryMutualAid;
+
+  /// L4.9.5: Category System subcategory `social_impact_event` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Social impact event'**
+  String get taxSubcategorySocialImpactEvent;
+
+  /// L4.9.5: Category System subcategory `environmental_action` in `community_charity` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Environmental action'**
+  String get taxSubcategoryEnvironmentalAction;
+
+  /// L4.9.5: Category System subcategory `local_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Local market'**
+  String get taxSubcategoryLocalMarket;
+
+  /// L4.9.5: Category System subcategory `flea_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Flea market'**
+  String get taxSubcategoryFleaMarket;
+
+  /// L4.9.5: Category System subcategory `seasonal_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Seasonal market'**
+  String get taxSubcategorySeasonalMarket;
+
+  /// L4.9.5: Category System subcategory `christmas_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Christmas market'**
+  String get taxSubcategoryChristmasMarket;
+
+  /// L4.9.5: Category System subcategory `farmers_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Farmers market'**
+  String get taxSubcategoryFarmersMarket;
+
+  /// L4.9.5: Category System subcategory `craft_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Craft market'**
+  String get taxSubcategoryCraftMarket;
+
+  /// L4.9.5: Category System subcategory `design_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Design market'**
+  String get taxSubcategoryDesignMarket;
+
+  /// L4.9.5: Category System subcategory `vintage_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Vintage market'**
+  String get taxSubcategoryVintageMarket;
+
+  /// L4.9.5: Category System subcategory `book_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Book market'**
+  String get taxSubcategoryBookMarket;
+
+  /// L4.9.5: Category System subcategory `food_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Food market'**
+  String get taxSubcategoryFoodMarket;
+
+  /// L4.9.5: Category System subcategory `flower_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Flower market'**
+  String get taxSubcategoryFlowerMarket;
+
+  /// L4.9.5: Category System subcategory `art_fair` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Art fair'**
+  String get taxSubcategoryArtFair;
+
+  /// L4.9.5: Category System subcategory `pop_up_shop` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pop-up shop'**
+  String get taxSubcategoryPopUpShop;
+
+  /// L4.9.5: Category System subcategory `street_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Street market'**
+  String get taxSubcategoryStreetMarket;
+
+  /// L4.9.5: Category System subcategory `handmade_fair` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Handmade fair'**
+  String get taxSubcategoryHandmadeFair;
+
+  /// L4.9.5: Category System subcategory `charity_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Charity market'**
+  String get taxSubcategoryCharityMarket;
+
+  /// L4.9.5: Category System subcategory `kids_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Kids market'**
+  String get taxSubcategoryKidsMarket;
+
+  /// L4.9.5: Category System subcategory `night_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Night market'**
+  String get taxSubcategoryNightMarket;
+
+  /// L4.9.5: Category System subcategory `local_brands_market` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Local brands market'**
+  String get taxSubcategoryLocalBrandsMarket;
+
+  /// L4.9.5: Category System subcategory `clothing_swap` in `markets_fairs` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Clothing swap'**
+  String get taxSubcategoryClothingSwap;
+
+  /// L4.9.5: Category System subcategory `christmas` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Christmas'**
+  String get taxSubcategoryChristmas;
+
+  /// L4.9.5: Category System subcategory `new_year` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'New Year'**
+  String get taxSubcategoryNewYear;
+
+  /// L4.9.5: Category System subcategory `halloween` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Halloween'**
+  String get taxSubcategoryHalloween;
+
+  /// L4.9.5: Category System subcategory `easter` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Easter'**
+  String get taxSubcategoryEaster;
+
+  /// L4.9.5: Category System subcategory `valentines_day` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Valentine\'s Day'**
+  String get taxSubcategoryValentinesDay;
+
+  /// L4.9.5: Category System subcategory `jani` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Jāņi (Midsummer)'**
+  String get taxSubcategoryJani;
+
+  /// L4.9.5: Category System subcategory `city_festival` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'City festival'**
+  String get taxSubcategoryCityFestival;
+
+  /// L4.9.5: Category System subcategory `summer_festival` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Summer festival'**
+  String get taxSubcategorySummerFestival;
+
+  /// L4.9.5: Category System subcategory `autumn_event` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Autumn event'**
+  String get taxSubcategoryAutumnEvent;
+
+  /// L4.9.5: Category System subcategory `spring_event` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Spring event'**
+  String get taxSubcategorySpringEvent;
+
+  /// L4.9.5: Category System subcategory `school_holiday` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'School holiday'**
+  String get taxSubcategorySchoolHoliday;
+
+  /// L4.9.5: Category System subcategory `national_holiday` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'National holiday'**
+  String get taxSubcategoryNationalHoliday;
+
+  /// L4.9.5: Category System subcategory `local_tradition` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Local tradition'**
+  String get taxSubcategoryLocalTradition;
+
+  /// L4.9.5: Category System subcategory `midsummer` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Midsummer'**
+  String get taxSubcategoryMidsummer;
+
+  /// L4.9.5: Category System subcategory `fireworks` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Fireworks'**
+  String get taxSubcategoryFireworks;
+
+  /// L4.9.5: Category System subcategory `public_celebration` in `holidays_seasonal` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Public celebration'**
+  String get taxSubcategoryPublicCelebration;
+
+  /// L4.9.5: Category System subcategory `recharge_walk` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Recharge walk'**
+  String get taxSubcategoryRechargeWalk;
+
+  /// L4.9.5: Category System subcategory `calm_walk` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Calm walk'**
+  String get taxSubcategoryCalmWalk;
+
+  /// L4.9.5: Category System subcategory `mindful_walk` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Mindful walk'**
+  String get taxSubcategoryMindfulWalk;
+
+  /// L4.9.5: Category System subcategory `coffee_walk` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Coffee walk'**
+  String get taxSubcategoryCoffeeWalk;
+
+  /// L4.9.5: Category System subcategory `tea_walk` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Tea walk'**
+  String get taxSubcategoryTeaWalk;
+
+  /// L4.9.5: Category System subcategory `sunset_reset` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Sunset reset'**
+  String get taxSubcategorySunsetReset;
+
+  /// L4.9.5: Category System subcategory `nature_reset` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Nature reset'**
+  String get taxSubcategoryNatureReset;
+
+  /// L4.9.5: Category System subcategory `digital_detox` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Digital detox'**
+  String get taxSubcategoryDigitalDetox;
+
+  /// L4.9.5: Category System subcategory `slow_morning` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Slow morning'**
+  String get taxSubcategorySlowMorning;
+
+  /// L4.9.5: Category System subcategory `evening_reset` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Evening reset'**
+  String get taxSubcategoryEveningReset;
+
+  /// L4.9.5: Category System subcategory `sauna` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Sauna'**
+  String get taxSubcategorySauna;
+
+  /// L4.9.5: Category System subcategory `spa` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Spa'**
+  String get taxSubcategorySpa;
+
+  /// L4.9.5: Category System subcategory `massage` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Massage'**
+  String get taxSubcategoryMassage;
+
+  /// L4.9.5: Category System subcategory `breathwork` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Breathwork'**
+  String get taxSubcategoryBreathwork;
+
+  /// L4.9.5: Category System subcategory `meditation` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Meditation'**
+  String get taxSubcategoryMeditation;
+
+  /// L4.9.5: Category System subcategory `sound_healing` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Sound healing'**
+  String get taxSubcategorySoundHealing;
+
+  /// L4.9.5: Category System subcategory `wellness_class` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Wellness class'**
+  String get taxSubcategoryWellnessClass;
+
+  /// L4.9.5: Category System subcategory `relaxation_session` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Relaxation session'**
+  String get taxSubcategoryRelaxationSession;
+
+  /// L4.9.5: Category System subcategory `mental_health_meetup` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Mental health meetup'**
+  String get taxSubcategoryMentalHealthMeetup;
+
+  /// L4.9.5: Category System subcategory `quiet_social` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet social'**
+  String get taxSubcategoryQuietSocial;
+
+  /// L4.9.5: Category System subcategory `couple_recharge` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Couple recharge'**
+  String get taxSubcategoryCoupleRecharge;
+
+  /// L4.9.5: Category System subcategory `solo_recharge` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Solo recharge'**
+  String get taxSubcategorySoloRecharge;
+
+  /// L4.9.5: Category System subcategory `friends_recharge` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Friends recharge'**
+  String get taxSubcategoryFriendsRecharge;
+
+  /// L4.9.5: Category System subcategory `pirts_ritual` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Pirts ritual (Latvian sauna)'**
+  String get taxSubcategoryPirtsRitual;
+
+  /// L4.9.5: Category System subcategory `retreat` in `wellness_recharge` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Retreat'**
+  String get taxSubcategoryRetreat;
+
+  /// L4.9.5: Category System subcategory `laser_tag` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Laser tag'**
+  String get taxSubcategoryLaserTag;
+
+  /// L4.9.5: Category System subcategory `paintball` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Paintball'**
+  String get taxSubcategoryPaintball;
+
+  /// L4.9.5: Category System subcategory `airsoft` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Airsoft'**
+  String get taxSubcategoryAirsoft;
+
+  /// L4.9.5: Category System subcategory `karting` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Karting'**
+  String get taxSubcategoryKarting;
+
+  /// L4.9.5: Category System subcategory `shooting_range` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Shooting range'**
+  String get taxSubcategoryShootingRange;
+
+  /// L4.9.5: Category System subcategory `archery` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Archery'**
+  String get taxSubcategoryArchery;
+
+  /// L4.9.5: Category System subcategory `axe_throwing` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Axe throwing'**
+  String get taxSubcategoryAxeThrowing;
+
+  /// L4.9.5: Category System subcategory `trampoline_park` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Trampoline park'**
+  String get taxSubcategoryTrampolinePark;
+
+  /// L4.9.5: Category System subcategory `rope_park` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Rope park'**
+  String get taxSubcategoryRopePark;
+
+  /// L4.9.5: Category System subcategory `zipline` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Zipline'**
+  String get taxSubcategoryZipline;
+
+  /// L4.9.5: Category System subcategory `wind_tunnel` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Wind tunnel'**
+  String get taxSubcategoryWindTunnel;
+
+  /// L4.9.5: Category System subcategory `hot_air_balloon` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Hot air balloon'**
+  String get taxSubcategoryHotAirBalloon;
+
+  /// L4.9.5: Category System subcategory `skydiving` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Skydiving'**
+  String get taxSubcategorySkydiving;
+
+  /// L4.9.5: Category System subcategory `bungee_jumping` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Bungee jumping'**
+  String get taxSubcategoryBungeeJumping;
+
+  /// L4.9.5: Category System subcategory `parkour` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Parkour'**
+  String get taxSubcategoryParkour;
+
+  /// L4.9.5: Category System subcategory `obstacle_course` in `adrenaline_entertainment` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Obstacle course'**
+  String get taxSubcategoryObstacleCourse;
+
+  /// L4.9.5: Category System subcategory `zoo` in `attractions` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Zoo'**
+  String get taxSubcategoryZoo;
+
+  /// L4.9.5: Category System subcategory `petting_zoo` in `attractions` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Petting zoo'**
+  String get taxSubcategoryPettingZoo;
+
+  /// L4.9.5: Category System subcategory `aquarium` in `attractions` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Aquarium'**
+  String get taxSubcategoryAquarium;
+
+  /// L4.9.5: Category System subcategory `amusement_park` in `attractions` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Amusement park'**
+  String get taxSubcategoryAmusementPark;
+
+  /// L4.9.5: Category System subcategory `water_park` in `attractions` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Water park'**
+  String get taxSubcategoryWaterPark;
+
+  /// L4.9.5: Category System subcategory `adventure_park` in `attractions` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Adventure park'**
+  String get taxSubcategoryAdventurePark;
+
+  /// L4.9.5: Category System subcategory `botanical_garden` in `attractions` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Botanical garden'**
+  String get taxSubcategoryBotanicalGarden;
+
+  /// L4.9.5: Category System subcategory `planetarium` in `attractions` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Planetarium'**
+  String get taxSubcategoryPlanetarium;
+
+  /// L4.9.5: Category System subcategory `science_center` in `attractions` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Science center'**
+  String get taxSubcategoryScienceCenter;
+
+  /// L4.9.5: Category System subcategory `observation_deck` in `attractions` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Observation deck'**
+  String get taxSubcategoryObservationDeck;
+
+  /// L4.9.5: Category System subcategory `ferris_wheel` in `attractions` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Ferris wheel'**
+  String get taxSubcategoryFerrisWheel;
+
+  /// L4.9.5: Category System subcategory `seasonal_attraction` in `attractions` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Seasonal attraction'**
+  String get taxSubcategorySeasonalAttraction;
+
+  /// L4.9.5: Category System subcategory `car_meetup` in `auto_moto` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Car meetup'**
+  String get taxSubcategoryCarMeetup;
+
+  /// L4.9.5: Category System subcategory `retro_cars` in `auto_moto` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Retro cars'**
+  String get taxSubcategoryRetroCars;
+
+  /// L4.9.5: Category System subcategory `car_show` in `auto_moto` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Car show'**
+  String get taxSubcategoryCarShow;
+
+  /// L4.9.5: Category System subcategory `auto_exhibition` in `auto_moto` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Auto exhibition'**
+  String get taxSubcategoryAutoExhibition;
+
+  /// L4.9.5: Category System subcategory `tuning_meetup` in `auto_moto` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Tuning meetup'**
+  String get taxSubcategoryTuningMeetup;
+
+  /// L4.9.5: Category System subcategory `drift_event` in `auto_moto` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Drift event'**
+  String get taxSubcategoryDriftEvent;
+
+  /// L4.9.5: Category System subcategory `offroad_trip` in `auto_moto` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Off-road trip'**
+  String get taxSubcategoryOffroadTrip;
+
+  /// L4.9.5: Category System subcategory `motorcycle_ride` in `auto_moto` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Motorcycle ride'**
+  String get taxSubcategoryMotorcycleRide;
+
+  /// L4.9.5: Category System subcategory `motorcycle_meetup` in `auto_moto` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Motorcycle meetup'**
+  String get taxSubcategoryMotorcycleMeetup;
+
+  /// L4.9.5: Category System subcategory `scooter_meetup` in `auto_moto` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Scooter meetup'**
+  String get taxSubcategoryScooterMeetup;
+
+  /// L4.9.5: Category System subcategory `car_photo_meet` in `auto_moto` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Car photo meet'**
+  String get taxSubcategoryCarPhotoMeet;
+
+  /// L4.9.5: Category System subcategory `drive_in_cinema` in `auto_moto` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Drive-in cinema'**
+  String get taxSubcategoryDriveInCinema;
+
+  /// L4.9.5: Category System subcategory `anime_meetup` in `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Anime meetup'**
+  String get taxSubcategoryAnimeMeetup;
+
+  /// L4.9.5: Category System subcategory `cosplay_event` in `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Cosplay event'**
+  String get taxSubcategoryCosplayEvent;
+
+  /// L4.9.5: Category System subcategory `comic_con` in `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Comic Con'**
+  String get taxSubcategoryComicCon;
+
+  /// L4.9.5: Category System subcategory `esports_tournament` in `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Esports tournament'**
+  String get taxSubcategoryEsportsTournament;
+
+  /// L4.9.5: Category System subcategory `lan_party` in `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'LAN party'**
+  String get taxSubcategoryLanParty;
+
+  /// L4.9.5: Category System subcategory `retro_gaming` in `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Retro gaming'**
+  String get taxSubcategoryRetroGaming;
+
+  /// L4.9.5: Category System subcategory `tabletop_wargames` in `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Tabletop wargames'**
+  String get taxSubcategoryTabletopWargames;
+
+  /// L4.9.5: Category System subcategory `trading_card_games` in `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Trading card games'**
+  String get taxSubcategoryTradingCardGames;
+
+  /// L4.9.5: Category System subcategory `hackathon` in `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Hackathon'**
+  String get taxSubcategoryHackathon;
+
+  /// L4.9.5: Category System subcategory `game_dev_meetup` in `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Game dev meetup'**
+  String get taxSubcategoryGameDevMeetup;
+
+  /// L4.9.5: Category System subcategory `tech_meetup` in `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Tech meetup'**
+  String get taxSubcategoryTechMeetup;
+
+  /// L4.9.5: Category System subcategory `robotics_event` in `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Robotics event'**
+  String get taxSubcategoryRoboticsEvent;
+
+  /// L4.9.5: Category System subcategory `fandom_meetup` in `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Fandom meetup'**
+  String get taxSubcategoryFandomMeetup;
+
+  /// L4.9.5: Category System subcategory `collectors_meetup` in `geek_tech` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Collectors meetup'**
+  String get taxSubcategoryCollectorsMeetup;
+
+  /// L4.9.5: Category System subcategory `speed_dating` in `dating_singles` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Speed dating'**
+  String get taxSubcategorySpeedDating;
+
+  /// L4.9.5: Category System subcategory `singles_party` in `dating_singles` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Singles party'**
+  String get taxSubcategorySinglesParty;
+
+  /// L4.9.5: Category System subcategory `singles_mixer` in `dating_singles` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Singles mixer'**
+  String get taxSubcategorySinglesMixer;
+
+  /// L4.9.5: Category System subcategory `singles_dinner` in `dating_singles` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Singles dinner'**
+  String get taxSubcategorySinglesDinner;
+
+  /// L4.9.5: Category System subcategory `blind_date_event` in `dating_singles` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Blind date event'**
+  String get taxSubcategoryBlindDateEvent;
+
+  /// L4.9.5: Category System subcategory `dating_game_event` in `dating_singles` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Dating game event'**
+  String get taxSubcategoryDatingGameEvent;
+
+  /// L4.9.5: Category System subcategory `singles_activity` in `dating_singles` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Singles activity'**
+  String get taxSubcategorySinglesActivity;
+
+  /// L4.9.5: Category System subcategory `matchmaking_event` in `dating_singles` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Matchmaking event'**
+  String get taxSubcategoryMatchmakingEvent;
+
+  /// L4.9.5: Category System subcategory `other_event` in `other` (stable id; G04).
+  ///
+  /// In en, this message translates to:
+  /// **'Other event'**
+  String get taxSubcategoryOtherEvent;
+
+  /// L4.9.5: Home — short category chip name (the full name is taxCategory…).
+  ///
+  /// In en, this message translates to:
+  /// **'Sport'**
+  String get discoverHomeShortSport;
+
+  /// L4.9.5: Home — short category chip name (the full name is taxCategory…).
+  ///
+  /// In en, this message translates to:
+  /// **'Walks'**
+  String get discoverHomeShortWalks;
+
+  /// L4.9.5: Home — short category chip name (the full name is taxCategory…).
+  ///
+  /// In en, this message translates to:
+  /// **'Games'**
+  String get discoverHomeShortGames;
+
+  /// L4.9.5: Home — short category chip name (the full name is taxCategory…).
+  ///
+  /// In en, this message translates to:
+  /// **'Dance'**
+  String get discoverHomeShortDance;
+
+  /// L4.9.5: Home — short category chip name (the full name is taxCategory…).
+  ///
+  /// In en, this message translates to:
+  /// **'Music'**
+  String get discoverHomeShortMusic;
+
+  /// L4.9.5: Home — short category chip name (the full name is taxCategory…).
+  ///
+  /// In en, this message translates to:
+  /// **'Art'**
+  String get discoverHomeShortArt;
+
+  /// L4.9.5: Home — short category chip name (the full name is taxCategory…).
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get discoverHomeShortFood;
+
+  /// L4.9.5: Home — short category chip name (the full name is taxCategory…).
+  ///
+  /// In en, this message translates to:
+  /// **'Wellness'**
+  String get discoverHomeShortWellness;
 }
 
 class _AppLocalizationsDelegate

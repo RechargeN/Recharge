@@ -11795,4 +11795,1715 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get localErrorImportNotReappliable =>
       'Этот импорт нельзя повторить. Импортируйте файл заново.';
+
+  @override
+  String get taxCategoryMusicNightlife => 'Музыка и ночная жизнь';
+
+  @override
+  String get taxCategoryComedyTheatrePerformance =>
+      'Комедия и сценическое искусство';
+
+  @override
+  String get taxCategoryCinemaScreenings => 'Кино и показы';
+
+  @override
+  String get taxCategoryArtCultureMuseums => 'Искусство, культура и музеи';
+
+  @override
+  String get taxCategoryEducationTalks => 'Образование и лекции';
+
+  @override
+  String get taxCategoryBusinessNetworking => 'Бизнес и нетворкинг';
+
+  @override
+  String get taxCategoryWorkshopsMasterclasses => 'Мастерские и мастер-классы';
+
+  @override
+  String get taxCategoryLanguageSocialLearning => 'Языки и обучение в компании';
+
+  @override
+  String get taxCategoryFoodDrinks => 'Еда и напитки';
+
+  @override
+  String get taxCategoryGamesIndoor => 'Игры в помещении';
+
+  @override
+  String get taxCategorySport => 'Спорт';
+
+  @override
+  String get taxCategoryDance => 'Танцы';
+
+  @override
+  String get taxCategoryOutdoorNatureWalking =>
+      'Природа, прогулки и на открытом воздухе';
+
+  @override
+  String get taxCategoryWaterActivities => 'Активности на воде';
+
+  @override
+  String get taxCategoryWinterSeasonal => 'Зима и сезонные активности';
+
+  @override
+  String get taxCategoryTravelTours => 'Поездки и экскурсии';
+
+  @override
+  String get taxCategoryFamilyKids => 'Для семьи и детей';
+
+  @override
+  String get taxCategoryPetsAnimals => 'Питомцы и животные';
+
+  @override
+  String get taxCategoryCommunityCharity => 'Сообщество и благотворительность';
+
+  @override
+  String get taxCategoryMarketsFairs => 'Рынки и ярмарки';
+
+  @override
+  String get taxCategoryHolidaysSeasonal => 'Праздники и сезонные события';
+
+  @override
+  String get taxCategoryWellnessRecharge => 'Благополучие и отдых';
+
+  @override
+  String get taxCategoryAdrenalineEntertainment => 'Адреналин и развлечения';
+
+  @override
+  String get taxCategoryAttractions => 'Достопримечательности и аттракционы';
+
+  @override
+  String get taxCategoryAutoMoto => 'Авто и мото';
+
+  @override
+  String get taxCategoryGeekTech => 'Гик-культура и технологии';
+
+  @override
+  String get taxCategoryDatingSingles => 'Знакомства и свидания';
+
+  @override
+  String get taxCategoryOther => 'Другое';
+
+  @override
+  String get taxSubcategoryConcert => 'Концерт';
+
+  @override
+  String get taxSubcategoryLiveMusic => 'Живая музыка';
+
+  @override
+  String get taxSubcategoryAcousticEvening => 'Акустический вечер';
+
+  @override
+  String get taxSubcategoryJazz => 'Джаз';
+
+  @override
+  String get taxSubcategoryClassicalMusic => 'Классическая музыка';
+
+  @override
+  String get taxSubcategoryRockMusic => 'Рок-музыка';
+
+  @override
+  String get taxSubcategoryPopMusic => 'Поп-музыка';
+
+  @override
+  String get taxSubcategoryElectronicMusic => 'Электронная музыка';
+
+  @override
+  String get taxSubcategoryTechno => 'Техно';
+
+  @override
+  String get taxSubcategoryHouseMusic => 'Хаус';
+
+  @override
+  String get taxSubcategoryLatinMusic => 'Латиноамериканская музыка';
+
+  @override
+  String get taxSubcategoryDjParty => 'DJ-вечеринка';
+
+  @override
+  String get taxSubcategoryClubNight => 'Клубная ночь';
+
+  @override
+  String get taxSubcategoryKaraoke => 'Караоке';
+
+  @override
+  String get taxSubcategoryOpenMicMusic => 'Открытый микрофон: музыка';
+
+  @override
+  String get taxSubcategoryRooftopParty => 'Вечеринка на крыше';
+
+  @override
+  String get taxSubcategoryBeachParty => 'Пляжная вечеринка';
+
+  @override
+  String get taxSubcategoryThemedParty => 'Тематическая вечеринка';
+
+  @override
+  String get taxSubcategoryMusicFestival => 'Музыкальный фестиваль';
+
+  @override
+  String get taxSubcategoryListeningParty => 'Совместное прослушивание';
+
+  @override
+  String get taxSubcategoryJamSession => 'Джем-сейшн';
+
+  @override
+  String get taxSubcategoryNightBar => 'Ночной бар';
+
+  @override
+  String get taxSubcategoryAfterworkDrinks => 'Встреча после работы';
+
+  @override
+  String get taxSubcategoryLateNightSocial => 'Поздние посиделки';
+
+  @override
+  String get taxSubcategoryGroupSinging => 'Совместное пение';
+
+  @override
+  String get taxSubcategoryOrganConcert => 'Органный концерт';
+
+  @override
+  String get taxSubcategoryStandup => 'Стендап';
+
+  @override
+  String get taxSubcategoryComedyOpenMic => 'Открытый микрофон: комедия';
+
+  @override
+  String get taxSubcategoryTheatre => 'Театр';
+
+  @override
+  String get taxSubcategoryImprovisation => 'Импровизация';
+
+  @override
+  String get taxSubcategoryMagicShow => 'Шоу фокусов';
+
+  @override
+  String get taxSubcategoryCircus => 'Цирк';
+
+  @override
+  String get taxSubcategoryPoetryNight => 'Поэтический вечер';
+
+  @override
+  String get taxSubcategoryStorytelling => 'Сторителлинг';
+
+  @override
+  String get taxSubcategoryPuppetShow => 'Кукольный спектакль';
+
+  @override
+  String get taxSubcategoryBallet => 'Балет';
+
+  @override
+  String get taxSubcategoryOpera => 'Опера';
+
+  @override
+  String get taxSubcategoryCabaret => 'Кабаре';
+
+  @override
+  String get taxSubcategoryStreetPerformance => 'Уличное выступление';
+
+  @override
+  String get taxSubcategoryPerformanceArt => 'Перформанс';
+
+  @override
+  String get taxSubcategoryDragShow => 'Драг-шоу';
+
+  @override
+  String get taxSubcategoryMusical => 'Мюзикл';
+
+  @override
+  String get taxSubcategoryExperimentalTheatre => 'Экспериментальный театр';
+
+  @override
+  String get taxSubcategoryCinema => 'Кино';
+
+  @override
+  String get taxSubcategoryMovieScreening => 'Показ фильма';
+
+  @override
+  String get taxSubcategoryOpenAirCinema => 'Кино под открытым небом';
+
+  @override
+  String get taxSubcategoryFilmFestival => 'Кинофестиваль';
+
+  @override
+  String get taxSubcategoryDocumentary => 'Документальное кино';
+
+  @override
+  String get taxSubcategoryShortFilms => 'Короткометражки';
+
+  @override
+  String get taxSubcategoryRetroCinema => 'Ретро-кино';
+
+  @override
+  String get taxSubcategoryAnimation => 'Анимация';
+
+  @override
+  String get taxSubcategorySportsScreening => 'Спортивная трансляция';
+
+  @override
+  String get taxSubcategoryMovieDiscussion => 'Обсуждение фильма';
+
+  @override
+  String get taxSubcategoryPremiere => 'Премьера';
+
+  @override
+  String get taxSubcategoryIndependentFilm => 'Независимое кино';
+
+  @override
+  String get taxSubcategoryCinemaClub => 'Киноклуб';
+
+  @override
+  String get taxSubcategoryExhibition => 'Выставка';
+
+  @override
+  String get taxSubcategoryGallery => 'Галерея';
+
+  @override
+  String get taxSubcategoryMuseum => 'Музей';
+
+  @override
+  String get taxSubcategoryMuseumNight => 'Ночь музеев';
+
+  @override
+  String get taxSubcategoryGalleryWalk => 'Прогулка по галереям';
+
+  @override
+  String get taxSubcategoryArtistTalk => 'Встреча с художником';
+
+  @override
+  String get taxSubcategoryArtWalk => 'Арт-прогулка';
+
+  @override
+  String get taxSubcategoryPhotographyExhibition => 'Фотовыставка';
+
+  @override
+  String get taxSubcategoryStreetArt => 'Стрит-арт';
+
+  @override
+  String get taxSubcategoryArchitecture => 'Архитектура';
+
+  @override
+  String get taxSubcategoryCulturalHeritage => 'Культурное наследие';
+
+  @override
+  String get taxSubcategoryMonument => 'Памятник';
+
+  @override
+  String get taxSubcategoryMemorial => 'Мемориал';
+
+  @override
+  String get taxSubcategorySculpture => 'Скульптура';
+
+  @override
+  String get taxSubcategoryHistoricLandmark =>
+      'Историческая достопримечательность';
+
+  @override
+  String get taxSubcategoryLiteratureEvening => 'Литературный вечер';
+
+  @override
+  String get taxSubcategoryBookReading => 'Чтения';
+
+  @override
+  String get taxSubcategoryHistoryWalk => 'Прогулка-лекция по истории';
+
+  @override
+  String get taxSubcategoryDesignEvent => 'Дизайн-событие';
+
+  @override
+  String get taxSubcategoryCraftExhibition => 'Выставка ремёсел';
+
+  @override
+  String get taxSubcategoryPublicArt => 'Паблик-арт';
+
+  @override
+  String get taxSubcategoryCreativeMeetup => 'Творческая встреча';
+
+  @override
+  String get taxSubcategoryFashionEvent => 'Модное событие';
+
+  @override
+  String get taxSubcategoryLecture => 'Лекция';
+
+  @override
+  String get taxSubcategoryPublicTalk => 'Публичная беседа';
+
+  @override
+  String get taxSubcategoryDiscussion => 'Дискуссия';
+
+  @override
+  String get taxSubcategoryDebate => 'Дебаты';
+
+  @override
+  String get taxSubcategoryPanelDiscussion => 'Панельная дискуссия';
+
+  @override
+  String get taxSubcategoryScienceTalk => 'Научная лекция';
+
+  @override
+  String get taxSubcategoryHistoryLecture => 'Лекция по истории';
+
+  @override
+  String get taxSubcategoryPsychologyTalk => 'Лекция по психологии';
+
+  @override
+  String get taxSubcategoryFinanceTalk => 'Лекция о финансах';
+
+  @override
+  String get taxSubcategoryCareerTalk => 'Лекция о карьере';
+
+  @override
+  String get taxSubcategoryLegalInfoSession => 'Правовая консультация';
+
+  @override
+  String get taxSubcategoryBookClub => 'Книжный клуб';
+
+  @override
+  String get taxSubcategoryPracticalSeminar => 'Практический семинар';
+
+  @override
+  String get taxSubcategorySelfDevelopment => 'Саморазвитие';
+
+  @override
+  String get taxSubcategoryHealthTalk => 'Лекция о здоровье';
+
+  @override
+  String get taxSubcategoryTechnologyTalk => 'Лекция о технологиях';
+
+  @override
+  String get taxSubcategoryStartupTalk => 'Лекция о стартапах';
+
+  @override
+  String get taxSubcategoryParentingTalk => 'Лекция для родителей';
+
+  @override
+  String get taxSubcategoryCommunityDiscussion => 'Обсуждение в сообществе';
+
+  @override
+  String get taxSubcategoryNetworking => 'Нетворкинг';
+
+  @override
+  String get taxSubcategoryBusinessBreakfast => 'Бизнес-завтрак';
+
+  @override
+  String get taxSubcategoryBusinessLunch => 'Бизнес-ланч';
+
+  @override
+  String get taxSubcategoryConference => 'Конференция';
+
+  @override
+  String get taxSubcategoryProductPresentation => 'Презентация продукта';
+
+  @override
+  String get taxSubcategoryProductLaunch => 'Запуск продукта';
+
+  @override
+  String get taxSubcategoryStartupMeetup => 'Встреча стартапов';
+
+  @override
+  String get taxSubcategoryPitchNight => 'Питч-вечер';
+
+  @override
+  String get taxSubcategoryInvestorMeetup => 'Встреча с инвесторами';
+
+  @override
+  String get taxSubcategoryJobFair => 'Ярмарка вакансий';
+
+  @override
+  String get taxSubcategoryPortfolioReview => 'Разбор портфолио';
+
+  @override
+  String get taxSubcategoryFreelancersMeetup => 'Встреча фрилансеров';
+
+  @override
+  String get taxSubcategoryDemoDay => 'Демо-день';
+
+  @override
+  String get taxSubcategoryExpo => 'Экспо';
+
+  @override
+  String get taxSubcategoryFounderMeetup => 'Встреча основателей';
+
+  @override
+  String get taxSubcategoryIndustryMeetup => 'Отраслевая встреча';
+
+  @override
+  String get taxSubcategoryCareerNetworking => 'Карьерный нетворкинг';
+
+  @override
+  String get taxSubcategoryCoworkingEvent => 'Событие в коворкинге';
+
+  @override
+  String get taxSubcategoryBusinessWorkshop => 'Бизнес-мастерская';
+
+  @override
+  String get taxSubcategoryWorkshop => 'Мастерская';
+
+  @override
+  String get taxSubcategoryMasterclass => 'Мастер-класс';
+
+  @override
+  String get taxSubcategoryCourse => 'Курс';
+
+  @override
+  String get taxSubcategoryPottery => 'Гончарное дело';
+
+  @override
+  String get taxSubcategoryCeramics => 'Керамика';
+
+  @override
+  String get taxSubcategoryDrawing => 'Рисунок';
+
+  @override
+  String get taxSubcategoryPainting => 'Живопись';
+
+  @override
+  String get taxSubcategoryPhotography => 'Фотография';
+
+  @override
+  String get taxSubcategoryCookingClass => 'Кулинарный класс';
+
+  @override
+  String get taxSubcategorySewing => 'Шитьё';
+
+  @override
+  String get taxSubcategoryFloristics => 'Флористика';
+
+  @override
+  String get taxSubcategoryCandleMaking => 'Изготовление свечей';
+
+  @override
+  String get taxSubcategoryPublicSpeaking => 'Публичные выступления';
+
+  @override
+  String get taxSubcategoryCreativeClass => 'Творческое занятие';
+
+  @override
+  String get taxSubcategoryCraftWorkshop => 'Ремесленная мастерская';
+
+  @override
+  String get taxSubcategoryWritingWorkshop => 'Писательская мастерская';
+
+  @override
+  String get taxSubcategoryMusicLesson => 'Урок музыки';
+
+  @override
+  String get taxSubcategoryDanceWorkshop => 'Танцевальная мастерская';
+
+  @override
+  String get taxSubcategoryBeautyWorkshop => 'Бьюти-мастерская';
+
+  @override
+  String get taxSubcategoryWellnessWorkshop => 'Велнес-мастерская';
+
+  @override
+  String get taxSubcategoryLanguageExchange => 'Языковой обмен';
+
+  @override
+  String get taxSubcategoryEnglishClub => 'Клуб английского языка';
+
+  @override
+  String get taxSubcategoryDutchClub => 'Клуб нидерландского языка';
+
+  @override
+  String get taxSubcategoryLatvianClub => 'Клуб латышского языка';
+
+  @override
+  String get taxSubcategoryConversationClub => 'Разговорный клуб';
+
+  @override
+  String get taxSubcategoryInternationalMeetup => 'Международная встреча';
+
+  @override
+  String get taxSubcategoryExpatsMeetup => 'Встреча экспатов';
+
+  @override
+  String get taxSubcategoryTandemMeeting => 'Языковой тандем';
+
+  @override
+  String get taxSubcategoryLanguageCafe => 'Языковое кафе';
+
+  @override
+  String get taxSubcategoryLanguageWalk => 'Языковая прогулка';
+
+  @override
+  String get taxSubcategorySpeedFriending => 'Быстрые знакомства для дружбы';
+
+  @override
+  String get taxSubcategorySpeakingClub => 'Спикинг-клуб';
+
+  @override
+  String get taxSubcategoryCultureExchange => 'Культурный обмен';
+
+  @override
+  String get taxSubcategoryNewcomersMeetup => 'Встреча новоприбывших';
+
+  @override
+  String get taxSubcategoryStudyGroup => 'Учебная группа';
+
+  @override
+  String get taxSubcategoryCoffee => 'Кофе';
+
+  @override
+  String get taxSubcategoryBreakfast => 'Завтрак';
+
+  @override
+  String get taxSubcategoryBrunch => 'Бранч';
+
+  @override
+  String get taxSubcategoryLunch => 'Обед';
+
+  @override
+  String get taxSubcategoryDinner => 'Ужин';
+
+  @override
+  String get taxSubcategoryDessert => 'Десерт';
+
+  @override
+  String get taxSubcategoryStreetFood => 'Уличная еда';
+
+  @override
+  String get taxSubcategoryFoodTasting => 'Дегустация еды';
+
+  @override
+  String get taxSubcategoryDrinkTasting => 'Дегустация напитков';
+
+  @override
+  String get taxSubcategoryWineTasting => 'Дегустация вина';
+
+  @override
+  String get taxSubcategoryBeerTasting => 'Дегустация пива';
+
+  @override
+  String get taxSubcategoryCocktailTasting => 'Дегустация коктейлей';
+
+  @override
+  String get taxSubcategoryTeaCeremony => 'Чайная церемония';
+
+  @override
+  String get taxSubcategoryBbq => 'Барбекю';
+
+  @override
+  String get taxSubcategoryPicnic => 'Пикник';
+
+  @override
+  String get taxSubcategoryFoodTour => 'Гастрономический тур';
+
+  @override
+  String get taxSubcategoryBarCrawl => 'Тур по барам';
+
+  @override
+  String get taxSubcategoryPubCrawl => 'Тур по пабам';
+
+  @override
+  String get taxSubcategoryHappyHour => 'Счастливые часы';
+
+  @override
+  String get taxSubcategoryRestaurantVisit => 'Поход в ресторан';
+
+  @override
+  String get taxSubcategoryCafeVisit => 'Поход в кафе';
+
+  @override
+  String get taxSubcategoryBakeryVisit => 'Поход в пекарню';
+
+  @override
+  String get taxSubcategoryVeganFood => 'Веганская еда';
+
+  @override
+  String get taxSubcategoryLocalFood => 'Местная кухня';
+
+  @override
+  String get taxSubcategoryFineDining => 'Высокая кухня';
+
+  @override
+  String get taxSubcategoryFamilyMeal => 'Семейная трапеза';
+
+  @override
+  String get taxSubcategoryQuiz => 'Квиз';
+
+  @override
+  String get taxSubcategoryBoardGames => 'Настольные игры';
+
+  @override
+  String get taxSubcategoryMafia => 'Мафия';
+
+  @override
+  String get taxSubcategoryPokerNoGambling => 'Покер (без ставок на деньги)';
+
+  @override
+  String get taxSubcategoryChess => 'Шахматы';
+
+  @override
+  String get taxSubcategoryEscapeRoom => 'Квест-комната';
+
+  @override
+  String get taxSubcategoryQuest => 'Квест';
+
+  @override
+  String get taxSubcategoryCityGame => 'Городская игра';
+
+  @override
+  String get taxSubcategoryTreasureHunt => 'Поиск сокровищ';
+
+  @override
+  String get taxSubcategoryBowling => 'Боулинг';
+
+  @override
+  String get taxSubcategoryBilliards => 'Бильярд';
+
+  @override
+  String get taxSubcategoryDarts => 'Дартс';
+
+  @override
+  String get taxSubcategoryMiniGolf => 'Мини-гольф';
+
+  @override
+  String get taxSubcategoryArcade => 'Игровые автоматы';
+
+  @override
+  String get taxSubcategoryVrArcade => 'VR-клуб';
+
+  @override
+  String get taxSubcategoryVideoGames => 'Видеоигры';
+
+  @override
+  String get taxSubcategoryTableGames => 'Настольные игры в компании';
+
+  @override
+  String get taxSubcategoryCardGames => 'Карточные игры';
+
+  @override
+  String get taxSubcategoryRolePlayingGame => 'Ролевая игра';
+
+  @override
+  String get taxSubcategoryIndoorCompetition => 'Соревнование в помещении';
+
+  @override
+  String get taxSubcategoryFootball => 'Футбол';
+
+  @override
+  String get taxSubcategoryBasketball => 'Баскетбол';
+
+  @override
+  String get taxSubcategoryVolleyball => 'Волейбол';
+
+  @override
+  String get taxSubcategoryBeachVolleyball => 'Пляжный волейбол';
+
+  @override
+  String get taxSubcategoryTennis => 'Теннис';
+
+  @override
+  String get taxSubcategoryTableTennis => 'Настольный теннис';
+
+  @override
+  String get taxSubcategoryBadminton => 'Бадминтон';
+
+  @override
+  String get taxSubcategorySquash => 'Сквош';
+
+  @override
+  String get taxSubcategoryPadel => 'Падел';
+
+  @override
+  String get taxSubcategoryRunning => 'Бег';
+
+  @override
+  String get taxSubcategoryTrailRunning => 'Трейлраннинг';
+
+  @override
+  String get taxSubcategoryCycling => 'Велоспорт';
+
+  @override
+  String get taxSubcategorySwimming => 'Плавание';
+
+  @override
+  String get taxSubcategoryBoxing => 'Бокс';
+
+  @override
+  String get taxSubcategoryMartialArts => 'Боевые искусства';
+
+  @override
+  String get taxSubcategoryClimbing => 'Скалолазание';
+
+  @override
+  String get taxSubcategoryBouldering => 'Боулдеринг';
+
+  @override
+  String get taxSubcategoryFitness => 'Фитнес';
+
+  @override
+  String get taxSubcategoryGym => 'Тренажёрный зал';
+
+  @override
+  String get taxSubcategoryCrossfit => 'Кроссфит';
+
+  @override
+  String get taxSubcategoryCalisthenics => 'Калистеника';
+
+  @override
+  String get taxSubcategoryYoga => 'Йога';
+
+  @override
+  String get taxSubcategoryPilates => 'Пилатес';
+
+  @override
+  String get taxSubcategoryStretching => 'Растяжка';
+
+  @override
+  String get taxSubcategoryDanceFitness => 'Танцевальный фитнес';
+
+  @override
+  String get taxSubcategoryNordicWalking => 'Скандинавская ходьба';
+
+  @override
+  String get taxSubcategorySkating => 'Катание на коньках';
+
+  @override
+  String get taxSubcategorySkateboarding => 'Скейтбординг';
+
+  @override
+  String get taxSubcategoryRollerblading => 'Катание на роликах';
+
+  @override
+  String get taxSubcategoryGolf => 'Гольф';
+
+  @override
+  String get taxSubcategoryFrisbee => 'Фрисби';
+
+  @override
+  String get taxSubcategoryDiscGolf => 'Диск-гольф';
+
+  @override
+  String get taxSubcategoryRunningRace => 'Забег';
+
+  @override
+  String get taxSubcategoryCyclingRace => 'Велогонка';
+
+  @override
+  String get taxSubcategoryFitnessChallenge => 'Фитнес-челлендж';
+
+  @override
+  String get taxSubcategoryAmateurTournament => 'Любительский турнир';
+
+  @override
+  String get taxSubcategorySalsa => 'Сальса';
+
+  @override
+  String get taxSubcategoryBachata => 'Бачата';
+
+  @override
+  String get taxSubcategoryKizomba => 'Кизомба';
+
+  @override
+  String get taxSubcategoryTango => 'Танго';
+
+  @override
+  String get taxSubcategoryHipHop => 'Хип-хоп';
+
+  @override
+  String get taxSubcategoryContemporaryDance => 'Современный танец';
+
+  @override
+  String get taxSubcategoryBallroomDance => 'Бальные танцы';
+
+  @override
+  String get taxSubcategoryFolkDance => 'Народные танцы';
+
+  @override
+  String get taxSubcategoryDanceSocial => 'Танцевальный вечер';
+
+  @override
+  String get taxSubcategoryDanceBattle => 'Танцевальный баттл';
+
+  @override
+  String get taxSubcategoryZumba => 'Зумба';
+
+  @override
+  String get taxSubcategoryPartnerDance => 'Парные танцы';
+
+  @override
+  String get taxSubcategoryLatinDance => 'Латиноамериканские танцы';
+
+  @override
+  String get taxSubcategoryHeelsDance => 'Хилс';
+
+  @override
+  String get taxSubcategoryStreetDance => 'Уличные танцы';
+
+  @override
+  String get taxSubcategoryDanceClass => 'Урок танцев';
+
+  @override
+  String get taxSubcategoryDancePractice => 'Танцевальная практика';
+
+  @override
+  String get taxSubcategoryDanceShow => 'Танцевальное шоу';
+
+  @override
+  String get taxSubcategoryHiking => 'Поход';
+
+  @override
+  String get taxSubcategoryNatureWalk => 'Прогулка на природе';
+
+  @override
+  String get taxSubcategoryCityWalk => 'Прогулка по городу';
+
+  @override
+  String get taxSubcategoryHistoricalWalk => 'Историческая прогулка';
+
+  @override
+  String get taxSubcategorySunsetWalk => 'Прогулка на закате';
+
+  @override
+  String get taxSubcategorySunriseWalk => 'Прогулка на рассвете';
+
+  @override
+  String get taxSubcategoryForestWalk => 'Прогулка по лесу';
+
+  @override
+  String get taxSubcategoryLakeWalk => 'Прогулка у озера';
+
+  @override
+  String get taxSubcategoryRiverWalk => 'Прогулка вдоль реки';
+
+  @override
+  String get taxSubcategoryArchitectureWalk => 'Архитектурная прогулка';
+
+  @override
+  String get taxSubcategoryHiddenGemsWalk => 'Прогулка по скрытым местам';
+
+  @override
+  String get taxSubcategoryPhotographyWalk => 'Фотопрогулка';
+
+  @override
+  String get taxSubcategoryBirdwatching => 'Наблюдение за птицами';
+
+  @override
+  String get taxSubcategoryMushroomPicking => 'Сбор грибов';
+
+  @override
+  String get taxSubcategoryBerryPicking => 'Сбор ягод';
+
+  @override
+  String get taxSubcategoryPicnicWalk => 'Прогулка с пикником';
+
+  @override
+  String get taxSubcategoryParkWalk => 'Прогулка по парку';
+
+  @override
+  String get taxSubcategoryBeachWalk => 'Прогулка по пляжу';
+
+  @override
+  String get taxSubcategoryPromenadeWalk => 'Прогулка по набережной';
+
+  @override
+  String get taxSubcategoryPark => 'Парк';
+
+  @override
+  String get taxSubcategoryBeach => 'Пляж';
+
+  @override
+  String get taxSubcategoryPromenade => 'Набережная';
+
+  @override
+  String get taxSubcategoryViewpoint => 'Смотровая точка';
+
+  @override
+  String get taxSubcategoryForest => 'Лес';
+
+  @override
+  String get taxSubcategoryLake => 'Озеро';
+
+  @override
+  String get taxSubcategoryWaterfall => 'Водопад';
+
+  @override
+  String get taxSubcategoryCave => 'Пещера';
+
+  @override
+  String get taxSubcategoryNaturalLandmark => 'Природная достопримечательность';
+
+  @override
+  String get taxSubcategoryOutdoorWorkout => 'Тренировка на улице';
+
+  @override
+  String get taxSubcategoryNatureEscape => 'Выезд на природу';
+
+  @override
+  String get taxSubcategorySlowWalk => 'Неспешная прогулка';
+
+  @override
+  String get taxSubcategoryStargazing => 'Наблюдение за звёздами';
+
+  @override
+  String get taxSubcategoryNorthernLightsWatch =>
+      'Наблюдение за северным сиянием';
+
+  @override
+  String get taxSubcategoryMeteorShowerWatch => 'Наблюдение за звездопадом';
+
+  @override
+  String get taxSubcategorySup => 'SUP';
+
+  @override
+  String get taxSubcategoryKayak => 'Каяк';
+
+  @override
+  String get taxSubcategoryCanoe => 'Каноэ';
+
+  @override
+  String get taxSubcategoryBoatTrip => 'Прогулка на лодке';
+
+  @override
+  String get taxSubcategoryCatamaran => 'Катамаран';
+
+  @override
+  String get taxSubcategoryCanalCruise => 'Прогулка по каналу';
+
+  @override
+  String get taxSubcategoryRowing => 'Гребля';
+
+  @override
+  String get taxSubcategorySailing => 'Парусный спорт';
+
+  @override
+  String get taxSubcategoryFishing => 'Рыбалка';
+
+  @override
+  String get taxSubcategoryWakeboarding => 'Вейкбординг';
+
+  @override
+  String get taxSubcategoryWaterBike => 'Водный велосипед';
+
+  @override
+  String get taxSubcategoryJetSki => 'Гидроцикл';
+
+  @override
+  String get taxSubcategoryBeachActivity => 'Активность на пляже';
+
+  @override
+  String get taxSubcategoryWaterTour => 'Водная экскурсия';
+
+  @override
+  String get taxSubcategoryDiving => 'Дайвинг';
+
+  @override
+  String get taxSubcategorySnorkeling => 'Снорклинг';
+
+  @override
+  String get taxSubcategorySurfing => 'Сёрфинг';
+
+  @override
+  String get taxSubcategoryWindsurfing => 'Виндсёрфинг';
+
+  @override
+  String get taxSubcategoryKitesurfing => 'Кайтсёрфинг';
+
+  @override
+  String get taxSubcategoryBeachDay => 'День на пляже';
+
+  @override
+  String get taxSubcategoryWinterWalk => 'Зимняя прогулка';
+
+  @override
+  String get taxSubcategoryIceSkating => 'Каток';
+
+  @override
+  String get taxSubcategorySkiing => 'Лыжи';
+
+  @override
+  String get taxSubcategorySnowboarding => 'Сноуборд';
+
+  @override
+  String get taxSubcategorySledding => 'Катание на санках';
+
+  @override
+  String get taxSubcategoryWinterHiking => 'Зимний поход';
+
+  @override
+  String get taxSubcategoryChristmasMarketWalk =>
+      'Прогулка по рождественской ярмарке';
+
+  @override
+  String get taxSubcategoryWinterPhotoRoute => 'Зимний фотомаршрут';
+
+  @override
+  String get taxSubcategorySaunaColdPlunge => 'Сауна и холодная купель';
+
+  @override
+  String get taxSubcategoryIceFishing => 'Подлёдная рыбалка';
+
+  @override
+  String get taxSubcategoryWinterFestival => 'Зимний фестиваль';
+
+  @override
+  String get taxSubcategoryAutumnLeafWalk => 'Прогулка по осенней листве';
+
+  @override
+  String get taxSubcategorySpringBlossomWalk =>
+      'Прогулка среди весеннего цветения';
+
+  @override
+  String get taxSubcategorySummerOutdoor => 'Летом на природе';
+
+  @override
+  String get taxSubcategorySeasonalWalk => 'Сезонная прогулка';
+
+  @override
+  String get taxSubcategorySnowActivity => 'Активность на снегу';
+
+  @override
+  String get taxSubcategoryColdPlunge => 'Холодная купель';
+
+  @override
+  String get taxSubcategoryHolidayLightsWalk =>
+      'Прогулка по праздничной иллюминации';
+
+  @override
+  String get taxSubcategoryDayTrip => 'Однодневная поездка';
+
+  @override
+  String get taxSubcategoryWeekendTrip => 'Поездка на выходные';
+
+  @override
+  String get taxSubcategoryLocalExperience => 'Местный опыт';
+
+  @override
+  String get taxSubcategoryTouristExcursion => 'Туристическая экскурсия';
+
+  @override
+  String get taxSubcategoryCityTour => 'Экскурсия по городу';
+
+  @override
+  String get taxSubcategoryFoodTastingTour => 'Дегустационный тур';
+
+  @override
+  String get taxSubcategoryCraftExperience => 'Ремесленный опыт';
+
+  @override
+  String get taxSubcategoryFarmExperience => 'Поездка на ферму';
+
+  @override
+  String get taxSubcategoryCastleTour => 'Экскурсия в замок';
+
+  @override
+  String get taxSubcategoryNatureReserveTour => 'Экскурсия в заповедник';
+
+  @override
+  String get taxSubcategoryCoastalTrip => 'Поездка на побережье';
+
+  @override
+  String get taxSubcategoryTrainDayTrip => 'Однодневная поездка на поезде';
+
+  @override
+  String get taxSubcategoryLocalGuideExperience => 'С местным гидом';
+
+  @override
+  String get taxSubcategoryBikeTour => 'Велотур';
+
+  @override
+  String get taxSubcategoryWalkingTour => 'Пешеходная экскурсия';
+
+  @override
+  String get taxSubcategoryHistoricalTour => 'Историческая экскурсия';
+
+  @override
+  String get taxSubcategoryArchitectureTour => 'Архитектурная экскурсия';
+
+  @override
+  String get taxSubcategoryPhotoTour => 'Фототур';
+
+  @override
+  String get taxSubcategoryHiddenGemsTour => 'Экскурсия по скрытым местам';
+
+  @override
+  String get taxSubcategoryFamilyActivity => 'Семейное занятие';
+
+  @override
+  String get taxSubcategoryKidsWorkshop => 'Детская мастерская';
+
+  @override
+  String get taxSubcategoryPlaygroundEvent => 'Событие на детской площадке';
+
+  @override
+  String get taxSubcategoryFamilyPicnic => 'Семейный пикник';
+
+  @override
+  String get taxSubcategoryKidsTheatre => 'Детский театр';
+
+  @override
+  String get taxSubcategoryKidsMuseumEvent => 'Детское событие в музее';
+
+  @override
+  String get taxSubcategoryFamilySportsDay => 'Семейный спортивный день';
+
+  @override
+  String get taxSubcategoryParentChildClass => 'Занятие для родителей с детьми';
+
+  @override
+  String get taxSubcategoryCreativeKidsClass => 'Творческое занятие для детей';
+
+  @override
+  String get taxSubcategoryKidsCookingClass => 'Кулинарный класс для детей';
+
+  @override
+  String get taxSubcategoryKidsOutdoorWalk => 'Прогулка с детьми';
+
+  @override
+  String get taxSubcategoryBirthdayActivity => 'Развлечение на день рождения';
+
+  @override
+  String get taxSubcategoryFamilyFarmVisit => 'Семейная поездка на ферму';
+
+  @override
+  String get taxSubcategoryFamilyRoute => 'Семейный маршрут';
+
+  @override
+  String get taxSubcategoryKidsParty => 'Детский праздник';
+
+  @override
+  String get taxSubcategoryEducationalKidsEvent =>
+      'Познавательное событие для детей';
+
+  @override
+  String get taxSubcategoryBabyFriendlyActivity => 'Занятие для малышей';
+
+  @override
+  String get taxSubcategoryKidsCamp => 'Детский лагерь';
+
+  @override
+  String get taxSubcategoryDayCamp => 'Дневной лагерь';
+
+  @override
+  String get taxSubcategoryTeenMeetup => 'Встреча подростков';
+
+  @override
+  String get taxSubcategoryTeenEvent => 'Событие для подростков';
+
+  @override
+  String get taxSubcategoryKidsQuest => 'Детский квест';
+
+  @override
+  String get taxSubcategoryKidsScienceEvent => 'Научное событие для детей';
+
+  @override
+  String get taxSubcategoryKidsDisco => 'Детская дискотека';
+
+  @override
+  String get taxSubcategoryDogWalk => 'Прогулка с собакой';
+
+  @override
+  String get taxSubcategoryDogMeetup => 'Встреча собачников';
+
+  @override
+  String get taxSubcategoryDogParkMeetup => 'Встреча на собачьей площадке';
+
+  @override
+  String get taxSubcategoryPetFriendlyCafe => 'Кафе, куда можно с питомцем';
+
+  @override
+  String get taxSubcategoryDogTraining => 'Дрессировка собак';
+
+  @override
+  String get taxSubcategoryPetPhotoSession => 'Фотосессия питомца';
+
+  @override
+  String get taxSubcategoryAnimalShelterVisit =>
+      'Посещение приюта для животных';
+
+  @override
+  String get taxSubcategoryFarmAnimalExperience =>
+      'Знакомство с фермерскими животными';
+
+  @override
+  String get taxSubcategoryHorseRiding => 'Верховая езда';
+
+  @override
+  String get taxSubcategoryPonyRiding => 'Катание на пони';
+
+  @override
+  String get taxSubcategoryCatCafe => 'Котокафе';
+
+  @override
+  String get taxSubcategoryPetAdoption => 'Пристройство питомцев';
+
+  @override
+  String get taxSubcategoryPetCharity => 'Благотворительность для животных';
+
+  @override
+  String get taxSubcategoryPetFriendlyWalk => 'Прогулка с питомцем';
+
+  @override
+  String get taxSubcategoryDogSport => 'Кинологический спорт';
+
+  @override
+  String get taxSubcategoryPetOwnerMeetup => 'Встреча владельцев питомцев';
+
+  @override
+  String get taxSubcategoryDogShow => 'Выставка собак';
+
+  @override
+  String get taxSubcategoryPetExhibition => 'Выставка животных';
+
+  @override
+  String get taxSubcategoryPetFair => 'Ярмарка для питомцев';
+
+  @override
+  String get taxSubcategoryPetCareTalk => 'Лекция об уходе за питомцами';
+
+  @override
+  String get taxSubcategoryAnimalTherapy => 'Анималотерапия';
+
+  @override
+  String get taxSubcategoryCharityEvent => 'Благотворительное событие';
+
+  @override
+  String get taxSubcategoryVolunteerActivity => 'Волонтёрство';
+
+  @override
+  String get taxSubcategoryCommunityCleanup => 'Общественный субботник';
+
+  @override
+  String get taxSubcategoryDonationEvent => 'Сбор пожертвований';
+
+  @override
+  String get taxSubcategoryNeighborhoodEvent => 'Районное событие';
+
+  @override
+  String get taxSubcategoryFundraisingDinner => 'Благотворительный ужин';
+
+  @override
+  String get taxSubcategoryCharityRun => 'Благотворительный забег';
+
+  @override
+  String get taxSubcategoryAnimalShelterVolunteering => 'Волонтёрство в приюте';
+
+  @override
+  String get taxSubcategoryFoodBankVolunteering =>
+      'Волонтёрство в продуктовом банке';
+
+  @override
+  String get taxSubcategoryTreePlanting => 'Посадка деревьев';
+
+  @override
+  String get taxSubcategoryBeachCleanup => 'Уборка пляжа';
+
+  @override
+  String get taxSubcategoryParkCleanup => 'Уборка парка';
+
+  @override
+  String get taxSubcategoryCommunityGarden => 'Общественный огород';
+
+  @override
+  String get taxSubcategoryPublicSquare => 'Городская площадь';
+
+  @override
+  String get taxSubcategoryLocalCommunityMeetup =>
+      'Встреча местного сообщества';
+
+  @override
+  String get taxSubcategoryMutualAid => 'Взаимопомощь';
+
+  @override
+  String get taxSubcategorySocialImpactEvent => 'Социальное событие';
+
+  @override
+  String get taxSubcategoryEnvironmentalAction => 'Экологическая акция';
+
+  @override
+  String get taxSubcategoryLocalMarket => 'Местный рынок';
+
+  @override
+  String get taxSubcategoryFleaMarket => 'Блошиный рынок';
+
+  @override
+  String get taxSubcategorySeasonalMarket => 'Сезонный рынок';
+
+  @override
+  String get taxSubcategoryChristmasMarket => 'Рождественская ярмарка';
+
+  @override
+  String get taxSubcategoryFarmersMarket => 'Фермерский рынок';
+
+  @override
+  String get taxSubcategoryCraftMarket => 'Ремесленный рынок';
+
+  @override
+  String get taxSubcategoryDesignMarket => 'Дизайн-маркет';
+
+  @override
+  String get taxSubcategoryVintageMarket => 'Винтажный рынок';
+
+  @override
+  String get taxSubcategoryBookMarket => 'Книжный рынок';
+
+  @override
+  String get taxSubcategoryFoodMarket => 'Продуктовый рынок';
+
+  @override
+  String get taxSubcategoryFlowerMarket => 'Цветочный рынок';
+
+  @override
+  String get taxSubcategoryArtFair => 'Арт-ярмарка';
+
+  @override
+  String get taxSubcategoryPopUpShop => 'Поп-ап магазин';
+
+  @override
+  String get taxSubcategoryStreetMarket => 'Уличный рынок';
+
+  @override
+  String get taxSubcategoryHandmadeFair => 'Ярмарка хендмейда';
+
+  @override
+  String get taxSubcategoryCharityMarket => 'Благотворительная ярмарка';
+
+  @override
+  String get taxSubcategoryKidsMarket => 'Детская ярмарка';
+
+  @override
+  String get taxSubcategoryNightMarket => 'Ночной рынок';
+
+  @override
+  String get taxSubcategoryLocalBrandsMarket => 'Маркет местных брендов';
+
+  @override
+  String get taxSubcategoryClothingSwap => 'Обмен одеждой';
+
+  @override
+  String get taxSubcategoryChristmas => 'Рождество';
+
+  @override
+  String get taxSubcategoryNewYear => 'Новый год';
+
+  @override
+  String get taxSubcategoryHalloween => 'Хэллоуин';
+
+  @override
+  String get taxSubcategoryEaster => 'Пасха';
+
+  @override
+  String get taxSubcategoryValentinesDay => 'День святого Валентина';
+
+  @override
+  String get taxSubcategoryJani => 'Лиго (Яни)';
+
+  @override
+  String get taxSubcategoryCityFestival => 'Городской праздник';
+
+  @override
+  String get taxSubcategorySummerFestival => 'Летний фестиваль';
+
+  @override
+  String get taxSubcategoryAutumnEvent => 'Осеннее событие';
+
+  @override
+  String get taxSubcategorySpringEvent => 'Весеннее событие';
+
+  @override
+  String get taxSubcategorySchoolHoliday => 'Школьные каникулы';
+
+  @override
+  String get taxSubcategoryNationalHoliday => 'Государственный праздник';
+
+  @override
+  String get taxSubcategoryLocalTradition => 'Местная традиция';
+
+  @override
+  String get taxSubcategoryMidsummer => 'Летнее солнцестояние';
+
+  @override
+  String get taxSubcategoryFireworks => 'Салют';
+
+  @override
+  String get taxSubcategoryPublicCelebration => 'Народное гулянье';
+
+  @override
+  String get taxSubcategoryRechargeWalk => 'Восстанавливающая прогулка';
+
+  @override
+  String get taxSubcategoryCalmWalk => 'Спокойная прогулка';
+
+  @override
+  String get taxSubcategoryMindfulWalk => 'Осознанная прогулка';
+
+  @override
+  String get taxSubcategoryCoffeeWalk => 'Прогулка с кофе';
+
+  @override
+  String get taxSubcategoryTeaWalk => 'Прогулка с чаем';
+
+  @override
+  String get taxSubcategorySunsetReset => 'Перезагрузка на закате';
+
+  @override
+  String get taxSubcategoryNatureReset => 'Перезагрузка на природе';
+
+  @override
+  String get taxSubcategoryDigitalDetox => 'Цифровой детокс';
+
+  @override
+  String get taxSubcategorySlowMorning => 'Неспешное утро';
+
+  @override
+  String get taxSubcategoryEveningReset => 'Вечерняя перезагрузка';
+
+  @override
+  String get taxSubcategorySauna => 'Сауна';
+
+  @override
+  String get taxSubcategorySpa => 'Спа';
+
+  @override
+  String get taxSubcategoryMassage => 'Массаж';
+
+  @override
+  String get taxSubcategoryBreathwork => 'Дыхательные практики';
+
+  @override
+  String get taxSubcategoryMeditation => 'Медитация';
+
+  @override
+  String get taxSubcategorySoundHealing => 'Звукотерапия';
+
+  @override
+  String get taxSubcategoryWellnessClass => 'Велнес-занятие';
+
+  @override
+  String get taxSubcategoryRelaxationSession => 'Сеанс релаксации';
+
+  @override
+  String get taxSubcategoryMentalHealthMeetup =>
+      'Встреча о ментальном здоровье';
+
+  @override
+  String get taxSubcategoryQuietSocial => 'Тихая встреча';
+
+  @override
+  String get taxSubcategoryCoupleRecharge => 'Отдых для пары';
+
+  @override
+  String get taxSubcategorySoloRecharge => 'Отдых в одиночку';
+
+  @override
+  String get taxSubcategoryFriendsRecharge => 'Отдых с друзьями';
+
+  @override
+  String get taxSubcategoryPirtsRitual => 'Ритуал латышской бани';
+
+  @override
+  String get taxSubcategoryRetreat => 'Ретрит';
+
+  @override
+  String get taxSubcategoryLaserTag => 'Лазертаг';
+
+  @override
+  String get taxSubcategoryPaintball => 'Пейнтбол';
+
+  @override
+  String get taxSubcategoryAirsoft => 'Страйкбол';
+
+  @override
+  String get taxSubcategoryKarting => 'Картинг';
+
+  @override
+  String get taxSubcategoryShootingRange => 'Тир';
+
+  @override
+  String get taxSubcategoryArchery => 'Стрельба из лука';
+
+  @override
+  String get taxSubcategoryAxeThrowing => 'Метание топоров';
+
+  @override
+  String get taxSubcategoryTrampolinePark => 'Батутный парк';
+
+  @override
+  String get taxSubcategoryRopePark => 'Верёвочный парк';
+
+  @override
+  String get taxSubcategoryZipline => 'Зиплайн';
+
+  @override
+  String get taxSubcategoryWindTunnel => 'Аэротруба';
+
+  @override
+  String get taxSubcategoryHotAirBalloon => 'Полёт на воздушном шаре';
+
+  @override
+  String get taxSubcategorySkydiving => 'Прыжок с парашютом';
+
+  @override
+  String get taxSubcategoryBungeeJumping => 'Банджи-джампинг';
+
+  @override
+  String get taxSubcategoryParkour => 'Паркур';
+
+  @override
+  String get taxSubcategoryObstacleCourse => 'Полоса препятствий';
+
+  @override
+  String get taxSubcategoryZoo => 'Зоопарк';
+
+  @override
+  String get taxSubcategoryPettingZoo => 'Контактный зоопарк';
+
+  @override
+  String get taxSubcategoryAquarium => 'Аквариум';
+
+  @override
+  String get taxSubcategoryAmusementPark => 'Парк аттракционов';
+
+  @override
+  String get taxSubcategoryWaterPark => 'Аквапарк';
+
+  @override
+  String get taxSubcategoryAdventurePark => 'Парк приключений';
+
+  @override
+  String get taxSubcategoryBotanicalGarden => 'Ботанический сад';
+
+  @override
+  String get taxSubcategoryPlanetarium => 'Планетарий';
+
+  @override
+  String get taxSubcategoryScienceCenter => 'Научный центр';
+
+  @override
+  String get taxSubcategoryObservationDeck => 'Смотровая площадка';
+
+  @override
+  String get taxSubcategoryFerrisWheel => 'Колесо обозрения';
+
+  @override
+  String get taxSubcategorySeasonalAttraction => 'Сезонный аттракцион';
+
+  @override
+  String get taxSubcategoryCarMeetup => 'Автовстреча';
+
+  @override
+  String get taxSubcategoryRetroCars => 'Ретро-автомобили';
+
+  @override
+  String get taxSubcategoryCarShow => 'Автошоу';
+
+  @override
+  String get taxSubcategoryAutoExhibition => 'Автовыставка';
+
+  @override
+  String get taxSubcategoryTuningMeetup => 'Встреча тюнинга';
+
+  @override
+  String get taxSubcategoryDriftEvent => 'Дрифт';
+
+  @override
+  String get taxSubcategoryOffroadTrip => 'Поездка по бездорожью';
+
+  @override
+  String get taxSubcategoryMotorcycleRide => 'Мотопробег';
+
+  @override
+  String get taxSubcategoryMotorcycleMeetup => 'Встреча мотоциклистов';
+
+  @override
+  String get taxSubcategoryScooterMeetup => 'Встреча скутеристов';
+
+  @override
+  String get taxSubcategoryCarPhotoMeet => 'Автофотовстреча';
+
+  @override
+  String get taxSubcategoryDriveInCinema => 'Автокинотеатр';
+
+  @override
+  String get taxSubcategoryAnimeMeetup => 'Встреча любителей аниме';
+
+  @override
+  String get taxSubcategoryCosplayEvent => 'Косплей';
+
+  @override
+  String get taxSubcategoryComicCon => 'Комик-кон';
+
+  @override
+  String get taxSubcategoryEsportsTournament => 'Киберспортивный турнир';
+
+  @override
+  String get taxSubcategoryLanParty => 'LAN-пати';
+
+  @override
+  String get taxSubcategoryRetroGaming => 'Ретро-гейминг';
+
+  @override
+  String get taxSubcategoryTabletopWargames => 'Настольные варгеймы';
+
+  @override
+  String get taxSubcategoryTradingCardGames => 'Коллекционные карточные игры';
+
+  @override
+  String get taxSubcategoryHackathon => 'Хакатон';
+
+  @override
+  String get taxSubcategoryGameDevMeetup => 'Встреча разработчиков игр';
+
+  @override
+  String get taxSubcategoryTechMeetup => 'Технологическая встреча';
+
+  @override
+  String get taxSubcategoryRoboticsEvent => 'Событие по робототехнике';
+
+  @override
+  String get taxSubcategoryFandomMeetup => 'Встреча фанатов';
+
+  @override
+  String get taxSubcategoryCollectorsMeetup => 'Встреча коллекционеров';
+
+  @override
+  String get taxSubcategorySpeedDating => 'Быстрые свидания';
+
+  @override
+  String get taxSubcategorySinglesParty => 'Вечеринка для свободных';
+
+  @override
+  String get taxSubcategorySinglesMixer => 'Вечер знакомств';
+
+  @override
+  String get taxSubcategorySinglesDinner => 'Ужин для знакомств';
+
+  @override
+  String get taxSubcategoryBlindDateEvent => 'Свидание вслепую';
+
+  @override
+  String get taxSubcategoryDatingGameEvent => 'Игра-знакомство';
+
+  @override
+  String get taxSubcategorySinglesActivity => 'Занятие для свободных';
+
+  @override
+  String get taxSubcategoryMatchmakingEvent => 'Подбор пары';
+
+  @override
+  String get taxSubcategoryOtherEvent => 'Другое событие';
+
+  @override
+  String get discoverHomeShortSport => 'Спорт';
+
+  @override
+  String get discoverHomeShortWalks => 'Прогулки';
+
+  @override
+  String get discoverHomeShortGames => 'Игры';
+
+  @override
+  String get discoverHomeShortDance => 'Танцы';
+
+  @override
+  String get discoverHomeShortMusic => 'Музыка';
+
+  @override
+  String get discoverHomeShortArt => 'Искусство';
+
+  @override
+  String get discoverHomeShortFood => 'Еда';
+
+  @override
+  String get discoverHomeShortWellness => 'Отдых';
 }

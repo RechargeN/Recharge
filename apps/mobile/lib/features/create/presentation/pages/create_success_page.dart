@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../application/create_providers.dart';
 import '../../application/create_taxonomy.dart';
@@ -347,11 +348,15 @@ class _PublishedDraftCard extends StatelessWidget {
                   label: createOptionText(context.l10n, draft.publishStatus),
                 ),
                 if (category != null)
-                  _StatusChip(icon: Icons.category, label: category.title),
+                  _StatusChip(
+                    icon: Icons.category,
+                    label: taxonomyLabel(context.l10n, category.id),
+                  ),
                 if (draft.subcategory.isNotEmpty)
                   _StatusChip(
                     icon: Icons.sell_outlined,
-                    label: createTaxonomyLabelForPath(
+                    label: taxonomyLabel(
+                      context.l10n,
                       '${draft.mainCategory}.${draft.subcategory}',
                     ),
                   ),
@@ -465,7 +470,7 @@ class _PublishedScenarioRouteCard extends StatelessWidget {
                   .map(
                     (String step) => _StatusChip(
                       icon: Icons.place_outlined,
-                      label: createTaxonomyLabelForPath(step),
+                      label: taxonomyLabel(context.l10n, step),
                     ),
                   )
                   .toList(growable: false),

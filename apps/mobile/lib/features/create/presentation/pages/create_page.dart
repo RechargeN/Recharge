@@ -1,3 +1,4 @@
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../application/activity_validation_feedback_provider.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
@@ -844,12 +845,13 @@ class _CreateHubHeader extends StatelessWidget {
                 if (draft.mainCategory.isNotEmpty)
                   _HeaderChip(
                     icon: Icons.category,
-                    label: createTaxonomyLabelForPath(draft.mainCategory),
+                    label: taxonomyLabel(context.l10n, draft.mainCategory),
                   ),
                 if (draft.subcategory.isNotEmpty)
                   _HeaderChip(
                     icon: Icons.sell,
-                    label: createTaxonomyLabelForPath(
+                    label: taxonomyLabel(
+                      context.l10n,
                       '${draft.mainCategory}.${draft.subcategory}',
                     ),
                   ),
@@ -1211,7 +1213,11 @@ class _TaxonomySubcategoryPickerState
         .subcategories
         .where((CreateTaxonomySubcategory subcategory) {
           if (normalizedQuery.isEmpty) return true;
-          return subcategory.title.toLowerCase().contains(normalizedQuery) ||
+          return taxonomyLabel(
+                context.l10n,
+                subcategory.id,
+              ).toLowerCase().contains(normalizedQuery) ||
+              subcategory.title.toLowerCase().contains(normalizedQuery) ||
               subcategory.id.contains(normalizedQuery) ||
               subcategory.activityCategory.aliases.any(
                 (String alias) => alias.toLowerCase().contains(normalizedQuery),
@@ -1246,7 +1252,7 @@ class _TaxonomySubcategoryPickerState
             children: visibleSubcategories
                 .map(
                   (CreateTaxonomySubcategory subcategory) => ChoiceChip(
-                    label: Text(subcategory.title),
+                    label: Text(taxonomyLabel(context.l10n, subcategory.id)),
                     selected: subcategory.id == widget.selectedSubcategoryId,
                     onSelected: (_) => widget.onSelected(subcategory),
                   ),
@@ -1307,7 +1313,7 @@ class _TaxonomyCategoryCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                category.title,
+                taxonomyLabel(context.l10n, category.id),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(
@@ -1898,7 +1904,7 @@ class _ScenarioRouteSeedPanel extends StatelessWidget {
                 children: seedContext.stepCategories
                     .map(
                       (String step) =>
-                          _CreatePill(label: createTaxonomyLabelForPath(step)),
+                          _CreatePill(label: taxonomyLabel(context.l10n, step)),
                     )
                     .toList(growable: false),
               ),

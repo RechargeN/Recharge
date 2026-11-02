@@ -11734,4 +11734,1710 @@ class AppLocalizationsLv extends AppLocalizations {
   @override
   String get localErrorImportNotReappliable =>
       'Šo importu nevar atkārtot. Importējiet failu vēlreiz.';
+
+  @override
+  String get taxCategoryMusicNightlife => 'Mūzika un nakts dzīve';
+
+  @override
+  String get taxCategoryComedyTheatrePerformance =>
+      'Komēdija un skatuves māksla';
+
+  @override
+  String get taxCategoryCinemaScreenings => 'Kino un seansi';
+
+  @override
+  String get taxCategoryArtCultureMuseums => 'Māksla, kultūra un muzeji';
+
+  @override
+  String get taxCategoryEducationTalks => 'Izglītība un lekcijas';
+
+  @override
+  String get taxCategoryBusinessNetworking => 'Bizness un kontaktu veidošana';
+
+  @override
+  String get taxCategoryWorkshopsMasterclasses => 'Darbnīcas un meistarklases';
+
+  @override
+  String get taxCategoryLanguageSocialLearning => 'Valodas un mācīšanās kopā';
+
+  @override
+  String get taxCategoryFoodDrinks => 'Ēdiens un dzērieni';
+
+  @override
+  String get taxCategoryGamesIndoor => 'Spēles telpās';
+
+  @override
+  String get taxCategorySport => 'Sports';
+
+  @override
+  String get taxCategoryDance => 'Dejas';
+
+  @override
+  String get taxCategoryOutdoorNatureWalking => 'Daba, pastaigas un brīvdabā';
+
+  @override
+  String get taxCategoryWaterActivities => 'Aktivitātes uz ūdens';
+
+  @override
+  String get taxCategoryWinterSeasonal => 'Ziema un sezonas aktivitātes';
+
+  @override
+  String get taxCategoryTravelTours => 'Ceļojumi un ekskursijas';
+
+  @override
+  String get taxCategoryFamilyKids => 'Ģimenei un bērniem';
+
+  @override
+  String get taxCategoryPetsAnimals => 'Mājdzīvnieki un dzīvnieki';
+
+  @override
+  String get taxCategoryCommunityCharity => 'Kopiena un labdarība';
+
+  @override
+  String get taxCategoryMarketsFairs => 'Tirgi un gadatirgi';
+
+  @override
+  String get taxCategoryHolidaysSeasonal => 'Svētki un sezonas notikumi';
+
+  @override
+  String get taxCategoryWellnessRecharge => 'Labsajūta un atpūta';
+
+  @override
+  String get taxCategoryAdrenalineEntertainment => 'Adrenalīns un izklaide';
+
+  @override
+  String get taxCategoryAttractions => 'Apskates objekti un atrakcijas';
+
+  @override
+  String get taxCategoryAutoMoto => 'Auto un moto';
+
+  @override
+  String get taxCategoryGeekTech => 'Geek kultūra un tehnoloģijas';
+
+  @override
+  String get taxCategoryDatingSingles => 'Iepazīšanās un randiņi';
+
+  @override
+  String get taxCategoryOther => 'Cits';
+
+  @override
+  String get taxSubcategoryConcert => 'Koncerts';
+
+  @override
+  String get taxSubcategoryLiveMusic => 'Dzīvā mūzika';
+
+  @override
+  String get taxSubcategoryAcousticEvening => 'Akustiskais vakars';
+
+  @override
+  String get taxSubcategoryJazz => 'Džezs';
+
+  @override
+  String get taxSubcategoryClassicalMusic => 'Klasiskā mūzika';
+
+  @override
+  String get taxSubcategoryRockMusic => 'Rokmūzika';
+
+  @override
+  String get taxSubcategoryPopMusic => 'Popmūzika';
+
+  @override
+  String get taxSubcategoryElectronicMusic => 'Elektroniskā mūzika';
+
+  @override
+  String get taxSubcategoryTechno => 'Tehno';
+
+  @override
+  String get taxSubcategoryHouseMusic => 'House mūzika';
+
+  @override
+  String get taxSubcategoryLatinMusic => 'Latīņamerikas mūzika';
+
+  @override
+  String get taxSubcategoryDjParty => 'DJ ballīte';
+
+  @override
+  String get taxSubcategoryClubNight => 'Klubu nakts';
+
+  @override
+  String get taxSubcategoryKaraoke => 'Karaoke';
+
+  @override
+  String get taxSubcategoryOpenMicMusic => 'Atvērtais mikrofons: mūzika';
+
+  @override
+  String get taxSubcategoryRooftopParty => 'Ballīte uz jumta';
+
+  @override
+  String get taxSubcategoryBeachParty => 'Pludmales ballīte';
+
+  @override
+  String get taxSubcategoryThemedParty => 'Tematiskā ballīte';
+
+  @override
+  String get taxSubcategoryMusicFestival => 'Mūzikas festivāls';
+
+  @override
+  String get taxSubcategoryListeningParty => 'Klausīšanās vakars';
+
+  @override
+  String get taxSubcategoryJamSession => 'Džemsešns';
+
+  @override
+  String get taxSubcategoryNightBar => 'Nakts bārs';
+
+  @override
+  String get taxSubcategoryAfterworkDrinks => 'Iedzeršana pēc darba';
+
+  @override
+  String get taxSubcategoryLateNightSocial => 'Vēla vakara tikšanās';
+
+  @override
+  String get taxSubcategoryGroupSinging => 'Kopdziedāšana';
+
+  @override
+  String get taxSubcategoryOrganConcert => 'Ērģeļmūzikas koncerts';
+
+  @override
+  String get taxSubcategoryStandup => 'Stendaps';
+
+  @override
+  String get taxSubcategoryComedyOpenMic => 'Atvērtais mikrofons: komēdija';
+
+  @override
+  String get taxSubcategoryTheatre => 'Teātris';
+
+  @override
+  String get taxSubcategoryImprovisation => 'Improvizācija';
+
+  @override
+  String get taxSubcategoryMagicShow => 'Burvju šovs';
+
+  @override
+  String get taxSubcategoryCircus => 'Cirks';
+
+  @override
+  String get taxSubcategoryPoetryNight => 'Dzejas vakars';
+
+  @override
+  String get taxSubcategoryStorytelling => 'Stāstu vakars';
+
+  @override
+  String get taxSubcategoryPuppetShow => 'Leļļu izrāde';
+
+  @override
+  String get taxSubcategoryBallet => 'Balets';
+
+  @override
+  String get taxSubcategoryOpera => 'Opera';
+
+  @override
+  String get taxSubcategoryCabaret => 'Kabarē';
+
+  @override
+  String get taxSubcategoryStreetPerformance => 'Ielu izrāde';
+
+  @override
+  String get taxSubcategoryPerformanceArt => 'Performanss';
+
+  @override
+  String get taxSubcategoryDragShow => 'Dragšovs';
+
+  @override
+  String get taxSubcategoryMusical => 'Mūzikls';
+
+  @override
+  String get taxSubcategoryExperimentalTheatre => 'Eksperimentālais teātris';
+
+  @override
+  String get taxSubcategoryCinema => 'Kino';
+
+  @override
+  String get taxSubcategoryMovieScreening => 'Filmas seanss';
+
+  @override
+  String get taxSubcategoryOpenAirCinema => 'Brīvdabas kino';
+
+  @override
+  String get taxSubcategoryFilmFestival => 'Filmu festivāls';
+
+  @override
+  String get taxSubcategoryDocumentary => 'Dokumentālā filma';
+
+  @override
+  String get taxSubcategoryShortFilms => 'Īsfilmas';
+
+  @override
+  String get taxSubcategoryRetroCinema => 'Retro kino';
+
+  @override
+  String get taxSubcategoryAnimation => 'Animācija';
+
+  @override
+  String get taxSubcategorySportsScreening => 'Sporta translācija';
+
+  @override
+  String get taxSubcategoryMovieDiscussion => 'Filmas apspriešana';
+
+  @override
+  String get taxSubcategoryPremiere => 'Pirmizrāde';
+
+  @override
+  String get taxSubcategoryIndependentFilm => 'Neatkarīgais kino';
+
+  @override
+  String get taxSubcategoryCinemaClub => 'Kinoklubs';
+
+  @override
+  String get taxSubcategoryExhibition => 'Izstāde';
+
+  @override
+  String get taxSubcategoryGallery => 'Galerija';
+
+  @override
+  String get taxSubcategoryMuseum => 'Muzejs';
+
+  @override
+  String get taxSubcategoryMuseumNight => 'Muzeju nakts';
+
+  @override
+  String get taxSubcategoryGalleryWalk => 'Galeriju apmeklējums';
+
+  @override
+  String get taxSubcategoryArtistTalk => 'Saruna ar mākslinieku';
+
+  @override
+  String get taxSubcategoryArtWalk => 'Mākslas pastaiga';
+
+  @override
+  String get taxSubcategoryPhotographyExhibition => 'Fotoizstāde';
+
+  @override
+  String get taxSubcategoryStreetArt => 'Ielu māksla';
+
+  @override
+  String get taxSubcategoryArchitecture => 'Arhitektūra';
+
+  @override
+  String get taxSubcategoryCulturalHeritage => 'Kultūras mantojums';
+
+  @override
+  String get taxSubcategoryMonument => 'Piemineklis';
+
+  @override
+  String get taxSubcategoryMemorial => 'Memoriāls';
+
+  @override
+  String get taxSubcategorySculpture => 'Skulptūra';
+
+  @override
+  String get taxSubcategoryHistoricLandmark => 'Vēsturisks objekts';
+
+  @override
+  String get taxSubcategoryLiteratureEvening => 'Literatūras vakars';
+
+  @override
+  String get taxSubcategoryBookReading => 'Grāmatu lasījums';
+
+  @override
+  String get taxSubcategoryHistoryWalk => 'Vēstures pastaiga';
+
+  @override
+  String get taxSubcategoryDesignEvent => 'Dizaina pasākums';
+
+  @override
+  String get taxSubcategoryCraftExhibition => 'Amatniecības izstāde';
+
+  @override
+  String get taxSubcategoryPublicArt => 'Publiskā māksla';
+
+  @override
+  String get taxSubcategoryCreativeMeetup => 'Radošā tikšanās';
+
+  @override
+  String get taxSubcategoryFashionEvent => 'Modes pasākums';
+
+  @override
+  String get taxSubcategoryLecture => 'Lekcija';
+
+  @override
+  String get taxSubcategoryPublicTalk => 'Publiska saruna';
+
+  @override
+  String get taxSubcategoryDiscussion => 'Diskusija';
+
+  @override
+  String get taxSubcategoryDebate => 'Debates';
+
+  @override
+  String get taxSubcategoryPanelDiscussion => 'Paneļdiskusija';
+
+  @override
+  String get taxSubcategoryScienceTalk => 'Zinātnes lekcija';
+
+  @override
+  String get taxSubcategoryHistoryLecture => 'Vēstures lekcija';
+
+  @override
+  String get taxSubcategoryPsychologyTalk => 'Psiholoģijas lekcija';
+
+  @override
+  String get taxSubcategoryFinanceTalk => 'Finanšu lekcija';
+
+  @override
+  String get taxSubcategoryCareerTalk => 'Karjeras lekcija';
+
+  @override
+  String get taxSubcategoryLegalInfoSession => 'Juridiskā informācija';
+
+  @override
+  String get taxSubcategoryBookClub => 'Grāmatu klubs';
+
+  @override
+  String get taxSubcategoryPracticalSeminar => 'Praktisks seminārs';
+
+  @override
+  String get taxSubcategorySelfDevelopment => 'Pašattīstība';
+
+  @override
+  String get taxSubcategoryHealthTalk => 'Lekcija par veselību';
+
+  @override
+  String get taxSubcategoryTechnologyTalk => 'Tehnoloģiju lekcija';
+
+  @override
+  String get taxSubcategoryStartupTalk => 'Lekcija par jaunuzņēmumiem';
+
+  @override
+  String get taxSubcategoryParentingTalk => 'Lekcija vecākiem';
+
+  @override
+  String get taxSubcategoryCommunityDiscussion => 'Kopienas diskusija';
+
+  @override
+  String get taxSubcategoryNetworking => 'Kontaktu veidošana';
+
+  @override
+  String get taxSubcategoryBusinessBreakfast => 'Biznesa brokastis';
+
+  @override
+  String get taxSubcategoryBusinessLunch => 'Biznesa pusdienas';
+
+  @override
+  String get taxSubcategoryConference => 'Konference';
+
+  @override
+  String get taxSubcategoryProductPresentation => 'Produkta prezentācija';
+
+  @override
+  String get taxSubcategoryProductLaunch => 'Produkta palaišana';
+
+  @override
+  String get taxSubcategoryStartupMeetup => 'Jaunuzņēmumu tikšanās';
+
+  @override
+  String get taxSubcategoryPitchNight => 'Prezentāciju vakars';
+
+  @override
+  String get taxSubcategoryInvestorMeetup => 'Tikšanās ar investoriem';
+
+  @override
+  String get taxSubcategoryJobFair => 'Darba gadatirgus';
+
+  @override
+  String get taxSubcategoryPortfolioReview => 'Portfolio apskats';
+
+  @override
+  String get taxSubcategoryFreelancersMeetup => 'Ārštata darbinieku tikšanās';
+
+  @override
+  String get taxSubcategoryDemoDay => 'Demo diena';
+
+  @override
+  String get taxSubcategoryExpo => 'Ekspo';
+
+  @override
+  String get taxSubcategoryFounderMeetup => 'Dibinātāju tikšanās';
+
+  @override
+  String get taxSubcategoryIndustryMeetup => 'Nozares tikšanās';
+
+  @override
+  String get taxSubcategoryCareerNetworking => 'Karjeras kontakti';
+
+  @override
+  String get taxSubcategoryCoworkingEvent => 'Kopstrādes pasākums';
+
+  @override
+  String get taxSubcategoryBusinessWorkshop => 'Biznesa darbnīca';
+
+  @override
+  String get taxSubcategoryWorkshop => 'Darbnīca';
+
+  @override
+  String get taxSubcategoryMasterclass => 'Meistarklase';
+
+  @override
+  String get taxSubcategoryCourse => 'Kurss';
+
+  @override
+  String get taxSubcategoryPottery => 'Podniecība';
+
+  @override
+  String get taxSubcategoryCeramics => 'Keramika';
+
+  @override
+  String get taxSubcategoryDrawing => 'Zīmēšana';
+
+  @override
+  String get taxSubcategoryPainting => 'Gleznošana';
+
+  @override
+  String get taxSubcategoryPhotography => 'Fotografēšana';
+
+  @override
+  String get taxSubcategoryCookingClass => 'Kulinārijas nodarbība';
+
+  @override
+  String get taxSubcategorySewing => 'Šūšana';
+
+  @override
+  String get taxSubcategoryFloristics => 'Floristika';
+
+  @override
+  String get taxSubcategoryCandleMaking => 'Sveču liešana';
+
+  @override
+  String get taxSubcategoryPublicSpeaking => 'Publiskā runa';
+
+  @override
+  String get taxSubcategoryCreativeClass => 'Radošā nodarbība';
+
+  @override
+  String get taxSubcategoryCraftWorkshop => 'Amatniecības darbnīca';
+
+  @override
+  String get taxSubcategoryWritingWorkshop => 'Rakstīšanas darbnīca';
+
+  @override
+  String get taxSubcategoryMusicLesson => 'Mūzikas nodarbība';
+
+  @override
+  String get taxSubcategoryDanceWorkshop => 'Deju darbnīca';
+
+  @override
+  String get taxSubcategoryBeautyWorkshop => 'Skaistumkopšanas darbnīca';
+
+  @override
+  String get taxSubcategoryWellnessWorkshop => 'Labsajūtas darbnīca';
+
+  @override
+  String get taxSubcategoryLanguageExchange => 'Valodu apmaiņa';
+
+  @override
+  String get taxSubcategoryEnglishClub => 'Angļu valodas klubs';
+
+  @override
+  String get taxSubcategoryDutchClub => 'Nīderlandiešu valodas klubs';
+
+  @override
+  String get taxSubcategoryLatvianClub => 'Latviešu valodas klubs';
+
+  @override
+  String get taxSubcategoryConversationClub => 'Sarunu klubs';
+
+  @override
+  String get taxSubcategoryInternationalMeetup => 'Starptautiska tikšanās';
+
+  @override
+  String get taxSubcategoryExpatsMeetup => 'Ārzemnieku tikšanās';
+
+  @override
+  String get taxSubcategoryTandemMeeting => 'Valodu tandēms';
+
+  @override
+  String get taxSubcategoryLanguageCafe => 'Valodu kafejnīca';
+
+  @override
+  String get taxSubcategoryLanguageWalk => 'Valodu pastaiga';
+
+  @override
+  String get taxSubcategorySpeedFriending => 'Ātrā draudzēšanās';
+
+  @override
+  String get taxSubcategorySpeakingClub => 'Runāšanas klubs';
+
+  @override
+  String get taxSubcategoryCultureExchange => 'Kultūru apmaiņa';
+
+  @override
+  String get taxSubcategoryNewcomersMeetup => 'Jaunpienācēju tikšanās';
+
+  @override
+  String get taxSubcategoryStudyGroup => 'Mācību grupa';
+
+  @override
+  String get taxSubcategoryCoffee => 'Kafija';
+
+  @override
+  String get taxSubcategoryBreakfast => 'Brokastis';
+
+  @override
+  String get taxSubcategoryBrunch => 'Vēlās brokastis';
+
+  @override
+  String get taxSubcategoryLunch => 'Pusdienas';
+
+  @override
+  String get taxSubcategoryDinner => 'Vakariņas';
+
+  @override
+  String get taxSubcategoryDessert => 'Deserts';
+
+  @override
+  String get taxSubcategoryStreetFood => 'Ielu ēdiens';
+
+  @override
+  String get taxSubcategoryFoodTasting => 'Ēdienu degustācija';
+
+  @override
+  String get taxSubcategoryDrinkTasting => 'Dzērienu degustācija';
+
+  @override
+  String get taxSubcategoryWineTasting => 'Vīna degustācija';
+
+  @override
+  String get taxSubcategoryBeerTasting => 'Alus degustācija';
+
+  @override
+  String get taxSubcategoryCocktailTasting => 'Kokteiļu degustācija';
+
+  @override
+  String get taxSubcategoryTeaCeremony => 'Tējas ceremonija';
+
+  @override
+  String get taxSubcategoryBbq => 'Grils';
+
+  @override
+  String get taxSubcategoryPicnic => 'Pikniks';
+
+  @override
+  String get taxSubcategoryFoodTour => 'Gastronomiskā tūre';
+
+  @override
+  String get taxSubcategoryBarCrawl => 'Bāru apgaita';
+
+  @override
+  String get taxSubcategoryPubCrawl => 'Krogu apgaita';
+
+  @override
+  String get taxSubcategoryHappyHour => 'Laimīgā stunda';
+
+  @override
+  String get taxSubcategoryRestaurantVisit => 'Restorāna apmeklējums';
+
+  @override
+  String get taxSubcategoryCafeVisit => 'Kafejnīcas apmeklējums';
+
+  @override
+  String get taxSubcategoryBakeryVisit => 'Maiznīcas apmeklējums';
+
+  @override
+  String get taxSubcategoryVeganFood => 'Vegāniskais ēdiens';
+
+  @override
+  String get taxSubcategoryLocalFood => 'Vietējais ēdiens';
+
+  @override
+  String get taxSubcategoryFineDining => 'Smalkā virtuve';
+
+  @override
+  String get taxSubcategoryFamilyMeal => 'Ģimenes maltīte';
+
+  @override
+  String get taxSubcategoryQuiz => 'Viktorīna';
+
+  @override
+  String get taxSubcategoryBoardGames => 'Galda spēles';
+
+  @override
+  String get taxSubcategoryMafia => 'Mafija';
+
+  @override
+  String get taxSubcategoryPokerNoGambling => 'Pokers (bez azartspēlēm)';
+
+  @override
+  String get taxSubcategoryChess => 'Šahs';
+
+  @override
+  String get taxSubcategoryEscapeRoom => 'Bēgšanas istaba';
+
+  @override
+  String get taxSubcategoryQuest => 'Kvests';
+
+  @override
+  String get taxSubcategoryCityGame => 'Pilsētas spēle';
+
+  @override
+  String get taxSubcategoryTreasureHunt => 'Dārgumu meklēšana';
+
+  @override
+  String get taxSubcategoryBowling => 'Boulings';
+
+  @override
+  String get taxSubcategoryBilliards => 'Biljards';
+
+  @override
+  String get taxSubcategoryDarts => 'Šautriņas';
+
+  @override
+  String get taxSubcategoryMiniGolf => 'Minigolfs';
+
+  @override
+  String get taxSubcategoryArcade => 'Spēļu automāti';
+
+  @override
+  String get taxSubcategoryVrArcade => 'VR spēļu zāle';
+
+  @override
+  String get taxSubcategoryVideoGames => 'Videospēles';
+
+  @override
+  String get taxSubcategoryTableGames => 'Galda spēles grupā';
+
+  @override
+  String get taxSubcategoryCardGames => 'Kāršu spēles';
+
+  @override
+  String get taxSubcategoryRolePlayingGame => 'Lomu spēle';
+
+  @override
+  String get taxSubcategoryIndoorCompetition => 'Sacensības telpās';
+
+  @override
+  String get taxSubcategoryFootball => 'Futbols';
+
+  @override
+  String get taxSubcategoryBasketball => 'Basketbols';
+
+  @override
+  String get taxSubcategoryVolleyball => 'Volejbols';
+
+  @override
+  String get taxSubcategoryBeachVolleyball => 'Pludmales volejbols';
+
+  @override
+  String get taxSubcategoryTennis => 'Teniss';
+
+  @override
+  String get taxSubcategoryTableTennis => 'Galda teniss';
+
+  @override
+  String get taxSubcategoryBadminton => 'Badmintons';
+
+  @override
+  String get taxSubcategorySquash => 'Skvošs';
+
+  @override
+  String get taxSubcategoryPadel => 'Padels';
+
+  @override
+  String get taxSubcategoryRunning => 'Skriešana';
+
+  @override
+  String get taxSubcategoryTrailRunning => 'Taku skriešana';
+
+  @override
+  String get taxSubcategoryCycling => 'Riteņbraukšana';
+
+  @override
+  String get taxSubcategorySwimming => 'Peldēšana';
+
+  @override
+  String get taxSubcategoryBoxing => 'Bokss';
+
+  @override
+  String get taxSubcategoryMartialArts => 'Cīņas māksla';
+
+  @override
+  String get taxSubcategoryClimbing => 'Kāpšana';
+
+  @override
+  String get taxSubcategoryBouldering => 'Boulderings';
+
+  @override
+  String get taxSubcategoryFitness => 'Fitness';
+
+  @override
+  String get taxSubcategoryGym => 'Sporta zāle';
+
+  @override
+  String get taxSubcategoryCrossfit => 'Krosfits';
+
+  @override
+  String get taxSubcategoryCalisthenics => 'Kalistēnika';
+
+  @override
+  String get taxSubcategoryYoga => 'Joga';
+
+  @override
+  String get taxSubcategoryPilates => 'Pilates';
+
+  @override
+  String get taxSubcategoryStretching => 'Stiepšanās';
+
+  @override
+  String get taxSubcategoryDanceFitness => 'Deju fitness';
+
+  @override
+  String get taxSubcategoryNordicWalking => 'Nūjošana';
+
+  @override
+  String get taxSubcategorySkating => 'Slidošana';
+
+  @override
+  String get taxSubcategorySkateboarding => 'Skeitbords';
+
+  @override
+  String get taxSubcategoryRollerblading => 'Skrituļslidošana';
+
+  @override
+  String get taxSubcategoryGolf => 'Golfs';
+
+  @override
+  String get taxSubcategoryFrisbee => 'Frisbijs';
+
+  @override
+  String get taxSubcategoryDiscGolf => 'Disku golfs';
+
+  @override
+  String get taxSubcategoryRunningRace => 'Skrējiens';
+
+  @override
+  String get taxSubcategoryCyclingRace => 'Velobrauciens';
+
+  @override
+  String get taxSubcategoryFitnessChallenge => 'Fitnesa izaicinājums';
+
+  @override
+  String get taxSubcategoryAmateurTournament => 'Amatieru turnīrs';
+
+  @override
+  String get taxSubcategorySalsa => 'Salsa';
+
+  @override
+  String get taxSubcategoryBachata => 'Bačata';
+
+  @override
+  String get taxSubcategoryKizomba => 'Kizomba';
+
+  @override
+  String get taxSubcategoryTango => 'Tango';
+
+  @override
+  String get taxSubcategoryHipHop => 'Hiphops';
+
+  @override
+  String get taxSubcategoryContemporaryDance => 'Laikmetīgā deja';
+
+  @override
+  String get taxSubcategoryBallroomDance => 'Sporta dejas';
+
+  @override
+  String get taxSubcategoryFolkDance => 'Tautas dejas';
+
+  @override
+  String get taxSubcategoryDanceSocial => 'Deju vakars';
+
+  @override
+  String get taxSubcategoryDanceBattle => 'Deju batls';
+
+  @override
+  String get taxSubcategoryZumba => 'Zumba';
+
+  @override
+  String get taxSubcategoryPartnerDance => 'Pāru dejas';
+
+  @override
+  String get taxSubcategoryLatinDance => 'Latīņamerikas dejas';
+
+  @override
+  String get taxSubcategoryHeelsDance => 'Heels dejas';
+
+  @override
+  String get taxSubcategoryStreetDance => 'Ielu dejas';
+
+  @override
+  String get taxSubcategoryDanceClass => 'Deju nodarbība';
+
+  @override
+  String get taxSubcategoryDancePractice => 'Deju treniņš';
+
+  @override
+  String get taxSubcategoryDanceShow => 'Deju šovs';
+
+  @override
+  String get taxSubcategoryHiking => 'Pārgājiens';
+
+  @override
+  String get taxSubcategoryNatureWalk => 'Pastaiga dabā';
+
+  @override
+  String get taxSubcategoryCityWalk => 'Pastaiga pa pilsētu';
+
+  @override
+  String get taxSubcategoryHistoricalWalk => 'Vēsturiska pastaiga';
+
+  @override
+  String get taxSubcategorySunsetWalk => 'Saulrieta pastaiga';
+
+  @override
+  String get taxSubcategorySunriseWalk => 'Saullēkta pastaiga';
+
+  @override
+  String get taxSubcategoryForestWalk => 'Pastaiga mežā';
+
+  @override
+  String get taxSubcategoryLakeWalk => 'Pastaiga gar ezeru';
+
+  @override
+  String get taxSubcategoryRiverWalk => 'Pastaiga gar upi';
+
+  @override
+  String get taxSubcategoryArchitectureWalk => 'Arhitektūras pastaiga';
+
+  @override
+  String get taxSubcategoryHiddenGemsWalk => 'Apslēpto vietu pastaiga';
+
+  @override
+  String get taxSubcategoryPhotographyWalk => 'Fotopastaiga';
+
+  @override
+  String get taxSubcategoryBirdwatching => 'Putnu vērošana';
+
+  @override
+  String get taxSubcategoryMushroomPicking => 'Sēņošana';
+
+  @override
+  String get taxSubcategoryBerryPicking => 'Ogošana';
+
+  @override
+  String get taxSubcategoryPicnicWalk => 'Pastaiga ar pikniku';
+
+  @override
+  String get taxSubcategoryParkWalk => 'Pastaiga parkā';
+
+  @override
+  String get taxSubcategoryBeachWalk => 'Pastaiga pludmalē';
+
+  @override
+  String get taxSubcategoryPromenadeWalk => 'Pastaiga pa promenādi';
+
+  @override
+  String get taxSubcategoryPark => 'Parks';
+
+  @override
+  String get taxSubcategoryBeach => 'Pludmale';
+
+  @override
+  String get taxSubcategoryPromenade => 'Promenāde';
+
+  @override
+  String get taxSubcategoryViewpoint => 'Skatu punkts';
+
+  @override
+  String get taxSubcategoryForest => 'Mežs';
+
+  @override
+  String get taxSubcategoryLake => 'Ezers';
+
+  @override
+  String get taxSubcategoryWaterfall => 'Ūdenskritums';
+
+  @override
+  String get taxSubcategoryCave => 'Ala';
+
+  @override
+  String get taxSubcategoryNaturalLandmark => 'Dabas objekts';
+
+  @override
+  String get taxSubcategoryOutdoorWorkout => 'Treniņš brīvā dabā';
+
+  @override
+  String get taxSubcategoryNatureEscape => 'Atpūta dabā';
+
+  @override
+  String get taxSubcategorySlowWalk => 'Lēna pastaiga';
+
+  @override
+  String get taxSubcategoryStargazing => 'Zvaigžņu vērošana';
+
+  @override
+  String get taxSubcategoryNorthernLightsWatch => 'Ziemeļblāzmas vērošana';
+
+  @override
+  String get taxSubcategoryMeteorShowerWatch => 'Meteoru lietus vērošana';
+
+  @override
+  String get taxSubcategorySup => 'SUP dēlis';
+
+  @override
+  String get taxSubcategoryKayak => 'Kajaks';
+
+  @override
+  String get taxSubcategoryCanoe => 'Kanoe';
+
+  @override
+  String get taxSubcategoryBoatTrip => 'Izbrauciens ar laivu';
+
+  @override
+  String get taxSubcategoryCatamaran => 'Katamarāns';
+
+  @override
+  String get taxSubcategoryCanalCruise => 'Brauciens pa kanālu';
+
+  @override
+  String get taxSubcategoryRowing => 'Airēšana';
+
+  @override
+  String get taxSubcategorySailing => 'Burāšana';
+
+  @override
+  String get taxSubcategoryFishing => 'Makšķerēšana';
+
+  @override
+  String get taxSubcategoryWakeboarding => 'Veikbords';
+
+  @override
+  String get taxSubcategoryWaterBike => 'Ūdens velosipēds';
+
+  @override
+  String get taxSubcategoryJetSki => 'Ūdens motocikls';
+
+  @override
+  String get taxSubcategoryBeachActivity => 'Aktivitātes pludmalē';
+
+  @override
+  String get taxSubcategoryWaterTour => 'Ūdens tūre';
+
+  @override
+  String get taxSubcategoryDiving => 'Niršana';
+
+  @override
+  String get taxSubcategorySnorkeling => 'Snorkelēšana';
+
+  @override
+  String get taxSubcategorySurfing => 'Sērfošana';
+
+  @override
+  String get taxSubcategoryWindsurfing => 'Vindsērfings';
+
+  @override
+  String get taxSubcategoryKitesurfing => 'Kaitsērfings';
+
+  @override
+  String get taxSubcategoryBeachDay => 'Diena pludmalē';
+
+  @override
+  String get taxSubcategoryWinterWalk => 'Ziemas pastaiga';
+
+  @override
+  String get taxSubcategoryIceSkating => 'Slidošana uz ledus';
+
+  @override
+  String get taxSubcategorySkiing => 'Slēpošana';
+
+  @override
+  String get taxSubcategorySnowboarding => 'Snovbords';
+
+  @override
+  String get taxSubcategorySledding => 'Braukšana ar ragaviņām';
+
+  @override
+  String get taxSubcategoryWinterHiking => 'Ziemas pārgājiens';
+
+  @override
+  String get taxSubcategoryChristmasMarketWalk =>
+      'Pastaiga pa Ziemassvētku tirdziņu';
+
+  @override
+  String get taxSubcategoryWinterPhotoRoute => 'Ziemas fotomaršruts';
+
+  @override
+  String get taxSubcategorySaunaColdPlunge => 'Pirts un auksta ūdens peldes';
+
+  @override
+  String get taxSubcategoryIceFishing => 'Zemledus makšķerēšana';
+
+  @override
+  String get taxSubcategoryWinterFestival => 'Ziemas festivāls';
+
+  @override
+  String get taxSubcategoryAutumnLeafWalk => 'Rudens lapu pastaiga';
+
+  @override
+  String get taxSubcategorySpringBlossomWalk => 'Pavasara ziedu pastaiga';
+
+  @override
+  String get taxSubcategorySummerOutdoor => 'Vasara brīvā dabā';
+
+  @override
+  String get taxSubcategorySeasonalWalk => 'Sezonas pastaiga';
+
+  @override
+  String get taxSubcategorySnowActivity => 'Aktivitātes sniegā';
+
+  @override
+  String get taxSubcategoryColdPlunge => 'Auksta ūdens peldes';
+
+  @override
+  String get taxSubcategoryHolidayLightsWalk => 'Svētku gaismu pastaiga';
+
+  @override
+  String get taxSubcategoryDayTrip => 'Vienas dienas brauciens';
+
+  @override
+  String get taxSubcategoryWeekendTrip => 'Nedēļas nogales brauciens';
+
+  @override
+  String get taxSubcategoryLocalExperience => 'Vietējā pieredze';
+
+  @override
+  String get taxSubcategoryTouristExcursion => 'Tūristu ekskursija';
+
+  @override
+  String get taxSubcategoryCityTour => 'Pilsētas ekskursija';
+
+  @override
+  String get taxSubcategoryFoodTastingTour => 'Degustāciju tūre';
+
+  @override
+  String get taxSubcategoryCraftExperience => 'Amatniecības pieredze';
+
+  @override
+  String get taxSubcategoryFarmExperience => 'Lauku sētas pieredze';
+
+  @override
+  String get taxSubcategoryCastleTour => 'Pils apmeklējums';
+
+  @override
+  String get taxSubcategoryNatureReserveTour => 'Ekskursija dabas rezervātā';
+
+  @override
+  String get taxSubcategoryCoastalTrip => 'Brauciens gar jūru';
+
+  @override
+  String get taxSubcategoryTrainDayTrip => 'Dienas brauciens ar vilcienu';
+
+  @override
+  String get taxSubcategoryLocalGuideExperience => 'Ekskursija ar vietējo gidu';
+
+  @override
+  String get taxSubcategoryBikeTour => 'Velotūre';
+
+  @override
+  String get taxSubcategoryWalkingTour => 'Kājāmgājēju ekskursija';
+
+  @override
+  String get taxSubcategoryHistoricalTour => 'Vēsturiska ekskursija';
+
+  @override
+  String get taxSubcategoryArchitectureTour => 'Arhitektūras ekskursija';
+
+  @override
+  String get taxSubcategoryPhotoTour => 'Fototūre';
+
+  @override
+  String get taxSubcategoryHiddenGemsTour => 'Apslēpto vietu ekskursija';
+
+  @override
+  String get taxSubcategoryFamilyActivity => 'Ģimenes aktivitāte';
+
+  @override
+  String get taxSubcategoryKidsWorkshop => 'Bērnu darbnīca';
+
+  @override
+  String get taxSubcategoryPlaygroundEvent => 'Pasākums rotaļu laukumā';
+
+  @override
+  String get taxSubcategoryFamilyPicnic => 'Ģimenes pikniks';
+
+  @override
+  String get taxSubcategoryKidsTheatre => 'Bērnu teātris';
+
+  @override
+  String get taxSubcategoryKidsMuseumEvent => 'Bērnu pasākums muzejā';
+
+  @override
+  String get taxSubcategoryFamilySportsDay => 'Ģimenes sporta diena';
+
+  @override
+  String get taxSubcategoryParentChildClass => 'Nodarbība vecākiem ar bērnu';
+
+  @override
+  String get taxSubcategoryCreativeKidsClass => 'Radošā nodarbība bērniem';
+
+  @override
+  String get taxSubcategoryKidsCookingClass => 'Kulinārijas nodarbība bērniem';
+
+  @override
+  String get taxSubcategoryKidsOutdoorWalk => 'Pastaiga ar bērniem';
+
+  @override
+  String get taxSubcategoryBirthdayActivity => 'Dzimšanas dienas aktivitāte';
+
+  @override
+  String get taxSubcategoryFamilyFarmVisit => 'Ģimenes brauciens uz lauku sētu';
+
+  @override
+  String get taxSubcategoryFamilyRoute => 'Ģimenes maršruts';
+
+  @override
+  String get taxSubcategoryKidsParty => 'Bērnu ballīte';
+
+  @override
+  String get taxSubcategoryEducationalKidsEvent =>
+      'Izglītojošs pasākums bērniem';
+
+  @override
+  String get taxSubcategoryBabyFriendlyActivity => 'Aktivitāte ar mazuli';
+
+  @override
+  String get taxSubcategoryKidsCamp => 'Bērnu nometne';
+
+  @override
+  String get taxSubcategoryDayCamp => 'Dienas nometne';
+
+  @override
+  String get taxSubcategoryTeenMeetup => 'Pusaudžu tikšanās';
+
+  @override
+  String get taxSubcategoryTeenEvent => 'Pasākums pusaudžiem';
+
+  @override
+  String get taxSubcategoryKidsQuest => 'Bērnu kvests';
+
+  @override
+  String get taxSubcategoryKidsScienceEvent => 'Zinātnes pasākums bērniem';
+
+  @override
+  String get taxSubcategoryKidsDisco => 'Bērnu diskotēka';
+
+  @override
+  String get taxSubcategoryDogWalk => 'Pastaiga ar suni';
+
+  @override
+  String get taxSubcategoryDogMeetup => 'Suņu saieti';
+
+  @override
+  String get taxSubcategoryDogParkMeetup => 'Tikšanās suņu parkā';
+
+  @override
+  String get taxSubcategoryPetFriendlyCafe =>
+      'Kafejnīca, kur gaidīti mājdzīvnieki';
+
+  @override
+  String get taxSubcategoryDogTraining => 'Suņu apmācība';
+
+  @override
+  String get taxSubcategoryPetPhotoSession => 'Mājdzīvnieku fotosesija';
+
+  @override
+  String get taxSubcategoryAnimalShelterVisit =>
+      'Dzīvnieku patversmes apmeklējums';
+
+  @override
+  String get taxSubcategoryFarmAnimalExperience =>
+      'Iepazīšanās ar lauku dzīvniekiem';
+
+  @override
+  String get taxSubcategoryHorseRiding => 'Jāšana';
+
+  @override
+  String get taxSubcategoryPonyRiding => 'Izjāde ar poniju';
+
+  @override
+  String get taxSubcategoryCatCafe => 'Kaķu kafejnīca';
+
+  @override
+  String get taxSubcategoryPetAdoption => 'Mājdzīvnieku adopcija';
+
+  @override
+  String get taxSubcategoryPetCharity => 'Labdarība dzīvniekiem';
+
+  @override
+  String get taxSubcategoryPetFriendlyWalk => 'Pastaiga ar mājdzīvnieku';
+
+  @override
+  String get taxSubcategoryDogSport => 'Suņu sports';
+
+  @override
+  String get taxSubcategoryPetOwnerMeetup => 'Mājdzīvnieku saimnieku tikšanās';
+
+  @override
+  String get taxSubcategoryDogShow => 'Suņu izstāde';
+
+  @override
+  String get taxSubcategoryPetExhibition => 'Mājdzīvnieku izstāde';
+
+  @override
+  String get taxSubcategoryPetFair => 'Mājdzīvnieku gadatirgus';
+
+  @override
+  String get taxSubcategoryPetCareTalk => 'Lekcija par mājdzīvnieku kopšanu';
+
+  @override
+  String get taxSubcategoryAnimalTherapy => 'Dzīvnieku terapija';
+
+  @override
+  String get taxSubcategoryCharityEvent => 'Labdarības pasākums';
+
+  @override
+  String get taxSubcategoryVolunteerActivity => 'Brīvprātīgais darbs';
+
+  @override
+  String get taxSubcategoryCommunityCleanup => 'Kopienas talka';
+
+  @override
+  String get taxSubcategoryDonationEvent => 'Ziedojumu pasākums';
+
+  @override
+  String get taxSubcategoryNeighborhoodEvent => 'Apkaimes pasākums';
+
+  @override
+  String get taxSubcategoryFundraisingDinner => 'Labdarības vakariņas';
+
+  @override
+  String get taxSubcategoryCharityRun => 'Labdarības skrējiens';
+
+  @override
+  String get taxSubcategoryAnimalShelterVolunteering =>
+      'Brīvprātīgais darbs patversmē';
+
+  @override
+  String get taxSubcategoryFoodBankVolunteering =>
+      'Brīvprātīgais darbs pārtikas bankā';
+
+  @override
+  String get taxSubcategoryTreePlanting => 'Koku stādīšana';
+
+  @override
+  String get taxSubcategoryBeachCleanup => 'Pludmales talka';
+
+  @override
+  String get taxSubcategoryParkCleanup => 'Parka talka';
+
+  @override
+  String get taxSubcategoryCommunityGarden => 'Kopienas dārzs';
+
+  @override
+  String get taxSubcategoryPublicSquare => 'Publisks laukums';
+
+  @override
+  String get taxSubcategoryLocalCommunityMeetup => 'Vietējās kopienas tikšanās';
+
+  @override
+  String get taxSubcategoryMutualAid => 'Savstarpēja palīdzība';
+
+  @override
+  String get taxSubcategorySocialImpactEvent => 'Sociālās ietekmes pasākums';
+
+  @override
+  String get taxSubcategoryEnvironmentalAction => 'Vides akcija';
+
+  @override
+  String get taxSubcategoryLocalMarket => 'Vietējais tirgus';
+
+  @override
+  String get taxSubcategoryFleaMarket => 'Blusu tirgus';
+
+  @override
+  String get taxSubcategorySeasonalMarket => 'Sezonas tirgus';
+
+  @override
+  String get taxSubcategoryChristmasMarket => 'Ziemassvētku tirdziņš';
+
+  @override
+  String get taxSubcategoryFarmersMarket => 'Zemnieku tirgus';
+
+  @override
+  String get taxSubcategoryCraftMarket => 'Amatnieku tirgus';
+
+  @override
+  String get taxSubcategoryDesignMarket => 'Dizaina tirgus';
+
+  @override
+  String get taxSubcategoryVintageMarket => 'Vintāžas tirgus';
+
+  @override
+  String get taxSubcategoryBookMarket => 'Grāmatu tirgus';
+
+  @override
+  String get taxSubcategoryFoodMarket => 'Pārtikas tirgus';
+
+  @override
+  String get taxSubcategoryFlowerMarket => 'Ziedu tirgus';
+
+  @override
+  String get taxSubcategoryArtFair => 'Mākslas gadatirgus';
+
+  @override
+  String get taxSubcategoryPopUpShop => 'Pop-up veikals';
+
+  @override
+  String get taxSubcategoryStreetMarket => 'Ielu tirgus';
+
+  @override
+  String get taxSubcategoryHandmadeFair => 'Rokdarbu tirdziņš';
+
+  @override
+  String get taxSubcategoryCharityMarket => 'Labdarības tirdziņš';
+
+  @override
+  String get taxSubcategoryKidsMarket => 'Bērnu tirdziņš';
+
+  @override
+  String get taxSubcategoryNightMarket => 'Nakts tirgus';
+
+  @override
+  String get taxSubcategoryLocalBrandsMarket => 'Vietējo zīmolu tirgus';
+
+  @override
+  String get taxSubcategoryClothingSwap => 'Apģērbu apmaiņa';
+
+  @override
+  String get taxSubcategoryChristmas => 'Ziemassvētki';
+
+  @override
+  String get taxSubcategoryNewYear => 'Jaunais gads';
+
+  @override
+  String get taxSubcategoryHalloween => 'Helovīns';
+
+  @override
+  String get taxSubcategoryEaster => 'Lieldienas';
+
+  @override
+  String get taxSubcategoryValentinesDay => 'Valentīndiena';
+
+  @override
+  String get taxSubcategoryJani => 'Jāņi';
+
+  @override
+  String get taxSubcategoryCityFestival => 'Pilsētas svētki';
+
+  @override
+  String get taxSubcategorySummerFestival => 'Vasaras festivāls';
+
+  @override
+  String get taxSubcategoryAutumnEvent => 'Rudens pasākums';
+
+  @override
+  String get taxSubcategorySpringEvent => 'Pavasara pasākums';
+
+  @override
+  String get taxSubcategorySchoolHoliday => 'Skolēnu brīvlaiks';
+
+  @override
+  String get taxSubcategoryNationalHoliday => 'Valsts svētki';
+
+  @override
+  String get taxSubcategoryLocalTradition => 'Vietējā tradīcija';
+
+  @override
+  String get taxSubcategoryMidsummer => 'Vasaras saulgrieži';
+
+  @override
+  String get taxSubcategoryFireworks => 'Salūts';
+
+  @override
+  String get taxSubcategoryPublicCelebration => 'Publiski svētki';
+
+  @override
+  String get taxSubcategoryRechargeWalk => 'Atjaunojoša pastaiga';
+
+  @override
+  String get taxSubcategoryCalmWalk => 'Mierīga pastaiga';
+
+  @override
+  String get taxSubcategoryMindfulWalk => 'Apzinātības pastaiga';
+
+  @override
+  String get taxSubcategoryCoffeeWalk => 'Pastaiga ar kafiju';
+
+  @override
+  String get taxSubcategoryTeaWalk => 'Pastaiga ar tēju';
+
+  @override
+  String get taxSubcategorySunsetReset => 'Atpūta saulrietā';
+
+  @override
+  String get taxSubcategoryNatureReset => 'Atpūta dabas ieskautā';
+
+  @override
+  String get taxSubcategoryDigitalDetox => 'Digitālais detokss';
+
+  @override
+  String get taxSubcategorySlowMorning => 'Lēns rīts';
+
+  @override
+  String get taxSubcategoryEveningReset => 'Vakara atpūta';
+
+  @override
+  String get taxSubcategorySauna => 'Pirts';
+
+  @override
+  String get taxSubcategorySpa => 'Spa';
+
+  @override
+  String get taxSubcategoryMassage => 'Masāža';
+
+  @override
+  String get taxSubcategoryBreathwork => 'Elpošanas prakse';
+
+  @override
+  String get taxSubcategoryMeditation => 'Meditācija';
+
+  @override
+  String get taxSubcategorySoundHealing => 'Skaņu terapija';
+
+  @override
+  String get taxSubcategoryWellnessClass => 'Labsajūtas nodarbība';
+
+  @override
+  String get taxSubcategoryRelaxationSession => 'Relaksācijas nodarbība';
+
+  @override
+  String get taxSubcategoryMentalHealthMeetup => 'Tikšanās par garīgo veselību';
+
+  @override
+  String get taxSubcategoryQuietSocial => 'Klusa tikšanās';
+
+  @override
+  String get taxSubcategoryCoupleRecharge => 'Atpūta pārim';
+
+  @override
+  String get taxSubcategorySoloRecharge => 'Atpūta vienatnē';
+
+  @override
+  String get taxSubcategoryFriendsRecharge => 'Atpūta ar draugiem';
+
+  @override
+  String get taxSubcategoryPirtsRitual => 'Pirts rituāls';
+
+  @override
+  String get taxSubcategoryRetreat => 'Retrīts';
+
+  @override
+  String get taxSubcategoryLaserTag => 'Lāzertags';
+
+  @override
+  String get taxSubcategoryPaintball => 'Peintbols';
+
+  @override
+  String get taxSubcategoryAirsoft => 'Airsofts';
+
+  @override
+  String get taxSubcategoryKarting => 'Kartings';
+
+  @override
+  String get taxSubcategoryShootingRange => 'Šautuve';
+
+  @override
+  String get taxSubcategoryArchery => 'Loka šaušana';
+
+  @override
+  String get taxSubcategoryAxeThrowing => 'Cirvju mešana';
+
+  @override
+  String get taxSubcategoryTrampolinePark => 'Batutu parks';
+
+  @override
+  String get taxSubcategoryRopePark => 'Virvju parks';
+
+  @override
+  String get taxSubcategoryZipline => 'Trošu nobrauciens';
+
+  @override
+  String get taxSubcategoryWindTunnel => 'Vēja tunelis';
+
+  @override
+  String get taxSubcategoryHotAirBalloon => 'Gaisa balons';
+
+  @override
+  String get taxSubcategorySkydiving => 'Izpletņlēkšana';
+
+  @override
+  String get taxSubcategoryBungeeJumping => 'Lēciens ar gumiju';
+
+  @override
+  String get taxSubcategoryParkour => 'Parkūrs';
+
+  @override
+  String get taxSubcategoryObstacleCourse => 'Šķēršļu josla';
+
+  @override
+  String get taxSubcategoryZoo => 'Zoodārzs';
+
+  @override
+  String get taxSubcategoryPettingZoo => 'Kontaktzoodārzs';
+
+  @override
+  String get taxSubcategoryAquarium => 'Akvārijs';
+
+  @override
+  String get taxSubcategoryAmusementPark => 'Atrakciju parks';
+
+  @override
+  String get taxSubcategoryWaterPark => 'Ūdens parks';
+
+  @override
+  String get taxSubcategoryAdventurePark => 'Piedzīvojumu parks';
+
+  @override
+  String get taxSubcategoryBotanicalGarden => 'Botāniskais dārzs';
+
+  @override
+  String get taxSubcategoryPlanetarium => 'Planetārijs';
+
+  @override
+  String get taxSubcategoryScienceCenter => 'Zinātnes centrs';
+
+  @override
+  String get taxSubcategoryObservationDeck => 'Skatu laukums';
+
+  @override
+  String get taxSubcategoryFerrisWheel => 'Panorāmas rats';
+
+  @override
+  String get taxSubcategorySeasonalAttraction => 'Sezonas atrakcija';
+
+  @override
+  String get taxSubcategoryCarMeetup => 'Auto entuziastu tikšanās';
+
+  @override
+  String get taxSubcategoryRetroCars => 'Retro automašīnas';
+
+  @override
+  String get taxSubcategoryCarShow => 'Auto šovs';
+
+  @override
+  String get taxSubcategoryAutoExhibition => 'Auto izstāde';
+
+  @override
+  String get taxSubcategoryTuningMeetup => 'Tūninga entuziastu tikšanās';
+
+  @override
+  String get taxSubcategoryDriftEvent => 'Drifta pasākums';
+
+  @override
+  String get taxSubcategoryOffroadTrip => 'Bezceļu brauciens';
+
+  @override
+  String get taxSubcategoryMotorcycleRide => 'Motociklu brauciens';
+
+  @override
+  String get taxSubcategoryMotorcycleMeetup => 'Motociklistu tikšanās';
+
+  @override
+  String get taxSubcategoryScooterMeetup => 'Motorolleru tikšanās';
+
+  @override
+  String get taxSubcategoryCarPhotoMeet => 'Auto fototikšanās';
+
+  @override
+  String get taxSubcategoryDriveInCinema => 'Autokino';
+
+  @override
+  String get taxSubcategoryAnimeMeetup => 'Anime cienītāju tikšanās';
+
+  @override
+  String get taxSubcategoryCosplayEvent => 'Kosplejs';
+
+  @override
+  String get taxSubcategoryComicCon => 'Komiksu festivāls';
+
+  @override
+  String get taxSubcategoryEsportsTournament => 'E-sporta turnīrs';
+
+  @override
+  String get taxSubcategoryLanParty => 'LAN ballīte';
+
+  @override
+  String get taxSubcategoryRetroGaming => 'Retro spēles';
+
+  @override
+  String get taxSubcategoryTabletopWargames => 'Galda kara spēles';
+
+  @override
+  String get taxSubcategoryTradingCardGames => 'Kolekcionējamās kāršu spēles';
+
+  @override
+  String get taxSubcategoryHackathon => 'Hakatons';
+
+  @override
+  String get taxSubcategoryGameDevMeetup => 'Spēļu izstrādātāju tikšanās';
+
+  @override
+  String get taxSubcategoryTechMeetup => 'Tehnoloģiju tikšanās';
+
+  @override
+  String get taxSubcategoryRoboticsEvent => 'Robotikas pasākums';
+
+  @override
+  String get taxSubcategoryFandomMeetup => 'Fanu tikšanās';
+
+  @override
+  String get taxSubcategoryCollectorsMeetup => 'Kolekcionāru tikšanās';
+
+  @override
+  String get taxSubcategorySpeedDating => 'Ātrā iepazīšanās';
+
+  @override
+  String get taxSubcategorySinglesParty => 'Ballīte brīvajiem';
+
+  @override
+  String get taxSubcategorySinglesMixer => 'Iepazīšanās vakars';
+
+  @override
+  String get taxSubcategorySinglesDinner => 'Iepazīšanās vakariņas';
+
+  @override
+  String get taxSubcategoryBlindDateEvent => 'Akls randiņš';
+
+  @override
+  String get taxSubcategoryDatingGameEvent => 'Iepazīšanās spēle';
+
+  @override
+  String get taxSubcategorySinglesActivity => 'Aktivitāte brīvajiem';
+
+  @override
+  String get taxSubcategoryMatchmakingEvent => 'Pāru meklēšanas pasākums';
+
+  @override
+  String get taxSubcategoryOtherEvent => 'Cits pasākums';
+
+  @override
+  String get discoverHomeShortSport => 'Sports';
+
+  @override
+  String get discoverHomeShortWalks => 'Pastaigas';
+
+  @override
+  String get discoverHomeShortGames => 'Spēles';
+
+  @override
+  String get discoverHomeShortDance => 'Dejas';
+
+  @override
+  String get discoverHomeShortMusic => 'Mūzika';
+
+  @override
+  String get discoverHomeShortArt => 'Māksla';
+
+  @override
+  String get discoverHomeShortFood => 'Ēdiens';
+
+  @override
+  String get discoverHomeShortWellness => 'Labsajūta';
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../application/activity_place_link_controller.dart';
 
 import '../../../../core/config/recharge_category_criteria.dart';
@@ -185,7 +186,10 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
             for (final CreateTaxonomyCategory category in categories)
               DropdownMenuItem<CreateTaxonomyCategory>(
                 value: category,
-                child: Text(category.title, overflow: TextOverflow.ellipsis),
+                child: Text(
+                  taxonomyLabel(context.l10n, category.id),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
           ],
           onChanged: (CreateTaxonomyCategory? category) {

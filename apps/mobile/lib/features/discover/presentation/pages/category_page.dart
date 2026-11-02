@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_query.dart';
@@ -71,11 +72,12 @@ class _CategoryPageState extends ConsumerState<CategoryPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(group.title),
+        title: Text(taxonomyLabel(context.l10n, group.id)),
         actions: <Widget>[
           IconButton(
             // The category name is shown as is (G04).
-            tooltip: '${context.l10n.discoverMap}: ${group.title}',
+            tooltip:
+                '${context.l10n.discoverMap}: ${taxonomyLabel(context.l10n, group.id)}',
             onPressed: () => context.push(RouteNames.discoverMap),
             icon: const Icon(Icons.map_outlined),
           ),
@@ -125,7 +127,7 @@ class _CategoryPageState extends ConsumerState<CategoryPage> {
                     subcategories[index - 1];
                 return _SubcategoryTile(
                   key: Key('subcategory-${subcategory.slug}'),
-                  label: subcategory.title,
+                  label: taxonomyLabel(context.l10n, subcategory.id),
                   icon: discoverCategoryIcon(group.id),
                   selected: selectedSubcategoryId == subcategory.slug,
                   onTap: () => _selectSubcategory(
@@ -196,7 +198,7 @@ class _CategoryHeading extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                group.title,
+                taxonomyLabel(context.l10n, group.id),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w900,
                 ),
