@@ -104,6 +104,8 @@ export const productAnalyticsFlagIds = Object.freeze({
 /** ADR 0022 stage 1: Emulator-only machine translation on request (default off). */
 export const contentTranslationFlagIds = Object.freeze({
   onDemand: 'contentTranslation.onDemand',
+  /** Amendment 1: translation at publication of long-lived types; needs `onDemand` too. */
+  atPublication: 'contentTranslation.atPublication',
 });
 
 export type BookingFlagId = (typeof bookingFlagIds)[keyof typeof bookingFlagIds];

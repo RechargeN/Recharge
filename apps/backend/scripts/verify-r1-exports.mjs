@@ -46,7 +46,7 @@ const expected = [
   // ADR 0022 stage 1: default-off, Emulator-only translation with the mock adapter.
   "offerContentTranslationV1",
   "translateContentV1",
-  "purgeContentTranslationsV1",
+  "syncContentTranslationsV1",
   "purgeContentTranslationsOnHoldV1",
   "sweepContentTranslationsV1",
   "quickPlanCommandV1",

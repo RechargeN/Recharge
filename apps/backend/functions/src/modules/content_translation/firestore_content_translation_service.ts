@@ -20,6 +20,7 @@ import {
   allowlistedFields,
   cacheKeyOf,
   contentTranslationCollections as cols,
+  contentTranslationModes,
   contentTranslationStageOneLimits,
   contentTranslationTargetLocales,
   declaredSourceLocale,
@@ -71,10 +72,21 @@ const rejected = (code: ContentTranslationFailureCode): ContentTranslationResult
 interface Source {
   readonly fields: TranslationFields;
   readonly sourceLocale: string;
+  /** Amendment 1: kept without TTL and shown without a button. */
+  readonly persistent: boolean;
 }
 
+/** What publication of one revision did for each target language. */
+export type PublicationTranslationOutcome =
+  'translated' | 'carried' | 'present' | 'pending' | ContentTranslationFailureCode;
+
 type Admission =
-  | { readonly kind: 'done'; readonly result: ContentTranslationResult }
+  | {
+      readonly kind: 'done';
+      readonly result: ContentTranslationResult;
+      /** A kept translation of the same text moved to this revision. */
+      readonly carried?: true;
+    }
   | { readonly kind: 'wait'; readonly cacheKey: string }
   | {
       readonly kind: 'call';
@@ -85,7 +97,9 @@ type Admission =
     };
 
 const entryFresh = (data: Record<string, unknown> | undefined, nowUtc: string): boolean =>
-  data !== undefined && typeof data.expiresAtUtc === 'string' && data.expiresAtUtc > nowUtc;
+  data !== undefined &&
+  (data.persistent === true ||
+    (typeof data.expiresAtUtc === 'string' && data.expiresAtUtc > nowUtc));
 
 /** Emulator-only. The only writer of its collections; it reads Content and never writes it. */
 export class FirestoreContentTranslationService {
@@ -114,12 +128,13 @@ export class FirestoreContentTranslationService {
     }
   }
 
+  private flag(flagId: string, tx?: Transaction): Promise<boolean> {
+    return new FirestoreFeatureFlagGate(this.db, 'local', 'LV').isEnabled(flagId, tx);
+  }
+
   /** Activation flag fails off; the L2 incident switch fails closed. */
   private async enabled(tx: Transaction): Promise<boolean> {
-    const flag = await new FirestoreFeatureFlagGate(this.db, 'local', 'LV').isEnabled(
-      contentTranslationFlagIds.onDemand,
-      tx,
-    );
+    const flag = await this.flag(contentTranslationFlagIds.onDemand, tx);
     if (!flag) return false;
     const state = await emergencySwitchState(
       this.db,
@@ -178,19 +193,20 @@ export class FirestoreContentTranslationService {
     const fields = allowlistedFields(typeId, body);
     const sourceLocale = declaredSourceLocale(body);
     if (fields === null || sourceLocale === null) return 'source_unavailable';
-    return { fields, sourceLocale };
+    return { fields, sourceLocale, persistent: contentTranslationModes[typeId] === 'publication' };
   }
 
   private async gate(
     tx: Transaction,
-    hint: BookingAccessHint,
+    hint: BookingAccessHint | null,
     request: ContentTranslationRequest,
   ): Promise<
     | { readonly refusal: ContentTranslationFailureCode }
-    | { readonly refusal: null; readonly actorId: string; readonly source: Source }
+    | { readonly refusal: null; readonly actorId: string | null; readonly source: Source }
   > {
-    const actorId = await this.actor(tx, hint);
-    if (actorId === null) return { refusal: 'unauthenticated' };
+    // `null` is the publication path: no reader, so no Session and no reader quota.
+    const actorId = hint === null ? null : await this.actor(tx, hint);
+    if (hint !== null && actorId === null) return { refusal: 'unauthenticated' };
     if (!(await this.enabled(tx))) return { refusal: 'translation_disabled' };
     if (!(contentTranslationTargetLocales as readonly string[]).includes(request.targetLocale))
       return { refusal: 'unsupported_locale' };
@@ -200,13 +216,27 @@ export class FirestoreContentTranslationService {
     return { refusal: null, actorId, source };
   }
 
-  /** Read-only: tells Details whether to show the button. Spends nothing. */
+  /**
+   * Read-only: tells Details whether to show the button, or hands over a kept
+   * publication translation to show at once (amendment 1). Spends nothing.
+   */
   async offer(hint: BookingAccessHint, raw: unknown): Promise<ContentTranslationResult> {
     const request = parseContentTranslationRequest(raw);
     if (!request) return rejected('request_invalid');
-    return this.db.runTransaction(async (tx) => {
+    return this.db.runTransaction(async (tx): Promise<ContentTranslationResult> => {
       const gate = await this.gate(tx, hint, request);
       if (gate.refusal !== null) return rejected(gate.refusal);
+      if (gate.source.persistent) {
+        const kept = (
+          await tx.get(this.db.collection(cols.entries).doc(this.keyFor(request, gate.source)))
+        ).data();
+        if (kept?.persistent === true)
+          return this.translated(
+            request,
+            gate.source.sourceLocale,
+            kept.fields as TranslationFields,
+          );
+      }
       return {
         schemaVersion: 1,
         kind: 'offered',
@@ -267,7 +297,10 @@ export class FirestoreContentTranslationService {
    * One transaction: a cache hit spends nothing, a live lease waits uncharged, and
    * quota, budget and lease are taken together, before any provider call.
    */
-  private admit(hint: BookingAccessHint, request: ContentTranslationRequest): Promise<Admission> {
+  private admit(
+    hint: BookingAccessHint | null,
+    request: ContentTranslationRequest,
+  ): Promise<Admission> {
     return this.db.runTransaction(async (tx): Promise<Admission> => {
       const done = (code: ContentTranslationFailureCode): Admission => ({
         kind: 'done',
@@ -276,6 +309,8 @@ export class FirestoreContentTranslationService {
       const gate = await this.gate(tx, hint, request);
       if (gate.refusal !== null) return done(gate.refusal);
       const { actorId, source } = gate;
+      // Publication translates only long-lived types; the rest wait for a reader.
+      if (actorId === null && !source.persistent) return done('source_unavailable');
       const now = this.clock.now();
       const nowUtc = now.toISOString();
       const cacheKey = this.keyFor(request, source);
@@ -285,6 +320,19 @@ export class FirestoreContentTranslationService {
           kind: 'done',
           result: this.translated(request, source.sourceLocale, entry!.fields as TranslationFields),
         };
+      // Same text as an earlier revision: its kept translation moves over, no call.
+      const carried = source.persistent ? await this.keptForSameText(tx, request, source) : null;
+      if (carried !== null) {
+        tx.set(this.db.collection(cols.entries).doc(cacheKey), {
+          ...this.entryOf(request, source, carried, nowUtc),
+          carriedFromRevisionId: carried.publishedRevisionId,
+        });
+        return {
+          kind: 'done',
+          result: this.translated(request, source.sourceLocale, carried.fields),
+          carried: true,
+        };
+      }
       const leaseRef = this.db.collection(cols.leases).doc(cacheKey);
       const lease = (await tx.get(leaseRef)).data();
       if (lease && String(lease.leaseExpiresAtUtc) > nowUtc) return { kind: 'wait', cacheKey };
@@ -292,9 +340,14 @@ export class FirestoreContentTranslationService {
       const day = nowUtc.slice(0, 10);
       const accountRef = this.db.collection(cols.accountUsage).doc(actorId + ':' + day);
       const objectRef = this.db.collection(cols.objectUsage).doc(request.contentId + ':' + day);
-      const accountCount = Number((await tx.get(accountRef)).data()?.count ?? 0);
+      const accountCount =
+        actorId === null ? 0 : Number((await tx.get(accountRef)).data()?.count ?? 0);
       const objectCount = Number((await tx.get(objectRef)).data()?.count ?? 0);
-      if (accountCount >= this.limits.accountPerDay || objectCount >= this.limits.objectPerDay)
+      // The budget alone bounds publication; reader quotas protect against readers.
+      if (
+        actorId !== null &&
+        (accountCount >= this.limits.accountPerDay || objectCount >= this.limits.objectPerDay)
+      )
         return done('quota_exceeded');
 
       const month = nowUtc.slice(0, 7);
@@ -310,20 +363,22 @@ export class FirestoreContentTranslationService {
       const expiresAtUtc = new Date(
         now.getTime() + this.limits.usageTtlDays * 86_400_000,
       ).toISOString();
-      tx.set(accountRef, {
-        schemaVersion: 1,
-        accountId: actorId,
-        day,
-        count: accountCount + 1,
-        expiresAtUtc,
-      });
-      tx.set(objectRef, {
-        schemaVersion: 1,
-        contentId: request.contentId,
-        day,
-        count: objectCount + 1,
-        expiresAtUtc,
-      });
+      if (actorId !== null) {
+        tx.set(accountRef, {
+          schemaVersion: 1,
+          accountId: actorId,
+          day,
+          count: accountCount + 1,
+          expiresAtUtc,
+        });
+        tx.set(objectRef, {
+          schemaVersion: 1,
+          contentId: request.contentId,
+          day,
+          count: objectCount + 1,
+          expiresAtUtc,
+        });
+      }
       tx.set(budgetRef, {
         schemaVersion: 1,
         month,
@@ -402,21 +457,152 @@ export class FirestoreContentTranslationService {
       // Hidden or replaced during the call: the provider was paid, nothing is kept or shown.
       if (typeof source === 'string' || source === null)
         return rejected(source ?? 'provider_unavailable');
-      tx.set(this.db.collection(cols.entries).doc(admission.cacheKey), {
-        schemaVersion: 1,
-        contentId: request.contentId,
-        publishedRevisionId: request.publishedRevisionId,
-        sourceHash: sourceHashOf(admission.source.fields),
-        sourceLocale: admission.source.sourceLocale,
-        targetLocale: request.targetLocale,
-        providerRef: this.provider.providerRef,
-        engineRevision: this.provider.engineRevision,
-        fields,
-        createdAtUtc: nowUtc,
-        expiresAtUtc: new Date(now.getTime() + this.limits.cacheTtlDays * 86_400_000).toISOString(),
-      });
+      tx.set(
+        this.db.collection(cols.entries).doc(admission.cacheKey),
+        this.entryOf(request, admission.source, { fields }, nowUtc),
+      );
       return this.translated(request, admission.source.sourceLocale, fields);
     });
+  }
+
+  private entryOf(
+    request: ContentTranslationRequest,
+    source: Source,
+    translation: { readonly fields: TranslationFields },
+    nowUtc: string,
+  ): Record<string, unknown> {
+    return {
+      schemaVersion: 1,
+      contentId: request.contentId,
+      publishedRevisionId: request.publishedRevisionId,
+      sourceHash: sourceHashOf(source.fields),
+      sourceLocale: source.sourceLocale,
+      targetLocale: request.targetLocale,
+      providerRef: this.provider.providerRef,
+      engineRevision: this.provider.engineRevision,
+      fields: translation.fields,
+      persistent: source.persistent,
+      createdAtUtc: nowUtc,
+      expiresAtUtc: source.persistent
+        ? null
+        : new Date(
+            new Date(nowUtc).getTime() + this.limits.cacheTtlDays * 86_400_000,
+          ).toISOString(),
+    };
+  }
+
+  /** A kept translation of the same text, language, provider and engine. */
+  private async keptForSameText(
+    tx: Transaction,
+    request: ContentTranslationRequest,
+    source: Source,
+  ): Promise<{ readonly fields: TranslationFields; readonly publishedRevisionId: string } | null> {
+    const rows = await tx.get(
+      this.db
+        .collection(cols.entries)
+        .where('contentId', '==', request.contentId)
+        .where('sourceHash', '==', sourceHashOf(source.fields))
+        .where('targetLocale', '==', request.targetLocale)
+        .limit(20),
+    );
+    const kept = rows.docs
+      .map((document) => document.data())
+      .find(
+        (data) =>
+          data.persistent === true &&
+          data.sourceLocale === source.sourceLocale &&
+          data.providerRef === this.provider.providerRef &&
+          data.engineRevision === this.provider.engineRevision,
+      );
+    return kept === undefined
+      ? null
+      : {
+          fields: kept.fields as TranslationFields,
+          publishedRevisionId: String(kept.publishedRevisionId),
+        };
+  }
+
+  /**
+   * Amendment 1: translates the current revision of a long-lived type into every
+   * other market language. Never blocks publication; a refusal or a busy lease
+   * leaves the reader's button, and the reconciliation retries later.
+   */
+  async translateAtPublication(
+    contentId: string,
+  ): Promise<Readonly<Record<string, PublicationTranslationOutcome>>> {
+    const pointer = (
+      await this.db.collection(contentCollections.pointers).doc(contentId).get()
+    ).data();
+    const revisionId: unknown = pointer?.currentPublishedRevisionId;
+    if (pointer?.visibility !== 'visible' || typeof revisionId !== 'string') return {};
+    const outcomes: Record<string, PublicationTranslationOutcome> = {};
+    for (const targetLocale of contentTranslationTargetLocales) {
+      const request: ContentTranslationRequest = {
+        schemaVersion: 1,
+        requestId: 'publication',
+        contentId,
+        publishedRevisionId: revisionId,
+        targetLocale,
+      };
+      const admission = await this.admit(null, request);
+      if (admission.kind === 'wait') outcomes[targetLocale] = 'pending';
+      else if (admission.kind === 'call') {
+        const result = await this.call(request, admission);
+        outcomes[targetLocale] = result.kind === 'rejected' ? result.code : 'translated';
+      } else if (admission.result.kind === 'rejected') {
+        outcomes[targetLocale] = admission.result.code;
+        // Not a publication type, or no declared language: nothing else to try.
+        if (admission.result.code === 'source_unavailable') break;
+      } else outcomes[targetLocale] = admission.carried ? 'carried' : 'present';
+    }
+    await this.removeKeptOfOtherRevisions(contentId, revisionId);
+    return outcomes;
+  }
+
+  private async removeKeptOfOtherRevisions(contentId: string, revisionId: string): Promise<void> {
+    const rows = await this.db.collection(cols.entries).where('contentId', '==', contentId).get();
+    for (const document of rows.docs) {
+      const data = document.data();
+      if (data.persistent === true && data.publishedRevisionId !== revisionId)
+        await document.ref.delete();
+    }
+  }
+
+  /**
+   * Publication pointer changed: a hidden or deleted source loses its translations
+   * at once; a visible long-lived one is translated when the publication flag is on.
+   */
+  async onPublicationChanged(contentId: string): Promise<void> {
+    const pointer = (
+      await this.db.collection(contentCollections.pointers).doc(contentId).get()
+    ).data();
+    if (pointer?.visibility !== 'visible') {
+      await this.purgeContent(contentId);
+      return;
+    }
+    if (await this.flag(contentTranslationFlagIds.atPublication))
+      await this.translateAtPublication(contentId);
+  }
+
+  /** Idempotent rescan of visible publications: fills what a missed or deferred run left. */
+  async reconcilePublications(pageSize = 200): Promise<number> {
+    if (!(await this.flag(contentTranslationFlagIds.atPublication))) return 0;
+    let visited = 0;
+    let after: QueryDocumentSnapshot | undefined;
+    for (;;) {
+      const base = this.db
+        .collection(contentCollections.pointers)
+        .where('visibility', '==', 'visible')
+        .orderBy('__name__')
+        .limit(pageSize);
+      const page = await (after === undefined ? base : base.startAfter(after)).get();
+      if (page.empty) return visited;
+      for (const document of page.docs) {
+        await this.translateAtPublication(document.id);
+        visited += 1;
+      }
+      after = page.docs.at(-1);
+    }
   }
 
   /** Withdrawal, restriction or deletion of the source removes its translations. */
@@ -460,7 +646,10 @@ export class FirestoreContentTranslationService {
       for (const document of page.docs) {
         const data = document.data();
         const expired = !entryFresh(data, nowUtc);
-        if (expired || !(await this.sourceStillPublic(String(data.contentId)))) {
+        const current = await this.publicRevisionOf(String(data.contentId));
+        // A kept translation of a replaced revision has no TTL to end it.
+        const replaced = data.persistent === true && current !== data.publishedRevisionId;
+        if (expired || current === null || replaced) {
           await document.ref.delete();
           removed += 1;
         }
@@ -469,11 +658,12 @@ export class FirestoreContentTranslationService {
     }
   }
 
-  private async sourceStillPublic(contentId: string): Promise<boolean> {
+  /** The current public revision id, or null when the source is not public. */
+  private async publicRevisionOf(contentId: string): Promise<string | null> {
     const pointer = (
       await this.db.collection(contentCollections.pointers).doc(contentId).get()
     ).data();
-    if (pointer?.visibility !== 'visible') return false;
+    if (pointer?.visibility !== 'visible') return null;
     const revision = (
       await this.db
         .collection(contentCollections.publishedRevisions)
@@ -481,9 +671,9 @@ export class FirestoreContentTranslationService {
         .get()
     ).data();
     const publisher = revision?.publisherRef as { id?: unknown } | undefined;
-    return (
-      typeof publisher?.id === 'string' &&
+    return typeof publisher?.id === 'string' &&
       !(await safetyRestricted(this.db, 'content', publisher.id, this.clock.now(), contentId))
-    );
+      ? String(pointer.currentPublishedRevisionId)
+      : null;
   }
 }

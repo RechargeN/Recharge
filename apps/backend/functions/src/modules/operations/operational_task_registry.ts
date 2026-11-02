@@ -370,7 +370,7 @@ export const operationalTaskRegistry: readonly OperationalTaskFamily[] = deepFre
   },
   {
     id: 'TF-15',
-    name: 'Content translation on request and cache purge (ADR 0022)',
+    name: 'Content translation on request, at publication and cache purge (ADR 0022)',
     owner: 'content_translation',
     producer: 'reader request; contentPublicationPointers or contentSafetyHolds change',
     consumer: 'content translation provider call and cache purge',
@@ -378,11 +378,11 @@ export const operationalTaskRegistry: readonly OperationalTaskFamily[] = deepFre
     receipt: 'cache entry + cost ledger row, under the lease token',
     sources: [mod('content_translation', 'firestore_content_translation_service.ts')],
     triggers: [
-      'purgeContentTranslationsV1',
+      'syncContentTranslationsV1',
       'purgeContentTranslationsOnHoldV1',
       'sweepContentTranslationsV1',
     ],
-    recovery: ['lease_fencing', 'idempotent_rescan'],
+    recovery: ['lease_fencing', 'idempotent_rescan', 'reconciliation'],
     emergencySwitchId: operationsEmergencySwitchIds.contentTranslation,
     activationFlagId: contentTranslationFlagIds.onDemand,
     console: noConsole,

@@ -6,6 +6,7 @@ import {
   allowlistedFields,
   cacheKeyOf,
   contentTranslationAllowlist,
+  contentTranslationModes,
   declaredSourceLocale,
   parseContentTranslationRequest,
 } from '../../../src/modules/content_translation/content_translation_contract.js';
@@ -139,4 +140,18 @@ void test('the mock adapter makes no network call and keeps tokens', async () =>
     fields: redacted.fields,
   });
   assert.equal(acceptProviderOutput(redacted, output)?.title, '[lv→ru] Mail a@example.com now');
+});
+
+void test('amendment 1: every allowlisted type has exactly one mode; Find People has none', () => {
+  assert.deepEqual(
+    Object.keys(contentTranslationModes).sort(),
+    Object.keys(contentTranslationAllowlist).sort(),
+  );
+  assert.equal(contentTranslationModes.find_people, undefined);
+  assert.deepEqual(
+    Object.keys(contentTranslationModes)
+      .filter((typeId) => contentTranslationModes[typeId] === 'publication')
+      .sort(),
+    ['activity', 'collection', 'place', 'rental', 'route'],
+  );
 });

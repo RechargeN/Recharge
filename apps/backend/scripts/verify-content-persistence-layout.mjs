@@ -222,7 +222,7 @@ const approvedContentExports = [
   // ADR 0022 stage 1: its own module; these read Content and never write it.
   "offerContentTranslationV1",
   "translateContentV1",
-  "purgeContentTranslationsV1",
+  "syncContentTranslationsV1",
   "purgeContentTranslationsOnHoldV1",
   "sweepContentTranslationsV1",
 ];

@@ -56,6 +56,24 @@ export const contentTranslationAllowlist: Readonly<Record<string, readonly Trans
     scenario: describedFields,
   });
 
+/**
+ * ADR 0022 amendment 1 (TR-OD-10): long-lived types are translated when a revision
+ * is published and kept without TTL; short-lived ones only on a reader's request.
+ */
+export type ContentTranslationMode = 'publication' | 'on_demand';
+export const contentTranslationModes: Readonly<Record<string, ContentTranslationMode>> =
+  Object.freeze({
+    place: 'publication',
+    route: 'publication',
+    activity: 'publication',
+    collection: 'publication',
+    rental: 'publication',
+    event: 'on_demand',
+    session: 'on_demand',
+    class_workshop: 'on_demand',
+    scenario: 'on_demand',
+  });
+
 export function allowlistedFields(
   typeId: string,
   body: Readonly<Record<string, unknown>>,

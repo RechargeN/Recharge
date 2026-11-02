@@ -178,7 +178,7 @@ const expectedBoundedCallableExports = [
   "libraryQueryV1",
   "offerContentTranslationV1",
   "translateContentV1",
-  "purgeContentTranslationsV1",
+  "syncContentTranslationsV1",
   "purgeContentTranslationsOnHoldV1",
   "sweepContentTranslationsV1",
   "quickPlanCommandV1",

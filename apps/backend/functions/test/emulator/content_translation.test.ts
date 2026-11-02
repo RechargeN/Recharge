@@ -75,7 +75,7 @@ const baseBody = {
 };
 
 async function publish(
-  typeId = 'place',
+  typeId = 'event',
   body: Record<string, unknown> = baseBody,
   contentId: string = randomUUID(),
 ) {
@@ -162,12 +162,14 @@ before(async () => {
 });
 beforeEach(async () => {
   await clear();
+  await setLocalFlag(db, contentTranslationFlagIds.atPublication, false);
   await setLocalFlag(db, operationsEmergencySwitchIds.contentTranslation, false);
   await setLocalFlag(db, contentTranslationFlagIds.onDemand, true);
 });
 after(async () => {
   await clear();
   await setLocalFlag(db, contentTranslationFlagIds.onDemand, false);
+  await setLocalFlag(db, contentTranslationFlagIds.atPublication, false);
   await cleanupBookingEmulator(db);
 });
 
@@ -338,7 +340,7 @@ void test('a new revision never serves the old translation', async () => {
   const { hint } = await reader();
   const old = await publish();
   assert.equal((await service().translate(hint, ask(old))).kind, 'translated');
-  const next = await publish('place', { ...baseBody, title: 'Jauns nosaukums' }, old.contentId);
+  const next = await publish('event', { ...baseBody, title: 'Jauns nosaukums' }, old.contentId);
   const stale = await service().translate(hint, ask(old));
   assert.equal(stale.kind === 'rejected' && stale.code, 'revision_changed');
   const fresh = await service().translate(hint, ask(next));
@@ -540,6 +542,143 @@ void test(
     assert.equal(result, 0);
   },
 );
+
+void test('amendment 1: a long-lived type is translated at publication, kept and shown at once', async () => {
+  const { provider, service } = fixtures();
+  const { hint } = await reader();
+  const place = await publish('place');
+  assert.deepEqual(await service().translateAtPublication(place.contentId), {
+    lv: 'same_language',
+    en: 'translated',
+    ru: 'translated',
+  });
+  assert.equal(provider.calls.length, 2);
+  assert.equal(await count(cols.accountUsage), 0, 'no reader, no reader quota');
+  assert.equal(await count(cols.objectUsage), 0);
+  for (const entry of (await db.collection(cols.entries).get()).docs) {
+    assert.equal(entry.data().persistent, true);
+    assert.equal(entry.data().expiresAtUtc, null);
+  }
+  const offer = await service().offer(hint, ask(place));
+  assert.equal(offer.kind, 'translated', 'a kept translation is handed over at once');
+  assert.equal(offer.kind === 'translated' && offer.fields.title, '[lv→ru] Atvērto durvju diena');
+  assert.equal(provider.calls.length, 2);
+  // A short-lived type keeps the button, even with a cached reader translation.
+  const event = await publish('event');
+  assert.equal((await service().translate(hint, ask(event))).kind, 'translated');
+  assert.equal((await service().offer(hint, ask(event))).kind, 'offered');
+  // The source language comes first; a short-lived type then stops.
+  assert.deepEqual(await service().translateAtPublication(event.contentId), {
+    lv: 'same_language',
+    en: 'source_unavailable',
+  });
+  assert.equal(provider.calls.length, 3);
+});
+
+void test('amendment 1: the same text moves to a new revision without a call; old kept entries go', async () => {
+  const { provider, service } = fixtures();
+  const first = await publish('place');
+  await service().translateAtPublication(first.contentId);
+  assert.equal(provider.calls.length, 2);
+  const same = await publish('place', baseBody, first.contentId);
+  assert.deepEqual(await service().translateAtPublication(same.contentId), {
+    lv: 'same_language',
+    en: 'carried',
+    ru: 'carried',
+  });
+  assert.equal(provider.calls.length, 2);
+  const revisions = async () =>
+    (await db.collection(cols.entries).get()).docs.map(
+      (d) => d.data().publishedRevisionId as string,
+    );
+  assert.deepEqual([...new Set(await revisions())], [same.revisionId]);
+  const changed = await publish(
+    'place',
+    { ...baseBody, title: 'Jauns nosaukums' },
+    first.contentId,
+  );
+  await service().translateAtPublication(changed.contentId);
+  assert.equal(provider.calls.length, 4);
+  assert.deepEqual([...new Set(await revisions())], [changed.revisionId]);
+  // A replaced revision left behind by a missed run is removed by the sweep.
+  const missed = await publish('place', { ...baseBody, title: 'Vēl viens' }, first.contentId);
+  assert.equal((await service().sweep()).removed, 2);
+  assert.ok(!(await revisions()).includes(changed.revisionId));
+  void missed;
+});
+
+void test('amendment 1: refusals and failures never block publication and leave the button', async () => {
+  const { provider, service } = fixtures();
+  const { hint } = await reader();
+  const place = await publish('place');
+  provider.answer = () => Promise.reject(new Error('down'));
+  assert.deepEqual(await service().translateAtPublication(place.contentId), {
+    lv: 'same_language',
+    en: 'provider_unavailable',
+    ru: 'provider_unavailable',
+  });
+  assert.equal(
+    (await db.collection(contentCollections.pointers).doc(place.contentId).get()).data()
+      ?.visibility,
+    'visible',
+  );
+  assert.equal((await service().offer(hint, ask(place))).kind, 'offered');
+  provider.answer = (request) => new MockTranslationProvider().translate(request);
+  const broke = await service({ monthlyCapMinor: 0 }).translateAtPublication(place.contentId);
+  assert.equal(broke.en, 'budget_exhausted');
+  assert.equal((await service().translateAtPublication(place.contentId)).en, 'translated');
+
+  const other = await publish('place');
+  await setLocalFlag(db, operationsEmergencySwitchIds.contentTranslation, true);
+  const before = provider.calls.length;
+  assert.equal(
+    (await service().translateAtPublication(other.contentId)).en,
+    'translation_disabled',
+  );
+  assert.equal(provider.calls.length, before);
+  assert.equal(await service().reconcilePublications(), 0, 'publication flag is off');
+});
+
+void test('amendment 1: the real trigger translates at publication; reconciliation refills; hiding removes', async () => {
+  const { provider, service } = fixtures();
+  const { hint } = await reader();
+  await setLocalFlag(db, contentTranslationFlagIds.atPublication, true);
+  try {
+    const place = await publish('place');
+    for (let attempt = 0; ; attempt++) {
+      const kept = await db
+        .collection(cols.entries)
+        .where('contentId', '==', place.contentId)
+        .get();
+      if (kept.size === 2) break;
+      assert.ok(attempt < 150, 'the publication trigger did not translate');
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    // Kept entries are keyed by provider: read them as the trigger's adapter does.
+    const offer = await new FirestoreContentTranslationService(
+      db,
+      clock,
+      new MockTranslationProvider(),
+    ).offer(hint, ask(place, 'en'));
+    assert.equal(offer.kind === 'translated' && offer.fields.title, '[lv→en] Atvērto durvju diena');
+    assert.equal(provider.calls.length, 0, 'the trigger used its own adapter');
+
+    for (const entry of (await db.collection(cols.entries).get()).docs) await entry.ref.delete();
+    assert.ok((await service().reconcilePublications()) >= 1);
+    assert.equal(
+      (await db.collection(cols.entries).where('contentId', '==', place.contentId).get()).size,
+      2,
+    );
+
+    await db
+      .collection(contentCollections.pointers)
+      .doc(place.contentId)
+      .set({ visibility: 'hidden' }, { merge: true });
+    await untilNoEntries(place.contentId);
+  } finally {
+    await setLocalFlag(db, contentTranslationFlagIds.atPublication, false);
+  }
+});
 
 void test('the sweep removes expired entries and counters and keeps live ones', async () => {
   const { service } = fixtures();

@@ -1270,13 +1270,14 @@ export const translateContentV1 = onCall<unknown>(callableOptions, async (reques
   void sessionContext;
   return contentTranslationService(access.firestore).translate(access.accessHint, data);
 });
-// Withdrawal or restriction removes translations at once; deletion never waits for a flag.
-export const purgeContentTranslationsV1 = onDocumentWritten(
+// Withdrawal, restriction or deletion removes translations at once and never waits
+// for a flag; a visible long-lived type is translated at publication (amendment 1).
+export const syncContentTranslationsV1 = onDocumentWritten(
   { document: 'contentPublicationPointers/{contentId}', region: 'europe-west1', retry: false },
   async (event) => {
     const firestore = emulatorFirestore();
-    if (firestore === undefined || event.data?.after.get('visibility') === 'visible') return;
-    await contentTranslationService(firestore).purgeContent(event.params.contentId);
+    if (firestore === undefined) return;
+    await contentTranslationService(firestore).onPublicationChanged(event.params.contentId);
   },
 );
 // A T&S hold never moves the pointer. One naming no object covers the publisher,
@@ -1297,7 +1298,9 @@ export const sweepContentTranslationsV1 = onSchedule(
   async () => {
     const firestore = emulatorFirestore();
     if (firestore === undefined) return;
-    await contentTranslationService(firestore).sweep();
+    const service = contentTranslationService(firestore);
+    await service.sweep();
+    await service.reconcilePublications();
   },
 );
 
