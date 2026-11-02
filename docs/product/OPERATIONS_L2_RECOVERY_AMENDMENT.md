@@ -53,7 +53,7 @@ stop-on-poison checkpoint).
 | TF-12 Booking retention TTL | Booking | `expiresAt` | provider TTL | физическое удаление | — | локального исполнителя нет (OB-05) |
 | TF-13 K3 repair execution | Admin/Support | approved proposal | `AdminSupportService.execute` | Moderation decide → Content disposition | owner receipt на шаг | `unknown` → восстановление receipt; resumable |
 | TF-14 Content local import (D4) | Content | client import session | import lifecycle | drafts | binding + lease | lease binding, rollback D4.1 |
-| TF-15 Content translation (ADR 0022) | content_translation | запрос читателя; изменение pointer или T&S hold | вызов провайдера, очистка кэша | запись кэша или её удаление | запись кэша + строка ledger под lease token | lease fencing, идемпотентный sweep; incident switch `contentTranslation.onDemand.incidentDisable` |
+| TF-15 Content translation (ADR 0022) | content_translation | запрос читателя; изменение pointer (в том числе публикация постоянного типа) или T&S hold | вызов провайдера, очистка кэша | запись кэша или её удаление | запись кэша + строка ledger под lease token | lease fencing, идемпотентный sweep, сверка публикаций раз в сутки; incident switch `contentTranslation.onDemand.incidentDisable` |
 
 ## 3. Контракт каждой семьи
 
