@@ -287,6 +287,46 @@ test, so they are covered in B1-device; Sessions are rate limited per Account
 `stand:*` npm scripts need a working npm (the portable one in Temp can be
 damaged), the gates can be run directly with `node` as shown.
 
+## B1-device: physical Android over USB
+
+From apps/backend/functions, with the pinned toolchain, Flutter and the
+Android SDK, a phone attached as `device` (`adb devices -l`) and a clean
+checkout:
+
+```powershell
+node ../scripts/stand-b1-device-gate.mjs --yes --device RFCW91QHWWJ --part core
+node ../scripts/stand-b1-device-gate.mjs --yes --device RFCW91QHWWJ --part route    # operator at the phone
+node ../scripts/stand-b1-device-gate.mjs --yes --device RFCW91QHWWJ --part release
+node ../scripts/stand-e2-gate.mjs --yes --android RFCW91QHWWJ                       # E2 alone, phone as client B
+```
+
+The stand stays on the PC loopback; the phone reaches Auth (9099), Functions
+(5001) and the gate's bridge (8765) on its own 127.0.0.1 through
+`adb reverse`, removed at the end. `stand-device-bridge.mjs` lets the phone's
+test code run the same allowlisted `StandBackend` stand commands, read media
+fixtures and meet the gate at rendezvous points; it listens on 127.0.0.1 only
+and logs no bodies. The stand suites read their variables from one define,
+`RECHARGE_DEVICE_ENV`; on the PC they behave as before.
+
+`core`: binding guards and loopback on the phone; the debug APK allows
+cleartext only to 127.0.0.1 (for native stacks: `dart:io` does not apply the
+Android network security config, so the Dart guard is the boundary for Dart
+requests); native firebase_auth and secure Session; three app launches across
+background/return, `am kill` (process ended by the OS from the background) and
+`am force-stop` (closed by the user), with the Session, the operation journal
+and one Booking without a duplicate; the B2, C3 and D4 stand suites in the
+installed app (test locale `en`); E2 with the phone as client B and a PC
+client as A. `route` needs a person: the real location dialog, GPS fixes and
+recovery after `am kill`, the system GPX picker and export. `release`: the
+release APK has no network security config, no `usesCleartextTraffic`, is not
+debuggable, targets SDK 28+, and starts on the phone.
+
+Every part stops on a missing, `unauthorized` or `offline` device and on a
+dirty checkout, and writes a JSON ledger (`--out <new directory>`). Keep the
+screen on during a run: Samsung freezes a backgrounded app (Freecess) when the
+screen dozes, and the test then never completes. Not covered: LAN, cloud, real
+Google/Apple Auth, push, iOS and image selection (the app has no picker).
+
 ## C1 minimal Media (Emulator only)
 
 `node ../scripts/stand-c1-gate.mjs --yes` (from apps/backend/functions) starts a
