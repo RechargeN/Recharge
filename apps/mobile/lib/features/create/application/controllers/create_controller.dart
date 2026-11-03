@@ -3,6 +3,8 @@ import '../../domain/usecases/build_session_content_body.dart';
 import 'dart:async';
 
 import '../class_workshop_create_coordinator.dart';
+import '../create_media_picking.dart';
+import '../../domain/repositories/create_image_picker_port.dart';
 import '../../domain/entities/class_workshop_draft_data.dart';
 import '../../domain/entities/class_workshop_validation_issue.dart';
 import '../../domain/usecases/build_class_workshop_content_body.dart';
@@ -152,6 +154,7 @@ class CreateController extends ChangeNotifier {
     LocationSearchRepository? locationSearchRepository,
     LocationSearchRuntimeConfig locationSearchConfig =
         const LocationSearchRuntimeConfig(),
+    CreateMediaPicking? mediaPicking,
     CatalogObjectPickerPort? catalogObjectPicker,
     CreateRuntimeDefaults runtimeDefaults = const CreateRuntimeDefaults(
       marketCityId: '',
@@ -212,6 +215,7 @@ class CreateController extends ChangeNotifier {
        _classWorkshopCreateCoordinator = classWorkshopCreateCoordinator,
        _locationSearchRepository = locationSearchRepository,
        _locationSearchConfig = locationSearchConfig,
+       _mediaPicking = mediaPicking,
        _catalogObjectPicker = catalogObjectPicker,
        _runtimeDefaults = runtimeDefaults,
        _validateCreateAvailability = validateCreateAvailability,
@@ -255,6 +259,7 @@ class CreateController extends ChangeNotifier {
   final ClassWorkshopCreateCoordinator? _classWorkshopCreateCoordinator;
   final LocationSearchRepository? _locationSearchRepository;
   final LocationSearchRuntimeConfig _locationSearchConfig;
+  final CreateMediaPicking? _mediaPicking;
   int _placeLocationRequestSerial = 0;
   final CatalogObjectPickerPort? _catalogObjectPicker;
   final CreateRuntimeDefaults _runtimeDefaults;
@@ -3164,6 +3169,72 @@ class CreateController extends ChangeNotifier {
     ),
   );
 
+  /// MEDIA-PICK-01: whether the photo picker is offered (kill switch on).
+  bool get mediaPickerEnabled => _mediaPicking?.config.enabled ?? false;
+
+  /// Whether [path] is a private copy the picker stored (shown as a photo).
+  bool isPickedMediaCopy(String path) =>
+      path.isNotEmpty && (_mediaPicking?.store.owns(path) ?? false);
+
+  /// MP-OD-02: whether "Take photo" is offered next to the picker.
+  bool get mediaCameraEnabled =>
+      mediaPickerEnabled && _mediaPicking!.config.cameraEnabled;
+
+  /// Picks, normalizes and stores a photo as the cover. Returns a MEDIA-PICK-01
+  /// §9 code to show, or null when it was set or the person cancelled.
+  Future<String?> pickCoverImage(CreateImageSource source) async {
+    final String previous = _state.draft.media.coverImage;
+    final String? code = await _pickImage(source, (String path) {
+      updateCoverImage(path);
+      return true;
+    });
+    if (code == null && _state.draft.media.coverImage != previous) {
+      await _forgetCopy(previous);
+    }
+    return code;
+  }
+
+  /// Picks, normalizes and stores a photo into the gallery (the same limits
+  /// as [addGalleryImage]).
+  Future<String?> pickGalleryImage(CreateImageSource source) =>
+      _pickImage(source, (String path) {
+        final int before = _state.draft.media.gallery.length;
+        addGalleryImage(path);
+        return _state.draft.media.gallery.length > before;
+      });
+
+  Future<String?> _pickImage(
+    CreateImageSource source,
+    bool Function(String path) apply,
+  ) async {
+    final CreateMediaPicking? picking = _mediaPicking;
+    if (picking == null || !picking.config.enabled) return null;
+    try {
+      final String? path = await picking.pickInto(_state.draft.id, source);
+      if (path == null) return null;
+      if (!apply(path)) await picking.store.remove(path);
+      return null;
+    } on CreateMediaException catch (error) {
+      return error.code;
+    } catch (_) {
+      return 'media_decode_failed';
+    }
+  }
+
+  /// Deletes a private copy the draft no longer references.
+  Future<void> _forgetCopy(String path) async {
+    final CreateMediaPicking? picking = _mediaPicking;
+    if (picking == null || path.isEmpty || !picking.store.owns(path)) return;
+    final MediaEntity media = _state.draft.media;
+    if (media.coverImage == path || media.gallery.contains(path)) return;
+    try {
+      await picking.store.remove(path);
+    } catch (_) {
+      // A copy that cannot be deleted now is retried by nothing worse than
+      // leaving one file in the app's private folder.
+    }
+  }
+
   void addGalleryImage(String value) {
     final String trimmed = value.trim();
     if (trimmed.isEmpty) return;
@@ -3208,6 +3279,8 @@ class CreateController extends ChangeNotifier {
   void removeGalleryImageAt(int index) {
     if (index < 0 || index >= _state.draft.media.gallery.length) return;
     final String removed = _state.draft.media.gallery[index];
+    // Runs after the draft below no longer lists it.
+    scheduleMicrotask(() => _forgetCopy(removed));
     final List<String> gallery = List<String>.from(_state.draft.media.gallery)
       ..removeAt(index);
     if (_state.draft.objectType == CreateObjectType.event &&

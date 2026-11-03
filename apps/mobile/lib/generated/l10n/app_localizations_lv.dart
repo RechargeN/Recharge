@@ -468,6 +468,38 @@ class AppLocalizationsLv extends AppLocalizations {
       'Vispirms augšupielādējiet nepieciešamo multividi.';
 
   @override
+  String get createMediaChoosePhoto => 'Izvēlēties foto';
+
+  @override
+  String get createMediaTakePhoto => 'Uzņemt foto';
+
+  @override
+  String get createMediaPreparing => 'Sagatavo foto…';
+
+  @override
+  String get createMediaCoverSelected => 'Vāka attēls izvēlēts';
+
+  @override
+  String get localErrorMediaUnsupported =>
+      'Šo attēlu nevar izmantot. Izvēlieties foto.';
+
+  @override
+  String get localErrorMediaDecodeFailed =>
+      'Attēlu neizdevās atvērt. Mēģiniet citu.';
+
+  @override
+  String get localErrorMediaTooLarge =>
+      'Attēls ir pārāk liels pat pēc saspiešanas.';
+
+  @override
+  String get localErrorMediaStorageFull =>
+      'Melnraksta foto nepietiek vietas. Noņemiet dažus foto.';
+
+  @override
+  String get localErrorMediaPermissionDenied =>
+      'Atļaujiet piekļuvi kamerai iestatījumos, lai uzņemtu foto.';
+
+  @override
   String get localErrorCoverRequired => 'Vispirms pievienojiet vāka attēlu.';
 
   @override

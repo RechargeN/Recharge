@@ -34,7 +34,14 @@ import '../adapters/collection_publication_discovery_adapter.dart';
 import '../adapters/rental_publication_discovery_adapter.dart';
 import '../adapters/route_publication_discovery_adapter.dart';
 import '../adapters/route_safety_reporting_adapter.dart';
+import '../adapters/create_image_picker_adapter.dart';
 import '../adapters/route_gpx_file_selector_adapter.dart';
+import '../../features/create/application/create_media_picking.dart';
+import '../../features/create/data/media/create_image_normalizer_impl.dart';
+import '../../features/create/data/media/file_create_media_store.dart';
+import '../../features/create/domain/repositories/create_image_normalizer.dart';
+import '../../features/create/domain/repositories/create_image_picker_port.dart';
+import '../../features/create/domain/repositories/create_media_store.dart';
 import '../adapters/route_geolocator_adapter.dart';
 import '../../core/telemetry/analytics_service.dart';
 import '../../core/product_analytics/product_analytics_recorder.dart';
@@ -722,6 +729,20 @@ Future<void> setupDependencies() async {
     )
     ..registerLazySingleton<RouteGpxFilePickerPort>(
       () => RouteGpxFileSelectorAdapter(sl(), config: sl()),
+    )
+    // MEDIA-PICK-01: system photo picker, metadata-free copies, private store.
+    ..registerLazySingleton<CreateMediaPickerConfig>(
+      () => const CreateMediaPickerConfig(),
+    )
+    ..registerLazySingleton<CreateImagePickerPort>(CreateImagePickerAdapter.new)
+    ..registerLazySingleton<CreateImageNormalizer>(
+      () => const CreateImageNormalizerImpl(),
+    )
+    ..registerLazySingleton<CreateMediaStore>(
+      () => FileCreateMediaStore(
+        supportDirectory: getApplicationSupportDirectory,
+        idGenerator: sl(),
+      ),
     )
     ..registerLazySingleton<RouteGpxInspector>(
       () => RouteGpxInspector(config: sl()),

@@ -39,7 +39,11 @@ import 'controllers/route_gpx_transfer_controller.dart';
 import 'controllers/route_recording_controller.dart';
 import 'controllers/route_quality_admin_controller.dart';
 import 'controllers/scenario_transit_picker_controller.dart';
+import '../domain/repositories/create_image_normalizer.dart';
+import '../domain/repositories/create_image_picker_port.dart';
+import '../domain/repositories/create_media_store.dart';
 import '../domain/repositories/route_gpx_file_picker_port.dart';
+import 'create_media_picking.dart';
 import '../domain/repositories/route_gpx_repository.dart';
 import '../domain/usecases/export_route_gpx_usecase.dart';
 import '../domain/usecases/inspect_route_gpx_usecase.dart';
@@ -63,6 +67,14 @@ final createControllerProvider = ChangeNotifierProvider<CreateController>((
     classWorkshopCreateCoordinator: sl<ClassWorkshopCreateCoordinator>(),
     locationSearchRepository: sl<LocationSearchRepository>(),
     locationSearchConfig: sl<LocationSearchRuntimeConfig>(),
+    mediaPicking: sl.isRegistered<CreateImagePickerPort>()
+        ? CreateMediaPicking(
+            picker: sl<CreateImagePickerPort>(),
+            normalizer: sl<CreateImageNormalizer>(),
+            store: sl<CreateMediaStore>(),
+            config: sl<CreateMediaPickerConfig>(),
+          )
+        : null,
     eventAdmissionConfigurationEnabled: true,
     eventMockAvailabilityEnabled: true,
     createTemplateRepository: sl<CreateTemplateRepository>(),

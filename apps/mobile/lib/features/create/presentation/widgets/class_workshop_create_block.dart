@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'create_media_pick_actions.dart';
+
 import '../../../../core/localization/l10n_context.dart';
 import '../../application/class_workshop_create_config.dart';
 import '../../application/controllers/create_controller.dart';
@@ -142,16 +144,18 @@ class _ClassWorkshopCreateBlockState extends State<ClassWorkshopCreateBlock> {
       _c.updateFullDescription,
       lines: 4,
     ),
-    _text(
-      'class-workshop-cover',
-      context.l10n.createClassCoverImage,
-      draft.media.coverImage,
-      _c.updateCoverImage,
-      errorText: switch (widget.state.validationErrors['coverImage']) {
-        final String id => CreateTexts.fieldError(context.l10n, id),
-        null => null,
-      },
-    ),
+    CreateMediaPickActions(controller: _c, target: CreateMediaTarget.cover),
+    if (showCreateMediaPathField(_c))
+      _text(
+        'class-workshop-cover',
+        context.l10n.createClassCoverImage,
+        draft.media.coverImage,
+        _c.updateCoverImage,
+        errorText: switch (widget.state.validationErrors['coverImage']) {
+          final String id => CreateTexts.fieldError(context.l10n, id),
+          null => null,
+        },
+      ),
     DropdownButtonFormField<String>(
       isExpanded: true,
       key: const Key('class-workshop-locale'),

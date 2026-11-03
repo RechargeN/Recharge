@@ -2,6 +2,8 @@ import '../../../../core/localization/taxonomy_labels.dart';
 import '../../application/activity_validation_feedback_provider.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+
+import '../widgets/create_media_pick_actions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -471,12 +473,17 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                 maxLines: 4,
                 onChanged: controller.updateFullDescription,
               ),
-              _LabeledField(
-                label: context.l10n.createFormCoverImage,
-                controller: _coverController,
-                errorText: _fieldError(context, state, 'coverImage'),
-                onChanged: controller.updateCoverImage,
+              CreateMediaPickActions(
+                controller: controller,
+                target: CreateMediaTarget.cover,
               ),
+              if (showCreateMediaPathField(controller))
+                _LabeledField(
+                  label: context.l10n.createFormCoverImage,
+                  controller: _coverController,
+                  errorText: _fieldError(context, state, 'coverImage'),
+                  onChanged: controller.updateCoverImage,
+                ),
               if (blockConfig.requiresStartDateTime)
                 _LabeledField(
                   label: context.l10n.createObjectTypeStartUtc(
@@ -525,27 +532,34 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                 onCapacityChanged: controller.updateCapacity,
               ),
               const SizedBox(height: 8),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: TextField(
-                      controller: _galleryInputController,
-                      decoration: InputDecoration(
-                        labelText: context.l10n.createFormGalleryImageUrlPath,
-                        border: OutlineInputBorder(),
+              CreateMediaPickActions(
+                controller: controller,
+                target: CreateMediaTarget.gallery,
+              ),
+              if (showCreateMediaPathField(controller))
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: TextField(
+                        controller: _galleryInputController,
+                        decoration: InputDecoration(
+                          labelText: context.l10n.createFormGalleryImageUrlPath,
+                          border: OutlineInputBorder(),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton(
-                    onPressed: () {
-                      controller.addGalleryImage(_galleryInputController.text);
-                      _galleryInputController.clear();
-                    },
-                    child: Text(context.l10n.createFormAdd),
-                  ),
-                ],
-              ),
+                    const SizedBox(width: 8),
+                    OutlinedButton(
+                      onPressed: () {
+                        controller.addGalleryImage(
+                          _galleryInputController.text,
+                        );
+                        _galleryInputController.clear();
+                      },
+                      child: Text(context.l10n.createFormAdd),
+                    ),
+                  ],
+                ),
               if (state.draft.media.gallery.isNotEmpty) ...<Widget>[
                 const SizedBox(height: 8),
                 Wrap(

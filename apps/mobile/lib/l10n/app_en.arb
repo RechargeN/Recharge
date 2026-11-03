@@ -538,6 +538,42 @@
   "@localErrorMediaMissing": {
     "description": "Client refusal media_missing."
   },
+  "createMediaChoosePhoto": "Choose photo",
+  "@createMediaChoosePhoto": {
+    "description": "Create media: button that opens the system photo picker."
+  },
+  "createMediaTakePhoto": "Take photo",
+  "@createMediaTakePhoto": {
+    "description": "Create media: button that opens the system camera."
+  },
+  "createMediaPreparing": "Preparing photo…",
+  "@createMediaPreparing": {
+    "description": "Create media: shown while a picked photo is compressed."
+  },
+  "createMediaCoverSelected": "Cover photo selected",
+  "@createMediaCoverSelected": {
+    "description": "Create media: the cover is a photo picked on this device."
+  },
+  "localErrorMediaUnsupported": "This image can't be used. Choose a photo.",
+  "@localErrorMediaUnsupported": {
+    "description": "Client refusal media_unsupported."
+  },
+  "localErrorMediaDecodeFailed": "This image couldn't be opened. Try another one.",
+  "@localErrorMediaDecodeFailed": {
+    "description": "Client refusal media_decode_failed."
+  },
+  "localErrorMediaTooLarge": "This image is too large even after compression.",
+  "@localErrorMediaTooLarge": {
+    "description": "Client refusal media_too_large."
+  },
+  "localErrorMediaStorageFull": "Not enough space for draft photos. Remove some photos.",
+  "@localErrorMediaStorageFull": {
+    "description": "Client refusal media_storage_full."
+  },
+  "localErrorMediaPermissionDenied": "Allow camera access in Settings to take a photo.",
+  "@localErrorMediaPermissionDenied": {
+    "description": "Client refusal media_permission_denied."
+  },
   "localErrorCoverRequired": "Add a cover image first.",
   "@localErrorCoverRequired": {
     "description": "Client refusal cover_required."

@@ -23,9 +23,9 @@ const functionsDir = path.join(here, "..", "functions");
 const standCli = path.join(here, "emulator-stand.mjs");
 const seedCli = path.join(here, "stand-seed.mjs");
 const e2Gate = path.join(here, "stand-e2-gate.mjs");
-const parts = ["core", "route", "release"];
+const parts = ["core", "route", "media", "release"];
 const usage =
-  "WARNING: this permanently deletes the stand data folder. Usage: stand-b1-device-gate.mjs --yes --device <serial> [--part core|route|release] [--out <new directory>]";
+  "WARNING: this permanently deletes the stand data folder. Usage: stand-b1-device-gate.mjs --yes --device <serial> [--part core|route|media|release] [--out <new directory>]";
 
 /** `--yes --device <serial> [--part <part>] [--out <dir>]`, or a refusal. */
 export function parseArgs(args) {
@@ -206,6 +206,8 @@ async function getJson(url) {
  * - route (needs an operator at the phone): the real location dialog, GPS
  *   recording and its recovery after `am kill`, the system GPX picker and
  *   export;
+ * - media (operator): MEDIA-PICK-01 with the real Photo Picker and camera;
+ *   kept copies have no EXIF/GPS; no media-read permission is requested;
  * - release: the release APK refuses cleartext (no debug network config,
  *   no usesCleartextTraffic, target 28+), is not debuggable and starts on
  *   the phone; its permissions are recorded.
@@ -280,6 +282,7 @@ export async function main(args) {
     }));
     if (part === "core") await core();
     else if (part === "route") await route();
+    else if (part === "media") await media();
     else await release();
   } catch (error) {
     failure = error;
@@ -290,7 +293,7 @@ export async function main(args) {
         await bridge.close();
       }
       ledger.reverseAfter = removeReversedPorts(serial);
-      if (part !== "route") run(standCli, ["stop"]);
+      if (part !== "route" && part !== "media") run(standCli, ["stop"]);
     } catch (error) {
       failure ??= error;
     }
@@ -537,6 +540,95 @@ export async function main(args) {
       );
     } finally {
       adb(serial, ["shell", "rm", "-f", target], { allowFail: true });
+    }
+  }
+
+  async function media() {
+    const fixture = path.join(
+      mobileRoot,
+      "test",
+      "fixtures",
+      "media",
+      "b1_device_exif_gps.jpg",
+    );
+    const folder = "/sdcard/Pictures/RechargeB1";
+    const target = `${folder}/recharge-b1-exif.jpg`;
+    const operator = (text) => process.stdout.write(`OPERATOR: ${text}\n`);
+    const scan = (file) =>
+      adb(
+        serial,
+        [
+          "shell",
+          "am",
+          "broadcast",
+          "-a",
+          "android.intent.action.MEDIA_SCANNER_SCAN_FILE",
+          "-d",
+          `file://${file}`,
+        ],
+        { allowFail: true },
+      );
+    await step("push the EXIF/GPS photo the operator will pick", () => {
+      adb(serial, ["shell", "mkdir", "-p", folder]);
+      adb(serial, ["push", fixture, target]);
+      scan(target);
+      return {
+        target,
+        sha256: crypto
+          .createHash("sha256")
+          .update(fs.readFileSync(fixture))
+          .digest("hex"),
+      };
+    });
+    try {
+      await step(
+        "system Photo Picker and camera; metadata-free copies",
+        async () => {
+          const run = onPhone(
+            "integration_test/b1_device_media_pick_test.dart",
+            [],
+            "media",
+          );
+          await point(rendezvous, "device", "gallery", run);
+          operator(
+            "in the photo picker choose the RechargeB1 photo (gradient with squares)",
+          );
+          const picked = await point(
+            rendezvous,
+            "device",
+            "gallery-picked",
+            run,
+          );
+          await point(rendezvous, "device", "camera", run);
+          operator("take any photo with the camera and confirm it");
+          const code = await run.exited;
+          if (code !== 0)
+            throw new Error(`media test exited ${code}; see ${run.log}`);
+          const done = await point(rendezvous, "device", "done");
+          return { picked, ...done };
+        },
+      );
+      await step("no media-read permission requested", () => {
+        const dump = adb(serial, ["shell", "dumpsys", "package", appPackage]);
+        const requested = dump
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter((line) => /^android\.permission\.[A-Z_]+/.test(line))
+          .map((line) => line.split(":")[0]);
+        for (const forbidden of [
+          "android.permission.READ_MEDIA_IMAGES",
+          "android.permission.READ_EXTERNAL_STORAGE",
+        ])
+          assert.equal(
+            requested.includes(forbidden),
+            false,
+            `${forbidden} must not be requested`,
+          );
+        return { requested: [...new Set(requested)].sort() };
+      });
+    } finally {
+      adb(serial, ["shell", "rm", "-rf", folder], { allowFail: true });
+      scan(target);
     }
   }
 

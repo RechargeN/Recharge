@@ -467,6 +467,38 @@ class AppLocalizationsRu extends AppLocalizations {
   String get localErrorMediaMissing => 'Сначала загрузите нужные медиафайлы.';
 
   @override
+  String get createMediaChoosePhoto => 'Выбрать фото';
+
+  @override
+  String get createMediaTakePhoto => 'Сделать фото';
+
+  @override
+  String get createMediaPreparing => 'Подготавливаем фото…';
+
+  @override
+  String get createMediaCoverSelected => 'Обложка выбрана';
+
+  @override
+  String get localErrorMediaUnsupported =>
+      'Это изображение нельзя использовать. Выберите фото.';
+
+  @override
+  String get localErrorMediaDecodeFailed =>
+      'Не удалось открыть изображение. Попробуйте другое.';
+
+  @override
+  String get localErrorMediaTooLarge =>
+      'Изображение слишком большое даже после сжатия.';
+
+  @override
+  String get localErrorMediaStorageFull =>
+      'Недостаточно места для фото черновика. Удалите часть фото.';
+
+  @override
+  String get localErrorMediaPermissionDenied =>
+      'Разрешите доступ к камере в настройках, чтобы сделать фото.';
+
+  @override
   String get localErrorCoverRequired => 'Сначала добавьте обложку.';
 
   @override

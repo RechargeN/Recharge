@@ -26,6 +26,10 @@
 	<true/>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Recharge uses your location in the background only while you record a route.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Recharge uses the camera only when you take a photo for something you create.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Recharge shows your photos only so you can choose one for something you create.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Recharge uses your location to record the route you travel.</string>
 	<key>UIBackgroundModes</key>

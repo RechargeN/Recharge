@@ -2,6 +2,8 @@ import '../../../../core/localization/taxonomy_labels.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
+import 'create_media_pick_actions.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../../core/localization/l10n_context.dart';
@@ -1190,15 +1192,20 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               ? context.l10n.createFormCoverRequiredGalleryOptional
               : context.l10n.createPlaceCoverRecommended,
           children: <Widget>[
-            _textField(
-              id: 'cover-image',
-              errorFieldId: 'coverImage',
-              label: policy.cover.isRequired
-                  ? context.l10n.createFormCoverImageUrlPath
-                  : context.l10n.createFormCoverImageUrlPathRecommended,
-              value: draft.media.coverImage,
-              onChanged: widget.controller.updateCoverImage,
+            CreateMediaPickActions(
+              controller: widget.controller,
+              target: CreateMediaTarget.cover,
             ),
+            if (showCreateMediaPathField(widget.controller))
+              _textField(
+                id: 'cover-image',
+                errorFieldId: 'coverImage',
+                label: policy.cover.isRequired
+                    ? context.l10n.createFormCoverImageUrlPath
+                    : context.l10n.createFormCoverImageUrlPathRecommended,
+                value: draft.media.coverImage,
+                onChanged: widget.controller.updateCoverImage,
+              ),
             ExpansionTile(
               key: const ValueKey<String>('place-gallery-details'),
               tilePadding: EdgeInsets.zero,
@@ -1206,29 +1213,34 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
               title: Text(context.l10n.createFormAddGalleryImages),
               subtitle: Text(context.l10n.createPlaceGalleryOptional),
               children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: _textField(
-                        id: 'gallery-image',
-                        label: context.l10n.createFormGalleryImageUrlPath,
-                        value: '',
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    OutlinedButton(
-                      onPressed: draft.media.gallery.length >= 12
-                          ? null
-                          : () {
-                              widget.controller.addGalleryImage(
-                                _field('gallery-image', '').text,
-                              );
-                              _field('gallery-image', '').clear();
-                            },
-                      child: Text(context.l10n.createFormAdd),
-                    ),
-                  ],
+                CreateMediaPickActions(
+                  controller: widget.controller,
+                  target: CreateMediaTarget.gallery,
                 ),
+                if (showCreateMediaPathField(widget.controller))
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: _textField(
+                          id: 'gallery-image',
+                          label: context.l10n.createFormGalleryImageUrlPath,
+                          value: '',
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      OutlinedButton(
+                        onPressed: draft.media.gallery.length >= 12
+                            ? null
+                            : () {
+                                widget.controller.addGalleryImage(
+                                  _field('gallery-image', '').text,
+                                );
+                                _field('gallery-image', '').clear();
+                              },
+                        child: Text(context.l10n.createFormAdd),
+                      ),
+                    ],
+                  ),
                 for (int index = 0; index < draft.media.gallery.length; index++)
                   ListTile(
                     contentPadding: EdgeInsets.zero,

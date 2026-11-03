@@ -1,6 +1,8 @@
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 
+import 'create_media_pick_actions.dart';
+
 import '../../../../core/localization/taxonomy_labels.dart';
 import '../../../../core/parsing/input_parsers.dart';
 
@@ -133,13 +135,18 @@ class EventCreateBlock extends StatelessWidget {
           maxLines: 6,
           onChanged: controller.updateFullDescription,
         ),
-        _TextField(
-          id: 'event-cover',
-          label: context.l10n.createFormCoverImageUrlPath,
-          value: draft.media.coverImage,
-          error: _error(context, 'coverImage'),
-          onChanged: controller.updateCoverImage,
+        CreateMediaPickActions(
+          controller: controller,
+          target: CreateMediaTarget.cover,
         ),
+        if (showCreateMediaPathField(controller))
+          _TextField(
+            id: 'event-cover',
+            label: context.l10n.createFormCoverImageUrlPath,
+            value: draft.media.coverImage,
+            error: _error(context, 'coverImage'),
+            onChanged: controller.updateCoverImage,
+          ),
         _TextField(
           id: 'event-cover-alt',
           label: context.l10n.createFormCoverDescriptionScreenReaders,
@@ -148,7 +155,12 @@ class EventCreateBlock extends StatelessWidget {
           onChanged: (String value) =>
               controller.updateEventMediaMetadata(coverAltText: value),
         ),
+        CreateMediaPickActions(
+          controller: controller,
+          target: CreateMediaTarget.gallery,
+        ),
         _EventGalleryEditor(
+          showInput: showCreateMediaPathField(controller),
           gallery: draft.media.gallery,
           altText: event.mediaMetadata.galleryAltText,
           onAdd: controller.addGalleryImage,
@@ -895,6 +907,7 @@ class _EventCard extends StatelessWidget {
 
 class _EventGalleryEditor extends StatefulWidget {
   const _EventGalleryEditor({
+    required this.showInput,
     required this.gallery,
     required this.altText,
     required this.onAdd,
@@ -903,6 +916,8 @@ class _EventGalleryEditor extends StatefulWidget {
     required this.errorFor,
   });
 
+  /// MP-OD-04: the URL/path input only in debug or with the picker off.
+  final bool showInput;
   final List<String> gallery;
   final Map<String, String> altText;
   final ValueChanged<String> onAdd;
@@ -927,32 +942,33 @@ class _EventGalleryEditorState extends State<_EventGalleryEditor> {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: <Widget>[
-      Row(
-        children: <Widget>[
-          Expanded(
-            child: TextField(
-              key: const Key('event-gallery-input'),
-              controller: _input,
-              decoration: InputDecoration(
-                labelText: context.l10n.createFormGalleryImageUrlPath,
-                border: OutlineInputBorder(),
+      if (widget.showInput)
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: TextField(
+                key: const Key('event-gallery-input'),
+                controller: _input,
+                decoration: InputDecoration(
+                  labelText: context.l10n.createFormGalleryImageUrlPath,
+                  border: OutlineInputBorder(),
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          IconButton.filledTonal(
-            key: const Key('event-gallery-add'),
-            tooltip: context.l10n.createFormAddGalleryImage,
-            onPressed: () {
-              final String value = _input.text.trim();
-              if (value.isEmpty) return;
-              widget.onAdd(value);
-              _input.clear();
-            },
-            icon: const Icon(Icons.add_photo_alternate_outlined),
-          ),
-        ],
-      ),
+            const SizedBox(width: 8),
+            IconButton.filledTonal(
+              key: const Key('event-gallery-add'),
+              tooltip: context.l10n.createFormAddGalleryImage,
+              onPressed: () {
+                final String value = _input.text.trim();
+                if (value.isEmpty) return;
+                widget.onAdd(value);
+                _input.clear();
+              },
+              icon: const Icon(Icons.add_photo_alternate_outlined),
+            ),
+          ],
+        ),
       const SizedBox(height: 10),
       for (int index = 0; index < widget.gallery.length; index++) ...<Widget>[
         Row(

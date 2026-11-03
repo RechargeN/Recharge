@@ -898,6 +898,60 @@ abstract class AppLocalizations {
   /// **'Upload the required media first.'**
   String get localErrorMediaMissing;
 
+  /// Create media: button that opens the system photo picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose photo'**
+  String get createMediaChoosePhoto;
+
+  /// Create media: button that opens the system camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get createMediaTakePhoto;
+
+  /// Create media: shown while a picked photo is compressed.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing photo…'**
+  String get createMediaPreparing;
+
+  /// Create media: the cover is a photo picked on this device.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover photo selected'**
+  String get createMediaCoverSelected;
+
+  /// Client refusal media_unsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This image can\'t be used. Choose a photo.'**
+  String get localErrorMediaUnsupported;
+
+  /// Client refusal media_decode_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'This image couldn\'t be opened. Try another one.'**
+  String get localErrorMediaDecodeFailed;
+
+  /// Client refusal media_too_large.
+  ///
+  /// In en, this message translates to:
+  /// **'This image is too large even after compression.'**
+  String get localErrorMediaTooLarge;
+
+  /// Client refusal media_storage_full.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough space for draft photos. Remove some photos.'**
+  String get localErrorMediaStorageFull;
+
+  /// Client refusal media_permission_denied.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow camera access in Settings to take a photo.'**
+  String get localErrorMediaPermissionDenied;
+
   /// Client refusal cover_required.
   ///
   /// In en, this message translates to:

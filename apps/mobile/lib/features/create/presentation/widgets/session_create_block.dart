@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'create_media_pick_actions.dart';
+
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/config/recharge_category_criteria.dart';
 import '../../../../core/localization/taxonomy_labels.dart';
@@ -201,13 +203,18 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
           onChanged: widget.controller.updateFullDescription,
         ),
         const SizedBox(height: 12),
-        TextFormField(
-          controller: _field('coverImage', draft.media.coverImage),
-          decoration: InputDecoration(
-            labelText: context.l10n.createSessionCoverImageUrl,
-          ),
-          onChanged: widget.controller.updateCoverImage,
+        CreateMediaPickActions(
+          controller: widget.controller,
+          target: CreateMediaTarget.cover,
         ),
+        if (showCreateMediaPathField(widget.controller))
+          TextFormField(
+            controller: _field('coverImage', draft.media.coverImage),
+            decoration: InputDecoration(
+              labelText: context.l10n.createSessionCoverImageUrl,
+            ),
+            onChanged: widget.controller.updateCoverImage,
+          ),
         DropdownButtonFormField<String>(
           isExpanded: true,
           initialValue: widget.controller.sessionContentLocale,

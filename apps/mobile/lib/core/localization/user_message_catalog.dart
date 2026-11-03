@@ -351,6 +351,12 @@ abstract final class UserMessageCatalog {
         'consent_missing': (l) => l.localErrorConsentMissing,
         'share_token_unavailable': (l) => l.localErrorShareUnavailable,
         'media_unavailable': (l) => l.localErrorMediaUnavailable,
+        // MEDIA-PICK-01 §9: the photo picker and its client copy.
+        'media_unsupported': (l) => l.localErrorMediaUnsupported,
+        'media_decode_failed': (l) => l.localErrorMediaDecodeFailed,
+        'media_too_large': (l) => l.localErrorMediaTooLarge,
+        'media_storage_full': (l) => l.localErrorMediaStorageFull,
+        'media_permission_denied': (l) => l.localErrorMediaPermissionDenied,
         'place_draft_required': _draftRequired,
         'event_draft_required': _draftRequired,
         'rental_draft_required': _draftRequired,

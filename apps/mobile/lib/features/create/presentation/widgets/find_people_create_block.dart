@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'create_media_pick_actions.dart';
+
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
 import '../../../../core/localization/taxonomy_labels.dart';
@@ -1348,11 +1350,16 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              _DraftTextField(
-                label: context.l10n.createFindPeopleCoverImageUrlOptional,
-                value: draft.media.coverImage,
-                onChanged: widget.controller.updateCoverImage,
+              CreateMediaPickActions(
+                controller: widget.controller,
+                target: CreateMediaTarget.cover,
               ),
+              if (showCreateMediaPathField(widget.controller))
+                _DraftTextField(
+                  label: context.l10n.createFindPeopleCoverImageUrlOptional,
+                  value: draft.media.coverImage,
+                  onChanged: widget.controller.updateCoverImage,
+                ),
               _DraftTextField(
                 label:
                     context.l10n.createFindPeopleSchedulePublicationUtcOptional,

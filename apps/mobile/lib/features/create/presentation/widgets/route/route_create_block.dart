@@ -3,6 +3,8 @@ import '../../../../../core/localization/taxonomy_labels.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
+import '../create_media_pick_actions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/geo/geo_point.dart';
@@ -517,12 +519,17 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
                 maxLines: 7,
                 onChanged: widget.controller.updateFullDescription,
               ),
-              _DraftField(
-                fieldKey: 'route-cover',
-                label: context.l10n.createRouteCoverImageUrl,
-                value: draft.media.coverImage,
-                onChanged: widget.controller.updateCoverImage,
+              CreateMediaPickActions(
+                controller: widget.controller,
+                target: CreateMediaTarget.cover,
               ),
+              if (showCreateMediaPathField(widget.controller))
+                _DraftField(
+                  fieldKey: 'route-cover',
+                  label: context.l10n.createRouteCoverImageUrl,
+                  value: draft.media.coverImage,
+                  onChanged: widget.controller.updateCoverImage,
+                ),
             ],
           ),
         ),

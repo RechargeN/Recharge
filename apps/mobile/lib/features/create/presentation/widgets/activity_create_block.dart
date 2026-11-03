@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'create_media_pick_actions.dart';
 import '../../../../core/localization/taxonomy_labels.dart';
 import '../../application/activity_place_link_controller.dart';
 
@@ -247,14 +249,19 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
           onChanged: widget.controller.updateFullDescription,
         ),
         const SizedBox(height: 12),
-        TextFormField(
-          controller: _field('coverImage', draft.media.coverImage),
-          decoration: InputDecoration(
-            labelText: context.l10n.createFormCoverImageUrl,
-            errorText: _serverError('/body/media/coverImage'),
-          ),
-          onChanged: widget.controller.updateCoverImage,
+        CreateMediaPickActions(
+          controller: widget.controller,
+          target: CreateMediaTarget.cover,
         ),
+        if (showCreateMediaPathField(widget.controller))
+          TextFormField(
+            controller: _field('coverImage', draft.media.coverImage),
+            decoration: InputDecoration(
+              labelText: context.l10n.createFormCoverImageUrl,
+              errorText: _serverError('/body/media/coverImage'),
+            ),
+            onChanged: widget.controller.updateCoverImage,
+          ),
         for (final path in const ['/body/media', '/body/media/gallery'])
           if (widget.serverErrors[path] case final String error)
             Text(

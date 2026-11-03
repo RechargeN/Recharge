@@ -463,6 +463,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localErrorMediaMissing => 'Upload the required media first.';
 
   @override
+  String get createMediaChoosePhoto => 'Choose photo';
+
+  @override
+  String get createMediaTakePhoto => 'Take photo';
+
+  @override
+  String get createMediaPreparing => 'Preparing photo…';
+
+  @override
+  String get createMediaCoverSelected => 'Cover photo selected';
+
+  @override
+  String get localErrorMediaUnsupported =>
+      'This image can\'t be used. Choose a photo.';
+
+  @override
+  String get localErrorMediaDecodeFailed =>
+      'This image couldn\'t be opened. Try another one.';
+
+  @override
+  String get localErrorMediaTooLarge =>
+      'This image is too large even after compression.';
+
+  @override
+  String get localErrorMediaStorageFull =>
+      'Not enough space for draft photos. Remove some photos.';
+
+  @override
+  String get localErrorMediaPermissionDenied =>
+      'Allow camera access in Settings to take a photo.';
+
+  @override
   String get localErrorCoverRequired => 'Add a cover image first.';
 
   @override
