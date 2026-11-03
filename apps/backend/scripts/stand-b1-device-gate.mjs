@@ -198,7 +198,7 @@ async function getJson(url) {
  * on the PC loopback; the phone reaches Auth, Functions and the gate's bridge
  * on its own 127.0.0.1 through `adb reverse`. No LAN, cloud, real Google/Apple
  * Auth, push or iOS. Parts:
- * - core: guards and debug cleartext policy, native adapters, the app across
+ * - core: binding guards, the debug APK cleartext policy (loopback only), native adapters, the app across
  *   background/return, `am kill` and `am force-stop` (Session, journal,
  *   Booking without duplicates), the B2 Booking UI, the C3 Create →
  *   publication UI, D4 import/rollback and E2 with the phone as client B and
@@ -318,9 +318,33 @@ export async function main(args) {
       status: run(standCli, ["status"]).trim(),
       emulators: await getJson("http://127.0.0.1:4400/emulators"),
     }));
-    await step("binding guards and debug cleartext policy on the phone", () =>
+    await step("binding guards and loopback on the phone", () =>
       passOnPhone("integration_test/b1_device_guards_test.dart", [], "guards"),
     );
+    await step("debug APK: cleartext only to 127.0.0.1 (native stacks)", () => {
+      const apk = path.join(
+        mobileRoot,
+        "build",
+        "app",
+        "outputs",
+        "flutter-apk",
+        "app-debug.apk",
+      );
+      const dump = exec(aaptPath(), [
+        "dump",
+        "xmltree",
+        apk,
+        "res/xml/local_emulator_network_security.xml",
+      ]);
+      if (dump.status !== 0) throw new Error(`aapt failed: ${dump.output}`);
+      return {
+        domains: loopbackOnlyCleartext(dump.output),
+        apkSha256: crypto
+          .createHash("sha256")
+          .update(fs.readFileSync(apk))
+          .digest("hex"),
+      };
+    });
     await step("native firebase_auth and secure Session adapters", () =>
       passOnPhone(
         "integration_test/booking_session_adapters_stand_test.dart",
@@ -600,6 +624,40 @@ function aaptPath() {
       )
     : "";
   return fs.existsSync(candidate) ? candidate : "aapt";
+}
+
+/**
+ * Reads `aapt dump xmltree` of the debug network security config: the base
+ * config refuses cleartext and the only cleartext domain is exactly
+ * 127.0.0.1 without subdomains. Returns the domains or throws.
+ */
+export function loopbackOnlyCleartext(xmltree) {
+  const lines = xmltree.split(/\r?\n/).map((line) => line.trim());
+  const at = (element) =>
+    lines.findIndex((line) => line.startsWith(`E: ${element} `));
+  const base = at("base-config");
+  const domainConfig = at("domain-config");
+  if (base < 0 || domainConfig < 0)
+    throw new Error("network security config not found");
+  if (lines[base + 1] !== "A: cleartextTrafficPermitted=(type 0x12)0x0")
+    throw new Error("the base config must refuse cleartext");
+  if (
+    lines[domainConfig + 1] !==
+    "A: cleartextTrafficPermitted=(type 0x12)0xffffffff"
+  )
+    throw new Error("unexpected domain-config shape");
+  const domains = lines
+    .filter((line) => line.startsWith('C: "'))
+    .map((line) => line.slice(4, -1));
+  if (domains.length !== 1 || domains[0] !== "127.0.0.1")
+    throw new Error(
+      `cleartext domains must be exactly 127.0.0.1, got ${domains.join(", ")}`,
+    );
+  if (
+    lines.some((line) => line === "A: includeSubdomains=(type 0x12)0xffffffff")
+  )
+    throw new Error("subdomains must not be included");
+  return domains;
 }
 
 /** A short synthetic track in Riga, written fresh for each run. */

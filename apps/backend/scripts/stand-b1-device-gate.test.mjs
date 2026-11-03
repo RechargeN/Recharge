@@ -3,7 +3,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
-import { parseArgs, preconditions, routeGpx } from "./stand-b1-device-gate.mjs";
+import {
+  loopbackOnlyCleartext,
+  parseArgs,
+  preconditions,
+  routeGpx,
+} from "./stand-b1-device-gate.mjs";
 import {
   BridgeRefusal,
   deviceEnvDefine,
@@ -261,4 +266,43 @@ test("the synthetic GPX is a small GPX 1.1 track in Riga", () => {
   );
   assert.equal(gpx.match(/<trkpt /g).length, 4);
   assert.doesNotMatch(gpx, /<!DOCTYPE|<!ENTITY/);
+});
+
+const debugConfig = `E: network-security-config (line=3)
+  E: base-config (line=4)
+    A: cleartextTrafficPermitted=(type 0x12)0x0
+  E: domain-config (line=5)
+    A: cleartextTrafficPermitted=(type 0x12)0xffffffff
+    E: domain (line=6)
+      A: includeSubdomains=(type 0x12)0x0
+      C: "127.0.0.1"
+`;
+
+test("the debug APK may send cleartext only to 127.0.0.1", () => {
+  assert.deepEqual(loopbackOnlyCleartext(debugConfig), ["127.0.0.1"]);
+  assert.deepEqual(
+    loopbackOnlyCleartext(debugConfig.replaceAll("\n", "\r\n")),
+    ["127.0.0.1"],
+  );
+  const baseAllows = debugConfig.replace(
+    "cleartextTrafficPermitted=(type 0x12)0x0",
+    "cleartextTrafficPermitted=(type 0x12)0xffffffff",
+  );
+  for (const [config, expected] of [
+    [baseAllows, /base config/],
+    [
+      debugConfig.replace('C: "127.0.0.1"', 'C: "10.0.2.2"'),
+      /exactly 127.0.0.1/,
+    ],
+    [`${debugConfig}      C: "192.168.0.1"\n`, /exactly 127.0.0.1/],
+    [
+      debugConfig.replace(
+        "includeSubdomains=(type 0x12)0x0",
+        "includeSubdomains=(type 0x12)0xffffffff",
+      ),
+      /subdomains/,
+    ],
+    ["E: manifest (line=1)\n", /not found/],
+  ])
+    assert.throws(() => loopbackOnlyCleartext(config), expected);
 });

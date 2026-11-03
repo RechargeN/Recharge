@@ -3,45 +3,51 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:integration_test/integration_test.dart';
+import 'package:recharge/features/booking/data/booking_callable_adapter.dart';
 
 import '../test/unit/booking_backend_selection_test.dart' as selection;
 
-/// B1-device: the binding guards and the debug network policy on the phone.
+/// B1-device: the binding guards in the installed app on the phone.
 ///
 /// The selection suite (release, disabled and localOnly never reach a
-/// backend; only the loopback demo-recharge base is accepted) runs unchanged
-/// in the installed app. Then the Android policy of the debug build itself:
-/// cleartext to the phone's loopback (the stand through `adb reverse`) works,
-/// cleartext to any other host is refused by the platform before a socket is
-/// opened, so a test binding cannot silently reach a LAN or emulator address.
+/// backend; only the loopback demo-recharge base is accepted) runs unchanged.
+/// Then on the phone itself: the stand answers on its own loopback through
+/// `adb reverse`, and the Dart guard refuses the emulator, LAN and localhost
+/// bases before any request.
+///
+/// Measured on the A34 (2026-11-03): `dart:io` does not apply the Android
+/// network security config, so a Dart request to a LAN address really goes
+/// out. The debug config (cleartext only to 127.0.0.1, checked in the APK by
+/// the gate) covers the native stacks such as firebase_auth; for the Dart
+/// transport the guard below is the boundary.
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   selection.main();
 
   testWidgets(
-    'debug cleartext is allowed only to 127.0.0.1',
+    'the stand answers on loopback; other bases are refused before a request',
     (tester) async {
       expect(Platform.isAndroid, isTrue);
-      // The Functions Emulator through adb reverse answers (any status).
       final http.Response loopback = await http.get(
         Uri.parse('http://127.0.0.1:5001/'),
       );
       expect(loopback.statusCode, greaterThan(0));
-      for (final String host in <String>[
-        '10.0.2.2',
-        '192.168.0.1',
-        'localhost',
+      expect(
+        BookingBackendEndpoint.devEmulator(
+          Uri.parse('http://127.0.0.1:5001/demo-recharge/europe-west1'),
+        ).enabled,
+        isTrue,
+      );
+      for (final String base in <String>[
+        'http://10.0.2.2:5001/demo-recharge/europe-west1',
+        'http://192.168.0.1:5001/demo-recharge/europe-west1',
+        'https://127.0.0.1:5001/demo-recharge/europe-west1',
+        'http://127.0.0.1:5001/recharge-prod/europe-west1',
       ]) {
-        await expectLater(
-          http.get(Uri.parse('http://$host:5001/')),
-          throwsA(
-            predicate(
-              (Object error) =>
-                  '$error'.contains('Insecure HTTP is not allowed'),
-              'refused by the platform cleartext policy',
-            ),
-          ),
-          reason: host,
+        expect(
+          () => BookingBackendEndpoint.devEmulator(Uri.parse(base)),
+          throwsArgumentError,
+          reason: base,
         );
       }
     },
