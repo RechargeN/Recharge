@@ -608,14 +608,19 @@ class _ProfileDashboardTab extends StatelessWidget {
                   color: active ? Colors.white : const Color(0xFF0B3028),
                 ),
                 const SizedBox(width: 6),
+                // L4.9: long lv/ru labels at large text shrink to fit instead
+                // of being cut to "Созд…" (found in the language review).
                 Flexible(
-                  child: Text(
-                    label,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: active ? Colors.white : const Color(0xFF0B3028),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: active ? Colors.white : const Color(0xFF0B3028),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                 ),

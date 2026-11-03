@@ -113,7 +113,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get settingsSearch => 'Meklēšana un nosacījumi';
 
   @override
-  String get settingsSearchHint => 'Saglabātie meklējumi un atklāšanas filtri';
+  String get settingsSearchHint => 'Saglabātie meklējumi un kataloga filtri';
 
   @override
   String get settingsNotificationsHint => 'Iesūtne un maršrutu jaunumi';
@@ -483,7 +483,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get localErrorNoConflict =>
-      'Nav jaunākas servera versijas, ko atrisināt.';
+      'Nav jaunākas servera versijas, ar kuru jāsaskaņo izmaiņas.';
 
   @override
   String get localErrorForeignRecord => 'Šis melnraksts pieder citam kontam.';
@@ -575,7 +575,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: '$count vietas',
       one: '$count vieta',
-      zero: '$count vietas',
+      zero: '$count vietu',
     );
     return '$_temp0';
   }
@@ -616,7 +616,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: 'Rezervēt $count vietas',
       one: 'Rezervēt $count vietu',
-      zero: 'Rezervēt $count vietas',
+      zero: 'Rezervēt $count vietu',
     );
     return '$_temp0';
   }
@@ -643,10 +643,10 @@ class AppLocalizationsLv extends AppLocalizations {
       'event': 'Sadaļā Izveidot nav pasākuma melnraksta',
       'place': 'Sadaļā Izveidot nav vietas melnraksta',
       'rental': 'Sadaļā Izveidot nav nomas melnraksta',
-      'session': 'Sadaļā Izveidot nav sesijas melnraksta',
+      'session': 'Sadaļā Izveidot nav seansa melnraksta',
       'activity': 'Sadaļā Izveidot nav aktivitātes melnraksta',
       'collection': 'Sadaļā Izveidot nav kolekcijas melnraksta',
-      'findPeople': 'Sadaļā Izveidot nav cilvēku meklēšanas melnraksta',
+      'findPeople': 'Sadaļā Izveidot nav kompānijas meklēšanas melnraksta',
       'route': 'Sadaļā Izveidot nav maršruta melnraksta',
       'scenario': 'Sadaļā Izveidot nav scenārija melnraksta',
       'classWorkshop': 'Sadaļā Izveidot nav nodarbības / darbnīcas melnraksta',
@@ -660,11 +660,11 @@ class AppLocalizationsLv extends AppLocalizations {
     String _temp0 = intl.Intl.selectLogic(type, {
       'event': 'Mani pasākumi',
       'place': 'Manas vietas',
-      'rental': 'Manas nomas',
-      'session': 'Manas sesijas',
+      'rental': 'Mani nomas piedāvājumi',
+      'session': 'Mani seansi',
       'activity': 'Manas aktivitātes',
       'collection': 'Manas kolekcijas',
-      'findPeople': 'Mani cilvēku meklēšanas pieprasījumi',
+      'findPeople': 'Mani kompānijas meklēšanas pieprasījumi',
       'route': 'Mani maršruti',
       'scenario': 'Mani scenāriji',
       'classWorkshop': 'Manas nodarbības un darbnīcas',
@@ -852,7 +852,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get routeTrimRequired =>
-      'Ierakstīts GPS: pirms publicēšanas paslēpiet vismaz 200 m abos galos';
+      'GPS ieraksts: pirms publicēšanas paslēpiet vismaz 200 m maršruta sākumā un beigās';
 
   @override
   String get routeTrimEmpty =>
@@ -864,7 +864,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String scenarioShareUntil(String date, String token) {
-    return 'Nepublicēta saite līdz $date: $token';
+    return 'Piekļuve pēc saites līdz $date: $token';
   }
 
   @override
@@ -886,10 +886,10 @@ class AppLocalizationsLv extends AppLocalizations {
       'event': 'Pasākuma publicēšana (tests)',
       'place': 'Vietas publicēšana (tests)',
       'rental': 'Nomas publicēšana (tests)',
-      'session': 'Sesijas publicēšana (tests)',
+      'session': 'Seansa publicēšana (tests)',
       'activity': 'Aktivitātes publicēšana (tests)',
       'collection': 'Kolekcijas publicēšana (tests)',
-      'findPeople': 'Cilvēku meklēšanas publicēšana (tests)',
+      'findPeople': 'Kompānijas meklēšanas publicēšana (tests)',
       'route': 'Maršruta publicēšana (tests)',
       'scenario': 'Scenārija publicēšana (tests)',
       'classWorkshop': 'Nodarbības / darbnīcas publicēšana (tests)',
@@ -904,10 +904,11 @@ class AppLocalizationsLv extends AppLocalizations {
       'event': 'Piesakieties, lai publicētu pasākuma melnrakstu',
       'place': 'Piesakieties, lai publicētu vietas melnrakstu',
       'rental': 'Piesakieties, lai publicētu nomas melnrakstu',
-      'session': 'Piesakieties, lai publicētu sesijas melnrakstu',
+      'session': 'Piesakieties, lai publicētu seansa melnrakstu',
       'activity': 'Piesakieties, lai publicētu aktivitātes melnrakstu',
       'collection': 'Piesakieties, lai publicētu kolekcijas melnrakstu',
-      'findPeople': 'Piesakieties, lai publicētu cilvēku meklēšanas melnrakstu',
+      'findPeople':
+          'Piesakieties, lai publicētu kompānijas meklēšanas melnrakstu',
       'route': 'Piesakieties, lai publicētu maršrutu',
       'scenario': 'Piesakieties, lai publicētu scenāriju',
       'classWorkshop': 'Piesakieties, lai publicētu nodarbības melnrakstu',
@@ -932,10 +933,10 @@ class AppLocalizationsLv extends AppLocalizations {
       'event': 'Pasākums',
       'place': 'Vieta',
       'rental': 'Noma',
-      'session': 'Sesija',
+      'session': 'Seanss',
       'activity': 'Aktivitāte',
       'collection': 'Kolekcija',
-      'findPeople': 'Cilvēku meklēšana',
+      'findPeople': 'Kompānijas meklēšana',
       'route': 'Maršruts',
       'scenario': 'Scenārijs',
       'classWorkshop': 'Nodarbība / darbnīca',
@@ -975,7 +976,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: '$count izdzēstas lokālās kopijas vēl jāreģistrē serverī',
       one: '$count izdzēsta lokālā kopija vēl jāreģistrē serverī',
-      zero: '$count izdzēstas lokālās kopijas vēl jāreģistrē serverī',
+      zero: 'Serverī vēl jāreģistrē izdzēsto lokālo kopiju skaits: $count',
     );
     return '$_temp0';
   }
@@ -1190,7 +1191,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'legacy': 'Novecojis paziņojums',
       'routeMap': 'Maršruta karte',
       'map': 'Karte',
-      'details': 'Detaļas',
+      'details': 'Informācija',
       'saved': 'Saglabātais plāns',
       'search': 'Meklēšana',
       'publishStatus': 'Publicēšanas statuss',
@@ -1208,7 +1209,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'legacy': 'Atvērt',
       'routeMap': 'Atvērt maršrutu',
       'map': 'Atvērt karti',
-      'details': 'Atvērt detaļas',
+      'details': 'Atvērt informāciju',
       'saved': 'Atvērt saglabāto',
       'search': 'Meklēt',
       'publishStatus': 'Atvērt sludinājumu',
@@ -1225,11 +1226,11 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get validationAPlaceInTheGuideIsNo =>
-      'Kāda gida vieta vairs nav publiska. Noņemiet vai aizstājiet to.';
+      'Kāda ceļveža vieta vairs nav publiska. Noņemiet vai aizstājiet to.';
 
   @override
   String get validationAPlaceInTheGuideWasNot =>
-      'Kāda gida vieta netika atrasta. Noņemiet vai aizstājiet to.';
+      'Kāda ceļveža vieta netika atrasta. Noņemiet vai aizstājiet to.';
 
   @override
   String get validationAddACoverImage => 'Pievienojiet vāka attēlu.';
@@ -1259,7 +1260,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'Pievienojiet vismaz trīs vietas.';
 
   @override
-  String get validationAddPlacesToTheGuide => 'Pievienojiet gidam vietas.';
+  String get validationAddPlacesToTheGuide => 'Pievienojiet ceļvedim vietas.';
 
   @override
   String get validationAddTheDeliveryFeeZeroIfFree =>
@@ -1407,7 +1408,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get validationConfirmTheAvailabilityAgainItIsOlder =>
-      'Vēlreiz apstipriniet pieejamību — tā ir vecāka par nedēļu.';
+      'Vēlreiz apstipriniet pieejamību — dati ir vecāki par nedēļu.';
 
   @override
   String get validationConfirmTheCategory => 'Apstipriniet kategoriju.';
@@ -1465,7 +1466,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get validationNameTheArea => 'Nosauciet apgabalu.';
 
   @override
-  String get validationNameWhatYouRentOut => 'Nosauciet, ko izīrējat.';
+  String get validationNameWhatYouRentOut => 'Nosauciet, ko iznomājat.';
 
   @override
   String get validationOnlySavedPublishedPlacesCanBeAdded =>
@@ -1494,11 +1495,11 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get validationReviewTheGuideAgainItChangedAfter =>
-      'Pārskatiet gidu vēlreiz: tas mainījās pēc pārskatīšanas.';
+      'Pārskatiet ceļvedi vēlreiz: tas mainījās pēc pārskatīšanas.';
 
   @override
   String get validationReviewTheGuideBeforeSubmitting =>
-      'Pirms iesniegšanas pārskatiet gidu.';
+      'Pirms iesniegšanas pārskatiet ceļvedi.';
 
   @override
   String get validationSaveTheDraftAgainBeforeSubmitting =>
@@ -1506,7 +1507,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get validationSaveThePlacesInTheGuideBefore =>
-      'Pirms iesniegšanas saglabājiet gida vietas.';
+      'Pirms iesniegšanas saglabājiet ceļveža vietas.';
 
   @override
   String get validationSeasonalHoursAreNotSupportedYet =>
@@ -1537,11 +1538,11 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get validationShowTheApproximateAreaAt500M =>
-      'Rādiet aptuveno apgabalu ar precizitāti 500 m vai mazāku.';
+      'Publiski rādiet tikai aptuvenu apgabalu ar detalizāciju ne precīzāku par 500 m.';
 
   @override
   String get validationSomePlacesChangedStatusReviewTheGuide =>
-      'Dažām vietām mainījās statuss. Pārskatiet gidu vēlreiz.';
+      'Dažām vietām mainījās statuss. Pārskatiet ceļvedi vēlreiz.';
 
   @override
   String get validationTheLinkedPlaceIsNoLongerPublic =>
@@ -1561,7 +1562,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get validationThisCategoryCannotBeRentedOutHere =>
-      'Šo kategoriju šeit vēl nevar izīrēt.';
+      'Šīs kategorijas priekšmetus šeit vēl nevar iznomāt.';
 
   @override
   String get validationThisCategoryRequiresAnIDAtHandover =>
@@ -1690,7 +1691,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get fieldLabelGallery => 'Galerija';
 
   @override
-  String get fieldLabelGuideReview => 'Gida pārskatīšana';
+  String get fieldLabelGuideReview => 'Ceļveža pārskatīšana';
 
   @override
   String get fieldLabelHandover => 'Nodošana';
@@ -1729,7 +1730,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get fieldLabelPhotos => 'Fotoattēli';
 
   @override
-  String get fieldLabelPlacesInTheGuide => 'Gida vietas';
+  String get fieldLabelPlacesInTheGuide => 'Ceļveža vietas';
 
   @override
   String get fieldLabelPrices => 'Cenas';
@@ -1825,7 +1826,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get detailsVisitFailed => 'Neizdevās atjaunināt apmeklējumu vēsturi';
 
   @override
-  String get detailsLoadFailed => 'Detaļas neizdevās ielādēt';
+  String get detailsLoadFailed => 'Neizdevās ielādēt informāciju';
 
   @override
   String get detailsUnavailable => 'Nav pieejams';
@@ -1979,7 +1980,7 @@ class AppLocalizationsLv extends AppLocalizations {
   @override
   String sessionValidationIssue(String code) {
     String _temp0 = intl.Intl.selectLogic(code, {
-      'session_category_not_allowed': 'Šī kategorija nav pieejama sesijām.',
+      'session_category_not_allowed': 'Šī kategorija nav pieejama seansiem.',
       'session_resource_missing':
           'Nosauciet, ko rezervē, un norādiet tā laika joslu.',
       'session_timezone_invalid': 'Apstipriniet laika joslu.',
@@ -1987,12 +1988,12 @@ class AppLocalizationsLv extends AppLocalizations {
       'session_weekday_invalid': 'Pārbaudiet nedēļas dienas.',
       'session_range_invalid': 'Pārbaudiet sākuma un beigu laiku.',
       'session_range_overlap': 'Laika posmi pārklājas.',
-      'session_duration_out_of_range': 'Pārbaudiet sesijas ilgumu.',
-      'session_buffer_out_of_range': 'Pārbaudiet pārtraukumu starp sesijām.',
+      'session_duration_out_of_range': 'Pārbaudiet seansa ilgumu.',
+      'session_buffer_out_of_range': 'Pārbaudiet pārtraukumu starp seansiem.',
       'session_notice_out_of_range':
           'Pārbaudiet iepriekšējas rezervēšanas laiku.',
       'session_projection_overflow':
-          'Grafiks rada pārāk daudz sesiju. Saīsiniet to.',
+          'Grafiks rada pārāk daudz seansu. Saīsiniet to.',
       'session_exception_invalid': 'Pārbaudiet izņēmumus.',
       'session_party_size_out_of_range': 'Pārbaudiet grupas lielumu.',
       'session_price_invalid': 'Pārbaudiet cenu.',
@@ -2003,17 +2004,17 @@ class AppLocalizationsLv extends AppLocalizations {
           'Jūs nevarat publicēt šī profila vai lapas vārdā.',
       'session_legacy_review_required':
           'Pirms publicēšanas pārskatiet šo vecāko melnrakstu.',
-      'session_no_offers_in_window': 'Tuvākajās nedēļās nav nevienas sesijas.',
+      'session_no_offers_in_window': 'Tuvākajās nedēļās nav neviena seansa.',
       'session_candidates_dropped_for_buffer':
           'Daži laiki izlaisti, lai saglabātu pārtraukumus.',
       'session_dst_slots_skipped': 'Daži laiki izlaisti pulksteņa maiņas dēļ.',
       'session_external_state_unknown':
           'Rezervēšanas vietnes stāvokli neizdevās pārbaudīt.',
       'session_material_revision':
-          'Šī izmaiņa lūgs rezervējušajiem apstiprināt vēlreiz.',
+          'Pēc šīm izmaiņām viesiem ar rezervāciju būs atkārtoti jāapstiprina dalība.',
       'session_category_criteria_incomplete':
           'Aizpildiet kategorijas kritērijus.',
-      'other': 'Pārbaudiet šo sesijas daļu.',
+      'other': 'Pārbaudiet šo seansa daļu.',
     });
     return '$_temp0';
   }
@@ -2028,7 +2029,8 @@ class AppLocalizationsLv extends AppLocalizations {
       'route_too_long': 'Maršruts ir pārāk garš.',
       'route_duration_too_long': 'Maršruts aizņem pārāk daudz laika.',
       'loop_must_close': 'Lokam jābeidzas tur, kur tas sākas.',
-      'one_way_must_not_close': 'Vienvirziena maršrutam nav jābeidzas sākumā.',
+      'one_way_must_not_close':
+          'Vienvirziena maršruts nedrīkst beigties tā sākumpunktā.',
       'out_and_back_must_return':
           'Turp un atpakaļ maršrutam jāatgriežas sākumā.',
       'anchors_too_few': 'Pievienojiet maršrutam vairāk punktu.',
@@ -2205,7 +2207,7 @@ class AppLocalizationsLv extends AppLocalizations {
   @override
   String findPeopleValidationIssue(String code) {
     String _temp0 = intl.Intl.selectLogic(code, {
-      'details_missing': 'Trūkst Find People informācijas',
+      'details_missing': 'Trūkst kompānijas meklēšanas informācijas',
       'category_required': 'Izvēlieties kategoriju',
       'subcategory_required': 'Izvēlieties apakškategoriju',
       'tags_limit': 'Izmantojiet ne vairāk kā 8 birkas',
@@ -2213,7 +2215,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'language_invalid': 'Valodu kodiem jābūt BCP-47 formātā',
       'house_rules_limit': 'Izmantojiet ne vairāk kā 10 noteikumus',
       'public_contact_forbidden':
-          'Publiskajā tekstā nedrīkst būt kontakti, maksājumu saites vai ziņotāju lietotājvārdi',
+          'Publiskajā tekstā nedrīkst būt kontaktinformācija, maksājumu saites vai ziņapmaiņas lietotņu lietotājvārdi',
       'single_slot_count': 'Vienreizējam laikam vajag tieši vienu laika posmu',
       'poll_slot_count': 'Laika aptaujai vajag vismaz divus variantus',
       'recurring_slots':
@@ -2264,7 +2266,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'page_host': 'Lapas pieprasījumam vajag atbildīgo rīkotāju',
       'cohost_grants': 'Līdzrīkotāju tiesībām jāizmanto atbalstītas iespējas',
       'quiet_hours': 'Klusuma stundu minūtēm jābūt no 0 līdz 1439',
-      'safety_rules': 'Pieņemiet Find People drošības noteikumus',
+      'safety_rules': 'Pieņemiet kompānijas meklēšanas drošības noteikumus',
       'accuracy': 'Apstipriniet, ka pieprasījuma dati ir precīzi',
       'adult_only': 'Apstipriniet, ka pieprasījums ir pieaugušajiem 18+',
       'publisher_host_mismatch':
@@ -2328,42 +2330,42 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: '$max rakstzīmes',
       one: '$max rakstzīmi',
-      zero: '$max rakstzīmes',
+      zero: '$max rakstzīmju',
     );
     String _temp1 = intl.Intl.pluralLogic(
       max,
       locale: localeName,
       other: '$max rakstzīmes',
       one: '$max rakstzīmi',
-      zero: '$max rakstzīmes',
+      zero: '$max rakstzīmju',
     );
     String _temp2 = intl.Intl.pluralLogic(
       max,
       locale: localeName,
       other: '$max rakstzīmes',
       one: '$max rakstzīmi',
-      zero: '$max rakstzīmes',
+      zero: '$max rakstzīmju',
     );
     String _temp3 = intl.Intl.pluralLogic(
       max,
       locale: localeName,
       other: '$max rakstzīmes',
       one: '$max rakstzīmi',
-      zero: '$max rakstzīmes',
+      zero: '$max rakstzīmju',
     );
     String _temp4 = intl.Intl.pluralLogic(
       max,
       locale: localeName,
       other: '$max rakstzīmes',
       one: '$max rakstzīmi',
-      zero: '$max rakstzīmes',
+      zero: '$max rakstzīmju',
     );
     String _temp5 = intl.Intl.pluralLogic(
       max,
       locale: localeName,
       other: '$max rakstzīmes',
       one: '$max rakstzīmi',
-      zero: '$max rakstzīmes',
+      zero: '$max rakstzīmju',
     );
     String _temp6 = intl.Intl.selectLogic(field, {
       'equipmentNotes': 'Piezīmes par aprīkojumu nedrīkst pārsniegt $_temp0',
@@ -2593,7 +2595,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: '$count vienumus',
       one: '$count vienumu',
-      zero: '$count vienumus',
+      zero: '$count vienumu',
     );
     return 'Pievienojiet vismaz $_temp0';
   }
@@ -2605,7 +2607,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: '$max rakstzīmes',
       one: '$max rakstzīmi',
-      zero: '$max rakstzīmes',
+      zero: '$max rakstzīmju',
     );
     return 'Kuratora piezīme nedrīkst pārsniegt $_temp0';
   }
@@ -2888,17 +2890,17 @@ class AppLocalizationsLv extends AppLocalizations {
       'collection_submitted': 'Kolekcija nosūtīta pārbaudei.',
       'collection_published': 'Kolekcija publicēta.',
       'collection_published_sync_pending':
-          'Kolekcija publicēta, bet Discover vēl nav pabeidzis atjaunināšanu.',
+          'Kolekcija publicēta, bet sadaļa Atklāt vēl nav pabeidzis atjaunināšanu.',
       'collection_not_published':
           'Kolekcija netika publicēta. Melnraksts saglabāts.',
       'collection_items_removed_sync_pending':
-          'Vienumi noņemti, bet Discover vēl nav pabeidzis atjaunināšanu.',
+          'Vienumi noņemti, bet sadaļa Atklāt vēl nav pabeidzis atjaunināšanu.',
       'collection_archived_sync_pending':
-          'Kolekcija arhivēta, bet Discover vēl nav pabeidzis atjaunināšanu.',
+          'Kolekcija arhivēta, bet sadaļa Atklāt vēl nav pabeidzis atjaunināšanu.',
       'collection_rejection_reason_required':
           'Kolekcijas noraidīšanai vajag iemeslu.',
       'collection_accepted_sync_pending':
-          'Kolekcija pieņemta, bet Discover vēl nav pabeidzis atjaunināšanu.',
+          'Kolekcija pieņemta, bet sadaļa Atklāt vēl nav pabeidzis atjaunināšanu.',
       'scenario_ai_proposal_added':
           'AI priekšlikums pievienots jūsu scenārijam.',
       'scenario_generation_empty_prompt':
@@ -3061,7 +3063,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: '$count detaļas',
       one: '$count detaļu',
-      zero: '$count detaļas',
+      zero: '$count detaļu',
     );
     return 'Vēlāk var uzlabot: $_temp0';
   }
@@ -3258,7 +3260,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get createFormRemovePeriod => 'Noņemt periodu';
 
   @override
-  String get createFormHoursUnknown => 'Laiks nav zināms';
+  String get createFormHoursUnknown => 'Darba laiks nav zināms';
 
   @override
   String get createFormRegularSchedule => 'Regulārs grafiks';
@@ -3323,7 +3325,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get createFormTapMapConfirmRepresentativePoint =>
-      'Pieskarieties kartei un apstipriniet raksturīgo punktu.';
+      'Pieskarieties kartei un apstipriniet vietu raksturojošo punktu.';
 
   @override
   String get createFormWhere => 'Kur tā atrodas?';
@@ -3418,11 +3420,11 @@ class AppLocalizationsLv extends AppLocalizations {
   @override
   String createFormSeededFrom(String type) {
     String _temp0 = intl.Intl.selectLogic(type, {
-      'details': 'Sagatavots no detaļām',
+      'details': 'Sagatavots no informācijas lapas',
       'saved_search': 'Sagatavots no saglabāta meklējuma',
       'search': 'Sagatavots no meklēšanas nosacījumiem',
       'smart_search': 'Sagatavots no viedās meklēšanas',
-      'profile': 'Sagatavots no profila darba vietas',
+      'profile': 'Sagatavots no profila darbvietas',
       'scenario': 'Sagatavots no scenārija maršruta',
       'map': 'Sagatavots no kartes apgabala',
       'other': 'Sagatavots no Recharge',
@@ -3479,11 +3481,11 @@ class AppLocalizationsLv extends AppLocalizations {
   String get createFormConvertRental => 'Pārveidot par nomu';
 
   @override
-  String get createFormKeepSession => 'Paturēt nodarbību';
+  String get createFormKeepSession => 'Paturēt seansu';
 
   @override
   String get createFormLegacyOfferWasMigratedSafelyAs =>
-      'Šis vecais piedāvājums droši pārveidots par rezervējamu nodarbību. Izvēlieties nomu tikai tad, ja tiek iznomāts aprīkojums vai transports.';
+      'Šis vecais piedāvājums droši pārveidots par rezervējamu seansu. Izvēlieties nomu tikai tad, ja tiek iznomāts aprīkojums vai transports.';
 
   @override
   String get createFormCouldRental => 'Vai tā varētu būt noma?';
@@ -3577,7 +3579,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get createFormSuggestedDefaultsCategory =>
-      'Ieteiktie noklusējumi šai kategorijai';
+      'Ieteiktās noklusējuma vērtības šai kategorijai';
 
   @override
   String get createFormDeliveryFeeMinorUnits => 'Piegādes maksa (centos)';
@@ -3608,10 +3610,10 @@ class AppLocalizationsLv extends AppLocalizations {
   String get createFormLocationDisclosure => 'Vietas atklāšana';
 
   @override
-  String get createFormLongitude => 'Garums';
+  String get createFormLongitude => 'Ģeogrāfiskais garums';
 
   @override
-  String get createFormLatitude => 'Platums';
+  String get createFormLatitude => 'Ģeogrāfiskais platums';
 
   @override
   String get createFormPublicAreaLabel => 'Publiskās zonas nosaukums';
@@ -4398,7 +4400,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get createFormSearchPlaceRouteBookableSessionClass =>
-      'Meklēt vietu, maršrutu, nodarbību, meistarklasi, nomu';
+      'Meklēt vietu, maršrutu, rezervējamu seansu, nodarbību / darbnīcu, nomu';
 
   @override
   String get createFormChooseTypeOpenItsCreationPage =>
@@ -4855,7 +4857,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'RentalCondition_rentalNew': 'Jauns',
       'RentalCondition_likeNew': 'Kā jauns',
       'RentalCondition_good': 'Labs',
-      'RentalCondition_worn': 'Lietots',
+      'RentalCondition_worn': 'Nolietots',
       'RentalDepositCollectionMethod_none': 'Bez depozīta',
       'RentalDepositCollectionMethod_atHandover': 'Izsniedzot',
       'RentalDepositCollectionMethod_externalProvider':
@@ -4923,7 +4925,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'ScenarioPace_relaxed': 'Mierīgs',
       'ScenarioPace_balanced': 'Līdzsvarots',
       'ScenarioPace_intensive': 'Intensīvs',
-      'ScenarioPartyKind_solo': 'Viens',
+      'ScenarioPartyKind_solo': 'Vienatnē',
       'ScenarioPartyKind_couple': 'Pāris',
       'ScenarioPartyKind_friends': 'Draugi',
       'ScenarioPartyKind_family': 'Ģimene',
@@ -4948,7 +4950,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'ScenarioItemKind_event': 'Pasākums',
       'ScenarioItemKind_activity': 'Aktivitāte',
       'ScenarioItemKind_route': 'Maršruts',
-      'ScenarioItemKind_bookableSession': 'Nodarbība',
+      'ScenarioItemKind_bookableSession': 'Seanss',
       'ScenarioItemKind_stay': 'Naktsmītne',
       'ScenarioItemKind_plannedTransport': 'Plānotais transports',
       'ScenarioItemKind_timeBlock': 'Laika bloks',
@@ -4997,7 +4999,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: '$count datumi',
       one: '$count datums',
-      zero: '$count datumi',
+      zero: '$count datumu',
     );
     return '$_temp0';
   }
@@ -5019,7 +5021,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: '$count problēmas bloķē publicēšanu',
       one: '$count problēma bloķē publicēšanu',
-      zero: '$count problēmas bloķē publicēšanu',
+      zero: 'Publicēšanu bloķējošo problēmu skaits: $count',
     );
     return '$_temp0';
   }
@@ -5085,10 +5087,10 @@ class AppLocalizationsLv extends AppLocalizations {
       'activity': 'Recharge aktivitāte',
       'route': 'Maršruts',
       'place': 'Vieta',
-      'session': 'Rezervējama nodarbība',
+      'session': 'Rezervējams seanss',
       'scenario': 'Scenārijs',
       'quickPlan': 'Vecais Quick Plan',
-      'findPeople': 'Atrast cilvēkus',
+      'findPeople': 'Kompānijas meklēšana',
       'classWorkshop': 'Nodarbība / meistarklase',
       'rental': 'Noma / aprīkojums',
       'collection': 'Kolekcija / ceļvedis',
@@ -5164,10 +5166,10 @@ class AppLocalizationsLv extends AppLocalizations {
       'activity': 'Jauns: Recharge aktivitāte',
       'route': 'Jauns: Maršruts',
       'place': 'Jauns: Vieta',
-      'session': 'Jauns: Rezervējama nodarbība',
+      'session': 'Jauns: Rezervējams seanss',
       'scenario': 'Jauns: Scenārijs',
       'quickPlan': 'Jauns: Vecais Quick Plan',
-      'findPeople': 'Jauns: Atrast cilvēkus',
+      'findPeople': 'Jauns: Kompānijas meklēšana',
       'classWorkshop': 'Jauns: Nodarbība / meistarklase',
       'rental': 'Jauns: Noma / aprīkojums',
       'collection': 'Jauns: Kolekcija / ceļvedis',
@@ -5183,10 +5185,10 @@ class AppLocalizationsLv extends AppLocalizations {
       'activity': 'Izveidot: Recharge aktivitāte',
       'route': 'Izveidot: Maršruts',
       'place': 'Izveidot: Vieta',
-      'session': 'Izveidot: Rezervējama nodarbība',
+      'session': 'Izveidot: Rezervējams seanss',
       'scenario': 'Izveidot: Scenārijs',
       'quickPlan': 'Izveidot: Vecais Quick Plan',
-      'findPeople': 'Izveidot: Atrast cilvēkus',
+      'findPeople': 'Izveidot: Kompānijas meklēšana',
       'classWorkshop': 'Izveidot: Nodarbība / meistarklase',
       'rental': 'Izveidot: Noma / aprīkojums',
       'collection': 'Izveidot: Kolekcija / ceļvedis',
@@ -5202,10 +5204,10 @@ class AppLocalizationsLv extends AppLocalizations {
       'activity': 'Bez maksas: Recharge aktivitāte',
       'route': 'Bez maksas: Maršruts',
       'place': 'Bez maksas: Vieta',
-      'session': 'Bez maksas: Rezervējama nodarbība',
+      'session': 'Bez maksas: Rezervējams seanss',
       'scenario': 'Bez maksas: Scenārijs',
       'quickPlan': 'Bez maksas: Vecais Quick Plan',
-      'findPeople': 'Bez maksas: Atrast cilvēkus',
+      'findPeople': 'Bez maksas: Kompānijas meklēšana',
       'classWorkshop': 'Bez maksas: Nodarbība / meistarklase',
       'rental': 'Bez maksas: Noma / aprīkojums',
       'collection': 'Bez maksas: Kolekcija / ceļvedis',
@@ -5223,13 +5225,13 @@ class AppLocalizationsLv extends AppLocalizations {
       'route': 'Maršruts: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
       'place': 'Vieta: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
       'session':
-          'Rezervējama nodarbība: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
+          'Rezervējams seanss: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
       'scenario':
           'Scenārijs: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
       'quickPlan':
           'Vecais Quick Plan: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
       'findPeople':
-          'Atrast cilvēkus: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
+          'Kompānijas meklēšana: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
       'classWorkshop':
           'Nodarbība / meistarklase: sākuma datums un laiks, UTC (GGGG-MM-DDTHH:mm:ssZ) *',
       'rental':
@@ -5248,7 +5250,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String createFindPeopleFindPeople(int done, int total) {
-    return 'Find People · $done/$total';
+    return 'Kompānijas meklēšana · $done/$total';
   }
 
   @override
@@ -5268,7 +5270,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get createFindPeoplePublishFindPeopleRequest =>
-      'Publicēt Find People pieprasījumu';
+      'Publicēt kompānijas meklēšanas pieprasījumu';
 
   @override
   String get createFindPeopleValidationSummary => 'Pārbaudes kopsavilkums';
@@ -5279,7 +5281,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get createFindPeopleIAcceptFindPeopleSafetyRules =>
-      'Es pieņemu Find People drošības noteikumus *';
+      'Es pieņemu kompānijas meklēšanas drošības noteikumus *';
 
   @override
   String get createFindPeopleRequestOnlyAdults18 =>
@@ -5313,7 +5315,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get createFindPeopleUntitledFindPeopleRequest =>
-      'Find People pieprasījums bez nosaukuma';
+      'Kompānijas meklēšanas pieprasījums bez nosaukuma';
 
   @override
   String get createFindPeopleMirrorsSafePublicDetailsContract =>
@@ -5485,7 +5487,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get createFindPeopleOnlyApproximatePublicAreaAppearsDiscover =>
-      'Discover rāda tikai aptuvenu publisku zonu. Precīzā informācija paliek privāta.';
+      'Sadaļā Atklāt tiek rādīts tikai aptuvens publiskais apgabals. Precīzā informācija paliek privāta.';
 
   @override
   String get createFindPeopleMeetingLocation => 'Tikšanās vieta';
@@ -5574,7 +5576,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get createFindPeopleFindPeopleDraftDataBeingPrepared =>
-      'Find People melnraksta dati tiek sagatavoti…';
+      'Kompānijas meklēšanas melnraksta dati tiek sagatavoti…';
 
   @override
   String get createSessionOnlyWhatMarkedRequiredBlocksPublishing =>
@@ -5688,7 +5690,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get createSessionLoadingBookableSessionDraft =>
-      'Ielādē rezervējamās nodarbības melnrakstu…';
+      'Ielādē rezervējamā seansa melnrakstu…';
 
   @override
   String get createClassPublish => 'Publicēt';
@@ -5737,7 +5739,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get createClassLocalTimeDoesNotExistAmbiguous =>
-      'Šāds vietējais laiks nepastāv vai ir divdomīgs';
+      'Šāds vietējais laiks nepastāv vai ir neviennozīmīgs';
 
   @override
   String get createClassPublicArea => 'Publiskā zona';
@@ -6179,7 +6181,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get createRouteHideRouteStart => 'Slēpt maršruta sākumu';
 
   @override
-  String get createRoutePrivacyTrim => 'Privātuma apgriešana';
+  String get createRoutePrivacyTrim => 'Maršruta galu paslēpšana privātumam';
 
   @override
   String get createRouteReviewRecordedTrack => 'Pārbaudīt ierakstīto maršrutu';
@@ -6899,7 +6901,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get createScenarioWarnings => 'Brīdinājumi';
 
   @override
-  String get createScenarioUnknownTravel => 'Nezināms ceļš';
+  String get createScenarioUnknownTravel => 'Ceļā pavadītais laiks nav zināms';
 
   @override
   String get createScenarioTimeBlocks => 'Laika bloki';
@@ -7267,7 +7269,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String scenarioIntakeNotice(String code) {
     String _temp0 = intl.Intl.selectLogic(code, {
       'targetsUnavailable':
-          'Scenāriji nav pieejami. Mēģiniet vēlreiz no detaļām.',
+          'Scenāriji nav pieejami. Mēģiniet vēlreiz no informācijas lapas.',
       'chooseTarget': 'Izvēlieties scenāriju vai izveidojiet jaunu.',
       'targetNotEditable': 'Šo scenāriju vairs nevar rediģēt.',
       'titleRequired': 'Ievadiet scenārija nosaukumu.',
@@ -7281,7 +7283,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'revisionConflict':
           'Scenārijs ir mainījies. Atgriezieties, atveriet to vēlreiz un pārskatiet.',
       'intentExpired':
-          'Šīs izvēles derīgums beidzies. Atgriezieties detaļās un mēģiniet vēlreiz.',
+          'Šīs izvēles derīgums beidzies. Atgriezieties informācijas lapā un mēģiniet vēlreiz.',
       'targetGone': 'Šis scenārijs vairs nav pieejams. Izvēlieties citu.',
       'lockedLegBoundary':
           'Šo ievietošanas vietu aizsargā bloķēts loģistikas posms.',
@@ -7300,7 +7302,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'place': 'Vieta',
       'activity': 'Aktivitāte',
       'route': 'Maršruts',
-      'bookableSession': 'Nodarbība',
+      'bookableSession': 'Seanss',
       'other': 'Objekts',
     });
     return '$_temp0';
@@ -8152,7 +8154,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get discoverPublishedRoute => 'Publicēts maršruts';
 
   @override
-  String get discoverOpenDetails => 'Atvērt detaļas';
+  String get discoverOpenDetails => 'Atvērt informāciju';
 
   @override
   String get discoverSelectForScenario => 'Atlasīt scenārijam';
@@ -8254,7 +8256,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get discoverMapArea => 'Kartes zona';
 
   @override
-  String get discoverRechargeIdea => 'Atpūtas ideja';
+  String get discoverRechargeIdea => 'Recharge ideja';
 
   @override
   String get discoverMapAreaIdea => 'Ideja kartes zonai';
@@ -8430,7 +8432,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get discoverNoReturnTrip => 'Bez atpakaļceļa';
 
   @override
-  String get discoverWidenTime => 'Paplašināt laiku';
+  String get discoverWidenTime => 'Paplašināt laika intervālu';
 
   @override
   String get discoverRefresh => 'Atjaunot';
@@ -8614,7 +8616,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: '$count laika varianti',
       one: '$count laika variants',
-      zero: '$count laika varianti',
+      zero: '$count laika variantu',
     );
     return '$_temp0';
   }
@@ -8693,7 +8695,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: '$count pieturas',
       one: '$count pietura',
-      zero: '$count pieturas',
+      zero: '$count pieturu',
     );
     return '$_temp0';
   }
@@ -8812,7 +8814,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: 'norādītas $count vienības',
       one: 'norādīta $count vienība',
-      zero: 'norādītas $count vienības',
+      zero: 'Norādīto vienību skaits: $count',
     );
     return '$_temp0';
   }
@@ -8850,7 +8852,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: 'Scenārijam pievienotas $count pieturas',
       one: 'Scenārijam pievienota $count pietura',
-      zero: 'Scenārijam pievienotas $count pieturas',
+      zero: 'Scenārijam pievienoto pieturu skaits: $count',
     );
     return '$_temp0';
   }
@@ -8879,7 +8881,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: 'Atrasti $count',
       one: 'Atrasts $count',
-      zero: 'Atrasti $count',
+      zero: 'Atrasto rezultātu skaits: $count',
     );
     return '$_temp0';
   }
@@ -8921,7 +8923,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: '$count stundas',
       one: '$count stunda',
-      zero: '$count stundas',
+      zero: '$count stundu',
     );
     return '$_temp0';
   }
@@ -8983,7 +8985,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String discoverSurface(String value) {
     String _temp0 = intl.Intl.selectLogic(value, {
       'asphalt': 'Asfalts',
-      'paved': 'Segums',
+      'paved': 'Cietais segums',
       'concrete': 'Betons',
       'paving_stones': 'Bruģakmens',
       'sett': 'Bruģis',
@@ -9010,7 +9012,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get discoverIntakeFindPeopleNotSupported =>
-      'Cilvēku meklēšanas pieprasījumu nevar pievienot scenārijam.';
+      'Kompānijas meklēšanas pieprasījumu nevar pievienot scenārijam.';
 
   @override
   String get discoverIntakeMissingIdentity =>
@@ -9032,7 +9034,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: 'Scenārijam atlasītas $count pieturas.',
       one: 'Scenārijam atlasīta $count pietura.',
-      zero: 'Scenārijam atlasītas $count pieturas.',
+      zero: 'Scenārijam atlasīto pieturu skaits: $count.',
     );
     return '$_temp0';
   }
@@ -9109,7 +9111,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: 'Scenārijam pievienotas $count pieturas',
       one: 'Scenārijam pievienota $count pietura',
-      zero: 'Scenārijam pievienotas $count pieturas',
+      zero: 'Scenārijam pievienoto pieturu skaits: $count',
     );
     return '$_temp0';
   }
@@ -9121,14 +9123,14 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: '$count dienas',
       one: '$count diena',
-      zero: '$count dienas',
+      zero: '$count dienu',
     );
     String _temp1 = intl.Intl.pluralLogic(
       total,
       locale: localeName,
       other: '$total aktīvi vienumi',
       one: '$total aktīvs vienums',
-      zero: '$total aktīvi vienumi',
+      zero: '$total aktīvu vienumu',
     );
     return '$_temp0 · $_temp1';
   }
@@ -9229,7 +9231,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get discoverListedByPageLabel => 'Publicējusi lapa';
 
   @override
-  String get discoverListedByLabel => 'Publicējis';
+  String get discoverListedByLabel => 'Publicēja:';
 
   @override
   String get discoverLearningOutcomesLabel => 'Ko iemācīsieties:';
@@ -9343,7 +9345,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: 'Maršruta priekšskatījums: $count posmi',
       one: 'Maršruta priekšskatījums: $count posms',
-      zero: 'Maršruta priekšskatījums: $count posmi',
+      zero: 'Maršruta priekšskatījums: $count posmu',
     );
     return '$_temp0';
   }
@@ -9378,16 +9380,16 @@ class AppLocalizationsLv extends AppLocalizations {
   String get discoverBadgeActivity => 'AKTIVITĀTE';
 
   @override
-  String get discoverBadgeFindPeople => 'MEKLĒ CILVĒKUS';
+  String get discoverBadgeFindPeople => 'KOMPĀNIJAS MEKLĒŠANA';
 
   @override
-  String get discoverBadgeSession => 'NODARBĪBA';
+  String get discoverBadgeSession => 'SEANSS';
 
   @override
   String get discoverBadgeClassWorkshop => 'NODARBĪBA / DARBNĪCA';
 
   @override
-  String get identityProfessionalPage => 'Professional Page';
+  String get identityProfessionalPage => 'Profesionālā lapa';
 
   @override
   String get identityVerificationRevoked => 'Pārbaude atsaukta';
@@ -9396,7 +9398,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get identityVerificationRejected => 'Pārbaude noraidīta';
 
   @override
-  String get identityVerificationPending => 'Pārbaude gaida';
+  String get identityVerificationPending => 'Gaida pārbaudi';
 
   @override
   String get identityKindPrivateProfessional => 'Privāts speciālists';
@@ -9430,7 +9432,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get identityPageName => 'Lapas nosaukums';
 
   @override
-  String get identityCreatePage => 'Izveidot Professional Page';
+  String get identityCreatePage => 'Izveidot profesionālo lapu';
 
   @override
   String get identityPreviewOnlyRoles =>
@@ -9441,7 +9443,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get identityNoPageYet =>
-      'Jūs vēl neesat izveidojis Professional Page.';
+      'Jums vēl nav izveidotas profesionālās lapas.';
 
   @override
   String get identityCreateContent => 'Veidot saturu';
@@ -9465,7 +9467,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get identityVerifiedTools => 'Pārbaudīts · Rīki atbilst jūsu tiesībām';
 
   @override
-  String get identityPersonalPending => 'Personīgais profils · Pārbaude gaida';
+  String get identityPersonalPending => 'Personīgais profils · Gaida pārbaudi';
 
   @override
   String get identityPersonalNotStarted =>
@@ -9486,10 +9488,11 @@ class AppLocalizationsLv extends AppLocalizations {
       'Moderatori izskatīs jūsu pieprasījumu.';
 
   @override
-  String get identityLimitRequestPending => 'Papildu lapas pieprasījums gaida';
+  String get identityLimitRequestPending =>
+      'Papildu lapas pieprasījums gaida izskatīšanu';
 
   @override
-  String get identityCreator => 'Creator';
+  String get identityCreator => 'Autors';
 
   @override
   String get identityOk => 'Labi';
@@ -9521,7 +9524,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get identityShare => 'Kopīgot';
 
   @override
-  String get identityVerifiedPage => 'Pārbaudīta Professional Page';
+  String get identityVerifiedPage => 'Pārbaudīta profesionālā lapa';
 
   @override
   String get identityPreviewDoesNotPublish =>
@@ -9540,11 +9543,11 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get identityContentScoped =>
-      'Saturs attiecas tieši uz šo Professional Page.';
+      'Saturs attiecas tieši uz šo profesionālo lapu.';
 
   @override
   String get identityOverviewModeration =>
-      'Professional Page pārskats un moderācijas statuss.';
+      'Profesionālās lapas pārskats un moderācijas statuss.';
 
   @override
   String get identityPreviewUntilVerified =>
@@ -9555,21 +9558,21 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get identityNoPageInvented =>
-      'Šim priekšskatījumam lapa netiek izdomāta. Izveidojiet lapu, lai aktivizētu tās darba vidi un publicētāja kontekstu.';
+      'Šim priekšskatījumam lapa netiek izdomāta. Izveidojiet lapu, lai aktivizētu tās darbvietu un publicētāja kontekstu.';
 
   @override
   String get identityContentAfterRealPage =>
-      'Saturs parādās tikai pēc tam, kad lietotājs izveido īstu Professional Page vai pievienojas tai.';
+      'Saturs parādās tikai pēc tam, kad lietotājs izveido profesionālo lapu vai pievienojas tai.';
 
   @override
-  String get identityPagePreview => 'Professional Page priekšskatījums';
+  String get identityPagePreview => 'Profesionālās lapas priekšskatījums';
 
   @override
-  String get identitySwitchPage => 'Pārslēgt Professional Page';
+  String get identitySwitchPage => 'Pārslēgt profesionālo lapu';
 
   @override
   String get identityCreateOrSelectPage =>
-      'Izveidojiet vai izvēlieties Professional Page';
+      'Izveidojiet vai izvēlieties profesionālo lapu';
 
   @override
   String get identityUserId => 'Lietotāja ID';
@@ -9606,7 +9609,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get identityNotSet => 'Nav iestatīts.';
 
   @override
-  String get identityCustomActivityLabel => 'Sava darbības nosaukums';
+  String get identityCustomActivityLabel => 'Pielāgots darbības nosaukums';
 
   @override
   String get identityDescription => 'Apraksts';
@@ -9616,10 +9619,10 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get identitySwitchWorkspaceHint =>
-      'Personīgais profils, Professional Pages un Admin piekļuve';
+      'Personīgais profils, profesionālās lapas un administratora piekļuve';
 
   @override
-  String get identitySwitchWorkspace => 'Pārslēgt darba profilu';
+  String get identitySwitchWorkspace => 'Pārslēgt darbvietu';
 
   @override
   String get profileDateTbd => 'Datums tiks noteikts';
@@ -9673,7 +9676,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get profileFinishDraft => 'Pabeigt melnrakstu';
 
   @override
-  String get profileCreatorNextSteps => 'Creator nākamie soļi';
+  String get profileCreatorNextSteps => 'Autora nākamie soļi';
 
   @override
   String get profileMapListingArea => 'Sludinājuma zona kartē';
@@ -9688,7 +9691,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get profileOpenCreate => 'Atvērt veidošanu';
 
   @override
-  String get profileCreatorListing => 'Creator sludinājums';
+  String get profileCreatorListing => 'Autora sludinājums';
 
   @override
   String get profileBuildRoute => 'Veidot maršrutu';
@@ -9698,10 +9701,10 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get profileManageDrafts =>
-      'Pārvaldiet melnrakstus un publicētos sludinājumus vienā darba vidē.';
+      'Pārvaldiet melnrakstus un publicētos sludinājumus vienā darbvietā.';
 
   @override
-  String get profileCreatorPublications => 'Creator publikācijas';
+  String get profileCreatorPublications => 'Autora publikācijas';
 
   @override
   String get profileListingFromLatestSmart =>
@@ -9712,10 +9715,10 @@ class AppLocalizationsLv extends AppLocalizations {
       'Veidot maršrutu no pēdējās viedās meklēšanas';
 
   @override
-  String get profileMapSmart => 'Viedais kartē';
+  String get profileMapSmart => 'Viedā meklēšana kartē';
 
   @override
-  String get profileResumeSmart => 'Turpināt viedo';
+  String get profileResumeSmart => 'Turpināt viedo meklēšanu';
 
   @override
   String get profileAnyArea => 'Jebkura zona';
@@ -9822,7 +9825,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get profileContinueInSearch => 'Turpināt meklēšanas nosacījumos';
 
   @override
-  String get profileFindPeople => 'Atrast cilvēkus';
+  String get profileFindPeople => 'Meklēt kompāniju';
 
   @override
   String get profileOpenScenarioBlock =>
@@ -9871,7 +9874,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get profileCreated => 'Izveidots';
 
   @override
-  String get profileWorkspace => 'Profila darba vide';
+  String get profileWorkspace => 'Profila darbvieta';
 
   @override
   String get profileSignInRequired => 'Nepieciešama pieteikšanās';
@@ -9881,7 +9884,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'Pārbaudi un pieejamos rīkus skatiet iestatījumos';
 
   @override
-  String get profileCreatorTools => 'Creator rīki';
+  String get profileCreatorTools => 'Autora rīki';
 
   @override
   String get profileSavedList => 'Saglabātais saraksts';
@@ -9914,7 +9917,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get quickPlanSmartRoute => 'Viedais maršruts';
 
   @override
-  String get quickPlanRechargeIdea => 'Atpūtas ideja';
+  String get quickPlanRechargeIdea => 'Recharge ideja';
 
   @override
   String get quickPlanTplActiveHint =>
@@ -10149,7 +10152,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'Uzaicināt uz pašreizējo saglabāto plānu';
 
   @override
-  String get quickPlanInviteUserId => 'Uzaicināt esoša lietotāja ID';
+  String get quickPlanInviteUserId => 'Uzaicināt pēc esoša lietotāja ID';
 
   @override
   String get quickPlanUseKnownUserId =>
@@ -10208,7 +10211,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get favoritesSmartRoute => 'Viedais maršruts';
 
   @override
-  String get favoritesRechargeIdea => 'Atpūtas ideja';
+  String get favoritesRechargeIdea => 'Recharge ideja';
 
   @override
   String get favoritesAnyTime => 'Jebkurā laikā';
@@ -10283,7 +10286,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get favoritesSavedIntents => 'Saglabātie nodomi';
 
   @override
-  String get favoritesOpenDiscover => 'Atvērt Discover';
+  String get favoritesOpenDiscover => 'Atvērt sadaļu Atklāt';
 
   @override
   String get favoritesEmpty => 'Saglabātu pasākumu vēl nav';
@@ -10370,22 +10373,22 @@ class AppLocalizationsLv extends AppLocalizations {
     String _temp0 = intl.Intl.selectLogic(code, {
       'workspace_recovered':
           'Nepieejamā lapa tika atiestatīta uz jūsu personīgo profilu.',
-      'workspace_load_failed': 'Neizdevās ielādēt darba profilus.',
-      'workspace_switched': 'Darba profils pārslēgts.',
+      'workspace_load_failed': 'Neizdevās ielādēt darbvietas.',
+      'workspace_switched': 'Darbvieta pārslēgta.',
       'workspace_access_unavailable':
           'Piekļuve izvēlētajai lapai nav pieejama.',
-      'workspace_switch_failed': 'Neizdevās pārslēgt darba profilu.',
+      'workspace_switch_failed': 'Neizdevās pārslēgt darbvietu.',
       'admin_preview_selected': 'Admin priekšskatījums izvēlēts.',
-      'page_created': 'Professional Page izveidota un nosūtīta pārbaudei.',
+      'page_created': 'Profesionālā lapa izveidota un nosūtīta pārbaudei.',
       'self_service_page_limit_reached':
           'Sasniegts 3 lapu limits. Nosūtiet pieprasījumu moderatoriem.',
-      'page_create_failed': 'Neizdevās izveidot Professional Page.',
+      'page_create_failed': 'Neizdevās izveidot profesionālo lapu.',
       'page_limit_request_sent': 'Papildu lapas pieprasījums nosūtīts.',
       'page_limit_request_unavailable':
           'Pieprasījums pieejams pēc trīs lapu izveides.',
       'page_limit_request_failed':
           'Neizdevās nosūtīt pieprasījumu moderatoriem.',
-      'other': 'Neizdevās ielādēt darba profilus.',
+      'other': 'Neizdevās ielādēt darbvietas.',
     });
     return '$_temp0';
   }
@@ -10450,8 +10453,8 @@ class AppLocalizationsLv extends AppLocalizations {
   @override
   String identityInboxTitle(String code) {
     String _temp0 = intl.Intl.selectLogic(code, {
-      'identity_page_created_user': 'Professional Page izveidota',
-      'identity_page_created_moderators': 'Jauna Professional Page',
+      'identity_page_created_user': 'Profesionālā lapa izveidota',
+      'identity_page_created_moderators': 'Jauna profesionālā lapa',
       'identity_page_limit_request_user': 'Pieprasījums nosūtīts',
       'identity_page_limit_request_moderators': 'Papildu lapas pieprasījums',
       'other': 'Paziņojums',
@@ -10466,7 +10469,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'identity_page_created_moderators':
           'Izveidota jauna lapa, nepieciešama pārbaude.',
       'identity_page_limit_request_user':
-          'Moderatori izskatīs papildu Professional Page.',
+          'Moderatori izskatīs papildu profesionālo lapu.',
       'other': '',
     });
     return '$_temp0';
@@ -10479,7 +10482,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: '$count lapas',
       one: '$count lapa',
-      zero: '$count lapas',
+      zero: '$count lapu',
     );
     return 'Lietotājs pieprasīja limitu: $_temp0.';
   }
@@ -10488,9 +10491,9 @@ class AppLocalizationsLv extends AppLocalizations {
   String profileRoleTitle(String value) {
     String _temp0 = intl.Intl.selectLogic(value, {
       'pro_generator': 'Pro ģenerators',
-      'creator': 'Creator',
+      'creator': 'Autors',
       'user': 'Lietotājs',
-      'other': 'Creator',
+      'other': 'Autors',
     });
     return '$_temp0';
   }
@@ -10584,7 +10587,7 @@ class AppLocalizationsLv extends AppLocalizations {
       locale: localeName,
       other: 'Paplašināt $count pieturas līdz scenārijam',
       one: 'Paplašināt $count pieturu līdz scenārijam',
-      zero: 'Paplašināt $count pieturas līdz scenārijam',
+      zero: 'Paplašināt $count pieturu līdz scenārijam',
     );
     return '$_temp0';
   }
@@ -10780,7 +10783,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get profileQuickActions => 'ĀTRĀS DARBĪBAS';
 
   @override
-  String get profileWorkspaceHeading => 'Darba vide';
+  String get profileWorkspaceHeading => 'Darbvieta';
 
   @override
   String profileSearchContinuations(int count) {
@@ -10848,7 +10851,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'Privātas, pašu atzīmētas apmeklētās vietas.';
 
   @override
-  String get visitedSelfReported => 'Atzīmēts pašam';
+  String get visitedSelfReported => 'Jūsu atzīmēts';
 
   @override
   String get identityProfile => 'Profils';
@@ -10863,7 +10866,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get identitySectionPersonal => 'PERSONĪGAIS';
 
   @override
-  String get identitySectionProfessionalPages => 'PROFESSIONAL PAGES';
+  String get identitySectionProfessionalPages => 'PROFESIONĀLĀS LAPAS';
 
   @override
   String get identitySectionAdministration => 'ADMINISTRĒŠANA';
@@ -10984,10 +10987,10 @@ class AppLocalizationsLv extends AppLocalizations {
   String get createClassFoldSecond => 'Otrais (ziemas laiks)';
 
   @override
-  String get createClassStartHhmm => 'Sākums (SS:MM)';
+  String get createClassStartHhmm => 'Sākums (HH:mm)';
 
   @override
-  String get createClassEndHhmm => 'Beigas (SS:MM)';
+  String get createClassEndHhmm => 'Beigas (HH:mm)';
 
   @override
   String get createCollectionNoTitleYet => '(nosaukuma vēl nav)';
@@ -11001,7 +11004,7 @@ class AppLocalizationsLv extends AppLocalizations {
     String _temp0 = intl.Intl.selectLogic(value, {
       'place': 'Vieta',
       'route': 'Maršruts',
-      'bookableSession': 'Nodarbība',
+      'bookableSession': 'Seanss',
       'classWorkshop': 'Nodarbība / darbnīca',
       'rental': 'Noma',
       'other': 'Objekts',
@@ -11583,7 +11586,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String createSessionNotice(int minutes) {
-    return 'iepriekšējs brīdinājums $minutes min';
+    return 'iepriekšēja rezervēšana vismaz $minutes min pirms sākuma';
   }
 
   @override
@@ -11622,7 +11625,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get discoverSlotLabel => 'Laika posms';
 
   @override
-  String get discoverGuides => 'Gidi';
+  String get discoverGuides => 'Ceļveži';
 
   @override
   String discoverItemsCount(int count) {
@@ -11661,7 +11664,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get errorAccountChanged =>
-      'Pierakstītais konts ir mainījies. Atjaunojiet un mēģiniet vēlreiz.';
+      'Pieteiktais konts ir mainījies. Atsvaidziniet un mēģiniet vēlreiz.';
 
   @override
   String get errorProcessingRestricted =>
@@ -11724,8 +11727,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'Pārāk daudz aktīvu sesiju. Izrakstieties citā ierīcē un mēģiniet vēlreiz.';
 
   @override
-  String get identityErrorRecentAuth =>
-      'Lai turpinātu, pierakstieties vēlreiz.';
+  String get identityErrorRecentAuth => 'Lai turpinātu, piesakieties vēlreiz.';
 
   @override
   String get localErrorStorageFull =>
@@ -11773,7 +11775,8 @@ class AppLocalizationsLv extends AppLocalizations {
   String get taxCategoryDance => 'Dejas';
 
   @override
-  String get taxCategoryOutdoorNatureWalking => 'Daba, pastaigas un brīvdabā';
+  String get taxCategoryOutdoorNatureWalking =>
+      'Daba, pastaigas un brīvdabas aktivitātes';
 
   @override
   String get taxCategoryWaterActivities => 'Aktivitātes uz ūdens';
@@ -11812,7 +11815,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get taxCategoryAutoMoto => 'Auto un moto';
 
   @override
-  String get taxCategoryGeekTech => 'Geek kultūra un tehnoloģijas';
+  String get taxCategoryGeekTech => 'Gīku kultūra un tehnoloģijas';
 
   @override
   String get taxCategoryDatingSingles => 'Iepazīšanās un randiņi';
@@ -12088,7 +12091,8 @@ class AppLocalizationsLv extends AppLocalizations {
   String get taxSubcategoryCareerTalk => 'Karjeras lekcija';
 
   @override
-  String get taxSubcategoryLegalInfoSession => 'Juridiskā informācija';
+  String get taxSubcategoryLegalInfoSession =>
+      'Informatīva tikšanās par juridiskiem jautājumiem';
 
   @override
   String get taxSubcategoryBookClub => 'Grāmatu klubs';
@@ -12514,7 +12518,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get taxSubcategoryRunningRace => 'Skrējiens';
 
   @override
-  String get taxSubcategoryCyclingRace => 'Velobrauciens';
+  String get taxSubcategoryCyclingRace => 'Velosacensības';
 
   @override
   String get taxSubcategoryFitnessChallenge => 'Fitnesa izaicinājums';
@@ -12541,7 +12545,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get taxSubcategoryContemporaryDance => 'Laikmetīgā deja';
 
   @override
-  String get taxSubcategoryBallroomDance => 'Sporta dejas';
+  String get taxSubcategoryBallroomDance => 'Balles dejas';
 
   @override
   String get taxSubcategoryFolkDance => 'Tautas dejas';
@@ -12800,7 +12804,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get taxSubcategoryWeekendTrip => 'Nedēļas nogales brauciens';
 
   @override
-  String get taxSubcategoryLocalExperience => 'Vietējā pieredze';
+  String get taxSubcategoryLocalExperience => 'Vietējās dzīves iepazīšana';
 
   @override
   String get taxSubcategoryTouristExcursion => 'Tūristu ekskursija';
@@ -12812,10 +12816,10 @@ class AppLocalizationsLv extends AppLocalizations {
   String get taxSubcategoryFoodTastingTour => 'Degustāciju tūre';
 
   @override
-  String get taxSubcategoryCraftExperience => 'Amatniecības pieredze';
+  String get taxSubcategoryCraftExperience => 'Amatniecības iepazīšana';
 
   @override
-  String get taxSubcategoryFarmExperience => 'Lauku sētas pieredze';
+  String get taxSubcategoryFarmExperience => 'Lauku sētas dzīves iepazīšana';
 
   @override
   String get taxSubcategoryCastleTour => 'Pils apmeklējums';
@@ -12987,7 +12991,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get taxSubcategoryPetCareTalk => 'Lekcija par mājdzīvnieku kopšanu';
 
   @override
-  String get taxSubcategoryAnimalTherapy => 'Dzīvnieku terapija';
+  String get taxSubcategoryAnimalTherapy => 'Terapija ar dzīvnieku palīdzību';
 
   @override
   String get taxSubcategoryCharityEvent => 'Labdarības pasākums';
@@ -13172,7 +13176,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get taxSubcategorySunsetReset => 'Atpūta saulrietā';
 
   @override
-  String get taxSubcategoryNatureReset => 'Atpūta dabas ieskautā';
+  String get taxSubcategoryNatureReset => 'Atpūta dabā';
 
   @override
   String get taxSubcategoryDigitalDetox => 'Digitālais detokss';
@@ -13403,7 +13407,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get taxSubcategorySinglesDinner => 'Iepazīšanās vakariņas';
 
   @override
-  String get taxSubcategoryBlindDateEvent => 'Akls randiņš';
+  String get taxSubcategoryBlindDateEvent => 'Aklais randiņš';
 
   @override
   String get taxSubcategoryDatingGameEvent => 'Iepazīšanās spēle';

@@ -214,7 +214,10 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                     const <CreateTaxonomySubcategory>[])
               DropdownMenuItem<CreateTaxonomySubcategory>(
                 value: sub,
-                child: Text(sub.title, overflow: TextOverflow.ellipsis),
+                child: Text(
+                  taxonomyLabel(context.l10n, sub.id),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
           ],
           onChanged: selectedCategory == null

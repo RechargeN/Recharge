@@ -170,7 +170,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
                     const <CreateTaxonomySubcategory>[])
               DropdownMenuItem<CreateTaxonomySubcategory>(
                 value: sub,
-                child: Text(sub.title),
+                child: Text(taxonomyLabel(context.l10n, sub.id)),
               ),
           ],
           onChanged: selectedCategory == null

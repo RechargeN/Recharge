@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/create_taxonomy.dart';
 import '../../application/find_people_create_config.dart';
@@ -119,7 +120,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 .map(
                   (CreateTaxonomyCategory item) => DropdownMenuItem<String>(
                     value: item.id,
-                    child: Text(item.title),
+                    child: Text(taxonomyLabel(context.l10n, item.id)),
                   ),
                 )
                 .toList(growable: false),
@@ -151,7 +152,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 .map(
                   (CreateTaxonomySubcategory item) => DropdownMenuItem<String>(
                     value: item.id,
-                    child: Text(item.title),
+                    child: Text(taxonomyLabel(context.l10n, item.id)),
                   ),
                 )
                 .toList(growable: false),

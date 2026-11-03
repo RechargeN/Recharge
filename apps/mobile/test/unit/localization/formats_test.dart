@@ -154,17 +154,20 @@ void main() {
       expect(en.bookingSeatsCount(0), '0 seats');
     });
 
-    test('lv: zero (0, 10–20, 30…), one (1, 21, 31… not 11), other', () {
-      expect(lv.bookingSeatsCount(1), '1 vieta');
-      expect(lv.bookingSeatsCount(21), '21 vieta');
-      expect(lv.bookingSeatsCount(11), '11 vietas');
-      expect(lv.bookingSeatsCount(0), '0 vietas');
-      expect(lv.bookingSeatsCount(2), '2 vietas');
-      expect(lv.bookingBookSeats(1), 'Rezervēt 1 vietu');
-      expect(lv.bookingBookSeats(3), 'Rezervēt 3 vietas');
-      expect(lv.errorRateLimitedSeconds(1), contains('1 sekundes'));
-      expect(lv.errorRateLimitedSeconds(30), contains('30 sekundēm'));
-    });
+    test(
+      'lv: zero (0, 10–20, 30…) takes the genitive (owner-appointed review), one (1, 21, 31… not 11), other',
+      () {
+        expect(lv.bookingSeatsCount(1), '1 vieta');
+        expect(lv.bookingSeatsCount(21), '21 vieta');
+        expect(lv.bookingSeatsCount(11), '11 vietu');
+        expect(lv.bookingSeatsCount(0), '0 vietu');
+        expect(lv.bookingSeatsCount(2), '2 vietas');
+        expect(lv.bookingBookSeats(1), 'Rezervēt 1 vietu');
+        expect(lv.bookingBookSeats(3), 'Rezervēt 3 vietas');
+        expect(lv.errorRateLimitedSeconds(1), contains('1 sekundes'));
+        expect(lv.errorRateLimitedSeconds(30), contains('30 sekundēm'));
+      },
+    );
 
     test('ru: one (1, 21), few (2–4, 22), many (5–20, 25, 11), other', () {
       expect(ru.bookingSeatsCount(1), '1 место');

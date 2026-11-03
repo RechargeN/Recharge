@@ -1,4 +1,5 @@
 import '../../../../../core/localization/recharge_formats.dart';
+import '../../../../../core/localization/taxonomy_labels.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -542,7 +543,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
                     .map(
                       (item) => DropdownMenuItem<String>(
                         value: item.id,
-                        child: Text(item.title),
+                        child: Text(taxonomyLabel(context.l10n, item.id)),
                       ),
                     )
                     .toList(growable: false),
@@ -576,7 +577,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
                     .map(
                       (item) => DropdownMenuItem<String>(
                         value: item.id,
-                        child: Text(item.title),
+                        child: Text(taxonomyLabel(context.l10n, item.id)),
                       ),
                     )
                     .toList(growable: false),

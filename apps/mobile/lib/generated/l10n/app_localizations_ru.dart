@@ -113,7 +113,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsSearch => 'Поиск и условия';
 
   @override
-  String get settingsSearchHint => 'Сохранённые поиски и фильтры';
+  String get settingsSearchHint => 'Сохранённые поиски и фильтры каталога';
 
   @override
   String get settingsNotificationsHint => 'Входящие и обновления маршрутов';
@@ -161,7 +161,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsProfileSaved => 'Профиль сохранён';
 
   @override
-  String get authSignInHeadline => 'Войдите, чтобы сохранить и управлять';
+  String get authSignInHeadline =>
+      'Войдите, чтобы сохранять контент и управлять им';
 
   @override
   String get authSignInToContinue => 'Войдите, чтобы продолжить';
@@ -172,7 +173,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get authScenarioRequiresSignIn =>
-      'Личный Scenario доступен только авторизованному пользователю.';
+      'Личный сценарий доступен только авторизованному пользователю.';
 
   @override
   String get authEmailLabel => 'Email';
@@ -357,7 +358,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Импорт за это время изменился. Обновите и попробуйте снова.';
 
   @override
-  String get importErrorRolledBack => 'Этот импорт был откачен.';
+  String get importErrorRolledBack => 'Этот импорт был отменён.';
 
   @override
   String get importErrorOriginalRemoved => 'Локальный оригинал уже удалён.';
@@ -644,14 +645,14 @@ class AppLocalizationsRu extends AppLocalizations {
       'event': 'В разделе «Создать» нет черновика события',
       'place': 'В разделе «Создать» нет черновика места',
       'rental': 'В разделе «Создать» нет черновика аренды',
-      'session': 'В разделе «Создать» нет черновика сессии',
+      'session': 'В разделе «Создать» нет черновика сеанса',
       'activity': 'В разделе «Создать» нет черновика активности',
       'collection': 'В разделе «Создать» нет черновика подборки',
-      'findPeople': 'В разделе «Создать» нет черновика поиска людей',
+      'findPeople': 'В разделе «Создать» нет черновика поиска компании',
       'route': 'В разделе «Создать» нет черновика маршрута',
       'scenario': 'В разделе «Создать» нет черновика сценария',
       'classWorkshop':
-          'В разделе «Создать» нет черновика занятия / мастер-класса',
+          'В разделе «Создать» нет черновика занятия / практического занятия',
       'other': 'В разделе «Создать» нет черновика',
     });
     return '$_temp0';
@@ -662,14 +663,14 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.selectLogic(type, {
       'event': 'Мои события',
       'place': 'Мои места',
-      'rental': 'Мои аренды',
-      'session': 'Мои сессии',
+      'rental': 'Мои предложения аренды',
+      'session': 'Мои сеансы',
       'activity': 'Мои активности',
       'collection': 'Мои подборки',
-      'findPeople': 'Мои запросы на поиск людей',
+      'findPeople': 'Мои запросы на поиск компании',
       'route': 'Мои маршруты',
       'scenario': 'Мои сценарии',
-      'classWorkshop': 'Мои занятия и мастер-классы',
+      'classWorkshop': 'Мои занятия и практические занятия',
       'other': 'Мои объекты',
     });
     return '$_temp0';
@@ -846,16 +847,17 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get routeHiddenEndsUnknown => 'Скрытые концы: неизвестно';
+  String get routeHiddenEndsUnknown =>
+      'Скрытые участки в начале и конце: неизвестны';
 
   @override
   String routeHiddenEnds(String start, String end) {
-    return 'Скрытые концы: начало $start м, конец $end м';
+    return 'Скрытые участки: в начале $start м, в конце $end м';
   }
 
   @override
   String get routeTrimRequired =>
-      'Записанный GPS: перед публикацией скройте не менее 200 м с обоих концов';
+      'GPS-трек: перед публикацией скройте не менее 200 м в начале и конце';
 
   @override
   String get routeTrimEmpty =>
@@ -867,7 +869,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String scenarioShareUntil(String date, String token) {
-    return 'Ссылка по приглашению до $date: $token';
+    return 'Доступ по ссылке до $date: $token';
   }
 
   @override
@@ -889,13 +891,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'event': 'Публикация события (тест)',
       'place': 'Публикация места (тест)',
       'rental': 'Публикация аренды (тест)',
-      'session': 'Публикация сессии (тест)',
+      'session': 'Публикация сеанса (тест)',
       'activity': 'Публикация активности (тест)',
       'collection': 'Публикация подборки (тест)',
-      'findPeople': 'Публикация поиска людей (тест)',
+      'findPeople': 'Публикация поиска компании (тест)',
       'route': 'Публикация маршрута (тест)',
       'scenario': 'Публикация сценария (тест)',
-      'classWorkshop': 'Публикация занятия / мастер-класса (тест)',
+      'classWorkshop': 'Публикация занятия / практического занятия (тест)',
       'other': 'Публикация (тест)',
     });
     return '$_temp0';
@@ -907,10 +909,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'event': 'Войдите, чтобы опубликовать черновик события',
       'place': 'Войдите, чтобы опубликовать черновик места',
       'rental': 'Войдите, чтобы опубликовать черновик аренды',
-      'session': 'Войдите, чтобы опубликовать черновик сессии',
+      'session': 'Войдите, чтобы опубликовать черновик сеанса',
       'activity': 'Войдите, чтобы опубликовать черновик активности',
       'collection': 'Войдите, чтобы опубликовать черновик подборки',
-      'findPeople': 'Войдите, чтобы опубликовать черновик поиска людей',
+      'findPeople': 'Войдите, чтобы опубликовать черновик поиска компании',
       'route': 'Войдите, чтобы опубликовать маршрут',
       'scenario': 'Войдите, чтобы опубликовать сценарий',
       'classWorkshop': 'Войдите, чтобы опубликовать черновик занятия',
@@ -935,13 +937,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'event': 'Событие',
       'place': 'Место',
       'rental': 'Аренда',
-      'session': 'Сессия',
+      'session': 'Сеанс',
       'activity': 'Активность',
       'collection': 'Подборка',
-      'findPeople': 'Поиск людей',
+      'findPeople': 'Поиск компании',
       'route': 'Маршрут',
       'scenario': 'Сценарий',
-      'classWorkshop': 'Занятие / мастер-класс',
+      'classWorkshop': 'Занятие / практическое занятие',
       'other': 'Объект',
     });
     return '$_temp0';
@@ -1022,7 +1024,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'publisher_not_eligible': 'вы не можете публиковать от этого имени',
       'local_id': 'есть только локальные ссылки',
       'unsupported_capability': 'использует ещё не поддерживаемые функции',
-      'rolled_back': 'импорт откачен',
+      'rolled_back': 'импорт отменён',
       'rollback_pending': 'откат ждёт сервер',
       'cleanup_reserved': 'локальная копия удаляется',
       'cleanup_pending': 'удаление ещё нужно отметить',
@@ -1057,7 +1059,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'verified': 'проверен',
       'failed': 'ошибка',
       'rollbackPending': 'ждёт отката',
-      'rolledBack': 'откачен',
+      'rolledBack': 'отменён',
       'cleanupReserved': 'локальная копия удаляется',
       'other': 'неизвестно',
     });
@@ -1113,7 +1115,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get importCleanupRollbackPending => 'сохранена (откат ждёт сервер)';
 
   @override
-  String get importCleanupRolledBack => 'сохранена (импорт откачен)';
+  String get importCleanupRolledBack => 'сохранена (импорт отменён)';
 
   @override
   String get importAgain => 'Импортировать снова';
@@ -1412,7 +1414,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get validationConfirmTheAvailabilityAgainItIsOlder =>
-      'Подтвердите доступность снова: она старше недели.';
+      'Подтвердите доступность снова: данные старше недели.';
 
   @override
   String get validationConfirmTheCategory => 'Подтвердите категорию.';
@@ -1497,7 +1499,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get validationRemoveThePartFromTheBookingLink =>
-      'Уберите часть после # из ссылки бронирования.';
+      'Удалите # и всё после него из ссылки бронирования.';
 
   @override
   String get validationReviewTheGuideAgainItChangedAfter =>
@@ -1544,7 +1546,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get validationShowTheApproximateAreaAt500M =>
-      'Показывайте примерный район с точностью 500 м или грубее.';
+      'Показывайте только примерный район с детализацией не точнее 500 м.';
 
   @override
   String get validationSomePlacesChangedStatusReviewTheGuide =>
@@ -1984,7 +1986,7 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String sessionValidationIssue(String code) {
     String _temp0 = intl.Intl.selectLogic(code, {
-      'session_category_not_allowed': 'Эта категория недоступна для сессий.',
+      'session_category_not_allowed': 'Эта категория недоступна для сеансов.',
       'session_resource_missing':
           'Укажите, что бронируется, и его часовой пояс.',
       'session_timezone_invalid': 'Подтвердите часовой пояс.',
@@ -1992,12 +1994,12 @@ class AppLocalizationsRu extends AppLocalizations {
       'session_weekday_invalid': 'Проверьте дни недели.',
       'session_range_invalid': 'Проверьте время начала и окончания.',
       'session_range_overlap': 'Временные слоты пересекаются.',
-      'session_duration_out_of_range': 'Проверьте длительность сессии.',
-      'session_buffer_out_of_range': 'Проверьте перерыв между сессиями.',
+      'session_duration_out_of_range': 'Проверьте длительность сеанса.',
+      'session_buffer_out_of_range': 'Проверьте перерыв между сеансами.',
       'session_notice_out_of_range':
           'Проверьте срок предварительного бронирования.',
       'session_projection_overflow':
-          'Расписание создаёт слишком много сессий. Сократите его.',
+          'Расписание создаёт слишком много сеансов. Сократите его.',
       'session_exception_invalid': 'Проверьте исключения.',
       'session_party_size_out_of_range': 'Проверьте размер группы.',
       'session_price_invalid': 'Проверьте цену.',
@@ -2008,17 +2010,17 @@ class AppLocalizationsRu extends AppLocalizations {
           'Вы не можете публиковать от имени этого профиля или страницы.',
       'session_legacy_review_required':
           'Проверьте этот старый черновик перед публикацией.',
-      'session_no_offers_in_window': 'В ближайшие недели нет ни одной сессии.',
+      'session_no_offers_in_window': 'В ближайшие недели нет ни одного сеанса.',
       'session_candidates_dropped_for_buffer':
-          'Часть времени пропущена, чтобы сохранить перерывы.',
+          'Некоторые временные слоты пропущены, чтобы сохранить перерывы.',
       'session_dst_slots_skipped':
-          'Часть времени пропущена из-за перевода часов.',
+          'Некоторые временные слоты пропущены из-за перевода часов.',
       'session_external_state_unknown':
           'Не удалось проверить состояние сайта бронирования.',
       'session_material_revision':
-          'Это изменение попросит забронировавших подтвердить снова.',
+          'После этого изменения гостям с бронированием потребуется повторно подтвердить участие.',
       'session_category_criteria_incomplete': 'Заполните критерии категории.',
-      'other': 'Проверьте эту часть сессии.',
+      'other': 'Проверьте эту часть сеанса.',
     });
     return '$_temp0';
   }
@@ -2220,7 +2222,7 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String findPeopleValidationIssue(String code) {
     String _temp0 = intl.Intl.selectLogic(code, {
-      'details_missing': 'Нет данных Find People',
+      'details_missing': 'Нет данных поиска компании',
       'category_required': 'Выберите категорию',
       'subcategory_required': 'Выберите подкатегорию',
       'tags_limit': 'Используйте не больше 8 тегов',
@@ -2271,7 +2273,7 @@ class AppLocalizationsRu extends AppLocalizations {
           'Для примерной стоимости нужны положительная сумма и валюта',
       'cost_amount_forbidden': 'Сумма бывает только у примерной стоимости',
       'expense_items':
-          'Для раздела по статьям нужны запланированные статьи расходов',
+          'Для распределения по статьям нужны запланированные статьи расходов',
       'expense_invalid':
           'Каждой статье расходов нужны ID, категория и положительная сумма',
       'publisher': 'Нужен публикующий',
@@ -2279,7 +2281,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'page_host': 'Запросу от страницы нужен ответственный организатор',
       'cohost_grants': 'Права соорганизаторов должны быть из поддерживаемых',
       'quiet_hours': 'Минуты тихих часов должны быть от 0 до 1439',
-      'safety_rules': 'Примите правила безопасности Find People',
+      'safety_rules': 'Примите правила безопасности поиска компании',
       'accuracy': 'Подтвердите, что данные запроса точны',
       'adult_only': 'Подтвердите, что запрос только для взрослых 18+',
       'publisher_host_mismatch':
@@ -2776,7 +2778,7 @@ class AppLocalizationsRu extends AppLocalizations {
           'В кратком описании должно быть 20–240 символов',
       'full_description_length':
           'В полном описании должно быть 50–4000 символов',
-      'category_not_whitelisted': 'Эта категория недоступна для проката',
+      'category_not_whitelisted': 'Эта категория недоступна для аренды',
       'category_not_confirmed': 'Подтвердите категорию',
       'inventory_group_count': 'Добавьте от 1 до 50 групп предметов',
       'no_available_group': 'Отметьте хотя бы одну группу как доступную',
@@ -2799,9 +2801,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'delivery_fee_missing':
           'Укажите стоимость доставки (ноль, если бесплатно)',
       'duration_bounds_invalid':
-          'Проверьте минимальный и максимальный срок проката',
+          'Проверьте минимальный и максимальный срок аренды',
       'billing_unit_exceeds_min_duration':
-          'Единица оплаты не может быть длиннее минимального срока проката',
+          'Единица оплаты не может быть длиннее минимального срока аренды',
       'min_renter_age_required':
           'Укажите минимальный возраст арендатора для этой категории',
       'id_required_at_handover':
@@ -2814,7 +2816,7 @@ class AppLocalizationsRu extends AppLocalizations {
           'Первая ступень цены должна начинаться с одной единицы',
       'rate_steps_not_increasing': 'Ступени цены должны расти по числу единиц',
       'rate_price_increases':
-          'Более долгий прокат не может стоить дороже за единицу',
+          'Более долгий аренда не может стоить дороже за единицу',
       'rate_step_currency_or_sign':
           'Используйте одну валюту и положительные цены',
       'deposit_currency_mismatch': 'Залог должен быть в валюте цены',
@@ -2827,7 +2829,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'external_url_missing': 'Добавьте ссылку для бронирования',
       'external_url_not_https': 'Используйте безопасную ссылку https',
       'attestation_incomplete': 'Перед публикацией подтвердите все заявления',
-      'other': 'Проверьте эту часть проката.',
+      'other': 'Проверьте эту часть аренды.',
     });
     return '$_temp0';
   }
@@ -2924,17 +2926,17 @@ class AppLocalizationsRu extends AppLocalizations {
       'collection_submitted': 'Подборка отправлена на проверку.',
       'collection_published': 'Подборка опубликована.',
       'collection_published_sync_pending':
-          'Подборка опубликована, но Discover ещё не обновился.',
+          'Подборка опубликована, но лента ещё не обновился.',
       'collection_not_published':
           'Подборка не опубликована. Черновик сохранён.',
       'collection_items_removed_sync_pending':
-          'Пункты удалены, но Discover ещё не обновился.',
+          'Пункты удалены, но лента ещё не обновился.',
       'collection_archived_sync_pending':
-          'Подборка архивирована, но Discover ещё не обновился.',
+          'Подборка архивирована, но лента ещё не обновился.',
       'collection_rejection_reason_required':
           'Для отказа по подборке нужна причина.',
       'collection_accepted_sync_pending':
-          'Подборка принята, но Discover ещё не обновился.',
+          'Подборка принята, но лента ещё не обновился.',
       'scenario_ai_proposal_added': 'Предложение ИИ добавлено в ваш сценарий.',
       'scenario_generation_empty_prompt':
           'Опишите план, который хотите собрать.',
@@ -3516,17 +3518,17 @@ class AppLocalizationsRu extends AppLocalizations {
   String get createFormScenarioTaxonomy => 'Категории сценария';
 
   @override
-  String get createFormConvertRental => 'Сделать прокатом';
+  String get createFormConvertRental => 'Преобразовать в предложение аренды';
 
   @override
   String get createFormKeepSession => 'Оставить сеанс';
 
   @override
   String get createFormLegacyOfferWasMigratedSafelyAs =>
-      'Это старое предложение безопасно перенесено как бронируемый сеанс. Выбирайте «Прокат», только если сдаётся снаряжение или транспорт.';
+      'Это старое предложение безопасно перенесено как бронируемый сеанс. Выбирайте «Аренда», только если сдаётся снаряжение или транспорт.';
 
   @override
-  String get createFormCouldRental => 'Может, это прокат?';
+  String get createFormCouldRental => 'Это предложение аренды?';
 
   @override
   String get createFormRechargeCreate => 'Recharge Create';
@@ -3706,10 +3708,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createFormCreateRentalCapabilityRequiredEditPublish =>
-      'Чтобы редактировать или публиковать, нужно право создавать прокат.';
+      'Чтобы редактировать или публиковать, нужно право создавать предложения аренды.';
 
   @override
-  String get createFormRentalDataBeingPrepared => 'Данные проката готовятся…';
+  String get createFormRentalDataBeingPrepared =>
+      'Данные предложения аренды готовятся…';
 
   @override
   String createFormRemoveGalleryImage(int count) {
@@ -3856,11 +3859,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createFormCloseMinutesBeforeOccurrence =>
-      'Закрывать за минут до начала';
+      'Закрывать за указанное число минут до начала';
 
   @override
   String get createFormOpenMinutesBeforeOccurrence =>
-      'Открывать за минут до начала';
+      'Открывать за указанное число минут до начала';
 
   @override
   String get createFormWindowType => 'Тип окна';
@@ -3912,11 +3915,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get createFormGuestPolicy => 'Правило для гостей';
 
   @override
-  String get createFormFuturePromotionPolicy => 'Будущее правило продвижения';
+  String get createFormFuturePromotionPolicy =>
+      'Правило будущего перевода из листа ожидания';
 
   @override
   String get createFormPreviewOnlyNoQueuePromotionRuns =>
-      'Только предпросмотр — очередь и продвижение не работают';
+      'Только предпросмотр — очередь и перевод из листа ожидания не работают';
 
   @override
   String get createFormConfigureWaitlist => 'Настроить лист ожидания';
@@ -4434,7 +4438,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createFormSearchPlaceRouteBookableSessionClass =>
-      'Поиск места, маршрута, сеанса, занятия, проката';
+      'Поиск места, маршрута, сеанса, занятия, аренды';
 
   @override
   String get createFormChooseTypeOpenItsCreationPage =>
@@ -4480,7 +4484,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get createFormWhyHere => 'Почему это здесь?';
 
   @override
-  String get createFormFeatured => 'Избранное';
+  String get createFormFeatured => 'Рекомендуемое';
 
   @override
   String get createFormAddItemsPreviousStepFirst =>
@@ -4664,7 +4668,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createStepRentalTermsDescription =>
-      'Срок проката, возраст, документы и требования безопасности';
+      'Срок аренды, возраст, документы и требования безопасности';
 
   @override
   String get createStepRentalPricingTitle => 'Цены и залог';
@@ -4694,9 +4698,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'publicSpace': 'Общественное пространство',
       'naturalDestination': 'Природное место',
       'culturalVenue': 'Культурная площадка',
-      'hospitality': 'Кафе, ресторан или гостеприимство',
+      'hospitality': 'Заведение питания или гостеприимства',
       'activityVenue': 'Площадка для занятий или услуг',
-      'paidAttraction': 'Платная достопримечательность',
+      'paidAttraction': 'Объект с организованным обслуживанием',
       'balanced': 'Обычное место',
       'other': 'Обычное место',
     });
@@ -4915,7 +4919,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'FindPeopleCostType_free': 'Бесплатно',
       'FindPeopleCostType_estimated': 'Примерные расходы',
       'FindPeopleCostType_unknown': 'Неизвестно',
-      'FindPeopleExpenseSplitMode_none': 'Без раздела',
+      'FindPeopleExpenseSplitMode_none': 'Без распределения',
       'FindPeopleExpenseSplitMode_equal': 'Поровну',
       'FindPeopleExpenseSplitMode_itemized': 'По статьям',
       'FindPeopleExpenseSplitMode_settleLater': 'Рассчитаться позже',
@@ -4941,7 +4945,8 @@ class AppLocalizationsRu extends AppLocalizations {
       'FindPeopleSkillLevel_advanced': 'Продвинутый',
       'FindPeopleVerificationLevel_none': 'Без проверки',
       'FindPeopleVerificationLevel_phone': 'Телефон',
-      'FindPeopleVerificationLevel_identityDocument': 'Документ личности',
+      'FindPeopleVerificationLevel_identityDocument':
+          'Документ, удостоверяющий личность',
       'FindPeopleVerificationLevel_organization': 'Организация',
       'FindPeopleVisibility_public': 'Публичный',
       'FindPeopleVisibility_unlisted': 'По ссылке',
@@ -4957,7 +4962,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'ScenarioPace_relaxed': 'Спокойный',
       'ScenarioPace_balanced': 'Сбалансированный',
       'ScenarioPace_intensive': 'Насыщенный',
-      'ScenarioPartyKind_solo': 'Один',
+      'ScenarioPartyKind_solo': 'В одиночку',
       'ScenarioPartyKind_couple': 'Пара',
       'ScenarioPartyKind_friends': 'Друзья',
       'ScenarioPartyKind_family': 'Семья',
@@ -4991,7 +4996,8 @@ class AppLocalizationsRu extends AppLocalizations {
       'RouteSegmentSource_freehand': 'От руки',
       'RouteSegmentSource_recordedGps': 'Запись GPS',
       'RouteSegmentSource_importedGpx': 'Импорт GPX',
-      'RouteSegmentSource_intentionalDirect': 'Намеренная прямая',
+      'RouteSegmentSource_intentionalDirect':
+          'Прямое соединение по выбору автора',
       'RouteSegmentSource_fallbackDirect': 'Прямая (запасной вариант)',
       'RouteSegmentOperationState_ready': 'Готов',
       'RouteSegmentOperationState_routing': 'Прокладывается',
@@ -5125,9 +5131,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'session': 'Бронируемый сеанс',
       'scenario': 'Сценарий',
       'quickPlan': 'Старый Quick Plan',
-      'findPeople': 'Найти людей',
-      'classWorkshop': 'Занятие / мастер-класс',
-      'rental': 'Прокат / снаряжение',
+      'findPeople': 'Поиск компании',
+      'classWorkshop': 'Занятие / практическое занятие',
+      'rental': 'Аренда / снаряжение',
       'collection': 'Подборка / гид',
       'other': 'Объект',
     });
@@ -5186,7 +5192,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'quickPlan': 'Ожидаемые траты',
       'findPeople': 'Ожидаемые траты',
       'classWorkshop': 'Цена участия',
-      'rental': 'Цена проката',
+      'rental': 'Цена аренды',
       'collection': 'Бюджет подборки',
       'other': 'Цена',
     });
@@ -5203,9 +5209,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'session': 'Новое: Бронируемый сеанс',
       'scenario': 'Новое: Сценарий',
       'quickPlan': 'Новое: Старый Quick Plan',
-      'findPeople': 'Новое: Найти людей',
-      'classWorkshop': 'Новое: Занятие / мастер-класс',
-      'rental': 'Новое: Прокат / снаряжение',
+      'findPeople': 'Новое: Поиск компании',
+      'classWorkshop': 'Новое: Занятие / практическое занятие',
+      'rental': 'Новое: Аренда / снаряжение',
       'collection': 'Новое: Подборка / гид',
       'other': 'Новый объект',
     });
@@ -5222,9 +5228,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'session': 'Создать: Бронируемый сеанс',
       'scenario': 'Создать: Сценарий',
       'quickPlan': 'Создать: Старый Quick Plan',
-      'findPeople': 'Создать: Найти людей',
-      'classWorkshop': 'Создать: Занятие / мастер-класс',
-      'rental': 'Создать: Прокат / снаряжение',
+      'findPeople': 'Создать: Поиск компании',
+      'classWorkshop': 'Создать: Занятие / практическое занятие',
+      'rental': 'Создать: Аренда / снаряжение',
       'collection': 'Создать: Подборка / гид',
       'other': 'Создать',
     });
@@ -5241,9 +5247,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'session': 'Бесплатно: Бронируемый сеанс',
       'scenario': 'Бесплатно: Сценарий',
       'quickPlan': 'Бесплатно: Старый Quick Plan',
-      'findPeople': 'Бесплатно: Найти людей',
-      'classWorkshop': 'Бесплатно: Занятие / мастер-класс',
-      'rental': 'Бесплатно: Прокат / снаряжение',
+      'findPeople': 'Бесплатно: Поиск компании',
+      'classWorkshop': 'Бесплатно: Занятие / практическое занятие',
+      'rental': 'Бесплатно: Аренда / снаряжение',
       'collection': 'Бесплатно: Подборка / гид',
       'other': 'Бесплатно',
     });
@@ -5264,11 +5270,11 @@ class AppLocalizationsRu extends AppLocalizations {
       'quickPlan':
           'Старый Quick Plan: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
       'findPeople':
-          'Найти людей: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
+          'Поиск компании: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
       'classWorkshop':
-          'Занятие / мастер-класс: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
+          'Занятие / практическое занятие: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
       'rental':
-          'Прокат / снаряжение: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
+          'Аренда / снаряжение: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
       'collection':
           'Подборка / гид: дата и время начала, UTC (ГГГГ-ММ-ДДTЧЧ:мм:ссZ) *',
       'other': 'Дата и время начала, UTC *',
@@ -5283,7 +5289,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String createFindPeopleFindPeople(int done, int total) {
-    return 'Find People · $done/$total';
+    return 'Поиск компании · $done/$total';
   }
 
   @override
@@ -5303,7 +5309,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createFindPeoplePublishFindPeopleRequest =>
-      'Опубликовать запрос Find People';
+      'Опубликовать запрос на поиск компании';
 
   @override
   String get createFindPeopleValidationSummary => 'Итоги проверки';
@@ -5314,7 +5320,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createFindPeopleIAcceptFindPeopleSafetyRules =>
-      'Я принимаю правила безопасности Find People *';
+      'Я принимаю правила безопасности поиска компании *';
 
   @override
   String get createFindPeopleRequestOnlyAdults18 =>
@@ -5349,7 +5355,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createFindPeopleUntitledFindPeopleRequest =>
-      'Запрос Find People без названия';
+      'Запрос на поиск компании без названия';
 
   @override
   String get createFindPeopleMirrorsSafePublicDetailsContract =>
@@ -5402,7 +5408,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get createFindPeopleExpenseItem => 'Статья расходов';
 
   @override
-  String get createFindPeopleExpenseSplitMode => 'Способ раздела расходов *';
+  String get createFindPeopleExpenseSplitMode =>
+      'Способ распределения расходов *';
 
   @override
   String get createFindPeopleCostNote => 'Заметка о расходах';
@@ -5466,7 +5473,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createFindPeoplePrivateAccessSecretReference =>
-      'Приватная ссылка на секрет доступа *';
+      'Ссылка на секрет для приватного доступа *';
 
   @override
   String get createFindPeopleGoogleMeetZoomDiscord =>
@@ -5520,7 +5527,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createFindPeopleOnlyApproximatePublicAreaAppearsDiscover =>
-      'В Discover видна только приблизительная публичная зона. Точные данные остаются приватными.';
+      'В ленте виден только приблизительный публичный район. Точные данные остаются приватными.';
 
   @override
   String get createFindPeopleMeetingLocation => 'Место встречи';
@@ -5608,7 +5615,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createFindPeopleFindPeopleDraftDataBeingPrepared =>
-      'Данные черновика Find People готовятся…';
+      'Данные черновика поиска компании готовятся…';
 
   @override
   String get createSessionOnlyWhatMarkedRequiredBlocksPublishing =>
@@ -5760,7 +5767,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createClassIncludedMaterialsOnePerLine =>
-      'Что входит (по одному в строке)';
+      'Включённые материалы (каждый с новой строки)';
 
   @override
   String get createClassAddDate => 'Добавить дату';
@@ -5917,7 +5924,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createRouteCurrentGeometryWillRemainAvailableThrough =>
-      'Текущую форму можно будет вернуть через «Отменить».';
+      'Текущую геометрию можно будет вернуть командой «Отменить».';
 
   @override
   String get createRouteReplaceExistingTrack => 'Заменить текущий трек?';
@@ -6048,7 +6055,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createRouteAllMethodsUseOneCanonicalRoute =>
-      'Все способы используют одну модель маршрута. Это демо позволяет точки и рисование от руки без платных сервисов.';
+      'Все способы используют одну модель маршрута. В этом демо доступны создание по точкам и рисование от руки без платных сервисов.';
 
   @override
   String get createRouteHowWillYouCreateTrack => 'Как вы создадите трек?';
@@ -6132,7 +6139,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createRoutePauseStaysAsExplicitGapWill =>
-      'Пауза остаётся явным разрывом и никогда не соединяется молча.';
+      'Пауза остаётся явным разрывом; соединение без вашего подтверждения не выполняется.';
 
   @override
   String get createRouteKeepRechargeOpenWhileMovingAlong =>
@@ -6262,7 +6269,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createRouteUseIntentionalDirectLine =>
-      'Использовать намеренную прямую';
+      'Использовать прямое соединение';
 
   @override
   String get createRouteRetryRouting => 'Повторить прокладку';
@@ -6937,7 +6944,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get createScenarioWarnings => 'Предупреждения';
 
   @override
-  String get createScenarioUnknownTravel => 'Неизвестная дорога';
+  String get createScenarioUnknownTravel => 'Время в пути неизвестно';
 
   @override
   String get createScenarioTimeBlocks => 'Блоки времени';
@@ -7624,7 +7631,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get discoverKindMasterclass => 'Мастер-класс';
 
   @override
-  String get discoverKindWorkshop => 'Воркшоп';
+  String get discoverKindWorkshop => 'Практическое занятие';
 
   @override
   String get discoverKindClass => 'Занятие';
@@ -7784,7 +7791,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get discoverAboutMeetup => 'О встрече';
 
   @override
-  String get discoverPublisher => 'Публикатор';
+  String get discoverPublisher => 'Публикующий профиль или страница';
 
   @override
   String get discoverShareAndMore => 'Поделиться и другие действия';
@@ -8286,7 +8293,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get discoverMapArea => 'Область карты';
 
   @override
-  String get discoverRechargeIdea => 'Идея для отдыха';
+  String get discoverRechargeIdea => 'Идея Recharge';
 
   @override
   String get discoverMapAreaIdea => 'Идея для области карты';
@@ -8460,7 +8467,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get discoverNoReturnTrip => 'Без обратной дороги';
 
   @override
-  String get discoverWidenTime => 'Расширить время';
+  String get discoverWidenTime => 'Расширить временной интервал';
 
   @override
   String get discoverRefresh => 'Обновить';
@@ -8794,7 +8801,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String discoverRentalBaseRate(String type, String price) {
     String _temp0 = intl.Intl.selectLogic(type, {
       'hour': '$price / час',
-      'week': '$price / неделя',
+      'week': '$price / неделю',
       'other': '$price / день',
     });
     return '$_temp0';
@@ -8828,7 +8835,7 @@ class AppLocalizationsRu extends AppLocalizations {
     );
     String _temp3 = intl.Intl.selectLogic(type, {
       'hour': 'От $_temp0: $price / час',
-      'week': 'От $_temp1: $price / неделя',
+      'week': 'От $_temp1: $price / неделю',
       'other': 'От $_temp2: $price / день',
     });
     return '$_temp3';
@@ -8841,7 +8848,7 @@ class AppLocalizationsRu extends AppLocalizations {
       locale: localeName,
       other: 'заявлено $count единицы',
       many: 'заявлено $count единиц',
-      few: 'заявлено $count единицы',
+      few: 'заявлены $count единицы',
       one: 'заявлена $count единица',
     );
     return '$_temp0';
@@ -8965,7 +8972,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String discoverHoursRange(int min, int max) {
-    return '$min–$max часа';
+    return '$min–$max ч';
   }
 
   @override
@@ -9268,7 +9275,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get discoverListedByPageLabel => 'Опубликовано страницей';
 
   @override
-  String get discoverListedByLabel => 'Опубликовал';
+  String get discoverListedByLabel => 'Опубликовано:';
 
   @override
   String get discoverLearningOutcomesLabel => 'Чему научитесь:';
@@ -9426,10 +9433,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get discoverBadgeSession => 'СЕАНС';
 
   @override
-  String get discoverBadgeClassWorkshop => 'ЗАНЯТИЕ / ВОРКШОП';
+  String get discoverBadgeClassWorkshop => 'ЗАНЯТИЕ / ПРАКТИЧЕСКОЕ ЗАНЯТИЕ';
 
   @override
-  String get identityProfessionalPage => 'Professional Page';
+  String get identityProfessionalPage => 'Профессиональная страница';
 
   @override
   String get identityVerificationRevoked => 'Проверка отозвана';
@@ -9438,7 +9445,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get identityVerificationRejected => 'Проверка отклонена';
 
   @override
-  String get identityVerificationPending => 'Проверка ожидает';
+  String get identityVerificationPending => 'Ожидает проверки';
 
   @override
   String get identityKindPrivateProfessional => 'Частный специалист';
@@ -9472,7 +9479,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get identityPageName => 'Название страницы';
 
   @override
-  String get identityCreatePage => 'Создать Professional Page';
+  String get identityCreatePage => 'Создать профессиональную страницу';
 
   @override
   String get identityPreviewOnlyRoles =>
@@ -9482,7 +9489,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get identityViewAs => 'Смотреть как';
 
   @override
-  String get identityNoPageYet => 'Вы ещё не создали Professional Page.';
+  String get identityNoPageYet => 'У вас ещё нет профессиональной страницы.';
 
   @override
   String get identityCreateContent => 'Создать контент';
@@ -9503,7 +9510,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get identityVerifiedTools => 'Проверено · Инструменты по вашим правам';
 
   @override
-  String get identityPersonalPending => 'Личный профиль · Проверка ожидает';
+  String get identityPersonalPending => 'Личный профиль · Ожидает проверки';
 
   @override
   String get identityPersonalNotStarted =>
@@ -9526,10 +9533,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get identityLimitRequestPending =>
-      'Заявка на дополнительную страницу ожидает';
+      'Заявка на дополнительную страницу ожидает рассмотрения';
 
   @override
-  String get identityCreator => 'Creator';
+  String get identityCreator => 'Автор';
 
   @override
   String get identityOk => 'ОК';
@@ -9561,7 +9568,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get identityShare => 'Поделиться';
 
   @override
-  String get identityVerifiedPage => 'Проверенная Professional Page';
+  String get identityVerifiedPage => 'Подтверждённая профессиональная страница';
 
   @override
   String get identityPreviewDoesNotPublish =>
@@ -9580,11 +9587,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get identityContentScoped =>
-      'Контент относится именно к этой Professional Page.';
+      'Контент относится именно к этой профессиональной странице.';
 
   @override
   String get identityOverviewModeration =>
-      'Обзор Professional Page и статус модерации.';
+      'Обзор профессиональной страницы и статус модерации.';
 
   @override
   String get identityPreviewUntilVerified =>
@@ -9599,17 +9606,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get identityContentAfterRealPage =>
-      'Контент появится только после того, как пользователь создаст настоящую Professional Page или присоединится к ней.';
+      'Контент появится только после того, как пользователь создаст профессиональную страницу или присоединится к ней.';
 
   @override
-  String get identityPagePreview => 'Предпросмотр Professional Page';
+  String get identityPagePreview => 'Предпросмотр профессиональной страницы';
 
   @override
-  String get identitySwitchPage => 'Сменить Professional Page';
+  String get identitySwitchPage => 'Сменить профессиональную страницу';
 
   @override
   String get identityCreateOrSelectPage =>
-      'Создайте или выберите Professional Page';
+      'Создайте или выберите профессиональную страницу';
 
   @override
   String get identityUserId => 'ID пользователя';
@@ -9656,10 +9663,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get identitySwitchWorkspaceHint =>
-      'Личный профиль, Professional Pages и доступ Admin';
+      'Личный профиль, профессиональные страницы и доступ администратора';
 
   @override
-  String get identitySwitchWorkspace => 'Сменить рабочий профиль';
+  String get identitySwitchWorkspace => 'Сменить рабочее пространство';
 
   @override
   String get profileDateTbd => 'Дата будет назначена';
@@ -9714,7 +9721,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profileFinishDraft => 'Завершить черновик';
 
   @override
-  String get profileCreatorNextSteps => 'Следующие шаги Creator';
+  String get profileCreatorNextSteps => 'Следующие шаги автора';
 
   @override
   String get profileMapListingArea => 'Область объявления на карте';
@@ -9729,7 +9736,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profileOpenCreate => 'Открыть создание';
 
   @override
-  String get profileCreatorListing => 'Объявление Creator';
+  String get profileCreatorListing => 'Объявление автора';
 
   @override
   String get profileBuildRoute => 'Построить маршрут';
@@ -9742,7 +9749,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Управляйте черновиками и опубликованными объявлениями в одном месте.';
 
   @override
-  String get profileCreatorPublications => 'Публикации Creator';
+  String get profileCreatorPublications => 'Публикации автора';
 
   @override
   String get profileListingFromLatestSmart =>
@@ -9753,10 +9760,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Построить маршрут по последнему умному поиску';
 
   @override
-  String get profileMapSmart => 'Умный на карте';
+  String get profileMapSmart => 'Умный поиск на карте';
 
   @override
-  String get profileResumeSmart => 'Продолжить умный';
+  String get profileResumeSmart => 'Продолжить умный поиск';
 
   @override
   String get profileAnyArea => 'Любой район';
@@ -9922,7 +9929,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Проверку и доступные инструменты смотрите в настройках';
 
   @override
-  String get profileCreatorTools => 'Инструменты Creator';
+  String get profileCreatorTools => 'Инструменты автора';
 
   @override
   String get profileSavedList => 'Сохранённое';
@@ -9955,7 +9962,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get quickPlanSmartRoute => 'Умный маршрут';
 
   @override
-  String get quickPlanRechargeIdea => 'Идея для отдыха';
+  String get quickPlanRechargeIdea => 'Идея Recharge';
 
   @override
   String get quickPlanTplActiveHint =>
@@ -10189,7 +10196,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get quickPlanInviteToSaved => 'Пригласить в текущий сохранённый план';
 
   @override
-  String get quickPlanInviteUserId => 'Пригласить по ID пользователя';
+  String get quickPlanInviteUserId =>
+      'Пригласить по ID существующего пользователя';
 
   @override
   String get quickPlanUseKnownUserId =>
@@ -10248,7 +10256,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get favoritesSmartRoute => 'Умный маршрут';
 
   @override
-  String get favoritesRechargeIdea => 'Идея для отдыха';
+  String get favoritesRechargeIdea => 'Идея Recharge';
 
   @override
   String get favoritesAnyTime => 'В любое время';
@@ -10322,7 +10330,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get favoritesSavedIntents => 'Сохранённые задумки';
 
   @override
-  String get favoritesOpenDiscover => 'Открыть Discover';
+  String get favoritesOpenDiscover => 'Открыть ленту';
 
   @override
   String get favoritesEmpty => 'Пока нет сохранённых событий';
@@ -10408,21 +10416,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String identityWorkspaceNotice(String code) {
     String _temp0 = intl.Intl.selectLogic(code, {
       'workspace_recovered': 'Недоступная страница сброшена на личный профиль.',
-      'workspace_load_failed': 'Не удалось загрузить рабочие профили.',
-      'workspace_switched': 'Рабочий профиль переключён.',
+      'workspace_load_failed': 'Не удалось загрузить рабочие пространства.',
+      'workspace_switched': 'Рабочее пространство переключено.',
       'workspace_access_unavailable': 'Доступ к выбранной странице недоступен.',
-      'workspace_switch_failed': 'Не удалось переключить рабочий профиль.',
+      'workspace_switch_failed': 'Не удалось переключить рабочее пространство.',
       'admin_preview_selected': 'Выбран предпросмотр Admin.',
-      'page_created': 'Professional Page создана и отправлена на проверку.',
+      'page_created':
+          'Профессиональная страница создана и отправлена на проверку.',
       'self_service_page_limit_reached':
           'Достигнут лимит 3 страниц. Отправьте заявку модераторам.',
-      'page_create_failed': 'Не удалось создать Professional Page.',
+      'page_create_failed': 'Не удалось создать профессиональную страницу.',
       'page_limit_request_sent':
           'Заявка на дополнительную страницу отправлена.',
       'page_limit_request_unavailable':
           'Заявка доступна после создания трёх страниц.',
       'page_limit_request_failed': 'Не удалось отправить заявку модераторам.',
-      'other': 'Не удалось загрузить рабочие профили.',
+      'other': 'Не удалось загрузить рабочие пространства.',
     });
     return '$_temp0';
   }
@@ -10487,8 +10496,8 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String identityInboxTitle(String code) {
     String _temp0 = intl.Intl.selectLogic(code, {
-      'identity_page_created_user': 'Professional Page создана',
-      'identity_page_created_moderators': 'Новая Professional Page',
+      'identity_page_created_user': 'Профессиональная страница создана',
+      'identity_page_created_moderators': 'Новая профессиональная страница',
       'identity_page_limit_request_user': 'Заявка отправлена',
       'identity_page_limit_request_moderators':
           'Запрос дополнительной страницы',
@@ -10504,7 +10513,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'identity_page_created_moderators':
           'Создана новая страница. Требуется проверка.',
       'identity_page_limit_request_user':
-          'Модераторы рассмотрят дополнительную Professional Page.',
+          'Модераторы рассмотрят дополнительную профессиональную страницу.',
       'other': '',
     });
     return '$_temp0';
@@ -10527,9 +10536,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String profileRoleTitle(String value) {
     String _temp0 = intl.Intl.selectLogic(value, {
       'pro_generator': 'Pro-генератор',
-      'creator': 'Creator',
+      'creator': 'Автор',
       'user': 'Пользователь',
-      'other': 'Creator',
+      'other': 'Автор',
     });
     return '$_temp0';
   }
@@ -10599,7 +10608,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get quickPlanAccessUnavailable =>
-      'Доступ недоступен. Обновите, чтобы повторить.';
+      'Нет доступа. Обновите, чтобы повторить.';
 
   @override
   String get quickPlanNotConfirmed =>
@@ -10905,7 +10914,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get identitySectionPersonal => 'ЛИЧНОЕ';
 
   @override
-  String get identitySectionProfessionalPages => 'PROFESSIONAL PAGES';
+  String get identitySectionProfessionalPages => 'ПРОФЕССИОНАЛЬНЫЕ СТРАНИЦЫ';
 
   @override
   String get identitySectionAdministration => 'АДМИНИСТРИРОВАНИЕ';
@@ -11049,7 +11058,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'place': 'Место',
       'route': 'Маршрут',
       'bookableSession': 'Сеанс',
-      'classWorkshop': 'Занятие / мастер-класс',
+      'classWorkshop': 'Занятие / практическое занятие',
       'rental': 'Аренда',
       'other': 'Объект',
     });
@@ -11641,7 +11650,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String createSessionNotice(int minutes) {
-    return 'предупреждение за $minutes мин';
+    return 'запись не позднее чем за $minutes мин';
   }
 
   @override
@@ -11773,7 +11782,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get routeErrorDistributionLimit =>
-      'Достигнут лимит на публикацию этого маршрута.';
+      'Достигнут лимит на предоставление доступа к этому маршруту.';
 
   @override
   String get identityErrorAccountBlocked => 'Этот аккаунт заблокирован.';
@@ -11816,7 +11825,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxCategoryBusinessNetworking => 'Бизнес и нетворкинг';
 
   @override
-  String get taxCategoryWorkshopsMasterclasses => 'Мастерские и мастер-классы';
+  String get taxCategoryWorkshopsMasterclasses =>
+      'Практические занятия и мастер-классы';
 
   @override
   String get taxCategoryLanguageSocialLearning => 'Языки и обучение в компании';
@@ -11835,7 +11845,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get taxCategoryOutdoorNatureWalking =>
-      'Природа, прогулки и на открытом воздухе';
+      'Природа, прогулки и отдых на свежем воздухе';
 
   @override
   String get taxCategoryWaterActivities => 'Активности на воде';
@@ -11862,7 +11872,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxCategoryHolidaysSeasonal => 'Праздники и сезонные события';
 
   @override
-  String get taxCategoryWellnessRecharge => 'Благополучие и отдых';
+  String get taxCategoryWellnessRecharge => 'Здоровье и отдых';
 
   @override
   String get taxCategoryAdrenalineEntertainment => 'Адреналин и развлечения';
@@ -11949,7 +11959,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryNightBar => 'Ночной бар';
 
   @override
-  String get taxSubcategoryAfterworkDrinks => 'Встреча после работы';
+  String get taxSubcategoryAfterworkDrinks => 'Напитки после работы';
 
   @override
   String get taxSubcategoryLateNightSocial => 'Поздние посиделки';
@@ -12151,7 +12161,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryCareerTalk => 'Лекция о карьере';
 
   @override
-  String get taxSubcategoryLegalInfoSession => 'Правовая консультация';
+  String get taxSubcategoryLegalInfoSession =>
+      'Информационная встреча по правовым вопросам';
 
   @override
   String get taxSubcategoryBookClub => 'Книжный клуб';
@@ -12232,10 +12243,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryCoworkingEvent => 'Событие в коворкинге';
 
   @override
-  String get taxSubcategoryBusinessWorkshop => 'Бизнес-мастерская';
+  String get taxSubcategoryBusinessWorkshop =>
+      'Практическое занятие по бизнесу';
 
   @override
-  String get taxSubcategoryWorkshop => 'Мастерская';
+  String get taxSubcategoryWorkshop => 'Практическое занятие';
 
   @override
   String get taxSubcategoryMasterclass => 'Мастер-класс';
@@ -12259,7 +12271,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryPhotography => 'Фотография';
 
   @override
-  String get taxSubcategoryCookingClass => 'Кулинарный класс';
+  String get taxSubcategoryCookingClass => 'Кулинарное занятие';
 
   @override
   String get taxSubcategorySewing => 'Шитьё';
@@ -12277,22 +12289,25 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryCreativeClass => 'Творческое занятие';
 
   @override
-  String get taxSubcategoryCraftWorkshop => 'Ремесленная мастерская';
+  String get taxSubcategoryCraftWorkshop => 'Практическое занятие по ремеслу';
 
   @override
-  String get taxSubcategoryWritingWorkshop => 'Писательская мастерская';
+  String get taxSubcategoryWritingWorkshop =>
+      'Практическое занятие по писательскому мастерству';
 
   @override
   String get taxSubcategoryMusicLesson => 'Урок музыки';
 
   @override
-  String get taxSubcategoryDanceWorkshop => 'Танцевальная мастерская';
+  String get taxSubcategoryDanceWorkshop => 'Практическое занятие по танцам';
 
   @override
-  String get taxSubcategoryBeautyWorkshop => 'Бьюти-мастерская';
+  String get taxSubcategoryBeautyWorkshop =>
+      'Практическое занятие по уходу за собой';
 
   @override
-  String get taxSubcategoryWellnessWorkshop => 'Велнес-мастерская';
+  String get taxSubcategoryWellnessWorkshop =>
+      'Практическое занятие по оздоровлению';
 
   @override
   String get taxSubcategoryLanguageExchange => 'Языковой обмен';
@@ -12457,7 +12472,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryMiniGolf => 'Мини-гольф';
 
   @override
-  String get taxSubcategoryArcade => 'Игровые автоматы';
+  String get taxSubcategoryArcade => 'Аркадные игры';
 
   @override
   String get taxSubcategoryVrArcade => 'VR-клуб';
@@ -12670,7 +12685,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryArchitectureWalk => 'Архитектурная прогулка';
 
   @override
-  String get taxSubcategoryHiddenGemsWalk => 'Прогулка по скрытым местам';
+  String get taxSubcategoryHiddenGemsWalk =>
+      'Прогулка по малоизвестным интересным местам';
 
   @override
   String get taxSubcategoryPhotographyWalk => 'Фотопрогулка';
@@ -12806,7 +12822,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryWinterWalk => 'Зимняя прогулка';
 
   @override
-  String get taxSubcategoryIceSkating => 'Каток';
+  String get taxSubcategoryIceSkating => 'Катание на коньках';
 
   @override
   String get taxSubcategorySkiing => 'Лыжи';
@@ -12866,7 +12882,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryWeekendTrip => 'Поездка на выходные';
 
   @override
-  String get taxSubcategoryLocalExperience => 'Местный опыт';
+  String get taxSubcategoryLocalExperience => 'Знакомство с местной жизнью';
 
   @override
   String get taxSubcategoryTouristExcursion => 'Туристическая экскурсия';
@@ -12878,7 +12894,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryFoodTastingTour => 'Дегустационный тур';
 
   @override
-  String get taxSubcategoryCraftExperience => 'Ремесленный опыт';
+  String get taxSubcategoryCraftExperience => 'Знакомство с ремёслами';
 
   @override
   String get taxSubcategoryFarmExperience => 'Поездка на ферму';
@@ -12914,13 +12930,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryPhotoTour => 'Фототур';
 
   @override
-  String get taxSubcategoryHiddenGemsTour => 'Экскурсия по скрытым местам';
+  String get taxSubcategoryHiddenGemsTour =>
+      'Экскурсия по малоизвестным интересным местам';
 
   @override
   String get taxSubcategoryFamilyActivity => 'Семейное занятие';
 
   @override
-  String get taxSubcategoryKidsWorkshop => 'Детская мастерская';
+  String get taxSubcategoryKidsWorkshop => 'Практическое занятие для детей';
 
   @override
   String get taxSubcategoryPlaygroundEvent => 'Событие на детской площадке';
@@ -12944,7 +12961,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryCreativeKidsClass => 'Творческое занятие для детей';
 
   @override
-  String get taxSubcategoryKidsCookingClass => 'Кулинарный класс для детей';
+  String get taxSubcategoryKidsCookingClass => 'Кулинарное занятие для детей';
 
   @override
   String get taxSubcategoryKidsOutdoorWalk => 'Прогулка с детьми';
@@ -12966,7 +12983,8 @@ class AppLocalizationsRu extends AppLocalizations {
       'Познавательное событие для детей';
 
   @override
-  String get taxSubcategoryBabyFriendlyActivity => 'Занятие для малышей';
+  String get taxSubcategoryBabyFriendlyActivity =>
+      'Занятие, на которое можно с младенцем';
 
   @override
   String get taxSubcategoryKidsCamp => 'Детский лагерь';
@@ -13105,7 +13123,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryMutualAid => 'Взаимопомощь';
 
   @override
-  String get taxSubcategorySocialImpactEvent => 'Социальное событие';
+  String get taxSubcategorySocialImpactEvent => 'Мероприятие на благо общества';
 
   @override
   String get taxSubcategoryEnvironmentalAction => 'Экологическая акция';
@@ -13186,7 +13204,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryValentinesDay => 'День святого Валентина';
 
   @override
-  String get taxSubcategoryJani => 'Лиго (Яни)';
+  String get taxSubcategoryJani => 'Янов день (Яни)';
 
   @override
   String get taxSubcategoryCityFestival => 'Городской праздник';
@@ -13391,7 +13409,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get taxSubcategoryAutoExhibition => 'Автовыставка';
 
   @override
-  String get taxSubcategoryTuningMeetup => 'Встреча тюнинга';
+  String get taxSubcategoryTuningMeetup => 'Встреча любителей тюнинга';
 
   @override
   String get taxSubcategoryDriftEvent => 'Дрифт';
@@ -13505,7 +13523,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get discoverHomeShortFood => 'Еда';
 
   @override
-  String get discoverHomeShortWellness => 'Отдых';
+  String get discoverHomeShortWellness => 'Здоровье';
 
   @override
   String get contentTranslationAction => 'Перевести';
