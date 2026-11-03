@@ -165,9 +165,10 @@ void main() {
   setUpAll(() async {
     if (stand == null) return;
     temp = await Directory.systemTemp.createTemp('c3-ui-');
-    cover = await File(
+    cover = await stand.fixture(
       'test/fixtures/media/stand_cover.png',
-    ).copy('${temp.path}/cover.png');
+      '${temp.path}/cover.png',
+    );
   });
 
   tearDownAll(() async {

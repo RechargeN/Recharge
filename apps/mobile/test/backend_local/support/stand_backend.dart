@@ -5,14 +5,23 @@ import 'package:http/http.dart' as http;
 import 'package:recharge/features/booking/data/booking_callable_adapter.dart';
 import 'package:recharge/features/booking/data/booking_functions_transport.dart';
 
+import 'stand_environment.dart';
+
 /// Connection to the real local demo-recharge Emulator stand (A1/A2).
 ///
 /// The suite runs on the PC host: the Dart VM reaches the loopback Emulators
 /// directly, so no port forwarding, LAN address or cloud credential is used.
 /// Nothing here carries authority: Sessions and Bookings come from the real
 /// backend, and Auth tokens come from the real Auth Emulator.
+///
+/// B1-device: on the phone the same client code reaches the stand scripts
+/// through the gate's loopback bridge ([overBridge]); see stand_environment.dart.
 final class StandBackend {
-  StandBackend._({required this.repoRoot, required this.node});
+  StandBackend._({
+    required this.repoRoot,
+    required this.node,
+    this.overBridge = false,
+  });
 
   static const String enableVariable = 'RECHARGE_B1_STAND';
   static const String skipReason =
@@ -28,11 +37,15 @@ final class StandBackend {
 
   final String repoRoot;
   final String node;
+  final bool overBridge;
 
   /// Null unless the gate script enabled the suite.
   static StandBackend? fromEnvironment() {
-    final env = Platform.environment;
+    final env = standEnvironment;
     if (env[enableVariable] != '1') return null;
+    if (standOverBridge) {
+      return StandBackend._(repoRoot: '', node: '', overBridge: true);
+    }
     final root = env['RECHARGE_REPO_ROOT'];
     if (root == null || root.isEmpty) {
       throw StateError('RECHARGE_REPO_ROOT is required with $enableVariable');
@@ -81,8 +94,7 @@ final class StandBackend {
   /// the stand only; prints no JSON, so only its exit code is checked.
   /// D3.6: seeds the stand Class / Workshop (and its creator identity).
   Future<void> classWorkshopSeed() async {
-    final result = await Process.run(node, <String>[
-      _script('stand-seed.mjs'),
+    final result = await _exec('stand-seed.mjs', <String>[
       'class-workshop',
       'seed',
     ]);
@@ -98,11 +110,7 @@ final class StandBackend {
       _stand(<String>['class-workshop', 'manifest']);
 
   Future<void> sessionSeed() async {
-    final result = await Process.run(node, <String>[
-      _script('stand-seed.mjs'),
-      'session',
-      'seed',
-    ]);
+    final result = await _exec('stand-seed.mjs', <String>['session', 'seed']);
     if (result.exitCode != 0) {
       throw StateError('session seed failed: ${result.stderr}${result.stdout}');
     }
@@ -116,8 +124,7 @@ final class StandBackend {
   /// synthetic 18+ attestations of the stand creator and viewer, consent,
   /// review, publish and Catalog delivery. Prints no JSON; exit code only.
   Future<void> findPeopleSeed() async {
-    final result = await Process.run(node, <String>[
-      _script('stand-seed.mjs'),
+    final result = await _exec('stand-seed.mjs', <String>[
       'find-people',
       'seed',
     ]);
@@ -131,11 +138,7 @@ final class StandBackend {
   /// I3: seeds (or reuses) the stand Scenario and enables the Scenario flags
   /// on the stand only; prints no JSON, so only its exit code is checked.
   Future<void> scenarioSeed() async {
-    final result = await Process.run(node, <String>[
-      _script('stand-seed.mjs'),
-      'scenario',
-      'seed',
-    ]);
+    final result = await _exec('stand-seed.mjs', <String>['scenario', 'seed']);
     if (result.exitCode != 0) {
       throw StateError(
         'scenario seed failed: ${result.stderr}${result.stdout}',
@@ -150,11 +153,7 @@ final class StandBackend {
   /// J2: seeds (or reuses) the stand Route and enables the Route flags on the
   /// stand only; prints no JSON, so only its exit code is checked.
   Future<void> routeSeed() async {
-    final result = await Process.run(node, <String>[
-      _script('stand-seed.mjs'),
-      'route',
-      'seed',
-    ]);
+    final result = await _exec('stand-seed.mjs', <String>['route', 'seed']);
     if (result.exitCode != 0) {
       throw StateError('route seed failed: ${result.stderr}${result.stdout}');
     }
@@ -179,11 +178,7 @@ final class StandBackend {
       _stand(<String>['find-people-fixture', ...args]);
 
   Future<void> placeSeed() async {
-    final result = await Process.run(node, <String>[
-      _script('stand-seed.mjs'),
-      'place',
-      'seed',
-    ]);
+    final result = await _exec('stand-seed.mjs', <String>['place', 'seed']);
     if (result.exitCode != 0) {
       throw StateError('place seed failed: ${result.stderr}${result.stdout}');
     }
@@ -196,11 +191,7 @@ final class StandBackend {
   /// D3.3: seeds (or reuses) the stand Rental and enables Rental authoring on
   /// the stand only; prints no JSON, so only its exit code is checked.
   Future<void> rentalSeed() async {
-    final result = await Process.run(node, <String>[
-      _script('stand-seed.mjs'),
-      'rental',
-      'seed',
-    ]);
+    final result = await _exec('stand-seed.mjs', <String>['rental', 'seed']);
     if (result.exitCode != 0) {
       throw StateError('rental seed failed: ${result.stderr}${result.stdout}');
     }
@@ -213,11 +204,7 @@ final class StandBackend {
   /// D3.2: seeds (or reuses) the stand Activity and enables Activity authoring
   /// on the stand only; prints no JSON, so only its exit code is checked.
   Future<void> activitySeed() async {
-    final result = await Process.run(node, <String>[
-      _script('stand-seed.mjs'),
-      'activity',
-      'seed',
-    ]);
+    final result = await _exec('stand-seed.mjs', <String>['activity', 'seed']);
     if (result.exitCode != 0) {
       throw StateError(
         'activity seed failed: ${result.stderr}${result.stdout}',
@@ -234,8 +221,7 @@ final class StandBackend {
   /// so only its exit code is checked. Membership needs the stand started with
   /// `RECHARGE_TEST_COLLECTION_MEMBERSHIP=true` (the D3.4 gate does).
   Future<void> collectionSeed() async {
-    final result = await Process.run(node, <String>[
-      _script('stand-seed.mjs'),
+    final result = await _exec('stand-seed.mjs', <String>[
       'collection',
       'seed',
     ]);
@@ -255,15 +241,28 @@ final class StandBackend {
   Future<({int exitCode, Map<String, Object?> json})> moderate(
     List<String> args,
   ) async {
-    final result = await Process.run(node, <String>[
-      _script('stand-moderate.mjs'),
-      ...args,
-    ]);
+    final result = await _exec('stand-moderate.mjs', <String>[...args]);
     return (exitCode: result.exitCode, json: _lastJson(result, args));
   }
 
   Future<Map<String, Object?>> catalog(List<String> args) =>
       _stand(<String>['catalog', ...args]);
+
+  /// A repository fixture (under apps/mobile) copied to [target]: read from
+  /// the checkout on the PC host, served by the gate's bridge on a device.
+  Future<File> fixture(String relativePath, String target) async {
+    if (!overBridge) return File(relativePath).copy(target);
+    final response = await http.get(
+      standBridgeBase.replace(
+        path: '/fixture',
+        queryParameters: <String, String>{'path': relativePath},
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw StateError('fixture $relativePath: ${response.statusCode}');
+    }
+    return File(target).writeAsBytes(response.bodyBytes, flush: true);
+  }
 
   String _script(String name) {
     final separator = Platform.pathSeparator;
@@ -271,11 +270,34 @@ final class StandBackend {
         '$separator$name';
   }
 
+  /// Runs one stand script: a local process on the PC host; on a device the
+  /// gate's bridge runs it on the PC and returns the same exit code and output.
+  Future<ProcessResult> _exec(String script, List<String> args) async {
+    if (!overBridge) {
+      return Process.run(node, <String>[_script(script), ...args]);
+    }
+    final response = await http.post(
+      standBridgeBase.replace(path: '/stand'),
+      headers: const <String, String>{'content-type': 'application/json'},
+      body: jsonEncode(<String, Object?>{'script': script, 'args': args}),
+    );
+    if (response.statusCode != 200) {
+      throw StateError(
+        'bridge refused $script ${args.first}: ${response.statusCode} '
+        '${response.body}',
+      );
+    }
+    final json = jsonDecode(response.body) as Map<String, Object?>;
+    return ProcessResult(
+      0,
+      json['exitCode']! as int,
+      json['stdout']! as String,
+      json['stderr']! as String,
+    );
+  }
+
   Future<Map<String, Object?>> _stand(List<String> args) async {
-    final result = await Process.run(node, <String>[
-      _script('stand-seed.mjs'),
-      ...args,
-    ]);
+    final result = await _exec('stand-seed.mjs', <String>[...args]);
     if (result.exitCode != 0) {
       throw StateError(
         '${args.first} failed: ${result.stderr}${result.stdout}',

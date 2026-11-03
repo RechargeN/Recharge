@@ -29,6 +29,7 @@ import 'package:uuid/uuid.dart';
 import '../fixtures/create/user_event_draft.dart';
 import 'support/e2_rendezvous.dart';
 import 'support/stand_backend.dart';
+import 'support/stand_environment.dart';
 
 /// E2b: one of two independent local clients, started as its own `flutter
 /// test` process by `stand-e2-gate.mjs` (role A or B). Each has its own stand
@@ -47,7 +48,7 @@ import 'support/stand_backend.dart';
 void main() {
   final StandBackend? stand = StandBackend.fromEnvironment();
   final E2Rendezvous? rendezvous = E2Rendezvous.fromEnvironment();
-  final String? pageId = Platform.environment['RECHARGE_E2_PAGE_ID'];
+  final String? pageId = standEnvironment['RECHARGE_E2_PAGE_ID'];
   final bool skip = stand == null || rendezvous == null || pageId == null;
   late Directory temp;
   late File cover;
@@ -102,9 +103,10 @@ void main() {
     if (skip) return;
     FlutterSecureStorage.setMockInitialValues(<String, String>{});
     temp = await Directory.systemTemp.createTemp('e2-client-');
-    cover = await File(
+    cover = await stand.fixture(
       'test/fixtures/media/stand_cover.png',
-    ).copy('${temp.path}/cover.png');
+      '${temp.path}/cover.png',
+    );
   });
 
   tearDownAll(() async {

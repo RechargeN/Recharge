@@ -5,6 +5,11 @@ import path from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import { StringDecoder } from "node:string_decoder";
 import { fileURLToPath } from "node:url";
+import {
+  deviceEnvDefine,
+  flutterOnDevice,
+  startDeviceBridge,
+} from "./stand-device-bridge.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..", "..", "..");
@@ -228,9 +233,10 @@ function timeline(rendezvous, clients, waits, meets) {
  * Next to its console log it writes a machine report, which the gate reads
  * to tell when its test has loaded.
  */
-function client(role, rendezvous, pageId, logDirectory) {
+function client(role, rendezvous, pageId, logDirectory, device) {
   const log = path.join(logDirectory, `client-${role}.log`);
   const events = path.join(logDirectory, `client-${role}.events.jsonl`);
+  if (device) return deviceClient(role, pageId, device, log, events);
   const args = [
     "test",
     "--no-pub",
@@ -274,6 +280,43 @@ function client(role, rendezvous, pageId, logDirectory) {
 }
 
 /**
+ * B1-device: the same client test as client [role] on a physical phone. Its
+ * variables travel in one define and it meets the gate through the loopback
+ * bridge (`adb reverse`), which keeps the points in the same directory.
+ */
+function deviceClient(role, pageId, serial, log, events) {
+  const started = flutterOnDevice(
+    "integration_test/b1_device_e2_client_test.dart",
+    serial,
+    {
+      log,
+      extra: [`--file-reporter=json:${events}`],
+      defines: [
+        "RECHARGE_TEST_DISCOVER_CATALOG=true",
+        "RECHARGE_TEST_BOOKING_ENTRY=true",
+        deviceEnvDefine({
+          RECHARGE_B1_STAND: "1",
+          RECHARGE_STAND_BRIDGE: "1",
+          RECHARGE_E2_ROLE: role,
+          RECHARGE_E2_RENDEZVOUS: "bridge",
+          RECHARGE_E2_PAGE_ID: pageId,
+        }),
+      ],
+    },
+  );
+  Object.assign(started, {
+    role,
+    events,
+    started: Date.now(),
+    report: machineReport(events),
+  });
+  void started.exited.then(() => {
+    started.endedAt = Date.now();
+  });
+  return started;
+}
+
+/**
  * E2b gate: two independent local clients on one shared stand (no reset
  * between them). Each Creator creates an Event through the C3 path, staff
  * approves both at a shared rendezvous, each publishes, finds the other's
@@ -288,9 +331,12 @@ function client(role, rendezvous, pageId, logDirectory) {
  * Evidence of two independent test clients on this PC, not of two phones.
  */
 export async function main(args) {
-  if (args.length !== 1 || args[0] !== "--yes") {
+  // `--android <serial>` (B1-device): client B runs on that phone.
+  const device =
+    args.length === 3 && args[1] === "--android" ? args[2] : undefined;
+  if (args[0] !== "--yes" || (args.length !== 1 && device === undefined)) {
     throw new Error(
-      "WARNING: this permanently deletes the stand data folder. Usage: stand-e2-gate.mjs --yes",
+      "WARNING: this permanently deletes the stand data folder. Usage: stand-e2-gate.mjs --yes [--android <serial>]",
     );
   }
   const step = async (name, action) => {
@@ -301,6 +347,7 @@ export async function main(args) {
   const rendezvous = path.join(work, "rendezvous");
   fs.mkdirSync(rendezvous);
   const clients = [];
+  let bridge;
   let failure;
   try {
     await step("build the Functions the stand loads", () => {
@@ -330,8 +377,18 @@ export async function main(args) {
     // A client that exits before the approval stops the waits at once,
     // instead of letting the gate sit out its rendezvous deadline.
     let approved = false;
+    if (device)
+      bridge = await step("loopback bridge for the phone (client B)", () =>
+        startDeviceBridge({ rendezvous }),
+      );
     const start = (role, pageId) => {
-      const started = client(role, rendezvous, pageId, work);
+      const started = client(
+        role,
+        rendezvous,
+        pageId,
+        work,
+        role === "B" ? device : undefined,
+      );
       clients.push(started);
       void started.exited.then((code) => {
         if (!approved && abort.reason === null)
@@ -474,6 +531,13 @@ export async function main(args) {
       failure ??= error;
     }
     try {
+      if (bridge) {
+        const refused = bridge.requests.filter((entry) => entry.status >= 400);
+        process.stdout.write(
+          `  bridge: ${bridge.requests.length} requests, ${refused.length} refused\n`,
+        );
+        await bridge.close();
+      }
       await step("verified stop", () => run(standCli, ["stop"]));
     } catch (error) {
       failure ??= error;
@@ -481,6 +545,12 @@ export async function main(args) {
   }
   if (failure) throw failure;
   fs.rmSync(work, { recursive: true, force: true });
+  if (device) {
+    process.stdout.write(
+      `E2 gate passed with client B on the Android device ${device} (USB, adb reverse to the PC loopback stand) and client A on this PC; two independent users, Sessions, installation ids and journals; eventual consistency of hide; no LAN or cloud claim\n`,
+    );
+    return;
+  }
   process.stdout.write(
     "E2 gate passed (local Emulator and PC host only; two independent flutter test clients with their own users, Sessions, installation ids and journals; Emulator-only Discover, Content effect trigger, Event → Booking handoff and internal registration v1; eventual consistency of hide; no device, LAN or cloud claim)\n",
   );

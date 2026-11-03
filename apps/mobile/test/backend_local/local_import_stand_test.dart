@@ -128,12 +128,14 @@ void main() {
     if (stand == null) return;
     FlutterSecureStorage.setMockInitialValues(<String, String>{});
     temp = await Directory.systemTemp.createTemp('d4-local-');
-    cover = await File(
+    cover = await stand.fixture(
       'test/fixtures/media/stand_cover.png',
-    ).copy('${temp.path}/cover.png');
-    photo = await File(
+      '${temp.path}/cover.png',
+    );
+    photo = await stand.fixture(
       'test/fixtures/media/stand_gallery_1.png',
-    ).copy('${temp.path}/gallery-1.png');
+      '${temp.path}/gallery-1.png',
+    );
     // Idempotent: the D4 gate has seeded it already.
     await stand.placeSeed();
     pageId = (await stand.placeManifest())['pageId']! as String;
