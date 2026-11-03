@@ -13,10 +13,16 @@ Firebase CLI из lock, Flutter 3.44.9 / Dart 3.12.2. Локальный Emulato
 
 ## Вердикт
 
-**M2 не пройден.** Вердикт «R1 функционально проверен локально» не выдаётся:
-три обязательных gate красные (дефекты ниже). Функциональные клиентские и
-Emulator-проверки зелёные, но красные gates не обходятся и не ослабляются.
-Статусы этапов B–L этим отчётом не меняются (остаются по LAUNCH_STATUS).
+**R1 функционально проверен локально** на candidate `b297be1`. Это не
+device-, cloud-, staging- или production-ready. Статусы этапов B–L этим
+отчётом не меняются (остаются по LAUNCH_STATUS); приёмку результата M2
+делает владелец.
+
+Первый прогон на `8330738` вердикта не дал: три обязательных gate были
+красными (M2-F1…F3 ниже). Они исправлены отдельными коммитами, а все gates,
+которые эти коммиты задевают, повторены на `b297be1` (раздел «Повтор»).
+Остальные проверки перенесены с `8330738`: между SHA изменились только один
+backend-тест, audit-скрипт и docs, runtime и клиентский код не менялись.
 
 Владелец решил 2026-11-03 вести M2, не дожидаясь отдельной приёмки
 Review-этапов: M2 перепроверяет их на одном SHA и даёт матрицу для приёмки.
@@ -28,6 +34,15 @@ Review-этапов: M2 перепроверяет их на одном SHA и �
 | M2-F1 | `test:r1:integration` (270/272), `stand-d2-gate` (70/72) | `content_publication_security.test` (Content ownership): закреплённые списки не знают модулей и callable-ов перевода ADR 0022 — `content_translation/*`, `index.ts`, `privacy_domain_task_runner.ts`; `translateContentV1`, `offerContentTranslationV1`, `syncContentTranslationsV1`, `sweepContentTranslationsV1`, `purgeContentTranslationsOnHoldV1`. Появились в `317b5d9` (stage 1) и `03a1e04` (amendment 1); тест последний раз обновлён в `b0fae53` (L3). Нужен review границы Content ownership, а не механическое обновление списков | дефект интеграции ADR 0022 |
 | M2-F2 | boundary inventory `--check-output` | `MOBILE_BOUNDARY_INVENTORY.md` не перегенерирован после L4.9.5: в документе 640 файлов и 71 исключение, фактически 685 и 69 | устаревший generated-документ |
 | M2-F3 | `verify:audit:full` | «Invalid advisory propagation graph»: новая moderate GHSA-g3hv-75wg-m249 (`minimatch <11.0.1`, через eslint) даёт в отчёте npm цикл `eslint ↔ @eslint-community/eslint-utils`; верификатор считает любой цикл ошибкой. Production и full graph: 0 high/critical, moderate 32 (на 2026-10-26 было 6/10) | дефект верификатора + новые moderate |
+
+Исправления: M2-F1 — `e19b4b8` (детектор сравнивал путь без разделителя, и
+`content_translation` считался Content; два read-only потребителя и пять
+callable-ов перевода внесены с точными символами, как в
+`verify-content-persistence-layout`), M2-F2 — `d120e5a` (inventory
+перегенерирован, правила и исключения не менялись), M2-F3 — `b297be1` (цикл
+без новых листьев допустим; неизвестное имя и находка без advisory по-прежнему
+отказ; правила high/critical и DEF-05 не изменены). 32 moderate остаются
+наблюдением для отдельного обновления зависимостей, gate их не блокирует.
 
 `test:media-tools` в цепочке: 21/24, `tokens, readiness and request checks`
 → `fetch failed`. Повтор файла (5/5) и всего набора (22 pass, 2 skip, 0 fail)
@@ -50,7 +65,19 @@ B1 на A34 зелёный на `5da203f`, от которого `8330738` от�
 | Boundary self-test, boundary, `git diff --check` | pass (69/71) |
 | Stand gates (реальные Flutter-клиенты и адаптеры) | A2, B1, B2, C1, C2, C3, D1, D3.1, D3.1 activity delivery, D3.2, D3.3, D3.4, D3.5, D3.6, D3.7, D3.8, D3.8 linked Place, D4, E1, E2a, E2, F1, F2, I3, J2 — pass |
 
+## Повтор на `b297be1`
+
+Toolchain, format, lint, typecheck, Content persistence layout, unit 824,
+contract 68, `test:r1:integration` 272/272, audit policy 15/15,
+`verify:audit:full` (без исключения), script self-tests 95/95, boundary
+self-test, boundary 69/71, inventory `--check-output`, `git diff --check
+8330738 HEAD` и D2 stand gate (72 + 5) — pass; дерево до и после чистое.
+
 ## Матрица требований M2
+
+Строки «red» относятся к первому прогону; после повтора на `b297be1` все
+строки — pass.
+
 
 | Требование | Evidence на `8330738` | Итог |
 |---|---|---|
@@ -89,4 +116,7 @@ export; Import и binding rollback на клиенте; release-сборка и 
 Логи, `summary.tsv`, `env.txt`, скрипт цепочки и отчёт npm audit:
 `C:\Users\User\Documents\Recharge-evidence\M2-2026-11-03`, SHA-256 файлов — в
 `SHA256SUMS.txt`, его хэш —
-`364aa41122328b99616463386fab64da7145db67cc90a4bfbb290ca6b0fc5f2a`.
+`364aa41122328b99616463386fab64da7145db67cc90a4bfbb290ca6b0fc5f2a`. Повтор на
+`b297be1` и повторы media-tools — в подпапке `rerun-b297be1`, хэш её
+`SHA256SUMS.txt` —
+`48df1752091302c0a988f9e0ac41bd4d080363021c7d091693f8a5f0d8dc2ff1`.
