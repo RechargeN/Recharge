@@ -232,6 +232,17 @@ void main() {
         WidgetsBinding.instance.addObserver(lifecycle);
         await _arrive('background', <String, Object?>{'sessionId': issued});
         await _gate('foreground');
+        // Returning passes through inactive; wait for the app to be resumed.
+        final DateTime resumeBy = DateTime.now().add(
+          const Duration(minutes: 1),
+        );
+        while (lifecycle.states.isEmpty ||
+            lifecycle.states.last != AppLifecycleState.resumed) {
+          if (DateTime.now().isAfter(resumeBy)) {
+            fail('not resumed: ${lifecycle.states}');
+          }
+          await tester.pump(const Duration(milliseconds: 200));
+        }
         await waitFor(find.byKey(const Key('event-booking-retry')));
         WidgetsBinding.instance.removeObserver(lifecycle);
         expect(lifecycle.states, contains(AppLifecycleState.paused));
