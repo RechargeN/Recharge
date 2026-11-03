@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:integration_test/integration_test.dart';
 
 import '../test/backend_local/e2_client_test.dart' as suite;
@@ -6,7 +7,13 @@ import '../test/backend_local/e2_client_test.dart' as suite;
 /// unchanged on the phone, as one app process, against the local stand through
 /// `stand-b1-device-gate.mjs` (adb reverse to the PC loopback, stand scripts
 /// and fixtures through its bridge). Not a run of the PC host gate.
+///
+/// The suite reads English UI text, as on the PC, so the phone's system
+/// language (Russian on the A34) is replaced by the test locale `en`; the
+/// suites that check lv/ru pass those locales themselves.
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  binding.platformDispatcher.localeTestValue = const Locale('en');
+  binding.platformDispatcher.localesTestValue = const <Locale>[Locale('en')];
   suite.main();
 }
