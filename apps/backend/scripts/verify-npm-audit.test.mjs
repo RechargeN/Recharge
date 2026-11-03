@@ -221,6 +221,86 @@ test("malformed reports, unknown propagation, graph drift and unexpected npm fai
     assert.throws(() => evaluateAudit(x));
   }
 });
+function moderateCycle() {
+  // The shape npm reported on 2026-11-03: eslint and eslint-utils depend on
+  // each other, and both reach the moderate minimatch advisory.
+  return {
+    minimatch: {
+      severity: "moderate",
+      nodes: ["node_modules/minimatch"],
+      via: [
+        {
+          name: "minimatch",
+          dependency: "minimatch",
+          severity: "moderate",
+          range: "<11.0.1",
+          url: "https://github.com/advisories/GHSA-g3hv-75wg-m249",
+        },
+      ],
+    },
+    eslint: {
+      severity: "moderate",
+      nodes: ["node_modules/eslint"],
+      via: ["@eslint-community/eslint-utils", "minimatch"],
+    },
+    "@eslint-community/eslint-utils": {
+      severity: "moderate",
+      nodes: ["node_modules/@eslint-community/eslint-utils"],
+      via: ["eslint"],
+    },
+  };
+}
+test("a dependency cycle that reaches a moderate advisory is a valid graph", () => {
+  const x = fixture();
+  x.full = report(moderateCycle());
+  assert.deepEqual(evaluateAudit(x), {
+    exceptionUsed: false,
+    reviewOnly: false,
+  });
+  // The same cycle beside the reviewed braces finding keeps the exception path.
+  const y = fixture();
+  Object.assign(y.full.report.vulnerabilities, moderateCycle());
+  y.full.report.metadata.vulnerabilities.moderate = 3;
+  assert.equal(evaluateAudit(y).exceptionUsed, true);
+});
+test("a cycle without an advisory, a high behind a cycle and a dangling name reject", () => {
+  const cases = [
+    [
+      (v) => {
+        v.eslint.via = ["@eslint-community/eslint-utils"];
+      },
+      /Invalid advisory propagation graph/,
+    ],
+    [
+      (v) => {
+        v.minimatch.severity = "high";
+        v.minimatch.via[0].severity = "high";
+        v.eslint.severity = "high";
+        v["@eslint-community/eslint-utils"].severity = "high";
+      },
+      /Unapproved high\/critical advisory/,
+    ],
+    [
+      (v) => {
+        v.eslint.severity = "high";
+      },
+      /Inconsistent or critical advisory/,
+    ],
+    [
+      (v) => {
+        v["@eslint-community/eslint-utils"].via = ["eslint", "missing"];
+      },
+      /Invalid advisory propagation graph/,
+    ],
+  ];
+  for (const [mutate, expected] of cases) {
+    const x = fixture();
+    const vulnerabilities = moderateCycle();
+    mutate(vulnerabilities);
+    x.full = report(vulnerabilities);
+    assert.throws(() => evaluateAudit(x), expected);
+  }
+});
 test("clean strict audits need no exception approval", () => {
   const x = fixture();
   x.full = report();

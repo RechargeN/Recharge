@@ -140,9 +140,13 @@ export function evaluateAudit({
   if (scope.full.some((row) => !row.cli))
     fail("braces has a dependency path outside firebase-tools");
   const report = audit(full, "Full graph");
+  // npm reports mutual dependents as a cycle (eslint <-> eslint-utils): a
+  // package already being expanded on this path adds no new advisory, and its
+  // leaves are collected where it was entered. An unknown name stays invalid.
   function leaves(name, ancestors = new Set()) {
     const v = report.vulnerabilities[name];
-    if (!v || ancestors.has(name)) fail("Invalid advisory propagation graph");
+    if (!v) fail("Invalid advisory propagation graph");
+    if (ancestors.has(name)) return [];
     const next = new Set([...ancestors, name]);
     return v.via.flatMap((via) => {
       if (typeof via === "string") return leaves(via, next);
@@ -157,7 +161,10 @@ export function evaluateAudit({
   }
   let excepted = false;
   for (const [name, v] of Object.entries(report.vulnerabilities)) {
-    const elevated = leaves(name).filter((via) => high(via.severity));
+    const reached = leaves(name);
+    // A finding must lead to at least one advisory; a cycle alone is invalid.
+    if (!reached.length) fail("Invalid advisory propagation graph");
+    const elevated = reached.filter((via) => high(via.severity));
     if (
       high(v.severity) !== Boolean(elevated.length) ||
       v.severity === "critical"
