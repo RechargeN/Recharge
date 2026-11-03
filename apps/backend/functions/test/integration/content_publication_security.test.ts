@@ -801,9 +801,10 @@ void test('revoked Creator verification of the Page owner blocks a delegated sub
 function importsContentModule(file: string, text: string, contentDir: string): boolean {
   return [...text.matchAll(/from\s+['"]([^'"]+)['"]/gu)].some((match) => {
     const specifier = match[1] ?? '';
+    // The separator keeps sibling modules such as content_translation out.
     return (
       specifier.startsWith('.') &&
-      path.resolve(path.dirname(file), specifier).startsWith(contentDir)
+      path.resolve(path.dirname(file), specifier).startsWith(contentDir + path.sep)
     );
   });
 }
@@ -823,6 +824,15 @@ void test('delegated import never reaches Content storage except through the Con
   );
   assert.equal(
     importsContentModule(sibling, "import x from '../../reference_data/domain/y.js';", contentDir),
+    false,
+  );
+  // A module whose name only starts with "content" is not Content.
+  assert.equal(
+    importsContentModule(
+      sibling,
+      "import x from '../../content_translation/content_translation_contract.js';",
+      contentDir,
+    ),
     false,
   );
   const offenders = sourceFiles(root)
@@ -868,6 +878,10 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/operations/operations_console.ts',
     // L3: analytics borrows only the Emulator guard, never Content storage.
     'modules/product_analytics/firestore_product_analytics_service.ts',
+    // ADR 0022 stage 1 and amendment 1: read-only checks of the published
+    // pointer and revision; translations live in their own collections.
+    'modules/content_translation/content_translation_contract.ts',
+    'modules/content_translation/firestore_content_translation_service.ts',
     'content_effects_entry.ts',
     'content_entry.ts',
     // D2: the composition root of Content's reaction to late Media restriction.
@@ -963,6 +977,15 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/operations/operations_console.ts': ['assertContentEmulatorContext'],
     'modules/product_analytics/firestore_product_analytics_service.ts': [
       'assertContentEmulatorContext',
+    ],
+    'modules/content_translation/content_translation_contract.ts': ['canonicalJson', 'sha256Hex'],
+    // The same read-only set verify-content-persistence-layout records.
+    'modules/content_translation/firestore_content_translation_service.ts': [
+      'assertContentEmulatorContext',
+      'contentCollections',
+      'canonicalJson',
+      'sha256Hex',
+      'resolveContentType',
     ],
     'modules/trust_safety/firestore_safety_service.ts': [
       'assertContentEmulatorContext',
@@ -1135,7 +1158,18 @@ void test('Content stays framework-neutral: no Firebase, transport, Booking or e
       .map((match) => match[1]!)
       .filter((name) => /content/iu.test(name))
       .sort(),
-    ['consumeContentEffectV1', 'contentCommandV1', 'contentQueryV1'],
+    [
+      'consumeContentEffectV1',
+      'contentCommandV1',
+      'contentQueryV1',
+      // ADR 0022: the content_translation module's own callables and
+      // triggers, wired from that module; Content itself gains no export.
+      'offerContentTranslationV1',
+      'purgeContentTranslationsOnHoldV1',
+      'sweepContentTranslationsV1',
+      'syncContentTranslationsV1',
+      'translateContentV1',
+    ],
   );
   // Negative control: neither a new SDK importer nor a new export is approved.
   assert.equal(emulatorOnly.has(path.join('domain', 'foreign.ts')), false);
