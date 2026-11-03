@@ -5,6 +5,7 @@ import path from "node:path";
 import { test } from "node:test";
 import {
   loopbackOnlyCleartext,
+  mediaReadPermissionsAbsent,
   releaseManifestChecks,
   parseArgs,
   preconditions,
@@ -354,4 +355,29 @@ test("the release APK refuses cleartext and is not debuggable", () => {
     ["E: manifest (line=2)", "", /not found/],
   ])
     assert.throws(() => releaseManifestChecks(manifest, files), expected);
+});
+
+test("MEDIA-PICK-01 needs no media-read or camera permission", () => {
+  const dump = [
+    "package: com.recharge.app.recharge",
+    "uses-permission: name='android.permission.INTERNET'",
+    "uses-permission: name='android.permission.ACCESS_FINE_LOCATION'",
+  ].join("\n");
+  assert.deepEqual(mediaReadPermissionsAbsent(dump), [
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_FINE_LOCATION",
+  ]);
+  assert.throws(() => mediaReadPermissionsAbsent(""), /no permission list/);
+  for (const forbidden of [
+    "READ_MEDIA_IMAGES",
+    "READ_EXTERNAL_STORAGE",
+    "CAMERA",
+  ])
+    assert.throws(
+      () =>
+        mediaReadPermissionsAbsent(
+          `${dump}\nuses-permission: name='android.permission.${forbidden}'`,
+        ),
+      new RegExp(forbidden),
+    );
 });

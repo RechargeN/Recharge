@@ -608,23 +608,27 @@ export async function main(args) {
           return { picked, ...done };
         },
       );
-      await step("no media-read permission requested", () => {
-        const dump = adb(serial, ["shell", "dumpsys", "package", appPackage]);
-        const requested = dump
-          .split(/\r?\n/)
-          .map((line) => line.trim())
-          .filter((line) => /^android\.permission\.[A-Z_]+/.test(line))
-          .map((line) => line.split(":")[0]);
-        for (const forbidden of [
-          "android.permission.READ_MEDIA_IMAGES",
-          "android.permission.READ_EXTERNAL_STORAGE",
-        ])
-          assert.equal(
-            requested.includes(forbidden),
-            false,
-            `${forbidden} must not be requested`,
-          );
-        return { requested: [...new Set(requested)].sort() };
+      // `flutter test` uninstalls the app when it ends, so the installed
+      // package is gone by now: read the APK that ran on the phone instead.
+      await step("no media-read permission in the APK that ran", () => {
+        const apk = path.join(
+          mobileRoot,
+          "build",
+          "app",
+          "outputs",
+          "flutter-apk",
+          "app-debug.apk",
+        );
+        const dump = exec(aaptPath(), ["dump", "permissions", apk]);
+        if (dump.status !== 0) throw new Error(`aapt failed: ${dump.output}`);
+        const requested = mediaReadPermissionsAbsent(dump.output);
+        return {
+          apkSha256: crypto
+            .createHash("sha256")
+            .update(fs.readFileSync(apk))
+            .digest("hex"),
+          requested,
+        };
       });
     } finally {
       adb(serial, ["shell", "rm", "-rf", folder], { allowFail: true });
@@ -782,6 +786,28 @@ export function releaseManifestChecks(manifest, files) {
   if (sdk < 28)
     throw new Error(`targetSdkVersion ${sdk} allows cleartext by default`);
   return sdk;
+}
+
+/**
+ * `aapt dump permissions`: MEDIA-PICK-01 asks for no media-read permission
+ * (Photo Picker) and needs no CAMERA (system camera app). An empty dump is
+ * an error, never a pass. Returns the requested permissions.
+ */
+export function mediaReadPermissionsAbsent(dump) {
+  const requested = [...dump.matchAll(/uses-permission: name='([^']+)'/g)].map(
+    (match) => match[1],
+  );
+  if (!requested.includes("android.permission.INTERNET"))
+    throw new Error("no permission list read from the APK");
+  for (const forbidden of [
+    "android.permission.READ_MEDIA_IMAGES",
+    "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+    "android.permission.READ_EXTERNAL_STORAGE",
+    "android.permission.CAMERA",
+  ])
+    if (requested.includes(forbidden))
+      throw new Error(`${forbidden} must not be requested`);
+  return requested;
 }
 
 /** A short synthetic track in Riga, written fresh for each run. */
