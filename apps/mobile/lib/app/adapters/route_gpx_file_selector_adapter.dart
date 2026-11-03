@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:share_plus/share_plus.dart';
 
 import '../../features/create/domain/repositories/route_gpx_file_picker_port.dart';
@@ -26,6 +27,10 @@ Future<Uint8List> readBoundedGpx(XFile file, int maximumBytes) async {
   return builder.takeBytes();
 }
 
+/// Whether a picked file is named like a GPX file (`.gpx`, any case); the
+/// same rule the inspector applies to the registered file.
+bool isGpxFileName(String name) => name.trim().toLowerCase().endsWith('.gpx');
+
 class RouteGpxFileSelectorAdapter implements RouteGpxFilePickerPort {
   const RouteGpxFileSelectorAdapter(
     this._sourceStore, {
@@ -35,11 +40,21 @@ class RouteGpxFileSelectorAdapter implements RouteGpxFilePickerPort {
   final RouteGpxSourceStore _sourceStore;
   final RouteGpxImportConfig _config;
 
-  static const XTypeGroup _gpxType = XTypeGroup(
+  /// Android filters the system picker by MIME type only, and MediaStore
+  /// types a `.gpx` file as `application/octet-stream` (B1-device on a Samsung
+  /// A34, 2026-11-03: the file was greyed out). That type is accepted here;
+  /// the name is checked before any read and the inspector decides by bytes.
+  @visibleForTesting
+  static const XTypeGroup gpxTypeGroup = XTypeGroup(
     label:
         'GPX route', // l10n-ignore: file-type filter of the desktop system picker; not shown on Android/iOS
     extensions: <String>['gpx'],
-    mimeTypes: <String>['application/gpx+xml', 'application/xml'],
+    mimeTypes: <String>[
+      'application/gpx+xml',
+      'application/xml',
+      'text/xml',
+      'application/octet-stream',
+    ],
     uniformTypeIdentifiers: <String>['com.topografix.gpx'],
     webWildCards: <String>['.gpx', 'application/gpx+xml'],
   );
@@ -47,9 +62,13 @@ class RouteGpxFileSelectorAdapter implements RouteGpxFilePickerPort {
   @override
   Future<RouteSafeFileRef?> pickForImport() async {
     final selected = await openFile(
-      acceptedTypeGroups: const <XTypeGroup>[_gpxType],
+      acceptedTypeGroups: const <XTypeGroup>[gpxTypeGroup],
     );
     if (selected == null) return null;
+    // The broad Android MIME filter also offers other binary files.
+    if (!isGpxFileName(selected.name)) {
+      throw const RouteGpxException('gpx_file_type_unsupported');
+    }
     final bytes = await readBoundedGpx(selected, _config.maximumFileBytes);
     return _sourceStore.register(
       displayName: selected.name,
@@ -63,7 +82,7 @@ class RouteGpxFileSelectorAdapter implements RouteGpxFilePickerPort {
     try {
       final location = await getSaveLocation(
         suggestedName: file.displayName,
-        acceptedTypeGroups: const <XTypeGroup>[_gpxType],
+        acceptedTypeGroups: const <XTypeGroup>[gpxTypeGroup],
       );
       if (location == null) return false;
       final bytes = await _sourceStore.read(file);
