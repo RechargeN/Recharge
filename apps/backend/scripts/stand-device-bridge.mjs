@@ -41,7 +41,8 @@ const seedCommands = new Set([
 const scripts = new Set(["stand-seed.mjs", "stand-moderate.mjs"]);
 const writers = new Set(["A", "B", "device"]);
 const readers = new Set(["A", "B", "gate", "device"]);
-const pointName = /^[a-z0-9][a-z0-9.-]{0,63}$/;
+// E2 points carry the client role, e.g. `approved.B`.
+const pointName = /^[A-Za-z0-9][A-Za-z0-9.-]{0,63}$/;
 const fixtureRoot = "test/fixtures/media/";
 const maxBody = 64 * 1024;
 

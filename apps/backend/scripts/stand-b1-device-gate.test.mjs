@@ -151,7 +151,13 @@ test("rendezvous points: who may write, who may read, safe names", () => {
     () => rendezvousPoint("gate", "approved.B", true),
     BridgeRefusal,
   );
-  for (const name of ["", "../x", "A/B", "UPPER", "x".repeat(70)])
+  // The E2 phone client reads the gate's per-role approval (found on the A34).
+  assert.equal(
+    rendezvousPoint("gate", "approved.B", false),
+    "gate.approved.B.json",
+  );
+  assert.equal(rendezvousPoint("B", "submitted", true), "B.submitted.json");
+  for (const name of ["", "../x", "A/B", ".hidden", "a b", "x".repeat(70)])
     assert.throws(
       () => rendezvousPoint("device", name, true),
       BridgeRefusal,
