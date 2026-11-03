@@ -22,6 +22,32 @@ void main() {
     expect(group.mimeTypes, isNot(contains('*/*')), reason: 'never everything');
   });
 
+  test('the Android cache rename by MIME type is undone, nothing else', () {
+    // As seen on the A34: Downloads/route.gpx, octet-stream, cached as .bin.
+    expect(
+      gpxDisplayName('recharge-b1-device.bin', 'application/octet-stream'),
+      'recharge-b1-device.gpx',
+    );
+    expect(gpxDisplayName('Ride.XML', 'text/xml'), 'Ride.gpx');
+    expect(gpxDisplayName('ride.xml', 'application/xml'), 'ride.gpx');
+    expect(gpxDisplayName('route.gpx', null), 'route.gpx');
+    expect(
+      gpxDisplayName('route.gpx', 'application/octet-stream'),
+      'route.gpx',
+    );
+    for (final (String name, String? mime) in <(String, String?)>[
+      ('photo.jpg', 'image/jpeg'),
+      ('route.bin', null),
+      ('route.bin', 'application/xml'),
+      ('route.xml', 'application/octet-stream'),
+      ('route.zip', 'application/zip'),
+      ('.bin', 'application/octet-stream'),
+      ('route.kml', 'application/vnd.google-earth.kml+xml'),
+    ]) {
+      expect(gpxDisplayName(name, mime), isNull, reason: '$name $mime');
+    }
+  });
+
   test('only a .gpx name passes before any byte is read', () {
     for (final String name in <String>[
       'route.gpx',

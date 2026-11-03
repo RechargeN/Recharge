@@ -31,6 +31,30 @@ Future<Uint8List> readBoundedGpx(XFile file, int maximumBytes) async {
 /// same rule the inspector applies to the registered file.
 bool isGpxFileName(String name) => name.trim().toLowerCase().endsWith('.gpx');
 
+/// The GPX name of a picked file, or null when it cannot be a GPX file.
+///
+/// file_selector on Android copies the document into the cache as its base
+/// name plus the extension of its MIME type, and `XFile.name` is that copy:
+/// a `.gpx` typed `application/octet-stream` arrives as `route.bin`, one typed
+/// as XML as `route.xml` (B1-device, A34, 2026-11-03). Only that rename is
+/// undone; the inspector still accepts the file by its bytes alone.
+String? gpxDisplayName(String name, String? mimeType) {
+  final trimmed = name.trim();
+  if (isGpxFileName(trimmed)) return trimmed;
+  final lower = trimmed.toLowerCase();
+  final platformExtension = switch (mimeType) {
+    'application/octet-stream' => '.bin',
+    'application/xml' || 'text/xml' => '.xml',
+    _ => null,
+  };
+  if (platformExtension == null ||
+      !lower.endsWith(platformExtension) ||
+      trimmed.length == platformExtension.length) {
+    return null;
+  }
+  return '${trimmed.substring(0, trimmed.length - platformExtension.length)}.gpx';
+}
+
 class RouteGpxFileSelectorAdapter implements RouteGpxFilePickerPort {
   const RouteGpxFileSelectorAdapter(
     this._sourceStore, {
@@ -66,12 +90,13 @@ class RouteGpxFileSelectorAdapter implements RouteGpxFilePickerPort {
     );
     if (selected == null) return null;
     // The broad Android MIME filter also offers other binary files.
-    if (!isGpxFileName(selected.name)) {
+    final displayName = gpxDisplayName(selected.name, selected.mimeType);
+    if (displayName == null) {
       throw const RouteGpxException('gpx_file_type_unsupported');
     }
     final bytes = await readBoundedGpx(selected, _config.maximumFileBytes);
     return _sourceStore.register(
-      displayName: selected.name,
+      displayName: displayName,
       mediaType: selected.mimeType ?? 'application/gpx+xml',
       bytes: bytes,
     );
