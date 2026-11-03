@@ -5,6 +5,7 @@ import path from "node:path";
 import { test } from "node:test";
 import {
   loopbackOnlyCleartext,
+  releaseManifestChecks,
   parseArgs,
   preconditions,
   routeGpx,
@@ -311,4 +312,46 @@ test("the debug APK may send cleartext only to 127.0.0.1", () => {
     ["E: manifest (line=1)\n", /not found/],
   ])
     assert.throws(() => loopbackOnlyCleartext(config), expected);
+});
+
+const releaseManifest = [
+  "E: manifest (line=2)",
+  "  E: uses-sdk (line=7)",
+  "    A: android:minSdkVersion(0x0101020c)=(type 0x10)0x18",
+  "    A: android:targetSdkVersion(0x01010270)=(type 0x10)0x24",
+  "  E: application (line=20)",
+  '    A: android:label(0x01010001)="recharge"',
+].join("\n");
+
+test("the release APK refuses cleartext and is not debuggable", () => {
+  assert.equal(
+    releaseManifestChecks(releaseManifest, "res/xml/other.xml\n"),
+    36,
+  );
+  const add = (line) => `${releaseManifest}\n    ${line}`;
+  for (const [manifest, files, expected] of [
+    [
+      add("A: android:networkSecurityConfig(0x01010527)=@0x7f110002"),
+      "",
+      /network security config/,
+    ],
+    [
+      releaseManifest,
+      "res/xml/local_emulator_network_security.xml\n",
+      /debug network config/,
+    ],
+    [
+      add("A: android:usesCleartextTraffic(0x010104ec)=(type 0x12)0xffffffff"),
+      "",
+      /cleartext traffic/,
+    ],
+    [
+      add("A: android:debuggable(0x0101000f)=(type 0x12)0xffffffff"),
+      "",
+      /debuggable/,
+    ],
+    [releaseManifest.replace("0x24", "0x1b"), "", /targetSdkVersion 27/],
+    ["E: manifest (line=2)", "", /not found/],
+  ])
+    assert.throws(() => releaseManifestChecks(manifest, files), expected);
 });

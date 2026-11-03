@@ -206,8 +206,9 @@ async function getJson(url) {
  * - route (needs an operator at the phone): the real location dialog, GPS
  *   recording and its recovery after `am kill`, the system GPX picker and
  *   export;
- * - release: the release APK has no INTERNET permission and starts on the
- *   phone.
+ * - release: the release APK refuses cleartext (no debug network config,
+ *   no usesCleartextTraffic, target 28+), is not debuggable and starts on
+ *   the phone; its permissions are recorded.
  * Each part writes a JSON ledger (steps, device facts, bridge requests).
  */
 export async function main(args) {
@@ -560,13 +561,19 @@ export async function main(args) {
       "flutter-apk",
       "app-release.apk",
     );
-    await step("release APK permissions: no INTERNET", () => {
+    // Plugins (maps, firebase_auth) bring INTERNET, so the release boundary is
+    // the code (releaseMode → productionDisabled) plus a platform that refuses
+    // cleartext: no debug network config, no usesCleartextTraffic, target 28+.
+    await step("release APK: no cleartext, not debuggable", () => {
       const permissions = exec(aaptPath(), ["dump", "permissions", apk]).output;
-      assert.doesNotMatch(
-        permissions,
-        /android\.permission\.INTERNET/,
-        "release must not reach the network",
-      );
+      const manifest = exec(aaptPath(), [
+        "dump",
+        "xmltree",
+        apk,
+        "AndroidManifest.xml",
+      ]).output;
+      const files = exec(aaptPath(), ["list", apk]).output;
+      releaseManifestChecks(manifest, files);
       return {
         sha256: crypto
           .createHash("sha256")
@@ -658,6 +665,31 @@ export function loopbackOnlyCleartext(xmltree) {
   )
     throw new Error("subdomains must not be included");
   return domains;
+}
+
+/**
+ * Release APK (`aapt dump xmltree … AndroidManifest.xml` and `aapt list`):
+ * no network security config or debug config resource, no
+ * usesCleartextTraffic=true, not debuggable, targetSdkVersion 28 or higher
+ * (cleartext refused by default on Android 9+). Returns the target SDK.
+ */
+export function releaseManifestChecks(manifest, files) {
+  if (/networkSecurityConfig/.test(manifest))
+    throw new Error("release must not carry a network security config");
+  if (/local_emulator_network_security/.test(files))
+    throw new Error("release must not package the debug network config");
+  if (/usesCleartextTraffic\([^)]*\)=\(type 0x12\)0xffffffff/.test(manifest))
+    throw new Error("release must not allow cleartext traffic");
+  if (/debuggable\([^)]*\)=\(type 0x12\)0xffffffff/.test(manifest))
+    throw new Error("release must not be debuggable");
+  const target = /targetSdkVersion\([^)]*\)=\(type 0x10\)0x([0-9a-f]+)/.exec(
+    manifest,
+  );
+  if (!target) throw new Error("targetSdkVersion not found");
+  const sdk = Number.parseInt(target[1], 16);
+  if (sdk < 28)
+    throw new Error(`targetSdkVersion ${sdk} allows cleartext by default`);
+  return sdk;
 }
 
 /** A short synthetic track in Riga, written fresh for each run. */
