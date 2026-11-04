@@ -11,15 +11,24 @@ import '../../features/create/domain/repositories/route_location_recording_port.
 class RouteGeolocatorAdapter implements RouteLocationRecordingPort {
   /// L4.6: [languageCode] is the app language for the Android background
   /// recording notification, which is shown outside the widget tree.
-  RouteGeolocatorAdapter({String Function()? languageCode})
-    : _languageCode = languageCode ?? (() => 'en');
+  ///
+  /// [check] and [request] default to the plugin; tests pass their own.
+  RouteGeolocatorAdapter({
+    String Function()? languageCode,
+    Future<LocationPermission> Function()? check,
+    Future<LocationPermission> Function()? request,
+  }) : _languageCode = languageCode ?? (() => 'en'),
+       _check = check ?? Geolocator.checkPermission,
+       _request = request ?? Geolocator.requestPermission;
 
   final String Function() _languageCode;
+  final Future<LocationPermission> Function() _check;
+  final Future<LocationPermission> Function() _request;
 
   @override
   Future<RouteLocationPermission> checkPermission() async {
     try {
-      return _permission(await Geolocator.checkPermission());
+      return _permission(await _check());
     } catch (_) {
       throw const RouteLocationException('gps_permission_check_failed');
     }
@@ -52,9 +61,18 @@ class RouteGeolocatorAdapter implements RouteLocationRecordingPort {
     }
   }
 
+  /// B1D-ROUTE-BG-01 (Samsung A34, Android 16, 2026-11-04): geolocator adds
+  /// ACCESS_BACKGROUND_LOCATION to its request only while the status is
+  /// `whileInUse`, so with "Allow all the time" already granted (the path the
+  /// app sends people to in Settings) a new request asks for the foreground
+  /// permissions alone and answers `whileInUse`. A granted `always` is kept
+  /// as it is; otherwise the plugin request runs as before.
   @override
-  Future<RouteLocationPermission> requestBackgroundPermission() =>
-      _requestPermission();
+  Future<RouteLocationPermission> requestBackgroundPermission() async {
+    final RouteLocationPermission current = await checkPermission();
+    if (current == RouteLocationPermission.always) return current;
+    return _requestPermission();
+  }
 
   @override
   Future<RouteLocationPermission> requestForegroundPermission() =>
@@ -62,7 +80,7 @@ class RouteGeolocatorAdapter implements RouteLocationRecordingPort {
 
   Future<RouteLocationPermission> _requestPermission() async {
     try {
-      return _permission(await Geolocator.requestPermission());
+      return _permission(await _request());
     } catch (_) {
       throw const RouteLocationException('gps_permission_request_failed');
     }
