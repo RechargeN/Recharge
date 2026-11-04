@@ -23,9 +23,9 @@ const functionsDir = path.join(here, "..", "functions");
 const standCli = path.join(here, "emulator-stand.mjs");
 const seedCli = path.join(here, "stand-seed.mjs");
 const e2Gate = path.join(here, "stand-e2-gate.mjs");
-const parts = ["core", "route", "media", "release"];
+const parts = ["core", "route", "route-background", "media", "release"];
 const usage =
-  "WARNING: this permanently deletes the stand data folder. Usage: stand-b1-device-gate.mjs --yes --device <serial> [--part core|route|media|release] [--out <new directory>]";
+  "WARNING: this permanently deletes the stand data folder. Usage: stand-b1-device-gate.mjs --yes --device <serial> [--part core|route|route-background|media|release] [--out <new directory>]";
 
 /** `--yes --device <serial> [--part <part>] [--out <dir>]`, or a refusal. */
 export function parseArgs(args) {
@@ -206,6 +206,9 @@ async function getJson(url) {
  * - route (needs an operator at the phone): the real location dialog, GPS
  *   recording and its recovery after `am kill`, the system GPX picker and
  *   export;
+ * - route-background (operator): "Allow all the time" chosen in Settings
+ *   starts background recording (B1D-ROUTE-BG-01) and the location
+ *   foreground service runs while the app is in the background;
  * - media (operator): MEDIA-PICK-01 with the real Photo Picker and camera;
  *   kept copies have no EXIF/GPS; no media-read permission is requested;
  * - release: the release APK refuses cleartext (no debug network config,
@@ -283,6 +286,7 @@ export async function main(args) {
     if (part === "core") await core();
     else if (part === "route") await route();
     else if (part === "media") await media();
+    else if (part === "route-background") await routeBackground();
     else await release();
   } catch (error) {
     failure = error;
@@ -293,7 +297,7 @@ export async function main(args) {
         await bridge.close();
       }
       ledger.reverseAfter = removeReversedPorts(serial);
-      if (part !== "route" && part !== "media") run(standCli, ["stop"]);
+      if (["core", "release"].includes(part)) run(standCli, ["stop"]);
     } catch (error) {
       failure ??= error;
     }
@@ -541,6 +545,63 @@ export async function main(args) {
     } finally {
       adb(serial, ["shell", "rm", "-f", target], { allowFail: true });
     }
+  }
+
+  async function routeBackground() {
+    const operator = (text) => process.stdout.write(`OPERATOR: ${text}\n`);
+    adb(serial, ["shell", "pm", "clear", appPackage], { allowFail: true });
+    await step(
+      'while-in-use, Settings "all the time", background start',
+      async () => {
+        const run = onPhone(
+          "integration_test/b1_device_route_background_test.dart",
+          [],
+          "route-background",
+        );
+        await point(rendezvous, "device", "foreground-dialog", run);
+        operator("allow location for Recharge: While using the app");
+        const settings = await Promise.race([
+          point(rendezvous, "device", "settings", run).then(() => true),
+          point(rendezvous, "device", "background", run).then(() => false),
+        ]);
+        if (settings)
+          operator(
+            "in Settings open Permissions → Location → Allow all the time, then return to the app",
+          );
+        const trace = await point(rendezvous, "device", "background", run);
+        home(serial);
+        await pause(20000);
+        const services = adb(
+          serial,
+          ["shell", "dumpsys", "activity", "services", appPackage],
+          { allowFail: true },
+        );
+        const foregroundService =
+          /isForeground=true/.test(services) &&
+          /foregroundServiceType=0x0*8\b|location/i.test(services);
+        adb(serial, [
+          "shell",
+          "monkey",
+          "-p",
+          appPackage,
+          "-c",
+          "android.intent.category.LAUNCHER",
+          "1",
+        ]);
+        arrive(rendezvous, "foreground");
+        const code = await run.exited;
+        if (code !== 0)
+          throw new Error(
+            `route-background test exited ${code}; see ${run.log}`,
+          );
+        const done = await point(rendezvous, "device", "done");
+        assert.ok(
+          foregroundService,
+          "a location foreground service ran in the background",
+        );
+        return { trace, done, foregroundService };
+      },
+    );
   }
 
   async function media() {
