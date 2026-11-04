@@ -43,7 +43,7 @@ it. Do not ask the owner to re-accept already Accepted architecture decisions.
 |---|---|---|
 | Scope and location | OD-07 Accepted with controls; exact available project ID/number, artifact and resource/API allowlist still missing | project creation and any provisioning |
 | IAM/WIF | BCK05-OD-02 Accepted; expanded per-identity permissions/bindings, immutable subject opt-in, exact audience, protected main and environments, sanitized negative claim evidence pending | WIF binding or cloud-bearing workflow |
-| Budget | Roadmap §3.5 already accepts the dev EUR25/month verification baseline and RechargeN as temporary Finance owner. OD-04 remains Proposed; this is neither spending authorization nor a hard cap. Notification destination, quotas and exact spend/provisioning approval remain missing | billable provisioning |
+| Budget | Roadmap §3.5 already accepts the dev verification budget, lowered by the owner to EUR5/month on 2026-11-04 (earlier EUR25), and RechargeN as temporary Finance owner. OD-04 remains Proposed; this is neither spending authorization nor a hard cap. Notification destination, quotas and exact spend/provisioning approval remain missing | billable provisioning |
 | Reliability | OD-03 Proposed; select bounded dev thresholds, observation duration and stop criteria; full stage load evidence is not claimed | dev service deployment/traffic; BCK-05/G1/R1 approvals remain independent |
 | Recovery | Roadmap §3.5 accepts the OD-05 §7 verification targets; OD-05 remains Proposed and restore evidence is absent. State backup custody and an executable dev export/restore procedure remain missing; do not silently relax RPO/RTO for synthetic data | data-bearing provisioning under the approved slice |
 | Incident | Roadmap §3.5 names RechargeN as Incident owner. OD-08 remains Proposed, formal G5/G6 gate; dev contact channel, containment and escalation remain missing. Independent review/tabletop evidence is not fabricated | dev traffic; full OD-08 evidence before G5/G6 |
@@ -154,8 +154,8 @@ Alert delivery test, budget creation and monitoring creation remain unauthorized
 
 ### Next owner checkpoint — one bounded decision, not a new document
 
-Do not request re-approval of the R1 scope, locations, IAM architecture, EUR25
-baseline or RechargeN's existing roles. Do not fill missing contact data from a
+Do not request re-approval of the R1 scope, locations, IAM architecture, the
+EUR5 dev budget target or RechargeN's existing roles. Do not fill missing contact data from a
 Git email address. Resolve these inputs before preparing an executable cloud
 authorization:
 
@@ -202,8 +202,8 @@ zero-risk bootstrap. Dev synthetic traffic does not prove R1/stage capacity.
 Copyable next-step wording (replace the channel and expiry first):
 
 > Подтверждаю канал dev budget/incident [канал] и получение уведомлений мной,
-> RechargeN. Принимаю пороги 50/75/90/100% поверх ранее принятого baseline
-> €25/месяц; это не hard cap и не разрешение расходов. Разрешаю только
+> RechargeN. Принимаю пороги 50/75/90/100% от цели €5/месяц
+> (€2.50/€3.75/€4.50/€5); это не hard cap и не разрешение расходов. Разрешаю только
 > read-only проверку доступности candidate dev project ID, billing currency
 > и доступных квот до [UTC]. Вход/MFA выполняю сам. Создание проекта,
 > привязку billing, IAM/API changes, plan/apply, deployment, активные проверки,

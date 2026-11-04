@@ -133,7 +133,7 @@
         "status": "proposed",
         "decisionRef": "BCK05-OD04-COST-01",
         "currency": "EUR",
-        "guardrailMonthlyEur": 25,
+        "guardrailMonthlyEur": 5,
         "thresholdsPercent": [
           50,
           75,

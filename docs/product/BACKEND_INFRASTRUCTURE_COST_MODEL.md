@@ -296,11 +296,17 @@ invoice forecast. Finance must record tax/support treatment separately.
 
 | Environment/profile | Monthly budget | 50% | 75% | 90% | 100% | Separate emergency ceiling |
 |---|---:|---:|---:|---:|---:|---:|
-| dev | **€25** | €12.50 | €18.75 | €22.50 | €25 | €40 |
+| dev | **€5** | €2.50 | €3.75 | €4.50 | €5 | €40 (not revised) |
 | stage | **€75** | €37.50 | €56.25 | €67.50 | €75 | €120 |
 | prod — L1 Latvia launch | **€150** | €75 | €112.50 | €135 | €150 | €250 |
 | prod — L2 approved year-one envelope | **€500** | €250 | €375 | €450 | €500 | €750 |
 | L3 stress authorization, temporary | **€1,000** | €500 | €750 | €900 | €1,000 | €1,500 |
+
+Dev revision 2026-11-04: the owner set a €5/month target for the minimal
+synthetic dev (≤500 objects, scale-to-zero; N1). It replaces the earlier dev
+proposal of €25 (€12.50/€18.75/€22.50/€25) in the execution manifest and its
+checker. The emergency ceiling was not revised. The target is an alert
+threshold, not a spending permission.
 
 Rules:
 

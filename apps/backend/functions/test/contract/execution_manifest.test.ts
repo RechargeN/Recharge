@@ -221,6 +221,16 @@ void test('containment never blocks cancelling a Booking or a mandatory privacy 
     assert.equal(budget.hardStop, false);
     assert.equal(budget.status, 'proposed');
   }
+  // dev follows the owner's €5/month target (2026-11-04); the old €25 baseline is rejected.
+  assert.equal((env(load(), 'dev').budget as Json).guardrailMonthlyEur, 5);
+  assert.ok(
+    hasProblem(
+      check((m) => {
+        (env(m, 'dev').budget as Json).guardrailMonthlyEur = 25;
+      }),
+      'dev: budget differs from the proposed',
+    ),
+  );
   assert.ok(
     hasProblem(
       check((m) => {

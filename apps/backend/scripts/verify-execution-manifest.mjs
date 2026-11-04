@@ -105,7 +105,10 @@ const blockingSwitches = {
     "identity.session.rotate.incidentDisable",
   ],
 };
-const guardrails = { dev: 25, stage: 75, prod: 150 };
+// stage/prod: proposed BCK05-OD-04 baseline. dev: owner target €5/month
+// (2026-11-04, N1 minimal synthetic dev), below the €25 baseline.
+// A guardrail is an alert threshold, never a spending permission.
+const guardrails = { dev: 5, stage: 75, prod: 150 };
 const secretLike =
   /-----BEGIN|AIza[0-9A-Za-z_-]{20,}|gh[pousr]_[0-9A-Za-z]{20,}|\.iam\.gserviceaccount\.com|@[a-z0-9-]+\.[a-z]{2,}/u;
 
@@ -222,7 +225,7 @@ export function verifyExecutionManifest(manifest, facts = repositoryFacts()) {
       budget.status !== "proposed"
     )
       problems.push(
-        `${env}: budget differs from the proposed BCK05-OD-04 baseline`,
+        `${env}: budget differs from the proposed guardrail (€${String(guardrails[env])})`,
       );
     if (
       JSON.stringify(budget.thresholdsPercent) !==

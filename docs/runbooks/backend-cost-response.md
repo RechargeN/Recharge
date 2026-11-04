@@ -1,7 +1,8 @@
 # Backend cost response (Draft, not executed)
 
-Status: **Draft.** Budgets are proposed by BCK05-OD-04 (dev EUR 25, stage EUR 75,
-prod EUR 150 per month); no budget, channel or route exists yet.
+Status: **Draft.** Budgets are proposed by BCK05-OD-04 (stage EUR 75, prod
+EUR 150 per month); dev is the owner's EUR 5 target of 2026-11-04 (earlier
+EUR 25). No budget, channel or route exists yet.
 
 ## A budget alert is a notification, not a limiter
 

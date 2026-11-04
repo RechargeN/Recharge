@@ -948,7 +948,8 @@ routing is not evidence.
 - each optional provider/AI/payment channel has its own budget and kill switch.
 
 The concrete Draft proposal and dated unit-price model are in
-[BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md): dev €25, stage €75,
+[BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md): dev €5 (owner
+target 2026-11-04, earlier €25), stage €75,
 prod L1 €150 and L2 €500 monthly guardrails, with L3 stress separately
 authorized. `BCK05-OD-04` is Proposed; these numbers block provisioning until
 Product/Finance/Operations verdict and actual EUR SKU reconciliation.
@@ -1635,8 +1636,9 @@ families; workload-identity provider names per environment; secret **references*
 (names and owners, never values or versions); collections, composite indexes and
 TTL fields, **derived and cross-checked** against `firestore.rules` and
 `firestore.indexes.json`; feature flags (all default off); CI environments; App
-Check mode per stage; budgets (50/75/90/100 % thresholds, guardrails €25 / €75 /
-€150 **as proposed by BCK05-OD-04**), limits and quotas (`null` until decided);
+Check mode per stage; budgets (50/75/90/100 % thresholds, guardrails €5 / €75 /
+€150: stage/prod **as proposed by BCK05-OD-04**, dev by the owner's 2026-11-04
+target), limits and quotas (`null` until decided);
 deployment order, rollback, backup/recovery, smoke and destroy procedure
 references. Every unresolved value is `null`, never invented.
 
