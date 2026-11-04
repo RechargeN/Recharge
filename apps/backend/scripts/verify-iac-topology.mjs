@@ -430,6 +430,69 @@ if (terraform === undefined) {
           expect_failures = [terraform_data.execution_guard]
         }\n`;
         }
+        if (env === "dev") {
+          const planRecord = { ...record, operations: ["plan"] };
+          const planRecordRaw = JSON.stringify(planRecord);
+          writeFileSync(path.join(dir, "plan-only.json"), planRecordRaw);
+          const planVariables = `
+            project_id = "recharge-dev-selftest0"
+            authorization_ref = "synthetic-not-authority"
+            manifest_sha256 = "${digest}"
+            authorization_record_path = "./plan-only.json"
+            authorization_record_sha256 = "${createHash("sha256").update(planRecordRaw).digest("hex")}"
+            release_commit_sha = "${"a".repeat(40)}"
+          `;
+          tests += `run "plan_record_cannot_authorize_apply" {
+            command = plan
+            variables { ${planVariables} }
+            expect_failures = [terraform_data.execution_guard]
+          }
+          run "draft_review_plan_only" {
+            command = plan
+            variables {
+              ${planVariables}
+              execution_operation = "plan"
+            }
+            assert {
+              condition = output.review_plan_authorized == true && output.provisioning_authorized == false
+              error_message = "Review-only record must not claim provisioning authority"
+            }
+          }\n`;
+          for (const [name, value] of [
+            [
+              "review_expired",
+              { ...planRecord, expiresAtUtc: "2001-01-01T00:00:00Z" },
+            ],
+            [
+              "review_foreign_project",
+              { ...planRecord, projectId: "recharge-dev-foreign0" },
+            ],
+            [
+              "review_wrong_manifest",
+              { ...planRecord, manifestSha256: "0".repeat(64) },
+            ],
+            [
+              "review_no_plan_permission",
+              { ...planRecord, operations: ["apply"] },
+            ],
+          ]) {
+            const raw = JSON.stringify(value);
+            writeFileSync(path.join(dir, `${name}.json`), raw);
+            tests += `run "${name}" {
+              command = plan
+              variables {
+                project_id = "recharge-dev-selftest0"
+                authorization_ref = "synthetic-not-authority"
+                manifest_sha256 = "${digest}"
+                authorization_record_path = "./${name}.json"
+                authorization_record_sha256 = "${createHash("sha256").update(raw).digest("hex")}"
+                release_commit_sha = "${"a".repeat(40)}"
+                execution_operation = "plan"
+              }
+              expect_failures = [terraform_data.execution_guard]
+            }\n`;
+          }
+        }
         writeFileSync(path.join(dir, "authorization.tftest.hcl"), tests);
         const init = run(
           terraform,

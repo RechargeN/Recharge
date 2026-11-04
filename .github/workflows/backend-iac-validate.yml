@@ -13,6 +13,9 @@ on:
       - "apps/backend/firestore.indexes.json"
       - "apps/backend/scripts/verify-execution-manifest.mjs"
       - "apps/backend/scripts/verify-iac-topology.mjs"
+      - "apps/backend/scripts/verify-dev-apply-approval.mjs"
+      - "apps/backend/scripts/verify-dev-apply-approval.test.mjs"
+      - ".github/workflows/backend-deploy.yml"
       - "docs/runbooks/backend-*.md"
   workflow_dispatch:
 
@@ -65,6 +68,9 @@ jobs:
       - name: Execution manifest gate
         working-directory: apps/backend/functions
         run: npm run verify:execution-manifest
+
+      - name: Reject plan-only or mismatched apply records (local fixtures)
+        run: node --test apps/backend/scripts/verify-dev-apply-approval.test.mjs
 
       - name: IaC topology, Terraform validate and gate behaviour
         working-directory: apps/backend/functions

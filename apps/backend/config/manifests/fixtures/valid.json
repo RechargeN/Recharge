@@ -136,12 +136,7 @@
             "decisionRef": "BCK05-OD04-COST-01",
             "currency": "EUR",
             "guardrailMonthlyEur": 5,
-            "thresholdsPercent": [
-              50,
-              75,
-              90,
-              100
-            ],
+            "thresholdsPercent": [50, 75, 90, 100],
             "anomalyAlerts": true,
             "responseOwnerRole": "Finance owner",
             "notificationChannelRefs": [],
@@ -149,9 +144,7 @@
             "automaticBillingDetach": false,
             "containment": {
               "mechanism": "serverFlagsAndQuotas",
-              "killSwitchIds": [
-                "booking.create.incidentDisable"
-              ],
+              "killSwitchIds": ["booking.create.incidentDisable"],
               "neverBlocked": [
                 "booking.cancel",
                 "privacy.dsr.export",
@@ -276,12 +269,7 @@
             "decisionRef": "BCK05-OD04-COST-01",
             "currency": "EUR",
             "guardrailMonthlyEur": 75,
-            "thresholdsPercent": [
-              50,
-              75,
-              90,
-              100
-            ],
+            "thresholdsPercent": [50, 75, 90, 100],
             "anomalyAlerts": true,
             "responseOwnerRole": "Finance owner",
             "notificationChannelRefs": [],
@@ -289,9 +277,7 @@
             "automaticBillingDetach": false,
             "containment": {
               "mechanism": "serverFlagsAndQuotas",
-              "killSwitchIds": [
-                "booking.create.incidentDisable"
-              ],
+              "killSwitchIds": ["booking.create.incidentDisable"],
               "neverBlocked": [
                 "booking.cancel",
                 "privacy.dsr.export",
@@ -416,12 +402,7 @@
             "decisionRef": "BCK05-OD04-COST-01",
             "currency": "EUR",
             "guardrailMonthlyEur": 150,
-            "thresholdsPercent": [
-              50,
-              75,
-              90,
-              100
-            ],
+            "thresholdsPercent": [50, 75, 90, 100],
             "anomalyAlerts": true,
             "responseOwnerRole": "Finance owner",
             "notificationChannelRefs": [],
@@ -429,9 +410,7 @@
             "automaticBillingDetach": false,
             "containment": {
               "mechanism": "serverFlagsAndQuotas",
-              "killSwitchIds": [
-                "booking.create.incidentDisable"
-              ],
+              "killSwitchIds": ["booking.create.incidentDisable"],
               "neverBlocked": [
                 "booking.cancel",
                 "privacy.dsr.export",
@@ -472,9 +451,7 @@
             "name": "bookingAudit",
             "clientAccess": "deny",
             "owner": "firebase_cli",
-            "ttlFields": [
-              "expiresAt"
-            ],
+            "ttlFields": ["expiresAt"],
             "compositeIndexes": []
           },
           {
@@ -487,6 +464,7 @@
         ]
       },
       "flags": {
+        "excludedFromDev": [],
         "flags": [
           {
             "id": "booking.create",

@@ -58,7 +58,7 @@ function repositoryFacts() {
       `export const ${name} = Object\\.freeze\\(\\{([\\s\\S]*?)\\}\\);`,
       "u",
     ).exec(flagSource);
-    return [...(block?.[1] ?? "").matchAll(/'([a-z][A-Za-z0-9.]*)'/gu)].map(
+    return [...(block?.[1] ?? "").matchAll(/'([a-z][A-Za-z0-9._]*)'/gu)].map(
       (match) => match[1],
     );
   };
@@ -67,10 +67,8 @@ function repositoryFacts() {
     ttl,
     composite,
     features: [
-      ...idsOf("bookingFlagIds"),
-      ...idsOf("identityFlagIds"),
-      ...idsOf("scenarioFlagIds"),
-    ],
+      ...flagSource.matchAll(/export const (\w+FlagIds) = Object\.freeze\(/gu),
+    ].flatMap((match) => idsOf(match[1])),
     emergency: [
       ...idsOf("abuseEmergencySwitchIds"),
       ...idsOf("operationsEmergencySwitchIds"),
@@ -154,17 +152,21 @@ export function verifyExecutionManifest(manifest, facts = repositoryFacts()) {
       );
   }
 
-  // ---- flags equal the code registry and default off
+  // Every code flag is either listed default-off or explicitly excluded from
+  // this dev scope. Neither disposition authorizes activation or deployment.
   const flagIds = manifest.flags.flags.map((item) => item.id);
+  const excludedIds = manifest.flags.excludedFromDev.map((item) => item.id);
   const registry = [...facts.features, ...facts.emergency];
-  if (
-    JSON.stringify([...flagIds].sort()) !== JSON.stringify([...registry].sort())
-  ) {
-    // A reduced fixture may list a subset, never an unknown flag.
-    for (const id of flagIds)
-      if (!registry.includes(id))
-        problems.push(`flags: ${id} is not in the code registry`);
+  const dispositions = [...flagIds, ...excludedIds];
+  for (const id of dispositions) {
+    if (!registry.includes(id))
+      problems.push(`flags: ${id} is not in the code registry`);
+    if (dispositions.filter((value) => value === id).length !== 1)
+      problems.push(`flags: ${id} has duplicate or overlapping dispositions`);
   }
+  for (const id of registry)
+    if (!dispositions.includes(id))
+      problems.push(`flags: ${id} lacks a dev disposition`);
   for (const item of manifest.flags.flags) {
     if (item.defaultState !== "off")
       problems.push(`flags: ${item.id} does not default off`);

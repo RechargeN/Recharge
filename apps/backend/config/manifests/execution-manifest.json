@@ -134,12 +134,7 @@
         "decisionRef": "BCK05-OD04-COST-01",
         "currency": "EUR",
         "guardrailMonthlyEur": 5,
-        "thresholdsPercent": [
-          50,
-          75,
-          90,
-          100
-        ],
+        "thresholdsPercent": [50, 75, 90, 100],
         "anomalyAlerts": true,
         "responseOwnerRole": "Finance owner",
         "notificationChannelRefs": [],
@@ -147,9 +142,7 @@
         "automaticBillingDetach": false,
         "containment": {
           "mechanism": "serverFlagsAndQuotas",
-          "killSwitchIds": [
-            "booking.create.incidentDisable"
-          ],
+          "killSwitchIds": ["booking.create.incidentDisable"],
           "neverBlocked": [
             "booking.cancel",
             "privacy.dsr.export",
@@ -274,12 +267,7 @@
         "decisionRef": "BCK05-OD04-COST-01",
         "currency": "EUR",
         "guardrailMonthlyEur": 75,
-        "thresholdsPercent": [
-          50,
-          75,
-          90,
-          100
-        ],
+        "thresholdsPercent": [50, 75, 90, 100],
         "anomalyAlerts": true,
         "responseOwnerRole": "Finance owner",
         "notificationChannelRefs": [],
@@ -287,9 +275,7 @@
         "automaticBillingDetach": false,
         "containment": {
           "mechanism": "serverFlagsAndQuotas",
-          "killSwitchIds": [
-            "booking.create.incidentDisable"
-          ],
+          "killSwitchIds": ["booking.create.incidentDisable"],
           "neverBlocked": [
             "booking.cancel",
             "privacy.dsr.export",
@@ -414,12 +400,7 @@
         "decisionRef": "BCK05-OD04-COST-01",
         "currency": "EUR",
         "guardrailMonthlyEur": 150,
-        "thresholdsPercent": [
-          50,
-          75,
-          90,
-          100
-        ],
+        "thresholdsPercent": [50, 75, 90, 100],
         "anomalyAlerts": true,
         "responseOwnerRole": "Finance owner",
         "notificationChannelRefs": [],
@@ -427,9 +408,7 @@
         "automaticBillingDetach": false,
         "containment": {
           "mechanism": "serverFlagsAndQuotas",
-          "killSwitchIds": [
-            "booking.create.incidentDisable"
-          ],
+          "killSwitchIds": ["booking.create.incidentDisable"],
           "neverBlocked": [
             "booking.cancel",
             "privacy.dsr.export",
@@ -505,9 +484,7 @@
         "name": "bookingAudit",
         "clientAccess": "deny",
         "owner": "firebase_cli",
-        "ttlFields": [
-          "expiresAt"
-        ],
+        "ttlFields": ["expiresAt"],
         "compositeIndexes": []
       },
       {
@@ -528,18 +505,14 @@
         "name": "bookingIdempotency",
         "clientAccess": "deny",
         "owner": "firebase_cli",
-        "ttlFields": [
-          "expiresAt"
-        ],
+        "ttlFields": ["expiresAt"],
         "compositeIndexes": []
       },
       {
         "name": "bookingOutbox",
         "clientAccess": "deny",
         "owner": "firebase_cli",
-        "ttlFields": [
-          "expiresAt"
-        ],
+        "ttlFields": ["expiresAt"],
         "compositeIndexes": []
       },
       {
@@ -560,15 +533,8 @@
         "name": "bookingProjectionDeliveries",
         "clientAccess": "deny",
         "owner": "firebase_cli",
-        "ttlFields": [
-          "expiresAt"
-        ],
-        "compositeIndexes": [
-          [
-            "status:ASCENDING",
-            "nextAttemptAtUtc:ASCENDING"
-          ]
-        ]
+        "ttlFields": ["expiresAt"],
+        "compositeIndexes": [["status:ASCENDING", "nextAttemptAtUtc:ASCENDING"]]
       },
       {
         "name": "bookingProjectionDiscoveryCheckpoints",
@@ -581,9 +547,7 @@
         "name": "bookingProjectionOperatorAudit",
         "clientAccess": "deny",
         "owner": "firebase_cli",
-        "ttlFields": [
-          "expiresAt"
-        ],
+        "ttlFields": ["expiresAt"],
         "compositeIndexes": []
       },
       {
@@ -597,9 +561,7 @@
         "name": "bookingReconfirmationDeadlineJobs",
         "clientAccess": "deny",
         "owner": "firebase_cli",
-        "ttlFields": [
-          "expiresAt"
-        ],
+        "ttlFields": ["expiresAt"],
         "compositeIndexes": [
           [
             "status:ASCENDING",
@@ -612,9 +574,7 @@
         "name": "bookingReconfirmationDeadlineOperatorAudit",
         "clientAccess": "deny",
         "owner": "firebase_cli",
-        "ttlFields": [
-          "expiresAt"
-        ],
+        "ttlFields": ["expiresAt"],
         "compositeIndexes": []
       },
       {
@@ -628,19 +588,10 @@
         "name": "bookings",
         "clientAccess": "deny",
         "owner": "firebase_cli",
-        "ttlFields": [
-          "expiresAt"
-        ],
+        "ttlFields": ["expiresAt"],
         "compositeIndexes": [
-          [
-            "occurrenceId:ASCENDING",
-            "__name__:ASCENDING"
-          ],
-          [
-            "userId:ASCENDING",
-            "createdAt:DESCENDING",
-            "__name__:DESCENDING"
-          ],
+          ["occurrenceId:ASCENDING", "__name__:ASCENDING"],
+          ["userId:ASCENDING", "createdAt:DESCENDING", "__name__:DESCENDING"],
           [
             "userId:ASCENDING",
             "state:ASCENDING",
@@ -652,10 +603,7 @@
             "reconfirmationDeadlineUtc:ASCENDING",
             "__name__:ASCENDING"
           ],
-          [
-            "userId:ASCENDING",
-            "eventId:ASCENDING"
-          ]
+          ["userId:ASCENDING", "eventId:ASCENDING"]
         ]
       },
       {
@@ -678,10 +626,7 @@
         "owner": "firebase_cli",
         "ttlFields": [],
         "compositeIndexes": [
-          [
-            "contentId:ASCENDING",
-            "pointerRevision:ASCENDING"
-          ]
+          ["contentId:ASCENDING", "pointerRevision:ASCENDING"]
         ]
       },
       {
@@ -725,10 +670,7 @@
         "owner": "firebase_cli",
         "ttlFields": [],
         "compositeIndexes": [
-          [
-            "contentId:ASCENDING",
-            "revisionNumber:ASCENDING"
-          ]
+          ["contentId:ASCENDING", "revisionNumber:ASCENDING"]
         ]
       },
       {
@@ -737,11 +679,7 @@
         "owner": "firebase_cli",
         "ttlFields": [],
         "compositeIndexes": [
-          [
-            "state:ASCENDING",
-            "marketId:ASCENDING",
-            "typeId:ASCENDING"
-          ]
+          ["state:ASCENDING", "marketId:ASCENDING", "typeId:ASCENDING"]
         ]
       },
       {
@@ -825,45 +763,31 @@
         "name": "notificationCommandReceipts",
         "clientAccess": "deny",
         "owner": "firebase_cli",
-        "ttlFields": [
-          "expiresAt"
-        ],
+        "ttlFields": ["expiresAt"],
         "compositeIndexes": []
       },
       {
         "name": "notificationDeliveryAttempts",
         "clientAccess": "deny",
         "owner": "firebase_cli",
-        "ttlFields": [
-          "expiresAt"
-        ],
+        "ttlFields": ["expiresAt"],
         "compositeIndexes": []
       },
       {
         "name": "notificationEffectReceipts",
         "clientAccess": "deny",
         "owner": "firebase_cli",
-        "ttlFields": [
-          "expiresAt"
-        ],
+        "ttlFields": ["expiresAt"],
         "compositeIndexes": [
-          [
-            "status:ASCENDING",
-            "nextAttemptAtUtc:ASCENDING"
-          ],
-          [
-            "status:ASCENDING",
-            "deliverUntilUtc:ASCENDING"
-          ]
+          ["status:ASCENDING", "nextAttemptAtUtc:ASCENDING"],
+          ["status:ASCENDING", "deliverUntilUtc:ASCENDING"]
         ]
       },
       {
         "name": "notificationInboxItems",
         "clientAccess": "deny",
         "owner": "firebase_cli",
-        "ttlFields": [
-          "expiresAt"
-        ],
+        "ttlFields": ["expiresAt"],
         "compositeIndexes": [
           [
             "recipientId:ASCENDING",
@@ -1056,18 +980,14 @@
         "name": "securityRateLimitAttempts",
         "clientAccess": "deny",
         "owner": "firebase_cli",
-        "ttlFields": [
-          "expiresAt"
-        ],
+        "ttlFields": ["expiresAt"],
         "compositeIndexes": []
       },
       {
         "name": "securityRateLimitCounters",
         "clientAccess": "deny",
         "owner": "firebase_cli",
-        "ttlFields": [
-          "expiresAt"
-        ],
+        "ttlFields": ["expiresAt"],
         "compositeIndexes": []
       },
       {
@@ -1117,36 +1037,21 @@
         "clientAccess": "deny",
         "owner": "firebase_cli",
         "ttlFields": [],
-        "compositeIndexes": [
-          [
-            "ownerId:ASCENDING",
-            "ownerRevision:ASCENDING"
-          ]
-        ]
+        "compositeIndexes": [["ownerId:ASCENDING", "ownerRevision:ASCENDING"]]
       },
       {
         "name": "moderationRemoderationQueue",
         "clientAccess": "deny",
         "owner": "firebase_cli",
         "ttlFields": [],
-        "compositeIndexes": [
-          [
-            "marketId:ASCENDING",
-            "typeId:ASCENDING"
-          ]
-        ]
+        "compositeIndexes": [["marketId:ASCENDING", "typeId:ASCENDING"]]
       },
       {
         "name": "trustSafetyReports",
         "clientAccess": "deny",
         "owner": "firebase_cli",
         "ttlFields": [],
-        "compositeIndexes": [
-          [
-            "marketId:ASCENDING",
-            "typeId:ASCENDING"
-          ]
-        ]
+        "compositeIndexes": [["marketId:ASCENDING", "typeId:ASCENDING"]]
       },
       {
         "name": "reviews",
@@ -1167,14 +1072,8 @@
         "owner": "firebase_cli",
         "ttlFields": [],
         "compositeIndexes": [
-          [
-            "subjectUserId:ASCENDING",
-            "desired:ASCENDING"
-          ],
-          [
-            "contentId:ASCENDING",
-            "desired:ASCENDING"
-          ]
+          ["subjectUserId:ASCENDING", "desired:ASCENDING"],
+          ["contentId:ASCENDING", "desired:ASCENDING"]
         ]
       },
       {
@@ -1183,14 +1082,8 @@
         "owner": "firebase_cli",
         "ttlFields": [],
         "compositeIndexes": [
-          [
-            "subjectUserId:ASCENDING",
-            "desired:ASCENDING"
-          ],
-          [
-            "contentId:ASCENDING",
-            "desired:ASCENDING"
-          ]
+          ["subjectUserId:ASCENDING", "desired:ASCENDING"],
+          ["contentId:ASCENDING", "desired:ASCENDING"]
         ]
       },
       {
@@ -1199,14 +1092,8 @@
         "owner": "firebase_cli",
         "ttlFields": [],
         "compositeIndexes": [
-          [
-            "subjectUserId:ASCENDING",
-            "desired:ASCENDING"
-          ],
-          [
-            "contentId:ASCENDING",
-            "desired:ASCENDING"
-          ]
+          ["subjectUserId:ASCENDING", "desired:ASCENDING"],
+          ["contentId:ASCENDING", "desired:ASCENDING"]
         ]
       },
       {
@@ -1317,6 +1204,148 @@
     ]
   },
   "flags": {
+    "excludedFromDev": [
+      {
+        "id": "booking.notification.effects",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "catalog.delivery",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "catalog.discover.read",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "catalog.findPeople",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "content.activity.authoring",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "content.class_workshop.authoring",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "content.collection.authoring",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "content.event.authoring",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "content.event.bookingHandoff",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "content.findPeople.authoring",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "content.mediaAvailability",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "content.place.authoring",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "content.rental.authoring",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "content.route.authoring",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "content.scenario.authoring",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "content.session.authoring",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "contentTranslation.atPublication",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "contentTranslation.onDemand",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "contentTranslation.onDemand.incidentDisable",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "identity.findPeople.consent",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "media.delivery",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "media.reconcile",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "media.upload",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "notifications.consume.booking",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "notifications.inbox",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "notifications.preferences",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "productAnalytics.aggregation",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      },
+      {
+        "id": "productAnalytics.collection",
+        "disposition": "excluded",
+        "reason": "no-approved-cloud-runtime-in-minimal-dev"
+      }
+    ],
     "flags": [
       {
         "id": "booking.create",

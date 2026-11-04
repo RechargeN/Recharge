@@ -5,6 +5,39 @@ create or destroy anything. Provider project IDs follow
 `recharge-<env>-<uniqueSuffix>` and are chosen only in the approved provisioning
 slice after availability checks; none is invented here.
 
+## N2a dev review-only mode (2026-11-04)
+
+Only the dev root supports `execution_operation=plan`; the default remains
+`apply` and denies a plan-only owner record. A valid, unexpired, exact-project,
+source/manifest-bound record with `operations=["plan"]` permits review of the
+denied Draft topology using read-only cloud access. This is not authorization
+to create resources. The review output explicitly reports
+`review_plan_authorized=true`, `provisioning_authorized=false`.
+
+Terraform cannot distinguish its plan command from later applying a saved
+plan. A saved review plan is executable data, not an approval. Before any
+apply, obtain the owner's explicit approval of the exact displayed saved-plan
+digest and action inventory, verify provenance/revocation, and recheck a
+separate current dev apply record with `savedPlanSha256`. Use the local
+`verify-dev-apply-approval.mjs` checkpoint with record, saved plan, manifest,
+full source SHA and exact dev project. It checks bindings/expiry/exclusions;
+it does not execute Terraform, verify a signature, or replace human consent.
+Never give a plan-only run mutating access or treat this script as an IAM
+security boundary. Do not apply a review plan through raw CLI as a shortcut.
+
+The locally prepared backend-deploy workflow is deliberately skipped and has
+no OIDC/deploy step. Its presence alone does not close the executable WIF/main
+source gate. All 47 code flags have a manifest disposition: 19 listed off and
+28 explicitly excluded from minimal dev. Exclusions are not a cloud runtime
+implementation for Place/Route/other local features. Any future inclusion
+requires reviewed exports/adapters and controls, not just a flag edit.
+
+The dev budget is EUR5/month with 50/75/90/100 percent alert thresholds. It is
+an alert target, not a spending cap or spending permission. Keep the owner's
+notification address outside Git in separately approved execution inputs.
+Login/MFA/payment entry stays with the owner; no key creation, automatic
+billing detach, production mutation, push/merge or WIF/main weakening.
+
 ## Provisioning (separately authorized slice)
 
 1. Create the environment project and link billing (outside this repository).
@@ -12,8 +45,9 @@ slice after availability checks; none is invented here.
    that environment (`<project>-tfstate`, versioned, never public,
    destroy-protected). One bucket per environment; never shared.
 3. Supply the reviewed project/commit/manifest and owner-record digests. The
-   record alone cannot open the checked-in Draft manifest: plan/apply fail with
-   a blocking precondition. Permission never changes resource cardinality.
+   record alone cannot open apply on the checked-in Draft manifest. The dev
+   review-only exception above permits only the separately scoped planning
+   phase. Permission never changes resource cardinality.
 4. Review the plan of that environment root; apply only in the approved slice.
 5. Deploy Rules, indexes, TTL and Functions with the Firebase CLI (they are not
    managed by Terraform); run the smoke list.

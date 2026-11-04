@@ -1,6 +1,11 @@
 output "provisioning_authorized" {
   description = "True only with a valid bound owner record AND an authorized execution manifest."
-  value       = local.provisioning_authorized
+  value       = var.execution_operation == "apply" && local.provisioning_authorized
+}
+
+output "review_plan_authorized" {
+  description = "Review authorization only; never sufficient evidence to apply a saved plan."
+  value       = var.execution_operation == "plan" && local.provisioning_authorized
 }
 
 output "managed_resource_count" {

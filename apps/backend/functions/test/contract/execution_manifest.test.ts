@@ -129,6 +129,48 @@ void test('flags equal the code registry, default off and have the right kind', 
   );
 });
 
+void test('each omitted local flag has one explicit dev exclusion; activation is not implied', () => {
+  const manifest = load();
+  const flags = manifest.flags as { flags: Json[]; excludedFromDev: Json[] };
+  assert.equal(flags.excludedFromDev.length, 28);
+  assert.ok(
+    flags.excludedFromDev.some((item) => item.id === 'contentTranslation.onDemand.incidentDisable'),
+  );
+  assert.ok(
+    hasProblem(
+      check((m) => {
+        (m.flags as { excludedFromDev: Json[] }).excludedFromDev.pop();
+      }),
+      'lacks a dev disposition',
+    ),
+  );
+  assert.ok(
+    hasProblem(
+      check((m) => {
+        const policy = m.flags as { flags: Json[]; excludedFromDev: Json[] };
+        policy.excludedFromDev.push({
+          id: policy.flags[0]?.id,
+          disposition: 'excluded',
+          reason: 'no-approved-cloud-runtime-in-minimal-dev',
+        });
+      }),
+      'overlapping dispositions',
+    ),
+  );
+  assert.ok(
+    hasProblem(
+      check((m) => {
+        (m.flags as { excludedFromDev: Json[] }).excludedFromDev.push({
+          id: 'unknown.flag',
+          disposition: 'excluded',
+          reason: 'no-approved-cloud-runtime-in-minimal-dev',
+        });
+      }),
+      'not in the code registry',
+    ),
+  );
+});
+
 void test('locations and identities follow the accepted baseline and never cross environments', () => {
   assert.ok(
     hasProblem(

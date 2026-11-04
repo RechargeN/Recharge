@@ -1,0 +1,19 @@
+name: Backend dev deployment preparation (disabled)
+
+# File-path preparation only. No OIDC, credentials or deployment authority.
+# The Accepted WIF/main policy is unchanged. An executable deployment job needs
+# its own review of source protection, immutable subject, permissions and plan.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preparation-only:
+    if: ${{ false }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - name: Deployment remains closed
+        run: exit 1

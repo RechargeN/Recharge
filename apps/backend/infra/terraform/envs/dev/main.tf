@@ -30,25 +30,35 @@ locals {
     && local.authorization.push == false && local.authorization.merge == false
     && local.authorization.marketActivation == false
     && contains(local.authorization.operations, "plan")
-    && contains(local.authorization.operations, "apply")
+    && (var.execution_operation == "plan" || contains(local.authorization.operations, "apply"))
     && alltrue([for op in local.authorization.operations : contains(["plan", "apply"], op)])
     && timecmp(local.authorization.issuedAtUtc, plantimestamp()) <= 0
     && timecmp(local.authorization.expiresAtUtc, plantimestamp()) > 0,
     false
   )
+  # A review-only plan may inspect the denied Draft topology with a bound
+  # plan record and read-only cloud credentials. This never grants apply.
+  # Applying a saved plan does NOT re-evaluate this variable: the operator must
+  # verify a separate current apply record bound to the exact saved-plan digest.
   manifest_authorized = (
     local.manifest.authority.apply == "allowed"
     && local.manifest.authority.provisioning == "authorized"
     && local.env.authorized == true
     && local.env.projectId == var.project_id
+    ) || (
+    var.execution_operation == "plan"
+    && local.manifest.authority.apply == "denied"
+    && local.manifest.authority.provisioning == "unauthorized"
+    && local.env.authorized == false
+    && local.env.projectId == null
   )
   provisioning_authorized = local.authorization_valid && local.manifest_authorized
 }
 
 # No provisioner, command or network action: the builtin resource is a blocking
-# precondition. The checked-in Draft manifest always fails this gate. An owner
-# record is an attestation, not a cryptographic signature: protected execution
-# must verify its provenance and exact reviewed plan before apply.
+# precondition. The checked-in Draft denies apply; a separately bound dev
+# review-only record can authorize planning. An owner record is an attestation,
+# not a signature: verify provenance and the exact saved plan before apply.
 resource "terraform_data" "execution_guard" {
   input = var.environment_id
   lifecycle {

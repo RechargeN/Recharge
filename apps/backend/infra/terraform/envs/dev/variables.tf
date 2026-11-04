@@ -1,3 +1,14 @@
+variable "execution_operation" {
+  description = "Requested dev review phase. Plan-only credentials and an external exact-plan apply approval check are mandatory; Terraform cannot distinguish plan from applying a saved plan."
+  type        = string
+  default     = "apply"
+
+  validation {
+    condition     = contains(["plan", "apply"], var.execution_operation)
+    error_message = "Only plan or apply is supported."
+  }
+}
+
 variable "environment_id" {
   description = "Logical environment of this root."
   type        = string
