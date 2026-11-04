@@ -328,10 +328,20 @@ export function devResourceInventory(manifest) {
 
 function main() {
   const validate = createValidator();
-  const manifest = readJson(
-    path.join(configRoot, "manifests", "execution-manifest.json"),
+  const manifestFile = path.join(
+    configRoot,
+    "manifests",
+    "execution-manifest.json",
   );
+  const manifestBytes = readFileSync(manifestFile);
+  const manifest = readJson(manifestFile);
   const problems = verifyExecutionManifest(manifest);
+  // The SHA-256 is pinned on LF bytes (.gitattributes eol=lf); a CRLF copy
+  // would yield a hash that no authorization record carries.
+  if (manifestBytes.includes(0x0d))
+    problems.push(
+      "execution-manifest.json has CR line endings; re-checkout it (eol=lf) before hashing",
+    );
   const valid = readJson(
     path.join(configRoot, "manifests", "fixtures", "valid.json"),
   );
@@ -352,13 +362,7 @@ function main() {
     return;
   }
   if (process.argv.includes("--dev-inventory")) {
-    const digest = createHash("sha256")
-      .update(
-        readFileSync(
-          path.join(configRoot, "manifests", "execution-manifest.json"),
-        ),
-      )
-      .digest("hex");
+    const digest = createHash("sha256").update(manifestBytes).digest("hex");
     process.stdout.write(
       `${JSON.stringify({ manifestSha256: digest, ...devResourceInventory(manifest) }, null, 2)}\n`,
     );

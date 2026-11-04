@@ -28,6 +28,10 @@ void test('the committed execution manifest is consistent with the repository', 
   assert.deepEqual(verifier.verifyExecutionManifest(load()), []);
 });
 
+void test('the manifest bytes are LF-only, so its pinned SHA-256 does not depend on the checkout', () => {
+  assert.equal(readFileSync(manifestPath).includes(0x0d), false);
+});
+
 void test('the manifest names no provider project, secret value, address or authority', () => {
   const manifest = load();
   for (const name of ['dev', 'stage', 'prod']) {

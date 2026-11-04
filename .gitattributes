@@ -1,2 +1,6 @@
 # Preserve raw Viewer rollback snapshots byte for byte.
 docs/archive/viewer-profile/** -text -diff
+
+# Terraform and authorization records pin the execution manifest by SHA-256 of
+# its bytes; LF on every checkout keeps that hash identical across machines.
+apps/backend/config/manifests/execution-manifest.json text eol=lf
