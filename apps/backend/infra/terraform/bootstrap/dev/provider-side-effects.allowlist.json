@@ -5,11 +5,41 @@
   "version": "7.43.0",
   "trigger": "google_project.auto_create_network=false",
   "acceptedApiSideEffects": [
+    "analyticshub.googleapis.com",
+    "appengine.googleapis.com",
+    "apptopology.googleapis.com",
     "backupdr.googleapis.com",
+    "bigquery.googleapis.com",
+    "bigqueryconnection.googleapis.com",
+    "bigquerydatapolicy.googleapis.com",
+    "bigquerydatatransfer.googleapis.com",
+    "bigquerymigration.googleapis.com",
+    "bigqueryreservation.googleapis.com",
+    "bigquerystorage.googleapis.com",
+    "cloudapis.googleapis.com",
+    "cloudtrace.googleapis.com",
     "compute.googleapis.com",
+    "dataform.googleapis.com",
+    "dataplex.googleapis.com",
+    "datastore.googleapis.com",
+    "fcm.googleapis.com",
+    "firebasehosting.googleapis.com",
+    "firebaseinstallations.googleapis.com",
+    "firebaseremoteconfig.googleapis.com",
+    "firebaseremoteconfigrealtime.googleapis.com",
+    "firebaserules.googleapis.com",
+    "iamcredentials.googleapis.com",
+    "identitytoolkit.googleapis.com",
     "oslogin.googleapis.com",
+    "runtimeconfig.googleapis.com",
+    "securetoken.googleapis.com",
+    "servicemanagement.googleapis.com",
     "servicenetworking.googleapis.com",
-    "telemetry.googleapis.com"
+    "sql-component.googleapis.com",
+    "storage-api.googleapis.com",
+    "storage-component.googleapis.com",
+    "telemetry.googleapis.com",
+    "testing.googleapis.com"
   ],
   "evidence": "ServiceUsage CrossLoggingResponse: Compute->compute/backupdr/oslogin/servicenetworking; Logging and Monitoring->telemetry, verified in dev audit 2026-11-05",
   "doesNotAuthorize": [
@@ -20,7 +50,7 @@
     "destroy/replace",
     "data deletion"
   ],
-  "status": "Observed dependencies accepted by owner standing N2b policy",
+  "status": "N2b bootstrap completed; final GCS plan no changes; observed automatic effects retained",
   "standingN2bPolicy": {
     "automaticGoogleApiDependencies": "record observed evidence and continue; no manual out-of-package service activation",
     "automaticGoogleSystemServiceAgentRoles": "record and continue",
@@ -32,5 +62,34 @@
       "destroy or replace plan",
       "state migration error"
     ]
+  },
+  "explicitManagedApis": [
+    "billingbudgets.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "firebase.googleapis.com",
+    "firestore.googleapis.com",
+    "iam.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com",
+    "pubsub.googleapis.com",
+    "serviceusage.googleapis.com",
+    "storage.googleapis.com"
+  ],
+  "observedGoogleSystemRoleNames": [
+    "roles/compute.instanceGroupManagerServiceAgent",
+    "roles/compute.serviceAgent",
+    "roles/firebase.managementServiceAgent",
+    "roles/firebase.sdkAdminServiceAgent",
+    "roles/firebaserules.system",
+    "roles/firestore.serviceAgent",
+    "roles/iam.serviceAccountTokenCreator",
+    "roles/pubsub.serviceAgent"
+  ],
+  "googleSystemIdentityEvidence": {
+    "firebaseAdminSdk": "Exact SDK account created and granted SDK service-agent and TokenCreator roles by project Firebase management service agent; audit verified",
+    "firebaseRules": "Documented Google Firebase Rules service agent",
+    "basicRoles": "Owner only on owner principal; Editor/Viewer absent",
+    "runtimeAccounts": "Three Terraform-created runtime/deploy service accounts have no explicit project roles or user-managed keys"
   }
 }
