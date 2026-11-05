@@ -34,6 +34,15 @@ provider "google" {
   # Process-only ADC; no credential value or quota-project override in config.
 }
 
+# Budget API requires a quota project for user ADC. This alias only affects
+# budget calls after the cost_bootstrap API dependency; no ADC file mutation.
+provider "google" {
+  alias                 = "budget"
+  project               = var.project_id
+  billing_project       = var.project_id
+  user_project_override = true
+}
+
 provider "google-beta" {
   project               = var.project_id
   region                = local.manifest.locationPolicy.functions.region
@@ -105,6 +114,7 @@ resource "google_pubsub_subscription" "budget_evidence" {
 }
 
 module "budget_alerts" {
+  providers                = { google = google.budget }
   depends_on               = [google_pubsub_topic_iam_member.budget_publisher]
   source                   = "../../modules/budget_alerts"
   enabled                  = true

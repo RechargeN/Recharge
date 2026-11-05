@@ -2,6 +2,7 @@
 mock_provider "google" {
   mock_resource "google_project" { defaults = { number = "123456789012" } }
 }
+mock_provider "google" { alias = "budget" }
 mock_provider "google-beta" {}
 mock_provider "external" {}
 variables {
