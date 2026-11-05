@@ -25,7 +25,7 @@ const fixture = () => ({
     resource("wif", "google_iam_workload_identity_pool_provider", {
       project: projectId,
       disabled: true,
-      attribute_condition: "false",
+      attribute_condition: "false && assertion.sub != ''",
     }),
   ],
 });

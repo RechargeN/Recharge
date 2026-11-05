@@ -38,6 +38,13 @@ run "full_graph" {
     error_message = "Bounded evidence retention required."
   }
 }
+run "wif_stays_hard_denied" {
+  command = plan
+  assert {
+    condition     = module.ci_wif.provider_disabled == true && module.ci_wif.provider_attribute_condition == "false && assertion.sub != ''" && module.ci_wif.trust_condition == "false"
+    error_message = "Claim-referencing wire condition must remain identically false and provider disabled."
+  }
+}
 run "wrong_billing_denied" {
   command = plan
   variables { billing_account_id = "111111-111111-111111" }

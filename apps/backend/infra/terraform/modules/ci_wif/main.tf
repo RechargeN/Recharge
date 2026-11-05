@@ -37,7 +37,7 @@ resource "google_iam_workload_identity_pool_provider" "github" {
   workload_identity_pool_id          = google_iam_workload_identity_pool.github[0].workload_identity_pool_id
   workload_identity_pool_provider_id = var.provider_id
   disabled                           = !local.configured
-  attribute_condition                = local.condition
+  attribute_condition                = local.configured ? local.condition : "false && assertion.sub != ''"
   attribute_mapping = {
     "google.subject"             = "assertion.sub"
     "attribute.repository_id"    = "assertion.repository_id"

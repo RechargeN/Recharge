@@ -46,7 +46,8 @@ provider "google" {
 provider "google-beta" {
   project               = var.project_id
   region                = local.manifest.locationPolicy.functions.region
-  user_project_override = false
+  billing_project       = var.project_id
+  user_project_override = true
 }
 
 resource "terraform_data" "review_guard" {

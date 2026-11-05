@@ -60,7 +60,7 @@ export function checkBootstrapPlan(plan, expected) {
   if (
     wif.length !== 1 ||
     wif[0].change.after.disabled !== true ||
-    wif[0].change.after.attribute_condition !== "false"
+    wif[0].change.after.attribute_condition !== "false && assertion.sub != ''"
   )
     errors.push("WIF must remain disabled");
   return errors;
