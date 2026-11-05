@@ -57,7 +57,7 @@ resource "google_project" "dev" {
   billing_account     = var.billing_account_id
   auto_create_network = false
   deletion_policy     = "PREVENT"
-  labels              = local.labels
+  labels              = merge(local.labels, { firebase = "enabled" })
   lifecycle {
     prevent_destroy = true
   }
@@ -65,7 +65,7 @@ resource "google_project" "dev" {
 
 # Only APIs needed for initial cost controls, before any ordinary resources.
 resource "google_project_service" "cost_bootstrap" {
-  for_each           = toset(["billingbudgets.googleapis.com", "monitoring.googleapis.com", "serviceusage.googleapis.com", "cloudresourcemanager.googleapis.com", "pubsub.googleapis.com", "logging.googleapis.com"])
+  for_each           = toset(["billingbudgets.googleapis.com", "monitoring.googleapis.com", "serviceusage.googleapis.com", "cloudresourcemanager.googleapis.com", "pubsub.googleapis.com", "logging.googleapis.com", "cloudbilling.googleapis.com"])
   project            = google_project.dev.project_id
   service            = each.value
   disable_on_destroy = false
