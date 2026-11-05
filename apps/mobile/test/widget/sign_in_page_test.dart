@@ -1,3 +1,4 @@
+import 'package:recharge/features/auth/domain/usecases/sign_in_with_google_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +16,36 @@ import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/auth/presentation/pages/sign_in_page.dart';
 
 void main() {
+  testWidgets('dev federated entry shows Google and no password form', (
+    tester,
+  ) async {
+    final repository = _FederatedRepository();
+    final controller = AuthController(
+      signInUseCase: SignInUseCase(repository),
+      restoreSessionUseCase: RestoreSessionUseCase(repository),
+      signOutUseCase: SignOutUseCase(repository),
+      getCurrentUserUseCase: GetCurrentUserUseCase(repository),
+      analyticsService: _NoopAnalytics(),
+      signInWithGoogleUseCase: SignInWithGoogleUseCase(repository),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [authControllerProvider.overrideWith((ref) => controller)],
+        child: const MaterialApp(
+          home: SignInPage(
+            originRoute: null,
+            originAction: null,
+            sourceScreen: 'test',
+            sourceAction: 'test',
+          ),
+        ),
+      ),
+    );
+    expect(find.widgetWithText(FilledButton, 'Google'), findsOneWidget);
+    expect(find.byKey(SignInPage.emailFieldKey), findsNothing);
+    expect(find.byKey(SignInPage.passwordFieldKey), findsNothing);
+  });
+
   testWidgets('shows validation errors when form is empty', (tester) async {
     final controller = AuthController(
       signInUseCase: SignInUseCase(_NoopAuthRepository()),
@@ -96,4 +127,12 @@ class _NoopAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {}
+}
+
+class _FederatedRepository extends _NoopAuthRepository
+    implements FederatedAuthRepository {
+  @override
+  Future<AuthResultEntity> signInWithGoogle() async {
+    throw const AuthException(code: 'cancelled', message: 'cancelled');
+  }
 }

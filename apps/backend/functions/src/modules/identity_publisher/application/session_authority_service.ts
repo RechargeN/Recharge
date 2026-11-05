@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import type { Account } from '../domain/account.js';
 import { advanceRevocationFence } from '../domain/account.js';
 import { createAccessSnapshot, type AccessSnapshot } from '../domain/access_snapshot.js';
 import { IdentityFailure } from '../domain/failures.js';
@@ -29,6 +30,7 @@ export class SessionAuthorityService {
     readonly snapshotExpiresAtUtc: string;
     readonly capabilityPolicyRevision?: number;
   }): Promise<{
+    readonly account: Account;
     readonly session: IdentitySession;
     readonly accessSnapshot: AccessSnapshot;
     readonly sessionHandle: string;
@@ -93,7 +95,7 @@ export class SessionAuthorityService {
       }
       transaction.putSession(session);
       transaction.putAccessSnapshot(accessSnapshot);
-      return Object.freeze({ session, accessSnapshot, sessionHandle });
+      return Object.freeze({ account, session, accessSnapshot, sessionHandle });
     });
   }
 
@@ -119,6 +121,7 @@ export class SessionAuthorityService {
     readonly nowUtc: string;
     readonly snapshotExpiresAtUtc: string;
   }): Promise<{
+    readonly account: Account;
     readonly session: IdentitySession;
     readonly accessSnapshot: AccessSnapshot;
     readonly sessionHandle: string;
@@ -158,7 +161,46 @@ export class SessionAuthorityService {
       }) as AccessSnapshot;
       transaction.putSession(session);
       transaction.putAccessSnapshot(accessSnapshot);
-      return Object.freeze({ session, accessSnapshot, sessionHandle });
+      return Object.freeze({ account, session, accessSnapshot, sessionHandle });
+    });
+  }
+
+  readCurrent(input: {
+    readonly sessionId: string;
+    readonly sessionHandle: string;
+    readonly firebaseUid: string;
+    readonly installationId: string;
+    readonly nowUtc: string;
+  }): Promise<{
+    readonly account: Account;
+    readonly session: IdentitySession;
+    readonly accessSnapshot: AccessSnapshot;
+    readonly sessionHandle: string;
+  }> {
+    return this.repository.transact(async (transaction) => {
+      const session = await transaction.session(input.sessionId);
+      const account = session === null ? null : await transaction.account(session.userId);
+      const snapshot = await transaction.accessSnapshot(input.sessionId);
+      if (session === null || account === null || snapshot === null)
+        throw new IdentityFailure('unauthenticated');
+      assertCurrentSession(session, account, input.nowUtc);
+      if (
+        session.firebaseUid !== input.firebaseUid ||
+        session.installationId !== input.installationId ||
+        session.handleHash !== hashSessionHandle(input.sessionHandle)
+      )
+        throw new IdentityFailure('unauthenticated');
+      if (
+        snapshot.userId !== account.userId ||
+        snapshot.sessionId !== session.sessionId ||
+        snapshot.accountRevision !== account.revision ||
+        snapshot.sessionRevision !== session.revision ||
+        snapshot.authzRevision !== session.authzRevision ||
+        Date.parse(snapshot.expiresAtUtc) <= Date.parse(input.nowUtc)
+      ) {
+        throw new IdentityFailure('snapshot_stale');
+      }
+      return { account, session, accessSnapshot: snapshot, sessionHandle: input.sessionHandle };
     });
   }
 
@@ -225,6 +267,7 @@ export class SessionAuthorityService {
     readonly nowUtc: string;
     readonly snapshotExpiresAtUtc: string;
   }): Promise<{
+    readonly account: Account;
     readonly session: IdentitySession;
     readonly accessSnapshot: AccessSnapshot;
     readonly sessionHandle: string;
@@ -275,7 +318,7 @@ export class SessionAuthorityService {
       }
       transaction.putSession(session);
       transaction.putAccessSnapshot(accessSnapshot);
-      return Object.freeze({ session, accessSnapshot, sessionHandle });
+      return Object.freeze({ account: nextAccount, session, accessSnapshot, sessionHandle });
     });
   }
 }

@@ -85,35 +85,47 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               const SizedBox(height: 8),
               Text(l10n.authSignInBody),
               const SizedBox(height: 24),
-              TextFormField(
-                key: SignInPage.emailFieldKey,
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: l10n.authEmailLabel,
-                  hintText: l10n.authEmailHint,
+              if (authController.supportsGoogleSignIn) ...<Widget>[
+                FilledButton(
+                  key: SignInPage.submitButtonKey,
+                  onPressed: _isSubmitting ? null : _onGoogleSubmit,
+                  child: Text(
+                    _isSubmitting
+                        ? l10n.authSigningIn
+                        : 'Google', // l10n-ignore: provider brand
+                  ),
                 ),
-                validator: _validateEmail,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                key: SignInPage.passwordFieldKey,
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: l10n.authPasswordLabel,
-                  hintText: l10n.authPasswordHint,
+              ] else ...<Widget>[
+                TextFormField(
+                  key: SignInPage.emailFieldKey,
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: l10n.authEmailLabel,
+                    hintText: l10n.authEmailHint,
+                  ),
+                  validator: _validateEmail,
                 ),
-                validator: _validatePassword,
-              ),
-              const SizedBox(height: 16),
-              FilledButton(
-                key: SignInPage.submitButtonKey,
-                onPressed: _isSubmitting ? null : _onSubmit,
-                child: Text(
-                  _isSubmitting ? l10n.authSigningIn : l10n.commonSignIn,
+                const SizedBox(height: 12),
+                TextFormField(
+                  key: SignInPage.passwordFieldKey,
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: l10n.authPasswordLabel,
+                    hintText: l10n.authPasswordHint,
+                  ),
+                  validator: _validatePassword,
                 ),
-              ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  key: SignInPage.submitButtonKey,
+                  onPressed: _isSubmitting ? null : _onSubmit,
+                  child: Text(
+                    _isSubmitting ? l10n.authSigningIn : l10n.commonSignIn,
+                  ),
+                ),
+              ],
               const SizedBox(height: 8),
               TextButton(
                 onPressed: _isSubmitting
@@ -159,6 +171,27 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     return null;
   }
 
+  Future<void> _onGoogleSubmit() async {
+    final controller = ref.read(authControllerProvider);
+    controller.setPendingTarget(
+      action: _actionFromString(widget.originAction),
+      originRoute: widget.originRoute,
+    );
+    setState(() {
+      _isSubmitting = true;
+      _inlineError = null;
+    });
+    final success = await controller.signInWithGoogle();
+    if (!mounted) return;
+    setState(() {
+      _isSubmitting = false;
+      _inlineError = success ? null : controller.state.message;
+    });
+    if (success) {
+      _navigateAfterSignIn();
+    }
+  }
+
   Future<void> _onSubmit() async {
     if (!_formKey.currentState!.validate()) {
       setState(() => _inlineError = null);
@@ -196,6 +229,10 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       return;
     }
 
+    _navigateAfterSignIn();
+  }
+
+  void _navigateAfterSignIn() {
     final normalizedOrigin = _normalizeOriginRoute(widget.originRoute);
     final authController = ref.read(authControllerProvider);
     switch (authController.pendingAction) {

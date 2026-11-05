@@ -76,9 +76,14 @@ abstract interface class BookingIdentitySessionStore {
 
 final class SecureBookingIdentitySessionStore
     implements BookingIdentitySessionStore {
-  const SecureBookingIdentitySessionStore(this._storage);
+  const SecureBookingIdentitySessionStore(
+    this._storage, {
+    this.environment = BookingIdentityCacheEnvironment.local,
+  });
 
-  static const String _key = 'booking.server_identity_session.v1';
+  final BookingIdentityCacheEnvironment environment;
+
+  String get _key => '${environment.namespace}.server_identity_session.v1';
   final FlutterSecureStorage _storage;
 
   @override
@@ -140,10 +145,14 @@ abstract interface class BookingInstallationIdProvider {
 
 final class SecureBookingInstallationIdProvider
     implements BookingInstallationIdProvider {
-  SecureBookingInstallationIdProvider(this._storage, {Uuid? uuid})
-    : _uuid = uuid ?? const Uuid();
+  SecureBookingInstallationIdProvider(
+    this._storage, {
+    Uuid? uuid,
+    this.environment = BookingIdentityCacheEnvironment.local,
+  }) : _uuid = uuid ?? const Uuid();
 
-  static const String _key = 'booking.installation_id.v1';
+  final BookingIdentityCacheEnvironment environment;
+  String get _key => '${environment.namespace}.installation_id.v1';
   final FlutterSecureStorage _storage;
   final Uuid _uuid;
 
@@ -157,6 +166,10 @@ final class SecureBookingInstallationIdProvider
   }
 }
 
+abstract interface class BookingAppCheckTokenProvider {
+  Future<String> currentToken({bool forceRefresh = false});
+}
+
 final class FunctionsIdentitySessionClient {
   FunctionsIdentitySessionClient({
     required BookingBackendEndpoint endpoint,
@@ -165,12 +178,20 @@ final class FunctionsIdentitySessionClient {
     required BookingInstallationIdProvider installations,
     required BookingIdentitySessionStore sessions,
     this.timeout = const Duration(seconds: 35),
-  }) : _endpoint = endpoint,
+    BookingAppCheckTokenProvider? appCheck,
+    this.observeAppCheck = false,
+    String? identityProvider,
+  }) : _appCheck = appCheck,
+       _identityProvider = identityProvider,
+       _endpoint = endpoint,
        _client = client,
        _tokens = tokens,
        _installations = installations,
        _sessions = sessions;
 
+  final bool observeAppCheck;
+  final BookingAppCheckTokenProvider? _appCheck;
+  final String? _identityProvider;
   final BookingBackendEndpoint _endpoint;
   final http.Client _client;
   final BookingFirebaseIdTokenProvider _tokens;
@@ -178,36 +199,148 @@ final class FunctionsIdentitySessionClient {
   final BookingIdentitySessionStore _sessions;
   final Duration timeout;
 
+  bool isDevGoogleFor(
+    BookingIdentitySessionStore store,
+    BookingFirebaseIdTokenProvider tokens,
+  ) =>
+      _endpoint.binding == BookingBackendBinding.devIdentity &&
+      _identityProvider == 'google' &&
+      _appCheck != null &&
+      identical(_sessions, store) &&
+      identical(_tokens, tokens);
+
   Future<BookingIdentitySessionContext> establish({
     required String requestId,
+    Future<void> Function(Map<String, Object?> data)? onAuthContext,
   }) async {
     return _sessionCommand(
       callableName: 'establishIdentitySessionV1',
       commandType: 'establishIdentitySession',
       requestId: requestId,
+      onAuthContext: onAuthContext,
       body: <String, Object?>{'installationId': await _installations.current()},
     );
   }
 
   Future<BookingIdentitySessionContext> refresh({
     required String requestId,
+    bool requireExistingSession = false,
+    bool forceRefreshToken = false,
+    Future<void> Function(Map<String, Object?> data)? onAuthContext,
   }) async {
     final current = await _sessions.read();
-    if (current == null) return establish(requestId: requestId);
+    if (current == null) {
+      if (requireExistingSession) {
+        throw const BookingCallableFailure(
+          code: 'unauthenticated',
+          dispatched: false,
+        );
+      }
+      return establish(requestId: requestId, onAuthContext: onAuthContext);
+    }
     try {
       return await _sessionCommand(
         callableName: 'refreshIdentitySessionV1',
         commandType: 'refreshIdentitySession',
+        forceRefreshToken: forceRefreshToken,
         requestId: requestId,
+        onAuthContext: onAuthContext,
         body: <String, Object?>{'sessionContext': current.toJson()},
       );
-    } on BookingCallableFailure catch (error) {
+    } catch (error) {
+      if (_endpoint.binding == BookingBackendBinding.devIdentity) {
+        await _sessions.clear();
+        rethrow;
+      }
+      if (error is! BookingCallableFailure) rethrow;
       if (error.code != 'session-revoked' && error.code != 'session-expired') {
         rethrow;
       }
       await _sessions.clear();
       return establish(requestId: const Uuid().v4());
     }
+  }
+
+  Future<BookingIdentitySessionContext> readCurrent({
+    required String requestId,
+    required Future<void> Function(Map<String, Object?> data) onAuthContext,
+  }) async {
+    final session = await _sessions.read();
+    if (_endpoint.binding != BookingBackendBinding.devIdentity ||
+        session == null) {
+      throw const BookingCallableFailure(
+        code: 'unauthenticated',
+        dispatched: false,
+      );
+    }
+    return _sessionCommand(
+      callableName: 'readIdentitySessionV1',
+      commandType: 'readIdentitySession',
+      requestId: requestId,
+      onAuthContext: onAuthContext,
+      body: {'sessionContext': session.toJson()},
+    );
+  }
+
+  Future<void> revoke({
+    required String requestId,
+    bool allSessions = false,
+  }) async {
+    if (_endpoint.binding != BookingBackendBinding.devIdentity ||
+        _appCheck == null ||
+        !const {'google', 'apple'}.contains(_identityProvider)) {
+      throw const BookingCallableFailure(
+        code: 'failed-precondition',
+        dispatched: false,
+      );
+    }
+    final session = await _sessions.read();
+    if (session == null) return;
+    final token = await _tokens.currentIdToken(forceRefresh: true);
+    if (token == null || token.isEmpty) {
+      throw const BookingCallableFailure(
+        code: 'unauthenticated',
+        dispatched: false,
+      );
+    }
+    final check = await _appCheck.currentToken();
+    if (check.trim().isEmpty && !observeAppCheck) {
+      throw const BookingCallableFailure(
+        code: 'app-check-required',
+        dispatched: false,
+      );
+    }
+    final response = await _invokeCallable(
+      client: _client,
+      endpoint: _endpoint,
+      callableName: 'revokeIdentitySessionV1',
+      idToken: token,
+      timeout: timeout,
+      additionalHeaders: {
+        if (check.isNotEmpty) 'X-Firebase-AppCheck': check,
+        'X-Recharge-Identity-Provider': _identityProvider!,
+      },
+      data: {
+        'schemaVersion': 1,
+        'commandType': 'revokeIdentitySession',
+        'requestId': requestId,
+        'sessionContext': session.toJson(),
+        'allSessions': allSessions,
+      },
+    );
+    final data = response['data'];
+    if (response['schemaVersion'] != 1 ||
+        response['requestId'] != requestId ||
+        response['commandType'] != 'revokeIdentitySession' ||
+        response['kind'] != 'succeeded' ||
+        data is! Map ||
+        data['revoked'] != true) {
+      throw const BookingCallableFailure(
+        code: 'revoke-unconfirmed',
+        dispatched: true,
+      );
+    }
+    await _sessions.clear();
   }
 
   Future<BookingIdentitySessionContext> recover({
@@ -229,6 +362,7 @@ final class FunctionsIdentitySessionClient {
     required String requestId,
     required Map<String, Object?> body,
     bool forceRefreshToken = false,
+    Future<void> Function(Map<String, Object?> data)? onAuthContext,
   }) async {
     final token = await _tokens.currentIdToken(forceRefresh: forceRefreshToken);
     if (token == null || token.isEmpty) {
@@ -237,10 +371,32 @@ final class FunctionsIdentitySessionClient {
         dispatched: false,
       );
     }
+    final headers = <String, String>{};
+    if (_endpoint.binding == BookingBackendBinding.devIdentity) {
+      if (_appCheck == null ||
+          !const {'google', 'apple'}.contains(_identityProvider)) {
+        throw const BookingCallableFailure(
+          code: 'app-check-required',
+          dispatched: false,
+        );
+      }
+      final appCheckToken = await _appCheck.currentToken();
+      if (appCheckToken.trim().isEmpty && !observeAppCheck) {
+        throw const BookingCallableFailure(
+          code: 'app-check-required',
+          dispatched: false,
+        );
+      }
+      if (appCheckToken.isNotEmpty) {
+        headers['X-Firebase-AppCheck'] = appCheckToken;
+      }
+      headers['X-Recharge-Identity-Provider'] = _identityProvider!;
+    }
     final result = await _invokeCallable(
       client: _client,
       endpoint: _endpoint,
       callableName: callableName,
+      additionalHeaders: headers,
       data: <String, Object?>{
         'schemaVersion': 1,
         'commandType': commandType,
@@ -250,12 +406,19 @@ final class FunctionsIdentitySessionClient {
       idToken: token,
       timeout: timeout,
     );
+    if (_endpoint.binding == BookingBackendBinding.devIdentity &&
+        (result['schemaVersion'] != 1 ||
+            result['requestId'] != requestId ||
+            result['commandType'] != commandType)) {
+      await _sessions.clear();
+      throw const FormatException('dev_identity_response_mismatch');
+    }
     if (result['kind'] != 'succeeded') {
       final error = result['error'];
       final code = error is Map ? error['code'] : null;
       final details = error is Map ? error['details'] : null;
       final retryAfterSeconds = details is Map
-          ? details['retryAfterSeconds']
+          ? (details['retryAfter'] ?? details['retryAfterSeconds'])
           : null;
       throw BookingCallableFailure(
         code: code is String ? code.replaceAll('_', '-') : 'unauthenticated',
@@ -273,6 +436,25 @@ final class FunctionsIdentitySessionClient {
     final session = BookingIdentitySessionContext.fromServerResponse(
       Map<String, Object?>.from(rawSession),
     );
+    if (_endpoint.binding == BookingBackendBinding.devIdentity) {
+      final expires = rawSession['expiresAtUtc'];
+      final expiry = expires is String ? DateTime.tryParse(expires) : null;
+      final installation = await _installations.current();
+      if (expiry == null ||
+          !expiry.isUtc ||
+          !expiry.isAfter(DateTime.now().toUtc()) ||
+          session.installationId != installation) {
+        await _sessions.clear();
+        throw const FormatException('dev_identity_session_binding_invalid');
+      }
+    }
+    if (onAuthContext != null) {
+      if (_endpoint.binding != BookingBackendBinding.devIdentity ||
+          data is! Map) {
+        throw const FormatException('server_auth_context_binding_invalid');
+      }
+      await onAuthContext(Map<String, Object?>.from(data));
+    }
     await _sessions.saveServerIssued(session);
     return session;
   }
@@ -373,12 +555,14 @@ Future<Map<String, Object?>> _invokeCallable({
   required Map<String, Object?> data,
   required String idToken,
   required Duration timeout,
+  Map<String, String> additionalHeaders = const {},
 }) async {
   late http.StreamedResponse response;
   var dispatched = false;
   try {
     final request = http.Request('POST', endpoint.callableUri(callableName))
       ..headers.addAll(<String, String>{
+        ...additionalHeaders,
         HttpHeaders.authorizationHeader: 'Bearer $idToken',
         HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
       })
@@ -517,3 +701,13 @@ void _rejectTransportAuthority(
 }
 
 const int _maximumCallableResponseBytes = 256 * 1024;
+
+/// Exact persistence boundaries; keys/handles are never migrated on mode switch.
+enum BookingIdentityCacheEnvironment {
+  local('booking'),
+  emulator('booking.emulator.demo-recharge'),
+  dev('booking.dev.recharge-dev-n2a01');
+
+  const BookingIdentityCacheEnvironment(this.namespace);
+  final String namespace;
+}

@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart' show appFlavor;
+import 'app/auth_lifecycle_boundary.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,7 +25,9 @@ Future<void> main() async {
         // L4: the persisted, device-scoped UI language owner.
         localeControllerProvider.overrideWith((ref) => sl<LocaleController>()),
       ],
-      child: const RechargeApp(),
+      child: appFlavor == 'dev'
+          ? const AuthLifecycleBoundary(child: RechargeApp())
+          : const RechargeApp(),
     ),
   );
 }

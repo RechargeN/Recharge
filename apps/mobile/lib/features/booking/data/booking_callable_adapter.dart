@@ -509,7 +509,12 @@ void _rejectClientAuthority(Object? value) {
   }
 }
 
-enum BookingBackendBinding { localMock, devEmulator, productionDisabled }
+enum BookingBackendBinding {
+  localMock,
+  devEmulator,
+  devIdentity,
+  productionDisabled,
+}
 
 final class BookingBackendEndpoint {
   const BookingBackendEndpoint.localMock()
@@ -535,6 +540,16 @@ final class BookingBackendEndpoint {
     }
   }
 
+  /// Session endpoints only; does not activate Booking or other cloud features.
+  BookingBackendEndpoint.devIdentity(Uri devUri)
+    : binding = BookingBackendBinding.devIdentity,
+      uri = devUri {
+    if (devUri.toString() !=
+        'https://europe-west1-recharge-dev-n2a01.cloudfunctions.net') {
+      throw ArgumentError('dev_identity_endpoint_invalid');
+    }
+  }
+
   const BookingBackendEndpoint.productionDisabled()
     : binding = BookingBackendBinding.productionDisabled,
       uri = null;
@@ -542,11 +557,23 @@ final class BookingBackendEndpoint {
   final BookingBackendBinding binding;
   final Uri? uri;
 
-  bool get enabled => binding == BookingBackendBinding.devEmulator;
+  bool get enabled =>
+      binding == BookingBackendBinding.devEmulator ||
+      binding == BookingBackendBinding.devIdentity;
 
   Uri callableUri(String callableName) {
     if (!enabled || uri == null) {
       throw StateError('Booking Functions transport is disabled');
+    }
+    if (binding == BookingBackendBinding.devIdentity &&
+        !const {
+          'establishIdentitySessionV1',
+          'refreshIdentitySessionV1',
+          'recoverIdentitySessionsV1',
+          'revokeIdentitySessionV1',
+          'readIdentitySessionV1',
+        }.contains(callableName)) {
+      throw ArgumentError('dev_identity_callable_forbidden');
     }
     if (!_bookingCallableAllowlist.contains(callableName)) {
       throw ArgumentError.value(callableName, 'callableName');
@@ -560,6 +587,8 @@ const Set<String> _bookingCallableAllowlist = <String>{
   'establishIdentitySessionV1',
   'refreshIdentitySessionV1',
   'recoverIdentitySessionsV1',
+  'revokeIdentitySessionV1',
+  'readIdentitySessionV1',
   'createInternalBookingV1',
   'cancelInternalBookingV1',
   // F2: reconfirmation after a material reschedule (same Session and journal).

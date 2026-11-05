@@ -70,6 +70,7 @@ final class BookingTransportRuntimeFactory {
     switch (_endpoint.binding) {
       case BookingBackendBinding.localMock:
         return const BookingTransportRuntime.localMock();
+      case BookingBackendBinding.devIdentity:
       case BookingBackendBinding.productionDisabled:
         return const BookingTransportRuntime.productionDisabled();
       case BookingBackendBinding.devEmulator:

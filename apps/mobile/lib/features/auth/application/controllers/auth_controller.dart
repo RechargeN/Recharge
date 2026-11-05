@@ -1,3 +1,4 @@
+import '../../domain/repositories/auth_session_events.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -9,6 +10,7 @@ import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/restore_session_usecase.dart';
 import '../../domain/usecases/sign_in_usecase.dart';
+import '../../domain/usecases/sign_in_with_google_usecase.dart';
 import '../../domain/usecases/sign_out_usecase.dart';
 import '../state/auth_state.dart';
 
@@ -34,13 +36,26 @@ class AuthController extends ChangeNotifier {
     required GetCurrentUserUseCase getCurrentUserUseCase,
     required AnalyticsService analyticsService,
     ProductAnalyticsRecorder? productAnalytics,
-  }) : _signInUseCase = signInUseCase,
+    SignInWithGoogleUseCase? signInWithGoogleUseCase,
+    AuthSessionEvents? sessionEvents,
+  }) : _signInWithGoogleUseCase = signInWithGoogleUseCase,
+       _signInUseCase = signInUseCase,
        _restoreSessionUseCase = restoreSessionUseCase,
        _signOutUseCase = signOutUseCase,
        _getCurrentUserUseCase = getCurrentUserUseCase,
        _analyticsService = analyticsService,
-       _productAnalytics = productAnalytics;
+       _productAnalytics = productAnalytics {
+    _sessionSubscription = sessionEvents?.invalidated.listen((_) {
+      suspendServerAuthority();
+      unawaited(_signOutUseCase().catchError((Object _) {}));
+    });
+  }
 
+  final SignInWithGoogleUseCase? _signInWithGoogleUseCase;
+  bool get supportsGoogleSignIn => _signInWithGoogleUseCase != null;
+  Timer? _serverExpiry;
+  StreamSubscription<void>? _sessionSubscription;
+  int _generation = 0;
   final SignInUseCase _signInUseCase;
   final RestoreSessionUseCase _restoreSessionUseCase;
   final SignOutUseCase _signOutUseCase;
@@ -112,6 +127,10 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> initializeCurrentUserFromCache() async {
+    if (supportsGoogleSignIn) {
+      await restoreSession();
+      return;
+    }
     final user = await _getCurrentUserUseCase();
     if (user != null && !_state.isAuthenticated) {
       _setState(
@@ -180,6 +199,37 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  void suspendServerAuthority() {
+    if (!supportsGoogleSignIn) return;
+    _generation++;
+    _serverExpiry?.cancel();
+    clearPendingTarget();
+    _setState(const AuthState.guest());
+  }
+
+  Future<bool> signInWithGoogle() async {
+    final operation = _signInWithGoogleUseCase;
+    if (operation == null) return false;
+    final generation = ++_generation;
+    _setState(_state.copyWith(status: AuthStatus.loading, clearError: true));
+    try {
+      final result = await operation();
+      if (generation != _generation) return false;
+      _consumeAuthResult(result);
+      return _state.isAuthenticated;
+    } on AuthException catch (error) {
+      if (generation == _generation) {
+        _setState(
+          const AuthState.guest().copyWith(
+            errorCode: error.code,
+            message: error.code,
+          ),
+        );
+      }
+      return false;
+    }
+  }
+
   Future<void> restoreSession() {
     final pendingRestore = _restoreSessionFuture;
     if (pendingRestore != null) {
@@ -213,6 +263,7 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> _restoreSession() async {
+    final generation = _generation;
     _analyticsService.track(
       'auth_session_restore_started',
       params: <String, Object?>{
@@ -223,6 +274,7 @@ class AuthController extends ChangeNotifier {
     _setState(_state.copyWith(status: AuthStatus.loading, clearError: true));
     try {
       final result = await _restoreSessionUseCase();
+      if (supportsGoogleSignIn && generation != _generation) return;
       if (result == null) {
         _setState(const AuthState.guest());
         return;
@@ -236,6 +288,7 @@ class AuthController extends ChangeNotifier {
         },
       );
     } on AuthException catch (e) {
+      if (supportsGoogleSignIn && generation != _generation) return;
       _setState(
         const AuthState.guest().copyWith(
           errorCode: e.code,
@@ -258,6 +311,11 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
+    if (supportsGoogleSignIn) {
+      _generation++;
+      _serverExpiry?.cancel();
+      _setState(const AuthState.guest());
+    }
     _analyticsService.track(
       'auth_sign_out_started',
       params: <String, Object?>{'source_screen': 'profile'},
@@ -290,17 +348,40 @@ class AuthController extends ChangeNotifier {
   }
 
   void _consumeAuthResult(AuthResultEntity result) {
+    _serverExpiry?.cancel();
+    if (result.session.serverSessionHandle != null) {
+      final remaining = result.session.expiresAtUtc.difference(
+        DateTime.now().toUtc(),
+      );
+      if (remaining <= Duration.zero) {
+        _setState(const AuthState.guest());
+        return;
+      }
+      _serverExpiry = Timer(remaining, () {
+        _generation++;
+        clearPendingTarget();
+        _setState(const AuthState.guest());
+      });
+    }
     _setState(AuthState(status: AuthStatus.authenticated, user: result.user));
   }
 
   void _setState(AuthState state) {
     _state = state;
+    if (state.status == AuthStatus.guest) _serverExpiry?.cancel();
     // L3: product analytics queues follow the signed-in account; sign-out or
     // another account deletes every other account's queue (amendment §6).
     _productAnalytics?.bindAccount(
       state.isAuthenticated ? state.user?.id : null,
     );
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _serverExpiry?.cancel();
+    unawaited(_sessionSubscription?.cancel());
+    super.dispose();
   }
 
   String _errorGroup(String code) {

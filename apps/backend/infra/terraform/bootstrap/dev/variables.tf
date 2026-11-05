@@ -35,3 +35,21 @@ variable "delivery_receipt_path" {
   description = "Private receipt bound to the created budget/channel and actual owner acknowledgement. Never stored in Git."
   type        = string
 }
+
+# ---- N2c (dev Identity). All default to "absent"; presence needs the N2c record.
+variable "n2c_enabled" {
+  description = "Desired presence of N2c Identity registration/runtime infrastructure. Not execution authority."
+  type        = bool
+  default     = false
+}
+
+variable "n2c_authorization_record_path" {
+  description = "Private owner-issued N2c plan record. Never stored in Git."
+  type        = string
+  default     = ""
+}
+
+variable "n2c_authorization_record_sha256" {
+  type    = string
+  default = ""
+}

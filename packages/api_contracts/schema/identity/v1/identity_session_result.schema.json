@@ -48,46 +48,214 @@
         "data"
       ],
       "properties": {
-        "schemaVersion": { "const": 1 },
+        "schemaVersion": {
+          "const": 1
+        },
         "commandType": {
           "enum": [
             "establishIdentitySession",
             "refreshIdentitySession",
-            "recoverIdentitySessions"
+            "recoverIdentitySessions",
+            "revokeIdentitySession",
+            "readIdentitySession"
           ]
         },
-        "requestId": { "type": "string" },
-        "serverTime": { "type": "string", "format": "date-time" },
-        "kind": { "const": "succeeded" },
+        "requestId": {
+          "type": "string"
+        },
+        "serverTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "kind": {
+          "const": "succeeded"
+        },
         "data": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["sessionContext"],
-          "properties": {
-            "sessionContext": {
+          "oneOf": [
+            {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "userId",
-                "sessionId",
-                "sessionHandle",
-                "installationId",
-                "expiresAtUtc"
-              ],
+              "required": ["sessionContext"],
               "properties": {
-                "userId": { "type": "string" },
-                "sessionId": { "type": "string" },
-                "sessionHandle": {
-                  "type": "string",
-                  "pattern": "^[A-Za-z0-9_-]{43}$"
+                "sessionContext": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "userId",
+                    "sessionId",
+                    "sessionHandle",
+                    "installationId",
+                    "expiresAtUtc"
+                  ],
+                  "properties": {
+                    "userId": {
+                      "type": "string"
+                    },
+                    "sessionId": {
+                      "type": "string"
+                    },
+                    "sessionHandle": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_-]{43}$"
+                    },
+                    "installationId": {
+                      "type": "string"
+                    },
+                    "expiresAtUtc": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
                 },
-                "installationId": { "type": "string" },
-                "expiresAtUtc": { "type": "string", "format": "date-time" }
+                "authContext": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["schemaVersion", "profile", "accessSnapshot"],
+                  "properties": {
+                    "schemaVersion": {
+                      "const": 1
+                    },
+                    "profile": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["userId", "accountStatus", "systemRoles"],
+                      "properties": {
+                        "userId": {
+                          "$ref": "identity_common.schema.json#/$defs/entityId"
+                        },
+                        "accountStatus": {
+                          "const": "active"
+                        },
+                        "systemRoles": {
+                          "type": "array",
+                          "uniqueItems": true,
+                          "minItems": 1,
+                          "items": {
+                            "enum": ["User", "Creator", "Admin"]
+                          }
+                        }
+                      }
+                    },
+                    "accessSnapshot": {
+                      "$ref": "access_snapshot.schema.json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["revoked"],
+              "properties": {
+                "revoked": {
+                  "const": true
+                }
+              }
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "commandType": {
+                "const": "revokeIdentitySession"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["revoked"],
+                "properties": {
+                  "revoked": {
+                    "const": true
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["sessionContext"],
+                "properties": {
+                  "sessionContext": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "userId",
+                      "sessionId",
+                      "sessionHandle",
+                      "installationId",
+                      "expiresAtUtc"
+                    ],
+                    "properties": {
+                      "userId": {
+                        "type": "string"
+                      },
+                      "sessionId": {
+                        "type": "string"
+                      },
+                      "sessionHandle": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_-]{43}$"
+                      },
+                      "installationId": {
+                        "type": "string"
+                      },
+                      "expiresAtUtc": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  },
+                  "authContext": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["schemaVersion", "profile", "accessSnapshot"],
+                    "properties": {
+                      "schemaVersion": {
+                        "const": 1
+                      },
+                      "profile": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["userId", "accountStatus", "systemRoles"],
+                        "properties": {
+                          "userId": {
+                            "$ref": "identity_common.schema.json#/$defs/entityId"
+                          },
+                          "accountStatus": {
+                            "const": "active"
+                          },
+                          "systemRoles": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "minItems": 1,
+                            "items": {
+                              "enum": ["User", "Creator", "Admin"]
+                            }
+                          }
+                        }
+                      },
+                      "accessSnapshot": {
+                        "$ref": "access_snapshot.schema.json"
+                      }
+                    }
+                  }
+                }
               }
             }
           }
         }
-      }
+      ]
     },
     {
       "type": "object",
@@ -101,31 +269,53 @@
         "error"
       ],
       "properties": {
-        "schemaVersion": { "const": 1 },
+        "schemaVersion": {
+          "const": 1
+        },
         "commandType": {
           "enum": [
             "establishIdentitySession",
             "refreshIdentitySession",
-            "recoverIdentitySessions"
+            "recoverIdentitySessions",
+            "revokeIdentitySession",
+            "readIdentitySession"
           ]
         },
-        "requestId": { "type": "string" },
-        "serverTime": { "type": "string", "format": "date-time" },
-        "kind": { "enum": ["rejected", "retryableFailure"] },
+        "requestId": {
+          "type": "string"
+        },
+        "serverTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "kind": {
+          "enum": ["rejected", "retryableFailure"]
+        },
         "error": {
           "type": "object",
           "additionalProperties": false,
           "required": ["schemaVersion", "code", "retryable", "correlationId"],
           "properties": {
-            "schemaVersion": { "const": 1 },
-            "code": { "$ref": "#/$defs/failureCode" },
-            "retryable": { "type": "boolean" },
-            "correlationId": { "type": "string" },
+            "schemaVersion": {
+              "const": 1
+            },
+            "code": {
+              "$ref": "#/$defs/failureCode"
+            },
+            "retryable": {
+              "type": "boolean"
+            },
+            "correlationId": {
+              "type": "string"
+            },
             "details": {
               "type": "object",
               "additionalProperties": false,
               "properties": {
-                "retryAfter": { "type": "integer", "minimum": 1 }
+                "retryAfter": {
+                  "type": "integer",
+                  "minimum": 1
+                }
               }
             }
           }

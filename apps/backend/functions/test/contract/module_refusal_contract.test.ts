@@ -8,6 +8,7 @@ import { Ajv2020, type ValidateFunction } from 'ajv/dist/2020.js';
 import type { FormatsPlugin } from 'ajv-formats';
 
 import { identitySessionFailureCodes } from '../../src/contracts/identity_session_v1.js';
+import { createIdentitySchemaRegistry } from '../../src/contracts/identity_schema_registry.js';
 import { libraryRefusalCodes, rejected } from '../../src/modules/library/library_contract.js';
 import { privacyIntakeRefusalCodes } from '../../src/modules/privacy_orchestration/application/privacy_request_intake.js';
 import {
@@ -110,7 +111,8 @@ void test('privacy intake: schema enum equals the backend list and fixtures hold
 void test('identity session: failure enum equals the backend list', async () => {
   const schema = await json('identity', 'v1', 'identity_session_result.schema.json');
   sameCodes(enumOf(schema, 'failureCode'), identitySessionFailureCodes, 'identity session');
-  const validate = compile(schema);
+  // The result schema references sibling Identity schemas; compile it via the owning registry.
+  const validate = (await createIdentitySchemaRegistry()).validator('identitySessionResult');
   const answer = (code: string) => ({
     schemaVersion: 1,
     commandType: 'establishIdentitySession',

@@ -1,3 +1,6 @@
+import 'package:fake_async/fake_async.dart';
+import 'package:recharge/features/auth/domain/usecases/sign_in_with_google_usecase.dart';
+import 'package:recharge/features/auth/domain/repositories/auth_session_events.dart';
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -31,6 +34,47 @@ void main() {
       getCurrentUserUseCase: GetCurrentUserUseCase(repository),
       analyticsService: _FakeAnalyticsService(),
     );
+  });
+
+  test('server Auth expiry removes UI authority without demo restore', () {
+    fakeAsync((clock) {
+      final repo = _FederatedRepository();
+      final controller = AuthController(
+        signInUseCase: SignInUseCase(repo),
+        restoreSessionUseCase: RestoreSessionUseCase(repo),
+        signOutUseCase: SignOutUseCase(repo),
+        getCurrentUserUseCase: GetCurrentUserUseCase(repo),
+        analyticsService: _FakeAnalyticsService(),
+        signInWithGoogleUseCase: SignInWithGoogleUseCase(repo),
+      );
+      unawaited(controller.signInWithGoogle());
+      clock.flushMicrotasks();
+      expect(controller.state.isAuthenticated, isTrue);
+      expect(controller.state.user!.role, 'user');
+      clock.elapse(const Duration(hours: 2));
+      expect(controller.state.isAuthenticated, isFalse);
+      expect(controller.state.user, isNull);
+      controller.dispose();
+    });
+  });
+  test('SDK invalidation closes UI authority immediately', () async {
+    final repo = _FederatedRepository();
+    final events = _SessionEvents();
+    final controller = AuthController(
+      signInUseCase: SignInUseCase(repo),
+      restoreSessionUseCase: RestoreSessionUseCase(repo),
+      signOutUseCase: SignOutUseCase(repo),
+      getCurrentUserUseCase: GetCurrentUserUseCase(repo),
+      analyticsService: _FakeAnalyticsService(),
+      signInWithGoogleUseCase: SignInWithGoogleUseCase(repo),
+      sessionEvents: events,
+    );
+    await controller.signInWithGoogle();
+    events.source.add(null);
+    await Future<void>.delayed(Duration.zero);
+    expect(controller.state.isAuthenticated, isFalse);
+    controller.dispose();
+    await events.source.close();
   });
 
   test('signIn success -> authenticated', () async {
@@ -246,4 +290,34 @@ AuthResultEntity _demoAuthResult() {
 class _FakeAnalyticsService implements AnalyticsService {
   @override
   void track(String eventName, {Map<String, Object?> params = const {}}) {}
+}
+
+class _FederatedRepository extends _FakeAuthRepository
+    implements FederatedAuthRepository {
+  @override
+  Future<AuthResultEntity> signInWithGoogle() async {
+    final result = AuthResultEntity(
+      session: AuthSessionEntity.serverIssued(
+        sessionId: 'server',
+        serverSessionHandle: 'A' * 43,
+        installationId: 'install',
+        expiresAtUtc: DateTime.now().toUtc().add(const Duration(hours: 1)),
+      ),
+      user: const AuthUserEntity(
+        id: 'server-user',
+        email: '',
+        role: 'user',
+        capabilities: ['booking.self_service'],
+        profileStatus: 'active',
+      ),
+    );
+    _cachedResult = result;
+    return result;
+  }
+}
+
+class _SessionEvents implements AuthSessionEvents {
+  final source = StreamController<void>();
+  @override
+  Stream<void> get invalidated => source.stream;
 }

@@ -39,7 +39,7 @@ export interface AbuseRateRequest {
   readonly installationId: string;
   readonly sessionId?: string;
   readonly networkRiskHash?: string;
-  readonly environmentId: 'local';
+  readonly environmentId: 'local' | 'recharge-dev-n2a01';
   readonly marketId: 'LV' | 'EE' | 'LT';
   readonly now: Date;
   readonly correlationId: string;
@@ -255,7 +255,7 @@ function assertCounterCompatible(
 
 function assertRequest(input: AbuseRateRequest): void {
   if (
-    input.environmentId !== 'local' ||
+    (input.environmentId !== 'local' && input.environmentId !== 'recharge-dev-n2a01') ||
     !['LV', 'EE', 'LT'].includes(input.marketId) ||
     !/^(?!__name__$)[A-Za-z0-9_-]{1,128}$/u.test(input.attemptRequestId) ||
     !Number.isFinite(input.now.getTime()) ||

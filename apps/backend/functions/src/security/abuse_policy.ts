@@ -6,6 +6,8 @@ export type AbuseOperation =
   | 'booking.cancel'
   | 'booking.reconfirm'
   | 'booking.query'
+  | 'identity.session.ingress'
+  | 'identity.session.query'
   | 'identity.session.bootstrap'
   | 'identity.session.issue'
   | 'identity.session.rotate';
@@ -49,6 +51,11 @@ const bookingRules = Object.freeze({
 } satisfies Record<string, readonly AbuseBucketRule[]>);
 
 const identityRules = Object.freeze({
+  'identity.session.ingress': Object.freeze([
+    rule('transportIdentity', 60, 30),
+    rule('installation', 3600, 120),
+  ]),
+  'identity.session.query': Object.freeze([rule('account', 60, 120), rule('session', 60, 120)]),
   'identity.session.bootstrap': Object.freeze([
     rule('transportIdentity', 15 * 60, 5),
     rule('installation', 15 * 60, 10),

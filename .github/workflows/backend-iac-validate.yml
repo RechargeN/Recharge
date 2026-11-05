@@ -17,6 +17,10 @@ on:
       - "apps/backend/scripts/verify-dev-apply-approval.test.mjs"
       - "apps/backend/scripts/wait-dev-budget-delivery*.mjs"
       - "apps/backend/scripts/check-dev-bootstrap-plan*.mjs"
+      - "apps/backend/scripts/check-n2c-plan*.mjs"
+      - "apps/backend/scripts/package-n2c-identity-runtime*.mjs"
+      - "apps/backend/scripts/verify-n2c-stage.mjs"
+      - "apps/backend/n2c-identity-runtime/**"
       - ".github/workflows/backend-deploy.yml"
       - "docs/runbooks/backend-*.md"
   workflow_dispatch:
@@ -72,7 +76,7 @@ jobs:
         run: npm run verify:execution-manifest
 
       - name: Reject plan-only or mismatched apply records (local fixtures)
-        run: node --test apps/backend/scripts/verify-dev-apply-approval.test.mjs apps/backend/scripts/wait-dev-budget-delivery.test.mjs apps/backend/scripts/check-dev-bootstrap-plan.test.mjs
+        run: node --test apps/backend/scripts/verify-dev-apply-approval.test.mjs apps/backend/scripts/wait-dev-budget-delivery.test.mjs apps/backend/scripts/check-dev-bootstrap-plan.test.mjs apps/backend/scripts/check-n2c-plan.test.mjs
 
       - name: IaC topology, Terraform validate and gate behaviour
         working-directory: apps/backend/functions

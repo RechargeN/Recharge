@@ -65,10 +65,27 @@ export interface RecoverIdentitySessionsCommandV1 {
   readonly installationId: string;
 }
 
+export interface RevokeIdentitySessionCommandV1 {
+  readonly schemaVersion: 1;
+  readonly commandType: 'revokeIdentitySession';
+  readonly requestId: string;
+  readonly sessionContext: RefreshIdentitySessionCommandV1['sessionContext'];
+  readonly allSessions: boolean;
+}
+
+export interface ReadIdentitySessionCommandV1 {
+  readonly schemaVersion: 1;
+  readonly commandType: 'readIdentitySession';
+  readonly requestId: string;
+  readonly sessionContext: RefreshIdentitySessionCommandV1['sessionContext'];
+}
+
 export type IdentitySessionCommandV1 =
   | EstablishIdentitySessionCommandV1
   | RefreshIdentitySessionCommandV1
-  | RecoverIdentitySessionsCommandV1;
+  | RecoverIdentitySessionsCommandV1
+  | RevokeIdentitySessionCommandV1
+  | ReadIdentitySessionCommandV1;
 
 export type IdentitySessionCommandInspection =
   | Readonly<{ ok: true; value: IdentitySessionCommandV1 }>
@@ -98,13 +115,27 @@ export function inspectIdentitySessionCommand(value: unknown): IdentitySessionCo
     return { ok: true, value: record as unknown as IdentitySessionCommandV1 };
   }
   if (
-    record.commandType === 'refreshIdentitySession' &&
+    record.commandType === 'revokeIdentitySession' &&
+    validSessionContext(record.sessionContext) &&
+    typeof record.allSessions === 'boolean' &&
+    Object.keys(record).every((key) =>
+      ['schemaVersion', 'commandType', 'requestId', 'sessionContext', 'allSessions'].includes(key),
+    )
+  ) {
+    return { ok: true, value: record as unknown as RevokeIdentitySessionCommandV1 };
+  }
+  if (
+    (record.commandType === 'refreshIdentitySession' ||
+      record.commandType === 'readIdentitySession') &&
     validSessionContext(record.sessionContext) &&
     Object.keys(record).every((key) =>
       ['schemaVersion', 'commandType', 'requestId', 'sessionContext'].includes(key),
     )
   ) {
-    return { ok: true, value: record as unknown as RefreshIdentitySessionCommandV1 };
+    return {
+      ok: true,
+      value: record as unknown as RefreshIdentitySessionCommandV1 | ReadIdentitySessionCommandV1,
+    };
   }
   return { ok: false, reason: 'invalid_contract' };
 }

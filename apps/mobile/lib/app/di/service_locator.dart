@@ -1,3 +1,9 @@
+import '../../features/auth/domain/repositories/auth_session_events.dart';
+import 'dart:io';
+import 'dev_auth_bundle.dart';
+import '../../features/identity/data/repositories/dev_identity_workspace_repository.dart';
+import '../../features/auth/domain/usecases/sign_in_with_google_usecase.dart';
+import 'package:flutter/services.dart' show appFlavor;
 import 'session_publication_composition.dart';
 import 'scenario_publication_composition.dart';
 import 'route_content_publication_composition.dart';
@@ -256,9 +262,23 @@ import '../../features/visited/domain/usecases/remove_visit_usecase.dart';
 
 final GetIt sl = GetIt.instance;
 
-Future<void> setupDependencies() async {
+Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
+  final dev = appFlavor == 'dev';
+  if (dev != (devAuth != null)) {
+    throw StateError('dev_auth_composition_required');
+  }
   if (sl.isRegistered<AnalyticsService>()) {
+    if (devAuth != null && !identical(sl<AuthRepository>(), devAuth.auth)) {
+      throw StateError('dev_auth_composition_conflict');
+    }
     return;
+  }
+  Future<Directory> supportDirectory() async {
+    final root = await getApplicationSupportDirectory();
+    if (!dev) return root;
+    return Directory(
+      '${root.path}${Platform.pathSeparator}dev-recharge-dev-n2a01',
+    ).create(recursive: true);
   }
 
   sl
@@ -318,7 +338,9 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<ProductAnalyticsRecorder>(
       ProductAnalyticsRecorder.disabled,
     )
-    ..registerLazySingleton<FlutterSecureStorage>(FlutterSecureStorage.new)
+    ..registerLazySingleton<FlutterSecureStorage>(
+      () => devAuth?.storage ?? const FlutterSecureStorage(),
+    )
     // L4: one device-scoped UI language owner; fallback from market config.
     ..registerLazySingleton<LocalePreferenceStore>(
       () => SecureLocalePreferenceStore(sl<FlutterSecureStorage>()),
@@ -340,7 +362,9 @@ Future<void> setupDependencies() async {
       _bookingBackendBindingController,
     )
     ..registerLazySingleton<BookingBackendEndpoint>(
-      () => sl<BookingBackendBindingController>().endpoint,
+      () => dev
+          ? const BookingBackendEndpoint.productionDisabled()
+          : sl<BookingBackendBindingController>().endpoint,
     )
     ..registerLazySingleton<BookingTestEntryGuard>(
       () => BookingTestEntryGuard.fromEnvironment(sl()),
@@ -405,10 +429,19 @@ Future<void> setupDependencies() async {
       ),
     )
     ..registerLazySingleton<BookingSupportDirectoryProvider>(
-      () => getApplicationSupportDirectory,
+      () => supportDirectory,
     )
     ..registerLazySingleton<BookingIdentitySessionStore>(
-      () => SecureBookingIdentitySessionStore(sl()),
+      () =>
+          devAuth?.sessions ??
+          SecureBookingIdentitySessionStore(
+            sl(),
+            environment:
+                sl<BookingBackendEndpoint>().binding ==
+                    BookingBackendBinding.devEmulator
+                ? BookingIdentityCacheEnvironment.emulator
+                : BookingIdentityCacheEnvironment.local,
+          ),
     )
     ..registerLazySingleton<BookingFirebaseIdTokenProvider>(() {
       final endpoint = sl<BookingBackendEndpoint>();
@@ -426,7 +459,14 @@ Future<void> setupDependencies() async {
       );
     })
     ..registerLazySingleton<BookingInstallationIdProvider>(
-      () => SecureBookingInstallationIdProvider(sl()),
+      () => SecureBookingInstallationIdProvider(
+        sl(),
+        environment:
+            sl<BookingBackendEndpoint>().binding ==
+                BookingBackendBinding.devEmulator
+            ? BookingIdentityCacheEnvironment.emulator
+            : BookingIdentityCacheEnvironment.local,
+      ),
     )
     ..registerLazySingleton<BookingTransportRuntimeFactory>(
       () => BookingTransportRuntimeFactory(
@@ -435,7 +475,7 @@ Future<void> setupDependencies() async {
         tokens: sl(),
         sessions: sl(),
         installations: sl(),
-        supportDirectory: getApplicationSupportDirectory,
+        supportDirectory: supportDirectory,
       ),
     )
     ..registerLazySingletonAsync<BookingTransportRuntime>(
@@ -444,7 +484,7 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<RouteRecordingSecureStore>(
       () => EncryptedFileRouteRecordingStore(
         secureStorage: sl(),
-        supportDirectory: getApplicationSupportDirectory,
+        supportDirectory: supportDirectory,
       ),
     )
     ..registerLazySingleton<RouteRecordingJournalRepository>(
@@ -462,14 +502,27 @@ Future<void> setupDependencies() async {
         journalRepository: sl(),
       ),
     )
-    ..registerLazySingleton<AuthRemoteDataSource>(MockAuthRemoteDataSource.new)
+    ..registerLazySingleton<AuthRemoteDataSource>(() {
+      if (dev) throw StateError('dev_mock_auth_forbidden');
+      return MockAuthRemoteDataSource();
+    })
     ..registerLazySingleton<AuthLocalDataSource>(
-      () => AuthLocalDataSource(sl()),
+      () => AuthLocalDataSource(
+        sl(),
+        environment: dev
+            ? AuthCacheEnvironment.dev
+            : AuthCacheEnvironment.local,
+      ),
     )
     ..registerLazySingleton<AuthRepository>(
-      () => AuthRepositoryImpl(remoteDataSource: sl(), localDataSource: sl()),
+      () =>
+          devAuth?.auth ??
+          AuthRepositoryImpl(remoteDataSource: sl(), localDataSource: sl()),
     )
-    ..registerLazySingleton<MockIdentityFixture>(MockIdentityFixture.new)
+    ..registerLazySingleton<MockIdentityFixture>(() {
+      if (dev) throw StateError('dev_mock_identity_forbidden');
+      return const MockIdentityFixture();
+    })
     ..registerLazySingleton<IdentityWorkspaceLocalDataSource>(
       () => IdentityWorkspaceLocalDataSource(sl()),
     )
@@ -477,14 +530,18 @@ Future<void> setupDependencies() async {
       () => PublicProfessionalPageLocalDataSource(sl()),
     )
     ..registerLazySingleton<IdentityWorkspaceRepository>(
-      () => IdentityWorkspaceRepositoryImpl(
-        localDataSource: sl(),
-        mockFixture: sl(),
-        publicPageLocalDataSource: sl(),
-      ),
+      () =>
+          devAuth?.workspace ??
+          IdentityWorkspaceRepositoryImpl(
+            localDataSource: sl(),
+            mockFixture: sl(),
+            publicPageLocalDataSource: sl(),
+          ),
     )
     ..registerLazySingleton<PublicProfessionalPageRepository>(
-      () => PublicProfessionalPageRepositoryImpl(sl()),
+      () => dev
+          ? const DisabledDevPublicProfessionalPageRepository()
+          : PublicProfessionalPageRepositoryImpl(sl()),
     )
     ..registerLazySingleton<PublicPageContentProjectionRepository>(
       EmptyPublicPageContentProjectionRepository.new,
@@ -740,7 +797,7 @@ Future<void> setupDependencies() async {
     )
     ..registerLazySingleton<CreateMediaStore>(
       () => FileCreateMediaStore(
-        supportDirectory: getApplicationSupportDirectory,
+        supportDirectory: supportDirectory,
         idGenerator: sl(),
       ),
     )
@@ -904,8 +961,7 @@ Future<void> setupDependencies() async {
       () => LatviaGtfsRemoteDataSource(client: sl()),
     )
     ..registerLazySingleton<GtfsCacheDataSource>(
-      () =>
-          GtfsCacheDataSource(supportDirectory: getApplicationSupportDirectory),
+      () => GtfsCacheDataSource(supportDirectory: supportDirectory),
     )
     ..registerLazySingleton<ScenarioTransitScheduleRepository>(
       () => ScenarioTransitScheduleRepositoryImpl(
@@ -1138,6 +1194,12 @@ Future<void> setupDependencies() async {
       () => RecordPlaceVisitUseCase(repository: sl(), idGenerator: sl()),
     )
     ..registerFactory<RemoveVisitUseCase>(() => RemoveVisitUseCase(sl()));
+  if (devAuth != null) {
+    sl.registerSingleton<AuthSessionEvents>(devAuth);
+    sl.registerFactory<SignInWithGoogleUseCase>(
+      () => SignInWithGoogleUseCase(devAuth.auth),
+    );
+  }
 }
 
 BookingBackendBindingController _bookingBackendBindingController() {
