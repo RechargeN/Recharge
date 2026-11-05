@@ -20,7 +20,7 @@ const fixture = () => ({
     resource("publisher", "google_pubsub_topic_iam_member", {
       project: projectId,
       role: "roles/pubsub.publisher",
-      member: "serviceAccount:billing-budget-alerts@system.gserviceaccount.com",
+      member: "serviceAccount:billing-budget-alert@system.gserviceaccount.com",
     }),
     resource("wif", "google_iam_workload_identity_pool_provider", {
       project: projectId,

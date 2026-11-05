@@ -53,7 +53,7 @@ export function checkBootstrapPlan(plan, expected) {
     pub.length !== 1 ||
     pub[0].change.after.role !== "roles/pubsub.publisher" ||
     pub[0].change.after.member !==
-      "serviceAccount:billing-budget-alerts@system.gserviceaccount.com"
+      "serviceAccount:billing-budget-alert@system.gserviceaccount.com"
   )
     errors.push("budget publisher mismatch");
   const wif = byType("google_iam_workload_identity_pool_provider");

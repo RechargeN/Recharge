@@ -1,0 +1,5 @@
+# Budget publisher correction, 2026-11-05
+
+The first continuation apply created the channel/topic/subscription and cost APIs, then failed with400 because the proposed Google system principal had an extra plural s. No publisher binding was created. Correct principal: serviceAccount:billing-budget-alert@system.gserviceaccount.com; same topic-scoped roles/pubsub.publisher and same resource address. Source: https://docs.cloud.google.com/organization-policy/restrict-domains (Cloud Billing budget alert service account).
+
+This is a technical correction within the owner standing N2b policy: no new resource address, paid resource, user principal, basic role or trust widening. Earlier historical review records containing billing-budget-alerts describe the failed proposal, not a valid principal. Current schema/mock/checkpoint uses the corrected singular principal. New refresh plan must have zero delete/replace and only remaining approved addresses before another apply. Credentials remain private and are retained until N2b completion/deadline under the owner revision.

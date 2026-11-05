@@ -102,7 +102,7 @@ resource "google_pubsub_topic_iam_member" "budget_publisher" {
   project = google_project.dev.project_id
   topic   = google_pubsub_topic.budget.name
   role    = "roles/pubsub.publisher"
-  member  = "serviceAccount:billing-budget-alerts@system.gserviceaccount.com"
+  member  = "serviceAccount:billing-budget-alert@system.gserviceaccount.com"
 }
 resource "google_pubsub_subscription" "budget_evidence" {
   project                    = google_project.dev.project_id

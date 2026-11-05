@@ -30,7 +30,7 @@ run "full_graph" {
     error_message = "WIF must remain disabled."
   }
   assert {
-    condition     = google_pubsub_topic_iam_member.budget_publisher.member == "serviceAccount:billing-budget-alerts@system.gserviceaccount.com" && google_pubsub_topic_iam_member.budget_publisher.role == "roles/pubsub.publisher"
+    condition     = google_pubsub_topic_iam_member.budget_publisher.member == "serviceAccount:billing-budget-alert@system.gserviceaccount.com" && google_pubsub_topic_iam_member.budget_publisher.role == "roles/pubsub.publisher"
     error_message = "Only Cloud Billing may publish via this binding."
   }
   assert {
