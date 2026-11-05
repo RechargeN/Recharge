@@ -88,3 +88,6 @@ aider_config_html.txt
 # Local A1 stand safety net
 **/.recharge-emulator-stand/
 **/pubsub-debug.log
+
+# Locally materialized, separately approved bootstrap backend configuration
+apps/backend/infra/terraform/bootstrap/dev/backend.tf

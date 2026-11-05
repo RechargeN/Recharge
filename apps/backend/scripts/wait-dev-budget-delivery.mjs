@@ -10,30 +10,64 @@ export function inspectReceipt(query, receipt, now = new Date()) {
     )
   )
     return false;
-  if (!query.budgetName?.startsWith("billingAccounts/")) return false;
+  if (!/^billingAccounts\/[^/]+\/budgets\/[^/]+$/u.test(query.budgetName ?? ""))
+    return false;
+  const message = receipt?.budgetMessage;
+  let payload;
+  try {
+    payload = JSON.parse(
+      Buffer.from(message?.data ?? "", "base64").toString("utf8"),
+    );
+  } catch {
+    return false;
+  }
+  const parts = query.budgetName.split("/");
+  if (
+    message?.attributes?.billingAccountId !== parts[1] ||
+    message?.attributes?.budgetId !== parts[3] ||
+    message?.attributes?.schemaVersion !== "1.0" ||
+    message?.messageId !== receipt?.budgetMessageId ||
+    message?.publishTime !== receipt?.budgetMessagePublishedAtUtc ||
+    payload?.currencyCode !== "EUR" ||
+    payload?.budgetAmount !== 5 ||
+    payload?.budgetDisplayName !== "budget-guardrail-dev"
+  )
+    return false;
   const time = Date.parse(receipt?.deliveredAtUtc);
   return (
-    receipt?.schemaVersion === 1 &&
+    receipt?.schemaVersion === 2 &&
     receipt.projectId === query.projectId &&
     receipt.budgetName === query.budgetName &&
     receipt.channelName === query.channelName &&
+    query.topicName ===
+      `projects/${query.projectId}/topics/dev-budget-events` &&
+    query.subscriptionName ===
+      `projects/${query.projectId}/subscriptions/dev-budget-evidence` &&
+    receipt.topicName === query.topicName &&
+    receipt.subscriptionName === query.subscriptionName &&
+    receipt.budgetPubsubMessageVerified === true &&
+    typeof receipt.budgetMessageId === "string" &&
+    receipt.budgetMessageId.trim().length > 0 &&
+    typeof receipt.budgetMessageEvidenceRef === "string" &&
+    receipt.budgetMessageEvidenceRef.trim().length > 0 &&
+    Number.isFinite(Date.parse(receipt.budgetMessagePublishedAtUtc)) &&
+    Date.parse(receipt.budgetMessagePublishedAtUtc) <= now.getTime() &&
+    now.getTime() - Date.parse(receipt.budgetMessagePublishedAtUtc) <=
+      24 * 60 * 60 * 1000 &&
     receipt.budgetConfigurationVerified === true &&
     receipt.channelDeliveryVerified === true &&
     receipt.ownerAcknowledged === true &&
     typeof receipt.ownerAckEvidenceRef === "string" &&
     receipt.ownerAckEvidenceRef.trim().length > 0 &&
-    [
-      "monitoring-channel-delivery",
-      "actual-budget-threshold-delivery",
-    ].includes(receipt.testKind) &&
+    receipt.testKind === "monitoring-channel-delivery" &&
     Number.isFinite(time) &&
     time <= now.getTime() &&
-    now.getTime() - time <= 60 * 60 * 1000
+    now.getTime() - time <= 24 * 60 * 60 * 1000
   );
 }
 
 // Pure local receipt reader. No SDK, HTTP, subprocess, email or cloud mutation.
-// Plan mode never waits or writes. Apply mode may wait up to five minutes for
+// Plan mode never waits or writes. Apply mode may wait up to 24 hours for
 // the operator to record the owner's real acknowledgement of the shown test.
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   try {
@@ -41,7 +75,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
     for await (const chunk of process.stdin) input += chunk;
     const query = JSON.parse(input);
     const applying = process.env.N2B_EXECUTION_PHASE === "apply";
-    const deadline = Date.now() + (applying ? 300_000 : 0);
+    const deadline = Date.now() + (applying ? 86_400_000 : 0);
     let passed = false;
     do {
       try {

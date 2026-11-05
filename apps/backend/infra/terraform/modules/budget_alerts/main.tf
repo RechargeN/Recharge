@@ -26,6 +26,8 @@ resource "google_billing_budget" "guardrail" {
   }
 
   all_updates_rule {
+    pubsub_topic                     = var.pubsub_topic
+    schema_version                   = var.pubsub_topic == null ? null : "1.0"
     monitoring_notification_channels = var.notification_channel_ids
     disable_default_iam_recipients   = false
   }

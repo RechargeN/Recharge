@@ -34,6 +34,12 @@ provider "google" {
   # Process-only ADC; no credential value or quota-project override in config.
 }
 
+provider "google-beta" {
+  project               = var.project_id
+  region                = local.manifest.locationPolicy.functions.region
+  user_project_override = false
+}
+
 resource "terraform_data" "review_guard" {
   input = "dev-review-only"
   lifecycle {
@@ -59,7 +65,7 @@ resource "google_project" "dev" {
 
 # Only APIs needed for initial cost controls, before any ordinary resources.
 resource "google_project_service" "cost_bootstrap" {
-  for_each           = toset(["billingbudgets.googleapis.com", "monitoring.googleapis.com", "serviceusage.googleapis.com", "cloudresourcemanager.googleapis.com"])
+  for_each           = toset(["billingbudgets.googleapis.com", "monitoring.googleapis.com", "serviceusage.googleapis.com", "cloudresourcemanager.googleapis.com", "pubsub.googleapis.com", "logging.googleapis.com"])
   project            = google_project.dev.project_id
   service            = each.value
   disable_on_destroy = false
@@ -76,8 +82,30 @@ resource "google_monitoring_notification_channel" "budget_email" {
   }
 }
 
+resource "google_pubsub_topic" "budget" {
+  depends_on = [google_project_service.cost_bootstrap]
+  project    = google_project.dev.project_id
+  name       = "dev-budget-events"
+  message_storage_policy { allowed_persistence_regions = ["europe-west1"] }
+  lifecycle { prevent_destroy = true }
+}
+resource "google_pubsub_topic_iam_member" "budget_publisher" {
+  project = google_project.dev.project_id
+  topic   = google_pubsub_topic.budget.name
+  role    = "roles/pubsub.publisher"
+  member  = "serviceAccount:billing-budget-alerts@system.gserviceaccount.com"
+}
+resource "google_pubsub_subscription" "budget_evidence" {
+  project                    = google_project.dev.project_id
+  name                       = "dev-budget-evidence"
+  topic                      = google_pubsub_topic.budget.id
+  message_retention_duration = "86400s"
+  expiration_policy { ttl = "" }
+  lifecycle { prevent_destroy = true }
+}
+
 module "budget_alerts" {
-  depends_on               = [google_project_service.cost_bootstrap]
+  depends_on               = [google_pubsub_topic_iam_member.budget_publisher]
   source                   = "../../modules/budget_alerts"
   enabled                  = true
   labels                   = local.labels
@@ -87,6 +115,28 @@ module "budget_alerts" {
   amount_eur               = local.dev.budget.guardrailMonthlyEur
   thresholds_percent       = local.dev.budget.thresholdsPercent
   notification_channel_ids = [google_monitoring_notification_channel.budget_email.name]
+  pubsub_topic             = google_pubsub_topic.budget.id
+}
+
+# A one-shot synthetic Logging entry tests this exact email channel. The entry
+# is a separately enumerated post-approval operator action, never sent by plan.
+resource "google_monitoring_alert_policy" "channel_test" {
+  depends_on            = [module.budget_alerts]
+  project               = google_project.dev.project_id
+  display_name          = "dev-budget-channel-delivery-test"
+  combiner              = "OR"
+  enabled               = true
+  notification_channels = [google_monitoring_notification_channel.budget_email.name]
+  conditions {
+    display_name = "explicit synthetic delivery probe only"
+    condition_matched_log {
+      filter = "logName=\"projects/${var.project_id}/logs/dev-budget-channel-test\" AND jsonPayload.kind=\"n2b-email-delivery-probe\""
+    }
+  }
+  alert_strategy {
+    notification_rate_limit { period = "300s" }
+    auto_close = "1800s"
+  }
 }
 
 # Deferred until budget/channel have been created. This program only reads a
@@ -94,13 +144,15 @@ module "budget_alerts" {
 # The approved apply operator performs the separately enumerated delivery test
 # and records the owner's actual acknowledgement while this gate waits.
 data "external" "budget_delivery" {
-  depends_on = [module.budget_alerts, google_monitoring_notification_channel.budget_email]
+  depends_on = [module.budget_alerts, google_monitoring_notification_channel.budget_email, google_pubsub_subscription.budget_evidence, google_monitoring_alert_policy.channel_test]
   program    = ["node", "${path.module}/../../../../scripts/wait-dev-budget-delivery.mjs"]
   query = {
-    projectId   = google_project.dev.project_id
-    budgetName  = module.budget_alerts.budget_name
-    channelName = google_monitoring_notification_channel.budget_email.name
-    receiptPath = var.delivery_receipt_path
+    projectId        = google_project.dev.project_id
+    budgetName       = module.budget_alerts.budget_name
+    channelName      = google_monitoring_notification_channel.budget_email.name
+    topicName        = google_pubsub_topic.budget.id
+    subscriptionName = google_pubsub_subscription.budget_evidence.id
+    receiptPath      = var.delivery_receipt_path
   }
 }
 
@@ -133,9 +185,15 @@ module "project_baseline" {
   services = toset(["firestore.googleapis.com", "storage.googleapis.com", "iam.googleapis.com", "firebase.googleapis.com"])
 }
 
+resource "google_firebase_project" "dev" {
+  provider   = google-beta
+  project    = google_project.dev.project_id
+  depends_on = [module.project_baseline]
+  lifecycle { prevent_destroy = true }
+}
 
 module "firestore" {
-  depends_on             = [module.project_baseline]
+  depends_on             = [google_firebase_project.dev]
   source                 = "../../modules/firestore"
   enabled                = true
   labels                 = local.labels
@@ -181,11 +239,13 @@ module "ci_wif" {
 
 output "review_inventory" {
   value = {
-    project_id       = google_project.dev.project_id
-    project_number   = google_project.dev.number
-    budget_name      = module.budget_alerts.budget_name
-    channel_name     = google_monitoring_notification_channel.budget_email.name
-    wif_condition    = module.ci_wif.trust_condition
-    apply_authorized = false
+    project_id        = google_project.dev.project_id
+    project_number    = google_project.dev.number
+    budget_name       = module.budget_alerts.budget_name
+    topic_name        = google_pubsub_topic.budget.id
+    subscription_name = google_pubsub_subscription.budget_evidence.id
+    channel_name      = google_monitoring_notification_channel.budget_email.name
+    wif_condition     = module.ci_wif.trust_condition
+    apply_authorized  = false
   }
 }

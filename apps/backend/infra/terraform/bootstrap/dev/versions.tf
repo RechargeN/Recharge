@@ -5,6 +5,10 @@ terraform {
       source  = "hashicorp/google"
       version = "= 7.43.0"
     }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "= 7.43.0"
+    }
     external = {
       source  = "hashicorp/external"
       version = "= 2.3.5"

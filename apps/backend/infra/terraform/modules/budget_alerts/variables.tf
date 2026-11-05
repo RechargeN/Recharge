@@ -39,3 +39,9 @@ variable "notification_channel_ids" {
   type        = list(string)
   default     = []
 }
+
+variable "pubsub_topic" {
+  description = "Optional budget-event topic; publisher IAM is managed by the caller."
+  type        = string
+  default     = null
+}

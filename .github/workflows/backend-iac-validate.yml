@@ -15,6 +15,8 @@ on:
       - "apps/backend/scripts/verify-iac-topology.mjs"
       - "apps/backend/scripts/verify-dev-apply-approval.mjs"
       - "apps/backend/scripts/verify-dev-apply-approval.test.mjs"
+      - "apps/backend/scripts/wait-dev-budget-delivery*.mjs"
+      - "apps/backend/scripts/check-dev-bootstrap-plan*.mjs"
       - ".github/workflows/backend-deploy.yml"
       - "docs/runbooks/backend-*.md"
   workflow_dispatch:
@@ -70,8 +72,18 @@ jobs:
         run: npm run verify:execution-manifest
 
       - name: Reject plan-only or mismatched apply records (local fixtures)
-        run: node --test apps/backend/scripts/verify-dev-apply-approval.test.mjs
+        run: node --test apps/backend/scripts/verify-dev-apply-approval.test.mjs apps/backend/scripts/wait-dev-budget-delivery.test.mjs apps/backend/scripts/check-dev-bootstrap-plan.test.mjs
 
       - name: IaC topology, Terraform validate and gate behaviour
         working-directory: apps/backend/functions
         run: npm run verify:iac:topology -- --require-terraform
+
+      - name: Bootstrap providers (local backend, no credentials)
+        working-directory: apps/backend/infra/terraform/bootstrap/dev
+        run: terraform init -backend=false -input=false -lockfile=readonly
+
+      - name: Bootstrap schema and offline mocked gates
+        working-directory: apps/backend/infra/terraform/bootstrap/dev
+        run: |
+          terraform validate -no-color
+          terraform test -no-color
