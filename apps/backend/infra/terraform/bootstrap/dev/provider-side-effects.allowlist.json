@@ -5,17 +5,32 @@
   "version": "7.43.0",
   "trigger": "google_project.auto_create_network=false",
   "acceptedApiSideEffects": [
-    "compute.googleapis.com",
     "backupdr.googleapis.com",
+    "compute.googleapis.com",
     "oslogin.googleapis.com",
-    "servicenetworking.googleapis.com"
+    "servicenetworking.googleapis.com",
+    "telemetry.googleapis.com"
   ],
-  "evidence": "ServiceUsage EnableService request for compute; same operation CrossLoggingResponse lists all four services; owner conditional exception 2026-11-05",
+  "evidence": "ServiceUsage CrossLoggingResponse: Compute->compute/backupdr/oslogin/servicenetworking; Logging and Monitoring->telemetry, verified in dev audit 2026-11-05",
   "doesNotAuthorize": [
-    "new API enablement commands",
-    "VMs or disks or IPs",
-    "IAM grants including default service account roles/editor",
-    "network or data deletion beyond separately approved exact default network/firewalls"
+    "paid resources outside reviewed addresses",
+    "basic IAM roles except owner",
+    "IAM grants to non-Google principals",
+    "manual unrelated API activation",
+    "destroy/replace",
+    "data deletion"
   ],
-  "status": "API exception verified; recovery stopped on unapproved IAM role"
+  "status": "Observed dependencies accepted by owner standing N2b policy",
+  "standingN2bPolicy": {
+    "automaticGoogleApiDependencies": "record observed evidence and continue; no manual out-of-package service activation",
+    "automaticGoogleSystemServiceAgentRoles": "record and continue",
+    "hardStops": [
+      "paid resources beyond plan",
+      "basic roles for principals other than owner",
+      "roles on non-Google principals",
+      "billing drift",
+      "destroy or replace plan",
+      "state migration error"
+    ]
+  }
 }
