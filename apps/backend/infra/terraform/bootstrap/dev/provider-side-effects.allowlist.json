@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "scope": "dev-bootstrap-observed-provider-side-effects-only",
+  "provider": "hashicorp/google",
+  "version": "7.43.0",
+  "trigger": "google_project.auto_create_network=false",
+  "acceptedApiSideEffects": [
+    "compute.googleapis.com",
+    "backupdr.googleapis.com",
+    "oslogin.googleapis.com",
+    "servicenetworking.googleapis.com"
+  ],
+  "evidence": "ServiceUsage EnableService request for compute; same operation CrossLoggingResponse lists all four services; owner conditional exception 2026-11-05",
+  "doesNotAuthorize": [
+    "new API enablement commands",
+    "VMs or disks or IPs",
+    "IAM grants including default service account roles/editor",
+    "network or data deletion beyond separately approved exact default network/firewalls"
+  ],
+  "status": "API exception verified; recovery stopped on unapproved IAM role"
+}
