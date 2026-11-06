@@ -31,11 +31,12 @@
 
 1. Окно выбора аккаунта (`inactive`) сбрасывало только что созданную сессию — `26cc169`.
 2. Холодный старт без сети (после Doze) стирал сессию и SDK-пользователя; снимок прав ~1 ч истекал без тихого обновления — `a25e532`, `7055882`: стирание только на явный отказ, тихое обновление до истечения, автоповтор 2/5/15/30/60 с, вход сохраняется в фоне.
+3. Отмена окна Google (проверено через adb, без выбора аккаунта): вход не выполняется, ничего не сохраняется; сообщение об ошибке убрано — `c4a5fc4`.
 
 ## Проверки
 
-Flutter: analyze 0, boundary 0 нарушений (69/71), полный набор 2296 passed / 83 skipped. Terraform bootstrap: validate, тесты 12/12, `verify:iac:topology` PASS. Скрипты N2c (checker plan, stage, predeploy): 20/20. Backend unit 843/843, security+contract+identity integration 112/112.
+Flutter: analyze 0, boundary 0 нарушений (69/71), полный набор 2297 passed / 83 skipped. Terraform bootstrap: validate, тесты 12/12, `verify:iac:topology` PASS. Скрипты N2c (checker plan, stage, predeploy): 20/20. Backend unit 843/843, security+contract+identity integration 112/112.
 
 ## Открыто
 
-Проверки владельца на A34 (выход/revoke, перезапуск офлайн → восстановление при появлении сети, отмена входа); Play Integrity; iOS; реализация ADR 0023; N3a (dev Storage adapter) и N3b (scanner/processor) — заблокированы до N2c Done. Guard квитанции бюджета N2b истёк 2026-11-06 12:11 UTC: следующий Terraform plan требует новой проверки доставки бюджета.
+Проверки владельца на A34 (вход, выход/revoke, перезапуск офлайн → восстановление при появлении сети); отмена входа проверена; Play Integrity; iOS; реализация ADR 0023; N3a (dev Storage adapter) и N3b (scanner/processor) — заблокированы до N2c Done. Guard квитанции бюджета N2b истёк 2026-11-06 12:11 UTC: следующий Terraform plan требует новой проверки доставки бюджета.
