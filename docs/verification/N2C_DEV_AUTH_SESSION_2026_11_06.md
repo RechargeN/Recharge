@@ -1,6 +1,6 @@
 # N2c — dev серверный Auth/Session в recharge-dev-n2a01, 2026-11-06
 
-Статус: **Review**. Работает в dev на Samsung A34; открыты проверки владельца на устройстве (выход, перезапуск офлайн, отмена входа). Только recharge-dev-n2a01 (420479958348), синтетические данные. Push/merge, stage/prod, enforcement App Check и N3a не выполнялись.
+Статус: **Done (Android dev)** — решение владельца 2026-11-06 после проверок на Samsung A34 (вход, выход, фон без сети, холодный старт без сети с автоматическим восстановлением, отмена окна Google). iOS и Play Integrity — отдельные gate, этим статусом не закрываются. Только recharge-dev-n2a01 (420479958348), синтетические данные. Push/merge, stage/prod, enforcement App Check и N3a не выполнялись.
 
 ## Решения владельца
 
@@ -38,6 +38,6 @@
 
 Flutter: analyze 0, boundary 0 нарушений (69/71), полный набор 2299 passed / 83 skipped. Terraform bootstrap: validate, тесты 12/12, `verify:iac:topology` PASS. Скрипты N2c (checker plan, stage, predeploy): 20/20. Backend unit 843/843, security+contract+identity integration 112/112.
 
-## Открыто
+## Открыто (отдельные gate)
 
-Проверки владельца на A34 (вход, выход/revoke, перезапуск офлайн → восстановление при появлении сети); отмена входа проверена; Play Integrity; iOS; реализация ADR 0023; N3a (dev Storage adapter) и N3b (scanner/processor) — заблокированы до N2c Done. Guard квитанции бюджета N2b истёк 2026-11-06 12:11 UTC: следующий Terraform plan требует новой проверки доставки бюджета.
+Play Integrity; iOS; реализация ADR 0023; N3a (dev Storage adapter) и N3b (scanner/processor) — заблокированы до N2c Done. Guard квитанции бюджета N2b истёк 2026-11-06 12:11 UTC: следующий Terraform plan требует новой проверки доставки бюджета.
