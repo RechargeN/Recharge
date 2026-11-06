@@ -1,6 +1,6 @@
 # N3a — dev Cloud Storage adapter для Media, 2026-11-07
 
-Статус: **Review** (adapter реализован и проверен в облаке на синтетических объектах). Только recharge-dev-n2a01 / `recharge-dev-n2a01-media`. Scanner, processor, push, signed URL, публичный доступ, cleanup и удаление в облаке не выполнялись. Push/merge не выполнялись.
+Статус: **Done** — решение владельца 2026-11-07 (adapter реализован и проверен в облаке на синтетических объектах). Только recharge-dev-n2a01 / `recharge-dev-n2a01-media`. Scanner, processor, push, signed URL, публичный доступ, cleanup и удаление в облаке не выполнялись. Push/merge не выполнялись.
 
 ## Что сделано (`b906d93`)
 
@@ -24,4 +24,4 @@ Backend unit + contract + integration 1192/1192, полный lint, adapter 7/7,
 - Удаление в облаке проверено только unit-тестами (облачное удаление — отдельное разрешение).
 - Полный Media runtime в облаке: `FirestoreMediaRepository` разрешён только в Emulator; включение — отдельное решение.
 - Upload transport для клиента (signed upload / Rules) и runtime-media IAM — до развёртывания Media функций.
-- N3b (scanner/processor): пакет готовности `N3B-READINESS-2026-11-06.md`, решения D-01…D-12.
+- N3b (scanner/processor) разблокирован по зависимости N3a; нужны разрешение на проект и решения из пакета готовности `N3B-READINESS-2026-11-06.md`, решения D-01…D-12.
