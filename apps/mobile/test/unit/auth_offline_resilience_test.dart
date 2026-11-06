@@ -55,12 +55,14 @@ class _ScriptedRepository implements FederatedAuthRepository {
   }
 
   bool cancelSignIn = false;
+  int freshSignIns = 0;
 
   @override
   Future<AuthResultEntity> signInWithGoogle() async {
     if (cancelSignIn) {
       throw const AuthException(code: 'auth_cancelled', message: '');
     }
+    freshSignIns++;
     return _result(clock(), const Duration(hours: 1));
   }
 
@@ -215,5 +217,56 @@ void main() {
     expect(controller.state.message, isNull);
     expect(controller.state.errorCode, isNull);
     controller.dispose();
+  });
+
+  test(
+    'tapping sign-in while offline resumes kept credentials instead of a fresh sign-in',
+    () {
+      fakeAsync((async) {
+        final repo = _ScriptedRepository(DateTime.now);
+        repo.restoreScript.addAll(<Object>[
+          'offline',
+          'offline',
+          const Duration(hours: 1),
+        ]);
+        final controller = _controller(repo);
+        unawaited(controller.restoreSession());
+        async.flushMicrotasks();
+        expect(controller.state.message, AuthController.offlineMessage);
+        bool? first;
+        controller.signInWithGoogle().then((v) => first = v);
+        async.flushMicrotasks();
+        expect(
+          first,
+          isFalse,
+        ); // still offline: nothing wiped, no Google picker
+        expect(repo.freshSignIns, 0);
+        expect(repo.signOuts, 0);
+        bool? second;
+        controller.signInWithGoogle().then((v) => second = v);
+        async.flushMicrotasks();
+        expect(second, isTrue); // network back: resumed without a new sign-in
+        expect(repo.freshSignIns, 0);
+        expect(controller.state.isAuthenticated, isTrue);
+        controller.dispose();
+      });
+    },
+  );
+
+  test('after a server refusal the button starts a fresh Google sign-in', () {
+    fakeAsync((async) {
+      final repo = _ScriptedRepository(DateTime.now);
+      repo.restoreScript.addAll(<Object>['offline', 'refused']);
+      final controller = _controller(repo);
+      unawaited(controller.restoreSession());
+      async.flushMicrotasks();
+      bool? result;
+      controller.signInWithGoogle().then((v) => result = v);
+      async.flushMicrotasks();
+      expect(result, isTrue);
+      expect(repo.freshSignIns, 1);
+      expect(controller.state.isAuthenticated, isTrue);
+      controller.dispose();
+    });
   });
 }

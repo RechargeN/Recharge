@@ -265,6 +265,18 @@ class AuthController extends ChangeNotifier {
         /* Restore failure is already reflected in state. */
       }
     }
+    // Credentials kept while offline: the button resumes them instead of a
+    // fresh Google sign-in (which would refuse with an SDK user present and
+    // wipe everything). Only a server refusal falls through to a new sign-in.
+    if (_state.errorCode == offlineMessage) {
+      try {
+        await restoreSession();
+      } catch (_) {
+        /* Reflected in state. */
+      }
+      if (_state.isAuthenticated) return true;
+      if (_state.errorCode == offlineMessage) return false;
+    }
     final generation = ++_generation;
     _federatedSignInInProgress = true;
     _setState(_state.copyWith(status: AuthStatus.loading, clearError: true));
