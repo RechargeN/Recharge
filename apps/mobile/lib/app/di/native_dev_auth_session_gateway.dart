@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import '../../features/booking/data/booking_dev_android_identity.dart';
 import '../../features/booking/data/booking_functions_transport.dart';
@@ -54,6 +55,12 @@ final class NativeDevAuthSessionGateway implements DevAuthSessionGateway {
     try {
       return await operation();
     } catch (error, stack) {
+      if (kDebugMode) {
+        debugPrint(
+          'recharge-auth: gateway failure code=${identityFailureCode(error)} '
+          'transient=${isTransientIdentityFailure(error)}',
+        );
+      }
       if (isTransientIdentityFailure(error)) {
         throw const AuthException(code: offlineCode, message: offlineCode);
       }

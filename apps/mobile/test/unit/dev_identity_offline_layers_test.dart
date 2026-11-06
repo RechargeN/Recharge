@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -82,7 +83,7 @@ http.Response _envelope(Map<String, Object?> result) =>
     http.Response(jsonEncode({'result': result}), 200);
 
 void main() {
-  test('classifier: only offline/overload outcomes are transient', () {
+  test('classifier: only explicit refusals are terminal', () {
     for (final transient in <Object>[
       TimeoutException('t'),
       const SocketException('dns'),
@@ -92,6 +93,16 @@ void main() {
       const BookingCallableFailure(code: 'unavailable', dispatched: true),
       const BookingCallableFailure(code: 'deadline-exceeded', dispatched: true),
       const BookingCallableFailure(code: 'rate-limited', dispatched: true),
+      const BookingCallableFailure(code: 'internal', dispatched: true),
+      const BookingCallableFailure(
+        code: 'temporarily-unavailable',
+        dispatched: true,
+      ),
+      FirebaseAuthException(code: 'unknown'),
+      FirebaseAuthException(code: 'internal-error'),
+      PlatformException(code: 'ERROR'),
+      const FormatException('Malformed Functions callable response'),
+      StateError('dev_identity_operation_in_progress'),
     ]) {
       expect(
         isTransientIdentityFailure(transient),
@@ -106,6 +117,12 @@ void main() {
       const BookingCallableFailure(code: 'session-revoked', dispatched: true),
       const BookingCallableFailure(code: 'session-expired', dispatched: true),
       const FormatException('dev_identity_response_mismatch'),
+      const FormatException('server_auth_context_invalid'),
+      const BookingCallableFailure(code: 'account-blocked', dispatched: true),
+      const BookingCallableFailure(
+        code: 'provider-assertion-invalid',
+        dispatched: true,
+      ),
       StateError('dev_identity_session_composition_invalid'),
     ]) {
       expect(
