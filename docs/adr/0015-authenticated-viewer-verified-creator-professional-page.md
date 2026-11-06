@@ -1,6 +1,7 @@
 # ADR 0015: Authenticated Viewer, Verified Creator And Professional Page
 
 - Status: Accepted
+- Superseded in part by: [ADR 0023](0023-user-creator-professional-page-admin-model.md) (2026-11-06) — §2, §3, §4 и перечень ролей в §6
 - Date: 2026-07-26
 - Deciders: Recharge team
 - Supersedes: ADR 0013 policy 6 only where it permits unauthenticated guest mode

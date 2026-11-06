@@ -1,6 +1,7 @@
 # ADR 0021: Unified Personal Profile
 
 - Status: Accepted
+- Superseded in part by: [ADR 0023](0023-user-creator-professional-page-admin-model.md) (2026-11-06) — §1 в части «Persisted system roles remain User / Creator / Admin»
 - Date: 2026-10-10
 - Slice: PVR-01 (local UI, documentation, archive and regression only)
 - Deciders: Recharge product owner; explicit acceptance on 2026-10-10

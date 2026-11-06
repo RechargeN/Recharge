@@ -1,6 +1,7 @@
 # ADR 0016: Bounded Identity And Workspace Implementation During Stabilization
 
 - Status: Accepted
+- Superseded in part by: [ADR 0023](0023-user-creator-professional-page-admin-model.md) (2026-11-06) — утверждение «Persisted roles remain User, Creator and Admin»
 - Date: 2026-07-31
 - Deciders: Recharge team
 - Supersedes: ADR 0015 section 7 only for the bounded local/mock slices defined

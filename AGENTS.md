@@ -50,21 +50,26 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
 
 ## Разрешённые конфликты (решения приняты, не пересматривать молча)
 
-1. **Роли и identity** — по ADR 0013 и ADR 0015:
-   `User / Creator / Admin` + capability-based permissions. Viewer —
-   обязательно авторизованный User. Creator требует отдельной
-   подтверждённой identity verification; Google/Apple auth сам по себе
-   Creator не даёт. По Accepted ADR 0021 единый личный интерфейс называется Creator для любого
-   авторизованного User; имя UI не выдаёт роль или grants. Creator tools доступны
-   по действующим create/submit/publish capabilities; пользователь не
-   переключается вручную между Viewer и Creator; отдельной Viewer-страницы
-   в целевой UI-политике нет. Professional Page
-   (`ManagedPage`) — отдельный рабочий контекст verified Creator с active
-   membership и page-scoped capabilities (`manage_page`, `view_insights`,
-   `manage_bookings`). Один аккаунт может управлять несколькими страницами и
+1. **Роли и identity** — по ADR 0013, ADR 0015 и Accepted ADR 0023
+   (2026-11-06, суперсидит ADR 0015 §2–§4 и перечень ролей): три вида
+   аккаунта — **User (он же Creator)**, **Professional Page**, **Admin**.
+   Глобальные роли только `User` и `Admin` + capability-based permissions;
+   старое значение `Creator` читается как `User`. Viewer — обязательно
+   авторизованный User. Любой User публикует бесплатный личный контент без
+   проверки личности (модерация, лимиты); платное, бронирование, аренда и сбор
+   денег — только от проверенной Professional Page или при серверном факте
+   проверки личности. Google/Apple auth прав сам по себе не даёт; роли, права,
+   членство и проверки выдаёт только сервер. По ADR 0021 единый личный
+   интерфейс называется Creator; пользователь не переключается между Viewer и
+   Creator. Professional Page (`ManagedPage`) — членство (owner/manager) в
+   конкретной странице с page-scoped capabilities (`manage_page`,
+   `view_insights`, `manage_bookings`), а не глобальная роль; права одной
+   страницы не открывают другую; владелец места (Place) — проверенная
+   страница. Один аккаунт может управлять несколькими страницами и
    переключает только `Personal profile ↔ Professional Page`; Admin tools —
    отдельная capability-gated поверхность, не профиль, workspace или
    publisher. Термин `Pro generator` — legacy UI и не целевая модель.
+   Реализация ADR 0023 (контракт → сервер → правила → клиент) — отдельный срез.
    Guest mode более не является целевой продуктовой политикой.
 2. **ID** — по ADR 0013: server IDs — immutable ULID/UUID-style IDs.
    Permanent client-generated ID допустим только там, где это явно принимает
