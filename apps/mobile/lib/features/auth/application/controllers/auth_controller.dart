@@ -56,6 +56,11 @@ class AuthController extends ChangeNotifier {
   Timer? _serverExpiry;
   StreamSubscription<void>? _sessionSubscription;
   int _generation = 0;
+  bool _federatedSignInInProgress = false;
+
+  /// True while a user-initiated Google sign-in (including its system
+  /// account picker) is running.
+  bool get isSignInInProgress => _federatedSignInInProgress;
   final SignInUseCase _signInUseCase;
   final RestoreSessionUseCase _restoreSessionUseCase;
   final SignOutUseCase _signOutUseCase;
@@ -207,10 +212,35 @@ class AuthController extends ChangeNotifier {
     _setState(const AuthState.guest());
   }
 
+  /// App moved to the background (not a transient system overlay). Never
+  /// invalidates a sign-in the user just started.
+  void suspendForBackground() {
+    if (_federatedSignInInProgress) return;
+    suspendServerAuthority();
+  }
+
+  /// Returning from the background revalidates with the server; skipped while
+  /// a sign-in is still completing (its own result is fresh server authority).
+  Future<void> restoreAfterBackground() {
+    if (_federatedSignInInProgress) return Future<void>.value();
+    return restoreSession();
+  }
+
   Future<bool> signInWithGoogle() async {
     final operation = _signInWithGoogleUseCase;
     if (operation == null) return false;
+    // A startup/foreground restore holds the repository; wait for it instead
+    // of failing the user's tap with auth_operation_in_progress (A34, 2026-11-06).
+    final pendingRestore = _restoreSessionFuture;
+    if (pendingRestore != null) {
+      try {
+        await pendingRestore;
+      } catch (_) {
+        /* Restore failure is already reflected in state. */
+      }
+    }
     final generation = ++_generation;
+    _federatedSignInInProgress = true;
     _setState(_state.copyWith(status: AuthStatus.loading, clearError: true));
     try {
       final result = await operation();
@@ -218,6 +248,9 @@ class AuthController extends ChangeNotifier {
       _consumeAuthResult(result);
       return _state.isAuthenticated;
     } on AuthException catch (error) {
+      if (kDebugMode) {
+        debugPrint('recharge-auth: sign-in failed code=${error.code}');
+      }
       if (generation == _generation) {
         _setState(
           const AuthState.guest().copyWith(
@@ -227,6 +260,8 @@ class AuthController extends ChangeNotifier {
         );
       }
       return false;
+    } finally {
+      _federatedSignInInProgress = false;
     }
   }
 
@@ -288,6 +323,9 @@ class AuthController extends ChangeNotifier {
         },
       );
     } on AuthException catch (e) {
+      if (kDebugMode) {
+        debugPrint('recharge-auth: restore failed code=${e.code}');
+      }
       if (supportsGoogleSignIn && generation != _generation) return;
       _setState(
         const AuthState.guest().copyWith(

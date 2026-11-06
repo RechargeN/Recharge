@@ -6,6 +6,7 @@ import '../../../../app/router/route_names.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../application/auth_providers.dart';
 import '../../application/controllers/auth_controller.dart';
+import '../../application/state/auth_state.dart';
 import '../auth_messages.dart';
 
 class SignInPage extends ConsumerStatefulWidget {
@@ -88,7 +89,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               if (authController.supportsGoogleSignIn) ...<Widget>[
                 FilledButton(
                   key: SignInPage.submitButtonKey,
-                  onPressed: _isSubmitting ? null : _onGoogleSubmit,
+                  onPressed: _isSubmitting || state.status == AuthStatus.loading
+                      ? null
+                      : _onGoogleSubmit,
                   child: Text(
                     _isSubmitting
                         ? l10n.authSigningIn

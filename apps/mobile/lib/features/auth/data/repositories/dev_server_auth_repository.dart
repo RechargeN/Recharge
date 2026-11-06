@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../domain/entities/auth_result_entity.dart';
 import '../../domain/entities/auth_user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -82,6 +83,13 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
       }
       return context;
     } catch (error, stack) {
+      if (kDebugMode) {
+        // Type and our own constant code only; never messages, tokens or ids.
+        final code = error is AuthException ? error.code : '';
+        debugPrint(
+          'recharge-auth: dev operation failed type=${error.runtimeType} $code',
+        );
+      }
       try {
         await gateway.clearLocal();
       } catch (_) {

@@ -13,6 +13,8 @@ class AuthLifecycleBoundary extends ConsumerStatefulWidget {
 
 class _AuthLifecycleBoundaryState extends ConsumerState<AuthLifecycleBoundary>
     with WidgetsBindingObserver {
+  bool _backgrounded = false;
+
   @override
   void initState() {
     super.initState();
@@ -23,10 +25,21 @@ class _AuthLifecycleBoundaryState extends ConsumerState<AuthLifecycleBoundary>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final controller = ref.read(authControllerProvider);
     if (!controller.supportsGoogleSignIn) return;
-    if (state == AppLifecycleState.resumed) {
-      unawaited(controller.restoreSession());
-    } else {
-      controller.suspendServerAuthority();
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+        _backgrounded = true;
+        controller.suspendForBackground();
+      case AppLifecycleState.resumed:
+        if (!_backgrounded) return;
+        _backgrounded = false;
+        unawaited(controller.restoreAfterBackground());
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+        // Transient: system overlays such as the Google account picker
+        // (Credential Manager) or the notification shade. A sign-in in progress
+        // must not be invalidated by them (A34, 2026-11-06).
+        return;
     }
   }
 
