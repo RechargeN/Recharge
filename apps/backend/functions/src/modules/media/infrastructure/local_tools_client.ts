@@ -37,7 +37,7 @@ export interface LocalToolsConfig {
 
 const unavailable = 'local-tools-unavailable';
 
-interface HttpAnswer {
+export interface HttpAnswer {
   readonly status: number;
   readonly body: Buffer;
 }
@@ -131,41 +131,141 @@ export function cleanAccepted(database: ToolsDatabase, config: LocalToolsConfig)
   );
 }
 
+/**
+ * How a tools client reaches its service. The local client talks to 127.0.0.1;
+ * the N3b dev-cloud client (cloud_tools_client.ts) to private Cloud Run. Both
+ * share the checks below, so a cloud answer is judged exactly like a local one.
+ */
+export type ToolsTransport = (
+  path: string,
+  body: Buffer,
+  headers: Readonly<Record<string, string>>,
+  totalMs: number,
+) => Promise<HttpAnswer>;
+
+/** One scan over a transport; every failure is `inconclusive`. */
+export async function scanThroughTools(
+  transport: ToolsTransport,
+  store: ObjectBytesPort,
+  input: ScanRequest,
+  acceptClean: (database: ToolsDatabase) => boolean,
+  unavailableRevision: string,
+): Promise<ScanOutcome> {
+  const bytes = await sourceBytes(
+    store,
+    input.objectKeyHandle,
+    input.providerGeneration,
+    input.sha256,
+  );
+  if (bytes === null) return { toolRevision: unavailableRevision, result: 'inconclusive' };
+  let answer: HttpAnswer;
+  try {
+    answer = await transport(
+      toolsPaths.scan,
+      bytes,
+      { [toolsHeaders.requestId]: randomUUID(), [toolsHeaders.sha256]: input.sha256 },
+      clientDeadlines.scanMs,
+    );
+  } catch {
+    return { toolRevision: unavailableRevision, result: 'inconclusive' };
+  }
+  if (answer.status !== 200) return { toolRevision: unavailableRevision, result: 'inconclusive' };
+  try {
+    const response = parseScanResponse(JSON.parse(answer.body.toString('utf8')));
+    if (response.result === 'clean' && !acceptClean(response.database))
+      return { toolRevision: response.toolRevision, result: 'inconclusive' };
+    return { toolRevision: response.toolRevision, result: response.result };
+  } catch {
+    return { toolRevision: unavailableRevision, result: 'inconclusive' };
+  }
+}
+
+/** One processing run over a transport; every failure is `failed`. */
+export async function processThroughTools(
+  transport: ToolsTransport,
+  store: ObjectBytesPort,
+  input: ProcessRequest,
+  newVariantId: () => EntityId,
+  unavailableRevision: string,
+): Promise<ProcessOutcome> {
+  if (input.family !== 'image') return { toolRevision: unavailableRevision, result: 'failed' };
+  const bytes = await sourceBytes(
+    store,
+    input.objectKeyHandle,
+    input.sourceProviderGeneration,
+    input.sourceSha256,
+  );
+  if (bytes === null) return { toolRevision: unavailableRevision, result: 'failed' };
+  let answer: HttpAnswer;
+  try {
+    answer = await transport(
+      toolsPaths.process,
+      bytes,
+      {
+        [toolsHeaders.requestId]: randomUUID(),
+        [toolsHeaders.sha256]: input.sourceSha256,
+        [toolsHeaders.profiles]: input.mandatoryVariantProfiles.join(','),
+      },
+      clientDeadlines.processMs,
+    );
+  } catch {
+    return { toolRevision: unavailableRevision, result: 'failed' };
+  }
+  if (answer.status !== 200) return { toolRevision: unavailableRevision, result: 'failed' };
+  let response;
+  try {
+    response = parseProcessResponse(JSON.parse(answer.body.toString('utf8')), {
+      maxVariantBytes,
+      profiles: input.mandatoryVariantProfiles,
+    });
+  } catch {
+    return { toolRevision: unavailableRevision, result: 'failed' };
+  }
+  if (response.result !== 'succeeded')
+    return { toolRevision: response.toolRevision, result: response.result };
+  const variants: MediaVariantRefV1[] = [];
+  for (const variant of response.variants ?? []) {
+    const data = Buffer.from(variant.bytesBase64, 'base64');
+    // The service is not trusted blindly: length and hash are recomputed here.
+    if (data.length !== variant.byteLength || sha256(data) !== variant.sha256)
+      return { toolRevision: response.toolRevision, result: 'failed' };
+    const variantId = newVariantId();
+    let stored: { readonly providerGeneration: string };
+    try {
+      stored = await store.writeVariant(variantId, data, variant.format);
+    } catch {
+      return { toolRevision: response.toolRevision, result: 'failed' };
+    }
+    variants.push({
+      variantId,
+      profile: variant.profile,
+      format: variant.format,
+      providerGeneration: stored.providerGeneration,
+      sha256: variant.sha256,
+      byteLength: variant.byteLength,
+      transformProfileRevision: response.transformProfileRevision ?? '',
+      sourceProviderGeneration: input.sourceProviderGeneration,
+      width: variant.width,
+      height: variant.height,
+    });
+  }
+  return { toolRevision: response.toolRevision, result: 'succeeded', variants };
+}
+
 export class LocalToolsScanner implements ScannerPort {
   constructor(
     private readonly config: LocalToolsConfig,
     private readonly store: ObjectBytesPort,
   ) {}
 
-  async scan(input: ScanRequest): Promise<ScanOutcome> {
-    const bytes = await sourceBytes(
+  scan(input: ScanRequest): Promise<ScanOutcome> {
+    return scanThroughTools(
+      (path, body, headers, totalMs) => call(this.config, path, body, headers, totalMs),
       this.store,
-      input.objectKeyHandle,
-      input.providerGeneration,
-      input.sha256,
+      input,
+      (database) => cleanAccepted(database, this.config),
+      unavailable,
     );
-    if (bytes === null) return { toolRevision: unavailable, result: 'inconclusive' };
-    let answer: HttpAnswer;
-    try {
-      answer = await call(
-        this.config,
-        toolsPaths.scan,
-        bytes,
-        { [toolsHeaders.requestId]: randomUUID(), [toolsHeaders.sha256]: input.sha256 },
-        clientDeadlines.scanMs,
-      );
-    } catch {
-      return { toolRevision: unavailable, result: 'inconclusive' };
-    }
-    if (answer.status !== 200) return { toolRevision: unavailable, result: 'inconclusive' };
-    try {
-      const response = parseScanResponse(JSON.parse(answer.body.toString('utf8')));
-      if (response.result === 'clean' && !cleanAccepted(response.database, this.config))
-        return { toolRevision: response.toolRevision, result: 'inconclusive' };
-      return { toolRevision: response.toolRevision, result: response.result };
-    } catch {
-      return { toolRevision: unavailable, result: 'inconclusive' };
-    }
   }
 }
 
@@ -176,70 +276,14 @@ export class LocalToolsProcessor implements ProcessorPort {
     private readonly newVariantId: () => EntityId = () => randomUUID() as EntityId,
   ) {}
 
-  async process(input: ProcessRequest): Promise<ProcessOutcome> {
-    if (input.family !== 'image') return { toolRevision: unavailable, result: 'failed' };
-    const bytes = await sourceBytes(
+  process(input: ProcessRequest): Promise<ProcessOutcome> {
+    return processThroughTools(
+      (path, body, headers, totalMs) => call(this.config, path, body, headers, totalMs),
       this.store,
-      input.objectKeyHandle,
-      input.sourceProviderGeneration,
-      input.sourceSha256,
+      input,
+      this.newVariantId,
+      unavailable,
     );
-    if (bytes === null) return { toolRevision: unavailable, result: 'failed' };
-    let answer: HttpAnswer;
-    try {
-      answer = await call(
-        this.config,
-        toolsPaths.process,
-        bytes,
-        {
-          [toolsHeaders.requestId]: randomUUID(),
-          [toolsHeaders.sha256]: input.sourceSha256,
-          [toolsHeaders.profiles]: input.mandatoryVariantProfiles.join(','),
-        },
-        clientDeadlines.processMs,
-      );
-    } catch {
-      return { toolRevision: unavailable, result: 'failed' };
-    }
-    if (answer.status !== 200) return { toolRevision: unavailable, result: 'failed' };
-    let response;
-    try {
-      response = parseProcessResponse(JSON.parse(answer.body.toString('utf8')), {
-        maxVariantBytes,
-        profiles: input.mandatoryVariantProfiles,
-      });
-    } catch {
-      return { toolRevision: unavailable, result: 'failed' };
-    }
-    if (response.result !== 'succeeded')
-      return { toolRevision: response.toolRevision, result: response.result };
-    const variants: MediaVariantRefV1[] = [];
-    for (const variant of response.variants ?? []) {
-      const data = Buffer.from(variant.bytesBase64, 'base64');
-      // The service is not trusted blindly: length and hash are recomputed here.
-      if (data.length !== variant.byteLength || sha256(data) !== variant.sha256)
-        return { toolRevision: response.toolRevision, result: 'failed' };
-      const variantId = this.newVariantId();
-      let stored: { readonly providerGeneration: string };
-      try {
-        stored = await this.store.writeVariant(variantId, data, variant.format);
-      } catch {
-        return { toolRevision: response.toolRevision, result: 'failed' };
-      }
-      variants.push({
-        variantId,
-        profile: variant.profile,
-        format: variant.format,
-        providerGeneration: stored.providerGeneration,
-        sha256: variant.sha256,
-        byteLength: variant.byteLength,
-        transformProfileRevision: response.transformProfileRevision ?? '',
-        sourceProviderGeneration: input.sourceProviderGeneration,
-        width: variant.width,
-        height: variant.height,
-      });
-    }
-    return { toolRevision: response.toolRevision, result: 'succeeded', variants };
   }
 }
 

@@ -1510,6 +1510,22 @@
       "owner": "terraform"
     },
     {
+      "resource": "cloudRun.mediaTools",
+      "owner": "terraform"
+    },
+    {
+      "resource": "artifactRegistry.mediaTools",
+      "owner": "terraform"
+    },
+    {
+      "resource": "storage.clamavMirror",
+      "owner": "terraform"
+    },
+    {
+      "resource": "scheduler.clamavMirror",
+      "owner": "terraform"
+    },
+    {
       "resource": "flags.values",
       "owner": "application"
     },

@@ -1,0 +1,14 @@
+{
+  "name": "@recharge/media-tools-runtime",
+  "version": "0.0.0-n3b",
+  "private": true,
+  "description": "N3b dev-cloud Media tools (ClamAV scanner, sharp processor, database mirror job). No npm dependencies: sharp comes from verified tarballs in the image.",
+  "type": "module",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "build": "node ../functions/node_modules/typescript/bin/tsc -p tsconfig.json",
+    "test": "npm run build --silent && node --test --experimental-test-isolation=none \"build/media-tools-runtime/test/*.test.js\""
+  }
+}

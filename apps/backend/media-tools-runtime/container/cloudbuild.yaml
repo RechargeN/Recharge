@@ -1,0 +1,16 @@
+# N3b: builds the one media-tools image from the staged context and pushes it to
+# the Terraform-owned Artifact Registry repository `media-tools` (no cleanup
+# policy, D-07). Run by the owner script with the dedicated build service account,
+# region europe-west1 and an explicit staging bucket; never `gcloud run deploy --source`.
+steps:
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args: ['build', '--network=cloudbuild', '-t', '${_IMAGE}:${_TAG}', '.']
+images: ['${_IMAGE}:${_TAG}']
+substitutions:
+  _IMAGE: europe-west1-docker.pkg.dev/recharge-dev-n2a01/media-tools/media-tools
+  _TAG: unset
+options:
+  logging: CLOUD_LOGGING_ONLY
+  substitutionOption: MUST_MATCH
+timeout: 1800s

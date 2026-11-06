@@ -53,3 +53,34 @@ variable "n2c_authorization_record_sha256" {
   type    = string
   default = ""
 }
+
+# ---- N3b (dev Media tools). All default to "absent"; presence needs the N3b record.
+variable "n3b_enabled" {
+  description = "Desired presence of N3b Media tools infrastructure. Not execution authority."
+  type        = bool
+  default     = false
+}
+
+variable "n3b_authorization_record_path" {
+  description = "Private owner-issued N3b plan record. Never stored in Git."
+  type        = string
+  default     = ""
+}
+
+variable "n3b_authorization_record_sha256" {
+  type    = string
+  default = ""
+}
+
+variable "n3b_image_digest" {
+  description = "Empty: phase 1 (no services). Set: exact sha256 digest of the Cloud Build image; must equal the record."
+  type        = string
+  default     = ""
+}
+
+variable "n3b_operator_email" {
+  description = "Owner account that may invoke the two services for the operator smoke (phase 2)."
+  type        = string
+  default     = ""
+  sensitive   = true
+}

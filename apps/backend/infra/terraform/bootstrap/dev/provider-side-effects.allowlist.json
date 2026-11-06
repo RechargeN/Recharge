@@ -152,5 +152,28 @@
         "action": "removed 2026-11-06T08:24Z with owner approval (App Engine default SA, unused by gen2 functions)"
       }
     ]
+  },
+  "n3b": {
+    "status": "expected before the N3b apply; replace with observed facts after each phase",
+    "scope": "N3b dev Media tools: Terraform phases 1-2, Cloud Build of the media-tools image, mirror job runs",
+    "explicitManagedApis": [
+      "cloudscheduler.googleapis.com"
+    ],
+    "expectedGoogleSystemRoles": [
+      {
+        "role": "roles/cloudscheduler.serviceAgent",
+        "member": "service-420479958348@gcp-sa-cloudscheduler"
+      }
+    ],
+    "expectedAutomaticEffects": [
+      "Cloud Run service agent pulls the image from the media-tools repository (same project, existing roles/run.serviceAgent)",
+      "Cloud Build runs regionally in europe-west1 as media-tools-build; source staged only in recharge-dev-n2a01-media-tools-build"
+    ],
+    "hardStops": [
+      "roles/editor or roles/viewer granted to any new account (remove only with owner approval, as in N2c)",
+      "a recharge-dev-n2a01_cloudbuild bucket or cloud-run-source-deploy repository appearing",
+      "allUsers or allAuthenticatedUsers on a service, job, bucket or repository",
+      "min instances above 0 or a cleanup/lifecycle rule"
+    ]
   }
 }

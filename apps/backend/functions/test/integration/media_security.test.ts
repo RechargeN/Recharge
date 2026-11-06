@@ -430,6 +430,10 @@ void test('Media stays framework-neutral, offline and free of delivery or cloud 
   // D1: only the local tools client may open a loopback HTTP connection.
   const localToolsClient = 'infrastructure/local_tools_client.ts';
   const withoutHttp = /from ['"]node:(https|net|fs|child_process)['"]/u;
+  // N3b: the dev-cloud tools client speaks HTTPS to the two private Cloud Run
+  // services and HTTP to the metadata server for ID tokens; nothing else.
+  const cloudToolsClient = 'infrastructure/cloud_tools_client.ts';
+  const withoutSockets = /from ['"]node:(net|fs|child_process)['"]/u;
   // N3a: the dev cloud adapter streams bounded, generation-pinned reads; signed
   // URLs and delivery stay forbidden for it as for every other Media file.
   const devCloudStore = 'infrastructure/dev_cloud_object_store.ts';
@@ -444,9 +448,11 @@ void test('Media stays framework-neutral, offline and free of delivery or cloud 
       .map((pattern) =>
         relative === localToolsClient && pattern === forbidden[6]
           ? withoutHttp
-          : relative === devCloudStore && pattern === forbidden[7]
-            ? withoutDelivery
-            : pattern,
+          : relative === cloudToolsClient && pattern === forbidden[6]
+            ? withoutSockets
+            : relative === devCloudStore && pattern === forbidden[7]
+              ? withoutDelivery
+              : pattern,
       );
   for (const file of sourceFiles(mediaDir))
     for (const pattern of patternsFor(path.relative(mediaDir, file).replaceAll('\\', '/')))
@@ -469,6 +475,25 @@ void test('Media stays framework-neutral, offline and free of delivery or cloud 
   ])
     assert.ok(
       patternsFor(localToolsClient).some((pattern) => pattern.test(other)),
+      other,
+    );
+  const https = "import { request as httpsRequest } from 'node:https';";
+  assert.equal(
+    patternsFor(cloudToolsClient).some((pattern) => pattern.test(https)),
+    false,
+  );
+  assert.ok(patternsFor(localToolsClient).some((pattern) => pattern.test(https)));
+  for (const other of [
+    "from 'node:net'",
+    "from 'node:fs'",
+    "from 'node:child_process'",
+    'process.env',
+    'fetch(url)',
+    'getSignedUrl()',
+    "from 'firebase-admin/storage'",
+  ])
+    assert.ok(
+      patternsFor(cloudToolsClient).some((pattern) => pattern.test(other)),
       other,
     );
   const foreign = "import { getFirestore } from 'firebase-admin/firestore';";
@@ -563,6 +588,8 @@ void test('adapters: the fakes are labelled FAKE and the D1 local tools modules 
   const names = readdirSync(infrastructure).sort();
   assert.deepEqual(names, [
     'clamd_protocol.ts',
+    // N3b: dev-cloud scanner/processor clients (private Cloud Run, fail-closed).
+    'cloud_tools_client.ts',
     // N3a: dev Cloud Storage adapter (explicit dev-cloud mode, no scanner/processor/push).
     'dev_cloud_object_store.ts',
     'emulator_media_composition.ts',
