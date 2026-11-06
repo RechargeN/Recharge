@@ -32,10 +32,11 @@
 1. Окно выбора аккаунта (`inactive`) сбрасывало только что созданную сессию — `26cc169`.
 2. Холодный старт без сети (после Doze) стирал сессию и SDK-пользователя; снимок прав ~1 ч истекал без тихого обновления — `a25e532`, `7055882`: стирание только на явный отказ, тихое обновление до истечения, автоповтор 2/5/15/30/60 с, вход сохраняется в фоне.
 3. Отмена окна Google (проверено через adb, без выбора аккаунта): вход не выполняется, ничего не сохраняется; сообщение об ошибке убрано — `c4a5fc4`.
+4. Проверка владельца офлайн: свернуть/развернуть без сети — вход сохранён; холодный старт без сети — сохранён (`network-request-failed` → transient), но нажатие «Google» запускало новый вход и стирало всё — `4a56b92`: кнопка возобновляет сохранённый вход. Вход/выход владельца — работают.
 
 ## Проверки
 
-Flutter: analyze 0, boundary 0 нарушений (69/71), полный набор 2297 passed / 83 skipped. Terraform bootstrap: validate, тесты 12/12, `verify:iac:topology` PASS. Скрипты N2c (checker plan, stage, predeploy): 20/20. Backend unit 843/843, security+contract+identity integration 112/112.
+Flutter: analyze 0, boundary 0 нарушений (69/71), полный набор 2299 passed / 83 skipped. Terraform bootstrap: validate, тесты 12/12, `verify:iac:topology` PASS. Скрипты N2c (checker plan, stage, predeploy): 20/20. Backend unit 843/843, security+contract+identity integration 112/112.
 
 ## Открыто
 
