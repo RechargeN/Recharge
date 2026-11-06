@@ -423,11 +423,17 @@ void test('Media stays framework-neutral, offline and free of delivery or cloud 
     'infrastructure/firestore_media_repository.ts',
     // D2: read-only feed of committed Media facts for the owning domain.
     'infrastructure/media_effect_feed.ts',
+    // N3a: dev Cloud Storage adapter bound to recharge-dev-n2a01-media only.
+    'infrastructure/dev_cloud_object_store.ts',
   ]);
   const environment = new Set([...sdk, 'infrastructure/storage_emulator_object_store.ts']);
   // D1: only the local tools client may open a loopback HTTP connection.
   const localToolsClient = 'infrastructure/local_tools_client.ts';
   const withoutHttp = /from ['"]node:(https|net|fs|child_process)['"]/u;
+  // N3a: the dev cloud adapter streams bounded, generation-pinned reads; signed
+  // URLs and delivery stay forbidden for it as for every other Media file.
+  const devCloudStore = 'infrastructure/dev_cloud_object_store.ts';
+  const withoutDelivery = /getSignedUrl|signedUrl|requestDelivery|getDeliveryHandle/u;
   const patternsFor = (relative: string) =>
     forbidden
       .filter(
@@ -436,7 +442,11 @@ void test('Media stays framework-neutral, offline and free of delivery or cloud 
           !(environment.has(relative) && index === 4),
       )
       .map((pattern) =>
-        relative === localToolsClient && pattern === forbidden[6] ? withoutHttp : pattern,
+        relative === localToolsClient && pattern === forbidden[6]
+          ? withoutHttp
+          : relative === devCloudStore && pattern === forbidden[7]
+            ? withoutDelivery
+            : pattern,
       );
   for (const file of sourceFiles(mediaDir))
     for (const pattern of patternsFor(path.relative(mediaDir, file).replaceAll('\\', '/')))
@@ -553,6 +563,8 @@ void test('adapters: the fakes are labelled FAKE and the D1 local tools modules 
   const names = readdirSync(infrastructure).sort();
   assert.deepEqual(names, [
     'clamd_protocol.ts',
+    // N3a: dev Cloud Storage adapter (explicit dev-cloud mode, no scanner/processor/push).
+    'dev_cloud_object_store.ts',
     'emulator_media_composition.ts',
     'fake_object_store.ts',
     'fake_processor.ts',
