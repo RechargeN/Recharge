@@ -40,4 +40,4 @@ Flutter: analyze 0, boundary 0 нарушений (69/71), полный набо
 
 ## Открыто (отдельные gate)
 
-Play Integrity; iOS; реализация ADR 0023; N3a (dev Storage adapter) и N3b (scanner/processor) — заблокированы до N2c Done. Guard квитанции бюджета N2b истёк 2026-11-06 12:11 UTC: следующий Terraform plan требует новой проверки доставки бюджета.
+Play Integrity; iOS; реализация ADR 0023; N3a (dev Storage adapter) — разблокирован этим Done, исполнение по своему плану и разрешению; N3b (scanner/processor) — после N3a Done. Guard квитанции бюджета N2b истёк 2026-11-06 12:11 UTC: следующий Terraform plan требует новой проверки доставки бюджета.
