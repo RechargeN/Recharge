@@ -33,6 +33,9 @@ class AuthController extends ChangeNotifier {
   /// kept, no authority is granted, and the controller retries by itself.
   static const String offlineMessage = 'NETWORK_UNAVAILABLE';
 
+  /// The user closed the provider picker; shown as no error at all.
+  static const String cancelledCode = 'auth_cancelled';
+
   /// Backoff of automatic re-validation while offline.
   static const List<Duration> offlineRetryDelays = <Duration>[
     Duration(seconds: 2),
@@ -276,10 +279,12 @@ class AuthController extends ChangeNotifier {
       }
       if (generation == _generation) {
         _setState(
-          const AuthState.guest().copyWith(
-            errorCode: error.code,
-            message: error.code,
-          ),
+          error.code == cancelledCode
+              ? const AuthState.guest()
+              : const AuthState.guest().copyWith(
+                  errorCode: error.code,
+                  message: error.code,
+                ),
         );
       }
       return false;

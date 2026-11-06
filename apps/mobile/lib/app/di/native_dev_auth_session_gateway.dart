@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:uuid/uuid.dart';
 import '../../features/booking/data/booking_dev_android_identity.dart';
 import '../../features/booking/data/booking_functions_transport.dart';
@@ -29,8 +30,22 @@ final class NativeDevAuthSessionGateway implements DevAuthSessionGateway {
   final Future<void> Function() revokeCurrentSession;
   final DateTime Function() _now;
 
+  /// The user closed the Google account picker: nothing failed.
+  static const cancelledCode = 'auth_cancelled';
+
   @override
   Future<ServerAuthContext> signInWithGoogle() async {
+    try {
+      return await _signInWithGoogle();
+    } on GoogleSignInException catch (error) {
+      if (error.code == GoogleSignInExceptionCode.canceled) {
+        throw const AuthException(code: cancelledCode, message: cancelledCode);
+      }
+      rethrow;
+    }
+  }
+
+  Future<ServerAuthContext> _signInWithGoogle() async {
     ServerAuthContext? result;
     final installation = await installations.current();
     await coordinator.signInWithGoogle(

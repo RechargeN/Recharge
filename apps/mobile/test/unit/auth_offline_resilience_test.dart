@@ -54,9 +54,15 @@ class _ScriptedRepository implements FederatedAuthRepository {
     return _result(clock(), step as Duration);
   }
 
+  bool cancelSignIn = false;
+
   @override
-  Future<AuthResultEntity> signInWithGoogle() async =>
-      _result(clock(), const Duration(hours: 1));
+  Future<AuthResultEntity> signInWithGoogle() async {
+    if (cancelSignIn) {
+      throw const AuthException(code: 'auth_cancelled', message: '');
+    }
+    return _result(clock(), const Duration(hours: 1));
+  }
 
   @override
   Future<AuthUserEntity?> getCurrentUser() async => null;
@@ -199,5 +205,15 @@ void main() {
       expect(repo.restoreCalls, calls);
       controller.dispose();
     });
+  });
+
+  test('closing the Google picker returns to guest without an error', () async {
+    final repo = _ScriptedRepository(DateTime.now)..cancelSignIn = true;
+    final controller = _controller(repo);
+    expect(await controller.signInWithGoogle(), isFalse);
+    expect(controller.state.isAuthenticated, isFalse);
+    expect(controller.state.message, isNull);
+    expect(controller.state.errorCode, isNull);
+    controller.dispose();
   });
 }
