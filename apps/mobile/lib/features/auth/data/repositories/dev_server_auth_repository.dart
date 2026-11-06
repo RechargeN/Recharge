@@ -14,6 +14,9 @@ abstract interface class DevAuthSessionGateway {
 }
 
 /// No demo authority, no persisted permission cache, no fabricated bearer tokens.
+/// Auth code for transient (offline/overloaded) outcomes: credentials stay.
+const String offlineAuthErrorCode = 'NETWORK_UNAVAILABLE';
+
 final class DevServerAuthRepository implements FederatedAuthRepository {
   DevServerAuthRepository({required this.gateway, DateTime Function()? now})
     : _now = now ?? (() => DateTime.now().toUtc());
@@ -90,10 +93,14 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
           'recharge-auth: dev operation failed type=${error.runtimeType} $code',
         );
       }
-      try {
-        await gateway.clearLocal();
-      } catch (_) {
-        /* Never grant authority on cleanup failure. */
+      final offline =
+          error is AuthException && error.code == offlineAuthErrorCode;
+      if (!offline) {
+        try {
+          await gateway.clearLocal();
+        } catch (_) {
+          /* Never grant authority on cleanup failure. */
+        }
       }
       if (error is AuthException) {
         Error.throwWithStackTrace(error, stack);

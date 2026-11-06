@@ -1,6 +1,8 @@
 import 'package:uuid/uuid.dart';
 import '../../features/booking/data/booking_dev_android_identity.dart';
 import '../../features/booking/data/booking_functions_transport.dart';
+import '../../features/booking/data/booking_identity_failure.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/data/models/server_auth_context.dart';
 import '../../features/auth/data/repositories/dev_server_auth_repository.dart';
 
@@ -45,8 +47,24 @@ final class NativeDevAuthSessionGateway implements DevAuthSessionGateway {
     return result!;
   }
 
+  /// Offline or overloaded: keep credentials, grant nothing, let Auth retry.
+  static const offlineCode = 'NETWORK_UNAVAILABLE';
+
+  Future<T> _offlineAware<T>(Future<T> Function() operation) async {
+    try {
+      return await operation();
+    } catch (error, stack) {
+      if (isTransientIdentityFailure(error)) {
+        throw const AuthException(code: offlineCode, message: offlineCode);
+      }
+      Error.throwWithStackTrace(error, stack);
+    }
+  }
+
   @override
-  Future<ServerAuthContext?> refresh() async {
+  Future<ServerAuthContext?> refresh() => _offlineAware(_refresh);
+
+  Future<ServerAuthContext?> _refresh() async {
     if (await store.read() == null) return null;
     ServerAuthContext? result;
     final installation = await installations.current();
@@ -67,7 +85,9 @@ final class NativeDevAuthSessionGateway implements DevAuthSessionGateway {
   }
 
   @override
-  Future<ServerAuthContext?> current() async {
+  Future<ServerAuthContext?> current() => _offlineAware(_current);
+
+  Future<ServerAuthContext?> _current() async {
     if (await store.read() == null ||
         await coordinator.identity.currentIdToken() == null) {
       return null;

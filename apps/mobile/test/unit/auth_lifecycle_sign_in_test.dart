@@ -120,7 +120,7 @@ void main() {
   );
 
   test(
-    'after sign-in, real backgrounding still suspends and revalidates',
+    'after sign-in, backgrounding keeps the sign-in and revalidates on resume',
     () async {
       final repo = _HeldFederatedRepository();
       final controller = _controller(repo);
@@ -128,7 +128,7 @@ void main() {
       repo.signInGate.complete(_serverResult());
       await signIn;
       controller.suspendForBackground();
-      expect(controller.state.isAuthenticated, isFalse);
+      expect(controller.state.isAuthenticated, isTrue);
       await controller.restoreAfterBackground();
       expect(repo.restoreCalls, 1);
       expect(controller.state.isAuthenticated, isTrue);
@@ -160,7 +160,7 @@ void main() {
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      expect(controller.state.isAuthenticated, isFalse);
+      expect(controller.state.isAuthenticated, isTrue);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);

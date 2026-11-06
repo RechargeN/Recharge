@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'booking_functions_transport.dart';
+import 'booking_identity_failure.dart';
 
 /// Provider credentials only; never supplies Recharge roles or Session authority.
 abstract interface class DevGoogleAuthenticationDriver {
@@ -252,10 +253,12 @@ final class DevAndroidIdentitySessionCoordinator {
         onAuthContext: onAuthContext,
       );
     } catch (error, stack) {
-      try {
-        await identity.signOutLocal();
-      } catch (_) {
-        /* Access is closed before SDK cleanup. */
+      if (!isTransientIdentityFailure(error)) {
+        try {
+          await identity.signOutLocal();
+        } catch (_) {
+          /* Access is closed before SDK cleanup. */
+        }
       }
       Error.throwWithStackTrace(error, stack);
     } finally {

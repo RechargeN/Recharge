@@ -38,6 +38,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isSubmitting = false;
+  bool _navigated = false;
   String? _inlineError;
 
   @override
@@ -66,6 +67,15 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     final authController = ref.watch(authControllerProvider);
     final state = authController.state;
     final AppLocalizations l10n = context.l10n;
+    // Sign-in restored by itself (network came back): continue like a tap.
+    if (authController.supportsGoogleSignIn &&
+        state.isAuthenticated &&
+        !_isSubmitting &&
+        !_navigated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_navigated) _navigateAfterSignIn();
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.commonSignIn)),
@@ -236,6 +246,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   }
 
   void _navigateAfterSignIn() {
+    if (_navigated) return;
+    _navigated = true;
     final normalizedOrigin = _normalizeOriginRoute(widget.originRoute);
     final authController = ref.read(authControllerProvider);
     switch (authController.pendingAction) {

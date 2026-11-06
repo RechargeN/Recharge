@@ -288,6 +288,39 @@ void main() {
     );
   }
 
+  test('offline cold restore keeps the SDK user and stored Session', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    auth.currentUser = _User();
+    await sessions.saveServerIssued(
+      BookingIdentitySessionContext(
+        sessionId: 'old-session',
+        sessionHandle: 'A' * 43,
+        installationId: 'test-installation',
+      ),
+    );
+    final client = FunctionsIdentitySessionClient(
+      endpoint: BookingBackendEndpoint.devIdentity(
+        Uri.parse('https://europe-west1-recharge-dev-n2a01.cloudfunctions.net'),
+      ),
+      client: MockClient((_) async => throw http.ClientException('offline')),
+      tokens: identity,
+      installations: _Installations(),
+      sessions: sessions,
+      appCheck: DevAndroidAppCheckTokens(_AppCheck()),
+      identityProvider: 'google',
+    );
+    final coordinator = DevAndroidIdentitySessionCoordinator(
+      identity: identity,
+      sessions: client,
+    );
+    await expectLater(
+      coordinator.restoreSession(requestId: 'restore'),
+      throwsA(isA<BookingCallableFailure>()),
+    );
+    expect(auth.currentUser, isNotNull);
+    expect(await sessions.read(), isNotNull);
+  });
+
   test('coordinator rejects a different Firebase token provider', () {
     final client = FunctionsIdentitySessionClient(
       endpoint: BookingBackendEndpoint.devIdentity(

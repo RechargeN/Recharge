@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 import 'booking_callable_adapter.dart';
+import 'booking_identity_failure.dart';
 
 final class BookingIdentitySessionContext {
   BookingIdentitySessionContext({
@@ -249,7 +250,9 @@ final class FunctionsIdentitySessionClient {
       );
     } catch (error) {
       if (_endpoint.binding == BookingBackendBinding.devIdentity) {
-        await _sessions.clear();
+        // Offline/Doze/overload decides nothing about the account: keep the
+        // handle and retry later; any server refusal still clears it.
+        if (!isTransientIdentityFailure(error)) await _sessions.clear();
         rethrow;
       }
       if (error is! BookingCallableFailure) rethrow;
@@ -577,7 +580,13 @@ Future<Map<String, Object?>> _invokeCallable({
   } on SocketException {
     throw BookingCallableFailure(code: 'unavailable', dispatched: dispatched);
   } on http.ClientException {
-    throw BookingCallableFailure(code: 'unknown', dispatched: dispatched);
+    // package:http wraps Android socket/DNS failures in ClientException.
+    throw BookingCallableFailure(
+      code: endpoint.binding == BookingBackendBinding.devIdentity
+          ? 'unavailable'
+          : 'unknown',
+      dispatched: dispatched,
+    );
   }
 
   final bytes = <int>[];

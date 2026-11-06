@@ -29,6 +29,23 @@ class AuthController extends ChangeNotifier {
   /// L4: stable message code of a failed session restore; the UI localizes it.
   static const String sessionExpiredMessage = 'session_expired';
 
+  /// Transient outcome (offline, Doze, overloaded backend): credentials are
+  /// kept, no authority is granted, and the controller retries by itself.
+  static const String offlineMessage = 'NETWORK_UNAVAILABLE';
+
+  /// Backoff of automatic re-validation while offline.
+  static const List<Duration> offlineRetryDelays = <Duration>[
+    Duration(seconds: 2),
+    Duration(seconds: 5),
+    Duration(seconds: 15),
+    Duration(seconds: 30),
+    Duration(seconds: 60),
+  ];
+
+  /// Silent refresh happens this long before the server snapshot expires
+  /// (at most a fifth of its lifetime), so an active user never sees expiry.
+  static const Duration silentRefreshLead = Duration(minutes: 5);
+
   AuthController({
     required SignInUseCase signInUseCase,
     required RestoreSessionUseCase restoreSessionUseCase,
@@ -54,6 +71,9 @@ class AuthController extends ChangeNotifier {
   final SignInWithGoogleUseCase? _signInWithGoogleUseCase;
   bool get supportsGoogleSignIn => _signInWithGoogleUseCase != null;
   Timer? _serverExpiry;
+  Timer? _silentRefresh;
+  Timer? _offlineRetry;
+  int _offlineAttempt = 0;
   StreamSubscription<void>? _sessionSubscription;
   int _generation = 0;
   bool _federatedSignInInProgress = false;
@@ -208,15 +228,18 @@ class AuthController extends ChangeNotifier {
     if (!supportsGoogleSignIn) return;
     _generation++;
     _serverExpiry?.cancel();
+    _cancelBackgroundRevalidation();
     clearPendingTarget();
     _setState(const AuthState.guest());
   }
 
-  /// App moved to the background (not a transient system overlay). Never
-  /// invalidates a sign-in the user just started.
+  /// App moved to the background (not a transient system overlay). Like
+  /// Instagram-class apps the user stays signed in: UI authority still ends at
+  /// the server snapshot expiry, every server call is still checked, and the
+  /// return to the foreground revalidates. Pending retries wait for resume.
   void suspendForBackground() {
     if (_federatedSignInInProgress) return;
-    suspendServerAuthority();
+    _offlineRetry?.cancel();
   }
 
   /// Returning from the background revalidates with the server; skipped while
@@ -306,10 +329,14 @@ class AuthController extends ChangeNotifier {
         'source_screen': 'splash',
       },
     );
-    _setState(_state.copyWith(status: AuthStatus.loading, clearError: true));
+    final wasAuthenticated = _state.isAuthenticated;
+    if (!wasAuthenticated) {
+      _setState(_state.copyWith(status: AuthStatus.loading, clearError: true));
+    }
     try {
       final result = await _restoreSessionUseCase();
       if (supportsGoogleSignIn && generation != _generation) return;
+      _cancelOfflineRetry(resetBackoff: true);
       if (result == null) {
         _setState(const AuthState.guest());
         return;
@@ -327,6 +354,21 @@ class AuthController extends ChangeNotifier {
         debugPrint('recharge-auth: restore failed code=${e.code}');
       }
       if (supportsGoogleSignIn && generation != _generation) return;
+      if (supportsGoogleSignIn && e.code == offlineMessage) {
+        // Keep the current UI authority while its snapshot is still valid;
+        // otherwise show "no connection" (not "session expired") and retry.
+        if (!wasAuthenticated) {
+          _setState(
+            const AuthState.guest().copyWith(
+              errorCode: offlineMessage,
+              message: offlineMessage,
+            ),
+          );
+        }
+        _scheduleOfflineRetry();
+        return;
+      }
+      _cancelOfflineRetry(resetBackoff: true);
       _setState(
         const AuthState.guest().copyWith(
           errorCode: e.code,
@@ -352,6 +394,7 @@ class AuthController extends ChangeNotifier {
     if (supportsGoogleSignIn) {
       _generation++;
       _serverExpiry?.cancel();
+      _cancelBackgroundRevalidation();
       _setState(const AuthState.guest());
     }
     _analyticsService.track(
@@ -398,10 +441,54 @@ class AuthController extends ChangeNotifier {
       _serverExpiry = Timer(remaining, () {
         _generation++;
         clearPendingTarget();
-        _setState(const AuthState.guest());
+        _silentRefresh?.cancel();
+        _setState(
+          const AuthState.guest().copyWith(
+            errorCode: offlineMessage,
+            message: offlineMessage,
+          ),
+        );
+        // The snapshot ran out without a successful refresh (offline): the
+        // Session itself lives on the server, so try again automatically.
+        if (supportsGoogleSignIn) _scheduleOfflineRetry();
       });
+      if (supportsGoogleSignIn) {
+        final fifth = Duration(microseconds: remaining.inMicroseconds ~/ 5);
+        final lead = fifth < silentRefreshLead ? fifth : silentRefreshLead;
+        _silentRefresh?.cancel();
+        _silentRefresh = Timer(remaining - lead, () {
+          if (_federatedSignInInProgress) return;
+          unawaited(restoreSession().catchError((Object _) {}));
+        });
+      }
     }
     _setState(AuthState(status: AuthStatus.authenticated, user: result.user));
+  }
+
+  void _scheduleOfflineRetry() {
+    _offlineRetry?.cancel();
+    final delays = offlineRetryDelays;
+    final delay =
+        delays[_offlineAttempt < delays.length
+            ? _offlineAttempt
+            : delays.length - 1];
+    _offlineAttempt++;
+    _offlineRetry = Timer(delay, () {
+      if (_federatedSignInInProgress) return;
+      unawaited(restoreSession().catchError((Object _) {}));
+    });
+  }
+
+  void _cancelOfflineRetry({bool resetBackoff = false}) {
+    _offlineRetry?.cancel();
+    _offlineRetry = null;
+    if (resetBackoff) _offlineAttempt = 0;
+  }
+
+  void _cancelBackgroundRevalidation() {
+    _silentRefresh?.cancel();
+    _silentRefresh = null;
+    _cancelOfflineRetry(resetBackoff: true);
   }
 
   void _setState(AuthState state) {
@@ -418,6 +505,7 @@ class AuthController extends ChangeNotifier {
   @override
   void dispose() {
     _serverExpiry?.cancel();
+    _cancelBackgroundRevalidation();
     unawaited(_sessionSubscription?.cancel());
     super.dispose();
   }

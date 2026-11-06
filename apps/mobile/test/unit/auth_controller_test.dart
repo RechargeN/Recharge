@@ -51,6 +51,9 @@ void main() {
       clock.flushMicrotasks();
       expect(controller.state.isAuthenticated, isTrue);
       expect(controller.state.user!.role, 'user');
+      // The server no longer has this Session: silent refresh and the
+      // automatic retries after expiry find nothing to restore.
+      repo._cachedResult = null;
       clock.elapse(const Duration(hours: 2));
       expect(controller.state.isAuthenticated, isFalse);
       expect(controller.state.user, isNull);
