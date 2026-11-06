@@ -30,12 +30,16 @@
 4. **Четыре SA** вместо трёх (scanner и processor раздельно) — меньше прав у процесса, который разбирает недоверенные изображения.
 5. **Один секрет на оба сервиса**: второй фактор к IAM; у processor нет invoker на scanner.
 
+## Найдено при первом plan (2026-11-07)
+
+В облаке Firebase Auth были включены вход по email (ссылкой) и анонимный вход — вручную, вне Terraform; утверждённое состояние N2c: только Google. Код приложения их не использует. Решение владельца 2026-11-07: вернуть в выключенное состояние. `check-n3b-plan` разрешает ровно это одно обновление существующего ресурса и только с точным diff (три флага, только в сторону «выключено»); любое другое обновление по-прежнему запрещено.
+
 ## Проверки (локально)
 
 | Гейт | Результат |
 |---|---|
 | media-tools-runtime: typecheck + tests (host scanner/processor, самоперезапуск без базы, зеркало, fetch) | 12/12 |
-| scripts: `check-n3b-plan` 5/5, `package-media-tools-runtime` 4/4 | pass |
+| scripts: `check-n3b-plan` 7/7, `package-media-tools-runtime` 4/4 | pass |
 | Terraform `fmt`/`validate`/`test` (bootstrap 6 + n2c 6 + **n3b 10**) | 22/22 |
 | `verify:iac:topology --require-terraform`, `verify:execution-manifest` | pass |
 | Functions lint, typecheck, format, `verify:cloud-context` | pass |

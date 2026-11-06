@@ -437,3 +437,68 @@ test("inputs: digest, project and inventory must match the review", () => {
     /recharge-dev-n2a01 only/u,
   );
 });
+
+const identityUpdate = (afterSignIn, extra = {}) => ({
+  address: "google_identity_platform_config.n2c[0]",
+  type: "google_identity_platform_config",
+  change: {
+    actions: ["update"],
+    before: {
+      project,
+      authorized_domains: ["a"],
+      sign_in: [
+        {
+          email: [{ enabled: true, password_required: false }],
+          anonymous: [{ enabled: true }],
+          phone_number: [{ enabled: false }],
+        },
+      ],
+    },
+    after: {
+      project,
+      authorized_domains: ["a"],
+      sign_in: [afterSignIn],
+      ...extra,
+    },
+    after_unknown: {},
+  },
+});
+const disabled = {
+  email: [{ enabled: false, password_required: true }],
+  anonymous: [{ enabled: false }],
+  phone_number: [{ enabled: false }],
+};
+
+test("the one reviewed update: console-enabled email/anonymous sign-in goes back to disabled", () => {
+  const changes = [...phase1(), identityUpdate(disabled)];
+  const p = plan(changes);
+  assert.deepEqual(
+    checkN3bPlan(p, {
+      ...expectedFor(p),
+      allowedUpdates: ["google_identity_platform_config.n2c[0]"],
+    }),
+    [],
+  );
+  // Not listed in the review: refused.
+  assert.match(
+    checkN3bPlan(p, expectedFor(p)).join(),
+    /forbidden action update/u,
+  );
+});
+
+test("the reviewed update cannot enable anything or touch other fields", () => {
+  for (const change of [
+    identityUpdate({ ...disabled, anonymous: [{ enabled: true }] }),
+    identityUpdate({ ...disabled, phone_number: [{ enabled: true }] }),
+    identityUpdate(disabled, { authorized_domains: ["a", "evil.example"] }),
+  ]) {
+    const p = plan([...phase1(), change]);
+    assert.match(
+      checkN3bPlan(p, {
+        ...expectedFor(p),
+        allowedUpdates: ["google_identity_platform_config.n2c[0]"],
+      }).join(),
+      /forbidden action update/u,
+    );
+  }
+});

@@ -78,6 +78,69 @@ const services = {
 };
 const publicMembers = /^(allUsers|allAuthenticatedUsers)$/u;
 
+// The one existing-resource update N3b may carry (owner decision 2026-11-07):
+// Firebase Auth email/anonymous sign-in, enabled by hand in the console, goes
+// back to the reviewed N2c state (disabled). Nothing else may differ.
+const reviewedUpdates = {
+  "google_identity_platform_config.n2c[0]": {
+    paths: new Set([
+      "sign_in[0].email[0].enabled",
+      "sign_in[0].email[0].password_required",
+      "sign_in[0].anonymous[0].enabled",
+    ]),
+    check: (after) => {
+      const signIn = after.sign_in?.[0] ?? {};
+      return (
+        signIn.email?.[0]?.enabled === false &&
+        signIn.anonymous?.[0]?.enabled === false &&
+        signIn.phone_number?.[0]?.enabled === false
+      );
+    },
+  },
+};
+
+function differingPaths(before, after, prefix = "", out = []) {
+  if (
+    Array.isArray(before) &&
+    Array.isArray(after) &&
+    before.length === after.length
+  ) {
+    before.forEach((item, index) =>
+      differingPaths(item, after[index], `${prefix}[${index}]`, out),
+    );
+  } else if (
+    before !== null &&
+    after !== null &&
+    typeof before === "object" &&
+    typeof after === "object" &&
+    !Array.isArray(before) &&
+    !Array.isArray(after)
+  ) {
+    for (const key of new Set([...Object.keys(before), ...Object.keys(after)]))
+      differingPaths(
+        before[key],
+        after[key],
+        prefix ? `${prefix}.${key}` : key,
+        out,
+      );
+  } else if (JSON.stringify(before) !== JSON.stringify(after)) out.push(prefix);
+  return out;
+}
+
+/** An update is allowed only when the review lists it and its diff is exactly the reviewed one. */
+function reviewedUpdate(c, expected) {
+  const rule = reviewedUpdates[c.address];
+  if (!rule || !(expected.allowedUpdates ?? []).includes(c.address))
+    return false;
+  if (Object.values(c.change?.after_unknown ?? {}).some(Boolean)) return false;
+  const paths = differingPaths(c.change?.before ?? {}, c.change?.after ?? {});
+  return (
+    paths.length > 0 &&
+    paths.every((item) => rule.paths.has(item)) &&
+    rule.check(c.change.after)
+  );
+}
+
 export function inventoryDigest(plan) {
   const inventory = (plan.resource_changes ?? [])
     .map(({ address, type, change }) => ({
@@ -156,9 +219,14 @@ export function checkN3bPlan(plan, expected) {
   for (const c of plan.resource_changes ?? []) {
     const actions = c.change?.actions ?? [];
     const after = c.change?.after ?? {};
+    const allowedUpdate =
+      actions.length === 1 &&
+      actions[0] === "update" &&
+      reviewedUpdate(c, expected);
     if (
-      actions.length !== 1 ||
-      !["create", "read", "no-op"].includes(actions[0])
+      !allowedUpdate &&
+      (actions.length !== 1 ||
+        !["create", "read", "no-op"].includes(actions[0]))
     )
       errors.push(`forbidden action ${actions.join("+")}: ${c.address}`);
     if (neverTypes.test(c.type))
