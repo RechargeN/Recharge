@@ -7,7 +7,7 @@ import { pathToFileURL } from "node:url";
 // must be a reviewed N2c address; Functions stay with the Firebase CLI; secret
 // values, debug tokens and OAuth client secrets never appear.
 const n2cAddress =
-  /^(terraform_data\.n2c_guard|google_project_service\.n2c|google_identity_platform_config\.n2c|google_apikeys_key\.n2c_android|google_firebase_android_app\.n2c_dev|module\.n2c_secret\.google_secret_manager_secret\.reference|google_project_iam_custom_role\.n2c_(auth_verify|session_data)|google_project_iam_member\.n2c_(runtime_auth|runtime_database|build_logging|build_source|build_artifacts)|google_secret_manager_secret_iam_member\.n2c_runtime_ingress)(\[.*\])?$/u;
+  /^(terraform_data\.n2c_guard|google_project_service\.n2c|google_identity_platform_config\.n2c|google_apikeys_key\.n2c_android|google_firebase_android_app\.n2c_dev|module\.n2c_secret\.google_secret_manager_secret\.reference|google_project_iam_custom_role\.n2c_(auth_verify|session_data)|google_project_iam_member\.n2c_(runtime_auth|runtime_database|build_logging|build_source)|google_artifact_registry_repository_iam_member\.n2c_build_artifacts|google_secret_manager_secret_iam_member\.n2c_runtime_ingress)(\[.*\])?$/u;
 const neverTypes =
   /secret_manager_secret_version|service_account_key|app_check_debug_token|default_supported_idp_config|inbound_saml_config|oauth_idp_config|cloudfunctions2?_function|cloud_run_v2_service|_iam_policy$|_iam_binding$|iam_audit_config|billing_account_iam/u;
 const runtimeMember =
@@ -29,11 +29,9 @@ const fixed = {
     condition:
       'resource.name.startsWith("projects/_/buckets/gcf-v2-sources-420479958348-europe-west1")',
   },
-  "google_project_iam_member.n2c_build_artifacts[0]": {
+  "google_artifact_registry_repository_iam_member.n2c_build_artifacts[0]": {
     role: "roles/artifactregistry.writer",
     member: buildMember,
-    condition:
-      'resource.name.startsWith("projects/recharge-dev-n2a01/locations/europe-west1/repositories/gcf-artifacts")',
   },
   "google_project_iam_member.n2c_runtime_database[0]": {
     member: runtimeMember,
@@ -70,9 +68,14 @@ export function checkN2cPlan(plan, expected) {
   for (const c of plan.resource_changes ?? []) {
     const actions = c.change?.actions ?? [];
     const after = c.change?.after ?? {};
+    const reviewedDelete =
+      actions.length === 1 &&
+      actions[0] === "delete" &&
+      (expected.allowedDeletes ?? []).includes(c.address);
     if (
-      actions.length !== 1 ||
-      !["create", "read", "no-op"].includes(actions[0])
+      !reviewedDelete &&
+      (actions.length !== 1 ||
+        !["create", "read", "no-op"].includes(actions[0]))
     )
       errors.push(`forbidden action ${actions.join("+")}: ${c.address}`);
     if (actions[0] === "create" && !n2cAddress.test(c.address))
@@ -83,7 +86,9 @@ export function checkN2cPlan(plan, expected) {
     if (actions[0] === "create" && project && project !== expected.projectId)
       errors.push(`foreign target: ${c.address}`);
     const rule = fixed[c.address];
-    if (rule) {
+    if (reviewedDelete) {
+      // Exact owner-reviewed removal; nothing else about it is checked.
+    } else if (rule) {
       if (
         (rule.role && after.role !== rule.role) ||
         after.member !== rule.member ||

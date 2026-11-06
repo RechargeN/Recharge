@@ -34,7 +34,7 @@ run "n2c_absent_by_default" {
     condition = (length(terraform_data.n2c_guard) + length(google_project_service.n2c) + length(google_identity_platform_config.n2c)
       + length(google_apikeys_key.n2c_android) + length(google_firebase_android_app.n2c_dev) + length(google_project_iam_member.n2c_runtime_auth)
       + length(google_project_iam_member.n2c_runtime_database) + length(google_project_iam_member.n2c_build_logging)
-    + length(google_project_iam_member.n2c_build_source) + length(google_project_iam_member.n2c_build_artifacts)) == 0
+    + length(google_project_iam_member.n2c_build_source) + length(google_artifact_registry_repository_iam_member.n2c_build_artifacts)) == 0
     error_message = "N2c must create nothing unless explicitly enabled."
   }
   assert {
@@ -75,9 +75,11 @@ run "n2c_registration_shape" {
     condition = (google_project_iam_member.n2c_build_logging[0].member == "serviceAccount:420479958348-compute@developer.gserviceaccount.com"
       && google_project_iam_member.n2c_build_source[0].role == "roles/storage.objectViewer"
       && google_project_iam_member.n2c_build_source[0].condition[0].expression == "resource.name.startsWith(\"projects/_/buckets/gcf-v2-sources-420479958348-europe-west1\")"
-      && google_project_iam_member.n2c_build_artifacts[0].role == "roles/artifactregistry.writer"
-    && google_project_iam_member.n2c_build_artifacts[0].condition[0].expression == "resource.name.startsWith(\"projects/recharge-dev-n2a01/locations/europe-west1/repositories/gcf-artifacts\")")
-    error_message = "Build account gets only three condition-scoped build roles."
+      && google_artifact_registry_repository_iam_member.n2c_build_artifacts[0].repository == "gcf-artifacts"
+      && google_artifact_registry_repository_iam_member.n2c_build_artifacts[0].location == "europe-west1"
+      && google_artifact_registry_repository_iam_member.n2c_build_artifacts[0].role == "roles/artifactregistry.writer"
+    && google_artifact_registry_repository_iam_member.n2c_build_artifacts[0].member == "serviceAccount:420479958348-compute@developer.gserviceaccount.com")
+    error_message = "Build account gets only three narrow build roles (source bucket condition, gcf-artifacts repository)."
   }
   assert {
     condition     = tolist(module.n2c_secret.secret_ids) == tolist(["DEV_AUTH_INGRESS_HMAC"])

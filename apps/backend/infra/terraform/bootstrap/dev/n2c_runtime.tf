@@ -4,7 +4,8 @@
 locals {
   n2c_runtime_member = "serviceAccount:runtime-identity@${local.n2c_project}.iam.gserviceaccount.com"
   # Gen2 builds of a project created after the 2024 Cloud Build change run as the
-  # default compute account. It gets three build roles, scoped by condition; the
+  # default compute account. It gets three narrow build roles (source bucket by condition,
+  # Artifact Registry on the gcf-artifacts repository); the
   # roles/editor it once had stays removed.
   n2c_build_member  = "serviceAccount:${local.n2c_project_number}-compute@developer.gserviceaccount.com"
   n2c_source_bucket = "gcf-v2-sources-${local.n2c_project_number}-${local.n2c_region}"
@@ -90,14 +91,15 @@ resource "google_project_iam_member" "n2c_build_source" {
   }
 }
 
-resource "google_project_iam_member" "n2c_build_artifacts" {
+# Artifact Registry ignored a project-level resource.name condition for Docker token
+# scopes (2026-11-06 build logs: DENIED on gcf-artifacts cache). Grant on the
+# repository itself; the repository is created and cleanup-managed by the Firebase CLI.
+resource "google_artifact_registry_repository_iam_member" "n2c_build_artifacts" {
   count      = local.n2c_on ? 1 : 0
   depends_on = [terraform_data.n2c_guard]
   project    = google_project.dev.project_id
+  location   = local.n2c_region
+  repository = "gcf-artifacts"
   role       = "roles/artifactregistry.writer"
   member     = local.n2c_build_member
-  condition {
-    title      = "gcf_artifacts_only"
-    expression = "resource.name.startsWith(\"projects/${local.n2c_project}/locations/${local.n2c_region}/repositories/gcf-artifacts\")"
-  }
 }

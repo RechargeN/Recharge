@@ -170,3 +170,51 @@ test("IAM drift, dropped conditions, enabled sign-in and wide keys are refused",
     ["reviewed inventory mismatch"],
   );
 });
+
+test("only an exact owner-reviewed delete passes; repository-level AR grant is checked", () => {
+  const oldGrant = change(
+    "google_project_iam_member.n2c_build_artifacts[0]",
+    "google_project_iam_member",
+    { project, role: "roles/artifactregistry.writer", member: build },
+    ["delete"],
+  );
+  const repoGrant = change(
+    "google_artifact_registry_repository_iam_member.n2c_build_artifacts[0]",
+    "google_artifact_registry_repository_iam_member",
+    { project, role: "roles/artifactregistry.writer", member: build },
+  );
+  const p = plan([oldGrant, repoGrant]);
+  assert.notDeepEqual(checkN2cPlan(p, expected(p)), []);
+  assert.deepEqual(
+    checkN2cPlan(p, {
+      ...expected(p),
+      allowedDeletes: ["google_project_iam_member.n2c_build_artifacts[0]"],
+    }),
+    [],
+  );
+  const other = plan([
+    change(
+      "module.firestore.google_firestore_database.default[0]",
+      "google_firestore_database",
+      { project },
+      ["delete"],
+    ),
+  ]);
+  assert.notDeepEqual(
+    checkN2cPlan(other, {
+      ...expected(other),
+      allowedDeletes: ["google_project_iam_member.n2c_build_artifacts[0]"],
+    }),
+    [],
+  );
+  const wide = plan([
+    {
+      ...repoGrant,
+      change: {
+        actions: ["create"],
+        after: { project, role: "roles/artifactregistry.admin", member: build },
+      },
+    },
+  ]);
+  assert.notDeepEqual(checkN2cPlan(wide, expected(wide)), []);
+});
