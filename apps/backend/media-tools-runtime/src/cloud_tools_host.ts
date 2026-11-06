@@ -55,6 +55,12 @@ export interface CloudHostOptions {
   readonly now?: () => Date;
   /** One JSON line per request; never bytes, hashes, tokens or signature names. */
   readonly log?: (line: Record<string, unknown>) => void;
+  /**
+   * Scanner without a reachable clamd (no mirror set at start, clamd died):
+   * after the fail-closed answer the instance leaves, so Cloud Run starts a
+   * fresh one that fetches the newest set. The entry exits the process.
+   */
+  readonly onUnrecoverable?: () => void;
 }
 
 // ---------- admission ----------
@@ -327,6 +333,8 @@ export function startCloudHost(options: CloudHostOptions) {
   let version: { value: ClamdVersion | null; at: number } | null = null;
   let scannerRevision: string | null = null;
   let firstRequest = true;
+  let noDatabase = false;
+  let leaving = false;
 
   const database = async (): Promise<{
     database: ToolsDatabase;
@@ -341,6 +349,7 @@ export function startCloudHost(options: CloudHostOptions) {
         };
       } catch {
         version = null;
+        noDatabase = true;
         return null;
       }
     }
@@ -532,7 +541,12 @@ export function startCloudHost(options: CloudHostOptions) {
           ...facts,
           status: response.statusCode,
           durationMs: Date.now() - started,
+          ...(noDatabase ? { failureClass: facts.failureClass ?? 'db_absent' } : {}),
         });
+        if (noDatabase && !leaving && options.onUnrecoverable !== undefined) {
+          leaving = true;
+          options.onUnrecoverable();
+        }
       });
   });
   server.maxConnections = admissionLimits.maxConnections;
@@ -605,6 +619,12 @@ if (
   const host = startCloudHost({
     ...settings,
     workerModule: path.join(path.dirname(fileURLToPath(import.meta.url)), 'cloud_tools_worker.js'),
+    onUnrecoverable: () => {
+      process.stdout
+        .write(`${JSON.stringify({ kind: 'media-tools-exit', reason: 'clamd_unavailable' })}
+`);
+      setTimeout(() => process.exit(3), 200);
+    },
   });
   // Ready before listening: the Cloud Run TCP startup probe passes only then.
   await host.arm();

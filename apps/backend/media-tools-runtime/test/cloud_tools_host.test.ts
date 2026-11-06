@@ -63,7 +63,7 @@ function fakeClamd(): Promise<{ server: Server; port: number }> {
 
 async function host(
   mode: ToolsMode,
-  options: { clamdPort?: number; now?: Date; jobMs?: number } = {},
+  options: { clamdPort?: number; now?: Date; jobMs?: number; onUnrecoverable?: () => void } = {},
 ) {
   const logs: Record<string, unknown>[] = [];
   const started = startCloudHost({
@@ -77,6 +77,7 @@ async function host(
     now: () => options.now ?? new Date(2026, 10, 7, 9, 0, 0),
     log: (line) => logs.push(line),
     ...(options.jobMs === undefined ? {} : { processorJobMs: options.jobMs }),
+    ...(options.onUnrecoverable === undefined ? {} : { onUnrecoverable: options.onUnrecoverable }),
   });
   await started.listen();
   const address = started.server.address();
@@ -303,5 +304,45 @@ void test('processor: variants pass through; bad profiles refused; a hung job fa
     assert.equal(again.json.result, 'succeeded');
   } finally {
     await service.close();
+  }
+});
+
+void test('scanner without clamd answers fail-closed, then leaves once so Cloud Run restarts it', async () => {
+  let leaves = 0;
+  const service = await host('scanner', { clamdPort: 1, onUnrecoverable: () => (leaves += 1) });
+  await service.arm();
+  try {
+    const bytes = Buffer.from('plain');
+    const health = await call(service.port, 'GET', '/v1/health', undefined, {
+      [toolsTokenHeader]: token,
+    });
+    assert.equal(health.json.state, 'degraded');
+    const scan = await call(service.port, 'POST', '/v1/scan', bytes, authorized(bytes));
+    assert.equal(scan.json.result, 'inconclusive');
+    assert.equal(leaves, 1);
+    assert.ok(service.logs.some((line) => line.failureClass === 'db_absent'));
+  } finally {
+    await service.close();
+  }
+});
+
+void test('a healthy scanner never leaves', async () => {
+  const clamd = await fakeClamd();
+  let leaves = 0;
+  const service = await host('scanner', {
+    clamdPort: clamd.port,
+    onUnrecoverable: () => (leaves += 1),
+  });
+  await service.arm();
+  try {
+    const bytes = Buffer.from('plain');
+    assert.equal(
+      (await call(service.port, 'POST', '/v1/scan', bytes, authorized(bytes))).json.result,
+      'clean',
+    );
+    assert.equal(leaves, 0);
+  } finally {
+    await service.close();
+    clamd.server.close();
   }
 });

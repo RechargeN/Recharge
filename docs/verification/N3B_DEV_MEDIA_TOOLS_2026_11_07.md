@@ -7,7 +7,7 @@
 **Один образ, три роли** (`apps/backend/media-tools-runtime/`):
 
 - `cloud_tools_host.ts` — из D1 stand host: тот же протокол `local_tools_protocol.ts`, `0.0.0.0:$PORT`, режим `scanner` (clamd только на 127.0.0.1) или `processor` (sharp в отдельном worker с жёстким сроком). Нет `/v1/control/*` и `/v1/selftest/*`, нет stand-исключения базы: `clean` только при `OK` на **свежей официальной** базе (≤ 7 сут по `VERSION`). Секрет сервиса — в `x-recharge-tools-token`; `Authorization` занят Google ID token для Cloud Run IAM. Логи — одна JSON-строка на запрос без байтов, hash, токенов и имён сигнатур (`bytesBucket`, `result`, `failureClass`, `dbState`, `coldStart`).
-- `scanner_prepare.ts` — при старте сканера: новейший набор из зеркала, каждый файл сверяется с манифестом набора (размер + SHA-256), затем ожидание clamd. Любой сбой → host стартует без clamd → все scan `inconclusive`.
+- `scanner_prepare.ts` — при старте сканера: новейший набор из зеркала, каждый файл сверяется с манифестом набора (размер + SHA-256), затем ожидание clamd. Любой сбой → host стартует без clamd → ответ `inconclusive`, после чего инстанс завершается, и Cloud Run поднимает новый со свежим набором (нужно, т.к. Cloud Run запускает инстанс при создании сервиса — ещё до первого прогона зеркала).
 - `mirror_store.ts` / `publish_databases.ts` — частное зеркало официальных баз: `cvd/<sha256>.cvd` + `sets/<UTC>.json`, только create-only (`ifGenerationMatch=0`), без перезаписи и удаления (D-07); `.cld`/неполный набор останавливает job.
 - `container/`: `Dockerfile` (Debian bookworm-slim по digest; Node 22.23.2, ClamAV 1.5.4 `.deb` (SHA-256 + GPG Talos `5BADCA26…6771`), sharp и его замыкание по npm SRI — всё из `media-tools.lock.json` и Functions lock; при сборке проверяется отсутствие недостающих библиотек, `clamd 1.5.4` и нативный `sharp-linux-x64`), `start.sh`, `fetch-verify.sh`, `cloudbuild.yaml` (регион, свой SA, `CLOUD_LOGGING_ONLY`).
 - `scripts/package-media-tools-runtime.mjs` — локальный stage контекста сборки (замыкание импортов; Firebase/Firestore/fake/stand запрещены), тег образа = tree digest.
@@ -34,7 +34,7 @@
 
 | Гейт | Результат |
 |---|---|
-| media-tools-runtime: typecheck + tests (host scanner/processor, зеркало, fetch) | 10/10 |
+| media-tools-runtime: typecheck + tests (host scanner/processor, самоперезапуск без базы, зеркало, fetch) | 12/12 |
 | scripts: `check-n3b-plan` 5/5, `package-media-tools-runtime` 4/4 | pass |
 | Terraform `fmt`/`validate`/`test` (bootstrap 6 + n2c 6 + **n3b 10**) | 22/22 |
 | `verify:iac:topology --require-terraform`, `verify:execution-manifest` | pass |
