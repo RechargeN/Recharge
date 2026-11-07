@@ -28,11 +28,27 @@ const queryResultTypes: Readonly<Record<string, MediaResultType>> = Object.freez
   getProcessingReceipt: 'processingReceipt',
 });
 
+/** What the three owner handlers need from a Media composition. */
+export interface MediaHandlerComposition {
+  readonly service: EmulatorMediaComposition['service'];
+  readonly repository: Pick<EmulatorMediaComposition['repository'], 'transact'>;
+  readonly authority: Pick<EmulatorMediaComposition['authority'], 'evaluate'>;
+  readonly objectStore: { put(objectKeyHandle: string, bytes: Buffer): Promise<void> };
+}
+
 /** Server-resolved caller. The Session was already validated by the Booking access authority. */
 export interface MediaCaller {
   readonly actor: MediaActor;
   readonly firestore: Firestore;
+  /**
+   * N3a.2: a ready composition (the dev-cloud one). Absent: the Emulator
+   * composition, exactly as before.
+   */
+  readonly composition?: MediaHandlerComposition;
 }
+
+const compositionFor = (caller: MediaCaller): MediaHandlerComposition =>
+  caller.composition ?? mediaComposition(caller.firestore);
 
 export function mediaComposition(
   firestore: Firestore,
@@ -86,7 +102,7 @@ export async function handleMediaCommand(
     // Delete, detach and system instructions are never a client command here.
     return { schemaVersion: 1, kind: 'rejected', code: 'capability_denied' };
   }
-  const { service } = mediaComposition(caller.firestore);
+  const { service } = compositionFor(caller);
   return toMediaWireResult(resultType, await service.execute(caller.actor, body));
 }
 
@@ -103,7 +119,7 @@ export async function handleMediaQuery(
   if (resultType === undefined) {
     return { schemaVersion: 1, kind: 'rejected', code: 'invalid_contract' };
   }
-  const { service } = mediaComposition(caller.firestore);
+  const { service } = compositionFor(caller);
   return toMediaWireResult(resultType, await service.query(caller.actor, body));
 }
 
@@ -164,7 +180,7 @@ export async function handleMediaBytes(
     record.bytesBase64.length > 2_000_000
   )
     return reject('invalid_contract');
-  const composition = mediaComposition(caller.firestore);
+  const composition = compositionFor(caller);
   const now = parseUtcInstant(systemServerClock.now().toISOString());
   const decision = await composition.repository.transact(async (tx) => {
     const session = await tx.session(record.uploadSessionId as string);

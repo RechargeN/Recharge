@@ -265,6 +265,8 @@ export const operationalTaskRegistry: readonly OperationalTaskFamily[] = deepFre
       mod('media', 'application/media_service.ts'),
       mod('media', 'domain/media_policy.ts'),
       mod('media', 'infrastructure/emulator_media_composition.ts'),
+      // N3a.2: the same scan/process family in dev cloud (real ClamAV/sharp).
+      mod('media', 'infrastructure/dev_media_composition.ts'),
       'contracts/media_v1.ts',
     ],
     triggers: [],

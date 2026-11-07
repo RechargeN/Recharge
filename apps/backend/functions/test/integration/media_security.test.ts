@@ -425,6 +425,8 @@ void test('Media stays framework-neutral, offline and free of delivery or cloud 
     'infrastructure/media_effect_feed.ts',
     // N3a: dev Cloud Storage adapter bound to recharge-dev-n2a01-media only.
     'infrastructure/dev_cloud_object_store.ts',
+    // N3a.2: dev-cloud composition (real tools, no fake, no delivery or deletion).
+    'infrastructure/dev_media_composition.ts',
   ]);
   const environment = new Set([...sdk, 'infrastructure/storage_emulator_object_store.ts']);
   // D1: only the local tools client may open a loopback HTTP connection.
@@ -519,7 +521,13 @@ void test('Media and Content never import each other and nothing exports Media t
   assert.deepEqual(
     offenders.map((file) => path.relative(srcRoot, file)),
     // D2: the composition root of Content's reaction to late Media restriction.
-    ['content_entry.ts', 'media_effects_entry.ts', 'media_entry.ts'],
+    // N3a.2: the dev-cloud Content + Media composition (separate codebase).
+    [
+      'content_entry.ts',
+      'dev_content_media_composition.ts',
+      'media_effects_entry.ts',
+      'media_entry.ts',
+    ],
   );
   const entry = read(path.join(srcRoot, 'index.ts'));
   assert.doesNotMatch(entry, /from ['"]\.\/modules\/media\//u);
@@ -592,6 +600,8 @@ void test('adapters: the fakes are labelled FAKE and the D1 local tools modules 
     'cloud_tools_client.ts',
     // N3a: dev Cloud Storage adapter (explicit dev-cloud mode, no scanner/processor/push).
     'dev_cloud_object_store.ts',
+    // N3a.2: dev-cloud Media composition over the N3a adapter and the N3b tools.
+    'dev_media_composition.ts',
     'emulator_media_composition.ts',
     'fake_object_store.ts',
     'fake_processor.ts',

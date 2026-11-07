@@ -259,6 +259,19 @@ void test('writeVariant is create-only: identical retry returns the stored gener
   );
 });
 
+void test('put (server byte channel) is create-only: identical retry accepted, other bytes refused', async () => {
+  const gcs = new FakeGcs();
+  const store = new DevCloudObjectStore(gcs.cloudBucket(), 1_048_576, cloudEnv);
+  await store.put(handle, png);
+  const generation = String(gcs.objects.get(`media-source/${handle.slice(5)}`)!.generation);
+  await store.put(handle, png);
+  await assert.rejects(store.put(handle, Buffer.from('other')), /source_content_conflict/);
+  assert.equal(String(gcs.objects.get(`media-source/${handle.slice(5)}`)!.generation), generation);
+  const stat = await store.stat(handle);
+  assert.equal(stat.kind, 'complete');
+  await assert.rejects(store.put('objk:../../tfstate', png));
+});
+
 void test('removal never claims success it did not get', async () => {
   const gcs = new FakeGcs();
   const store = new DevCloudObjectStore(gcs.cloudBucket(), 1_048_576, cloudEnv);

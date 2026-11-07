@@ -213,7 +213,13 @@ export interface ContentCaller {
   readonly firestore: Firestore;
   /** D3.1 §2.2: authoring types whose flag is on for this call. */
   readonly enabledTypes: ReadonlySet<ContentTypeId>;
+  /** N3a.2: a ready Content service (the dev-cloud one). Absent: the Emulator composition. */
+  readonly content?: ContentPublicationService;
 }
+
+const contentFor = (caller: ContentCaller): ContentPublicationService =>
+  caller.content ??
+  eventAuthoringComposition(caller.firestore, { enabledTypes: caller.enabledTypes }).content;
 
 // Owner commands only. Moderation dispositions and delegated-import inputs are
 // refused by the Content service itself; nothing else is reachable here.
@@ -259,10 +265,7 @@ export async function handleContentCommand(
   const resultType = typeof commandType === 'string' ? commandResultTypes[commandType] : undefined;
   if (resultType === undefined)
     return { schemaVersion: 1, kind: 'rejected', code: 'capability_denied' };
-  const { content } = eventAuthoringComposition(caller.firestore, {
-    enabledTypes: caller.enabledTypes,
-  });
-  return toContentWireResult(resultType, await content.execute(caller.actor, body));
+  return toContentWireResult(resultType, await contentFor(caller).execute(caller.actor, body));
 }
 
 export async function handleContentQuery(
@@ -274,8 +277,5 @@ export async function handleContentQuery(
   const resultType = typeof queryType === 'string' ? queryResultTypes[queryType] : undefined;
   if (resultType === undefined)
     return { schemaVersion: 1, kind: 'rejected', code: 'capability_denied' };
-  const { content } = eventAuthoringComposition(caller.firestore, {
-    enabledTypes: caller.enabledTypes,
-  });
-  return toContentWireResult(resultType, await content.query(caller.actor, body));
+  return toContentWireResult(resultType, await contentFor(caller).query(caller.actor, body));
 }

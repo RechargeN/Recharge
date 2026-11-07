@@ -884,12 +884,15 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/content_translation/firestore_content_translation_service.ts',
     'content_effects_entry.ts',
     'content_entry.ts',
+    // N3a.2: dev-cloud Content + Media composition (Place only, no publication).
+    'dev_content_media_composition.ts',
     // D2: the composition root of Content's reaction to late Media restriction.
     'media_effects_entry.ts',
     'modules/catalog/domain/catalog_item.ts',
     'modules/catalog/infrastructure/content_catalog_source.ts',
     'modules/catalog/infrastructure/emulator_catalog_composition.ts',
     'modules/catalog/infrastructure/firestore_catalog_repository.ts',
+    'modules/media/infrastructure/dev_media_composition.ts',
     'modules/media/infrastructure/emulator_media_composition.ts',
     'modules/media/infrastructure/firestore_media_repository.ts',
     'modules/moderation/infrastructure/content_moderation_adapter.ts',
@@ -1045,6 +1048,19 @@ void test('delegated import never reaches Content storage except through the Con
     ],
     'modules/media/infrastructure/emulator_media_composition.ts': [
       'ContentMediaScope',
+      'FirestoreContentRepository',
+      'IdentityPublisherEligibility',
+    ],
+    'modules/media/infrastructure/dev_media_composition.ts': [
+      'ContentMediaScope',
+      'FirestoreContentRepository',
+      'IdentityPublisherEligibility',
+    ],
+    'dev_content_media_composition.ts': [
+      'ContentPublicationService',
+      'ModerationDispositionPort',
+      'emulatorCompositionRules',
+      'EmulatorSyntheticReferenceData',
       'FirestoreContentRepository',
       'IdentityPublisherEligibility',
     ],

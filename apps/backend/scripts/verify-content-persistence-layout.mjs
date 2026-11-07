@@ -103,6 +103,13 @@ const approvedOutsideUsers = {
   "modules/media/infrastructure/emulator_media_composition.ts": {
     firestore_content_repository: ["FirestoreContentRepository"],
   },
+  // N3a.2: dev-cloud Media composition and the dev Content + Media root.
+  "modules/media/infrastructure/dev_media_composition.ts": {
+    firestore_content_repository: ["FirestoreContentRepository"],
+  },
+  "dev_content_media_composition.ts": {
+    firestore_content_repository: ["FirestoreContentRepository"],
+  },
   "modules/media/infrastructure/firestore_media_repository.ts":
     mediaChainGuardOnly,
   "modules/moderation/infrastructure/content_moderation_adapter.ts": {

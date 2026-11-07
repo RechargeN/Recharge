@@ -234,6 +234,27 @@ export class DevCloudObjectStore implements ObjectStorePort, ObjectBytesPort {
   }
 
   /**
+   * N3a.2 server byte channel (`uploadMediaBytesV1`): create-only on the source
+   * handle. A retry with identical bytes is accepted; other bytes are refused,
+   * never written over (the caller already bounded the size).
+   */
+  async put(objectKeyHandle: string, bytes: Buffer): Promise<void> {
+    const name = this.sourceName(objectKeyHandle);
+    const md5 = createHash('md5').update(bytes).digest('base64');
+    try {
+      await this.bucket.file(name).save(bytes, {
+        resumable: false,
+        preconditionOpts: { ifGenerationMatch: 0 },
+      });
+      return;
+    } catch (error) {
+      if (statusOf(error) !== 412) throw error;
+    }
+    const metadata = await this.metadataOrAbsent(name);
+    if (metadata?.md5Hash !== md5) throw new DevCloudStorageContextError('source_content_conflict');
+  }
+
+  /**
    * Create-only. A retry after a lost response finds the object (412) and
    * returns its generation only when the stored bytes are identical (MD5);
    * otherwise it refuses instead of overwriting.
