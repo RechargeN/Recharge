@@ -37,7 +37,8 @@ void main() {
         throwsArgumentError,
       );
     }
-    expect(() => endpoint.callableUri('mediaCommandV1'), throwsArgumentError);
+    // N3a.2 opens only the five Content/Media calls; delivery stays closed.
+    expect(() => endpoint.callableUri('mediaDeliveryV1'), throwsArgumentError);
     expect(
       () => endpoint.callableUri('createInternalBookingV1'),
       throwsArgumentError,

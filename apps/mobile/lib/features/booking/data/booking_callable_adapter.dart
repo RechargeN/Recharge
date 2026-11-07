@@ -572,6 +572,12 @@ final class BookingBackendEndpoint {
           'recoverIdentitySessionsV1',
           'revokeIdentitySessionV1',
           'readIdentitySessionV1',
+          // N3a.2: dev-cloud Content (Place drafts) and Media (images) only.
+          'contentCommandV1',
+          'contentQueryV1',
+          'mediaCommandV1',
+          'mediaQueryV1',
+          'uploadMediaBytesV1',
         }.contains(callableName)) {
       throw ArgumentError('dev_identity_callable_forbidden');
     }

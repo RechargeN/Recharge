@@ -1,6 +1,7 @@
 import '../../features/auth/domain/repositories/auth_session_events.dart';
 import 'dart:io';
 import 'dev_auth_bundle.dart';
+import 'dev_content_media_port.dart';
 import '../../features/identity/data/repositories/dev_identity_workspace_repository.dart';
 import '../../features/auth/domain/usecases/sign_in_with_google_usecase.dart';
 import 'package:flutter/services.dart' show appFlavor;
@@ -1195,6 +1196,10 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     )
     ..registerFactory<RemoveVisitUseCase>(() => RemoveVisitUseCase(sl()));
   if (devAuth != null) {
+    final DevContentMediaPort? contentMedia = devAuth.contentMedia;
+    if (contentMedia != null) {
+      sl.registerSingleton<DevContentMediaPort>(contentMedia);
+    }
     sl.registerSingleton<AuthSessionEvents>(devAuth);
     sl.registerFactory<SignInWithGoogleUseCase>(
       () => SignInWithGoogleUseCase(devAuth.auth),

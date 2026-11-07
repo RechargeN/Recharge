@@ -13,6 +13,7 @@ import '../../features/booking/data/booking_functions_transport.dart';
 import '../../features/identity/data/repositories/dev_identity_workspace_repository.dart';
 import 'native_dev_auth_session_gateway.dart';
 import 'dev_auth_workspace_composition.dart';
+import 'dev_content_media_port.dart';
 
 final class DevAuthBundle implements AuthSessionEvents {
   DevAuthBundle({
@@ -21,6 +22,7 @@ final class DevAuthBundle implements AuthSessionEvents {
     required this.workspace,
     required this.sessions,
     required this.invalidated,
+    this.contentMedia,
   });
   @override
   final Stream<void> invalidated;
@@ -28,6 +30,9 @@ final class DevAuthBundle implements AuthSessionEvents {
   final DevServerAuthRepository auth;
   final DevIdentityWorkspaceRepository workspace;
   final BookingIdentitySessionStore sessions;
+
+  /// N3a.2: present only with `N3A2_DEV_PLACE_DRAFT=true`.
+  final DevContentMediaPort? contentMedia;
 }
 
 /// All values are public app configuration. No provider keys or SA credentials.
@@ -77,11 +82,13 @@ Future<DevAuthBundle> createDevAuthBundleFromEnvironment() async {
     google: NativeDevGoogleAuthenticationDriver(clientId),
     sessions: sessions,
   );
+  final endpoint = BookingBackendEndpoint.devIdentity(
+    Uri.parse('https://europe-west1-recharge-dev-n2a01.cloudfunctions.net'),
+  );
+  final httpClient = http.Client();
   final client = FunctionsIdentitySessionClient(
-    endpoint: BookingBackendEndpoint.devIdentity(
-      Uri.parse('https://europe-west1-recharge-dev-n2a01.cloudfunctions.net'),
-    ),
-    client: http.Client(),
+    endpoint: endpoint,
+    client: httpClient,
     tokens: identity,
     installations: installations,
     sessions: sessions,
@@ -110,6 +117,17 @@ Future<DevAuthBundle> createDevAuthBundleFromEnvironment() async {
     auth: auth,
     workspace: createDevIdentityWorkspaceRepository(auth),
     sessions: sessions,
+    contentMedia: n3a2DevPlaceDraftDefined
+        ? DevContentMediaPort(
+            FunctionsBookingCallablePort(
+              endpoint: endpoint,
+              client: httpClient,
+              tokens: identity,
+              sessions: sessions,
+              identitySessions: client,
+            ),
+          )
+        : null,
     invalidated: FirebaseAuth.instanceFor(app: app)
         .authStateChanges()
         .where((_) => identity.hasMismatchedSdkUser)
