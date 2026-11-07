@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { Firestore, Transaction } from 'firebase-admin/firestore';
 
-import { assertContentEmulatorContext } from '../../content/infrastructure/firestore_content_repository.js';
+import { assertMediaChainPersistenceContext } from '../../content/infrastructure/firestore_content_repository.js';
 import type {
   EnforcementReceipt,
   ModerationAuditEntry,
@@ -47,7 +47,7 @@ export class FirestoreModerationRepository implements ModerationRepository {
     private readonly firestore: Firestore,
     environment: NodeJS.ProcessEnv = process.env,
   ) {
-    assertContentEmulatorContext(firestore, environment);
+    assertMediaChainPersistenceContext(firestore, environment);
   }
 
   transact<T>(operation: (transaction: ModerationTransaction) => T | Promise<T>): Promise<T> {

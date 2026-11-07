@@ -61,7 +61,11 @@ export type ContentPersistenceRefusal =
   | 'cloud_credentials_present'
   | 'cloud_endpoint_override'
   | 'client_endpoint_unverifiable'
-  | 'client_not_emulator_endpoint';
+  | 'client_not_emulator_endpoint'
+  // N3a.2 dev-cloud Media chain refusals.
+  | 'dev_cloud_with_emulator'
+  | 'dev_cloud_project_mismatch'
+  | 'dev_cloud_override';
 
 export class ContentPersistenceEnvironmentError extends Error {
   constructor(readonly reason: ContentPersistenceRefusal) {
@@ -147,6 +151,79 @@ function assertClientTargetsEmulator(firestore: Firestore, environmentHost: stri
     throw new ContentPersistenceEnvironmentError('client_not_emulator_endpoint');
 }
 
+/** N3a.2: the only cloud project the Media chain may persist to, and its switch. */
+export const devCloudPersistenceProjectId = 'recharge-dev-n2a01';
+export const devCloudPersistenceSwitch = {
+  name: 'RECHARGE_DEV_RUNTIME',
+  value: 'content-media',
+} as const;
+const emulatorVariables = [
+  'FIRESTORE_EMULATOR_HOST',
+  'FIREBASE_AUTH_EMULATOR_HOST',
+  'FIREBASE_STORAGE_EMULATOR_HOST',
+  'STORAGE_EMULATOR_HOST',
+  'FUNCTIONS_EMULATOR',
+] as const;
+
+/**
+ * N3a.2 (owner-approved plan 2026-11-07): persistence for the Media chain only —
+ * the Content, Media and Moderation repositories — in either the Emulator
+ * (exactly `assertContentEmulatorContext`) or, behind the explicit switch,
+ * `recharge-dev-n2a01` in the cloud: exact project in the environment and in the
+ * client, no Emulator variable, no endpoint override, no key file, default TLS
+ * endpoint. Every other module keeps `assertContentEmulatorContext` (static test).
+ */
+export function assertMediaChainPersistenceContext(
+  firestore: Firestore,
+  environment: NodeJS.ProcessEnv = process.env,
+): void {
+  if (environment[devCloudPersistenceSwitch.name] !== devCloudPersistenceSwitch.value) {
+    assertContentEmulatorContext(firestore, environment);
+    return;
+  }
+  for (const name of emulatorVariables)
+    if ((environment[name] ?? '') !== '')
+      throw new ContentPersistenceEnvironmentError('dev_cloud_with_emulator');
+  for (const name of ['GCLOUD_PROJECT', 'GOOGLE_CLOUD_PROJECT'] as const) {
+    const value = environment[name];
+    if (value !== undefined && value !== devCloudPersistenceProjectId)
+      throw new ContentPersistenceEnvironmentError('dev_cloud_project_mismatch');
+  }
+  if (environment.GCLOUD_PROJECT !== devCloudPersistenceProjectId)
+    throw new ContentPersistenceEnvironmentError('dev_cloud_project_mismatch');
+  if (
+    (environment.GOOGLE_APPLICATION_CREDENTIALS ?? '') !== '' ||
+    (environment.FIREBASE_SERVICE_ACCOUNT ?? '') !== '' ||
+    (environment.FIRESTORE_HOST ?? '') !== ''
+  )
+    throw new ContentPersistenceEnvironmentError('dev_cloud_override');
+  let projectId: string | undefined;
+  try {
+    projectId = (firestore as unknown as { readonly projectId: string }).projectId;
+  } catch {
+    projectId = undefined;
+  }
+  if (projectId !== devCloudPersistenceProjectId)
+    throw new ContentPersistenceEnvironmentError('dev_cloud_project_mismatch');
+  const settings = (
+    firestore as unknown as {
+      readonly _settings?: {
+        readonly servicePath?: unknown;
+        readonly port?: unknown;
+        readonly ssl?: unknown;
+      };
+    }
+  )._settings;
+  if (settings === undefined || settings === null || typeof settings !== 'object')
+    throw new ContentPersistenceEnvironmentError('client_endpoint_unverifiable');
+  if (
+    (settings.servicePath !== undefined && settings.servicePath !== 'firestore.googleapis.com') ||
+    (settings.port !== undefined && settings.port !== 443) ||
+    settings.ssl === false
+  )
+    throw new ContentPersistenceEnvironmentError('dev_cloud_override');
+}
+
 export interface FirestoreContentRepositoryOptions {
   readonly limits?: Partial<ContentStorageLimits>;
   readonly environment?: NodeJS.ProcessEnv;
@@ -159,7 +236,7 @@ export class FirestoreContentRepository implements ContentRepository {
     private readonly firestore: Firestore,
     options: FirestoreContentRepositoryOptions = {},
   ) {
-    assertContentEmulatorContext(firestore, options.environment ?? process.env);
+    assertMediaChainPersistenceContext(firestore, options.environment ?? process.env);
     this.#limits = resolveStorageLimits(options.limits);
   }
 

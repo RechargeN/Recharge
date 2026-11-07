@@ -77,6 +77,10 @@ const persistenceModules = [
 const guardOnly = {
   firestore_content_repository: ["assertContentEmulatorContext"],
 };
+// N3a.2: the Media chain repositories borrow only the Emulator-or-dev-cloud guard.
+const mediaChainGuardOnly = {
+  firestore_content_repository: ["assertMediaChainPersistenceContext"],
+};
 const approvedOutsideUsers = {
   // K3 borrows only the Emulator guard, never Content storage symbols.
   "modules/admin_support/admin_support_service.ts": guardOnly,
@@ -99,7 +103,8 @@ const approvedOutsideUsers = {
   "modules/media/infrastructure/emulator_media_composition.ts": {
     firestore_content_repository: ["FirestoreContentRepository"],
   },
-  "modules/media/infrastructure/firestore_media_repository.ts": guardOnly,
+  "modules/media/infrastructure/firestore_media_repository.ts":
+    mediaChainGuardOnly,
   "modules/moderation/infrastructure/content_moderation_adapter.ts": {
     firestore_content_repository: [
       "contentCollections",
@@ -111,7 +116,7 @@ const approvedOutsideUsers = {
   },
   "modules/moderation/infrastructure/emulator_staff_authority.ts": guardOnly,
   "modules/moderation/infrastructure/firestore_moderation_repository.ts":
-    guardOnly,
+    mediaChainGuardOnly,
   "modules/catalog/infrastructure/emulator_catalog_composition.ts": {
     firestore_content_repository: ["FirestoreContentRepository"],
   },

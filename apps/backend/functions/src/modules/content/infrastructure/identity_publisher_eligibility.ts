@@ -1,6 +1,7 @@
 import type { PublisherEligibilityV1 } from '../../../contracts/identity_v1.js';
 import { parseUtcInstant } from '../../../shared/utc_instant.js';
 import { evaluatePublisherAccess } from '../../identity_publisher/application/publisher_access_evaluation.js';
+import { identityVerificationRequired } from '../domain/personal_publishing_policy.js';
 import type { IdentityAuthorityRepository } from '../../identity_publisher/domain/repositories.js';
 import type {
   DelegatedEligibilityRequest,
@@ -46,6 +47,10 @@ export class IdentityPublisherEligibility implements PublisherEligibilityPort {
         publisherRef: request.publisherRef,
         requiredCapability: request.requiredCapability,
         nowUtc: request.nowUtc,
+        identityVerificationRequired: identityVerificationRequired(
+          request.typeId,
+          request.publisherRef,
+        ),
       }),
     );
     return {

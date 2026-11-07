@@ -12,7 +12,7 @@ export const mediaUploadCapability = 'content.create';
 
 /**
  * Media authority from the Identity owner records at backend time: Session and
- * revocation, enabled market, verified Creator and the exact Publisher
+ * revocation, enabled market and the exact Publisher
  * (personal, or an active verified Page with an active membership holding
  * `content.create`). Reading a Media status needs only a current Session; the
  * service itself restricts it to the owner.
@@ -47,6 +47,10 @@ export class IdentityMediaActorAuthority implements MediaActorAuthorityPort {
         publisherRef: request.publisherRef,
         requiredCapability: mediaUploadCapability,
         nowUtc: request.nowUtc,
+        // Media does not know the content type: the per-type rule of ADR 0023
+        // (risky types need identity verification) is enforced by Content's
+        // entity scope for the exact draft, which every content upload passes.
+        identityVerificationRequired: false,
       });
       if (decision.eligible)
         return { allowed: true, authorityRevision: decision.authorityRevision };

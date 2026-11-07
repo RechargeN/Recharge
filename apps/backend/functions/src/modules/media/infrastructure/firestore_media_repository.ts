@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { FieldPath, type Firestore, type Query, type Transaction } from 'firebase-admin/firestore';
 
 import type { MediaEffectV1 } from '../../../contracts/media_v1.js';
-import { assertContentEmulatorContext } from '../../content/infrastructure/firestore_content_repository.js';
+import { assertMediaChainPersistenceContext } from '../../content/infrastructure/firestore_content_repository.js';
 import { MediaRepositoryConflict } from '../domain/failures.js';
 import type { MediaAsset } from '../domain/media_asset.js';
 import type {
@@ -47,7 +47,7 @@ export class FirestoreMediaRepository implements MediaRepository {
     private readonly firestore: Firestore,
     environment: NodeJS.ProcessEnv = process.env,
   ) {
-    assertContentEmulatorContext(firestore, environment);
+    assertMediaChainPersistenceContext(firestore, environment);
   }
 
   transact<T>(operation: (transaction: MediaTransaction) => T | Promise<T>): Promise<T> {

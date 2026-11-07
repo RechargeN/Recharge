@@ -1048,7 +1048,10 @@ void test('delegated import never reaches Content storage except through the Con
       'FirestoreContentRepository',
       'IdentityPublisherEligibility',
     ],
-    'modules/media/infrastructure/firestore_media_repository.ts': ['assertContentEmulatorContext'],
+    // N3a.2: the Media chain borrows only the Emulator-or-dev-cloud guard.
+    'modules/media/infrastructure/firestore_media_repository.ts': [
+      'assertMediaChainPersistenceContext',
+    ],
     'modules/moderation/infrastructure/content_moderation_adapter.ts': [
       'ContentPublicationService',
       'contentCollections',
@@ -1062,7 +1065,7 @@ void test('delegated import never reaches Content storage except through the Con
       'assertContentEmulatorContext',
     ],
     'modules/moderation/infrastructure/firestore_moderation_repository.ts': [
-      'assertContentEmulatorContext',
+      'assertMediaChainPersistenceContext',
     ],
     'modules/moderation/infrastructure/moderation_decision_verifier.ts': [
       'ModerationDispositionPort',
