@@ -366,9 +366,8 @@ resource "google_cloud_scheduler_job" "n3b_mirror" {
   time_zone        = "Etc/UTC"
   attempt_deadline = "180s"
   deletion_policy  = "PREVENT"
-  retry_config {
-    retry_count = 0
-  }
+  # No retry_config: retry_count 0 is the API default, and an explicit block
+  # with 0 reads back as absent (perpetual diff, 2026-11-07).
   http_target {
     http_method = "POST"
     uri         = "https://run.googleapis.com/v2/projects/${local.n3b_project}/locations/${local.n3b_region}/jobs/clamav-mirror:run"
