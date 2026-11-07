@@ -517,3 +517,63 @@ test("the provider's empty string for an unset secret value is accepted; a liter
     /secret reference/u,
   );
 });
+
+const newDigest = `sha256:${"c".repeat(64)}`;
+const newImage = `europe-west1-docker.pkg.dev/${project}/media-tools/media-tools@${newDigest}`;
+function rolled(mutate = () => {}) {
+  const changes = phase2().map((c) => ({
+    ...c,
+    change: { ...c.change, actions: ["no-op"] },
+  }));
+  for (const c of changes) {
+    if (
+      c.type !== "google_cloud_run_v2_service" &&
+      c.type !== "google_cloud_run_v2_job"
+    )
+      continue;
+    const before = JSON.parse(JSON.stringify(c.change.after));
+    const after = JSON.parse(JSON.stringify(c.change.after));
+    const container =
+      c.type === "google_cloud_run_v2_job"
+        ? after.template[0].template[0].containers[0]
+        : after.template[0].containers[0];
+    container.image = newImage;
+    before.etag = "old";
+    delete after.etag;
+    c.change = {
+      actions: ["update"],
+      before,
+      after,
+      after_unknown: { etag: true },
+    };
+  }
+  mutate(changes);
+  const p = plan(changes, newDigest);
+  return checkN3bPlan(p, {
+    ...expectedFor(p),
+    imageDigest: newDigest,
+    image: newImage,
+    operatorEmail,
+    allowedUpdates: [
+      'google_cloud_run_v2_service.n3b["media-scanner"]',
+      'google_cloud_run_v2_service.n3b["media-processor"]',
+      "google_cloud_run_v2_job.n3b_mirror[0]",
+    ],
+  });
+}
+
+test("image roll: only the image may change, and only to the recorded digest", () => {
+  assert.deepEqual(rolled(), []);
+  assert.match(
+    rolled((c) => {
+      find(c, scanner).template[0].scaling[0].min_instance_count = 1;
+    }).join(),
+    /forbidden action update/u,
+  );
+  assert.match(
+    rolled((c) => {
+      find(c, scanner).template[0].containers[0].image = image;
+    }).join(),
+    /forbidden action update/u,
+  );
+});

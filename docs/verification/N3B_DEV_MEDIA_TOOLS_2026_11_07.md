@@ -34,12 +34,16 @@
 
 В облаке Firebase Auth были включены вход по email (ссылкой) и анонимный вход — вручную, вне Terraform; утверждённое состояние N2c: только Google. Код приложения их не использует. Решение владельца 2026-11-07: вернуть в выключенное состояние. `check-n3b-plan` разрешает ровно это одно обновление существующего ресурса и только с точным diff (три флага, только в сторону «выключено»); любое другое обновление по-прежнему запрещено.
 
+## Первый облачный прогон (2026-11-07)
+
+Фазы 1 и 2 применены (18 + 7 ресурсов, Auth возвращён к N2c), секрет создан, образ собран Cloud Build за 2 мин, job зеркала — 53 с, набор `20261107T094339Z` (`daily 28176`, сборка 06:24 UTC). Smoke не прошёл: clamd не стартовал — `Failed to open log file /dev/stderr: Too many levels of symbolic links` (на Cloud Run gen2 `/dev/stderr` — цепочка ссылок). Сканер вёл себя fail-closed: `inconclusive`, выход инстанса, новый инстанс. Исправление: без `LogFile` у clamd (ошибки и так идут в stderr); пересборка образа и обновление сервисов/job только на новый digest — checker разрешает при обновлении менять лишь `image`.
+
 ## Проверки (локально)
 
 | Гейт | Результат |
 |---|---|
 | media-tools-runtime: typecheck + tests (host scanner/processor, самоперезапуск без базы, зеркало, fetch) | 12/12 |
-| scripts: `check-n3b-plan` 8/8, `package-media-tools-runtime` 4/4 | pass |
+| scripts: `check-n3b-plan` 9/9, `package-media-tools-runtime` 4/4 | pass |
 | Terraform `fmt`/`validate`/`test` (bootstrap 6 + n2c 6 + **n3b 10**) | 22/22 |
 | `verify:iac:topology --require-terraform`, `verify:execution-manifest` | pass |
 | Functions lint, typecheck, format, `verify:cloud-context` | pass |

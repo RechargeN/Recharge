@@ -97,7 +97,39 @@ const reviewedUpdates = {
       );
     },
   },
+  // Image roll to the recorded digest (2026-11-07: clamd LogFile fix). Only the
+  // image may change; the full service/job shape is checked below as for a create.
+  ...Object.fromEntries(
+    [
+      'google_cloud_run_v2_service.n3b["media-scanner"]',
+      'google_cloud_run_v2_service.n3b["media-processor"]',
+    ].map((address) => [
+      address,
+      {
+        paths: new Set(["template[0].containers[0].image"]),
+        check: (after, expected) =>
+          after.template?.[0]?.containers?.[0]?.image === expected.image,
+      },
+    ]),
+  ),
+  "google_cloud_run_v2_job.n3b_mirror[0]": {
+    paths: new Set(["template[0].template[0].containers[0].image"]),
+    check: (after, expected) =>
+      after.template?.[0]?.template?.[0]?.containers?.[0]?.image ===
+      expected.image,
+  },
 };
+
+/** True when Terraform marks the path (or a parent) as known only after apply. */
+function unknownAt(unknown, path) {
+  let node = unknown;
+  for (const token of path.match(/[^.[\]]+/gu) ?? []) {
+    if (node === true) return true;
+    if (node === null || typeof node !== "object") return false;
+    node = node[/^\d+$/u.test(token) ? Number(token) : token];
+  }
+  return node === true;
+}
 
 function differingPaths(before, after, prefix = "", out = []) {
   if (
@@ -132,12 +164,15 @@ function reviewedUpdate(c, expected) {
   const rule = reviewedUpdates[c.address];
   if (!rule || !(expected.allowedUpdates ?? []).includes(c.address))
     return false;
-  if (Object.values(c.change?.after_unknown ?? {}).some(Boolean)) return false;
-  const paths = differingPaths(c.change?.before ?? {}, c.change?.after ?? {});
+  // Computed attributes that refresh on apply are not configuration changes.
+  const paths = differingPaths(
+    c.change?.before ?? {},
+    c.change?.after ?? {},
+  ).filter((item) => !unknownAt(c.change?.after_unknown ?? {}, item));
   return (
     paths.length > 0 &&
     paths.every((item) => rule.paths.has(item)) &&
-    rule.check(c.change.after)
+    rule.check(c.change.after, expected)
   );
 }
 
@@ -232,8 +267,8 @@ export function checkN3bPlan(plan, expected) {
       errors.push(`forbidden action ${actions.join("+")}: ${c.address}`);
     if (neverTypes.test(c.type))
       errors.push(`forbidden resource type: ${c.address}`);
-    if (actions[0] !== "create") continue;
-    if (!n3bAddress.test(c.address))
+    if (actions[0] !== "create" && !allowedUpdate) continue;
+    if (actions[0] === "create" && !n3bAddress.test(c.address))
       errors.push(`unreviewed create: ${c.address}`);
     const target = after.project ?? after.project_id;
     if (target && target !== expected.projectId)

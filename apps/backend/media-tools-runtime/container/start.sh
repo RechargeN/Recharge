@@ -22,9 +22,8 @@ TCPAddr 127.0.0.1
 Foreground yes
 DatabaseDirectory $DB
 TemporaryDirectory /tmp/clamtmp
-LogFile /dev/stderr
-LogFileUnlock yes
-LogTime yes
+# No LogFile: on Cloud Run gen2 /dev/stderr is a symlink chain clamd cannot
+# open ("Too many levels of symbolic links"); its errors still reach stderr.
 MaxThreads 2
 MaxQueue 4
 MaxConnectionQueueLength 4
