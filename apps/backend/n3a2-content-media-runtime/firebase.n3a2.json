@@ -1,0 +1,17 @@
+{
+  "functions": [
+    {
+      "source": "stage",
+      "codebase": "n3a2-content-media",
+      "runtime": "nodejs22",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "stage-manifest.json",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ],
+      "predeploy": ["node ../scripts/verify-n3a2-stage.mjs stage"]
+    }
+  ]
+}
