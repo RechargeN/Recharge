@@ -1,6 +1,6 @@
 # N3b — dev-cloud scanner/processor (ClamAV, sharp), 2026-11-07
 
-Статус: **Review — код и IaC локально, облако не выполнялось.** Только recharge-dev-n2a01. Вариант (в) владельца: проверка через `ScannerPort`/`ProcessorPort` operator-smoke на синтетических байтах; Media/Content runtime в облаке не поднимается. Решения D-01…D-12 (лимит €5, без автоудаления, без AI moderation и третьих сторон). Push/merge не выполнялись.
+Статус: **Review — развёрнуто в dev, operator-smoke пройден 2026-11-07 13:57 UTC; ждёт решения владельца о Done.** Только recharge-dev-n2a01. Вариант (в) владельца: проверка через `ScannerPort`/`ProcessorPort` operator-smoke на синтетических байтах; Media/Content runtime в облаке не поднимается. Решения D-01…D-12 (лимит €5, без автоудаления, без AI moderation и третьих сторон). Push/merge не выполнялись.
 
 ## Что сделано
 
@@ -37,6 +37,22 @@
 ## Первый облачный прогон (2026-11-07)
 
 Фазы 1 и 2 применены (18 + 7 ресурсов, Auth возвращён к N2c), секрет создан, образ собран Cloud Build за 2 мин, job зеркала — 53 с, набор `20261107T094339Z` (`daily 28176`, сборка 06:24 UTC). Smoke не прошёл: clamd не стартовал — `Failed to open log file /dev/stderr: Too many levels of symbolic links` (на Cloud Run gen2 `/dev/stderr` — цепочка ссылок). Сканер вёл себя fail-closed: `inconclusive`, выход инстанса, новый инстанс. Исправление: без `LogFile` у clamd (ошибки и так идут в stderr); пересборка образа и обновление сервисов/job только на новый digest — checker разрешает при обновлении менять лишь `image`.
+
+## Облако: итог (run `20261107T135510Z`, вход владельца, ADC и вход отозваны)
+
+Обновление образа сервисов и job на `sha256:6807585364949f0b13e67df93a9ac5e25e8da4571be99ff266d47c4815936a91` (0 added / 3 changed, только `image`). Smoke через адаптеры Functions:
+
+| Проверка | Результат |
+|---|---|
+| Health scanner | `ready`, база `fresh`, `daily 28176` (сборка 2026-11-07 06:24 UTC), набор зеркала `20261107T094339Z` |
+| Health processor | `ready`, `sharp-0.35.5/libvips-8.18.7/linux-x64-native` |
+| Чистый PNG (media-бакет → `DevCloudObjectStore` → `CloudToolsScanner`) | `clean`, `clamav-1.5.4/daily-28176`, 282 мс |
+| EICAR (собран в памяти, не на диске и не в Storage) | `rejected`, 99 мс |
+| Чужой секрет / недействительный ID token / недоступный источник токена | `inconclusive` ×3 |
+| Processor | `succeeded`, `display` и `thumb` WebP create-only в `media-variant/` (64×48 — исходник меньше профиля, без увеличения), 753 мс |
+| IAM | 23 привязки, стоп-условий нет (до и после каждой фазы) |
+
+Не замерено: настоящий холодный старт сканера (D-04) — инстанс был прогрет развёртыванием ревизии. Оставлены синтетические объекты (удаление запрещено): `media-source/n3b-smoke-20261107T130814-bbd0eeb2`, `media-source/n3b-smoke-20261107T135704-9e19745c` и четыре `media-variant/` (≈ 90 байт каждый); в зеркале один набор. Проверка на A34 невозможна до Media runtime в облаке (N3a.2): сервисы закрыты IAM для оператора и будущего `runtime-media`.
 
 ## Проверки (локально)
 
