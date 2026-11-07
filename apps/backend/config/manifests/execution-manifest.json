@@ -74,8 +74,8 @@
         {
           "name": "runtime-media",
           "kind": "runtime",
-          "purpose": "Media service: library only, fake adapters, no runtime",
-          "deployed": false,
+          "purpose": "Media service: dev Content + Media runtime (N3a.2, Place drafts and images)",
+          "deployed": true,
           "authorized": false
         },
         {

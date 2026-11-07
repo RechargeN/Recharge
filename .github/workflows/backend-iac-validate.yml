@@ -19,6 +19,10 @@ on:
       - "apps/backend/scripts/check-dev-bootstrap-plan*.mjs"
       - "apps/backend/scripts/check-n2c-plan*.mjs"
       - "apps/backend/scripts/check-n3b-plan*.mjs"
+      - "apps/backend/scripts/check-n3a2-plan*.mjs"
+      - "apps/backend/scripts/package-n3a2-content-media-runtime*.mjs"
+      - "apps/backend/scripts/verify-n3a2-stage.mjs"
+      - "apps/backend/n3a2-content-media-runtime/**"
       - "apps/backend/scripts/package-media-tools-runtime*.mjs"
       - "apps/backend/media-tools-runtime/**"
       - "apps/backend/scripts/package-n2c-identity-runtime*.mjs"
@@ -79,7 +83,7 @@ jobs:
         run: npm run verify:execution-manifest
 
       - name: Reject plan-only or mismatched apply records (local fixtures)
-        run: node --test apps/backend/scripts/verify-dev-apply-approval.test.mjs apps/backend/scripts/wait-dev-budget-delivery.test.mjs apps/backend/scripts/check-dev-bootstrap-plan.test.mjs apps/backend/scripts/check-n2c-plan.test.mjs apps/backend/scripts/check-n3b-plan.test.mjs apps/backend/scripts/package-media-tools-runtime.test.mjs
+        run: node --test apps/backend/scripts/verify-dev-apply-approval.test.mjs apps/backend/scripts/wait-dev-budget-delivery.test.mjs apps/backend/scripts/check-dev-bootstrap-plan.test.mjs apps/backend/scripts/check-n2c-plan.test.mjs apps/backend/scripts/check-n3b-plan.test.mjs apps/backend/scripts/package-media-tools-runtime.test.mjs apps/backend/scripts/check-n3a2-plan.test.mjs
 
       - name: N3b media-tools runtime (typecheck, host and mirror tests, local stage)
         working-directory: apps/backend/media-tools-runtime

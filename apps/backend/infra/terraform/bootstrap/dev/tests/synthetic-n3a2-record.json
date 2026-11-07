@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "status": "approved",
+  "stage": "n3a2",
+  "environment": "dev",
+  "projectId": "recharge-dev-n2a01",
+  "commitSha": "0000000000000000000000000000000000000000",
+  "manifestSha256": "eb894b31565625df78d4f6d064ceceb73d664605ad58241db4f4173b70612738",
+  "operations": [
+    "plan"
+  ],
+  "ownerApprovalEvidenceRef": "SYNTHETIC-TERRAFORM-MOCK-TEST-ONLY",
+  "dataScope": "synthetic",
+  "automaticDeletion": false,
+  "push": false,
+  "merge": false,
+  "marketActivation": false,
+  "issuedAtUtc": "2020-01-01T00:00:00Z",
+  "expiresAtUtc": "2099-01-01T00:00:00Z",
+  "publication": false
+}

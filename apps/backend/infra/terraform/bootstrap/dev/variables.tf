@@ -84,3 +84,21 @@ variable "n3b_operator_email" {
   default     = ""
   sensitive   = true
 }
+
+# ---- N3a.2 (dev Content + Media runtime grants). Absent by default; needs the N3a.2 record.
+variable "n3a2_enabled" {
+  description = "Desired presence of the N3a.2 runtime grants. Not execution authority."
+  type        = bool
+  default     = false
+}
+
+variable "n3a2_authorization_record_path" {
+  description = "Private owner-issued N3a.2 plan record. Never stored in Git."
+  type        = string
+  default     = ""
+}
+
+variable "n3a2_authorization_record_sha256" {
+  type    = string
+  default = ""
+}
