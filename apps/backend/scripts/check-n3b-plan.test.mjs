@@ -502,3 +502,18 @@ test("the reviewed update cannot enable anything or touch other fields", () => {
     );
   }
 });
+
+test("the provider's empty string for an unset secret value is accepted; a literal is not", () => {
+  assert.deepEqual(
+    mutated((c) => {
+      find(c, scanner).template[0].containers[0].env[1].value = "";
+    }),
+    [],
+  );
+  assert.match(
+    mutated((c) => {
+      find(c, scanner).template[0].containers[0].env[1].value = "0".repeat(64);
+    }).join(),
+    /secret reference/u,
+  );
+});

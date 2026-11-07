@@ -39,7 +39,7 @@
 | Гейт | Результат |
 |---|---|
 | media-tools-runtime: typecheck + tests (host scanner/processor, самоперезапуск без базы, зеркало, fetch) | 12/12 |
-| scripts: `check-n3b-plan` 7/7, `package-media-tools-runtime` 4/4 | pass |
+| scripts: `check-n3b-plan` 8/8, `package-media-tools-runtime` 4/4 | pass |
 | Terraform `fmt`/`validate`/`test` (bootstrap 6 + n2c 6 + **n3b 10**) | 22/22 |
 | `verify:iac:topology --require-terraform`, `verify:execution-manifest` | pass |
 | Functions lint, typecheck, format, `verify:cloud-context` | pass |

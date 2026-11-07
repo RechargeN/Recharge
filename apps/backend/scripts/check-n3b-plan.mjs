@@ -186,7 +186,8 @@ function checkService(address, after, expected, errors) {
     errors.push(`service identity differs: ${address}`);
   if (
     env.RECHARGE_TOOLS_MODE?.value !== rule.mode ||
-    env.RECHARGE_TOOLS_TOKEN?.value !== null ||
+    // The provider renders an unset value as ""; only a secret reference may carry it.
+    ![null, ""].includes(env.RECHARGE_TOOLS_TOKEN?.value) ||
     env.RECHARGE_TOOLS_TOKEN?.value_source?.[0]?.secret_key_ref?.[0]?.secret !==
       "MEDIA_TOOLS_TOKEN"
   )
