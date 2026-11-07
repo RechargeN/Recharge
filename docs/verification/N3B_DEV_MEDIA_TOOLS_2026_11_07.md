@@ -1,6 +1,6 @@
 # N3b — dev-cloud scanner/processor (ClamAV, sharp), 2026-11-07
 
-Статус: **Review — развёрнуто в dev, operator-smoke пройден 2026-11-07 13:57 UTC; ждёт решения владельца о Done.** Только recharge-dev-n2a01. Вариант (в) владельца: проверка через `ScannerPort`/`ProcessorPort` operator-smoke на синтетических байтах; Media/Content runtime в облаке не поднимается. Решения D-01…D-12 (лимит €5, без автоудаления, без AI moderation и третьих сторон). Push/merge не выполнялись.
+Статус: **Done (dev) — решение владельца 2026-11-07**; развёрнуто в dev, operator-smoke пройден 2026-11-07 13:57 UTC. Открыто: замер холодного старта сканера (D-04), Media runtime в облаке (N3a.2), проверка на A34. Только recharge-dev-n2a01. Вариант (в) владельца: проверка через `ScannerPort`/`ProcessorPort` operator-smoke на синтетических байтах; Media/Content runtime в облаке не поднимается. Решения D-01…D-12 (лимит €5, без автоудаления, без AI moderation и третьих сторон). Push/merge не выполнялись.
 
 ## Что сделано
 
