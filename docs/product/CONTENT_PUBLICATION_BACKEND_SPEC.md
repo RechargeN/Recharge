@@ -1176,7 +1176,7 @@ Stage 3 requires typed contracts for `createDraft`, `updateDraft`,
 `getPublicationStatus` and `getPublishedRevision`.
 
 Required failures include `unauthenticated`, `capability_denied`,
-`publisher_not_eligible`, `creator_verification_required`,
+`publisher_not_eligible`, `identity_verification_required` (ADR 0023; legacy `creator_verification_required` maps to it),
 `membership_inactive`, `type_disabled`, `source_revision_stale`,
 `validation_failed`, `media_not_ready`, `moderation_required`,
 `moderation_decision_stale`, `market_disabled`, `policy_unavailable`,

@@ -636,7 +636,8 @@ success | cancelled | failure
 | `recent_auth_required` | `failed_precondition` | Step-up/re-auth is required |
 | `session_revoked` | `unauthenticated` | Current session is no longer active |
 | `session_limit_reached` | `failed_precondition` | Session policy blocks issuance |
-| `creator_verification_required` | `failed_precondition` | Creator-only operation is unavailable |
+| `identity_verification_required` | `failed_precondition` | ADR 0023: the operation takes money or reserves places and the server identity-verification fact is missing (no Creator role exists) |
+| `creator_verification_required` | `failed_precondition` | Legacy name of the same refusal; still accepted when read during the transition, never emitted |
 | `creator_verification_pending` | `failed_precondition` | Decision is pending |
 | `creator_verification_expired` | `failed_precondition` | Reverification is required |
 | `page_limit_reached` | `failed_precondition` | No page is created; request path may be offered |
@@ -1486,7 +1487,7 @@ does not rewrite historical authorship.
 | `PublisherEligibilityChanged` | BCK-07/08 | PublisherRef, capability/policy revision and typed effect request |
 
 Required failures include `unauthenticated`, `session_revoked`,
-`reauth_required`, `account_restricted`, `creator_verification_required`,
+`reauth_required`, `account_restricted`, `identity_verification_required` (legacy `creator_verification_required`),
 `creator_verification_unavailable`, `membership_inactive`,
 `capability_denied`, `publisher_not_eligible`, `policy_unavailable`,
 `conflict`, `unsupported_version` and `unknown_outcome`. Anti-enumeration maps
