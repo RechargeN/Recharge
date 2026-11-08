@@ -6,12 +6,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'create_media_pick_actions.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../../../../app/di/place_publication_composition.dart';
-import '../../../../app/di/service_locator.dart';
-import '../../../../app/router/route_names.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
 import '../../../../core/parsing/input_parsers.dart';
@@ -37,12 +33,16 @@ class PlaceCreateBlock extends StatefulWidget {
     required this.controller,
     required this.state,
     required this.onPublished,
+    this.onOpenServerTest,
     super.key,
   });
 
   final CreateController controller;
   final CreateState state;
   final VoidCallback onPublished;
+
+  /// N3a.2: opens the dev-cloud Place page; null unless its guard is open.
+  final VoidCallback? onOpenServerTest;
 
   @override
   State<PlaceCreateBlock> createState() => _PlaceCreateBlockState();
@@ -1346,12 +1346,11 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
         // N3a.2 (A34 2026-11-08): the dev-cloud draft path had no way in from
         // the app. Shown only where its own guard lets the test route open
         // (debug build, its define, the dev port); never in release.
-        if (sl.isRegistered<PlacePublicationTestEntryGuard>() &&
-            sl<PlacePublicationTestEntryGuard>().allowed) ...<Widget>[
+        if (widget.onOpenServerTest != null) ...<Widget>[
           const SizedBox(height: 8),
           OutlinedButton.icon(
             key: const ValueKey<String>('place-server-test-entry'),
-            onPressed: () => context.push(RouteNames.testPlacePublication),
+            onPressed: widget.onOpenServerTest,
             icon: const Icon(Icons.cloud_upload_outlined),
             label: Text(context.l10n.publicationPageTitle('place')),
           ),

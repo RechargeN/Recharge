@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/features/booking/data/booking_callable_adapter.dart';
 import 'package:recharge/features/identity/data/seller_declaration_gateway.dart';
 import 'package:recharge/features/identity/domain/entities/seller_declaration.dart';
+import 'package:recharge/features/identity/domain/repositories/seller_declaration_repository.dart';
 import 'package:recharge/features/identity/presentation/pages/seller_declaration_page.dart';
 import 'package:recharge/generated/l10n/app_localizations.dart';
 
 /// ADR 0023 (2026-11-08, DSA Art. 30): the seller details form and gateway.
-final class _ScriptedPort implements BookingCallablePort {
+final class _ScriptedPort implements SellerDeclarationPort {
   final List<Map<String, Object?>> commands = <Map<String, Object?>>[];
   Map<String, Object?>? stored;
   String? refuse;
@@ -43,12 +43,12 @@ final class _ScriptedPort implements BookingCallablePort {
   }
 }
 
-Widget _app(SellerDeclarationGateway? gateway) => MaterialApp(
+Widget _app(SellerDeclarationRepository? gateway) => MaterialApp(
   locale: const Locale('en'),
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   home: SellerDeclarationPage(
-    gateway: Future<SellerDeclarationGateway?>.value(gateway),
+    gateway: Future<SellerDeclarationRepository?>.value(gateway),
   ),
 );
 

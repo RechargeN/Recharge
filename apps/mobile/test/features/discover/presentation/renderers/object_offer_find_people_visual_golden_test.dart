@@ -68,6 +68,9 @@ void main() {
         matchesGoldenFile('goldens/object_offer_find_people_reference.png'),
       );
     },
+    // Visual references are recorded on Windows; other platforms render fonts
+    // differently (CI 2026-11-08), so the comparison runs on Windows only.
+    skip: !Platform.isWindows,
   );
 }
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/localization/l10n_context.dart';
-import '../../data/seller_declaration_gateway.dart';
 import '../../domain/entities/seller_declaration.dart';
+import '../../domain/repositories/seller_declaration_repository.dart';
 
 /// ADR 0023 (2026-11-08, DSA Art. 30): the author's own seller details. The
 /// server decides; this form only collects and sends them. Without a backend
@@ -11,7 +11,7 @@ class SellerDeclarationPage extends StatefulWidget {
   const SellerDeclarationPage({super.key, required this.gateway});
 
   /// Null when no backend is bound (local mock, production disabled).
-  final Future<SellerDeclarationGateway?> gateway;
+  final Future<SellerDeclarationRepository?> gateway;
 
   @override
   State<SellerDeclarationPage> createState() => _SellerDeclarationPageState();
@@ -34,7 +34,7 @@ class _SellerDeclarationPageState extends State<SellerDeclarationPage> {
         ])
           id: TextEditingController(),
       };
-  SellerDeclarationGateway? _gateway;
+  SellerDeclarationRepository? _gateway;
   SellerStatus _status = SellerStatus.private;
   final Set<Dac7ActivityType> _activities = <Dac7ActivityType>{};
   int _revision = 0;
@@ -66,7 +66,7 @@ class _SellerDeclarationPageState extends State<SellerDeclarationPage> {
 
   Future<void> _load() async {
     try {
-      final SellerDeclarationGateway? gateway = await widget.gateway;
+      final SellerDeclarationRepository? gateway = await widget.gateway;
       _gateway = gateway;
       if (gateway == null) {
         _fail('unavailable');
@@ -118,7 +118,7 @@ class _SellerDeclarationPageState extends State<SellerDeclarationPage> {
   String _text(String id) => _fields[id]!.text.trim();
 
   Future<void> _save() async {
-    final SellerDeclarationGateway? gateway = _gateway;
+    final SellerDeclarationRepository? gateway = _gateway;
     if (gateway == null || !(_form.currentState?.validate() ?? false)) return;
     final SellerDeclaration declaration = SellerDeclaration(
       status: _status,

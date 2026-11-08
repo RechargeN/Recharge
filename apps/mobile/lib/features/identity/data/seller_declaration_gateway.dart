@@ -1,22 +1,19 @@
-import '../../booking/data/booking_callable_adapter.dart';
 import '../domain/entities/seller_declaration.dart';
+import '../domain/repositories/seller_declaration_repository.dart';
 
-/// A refused or failed declaration call. `code` is the server result code
-/// (`invalid_contract`, `revision_conflict`, `account_inactive`,
-/// `unauthenticated`, `unavailable`) or a transport code.
-final class SellerDeclarationFailure implements Exception {
-  const SellerDeclarationFailure(this.code);
-
-  final String code;
-
-  @override
-  String toString() => 'SellerDeclarationFailure($code)';
+/// The callable transport (the app adapts its Session-bound port to this);
+/// it throws [SellerDeclarationFailure] with the transport code on failure.
+abstract interface class SellerDeclarationPort {
+  Future<Map<String, Object?>> invoke(
+    String callableName,
+    Map<String, Object?> command,
+  );
 }
 
 /// ADR 0023 (2026-11-08): the author's own seller declaration over the
 /// `sellerDeclarationV1` callable. The transport adds the current Session;
 /// the server resolves the user from it, never from this payload.
-final class SellerDeclarationGateway {
+final class SellerDeclarationGateway implements SellerDeclarationRepository {
   SellerDeclarationGateway(this._port, {String Function()? requestId})
     : _requestId =
           requestId ??
@@ -24,9 +21,10 @@ final class SellerDeclarationGateway {
 
   static const String callable = 'sellerDeclarationV1';
 
-  final BookingCallablePort _port;
+  final SellerDeclarationPort _port;
   final String Function() _requestId;
 
+  @override
   Future<SellerDeclarationRecord> read() async {
     final Object? data = await _call(<String, Object?>{
       'schemaVersion': 1,
@@ -36,6 +34,7 @@ final class SellerDeclarationGateway {
     return _record(data);
   }
 
+  @override
   Future<SellerDeclarationRecord> declare(
     SellerDeclaration declaration, {
     required int expectedRevision,
@@ -55,12 +54,7 @@ final class SellerDeclarationGateway {
   }
 
   Future<Object?> _call(Map<String, Object?> command) async {
-    final Map<String, Object?> result;
-    try {
-      result = await _port.invoke(callable, command);
-    } on BookingCallableFailure catch (error) {
-      throw SellerDeclarationFailure(error.code);
-    }
+    final Map<String, Object?> result = await _port.invoke(callable, command);
     if (result['schemaVersion'] != 1) {
       throw const SellerDeclarationFailure('unavailable');
     }

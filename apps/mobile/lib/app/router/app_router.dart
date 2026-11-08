@@ -82,7 +82,7 @@ import '../../features/scenarios/presentation/pages/scenario_builder_page.dart';
 import '../../features/visited/presentation/pages/visited_places_page.dart';
 import 'details_route_parser.dart';
 import 'route_names.dart';
-import '../../features/auth/domain/personal_creation_hints.dart';
+import '../../features/create/domain/personal_creation_hints.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authController = ref.read(authControllerProvider);
@@ -220,7 +220,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: 'seller_declaration',
             path: RouteNames.sellerDeclaration,
             builder: (context, state) => SellerDeclarationPage(
-              gateway: createSellerDeclarationGateway(),
+              gateway: createSellerDeclarationRepository(),
             ),
           ),
           GoRoute(
@@ -525,6 +525,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             state.pathParameters['objectTypeId'] ?? '',
           ),
           seedParameters: state.uri.queryParameters,
+          onOpenPlaceServerTest: _placeServerTestEntry(context),
         ),
       ),
       GoRoute(
@@ -532,7 +533,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RouteNames.create,
         builder: (context, state) {
           if (state.uri.queryParameters.isNotEmpty) {
-            return CreatePage(seedParameters: state.uri.queryParameters);
+            return CreatePage(
+              seedParameters: state.uri.queryParameters,
+              onOpenPlaceServerTest: _placeServerTestEntry(context),
+            );
           }
           final user = authController.state.user;
           return CreateHubPage(
@@ -763,3 +767,11 @@ class ResolvedDetailsRoute extends ConsumerWidget {
     );
   }
 }
+
+/// N3a.2 (A34 2026-11-08): the way into the dev-cloud Place page, only where its
+/// own guard opens the test route (debug build, its define, the dev port).
+VoidCallback? _placeServerTestEntry(BuildContext context) =>
+    sl.isRegistered<PlacePublicationTestEntryGuard>() &&
+        sl<PlacePublicationTestEntryGuard>().allowed
+    ? () => context.push(RouteNames.testPlacePublication)
+    : null;

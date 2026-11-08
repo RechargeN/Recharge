@@ -78,6 +78,9 @@ void main() {
         ),
       );
     },
+    // Visual references are recorded on Windows; other platforms render fonts
+    // differently (CI 2026-11-08), so the comparison runs on Windows only.
+    skip: !Platform.isWindows,
   );
 }
 

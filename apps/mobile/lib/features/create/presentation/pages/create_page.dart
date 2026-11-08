@@ -38,17 +38,21 @@ import '../widgets/route/route_create_block.dart';
 import '../widgets/scenario/scenario_create_block.dart';
 import '../widgets/create_texts.dart';
 import '../../../../core/localization/recharge_formats.dart';
-import '../../../auth/domain/personal_creation_hints.dart';
+import '../../domain/personal_creation_hints.dart';
 
 class CreatePage extends ConsumerStatefulWidget {
   const CreatePage({
     super.key,
     this.initialObjectType,
     this.seedParameters = const <String, String>{},
+    this.onOpenPlaceServerTest,
   });
 
   final CreateObjectType? initialObjectType;
   final Map<String, String> seedParameters;
+
+  /// N3a.2: the app opens the dev-cloud Place page; null keeps it hidden.
+  final VoidCallback? onOpenPlaceServerTest;
 
   @override
   ConsumerState<CreatePage> createState() => _CreatePageState();
@@ -258,6 +262,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                 state: state,
                 onPublished: () =>
                     ref.read(appRouterProvider).go(RouteNames.createSuccess),
+                onOpenServerTest: widget.onOpenPlaceServerTest,
               ),
             ] else if (state.draft.objectType ==
                 CreateObjectType.findPeople) ...<Widget>[
