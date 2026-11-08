@@ -638,6 +638,7 @@ success | cancelled | failure
 | `session_limit_reached` | `failed_precondition` | Session policy blocks issuance |
 | `identity_verification_required` | `failed_precondition` | ADR 0023: the operation takes money or reserves places and the server identity-verification fact is missing (no Creator role exists) |
 | `creator_verification_required` | `failed_precondition` | Legacy name of the same refusal; still accepted when read during the transition, never emitted |
+| `seller_declaration_required` | `failed_precondition` | ADR 0023 (2026-11-08): paid or bookable content leaves the draft without the author's DSA Art. 30 seller declaration (`sellerDeclarationV1`) |
 | `creator_verification_pending` | `failed_precondition` | Decision is pending |
 | `creator_verification_expired` | `failed_precondition` | Reverification is required |
 | `page_limit_reached` | `failed_precondition` | No page is created; request path may be offered |
