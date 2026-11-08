@@ -29,6 +29,28 @@ const entry = "lib/src/dev_content_media_entry.js";
 const forbidden =
   /(^|\/)(index\.js$|notifications|booking_(create|cancel|reconfirm)|stand\/|test\/)/u;
 const uidPattern = /^[A-Za-z0-9]{20,128}$/u;
+// The JSON Schemas each contract registry of the closure reads at run time.
+// 2026-11-08: the cloud runtime failed with ENOENT — the registries looked for
+// packages/api_contracts outside the deployed source. An unknown registry stops.
+const schemaGroups = Object.freeze({
+  "lib/src/contracts/schema_registry.js": "platform",
+  "lib/src/contracts/content_schema_registry.js": "content",
+  "lib/src/contracts/media_schema_registry.js": "media",
+});
+
+/** Contract groups whose schemas the closure needs, in a stable order. */
+export function closureSchemaGroups(files) {
+  const groups = new Set();
+  for (const rel of files) {
+    if (!/^lib\/src\/contracts\/[a-z_]*schema_registry\.js$/u.test(rel))
+      continue;
+    const group = schemaGroups[rel];
+    if (group === undefined)
+      throw new Error(`no staged schemas for contract registry ${rel}`);
+    groups.add(group);
+  }
+  return [...groups].sort();
+}
 
 export function importClosure(functionsRoot, start = entry) {
   const seen = new Set();
@@ -148,6 +170,21 @@ export function stageRuntime({
   );
   for (const rel of files)
     write(rel, readFileSync(path.join(functionsRoot, rel)));
+  const schemaRoot = path.resolve(
+    backend,
+    "..",
+    "..",
+    "packages",
+    "api_contracts",
+    "schema",
+  );
+  for (const group of closureSchemaGroups(files))
+    for (const name of readdirSync(path.join(schemaRoot, group, "v1")).sort())
+      if (name.endsWith(".schema.json"))
+        write(
+          `contracts/${group}/v1/${name}`,
+          readFileSync(path.join(schemaRoot, group, "v1", name)),
+        );
   write(envFile, env);
   const digest = treeDigest(outDir);
   const manifest = {

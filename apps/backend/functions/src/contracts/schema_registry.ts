@@ -8,21 +8,12 @@ import type { FormatsPlugin } from 'ajv-formats';
 
 import { isIanaTimezone } from '../shared/utc_instant.js';
 
+import { contractSchemaRoot } from './contract_schema_root.js';
 const require = createRequire(import.meta.url);
 const loadedFormats = require('ajv-formats') as FormatsPlugin | { readonly default: FormatsPlugin };
 const addFormats = typeof loadedFormats === 'function' ? loadedFormats : loadedFormats.default;
 
-export const platformContractRoot = path.resolve(
-  process.cwd(),
-  '..',
-  '..',
-  '..',
-  'packages',
-  'api_contracts',
-  'schema',
-  'platform',
-  'v1',
-);
+export const platformContractRoot = contractSchemaRoot('platform');
 
 export const platformSchemaFiles = [
   'request_context.schema.json',

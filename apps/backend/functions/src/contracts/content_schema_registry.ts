@@ -6,21 +6,12 @@ import path from 'node:path';
 import { Ajv2020, type ValidateFunction } from 'ajv/dist/2020.js';
 import type { FormatsPlugin } from 'ajv-formats';
 
+import { contractSchemaRoot } from './contract_schema_root.js';
 const require = createRequire(import.meta.url);
 const loadedFormats = require('ajv-formats') as FormatsPlugin | { readonly default: FormatsPlugin };
 const addFormats = typeof loadedFormats === 'function' ? loadedFormats : loadedFormats.default;
 
-export const contentContractRoot = path.resolve(
-  process.cwd(),
-  '..',
-  '..',
-  '..',
-  'packages',
-  'api_contracts',
-  'schema',
-  'content',
-  'v1',
-);
+export const contentContractRoot = contractSchemaRoot('content');
 export const contentSchemaFiles = [
   'content_common.schema.json',
   'content_draft.schema.json',

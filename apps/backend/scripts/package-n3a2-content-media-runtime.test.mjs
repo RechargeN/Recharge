@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 import {
+  closureSchemaGroups,
   closurePackages,
   envFile,
   renderEnv,
@@ -62,6 +63,14 @@ test("stage: the compiled closure of the dev entry, verified against the owner r
     });
     const names = manifest.files.map((f) => f.name);
     assert.ok(names.includes("lib/src/dev_content_media_entry.js"));
+    // The registries' schemas travel with the bundle (2026-11-08 ENOENT in dev).
+    for (const file of [
+      "contracts/platform/v1/request_context.schema.json",
+      "contracts/content/v1/content_command.schema.json",
+      "contracts/media/v1/media_command.schema.json",
+    ])
+      assert.ok(names.includes(file), file);
+    assert.ok(!names.some((n) => n.includes("/fixtures/")));
     assert.ok(!names.includes("lib/src/index.js"));
     assert.ok(!names.some((n) => /notifications|stand\//u.test(n)));
     assert.deepEqual(
@@ -114,4 +123,18 @@ test("every package the closure loads is a pinned runtime dependency", () => {
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("an unknown contract registry in the closure stops the staging", () => {
+  assert.deepEqual(
+    closureSchemaGroups([
+      "lib/src/contracts/content_schema_registry.js",
+      "lib/src/contracts/schema_registry.js",
+      "lib/src/other.js",
+    ]),
+    ["content", "platform"],
+  );
+  assert.throws(() =>
+    closureSchemaGroups(["lib/src/contracts/identity_schema_registry.js"]),
+  );
 });
