@@ -1,6 +1,10 @@
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
+// Owner decision 2026-11-08: one confirmed delivery test covers a working week
+// (was 24 hours), so repeated cloud runs do not each wait for a new e-mail.
+export const receiptValidityMs = 7 * 24 * 60 * 60 * 1000;
+
 export function inspectReceipt(query, receipt, now = new Date()) {
   if (!/^recharge-dev-[a-z0-9]{4,20}$/u.test(query.projectId ?? ""))
     return false;
@@ -53,7 +57,7 @@ export function inspectReceipt(query, receipt, now = new Date()) {
     Number.isFinite(Date.parse(receipt.budgetMessagePublishedAtUtc)) &&
     Date.parse(receipt.budgetMessagePublishedAtUtc) <= now.getTime() &&
     now.getTime() - Date.parse(receipt.budgetMessagePublishedAtUtc) <=
-      24 * 60 * 60 * 1000 &&
+      receiptValidityMs &&
     receipt.budgetConfigurationVerified === true &&
     receipt.channelDeliveryVerified === true &&
     receipt.ownerAcknowledged === true &&
@@ -62,7 +66,7 @@ export function inspectReceipt(query, receipt, now = new Date()) {
     receipt.testKind === "monitoring-channel-delivery" &&
     Number.isFinite(time) &&
     time <= now.getTime() &&
-    now.getTime() - time <= 24 * 60 * 60 * 1000
+    now.getTime() - time <= receiptValidityMs
   );
 }
 

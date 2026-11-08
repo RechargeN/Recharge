@@ -60,7 +60,7 @@ for (const [label, change] of [
   ],
   [
     "stale budget message",
-    { budgetMessagePublishedAtUtc: "2026-11-01T00:00:00Z" },
+    { budgetMessagePublishedAtUtc: "2026-10-28T00:00:00Z" },
   ],
   [
     "future budget message",
@@ -75,7 +75,7 @@ for (const [label, change] of [
     "wrong channel",
     { channelName: "projects/recharge-dev-other0/notificationChannels/one" },
   ],
-  ["stale", { deliveredAtUtc: "2026-11-01T20:00:00Z" }],
+  ["stale", { deliveredAtUtc: "2026-10-28T20:00:00Z" }],
   ["future", { deliveredAtUtc: "2026-11-05T01:00:00Z" }],
   ["configuration-only", { testKind: "configuration-only" }],
   ["no actual evidence ref", { ownerAckEvidenceRef: "" }],
