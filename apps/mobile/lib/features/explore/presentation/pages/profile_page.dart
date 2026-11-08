@@ -149,6 +149,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               title: context.l10n.profileSavedList,
               onTap: () => context.push(RouteNames.favorites),
             ),
+            // ADR 0023 (DSA Art. 30): needed before paid or bookable content.
+            _ProfileActionRow(
+              icon: Icons.storefront_outlined,
+              title: context.l10n.sellerDataTitle,
+              subtitle: context.l10n.sellerDataIntro,
+              onTap: () => context.push(RouteNames.sellerDeclaration),
+            ),
             if (!presentation.canShowCreatorTools)
               _ProfileActionRow(
                 icon: Icons.workspace_premium_outlined,

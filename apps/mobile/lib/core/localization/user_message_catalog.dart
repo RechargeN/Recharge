@@ -31,6 +31,8 @@ abstract final class UserMessageCatalog {
       l.contentErrorPublisherNotEligible;
   static String _verification(AppLocalizations l) =>
       l.contentErrorCreatorVerificationRequired;
+  static String _sellerDeclaration(AppLocalizations l) =>
+      l.contentErrorSellerDeclarationRequired;
   static String _membership(AppLocalizations l) =>
       l.contentErrorMembershipInactive;
   static String _importChanged(AppLocalizations l) => l.importErrorChanged;
@@ -81,6 +83,7 @@ abstract final class UserMessageCatalog {
     'creator_verification_required': _verification,
     // ADR 0023: the new name of the same refusal.
     'identity_verification_required': _verification,
+    'seller_declaration_required': _sellerDeclaration,
     'membership_inactive': _membership,
     'type_disabled': (l) => l.contentErrorTypeDisabled,
     'content_type_unsupported': (l) => l.contentErrorTypeDisabled,
@@ -143,6 +146,7 @@ abstract final class UserMessageCatalog {
         'creator_verification_required': _verification,
         // ADR 0023: the new name of the same refusal.
         'identity_verification_required': _verification,
+        'seller_declaration_required': _sellerDeclaration,
         'creator_verification_unavailable': (l) =>
             l.contentErrorCreatorVerificationUnavailable,
         'membership_inactive': _membership,
@@ -298,6 +302,7 @@ abstract final class UserMessageCatalog {
         'creator_verification_required': _verification,
         // ADR 0023: the new name of the same refusal.
         'identity_verification_required': _verification,
+        'seller_declaration_required': _sellerDeclaration,
         'creator_verification_unavailable': _unavailable,
         'feature_disabled': _featureOff,
         'invalid_contract': _invalid,

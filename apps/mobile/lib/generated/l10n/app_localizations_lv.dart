@@ -13540,4 +13540,76 @@ class AppLocalizationsLv extends AppLocalizations {
   @override
   String get createContentLanguageHelp =>
       'Lasītāji varēs tulkot tekstu tikai tad, ja izvēlēsieties tā valodu.';
+
+  @override
+  String get sellerDataTitle => 'Pārdevēja dati';
+
+  @override
+  String get sellerDataIntro =>
+      'Nepieciešami pirms maksas vai rezervējama satura publicēšanas (ES Digitālo pakalpojumu akts).';
+
+  @override
+  String get sellerStatusPrivate => 'Privātpersona';
+
+  @override
+  String get sellerStatusTrader => 'Uzņēmējs';
+
+  @override
+  String get sellerEmail => 'Saziņas e-pasts';
+
+  @override
+  String get sellerPhone => 'Saziņas tālrunis (+371…)';
+
+  @override
+  String get sellerContactHint => 'Vismaz viens kontakts.';
+
+  @override
+  String get sellerLegalName => 'Juridiskais nosaukums';
+
+  @override
+  String get sellerRegistrationNumber => 'Reģistrācijas numurs';
+
+  @override
+  String get sellerVatId => 'PVN numurs (neobligāti)';
+
+  @override
+  String get sellerAddressLine => 'Adrese';
+
+  @override
+  String get sellerCity => 'Pilsēta';
+
+  @override
+  String get sellerPostalCode => 'Pasta indekss';
+
+  @override
+  String get sellerCountryCode => 'Valsts kods (LV)';
+
+  @override
+  String get sellerDac7Title => 'Ko jūs piedāvājat (ES nodokļu pārskatiem)';
+
+  @override
+  String get sellerDac7Services => 'Personiski pakalpojumi';
+
+  @override
+  String get sellerDac7Rental => 'Preču noma';
+
+  @override
+  String get sellerSave => 'Saglabāt';
+
+  @override
+  String get sellerSaved => 'Pārdevēja dati saglabāti.';
+
+  @override
+  String get sellerUnavailable => 'Pārdevēja dati pašlaik nav pieejami.';
+
+  @override
+  String get sellerInvalid => 'Pārbaudiet laukus.';
+
+  @override
+  String get sellerConflict =>
+      'Dati mainīti citur. Atjaunojiet un mēģiniet vēlreiz.';
+
+  @override
+  String get contentErrorSellerDeclarationRequired =>
+      'Lai publicētu maksas vai rezervējamu saturu, aizpildiet pārdevēja datus profilā.';
 }

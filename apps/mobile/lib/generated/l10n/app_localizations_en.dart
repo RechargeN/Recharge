@@ -13368,4 +13368,76 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get createContentLanguageHelp =>
       'Readers can translate the text only if you choose its language.';
+
+  @override
+  String get sellerDataTitle => 'Seller details';
+
+  @override
+  String get sellerDataIntro =>
+      'Needed before you publish paid or bookable content (EU Digital Services Act).';
+
+  @override
+  String get sellerStatusPrivate => 'Private person';
+
+  @override
+  String get sellerStatusTrader => 'Business (trader)';
+
+  @override
+  String get sellerEmail => 'Contact email';
+
+  @override
+  String get sellerPhone => 'Contact phone (+371…)';
+
+  @override
+  String get sellerContactHint => 'At least one contact.';
+
+  @override
+  String get sellerLegalName => 'Legal name';
+
+  @override
+  String get sellerRegistrationNumber => 'Registration number';
+
+  @override
+  String get sellerVatId => 'VAT number (optional)';
+
+  @override
+  String get sellerAddressLine => 'Address';
+
+  @override
+  String get sellerCity => 'City';
+
+  @override
+  String get sellerPostalCode => 'Postal code';
+
+  @override
+  String get sellerCountryCode => 'Country code (LV)';
+
+  @override
+  String get sellerDac7Title => 'What you offer (for EU tax reporting)';
+
+  @override
+  String get sellerDac7Services => 'Personal services';
+
+  @override
+  String get sellerDac7Rental => 'Rental of goods';
+
+  @override
+  String get sellerSave => 'Save';
+
+  @override
+  String get sellerSaved => 'Seller details saved.';
+
+  @override
+  String get sellerUnavailable => 'Seller details are not available right now.';
+
+  @override
+  String get sellerInvalid => 'Check the fields.';
+
+  @override
+  String get sellerConflict =>
+      'Details were changed elsewhere. Reload and try again.';
+
+  @override
+  String get contentErrorSellerDeclarationRequired =>
+      'Fill in your seller details in the profile to publish paid or bookable content.';
 }

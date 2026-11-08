@@ -13618,4 +13618,77 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get createContentLanguageHelp =>
       'Читатели смогут перевести текст, только если вы выберете его язык.';
+
+  @override
+  String get sellerDataTitle => 'Данные продавца';
+
+  @override
+  String get sellerDataIntro =>
+      'Нужны перед публикацией платного или бронируемого контента (Акт ЕС о цифровых услугах).';
+
+  @override
+  String get sellerStatusPrivate => 'Частное лицо';
+
+  @override
+  String get sellerStatusTrader => 'Предприниматель';
+
+  @override
+  String get sellerEmail => 'Email для связи';
+
+  @override
+  String get sellerPhone => 'Телефон для связи (+371…)';
+
+  @override
+  String get sellerContactHint => 'Хотя бы один контакт.';
+
+  @override
+  String get sellerLegalName => 'Наименование';
+
+  @override
+  String get sellerRegistrationNumber => 'Регистрационный номер';
+
+  @override
+  String get sellerVatId => 'Номер НДС (необязательно)';
+
+  @override
+  String get sellerAddressLine => 'Адрес';
+
+  @override
+  String get sellerCity => 'Город';
+
+  @override
+  String get sellerPostalCode => 'Почтовый индекс';
+
+  @override
+  String get sellerCountryCode => 'Код страны (LV)';
+
+  @override
+  String get sellerDac7Title =>
+      'Что вы предлагаете (для налоговой отчётности ЕС)';
+
+  @override
+  String get sellerDac7Services => 'Личные услуги';
+
+  @override
+  String get sellerDac7Rental => 'Аренда вещей';
+
+  @override
+  String get sellerSave => 'Сохранить';
+
+  @override
+  String get sellerSaved => 'Данные продавца сохранены.';
+
+  @override
+  String get sellerUnavailable => 'Данные продавца сейчас недоступны.';
+
+  @override
+  String get sellerInvalid => 'Проверьте поля.';
+
+  @override
+  String get sellerConflict =>
+      'Данные изменились в другом месте. Обновите и попробуйте снова.';
+
+  @override
+  String get contentErrorSellerDeclarationRequired =>
+      'Чтобы публиковать платный или бронируемый контент, заполните данные продавца в профиле.';
 }

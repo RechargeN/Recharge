@@ -19917,6 +19917,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Readers can translate the text only if you choose its language.'**
   String get createContentLanguageHelp;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Seller details'**
+  String get sellerDataTitle;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Needed before you publish paid or bookable content (EU Digital Services Act).'**
+  String get sellerDataIntro;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Private person'**
+  String get sellerStatusPrivate;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Business (trader)'**
+  String get sellerStatusTrader;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Contact email'**
+  String get sellerEmail;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Contact phone (+371…)'**
+  String get sellerPhone;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'At least one contact.'**
+  String get sellerContactHint;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Legal name'**
+  String get sellerLegalName;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Registration number'**
+  String get sellerRegistrationNumber;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'VAT number (optional)'**
+  String get sellerVatId;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get sellerAddressLine;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get sellerCity;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Postal code'**
+  String get sellerPostalCode;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Country code (LV)'**
+  String get sellerCountryCode;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'What you offer (for EU tax reporting)'**
+  String get sellerDac7Title;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Personal services'**
+  String get sellerDac7Services;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Rental of goods'**
+  String get sellerDac7Rental;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get sellerSave;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Seller details saved.'**
+  String get sellerSaved;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Seller details are not available right now.'**
+  String get sellerUnavailable;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Check the fields.'**
+  String get sellerInvalid;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Details were changed elsewhere. Reload and try again.'**
+  String get sellerConflict;
+
+  /// ADR 0023 seller declaration (DSA Art. 30).
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in your seller details in the profile to publish paid or bookable content.'**
+  String get contentErrorSellerDeclarationRequired;
 }
 
 class _AppLocalizationsDelegate

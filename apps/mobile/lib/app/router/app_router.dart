@@ -1,5 +1,7 @@
 import '../di/session_publication_composition.dart';
 import '../di/class_workshop_publication_composition.dart';
+import '../../features/identity/presentation/pages/seller_declaration_page.dart';
+import '../di/seller_declaration_composition.dart';
 import '../presentation/class_workshop_publication_panel.dart';
 import '../di/find_people_publication_composition.dart';
 import '../presentation/find_people_publication_panel.dart';
@@ -213,6 +215,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: 'profile_workspace',
             path: RouteNames.profileWorkspace,
             builder: (context, state) => const ProfileWorkspacePage(),
+          ),
+          GoRoute(
+            name: 'seller_declaration',
+            path: RouteNames.sellerDeclaration,
+            builder: (context, state) => SellerDeclarationPage(
+              gateway: createSellerDeclarationGateway(),
+            ),
           ),
           GoRoute(
             name: 'visited_places',
@@ -565,6 +574,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isProtected =
           state.matchedLocation == RouteNames.profile ||
           state.matchedLocation == RouteNames.profileWorkspace ||
+          state.matchedLocation == RouteNames.sellerDeclaration ||
           state.matchedLocation == RouteNames.visitedPlaces ||
           state.matchedLocation == RouteNames.create ||
           state.matchedLocation.startsWith('${RouteNames.createObject}/') ||

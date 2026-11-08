@@ -15227,5 +15227,97 @@
   "createContentLanguageHelp": "Readers can translate the text only if you choose its language.",
   "@createContentLanguageHelp": {
     "description": "Create: why the author should choose the text language."
+  },
+  "sellerDataTitle": "Seller details",
+  "@sellerDataTitle": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerDataIntro": "Needed before you publish paid or bookable content (EU Digital Services Act).",
+  "@sellerDataIntro": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerStatusPrivate": "Private person",
+  "@sellerStatusPrivate": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerStatusTrader": "Business (trader)",
+  "@sellerStatusTrader": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerEmail": "Contact email",
+  "@sellerEmail": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerPhone": "Contact phone (+371…)",
+  "@sellerPhone": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerContactHint": "At least one contact.",
+  "@sellerContactHint": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerLegalName": "Legal name",
+  "@sellerLegalName": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerRegistrationNumber": "Registration number",
+  "@sellerRegistrationNumber": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerVatId": "VAT number (optional)",
+  "@sellerVatId": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerAddressLine": "Address",
+  "@sellerAddressLine": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerCity": "City",
+  "@sellerCity": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerPostalCode": "Postal code",
+  "@sellerPostalCode": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerCountryCode": "Country code (LV)",
+  "@sellerCountryCode": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerDac7Title": "What you offer (for EU tax reporting)",
+  "@sellerDac7Title": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerDac7Services": "Personal services",
+  "@sellerDac7Services": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerDac7Rental": "Rental of goods",
+  "@sellerDac7Rental": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerSave": "Save",
+  "@sellerSave": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerSaved": "Seller details saved.",
+  "@sellerSaved": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerUnavailable": "Seller details are not available right now.",
+  "@sellerUnavailable": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerInvalid": "Check the fields.",
+  "@sellerInvalid": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "sellerConflict": "Details were changed elsewhere. Reload and try again.",
+  "@sellerConflict": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
+  },
+  "contentErrorSellerDeclarationRequired": "Fill in your seller details in the profile to publish paid or bookable content.",
+  "@contentErrorSellerDeclarationRequired": {
+    "description": "ADR 0023 seller declaration (DSA Art. 30)."
   }
 }

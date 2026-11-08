@@ -70,6 +70,7 @@ class RouteNames {
   static const String signIn = '/auth/sign-in';
   static const String profile = '/profile';
   static const String profileWorkspace = '/profile/workspace';
+  static const String sellerDeclaration = '/profile/seller';
   static const String visitedPlaces = '/profile/visited';
   static const String create = '/create';
   static const String createObject = '/create/new';

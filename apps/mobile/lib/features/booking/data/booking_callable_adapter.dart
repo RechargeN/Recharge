@@ -590,6 +590,8 @@ final class BookingBackendEndpoint {
 }
 
 const Set<String> _bookingCallableAllowlist = <String>{
+  // ADR 0023 (2026-11-08): the author's seller declaration (Emulator only).
+  'sellerDeclarationV1',
   'establishIdentitySessionV1',
   'refreshIdentitySessionV1',
   'recoverIdentitySessionsV1',
