@@ -1,11 +1,17 @@
 import '../../../../core/localization/taxonomy_labels.dart';
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'create_media_pick_actions.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../../../app/di/place_publication_composition.dart';
+import '../../../../app/di/service_locator.dart';
+import '../../../../app/router/route_names.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
 import '../../../../core/parsing/input_parsers.dart';
@@ -143,6 +149,15 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             ),
           ),
         ),
+        // A34 2026-11-08: a blocked step named no field. List the errors that
+        // block this step, as the last step does for publishing.
+        if (_stepErrors.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 12),
+          _ValidationSummary(
+            key: const ValueKey<String>('place-step-issues'),
+            issues: _stepErrors,
+          ),
+        ],
         const SizedBox(height: 16),
         IgnorePointer(
           ignoring: !widget.controller.canManagePlace,
@@ -486,6 +501,17 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
     );
   }
 
+  List<PlaceValidationIssue> get _stepErrors {
+    final Set<String> sections = placeStepSections(widget.state.placeStep);
+    return widget.state.placeValidationIssues
+        .where(
+          (PlaceValidationIssue issue) =>
+              issue.severity == PlaceValidationSeverity.error &&
+              sections.contains(issue.sectionId),
+        )
+        .toList(growable: false);
+  }
+
   Widget _visitStep(PlaceDraftData place, PlaceCreationPolicy policy) {
     final PlaceLocationDraft location = place.location;
     return Column(
@@ -518,6 +544,13 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                             ),
                           ),
                         },
+                  // A34 2026-11-08: inside the scrolling form the map got no
+                  // drag or zoom, so a misplaced pin could not be moved back.
+                  gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                    Factory<OneSequenceGestureRecognizer>(
+                      EagerGestureRecognizer.new,
+                    ),
+                  },
                   onTap: (LatLng point) {
                     widget.controller.updatePlaceCoordinates(
                       latitude: point.latitude.toStringAsFixed(6),
@@ -1310,6 +1343,19 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
             label: Text(context.l10n.createPlaceWarningsReviewed),
           ),
         ],
+        // N3a.2 (A34 2026-11-08): the dev-cloud draft path had no way in from
+        // the app. Shown only where its own guard lets the test route open
+        // (debug build, its define, the dev port); never in release.
+        if (sl.isRegistered<PlacePublicationTestEntryGuard>() &&
+            sl<PlacePublicationTestEntryGuard>().allowed) ...<Widget>[
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            key: const ValueKey<String>('place-server-test-entry'),
+            onPressed: () => context.push(RouteNames.testPlacePublication),
+            icon: const Icon(Icons.cloud_upload_outlined),
+            label: Text(context.l10n.publicationPageTitle('place')),
+          ),
+        ],
       ],
     );
   }
@@ -1766,7 +1812,7 @@ class _PreviewRow extends StatelessWidget {
 }
 
 class _ValidationSummary extends StatelessWidget {
-  const _ValidationSummary({required this.issues});
+  const _ValidationSummary({required this.issues, super.key});
 
   final List<PlaceValidationIssue> issues;
 

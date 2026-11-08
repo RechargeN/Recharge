@@ -107,6 +107,87 @@ void main() {
       expect(controller.state.placeEnrichmentProposal, isNull);
     },
   );
+
+  // A34 2026-11-08: a blocked step said only "check the required fields".
+  fullPageTestWidgets('a blocked step lists what blocks it', (
+    WidgetTester tester,
+  ) async {
+    final _MemoryRepository repository = _MemoryRepository();
+    final CreateController controller = CreateController(
+      loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+      saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+      publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+      analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
+      placeEnrichmentCoordinator: PlaceEnrichmentCoordinator(
+        generateProposal: GeneratePlaceEnrichmentProposalUseCase(
+          MockPlaceEnrichmentDataSource(),
+        ),
+      ),
+      runtimeDefaults: const CreateRuntimeDefaults(
+        marketCityId: 'riga',
+        timezone: 'Europe/Riga',
+        country: 'LV',
+        city: 'Riga',
+        currency: 'EUR',
+      ),
+    );
+    addTearDown(controller.dispose);
+    await controller.ensureLoaded(
+      userId: 'user-1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'Creator',
+      capabilities: const <String>['create.place'],
+    );
+    controller.setObjectType(CreateObjectType.place);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AnimatedBuilder(
+            animation: controller,
+            builder: (BuildContext context, Widget? child) {
+              return SingleChildScrollView(
+                child: PlaceCreateBlock(
+                  controller: controller,
+                  state: controller.state,
+                  onPublished: () {},
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('place-step-issues')),
+      findsNothing,
+    );
+
+    await tester.ensureVisible(
+      find.byKey(const ValueKey<String>('place-next-step')),
+    );
+    await tester.tap(find.byKey(const ValueKey<String>('place-next-step')));
+    await tester.pumpAndSettle();
+
+    expect(controller.state.placeStep, 0);
+    expect(
+      find.byKey(const ValueKey<String>('place-step-issues')),
+      findsOneWidget,
+    );
+    // Only errors of this step: none from the later Visit step.
+    expect(find.byIcon(Icons.error_outline), findsWidgets);
+    expect(
+      controller.state.placeValidationIssues.any(
+        (issue) => issue.sectionId == 'location',
+      ),
+      isTrue,
+    );
+    expect(find.text('Location'), findsNothing);
+    // Let the draft autosave timer run out.
+    await tester.pump(const Duration(seconds: 2));
+  });
 }
 
 class _NoopAnalyticsService implements AnalyticsService {

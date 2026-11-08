@@ -131,6 +131,14 @@ import '../../domain/usecases/validate_session_draft_usecase.dart';
 import '../create_message_ids.dart';
 import '../state/create_notice.dart';
 
+/// Validation sections a Place step blocks on (the last step blocks nothing
+/// here: publishing runs its own full check).
+Set<String> placeStepSections(int step) => switch (step) {
+  0 => const <String>{'identity', 'category'},
+  1 => const <String>{'location', 'hours', 'planning', 'amenities', 'pricing'},
+  _ => const <String>{},
+};
+
 class CreateController extends ChangeNotifier {
   CreateController({
     required LoadCreateDraftUseCase loadCreateDraftUseCase,
@@ -3082,11 +3090,7 @@ class CreateController extends ChangeNotifier {
     final int nextStep = step.clamp(0, 2);
     if (nextStep > _state.placeStep) {
       final List<PlaceValidationIssue> issues = _placeIssues();
-      final Set<String> currentSections = switch (_state.placeStep) {
-        0 => <String>{'identity', 'category'},
-        1 => <String>{'location', 'hours', 'planning', 'amenities', 'pricing'},
-        _ => <String>{},
-      };
+      final Set<String> currentSections = placeStepSections(_state.placeStep);
       final List<PlaceValidationIssue> blocking = issues
           .where(
             (PlaceValidationIssue issue) =>
