@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 import {
+  closurePackages,
   envFile,
   renderEnv,
   stageRuntime,
@@ -87,6 +88,29 @@ test("stage: the compiled closure of the dev entry, verified against the owner r
       verifyStage({ stageDir: stage, env: record(dir, manifest) }),
       [],
     );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("every package the closure loads is a pinned runtime dependency", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "n3a2-pkgs-"));
+  try {
+    const manifest = stageRuntime({
+      outDir: path.join(dir, "stage"),
+      runtimeEnabled: false,
+      allowedUids: [uid],
+    });
+    const used = closurePackages(
+      path.join(dir, "stage"),
+      manifest.files.map((f) => f.name).filter((n) => n.endsWith(".js")),
+    );
+    assert.deepEqual(used, [
+      "ajv",
+      "ajv-formats",
+      "firebase-admin",
+      "firebase-functions",
+    ]);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

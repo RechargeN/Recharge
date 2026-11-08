@@ -63,6 +63,26 @@ export function importClosure(functionsRoot, start = entry) {
   return [...seen].sort();
 }
 
+/** Bare packages the compiled closure loads (import, dynamic import or require). */
+export function closurePackages(functionsRoot, files) {
+  const names = new Set();
+  for (const rel of files) {
+    const source = readFileSync(path.join(functionsRoot, rel), "utf8");
+    for (const m of source.matchAll(
+      /(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+|\brequire\s*\(\s*)['"]([^'"]+)['"]/gu,
+    )) {
+      const spec = m[1];
+      if (spec.startsWith(".") || spec.startsWith("node:")) continue;
+      names.add(
+        spec.startsWith("@")
+          ? spec.split("/").slice(0, 2).join("/")
+          : spec.split("/")[0],
+      );
+    }
+  }
+  return [...names].sort();
+}
+
 export function renderEnv({ runtimeEnabled, allowedUids }) {
   if (typeof runtimeEnabled !== "boolean")
     throw new Error("runtimeEnabled must be boolean");
@@ -106,6 +126,12 @@ export function stageRuntime({
     throw new Error("runtime dependencies must be exact versions");
   const env = renderEnv({ runtimeEnabled, allowedUids });
   const files = importClosure(functionsRoot);
+  // 2026-11-08: the first cloud analysis failed on ajv/ajv-formats missing here.
+  const missing = closurePackages(functionsRoot, files).filter(
+    (name) => !(name in pkg.dependencies),
+  );
+  if (missing.length > 0)
+    throw new Error(`runtime package lacks ${missing.join(", ")}`);
   if (existsSync(outDir))
     for (const name of readdirSync(outDir))
       if (name !== "node_modules")
