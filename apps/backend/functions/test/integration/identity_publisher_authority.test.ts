@@ -292,7 +292,8 @@ void test('verified Creator obtains exact personal and page Publisher authority 
     requiredCapability: 'content.publish',
     nowUtc: '2026-09-22T00:00:03.000Z',
   });
-  assert.equal(unverified.reason, 'creator_verification_required');
+  // ADR 0023: an unverified User is a personal publisher (money is checked by Content).
+  assert.equal(unverified.reason, 'eligible');
   await authority.creatorVerification.submit({
     userId: ids.user1,
     verificationId: ids.verification1,
@@ -530,14 +531,21 @@ void test('Admin role is never sufficient Publisher authority', async () => {
     evaluatedAtUtc: '2026-09-22T00:00:02.000Z',
     expiresAtUtc: '2026-09-22T00:05:02.000Z',
   });
-  const decision = await authority.publishers.evaluate({
+  // ADR 0023: Admin is also a User — personal authority like any User, nothing more.
+  const personal = await authority.publishers.evaluate({
     snapshot,
     requestedPublisher: authority.publishers.personalRef(ids.user1),
     requiredCapability: 'content.publish',
     nowUtc: '2026-09-22T00:00:03.000Z',
   });
-  assert.equal(decision.eligible, false);
-  assert.equal(decision.reason, 'creator_verification_required');
+  assert.equal(personal.reason, 'eligible');
+  const page = await authority.publishers.evaluate({
+    snapshot,
+    requestedPublisher: authority.publishers.pageRef(ids.page1),
+    requiredCapability: 'content.publish',
+    nowUtc: '2026-09-22T00:00:03.000Z',
+  });
+  assert.equal(page.eligible, false);
 });
 
 void test('page grants are role-bounded and suspended pages become restricted', async () => {

@@ -13,7 +13,8 @@ export interface AccountV1 {
   readonly schemaVersion: 1;
   readonly userId: EntityId;
   readonly status: AccountStatus;
-  readonly systemRoles: readonly ('User' | 'Creator' | 'Admin')[];
+  /** ADR 0023: User and Admin only; a stored legacy `Creator` is read as `User`. */
+  readonly systemRoles: readonly ('User' | 'Admin')[];
   readonly revision: number;
   readonly securityRevision: number;
   readonly revokeBeforeSecurityRevision: number;
@@ -115,6 +116,7 @@ export interface PublisherEligibilityV1 {
     | 'eligible'
     | 'account_inactive'
     | 'creator_verification_required'
+    | 'identity_verification_required'
     | 'creator_verification_unavailable'
     | 'membership_inactive'
     | 'capability_denied'

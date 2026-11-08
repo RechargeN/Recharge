@@ -274,6 +274,7 @@ export type ContentFailureCode =
   | 'capability_denied'
   | 'publisher_not_eligible'
   | 'creator_verification_required'
+  | 'identity_verification_required'
   | 'membership_inactive'
   | 'type_disabled'
   | 'content_type_unsupported'

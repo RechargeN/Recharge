@@ -48,8 +48,8 @@ export class IdentityPublisherEligibility implements PublisherEligibilityPort {
         requiredCapability: request.requiredCapability,
         nowUtc: request.nowUtc,
         identityVerificationRequired: identityVerificationRequired(
-          request.typeId,
           request.publisherRef,
+          request.involvesMoney === true,
         ),
       }),
     );

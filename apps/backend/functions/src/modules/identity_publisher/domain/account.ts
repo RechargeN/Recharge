@@ -25,13 +25,29 @@ export function createAccount(
   });
 }
 
-export function setCreatorRole(account: Account, granted: boolean, nowUtc: string): Account {
-  const roles = new Set(account.systemRoles);
-  if (granted) roles.add('Creator');
-  else roles.delete('Creator');
+/**
+ * ADR 0023: global roles are `User` and `Admin`. A legacy `Creator` (written
+ * before ADR 0023) reads as `User` and grants nothing more.
+ */
+export function normalizeSystemRoles(roles: readonly string[]): readonly ('User' | 'Admin')[] {
+  return roles.includes('Admin') ? ['Admin', 'User'] : ['User'];
+}
+
+export function normalizeLegacyAccount(account: Account): Account {
+  const roles = account.systemRoles as readonly string[];
+  if (!roles.includes('Creator')) return account;
+  return deepFreeze({ ...account, systemRoles: normalizeSystemRoles(roles) });
+}
+
+/**
+ * A verification decision changes publishing authority: the security revision
+ * moves (old snapshots end) and a legacy `Creator` role is dropped. It never
+ * grants a role (ADR 0023: verification is a fact, not a role).
+ */
+export function recordVerificationDecision(account: Account, nowUtc: string): Account {
   return deepFreeze({
     ...account,
-    systemRoles: [...roles].sort(),
+    systemRoles: [...normalizeSystemRoles(account.systemRoles)],
     revision: account.revision + 1,
     securityRevision: account.securityRevision + 1,
     updatedAtUtc: parseUtcInstant(nowUtc),

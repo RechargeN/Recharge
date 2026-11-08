@@ -12,6 +12,7 @@
         "capability_denied",
         "contention",
         "creator_verification_required",
+        "identity_verification_required",
         "creator_verification_unavailable",
         "feature_disabled",
         "invalid_contract",
@@ -131,7 +132,7 @@
                           "uniqueItems": true,
                           "minItems": 1,
                           "items": {
-                            "enum": ["User", "Creator", "Admin"]
+                            "enum": ["User", "Admin"]
                           }
                         }
                       }
@@ -240,7 +241,7 @@
                             "uniqueItems": true,
                             "minItems": 1,
                             "items": {
-                              "enum": ["User", "Creator", "Admin"]
+                              "enum": ["User", "Admin"]
                             }
                           }
                         }

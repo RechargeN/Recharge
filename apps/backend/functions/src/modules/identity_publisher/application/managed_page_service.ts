@@ -41,7 +41,7 @@ export class ManagedPageService {
       if (account === null || account.status !== 'active')
         throw new IdentityFailure('not_found_or_not_accessible');
       if (verification?.status !== 'verified')
-        throw new IdentityFailure('creator_verification_required');
+        throw new IdentityFailure('identity_verification_required');
       if ((await transaction.page(input.pageId)) !== null)
         throw new IdentityFailure('revision_conflict');
       const page = createManagedPage({

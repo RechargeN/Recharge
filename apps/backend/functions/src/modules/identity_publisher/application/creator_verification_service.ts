@@ -1,4 +1,4 @@
-import { setCreatorRole } from '../domain/account.js';
+import { recordVerificationDecision } from '../domain/account.js';
 import {
   decideCreatorVerification,
   submitCreatorVerification,
@@ -53,7 +53,7 @@ export class CreatorVerificationService {
         throw new IdentityFailure('not_found_or_not_accessible');
       const next = decideCreatorVerification(current, input.status, input.nowUtc);
       transaction.putVerification(next);
-      const nextAccount = setCreatorRole(account, input.status === 'verified', input.nowUtc);
+      const nextAccount = recordVerificationDecision(account, input.nowUtc);
       transaction.putAccount(nextAccount);
       return next;
     });

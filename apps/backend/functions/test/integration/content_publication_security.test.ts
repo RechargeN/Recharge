@@ -72,8 +72,9 @@ class IdentityBackedEligibility implements PublisherEligibilityPort {
       const account = await tx.account(ownerId);
       if (account?.status !== 'active') return result(false, 'account_inactive');
       const verification = await tx.verificationForUser(ownerId);
-      if (verification?.status !== 'verified' || !account.systemRoles.includes('Creator'))
-        return result(false, 'creator_verification_required');
+      // ADR 0023: the verification fact, never a Creator role.
+      if (verification?.status !== 'verified')
+        return result(false, 'identity_verification_required');
       return result(true, 'eligible');
     });
   }
@@ -338,13 +339,11 @@ void test('a verified Creator publishes personally through real server-current e
   assert.equal(repository.snapshot().revisions.length, 1);
 });
 
-void test('a User without Creator verification cannot create, and nothing is written', async () => {
+void test('ADR 0023: an unverified User creates a free personal draft (no Creator role)', async () => {
   const { service, repository } = await bootstrap();
-  assert.deepEqual(
-    await service.execute(actor2, create({ type: 'user', id: u2 })),
-    denial('creator_verification_required'),
-  );
-  assert.equal(repository.snapshot().drafts.length, 0);
+  const created = await service.execute(actor2, create({ type: 'user', id: u2 }));
+  assert.equal(created.kind, 'succeeded');
+  assert.equal(repository.snapshot().drafts.length, 1);
 });
 
 void test("another verified Creator cannot read, edit, submit or publish someone else's content", async () => {
@@ -744,7 +743,7 @@ void test('a delegated import for a Page still needs the Page, its owner and its
       importer,
       importCreate({ type: 'user', id: u2 }, 'LV', 'src-1|uid-3|'),
     ),
-    denial('creator_verification_required'),
+    denial('identity_verification_required'),
   );
   // Unknown Pages do not exist for the importer.
   assert.deepEqual(
@@ -793,7 +792,7 @@ void test('revoked Creator verification of the Page owner blocks a delegated sub
       idempotencyKey: key('import-submit'),
       payload: { draftId, expectedDraftRevision: 1, changeClass: 'new' },
     }),
-    denial('creator_verification_required'),
+    denial('identity_verification_required'),
   );
 });
 

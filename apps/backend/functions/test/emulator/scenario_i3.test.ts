@@ -284,7 +284,8 @@ void test('1. visibility × actor matrix: only the owner distributes, shares, su
     }),
     'editor save',
   );
-  // A non-Creator owner may keep and distribute a personal Scenario, never publish it.
+  // ADR 0023 (User = Creator): an unverified owner keeps, distributes and may
+  // start a publication of a free personal Scenario (no money involved).
   const own = i3Ulid();
   ok(
     await world.planning.command(
@@ -296,7 +297,7 @@ void test('1. visibility × actor matrix: only the owner distributes, shares, su
     'editor own save',
   );
   const editorRevision = ok(await distribute(own, 1, editor), 'editor distribute');
-  const refused = await world.composition.content.execute(
+  const personal = await world.composition.content.execute(
     { userId: editor.userId, sessionId: editor.hint.sessionId },
     {
       schemaVersion: 1,
@@ -310,7 +311,7 @@ void test('1. visibility × actor matrix: only the owner distributes, shares, su
       },
     },
   );
-  assert.equal(refused.kind, 'rejected');
+  assert.equal(personal.kind, 'succeeded');
   // unlisted: a token is the capability; the id alone is nothing.
   const link = ok(await share(id, 2), 'share') as Json & { token: string };
   for (const actor of [stranger, revoked, editor, owner])

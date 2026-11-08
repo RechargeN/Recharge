@@ -59,12 +59,11 @@ export async function evaluatePublisherAccess(
     (await transaction.verificationForUser(input.userId))?.status === 'verified';
   if (input.publisherRef.type === 'user') {
     if (input.publisherRef.id !== input.userId) return deny('publisher_not_accessible');
-    // Wire name kept for compatibility; it now means "identity verification required".
     if (input.identityVerificationRequired && !(await verified()))
-      return deny('creator_verification_required');
+      return deny('identity_verification_required');
     return { eligible: true, reason: 'eligible', authorityRevision: revision };
   }
-  if (!(await verified())) return deny('creator_verification_required');
+  if (!(await verified())) return deny('identity_verification_required');
   const membership = await transaction.membership(input.publisherRef.id, input.userId);
   if (membership?.status !== 'active') return deny('membership_inactive');
   const page = await transaction.page(input.publisherRef.id);

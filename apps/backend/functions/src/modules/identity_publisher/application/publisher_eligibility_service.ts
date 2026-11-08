@@ -39,12 +39,14 @@ export class PublisherEligibilityService {
           input.snapshot.authzRevision,
           input.nowUtc,
         );
+      // ADR 0023: no Creator role. The personal publisher needs no verification
+      // here (money is checked where content leaves the draft); a Page does.
       const verification = await transaction.verificationForUser(input.snapshot.userId);
-      if (verification?.status !== 'verified' || !account.systemRoles.includes('Creator'))
+      if (input.requestedPublisher.type !== 'user' && verification?.status !== 'verified')
         return result(
           input.requestedPublisher,
           false,
-          'creator_verification_required',
+          'identity_verification_required',
           account.securityRevision,
           input.nowUtc,
         );

@@ -371,6 +371,12 @@ void test('Place flows draft -> submit -> publish with an immutable revision, po
     eligibility.requests.map((request) => request.action),
     ['create', 'update', 'submit', 'publish'],
   );
+  // ADR 0023 (risk by money): drafts carry no money flag; content leaving the
+  // draft does — a Place takes no money, so it is false, never absent.
+  assert.deepEqual(
+    eligibility.requests.map((request) => request.involvesMoney),
+    [undefined, undefined, false, false],
+  );
 
   const status = await data<{ pointer: { visibility: string } }>(
     service.query(actorA, {
@@ -730,7 +736,8 @@ void test('authority is re-evaluated with the exact action and a foreign answer 
   });
   eligibility.wrongPublisher = false;
   const reasons: Array<[PublisherEligibilityV1['reason'], string]> = [
-    ['creator_verification_required', 'creator_verification_required'],
+    ['creator_verification_required', 'identity_verification_required'],
+    ['identity_verification_required', 'identity_verification_required'],
     ['membership_inactive', 'membership_inactive'],
     ['capability_denied', 'capability_denied'],
     ['publisher_not_accessible', 'publisher_not_eligible'],

@@ -18,6 +18,11 @@ export interface PublisherEligibilityRequest {
   readonly marketId: MarketId;
   readonly requiredCapability: string;
   readonly nowUtc: string;
+  /**
+   * ADR 0023 (2026-11-08): the publication takes money or reserves places.
+   * Set where content leaves the draft (submit, publish, activation).
+   */
+  readonly involvesMoney?: boolean;
 }
 
 /**

@@ -23,7 +23,7 @@
       "uniqueItems": true,
       "minItems": 1,
       "maxItems": 3,
-      "items": { "enum": ["User", "Creator", "Admin"] }
+      "items": { "enum": ["User", "Admin"] }
     },
     "revision": { "$ref": "identity_common.schema.json#/$defs/revision" },
     "securityRevision": {

@@ -2,7 +2,7 @@ import type {
   IdentityAuthorityRepository,
   IdentityAuthorityTransaction,
 } from '../domain/repositories.js';
-import type { Account } from '../domain/account.js';
+import { normalizeLegacyAccount, type Account } from '../domain/account.js';
 import type { AuthIdentity } from '../domain/auth_identity.js';
 import type { CreatorVerification } from '../domain/creator_verification.js';
 import type { ManagedPage } from '../domain/managed_page.js';
@@ -74,7 +74,10 @@ function membershipKey(pageId: string, userId: string): string {
 
 function transactionFor(store: Store): IdentityAuthorityTransaction {
   return {
-    account: (userId) => Promise.resolve(store.accounts.get(userId) ?? null),
+    account: (userId) => {
+      const stored = store.accounts.get(userId);
+      return Promise.resolve(stored === undefined ? null : normalizeLegacyAccount(stored));
+    },
     putAccount: (account) => store.accounts.set(account.userId, account),
     identityBySubjectHash: (subjectHash) =>
       Promise.resolve(store.identities.get(subjectHash) ?? null),

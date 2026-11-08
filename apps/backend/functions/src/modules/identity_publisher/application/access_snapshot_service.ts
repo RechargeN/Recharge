@@ -25,11 +25,14 @@ export class AccessSnapshotService {
       const session = await transaction.session(input.sessionId);
       if (account === null || session === null) throw new IdentityFailure('unauthenticated');
       assertCurrentSession(session, account, input.evaluatedAtUtc);
-      const verification = await transaction.verificationForUser(input.userId);
-      const personalCapabilityIds =
-        verification?.status === 'verified' && account.systemRoles.includes('Creator')
-          ? ['booking.self_service', 'content.create', 'content.submit', 'content.publish']
-          : ['booking.self_service'];
+      // ADR 0023: every active User authors personal content; taking money
+      // needs the verification fact, checked where content leaves the draft.
+      const personalCapabilityIds = [
+        'booking.self_service',
+        'content.create',
+        'content.submit',
+        'content.publish',
+      ];
       const membership =
         input.pageId === undefined
           ? undefined

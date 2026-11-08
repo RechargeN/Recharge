@@ -53,6 +53,7 @@ import {
   type ContentTypeRegistryEntry,
   type ContentTypeRule,
 } from '../domain/content_type_registry.js';
+import { contentInvolvesMoney } from '../domain/personal_publishing_policy.js';
 import {
   ContentDomainRefusal,
   ContentRepositoryConflict,
@@ -730,6 +731,7 @@ export class ContentPublicationService {
       draft.typeId,
       'submit',
       draft.marketId,
+      draft.body,
     );
     assertSubmittable(draft, payload.expectedDraftRevision);
     await this.assertFindPeopleActor(context, draft.marketId, draft, 'consent');
@@ -807,6 +809,7 @@ export class ContentPublicationService {
       submission.typeId,
       'publish',
       submission.marketId,
+      draft.body,
     );
     await this.assertFindPeopleActor(context, draft.marketId, draft, 'consent');
     const resolved = await this.resolveReferences(submission.marketId, submission.typeId, nowUtc);
@@ -943,6 +946,15 @@ export class ContentPublicationService {
       throw new ContentDomainRefusal('not_found');
     // Compatible = same type, still available, market and media still valid.
     if (target.typeId !== draft.typeId) throw new ContentDomainRefusal('content_type_unsupported');
+    // ADR 0023: the revision that goes live decides whether money is involved.
+    await this.authorize(
+      context,
+      draft.publisherRef,
+      draft.typeId,
+      'publish',
+      draft.marketId,
+      target.body,
+    );
     const resolved = await this.resolveReferences(target.marketId, target.typeId, nowUtc);
     // D3.5/D3.6/SCN-PUB-01: revalidate the immutable target, never the draft.
     if (
@@ -1753,6 +1765,8 @@ export class ContentPublicationService {
     typeId: ContentTypeId,
     action: ContentAction,
     marketId: MarketId,
+    // ADR 0023: the body where content leaves the draft (risk by money).
+    leavingBody?: ContentBody,
   ): Promise<PublisherEligibilityV1> {
     const entry = resolveContentType(typeId);
     if (entry === null) throw new ContentDomainRefusal('content_type_unsupported');
@@ -1767,6 +1781,9 @@ export class ContentPublicationService {
             marketId,
             requiredCapability: entry.requiredCapabilities[action],
             nowUtc: context.nowUtc,
+            ...(leavingBody === undefined
+              ? {}
+              : { involvesMoney: contentInvolvesMoney(typeId, leavingBody) }),
           })
         : await this.deps.eligibility.evaluateDelegated({
             delegatedActor: principal.delegated,
@@ -1854,8 +1871,10 @@ export class ContentPublicationService {
 
 function failureFor(reason: PublisherEligibilityV1['reason']): ContentFailureCode {
   switch (reason) {
+    // ADR 0023: the refusal is about the identity verification fact, not a role.
     case 'creator_verification_required':
-      return 'creator_verification_required';
+    case 'identity_verification_required':
+      return 'identity_verification_required';
     case 'membership_inactive':
       return 'membership_inactive';
     case 'capability_denied':

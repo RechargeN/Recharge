@@ -3,7 +3,7 @@ import type { Account } from './account.js';
 
 export interface User {
   readonly userId: EntityId;
-  readonly roles: readonly ('User' | 'Creator' | 'Admin')[];
+  readonly roles: readonly ('User' | 'Admin')[];
   readonly active: boolean;
   readonly sourceAccountRevision: number;
 }

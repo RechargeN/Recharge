@@ -1,7 +1,7 @@
 import type { Firestore, Transaction } from 'firebase-admin/firestore';
 
 import type { AccessSnapshot } from '../domain/access_snapshot.js';
-import type { Account } from '../domain/account.js';
+import { normalizeLegacyAccount, type Account } from '../domain/account.js';
 import type { AuthIdentity } from '../domain/auth_identity.js';
 import type { CreatorVerification } from '../domain/creator_verification.js';
 import type { ManagedPage } from '../domain/managed_page.js';
@@ -43,8 +43,9 @@ class FirestoreIdentityAuthorityTransaction implements IdentityAuthorityTransact
     private readonly transaction: Transaction,
   ) {}
 
-  account(userId: string): Promise<Account | null> {
-    return this.readDocument(identityAuthorityCollections.accounts, userId);
+  async account(userId: string): Promise<Account | null> {
+    const stored = await this.readDocument<Account>(identityAuthorityCollections.accounts, userId);
+    return stored === null ? null : normalizeLegacyAccount(stored);
   }
 
   putAccount(account: Account): void {

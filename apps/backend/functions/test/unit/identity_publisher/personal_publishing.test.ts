@@ -4,7 +4,7 @@ import test from 'node:test';
 import type { ContentTypeId } from '../../../src/contracts/content_v1.js';
 import { createLocalIdentityPublisherAuthority } from '../../../src/modules/identity_publisher/application/identity_publisher_authority.js';
 import {
-  freePersonalContentTypes,
+  contentInvolvesMoney,
   identityVerificationRequired,
 } from '../../../src/modules/content/domain/personal_publishing_policy.js';
 import { IdentityPublisherEligibility } from '../../../src/modules/content/infrastructure/identity_publisher_eligibility.js';
@@ -12,8 +12,22 @@ import { IdentityMediaActorAuthority } from '../../../src/modules/media/infrastr
 import type { EntityId } from '../../../src/shared/ids.js';
 import type { MarketId } from '../../../src/modules/reference_data/domain/identifiers.js';
 
-// ADR 0023 (User = Creator, OQ-2): free personal content without identity
-// verification; risky types and Page publishing keep the verification fact.
+// ADR 0023 (User = Creator; owner decision 2026-11-08, risk by money): a User
+// publishes any content without identity verification unless it takes money or
+// reserves places; Page publishing keeps the verification fact.
+
+const allTypes: ContentTypeId[] = [
+  'place',
+  'activity',
+  'collection',
+  'route',
+  'scenario',
+  'event',
+  'rental',
+  'session',
+  'class_workshop',
+  'find_people',
+];
 
 const ids = {
   user1: '018FQ2Z8Q9N4M7K2T6V3W1X5YA',
@@ -54,7 +68,9 @@ const request = (
   typeId: ContentTypeId,
   publisherId: string = ids.user1,
   sessionId: string = ids.session1,
+  involvesMoney?: boolean,
 ) => ({
+  ...(involvesMoney === undefined ? {} : { involvesMoney }),
   actor: { userId: ids.user1 as EntityId, sessionId: sessionId as EntityId },
   publisherRef: { type: 'user' as const, id: publisherId as EntityId },
   typeId,
@@ -64,55 +80,69 @@ const request = (
   nowUtc: now,
 });
 
-void test('policy: only the free personal types skip verification; Page and unknown types never do', () => {
-  assert.deepEqual([...freePersonalContentTypes].sort(), [
-    'activity',
-    'collection',
-    'place',
-    'route',
-    'scenario',
-  ]);
+void test('policy: money or place reservation needs verification; a Page always does', () => {
   const user = { type: 'user' as const, id: ids.user1 as EntityId };
-  for (const typeId of [
-    'event',
-    'rental',
-    'session',
-    'class_workshop',
-    'find_people',
-  ] as ContentTypeId[])
-    assert.equal(identityVerificationRequired(typeId, user), true, typeId);
-  assert.equal(identityVerificationRequired('place', user), false);
-  assert.equal(identityVerificationRequired('place', { type: 'page', id: 'p' as EntityId }), true);
-  assert.equal(identityVerificationRequired('unknown_type' as ContentTypeId, user), true);
+  assert.equal(identityVerificationRequired(user, false), false);
+  assert.equal(identityVerificationRequired(user, true), true);
+  assert.equal(identityVerificationRequired({ type: 'page', id: 'p' as EntityId }, false), true);
 });
 
-void test('a plain User (no Creator role, no verification) may author free personal content', async () => {
+void test('what involves money, per type', () => {
+  const money = (typeId: string, body: Record<string, unknown>) =>
+    contentInvolvesMoney(typeId as ContentTypeId, body);
+  for (const typeId of ['place', 'activity', 'route', 'scenario', 'collection'])
+    assert.equal(money(typeId, { pricing: { entryType: 'paid' } }), false, typeId);
+  assert.equal(money('rental', {}), true);
+  assert.equal(money('session', {}), true);
+  // Event: free without internal registration is free; a price or reserved places are not.
+  assert.equal(
+    money('event', { pricing: { mode: 'free' }, registration: { mode: 'none' } }),
+    false,
+  );
+  assert.equal(
+    money('event', { pricing: { mode: 'free' }, registration: { mode: 'external' } }),
+    false,
+  );
+  assert.equal(
+    money('event', { pricing: { mode: 'fixed' }, registration: { mode: 'none' } }),
+    true,
+  );
+  assert.equal(
+    money('event', { pricing: { mode: 'free' }, registration: { mode: 'internal' } }),
+    true,
+  );
+  assert.equal(money('event', {}), true);
+  assert.equal(money('class_workshop', { class_workshop: { price: { mode: 'free' } } }), false);
+  assert.equal(money('class_workshop', { class_workshop: { price: { mode: 'fixed' } } }), true);
+  assert.equal(money('find_people', { findPeople: { cost: { costType: 'free' } } }), false);
+  assert.equal(money('find_people', { findPeople: { cost: { costType: 'unknown' } } }), false);
+  assert.equal(money('find_people', { findPeople: { cost: { costType: 'estimated' } } }), true);
+  assert.equal(money('unknown_type', {}), true);
+});
+
+void test('a plain User (no Creator role, no verification) may author every type for free', async () => {
   const { repository } = await plainUser();
   const eligibility = new IdentityPublisherEligibility(repository);
-  for (const typeId of freePersonalContentTypes) {
+  for (const typeId of allTypes) {
     const result = await eligibility.evaluate(request(typeId));
     assert.equal(result.eligible, true, typeId);
     assert.equal(result.reason, 'eligible');
+    const free = await eligibility.evaluate(request(typeId, ids.user1, ids.session1, false));
+    assert.equal(free.eligible, true, typeId);
   }
 });
 
-void test('risky types still need the verification fact for the personal publisher', async () => {
+void test('taking money or reserving places needs the verification fact', async () => {
   const { repository } = await plainUser();
   const eligibility = new IdentityPublisherEligibility(repository);
-  for (const typeId of [
-    'event',
-    'rental',
-    'session',
-    'class_workshop',
-    'find_people',
-  ] as ContentTypeId[]) {
-    const result = await eligibility.evaluate(request(typeId));
+  for (const typeId of allTypes) {
+    const result = await eligibility.evaluate(request(typeId, ids.user1, ids.session1, true));
     assert.equal(result.eligible, false, typeId);
-    assert.equal(result.reason, 'creator_verification_required', typeId);
+    assert.equal(result.reason, 'identity_verification_required', typeId);
   }
 });
 
-void test('a verified User may author risky types (no Creator role consulted)', async () => {
+void test('a verified User may take money (no Creator role consulted)', async () => {
   const local = await plainUser();
   await local.authority.creatorVerification.submit({
     userId: ids.user1,
@@ -136,7 +166,7 @@ void test('a verified User may author risky types (no Creator role consulted)', 
   });
   const eligibility = new IdentityPublisherEligibility(local.repository);
   const event = await eligibility.evaluate({
-    ...request('event', ids.user1, ids.session2),
+    ...request('event', ids.user1, ids.session2, true),
     nowUtc: '2026-09-22T00:00:05.000Z',
   });
   assert.equal(event.eligible, true);

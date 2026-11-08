@@ -3,7 +3,7 @@
     "schemaVersion": 1,
     "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
     "status": "active",
-    "systemRoles": ["User", "Creator"],
+    "systemRoles": ["User"],
     "revision": 1,
     "securityRevision": 1,
     "revokeBeforeSecurityRevision": 0,

@@ -4,7 +4,8 @@ import test from 'node:test';
 import {
   createAccount,
   advanceRevocationFence,
-  setCreatorRole,
+  normalizeLegacyAccount,
+  recordVerificationDecision,
 } from '../../../src/modules/identity_publisher/domain/account.js';
 import {
   decideCreatorVerification,
@@ -69,7 +70,26 @@ void test('revision fences allow same-instant issuance and stale changed authori
   });
   assert.doesNotThrow(() => assertCurrentSession(session, account));
   assert.throws(
-    () => assertCurrentSession(session, setCreatorRole(account, true, '2026-09-22T00:00:01.000Z')),
+    () =>
+      assertCurrentSession(
+        session,
+        recordVerificationDecision(account, '2026-09-22T00:00:01.000Z'),
+      ),
     (error: unknown) => error instanceof IdentityFailure && error.code === 'snapshot_stale',
   );
+});
+
+void test('ADR 0023: a legacy Creator reads as User; a decision never grants a role', () => {
+  const account = createAccount('018FQ2Z8Q9N4M7K2T6V3W1X5YA', '2026-09-22T00:00:00.000Z');
+  const legacy = { ...account, systemRoles: ['Creator', 'User'] } as unknown as typeof account;
+  assert.deepEqual(normalizeLegacyAccount(legacy).systemRoles, ['User']);
+  const admin = {
+    ...account,
+    systemRoles: ['Admin', 'Creator', 'User'],
+  } as unknown as typeof account;
+  assert.deepEqual(normalizeLegacyAccount(admin).systemRoles, ['Admin', 'User']);
+  assert.equal(normalizeLegacyAccount(account), account);
+  const decided = recordVerificationDecision(legacy, '2026-09-22T00:00:01.000Z');
+  assert.deepEqual(decided.systemRoles, ['User']);
+  assert.equal(decided.securityRevision, account.securityRevision + 1);
 });
