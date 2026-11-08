@@ -97,6 +97,14 @@ const approvedSubsequentSlicePaths = [
   "apps/backend/functions/test/integration/content_local_import.test.ts",
   // D4.1 (LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md §5): import rollback and cleanup fencing.
   "apps/backend/functions/test/integration/content_local_import_rollback.test.ts",
+  // N2c (docs/verification/N2C_DEV_AUTH_SESSION_2026_11_06.md, owner Done 2026-11-06):
+  // dev App Check observation and the dev identity session runtime with its tests.
+  "apps/backend/functions/src/platform/adapters/dev_firebase_app_check.ts",
+  "apps/backend/functions/test/unit/security/dev_firebase_app_check.test.ts",
+  "apps/backend/functions/test/unit/security/dev_firebase_provider_identity_verifier.test.ts",
+  "apps/backend/functions/test/unit/security/dev_identity_entry.test.ts",
+  "apps/backend/functions/test/unit/security/dev_identity_session_binding.test.ts",
+  "apps/backend/functions/test/unit/security/dev_identity_session_handler.test.ts",
 ];
 
 if (

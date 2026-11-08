@@ -48,6 +48,10 @@ const reviewedPackageLicenses = new Map([
   ["@img/sharp-win32-x64@0.35.5", "Apache-2.0 AND LGPL-3.0-or-later"],
   ["@img/sharp-wasm32@0.35.5", "Apache-2.0 AND LGPL-3.0-or-later AND MIT"],
   ["@img/sharp-libvips-linux-x64@1.3.4", "LGPL-3.0-or-later"],
+  // 2026-11-08: the musl build of the same libvips 1.3.4, which npm installs on
+  // the Linux CI runner next to the glibc one. Same review, same limits: local
+  // and CI gates only, never distributed.
+  ["@img/sharp-libvips-linuxmusl-x64@1.3.4", "LGPL-3.0-or-later"],
 ]);
 const allowedLifecycleHooks = new Set([
   "@firebase/util@1.15.3:postinstall",

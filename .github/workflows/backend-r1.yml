@@ -61,6 +61,28 @@ jobs:
           verify-signature: true
           overwrite-settings: false
 
+      # 2026-11-08: the Emulator groups with real Flutter adapters (I1 Quick Plan,
+      # Scenario, Route) need Flutter, as in R0; without it they cannot pass.
+      - name: Set up exact Flutter for required I1 adapters
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: "3.44.9"
+          channel: stable
+          cache: false
+
+      - name: Prepare mobile adapter dependencies
+        working-directory: apps/mobile
+        run: flutter pub get
+
+      - name: Export native Dart and Flutter tool paths
+        run: >-
+          node -e "const fs=require('node:fs'),p=require('node:path'),r=process.env.FLUTTER_ROOT;
+          if(!r)throw Error('FLUTTER_ROOT missing');
+          const d=p.join(r,'bin','cache','dart-sdk','bin',process.platform==='win32'?'dart.exe':'dart');
+          const f=p.join(r,'bin','cache','flutter_tools.snapshot');
+          for(const x of [d,f])if(!fs.existsSync(x))throw Error('Flutter tool missing: '+x);
+          fs.appendFileSync(process.env.GITHUB_ENV,'RECHARGE_DART='+d+'\nRECHARGE_FLUTTER_TOOL='+f+'\nRECHARGE_G_MOBILE=1\n');"
+
       - name: Reject cloud and credential context
         run: node apps/backend/scripts/verify-no-cloud-context.mjs
 
