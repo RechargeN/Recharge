@@ -13,7 +13,7 @@ import {
   handleDevContentMedia,
   type DevContentMedia,
 } from '../../src/dev_content_media_composition.js';
-import { devRuntimeOpen } from '../../src/dev_content_media_entry.js';
+import { devRuntimeOpen, failureShape } from '../../src/dev_content_media_entry.js';
 import { createDevMediaComposition } from '../../src/modules/media/infrastructure/dev_media_composition.js';
 
 const uid = 'abcdefghijklmnopqrstuvwxyz012345';
@@ -165,4 +165,25 @@ void test('static: the dev compositions use the real adapters only', () => {
       file,
     );
   }
+});
+
+void test('a failure logs only its class and a short code, never the message', () => {
+  const refused = Object.assign(new Error('secret detail /path?token=abc'), {
+    name: 'ContentPersistenceEnvironmentError',
+    reason: 'dev_cloud_override',
+  });
+  assert.deepEqual(failureShape(refused), {
+    error: 'ContentPersistenceEnvironmentError',
+    code: 'dev_cloud_override',
+  });
+  assert.deepEqual(failureShape(Object.assign(new Error('x'), { code: 7 })), {
+    error: 'Error',
+    code: '7',
+  });
+  assert.deepEqual(failureShape(Object.assign(new Error('x'), { code: 'has spaces and more' })), {
+    error: 'Error',
+    code: null,
+  });
+  assert.deepEqual(failureShape('boom'), { error: 'string', code: null });
+  assert.ok(!JSON.stringify(failureShape(refused)).includes('secret'));
 });
