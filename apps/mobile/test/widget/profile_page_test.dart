@@ -111,7 +111,8 @@ void main() {
         expect(find.text('Created'), findsOneWidget);
         expect(find.text('Visited'), findsOneWidget);
         expect(find.text('Saved list'), findsOneWidget);
-        expect(find.text('Create Hub'), findsNothing);
+        // ADR 0023: User = Creator — the personal profile offers the Create Hub.
+        expect(find.text('Create Hub'), findsOneWidget);
         expect(find.text('Upgrade account'), findsNothing);
         expect(find.text('PROFILE MODE'), findsNothing);
         expect(find.byType(ScenarioLibraryPanel), findsOneWidget);
@@ -143,18 +144,18 @@ void main() {
           tester.element(find.text('Visited destination')),
         ).go(RouteNames.profile);
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Creator tools'));
-        await tester.pumpAndSettle();
-        expect(find.text('Settings destination'), findsOneWidget);
+        // ADR 0023: no "Creator tools" upsell — the User already creates.
+        expect(find.text('Creator tools'), findsNothing);
         GoRouter.of(
-          tester.element(find.text('Settings destination')),
+          tester.element(find.text('Created')),
         ).go(RouteNames.profileWorkspace);
         await tester.pumpAndSettle();
         expect(find.text('PROFILE MODE'), findsNothing);
         expect(find.text('User'), findsNothing);
         expect(find.text('Pro'), findsNothing);
-        expect(find.text('Build a route'), findsOneWidget);
-        await tester.tap(find.text('Build a route'));
+        // ADR 0023: the User sees the creator workspace (route idea, Create Hub).
+        expect(find.text('Build route idea'), findsOneWidget);
+        await tester.tap(find.text('Build route idea'));
         await tester.pumpAndSettle();
         expect(find.text('Create scenario'), findsOneWidget);
         expect(

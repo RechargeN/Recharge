@@ -10,28 +10,28 @@ import 'package:recharge/features/identity/domain/repositories/identity_workspac
 import 'package:recharge/features/identity/domain/usecases/create_professional_page_usecase.dart';
 
 void main() {
-  test('maps default user role to User tier', () {
+  // ADR 0023: User = Creator — the default user may author personal content.
+  test('maps default user role to the personal creator tier', () {
     final ProfileRoleSummary summary = profileRoleSummaryFor(
       role: 'user',
       capabilities: const <String>['discover.read', 'favorites.write'],
     );
 
-    expect(summary.tier, ProfileRoleTier.user);
-    expect(summary.canCreate, isFalse);
+    expect(summary.tier, ProfileRoleTier.creator);
+    expect(summary.canCreate, isTrue);
     expect(summary.canGenerate, isFalse);
-    expect(summary.primaryActionId, 'open_saved');
+    expect(summary.primaryActionId, 'open_create_hub');
   });
 
-  test('does not promote a user from create capabilities alone', () {
+  test('does not promote a user to generator from capabilities alone', () {
     final ProfileRoleSummary summary = profileRoleSummaryFor(
       role: 'user',
-      capabilities: const <String>['create.event', 'create.place'],
+      capabilities: const <String>['create.place', 'scenario.generate'],
     );
 
-    expect(summary.tier, ProfileRoleTier.user);
-    expect(summary.canCreate, isFalse);
+    expect(summary.tier, ProfileRoleTier.creator);
+    expect(summary.canCreate, isTrue);
     expect(summary.canGenerate, isFalse);
-    expect(summary.primaryActionId, 'open_saved');
   });
 
   test('maps generator capabilities to Pro generator tier', () {

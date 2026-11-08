@@ -38,6 +38,7 @@ import '../widgets/route/route_create_block.dart';
 import '../widgets/scenario/scenario_create_block.dart';
 import '../widgets/create_texts.dart';
 import '../../../../core/localization/recharge_formats.dart';
+import '../../../auth/domain/personal_creation_hints.dart';
 
 class CreatePage extends ConsumerStatefulWidget {
   const CreatePage({
@@ -118,7 +119,8 @@ class _CreatePageState extends ConsumerState<CreatePage> {
       userId: user.id,
       organizerEmail: user.email,
       organizerName: user.email.split('@').first,
-      capabilities: user.capabilities,
+      // ADR 0023: personal creation hints; the server decides every command.
+      capabilities: withPersonalCreationHints(user.capabilities),
       publisherRef: activePublisher,
       isVerifiedCreator: isVerifiedCreator,
     );

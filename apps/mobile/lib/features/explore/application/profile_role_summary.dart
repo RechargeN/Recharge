@@ -41,7 +41,9 @@ ProfileRoleSummary profileRoleSummaryFor({
       normalizedRole == 'creator' ||
       normalizedRole == 'pro_generator' ||
       normalizedRole == 'pro';
-  final bool canCreate = isCreatorRole;
+  // ADR 0023: User = Creator — every active User may author personal content.
+  // Generation (Pro) still needs a creator/pro role, never capabilities alone.
+  final bool canCreate = isCreatorRole || normalizedRole == 'user';
   final bool canGenerate =
       isCreatorRole &&
       (normalizedRole == 'pro_generator' ||

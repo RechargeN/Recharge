@@ -80,6 +80,7 @@ import '../../features/scenarios/presentation/pages/scenario_builder_page.dart';
 import '../../features/visited/presentation/pages/visited_places_page.dart';
 import 'details_route_parser.dart';
 import 'route_names.dart';
+import '../../features/auth/domain/personal_creation_hints.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authController = ref.read(authControllerProvider);
@@ -527,7 +528,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final user = authController.state.user;
           return CreateHubPage(
             isAuthenticated: user != null,
-            capabilities: user?.capabilities ?? const <String>[],
+            // ADR 0023: a User may author free personal content (UI hint only).
+            capabilities: user == null
+                ? const <String>[]
+                : withPersonalCreationHints(user.capabilities),
           );
         },
       ),
