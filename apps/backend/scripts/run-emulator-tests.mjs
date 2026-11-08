@@ -204,6 +204,8 @@ const expectedBoundedCallableExports = [
   "mediaDeliveryV1",
   "consumeMediaEffectV1",
   "reconcileMediaReferencesV1",
+  // ADR 0023 (2026-11-08): the author's DSA Art. 30 seller declaration (Emulator).
+  "sellerDeclarationV1",
 ].sort();
 if (
   JSON.stringify(boundedCallableExports) !==

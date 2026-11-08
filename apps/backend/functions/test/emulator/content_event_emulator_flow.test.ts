@@ -134,6 +134,14 @@ async function bootstrap() {
     status: 'verified',
     nowUtc,
   });
+  // ADR 0023 (2026-11-08, DSA Art. 30): the author's seller declaration for
+  // paid or bookable publications.
+  await authority.sellers.declare({
+    userId: creator,
+    body: { status: 'private', contact: { email: 'creator@example.com' }, dac7ActivityTypes: [] },
+    expectedRevision: 0,
+    nowUtc,
+  });
   const pageId = randomUUID();
   await authority.pages.create({
     userId: creator,
