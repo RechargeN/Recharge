@@ -70,7 +70,7 @@ resource "google_project_iam_custom_role" "n3a2_objects" {
 
 resource "google_project_iam_member" "n3a2_data" {
   count      = local.n3a2_on ? 1 : 0
-  depends_on = [google_project_iam_custom_role.n3a2_data]
+  depends_on = [google_project_iam_custom_role.n3a2_data, module.runtime_identities]
   project    = google_project.dev.project_id
   role       = "projects/${local.n2c_project}/roles/devMediaChainData"
   member     = local.n3a2_member
@@ -82,7 +82,7 @@ resource "google_project_iam_member" "n3a2_data" {
 
 resource "google_storage_bucket_iam_member" "n3a2_objects" {
   count      = local.n3a2_on ? 1 : 0
-  depends_on = [google_project_iam_custom_role.n3a2_objects]
+  depends_on = [google_project_iam_custom_role.n3a2_objects, module.runtime_identities]
   bucket     = "${local.n2c_project}-media"
   role       = "projects/${local.n2c_project}/roles/devMediaObjectWriter"
   member     = local.n3a2_member
@@ -91,25 +91,27 @@ resource "google_storage_bucket_iam_member" "n3a2_objects" {
 # verifyIdToken(checkRevoked) reads the Firebase user, as for runtime-identity (N2c).
 resource "google_project_iam_member" "n3a2_auth" {
   count      = local.n3a2_on ? 1 : 0
-  depends_on = [terraform_data.n3a2_guard]
+  depends_on = [terraform_data.n3a2_guard, module.runtime_identities]
   project    = google_project.dev.project_id
   role       = "projects/${local.n2c_project}/roles/devIdentityFirebaseVerifier"
   member     = local.n3a2_member
 }
 
 resource "google_secret_manager_secret_iam_member" "n3a2_tools_token" {
-  count     = local.n3a2_on ? 1 : 0
-  project   = google_project.dev.project_id
-  secret_id = module.n3b_secret.secret_ids[0]
-  role      = "roles/secretmanager.secretAccessor"
-  member    = local.n3a2_member
+  count      = local.n3a2_on ? 1 : 0
+  depends_on = [module.runtime_identities]
+  project    = google_project.dev.project_id
+  secret_id  = module.n3b_secret.secret_ids[0]
+  role       = "roles/secretmanager.secretAccessor"
+  member     = local.n3a2_member
 }
 
 resource "google_cloud_run_v2_service_iam_member" "n3a2_invoker" {
-  for_each = local.n3a2_on && local.n3b_services_on ? local.n3b_services : {}
-  project  = google_project.dev.project_id
-  location = local.n3b_region
-  name     = google_cloud_run_v2_service.n3b[each.key].name
-  role     = "roles/run.invoker"
-  member   = local.n3a2_member
+  for_each   = local.n3a2_on && local.n3b_services_on ? local.n3b_services : {}
+  depends_on = [module.runtime_identities]
+  project    = google_project.dev.project_id
+  location   = local.n3b_region
+  name       = google_cloud_run_v2_service.n3b[each.key].name
+  role       = "roles/run.invoker"
+  member     = local.n3a2_member
 }
