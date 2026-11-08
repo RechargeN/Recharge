@@ -3,6 +3,7 @@ import type { AuthIdentity } from './auth_identity.js';
 import type { CreatorVerification } from './creator_verification.js';
 import type { ManagedPage } from './managed_page.js';
 import type { PageMembership } from './page_membership.js';
+import type { SellerDeclaration } from './seller_declaration.js';
 import type { IdentitySession } from './session.js';
 import type { AccessSnapshot } from './access_snapshot.js';
 
@@ -26,6 +27,9 @@ export interface IdentityAuthorityTransaction {
   membershipsForPage(pageId: string): Promise<readonly PageMembership[]>;
   membershipsForUser(userId: string): Promise<readonly PageMembership[]>;
   putMembership(membership: PageMembership): void;
+  /** ADR 0023 (2026-11-08): DSA Art. 30 seller declaration, server-only. */
+  sellerDeclaration(userId: string): Promise<SellerDeclaration | null>;
+  putSellerDeclaration(declaration: SellerDeclaration): void;
 }
 
 export interface IdentityAuthorityRepository {

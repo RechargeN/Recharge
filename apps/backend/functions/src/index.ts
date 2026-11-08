@@ -60,6 +60,9 @@ import {
 } from './modules/identity_publisher/application/emulator_identity_session_service.js';
 import { FirestoreFeatureFlagGate } from './platform/config/firestore_feature_flag_gate.js';
 import { IdentityFailure } from './modules/identity_publisher/domain/failures.js';
+import { handleSellerDeclarationCommand } from './seller_declaration_entry.js';
+import { SellerDeclarationService } from './modules/identity_publisher/application/seller_declaration_service.js';
+import { FirestoreIdentityAuthorityRepository } from './modules/identity_publisher/infrastructure/firestore_identity_authority_repository.js';
 import { decideAppCheck } from './security/app_check_policy.js';
 import { localNetworkRiskHash } from './platform/security/firestore_abuse_rate_limiter.js';
 import {
@@ -1030,6 +1033,27 @@ export const purgeFindPeoplePrivateLocationsV1 = onSchedule(
 // reads stay available. Owner commands and queries only: the Content service
 // re-checks Session, verified Creator, exact Page, Media readiness and the C2
 // review on every call; dispositions are never accepted here.
+/** ADR 0023 (2026-11-08): the author's DSA Art. 30 seller declaration (Emulator). */
+export const sellerDeclarationV1 = onCall<unknown>(callableOptions, async (request) => {
+  const access = prepareTransport(request);
+  if (!access.ok) return access.result;
+  const now = systemServerClock.now();
+  const decision = await access.composition.accessAuthority.authorize(
+    access.accessHint,
+    now,
+    bookingAccessCapability,
+  );
+  if (!decision.allowed) return { schemaVersion: 1, kind: 'rejected', code: 'unauthenticated' };
+  return handleSellerDeclarationCommand({
+    userId: decision.userId,
+    data: request.data,
+    service: new SellerDeclarationService(
+      new FirestoreIdentityAuthorityRepository(access.firestore),
+    ),
+    nowUtc: now.toISOString(),
+  });
+});
+
 export const contentCommandV1 = onCall<unknown>(callableOptions, async (request) => {
   const prepared = await prepareContentCaller(request);
   return prepared.ok ? handleContentCommand(prepared.caller, request.data) : prepared.result;

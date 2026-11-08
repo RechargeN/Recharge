@@ -50,7 +50,7 @@ export class IdentityMediaActorAuthority implements MediaActorAuthorityPort {
         // Media does not know the content type: the per-type rule of ADR 0023
         // (risky types need identity verification) is enforced by Content's
         // entity scope for the exact draft, which every content upload passes.
-        identityVerificationRequired: false,
+        commerce: 'none',
       });
       if (decision.eligible)
         return { allowed: true, authorityRevision: decision.authorityRevision };

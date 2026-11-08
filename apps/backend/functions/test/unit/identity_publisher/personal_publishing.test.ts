@@ -4,17 +4,19 @@ import test from 'node:test';
 import type { ContentTypeId } from '../../../src/contracts/content_v1.js';
 import { createLocalIdentityPublisherAuthority } from '../../../src/modules/identity_publisher/application/identity_publisher_authority.js';
 import {
-  contentInvolvesMoney,
-  identityVerificationRequired,
+  contentCommerce,
+  type ContentCommerce,
 } from '../../../src/modules/content/domain/personal_publishing_policy.js';
 import { IdentityPublisherEligibility } from '../../../src/modules/content/infrastructure/identity_publisher_eligibility.js';
 import { IdentityMediaActorAuthority } from '../../../src/modules/media/infrastructure/identity_media_authority.js';
+import { ClosedPayoutReadiness } from '../../../src/modules/identity_publisher/infrastructure/closed_payout_readiness.js';
 import type { EntityId } from '../../../src/shared/ids.js';
 import type { MarketId } from '../../../src/modules/reference_data/domain/identifiers.js';
 
-// ADR 0023 (User = Creator; owner decision 2026-11-08, risk by money): a User
-// publishes any content without identity verification unless it takes money or
-// reserves places; Page publishing keeps the verification fact.
+// ADR 0023 (User = Creator; owner decision 2026-11-08, marketplace rule, DSA
+// Art. 30): free content publishes freely; paid or bookable content needs the
+// author's seller declaration; a trader selling inside the app, or any author
+// under a fraud step-up, also needs identity verification. No Creator role.
 
 const allTypes: ContentTypeId[] = [
   'place',
@@ -63,14 +65,15 @@ async function plainUser() {
   });
   return local;
 }
+type Local = Awaited<ReturnType<typeof plainUser>>;
 
 const request = (
   typeId: ContentTypeId,
   publisherId: string = ids.user1,
   sessionId: string = ids.session1,
-  involvesMoney?: boolean,
+  commerce?: ContentCommerce,
 ) => ({
-  ...(involvesMoney === undefined ? {} : { involvesMoney }),
+  ...(commerce === undefined ? {} : { commerce }),
   actor: { userId: ids.user1 as EntityId, sessionId: sessionId as EntityId },
   publisherRef: { type: 'user' as const, id: publisherId as EntityId },
   typeId,
@@ -80,70 +83,33 @@ const request = (
   nowUtc: now,
 });
 
-void test('policy: money or place reservation needs verification; a Page always does', () => {
-  const user = { type: 'user' as const, id: ids.user1 as EntityId };
-  assert.equal(identityVerificationRequired(user, false), false);
-  assert.equal(identityVerificationRequired(user, true), true);
-  assert.equal(identityVerificationRequired({ type: 'page', id: 'p' as EntityId }, false), true);
-});
+const privateSeller = {
+  status: 'private',
+  contact: { email: 'seller@example.com' },
+  dac7ActivityTypes: [],
+};
+const traderSeller = {
+  status: 'trader',
+  contact: { phone: '+37120000000' },
+  trader: {
+    legalName: 'Example SIA',
+    registrationNumber: '40003000000',
+    address: { line1: 'Brivibas iela 1', city: 'Riga', postalCode: 'LV-1010', countryCode: 'LV' },
+  },
+  dac7ActivityTypes: ['personalServices'],
+};
 
-void test('what involves money, per type', () => {
-  const money = (typeId: string, body: Record<string, unknown>) =>
-    contentInvolvesMoney(typeId as ContentTypeId, body);
-  for (const typeId of ['place', 'activity', 'route', 'scenario', 'collection'])
-    assert.equal(money(typeId, { pricing: { entryType: 'paid' } }), false, typeId);
-  assert.equal(money('rental', {}), true);
-  assert.equal(money('session', {}), true);
-  // Event: free without internal registration is free; a price or reserved places are not.
-  assert.equal(
-    money('event', { pricing: { mode: 'free' }, registration: { mode: 'none' } }),
-    false,
-  );
-  assert.equal(
-    money('event', { pricing: { mode: 'free' }, registration: { mode: 'external' } }),
-    false,
-  );
-  assert.equal(
-    money('event', { pricing: { mode: 'fixed' }, registration: { mode: 'none' } }),
-    true,
-  );
-  assert.equal(
-    money('event', { pricing: { mode: 'free' }, registration: { mode: 'internal' } }),
-    true,
-  );
-  assert.equal(money('event', {}), true);
-  assert.equal(money('class_workshop', { class_workshop: { price: { mode: 'free' } } }), false);
-  assert.equal(money('class_workshop', { class_workshop: { price: { mode: 'fixed' } } }), true);
-  assert.equal(money('find_people', { findPeople: { cost: { costType: 'free' } } }), false);
-  assert.equal(money('find_people', { findPeople: { cost: { costType: 'unknown' } } }), false);
-  assert.equal(money('find_people', { findPeople: { cost: { costType: 'estimated' } } }), true);
-  assert.equal(money('unknown_type', {}), true);
-});
+async function declare(local: Local, body: unknown, expectedRevision = 0) {
+  await local.authority.sellers.declare({
+    userId: ids.user1,
+    body,
+    expectedRevision,
+    nowUtc: '2026-09-22T00:00:01.500Z',
+  });
+}
 
-void test('a plain User (no Creator role, no verification) may author every type for free', async () => {
-  const { repository } = await plainUser();
-  const eligibility = new IdentityPublisherEligibility(repository);
-  for (const typeId of allTypes) {
-    const result = await eligibility.evaluate(request(typeId));
-    assert.equal(result.eligible, true, typeId);
-    assert.equal(result.reason, 'eligible');
-    const free = await eligibility.evaluate(request(typeId, ids.user1, ids.session1, false));
-    assert.equal(free.eligible, true, typeId);
-  }
-});
-
-void test('taking money or reserving places needs the verification fact', async () => {
-  const { repository } = await plainUser();
-  const eligibility = new IdentityPublisherEligibility(repository);
-  for (const typeId of allTypes) {
-    const result = await eligibility.evaluate(request(typeId, ids.user1, ids.session1, true));
-    assert.equal(result.eligible, false, typeId);
-    assert.equal(result.reason, 'identity_verification_required', typeId);
-  }
-});
-
-void test('a verified User may take money (no Creator role consulted)', async () => {
-  const local = await plainUser();
+/** Verified, with a fresh Session (session2) after the security revision moved. */
+async function verify(local: Local) {
   await local.authority.creatorVerification.submit({
     userId: ids.user1,
     verificationId: ids.verification1,
@@ -164,12 +130,150 @@ void test('a verified User may take money (no Creator role consulted)', async ()
     installationId: 'install-2',
     snapshotExpiresAtUtc: '2026-09-22T00:05:04.500Z',
   });
+}
+
+void test('commerce per type: what is sold or booked, and where', () => {
+  const commerce = (typeId: string, body: Record<string, unknown>) =>
+    contentCommerce(typeId as ContentTypeId, body);
+  for (const typeId of ['place', 'activity', 'route', 'scenario', 'collection'])
+    assert.equal(commerce(typeId, { pricing: { entryType: 'paid' } }), 'none', typeId);
+  assert.equal(commerce('rental', {}), 'external');
+  assert.equal(commerce('session', {}), 'external');
+  assert.equal(commerce('event', { pricing: { mode: 'free' } }), 'none');
+  // Free internal registration takes no money and concludes no sale (owner, 2026-11-08).
+  assert.equal(
+    commerce('event', { pricing: { mode: 'free' }, registration: { mode: 'internal' } }),
+    'none',
+  );
+  assert.equal(
+    commerce('event', { pricing: { mode: 'fixed', paymentCollectionMode: 'external' } }),
+    'external',
+  );
+  assert.equal(
+    commerce('event', { pricing: { mode: 'fixed', paymentCollectionMode: 'internal' } }),
+    'inApp',
+  );
+  assert.equal(commerce('event', {}), 'external');
+  assert.equal(commerce('class_workshop', { class_workshop: { price: { mode: 'free' } } }), 'none');
+  assert.equal(
+    commerce('class_workshop', { class_workshop: { price: { mode: 'fixed' } } }),
+    'external',
+  );
+  assert.equal(commerce('find_people', { findPeople: { cost: { costType: 'free' } } }), 'none');
+  assert.equal(
+    commerce('find_people', { findPeople: { cost: { costType: 'estimated' } } }),
+    'external',
+  );
+  assert.equal(commerce('unknown_type', {}), 'inApp');
+});
+
+void test('a plain User authors every type; drafts and free content need nothing', async () => {
+  const { repository } = await plainUser();
+  const eligibility = new IdentityPublisherEligibility(repository);
+  for (const typeId of allTypes) {
+    assert.equal((await eligibility.evaluate(request(typeId))).reason, 'eligible', typeId);
+    const free = await eligibility.evaluate(request(typeId, ids.user1, ids.session1, 'none'));
+    assert.equal(free.reason, 'eligible', typeId);
+  }
+});
+
+void test('paid or bookable content needs the seller declaration (DSA Art. 30)', async () => {
+  const local = await plainUser();
   const eligibility = new IdentityPublisherEligibility(local.repository);
-  const event = await eligibility.evaluate({
-    ...request('event', ids.user1, ids.session2, true),
+  for (const commerce of ['external', 'inApp'] as const)
+    assert.equal(
+      (await eligibility.evaluate(request('event', ids.user1, ids.session1, commerce))).reason,
+      'seller_declaration_required',
+      commerce,
+    );
+  await declare(local, privateSeller);
+  // A private seller: the declaration is enough, also inside the app.
+  for (const commerce of ['external', 'inApp'] as const)
+    assert.equal(
+      (await eligibility.evaluate(request('event', ids.user1, ids.session1, commerce))).reason,
+      'eligible',
+      commerce,
+    );
+});
+
+void test('a trader selling in the app is verified before sales start; outside, the declaration is enough', async () => {
+  const local = await plainUser();
+  await declare(local, traderSeller);
+  const eligibility = new IdentityPublisherEligibility(local.repository);
+  assert.equal(
+    (await eligibility.evaluate(request('event', ids.user1, ids.session1, 'external'))).reason,
+    'eligible',
+  );
+  assert.equal(
+    (await eligibility.evaluate(request('event', ids.user1, ids.session1, 'inApp'))).reason,
+    'identity_verification_required',
+  );
+  await verify(local);
+  const verified = await eligibility.evaluate({
+    ...request('event', ids.user1, ids.session2, 'inApp'),
     nowUtc: '2026-09-22T00:00:05.000Z',
   });
-  assert.equal(event.eligible, true);
+  assert.equal(verified.reason, 'eligible');
+});
+
+void test('suspected fraud: a step-up makes any paid or bookable publication need verification', async () => {
+  const local = await plainUser();
+  await declare(local, privateSeller);
+  await local.authority.sellers.setStepUpRequired({
+    reviewerId: 'reviewer',
+    userId: ids.user1,
+    required: true,
+    nowUtc: '2026-09-22T00:00:02.500Z',
+  });
+  // The security revision moved: the old Session is stale, a new one is issued.
+  await local.authority.sessions.issue({
+    userId: ids.user1,
+    sessionId: ids.session2,
+    issuedAtUtc: '2026-09-22T00:00:02.600Z',
+    firebaseUid: ids.user1,
+    installationId: 'install-2',
+    snapshotExpiresAtUtc: '2026-09-22T00:05:02.600Z',
+  });
+  const eligibility = new IdentityPublisherEligibility(local.repository);
+  assert.equal(
+    (await eligibility.evaluate(request('event', ids.user1, ids.session2, 'external'))).reason,
+    'identity_verification_required',
+  );
+  assert.equal(
+    (await eligibility.evaluate(request('place', ids.user1, ids.session2, 'none'))).reason,
+    'eligible',
+  );
+  await assert.rejects(
+    local.authority.sellers.setStepUpRequired({
+      reviewerId: 'not-a-reviewer',
+      userId: ids.user1,
+      required: false,
+      nowUtc: '2026-09-22T00:00:03.000Z',
+    }),
+  );
+});
+
+void test('declarations are validated and revisioned; a private seller carries no trader data', async () => {
+  const local = await plainUser();
+  await assert.rejects(declare(local, { ...privateSeller, trader: traderSeller.trader }));
+  await assert.rejects(declare(local, { ...traderSeller, trader: undefined }));
+  await assert.rejects(declare(local, { ...privateSeller, contact: {} }));
+  await assert.rejects(declare(local, { ...privateSeller, contact: { phone: '20000000' } }));
+  await declare(local, traderSeller);
+  // A stale revision is refused, never written over.
+  await assert.rejects(declare(local, privateSeller));
+  const stored = await local.authority.sellers.read(ids.user1);
+  assert.equal(stored?.revision, 1);
+  assert.equal(stored?.declaration.status, 'trader');
+  await declare(local, privateSeller, 1);
+  assert.equal((await local.authority.sellers.read(ids.user1))?.declaration.trader, undefined);
+});
+
+void test('no payout before the payment provider KYC/KYB (none is connected)', async () => {
+  assert.deepEqual(await new ClosedPayoutReadiness().readinessFor(), {
+    ready: false,
+    reason: 'payment_provider_not_connected',
+  });
 });
 
 void test('the free path never weakens identity: other user, no session, inactive account', async () => {

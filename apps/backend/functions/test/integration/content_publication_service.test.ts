@@ -371,11 +371,11 @@ void test('Place flows draft -> submit -> publish with an immutable revision, po
     eligibility.requests.map((request) => request.action),
     ['create', 'update', 'submit', 'publish'],
   );
-  // ADR 0023 (risk by money): drafts carry no money flag; content leaving the
-  // draft does — a Place takes no money, so it is false, never absent.
+  // ADR 0023 (marketplace rule): drafts carry no commerce; content leaving the
+  // draft does — a Place sells nothing, so it is 'none', never absent.
   assert.deepEqual(
-    eligibility.requests.map((request) => request.involvesMoney),
-    [undefined, undefined, false, false],
+    eligibility.requests.map((request) => request.commerce),
+    [undefined, undefined, 'none', 'none'],
   );
 
   const status = await data<{ pointer: { visibility: string } }>(

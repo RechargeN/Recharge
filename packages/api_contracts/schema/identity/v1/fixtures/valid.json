@@ -104,10 +104,60 @@
   },
   "publisherEligibility": {
     "schemaVersion": 1,
-    "publisherRef": { "type": "page", "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YF" },
+    "publisherRef": {
+      "type": "page",
+      "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YF"
+    },
     "eligible": true,
     "reason": "eligible",
     "authorityRevision": 2,
     "evaluatedAtUtc": "2026-09-22T00:04:00.000Z"
+  },
+  "sellerDeclaration": {
+    "schemaVersion": 1,
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "declaration": {
+      "status": "trader",
+      "contact": {
+        "email": "seller@example.com"
+      },
+      "trader": {
+        "legalName": "Example SIA",
+        "registrationNumber": "40003000000",
+        "vatId": "LV40003000000",
+        "address": {
+          "line1": "Brivibas iela 1",
+          "city": "Riga",
+          "postalCode": "LV-1010",
+          "countryCode": "LV"
+        }
+      },
+      "dac7ActivityTypes": ["personalServices"]
+    },
+    "revision": 1,
+    "declaredAtUtc": "2026-11-08T12:00:00.000Z"
+  },
+  "sellerDeclarationCommand": {
+    "schemaVersion": 1,
+    "commandType": "declareSeller",
+    "requestId": "req-1",
+    "sessionContext": {
+      "sessionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+      "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "installationId": "install-1"
+    },
+    "expectedRevision": 0,
+    "declaration": {
+      "status": "private",
+      "contact": {
+        "phone": "+37120000000"
+      },
+      "dac7ActivityTypes": []
+    }
+  },
+  "sellerDeclarationResult": {
+    "schemaVersion": 1,
+    "kind": "rejected",
+    "code": "revision_conflict"
   }
 }

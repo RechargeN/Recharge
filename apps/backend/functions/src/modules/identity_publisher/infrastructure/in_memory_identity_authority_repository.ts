@@ -7,6 +7,7 @@ import type { AuthIdentity } from '../domain/auth_identity.js';
 import type { CreatorVerification } from '../domain/creator_verification.js';
 import type { ManagedPage } from '../domain/managed_page.js';
 import type { PageMembership } from '../domain/page_membership.js';
+import type { SellerDeclaration } from '../domain/seller_declaration.js';
 import type { IdentitySession } from '../domain/session.js';
 import type { AccessSnapshot } from '../domain/access_snapshot.js';
 
@@ -18,6 +19,7 @@ interface Store {
   readonly verifications: Map<string, CreatorVerification>;
   readonly pages: Map<string, ManagedPage>;
   readonly memberships: Map<string, PageMembership>;
+  readonly sellerDeclarations: Map<string, SellerDeclaration>;
 }
 
 export class InMemoryIdentityAuthorityRepository implements IdentityAuthorityRepository {
@@ -53,6 +55,7 @@ function emptyStore(): Store {
     verifications: new Map(),
     pages: new Map(),
     memberships: new Map(),
+    sellerDeclarations: new Map(),
   };
 }
 
@@ -65,6 +68,7 @@ function cloneStore(source: Store): Store {
     verifications: new Map(source.verifications),
     pages: new Map(source.pages),
     memberships: new Map(source.memberships),
+    sellerDeclarations: new Map(source.sellerDeclarations),
   };
 }
 
@@ -111,6 +115,9 @@ function transactionFor(store: Store): IdentityAuthorityTransaction {
       ),
     putMembership: (membership) =>
       store.memberships.set(membershipKey(membership.pageId, membership.userId), membership),
+    sellerDeclaration: (userId) => Promise.resolve(store.sellerDeclarations.get(userId) ?? null),
+    putSellerDeclaration: (declaration) =>
+      store.sellerDeclarations.set(declaration.userId, declaration),
   };
 }
 

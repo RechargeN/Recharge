@@ -11,7 +11,7 @@ variables {
   notification_email          = "synthetic@example.invalid"
   authorization_record_path   = "tests/synthetic-plan-record.json"
   authorization_record_sha256 = filesha256("tests/synthetic-plan-record.json")
-  manifest_sha256             = "eb894b31565625df78d4f6d064ceceb73d664605ad58241db4f4173b70612738"
+  manifest_sha256             = "e9f365d3cf585d826ac602deb72cf91fe50b744aa7e511f338bf9e4a9532199c"
   release_commit_sha          = "0000000000000000000000000000000000000000"
   delivery_receipt_path       = "tests/never-created-receipt.json"
 }

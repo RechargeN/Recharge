@@ -88,6 +88,8 @@ export const privacyWriterRegistry: readonly PrivacyRegistryEntry[] = deepFreeze
     ['identitySessions', 'userId', blocked('PB-01')],
     ['identityAccessSnapshots', 'userId', blocked('PB-01')],
     ['identityCreatorVerifications', 'userId', blocked('PB-01')],
+    // ADR 0023 (2026-11-08): exported and erased with the account (PB-01).
+    ['identitySellerDeclarations', 'userId', blocked('PB-01')],
   ]),
   ...rows('W2', 'identity', [
     ['identityManagedPages', 'ownerUserId', blocked('PB-03')],

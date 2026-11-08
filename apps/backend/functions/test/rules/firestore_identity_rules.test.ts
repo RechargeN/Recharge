@@ -8,6 +8,7 @@ const identityCollections = [
   'identitySessions',
   'identityAccessSnapshots',
   'identityCreatorVerifications',
+  'identitySellerDeclarations',
   'identityManagedPages',
   'identityPageMemberships',
 ] as const;

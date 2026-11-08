@@ -19,10 +19,10 @@ export interface PublisherEligibilityRequest {
   readonly requiredCapability: string;
   readonly nowUtc: string;
   /**
-   * ADR 0023 (2026-11-08): the publication takes money or reserves places.
-   * Set where content leaves the draft (submit, publish, activation).
+   * ADR 0023 (2026-11-08, marketplace rule): what the publication sells or
+   * books. Set where content leaves the draft (submit, publish, activation).
    */
-  readonly involvesMoney?: boolean;
+  readonly commerce?: 'none' | 'external' | 'inApp';
 }
 
 /**

@@ -20,6 +20,35 @@ export interface AccountV1 {
   readonly revokeBeforeSecurityRevision: number;
   readonly createdAtUtc: UtcInstant;
   readonly updatedAtUtc: UtcInstant;
+  /** ADR 0023: suspected fraud; paid or bookable publishing needs identity verification. */
+  readonly stepUpRequired?: boolean;
+}
+
+/** ADR 0023 (2026-11-08): DSA Art. 30 trader traceability, DAC7 activity types. */
+export type SellerStatus = 'private' | 'trader';
+export type Dac7ActivityType = 'personalServices' | 'rentalOfGoods';
+export interface SellerDeclarationBodyV1 {
+  readonly status: SellerStatus;
+  readonly contact: { readonly email?: string; readonly phone?: string };
+  readonly trader?: {
+    readonly legalName: string;
+    readonly registrationNumber: string;
+    readonly vatId?: string;
+    readonly address: {
+      readonly line1: string;
+      readonly city: string;
+      readonly postalCode: string;
+      readonly countryCode: string;
+    };
+  };
+  readonly dac7ActivityTypes: readonly Dac7ActivityType[];
+}
+export interface SellerDeclarationV1 {
+  readonly schemaVersion: 1;
+  readonly userId: EntityId;
+  readonly declaration: SellerDeclarationBodyV1;
+  readonly revision: number;
+  readonly declaredAtUtc: UtcInstant;
 }
 
 export interface AuthIdentityV1 {
@@ -117,6 +146,7 @@ export interface PublisherEligibilityV1 {
     | 'account_inactive'
     | 'creator_verification_required'
     | 'identity_verification_required'
+    | 'seller_declaration_required'
     | 'creator_verification_unavailable'
     | 'membership_inactive'
     | 'capability_denied'

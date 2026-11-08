@@ -93,6 +93,16 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
       retentionPolicyId: 'identity.creator-verification',
     },
     {
+      // ADR 0023 (2026-11-08): DSA Art. 30 / DAC7 seller declaration.
+      dataClassId: 'identity.seller-declaration',
+      classification: 'personal',
+      containsDirectIdentifiers: true,
+      containsSecrets: false,
+      exportEligible: true,
+      deletionEligible: true,
+      retentionPolicyId: 'identity.seller-declaration',
+    },
+    {
       dataClassId: 'identity.managed-page',
       classification: 'personal',
       containsDirectIdentifiers: true,
@@ -258,6 +268,8 @@ export function createLocalPlatformApp(bundle: PlatformConfigBundle): PlatformAp
       status: 'unresolved',
       legalHoldSupported: true,
     },
+    // Trader data may outlive the account for DAC7/tax duties: counsel decides.
+    { policyId: 'identity.seller-declaration', status: 'unresolved', legalHoldSupported: true },
     { policyId: 'identity.managed-page', status: 'unresolved', legalHoldSupported: true },
     { policyId: 'identity.page-membership', status: 'unresolved', legalHoldSupported: true },
     ...acceptedBookingRetentionPolicies(),

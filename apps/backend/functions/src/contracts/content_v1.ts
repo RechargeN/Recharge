@@ -275,6 +275,7 @@ export type ContentFailureCode =
   | 'publisher_not_eligible'
   | 'creator_verification_required'
   | 'identity_verification_required'
+  | 'seller_declaration_required'
   | 'membership_inactive'
   | 'type_disabled'
   | 'content_type_unsupported'

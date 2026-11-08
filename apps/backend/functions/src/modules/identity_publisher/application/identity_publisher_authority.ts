@@ -8,6 +8,7 @@ import { AccessSnapshotService } from './access_snapshot_service.js';
 import { CreatorVerificationService } from './creator_verification_service.js';
 import { ManagedPageService } from './managed_page_service.js';
 import { PublisherEligibilityService } from './publisher_eligibility_service.js';
+import { SellerDeclarationService } from './seller_declaration_service.js';
 import { SessionAuthorityService } from './session_authority_service.js';
 import { InMemoryIdentityAuthorityRepository } from '../infrastructure/in_memory_identity_authority_repository.js';
 import { LocalPageCreationPolicy } from '../infrastructure/local_page_creation_policy.js';
@@ -24,6 +25,7 @@ export class IdentityPublisherAuthority {
   readonly pages: ManagedPageService;
   readonly access: AccessSnapshotService;
   readonly publishers: PublisherEligibilityService;
+  readonly sellers: SellerDeclarationService;
 
   constructor(input: {
     readonly repository: IdentityAuthorityRepository;
@@ -47,6 +49,7 @@ export class IdentityPublisherAuthority {
     );
     this.access = new AccessSnapshotService(input.repository);
     this.publishers = new PublisherEligibilityService(input.repository);
+    this.sellers = new SellerDeclarationService(input.repository, input.verificationDecisions);
     Object.freeze(this);
   }
 }

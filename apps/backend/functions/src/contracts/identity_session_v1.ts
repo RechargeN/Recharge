@@ -14,6 +14,7 @@ export const identitySessionFailureCodes = [
   'contention',
   'creator_verification_required',
   'identity_verification_required',
+  'seller_declaration_required',
   'creator_verification_unavailable',
   'feature_disabled',
   'invalid_contract',

@@ -17,11 +17,13 @@ export interface PublisherAccessDecision {
  * reads an AccessSnapshot, so a cached client snapshot is never authority
  * (BCK-14 §6, BCK-06).
  *
- * ADR 0023 (User = Creator, OQ-2/OQ-3): there is no Creator role gate any more.
- * The personal publisher needs the server identity-verification fact only when
- * the caller says the operation is risky (`identityVerificationRequired`, paid,
- * booking, rental, money); Page publishing keeps the verification fact as before.
- * The legacy `Creator` role is neither required nor consulted.
+ * ADR 0023 (User = Creator; owner decision 2026-11-08, marketplace rule, DSA
+ * Art. 30): no Creator role. For the personal publisher the caller passes the
+ * commerce of the publication: `none` publishes freely; `external` (paid, or a
+ * booking outside Recharge) needs the seller declaration; `inApp` needs it too,
+ * and a trader also needs the identity verification fact. On suspected fraud
+ * (`stepUpRequired`) any paid or bookable publication needs verification.
+ * Page publishing keeps the verification fact as before.
  */
 export async function evaluatePublisherAccess(
   transaction: IdentityAuthorityTransaction,
@@ -31,8 +33,8 @@ export async function evaluatePublisherAccess(
     readonly publisherRef: PublisherRefV1;
     readonly requiredCapability: string;
     readonly nowUtc: string;
-    /** Explicit at every call site: risky for the personal publisher (ADR 0023 OQ-2). */
-    readonly identityVerificationRequired: boolean;
+    /** Explicit at every call site (ADR 0023): what the publication sells or books. */
+    readonly commerce: 'none' | 'external' | 'inApp';
   },
 ): Promise<PublisherAccessDecision> {
   const account = await transaction.account(input.userId);
@@ -59,8 +61,14 @@ export async function evaluatePublisherAccess(
     (await transaction.verificationForUser(input.userId))?.status === 'verified';
   if (input.publisherRef.type === 'user') {
     if (input.publisherRef.id !== input.userId) return deny('publisher_not_accessible');
-    if (input.identityVerificationRequired && !(await verified()))
-      return deny('identity_verification_required');
+    if (input.commerce !== 'none') {
+      const declaration = await transaction.sellerDeclaration(input.userId);
+      if (declaration === null) return deny('seller_declaration_required');
+      const stepUp =
+        account.stepUpRequired === true ||
+        (input.commerce === 'inApp' && declaration.declaration.status === 'trader');
+      if (stepUp && !(await verified())) return deny('identity_verification_required');
+    }
     return { eligible: true, reason: 'eligible', authorityRevision: revision };
   }
   if (!(await verified())) return deny('identity_verification_required');

@@ -35,6 +35,7 @@
       "maximum": 2147483647
     },
     "createdAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" },
-    "updatedAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" }
+    "updatedAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" },
+    "stepUpRequired": { "type": "boolean" }
   }
 }

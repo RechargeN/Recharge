@@ -53,7 +53,7 @@ import {
   type ContentTypeRegistryEntry,
   type ContentTypeRule,
 } from '../domain/content_type_registry.js';
-import { contentInvolvesMoney } from '../domain/personal_publishing_policy.js';
+import { contentCommerce } from '../domain/personal_publishing_policy.js';
 import {
   ContentDomainRefusal,
   ContentRepositoryConflict,
@@ -946,7 +946,7 @@ export class ContentPublicationService {
       throw new ContentDomainRefusal('not_found');
     // Compatible = same type, still available, market and media still valid.
     if (target.typeId !== draft.typeId) throw new ContentDomainRefusal('content_type_unsupported');
-    // ADR 0023: the revision that goes live decides whether money is involved.
+    // ADR 0023: the revision that goes live decides what is sold or booked.
     await this.authorize(
       context,
       draft.publisherRef,
@@ -1765,7 +1765,7 @@ export class ContentPublicationService {
     typeId: ContentTypeId,
     action: ContentAction,
     marketId: MarketId,
-    // ADR 0023: the body where content leaves the draft (risk by money).
+    // ADR 0023: the body where content leaves the draft (marketplace rule).
     leavingBody?: ContentBody,
   ): Promise<PublisherEligibilityV1> {
     const entry = resolveContentType(typeId);
@@ -1783,7 +1783,7 @@ export class ContentPublicationService {
             nowUtc: context.nowUtc,
             ...(leavingBody === undefined
               ? {}
-              : { involvesMoney: contentInvolvesMoney(typeId, leavingBody) }),
+              : { commerce: contentCommerce(typeId, leavingBody) }),
           })
         : await this.deps.eligibility.evaluateDelegated({
             delegatedActor: principal.delegated,
@@ -1875,6 +1875,8 @@ function failureFor(reason: PublisherEligibilityV1['reason']): ContentFailureCod
     case 'creator_verification_required':
     case 'identity_verification_required':
       return 'identity_verification_required';
+    case 'seller_declaration_required':
+      return 'seller_declaration_required';
     case 'membership_inactive':
       return 'membership_inactive';
     case 'capability_denied':

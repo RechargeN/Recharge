@@ -732,6 +732,13 @@
         "compositeIndexes": []
       },
       {
+        "name": "identitySellerDeclarations",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
         "name": "identityManagedPages",
         "clientAccess": "deny",
         "owner": "firebase_cli",

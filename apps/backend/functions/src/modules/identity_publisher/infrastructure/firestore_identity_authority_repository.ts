@@ -6,6 +6,7 @@ import type { AuthIdentity } from '../domain/auth_identity.js';
 import type { CreatorVerification } from '../domain/creator_verification.js';
 import type { ManagedPage } from '../domain/managed_page.js';
 import type { PageMembership } from '../domain/page_membership.js';
+import type { SellerDeclaration } from '../domain/seller_declaration.js';
 import type {
   IdentityAuthorityRepository,
   IdentityAuthorityTransaction,
@@ -20,6 +21,8 @@ export const identityAuthorityCollections = Object.freeze({
   creatorVerifications: 'identityCreatorVerifications',
   managedPages: 'identityManagedPages',
   pageMemberships: 'identityPageMemberships',
+  /** ADR 0023 (2026-11-08): DSA Art. 30 seller declarations, keyed by userId. */
+  sellerDeclarations: 'identitySellerDeclarations',
 });
 
 export class FirestoreIdentityAuthorityRepository implements IdentityAuthorityRepository {
@@ -155,6 +158,14 @@ class FirestoreIdentityAuthorityTransaction implements IdentityAuthorityTransact
       membershipDocumentId(membership.pageId, membership.userId),
       membership,
     );
+  }
+
+  sellerDeclaration(userId: string): Promise<SellerDeclaration | null> {
+    return this.readDocument(identityAuthorityCollections.sellerDeclarations, userId);
+  }
+
+  putSellerDeclaration(declaration: SellerDeclaration): void {
+    this.write(identityAuthorityCollections.sellerDeclarations, declaration.userId, declaration);
   }
 
   async readDocument<T>(collection: string, documentId: string): Promise<T | null> {

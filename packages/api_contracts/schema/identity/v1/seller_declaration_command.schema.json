@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/identity/v1/seller_declaration_command.schema.json",
+  "title": "SellerDeclarationCommandV1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "requestId",
+        "sessionContext",
+        "expectedRevision",
+        "declaration"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "declareSeller"
+        },
+        "requestId": {
+          "$ref": "identity_session_command.schema.json#/$defs/requestId"
+        },
+        "sessionContext": {
+          "$ref": "identity_session_command.schema.json#/$defs/sessionContext"
+        },
+        "expectedRevision": {
+          "$ref": "identity_common.schema.json#/$defs/revision"
+        },
+        "declaration": {
+          "$ref": "seller_declaration.schema.json#/$defs/declaration"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "commandType",
+        "requestId",
+        "sessionContext"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "commandType": {
+          "const": "getSellerDeclaration"
+        },
+        "requestId": {
+          "$ref": "identity_session_command.schema.json#/$defs/requestId"
+        },
+        "sessionContext": {
+          "$ref": "identity_session_command.schema.json#/$defs/sessionContext"
+        }
+      }
+    }
+  ]
+}

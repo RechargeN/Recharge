@@ -101,6 +101,7 @@ export const securityPrivacyCollectionAccess = new CollectionAccessMatrix([
     ['identitySessions', 'identity.session'],
     ['identityAccessSnapshots', 'identity.access-snapshot'],
     ['identityCreatorVerifications', 'identity.creator-verification'],
+    ['identitySellerDeclarations', 'identity.seller-declaration'],
     ['identityManagedPages', 'identity.managed-page'],
     ['identityPageMemberships', 'identity.page-membership'],
   ].map(([collectionId, dataClassId]) => ({

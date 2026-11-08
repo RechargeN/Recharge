@@ -12,6 +12,7 @@ export type IdentityFailureCode =
   | 'snapshot_stale'
   | 'creator_verification_required'
   | 'identity_verification_required'
+  | 'seller_declaration_required'
   | 'creator_verification_unavailable'
   | 'membership_inactive'
   | 'capability_denied'
