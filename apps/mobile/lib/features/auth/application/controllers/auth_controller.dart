@@ -249,6 +249,10 @@ class AuthController extends ChangeNotifier {
   /// a sign-in is still completing (its own result is fresh server authority).
   Future<void> restoreAfterBackground() {
     if (_federatedSignInInProgress) return Future<void>.value();
+    // A34 2026-11-08: after a long offline sleep the backoff sat at 60 s, and
+    // the resume attempt usually runs before Wi-Fi is back, so the sign-in
+    // screen stayed for a minute. Coming back starts the short delays again.
+    _cancelOfflineRetry(resetBackoff: true);
     return restoreSession();
   }
 

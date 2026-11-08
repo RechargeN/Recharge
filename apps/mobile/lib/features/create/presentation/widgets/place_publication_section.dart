@@ -9,9 +9,16 @@ import '../../domain/entities/event_publication.dart';
 /// controller's state and forwards taps; it holds no rule and no second form:
 /// the Place itself is the user's Create draft.
 class PlacePublicationSection extends StatelessWidget {
-  const PlacePublicationSection({super.key, required this.controller});
+  const PlacePublicationSection({
+    super.key,
+    required this.controller,
+    this.devCloud = false,
+  });
 
   final PlacePublicationController controller;
+
+  /// N3a.2: the page talks to the dev cloud, not the local Emulator.
+  final bool devCloud;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +31,10 @@ class PlacePublicationSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              context.l10n.publicationTestPath,
+              devCloud
+                  ? context.l10n.publicationTestPathDevCloud
+                  : context.l10n.publicationTestPath,
+              key: const Key('place-publication-path'),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),

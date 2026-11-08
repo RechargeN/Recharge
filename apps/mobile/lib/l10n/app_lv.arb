@@ -181,6 +181,7 @@
   "bookingFewerSeats": "Mazāk vietu",
   "bookingMoreSeats": "Vairāk vietu",
   "publicationTestPath": "Testa publicēšanas ceļš (lokālais emulators)",
+  "publicationTestPathDevCloud": "Testa publicēšanas ceļš (izstrādes mākonis)",
   "publicationNoDraft": "{type, select, event{Sadaļā Izveidot nav pasākuma melnraksta} place{Sadaļā Izveidot nav vietas melnraksta} rental{Sadaļā Izveidot nav nomas melnraksta} session{Sadaļā Izveidot nav seansa melnraksta} activity{Sadaļā Izveidot nav aktivitātes melnraksta} collection{Sadaļā Izveidot nav kolekcijas melnraksta} findPeople{Sadaļā Izveidot nav kompānijas meklēšanas melnraksta} route{Sadaļā Izveidot nav maršruta melnraksta} scenario{Sadaļā Izveidot nav scenārija melnraksta} classWorkshop{Sadaļā Izveidot nav nodarbības / darbnīcas melnraksta} other{Sadaļā Izveidot nav melnraksta}}",
   "publicationMyObjects": "{type, select, event{Mani pasākumi} place{Manas vietas} rental{Mani nomas piedāvājumi} session{Mani seansi} activity{Manas aktivitātes} collection{Manas kolekcijas} findPeople{Mani kompānijas meklēšanas pieprasījumi} route{Mani maršruti} scenario{Mani scenāriji} classWorkshop{Manas nodarbības un darbnīcas} other{Mani objekti}}",
   "publicationMediaUploaded": "Augšupielādēta multivide: {count}",

@@ -774,6 +774,10 @@
   "@publicationTestPath": {
     "description": "Header of a default-off publication test page."
   },
+  "publicationTestPathDevCloud": "Test publication path (dev cloud)",
+  "@publicationTestPathDevCloud": {
+    "description": "Header of the publication test page when it talks to the dev cloud (N3a.2), not the local Emulator."
+  },
   "publicationNoDraft": "{type, select, event{No Event draft in Create} place{No Place draft in Create} rental{No Rental draft in Create} session{No Session draft in Create} activity{No Activity draft in Create} collection{No Collection draft in Create} findPeople{No Find People draft in Create} route{No Route draft in Create} scenario{No Scenario draft in Create} classWorkshop{No Class / Workshop draft in Create} other{No draft in Create}}",
   "@publicationNoDraft": {
     "description": "No local draft of the type; type is the stable Create type id.",

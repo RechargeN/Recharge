@@ -672,6 +672,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Тестовый путь публикации (локальный эмулятор)';
 
   @override
+  String get publicationTestPathDevCloud =>
+      'Тестовый путь публикации (dev-облако)';
+
+  @override
   String publicationNoDraft(String type) {
     String _temp0 = intl.Intl.selectLogic(type, {
       'event': 'В разделе «Создать» нет черновика события',

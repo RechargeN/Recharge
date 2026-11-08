@@ -10,6 +10,7 @@ import '../../features/create/application/content_server_path.dart';
 import '../../features/create/application/place_publication_controller.dart';
 import '../../features/create/presentation/widgets/place_publication_section.dart';
 import '../di/place_publication_composition.dart';
+import '../di/service_locator.dart';
 
 /// Default-off test page for the Place publication path (D3.1). It hosts the
 /// section for the signed-in user's own Create Place draft and shows nothing
@@ -97,7 +98,12 @@ class _PlacePublicationPanelState extends ConsumerState<PlacePublicationPanel> {
           ) {
             final PlacePublicationController? controller = snapshot.data;
             if (controller == null) return const SizedBox.shrink();
-            return PlacePublicationSection(controller: controller);
+            return PlacePublicationSection(
+              controller: controller,
+              devCloud:
+                  sl.isRegistered<PlacePublicationTestEntryGuard>() &&
+                  sl<PlacePublicationTestEntryGuard>().devCloudAllowed,
+            );
           },
     );
   }

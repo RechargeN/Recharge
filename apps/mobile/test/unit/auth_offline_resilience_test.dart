@@ -128,6 +128,28 @@ void main() {
     },
   );
 
+  test('returning from a long offline sleep retries after 2 s, not 60 s', () {
+    fakeAsync((async) {
+      final repo = _ScriptedRepository(DateTime.now);
+      final controller = _controller(repo);
+      unawaited(controller.restoreSession());
+      // Asleep offline: the backoff climbs to its 60 s cap.
+      async.elapse(const Duration(minutes: 10));
+      final asleep = repo.restoreCalls;
+      controller.suspendForBackground();
+      // Resume before Wi-Fi is back, then the network returns.
+      repo.restoreScript.addAll(<Object>['offline', const Duration(hours: 1)]);
+      unawaited(controller.restoreAfterBackground());
+      async.flushMicrotasks();
+      expect(repo.restoreCalls, asleep + 1);
+      expect(controller.state.isAuthenticated, isFalse);
+      async.elapse(const Duration(seconds: 2));
+      expect(repo.restoreCalls, asleep + 2);
+      expect(controller.state.isAuthenticated, isTrue);
+      controller.dispose();
+    });
+  });
+
   test('an active user is refreshed silently before the snapshot expires', () {
     fakeAsync((async) {
       final repo = _ScriptedRepository(DateTime.now);

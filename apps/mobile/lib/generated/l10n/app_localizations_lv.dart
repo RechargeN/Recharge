@@ -670,6 +670,10 @@ class AppLocalizationsLv extends AppLocalizations {
       'Testa publicēšanas ceļš (lokālais emulators)';
 
   @override
+  String get publicationTestPathDevCloud =>
+      'Testa publicēšanas ceļš (izstrādes mākonis)';
+
+  @override
   String publicationNoDraft(String type) {
     String _temp0 = intl.Intl.selectLogic(type, {
       'event': 'Sadaļā Izveidot nav pasākuma melnraksta',

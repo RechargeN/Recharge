@@ -1186,6 +1186,12 @@ abstract class AppLocalizations {
   /// **'Test publication path (local Emulator)'**
   String get publicationTestPath;
 
+  /// Header of the publication test page when it talks to the dev cloud (N3a.2), not the local Emulator.
+  ///
+  /// In en, this message translates to:
+  /// **'Test publication path (dev cloud)'**
+  String get publicationTestPathDevCloud;
+
   /// No local draft of the type; type is the stable Create type id.
   ///
   /// In en, this message translates to:
