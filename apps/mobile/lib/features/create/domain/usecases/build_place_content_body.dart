@@ -135,8 +135,11 @@ final class PlaceContentBodyMapper {
       if (criteria is Map && criteria.isNotEmpty)
         'criteria': Map<String, Object?>.from(criteria),
       'location': _location(place.location, policy),
-      if (policy.hours.isVisible && place.hours.mode != null)
-        'hours': _hours(place.hours, scope),
+      // The Content contract requires hours; hidden or unanswered hours are
+      // `unknown`, never an invented schedule (Place adaptive spec §8).
+      'hours': policy.hours.isVisible && place.hours.mode != null
+          ? _hours(place.hours, scope)
+          : _unknownHours,
       'operationalStatus': _operationalStatus(place.operationalStatus),
       if (policy.visitPlanning.isVisible)
         'visitPlanning': _visitPlanning(place.visitPlanning),
@@ -229,6 +232,12 @@ final class PlaceContentBodyMapper {
     'closesNextDay': period.closesNextDay,
   };
 
+  static const Map<String, Object?> _unknownHours = <String, Object?>{
+    'mode': 'unknown',
+    'weeklyPeriods': <Object?>[],
+    'exceptions': <Object?>[],
+  };
+
   static Map<String, Object?> _hours(
     PlaceHoursDraft hours,
     PlacePublicationScope scope,
@@ -301,7 +310,9 @@ final class PlaceContentBodyMapper {
     final String? note = pricing.pricingNote?.trim();
     final String? url = pricing.officialPricingUrl?.trim();
     return <String, Object?>{
-      if (type != null) 'entryType': type.name,
+      // The Content contract requires an entry type; a hidden or unanswered
+      // admission is `unknown`, never an invented `free` (Place adaptive spec §8).
+      'entryType': (type ?? PlaceEntryType.unknown).name,
       if (pricedEntry && pricing.entryPriceFrom != null)
         'entryPriceFrom': pricing.entryPriceFrom!.minorUnits,
       if (pricedEntry && pricing.entryPriceTo != null)

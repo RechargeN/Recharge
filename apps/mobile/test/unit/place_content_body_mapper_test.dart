@@ -85,8 +85,24 @@ void main() {
           placeCompatCases[item['name']! as String]!(),
         );
         expect(mapped.unsupported, isEmpty);
+        // The server still refuses these fixture bodies; since the A34 run
+        // (2026-11-08) Create sends an unanswered optional answer as `unknown`
+        // instead, so the user is no longer stuck on the step.
+        final Map<String, Object?> expected =
+            jsonDecode(jsonEncode(item['body'])) as Map<String, Object?>;
+        switch (item['name']) {
+          case 'hours_mode_missing':
+            expected['hours'] = <String, Object?>{
+              'mode': 'unknown',
+              'weeklyPeriods': <Object?>[],
+              'exceptions': <Object?>[],
+            };
+          case 'entry_type_missing':
+            (expected['pricing']! as Map<String, Object?>)['entryType'] =
+                'unknown';
+        }
         // Through JSON, as the transport sends it.
-        expect(jsonDecode(jsonEncode(mapped.body)), item['body']);
+        expect(jsonDecode(jsonEncode(mapped.body)), expected);
       });
     }
   });
@@ -232,12 +248,35 @@ void main() {
           paid,
           policy(admission: PlaceFieldRequirement.hidden),
           (body) =>
-              section(body, 'pricing').containsKey('entryType') ||
+              section(body, 'pricing')['entryType'] != 'unknown' ||
               section(body, 'pricing').containsKey('entryPriceFrom'),
           (d) => d.placeData!.pricing.entryType == PlaceEntryType.paid,
         );
       },
     );
+
+    // A34 2026-11-08: a quest room (admission hidden) could not leave step 2,
+    // because the Content contract requires pricing.entryType.
+    test('an unanswered or hidden admission is sent as unknown', () {
+      final CreateDraftEntity unanswered = base().copyWith(
+        placeData: place(
+          base(),
+        ).copyWith(pricing: const PlacePricingDraft(currencyCode: 'EUR')),
+      );
+      for (final PlaceFieldRequirement admission in <PlaceFieldRequirement>[
+        PlaceFieldRequirement.optional,
+        PlaceFieldRequirement.hidden,
+      ]) {
+        expect(
+          section(
+            map(unanswered, policy: policy(admission: admission)).body,
+            'pricing',
+          )['entryType'],
+          'unknown',
+          reason: admission.name,
+        );
+      }
+    });
 
     test('typical spend under hidden typical spend', () {
       final CreateDraftEntity draft = base().copyWith(
@@ -344,7 +383,9 @@ void main() {
       notSent(
         base(),
         policy(hours: PlaceFieldRequirement.hidden),
-        (body) => body.containsKey('hours'),
+        (body) =>
+            section(body, 'hours')['mode'] != 'unknown' ||
+            (section(body, 'hours')['weeklyPeriods']! as List).isNotEmpty,
         (d) => d.placeData!.hours.weeklyPeriods.isNotEmpty,
       );
     });
