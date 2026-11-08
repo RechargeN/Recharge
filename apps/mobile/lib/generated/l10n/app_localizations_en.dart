@@ -298,11 +298,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contentErrorCreatorVerificationRequired =>
-      'Publishing requires a verified creator account.';
+      'Taking payment or reservations requires identity verification.';
 
   @override
   String get contentErrorCreatorVerificationUnavailable =>
-      'Creator verification is temporarily unavailable.';
+      'Identity verification is temporarily unavailable.';
 
   @override
   String get contentErrorMembershipInactive =>

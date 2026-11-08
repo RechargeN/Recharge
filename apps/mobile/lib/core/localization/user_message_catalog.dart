@@ -79,6 +79,8 @@ abstract final class UserMessageCatalog {
     'capability_denied': _notAllowed,
     'publisher_not_eligible': _publisher,
     'creator_verification_required': _verification,
+    // ADR 0023: the new name of the same refusal.
+    'identity_verification_required': _verification,
     'membership_inactive': _membership,
     'type_disabled': (l) => l.contentErrorTypeDisabled,
     'content_type_unsupported': (l) => l.contentErrorTypeDisabled,
@@ -139,6 +141,8 @@ abstract final class UserMessageCatalog {
         'eligible': null,
         'account_inactive': (l) => l.errorAccountRestricted,
         'creator_verification_required': _verification,
+        // ADR 0023: the new name of the same refusal.
+        'identity_verification_required': _verification,
         'creator_verification_unavailable': (l) =>
             l.contentErrorCreatorVerificationUnavailable,
         'membership_inactive': _membership,
@@ -292,6 +296,8 @@ abstract final class UserMessageCatalog {
         'capability_denied': _notAllowed,
         'contention': _unavailable,
         'creator_verification_required': _verification,
+        // ADR 0023: the new name of the same refusal.
+        'identity_verification_required': _verification,
         'creator_verification_unavailable': _unavailable,
         'feature_disabled': _featureOff,
         'invalid_contract': _invalid,

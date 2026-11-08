@@ -304,11 +304,11 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get contentErrorCreatorVerificationRequired =>
-      'Publicēšanai nepieciešams verificēts autora konts.';
+      'Lai pieņemtu maksājumus vai rezervācijas, apstipriniet savu identitāti.';
 
   @override
   String get contentErrorCreatorVerificationUnavailable =>
-      'Autora verifikācija īslaicīgi nav pieejama.';
+      'Identitātes pārbaude īslaicīgi nav pieejama.';
 
   @override
   String get contentErrorMembershipInactive =>

@@ -164,11 +164,9 @@ final class ServerAuthContext {
         user: AuthUserEntity(
           id: userId,
           email: '', // Profile contract does not expose email.
-          role: (roles).contains('Admin')
-              ? 'admin'
-              : roles.contains('Creator')
-              ? 'creator'
-              : 'user',
+          // ADR 0023: global roles are User and Admin; a legacy `Creator`
+          // from an older server reads as `user` and grants nothing more.
+          role: (roles).contains('Admin') ? 'admin' : 'user',
           capabilities: List<String>.unmodifiable(
             (capabilities).cast<String>(),
           ),

@@ -305,11 +305,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get contentErrorCreatorVerificationRequired =>
-      'Для публикации нужен подтверждённый аккаунт автора.';
+      'Чтобы принимать оплату или бронирования, подтвердите личность.';
 
   @override
   String get contentErrorCreatorVerificationUnavailable =>
-      'Проверка автора временно недоступна.';
+      'Проверка личности временно недоступна.';
 
   @override
   String get contentErrorMembershipInactive =>

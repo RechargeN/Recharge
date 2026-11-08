@@ -637,13 +637,13 @@ abstract class AppLocalizations {
   /// Content/identity: creator verification required.
   ///
   /// In en, this message translates to:
-  /// **'Publishing requires a verified creator account.'**
+  /// **'Taking payment or reservations requires identity verification.'**
   String get contentErrorCreatorVerificationRequired;
 
   /// Identity: creator verification unavailable.
   ///
   /// In en, this message translates to:
-  /// **'Creator verification is temporarily unavailable.'**
+  /// **'Identity verification is temporarily unavailable.'**
   String get contentErrorCreatorVerificationUnavailable;
 
   /// Page membership inactive.

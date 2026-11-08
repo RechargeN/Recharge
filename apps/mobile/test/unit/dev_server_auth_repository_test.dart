@@ -87,6 +87,14 @@ void main() {
       expect(() => context(data), throwsFormatException);
     },
   );
+  test('ADR 0023: a legacy Creator role reads as user', () {
+    final legacy = packet();
+    ((legacy['authContext'] as Map)['profile'] as Map)['systemRoles'] = [
+      'User',
+      'Creator',
+    ];
+    expect(context(legacy).result.user.role, 'user');
+  });
   test(
     'schema boundaries: zero revision is valid; invalid ids, capabilities and UTC dates deny',
     () {

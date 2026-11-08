@@ -362,11 +362,11 @@
   "@contentErrorPublisherNotEligible": {
     "description": "Content: publisher not eligible or not accessible."
   },
-  "contentErrorCreatorVerificationRequired": "Publishing requires a verified creator account.",
+  "contentErrorCreatorVerificationRequired": "Taking payment or reservations requires identity verification.",
   "@contentErrorCreatorVerificationRequired": {
     "description": "Content/identity: creator verification required."
   },
-  "contentErrorCreatorVerificationUnavailable": "Creator verification is temporarily unavailable.",
+  "contentErrorCreatorVerificationUnavailable": "Identity verification is temporarily unavailable.",
   "@contentErrorCreatorVerificationUnavailable": {
     "description": "Identity: creator verification unavailable."
   },
