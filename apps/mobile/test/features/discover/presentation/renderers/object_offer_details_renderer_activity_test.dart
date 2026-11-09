@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,7 +33,7 @@ void main() {
       startsAtUtc: DateTime.utc(2026, 9, 12, 7),
       latitude: 56.956,
       longitude: 24.112,
-      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       distanceKm: 1.2,
       isFree: true,
       objectKind: DiscoverObjectKind.activity,

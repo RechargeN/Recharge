@@ -1,3 +1,7 @@
+import '../../../../shared/primitives/money/currency_metadata.dart';
+import '../../../../core/parsing/money_legacy_adapter.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/favorite_item_entity.dart';
 import '../../../../shared/primitives/money/money.dart';
 
@@ -40,8 +44,21 @@ class FavoriteItemModel {
 
   factory FavoriteItemModel.fromJson(
     Map<String, dynamic> json, {
-    required String defaultCurrencyCode,
+    String? legacyCurrencyCode,
   }) {
+    final price =
+        MoneyLegacyAdapter().readOptional(
+          hasCanonicalMinorUnits: json.containsKey('priceMinorUnits'),
+          canonicalMinorUnits: json['priceMinorUnits'],
+          legacyMajorAmount: json['priceAmount'],
+          currencyCode: json.containsKey('currencyCode')
+              ? json['currencyCode']
+              : legacyCurrencyCode,
+        ) ??
+        null;
+    if (price != null && price.minorUnits < 0) {
+      throw const MoneyReadException(MoneyParseError.outOfRange);
+    }
     return FavoriteItemModel(
       id: json['id'] as String,
       objectType: json['objectType'] as String?,
@@ -53,20 +70,7 @@ class FavoriteItemModel {
           ? json['startsAtUtcIso'] as String?
           : json['startsAtUtcIso'] as String,
       distanceKm: (json['distanceKm'] as num?)?.toDouble(),
-      priceAmount:
-          json['evergreen'] == true &&
-              json['price'] == null &&
-              json['priceAmount'] == null
-          ? null
-          : Money.fromJsonOrNull(
-                  json['price'],
-                  legacyCurrencyCode: defaultCurrencyCode,
-                ) ??
-                Money.fromJsonOrNull(
-                  json['priceAmount'],
-                  legacyCurrencyCode: defaultCurrencyCode,
-                ) ??
-                (throw const FormatException('Favorite Money is invalid')),
+      priceAmount: price,
       isFree: json['isFree'] as bool,
       savedAtUtcIso: json['savedAtUtcIso'] as String,
       targetRoute: json['targetRoute'] as String?,
@@ -77,6 +81,12 @@ class FavoriteItemModel {
   }
 
   Map<String, dynamic> toJson() {
+    if (CurrencyMetadataRegistry.eurOnly.lookup(priceAmount.currency) == null) {
+      throw const MoneyReadException(MoneyParseError.unknownCurrency);
+    }
+    if (priceAmount.minorUnits < 0) {
+      throw const MoneyReadException(MoneyParseError.outOfRange);
+    }
     return <String, dynamic>{
       'id': id,
       'objectType': objectType,
@@ -86,7 +96,8 @@ class FavoriteItemModel {
       'category': category,
       'startsAtUtcIso': startsAtUtcIso,
       'distanceKm': distanceKm,
-      'price': priceAmount?.toJson(),
+      'priceMinorUnits': priceAmount?.minorUnits,
+      'currencyCode': priceAmount?.currency.value,
       if (startsAtUtcIso == null && priceAmount == null) 'evergreen': true,
       'isFree': isFree,
       'savedAtUtcIso': savedAtUtcIso,

@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/geo/geo_bounds.dart';
@@ -55,6 +56,7 @@ void main() {
       final repository = DiscoverRepositoryImpl(
         remoteDataSource: _EmptyRemoteDataSource(),
         publishedRoutes: _RoutePort(_route()),
+        currency: CurrencyCode.eur,
       );
       final defaults = DiscoverQuery.defaults(
         marketCityId: 'riga',
@@ -81,6 +83,7 @@ void main() {
     final repository = DiscoverRepositoryImpl(
       remoteDataSource: _EmptyRemoteDataSource(),
       publishedRoutes: _RoutePort(_route()),
+      currency: CurrencyCode.eur,
     );
     final query = DiscoverQuery.defaults(
       marketCityId: 'riga',
@@ -124,6 +127,7 @@ void main() {
     final repository = DiscoverRepositoryImpl(
       remoteDataSource: _EmptyRemoteDataSource(),
       publishedRoutes: _RoutePort(_route()),
+      currency: CurrencyCode.eur,
     );
 
     final details = await repository.getDetails('route-1');
@@ -186,7 +190,7 @@ class _RoutePort implements PublishedRouteDiscoveryPort {
 class _EmptyRemoteDataSource implements DiscoverRemoteDataSource {
   @override
   Future<List<DiscoverItemModel>> getFeedCandidates() async =>
-      const <DiscoverItemModel>[];
+      <DiscoverItemModel>[];
 
   @override
   Future<DiscoverItemModel> getDetails(String itemId) {

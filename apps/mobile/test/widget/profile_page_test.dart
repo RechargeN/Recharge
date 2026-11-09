@@ -1,3 +1,6 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import '../support/publisher_access_test_support.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -2097,7 +2100,7 @@ DiscoverFeedController _discoverController({
       timezoneId: 'Europe/Riga',
       originLat: 56.9496,
       originLng: 24.1052,
-      currencyCode: 'EUR',
+      currency: CurrencyCode.eur,
     ),
   );
 }
@@ -2237,7 +2240,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,
@@ -2256,7 +2259,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
         startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
         latitude: query.centerLat,
         longitude: query.centerLng,
-        priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+        priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
         distanceKm: 1.2,
         isFree: true,
         relevanceScore: 0.8,
@@ -2330,9 +2333,7 @@ class _FakeDiscoverPreferencesRepository
 
 class _FakeFavoritesRepository implements FavoritesRepository {
   _FakeFavoritesRepository({List<FavoriteItemEntity>? initial})
-    : _items = List<FavoriteItemEntity>.from(
-        initial ?? const <FavoriteItemEntity>[],
-      );
+    : _items = List<FavoriteItemEntity>.from(initial ?? <FavoriteItemEntity>[]);
 
   final List<FavoriteItemEntity> _items;
 
@@ -2385,7 +2386,7 @@ FavoriteItemEntity _scenarioFavorite() {
     category: 'scenario',
     startsAtUtc: DateTime.parse('2026-04-20T12:00:00Z'),
     distanceKm: 2.4,
-    priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     isFree: true,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
     targetRoute:
@@ -2401,7 +2402,7 @@ SavedSearchEntity _savedSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
+      budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -2416,7 +2417,7 @@ SmartSearchHistoryEntity _smartSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
+      budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),

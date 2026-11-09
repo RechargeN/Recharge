@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/application/smart_search_parser.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
@@ -6,6 +8,8 @@ void main() {
   test('parses free yoga tonight near radius', () {
     final SmartSearchParseResult result = parseSmartSearch(
       'free yoga tonight near 5 km',
+      currency: CurrencyCode.eur,
+      locale: 'en',
     );
 
     expect(result.queryText, 'yoga');
@@ -20,14 +24,15 @@ void main() {
   test('parses museum today budget', () {
     final SmartSearchParseResult result = parseSmartSearch(
       'museum today under 10',
-      currencyCode: 'EUR',
+      currency: CurrencyCode.eur,
+      locale: 'en',
     );
 
     expect(result.queryText, 'museum');
     expect(result.selectedCategoryIds, contains('art_culture_museums'));
     expect(
       result.budgetMax,
-      const Money(minorUnits: 1000, currencyCode: 'EUR'),
+      Money(minorUnits: 1000, currency: CurrencyCode.eur),
     );
     expect(result.datePreset, SmartSearchDatePreset.today);
   });
@@ -35,6 +40,8 @@ void main() {
   test('parses any area and preserves text query', () {
     final SmartSearchParseResult result = parseSmartSearch(
       'live music anywhere',
+      currency: CurrencyCode.eur,
+      locale: 'en',
     );
 
     expect(result.queryText, 'live music');
@@ -45,6 +52,8 @@ void main() {
   test('parses smart route intent with duration and steps', () {
     final SmartSearchParseResult result = parseSmartSearch(
       'build a free calm walking route for 2 hours with coffee and park near 5 km',
+      currency: CurrencyCode.eur,
+      locale: 'en',
     );
 
     expect(result.routeIntent, isNotNull);
@@ -66,6 +75,8 @@ void main() {
   test('parses active smart route fallback steps', () {
     final SmartSearchParseResult result = parseSmartSearch(
       'active route for 90 min',
+      currency: CurrencyCode.eur,
+      locale: 'en',
     );
 
     expect(result.routeIntent, isNotNull);

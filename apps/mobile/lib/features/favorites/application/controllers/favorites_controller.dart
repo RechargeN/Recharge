@@ -84,7 +84,7 @@ class FavoritesController extends ChangeNotifier {
     return _state.favoriteIds.contains(itemId);
   }
 
-  Future<void> addFavorite(
+  Future<bool> addFavorite(
     FavoriteItemEntity item, {
     required String sourceScreen,
   }) async {
@@ -124,37 +124,48 @@ class FavoritesController extends ChangeNotifier {
     };
   }
 
-  Future<void> removeFavorite(
+  Future<bool> removeFavorite(
     String itemId, {
     required String sourceScreen,
   }) async {
-    _analyticsService.track(
-      'favorites_remove_started',
-      params: <String, Object?>{
-        'source_screen': sourceScreen,
-        'item_id': itemId,
-      },
-    );
-    await _removeFavoriteUseCase(itemId);
-    await loadFavorites();
-    _analyticsService.track(
-      'favorites_remove_succeeded',
-      params: <String, Object?>{
-        'source_screen': sourceScreen,
-        'item_id': itemId,
-      },
-    );
+    try {
+      _analyticsService.track(
+        'favorites_remove_started',
+        params: <String, Object?>{
+          'source_screen': sourceScreen,
+          'item_id': itemId,
+        },
+      );
+      await _removeFavoriteUseCase(itemId);
+      await loadFavorites();
+      if (_state.status == FavoritesStatus.error) return false;
+      _analyticsService.track(
+        'favorites_remove_succeeded',
+        params: <String, Object?>{
+          'source_screen': sourceScreen,
+          'item_id': itemId,
+        },
+      );
+      return true;
+    } on Object {
+      _setState(
+        _state.copyWith(
+          status: FavoritesStatus.error,
+          message: 'Не удалось завершить сохранение избранного.',
+        ),
+      );
+      return false;
+    }
   }
 
-  Future<void> toggleFavorite(
+  Future<bool> toggleFavorite(
     FavoriteItemEntity item, {
     required String sourceScreen,
   }) async {
     if (isFavorite(item.id)) {
-      await removeFavorite(item.id, sourceScreen: sourceScreen);
-      return;
+      return removeFavorite(item.id, sourceScreen: sourceScreen);
     }
-    await addFavorite(item, sourceScreen: sourceScreen);
+    return addFavorite(item, sourceScreen: sourceScreen);
   }
 
   void _setState(FavoritesState state) {

@@ -1,10 +1,12 @@
+import '../../../../core/parsing/money_legacy_adapter.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/opening_hours_rule.dart';
 import '../../domain/entities/time_slot.dart';
 import '../../../../shared/primitives/money/money.dart';
 
 class DiscoverItemModel extends DiscoverItemEntity {
-  const DiscoverItemModel({
+  DiscoverItemModel({
     required super.id,
     required super.title,
     required super.subtitle,
@@ -41,7 +43,23 @@ class DiscoverItemModel extends DiscoverItemEntity {
     super.highlights,
   });
 
-  factory DiscoverItemModel.fromMap(Map<String, Object?> map) {
+  factory DiscoverItemModel.fromMap(
+    Map<String, Object?> map, {
+    String? legacyCurrencyCode,
+  }) {
+    final price =
+        MoneyLegacyAdapter().readOptional(
+          hasCanonicalMinorUnits: map.containsKey('price_minor_units'),
+          canonicalMinorUnits: map['price_minor_units'],
+          legacyMajorAmount: map['price_amount'],
+          currencyCode: map.containsKey('currency_code')
+              ? map['currency_code']
+              : legacyCurrencyCode,
+        ) ??
+        (throw const MoneyReadException(MoneyParseError.invalidCanonicalValue));
+    if (price.minorUnits < 0) {
+      throw const MoneyReadException(MoneyParseError.outOfRange);
+    }
     return DiscoverItemModel(
       id: map['id']! as String,
       title: map['title']! as String,
@@ -52,16 +70,7 @@ class DiscoverItemModel extends DiscoverItemEntity {
       startsAtUtc: DateTime.parse(map['starts_at_utc']! as String),
       latitude: (map['latitude']! as num).toDouble(),
       longitude: (map['longitude']! as num).toDouble(),
-      priceAmount:
-          Money.fromJsonOrNull(
-            map['price'],
-            legacyCurrencyCode: map['currency_code'] as String?,
-          ) ??
-          Money.fromJsonOrNull(
-            map['price_amount'],
-            legacyCurrencyCode: map['currency_code'] as String?,
-          ) ??
-          (throw const FormatException('Discover item Money is invalid')),
+      priceAmount: price,
       distanceKm: (map['distance_km']! as num).toDouble(),
       isFree: map['is_free']! as bool,
       objectKind: DiscoverObjectKind.values.firstWhere(

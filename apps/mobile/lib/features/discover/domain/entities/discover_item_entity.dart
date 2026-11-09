@@ -1,4 +1,5 @@
 import 'activity_catalog_facts.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../../../shared/models/catalog_object_ref.dart';
 import 'opening_hours_rule.dart';
 import 'published_route_discovery_entity.dart';
@@ -14,7 +15,7 @@ enum AvailabilityKind { eventSlots, openingHours, none }
 enum DiscoverObjectKind { place, event, route, activity, findPeople }
 
 class DiscoverItemEntity {
-  const DiscoverItemEntity({
+  DiscoverItemEntity({
     required this.id,
     required this.title,
     required this.subtitle,
@@ -61,7 +62,11 @@ class DiscoverItemEntity {
        assert(bufferAfterMinutes >= 0),
        assert(
          !allowsPartialAttendance || (minimumVisitDurationMinutes ?? 0) > 0,
-       );
+       ) {
+    if (priceAmount.minorUnits < 0) {
+      throw ArgumentError('Price must be nonnegative');
+    }
+  }
 
   final String id;
   final String title;

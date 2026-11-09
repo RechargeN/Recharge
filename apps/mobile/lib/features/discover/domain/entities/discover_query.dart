@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money.dart';
 import 'time_window.dart';
 import '../../../../shared/primitives/money/money.dart';
 
@@ -32,6 +33,14 @@ class DiscoverQuery {
     this.timeWindow,
     this.travelContext,
   }) {
+    if ((budgetMin?.minorUnits ?? 0) < 0 || (budgetMax?.minorUnits ?? 0) < 0) {
+      throw ArgumentError('Budget must be nonnegative');
+    }
+    if (budgetMin != null &&
+        budgetMax != null &&
+        budgetMin!.compareTo(budgetMax!) > 0) {
+      throw ArgumentError('Budget minimum exceeds maximum');
+    }
     if (timeWindow != null && travelContext == null) {
       throw ArgumentError('travelContext is required with timeWindow');
     }

@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/scenarios/application/controllers/scenario_builder_controller.dart';
@@ -59,7 +61,7 @@ void main() {
     );
     expect(
       controller.state.draft.totalPriceAmount,
-      const Money(minorUnits: 0, currencyCode: 'EUR'),
+      Money(minorUnits: 0, currency: CurrencyCode.eur),
     );
   });
 

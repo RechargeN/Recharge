@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
@@ -13,7 +15,7 @@ void main() {
     final DiscoverQuery query = DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
+      budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
       radiusMeters: 7500,
       centerLat: 56.501234,
       centerLng: 27.345678,
@@ -54,7 +56,7 @@ void main() {
       query: DiscoverQuery.defaults().copyWith(
         queryText: 'museum',
         selectedCategoryIds: const <String>['art'],
-        budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
+        budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
         radiusMeters: 5000,
       ),
       createdAtUtc: DateTime.parse('2026-04-21T08:00:00Z'),
@@ -86,7 +88,7 @@ void main() {
       query: DiscoverQuery.defaults().copyWith(
         queryText: 'museum',
         selectedCategoryIds: const <String>['art'],
-        budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
+        budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
         radiusMeters: 5000,
       ),
       createdAtUtc: DateTime.parse('2026-04-22T08:00:00Z'),

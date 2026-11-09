@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 
@@ -427,16 +428,10 @@ class _PublishedRouteCard extends StatelessWidget {
               runSpacing: 8,
               children: <Widget>[
                 DetailsPill(
-                  label: routeProfileLabelForDetails(
-                    context.l10n,
-                    route.routingProfileId,
-                  ),
+                  label: routeProfileLabelForDetails(route.routingProfileId),
                 ),
                 DetailsPill(
-                  label: routeDifficultyLabelForDetails(
-                    context.l10n,
-                    route.difficultyId,
-                  ),
+                  label: routeDifficultyLabelForDetails(route.difficultyId),
                 ),
                 if (route.recommendedDifficultyId.isNotEmpty &&
                     route.recommendedDifficultyId != route.difficultyId)

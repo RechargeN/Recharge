@@ -1,3 +1,6 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,6 +23,12 @@ void main() {
       getDiscoverFeedUseCase: GetDiscoverFeedUseCase(_FakeDiscoverRepository()),
       discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
       analyticsService: _NoopAnalyticsService(),
+      runtimeDefaults: const DiscoverRuntimeDefaults(
+        timezoneId: 'Europe/Riga',
+        originLat: 56.9496,
+        originLng: 24.1052,
+        currency: CurrencyCode.eur,
+      ),
     );
     await controller.loadFeed();
 
@@ -57,7 +66,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,
@@ -76,7 +85,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
         startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
         latitude: query.centerLat,
         longitude: query.centerLng,
-        priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+        priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
         distanceKm: 1.2,
         isFree: true,
         relevanceScore: 0.8,

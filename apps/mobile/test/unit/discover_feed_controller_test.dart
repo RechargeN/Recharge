@@ -1,3 +1,6 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
@@ -26,7 +29,7 @@ void main() {
         timezoneId: 'Europe/Riga',
         originLat: 56.9496,
         originLng: 24.1052,
-        currencyCode: 'EUR',
+        currency: CurrencyCode.eur,
       ),
     );
   });
@@ -88,7 +91,7 @@ void main() {
       queryText: ' yoga ',
       selectedCategoryIds: const <String>['wellness'],
       freeOnly: true,
-      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
+      budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
       radiusMeters: 20000,
       unlimitedRadius: false,
     );
@@ -100,7 +103,7 @@ void main() {
     expect(controller.state.appliedQuery.freeOnly, isTrue);
     expect(
       controller.state.appliedQuery.budgetMax,
-      const Money(minorUnits: 1000, currencyCode: 'EUR'),
+      Money(minorUnits: 1000, currency: CurrencyCode.eur),
     );
     expect(controller.state.appliedQuery.radiusMeters, 20000);
     expect(repository.requestCount, 1);
@@ -137,7 +140,7 @@ void main() {
       queryText: 'art',
       selectedCategoryIds: const <String>['art'],
       freeOnly: true,
-      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
+      budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
     );
 
     await controller.resetSearchConditions();
@@ -187,7 +190,7 @@ void main() {
     final DiscoverQuery query = DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
+      budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
       radiusMeters: 5000,
     );
 
@@ -210,7 +213,7 @@ void main() {
     expect(controller.state.appliedQuery.selectedCategoryIds, <String>['art']);
     expect(
       controller.state.appliedQuery.budgetMax,
-      const Money(minorUnits: 1000, currencyCode: 'EUR'),
+      Money(minorUnits: 1000, currency: CurrencyCode.eur),
     );
 
     await controller.deleteSmartSearchPrompt(
@@ -243,7 +246,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,
@@ -261,7 +264,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       );
     }
     if (shouldReturnEmpty) {
-      return const <DiscoverItemEntity>[];
+      return <DiscoverItemEntity>[];
     }
 
     return <DiscoverItemEntity>[
@@ -274,7 +277,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
         startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
         latitude: query.centerLat,
         longitude: query.centerLng,
-        priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+        priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
         distanceKm: 1.2,
         isFree: true,
         relevanceScore: 0.8,

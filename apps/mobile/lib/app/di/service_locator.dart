@@ -18,6 +18,7 @@ import '../../features/library/data/library_sync_client.dart';
 import 'dart:ui' show Locale, PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
+import '../../shared/primitives/money/currency_code.dart';
 import '../../features/identity/domain/usecases/submit_managed_page_field_edit_usecase.dart';
 import '../../features/identity/domain/usecases/send_team_invitation_usecase.dart';
 import '../../features/identity/domain/usecases/revoke_team_invitation_usecase.dart';
@@ -342,6 +343,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     )
     ..registerLazySingleton<DiscoverRuntimeDefaults>(
       () => DiscoverRuntimeDefaults(
+        currency: CurrencyCode.parse(sl<MarketConfig>().currencyCode),
         timezoneId: sl<MarketConfig>().timezoneId,
         originLat: sl<MarketConfig>().centerLat,
         originLng: sl<MarketConfig>().centerLng,
@@ -1008,6 +1010,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     ..registerLazySingleton<DiscoverPreferencesLocalDataSource>(
       () => DiscoverPreferencesLocalDataSource(
         sl(),
+        legacyCurrencyCode: sl<MarketConfig>().currencyCode,
         defaultMarketCityId: sl<MarketConfig>().marketCityId,
         defaultCenterLat: sl<MarketConfig>().centerLat,
         defaultCenterLng: sl<MarketConfig>().centerLng,
@@ -1020,6 +1023,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
         local: () => DiscoverRepositoryImpl(
           remoteDataSource: sl(),
           publishedRoutes: sl(),
+          currency: CurrencyCode.parse(sl<MarketConfig>().currencyCode),
         ),
         port: sl(),
         session: sl(),
@@ -1053,7 +1057,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     ..registerLazySingleton<FavoritesLocalDataSource>(
       () => FavoritesLocalDataSource(
         sl(),
-        defaultCurrencyCode: sl<MarketConfig>().currencyCode,
+        legacyCurrencyCode: sl<MarketConfig>().currencyCode,
       ),
     )
     ..registerLazySingleton<ContentTranslationPort>(

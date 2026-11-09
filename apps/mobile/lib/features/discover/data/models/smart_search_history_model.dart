@@ -17,6 +17,7 @@ class SmartSearchHistoryModel {
     required String defaultMarketCityId,
     required double defaultCenterLat,
     required double defaultCenterLng,
+    String? legacyCurrencyCode,
   }) {
     final Object? rawQuery = map['query'];
     final Map<String, Object?> queryMap;
@@ -26,6 +27,7 @@ class SmartSearchHistoryModel {
             MapEntry<String, Object?>(key as String, value as Object?),
       );
     } else {
+      if (rawQuery != null) throw const FormatException('Invalid stored query');
       queryMap = const <String, Object?>{};
     }
 
@@ -37,6 +39,7 @@ class SmartSearchHistoryModel {
         defaultMarketCityId: defaultMarketCityId,
         defaultCenterLat: defaultCenterLat,
         defaultCenterLng: defaultCenterLng,
+        legacyCurrencyCode: legacyCurrencyCode,
       ),
       createdAtUtc: map['created_at_utc'] == null
           ? DateTime.now().toUtc()

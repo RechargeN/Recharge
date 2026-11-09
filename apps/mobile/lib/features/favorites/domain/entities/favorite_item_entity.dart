@@ -3,7 +3,7 @@ import '../../../../shared/primitives/money/money.dart';
 enum FavoritePlanningTargetKind { quickPlan, scenario, route }
 
 class FavoriteItemEntity {
-  const FavoriteItemEntity({
+  FavoriteItemEntity({
     required this.id,
     this.objectType,
     required this.title,
@@ -19,7 +19,11 @@ class FavoriteItemEntity {
     this.planningTargetKind,
     this.planningTargetId,
     this.coverImageUrl = '',
-  });
+  }) {
+    if (priceAmount.minorUnits < 0) {
+      throw ArgumentError('Price must be nonnegative');
+    }
+  }
 
   final String id;
   final String? objectType;

@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/domain/entities/event_occurrence.dart';
 import 'package:recharge/features/discover/domain/entities/published_event_discovery_entity.dart';
@@ -30,7 +32,7 @@ PublishedEventDiscoveryEntity _entity({
     latitude: 25.2048,
     longitude: 55.2708,
     distanceKm: 1.4,
-    priceAmount: 12,
+    priceAmount: Money(minorUnits: 1200, currency: CurrencyCode.eur),
     isFree: false,
     currencyCode: 'EUR',
     scheduleMode: EventScheduleMode.oneTime,

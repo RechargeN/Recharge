@@ -1,4 +1,8 @@
 import '../../../../core/layout/page_list_padding.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
@@ -224,10 +228,13 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
               controller.applySearchConditions(
                 freeOnly: false,
                 clearBudgetMin: true,
-                budgetMax: Money(
-                  minorUnits: 1000,
-                  currencyCode: controller.marketCurrencyCode,
-                ),
+                budgetMax: MoneyParser()
+                    .parse(
+                      '10',
+                      currency: controller.marketCurrency,
+                      locale: 'en',
+                    )
+                    .value!,
                 clearDateFrom: true,
                 clearDateTo: true,
               );
@@ -298,7 +305,8 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
             onFreeOnlyChanged: (bool value) {
               controller.applySearchConditions(freeOnly: value);
             },
-            onBudgetSelected: (double? value) {
+            currency: controller.marketCurrency,
+            onBudgetSelected: (Money? value) {
               controller.applySearchConditions(
                 freeOnly: false,
                 budgetMax: value == null
@@ -436,13 +444,19 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
     DiscoverFeedController controller,
     Map<String, String> seedParameters,
   ) async {
-    final String? rawBudgetMax = seedParameters['budgetMax'];
-    final Money? budgetMax = rawBudgetMax == null
+    final budgetText = seedParameters['budgetMax'];
+    final budgetResult = budgetText == null
         ? null
-        : Money.tryParseMajor(
-            rawBudgetMax,
-            currencyCode: controller.marketCurrencyCode,
-          );
+        : controller.parseBudgetInput(budgetText, locale: 'en');
+    if (budgetResult != null && !budgetResult.isSuccess) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Invalid budget')));
+      }
+      return;
+    }
+    final Money? budgetMax = budgetResult?.value;
     final DateTime? dateFrom = _dateFromSeed(seedParameters['dateFrom']);
     final DateTime? dateTo = _dateFromSeed(seedParameters['dateTo']);
     final TimeWindow? timeWindow = _timeWindowFromSeed(seedParameters);
@@ -686,7 +700,11 @@ String _mapLocationForQuery(DiscoverQuery query) {
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter().decimal(
+        query.budgetMax!,
+        locale: 'en',
+        omitZeroFraction: true,
+      ),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -728,7 +746,11 @@ String _createLocationForQuery(
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter().decimal(
+        query.budgetMax!,
+        locale: 'en',
+        omitZeroFraction: true,
+      ),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -1126,13 +1148,15 @@ class _ConditionPanel extends StatelessWidget {
     required this.query,
     required this.onFreeOnlyChanged,
     required this.onBudgetSelected,
+    required this.currency,
     required this.onDateSelected,
     required this.onRadiusSelected,
   });
 
   final DiscoverQuery query;
   final ValueChanged<bool> onFreeOnlyChanged;
-  final ValueChanged<double?> onBudgetSelected;
+  final ValueChanged<Money?> onBudgetSelected;
+  final CurrencyCode currency;
   final ValueChanged<_DateFilter> onDateSelected;
   final ValueChanged<_RadiusFilter> onRadiusSelected;
 
