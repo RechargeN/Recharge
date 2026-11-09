@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
+import 'package:recharge/features/create/data/models/create_template_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/domain/entities/rental_draft_data.dart';
@@ -15,6 +18,44 @@ import 'package:recharge/features/create/domain/usecases/manage_create_template_
 
 void main() {
   late ManageCreateTemplateUseCase useCase;
+  test(
+    'unreadable template money blocks collection mutation without deleting raw record',
+    () async {
+      const storage = FlutterSecureStorage();
+      final template = useCase.create(
+        userId: 'user-1',
+        name: 'original',
+        draft: _eventDraft(),
+        nowUtc: DateTime.utc(2026),
+      );
+      final wire = CreateTemplateModel.fromEntity(template).toJson();
+      (wire['snapshot'] as Map)['basePriceMinorUnits'] = 1.5;
+      final raw = jsonEncode({
+        'schemaVersion': 1,
+        'templates': [wire],
+      });
+      await storage.write(key: 'create_templates_v1_user-1', value: raw);
+      final source = CreateTemplateLocalDataSource(
+        storage,
+        activeMarketCityId: 'riga',
+        activeTimezone: 'Europe/Riga',
+        activeCountry: 'LV',
+        activeCity: 'Riga',
+        activeCurrency: 'EUR',
+      );
+      final repository = CreateTemplateRepositoryImpl(source);
+      expect(await source.loadTemplates('user-1'), isEmpty);
+      await expectLater(
+        repository.upsertTemplate(userId: 'user-1', template: template),
+        throwsA(isA<MoneyReadException>()),
+      );
+      await expectLater(
+        repository.deleteTemplate(userId: 'user-1', templateId: template.id),
+        throwsA(isA<MoneyReadException>()),
+      );
+      expect(await storage.read(key: 'create_templates_v1_user-1'), raw);
+    },
+  );
 
   setUp(() {
     FlutterSecureStorage.setMockInitialValues(<String, String>{});

@@ -16,17 +16,13 @@ void main() {
     ),
   );
 
-  CreateDraftEntity baseDraft() =>
-      CreateDraftEntity.defaults(
-        organizerId: 'user_1',
-        organizerEmail: 'user@example.com',
-        organizerName: 'Sauna Owner',
-        timezone: 'Europe/Riga',
-        currency: 'EUR',
-      ).copyWith(
-        objectType: CreateObjectType.session,
-        title: 'Sauna 1',
-      );
+  CreateDraftEntity baseDraft() => CreateDraftEntity.defaults(
+    organizerId: 'user_1',
+    organizerEmail: 'user@example.com',
+    organizerName: 'Sauna Owner',
+    timezone: 'Europe/Riga',
+    currency: 'EUR',
+  ).copyWith(objectType: CreateObjectType.session, title: 'Sauna 1');
 
   test('ensureData seeds a default draft from the entity title/timezone', () {
     final SessionDraftData data = coordinator.ensureData(
@@ -100,39 +96,43 @@ void main() {
     expect(tuned.schedule.minNoticeMinutes, 60);
   });
 
-  test('apply() mirrors typed data onto the shared envelope and increments revision', () {
-    final CreateDraftEntity draft = baseDraft();
-    final SessionDraftData data = coordinator
-        .ensureData(draft, timezoneId: 'Europe/Riga')
-        .copyWith(
-          resourceName: 'Sauna Deluxe',
-          price: const SessionPriceDisclosure(
-            mode: SessionPricingMode.fixed,
-            amount: SessionMoneyDraft(amountMinor: 2500, currencyCode: 'EUR'),
-          ),
-          externalBookingUrl: 'https://sauna-riga.lv/book',
-          schedule: const SessionSchedule(
-            scheduleRevision: 1,
-            slotDurationMinutes: 45,
-            projectionWindowDays: 30,
-          ),
-        );
+  test(
+    'apply() mirrors typed data onto the shared envelope and increments revision',
+    () {
+      final CreateDraftEntity draft = baseDraft();
+      final SessionDraftData data = coordinator
+          .ensureData(draft, timezoneId: 'Europe/Riga')
+          .copyWith(
+            resourceName: 'Sauna Deluxe',
+            price: const SessionPriceDisclosure(
+              mode: SessionPricingMode.fixed,
+              amount: SessionMoneyDraft(amountMinor: 2500, currencyCode: 'EUR'),
+            ),
+            externalBookingUrl: 'https://sauna-riga.lv/book',
+            schedule: const SessionSchedule(
+              scheduleRevision: 1,
+              slotDurationMinutes: 45,
+              projectionWindowDays: 30,
+            ),
+          );
 
-    final CreateDraftEntity applied = coordinator.apply(draft, data);
+      final CreateDraftEntity applied = coordinator.apply(draft, data);
 
-    expect(applied.sessionData!.revision, 1);
-    expect(applied.venueName, 'Sauna Deluxe');
-    expect(applied.timezone, 'Europe/Riga');
-    expect(applied.availabilityKind, CreateAvailabilityKind.none);
-    expect(applied.durationMinutes, 45);
-    expect(applied.isFree, isFalse);
-    expect(applied.basePrice, 25.0);
-    expect(applied.currency, 'EUR');
-    expect(applied.bookingLink, 'https://sauna-riga.lv/book');
-    // Legacy per-type mechanism must not be (re)populated by the typed
-    // writer (§6.1 "новый Session writer их не создаёт").
-    expect(applied.scheduleSlots, isEmpty);
-  });
+      expect(applied.sessionData!.revision, 1);
+      expect(applied.venueName, 'Sauna Deluxe');
+      expect(applied.timezone, 'Europe/Riga');
+      expect(applied.availabilityKind, CreateAvailabilityKind.none);
+      expect(applied.durationMinutes, 45);
+      expect(applied.isFree, isFalse);
+      expect(applied.basePrice?.minorUnits, 2500);
+      expect(applied.basePrice?.currency.value, 'EUR');
+      expect(applied.currency, 'EUR');
+      expect(applied.bookingLink, 'https://sauna-riga.lv/book');
+      // Legacy per-type mechanism must not be (re)populated by the typed
+      // writer (§6.1 "новый Session writer их не создаёт").
+      expect(applied.scheduleSlots, isEmpty);
+    },
+  );
 
   test('validate() flags a missing draft as resourceMissing', () {
     final issues = coordinator.validate(

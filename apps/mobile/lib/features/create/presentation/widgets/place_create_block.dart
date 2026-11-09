@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -996,10 +997,20 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                         id: 'entry-from',
                         errorFieldId: 'entryPriceFrom',
                         label: 'Entry from, ${pricing.currencyCode} *',
-                        value: pricing.entryPriceFrom?.toString() ?? '',
+                        value: MoneyFormatter().optionalDecimal(
+                          pricing.entryPriceFrom,
+                          locale: Localizations.localeOf(
+                            context,
+                          ).toLanguageTag(),
+                        ),
                         keyboardType: TextInputType.number,
-                        onChanged: (String value) => widget.controller
-                            .updatePlacePricing(entryFrom: value),
+                        onChanged: (String value) =>
+                            widget.controller.updatePlacePricing(
+                              entryFrom: value,
+                              locale: Localizations.localeOf(
+                                context,
+                              ).toLanguageTag(),
+                            ),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -1008,10 +1019,20 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                         id: 'entry-to',
                         errorFieldId: 'entryPriceTo',
                         label: 'Entry to, ${pricing.currencyCode}',
-                        value: pricing.entryPriceTo?.toString() ?? '',
+                        value: MoneyFormatter().optionalDecimal(
+                          pricing.entryPriceTo,
+                          locale: Localizations.localeOf(
+                            context,
+                          ).toLanguageTag(),
+                        ),
                         keyboardType: TextInputType.number,
-                        onChanged: (String value) => widget.controller
-                            .updatePlacePricing(entryTo: value),
+                        onChanged: (String value) =>
+                            widget.controller.updatePlacePricing(
+                              entryTo: value,
+                              locale: Localizations.localeOf(
+                                context,
+                              ).toLanguageTag(),
+                            ),
                       ),
                     ),
                   ],
@@ -1025,10 +1046,20 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                       child: _textField(
                         id: 'spend-from',
                         label: 'Typical spend from',
-                        value: pricing.typicalSpendFrom?.toString() ?? '',
+                        value: MoneyFormatter().optionalDecimal(
+                          pricing.typicalSpendFrom,
+                          locale: Localizations.localeOf(
+                            context,
+                          ).toLanguageTag(),
+                        ),
                         keyboardType: TextInputType.number,
-                        onChanged: (String value) => widget.controller
-                            .updatePlacePricing(spendFrom: value),
+                        onChanged: (String value) =>
+                            widget.controller.updatePlacePricing(
+                              spendFrom: value,
+                              locale: Localizations.localeOf(
+                                context,
+                              ).toLanguageTag(),
+                            ),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -1036,10 +1067,20 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                       child: _textField(
                         id: 'spend-to',
                         label: 'Typical spend to',
-                        value: pricing.typicalSpendTo?.toString() ?? '',
+                        value: MoneyFormatter().optionalDecimal(
+                          pricing.typicalSpendTo,
+                          locale: Localizations.localeOf(
+                            context,
+                          ).toLanguageTag(),
+                        ),
                         keyboardType: TextInputType.number,
-                        onChanged: (String value) => widget.controller
-                            .updatePlacePricing(spendTo: value),
+                        onChanged: (String value) =>
+                            widget.controller.updatePlacePricing(
+                              spendTo: value,
+                              locale: Localizations.localeOf(
+                                context,
+                              ).toLanguageTag(),
+                            ),
                       ),
                     ),
                   ],

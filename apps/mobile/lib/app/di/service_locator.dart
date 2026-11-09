@@ -328,6 +328,7 @@ Future<void> setupDependencies() async {
         activeTimezone: sl<CreateRuntimeDefaults>().timezone,
         activeCountry: sl<CreateRuntimeDefaults>().country,
         activeCity: sl<CreateRuntimeDefaults>().city,
+        activeCurrency: sl<CreateRuntimeDefaults>().currency,
       ),
     )
     ..registerLazySingleton<CreateTemplateLocalDataSource>(
@@ -337,6 +338,7 @@ Future<void> setupDependencies() async {
         activeTimezone: sl<CreateRuntimeDefaults>().timezone,
         activeCountry: sl<CreateRuntimeDefaults>().country,
         activeCity: sl<CreateRuntimeDefaults>().city,
+        activeCurrency: sl<CreateRuntimeDefaults>().currency,
       ),
     )
     ..registerLazySingleton<ScenarioObjectIntakeLocalDataSource>(

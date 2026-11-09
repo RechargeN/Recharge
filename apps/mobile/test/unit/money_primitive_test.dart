@@ -56,6 +56,8 @@ void main() {
     expect(() => eur + usd, mismatch);
     expect(() => eur - usd, mismatch);
     expect(() => eur.compareTo(usd), mismatch);
+    expect(() => eur.minorUnitsIn(usd.currency), mismatch);
+    expect(eur.minorUnitsIn(CurrencyCode.eur), 100);
     expect(eur, isNot(usd));
   });
   test('safe JSON bounds and intermediate arithmetic never wrap or round', () {

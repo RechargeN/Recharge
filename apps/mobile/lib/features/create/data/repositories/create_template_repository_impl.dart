@@ -41,7 +41,7 @@ class CreateTemplateRepositoryImpl implements CreateTemplateRepository {
       throw StateError('Template belongs to another user.');
     }
     final List<CreateTemplateModel> models = List<CreateTemplateModel>.from(
-      await _localDataSource.loadTemplates(userId),
+      await _localDataSource.loadTemplates(userId, requireLosslessMoney: true),
     );
     final int index = models.indexWhere(
       (CreateTemplateModel item) => item.id == template.id,
@@ -63,7 +63,7 @@ class CreateTemplateRepositoryImpl implements CreateTemplateRepository {
     required String templateId,
   }) async {
     final List<CreateTemplateModel> models = await _localDataSource
-        .loadTemplates(userId);
+        .loadTemplates(userId, requireLosslessMoney: true);
     models.removeWhere(
       (CreateTemplateModel item) =>
           item.ownerUserId == userId && item.id == templateId,

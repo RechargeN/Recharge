@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import '../../domain/entities/event_admission.dart';
 import '../../domain/entities/event_inventory.dart';
 import '../../domain/entities/event_draft_data.dart';
@@ -233,7 +236,10 @@ class EventDraftMapper {
             json['paymentCollectionMode'],
           ) ??
           defaults.paymentCollectionMode,
-      price: _money(json['price'], defaults.currencyCode),
+      price: _money(
+        json['price'],
+        _string(json['currencyCode'], defaults.currencyCode),
+      ),
       capacityMode:
           _enumValue(EventCapacityMode.values, json['capacityMode']) ??
           defaults.capacityMode,
@@ -351,8 +357,8 @@ class EventDraftMapper {
       'price': value.price == null
           ? null
           : <String, Object?>{
-              'amountMinor': value.price!.amountMinor,
-              'currencyCode': value.price!.currencyCode,
+              'minorUnits': value.price!.toMoney().minorUnits,
+              'currencyCode': value.price!.toMoney().currency.value,
             },
       'capacityMode': value.capacityMode.name,
       'capacity': value.capacity,
@@ -897,13 +903,34 @@ class EventDraftMapper {
   }
 
   static EventMoneyDraft? _money(Object? raw, String fallbackCurrency) {
-    final Map<String, Object?> json = _map(raw);
-    final int? amount = _int(json['amountMinor']);
-    if (amount == null) return null;
-    return EventMoneyDraft(
-      amountMinor: amount,
-      currencyCode: _string(json['currencyCode'], fallbackCurrency),
-    );
+    if (raw == null) return null;
+    final json = _map(raw);
+    final canonical = json.containsKey('minorUnits');
+    final rawAmount = canonical ? json['minorUnits'] : json['amountMinor'];
+    // Old Event minor-unit strings are read-compatible; canonical writes
+    // require an actual integer and never fall back on a malformed new field.
+    final amount = rawAmount is int
+        ? rawAmount
+        : !canonical && rawAmount is String
+        ? int.tryParse(rawAmount)
+        : null;
+    if (amount == null) {
+      throw const MoneyReadException(MoneyParseError.invalidCanonicalValue);
+    }
+    try {
+      return EventMoneyDraft.fromMoney(
+        Money(
+          minorUnits: amount,
+          currency: CurrencyCode.parse(
+            _string(json['currencyCode'], fallbackCurrency),
+          ),
+        ),
+      );
+    } on FormatException {
+      throw const MoneyReadException(MoneyParseError.missingCurrency);
+    } on MoneyArithmeticException {
+      throw const MoneyReadException(MoneyParseError.outOfRange);
+    }
   }
 
   static T? _enumValue<T extends Enum>(List<T> values, Object? raw) {

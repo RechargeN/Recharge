@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../core/parsing/money_legacy_adapter.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../domain/entities/activity_draft_data.dart';
 import '../../domain/entities/collection_draft_data.dart';
@@ -135,7 +138,7 @@ class CreateDraftModel {
   final bool petFriendly;
   final bool wheelchairAccessible;
   final bool isFree;
-  final double? basePrice;
+  final Money? basePrice;
   final String currency;
   final String pricingModel;
   final bool registrationRequired;
@@ -357,10 +360,7 @@ class CreateDraftModel {
               : EventPaymentCollectionMode.onsite,
           price: isFree || basePrice == null
               ? null
-              : EventMoneyDraft(
-                  amountMinor: (basePrice! * 100).round(),
-                  currencyCode: currency,
-                ),
+              : EventMoneyDraft.fromMoney(basePrice!),
           capacityMode: maxParticipants == null
               ? EventCapacityMode.unknown
               : EventCapacityMode.known,
@@ -620,6 +620,7 @@ class CreateDraftModel {
     String activeTimezone = 'UTC',
     String activeCountry = '',
     String activeCity = '',
+    String? activeCurrency,
   }) {
     final int sourceVersion = (json['schemaVersion'] as num?)?.toInt() ?? 1;
     final String country = json['country'] as String? ?? '';
@@ -699,8 +700,13 @@ class CreateDraftModel {
       petFriendly: json['petFriendly'] as bool? ?? false,
       wheelchairAccessible: json['wheelchairAccessible'] as bool? ?? false,
       isFree: json['isFree'] as bool? ?? true,
-      basePrice: (json['basePrice'] as num?)?.toDouble(),
-      currency: json['currency'] as String? ?? 'EUR',
+      basePrice: MoneyLegacyAdapter().readOptional(
+        hasCanonicalMinorUnits: json.containsKey('basePriceMinorUnits'),
+        canonicalMinorUnits: json['basePriceMinorUnits'],
+        legacyMajorAmount: json['basePrice'],
+        currencyCode: json['currency'] as String? ?? activeCurrency,
+      ),
+      currency: json['currency'] as String? ?? activeCurrency ?? '',
       pricingModel: json['pricingModel'] as String? ?? 'fixed',
       registrationRequired: json['registrationRequired'] as bool? ?? true,
       approvalRequired: json['approvalRequired'] as bool? ?? false,
@@ -845,7 +851,9 @@ class CreateDraftModel {
       'petFriendly': petFriendly,
       'wheelchairAccessible': wheelchairAccessible,
       'isFree': isFree,
-      'basePrice': basePrice,
+      'basePriceMinorUnits': basePrice?.minorUnitsIn(
+        CurrencyCode.parse(currency),
+      ),
       'currency': currency,
       'pricingModel': pricingModel,
       'registrationRequired': registrationRequired,

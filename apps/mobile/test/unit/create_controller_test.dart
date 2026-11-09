@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
 import '../support/publisher_access_test_support.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/domain/entities/draft_publisher.dart';
@@ -24,6 +25,43 @@ import '../support/event_create_test_support.dart';
 void main() {
   late _FakeCreateRepository repository;
   late CreateController controller;
+  test(
+    'invalid monetary input preserves previous value and blocks writes until corrected',
+    () async {
+      await controller.ensureLoaded(
+        userId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      controller.updateBasePrice('12.34');
+      expect(controller.state.draft.basePrice?.minorUnits, 1234);
+      await controller.saveDraft();
+      final stored = repository._stored;
+      controller.updateBasePrice('1.234');
+      expect(
+        controller.moneyInputErrors['basePrice'],
+        MoneyParseError.excessiveFractionDigits,
+      );
+      expect(controller.state.draft.basePrice?.minorUnits, 1234);
+      controller.updateTitle('Still pending invalid input');
+      await controller.saveDraft();
+      expect(repository._stored, same(stored));
+      expect(await controller.publishDraft(), isFalse);
+      controller.updateBasePrice('12,35', locale: 'ru');
+      expect(controller.moneyInputErrors, isEmpty);
+      expect(controller.state.draft.basePrice?.minorUnits, 1235);
+      await controller.saveDraft();
+      expect(repository._stored?.basePrice?.minorUnits, 1235);
+      controller.updateBasePrice('-1');
+      expect(controller.moneyInputErrors, isNotEmpty);
+      controller.resetToFreshDraft(
+        organizerId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      expect(controller.moneyInputErrors, isEmpty);
+    },
+  );
 
   setUp(() {
     repository = _FakeCreateRepository();
@@ -50,6 +88,40 @@ void main() {
   tearDown(() {
     controller.dispose();
   });
+
+  test(
+    'typed Money restore failure blocks fresh overwrite and publish until retry',
+    () async {
+      final stored = CreateDraftEntity.defaults(
+        organizerId: 'user-1',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      repository._stored = stored;
+      repository.loadError = const MoneyReadException(
+        MoneyParseError.excessiveFractionDigits,
+      );
+      await controller.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      expect(controller.state.status, CreateStatus.error);
+      controller.updateTitle('Must not overwrite stored draft');
+      await controller.saveDraft();
+      expect(await controller.publishDraft(), isFalse);
+      expect(repository._stored, same(stored));
+      expect(repository.publishCalls, 0);
+      repository.loadError = null;
+      await controller.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      expect(controller.state.isLoaded, isTrue);
+      expect(controller.state.draft.id, stored.id);
+    },
+  );
 
   for (final type in CreateObjectType.values.where(
     (t) => t != CreateObjectType.quickPlan && t != CreateObjectType.scenario,
@@ -762,10 +834,15 @@ class _SequentialIdGenerator implements IdGenerator {
 class _FakeCreateRepository implements CreateRepository {
   CreateDraftEntity? _stored;
   Object? saveError;
+  Object? loadError;
   int publishCalls = 0;
 
   @override
-  Future<CreateDraftEntity?> loadDraft(String userId) async => _stored;
+  Future<CreateDraftEntity?> loadDraft(String userId) async {
+    final failure = loadError;
+    if (failure != null) throw failure;
+    return _stored;
+  }
 
   @override
   Future<CreateDraftEntity> publishDraft(

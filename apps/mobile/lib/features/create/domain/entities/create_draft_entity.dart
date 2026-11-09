@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money.dart';
 import 'activity_draft_data.dart';
 import 'collection_draft_data.dart';
 import 'create_availability.dart';
@@ -232,7 +233,7 @@ class CreateDraftEntity {
   final bool wheelchairAccessible;
 
   final bool isFree;
-  final double? basePrice;
+  final Money? basePrice;
   final String currency;
   final String pricingModel;
 
@@ -425,7 +426,7 @@ class CreateDraftEntity {
     bool? petFriendly,
     bool? wheelchairAccessible,
     bool? isFree,
-    double? basePrice,
+    Money? basePrice,
     bool clearBasePrice = false,
     String? currency,
     String? pricingModel,

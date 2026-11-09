@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -3135,7 +3136,7 @@ _CreatorListingData? _creatorListingDataFor(
     city: draft.city.trim().isEmpty ? 'No city' : draft.city,
     priceLabel: draft.isFree
         ? 'Free'
-        : '${draft.basePrice?.toStringAsFixed(0) ?? '0'} ${draft.currency}',
+        : '${MoneyFormatter().optionalDecimal(draft.basePrice, locale: 'en', absent: '0')} ${draft.currency}',
     readinessLabel: missingFields.isEmpty
         ? (isPublished ? 'Published-ready' : 'Ready to publish')
         : '${missingFields.length} missing',
@@ -3340,7 +3341,7 @@ String _discoverRouteForCreateListing(String path, CreateDraftEntity draft) {
       'category': _discoverCategoryForCreateListing(draft.mainCategory),
       'free': draft.isFree ? '1' : '0',
       if (!draft.isFree && draft.basePrice != null)
-        'budgetMax': draft.basePrice!.toStringAsFixed(0),
+        'budgetMax': MoneyFormatter().decimal(draft.basePrice!, locale: 'en'),
       'radius': '5000',
       'unlimited': '0',
     },

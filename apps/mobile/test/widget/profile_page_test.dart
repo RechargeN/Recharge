@@ -1192,7 +1192,7 @@ void main() {
     expect(find.text('pendingReview'), findsOneWidget);
     expect(find.text('Art, culture & museums'), findsOneWidget);
     expect(find.text('Museum'), findsOneWidget);
-    expect(find.text('12 EUR'), findsOneWidget);
+    expect(find.text('12.00 EUR'), findsOneWidget);
 
     await tester.scrollPageUntilVisible(find.text('Open Create').first, 220);
     await tester.tap(find.text('Open Create').first);
@@ -1210,7 +1210,7 @@ void main() {
     expect(find.text('Search page'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
     expect(find.text('art_culture_museums'), findsOneWidget);
-    expect(find.text('12'), findsOneWidget);
+    expect(find.text('12.00'), findsOneWidget);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -1605,7 +1605,7 @@ void main() {
       expect(find.text('Search page'), findsOneWidget);
       expect(find.text('Draft pottery workshop'), findsOneWidget);
       expect(find.text('art_culture_museums'), findsOneWidget);
-      expect(find.text('8'), findsOneWidget);
+      expect(find.text('8.00'), findsOneWidget);
 
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();

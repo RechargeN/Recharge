@@ -1,3 +1,5 @@
+import '../../../shared/primitives/money/currency_code.dart';
+import '../../../shared/primitives/money/money.dart';
 import '../domain/entities/create_availability.dart';
 import '../domain/entities/create_draft_entity.dart';
 import '../domain/entities/session_availability_exception.dart';
@@ -122,7 +124,12 @@ class SessionCreateCoordinator {
       isFree: isFree,
       basePrice: normalized.price.amount == null
           ? null
-          : normalized.price.amount!.amountMinor / 100,
+          : Money(
+              minorUnits: normalized.price.amount!.amountMinor,
+              currency: CurrencyCode.parse(
+                normalized.price.amount!.currencyCode,
+              ),
+            ),
       clearBasePrice: normalized.price.amount == null,
       currency: normalized.price.amount?.currencyCode ?? draft.currency,
       bookingLink: normalized.externalBookingUrl,
