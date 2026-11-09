@@ -1,4 +1,7 @@
+import '../support/publisher_access_test_support.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/features/create/domain/entities/draft_publisher.dart';
+import 'package:recharge/features/create/domain/repositories/publisher_access_check.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
@@ -25,6 +28,7 @@ void main() {
   setUp(() {
     repository = _FakeCreateRepository();
     controller = CreateController(
+      publisherAccessCheck: const TestPersonalPublisherAccess(),
       loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
       saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
@@ -46,6 +50,82 @@ void main() {
   tearDown(() {
     controller.dispose();
   });
+
+  for (final type in CreateObjectType.values.where(
+    (t) => t != CreateObjectType.quickPlan && t != CreateObjectType.scenario,
+  )) {
+    for (final reason in <String>['missing', 'revoked', 'foreign']) {
+      test(
+        '${type.name}: $reason Page denied without rewriting or mutation',
+        () async {
+          final access = _PageAccess();
+          final guarded = CreateController(
+            loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+            saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+            publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+            analyticsService: _NoopAnalyticsService(),
+            eventCreateCoordinator: createTestEventCoordinator(),
+            publisherAccessCheck: reason == 'missing' ? null : access,
+          );
+          addTearDown(guarded.dispose);
+          final publisher = PublisherRef(
+            type: PublisherType.page,
+            id: reason == 'foreign' ? 'foreign-page' : 'page-A',
+          );
+          await guarded.ensureLoaded(
+            userId: 'u1',
+            organizerEmail: '',
+            organizerName: '',
+            activePublisherRef: publisher,
+            capabilities: const ['create.route', 'create.collection'],
+          );
+          guarded.setObjectType(type);
+          final before = guarded.state.draft;
+          // Membership valid at creation may be revoked before publish.
+          access.active = false;
+          expect(await guarded.publishDraft(), isFalse);
+          expect(guarded.state.draft, same(before));
+          expect(guarded.state.draft.effectivePublisher, publisher);
+          expect(repository.publishCalls, 0);
+          expect(repository._stored, isNull);
+        },
+      );
+    }
+  }
+  for (final type in <CreateObjectType>[
+    CreateObjectType.session,
+    CreateObjectType.route,
+    CreateObjectType.classWorkshop,
+  ]) {
+    test(
+      '${type.name}: envelope Page capture never enables Page publication',
+      () async {
+        final guarded = CreateController(
+          loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+          saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+          publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+          analyticsService: _NoopAnalyticsService(),
+          eventCreateCoordinator: createTestEventCoordinator(),
+          publisherAccessCheck: _PageAccess(),
+        );
+        addTearDown(guarded.dispose);
+        await guarded.ensureLoaded(
+          userId: 'u1',
+          organizerEmail: '',
+          organizerName: '',
+          activePublisherRef: const PublisherRef(
+            type: PublisherType.page,
+            id: 'page-A',
+          ),
+          capabilities: const ['create.route'],
+        );
+        guarded.setObjectType(type);
+        expect(await guarded.publishDraft(), isFalse);
+        expect(repository.publishCalls, 0);
+        expect(guarded.state.draft.effectivePublisher.id, 'page-A');
+      },
+    );
+  }
 
   test('publish fails when coverImage is empty', () async {
     await controller.ensureLoaded(
@@ -372,10 +452,7 @@ void main() {
 
       repository.saveError = null;
       expect(await controller.saveScenarioToMyScenarios(), isTrue);
-      expect(
-        repository._stored?.scenarioData?.items.first.id,
-        'scenario-id-1',
-      );
+      expect(repository._stored?.scenarioData?.items.first.id, 'scenario-id-1');
     },
   );
 
@@ -452,33 +529,42 @@ void main() {
   );
 
   group('CreateController activity wiring', () {
-    test('setObjectType(activity) seeds activityData with market defaults', () async {
-      await controller.ensureLoaded(
-        userId: 'u1',
-        organizerEmail: 'user@example.com',
-        organizerName: 'user',
-      );
-      controller.setObjectType(CreateObjectType.activity);
-      expect(controller.state.draft.objectType, CreateObjectType.activity);
-      expect(controller.state.draft.activityData, isNotNull);
-      expect(controller.state.draft.activityData!.location.accessNotes, '');
-    });
+    test(
+      'setObjectType(activity) seeds activityData with market defaults',
+      () async {
+        await controller.ensureLoaded(
+          userId: 'u1',
+          organizerEmail: 'user@example.com',
+          organizerName: 'user',
+        );
+        controller.setObjectType(CreateObjectType.activity);
+        expect(controller.state.draft.objectType, CreateObjectType.activity);
+        expect(controller.state.draft.activityData, isNotNull);
+        expect(controller.state.draft.activityData!.location.accessNotes, '');
+      },
+    );
 
-    test('updateActivityAccessNotes updates the draft and bumps revision', () async {
-      await controller.ensureLoaded(
-        userId: 'u1',
-        organizerEmail: 'user@example.com',
-        organizerName: 'user',
-      );
-      controller.setObjectType(CreateObjectType.activity);
-      final int before = controller.state.draft.activityData!.revision;
-      controller.updateActivityAccessNotes('Gravel path from parking.');
-      expect(
-        controller.state.draft.activityData!.location.accessNotes,
-        'Gravel path from parking.',
-      );
-      expect(controller.state.draft.activityData!.revision, greaterThan(before));
-    });
+    test(
+      'updateActivityAccessNotes updates the draft and bumps revision',
+      () async {
+        await controller.ensureLoaded(
+          userId: 'u1',
+          organizerEmail: 'user@example.com',
+          organizerName: 'user',
+        );
+        controller.setObjectType(CreateObjectType.activity);
+        final int before = controller.state.draft.activityData!.revision;
+        controller.updateActivityAccessNotes('Gravel path from parking.');
+        expect(
+          controller.state.draft.activityData!.location.accessNotes,
+          'Gravel path from parking.',
+        );
+        expect(
+          controller.state.draft.activityData!.revision,
+          greaterThan(before),
+        );
+      },
+    );
 
     test('confirmActivityPin sets pinConfirmed', () async {
       await controller.ensureLoaded(
@@ -487,51 +573,68 @@ void main() {
         organizerName: 'user',
       );
       controller.setObjectType(CreateObjectType.activity);
-      controller.updateActivityCoordinates(latitude: '56.95', longitude: '24.11');
+      controller.updateActivityCoordinates(
+        latitude: '56.95',
+        longitude: '24.11',
+      );
       controller.confirmActivityPin();
-      expect(controller.state.draft.activityData!.location.pinConfirmed, isTrue);
+      expect(
+        controller.state.draft.activityData!.location.pinConfirmed,
+        isTrue,
+      );
     });
 
-    test('goToActivityStep blocks forward navigation on a blocking error', () async {
-      await controller.ensureLoaded(
-        userId: 'u1',
-        organizerEmail: 'user@example.com',
-        organizerName: 'user',
-      );
-      controller.setObjectType(CreateObjectType.activity);
-      // No cover image set yet -> cover_image_required is a 'basics'-section
-      // blocking error, and step 0 is 'basics'.
-      final bool advanced = await controller.goToActivityStep(2);
-      expect(advanced, isFalse);
-      expect(controller.state.activityStep, 0);
-      expect(controller.state.activityValidationIssues, isNotEmpty);
-    });
+    test(
+      'goToActivityStep blocks forward navigation on a blocking error',
+      () async {
+        await controller.ensureLoaded(
+          userId: 'u1',
+          organizerEmail: 'user@example.com',
+          organizerName: 'user',
+        );
+        controller.setObjectType(CreateObjectType.activity);
+        // No cover image set yet -> cover_image_required is a 'basics'-section
+        // blocking error, and step 0 is 'basics'.
+        final bool advanced = await controller.goToActivityStep(2);
+        expect(advanced, isFalse);
+        expect(controller.state.activityStep, 0);
+        expect(controller.state.activityValidationIssues, isNotEmpty);
+      },
+    );
 
-    test('goToActivityStep allows forward navigation once the current step is valid', () async {
-      await controller.ensureLoaded(
-        userId: 'u1',
-        organizerEmail: 'user@example.com',
-        organizerName: 'user',
-      );
-      controller.setObjectType(CreateObjectType.activity);
-      controller.updateTitle('Hidden viewpoint');
-      controller.updateShortDescription(
-        'A quiet, lesser-known viewpoint with a great sunset view.',
-      );
-      controller.updateCoverImage('cover.jpg');
-      controller.updateActivityCoordinates(latitude: '56.95', longitude: '24.11');
-      controller.confirmActivityPin();
-      controller.updateActivityAccessNotes('Gravel path from parking.');
-      final bool advanced = await controller.goToActivityStep(1);
-      expect(advanced, isTrue);
-      expect(controller.state.activityStep, 1);
-    });
+    test(
+      'goToActivityStep allows forward navigation once the current step is valid',
+      () async {
+        await controller.ensureLoaded(
+          userId: 'u1',
+          organizerEmail: 'user@example.com',
+          organizerName: 'user',
+        );
+        controller.setObjectType(CreateObjectType.activity);
+        controller.updateTitle('Hidden viewpoint');
+        controller.updateShortDescription(
+          'A quiet, lesser-known viewpoint with a great sunset view.',
+        );
+        controller.updateCoverImage('cover.jpg');
+        controller.updateActivityCoordinates(
+          latitude: '56.95',
+          longitude: '24.11',
+        );
+        controller.confirmActivityPin();
+        controller.updateActivityAccessNotes('Gravel path from parking.');
+        final bool advanced = await controller.goToActivityStep(1);
+        expect(advanced, isTrue);
+        expect(controller.state.activityStep, 1);
+      },
+    );
   });
 
   group('CreateController activity publish moderation (§12)', () {
     test('4th+ informal-access card publishes flagged, not blocked', () async {
-      final _FakeCreateRepository moderationRepository = _FakeCreateRepository();
+      final _FakeCreateRepository moderationRepository =
+          _FakeCreateRepository();
       final CreateController moderationController = CreateController(
+        publisherAccessCheck: const TestPersonalPublisherAccess(),
         loadCreateDraftUseCase: LoadCreateDraftUseCase(moderationRepository),
         saveCreateDraftUseCase: SaveCreateDraftUseCase(moderationRepository),
         publishCreateDraftUseCase: PublishCreateDraftUseCase(
@@ -587,8 +690,10 @@ void main() {
     });
 
     test('1st-3rd informal-access card publishes as normal pending', () async {
-      final _FakeCreateRepository moderationRepository = _FakeCreateRepository();
+      final _FakeCreateRepository moderationRepository =
+          _FakeCreateRepository();
       final CreateController moderationController = CreateController(
+        publisherAccessCheck: const TestPersonalPublisherAccess(),
         loadCreateDraftUseCase: LoadCreateDraftUseCase(moderationRepository),
         saveCreateDraftUseCase: SaveCreateDraftUseCase(moderationRepository),
         publishCreateDraftUseCase: PublishCreateDraftUseCase(
@@ -657,6 +762,7 @@ class _SequentialIdGenerator implements IdGenerator {
 class _FakeCreateRepository implements CreateRepository {
   CreateDraftEntity? _stored;
   Object? saveError;
+  int publishCalls = 0;
 
   @override
   Future<CreateDraftEntity?> loadDraft(String userId) async => _stored;
@@ -666,12 +772,14 @@ class _FakeCreateRepository implements CreateRepository {
     String userId,
     CreateDraftEntity draft,
   ) async {
+    publishCalls++;
     final now = DateTime.now().toUtc();
     // Preserve a caller-requested flaggedForReview (ACT-CRT-01 §12 soft
     // moderation threshold); otherwise default to the normal pending state.
     _stored = draft.copyWith(
       draftStatus: DraftStatus.pendingReview,
-      moderationStatus: draft.moderationStatus == ModerationStatus.flaggedForReview
+      moderationStatus:
+          draft.moderationStatus == ModerationStatus.flaggedForReview
           ? ModerationStatus.flaggedForReview
           : ModerationStatus.pending,
       publishStatus: PublishStatus.pendingReview,
@@ -687,4 +795,15 @@ class _FakeCreateRepository implements CreateRepository {
     if (error != null) throw error;
     _stored = draft;
   }
+}
+
+class _PageAccess implements PublisherAccessCheck {
+  bool active = true;
+  @override
+  Future<bool> canPublishAs({
+    required String actorUserId,
+    required PublisherRef publisher,
+    Set<String> requiredCapabilities = const {},
+    bool requireAdmin = false,
+  }) async => active && actorUserId == 'u1' && publisher.id == 'page-A';
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../router/route_names.dart';
 
 import '../../features/identity/domain/usecases/load_identity_workspace_usecase.dart';
 import '../../features/identity/presentation/widgets/workspace_section.dart';
@@ -13,7 +15,10 @@ class WorkspaceSectionHost extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (sl.isRegistered<LoadIdentityWorkspaceUseCase>()) {
-      return WorkspaceSection(userId: userId);
+      return WorkspaceSection(
+        userId: userId,
+        onAdminTools: () => context.push(RouteNames.adminTools),
+      );
     }
     return const ListTile(
       leading: Icon(Icons.account_tree_outlined),

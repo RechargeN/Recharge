@@ -135,6 +135,12 @@ class RouteQualityWorkflowCoordinator {
       decision: RouteCandidateDecision.pending,
       createdAtUtc: now,
     );
+    await _authorize(
+      actorId: actorId,
+      draftId: routeId,
+      operation: RouteAuthoringOperation.reviewMapCandidate,
+      capabilities: capabilities,
+    );
     await _workflowRepository.saveCandidate(candidate);
     return candidate;
   }
@@ -153,15 +159,15 @@ class RouteQualityWorkflowCoordinator {
     if (candidate == null) {
       throw const RouteQualityWorkflowException('candidate_not_found');
     }
-    if (candidate.decision != RouteCandidateDecision.pending) {
-      return RouteCandidateDecisionResult(candidate: candidate);
-    }
     await _authorize(
       actorId: actorId,
       draftId: candidate.routeId,
       operation: RouteAuthoringOperation.reviewMapCandidate,
       capabilities: capabilities,
     );
+    if (candidate.decision != RouteCandidateDecision.pending) {
+      return RouteCandidateDecisionResult(candidate: candidate);
+    }
     final reason = _trimmedOrNull(reasonCode);
     if (decision != RouteCandidateDecision.accepted && reason == null) {
       throw const RouteQualityWorkflowException(
@@ -184,6 +190,12 @@ class RouteQualityWorkflowCoordinator {
       decidedAtUtc: now,
       decidedBy: actorId,
       reasonCode: reason,
+    );
+    await _authorize(
+      actorId: actorId,
+      draftId: candidate.routeId,
+      operation: RouteAuthoringOperation.reviewMapCandidate,
+      capabilities: capabilities,
     );
     await _workflowRepository.saveCandidate(decided);
     if (decision != RouteCandidateDecision.accepted) {
@@ -301,6 +313,12 @@ class RouteQualityWorkflowCoordinator {
           'open_critical_report_prevents_restore',
         );
       }
+      await _authorize(
+        actorId: actorId,
+        draftId: report.routeId,
+        operation: RouteAuthoringOperation.restoreRoute,
+        capabilities: capabilities,
+      );
       await _publicationRepository.setLifecycle(
         routeId: report.routeId,
         status: RouteLifecycleStatus.active,
@@ -316,14 +334,48 @@ class RouteQualityWorkflowCoordinator {
   Future<List<RouteMapSnapshotCandidate>> candidatesForRoute(String routeId) =>
       _workflowRepository.candidatesForRoute(routeId);
 
-  Future<List<RouteMapSnapshotCandidate>> pendingCandidates() =>
-      _workflowRepository.pendingCandidates();
+  Future<List<RouteMapSnapshotCandidate>> pendingCandidates({
+    String actorId = '',
+    Set<String> capabilities = const {},
+  }) async {
+    await _authorize(
+      actorId: actorId,
+      draftId: 'route-admin-queue',
+      operation: RouteAuthoringOperation.reviewMapCandidate,
+      capabilities: capabilities,
+    );
+    final result = await _workflowRepository.pendingCandidates();
+    await _authorize(
+      actorId: actorId,
+      draftId: 'route-admin-queue',
+      operation: RouteAuthoringOperation.reviewMapCandidate,
+      capabilities: capabilities,
+    );
+    return result;
+  }
 
   Future<List<RouteSafetyReport>> safetyReportsForRoute(String routeId) =>
       _workflowRepository.safetyReportsForRoute(routeId);
 
-  Future<List<RouteSafetyReport>> openSafetyReports() =>
-      _workflowRepository.openSafetyReports();
+  Future<List<RouteSafetyReport>> openSafetyReports({
+    String actorId = '',
+    Set<String> capabilities = const {},
+  }) async {
+    await _authorize(
+      actorId: actorId,
+      draftId: 'route-admin-queue',
+      operation: RouteAuthoringOperation.moderateSafety,
+      capabilities: capabilities,
+    );
+    final result = await _workflowRepository.openSafetyReports();
+    await _authorize(
+      actorId: actorId,
+      draftId: 'route-admin-queue',
+      operation: RouteAuthoringOperation.moderateSafety,
+      capabilities: capabilities,
+    );
+    return result;
+  }
 
   Future<PublishedRouteVersion> _version(String versionId) async {
     final aggregate = await _publicationRepository.routeByVersionId(versionId);

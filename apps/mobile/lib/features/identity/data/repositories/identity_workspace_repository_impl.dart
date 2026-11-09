@@ -13,9 +13,36 @@ class IdentityWorkspaceRepositoryImpl implements IdentityWorkspaceRepository {
     required IdentityWorkspaceLocalDataSource localDataSource,
     required MockIdentityFixture mockFixture,
     PublicProfessionalPageLocalDataSource? publicPageLocalDataSource,
+    Future<String?> Function()? currentActor,
   }) : _localDataSource = localDataSource,
        _mockFixture = mockFixture,
+       _currentActor = currentActor,
        _publicPageLocalDataSource = publicPageLocalDataSource;
+
+  final Future<String?> Function()? _currentActor;
+  Future<void> _requireActor(String userId) async {
+    if (userId.trim().isEmpty ||
+        (_currentActor != null && await _currentActor() != userId)) {
+      throw StateError('identity_actor_changed');
+    }
+  }
+
+  IdentityAccessSnapshot _access(
+    String userId,
+    IdentityManagedPageLocalRecord local,
+  ) {
+    final fixture = _mockFixture.accessForUser(userId);
+    return IdentityAccessSnapshot(
+      userId: fixture.userId,
+      globalRole: fixture.globalRole,
+      creatorVerificationStatus: fixture.creatorVerificationStatus,
+      globalCapabilities: fixture.globalCapabilities,
+      pages: [...fixture.pages, ...local.pages],
+      memberships: [...fixture.memberships, ...local.memberships],
+      revision:
+          fixture.revision + local.pages.length + local.memberships.length,
+    );
+  }
 
   final IdentityWorkspaceLocalDataSource _localDataSource;
   final MockIdentityFixture _mockFixture;
@@ -23,38 +50,28 @@ class IdentityWorkspaceRepositoryImpl implements IdentityWorkspaceRepository {
 
   @override
   Future<IdentityAccessSnapshot> loadAccessSnapshot(String userId) async {
-    final IdentityAccessSnapshot fixture = _mockFixture.accessForUser(userId);
-    final IdentityManagedPageLocalRecord local = await _localDataSource
-        .loadManagedPageRecord(userId);
-    final PublicProfessionalPageLocalDataSource? publicDataSource =
-        _publicPageLocalDataSource;
-    if (publicDataSource != null) {
-      for (final ManagedPageEntity page in local.pages) {
-        await publicDataSource.upsertPage(page);
-      }
-    }
-    return IdentityAccessSnapshot(
-      userId: fixture.userId,
-      globalRole: fixture.globalRole,
-      creatorVerificationStatus: fixture.creatorVerificationStatus,
-      globalCapabilities: fixture.globalCapabilities,
-      pages: <ManagedPageEntity>[...fixture.pages, ...local.pages],
-      memberships: <ManagedPageMembershipEntity>[
-        ...fixture.memberships,
-        ...local.memberships,
-      ],
-      revision:
-          fixture.revision + local.pages.length + local.memberships.length,
-    );
+    await _requireActor(userId);
+    final local = await _localDataSource.loadManagedPageRecord(userId);
+    await _requireActor(userId);
+    return _access(userId, local);
   }
 
   @override
-  Future<WorkspaceRef?> loadActiveWorkspace(String userId) {
+  Future<WorkspaceRef?> loadActiveWorkspace(String userId) async {
+    await _requireActor(userId);
     return _localDataSource.loadActiveWorkspace(userId);
   }
 
   @override
-  Future<void> saveActiveWorkspace(String userId, WorkspaceRef workspace) {
+  Future<void> saveActiveWorkspace(
+    String userId,
+    WorkspaceRef workspace,
+  ) async {
+    await _requireActor(userId);
+    if (workspace.isPersonal && workspace.id != userId) {
+      throw StateError('personal_workspace_user_mismatch');
+    }
+    await _requireActor(userId);
     return _localDataSource.saveActiveWorkspace(userId, workspace);
   }
 
@@ -70,25 +87,27 @@ class IdentityWorkspaceRepositoryImpl implements IdentityWorkspaceRepository {
         !membership.isOwner) {
       throw StateError('invalid_page_ownership_record');
     }
-    final IdentityManagedPageLocalRecord record = await _localDataSource
-        .loadManagedPageRecord(userId);
-    if (record.pages.any((ManagedPageEntity item) => item.id == page.id) ||
-        record.memberships.any(
-          (ManagedPageMembershipEntity item) => item.pageId == page.id,
-        )) {
-      return;
-    }
-    await _localDataSource.saveManagedPageRecord(
-      userId,
-      IdentityManagedPageLocalRecord(
-        pages: <ManagedPageEntity>[...record.pages, page],
-        memberships: <ManagedPageMembershipEntity>[
-          ...record.memberships,
-          membership,
-        ],
+    await _localDataSource.updateManagedPageRecord(userId, (record) async {
+      await _requireActor(userId);
+      final access = _access(userId, record);
+      if (!access.belongsTo(userId) || !access.canCreatePage) {
+        throw StateError('page_creation_not_authorized');
+      }
+      if (record.pages.any((item) => item.id == page.id)) return record;
+      if (access.ownedPages.length >=
+          IdentityAccessSnapshot.selfServiceOwnedPageLimit) {
+        throw StateError('self_service_page_limit_reached');
+      }
+      if (record.memberships.any((item) => item.pageId == page.id)) {
+        throw StateError('invalid_page_ownership_record');
+      }
+      return IdentityManagedPageLocalRecord(
+        pages: [...record.pages, page],
+        memberships: [...record.memberships, membership],
         limitRequests: record.limitRequests,
-      ),
-    );
+      );
+    });
+    await _requireActor(userId);
     await _publicPageLocalDataSource?.upsertPage(page);
   }
 
@@ -96,6 +115,7 @@ class IdentityWorkspaceRepositoryImpl implements IdentityWorkspaceRepository {
   Future<PageLimitIncreaseRequestEntity?> loadPendingPageLimitRequest(
     String userId,
   ) async {
+    await _requireActor(userId);
     final IdentityManagedPageLocalRecord record = await _localDataSource
         .loadManagedPageRecord(userId);
     for (final PageLimitIncreaseRequestEntity request
@@ -109,23 +129,22 @@ class IdentityWorkspaceRepositoryImpl implements IdentityWorkspaceRepository {
   Future<void> savePageLimitRequest(
     PageLimitIncreaseRequestEntity request,
   ) async {
-    final IdentityManagedPageLocalRecord record = await _localDataSource
-        .loadManagedPageRecord(request.userId);
-    if (record.limitRequests.any(
-      (PageLimitIncreaseRequestEntity item) => item.id == request.id,
-    )) {
-      return;
-    }
-    await _localDataSource.saveManagedPageRecord(
-      request.userId,
-      IdentityManagedPageLocalRecord(
+    await _localDataSource.updateManagedPageRecord(request.userId, (
+      record,
+    ) async {
+      await _requireActor(request.userId);
+      if (record.limitRequests.any(
+        (item) =>
+            item.id == request.id ||
+            (item.userId == request.userId && item.isPending),
+      )) {
+        return record;
+      }
+      return IdentityManagedPageLocalRecord(
         pages: record.pages,
         memberships: record.memberships,
-        limitRequests: <PageLimitIncreaseRequestEntity>[
-          ...record.limitRequests,
-          request,
-        ],
-      ),
-    );
+        limitRequests: [...record.limitRequests, request],
+      );
+    });
   }
 }

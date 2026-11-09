@@ -24,23 +24,44 @@ class ProfessionalPageWorkspacePage extends ConsumerStatefulWidget {
 }
 
 class _ProfessionalPageWorkspacePageState
-    extends ConsumerState<ProfessionalPageWorkspacePage> {
+    extends ConsumerState<ProfessionalPageWorkspacePage>
+    with WidgetsBindingObserver {
+  bool _checked = false;
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // IDP-05A: opening a page surface (also by deep link) re-validates the
     // stored active workspace, so a revoked page is never rendered from a
     // stale preference.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      unawaited(
-        ref.read(identityWorkspaceControllerProvider).revalidateAccess(),
-      );
+      unawaited(_refreshAccess());
     });
+  }
+
+  Future<void> _refreshAccess() async {
+    if (mounted) setState(() => _checked = false);
+    await ref.read(identityWorkspaceControllerProvider).revalidateAccess();
+    if (mounted) setState(() => _checked = true);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) unawaited(_refreshAccess());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_checked) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     final ProfessionalPageSection section = widget.section;
     final state = ref.watch(identityWorkspaceControllerProvider).state;
     final String? activePageId = state.activeWorkspace?.isPage ?? false
@@ -181,7 +202,8 @@ class _ActiveProfessionalPage extends StatelessWidget {
         ),
         if (section == ProfessionalPageSection.overview &&
             membership != null &&
-            membership!.isActive) ...<Widget>[
+            membership!.isActive &&
+            membership!.hasCapability('page.manage')) ...<Widget>[
           const SizedBox(height: 16),
           ManagedPageProfileEditorCard(
             page: page,
@@ -191,7 +213,8 @@ class _ActiveProfessionalPage extends StatelessWidget {
         ],
         if (section == ProfessionalPageSection.account &&
             membership != null &&
-            membership!.isActive) ...<Widget>[
+            membership!.isActive &&
+            membership!.hasCapability('page.team.manage')) ...<Widget>[
           const SizedBox(height: 16),
           TeamInvitationsCard(
             pageId: page.id,

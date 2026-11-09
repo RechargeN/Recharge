@@ -18,10 +18,10 @@ void main() {
       activeCity: 'Riga',
     );
 
-    expect(model.schemaVersion, 8);
+    expect(model.schemaVersion, 9);
     expect(model.marketCityId, 'riga');
     expect(model.timezone, 'Europe/Riga');
-    expect(model.toJson()['schemaVersion'], 8);
+    expect(model.toJson()['schemaVersion'], 9);
   });
 
   test('legacy Rezekne remains legacy market with Riga timezone', () {

@@ -2,11 +2,10 @@ import 'create_draft_entity.dart';
 import 'find_people_draft_data.dart';
 import 'publisher_ref.dart';
 
-/// The publisher stored on a draft, or the draft organizer (personal) for
-/// types that carry no typed `PublisherRef` yet (Session, Scenario, Route,
-/// Class / Workshop — migration is IDP-03B/04B). Read-only: never rewrites
-/// a stored publisher.
+/// Canonical local publisher reader. Workspace is deliberately not an input.
 extension CreateDraftPublisher on CreateDraftEntity {
+  bool get publisherSelectionRequired => !effectivePublisher.isValid;
+
   PublisherRef get effectivePublisher {
     final PublisherRef? stored = switch (objectType) {
       CreateObjectType.event => eventData?.publisherRef,
@@ -22,7 +21,21 @@ extension CreateDraftPublisher on CreateDraftEntity {
       ),
       _ => null,
     };
+    if (publisherEnvelope != null || publisherRef != null) {
+      final ref = publisherRef;
+      if (ref == null || !ref.isValid) return _missingPublisher;
+      // A forged/mismatched compatibility block cannot publish under a different identity.
+      if (stored != null && stored.isValid && stored != ref) {
+        return _missingPublisher;
+      }
+      return ref;
+    }
     if (stored != null && stored.isValid) return stored;
-    return PublisherRef(type: PublisherType.user, id: organizerId);
+    return _missingPublisher;
   }
 }
+
+const PublisherRef _missingPublisher = PublisherRef(
+  type: PublisherType.user,
+  id: '',
+);

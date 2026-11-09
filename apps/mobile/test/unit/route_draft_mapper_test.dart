@@ -109,7 +109,7 @@ void main() {
       final model = CreateDraftModel.fromEntity(draft);
       final restored = model.toEntity();
 
-      expect(model.schemaVersion, 8);
+      expect(model.schemaVersion, 9);
       expect(model.sectionData['route_details'], isA<Map>());
       expect(restored.routeData?.revision, 2);
       expect(restored.sectionData.containsKey('route_details'), isFalse);

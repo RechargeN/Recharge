@@ -1,3 +1,9 @@
+import '../../features/identity/domain/usecases/submit_managed_page_field_edit_usecase.dart';
+import '../../features/identity/domain/usecases/send_team_invitation_usecase.dart';
+import '../../features/identity/domain/usecases/revoke_team_invitation_usecase.dart';
+import '../../features/identity/domain/repositories/team_invitation_repository.dart';
+import '../../features/identity/data/datasources/team_invitation_local_datasource.dart';
+import '../../features/identity/data/repositories/team_invitation_repository_impl.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -59,7 +65,6 @@ import '../../features/create/data/datasources/route_recording_secure_store.dart
 import '../../features/create/data/gpx/route_gpx_inspector.dart';
 import '../../features/create/data/gpx/route_gpx_importer.dart';
 import '../../features/create/data/gpx/route_gpx_exporter.dart';
-import '../../features/create/data/policies/demo_route_authoring_policy.dart';
 import '../../features/create/data/repositories/event_timezone_repository_impl.dart';
 import '../../features/create/data/repositories/event_inventory_snapshot_repository_impl.dart';
 import '../../features/create/data/repositories/create_repository_impl.dart';
@@ -168,6 +173,7 @@ import '../../features/explore/domain/usecases/load_settings_usecase.dart';
 import '../../features/explore/domain/usecases/save_profile_editable_usecase.dart';
 import '../../features/explore/domain/usecases/save_settings_usecase.dart';
 import '../adapters/identity_publisher_access_check.dart';
+import '../adapters/identity_route_authoring_policy.dart';
 import '../../features/create/domain/repositories/publisher_access_check.dart';
 import '../../features/identity/data/datasources/identity_workspace_local_datasource.dart';
 import '../../features/identity/data/datasources/mock_identity_fixture.dart';
@@ -300,6 +306,7 @@ Future<void> setupDependencies() async {
     )
     ..registerLazySingleton<IdentityWorkspaceRepository>(
       () => IdentityWorkspaceRepositoryImpl(
+        currentActor: () async => (await sl<GetCurrentUserUseCase>()())?.id,
         localDataSource: sl(),
         mockFixture: sl(),
         publicPageLocalDataSource: sl(),
@@ -542,7 +549,9 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<RouteQualityWorkflowRepository>(
       () => RouteQualityWorkflowRepositoryImpl(sl()),
     )
-    ..registerLazySingleton<RouteAuthoringPolicy>(DemoRouteAuthoringPolicy.new)
+    ..registerLazySingleton<RouteAuthoringPolicy>(
+      () => IdentityRouteAuthoringPolicy(sl()),
+    )
     ..registerFactory<RouteQualityWorkflowCoordinator>(
       () => RouteQualityWorkflowCoordinator(
         idGenerator: sl(),
@@ -759,6 +768,31 @@ Future<void> setupDependencies() async {
     )
     ..registerLazySingleton<ManagedPageFieldModerationRepository>(
       () => ManagedPageFieldModerationRepositoryImpl(sl()),
+    )
+    ..registerFactory<SubmitManagedPageFieldEditUseCase>(
+      () => SubmitManagedPageFieldEditUseCase(
+        workspaceRepository: sl(),
+        moderationRepository: sl(),
+      ),
+    )
+    ..registerLazySingleton<TeamInvitationLocalDataSource>(
+      () => TeamInvitationLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<TeamInvitationRepository>(
+      () => TeamInvitationRepositoryImpl(sl()),
+    )
+    ..registerFactory<SendTeamInvitationUseCase>(
+      () => SendTeamInvitationUseCase(
+        workspaceRepository: sl(),
+        invitationRepository: sl(),
+        idGenerator: sl(),
+      ),
+    )
+    ..registerFactory<RevokeTeamInvitationUseCase>(
+      () => RevokeTeamInvitationUseCase(
+        workspaceRepository: sl(),
+        invitationRepository: sl(),
+      ),
     )
     ..registerFactory<ResolvePublicProfessionalPageUseCase>(
       () => ResolvePublicProfessionalPageUseCase(

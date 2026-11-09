@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:recharge/features/identity/data/datasources/identity_workspace_local_datasource.dart';
+import 'package:recharge/features/identity/data/repositories/identity_workspace_repository_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/config/market_config.dart';
 import 'package:recharge/core/id/id_generator.dart';
@@ -21,6 +25,7 @@ import 'package:recharge/features/identity/domain/usecases/request_page_limit_in
 import 'package:recharge/features/identity/domain/usecases/select_workspace_usecase.dart';
 
 void main() {
+  regressionCases();
   const String userId = 'demo_full_access';
 
   test('default Admin fixture starts with zero invented pages', () async {
@@ -187,7 +192,7 @@ void main() {
       await controller.ensureLoaded(userId);
       expect(controller.state.status, IdentityWorkspaceStatus.ready);
       expect(
-        controller.selectAdminPreview(AdminExperiencePreview.viewer),
+        await controller.selectAdminPreview(AdminExperiencePreview.viewer),
         isTrue,
       );
       expect(controller.state.effectiveExperience, AccountExperience.viewer);
@@ -413,4 +418,404 @@ class _MemoryNotificationSink implements AppNotificationSink {
 class _NoopAnalyticsService implements AnalyticsService {
   @override
   void track(String eventName, {Map<String, Object?> params = const {}}) {}
+}
+
+void regressionCases() {
+  test(
+    'creation retry after notification failure reuses page and event ids',
+    () async {
+      final repo = _MemoryIdentityWorkspaceRepository(
+        _accessWithPageCount(0, userId: 'alice'),
+      );
+      final sink = _FailingOnceNotificationSink();
+      final controller = _controller(repo, sink: sink);
+      addTearDown(controller.dispose);
+      await controller.ensureLoaded('alice');
+      expect(
+        await controller.createProfessionalPage(
+          displayName: 'Retry page',
+          kind: ManagedPageKind.company,
+        ),
+        isFalse,
+      );
+      expect(repo.accessSnapshot.pages, hasLength(1));
+      expect(
+        await controller.createProfessionalPage(
+          displayName: 'Retry page',
+          kind: ManagedPageKind.company,
+        ),
+        isTrue,
+      );
+      expect(repo.accessSnapshot.pages, hasLength(1));
+      expect(sink.events, hasLength(2));
+      expect(
+        sink.events
+            .where((e) => e.audience == AppNotificationAudience.user)
+            .single
+            .recipientUserId,
+        'alice',
+      );
+    },
+  );
+  test(
+    'two repository instances cannot exceed durable ownership quota',
+    () async {
+      const data = IdentityWorkspaceLocalDataSource(FlutterSecureStorage());
+      final initial = _accessWithPageCount(2, userId: 'alice');
+      await data.saveManagedPageRecord(
+        'alice',
+        IdentityManagedPageLocalRecord(
+          pages: initial.pages,
+          memberships: initial.memberships,
+        ),
+      );
+      final first = IdentityWorkspaceRepositoryImpl(
+        localDataSource: data,
+        mockFixture: const MockIdentityFixture(),
+      );
+      final second = IdentityWorkspaceRepositoryImpl(
+        localDataSource: data,
+        mockFixture: const MockIdentityFixture(),
+      );
+      final ids = _SequenceIdGenerator();
+      final results = await Future.wait(
+        [first, second].map(
+          (repo) =>
+              CreateProfessionalPageUseCase(repository: repo, idGenerator: ids)(
+                userId: 'alice',
+                input: _creationInput('Concurrent'),
+              ).then<Object>((page) => page, onError: (Object error) => error),
+        ),
+      );
+      expect(results.whereType<ManagedPageEntity>(), hasLength(1));
+      expect(
+        (await first.loadAccessSnapshot('alice')).ownedPages,
+        hasLength(3),
+      );
+    },
+  );
+  test('two repository instances return the same pending request', () async {
+    const data = IdentityWorkspaceLocalDataSource(FlutterSecureStorage());
+    final initial = _accessWithPageCount(3, userId: 'alice');
+    await data.saveManagedPageRecord(
+      'alice',
+      IdentityManagedPageLocalRecord(
+        pages: initial.pages,
+        memberships: initial.memberships,
+      ),
+    );
+    final ids = _SequenceIdGenerator();
+    final results = await Future.wait(
+      List.generate(
+        2,
+        (_) => RequestPageLimitIncreaseUseCase(
+          repository: IdentityWorkspaceRepositoryImpl(
+            localDataSource: data,
+            mockFixture: const MockIdentityFixture(),
+          ),
+          idGenerator: ids,
+        )('alice'),
+      ),
+    );
+    expect(results.map((r) => r.id).toSet(), hasLength(1));
+    expect(
+      (await data.loadManagedPageRecord('alice')).limitRequests,
+      hasLength(1),
+    );
+  });
+
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() => FlutterSecureStorage.setMockInitialValues({}));
+  test(
+    'R09 actual repository concurrent requests use one canonical id',
+    () async {
+      const data = IdentityWorkspaceLocalDataSource(FlutterSecureStorage());
+      final access = _accessWithPageCount(3, userId: 'alice');
+      await data.saveManagedPageRecord(
+        'alice',
+        IdentityManagedPageLocalRecord(
+          pages: access.pages,
+          memberships: access.memberships,
+          limitRequests: [],
+        ),
+      );
+      final repo = IdentityWorkspaceRepositoryImpl(
+        localDataSource: data,
+        mockFixture: const MockIdentityFixture(),
+      );
+      final request = RequestPageLimitIncreaseUseCase(
+        repository: repo,
+        idGenerator: _SequenceIdGenerator(),
+      );
+      final results = await Future.wait([request('alice'), request('alice')]);
+      expect(results.map((r) => r.id).toSet(), hasLength(1));
+    },
+  );
+  test(
+    'R10 actual repository retains every successfully returned page',
+    () async {
+      const data = IdentityWorkspaceLocalDataSource(FlutterSecureStorage());
+      final access = _accessWithPageCount(1, userId: 'alice');
+      await data.saveManagedPageRecord(
+        'alice',
+        IdentityManagedPageLocalRecord(
+          pages: access.pages,
+          memberships: access.memberships,
+          limitRequests: [],
+        ),
+      );
+      final repo = IdentityWorkspaceRepositoryImpl(
+        localDataSource: data,
+        mockFixture: const MockIdentityFixture(),
+      );
+      final create = CreateProfessionalPageUseCase(
+        repository: repo,
+        idGenerator: _SequenceIdGenerator(),
+      );
+      final results = await Future.wait([
+        create(userId: 'alice', input: _creationInput('Second')),
+        create(userId: 'alice', input: _creationInput('Third')),
+      ]);
+      final restored = await repo.loadAccessSnapshot('alice');
+      expect(
+        restored.pages.map((p) => p.id),
+        containsAll(results.map((p) => p.id)),
+      );
+    },
+  );
+  test('P01 Admin preview leaves authority and workspace unchanged', () async {
+    final repo = _MemoryIdentityWorkspaceRepository(
+      _accessWithPageCount(1, userId: 'alice'),
+    );
+    final controller = _controller(repo);
+    addTearDown(controller.dispose);
+    await controller.ensureLoaded('alice');
+    final snapshot = controller.state.accessSnapshot;
+    final workspace = controller.state.activeWorkspace;
+    for (final preview in AdminExperiencePreview.values) {
+      expect(await controller.selectAdminPreview(preview), isTrue);
+      expect(
+        controller.state.accessSnapshot!.globalRole == snapshot!.globalRole &&
+            controller.state.accessSnapshot!.globalCapabilities.containsAll(
+              snapshot.globalCapabilities,
+            ),
+        isTrue,
+      );
+      expect(controller.state.activeWorkspace, workspace);
+      expect(repo.savedWorkspace, isNull);
+    }
+  });
+
+  test('R01 owned quota must survive revoked membership', () async {
+    final repo = _MemoryIdentityWorkspaceRepository(
+      _accessWithPageCount(
+        3,
+        userId: 'alice',
+        membershipStatus: ManagedPageMembershipStatus.revoked,
+      ),
+    );
+    final create = CreateProfessionalPageUseCase(
+      repository: repo,
+      idGenerator: _SequenceIdGenerator(),
+    );
+    await expectLater(
+      create(userId: 'alice', input: _creationInput('Fourth')),
+      throwsA(isA<CreateProfessionalPageException>()),
+    );
+  });
+  test(
+    'R02 concurrent fourth-page requests return one pending request',
+    () async {
+      final repo = _MemoryIdentityWorkspaceRepository(
+        _accessWithPageCount(3, userId: 'alice'),
+      );
+      final request = RequestPageLimitIncreaseUseCase(
+        repository: repo,
+        idGenerator: _SequenceIdGenerator(),
+      );
+      final results = await Future.wait([request('alice'), request('alice')]);
+      expect(results.map((r) => r.id).toSet(), hasLength(1));
+      expect(repo.limitRequests, hasLength(1));
+    },
+  );
+  test('R03 concurrent creates cannot exceed quota three', () async {
+    final repo = _MemoryIdentityWorkspaceRepository(
+      _accessWithPageCount(2, userId: 'alice'),
+    );
+    final create = CreateProfessionalPageUseCase(
+      repository: repo,
+      idGenerator: _SequenceIdGenerator(),
+    );
+    await Future.wait([
+      create(
+        userId: 'alice',
+        input: _creationInput('Third'),
+      ).then<Object?>((p) => p, onError: (Object e) => e),
+      create(
+        userId: 'alice',
+        input: _creationInput('Fourth'),
+      ).then<Object?>((p) => p, onError: (Object e) => e),
+    ]);
+    expect(repo.accessSnapshot.pages, hasLength(3));
+  });
+  test('R04 foreign actor snapshot must not select a page', () async {
+    final repo = _MemoryIdentityWorkspaceRepository(
+      _accessWithPageCount(1, userId: 'alice'),
+    );
+    await expectLater(
+      SelectWorkspaceUseCase(repo)(
+        userId: 'bob',
+        workspace: WorkspaceRef.page('page-0'),
+      ),
+      throwsA(isA<WorkspaceSelectionException>()),
+    );
+  });
+  test(
+    'R05 non-Admin with preview capability cannot enter Admin preview',
+    () async {
+      final repo = _MemoryIdentityWorkspaceRepository(
+        _replaceAccess(_accessWithPageCount(0, userId: 'alice'), role: 'user'),
+      );
+      final controller = _controller(repo);
+      addTearDown(controller.dispose);
+      await controller.ensureLoaded('alice');
+      expect(
+        await controller.selectAdminPreview(AdminExperiencePreview.viewer),
+        isFalse,
+      );
+    },
+  );
+  test('R06 capability revocation clears an open Admin preview', () async {
+    final repo = _MemoryIdentityWorkspaceRepository(
+      _accessWithPageCount(0, userId: 'alice'),
+    );
+    final controller = _controller(repo);
+    addTearDown(controller.dispose);
+    await controller.ensureLoaded('alice');
+    await controller.selectAdminPreview(AdminExperiencePreview.viewer);
+    repo.accessSnapshot = _replaceAccess(repo.accessSnapshot, capabilities: {});
+    await controller.revalidateAccess();
+    expect(controller.state.adminPreview, isNull);
+  });
+  test(
+    'R07 switching account clears old access before asynchronous load',
+    () async {
+      final repo = _GatedRepository();
+      final controller = _controller(repo);
+      addTearDown(controller.dispose);
+      await controller.ensureLoaded('alice');
+      repo.blockBob = true;
+      final loading = controller.ensureLoaded('bob');
+      final oldSnapshot = controller.state.accessSnapshot;
+      repo.bobGate.complete();
+      await loading;
+      expect(oldSnapshot, isNull);
+    },
+  );
+  test(
+    'R08 page-created notification remains addressed to its owner during account switch',
+    () async {
+      final repo = _GatedRepository();
+      final sink = _MemoryNotificationSink();
+      final controller = _controller(repo, sink: sink);
+      addTearDown(controller.dispose);
+      await controller.ensureLoaded('alice');
+      final creating = controller.createProfessionalPage(
+        displayName: 'Alice private name',
+        kind: ManagedPageKind.company,
+      );
+      await repo.afterCreateLoadEntered.future;
+      await controller.ensureLoaded('bob');
+      repo.afterCreateLoadGate.complete();
+      await creating;
+      expect(
+        sink.events
+            .where((e) => e.audience == AppNotificationAudience.user)
+            .map((e) => e.recipientUserId),
+        everyElement('alice'),
+      );
+    },
+  );
+}
+
+IdentityAccessSnapshot _replaceAccess(
+  IdentityAccessSnapshot s, {
+  String? role,
+  Set<String>? capabilities,
+}) => IdentityAccessSnapshot(
+  userId: s.userId,
+  globalRole: role ?? s.globalRole,
+  creatorVerificationStatus: s.creatorVerificationStatus,
+  globalCapabilities: capabilities ?? s.globalCapabilities,
+  pages: s.pages,
+  memberships: s.memberships,
+  revision: s.revision + 1,
+);
+
+IdentityWorkspaceController _controller(
+  IdentityWorkspaceRepository repo, {
+  _MemoryNotificationSink? sink,
+}) => IdentityWorkspaceController(
+  loadIdentityWorkspaceUseCase: LoadIdentityWorkspaceUseCase(repo),
+  selectWorkspaceUseCase: SelectWorkspaceUseCase(repo),
+  createProfessionalPageUseCase: CreateProfessionalPageUseCase(
+    repository: repo,
+    idGenerator: _SequenceIdGenerator(),
+  ),
+  requestPageLimitIncreaseUseCase: RequestPageLimitIncreaseUseCase(
+    repository: repo,
+    idGenerator: _SequenceIdGenerator(),
+  ),
+  notificationSink: sink ?? _MemoryNotificationSink(),
+  marketConfig: MarketConfig.riga,
+  analyticsService: _NoopAnalyticsService(),
+);
+
+class _GatedRepository extends _MemoryIdentityWorkspaceRepository {
+  _GatedRepository() : super(_accessWithPageCount(0, userId: 'alice'));
+  bool blockBob = false;
+  bool pageSelected = false;
+  final bobGate = Completer<void>();
+  final afterCreateLoadEntered = Completer<void>();
+  final afterCreateLoadGate = Completer<void>();
+  @override
+  Future<IdentityAccessSnapshot> loadAccessSnapshot(String userId) async {
+    if (userId == 'bob') {
+      if (blockBob) await bobGate.future;
+      return _accessWithPageCount(0, userId: 'bob');
+    }
+    if (pageSelected) {
+      if (!afterCreateLoadEntered.isCompleted) {
+        afterCreateLoadEntered.complete();
+      }
+      await afterCreateLoadGate.future;
+    }
+    return accessSnapshot;
+  }
+
+  @override
+  Future<WorkspaceRef?> loadActiveWorkspace(String userId) async =>
+      userId == 'bob' ? WorkspaceRef.personal('bob') : savedWorkspace;
+  @override
+  Future<void> saveActiveWorkspace(
+    String userId,
+    WorkspaceRef workspace,
+  ) async {
+    if (userId == 'alice') {
+      savedWorkspace = workspace;
+      pageSelected = workspace.isPage;
+    }
+  }
+}
+
+class _FailingOnceNotificationSink extends _MemoryNotificationSink {
+  bool fail = true;
+  @override
+  Future<void> appendNotification(AppNotificationEvent event) async {
+    if (fail && event.audience == AppNotificationAudience.moderators) {
+      fail = false;
+      throw Exception('notification_storage_unavailable');
+    }
+    await super.appendNotification(event);
+  }
 }

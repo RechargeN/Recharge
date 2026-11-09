@@ -102,10 +102,13 @@ class _CreatePageState extends ConsumerState<CreatePage> {
       userId: user.id,
       organizerEmail: user.email,
       organizerName: user.email.split('@').first,
-      capabilities: user.capabilities,
+      capabilities: ref.watch(activeCreateCapabilitiesProvider),
       publisherRef: activePublisher,
       isVerifiedCreator: isVerifiedCreator,
     );
+    if (!state.isLoaded || state.userId != user.id) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     _syncControllers(state);
     _scheduleExactScenarioDraft(controller, state, user.id);
     _scheduleScenarioHandoff(controller, state);

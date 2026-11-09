@@ -66,7 +66,7 @@ class PublicProfessionalPageController extends ChangeNotifier {
           ),
         ),
       );
-    } on Exception {
+    } on Object {
       if (operation != _operationRevision) return;
       _setState(
         const PublicProfessionalPageState(
@@ -95,7 +95,11 @@ class PublicProfessionalPageController extends ChangeNotifier {
       final ManagedPageMembershipEntity? membership = access?.membershipFor(
         pageId,
       );
-      if (page == null || membership == null || !membership.isActive) {
+      if (page == null ||
+          membership == null ||
+          !membership.isActive ||
+          !(access?.belongsTo(userId) ?? false) ||
+          !(access?.canActivatePage(pageId) ?? false)) {
         _setState(
           const PublicProfessionalPageState(
             status: PublicProfessionalPageStatus.notFound,
@@ -118,7 +122,7 @@ class PublicProfessionalPageController extends ChangeNotifier {
           ),
         ),
       );
-    } on Exception {
+    } on Object {
       if (operation != _operationRevision) return;
       _setState(
         const PublicProfessionalPageState(
@@ -135,6 +139,9 @@ class PublicProfessionalPageController extends ChangeNotifier {
     final IdentityWorkspaceLoadResult result = await _loadIdentityWorkspace(
       normalized,
     );
+    if (!result.accessSnapshot.belongsTo(normalized)) {
+      throw StateError('access_snapshot_mismatch');
+    }
     return result.accessSnapshot;
   }
 
@@ -147,7 +154,9 @@ class PublicProfessionalPageController extends ChangeNotifier {
     final ManagedPageMembershipEntity? membership = access?.membershipFor(
       pageId,
     );
-    final bool canOpen = membership?.isActive ?? false;
+    final bool canOpen =
+        (access?.canActivatePage(pageId) ?? false) &&
+        (membership?.isActive ?? false);
     return PublicPageViewerContext(
       requestedLocale: requestedLocale,
       canOpenPageWorkspace: canOpen,

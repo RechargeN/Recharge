@@ -42,7 +42,7 @@ void main() {
       json,
     ).toEntity();
 
-    expect(json['schemaVersion'], 8);
+    expect(json['schemaVersion'], 9);
     expect(restored.objectType, CreateObjectType.findPeople);
     expect(restored.findPeopleData, isNotNull);
     expect(
