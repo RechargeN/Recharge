@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 
 import 'create_media_pick_actions.dart';
@@ -531,23 +534,30 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
               'contributionAmountHint',
               contribution.amountHint == null
                   ? ''
-                  : (contribution.amountHint!.amountMinor / 100)
-                        .toStringAsFixed(2),
+                  : MoneyFormatter().decimal(
+                      Money(
+                        minorUnits: contribution.amountHint!.amountMinor,
+                        currency: CurrencyCode.parse(
+                          contribution.amountHint!.currencyCode,
+                        ),
+                      ),
+                      locale: Localizations.localeOf(context).toLanguageTag(),
+                    ),
             ),
             decoration: InputDecoration(
               labelText: context.l10n.createFormApproximateAmountOptional,
-              errorText: widget
-                  .serverErrors['/body/optionalContribution/amountHint/amountMinor'],
+              errorText:
+                  widget.controller.moneyInputErrors.containsKey(
+                    'activity.contribution',
+                  )
+                  ? context.l10n.validationCheckTheAmount
+                  : widget.serverErrors['/body/optionalContribution/amountHint/amountMinor'],
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (String value) {
-              final double? parsed = double.tryParse(
-                value.replaceAll(',', '.'),
-              );
-              widget.controller.updateActivityOptionalContribution(
-                kind: contribution.kind,
-                note: contribution.note,
-                amountMinor: parsed == null ? null : (parsed * 100).round(),
+              widget.controller.updateActivityContributionAmountText(
+                value,
+                locale: Localizations.localeOf(context).toLanguageTag(),
               );
             },
           ),
