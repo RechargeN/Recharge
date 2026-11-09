@@ -38,6 +38,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: golden-failures-${{ github.run_id }}
-          path: ${{ steps.appdir.outputs.dir }}/test/widget/failures/
+          path: ${{ steps.appdir.outputs.dir }}/test/**/failures/
           if-no-files-found: ignore
           retention-days: 7
