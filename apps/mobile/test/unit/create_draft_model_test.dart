@@ -43,6 +43,12 @@ void main() {
         ).basePrice?.minorUnits,
         1234,
       );
+      json['currency'] = 123;
+      expect(
+        () => CreateDraftModel.fromJson(json),
+        throwsA(isA<MoneyReadException>()),
+      );
+      json.remove('currency');
       json['basePrice'] = 1.234;
       expect(
         () => CreateDraftModel.fromJson(json, activeCurrency: 'EUR'),

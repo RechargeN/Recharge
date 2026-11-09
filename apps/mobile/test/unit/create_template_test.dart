@@ -18,45 +18,61 @@ import 'package:recharge/features/create/domain/usecases/manage_create_template_
 
 void main() {
   late ManageCreateTemplateUseCase useCase;
-  test(
-    'unreadable template money blocks collection mutation without deleting raw record',
-    () async {
-      const storage = FlutterSecureStorage();
-      final template = useCase.create(
-        userId: 'user-1',
-        name: 'original',
-        draft: _eventDraft(),
-        nowUtc: DateTime.utc(2026),
-      );
-      final wire = CreateTemplateModel.fromEntity(template).toJson();
-      (wire['snapshot'] as Map)['basePriceMinorUnits'] = 1.5;
-      final raw = jsonEncode({
-        'schemaVersion': 1,
-        'templates': [wire],
-      });
-      await storage.write(key: 'create_templates_v1_user-1', value: raw);
-      final source = CreateTemplateLocalDataSource(
-        storage,
-        activeMarketCityId: 'riga',
-        activeTimezone: 'Europe/Riga',
-        activeCountry: 'LV',
-        activeCity: 'Riga',
-        activeCurrency: 'EUR',
-      );
-      final repository = CreateTemplateRepositoryImpl(source);
-      expect(await source.loadTemplates('user-1'), isEmpty);
-      await expectLater(
-        repository.upsertTemplate(userId: 'user-1', template: template),
-        throwsA(isA<MoneyReadException>()),
-      );
-      await expectLater(
-        repository.deleteTemplate(userId: 'user-1', templateId: template.id),
-        throwsA(isA<MoneyReadException>()),
-      );
-      expect(await storage.read(key: 'create_templates_v1_user-1'), raw);
-    },
-  );
-
+  for (final location in ['base', 'currency', 'nested']) {
+    test(
+      'unreadable $location template money blocks mutation without deleting raw record',
+      () async {
+        const storage = FlutterSecureStorage();
+        final template = useCase.create(
+          userId: 'user-1',
+          name: 'original',
+          draft: _eventDraft(),
+          nowUtc: DateTime.utc(2026),
+        );
+        final wire = CreateTemplateModel.fromEntity(template).toJson();
+        final snapshot = wire['snapshot'] as Map;
+        if (location == 'base') snapshot['basePriceMinorUnits'] = 1.5;
+        if (location == 'currency') {
+          snapshot['basePriceMinorUnits'] = 100;
+          snapshot['currency'] = 123;
+        }
+        if (location == 'nested') {
+          ((snapshot['sectionData'] as Map)['event_details'] as Map)['price'] =
+              {'minorUnits': 1.5, 'currencyCode': 'EUR'};
+        }
+        final raw = jsonEncode({
+          'schemaVersion': 1,
+          'templates': [wire],
+        });
+        await storage.write(key: 'create_templates_v1_user-1', value: raw);
+        final source = CreateTemplateLocalDataSource(
+          storage,
+          activeMarketCityId: 'riga',
+          activeTimezone: 'Europe/Riga',
+          activeCountry: 'LV',
+          activeCity: 'Riga',
+          activeCurrency: 'EUR',
+        );
+        final repository = CreateTemplateRepositoryImpl(source);
+        expect(
+          await repository.listTemplates(
+            userId: 'user-1',
+            objectType: CreateObjectType.event,
+          ),
+          isEmpty,
+        );
+        await expectLater(
+          repository.upsertTemplate(userId: 'user-1', template: template),
+          throwsA(isA<MoneyReadException>()),
+        );
+        await expectLater(
+          repository.deleteTemplate(userId: 'user-1', templateId: template.id),
+          throwsA(isA<MoneyReadException>()),
+        );
+        expect(await storage.read(key: 'create_templates_v1_user-1'), raw);
+      },
+    );
+  }
   setUp(() {
     FlutterSecureStorage.setMockInitialValues(<String, String>{});
     useCase = ManageCreateTemplateUseCase(_SequentialIdGenerator());

@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/domain/entities/scenario_budget_draft.dart';
 import 'package:recharge/features/create/domain/entities/scenario_draft_data.dart';
@@ -6,6 +7,39 @@ import 'package:recharge/features/create/domain/entities/scenario_logistics_draf
 import 'package:recharge/features/create/domain/usecases/evaluate_scenario_readiness_usecase.dart';
 
 void main() {
+  for (final basis in [
+    ScenarioPriceBasis.perPerson,
+    ScenarioPriceBasis.perBooking,
+  ]) {
+    test('Money totals reject ${basis.name} overflow without wrapping', () {
+      const evaluate = EvaluateScenarioReadinessUseCase();
+      ScenarioCostDraft cost(int minor) => ScenarioCostDraft(
+        components: [
+          ScenarioMoneyEstimateDraft(
+            componentCode: 'ticket',
+            knowledge: ScenarioPriceKnowledge.known,
+            amount: ScenarioMoneyDraft(minorUnits: minor, currencyCode: 'EUR'),
+            basis: basis,
+            source: ScenarioPriceSource.manual,
+          ),
+        ],
+      );
+      final result = evaluate(
+        _fixture(
+          routeCost: cost(Money.maxSafeMinorUnits),
+          breakCost: cost(1),
+          legCost: const ScenarioCostDraft(),
+        ),
+      );
+      expect(result.canSaveToMyScenarios, isFalse);
+      expect(
+        result.validation.issues.map((i) => i.code),
+        contains('money_outOfRange'),
+      );
+      expect(result.totals.displayFromTotalCost, isNull);
+    });
+  }
+
   const EvaluateScenarioReadinessUseCase evaluate =
       EvaluateScenarioReadinessUseCase();
 

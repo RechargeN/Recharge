@@ -14,7 +14,7 @@ class MoneyLegacyAdapter {
     required bool hasCanonicalMinorUnits,
     Object? canonicalMinorUnits,
     Object? legacyMajorAmount,
-    required String? currencyCode,
+    required Object? currencyCode,
   }) {
     // Explicit canonical null means absent, never a legacy fallback.
     if (hasCanonicalMinorUnits
@@ -24,6 +24,9 @@ class MoneyLegacyAdapter {
     }
     CurrencyCode? currency;
     if (currencyCode != null) {
+      if (currencyCode is! String) {
+        throw const MoneyReadException(MoneyParseError.missingCurrency);
+      }
       try {
         currency = CurrencyCode.parse(currencyCode);
       } on FormatException {

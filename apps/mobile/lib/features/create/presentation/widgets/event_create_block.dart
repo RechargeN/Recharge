@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 
@@ -619,13 +620,15 @@ class EventCreateBlock extends StatelessWidget {
             label: context.l10n.createEventPriceIn(event.currencyCode),
             value: event.price == null
                 ? ''
-                : (event.price!.amountMinor / 100).toStringAsFixed(2),
+                : MoneyFormatter().decimal(
+                    event.price!.toMoney(),
+                    locale: Localizations.localeOf(context).toLanguageTag(),
+                  ),
             error: _error(context, 'price'),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            onChanged: (String value) => controller.updateEventPricing(
-              mode: EventPricingMode.fixed,
-              collectionMode: event.paymentCollectionMode,
-              amountMinor: _minor(value),
+            onChanged: (String value) => controller.updateEventPriceText(
+              value,
+              locale: Localizations.localeOf(context).toLanguageTag(),
             ),
           ),
           _EnumDropdown<EventPaymentCollectionMode>(
@@ -1186,8 +1189,3 @@ class _Flag extends StatelessWidget {
 String _time(int minuteOfDay) =>
     '${(minuteOfDay ~/ 60).toString().padLeft(2, '0')}:'
     '${(minuteOfDay % 60).toString().padLeft(2, '0')}';
-
-int? _minor(String value) {
-  final double? parsed = parseLocaleDecimalInput(value);
-  return parsed == null ? null : (parsed * 100).round();
-}

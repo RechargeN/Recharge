@@ -3,7 +3,7 @@
 **ID:** MOB-ARCH-M2-P
 **Версия:** 1.0
 **Дата:** 2026-08-11
-**Статус:** Approved — M2-A Done; M2-B–M2-E not started
+**Статус:** Approved — M2-A Done; M2-B Doing; M2-C–M2-E not started
 **Parent:** [Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
 **Depends on:** MOB-ARCH-M1 — Done, merged as `f893a931a58cff9ef9f779e17517af0d28c2f454`
 **Нормативные AC:** MOB-ARCH-AC-05–06, AC-52–53, AC-56–60, AC-74
@@ -532,3 +532,31 @@ time/locale/market, backend, Firebase или продуктовых UI-изме�
 
 Это закрывает только M2-A. Compatibility exports остаются осознанным долгом
 M2-D; M2-B–M2-E и весь M2 остаются незавершёнными.
+
+## 15. M2-B local progress — 2026-10-29
+
+Scope остаётся Approved local/mock. Выполнение начато на detached HEAD
+`be17822ed1ee7b750274430b39ba38e07c0c4a0a` с сохранением исходного IDP WIP.
+Отдельные checkpoint diffs отделяют Money foundation от миграции Create.
+
+Реализованы shared CurrencyCode/Money, exact decimal parser/formatter и единый
+legacy adapter. Общий Create draft, Place и Find People используют Money;
+current local writers пишут integer minor units. Event/Scenario wrappers
+сохраняются как lossless adapters до M2-D. Typed read failure блокирует
+перезапись draft; mutation коллекции templates не удаляет нечитаемый Money
+record. Невалидный price input не округляется и не заменяет прежнюю сумму.
+
+Event/Session и Scenario transport используют тот же exact input parser;
+Scenario totals проверяют overflow и currency compatibility через Money.
+Повторное открытие transport editor сохраняет введённую сумму. Strict mutation
+read templates сохраняет повреждённые и неизвестные records без перезаписи.
+
+Проверенный Create checkpoint: `flutter analyze --no-pub` — exit 0, 0 issues;
+полный `flutter test --no-pub --reporter expanded` — 1373 passed, exit 0,
+02:30. Boundary self-test/rules/inventory/diff — exit 0; 542 scanned,
+71 findings/suppressions, 0 violations/stale/expired, budget 71/71.
+
+Дальнейшие изменения требуют свежих gates. Остались Discover/Favorites/query
+и legacy Quick Plan consumers, итоговый Money reference scan и Linux CI.
+Это не M2-B Done, не приёмка R1 и не Emulator/device/cloud evidence.
+Compatibility paths не удалялись; production authority не добавлялась.

@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 
 import 'create_media_pick_actions.dart';
@@ -475,7 +478,9 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
               selected: !isFree,
               onSelected: (_) => widget.controller.setSessionPriceFixed(
                 amountMinor: session.price.amount?.amountMinor ?? 0,
-                currencyCode: session.price.amount?.currencyCode ?? 'EUR',
+                currencyCode:
+                    session.price.amount?.currencyCode ??
+                    widget.state.draft.currency,
               ),
             ),
           ],
@@ -487,24 +492,25 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
               'priceAmount',
               session.price.amount == null
                   ? ''
-                  : (session.price.amount!.amountMinor / 100).toStringAsFixed(
-                      2,
+                  : MoneyFormatter().decimal(
+                      Money(
+                        minorUnits: session.price.amount!.amountMinor,
+                        currency: CurrencyCode.parse(
+                          session.price.amount!.currencyCode,
+                        ),
+                      ),
+                      locale: Localizations.localeOf(context).toLanguageTag(),
                     ),
             ),
             decoration: InputDecoration(
-              labelText: context.l10n.createSessionPricePerSlotEur,
+              labelText: context.l10n.createSessionPricePerSlotEur.replaceAll('EUR', session.price.amount?.currencyCode ?? widget.state.draft.currency),
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (String value) {
-              final double? parsed = double.tryParse(
-                value.replaceAll(',', '.'),
+              widget.controller.updateSessionPriceText(
+                value,
+                locale: Localizations.localeOf(context).toLanguageTag(),
               );
-              if (parsed != null) {
-                widget.controller.setSessionPriceFixed(
-                  amountMinor: (parsed * 100).round(),
-                  currencyCode: session.price.amount?.currencyCode ?? 'EUR',
-                );
-              }
             },
           ),
         ],

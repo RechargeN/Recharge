@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
@@ -67,6 +68,43 @@ Future<void> _pumpSessionBlock(
 }
 
 void main() {
+  testWidgets(
+    'Session price input rejects excess scale and preserves the exact value',
+    (tester) async {
+      final controller = _buildController(_MemoryRepository());
+      addTearDown(controller.dispose);
+      await controller.ensureLoaded(
+        userId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      controller.setObjectType(CreateObjectType.session);
+      controller.setSessionPriceFixed(amountMinor: 1234, currencyCode: 'EUR');
+      await _pumpSessionBlock(tester, controller);
+      final price = find.byWidgetPredicate(
+        (w) =>
+            w is TextField && w.decoration?.labelText == 'Price per slot, EUR',
+      );
+      await tester.ensureVisible(price);
+      await tester.enterText(price, '1.005');
+      await tester.pump();
+      expect(
+        controller.moneyInputErrors['session.price'],
+        MoneyParseError.excessiveFractionDigits,
+      );
+      expect(
+        controller.state.draft.sessionData?.price.amount?.amountMinor,
+        1234,
+      );
+      await tester.enterText(price, '0.29');
+      await tester.pump();
+      expect(controller.moneyInputErrors, isEmpty);
+      expect(controller.state.draft.sessionData?.price.amount?.amountMinor, 29);
+      expect(controller.state.draft.basePrice?.minorUnits, 29);
+      await tester.pump(const Duration(milliseconds: 800));
+    },
+  );
+
   testWidgets(
     'renders the required blocks and an optional-fields toggle for a fresh Session draft',
     (WidgetTester tester) async {
