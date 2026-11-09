@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
@@ -28,7 +30,7 @@ void main() {
         PublishedFindPeopleScheduleMode.single,
     List<PublishedFindPeopleTimeOption>? timeOptions,
     PublishedFindPeopleCostType costType = PublishedFindPeopleCostType.free,
-    double? expectedSpendAmount,
+    Money? expectedSpendAmount,
     String currencyCode = 'EUR',
     String costNote = '',
     String title = 'Утренняя пробежка в парке',
@@ -264,7 +266,10 @@ void main() {
       app(
         fixture(
           costType: PublishedFindPeopleCostType.estimated,
-          expectedSpendAmount: 7.5,
+          expectedSpendAmount: Money(
+            minorUnits: 751,
+            currency: CurrencyCode.eur,
+          ),
           costNote: 'Кофе после пробежки',
         ),
       ),

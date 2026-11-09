@@ -2,6 +2,8 @@ import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
 import '../../../../shared/primitives/money/money.dart';
 import '../discover_formats.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'dart:async';
 
 import 'package:design_system/design_system.dart';
@@ -3566,6 +3568,18 @@ String _findPeopleRecruitmentLabel(
   };
 }
 
+String _formatAmount(Money amount) {
+  try {
+    return MoneyFormatter().decimal(
+      amount,
+      locale: 'en',
+      omitZeroFraction: true,
+    );
+  } on MoneyFormatException {
+    return '—';
+  }
+}
+
 /// Internal formatting adapter only. Public renderer input is always typed.
 class _ClassWorkshopDisplay {
   _ClassWorkshopDisplay(this.projection, this.timezone);
@@ -4031,7 +4045,7 @@ String _bookableSessionPriceLabel(
     PublishedBookableSessionPriceType.fixed => RechargeFormats.money(
       Money(
         minorUnits: projection.priceAmountMinor!,
-        currencyCode: projection.currencyCode,
+        currency: CurrencyCode.parse(projection.currencyCode),
       ),
       l10n.localeName,
     ),

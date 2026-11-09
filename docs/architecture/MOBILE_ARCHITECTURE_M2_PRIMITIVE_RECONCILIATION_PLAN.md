@@ -551,9 +551,12 @@ Scenario totals проверяют overflow и currency compatibility через
 Повторное открытие transport editor сохраняет введённую сумму. Strict mutation
 read templates сохраняет повреждённые и неизвестные records без перезаписи.
 
-Проверенный Create checkpoint: `flutter analyze --no-pub` — exit 0, 0 issues;
-полный `flutter test --no-pub --reporter expanded` — 1373 passed, exit 0,
-02:30. Boundary self-test/rules/inventory/diff — exit 0; 542 scanned,
+Find People public projection использует Money; Details formatting для него
+и integer Rental/Session amounts не проходит через double.
+
+Проверенный checkpoint: `flutter analyze --no-pub` — exit 0, 0 issues;
+полный `flutter test --no-pub --reporter expanded` — 1374 passed, exit 0,
+02:52. Boundary self-test/rules/inventory/diff — exit 0; 542 scanned,
 71 findings/suppressions, 0 violations/stale/expired, budget 71/71.
 
 Дальнейшие изменения требуют свежих gates. Остались Discover/Favorites/query
