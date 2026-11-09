@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/scenarios/application/controllers/scenario_builder_controller.dart';
 import 'package:recharge/features/scenarios/domain/entities/scenario_draft_entity.dart';
@@ -55,7 +57,10 @@ void main() {
       ),
       isTrue,
     );
-    expect(controller.state.draft.totalPriceAmount, 0);
+    expect(
+      controller.state.draft.totalPriceAmount,
+      Money(minorUnits: 0, currency: CurrencyCode.eur),
+    );
   });
 
   test('mood change rebuilds scenario steps', () {

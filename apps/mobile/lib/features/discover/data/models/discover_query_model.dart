@@ -1,44 +1,64 @@
+import '../../../../shared/primitives/money/money_parse_result.dart';
+import '../../../../shared/primitives/money/currency_metadata.dart';
+import '../../../../core/parsing/money_legacy_adapter.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/time_window.dart';
 
 /// The single local record mapper; domain values do not own storage shapes.
 class DiscoverQueryModel {
-  static Map<String, Object?> toMap(DiscoverQuery value) => <String, Object?>{
-    'query_text': value.queryText,
-    'selected_category_ids': value.selectedCategoryIds,
-    'selected_subcategory_ids': value.selectedSubcategoryIds,
-    'date_from': value.dateFrom?.toIso8601String(),
-    'date_to': value.dateTo?.toIso8601String(),
-    'people_count': value.peopleCount,
-    'available_duration_minutes': value.availableDurationMinutes,
-    'mood': value.mood,
-    'budget_min': value.budgetMin,
-    'budget_max': value.budgetMax,
-    'free_only': value.freeOnly,
-    'center_lat': value.centerLat,
-    'center_lng': value.centerLng,
-    'radius_meters': value.radiusMeters,
-    'unlimited_radius': value.unlimitedRadius,
-    'sort_mode': value.sortMode.name,
-    'open_now': value.openNow,
-    'only_available': value.onlyAvailable,
-    'market_city_id': value.marketCityId,
-    'manual_area_selected': value.manualAreaSelected,
-    'search_area_dirty': value.searchAreaDirty,
-    'source_screen': value.sourceScreen,
-    'query_version': 2,
-    'applied_at_utc': value.appliedAtUtc.toIso8601String(),
-    'time_window': value.timeWindow?.toMap(),
-    'travel_context': value.travelContext?.toMap(),
-  };
+  static Map<String, Object?> toMap(DiscoverQuery value) {
+    for (final amount in [value.budgetMin, value.budgetMax]) {
+      if (amount != null &&
+          CurrencyMetadataRegistry.eurOnly.lookup(amount.currency) == null) {
+        throw const MoneyReadException(MoneyParseError.unknownCurrency);
+      }
+    }
+    return <String, Object?>{
+      'query_text': value.queryText,
+      'selected_category_ids': value.selectedCategoryIds,
+      'selected_subcategory_ids': value.selectedSubcategoryIds,
+      'date_from': value.dateFrom?.toIso8601String(),
+      'date_to': value.dateTo?.toIso8601String(),
+      'people_count': value.peopleCount,
+      'available_duration_minutes': value.availableDurationMinutes,
+      'mood': value.mood,
+      'budget_min_minor_units': value.budgetMin?.minorUnits,
+      'currency_code': (value.budgetMin ?? value.budgetMax)?.currency.value,
+      'budget_max_minor_units': value.budgetMax?.minorUnits,
+      'free_only': value.freeOnly,
+      'center_lat': value.centerLat,
+      'center_lng': value.centerLng,
+      'radius_meters': value.radiusMeters,
+      'unlimited_radius': value.unlimitedRadius,
+      'sort_mode': value.sortMode.name,
+      'open_now': value.openNow,
+      'only_available': value.onlyAvailable,
+      'market_city_id': value.marketCityId,
+      'manual_area_selected': value.manualAreaSelected,
+      'search_area_dirty': value.searchAreaDirty,
+      'source_screen': value.sourceScreen,
+      'query_version': 2,
+      'applied_at_utc': value.appliedAtUtc.toIso8601String(),
+      'time_window': value.timeWindow?.toMap(),
+      'travel_context': value.travelContext?.toMap(),
+    };
+  }
 
   static DiscoverQuery fromMap(
     Map<String, Object?> map, {
     required String defaultMarketCityId,
     required double defaultCenterLat,
     required double defaultCenterLng,
+    String? legacyCurrencyCode,
   }) {
-    final int sourceVersion = (map['query_version'] as num?)?.toInt() ?? 1;
+    final Object? rawVersion = map['query_version'];
+    if (rawVersion != null && rawVersion is! int) {
+      throw const FormatException('Invalid Discover query version');
+    }
+    final int sourceVersion = rawVersion as int? ?? 1;
+    if (sourceVersion > 2 || sourceVersion < 1) {
+      throw const FormatException('Unsupported Discover query version');
+    }
     final bool manualAreaSelected =
         (map['manual_area_selected'] as bool?) ?? false;
     String marketCityId =
@@ -76,8 +96,22 @@ class DiscoverQueryModel {
       availableDurationMinutes: (map['available_duration_minutes'] as num?)
           ?.toInt(),
       mood: map['mood'] as String?,
-      budgetMin: (map['budget_min'] as num?)?.toDouble(),
-      budgetMax: (map['budget_max'] as num?)?.toDouble(),
+      budgetMin: MoneyLegacyAdapter().readOptional(
+        hasCanonicalMinorUnits: map.containsKey('budget_min_minor_units'),
+        canonicalMinorUnits: map['budget_min_minor_units'],
+        legacyMajorAmount: map['budget_min'],
+        currencyCode: map.containsKey('currency_code')
+            ? map['currency_code']
+            : legacyCurrencyCode,
+      ),
+      budgetMax: MoneyLegacyAdapter().readOptional(
+        hasCanonicalMinorUnits: map.containsKey('budget_max_minor_units'),
+        canonicalMinorUnits: map['budget_max_minor_units'],
+        legacyMajorAmount: map['budget_max'],
+        currencyCode: map.containsKey('currency_code')
+            ? map['currency_code']
+            : legacyCurrencyCode,
+      ),
       freeOnly: (map['free_only'] as bool?) ?? false,
       centerLat: centerLat,
       centerLng: centerLng,

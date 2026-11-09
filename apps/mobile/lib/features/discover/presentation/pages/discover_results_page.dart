@@ -1,3 +1,7 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -209,7 +213,13 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
               controller.applySearchConditions(
                 freeOnly: false,
                 clearBudgetMin: true,
-                budgetMax: 10,
+                budgetMax: MoneyParser()
+                    .parse(
+                      '10',
+                      currency: controller.marketCurrency,
+                      locale: 'en',
+                    )
+                    .value!,
                 clearDateFrom: true,
                 clearDateTo: true,
               );
@@ -279,7 +289,8 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
             onFreeOnlyChanged: (bool value) {
               controller.applySearchConditions(freeOnly: value);
             },
-            onBudgetSelected: (double? value) {
+            currency: controller.marketCurrency,
+            onBudgetSelected: (Money? value) {
               controller.applySearchConditions(
                 freeOnly: false,
                 budgetMax: value,
@@ -410,7 +421,19 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
     DiscoverFeedController controller,
     Map<String, String> seedParameters,
   ) async {
-    final double? budgetMax = _doubleFromSeed(seedParameters['budgetMax']);
+    final budgetText = seedParameters['budgetMax'];
+    final budgetResult = budgetText == null
+        ? null
+        : controller.parseBudgetInput(budgetText, locale: 'en');
+    if (budgetResult != null && !budgetResult.isSuccess) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Invalid budget')));
+      }
+      return;
+    }
+    final Money? budgetMax = budgetResult?.value;
     final DateTime? dateFrom = _dateFromSeed(seedParameters['dateFrom']);
     final DateTime? dateTo = _dateFromSeed(seedParameters['dateTo']);
     final TimeWindow? timeWindow = _timeWindowFromSeed(seedParameters);
@@ -654,7 +677,11 @@ String _mapLocationForQuery(DiscoverQuery query) {
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter().decimal(
+        query.budgetMax!,
+        locale: 'en',
+        omitZeroFraction: true,
+      ),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -691,7 +718,11 @@ String _createLocationForQuery(
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter().decimal(
+        query.budgetMax!,
+        locale: 'en',
+        omitZeroFraction: true,
+      ),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -924,7 +955,9 @@ class _ActiveConditionChips extends StatelessWidget {
       else if (query.budgetMax != null)
         Chip(
           avatar: const Icon(Icons.payments_outlined, size: 16),
-          label: Text('Up to €${query.budgetMax!.toStringAsFixed(0)}'),
+          label: Text(
+            'Up to €${MoneyFormatter().decimal(query.budgetMax!, locale: 'en', omitZeroFraction: true)}',
+          ),
         ),
       Chip(
         avatar: const Icon(Icons.near_me_outlined, size: 16),
@@ -1075,13 +1108,15 @@ class _ConditionPanel extends StatelessWidget {
     required this.query,
     required this.onFreeOnlyChanged,
     required this.onBudgetSelected,
+    required this.currency,
     required this.onDateSelected,
     required this.onRadiusSelected,
   });
 
   final DiscoverQuery query;
   final ValueChanged<bool> onFreeOnlyChanged;
-  final ValueChanged<double?> onBudgetSelected;
+  final ValueChanged<Money?> onBudgetSelected;
+  final CurrencyCode currency;
   final ValueChanged<_DateFilter> onDateSelected;
   final ValueChanged<_RadiusFilter> onRadiusSelected;
 
@@ -1111,13 +1146,29 @@ class _ConditionPanel extends StatelessWidget {
                 ),
                 ChoiceChip(
                   label: const Text('Under 10'),
-                  selected: query.budgetMax == 10,
-                  onSelected: (_) => onBudgetSelected(10),
+                  selected:
+                      query.budgetMax ==
+                      MoneyParser()
+                          .parse('10', currency: currency, locale: 'en')
+                          .value!,
+                  onSelected: (_) => onBudgetSelected(
+                    MoneyParser()
+                        .parse('10', currency: currency, locale: 'en')
+                        .value!,
+                  ),
                 ),
                 ChoiceChip(
                   label: const Text('Under 15'),
-                  selected: query.budgetMax == 15,
-                  onSelected: (_) => onBudgetSelected(15),
+                  selected:
+                      query.budgetMax ==
+                      MoneyParser()
+                          .parse('15', currency: currency, locale: 'en')
+                          .value!,
+                  onSelected: (_) => onBudgetSelected(
+                    MoneyParser()
+                        .parse('15', currency: currency, locale: 'en')
+                        .value!,
+                  ),
                 ),
               ],
             ),
@@ -1210,7 +1261,7 @@ class _AppliedSummary extends StatelessWidget {
       if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
       if (query.freeOnly) 'free',
       if (query.budgetMax != null)
-        'up to ${query.budgetMax!.toStringAsFixed(0)}',
+        'up to ${MoneyFormatter().decimal(query.budgetMax!, locale: 'en', omitZeroFraction: true)}',
       if (query.dateFrom != null || query.dateTo != null) 'date set',
       query.unlimitedRadius
           ? 'any area'
@@ -1319,7 +1370,7 @@ class _SearchResultCard extends StatelessWidget {
         ? _routeDurationLabel(item.durationMinutes)
         : item.isFree
         ? 'Free'
-        : '${item.priceAmount.toStringAsFixed(0)} €';
+        : '${MoneyFormatter().decimal(item.priceAmount, locale: 'en', omitZeroFraction: true)} €';
 
     return Card(
       clipBehavior: Clip.antiAlias,

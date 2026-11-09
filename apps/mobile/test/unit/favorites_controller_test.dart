@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/favorites/application/controllers/favorites_controller.dart';
@@ -58,7 +60,7 @@ FavoriteItemEntity _favorite(String id) {
     category: 'outdoor',
     startsAtUtc: DateTime.parse('2026-04-20T10:00:00Z'),
     distanceKm: 2.4,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     isFree: true,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
     targetRoute: null,

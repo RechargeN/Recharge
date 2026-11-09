@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -96,6 +98,12 @@ class _SmartSearchTestApp extends StatelessWidget {
       getDiscoverFeedUseCase: GetDiscoverFeedUseCase(_FakeDiscoverRepository()),
       discoverPreferencesRepository: _preferences,
       analyticsService: _NoopAnalyticsService(),
+      runtimeDefaults: const DiscoverRuntimeDefaults(
+        timezoneId: 'Europe/Riga',
+        originLat: 56.9496,
+        originLng: 24.1052,
+        currency: CurrencyCode.eur,
+      ),
     );
     return ProviderScope(
       overrides: <Override>[
@@ -145,7 +153,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
 
   @override
   Future<List<DiscoverItemEntity>> getFeed(DiscoverQuery query) async {
-    return const <DiscoverItemEntity>[];
+    return <DiscoverItemEntity>[];
   }
 }
 

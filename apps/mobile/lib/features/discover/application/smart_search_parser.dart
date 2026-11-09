@@ -1,3 +1,8 @@
+import '../../../shared/primitives/money/currency_code.dart';
+import '../../../shared/primitives/money/money.dart';
+import '../../../shared/primitives/money/money_parser.dart';
+import '../../../shared/primitives/money/money_parse_result.dart';
+import '../../../shared/primitives/money/money_formatter.dart';
 import '../../../core/config/recharge_taxonomy.dart';
 
 class SmartSearchParseResult {
@@ -7,6 +12,7 @@ class SmartSearchParseResult {
     required this.selectedCategoryIds,
     required this.freeOnly,
     required this.budgetMax,
+    this.budgetError,
     required this.datePreset,
     required this.radiusMeters,
     required this.unlimitedRadius,
@@ -18,7 +24,8 @@ class SmartSearchParseResult {
   final String queryText;
   final List<String> selectedCategoryIds;
   final bool? freeOnly;
-  final double? budgetMax;
+  final Money? budgetMax;
+  final MoneyParseError? budgetError;
   final SmartSearchDatePreset? datePreset;
   final double? radiusMeters;
   final bool? unlimitedRadius;
@@ -46,7 +53,11 @@ class SmartRouteIntent {
 
 enum SmartSearchDatePreset { today, tonight }
 
-SmartSearchParseResult parseSmartSearch(String input) {
+SmartSearchParseResult parseSmartSearch(
+  String input, {
+  required CurrencyCode? currency,
+  required String locale,
+}) {
   final String normalized = input.trim().toLowerCase();
   final List<String> chips = <String>[];
   final Set<String> categories = <String>{};
@@ -103,11 +114,16 @@ SmartSearchParseResult parseSmartSearch(String input) {
     }
   }
 
-  double? budgetMax = _parseBudgetMax(working);
+  final budget = _parseBudgetMax(working, currency: currency, locale: locale);
+  final Money? budgetMax = budget?.value;
   if (budgetMax != null) {
-    chips.add('up to ${budgetMax.toStringAsFixed(0)}');
-    working = working.replaceAll(RegExp(r'(under|до|up to)\s*\d+'), ' ');
-    working = working.replaceAll(RegExp(r'\d+\s*(eur|euro)'), ' ');
+    chips.add(
+      'up to ${MoneyFormatter().decimal(budgetMax, locale: locale, omitZeroFraction: true)}',
+    );
+    working = working.replaceAll(_budgetWithPrefix, ' ');
+    working = working.replaceAll(_budgetWithCurrency, ' ');
+  } else if (budget?.error != null) {
+    chips.add('Invalid budget: ${budget!.error!.name}');
   }
 
   SmartSearchDatePreset? datePreset;
@@ -192,6 +208,7 @@ SmartSearchParseResult parseSmartSearch(String input) {
     selectedCategoryIds: categories.toList(growable: false),
     freeOnly: freeOnly,
     budgetMax: budgetMax,
+    budgetError: budget?.error,
     datePreset: datePreset,
     radiusMeters: radiusMeters,
     unlimitedRadius: unlimitedRadius,
@@ -359,20 +376,38 @@ bool _containsTaxonomySignal(String source, String signal) {
   ).hasMatch(source);
 }
 
-double? _parseBudgetMax(String source) {
-  final RegExpMatch? explicit = RegExp(
-    r'(under|до|up to)\s*(\d+)',
-  ).firstMatch(source);
-  if (explicit != null) {
-    return double.parse(explicit.group(2)!);
+final _budgetWithPrefix = RegExp(
+  r'(under|до|up to)\s*([+-]?\d(?:[\d.,\u00a0\u202f]| (?=\d))*(?:[eE][+-]?\d+)?)(?:\s*(eur|euro|евро|usd|gbp|jpy)\b)?',
+);
+final _budgetWithCurrency = RegExp(
+  r'([+-]?\d(?:[\d.,\u00a0\u202f]| (?=\d))*(?:[eE][+-]?\d+)?)\s*(eur|euro|евро|usd|gbp|jpy)\b',
+);
+
+MoneyParseResult? _parseBudgetMax(
+  String source, {
+  required CurrencyCode? currency,
+  required String locale,
+}) {
+  final prefix = _budgetWithPrefix.firstMatch(source);
+  final suffix = _budgetWithCurrency.firstMatch(source);
+  final text = prefix?.group(2) ?? suffix?.group(1);
+  if (text == null) return null;
+  final token = prefix?.group(3) ?? suffix?.group(2);
+  final parsedCurrency = token == null
+      ? currency
+      : CurrencyCode.parse(token == 'euro' || token == 'евро' ? 'EUR' : token);
+  if (parsedCurrency == null) {
+    return const MoneyParseResult.failure(MoneyParseError.missingCurrency);
   }
-  final RegExpMatch? currency = RegExp(
-    r'(\d+)\s*(eur|euro)',
-  ).firstMatch(source);
-  if (currency != null) {
-    return double.parse(currency.group(1)!);
+  final result = MoneyParser().parse(
+    text,
+    currency: parsedCurrency,
+    locale: locale,
+  );
+  if (result.value != null && result.value!.minorUnits < 0) {
+    return const MoneyParseResult.failure(MoneyParseError.outOfRange);
   }
-  return null;
+  return result;
 }
 
 int? _parseRouteDurationMinutes(String source) {

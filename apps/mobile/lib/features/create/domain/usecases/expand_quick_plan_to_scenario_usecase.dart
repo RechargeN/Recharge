@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../../../shared/primitives/id/id_generator.dart';
 import '../entities/quick_plan_conversion.dart';
 import '../entities/scenario_budget_draft.dart';
@@ -83,6 +85,35 @@ class ExpandQuickPlanToScenarioUseCase {
       );
     }
 
+    CurrencyCode? currency;
+    try {
+      currency = CurrencyCode.parse(source.currencyCode);
+    } on FormatException {
+      // Invalid source currency is a conversion issue, not an inferred default.
+    }
+    if (currency == null ||
+        source.stops
+            .where((stop) => request.selectedStopIds.contains(stop.id))
+            .any(
+              (stop) =>
+                  stop.price != null &&
+                  (stop.price!.currency != currency ||
+                      stop.price!.minorUnits < 0),
+            )) {
+      return ExpandQuickPlanToScenarioResult(
+        scenario: null,
+        issues: const [
+          QuickPlanConversionIssue(
+            code: QuickPlanConversionIssueCode.invalidPrice,
+            severity: QuickPlanConversionIssueSeverity.error,
+            message: 'Selected stop price is invalid or has another currency',
+          ),
+        ],
+        quickPlanStopIdToScenarioItemId: const {},
+        privateNotesByScenarioItemId: const {},
+        sourceRevision: source.revision,
+      );
+    }
     final String dayId = _idGenerator.generate();
     final List<ScenarioLocationDraft> locations = <ScenarioLocationDraft>[];
     final List<ScenarioItemDraft> items = <ScenarioItemDraft>[];
@@ -260,7 +291,7 @@ class ExpandQuickPlanToScenarioUseCase {
         ],
       );
     }
-    final int? amount = stop.priceMinorUnits;
+    final Money? amount = stop.price;
     if (amount == null) {
       return const ScenarioCostDraft(
         components: <ScenarioMoneyEstimateDraft>[
@@ -278,10 +309,7 @@ class ExpandQuickPlanToScenarioUseCase {
           componentCode: 'experience',
           knowledge: ScenarioPriceKnowledge.estimated,
           source: ScenarioPriceSource.manual,
-          amount: ScenarioMoneyDraft(
-            minorUnits: amount,
-            currencyCode: currencyCode,
-          ),
+          amount: ScenarioMoneyDraft.fromMoney(amount),
           basis: ScenarioPriceBasis.perPerson,
           confidence: 0.5,
         ),

@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -251,10 +252,11 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
     _favoriteHandled = true;
     if (favoritesController.isFavorite(item.id)) return;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await favoritesController.addFavorite(
+      final saved = await favoritesController.addFavorite(
         _toFavorite(item),
         sourceScreen: 'discover_details',
       );
+      if (!saved) return;
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -378,7 +380,8 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
       params: <String, Object?>{
         'item_id': item.id,
         'category': item.category,
-        'price_amount': item.priceAmount,
+        'price_minor_units': item.priceAmount.minorUnits,
+        'currency_code': item.priceAmount.currency.value,
       },
     );
     ScaffoldMessenger.of(context).showSnackBar(
@@ -551,7 +554,12 @@ String _createLocationForDetails(DiscoverItemEntity item) {
       'venue': item.venueName,
       'address': item.addressLine,
       'free': item.isFree ? '1' : '0',
-      if (!item.isFree) 'budgetMax': item.priceAmount.toStringAsFixed(0),
+      if (!item.isFree)
+        'budgetMax': MoneyFormatter().decimal(
+          item.priceAmount,
+          locale: 'en',
+          omitZeroFraction: true,
+        ),
       'cover': item.coverImageUrl,
       'start': item.startsAtUtc.toIso8601String(),
     },

@@ -5,7 +5,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/favorite_item_model.dart';
 
 class FavoritesLocalDataSource {
-  FavoritesLocalDataSource(this._storage);
+  FavoritesLocalDataSource(this._storage, {this.legacyCurrencyCode});
+  final String? legacyCurrencyCode;
 
   static const String _favoritesKey = 'favorites_items_v1';
   final FlutterSecureStorage _storage;
@@ -17,12 +18,14 @@ class FavoritesLocalDataSource {
       final List<dynamic> decoded = jsonDecode(raw) as List<dynamic>;
       return decoded
           .map(
-            (dynamic item) =>
-                FavoriteItemModel.fromJson(item as Map<String, dynamic>),
+            (dynamic item) => FavoriteItemModel.fromJson(
+              item as Map<String, dynamic>,
+              legacyCurrencyCode: legacyCurrencyCode,
+            ),
           )
           .toList(growable: false);
     } on FormatException {
-      return const <FavoriteItemModel>[];
+      rethrow;
     }
   }
 

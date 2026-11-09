@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'dart:io';
 
 import 'package:design_system/design_system.dart';
@@ -117,7 +119,7 @@ DiscoverItemEntity _activityFixture() {
     startsAtUtc: DateTime.utc(2026, 9, 12, 7),
     latitude: 56.956,
     longitude: 24.112,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     distanceKm: 1.2,
     isFree: true,
     objectKind: DiscoverObjectKind.activity,

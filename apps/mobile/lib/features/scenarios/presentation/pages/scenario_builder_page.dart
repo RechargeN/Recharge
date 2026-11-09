@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -438,9 +439,9 @@ class _ScenarioPreview extends StatelessWidget {
                     ),
                     _PreviewStat(
                       icon: Icons.payments_outlined,
-                      value: draft.totalPriceAmount == 0
+                      value: draft.isFree
                           ? 'Free'
-                          : '€${draft.totalPriceAmount.toStringAsFixed(0)}',
+                          : '€${MoneyFormatter().decimal(draft.totalPriceAmount, locale: 'en', omitZeroFraction: true)}',
                       label: 'budget',
                     ),
                     _PreviewStat(
@@ -867,7 +868,7 @@ class _PreviewTimelineStep extends StatelessWidget {
                       _TimelinePill(
                         step.isFree
                             ? 'Free'
-                            : '€${step.priceAmount.toStringAsFixed(0)}',
+                            : '€${MoneyFormatter().decimal(step.priceAmount, locale: 'en', omitZeroFraction: true)}',
                       ),
                     ],
                   ),
@@ -968,9 +969,9 @@ class _ScenarioHero extends StatelessWidget {
                   label: '${draft.totalDistanceKm.toStringAsFixed(1)} km',
                 ),
                 _HeroPill(
-                  label: draft.totalPriceAmount == 0
+                  label: draft.isFree
                       ? 'Free'
-                      : '${draft.totalPriceAmount.toStringAsFixed(0)} EUR',
+                      : '${MoneyFormatter().decimal(draft.totalPriceAmount, locale: 'en', omitZeroFraction: true)} EUR',
                 ),
               ],
             ),
@@ -1617,9 +1618,9 @@ class _RouteFitPanel extends StatelessWidget {
                   icon: Icons.payments_outlined,
                   label: draft.freeOnly
                       ? 'Free only'
-                      : draft.totalPriceAmount == 0
+                      : draft.isFree
                       ? 'Free'
-                      : '${draft.totalPriceAmount.toStringAsFixed(0)} EUR',
+                      : '${MoneyFormatter().decimal(draft.totalPriceAmount, locale: 'en', omitZeroFraction: true)} EUR',
                 ),
               ],
             ),
@@ -1743,7 +1744,7 @@ class _ScenarioStepCard extends StatelessWidget {
                         icon: Icons.payments,
                         label: step.isFree
                             ? 'Free'
-                            : '${step.priceAmount.toStringAsFixed(0)} EUR',
+                            : '${MoneyFormatter().decimal(step.priceAmount, locale: 'en', omitZeroFraction: true)} EUR',
                       ),
                     ],
                   ),
@@ -2076,7 +2077,7 @@ FavoriteItemEntity _favoriteFromScenario(ScenarioDraftEntity draft) {
     startsAtUtc: now,
     distanceKm: draft.totalDistanceKm,
     priceAmount: draft.totalPriceAmount,
-    isFree: draft.totalPriceAmount == 0,
+    isFree: draft.isFree,
     savedAtUtc: now,
     targetRoute: _targetRouteForScenario(draft),
     planningTargetKind: FavoritePlanningTargetKind.quickPlan,
@@ -2237,7 +2238,11 @@ String _quickPlanRouteForSmartSearch(
 SmartSearchParseResult? _smartRouteParseForSmartSearch(
   SmartSearchHistoryEntity item,
 ) {
-  final SmartSearchParseResult parseResult = parseSmartSearch(item.prompt);
+  final SmartSearchParseResult parseResult = parseSmartSearch(
+    item.prompt,
+    currency: (item.query.budgetMax ?? item.query.budgetMin)?.currency,
+    locale: 'en',
+  );
   if (parseResult.routeIntent == null) return null;
   return parseResult;
 }
@@ -2307,7 +2312,11 @@ Map<String, String> _queryParametersForQuery(DiscoverQuery query) {
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter().decimal(
+        query.budgetMax!,
+        locale: 'en',
+        omitZeroFraction: true,
+      ),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -2340,7 +2349,8 @@ String _promptForQuery(DiscoverQuery query) {
     if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
     if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.budgetMax != null)
+      'under ${MoneyFormatter().decimal(query.budgetMax!, locale: 'en', omitZeroFraction: true)}',
     query.unlimitedRadius
         ? 'any area'
         : 'near ${(query.radiusMeters / 1000).round()} km',
@@ -2410,7 +2420,7 @@ List<_IntentChipData> _intentChips(DiscoverQuery query) {
           ? 'Free'
           : query.budgetMax == null
           ? 'Any price'
-          : 'Under ${query.budgetMax!.toStringAsFixed(0)} EUR',
+          : 'Under ${MoneyFormatter().decimal(query.budgetMax!, locale: 'en', omitZeroFraction: true)} EUR',
     ),
     _IntentChipData(
       icon: Icons.radar,
@@ -2433,9 +2443,9 @@ String _scenarioSummary(ScenarioDraftEntity draft) {
     '${_moodLabel(draft.mood)} recharge scenario',
     '${draft.steps.length} stops · ${draft.totalDurationMinutes} min · '
         '${draft.totalDistanceKm.toStringAsFixed(1)} km',
-    draft.totalPriceAmount == 0
+    draft.isFree
         ? 'Free'
-        : '${draft.totalPriceAmount.toStringAsFixed(0)} EUR',
+        : '${MoneyFormatter().decimal(draft.totalPriceAmount, locale: 'en', omitZeroFraction: true)} EUR',
     '',
     ...List<String>.generate(draft.steps.length, (int index) {
       final ScenarioStepEntity step = draft.steps[index];

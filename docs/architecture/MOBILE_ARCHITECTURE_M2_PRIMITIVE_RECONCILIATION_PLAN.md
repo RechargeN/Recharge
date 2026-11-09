@@ -556,14 +556,17 @@ Find People public projection использует Money; Details formatting д�
 Query/saved-search/history persistence перенесён из domain в единственные
 data mappers; прежние domain readers/writers удалены после переноса всех
 вызовов. Legacy read без записи сохраняет raw record и использует явный
-geographic config context. Budget Money migration ещё не завершена.
+geographic config context. Discover/Favorites/query budgets, Smart Search и
+legacy Scenario/Quick Plan consumers используют Money; exact input/formatting
+не округляет cents. Corrupt/future saved records блокируют mutation без
+перезаписи, direct conversion проверяет currency до создания новых IDs.
 
 Проверенный checkpoint: `flutter analyze --no-pub` — exit 0, 0 issues;
-полный `flutter test --no-pub --reporter expanded` — 1376 passed, exit 0,
-02:30. Boundary self-test/rules/inventory/diff — exit 0; 545 scanned,
+полный `flutter test --no-pub --reporter expanded` — 1390 passed, exit 0,
+02:53. Boundary self-test/rules/inventory/diff — exit 0; 545 scanned,
 71 findings/suppressions, 0 violations/stale/expired, budget 71/71.
 
-Дальнейшие изменения требуют свежих gates. Остались Discover/Favorites/query
-и legacy Quick Plan consumers, итоговый Money reference scan и Linux CI.
+Дальнейшие изменения требуют свежих gates. Остались Activity optional
+contribution input/restore, итоговый Money reference scan и Linux CI.
 Это не M2-B Done, не приёмка R1 и не Emulator/device/cloud evidence.
 Compatibility paths не удалялись; production authority не добавлялась.

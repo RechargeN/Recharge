@@ -37,7 +37,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'object_kind': 'event',
         'category': 'wellness_recharge',
         'subcategory': 'yoga',
-        'price_amount': 0.0,
+        'price_minor_units': 0,
+        'currency_code': 'EUR',
         'is_free': true,
         'cover_image_url':
             'https://images.unsplash.com/photo-1506126613408-eca07ce68773'
@@ -63,7 +64,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'object_kind': 'event',
         'category': 'art_culture_museums',
         'subcategory': 'creative_meetup',
-        'price_amount': 8.0,
+        'price_minor_units': 800,
+        'currency_code': 'EUR',
         'is_free': false,
         'cover_image_url':
             'https://images.unsplash.com/photo-1513364776144-60967b0f800f'
@@ -89,7 +91,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'object_kind': 'route',
         'category': 'outdoor_nature_walking',
         'subcategory': 'lake_walk',
-        'price_amount': 0.0,
+        'price_minor_units': 0,
+        'currency_code': 'EUR',
         'is_free': true,
         'cover_image_url':
             'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee'
@@ -115,7 +118,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'object_kind': 'event',
         'category': 'music_nightlife',
         'subcategory': 'live_music',
-        'price_amount': 12.0,
+        'price_minor_units': 1200,
+        'currency_code': 'EUR',
         'is_free': false,
         'cover_image_url':
             'https://images.unsplash.com/photo-1501386761578-eac5c94b800a'
@@ -141,7 +145,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'object_kind': 'event',
         'category': 'family_kids',
         'subcategory': 'family_picnic',
-        'price_amount': 5.0,
+        'price_minor_units': 500,
+        'currency_code': 'EUR',
         'is_free': false,
         'cover_image_url':
             'https://images.unsplash.com/photo-1507525428034-b723cf961d3e'
@@ -167,7 +172,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'object_kind': 'route',
         'category': 'outdoor_nature_walking',
         'subcategory': 'sunset_walk',
-        'price_amount': 0.0,
+        'price_minor_units': 0,
+        'currency_code': 'EUR',
         'is_free': true,
         'cover_image_url':
             'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429'
@@ -193,7 +199,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'object_kind': 'place',
         'category': 'art_culture_museums',
         'subcategory': 'libraries',
-        'price_amount': 0.0,
+        'price_minor_units': 0,
+        'currency_code': 'EUR',
         'is_free': true,
         'cover_image_url':
             'https://images.unsplash.com/photo-1521587760476-6c12a4b040da'
@@ -234,7 +241,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
         'starts_at_utc': startsAt.toIso8601String(),
         'latitude': lat,
         'longitude': lng,
-        'price_amount': template['price_amount'],
+        'price_minor_units': template['price_minor_units'],
+        'currency_code': template['currency_code'],
         'distance_km': 0.0,
         'is_free': template['is_free'],
         'object_kind': template['object_kind'],
@@ -309,7 +317,8 @@ class MockDiscoverRemoteDataSource implements DiscoverRemoteDataSource {
       'starts_at_utc': base.toIso8601String(),
       'latitude': 56.9496,
       'longitude': 24.1052,
-      'price_amount': 0.0,
+      'price_minor_units': 0,
+      'currency_code': 'EUR',
       'distance_km': 0.0,
       'is_free': true,
       'object_kind': 'activity',

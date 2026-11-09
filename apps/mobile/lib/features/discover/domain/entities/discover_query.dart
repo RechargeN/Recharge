@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money.dart';
 import 'time_window.dart';
 
 enum DiscoverSortMode { geoFreshness }
@@ -31,6 +32,14 @@ class DiscoverQuery {
     this.timeWindow,
     this.travelContext,
   }) {
+    if ((budgetMin?.minorUnits ?? 0) < 0 || (budgetMax?.minorUnits ?? 0) < 0) {
+      throw ArgumentError('Budget must be nonnegative');
+    }
+    if (budgetMin != null &&
+        budgetMax != null &&
+        budgetMin!.compareTo(budgetMax!) > 0) {
+      throw ArgumentError('Budget minimum exceeds maximum');
+    }
     if (timeWindow != null && travelContext == null) {
       throw ArgumentError('travelContext is required with timeWindow');
     }
@@ -76,8 +85,8 @@ class DiscoverQuery {
   final int? peopleCount;
   final int? availableDurationMinutes;
   final String? mood;
-  final double? budgetMin;
-  final double? budgetMax;
+  final Money? budgetMin;
+  final Money? budgetMax;
   final bool freeOnly;
   final double centerLat;
   final double centerLng;
@@ -126,9 +135,9 @@ class DiscoverQuery {
     bool clearAvailableDurationMinutes = false,
     String? mood,
     bool clearMood = false,
-    double? budgetMin,
+    Money? budgetMin,
     bool clearBudgetMin = false,
-    double? budgetMax,
+    Money? budgetMax,
     bool clearBudgetMax = false,
     bool? freeOnly,
     double? centerLat,

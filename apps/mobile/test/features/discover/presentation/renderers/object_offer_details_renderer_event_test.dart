@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
@@ -51,7 +53,7 @@ void main() {
       latitude: 25.0805,
       longitude: 55.1403,
       distanceKm: 3.2,
-      priceAmount: 12,
+      priceAmount: Money(minorUnits: 1200, currency: CurrencyCode.eur),
       isFree: isFree,
       currencyCode: 'EUR',
       externalBookingUrl: externalBookingUrl,
@@ -462,7 +464,7 @@ void main() {
             latitude: 25.0805,
             longitude: 55.1403,
             distanceKm: 3.2,
-            priceAmount: 12,
+            priceAmount: Money(minorUnits: 1200, currency: CurrencyCode.eur),
             isFree: false,
             currencyCode: 'EUR',
             externalBookingUrl: 'https://example.com/book',

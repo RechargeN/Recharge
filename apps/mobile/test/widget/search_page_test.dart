@@ -1,3 +1,6 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,6 +34,37 @@ import 'package:recharge/features/discover/presentation/pages/search_page.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
+  fullPageTestWidgets(
+    'custom budget rejects rounding and preserves cents through navigation',
+    (tester) async {
+      await tester.pumpWidget(_SearchLandingTestApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('search-budget-chip')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('quick-budget-custom')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('custom-number-input')),
+        '12.345',
+      );
+      await tester.tap(find.byKey(const Key('custom-number-save')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('custom-number-input')), findsOneWidget);
+      expect(find.text('Enter an amount from €0 to €10,000'), findsOneWidget);
+      await tester.enterText(
+        find.byKey(const Key('custom-number-input')),
+        '12.34',
+      );
+      await tester.tap(find.byKey(const Key('custom-number-save')));
+      await tester.pumpAndSettle();
+      expect(find.text('€12.34'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('regular-search-field')));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+      expect(find.text('budget:12.34'), findsOneWidget);
+    },
+  );
+
   fullPageTestWidgets('search intake flag hides single and multi actions', (
     tester,
   ) async {
@@ -569,6 +603,12 @@ class _SearchLandingTestApp extends StatelessWidget {
         ),
         discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
         analyticsService: _NoopAnalyticsService(),
+        runtimeDefaults: const DiscoverRuntimeDefaults(
+          timezoneId: 'Europe/Riga',
+          originLat: 56.9496,
+          originLng: 24.1052,
+          currency: CurrencyCode.eur,
+        ),
       );
 
   final DiscoverFeedController _controller;
@@ -639,6 +679,12 @@ class _SearchTestApp extends StatelessWidget {
              discoverPreferencesRepository:
                  _FakeDiscoverPreferencesRepository(),
              analyticsService: _NoopAnalyticsService(),
+             runtimeDefaults: const DiscoverRuntimeDefaults(
+               timezoneId: 'Europe/Riga',
+               originLat: 56.9496,
+               originLng: 24.1052,
+               currency: CurrencyCode.eur,
+             ),
            );
 
   final String initialLocation;
@@ -798,7 +844,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.8,
@@ -812,7 +858,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T10:00:00Z'),
       latitude: 56.51,
       longitude: 27.34,
-      priceAmount: 0,
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       distanceKm: 1.8,
       isFree: true,
       relevanceScore: 0.7,
@@ -826,7 +872,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T12:00:00Z'),
       latitude: 56.51,
       longitude: 27.34,
-      priceAmount: 8,
+      priceAmount: Money(minorUnits: 800, currency: CurrencyCode.eur),
       distanceKm: 1.4,
       isFree: false,
       relevanceScore: 0.75,
@@ -853,7 +899,8 @@ class _FakeDiscoverRepository implements DiscoverRepository {
             return false;
           }
           if (query.freeOnly && !item.isFree) return false;
-          if (query.budgetMax != null && item.priceAmount > query.budgetMax!) {
+          if (query.budgetMax != null &&
+              item.priceAmount.compareTo(query.budgetMax!) > 0) {
             return false;
           }
           return true;

@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -499,7 +500,7 @@ class _SavedScenarioPanel extends StatelessWidget {
                   icon: Icons.payments,
                   label: scenario.isFree
                       ? 'Free'
-                      : '${scenario.priceAmount.toStringAsFixed(0)} EUR',
+                      : '${MoneyFormatter().decimal(scenario.priceAmount, locale: 'en', omitZeroFraction: true)} EUR',
                 ),
               ],
             ),
@@ -707,6 +708,8 @@ class _SmartSearchPanel extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final SmartRouteIntent? routeIntent = parseSmartSearch(
       item.prompt,
+      currency: (item.query.budgetMax ?? item.query.budgetMin)?.currency,
+      locale: 'en',
     ).routeIntent;
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -790,7 +793,8 @@ class _SmartSearchPanel extends StatelessWidget {
                 if (item.query.budgetMax != null)
                   _SavedScenarioChip(
                     icon: Icons.payments_outlined,
-                    label: 'Under ${item.query.budgetMax!.toStringAsFixed(0)}',
+                    label:
+                        'Under ${MoneyFormatter().decimal(item.query.budgetMax!, locale: 'en', omitZeroFraction: true)}',
                   ),
               ],
             ),
@@ -1815,7 +1819,7 @@ String _homeCardMeta(DiscoverItemEntity item) {
   final String minute = local.minute.toString().padLeft(2, '0');
   final String price = item.isFree
       ? 'Free'
-      : '${item.priceAmount.toStringAsFixed(0)} EUR';
+      : '${MoneyFormatter().decimal(item.priceAmount, locale: 'en', omitZeroFraction: true)} EUR';
   final String venue = item.venueName.isEmpty ? item.city : item.venueName;
   return '$price · $hour:$minute · $venue';
 }
@@ -1996,7 +2000,11 @@ Map<String, String> _queryParametersForSavedSearch(DiscoverQuery query) {
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter().decimal(
+        query.budgetMax!,
+        locale: 'en',
+        omitZeroFraction: true,
+      ),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -2007,7 +2015,11 @@ Map<String, String> _queryParametersForSavedSearch(DiscoverQuery query) {
 SmartSearchParseResult? _smartRouteParseForSmartSearch(
   SmartSearchHistoryEntity item,
 ) {
-  final SmartSearchParseResult parseResult = parseSmartSearch(item.prompt);
+  final SmartSearchParseResult parseResult = parseSmartSearch(
+    item.prompt,
+    currency: (item.query.budgetMax ?? item.query.budgetMin)?.currency,
+    locale: 'en',
+  );
   if (parseResult.routeIntent == null) return null;
   return parseResult;
 }

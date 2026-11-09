@@ -15,11 +15,13 @@ class DiscoverPreferencesLocalDataSource {
     required String defaultMarketCityId,
     required double defaultCenterLat,
     required double defaultCenterLng,
+    this.legacyCurrencyCode,
   }) : _defaultMarketCityId = defaultMarketCityId,
        _defaultCenterLat = defaultCenterLat,
        _defaultCenterLng = defaultCenterLng;
 
   final FlutterSecureStorage _secureStorage;
+  final String? legacyCurrencyCode;
   final String _defaultMarketCityId;
   final double _defaultCenterLat;
   final double _defaultCenterLng;
@@ -30,6 +32,7 @@ class DiscoverPreferencesLocalDataSource {
   static const int _maxSmartSearchHistory = 6;
 
   Future<void> saveLastQuery(DiscoverQuery query) async {
+    await loadLastQuery(); // Validate existing data before any explicit replacement.
     final String encoded = jsonEncode(DiscoverQueryModel.toMap(query));
     await _secureStorage.write(key: _lastQueryKey, value: encoded);
   }
@@ -50,9 +53,10 @@ class DiscoverPreferencesLocalDataSource {
         defaultMarketCityId: _defaultMarketCityId,
         defaultCenterLat: _defaultCenterLat,
         defaultCenterLng: _defaultCenterLng,
+        legacyCurrencyCode: legacyCurrencyCode,
       );
     } on FormatException {
-      return null;
+      rethrow;
     }
   }
 
@@ -64,7 +68,7 @@ class DiscoverPreferencesLocalDataSource {
     try {
       final List<dynamic> decoded = jsonDecode(raw) as List<dynamic>;
       return decoded
-          .whereType<Map<dynamic, dynamic>>()
+          .cast<Map<dynamic, dynamic>>()
           .map(
             (Map<dynamic, dynamic> item) => SavedSearchModel.fromMap(
               item.map(
@@ -74,13 +78,14 @@ class DiscoverPreferencesLocalDataSource {
               defaultMarketCityId: _defaultMarketCityId,
               defaultCenterLat: _defaultCenterLat,
               defaultCenterLng: _defaultCenterLng,
+              legacyCurrencyCode: legacyCurrencyCode,
             ),
           )
           .toList(growable: false);
     } on FormatException {
-      return const <SavedSearchEntity>[];
+      rethrow;
     } on TypeError {
-      return const <SavedSearchEntity>[];
+      rethrow;
     }
   }
 
@@ -109,7 +114,7 @@ class DiscoverPreferencesLocalDataSource {
     try {
       final List<dynamic> decoded = jsonDecode(raw) as List<dynamic>;
       return decoded
-          .whereType<Map<dynamic, dynamic>>()
+          .cast<Map<dynamic, dynamic>>()
           .map(
             (Map<dynamic, dynamic> item) => SmartSearchHistoryModel.fromMap(
               item.map(
@@ -119,6 +124,7 @@ class DiscoverPreferencesLocalDataSource {
               defaultMarketCityId: _defaultMarketCityId,
               defaultCenterLat: _defaultCenterLat,
               defaultCenterLng: _defaultCenterLng,
+              legacyCurrencyCode: legacyCurrencyCode,
             ),
           )
           .where(
@@ -126,9 +132,9 @@ class DiscoverPreferencesLocalDataSource {
           )
           .toList(growable: false);
     } on FormatException {
-      return const <SmartSearchHistoryEntity>[];
+      rethrow;
     } on TypeError {
-      return const <SmartSearchHistoryEntity>[];
+      rethrow;
     }
   }
 

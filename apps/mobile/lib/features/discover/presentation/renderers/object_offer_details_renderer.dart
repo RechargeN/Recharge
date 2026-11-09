@@ -3303,10 +3303,7 @@ String _hm(LocalDateTimeValue value) {
 /// bare "0" for a free event (`DTL-EVT-01` EVT-D-AC-07).
 String priceMetricLabel(PublishedEventDiscoveryEntity projection) {
   if (projection.isFree) return 'Бесплатно';
-  final double amount = projection.priceAmount;
-  final String formatted = amount.truncateToDouble() == amount
-      ? amount.toStringAsFixed(0)
-      : amount.toStringAsFixed(2);
+  final String formatted = _formatAmount(projection.priceAmount);
   return '${_currencySymbol(projection.currencyCode)}$formatted';
 }
 

@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/data/repositories/travel_time_repository_impl.dart';
@@ -248,7 +250,7 @@ DiscoverItemEntity _item({
   startsAtUtc: DateTime.utc(2026, 7, 20, 10),
   latitude: 56.9496,
   longitude: 24.1052,
-  priceAmount: 0,
+  priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
   distanceKm: 0,
   isFree: true,
   marketCityId: 'riga',
