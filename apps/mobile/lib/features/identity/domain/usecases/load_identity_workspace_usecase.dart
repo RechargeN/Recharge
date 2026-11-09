@@ -25,6 +25,9 @@ class LoadIdentityWorkspaceUseCase {
   Future<IdentityWorkspaceLoadResult> call(String userId) async {
     final IdentityAccessSnapshot snapshot = await _repository
         .loadAccessSnapshot(userId);
+    if (!snapshot.belongsTo(userId)) {
+      throw StateError('access_snapshot_user_mismatch');
+    }
     final WorkspaceRef personal = WorkspaceRef.personal(userId);
     final WorkspaceRef? saved = await _repository.loadActiveWorkspace(userId);
     final PageLimitIncreaseRequestEntity? pendingLimitRequest =

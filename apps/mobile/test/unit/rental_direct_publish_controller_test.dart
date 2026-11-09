@@ -24,7 +24,8 @@ void main() {
       isTrusted: true,
     ),
     bool wirePromotion = true,
-    PublisherAccessCheck? publisherAccessCheck,
+    PublisherAccessCheck? publisherAccessCheck =
+        const _AllowAllPublisherAccess(),
   }) {
     return CreateController(
       loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
@@ -221,7 +222,7 @@ void main() {
         publisherRef: const PublisherRef(type: PublisherType.page, id: 'p1'),
       ),
     );
-    final controller = buildController();
+    final controller = buildController(publisherAccessCheck: null);
     await controller.ensureLoaded(
       userId: 'user-1',
       organizerEmail: 'user@example.test',
@@ -370,6 +371,8 @@ class _AllowAllPublisherAccess implements PublisherAccessCheck {
   Future<bool> canPublishAs({
     required String actorUserId,
     required PublisherRef publisher,
+    Set<String> requiredCapabilities = const {},
+    bool requireAdmin = false,
   }) async => true;
 }
 

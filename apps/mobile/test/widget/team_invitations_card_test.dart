@@ -28,7 +28,25 @@ void main() {
       globalRole: 'user',
       creatorVerificationStatus: CreatorVerificationStatus.verified,
       globalCapabilities: const <String>{},
-      pages: const <ManagedPageEntity>[],
+      pages: [
+        ManagedPageEntity(
+          id: pageId,
+          ownerUserId: ownerId,
+          kind: ManagedPageKind.company,
+          displayName: 'Test page',
+          avatar: '',
+          verificationStatus: ManagedPageVerificationStatus.pending,
+          lifecycle: ManagedPageLifecycle.active,
+          marketId: 'riga',
+          countryCode: 'LV',
+          defaultLocale: 'en',
+          timezone: 'Europe/Riga',
+          defaultCurrency: 'EUR',
+          supportedLocales: const ['en'],
+          createdAtUtc: DateTime.utc(2026),
+          revision: 1,
+        ),
+      ],
       memberships: <ManagedPageMembershipEntity>[
         ManagedPageMembershipEntity(
           pageId: pageId,

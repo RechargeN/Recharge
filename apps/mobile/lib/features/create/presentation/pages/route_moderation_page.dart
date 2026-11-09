@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
 import '../../application/create_providers.dart';
+import '../../../../app/application/active_creator_verification_provider.dart';
 import '../../domain/entities/route_publication_data.dart';
 import '../../domain/entities/route_quality_workflow_data.dart';
 
@@ -40,10 +41,15 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
         userId: widget.userId,
         organizerEmail: widget.userEmail,
         organizerName: widget.userEmail.split('@').first,
-        capabilities: widget.capabilities,
+        capabilities: ref.read(activeCreateCapabilitiesProvider),
       );
       await controller.loadRouteModerationQueue();
-      await ref.read(routeQualityAdminControllerProvider).load();
+      await ref
+          .read(routeQualityAdminControllerProvider)
+          .load(
+            actorId: widget.userId,
+            capabilities: ref.read(activeCreateCapabilitiesProvider).toSet(),
+          );
     }
     if (mounted) setState(() => _loading = false);
   }
@@ -53,8 +59,12 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
     final controller = ref.watch(createControllerProvider);
     final qualityController = ref.watch(routeQualityAdminControllerProvider);
     final requests = controller.state.routeModerationRequests;
-    final canManageQuality = widget.capabilities.contains('manage.route');
-    final canModerateSafety = widget.capabilities.contains('moderate.route');
+    final canManageQuality = ref
+        .watch(activeCreateCapabilitiesProvider)
+        .contains('manage.route');
+    final canModerateSafety = ref
+        .watch(activeCreateCapabilitiesProvider)
+        .contains('moderate.route');
     return Scaffold(
       appBar: AppBar(
         title: Text(context.l10n.createRouteRouteModeration),
@@ -185,7 +195,7 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
           candidateId: candidate.id,
           decision: decision,
           actorId: widget.userId,
-          capabilities: widget.capabilities.toSet(),
+          capabilities: ref.read(activeCreateCapabilitiesProvider).toSet(),
           reasonCode: reason,
         );
   }
@@ -203,7 +213,7 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
           reportId: report.id,
           state: state,
           actorId: widget.userId,
-          capabilities: widget.capabilities.toSet(),
+          capabilities: ref.read(activeCreateCapabilitiesProvider).toSet(),
           reasonCode: reason,
           restoreRoute: restore,
         );

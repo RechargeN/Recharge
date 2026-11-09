@@ -43,7 +43,7 @@ void main() {
       globalRole: 'user',
       creatorVerificationStatus: CreatorVerificationStatus.verified,
       globalCapabilities: const <String>{},
-      pages: const <ManagedPageEntity>[],
+      pages: [page()],
       memberships: <ManagedPageMembershipEntity>[
         ManagedPageMembershipEntity(
           pageId: 'page-1',
@@ -58,9 +58,7 @@ void main() {
     );
   }
 
-  ManagedPageProfileEditorController buildController(
-    Set<String> capabilities,
-  ) {
+  ManagedPageProfileEditorController buildController(Set<String> capabilities) {
     final repository = _MemoryModerationRepository();
     return ManagedPageProfileEditorController(
       moderationRepository: repository,
@@ -205,7 +203,9 @@ class _MemoryModerationRepository
     String pageId,
   ) async {
     return saved
-        .where((ManagedPageFieldModerationOverlay item) => item.pageId == pageId)
+        .where(
+          (ManagedPageFieldModerationOverlay item) => item.pageId == pageId,
+        )
         .toList(growable: false);
   }
 

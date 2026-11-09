@@ -39,7 +39,6 @@ import '../widgets/route/route_create_block.dart';
 import '../widgets/scenario/scenario_create_block.dart';
 import '../widgets/create_texts.dart';
 import '../../../../core/localization/recharge_formats.dart';
-import '../../domain/personal_creation_hints.dart';
 import '../../application/create_media_asset_ref.dart';
 
 class CreatePage extends ConsumerStatefulWidget {
@@ -125,11 +124,13 @@ class _CreatePageState extends ConsumerState<CreatePage> {
       userId: user.id,
       organizerEmail: user.email,
       organizerName: user.email.split('@').first,
-      // ADR 0023: personal creation hints; the server decides every command.
-      capabilities: withPersonalCreationHints(user.capabilities),
+      capabilities: ref.watch(activeCreateCapabilitiesProvider),
       publisherRef: activePublisher,
       isVerifiedCreator: isVerifiedCreator,
     );
+    if (!state.isLoaded || state.userId != user.id) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     _syncControllers(state);
     _scheduleExactScenarioDraft(controller, state, user.id);
     _scheduleScenarioHandoff(controller, state);

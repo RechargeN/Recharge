@@ -51,7 +51,9 @@ void main() {
         analyticsService: _NoopAnalyticsService(),
       );
       await controller.ensureLoaded(userId);
-      controller.selectAdminPreview(AdminExperiencePreview.professionalPage);
+      await controller.selectAdminPreview(
+        AdminExperiencePreview.professionalPage,
+      );
       final actualSnapshot = controller.state.accessSnapshot;
 
       await tester.pumpWidget(

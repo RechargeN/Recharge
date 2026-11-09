@@ -44,6 +44,11 @@ class RevokeTeamInvitationUseCase {
 
     final IdentityAccessSnapshot access = await _workspaceRepository
         .loadAccessSnapshot(normalizedActor);
+    if (!access.belongsTo(normalizedActor) ||
+        (!access.isVerifiedCreator ||
+            access.pageById(normalizedPageId)?.isActive != true)) {
+      throw const RevokeTeamInvitationException('page_access_unavailable');
+    }
     final ManagedPageMembershipEntity? membership = access.membershipFor(
       normalizedPageId,
     );
@@ -79,6 +84,16 @@ class RevokeTeamInvitationUseCase {
       status: TeamInvitationStatus.revoked,
       revision: found.revision + 1,
     );
+    final fresh = await _workspaceRepository.loadAccessSnapshot(
+      normalizedActor,
+    );
+    if (!fresh.canUsePage(
+      normalizedActor,
+      normalizedPageId,
+      SendTeamInvitationUseCase.teamManageCapability,
+    )) {
+      throw const RevokeTeamInvitationException('page_access_unavailable');
+    }
     await _invitationRepository.saveInvitation(revoked);
     return revoked;
   }

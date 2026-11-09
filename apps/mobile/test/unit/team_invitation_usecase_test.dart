@@ -21,7 +21,25 @@ void main() {
       globalRole: 'user',
       creatorVerificationStatus: CreatorVerificationStatus.verified,
       globalCapabilities: const <String>{},
-      pages: const <ManagedPageEntity>[],
+      pages: [
+        ManagedPageEntity(
+          id: pageId,
+          ownerUserId: ownerId,
+          kind: ManagedPageKind.company,
+          displayName: 'Test page',
+          avatar: '',
+          verificationStatus: ManagedPageVerificationStatus.pending,
+          lifecycle: ManagedPageLifecycle.active,
+          marketId: 'riga',
+          countryCode: 'LV',
+          defaultLocale: 'en',
+          timezone: 'Europe/Riga',
+          defaultCurrency: 'EUR',
+          supportedLocales: const ['en'],
+          createdAtUtc: DateTime.utc(2026),
+          revision: 1,
+        ),
+      ],
       memberships: <ManagedPageMembershipEntity>[
         ManagedPageMembershipEntity(
           pageId: pageId,
@@ -204,48 +222,45 @@ void main() {
       );
     });
 
-    test(
-      'resend within the cooldown window is an idempotent no-op',
-      () async {
-        final repository = _MemoryTeamInvitationRepository();
-        DateTime now = DateTime.utc(2026, 1, 1);
-        final useCase = SendTeamInvitationUseCase(
-          workspaceRepository: _FakeWorkspaceRepository(
-            accessWithCapabilities(<String>{
-              SendTeamInvitationUseCase.teamManageCapability,
-            }),
-          ),
-          invitationRepository: repository,
-          idGenerator: _SequenceIdGenerator(),
-          utcNow: () => now,
-        );
-        const target = TeamInvitationTarget(
-          type: TeamInvitationTargetType.email,
-          value: 'colleague@example.com',
-        );
+    test('resend within the cooldown window is an idempotent no-op', () async {
+      final repository = _MemoryTeamInvitationRepository();
+      DateTime now = DateTime.utc(2026, 1, 1);
+      final useCase = SendTeamInvitationUseCase(
+        workspaceRepository: _FakeWorkspaceRepository(
+          accessWithCapabilities(<String>{
+            SendTeamInvitationUseCase.teamManageCapability,
+          }),
+        ),
+        invitationRepository: repository,
+        idGenerator: _SequenceIdGenerator(),
+        utcNow: () => now,
+      );
+      const target = TeamInvitationTarget(
+        type: TeamInvitationTargetType.email,
+        value: 'colleague@example.com',
+      );
 
-        final first = await useCase(
-          actingUserId: ownerId,
-          pageId: pageId,
-          target: target,
-          proposedRelationship: ManagedPageRelationship.editor,
-          proposedCapabilities: const <String>{},
-        );
+      final first = await useCase(
+        actingUserId: ownerId,
+        pageId: pageId,
+        target: target,
+        proposedRelationship: ManagedPageRelationship.editor,
+        proposedCapabilities: const <String>{},
+      );
 
-        now = now.add(const Duration(hours: 1));
-        final secondCallSameCooldown = await useCase(
-          actingUserId: ownerId,
-          pageId: pageId,
-          target: target,
-          proposedRelationship: ManagedPageRelationship.editor,
-          proposedCapabilities: const <String>{},
-        );
+      now = now.add(const Duration(hours: 1));
+      final secondCallSameCooldown = await useCase(
+        actingUserId: ownerId,
+        pageId: pageId,
+        target: target,
+        proposedRelationship: ManagedPageRelationship.editor,
+        proposedCapabilities: const <String>{},
+      );
 
-        expect(secondCallSameCooldown.id, first.id);
-        expect(secondCallSameCooldown.resendCount, 0);
-        expect(repository.saved, hasLength(1));
-      },
-    );
+      expect(secondCallSameCooldown.id, first.id);
+      expect(secondCallSameCooldown.resendCount, 0);
+      expect(repository.saved, hasLength(1));
+    });
 
     test(
       'resend after the cooldown elapses increments resendCount and extends expiry',
@@ -275,7 +290,9 @@ void main() {
           proposedCapabilities: const <String>{},
         );
 
-        now = now.add(TeamInvitationEntity.resendCooldown + const Duration(minutes: 1));
+        now = now.add(
+          TeamInvitationEntity.resendCooldown + const Duration(minutes: 1),
+        );
         final resent = await useCase(
           actingUserId: ownerId,
           pageId: pageId,
@@ -286,7 +303,10 @@ void main() {
 
         expect(resent.id, first.id);
         expect(resent.resendCount, 1);
-        expect(resent.expiresAtUtc, now.add(TeamInvitationEntity.defaultExpiry));
+        expect(
+          resent.expiresAtUtc,
+          now.add(TeamInvitationEntity.defaultExpiry),
+        );
         expect(repository.saved, hasLength(1));
       },
     );
@@ -453,32 +473,35 @@ void main() {
   });
 
   group('TeamInvitationEntity.effectiveStatusAt', () {
-    test('folds a past-due pending invitation into expired without a write', () {
-      final invitation = TeamInvitationEntity(
-        id: 'inv-1',
-        pageId: pageId,
-        target: const TeamInvitationTarget(
-          type: TeamInvitationTargetType.userId,
-          value: 'user-2',
-        ),
-        proposedRelationship: ManagedPageRelationship.editor,
-        proposedCapabilities: const <String>{},
-        invitedByUserId: ownerId,
-        sentAtUtc: DateTime.utc(2026, 1, 1),
-        expiresAtUtc: DateTime.utc(2026, 1, 8),
-        status: TeamInvitationStatus.pending,
-        revision: 1,
-      );
+    test(
+      'folds a past-due pending invitation into expired without a write',
+      () {
+        final invitation = TeamInvitationEntity(
+          id: 'inv-1',
+          pageId: pageId,
+          target: const TeamInvitationTarget(
+            type: TeamInvitationTargetType.userId,
+            value: 'user-2',
+          ),
+          proposedRelationship: ManagedPageRelationship.editor,
+          proposedCapabilities: const <String>{},
+          invitedByUserId: ownerId,
+          sentAtUtc: DateTime.utc(2026, 1, 1),
+          expiresAtUtc: DateTime.utc(2026, 1, 8),
+          status: TeamInvitationStatus.pending,
+          revision: 1,
+        );
 
-      expect(
-        invitation.effectiveStatusAt(DateTime.utc(2026, 1, 7)),
-        TeamInvitationStatus.pending,
-      );
-      expect(
-        invitation.effectiveStatusAt(DateTime.utc(2026, 1, 9)),
-        TeamInvitationStatus.expired,
-      );
-    });
+        expect(
+          invitation.effectiveStatusAt(DateTime.utc(2026, 1, 7)),
+          TeamInvitationStatus.pending,
+        );
+        expect(
+          invitation.effectiveStatusAt(DateTime.utc(2026, 1, 9)),
+          TeamInvitationStatus.expired,
+        );
+      },
+    );
   });
 }
 
@@ -496,7 +519,10 @@ class _FakeWorkspaceRepository implements IdentityWorkspaceRepository {
   Future<WorkspaceRef?> loadActiveWorkspace(String userId) async => null;
 
   @override
-  Future<void> saveActiveWorkspace(String userId, WorkspaceRef workspace) async {}
+  Future<void> saveActiveWorkspace(
+    String userId,
+    WorkspaceRef workspace,
+  ) async {}
 
   @override
   Future<void> saveCreatedPage({

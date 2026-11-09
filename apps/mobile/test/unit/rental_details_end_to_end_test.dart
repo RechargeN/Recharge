@@ -1,3 +1,4 @@
+import '../support/publisher_access_test_support.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -38,7 +39,8 @@ import '../widget/widget_test_viewport.dart';
 /// `RentalPublicationIndexSink` below is the *real*
 /// `RentalPublicationDiscoveryAdapter`, backed by real in-memory
 /// `FlutterSecureStorage`, not a fake.
-class _FakeCreateRepository implements CreateRepository, RentalPromotionRepository {
+class _FakeCreateRepository
+    implements CreateRepository, RentalPromotionRepository {
   CreateDraftEntity? _stored;
 
   void seed(CreateDraftEntity draft) => _stored = draft;
@@ -110,6 +112,7 @@ void main() {
 
   CreateController buildController() {
     return CreateController(
+      publisherAccessCheck: const TestPersonalPublisherAccess(),
       loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
       saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
@@ -134,76 +137,80 @@ void main() {
   }
 
   CreateDraftEntity completeRentalDraft() {
-    final RentalDraftData rentalData = RentalDraftData.defaults(
-      userId: 'user-1',
-      currencyCode: 'EUR',
-      timeZoneId: 'Europe/Riga',
-    ).copyWith(
-      title: 'Mountain bikes for rent',
-      shortDescription:
-          'Well maintained trail bikes, several sizes, helmets included.',
-      fullDescription:
-          'Full description with enough characters to satisfy the fifty '
-          'character minimum required by the Rental validation contract.',
-      categoryId: 'sport',
-      subcategoryId: 'cycling',
-      categoryConfirmed: true,
-      inventoryGroups: const <RentalInventoryGroup>[
-        RentalInventoryGroup(
-          id: 'g1',
-          label: 'Adult M',
-          quantity: 5,
-          condition: RentalCondition.good,
-          sizeOrVariant: 'M',
-        ),
-      ],
-      availability: RentalAvailabilityCalendar(
-        timeZoneId: 'Europe/Riga',
-        coverage: RentalAvailabilityCoverage(
-          startsAtUtc: DateTime.utc(2026, 8, 1),
-          endsAtUtc: DateTime.utc(2026, 11, 1),
-          confirmedAtUtc: DateTime.utc(2026, 8, 20),
-        ),
-      ),
-      handover: const RentalHandoverDraft(
-        pickupPlaceName: 'Riga bike shop',
-        publicAreaLabel: 'Old Town',
-        publicLatitude: 56.95,
-        publicLongitude: 24.11,
-        scheduleMode: RentalScheduleMode.byArrangement,
-      ),
-      terms: const RentalTerms(
-        offeredMinMinutes: 1440,
-        offeredMaxMinutes: 4320,
-      ),
-      pricing: RentalPricingPolicy(
-        currencyCode: 'EUR',
-        billingUnit: RentalBillingUnit.day,
-        rateSteps: const <RentalRateStep>[
-          RentalRateStep(
-            minUnits: 1,
-            unitPrice: RentalMoneyDraft(amountMinor: 2500, currencyCode: 'EUR'),
+    final RentalDraftData rentalData =
+        RentalDraftData.defaults(
+          userId: 'user-1',
+          currencyCode: 'EUR',
+          timeZoneId: 'Europe/Riga',
+        ).copyWith(
+          title: 'Mountain bikes for rent',
+          shortDescription:
+              'Well maintained trail bikes, several sizes, helmets included.',
+          fullDescription:
+              'Full description with enough characters to satisfy the fifty '
+              'character minimum required by the Rental validation contract.',
+          categoryId: 'sport',
+          subcategoryId: 'cycling',
+          categoryConfirmed: true,
+          inventoryGroups: const <RentalInventoryGroup>[
+            RentalInventoryGroup(
+              id: 'g1',
+              label: 'Adult M',
+              quantity: 5,
+              condition: RentalCondition.good,
+              sizeOrVariant: 'M',
+            ),
+          ],
+          availability: RentalAvailabilityCalendar(
+            timeZoneId: 'Europe/Riga',
+            coverage: RentalAvailabilityCoverage(
+              startsAtUtc: DateTime.utc(2026, 8, 1),
+              endsAtUtc: DateTime.utc(2026, 11, 1),
+              confirmedAtUtc: DateTime.utc(2026, 8, 20),
+            ),
           ),
-        ],
-        deposit: const RentalDepositPolicy(
-          amount: RentalMoneyDraft(amountMinor: 0, currencyCode: 'EUR'),
-          collectionMethod: RentalDepositCollectionMethod.none,
-        ),
-        damagePolicy: 'Repair cost billed to renter.',
-        cancellationPolicyId: 'standard',
-      ),
-      fulfillment: const RentalExternalFulfillment(
-        externalBookingUrl: 'https://example.com/book',
-      ),
-      attestation: RentalPublisherAttestation(
-        policyVersion: '1.0',
-        acceptedAtUtc: DateTime.utc(2026, 8, 20),
-        acceptedByUserId: 'user-1',
-        hasRightToOffer: true,
-        listingAccurate: true,
-        prohibitedItemsAcknowledged: true,
-      ),
-    );
+          handover: const RentalHandoverDraft(
+            pickupPlaceName: 'Riga bike shop',
+            publicAreaLabel: 'Old Town',
+            publicLatitude: 56.95,
+            publicLongitude: 24.11,
+            scheduleMode: RentalScheduleMode.byArrangement,
+          ),
+          terms: const RentalTerms(
+            offeredMinMinutes: 1440,
+            offeredMaxMinutes: 4320,
+          ),
+          pricing: RentalPricingPolicy(
+            currencyCode: 'EUR',
+            billingUnit: RentalBillingUnit.day,
+            rateSteps: const <RentalRateStep>[
+              RentalRateStep(
+                minUnits: 1,
+                unitPrice: RentalMoneyDraft(
+                  amountMinor: 2500,
+                  currencyCode: 'EUR',
+                ),
+              ),
+            ],
+            deposit: const RentalDepositPolicy(
+              amount: RentalMoneyDraft(amountMinor: 0, currencyCode: 'EUR'),
+              collectionMethod: RentalDepositCollectionMethod.none,
+            ),
+            damagePolicy: 'Repair cost billed to renter.',
+            cancellationPolicyId: 'standard',
+          ),
+          fulfillment: const RentalExternalFulfillment(
+            externalBookingUrl: 'https://example.com/book',
+          ),
+          attestation: RentalPublisherAttestation(
+            policyVersion: '1.0',
+            acceptedAtUtc: DateTime.utc(2026, 8, 20),
+            acceptedByUserId: 'user-1',
+            hasRightToOffer: true,
+            listingAccurate: true,
+            prohibitedItemsAcknowledged: true,
+          ),
+        );
     return CreateDraftEntity.defaults(
       organizerId: 'user-1',
       organizerEmail: 'user@example.test',
@@ -224,39 +231,36 @@ void main() {
     );
   }
 
-  test(
-    'controller.publishDraft() direct-publishes and reaches the real sink '
-    '(proves DTL-OBJ-01 §3.5 is actually wired, not just callable in '
-    'isolation)',
-    () async {
-      repository.seed(completeRentalDraft());
-      final CreateController controller = buildController();
-      await controller.ensureLoaded(
-        userId: 'user-1',
-        organizerEmail: 'user@example.test',
-        organizerName: 'User',
-        capabilities: const <String>['publish.rental.direct'],
-        isVerifiedCreator: true,
-      );
+  test('controller.publishDraft() direct-publishes and reaches the real sink '
+      '(proves DTL-OBJ-01 §3.5 is actually wired, not just callable in '
+      'isolation)', () async {
+    repository.seed(completeRentalDraft());
+    final CreateController controller = buildController();
+    await controller.ensureLoaded(
+      userId: 'user-1',
+      organizerEmail: 'user@example.test',
+      organizerName: 'User',
+      capabilities: const <String>['publish.rental.direct'],
+      isVerifiedCreator: true,
+    );
 
-      final bool ok = await controller.publishDraft();
+    final bool ok = await controller.publishDraft();
 
-      expect(ok, isTrue);
-      expect(
-        controller.state.publishedDraft?.publishStatus,
-        PublishStatus.published,
-      );
-      // Nobody called sink.activate directly here — this confirms the
-      // controller itself triggered it.
-      final PublishedRentalDiscoveryEntity? indexed = await adapter
-          .getActiveRental('rental-1');
-      expect(indexed, isNotNull);
-      expect(indexed!.title, 'Mountain bikes for rent');
-      expect(indexed.publisherId, 'user-1');
-      expect(indexed.publisherType, 'user');
-      controller.dispose();
-    },
-  );
+    expect(ok, isTrue);
+    expect(
+      controller.state.publishedDraft?.publishStatus,
+      PublishStatus.published,
+    );
+    // Nobody called sink.activate directly here — this confirms the
+    // controller itself triggered it.
+    final PublishedRentalDiscoveryEntity? indexed = await adapter
+        .getActiveRental('rental-1');
+    expect(indexed, isNotNull);
+    expect(indexed!.title, 'Mountain bikes for rent');
+    expect(indexed.publisherId, 'user-1');
+    expect(indexed.publisherType, 'user');
+    controller.dispose();
+  });
 
   fullPageTestWidgets(
     'the same publish, resolved through the real canonical-route dispatch '
@@ -323,47 +327,44 @@ void main() {
     },
   );
 
-  test(
-    'a draft that only ever reached pending_review (never promoted, so '
-    'sink.activate was never called) stays notFound through the resolver — '
-    'DTL-OBJ-01\'s core invariant',
-    () async {
-      // No capability -> generic publish stops at pending_review, the
-      // RNT-PUB-01 promotion branch never runs, sink.activate is never
-      // reached.
-      repository.seed(completeRentalDraft());
-      final CreateController controller = buildController();
-      await controller.ensureLoaded(
-        userId: 'user-1',
-        organizerEmail: 'user@example.test',
-        organizerName: 'User',
-        capabilities: const <String>[],
-        isVerifiedCreator: true,
-      );
-      final bool ok = await controller.publishDraft();
-      expect(ok, isTrue);
-      expect(
-        controller.state.publishedDraft?.publishStatus,
-        PublishStatus.pendingReview,
-      );
-      controller.dispose();
+  test('a draft that only ever reached pending_review (never promoted, so '
+      'sink.activate was never called) stays notFound through the resolver — '
+      'DTL-OBJ-01\'s core invariant', () async {
+    // No capability -> generic publish stops at pending_review, the
+    // RNT-PUB-01 promotion branch never runs, sink.activate is never
+    // reached.
+    repository.seed(completeRentalDraft());
+    final CreateController controller = buildController();
+    await controller.ensureLoaded(
+      userId: 'user-1',
+      organizerEmail: 'user@example.test',
+      organizerName: 'User',
+      capabilities: const <String>[],
+      isVerifiedCreator: true,
+    );
+    final bool ok = await controller.publishDraft();
+    expect(ok, isTrue);
+    expect(
+      controller.state.publishedDraft?.publishStatus,
+      PublishStatus.pendingReview,
+    );
+    controller.dispose();
 
-      final ResolveDetailsUseCase resolve = ResolveDetailsUseCase(
-        DetailsLookupRegistry(<CatalogObjectType, DetailsLookupPort>{
-          CatalogObjectType.rental: RentalDetailsLookup(adapter),
-        }),
-      );
-      final DetailsResolution result = await resolve(
-        DetailsRouteTargetRef(
-          const CatalogObjectRef(
-            objectType: CatalogObjectType.rental,
-            objectId: 'rental-1',
-          ),
+    final ResolveDetailsUseCase resolve = ResolveDetailsUseCase(
+      DetailsLookupRegistry(<CatalogObjectType, DetailsLookupPort>{
+        CatalogObjectType.rental: RentalDetailsLookup(adapter),
+      }),
+    );
+    final DetailsResolution result = await resolve(
+      DetailsRouteTargetRef(
+        const CatalogObjectRef(
+          objectType: CatalogObjectType.rental,
+          objectId: 'rental-1',
         ),
-      );
-      expect(result.status, DetailsResolutionStatus.notFound);
-    },
-  );
+      ),
+    );
+    expect(result.status, DetailsResolutionStatus.notFound);
+  });
 
   test('archive removes the listing from Discover', () async {
     // Uses the same complete, non-empty-title fixture as the other tests —

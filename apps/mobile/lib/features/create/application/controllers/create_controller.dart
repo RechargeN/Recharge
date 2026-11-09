@@ -536,6 +536,7 @@ class CreateController extends ChangeNotifier {
     );
 
     final CreateDraftEntity? saved = await _loadCreateDraftUseCase(userId);
+    if (_loadedUserId != userId) return;
     final bool createsFreshDraft = saved == null;
     CreateDraftEntity draft =
         saved ??
@@ -551,9 +552,19 @@ class CreateController extends ChangeNotifier {
         );
     if (createsFreshDraft && draft.eventData != null) {
       draft = draft.copyWith(
+        publisherRef: resolvedPublisher,
         eventData: draft.eventData!.copyWith(publisherRef: resolvedPublisher),
       );
     }
+    if (!createsFreshDraft &&
+        draft.publisherEnvelope == null &&
+        draft.publisherRef == null) {
+      draft = draft.copyWith(
+        publisherRef: draft.effectivePublisher,
+        publisherEnvelope: const <String, Object?>{'schemaVersion': 1},
+      );
+    }
+    _setState(_state.copyWith(draft: draft));
     if (draft.objectType == CreateObjectType.place && draft.placeData == null) {
       draft = draft.copyWith(placeData: _placeDefaults(userId));
     }
@@ -4335,18 +4346,43 @@ class CreateController extends ChangeNotifier {
   /// access check is composed (fail-closed). The draft is never rewritten, so
   /// the author keeps the form and can retry after access is restored.
   Future<bool> _publisherAccessAllowed(CreateDraftEntity draft) async {
+    final actor = _state.userId;
     final PublisherRef publisher = draft.effectivePublisher;
     final PublisherAccessCheck? check = _publisherAccessCheck;
     bool allowed;
-    if (publisher.type == PublisherType.user) {
-      allowed = publisher.id == _state.userId;
+    if (!publisher.isValid) {
+      allowed = false;
+    } else if (publisher.type == PublisherType.page &&
+        const <CreateObjectType>{
+          CreateObjectType.session,
+          CreateObjectType.scenario,
+          CreateObjectType.route,
+          CreateObjectType.classWorkshop,
+        }.contains(draft.objectType)) {
+      // Local envelope capture does not enable Page publication for these types.
+      allowed = false;
     } else if (check == null) {
       allowed = false;
     } else {
-      allowed = await check.canPublishAs(
-        actorUserId: _state.userId,
-        publisher: publisher,
-      );
+      final type = draft.objectType.taxonomyId;
+      final direct = 'publish.$type.direct';
+      final capability = _capabilities.contains(direct)
+          ? direct
+          : 'submit.$type';
+      try {
+        allowed = await check.canPublishAs(
+          actorUserId: actor,
+          publisher: publisher,
+          requiredCapabilities: {capability},
+        );
+      } on Object {
+        allowed = false;
+      }
+    }
+    if (_state.userId != actor ||
+        _loadedUserId != actor ||
+        _state.draft.id != draft.id) {
+      return false;
     }
     if (!allowed) {
       _setState(
@@ -4403,8 +4439,16 @@ class CreateController extends ChangeNotifier {
       );
       return false;
     }
+    final actor = _state.userId;
+    final publishingDraftId = _state.draft.id;
     await saveDraft();
-    if (_state.saveStatus == CreateSaveStatus.failed) return false;
+    if (_state.userId != actor ||
+        _loadedUserId != actor ||
+        _state.draft.id != publishingDraftId ||
+        _state.saveStatus == CreateSaveStatus.failed ||
+        !await _publisherAccessAllowed(_state.draft)) {
+      return false;
+    }
     final Map<String, String> errors = _validate(_state.draft);
     if (errors.isNotEmpty) {
       if (_state.draft.objectType == CreateObjectType.event) {
@@ -4552,6 +4596,13 @@ class CreateController extends ChangeNotifier {
       return false;
     }
 
+    if (_state.userId != actor ||
+        _loadedUserId != actor ||
+        _state.draft.id != publishingDraftId ||
+        !await _publisherAccessAllowed(draftToPublish)) {
+      return false;
+    }
+
     // RNT-PUB-01 §1.4: a single, bounded, Rental-only trusted direct-publish
     // attempt immediately after the generic publish above. `rentalData` is
     // checked explicitly here rather than assumed from `objectType ==
@@ -4574,7 +4625,7 @@ class CreateController extends ChangeNotifier {
           isPolicyTrusted: _rentalDirectPublishPolicy.isTrusted,
         ),
       );
-      if (decision.authorized) {
+      if (decision.authorized && await _publisherAccessAllowed(_state.draft)) {
         try {
           finalPublished = await promoteRentalToPublished(
             userId: _state.userId,
@@ -4875,8 +4926,13 @@ class CreateController extends ChangeNotifier {
     );
     if (draft.eventData != null) {
       draft = draft.copyWith(
+        publisherRef:
+            _activePublisherRef ??
+            PublisherRef(type: PublisherType.user, id: organizerId),
         eventData: draft.eventData!.copyWith(
-          publisherRef: _defaultPublisher(organizerId),
+          publisherRef:
+              _activePublisherRef ??
+              PublisherRef(type: PublisherType.user, id: organizerId),
         ),
       );
     }
@@ -5065,14 +5121,9 @@ class CreateController extends ChangeNotifier {
     );
   }
 
-  /// IDP-04A: publisher captured once from the active workspace when a new
-  /// typed block is created; existing drafts keep their stored publisher.
-  PublisherRef _defaultPublisher(String userId) {
-    final PublisherRef? active = _activePublisherRef;
-    return active != null && active.isValid
-        ? active
-        : PublisherRef(type: PublisherType.user, id: userId);
-  }
+  /// Typed block creation reuses the draft identity, including missing state.
+  PublisherRef _defaultPublisher(String userId) =>
+      _state.draft.effectivePublisher;
 
   PlaceDraftData _placeDefaults(String userId) {
     return PlaceDraftData.defaults(
@@ -5108,20 +5159,14 @@ class CreateController extends ChangeNotifier {
       timeZoneId: _runtimeDefaults.timezone,
       categoryId: config.defaultCategoryId,
       subcategoryId: config.defaultSubcategoryId,
-    ).copyWith(
-      publisherRef:
-          _activePublisherRef ??
-          PublisherRef(type: PublisherType.user, id: userId),
-    );
+    ).copyWith(publisherRef: _defaultPublisher(userId));
   }
 
   /// COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md §9: `publisherRef` is captured
   /// once from the active workspace at draft creation and never rewritten
   /// by a later workspace switch — same invariant as Rental/Event above.
   CollectionDraftData _collectionDefaults() => CollectionDraftData.defaults(
-    publisherRef:
-        _activePublisherRef ??
-        PublisherRef(type: PublisherType.user, id: _state.userId),
+    publisherRef: _defaultPublisher(_state.userId),
   );
 
   EventDraftData _eventDefaults() => EventDraftData.defaults(
@@ -5130,9 +5175,7 @@ class CreateController extends ChangeNotifier {
     city: _runtimeDefaults.city,
     timezoneId: _runtimeDefaults.timezone,
     currencyCode: _runtimeDefaults.currency,
-    publisherRef:
-        _activePublisherRef ??
-        PublisherRef(type: PublisherType.user, id: _state.draft.organizerId),
+    publisherRef: _defaultPublisher(_state.draft.organizerId),
   );
 
   List<EventValidationIssue> _eventIssues({
@@ -6407,10 +6450,29 @@ class CreateController extends ChangeNotifier {
   /// the presentation layer calls this yet — no dedicated moderation page
   /// ships in this slice, so the flow is not reachable end to end through
   /// the running app.
+  Future<bool> _adminAccessAllowed(String capability) async {
+    final actor = _state.userId;
+    final check = _publisherAccessCheck;
+    if (check == null || actor.isEmpty) return false;
+    try {
+      final allowed = await check.canPublishAs(
+        actorUserId: actor,
+        publisher: PublisherRef(type: PublisherType.user, id: actor),
+        requiredCapabilities: {capability},
+        requireAdmin: true,
+      );
+      return allowed && _state.userId == actor && _loadedUserId == actor;
+    } on Object {
+      return false;
+    }
+  }
+
   Future<List<CollectionModerationRequest>>
   loadPendingCollectionModerationRequests() async {
     final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null || !canModerateCollection) {
+    if (coordinator == null ||
+        !canModerateCollection ||
+        !await _adminAccessAllowed('moderate.collection')) {
       return const <CollectionModerationRequest>[];
     }
     return coordinator.pendingModerationRequests();
@@ -6426,7 +6488,11 @@ class CreateController extends ChangeNotifier {
     CollectionModerationRejectionReason? rejectionReason,
   }) async {
     final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null || !canModerateCollection) return false;
+    if (coordinator == null ||
+        !canModerateCollection ||
+        !await _adminAccessAllowed('moderate.collection')) {
+      return false;
+    }
     if (!accept && rejectionReason == null) {
       _setState(
         _state.copyWith(

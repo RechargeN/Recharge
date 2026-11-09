@@ -69,6 +69,7 @@ class IdentityWorkspaceState {
     IdentityWorkspaceStatus? status,
     String? userId,
     IdentityAccessSnapshot? accessSnapshot,
+    bool clearAccessSnapshot = false,
     WorkspaceRef? activeWorkspace,
     AdminExperiencePreview? adminPreview,
     bool clearAdminPreview = false,
@@ -80,7 +81,9 @@ class IdentityWorkspaceState {
     return IdentityWorkspaceState(
       status: status ?? this.status,
       userId: userId ?? this.userId,
-      accessSnapshot: accessSnapshot ?? this.accessSnapshot,
+      accessSnapshot: clearAccessSnapshot
+          ? null
+          : (accessSnapshot ?? this.accessSnapshot),
       activeWorkspace: activeWorkspace ?? this.activeWorkspace,
       adminPreview: clearAdminPreview
           ? null

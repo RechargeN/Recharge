@@ -16,14 +16,33 @@ class RouteQualityAdminController extends ChangeNotifier {
   List<RouteSafetyReport> reports = const <RouteSafetyReport>[];
   CreateDraftEntity? lastCreatedRevision;
 
-  Future<void> load() async {
+  Future<void> load({
+    String actorId = '',
+    Set<String> capabilities = const {},
+  }) async {
     loading = true;
+    candidates = [];
+    reports = [];
+    lastCreatedRevision = null;
     errorCode = null;
     notifyListeners();
     try {
-      candidates = await _coordinator.pendingCandidates();
-      reports = await _coordinator.openSafetyReports();
+      candidates = capabilities.contains('manage.route')
+          ? await _coordinator.pendingCandidates(
+              actorId: actorId,
+              capabilities: capabilities,
+            )
+          : [];
+      reports = capabilities.contains('moderate.route')
+          ? await _coordinator.openSafetyReports(
+              actorId: actorId,
+              capabilities: capabilities,
+            )
+          : [];
     } on Object {
+      candidates = [];
+      reports = [];
+      lastCreatedRevision = null;
       errorCode = 'route_quality_queue_failed';
     } finally {
       loading = false;
@@ -39,6 +58,9 @@ class RouteQualityAdminController extends ChangeNotifier {
     String? reasonCode,
   }) async {
     loading = true;
+    candidates = [];
+    reports = [];
+    lastCreatedRevision = null;
     errorCode = null;
     notifyListeners();
     try {
@@ -50,7 +72,7 @@ class RouteQualityAdminController extends ChangeNotifier {
         reasonCode: reasonCode,
       );
       lastCreatedRevision = result.revisionDraft;
-      await load();
+      await load(actorId: actorId, capabilities: capabilities);
     } on RouteQualityWorkflowException catch (error) {
       errorCode = error.reasonCode;
       loading = false;
@@ -67,6 +89,9 @@ class RouteQualityAdminController extends ChangeNotifier {
     bool restoreRoute = false,
   }) async {
     loading = true;
+    candidates = [];
+    reports = [];
+    lastCreatedRevision = null;
     errorCode = null;
     notifyListeners();
     try {
@@ -78,7 +103,7 @@ class RouteQualityAdminController extends ChangeNotifier {
         reasonCode: reasonCode,
         restoreRoute: restoreRoute,
       );
-      await load();
+      await load(actorId: actorId, capabilities: capabilities);
     } on RouteQualityWorkflowException catch (error) {
       errorCode = error.reasonCode;
       loading = false;

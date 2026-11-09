@@ -1,3 +1,5 @@
+import 'package:recharge/app/adapters/identity_route_authoring_policy.dart';
+import 'identity_access_guards_test.dart' show GuardRepository, guardSnapshot;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/features/create/application/route_publication_coordinator.dart';
@@ -18,6 +20,169 @@ import 'package:recharge/features/create/domain/usecases/build_route_publication
 import '../support/route_domain_fixtures.dart';
 
 void main() {
+  for (final scenario in [
+    'create',
+    'accept',
+    'replay',
+    'restore',
+    'publish',
+    'queue',
+  ]) {
+    test(
+      'IDP-05A revocation denies Route $scenario at the final boundary',
+      () async {
+        final access = GuardRepository(
+          guardSnapshot(
+            actor: 'creator-1',
+            capabilities: {
+              'admin.tools.view',
+              'manage.route',
+              'moderate.route',
+              'publish.route.direct',
+            },
+          ),
+        );
+        void revoke() => access.snapshot = guardSnapshot(
+          actor: 'creator-1',
+          capabilities: {},
+        );
+        final policy = IdentityRouteAuthoringPolicy(access);
+        final publication = _RevokingPublicationRepository();
+        final records = _RevokingWorkflowRepository();
+        final workflow = RouteQualityWorkflowCoordinator(
+          idGenerator: _SequenceIdGenerator(),
+          workflowRepository: records,
+          publicationRepository: publication,
+          authoringPolicy: policy,
+        );
+        final coordinator = RoutePublicationCoordinator(
+          idGenerator: _SequenceIdGenerator(),
+          repository: publication,
+          authoringPolicy: policy,
+          buildBundle: const BuildRoutePublicationBundleUseCase(),
+          buildPolicy: _buildPolicy,
+        );
+        final bundle = _bundle(
+          draft: _draft(),
+          routeId: 'route-1',
+          versionId: 'version-1',
+          attemptId: 'seed',
+          mode: RoutePublicationMode.trustedDirect,
+        );
+        await publication.publishDirect(bundle);
+        Future<RouteMapSnapshotCandidate> create() => workflow.createCandidate(
+          actorId: 'creator-1',
+          capabilities: {'manage.route'},
+          routeId: 'route-1',
+          baseVersionId: 'version-1',
+          sourceSnapshotId: 'snapshot',
+          sourceAttribution: 'fixture',
+          candidateDraft: _draft().routeData!,
+        );
+        final denied = throwsA(isA<RouteQualityWorkflowException>());
+        switch (scenario) {
+          case 'create':
+            publication.afterVersionRead = revoke;
+            await expectLater(create(), denied);
+            expect(await records.pendingCandidates(), isEmpty);
+          case 'accept':
+            final candidate = await create();
+            publication.afterVersionRead = revoke;
+            await expectLater(
+              workflow.decideCandidate(
+                candidateId: candidate.id,
+                decision: RouteCandidateDecision.accepted,
+                actorId: 'creator-1',
+                capabilities: {'manage.route'},
+              ),
+              denied,
+            );
+            expect(
+              (await records.candidateById(candidate.id))?.decision,
+              RouteCandidateDecision.pending,
+            );
+          case 'replay':
+            final candidate = await create();
+            await workflow.decideCandidate(
+              candidateId: candidate.id,
+              decision: RouteCandidateDecision.rejected,
+              actorId: 'creator-1',
+              capabilities: {'manage.route'},
+              reasonCode: 'test',
+            );
+            revoke();
+            await expectLater(
+              workflow.decideCandidate(
+                candidateId: candidate.id,
+                decision: RouteCandidateDecision.rejected,
+                actorId: 'creator-1',
+                capabilities: {'manage.route'},
+                reasonCode: 'test',
+              ),
+              denied,
+            );
+          case 'restore':
+            final report = await workflow.submitSafetyReport(
+              routeId: 'route-1',
+              reporterId: 'viewer',
+              reasonCode: 'closed',
+              severity: RouteSafetySeverity.critical,
+            );
+            records.afterReportsRead = revoke;
+            await expectLater(
+              workflow.decideSafetyReport(
+                reportId: report.id,
+                state: RouteSafetyReportState.resolved,
+                actorId: 'creator-1',
+                capabilities: {'moderate.route'},
+                reasonCode: 'resolved',
+                restoreRoute: true,
+              ),
+              denied,
+            );
+            expect(
+              (await publication.routeById('route-1'))?.lifecycleStatus,
+              RouteLifecycleStatus.suspended,
+            );
+          case 'publish':
+            publication.afterVersionRead = revoke;
+            await expectLater(
+              coordinator.publish(
+                actorId: 'creator-1',
+                capabilities: {'publish.route.direct'},
+                draft: _draft().copyWith(
+                  basedOnPublishedVersionId: 'version-1',
+                ),
+              ),
+              throwsA(isA<RoutePublicationAuthorizationException>()),
+            );
+            expect(
+              (await publication.routeById('route-1'))?.versions,
+              hasLength(1),
+            );
+          case 'queue':
+            await publication.submitForReview(
+              requestId: 'pending',
+              bundle: _bundle(
+                draft: _draft(),
+                routeId: 'route-2',
+                versionId: 'version-2',
+                attemptId: 'pending',
+              ),
+            );
+            publication.afterQueueRead = revoke;
+            await expectLater(
+              coordinator.pendingRequests(
+                actorId: 'creator-1',
+                capabilities: {'moderate.route'},
+              ),
+              throwsA(isA<RoutePublicationAuthorizationException>()),
+            );
+        }
+      },
+    );
+  }
+
   group('immutable Route publication', () {
     test('builds one coherent version, geometry and search projection', () {
       final bundle = _bundle(
@@ -484,10 +649,7 @@ void main() {
         );
 
         expect(decision.revisionDraft, isNotNull);
-        expect(
-          decision.revisionDraft?.basedOnPublishedVersionId,
-          'version-1',
-        );
+        expect(decision.revisionDraft?.basedOnPublishedVersionId, 'version-1');
         expect(decision.revisionDraft?.publishStatus, PublishStatus.draft);
         expect(
           (await publication.routeById('route-1'))?.activeVersionId,
@@ -496,35 +658,38 @@ void main() {
       },
     );
 
-    test('field verification requires manage capability and is audited', () async {
-      final publication = RoutePublicationRepositoryImpl(
-        RoutePublicationMemoryDataSource(),
-      );
-      final workflow = RouteQualityWorkflowCoordinator(
-        idGenerator: _SequenceIdGenerator(),
-        workflowRepository: RouteQualityWorkflowRepositoryImpl(
-          RouteQualityWorkflowMemoryDataSource(),
-        ),
-        publicationRepository: publication,
-        authoringPolicy: const DemoRouteAuthoringPolicy(),
-        clock: () => DateTime.utc(2026, 7, 25, 18),
-      );
+    test(
+      'field verification requires manage capability and is audited',
+      () async {
+        final publication = RoutePublicationRepositoryImpl(
+          RoutePublicationMemoryDataSource(),
+        );
+        final workflow = RouteQualityWorkflowCoordinator(
+          idGenerator: _SequenceIdGenerator(),
+          workflowRepository: RouteQualityWorkflowRepositoryImpl(
+            RouteQualityWorkflowMemoryDataSource(),
+          ),
+          publicationRepository: publication,
+          authoringPolicy: const DemoRouteAuthoringPolicy(),
+          clock: () => DateTime.utc(2026, 7, 25, 18),
+        );
 
-      final verified = await workflow.verifyDraft(
-        draft: _draft(),
-        actorId: 'creator-1',
-        capabilities: const <String>{'manage.route'},
-        kind: RouteVerificationKind.field,
-        evidenceMediaIds: const <String>['media-1'],
-        note: 'Walked the complete track.',
-      );
+        final verified = await workflow.verifyDraft(
+          draft: _draft(),
+          actorId: 'creator-1',
+          capabilities: const <String>{'manage.route'},
+          kind: RouteVerificationKind.field,
+          evidenceMediaIds: const <String>['media-1'],
+          note: 'Walked the complete track.',
+        );
 
-      final record = verified.routeData!.quality!.verifications.single;
-      expect(record.kind, RouteVerificationKind.field);
-      expect(record.actorId, 'creator-1');
-      expect(record.geometryRevision, verified.routeData!.geometryRevision);
-      expect(record.evidenceMediaIds, <String>['media-1']);
-    });
+        final record = verified.routeData!.quality!.verifications.single;
+        expect(record.kind, RouteVerificationKind.field);
+        expect(record.actorId, 'creator-1');
+        expect(record.geometryRevision, verified.routeData!.geometryRevision);
+        expect(record.evidenceMediaIds, <String>['media-1']);
+      },
+    );
 
     test('rollback publishes a new immutable version', () async {
       final repository = RoutePublicationRepositoryImpl(
@@ -558,10 +723,7 @@ void main() {
 
       final receipt = await coordinator.rollback(
         actorId: 'creator-1',
-        capabilities: const <String>{
-          'manage.route',
-          'publish.route.direct',
-        },
+        capabilities: const <String>{'manage.route', 'publish.route.direct'},
         routeId: 'route-1',
         targetVersionId: 'version-1',
       );
@@ -572,10 +734,7 @@ void main() {
       expect(aggregate?.activeVersionId, isNot('version-1'));
       expect(aggregate?.activeVersion?.rollbackSourceVersionId, 'version-1');
       expect(aggregate?.activeVersion?.versionNumber, 3);
-      expect(
-        aggregate?.auditTrail.last.action,
-        'route_rollback_published',
-      );
+      expect(aggregate?.auditTrail.last.action, 'route_rollback_published');
     });
   });
 }
@@ -659,5 +818,35 @@ class _RecordingRouteIndexSink implements RoutePublicationIndexSink {
   @override
   Future<void> archive(String routeId) async {
     archived.add(routeId);
+  }
+}
+
+class _RevokingPublicationRepository extends RoutePublicationRepositoryImpl {
+  _RevokingPublicationRepository() : super(RoutePublicationMemoryDataSource());
+  void Function()? afterVersionRead;
+  void Function()? afterQueueRead;
+  @override
+  Future<RoutePublicationAggregate?> routeByVersionId(String versionId) async {
+    final value = await super.routeByVersionId(versionId);
+    afterVersionRead?.call();
+    return value;
+  }
+
+  @override
+  Future<List<RouteModerationRequest>> pendingRequests() async {
+    final value = await super.pendingRequests();
+    afterQueueRead?.call();
+    return value;
+  }
+}
+
+class _RevokingWorkflowRepository extends RouteQualityWorkflowRepositoryImpl {
+  _RevokingWorkflowRepository() : super(RouteQualityWorkflowMemoryDataSource());
+  void Function()? afterReportsRead;
+  @override
+  Future<List<RouteSafetyReport>> safetyReportsForRoute(String routeId) async {
+    final value = await super.safetyReportsForRoute(routeId);
+    afterReportsRead?.call();
+    return value;
   }
 }

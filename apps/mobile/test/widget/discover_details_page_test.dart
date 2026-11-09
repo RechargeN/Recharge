@@ -278,17 +278,6 @@ Future<void> _openUtilityMenu(WidgetTester tester) async {
 
 DiscoverObjectKind _detailsKindForTest = DiscoverObjectKind.activity;
 
-Future<void> _openUtilityMenu(WidgetTester tester) async {
-  await tester.tap(find.byTooltip('Поделиться и другие действия'));
-  await tester.pumpAndSettle();
-}
-
-Future<void> _selectUtilityAction(WidgetTester tester, String label) async {
-  await _openUtilityMenu(tester);
-  await tester.tap(find.text(label));
-  await tester.pumpAndSettle();
-}
-
 Future<Widget> _detailsApp({
   VisitedPlacesController? visitedController,
   Locale? locale,

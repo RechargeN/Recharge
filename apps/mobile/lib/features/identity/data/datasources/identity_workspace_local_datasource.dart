@@ -6,6 +6,7 @@ import '../../domain/entities/managed_page_entity.dart';
 import '../../domain/entities/managed_page_membership_entity.dart';
 import '../../domain/entities/page_limit_increase_request_entity.dart';
 import '../../domain/entities/workspace_ref.dart';
+import '../../domain/repositories/identity_workspace_repository.dart';
 
 class IdentityManagedPageLocalRecord {
   const IdentityManagedPageLocalRecord({
@@ -25,6 +26,33 @@ class IdentityWorkspaceLocalDataSource {
   static const int schemaVersion = 3;
 
   final FlutterSecureStorage _storage;
+  static final Map<String, Future<void>> _writes = {};
+
+  Future<void> updateManagedPageRecord(
+    String userId,
+    Future<IdentityManagedPageLocalRecord> Function(
+      IdentityManagedPageLocalRecord,
+    )
+    update,
+  ) async {
+    final key = _managedPagesKey(userId);
+    final previous = _writes[key] ?? Future<void>.value();
+    final result = previous.then((_) async {
+      final record = await loadManagedPageRecord(userId, strict: true);
+      final next = await update(record);
+      await saveManagedPageRecord(userId, next);
+    });
+    final settled = result.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace __) {},
+    );
+    _writes[key] = settled;
+    try {
+      await result;
+    } finally {
+      if (identical(_writes[key], settled)) _writes.remove(key);
+    }
+  }
 
   String _key(String userId) => 'identity_active_workspace_$userId';
   String _managedPagesKey(String userId) => 'identity_managed_pages_$userId';
@@ -68,8 +96,9 @@ class IdentityWorkspaceLocalDataSource {
   }
 
   Future<IdentityManagedPageLocalRecord> loadManagedPageRecord(
-    String userId,
-  ) async {
+    String userId, {
+    bool strict = false,
+  }) async {
     final String? raw = await _storage.read(key: _managedPagesKey(userId));
     if (raw == null || raw.isEmpty) {
       return const IdentityManagedPageLocalRecord();
@@ -78,12 +107,14 @@ class IdentityWorkspaceLocalDataSource {
     try {
       final Object? decoded = jsonDecode(raw);
       if (decoded is! Map<String, dynamic>) {
+        if (strict) throw const FormatException('invalid_identity_record');
         return const IdentityManagedPageLocalRecord();
       }
       final int? storedVersion = decoded['schemaVersion'] as int?;
       if (storedVersion != 1 &&
           storedVersion != 2 &&
           storedVersion != schemaVersion) {
+        if (strict) throw const FormatException('invalid_identity_record');
         return const IdentityManagedPageLocalRecord();
       }
       final List<dynamic> pageJson =
@@ -109,10 +140,13 @@ class IdentityWorkspaceLocalDataSource {
             .toList(growable: false),
       );
     } on FormatException {
+      if (strict) throw const FormatException('invalid_identity_record');
       return const IdentityManagedPageLocalRecord();
     } on TypeError {
+      if (strict) throw const FormatException('invalid_identity_record');
       return const IdentityManagedPageLocalRecord();
     } on StateError {
+      if (strict) throw const FormatException('invalid_identity_record');
       return const IdentityManagedPageLocalRecord();
     }
   }
@@ -120,8 +154,8 @@ class IdentityWorkspaceLocalDataSource {
   Future<void> saveManagedPageRecord(
     String userId,
     IdentityManagedPageLocalRecord record,
-  ) {
-    return _storage.write(
+  ) async {
+    await _storage.write(
       key: _managedPagesKey(userId),
       value: jsonEncode(<String, Object>{
         'schemaVersion': schemaVersion,
@@ -134,6 +168,7 @@ class IdentityWorkspaceLocalDataSource {
             .toList(growable: false),
       }),
     );
+    IdentityWorkspaceRepository.notifyAccessChanged(userId);
   }
 
   static Map<String, Object> _pageToJson(ManagedPageEntity page) {

@@ -29,6 +29,7 @@ class CreateDraftModel {
     required this.schemaVersion,
     required this.id,
     this.basedOnPublishedVersionId,
+    this.publisherEnvelope,
     required this.objectType,
     required this.title,
     required this.eventType,
@@ -93,6 +94,7 @@ class CreateDraftModel {
     required this.publishedAtUtcIso,
   });
 
+  final Object? publisherEnvelope;
   final int schemaVersion;
   final String id;
   final String? basedOnPublishedVersionId;
@@ -252,6 +254,7 @@ class CreateDraftModel {
       schemaVersion: 9,
       id: entity.id,
       basedOnPublishedVersionId: entity.basedOnPublishedVersionId,
+      publisherEnvelope: _encodePublisherEnvelope(entity),
       objectType: entity.objectType.taxonomyId,
       title: entity.title,
       eventType: entity.eventType,
@@ -332,6 +335,12 @@ class CreateDraftModel {
       objectType,
       migratedSectionData,
     );
+    final Object envelope =
+        publisherEnvelope ??
+        _legacyPublisherEnvelope(parsedObjectType, migratedSectionData);
+    final PublisherRef? publisher = _envelopePublisher(envelope);
+    final PublisherRef compatibilityPublisher =
+        publisher ?? const PublisherRef(type: PublisherType.user, id: '');
     final EventDraftData eventDefaults =
         EventDraftData.defaults(
           marketCityId: marketCityId,
@@ -388,6 +397,7 @@ class CreateDraftModel {
           timezoneId: timezone,
           currencyCode: currency,
         ).copyWith(
+          publisherRef: compatibilityPublisher,
           location:
               PlaceDraftData.defaults(
                 userId: organizerId,
@@ -423,7 +433,7 @@ class CreateDraftModel {
     final ActivityDraftData legacyActivityDefaults = ActivityDraftData.defaults(
       userId: organizerId,
       currencyCode: currency,
-    );
+    ).copyWith(publisherRef: compatibilityPublisher);
     final ActivityDraftData? activityData =
         parsedObjectType == CreateObjectType.activity
         ? ActivityDraftMapper.fromJson(
@@ -435,10 +445,17 @@ class CreateDraftModel {
         parsedObjectType == CreateObjectType.findPeople
         ? FindPeopleDraftMapper.fromJson(
             migratedSectionData['find_people_details'],
-            defaults: FindPeopleDraftData.defaults(
-              userId: organizerId,
-              currencyCode: currency,
-            ),
+            defaults:
+                FindPeopleDraftData.defaults(
+                  userId: organizerId,
+                  currencyCode: currency,
+                ).copyWith(
+                  publisherType:
+                      compatibilityPublisher.type == PublisherType.page
+                      ? FindPeoplePublisherType.page
+                      : FindPeoplePublisherType.user,
+                  publisherId: compatibilityPublisher.id,
+                ),
           )
         : null;
     final Object? classWorkshopPayload =
@@ -487,7 +504,7 @@ class CreateDraftModel {
               userId: organizerId,
               currencyCode: currency,
               timeZoneId: timezone,
-            ),
+            ).copyWith(publisherRef: compatibilityPublisher),
           )
         : null;
     final Object? scenarioPayload =
@@ -510,10 +527,7 @@ class CreateDraftModel {
         ? CollectionDraftMapper.fromJson(
             migratedSectionData['collection_details'],
             defaults: CollectionDraftData.defaults(
-              publisherRef: PublisherRef(
-                type: PublisherType.user,
-                id: organizerId,
-              ),
+              publisherRef: compatibilityPublisher,
             ),
           )
         : null;
@@ -535,6 +549,8 @@ class CreateDraftModel {
       }
     }
     return CreateDraftEntity(
+      publisherRef: publisher,
+      publisherEnvelope: envelope,
       id: id,
       basedOnPublishedVersionId: basedOnPublishedVersionId,
       objectType: parsedObjectType,
@@ -656,9 +672,12 @@ class CreateDraftModel {
       }
     }
     return CreateDraftModel(
-      schemaVersion: 9,
+      schemaVersion: sourceVersion > 9 ? sourceVersion : 9,
       id: json['id'] as String,
       basedOnPublishedVersionId: json['basedOnPublishedVersionId'] as String?,
+      publisherEnvelope: json.containsKey('publisherEnvelope')
+          ? (json['publisherEnvelope'] ?? const <String, Object?>{})
+          : null,
       objectType: json['objectType'] as String,
       title: json['title'] as String? ?? '',
       eventType: json['eventType'] as String? ?? '',
@@ -742,9 +761,79 @@ class CreateDraftModel {
     );
   }
 
+  static Object? _encodePublisherEnvelope(CreateDraftEntity entity) {
+    final Object? original = entity.publisherEnvelope;
+    if (original != null &&
+        (original is! Map || original['schemaVersion'] != 1)) {
+      return original;
+    }
+    final PublisherRef? ref = entity.publisherRef;
+    if (ref == null) return original;
+    final Object? originalRef = original is Map
+        ? original['publisherRef']
+        : null;
+    return <String, Object?>{
+      if (original is Map) ...Map<String, Object?>.from(original),
+      'schemaVersion': 1,
+      'publisherRef': <String, Object?>{
+        if (originalRef is Map) ...Map<String, Object?>.from(originalRef),
+        'type': ref.type.wireName,
+        'id': ref.id,
+      },
+    };
+  }
+
+  static PublisherRef? _envelopePublisher(Object envelope) {
+    if (envelope is! Map || envelope['schemaVersion'] != 1) return null;
+    final Object? raw = envelope['publisherRef'];
+    if (raw is! Map) return null;
+    final PublisherType? type = PublisherType.fromWireName(raw['type']);
+    final Object? id = raw['id'];
+    if (type == null || id is! String || id.trim().isEmpty) return null;
+    return PublisherRef(type: type, id: id);
+  }
+
+  static Object _legacyPublisherEnvelope(
+    CreateObjectType type,
+    Map<String, Object?> sections,
+  ) {
+    final String? key = switch (type) {
+      CreateObjectType.event => 'event_details',
+      CreateObjectType.place => 'place_details',
+      CreateObjectType.activity => 'activity_details',
+      CreateObjectType.findPeople => 'find_people_details',
+      CreateObjectType.rental => 'rental_details',
+      CreateObjectType.collection => 'collection_details',
+      _ => null,
+    };
+    final Object? block = sections[key];
+    Object? ref;
+    if (block is Map) {
+      ref = switch (type) {
+        CreateObjectType.activity ||
+        CreateObjectType.collection => block['publisher_ref'],
+        CreateObjectType.findPeople => <String, Object?>{
+          'type': block['publisherType'],
+          'id': block['publisherId'],
+        },
+        _ => block['publisherRef'],
+      };
+      // Event schema v1 never had a publisher authority field.
+      if (type == CreateObjectType.event) {
+        final Object? rawVersion = block['schemaVersion'];
+        final int version = rawVersion is num
+            ? rawVersion.toInt()
+            : int.tryParse(rawVersion?.toString() ?? '') ?? 1;
+        if (version < 2) ref = null;
+      }
+    }
+    return <String, Object?>{'schemaVersion': 1, 'publisherRef': ref};
+  }
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      'schemaVersion': 9,
+      'schemaVersion': schemaVersion,
+      if (publisherEnvelope != null) 'publisherEnvelope': publisherEnvelope,
       'id': id,
       'basedOnPublishedVersionId': basedOnPublishedVersionId,
       'objectType': objectType,

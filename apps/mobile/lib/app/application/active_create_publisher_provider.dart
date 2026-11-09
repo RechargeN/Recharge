@@ -5,15 +5,19 @@ import '../../features/identity/application/identity_workspace_providers.dart';
 import '../../features/identity/domain/entities/workspace_ref.dart';
 import '../../features/identity/domain/usecases/load_identity_workspace_usecase.dart';
 import '../di/service_locator.dart';
+import 'active_creator_verification_provider.dart';
 
 /// App-level composition bridge between Identity workspace and Create.
 final activeCreatePublisherProvider = Provider<PublisherRef?>((ref) {
   if (!sl.isRegistered<LoadIdentityWorkspaceUseCase>()) return null;
+  final access = ref.watch(activeIdentityAccessProvider);
+  if (access == null) return null;
   final WorkspaceRef? workspace = ref
       .watch(identityWorkspaceControllerProvider)
       .state
       .activeWorkspace;
   if (workspace == null || workspace.id.trim().isEmpty) return null;
+  if (workspace.isPage && !access.canActivatePage(workspace.id)) return null;
   return PublisherRef(
     type: workspace.isPage ? PublisherType.page : PublisherType.user,
     id: workspace.id,

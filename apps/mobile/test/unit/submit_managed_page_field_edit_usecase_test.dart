@@ -39,7 +39,7 @@ void main() {
       globalRole: 'user',
       creatorVerificationStatus: CreatorVerificationStatus.verified,
       globalCapabilities: const <String>{},
-      pages: const <ManagedPageEntity>[],
+      pages: [page()],
       memberships: <ManagedPageMembershipEntity>[
         ManagedPageMembershipEntity(
           pageId: 'page-1',
@@ -70,31 +70,32 @@ void main() {
     );
   }
 
-  test('approves a short description edit for the page default locale', () async {
-    final repository = _MemoryModerationRepository();
-    final result = await useCase(
-      repository,
-      utcNow: () => DateTime.utc(2026, 1, 1),
-    )(
-      actingUserId: ownerId,
-      page: page(),
-      fieldKey: ManagedPageModeratedFieldKey.shortDescription,
-      value: const ManagedPageLocalizedTextValue(<String, String>{
-        'en': 'Bike tours across Riga',
-      }),
-      basedOnOverlayRevision: 0,
-    );
+  test(
+    'approves a short description edit for the page default locale',
+    () async {
+      final repository = _MemoryModerationRepository();
+      final result =
+          await useCase(repository, utcNow: () => DateTime.utc(2026, 1, 1))(
+            actingUserId: ownerId,
+            page: page(),
+            fieldKey: ManagedPageModeratedFieldKey.shortDescription,
+            value: const ManagedPageLocalizedTextValue(<String, String>{
+              'en': 'Bike tours across Riga',
+            }),
+            basedOnOverlayRevision: 0,
+          );
 
-    expect(
-      (result.lastApprovedValue as ManagedPageLocalizedTextValue)
-          .valuesByLocale['en'],
-      'Bike tours across Riga',
-    );
-    expect(result.approvedForVerificationRevision, 1);
-    expect(result.pendingSubmission, isNull);
-    expect(result.revision, 1);
-    expect(repository.saved, hasLength(1));
-  });
+      expect(
+        (result.lastApprovedValue as ManagedPageLocalizedTextValue)
+            .valuesByLocale['en'],
+        'Bike tours across Riga',
+      );
+      expect(result.approvedForVerificationRevision, 1);
+      expect(result.pendingSubmission, isNull);
+      expect(result.revision, 1);
+      expect(repository.saved, hasLength(1));
+    },
+  );
 
   test('rejects an actor without page.manage', () async {
     final repository = _MemoryModerationRepository();
@@ -104,9 +105,7 @@ void main() {
         actingUserId: ownerId,
         page: page(),
         fieldKey: ManagedPageModeratedFieldKey.shortDescription,
-        value: const ManagedPageLocalizedTextValue(<String, String>{
-          'en': 'x',
-        }),
+        value: const ManagedPageLocalizedTextValue(<String, String>{'en': 'x'}),
         basedOnOverlayRevision: 0,
       ),
       throwsA(
@@ -198,7 +197,8 @@ void main() {
         page: page(),
         fieldKey: ManagedPageModeratedFieldKey.shortDescription,
         value: ManagedPageLocalizedTextValue(<String, String>{
-          'en': 'x' * (SubmitManagedPageFieldEditUseCase.maxShortTextLength + 1),
+          'en':
+              'x' * (SubmitManagedPageFieldEditUseCase.maxShortTextLength + 1),
         }),
         basedOnOverlayRevision: 0,
       ),
@@ -235,63 +235,54 @@ void main() {
     );
   });
 
-  test('a clear request removes the approved value and sets clearedAtUtc', () async {
-    final repository = _MemoryModerationRepository();
-    final approved = await useCase(
-      repository,
-      utcNow: () => DateTime.utc(2026, 1, 1),
-    )(
-      actingUserId: ownerId,
-      page: page(),
-      fieldKey: ManagedPageModeratedFieldKey.customActivityLabel,
-      value: const ManagedPageActivityLabelValue('Bike guide'),
-      basedOnOverlayRevision: 0,
-    );
+  test(
+    'a clear request removes the approved value and sets clearedAtUtc',
+    () async {
+      final repository = _MemoryModerationRepository();
+      final approved =
+          await useCase(repository, utcNow: () => DateTime.utc(2026, 1, 1))(
+            actingUserId: ownerId,
+            page: page(),
+            fieldKey: ManagedPageModeratedFieldKey.customActivityLabel,
+            value: const ManagedPageActivityLabelValue('Bike guide'),
+            basedOnOverlayRevision: 0,
+          );
 
-    final cleared = await useCase(
-      repository,
-      utcNow: () => DateTime.utc(2026, 1, 2),
-    )(
-      actingUserId: ownerId,
-      page: page(),
-      fieldKey: ManagedPageModeratedFieldKey.customActivityLabel,
-      value: null,
-      basedOnOverlayRevision: approved.revision,
-    );
+      final cleared =
+          await useCase(repository, utcNow: () => DateTime.utc(2026, 1, 2))(
+            actingUserId: ownerId,
+            page: page(),
+            fieldKey: ManagedPageModeratedFieldKey.customActivityLabel,
+            value: null,
+            basedOnOverlayRevision: approved.revision,
+          );
 
-    expect(cleared.clearedAtUtc, DateTime.utc(2026, 1, 2));
-    expect(cleared.revision, 2);
-    expect(
-      cleared.effectiveValue(currentVerificationRevision: 1),
-      isNull,
-    );
-  });
+      expect(cleared.clearedAtUtc, DateTime.utc(2026, 1, 2));
+      expect(cleared.revision, 2);
+      expect(cleared.effectiveValue(currentVerificationRevision: 1), isNull);
+    },
+  );
 
   test(
     'an approved value is scoped to the verification revision it was approved under',
     () async {
       final repository = _MemoryModerationRepository();
-      final approved = await useCase(
-        repository,
-        utcNow: () => DateTime.utc(2026, 1, 1),
-      )(
-        actingUserId: ownerId,
-        page: page(verificationRevision: 1),
-        fieldKey: ManagedPageModeratedFieldKey.shortDescription,
-        value: const ManagedPageLocalizedTextValue(<String, String>{
-          'en': 'Bike tours',
-        }),
-        basedOnOverlayRevision: 0,
-      );
+      final approved =
+          await useCase(repository, utcNow: () => DateTime.utc(2026, 1, 1))(
+            actingUserId: ownerId,
+            page: page(verificationRevision: 1),
+            fieldKey: ManagedPageModeratedFieldKey.shortDescription,
+            value: const ManagedPageLocalizedTextValue(<String, String>{
+              'en': 'Bike tours',
+            }),
+            basedOnOverlayRevision: 0,
+          );
 
       expect(
         approved.effectiveValue(currentVerificationRevision: 1),
         isNotNull,
       );
-      expect(
-        approved.effectiveValue(currentVerificationRevision: 2),
-        isNull,
-      );
+      expect(approved.effectiveValue(currentVerificationRevision: 2), isNull);
     },
   );
 }
@@ -343,7 +334,9 @@ class _MemoryModerationRepository
     String pageId,
   ) async {
     return saved
-        .where((ManagedPageFieldModerationOverlay item) => item.pageId == pageId)
+        .where(
+          (ManagedPageFieldModerationOverlay item) => item.pageId == pageId,
+        )
         .toList(growable: false);
   }
 
