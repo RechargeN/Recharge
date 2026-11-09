@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'dart:async';
 
 import 'package:design_system/design_system.dart';
@@ -3116,8 +3119,7 @@ String _billingUnitLabel(String billingUnit) => switch (billingUnit) {
 };
 
 String _moneyLabel(int amountMinor, String currencyCode) {
-  final double amount = amountMinor / 100;
-  return '${amount.toStringAsFixed(amount.truncateToDouble() == amount ? 0 : 2)} $currencyCode';
+  return '${_formatAmount(Money(minorUnits: amountMinor, currency: CurrencyCode.parse(currencyCode)))} $currencyCode';
 }
 
 String _minutesLabel(int minutes) {
@@ -3454,10 +3456,16 @@ String _findPeopleRecruitmentLabel(
   };
 }
 
-String _formatAmount(double amount) {
-  return amount.truncateToDouble() == amount
-      ? amount.toStringAsFixed(0)
-      : amount.toStringAsFixed(2);
+String _formatAmount(Money amount) {
+  try {
+    return MoneyFormatter().decimal(
+      amount,
+      locale: 'en',
+      omitZeroFraction: true,
+    );
+  } on MoneyFormatException {
+    return '—';
+  }
 }
 
 /// Internal formatting adapter only. Public renderer input is always typed.
@@ -3553,7 +3561,9 @@ class _ClassWorkshopDisplay {
 String classWorkshopPriceLabel(ClassWorkshopPriceFixed price) {
   final scale = int.parse('1${'0' * price.minorUnitDigits}');
   final remainder = price.amountMinor % scale;
-  final fraction = remainder == 0 ? '' : '.${remainder.toString().padLeft(price.minorUnitDigits, '0')}';
+  final fraction = remainder == 0
+      ? ''
+      : '.${remainder.toString().padLeft(price.minorUnitDigits, '0')}';
   return '${price.amountMinor ~/ scale}$fraction ${price.currencyCode}';
 }
 
@@ -3897,7 +3907,7 @@ String _bookableSessionPriceLabel(
   return switch (projection.priceType) {
     PublishedBookableSessionPriceType.free => 'Бесплатно',
     PublishedBookableSessionPriceType.fixed =>
-      '${_formatAmount(projection.priceAmountMinor! / 100)} '
+      '${_formatAmount(Money(minorUnits: projection.priceAmountMinor!, currency: CurrencyCode.parse(projection.currencyCode)))} '
           '${projection.currencyCode}',
   };
 }

@@ -21,6 +21,7 @@ class MoneyFormatter {
     Money value, {
     required String locale,
     bool groupThousands = false,
+    bool omitZeroFraction = false,
   }) {
     final currencyMetadata = metadata.lookup(value.currency);
     if (currencyMetadata == null) {
@@ -44,9 +45,12 @@ class MoneyFormatter {
       groups.insert(0, whole);
       whole = groups.join(language == 'en' ? ',' : '\u00a0');
     }
-    final fraction = exponent == 0
+    final fractionDigits = digits.substring(digits.length - exponent);
+    final fraction =
+        exponent == 0 ||
+            (omitZeroFraction && RegExp(r'^0+$').hasMatch(fractionDigits))
         ? ''
-        : '${language == 'en' ? '.' : ','}${digits.substring(digits.length - exponent)}';
+        : '${language == 'en' ? '.' : ','}$fractionDigits';
     return '${value.minorUnits < 0 ? '-' : ''}$whole$fraction';
   }
 }

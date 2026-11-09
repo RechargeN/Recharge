@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/domain/entities/published_find_people_discovery_entity.dart';
 
@@ -7,7 +9,7 @@ void main() {
         PublishedFindPeopleScheduleMode.single,
     List<PublishedFindPeopleTimeOption>? timeOptions,
     PublishedFindPeopleCostType costType = PublishedFindPeopleCostType.free,
-    double? amount,
+    Money? amount,
     String currency = '',
   }) {
     return PublishedFindPeopleDiscoveryEntity(
@@ -84,10 +86,60 @@ void main() {
 
   test('unknown cost cannot silently carry an amount', () {
     expect(
-      () => entity(costType: PublishedFindPeopleCostType.unknown, amount: 10),
+      () => entity(
+        costType: PublishedFindPeopleCostType.unknown,
+        amount: Money(minorUnits: 1000, currency: CurrencyCode.eur),
+        currency: 'EUR',
+      ),
       throwsArgumentError,
     );
   });
+
+  test(
+    'expected spend preserves cents and enforces currency and free semantics',
+    () {
+      final price = Money(minorUnits: 751, currency: CurrencyCode.eur);
+      expect(
+        entity(
+          costType: PublishedFindPeopleCostType.estimated,
+          amount: price,
+          currency: 'eur',
+        ).expectedSpendAmount,
+        price,
+      );
+      expect(
+        () => entity(
+          costType: PublishedFindPeopleCostType.estimated,
+          amount: price,
+          currency: 'USD',
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => entity(
+          costType: PublishedFindPeopleCostType.estimated,
+          amount: price,
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => entity(
+          amount: Money(minorUnits: -1, currency: CurrencyCode.eur),
+          currency: 'EUR',
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => entity(
+          costType: PublishedFindPeopleCostType.estimated,
+          amount: Money(minorUnits: 0, currency: CurrencyCode.eur),
+          currency: 'EUR',
+        ),
+        throwsArgumentError,
+      );
+      expect(() => entity(amount: price, currency: 'EUR'), throwsArgumentError);
+    },
+  );
 
   test('online and hidden variants cannot expose point geometry', () {
     const PublishedFindPeoplePublicLocation online =
