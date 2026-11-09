@@ -26,6 +26,30 @@ void main() {
   late _FakeCreateRepository repository;
   late CreateController controller;
   test(
+    'Event text price is exact and invalid edits do not round the stored value',
+    () async {
+      await controller.ensureLoaded(
+        userId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      controller.updateEventPriceText('12,34', locale: 'ru');
+      expect(controller.state.draft.eventData?.price?.amountMinor, 1234);
+      expect(controller.state.draft.basePrice?.minorUnits, 1234);
+      controller.updateEventPriceText('1.005');
+      expect(
+        controller.moneyInputErrors['event.price'],
+        MoneyParseError.excessiveFractionDigits,
+      );
+      expect(controller.state.draft.eventData?.price?.amountMinor, 1234);
+      expect(await controller.publishDraft(), isFalse);
+      controller.updateEventPriceText('0.29');
+      expect(controller.moneyInputErrors, isEmpty);
+      expect(controller.state.draft.eventData?.price?.amountMinor, 29);
+    },
+  );
+
+  test(
     'invalid monetary input preserves previous value and blocks writes until corrected',
     () async {
       await controller.ensureLoaded(

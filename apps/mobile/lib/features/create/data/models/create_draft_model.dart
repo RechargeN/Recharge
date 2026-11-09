@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../core/parsing/money_legacy_adapter.dart';
 import '../../../../shared/primitives/money/money.dart';
@@ -704,9 +705,13 @@ class CreateDraftModel {
         hasCanonicalMinorUnits: json.containsKey('basePriceMinorUnits'),
         canonicalMinorUnits: json['basePriceMinorUnits'],
         legacyMajorAmount: json['basePrice'],
-        currencyCode: json['currency'] as String? ?? activeCurrency,
+        currencyCode: json['currency'] ?? activeCurrency,
       ),
-      currency: json['currency'] as String? ?? activeCurrency ?? '',
+      currency: json['currency'] == null
+          ? activeCurrency ?? ''
+          : json['currency'] is String
+          ? json['currency'] as String
+          : throw const MoneyReadException(MoneyParseError.missingCurrency),
       pricingModel: json['pricingModel'] as String? ?? 'fixed',
       registrationRequired: json['registrationRequired'] as bool? ?? true,
       approvalRequired: json['approvalRequired'] as bool? ?? false,

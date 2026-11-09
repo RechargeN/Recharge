@@ -2299,11 +2299,29 @@ class CreateController extends ChangeNotifier {
     );
   }
 
+  void updateEventPriceText(String text, {String locale = 'en'}) {
+    final event = _state.draft.eventData;
+    if (event == null) return;
+    final amount = _parseMoneyInput(
+      text,
+      currency: event.currencyCode,
+      locale: locale,
+      field: 'event.price',
+    );
+    if (_moneyInputErrors.containsKey('event.price')) return;
+    updateEventPricing(
+      mode: EventPricingMode.fixed,
+      collectionMode: event.paymentCollectionMode,
+      amountMinor: amount?.minorUnits ?? 0,
+    );
+  }
+
   void updateEventPricing({
     required EventPricingMode mode,
     EventPaymentCollectionMode? collectionMode,
     int? amountMinor,
   }) {
+    if (mode == EventPricingMode.free) _moneyInputErrors.remove('event.price');
     _updateEvent((EventDraftData event) {
       final bool free = mode == EventPricingMode.free;
       return event.copyWith(
@@ -3654,9 +3672,31 @@ class CreateController extends ChangeNotifier {
   void setSessionSlotDuration(int value) => _updateSession(
     (s) => _sessionCreateCoordinator!.setSlotDuration(s, value),
   );
-  void setSessionPriceFree() => _updateSession(
-    (s) => _sessionCreateCoordinator!.setPrice(s, SessionPriceDisclosure.free),
-  );
+  void setSessionPriceFree() {
+    _moneyInputErrors.remove('session.price');
+    _updateSession(
+      (s) =>
+          _sessionCreateCoordinator!.setPrice(s, SessionPriceDisclosure.free),
+    );
+  }
+
+  void updateSessionPriceText(String text, {String locale = 'en'}) {
+    final currency =
+        _state.draft.sessionData?.price.amount?.currencyCode ??
+        _state.draft.currency;
+    final amount = _parseMoneyInput(
+      text,
+      currency: currency,
+      locale: locale,
+      field: 'session.price',
+    );
+    if (_moneyInputErrors.containsKey('session.price')) return;
+    setSessionPriceFixed(
+      amountMinor: amount?.minorUnits ?? 0,
+      currencyCode: currency,
+    );
+  }
+
   void setSessionPriceFixed({
     required int amountMinor,
     required String currencyCode,
