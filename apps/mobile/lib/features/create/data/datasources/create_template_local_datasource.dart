@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -11,6 +12,7 @@ class CreateTemplateLocalDataSource {
     required this.activeTimezone,
     required this.activeCountry,
     required this.activeCity,
+    this.activeCurrency,
   });
 
   final FlutterSecureStorage _storage;
@@ -18,10 +20,14 @@ class CreateTemplateLocalDataSource {
   final String activeTimezone;
   final String activeCountry;
   final String activeCity;
+  final String? activeCurrency;
 
   String _key(String userId) => 'create_templates_v1_$userId';
 
-  Future<List<CreateTemplateModel>> loadTemplates(String userId) async {
+  Future<List<CreateTemplateModel>> loadTemplates(
+    String userId, {
+    bool requireLosslessMoney = false,
+  }) async {
     try {
       final String? raw = await _storage.read(key: _key(userId));
       if (raw == null || raw.isEmpty) return const <CreateTemplateModel>[];
@@ -42,13 +48,18 @@ class CreateTemplateLocalDataSource {
               activeTimezone: activeTimezone,
               activeCountry: activeCountry,
               activeCity: activeCity,
+              activeCurrency: activeCurrency,
             ),
           );
+        } on MoneyReadException {
+          if (requireLosslessMoney) rethrow;
         } on Object {
           // One corrupt or future record must not hide valid sibling templates.
         }
       }
       return result;
+    } on MoneyReadException {
+      rethrow;
     } on Object {
       return const <CreateTemplateModel>[];
     }

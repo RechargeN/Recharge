@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money.dart';
 import 'dart:math' as math;
 
 import '../entities/create_draft_entity.dart';
@@ -268,6 +269,10 @@ class ValidatePlaceDraftUseCase {
       ],
     ];
     for (final Money? amount in activeAmounts) {
+      if (amount != null &&
+          amount.currency.value != pricing.currencyCode.trim().toUpperCase()) {
+        error('price_currency_mismatch', 'pricing', 'currencyCode');
+      }
       if (amount != null && amount.minorUnits < 0) {
         error('price_negative', 'pricing', 'entryPriceFrom');
       }
@@ -426,7 +431,7 @@ class ValidatePlaceDraftUseCase {
   static bool _rangeInvalid(Money? from, Money? to) {
     return from != null &&
         to != null &&
-        (from.currencyCode != to.currencyCode || from.compareTo(to) > 0);
+        (from.currency != to.currency || from.compareTo(to) > 0);
   }
 
   static double _distanceKm(

@@ -10,6 +10,36 @@ class MoneyLegacyAdapter {
     : _parser = MoneyParser(metadata: metadata);
   final MoneyParser _parser;
 
+  Money? readOptional({
+    required bool hasCanonicalMinorUnits,
+    Object? canonicalMinorUnits,
+    Object? legacyMajorAmount,
+    required String? currencyCode,
+  }) {
+    // Explicit canonical null means absent, never a legacy fallback.
+    if (hasCanonicalMinorUnits
+        ? canonicalMinorUnits == null
+        : legacyMajorAmount == null) {
+      return null;
+    }
+    CurrencyCode? currency;
+    if (currencyCode != null) {
+      try {
+        currency = CurrencyCode.parse(currencyCode);
+      } on FormatException {
+        throw const MoneyReadException(MoneyParseError.missingCurrency);
+      }
+    }
+    final result = read(
+      hasCanonicalMinorUnits: hasCanonicalMinorUnits,
+      canonicalMinorUnits: canonicalMinorUnits,
+      legacyMajorAmount: legacyMajorAmount,
+      currency: currency,
+    );
+    if (!result.isSuccess) throw MoneyReadException(result.error!);
+    return result.value;
+  }
+
   MoneyParseResult read({
     required bool hasCanonicalMinorUnits,
     Object? canonicalMinorUnits,

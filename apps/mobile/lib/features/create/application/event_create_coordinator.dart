@@ -334,12 +334,7 @@ class EventCreateCoordinator {
         'wheelchair_accessible',
       ),
       isFree: isFree,
-      basePrice: normalized.price == null
-          ? null
-          : Money(
-              minorUnits: normalized.price!.amountMinor,
-              currencyCode: normalized.price!.currencyCode,
-            ),
+      basePrice: normalized.price?.toMoney(),
       clearBasePrice: normalized.price == null,
       currency: normalized.currencyCode,
       pricingModel: normalized.pricingMode.name,

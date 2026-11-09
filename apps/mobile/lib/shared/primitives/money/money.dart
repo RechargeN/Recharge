@@ -22,6 +22,17 @@ class Money implements Comparable<Money> {
   static final _max = BigInt.from(maxSafeMinorUnits);
   final int minorUnits;
   final CurrencyCode currency;
+
+  /// A containing record must not relabel this value with another currency.
+  int minorUnitsIn(CurrencyCode expectedCurrency) {
+    if (currency != expectedCurrency) {
+      throw const MoneyArithmeticException(
+        MoneyArithmeticError.currencyMismatch,
+      );
+    }
+    return minorUnits;
+  }
+
   Money operator +(Money other) {
     _sameCurrency(other);
     return _fromBigInt(BigInt.from(minorUnits) + BigInt.from(other.minorUnits));

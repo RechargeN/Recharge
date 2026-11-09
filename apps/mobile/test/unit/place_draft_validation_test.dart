@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/application/place_create_config.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
@@ -88,7 +90,7 @@ void main() {
   test('paid and mixed entry require their normative fields', () {
     final CreateDraftEntity paid = _validDraft().copyWith(
       placeData: _validDraft().placeData!.copyWith(
-        pricing: const PlacePricingDraft(
+        pricing: PlacePricingDraft(
           currencyCode: 'EUR',
           entryType: PlaceEntryType.paid,
         ),
@@ -103,10 +105,10 @@ void main() {
 
     final CreateDraftEntity mixed = paid.copyWith(
       placeData: paid.placeData!.copyWith(
-        pricing: const PlacePricingDraft(
+        pricing: PlacePricingDraft(
           currencyCode: 'EUR',
           entryType: PlaceEntryType.mixed,
-          entryPriceFrom: Money(minorUnits: 500, currencyCode: 'EUR'),
+          entryPriceFrom: Money(minorUnits: 500, currency: CurrencyCode.eur),
         ),
       ),
     );
@@ -119,12 +121,12 @@ void main() {
   });
 
   test('notApplicable clears entry prices but keeps typical spend', () {
-    const PlacePricingDraft paid = PlacePricingDraft(
+    final PlacePricingDraft paid = PlacePricingDraft(
       currencyCode: 'EUR',
       entryType: PlaceEntryType.paid,
-      entryPriceFrom: Money(minorUnits: 1000, currencyCode: 'EUR'),
-      entryPriceTo: Money(minorUnits: 2000, currencyCode: 'EUR'),
-      typicalSpendFrom: Money(minorUnits: 700, currencyCode: 'EUR'),
+      entryPriceFrom: Money(minorUnits: 1000, currency: CurrencyCode.eur),
+      entryPriceTo: Money(minorUnits: 2000, currency: CurrencyCode.eur),
+      typicalSpendFrom: Money(minorUnits: 700, currency: CurrencyCode.eur),
     );
 
     final PlacePricingDraft result = paid.copyWith(
@@ -135,7 +137,7 @@ void main() {
     expect(result.entryPriceTo, isNull);
     expect(
       result.typicalSpendFrom,
-      const Money(minorUnits: 700, currencyCode: 'EUR'),
+      Money(minorUnits: 700, currency: CurrencyCode.eur),
     );
   });
 
@@ -150,7 +152,7 @@ void main() {
         placeKind: PlaceKind.pointOfInterest,
         clearRelationshipToPlace: true,
         hours: const PlaceHoursDraft(),
-        pricing: const PlacePricingDraft(
+        pricing: PlacePricingDraft(
           currencyCode: 'EUR',
           entryType: PlaceEntryType.paid,
         ),
@@ -259,7 +261,7 @@ CreateDraftEntity _validDraft() {
           pinConfirmed: true,
         ),
         hours: const PlaceHoursDraft(mode: PlaceHoursMode.alwaysOpen),
-        pricing: const PlacePricingDraft(
+        pricing: PlacePricingDraft(
           currencyCode: 'EUR',
           entryType: PlaceEntryType.free,
         ),

@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money.dart';
 import 'activity_draft_data.dart';
 import 'class_workshop_draft_data.dart';
 import 'collection_draft_data.dart';

@@ -1,4 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../core/layout/page_list_padding.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -372,7 +374,7 @@ class _PublishedDraftCard extends StatelessWidget {
                           draft.basePrice ??
                               Money(
                                 minorUnits: 0,
-                                currencyCode: draft.currency,
+                                currency: CurrencyCode.parse(draft.currency),
                               ),
                           Localizations.localeOf(context).languageCode,
                         ),
@@ -723,7 +725,7 @@ String _discoverRouteForDraft(String path, CreateDraftEntity draft) {
       'category': _discoverCategoryForDraft(draft.mainCategory),
       'free': draft.isFree ? '1' : '0',
       if (!draft.isFree && draft.basePrice != null)
-        'budgetMax': draft.basePrice!.toStringAsFixed(0),
+        'budgetMax': MoneyFormatter().decimal(draft.basePrice!, locale: 'en'),
       'radius': '5000',
       'unlimited': '0',
     },

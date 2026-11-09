@@ -11,6 +11,12 @@ class MoneyFormatter {
   MoneyFormatter({CurrencyMetadataRegistry? metadata})
     : metadata = metadata ?? CurrencyMetadataRegistry.eurOnly;
   final CurrencyMetadataRegistry metadata;
+  String optionalDecimal(
+    Money? value, {
+    required String locale,
+    String absent = '',
+  }) => value == null ? absent : decimal(value, locale: locale);
+
   String decimal(
     Money value, {
     required String locale,

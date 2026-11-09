@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../core/parsing/money_legacy_adapter.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import '../../domain/entities/find_people_draft_data.dart';
 import '../../../../shared/primitives/money/money.dart';
 
@@ -56,7 +59,9 @@ class FindPeopleDraftMapper {
       'attendanceConfirmationRequired': value.attendanceConfirmationRequired,
       'guestPolicy': value.guestPolicy,
       'costType': value.costType.name,
-      'expectedSpendAmount': value.expectedSpendAmount?.toJson(),
+      'expectedSpendAmountMinorUnits': value.expectedSpendAmount?.minorUnitsIn(
+        CurrencyCode.parse(value.currencyCode),
+      ),
       'currencyCode': value.currencyCode,
       'costNote': value.costNote,
       'expenseSplitMode': value.expenseSplitMode.name,
@@ -65,7 +70,8 @@ class FindPeopleDraftMapper {
             (FindPeopleExpenseItemDraft item) => <String, Object?>{
               'id': item.id,
               'category': item.category,
-              'amount': item.amount.toJson(),
+              'amountMinorUnits': item.amount.minorUnits,
+              'currencyCode': item.amount.currency.value,
               'payerNote': item.payerNote,
             },
           )
@@ -236,19 +242,24 @@ class FindPeopleDraftMapper {
       costType:
           _enumValue(FindPeopleCostType.values, json['costType']) ??
           defaults.costType,
-      expectedSpendAmount: Money.fromJsonOrNull(
-        json['expectedSpendAmount'],
-        legacyCurrencyCode:
-            _text(json['currencyCode']) ?? defaults.currencyCode,
+      expectedSpendAmount: MoneyLegacyAdapter().readOptional(
+        hasCanonicalMinorUnits: json.containsKey(
+          'expectedSpendAmountMinorUnits',
+        ),
+        canonicalMinorUnits: json['expectedSpendAmountMinorUnits'],
+        legacyMajorAmount: json['expectedSpendAmount'],
+        currencyCode: _text(json['currencyCode']) ?? defaults.currencyCode,
       ),
       clearExpectedSpendAmount:
-          json.containsKey('expectedSpendAmount') &&
-          Money.fromJsonOrNull(
-                json['expectedSpendAmount'],
-                legacyCurrencyCode:
-                    _text(json['currencyCode']) ?? defaults.currencyCode,
-              ) ==
-              null,
+          MoneyLegacyAdapter().readOptional(
+            hasCanonicalMinorUnits: json.containsKey(
+              'expectedSpendAmountMinorUnits',
+            ),
+            canonicalMinorUnits: json['expectedSpendAmountMinorUnits'],
+            legacyMajorAmount: json['expectedSpendAmount'],
+            currencyCode: _text(json['currencyCode']) ?? defaults.currencyCode,
+          ) ==
+          null,
       currencyCode: _text(json['currencyCode']) ?? defaults.currencyCode,
       costNote: _text(json['costNote']),
       clearCostNote:
@@ -388,11 +399,15 @@ class FindPeopleDraftMapper {
             id: _text(json['id']) ?? '',
             category: _text(json['category']) ?? '',
             amount:
-                Money.fromJsonOrNull(
-                  json['amount'],
-                  legacyCurrencyCode: currencyCode,
+                MoneyLegacyAdapter().readOptional(
+                  hasCanonicalMinorUnits: json.containsKey('amountMinorUnits'),
+                  canonicalMinorUnits: json['amountMinorUnits'],
+                  legacyMajorAmount: json['amount'],
+                  currencyCode: _text(json['currencyCode']) ?? currencyCode,
                 ) ??
-                Money.zero(currencyCode),
+                (throw const MoneyReadException(
+                  MoneyParseError.invalidCanonicalValue,
+                )),
             payerNote: _text(json['payerNote']) ?? '',
           );
         })

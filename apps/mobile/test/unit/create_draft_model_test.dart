@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/models/create_draft_model.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
@@ -5,6 +6,51 @@ import 'package:recharge/features/create/domain/entities/draft_publisher.dart';
 import 'package:recharge/features/create/domain/entities/publisher_ref.dart';
 
 void main() {
+  test(
+    'common Create money has canonical precedence and explicit legacy currency',
+    () {
+      final draft = CreateDraftEntity.defaults(
+        organizerId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+        currency: 'EUR',
+      );
+      final json = CreateDraftModel.fromEntity(draft).toJson()
+        ..remove('basePriceMinorUnits');
+      json['basePrice'] = 12.34;
+      final legacy = CreateDraftModel.fromJson(json);
+      expect(legacy.basePrice?.minorUnits, 1234);
+      expect(legacy.basePrice?.currency.value, 'EUR');
+      expect(legacy.toJson()['basePriceMinorUnits'], 1234);
+      expect(legacy.toJson().containsKey('basePrice'), isFalse);
+      json['basePriceMinorUnits'] = 1;
+      expect(CreateDraftModel.fromJson(json).basePrice?.minorUnits, 1);
+      json['basePriceMinorUnits'] = 1.5;
+      expect(
+        () => CreateDraftModel.fromJson(json),
+        throwsA(isA<MoneyReadException>()),
+      );
+      json.remove('basePriceMinorUnits');
+      json.remove('currency');
+      expect(
+        () => CreateDraftModel.fromJson(json),
+        throwsA(isA<MoneyReadException>()),
+      );
+      expect(
+        CreateDraftModel.fromJson(
+          json,
+          activeCurrency: 'EUR',
+        ).basePrice?.minorUnits,
+        1234,
+      );
+      json['basePrice'] = 1.234;
+      expect(
+        () => CreateDraftModel.fromJson(json, activeCurrency: 'EUR'),
+        throwsA(isA<MoneyReadException>()),
+      );
+    },
+  );
+
   final base = CreateDraftEntity.defaults(
     organizerId: 'owner',
     organizerEmail: '',

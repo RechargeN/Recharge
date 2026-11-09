@@ -1,5 +1,9 @@
 import '../../../../shared/primitives/errors/coded_refusal.dart';
 import '../../domain/usecases/build_session_content_body.dart';
+import '../../../../../shared/primitives/money/money.dart';
+import '../../../../../shared/primitives/money/currency_code.dart';
+import '../../../../../shared/primitives/money/money_parser.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import 'dart:async';
 
 import '../class_workshop_create_coordinator.dart';
@@ -485,6 +489,10 @@ class CreateController extends ChangeNotifier {
   Set<String> _capabilities = const <String>{};
   PublisherRef? _activePublisherRef;
   Timer? _autosaveTimer;
+  bool _moneyReadBlocked = false;
+  final Map<String, MoneyParseError> _moneyInputErrors = {};
+  Map<String, MoneyParseError> get moneyInputErrors =>
+      Map.unmodifiable(_moneyInputErrors);
   int _localIdCounter = 0;
   RouteCreateCoordinator? _routeCoordinator;
   CollectionCreateCoordinator? _collectionCoordinator;
@@ -516,13 +524,16 @@ class CreateController extends ChangeNotifier {
     final PublisherRef resolvedPublisher = activePublisherRef?.isValid == true
         ? activePublisherRef!
         : PublisherRef(type: PublisherType.user, id: userId);
-    if (_loadedUserId == userId && _state.isLoaded) {
+    if (_loadedUserId == userId && _state.isLoaded && !_moneyReadBlocked) {
       _capabilities = capabilities.toSet();
       _activePublisherRef = resolvedPublisher;
       _isVerifiedCreator = isVerifiedCreator;
       return;
     }
     _loadedUserId = userId;
+    _moneyReadBlocked = false;
+    _moneyInputErrors.clear();
+    _autosaveTimer?.cancel();
     _capabilities = capabilities.toSet();
     _activePublisherRef = resolvedPublisher;
     _isVerifiedCreator = isVerifiedCreator;
@@ -535,7 +546,23 @@ class CreateController extends ChangeNotifier {
       ),
     );
 
-    final CreateDraftEntity? saved = await _loadCreateDraftUseCase(userId);
+    final CreateDraftEntity? saved;
+    try {
+      saved = await _loadCreateDraftUseCase(userId);
+    } on MoneyReadException {
+      if (_loadedUserId != userId) return;
+      _moneyReadBlocked = true;
+      _setState(
+        _state.copyWith(
+          status: CreateStatus.error,
+          userId: userId,
+          message:
+              'Не удалось прочитать сохранённую цену. Черновик сохранён без изменений.',
+          saveStatus: CreateSaveStatus.failed,
+        ),
+      );
+      return;
+    }
     if (_loadedUserId != userId) return;
     final bool createsFreshDraft = saved == null;
     CreateDraftEntity draft =
@@ -2955,6 +2982,7 @@ class CreateController extends ChangeNotifier {
   }
 
   void updatePlacePricing({
+    String locale = 'en',
     String? entryFrom,
     String? entryTo,
     String? spendFrom,
@@ -2962,6 +2990,28 @@ class CreateController extends ChangeNotifier {
     String? note,
     String? pricingUrl,
   }) {
+    final currency =
+        _state.draft.placeData?.pricing.currencyCode ?? _state.draft.currency;
+    final parsed = <String, Money?>{};
+    final inputs = {
+      'entryFrom': entryFrom,
+      'entryTo': entryTo,
+      'spendFrom': spendFrom,
+      'spendTo': spendTo,
+    };
+    for (final input in inputs.entries) {
+      if (input.value != null) {
+        parsed[input.key] = _parseMoneyInput(
+          input.value!,
+          currency: currency,
+          locale: locale,
+          field: 'place.${input.key}',
+        );
+      }
+    }
+    if (inputs.keys.any((key) => _moneyInputErrors.containsKey('place.$key'))) {
+      return;
+    }
     _updatePlace((PlaceDraftData place) {
       final String currencyCode = place.pricing.currencyCode;
       Money? parseMoney(String? value) => value == null
@@ -2969,16 +3019,15 @@ class CreateController extends ChangeNotifier {
           : Money.tryParseMajor(value, currencyCode: currencyCode);
       return place.copyWith(
         pricing: place.pricing.copyWith(
-          entryPriceFrom: parseMoney(entryFrom),
-          clearEntryPriceFrom:
-              entryFrom != null && parseMoney(entryFrom) == null,
-          entryPriceTo: parseMoney(entryTo),
-          clearEntryPriceTo: entryTo != null && parseMoney(entryTo) == null,
-          typicalSpendFrom: parseMoney(spendFrom),
+          entryPriceFrom: entryFrom == null ? null : parsed['entryFrom'],
+          clearEntryPriceFrom: entryFrom != null && parsed['entryFrom'] == null,
+          entryPriceTo: entryTo == null ? null : parsed['entryTo'],
+          clearEntryPriceTo: entryTo != null && parsed['entryTo'] == null,
+          typicalSpendFrom: spendFrom == null ? null : parsed['spendFrom'],
           clearTypicalSpendFrom:
-              spendFrom != null && parseMoney(spendFrom) == null,
-          typicalSpendTo: parseMoney(spendTo),
-          clearTypicalSpendTo: spendTo != null && parseMoney(spendTo) == null,
+              spendFrom != null && parsed['spendFrom'] == null,
+          typicalSpendTo: spendTo == null ? null : parsed['spendTo'],
+          clearTypicalSpendTo: spendTo != null && parsed['spendTo'] == null,
           pricingNote: note == null ? null : _nullableText(note),
           clearPricingNote: note != null && _nullableText(note) == null,
           officialPricingUrl: pricingUrl == null
@@ -3443,6 +3492,7 @@ class CreateController extends ChangeNotifier {
   }
 
   void updateIsFree(bool isFree) {
+    if (isFree) _moneyInputErrors.remove('basePrice');
     _updateDraft(
       _state.draft.copyWith(
         isFree: isFree,
@@ -3452,11 +3502,102 @@ class CreateController extends ChangeNotifier {
     );
   }
 
-  void updateBasePrice(String value) {
-    final Money? parsed = Money.tryParseMajor(
+  Money? _parseMoneyInput(
+    String text, {
+    required String currency,
+    required String locale,
+    required String field,
+  }) {
+    if (text.trim().isEmpty) {
+      _moneyInputErrors.remove(field);
+      return null;
+    }
+    MoneyParseResult result;
+    try {
+      result = MoneyParser().parse(
+        text,
+        currency: CurrencyCode.parse(currency),
+        locale: locale,
+      );
+    } on FormatException {
+      result = const MoneyParseResult.failure(MoneyParseError.missingCurrency);
+    }
+    if (result.value != null && result.value!.minorUnits < 0) {
+      result = const MoneyParseResult.failure(
+        MoneyParseError.invalidCanonicalValue,
+      );
+    }
+    if (!result.isSuccess) {
+      _moneyInputErrors[field] = result.error!;
+      _autosaveTimer?.cancel();
+      _setState(
+        _state.copyWith(
+          message:
+              'Проверьте сумму и валюту: лишние знаки после запятой не округляются.',
+        ),
+      );
+      return null;
+    }
+    _moneyInputErrors.remove(field);
+    return result.value;
+  }
+
+  void updateFindPeopleExpectedSpend(String value, {String locale = 'en'}) {
+    final data = _state.draft.findPeopleData;
+    if (data == null) return;
+    final amount = _parseMoneyInput(
       value,
-      currencyCode: _state.draft.currency,
+      currency: data.currencyCode,
+      locale: locale,
+      field: 'findPeople.expectedSpend',
     );
+    if (_moneyInputErrors.containsKey('findPeople.expectedSpend')) return;
+    updateFindPeopleData(
+      data.copyWith(
+        expectedSpendAmount: amount,
+        clearExpectedSpendAmount: amount == null,
+      ),
+    );
+  }
+
+  bool addFindPeopleExpense({
+    required String category,
+    required String text,
+    String locale = 'en',
+  }) {
+    final data = _state.draft.findPeopleData;
+    if (data == null || category.trim().isEmpty) return false;
+    final amount = _parseMoneyInput(
+      text,
+      currency: data.currencyCode,
+      locale: locale,
+      field: 'findPeople.expense',
+    );
+    if (amount == null || amount.minorUnits <= 0) return false;
+    updateFindPeopleData(
+      data.copyWith(
+        plannedExpenseItems: [
+          ...data.plannedExpenseItems,
+          FindPeopleExpenseItemDraft(
+            id: 'loc_${DateTime.now().toUtc().microsecondsSinceEpoch}',
+            category: category.trim(),
+            amount: amount,
+            payerNote: 'shared',
+          ),
+        ],
+      ),
+    );
+    return true;
+  }
+
+  void updateBasePrice(String value, {String locale = 'en'}) {
+    final Money? parsed = _parseMoneyInput(
+      value,
+      currency: _state.draft.currency,
+      locale: locale,
+      field: 'basePrice',
+    );
+    if (_moneyInputErrors.containsKey('basePrice')) return;
     _updateDraft(
       _state.draft.copyWith(
         basePrice: parsed,
@@ -4198,6 +4339,9 @@ class CreateController extends ChangeNotifier {
   }
 
   void updateFindPeopleData(FindPeopleDraftData value) {
+    if (value.costType != FindPeopleCostType.estimated) {
+      _moneyInputErrors.remove('findPeople.expectedSpend');
+    }
     if (_state.draft.objectType != CreateObjectType.findPeople) return;
     _updateDraft(
       _state.draft.copyWith(
@@ -4266,7 +4410,11 @@ class CreateController extends ChangeNotifier {
   }
 
   Future<void> saveDraft() async {
-    if (_state.userId.isEmpty) return;
+    if (_state.userId.isEmpty ||
+        _moneyReadBlocked ||
+        _moneyInputErrors.isNotEmpty) {
+      return;
+    }
     _autosaveTimer?.cancel();
     if (_state.draft.objectType == CreateObjectType.route) {
       final coordinator = _routeCoordinator;
@@ -4412,7 +4560,9 @@ class CreateController extends ChangeNotifier {
   /// A second call while one is already running (double tap, retry during a
   /// slow save) is ignored instead of racing the first publish.
   Future<bool> publishDraft() async {
-    if (_publishInFlight) return false;
+    if (_publishInFlight || _moneyReadBlocked || _moneyInputErrors.isNotEmpty) {
+      return false;
+    }
     _publishInFlight = true;
     try {
       return await _publishDraftOnce();
@@ -4914,6 +5064,7 @@ class CreateController extends ChangeNotifier {
     required String organizerEmail,
     required String organizerName,
   }) {
+    _moneyInputErrors.clear();
     CreateDraftEntity draft = CreateDraftEntity.defaults(
       organizerId: organizerId,
       organizerEmail: organizerEmail,
