@@ -323,13 +323,13 @@ Future<void> _loadGoldenFonts() async {
   }
   final String fontRoot = '$flutterRoot/bin/cache/artifacts/material_fonts';
   await (FontLoader('Roboto')
-        ..addFont(_goldenFontData('$fontRoot/roboto-regular.ttf'))
-        ..addFont(_goldenFontData('$fontRoot/roboto-medium.ttf'))
-        ..addFont(_goldenFontData('$fontRoot/roboto-bold.ttf')))
+        ..addFont(_goldenFontData('$fontRoot/Roboto-Regular.ttf'))
+        ..addFont(_goldenFontData('$fontRoot/Roboto-Medium.ttf'))
+        ..addFont(_goldenFontData('$fontRoot/Roboto-Bold.ttf')))
       .load();
   await (FontLoader(
     'MaterialIcons',
-  )..addFont(_goldenFontData('$fontRoot/materialicons-regular.otf'))).load();
+  )..addFont(_goldenFontData('$fontRoot/MaterialIcons-Regular.otf'))).load();
 }
 
 Future<ByteData> _goldenFontData(String path) async {
