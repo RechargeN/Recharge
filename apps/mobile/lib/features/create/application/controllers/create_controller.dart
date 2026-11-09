@@ -2729,6 +2729,26 @@ class CreateController extends ChangeNotifier {
     );
   }
 
+  void updateActivityContributionAmountText(
+    String text, {
+    String locale = 'en',
+  }) {
+    final contribution = _state.draft.activityData?.optionalContribution;
+    if (contribution == null) return;
+    final amount = _parseMoneyInput(
+      text,
+      currency: contribution.amountHint?.currencyCode ?? _state.draft.currency,
+      locale: locale,
+      field: 'activity.contribution',
+    );
+    if (_moneyInputErrors.containsKey('activity.contribution')) return;
+    updateActivityOptionalContribution(
+      kind: contribution.kind,
+      note: contribution.note,
+      amountMinor: amount?.minorUnits,
+    );
+  }
+
   void updateActivityOptionalContribution({
     ActivityContributionKind? kind,
     String? note,
@@ -2744,7 +2764,9 @@ class CreateController extends ChangeNotifier {
               ? null
               : ActivityContributionAmountDraft(
                   amountMinor: amountMinor,
-                  currencyCode: _runtimeDefaults.currency,
+                  currencyCode:
+                      activity.optionalContribution?.amountHint?.currencyCode ??
+                      _state.draft.currency,
                 ),
         ),
       );
@@ -2752,6 +2774,7 @@ class CreateController extends ChangeNotifier {
   }
 
   void clearActivityOptionalContribution() {
+    _moneyInputErrors.remove('activity.contribution');
     _updateActivity(
       (ActivityDraftData activity) =>
           activity.copyWith(clearOptionalContribution: true),

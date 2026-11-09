@@ -1,3 +1,4 @@
+import 'package:recharge/features/create/domain/entities/activity_draft_data.dart';
 import 'package:recharge/shared/primitives/money/money_parse_result.dart';
 import '../support/publisher_access_test_support.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,6 +26,69 @@ import '../support/event_create_test_support.dart';
 void main() {
   late _FakeCreateRepository repository;
   late CreateController controller;
+  test(
+    'Activity amount input preserves cents and blocks invalid edits',
+    () async {
+      await controller.ensureLoaded(
+        userId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      controller.setObjectType(CreateObjectType.activity);
+      controller.updateActivityOptionalContribution(
+        kind: ActivityContributionKind.donation,
+        note: 'Optional donation',
+      );
+      controller.updateActivityContributionAmountText('12,34', locale: 'ru');
+      expect(
+        controller
+            .state
+            .draft
+            .activityData!
+            .optionalContribution!
+            .amountHint!
+            .amountMinor,
+        1234,
+      );
+      await controller.saveDraft();
+      final stored = repository._stored;
+      controller.updateActivityContributionAmountText('12.345');
+      expect(
+        controller.moneyInputErrors['activity.contribution'],
+        MoneyParseError.excessiveFractionDigits,
+      );
+      expect(
+        controller
+            .state
+            .draft
+            .activityData!
+            .optionalContribution!
+            .amountHint!
+            .amountMinor,
+        1234,
+      );
+      await controller.saveDraft();
+      expect(repository._stored, same(stored));
+      expect(await controller.publishDraft(), isFalse);
+      controller.updateActivityContributionAmountText('0.29');
+      expect(controller.moneyInputErrors, isEmpty);
+      await controller.saveDraft();
+      expect(
+        repository
+            ._stored!
+            .activityData!
+            .optionalContribution!
+            .amountHint!
+            .amountMinor,
+        29,
+      );
+      controller.updateActivityContributionAmountText('1.001');
+      controller.clearActivityOptionalContribution();
+      expect(controller.moneyInputErrors, isEmpty);
+      expect(controller.state.draft.activityData!.optionalContribution, isNull);
+    },
+  );
+
   test(
     'Event text price is exact and invalid edits do not round the stored value',
     () async {

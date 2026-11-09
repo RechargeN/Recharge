@@ -561,12 +561,18 @@ legacy Scenario/Quick Plan consumers используют Money; exact input/for
 не округляет cents. Corrupt/future saved records блокируют mutation без
 перезаписи, direct conversion проверяет currency до создания новых IDs.
 
+Activity contribution input/restore использует общий parser/formatter и
+strict Money adapter без double rounding или удаления повреждённой суммы.
+Collection budget median сравнивается точно через integer arithmetic.
+Reference scan не выявил normalized monetary double declarations; coverage
+ratios, geo/duration/confidence и pixels не являются денежными суммами.
+
 Проверенный checkpoint: `flutter analyze --no-pub` — exit 0, 0 issues;
-полный `flutter test --no-pub --reporter expanded` — 1390 passed, exit 0,
-02:53. Boundary self-test/rules/inventory/diff — exit 0; 545 scanned,
+полный `flutter test --no-pub --reporter expanded` — 1395 passed, exit 0,
+02:50. Boundary self-test/rules/inventory/diff — exit 0; 545 scanned,
 71 findings/suppressions, 0 violations/stale/expired, budget 71/71.
 
-Дальнейшие изменения требуют свежих gates. Остались Activity optional
-contribution input/restore, итоговый Money reference scan и Linux CI.
+Local implementation готова к review. Обязательный Linux GitHub Actions для
+данного diff отсутствует; M2-B остаётся Doing, M2-C/D/E не начаты.
 Это не M2-B Done, не приёмка R1 и не Emulator/device/cloud evidence.
 Compatibility paths не удалялись; production authority не добавлялась.

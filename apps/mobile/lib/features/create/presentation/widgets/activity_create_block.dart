@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/config/recharge_category_criteria.dart';
@@ -366,21 +369,30 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
               'contributionAmountHint',
               contribution.amountHint == null
                   ? ''
-                  : (contribution.amountHint!.amountMinor / 100)
-                        .toStringAsFixed(2),
+                  : MoneyFormatter().decimal(
+                      Money(
+                        minorUnits: contribution.amountHint!.amountMinor,
+                        currency: CurrencyCode.parse(
+                          contribution.amountHint!.currencyCode,
+                        ),
+                      ),
+                      locale: Localizations.localeOf(context).toLanguageTag(),
+                    ),
             ),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Approximate amount (optional)',
+              errorText:
+                  widget.controller.moneyInputErrors.containsKey(
+                    'activity.contribution',
+                  )
+                  ? 'Enter an exact amount with at most two decimal places'
+                  : null,
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (String value) {
-              final double? parsed = double.tryParse(
-                value.replaceAll(',', '.'),
-              );
-              widget.controller.updateActivityOptionalContribution(
-                kind: contribution.kind,
-                note: contribution.note,
-                amountMinor: parsed == null ? null : (parsed * 100).round(),
+              widget.controller.updateActivityContributionAmountText(
+                value,
+                locale: Localizations.localeOf(context).toLanguageTag(),
               );
             },
           ),
