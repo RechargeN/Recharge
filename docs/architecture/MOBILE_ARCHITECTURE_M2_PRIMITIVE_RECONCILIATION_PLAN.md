@@ -533,7 +533,7 @@ time/locale/market, backend, Firebase или продуктовых UI-изме�
 Это закрывает только M2-A. Compatibility exports остаются осознанным долгом
 M2-D; M2-B–M2-E и весь M2 остаются незавершёнными.
 
-## 15. M2-B local progress — 2026-10-29
+## 15. M2-B local progress — 2026-11-02
 
 Scope остаётся Approved local/mock. Выполнение начато на detached HEAD
 `be17822ed1ee7b750274430b39ba38e07c0c4a0a` с сохранением исходного IDP WIP.
@@ -553,10 +553,14 @@ read templates сохраняет повреждённые и неизвестн
 
 Find People public projection использует Money; Details formatting для него
 и integer Rental/Session amounts не проходит через double.
+Query/saved-search/history persistence перенесён из domain в единственные
+data mappers; прежние domain readers/writers удалены после переноса всех
+вызовов. Legacy read без записи сохраняет raw record и использует явный
+geographic config context. Budget Money migration ещё не завершена.
 
 Проверенный checkpoint: `flutter analyze --no-pub` — exit 0, 0 issues;
-полный `flutter test --no-pub --reporter expanded` — 1374 passed, exit 0,
-02:52. Boundary self-test/rules/inventory/diff — exit 0; 542 scanned,
+полный `flutter test --no-pub --reporter expanded` — 1376 passed, exit 0,
+02:30. Boundary self-test/rules/inventory/diff — exit 0; 545 scanned,
 71 findings/suppressions, 0 violations/stale/expired, budget 71/71.
 
 Дальнейшие изменения требуют свежих gates. Остались Discover/Favorites/query

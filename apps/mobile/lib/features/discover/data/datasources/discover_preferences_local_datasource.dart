@@ -1,3 +1,6 @@
+import '../models/discover_query_model.dart';
+import '../models/saved_search_model.dart';
+import '../models/smart_search_history_model.dart';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -27,7 +30,7 @@ class DiscoverPreferencesLocalDataSource {
   static const int _maxSmartSearchHistory = 6;
 
   Future<void> saveLastQuery(DiscoverQuery query) async {
-    final String encoded = jsonEncode(query.toMap());
+    final String encoded = jsonEncode(DiscoverQueryModel.toMap(query));
     await _secureStorage.write(key: _lastQueryKey, value: encoded);
   }
 
@@ -42,7 +45,7 @@ class DiscoverPreferencesLocalDataSource {
             (dynamic key, dynamic value) =>
                 MapEntry<String, Object?>(key as String, value as Object?),
           );
-      return DiscoverQuery.fromMap(
+      return DiscoverQueryModel.fromMap(
         map,
         defaultMarketCityId: _defaultMarketCityId,
         defaultCenterLat: _defaultCenterLat,
@@ -63,7 +66,7 @@ class DiscoverPreferencesLocalDataSource {
       return decoded
           .whereType<Map<dynamic, dynamic>>()
           .map(
-            (Map<dynamic, dynamic> item) => SavedSearchEntity.fromMap(
+            (Map<dynamic, dynamic> item) => SavedSearchModel.fromMap(
               item.map(
                 (dynamic key, dynamic value) =>
                     MapEntry<String, Object?>(key as String, value as Object?),
@@ -108,7 +111,7 @@ class DiscoverPreferencesLocalDataSource {
       return decoded
           .whereType<Map<dynamic, dynamic>>()
           .map(
-            (Map<dynamic, dynamic> item) => SmartSearchHistoryEntity.fromMap(
+            (Map<dynamic, dynamic> item) => SmartSearchHistoryModel.fromMap(
               item.map(
                 (dynamic key, dynamic value) =>
                     MapEntry<String, Object?>(key as String, value as Object?),
@@ -152,7 +155,9 @@ class DiscoverPreferencesLocalDataSource {
 
   Future<void> _writeSavedSearches(List<SavedSearchEntity> searches) async {
     final String encoded = jsonEncode(
-      searches.map((SavedSearchEntity item) => item.toMap()).toList(),
+      searches
+          .map((SavedSearchEntity item) => SavedSearchModel.toMap(item))
+          .toList(),
     );
     await _secureStorage.write(key: _savedSearchesKey, value: encoded);
   }
@@ -161,7 +166,12 @@ class DiscoverPreferencesLocalDataSource {
     List<SmartSearchHistoryEntity> items,
   ) async {
     final String encoded = jsonEncode(
-      items.map((SmartSearchHistoryEntity item) => item.toMap()).toList(),
+      items
+          .map(
+            (SmartSearchHistoryEntity item) =>
+                SmartSearchHistoryModel.toMap(item),
+          )
+          .toList(),
     );
     await _secureStorage.write(key: _smartSearchHistoryKey, value: encoded);
   }

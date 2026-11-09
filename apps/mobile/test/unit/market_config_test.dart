@@ -1,3 +1,4 @@
+import 'package:recharge/features/discover/data/models/discover_query_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/config/market_config.dart';
 import 'package:recharge/app/config/travel_policy_config.dart';
@@ -30,13 +31,13 @@ void main() {
         'center_lng': 27.3332,
         'manual_area_selected': false,
       };
-      final DiscoverQuery migrated = DiscoverQuery.fromMap(
+      final DiscoverQuery migrated = DiscoverQueryModel.fromMap(
         legacy,
         defaultMarketCityId: 'riga',
         defaultCenterLat: 56.9496,
         defaultCenterLng: 24.1052,
       );
-      final DiscoverQuery manual = DiscoverQuery.fromMap(
+      final DiscoverQuery manual = DiscoverQueryModel.fromMap(
         <String, Object?>{...legacy, 'manual_area_selected': true},
         defaultMarketCityId: 'riga',
         defaultCenterLat: 56.9496,
@@ -88,8 +89,8 @@ void main() {
           ),
         );
 
-    final DiscoverQuery restored = DiscoverQuery.fromMap(
-      source.toMap(),
+    final DiscoverQuery restored = DiscoverQueryModel.fromMap(
+      DiscoverQueryModel.toMap(source),
       defaultMarketCityId: 'riga',
       defaultCenterLat: 56.9496,
       defaultCenterLng: 24.1052,
