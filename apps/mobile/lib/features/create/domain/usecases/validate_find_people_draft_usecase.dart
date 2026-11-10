@@ -460,7 +460,9 @@ class ValidateFindPeopleDraftUseCase {
     }
     if (data.costType == FindPeopleCostType.estimated &&
         (data.expectedSpendAmount == null ||
-            data.expectedSpendAmount! <= 0 ||
+            data.expectedSpendAmount!.minorUnits <= 0 ||
+            data.expectedSpendAmount!.currency.value !=
+                data.currencyCode.trim().toUpperCase() ||
             data.currencyCode.trim().isEmpty)) {
       error(
         'estimated_cost',
@@ -471,7 +473,7 @@ class ValidateFindPeopleDraftUseCase {
     }
     if (data.costType != FindPeopleCostType.estimated &&
         data.expectedSpendAmount != null &&
-        data.expectedSpendAmount! != 0) {
+        data.expectedSpendAmount!.minorUnits != 0) {
       error(
         'cost_amount_forbidden',
         'group',
@@ -492,7 +494,8 @@ class ValidateFindPeopleDraftUseCase {
       (item) =>
           item.id.trim().isEmpty ||
           item.category.trim().isEmpty ||
-          item.amount <= 0,
+          item.amount.minorUnits <= 0 ||
+          item.amount.currency.value != data.currencyCode.trim().toUpperCase(),
     )) {
       error(
         'expense_invalid',

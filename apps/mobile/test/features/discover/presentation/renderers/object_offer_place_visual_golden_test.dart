@@ -1,9 +1,12 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'dart:io';
 
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../../../support/platform_golden.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/domain/entities/opening_hours_rule.dart';
 import 'package:recharge/features/discover/presentation/renderers/object_offer_details_renderer.dart';
@@ -65,7 +68,9 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<String>('object-offer-place-golden-surface')),
-      matchesGoldenFile('goldens/object_offer_place_reference.png'),
+      matchesGoldenFile(
+        platformGoldenPath('goldens/object_offer_place_reference.png'),
+      ),
     );
   });
 }
@@ -77,13 +82,13 @@ Future<void> _loadGoldenFonts() async {
   }
   final String fontRoot = '$flutterRoot/bin/cache/artifacts/material_fonts';
   await (FontLoader('Roboto')
-        ..addFont(_fontData('$fontRoot/roboto-regular.ttf'))
-        ..addFont(_fontData('$fontRoot/roboto-medium.ttf'))
-        ..addFont(_fontData('$fontRoot/roboto-bold.ttf')))
+        ..addFont(_fontData('$fontRoot/Roboto-Regular.ttf'))
+        ..addFont(_fontData('$fontRoot/Roboto-Medium.ttf'))
+        ..addFont(_fontData('$fontRoot/Roboto-Bold.ttf')))
       .load();
   await (FontLoader(
     'MaterialIcons',
-  )..addFont(_fontData('$fontRoot/materialicons-regular.otf'))).load();
+  )..addFont(_fontData('$fontRoot/MaterialIcons-Regular.otf'))).load();
 }
 
 Future<ByteData> _fontData(String path) async {
@@ -114,7 +119,7 @@ DiscoverItemEntity _placeFixture() {
     startsAtUtc: DateTime.utc(2026, 9, 5, 9),
     latitude: 56.954,
     longitude: 24.113,
-    priceAmount: 7,
+    priceAmount: Money(minorUnits: 700, currency: CurrencyCode.eur),
     distanceKm: 1.8,
     isFree: false,
     objectKind: DiscoverObjectKind.place,

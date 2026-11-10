@@ -26,7 +26,8 @@ class SelectWorkspaceUseCase {
     } else {
       final IdentityAccessSnapshot snapshot = await _repository
           .loadAccessSnapshot(userId);
-      if (!snapshot.canActivatePage(workspace.id)) {
+      if (!snapshot.belongsTo(userId) ||
+          !snapshot.canActivatePage(workspace.id)) {
         throw const WorkspaceSelectionException('workspace_access_unavailable');
       }
     }

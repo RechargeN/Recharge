@@ -303,7 +303,8 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
       params: <String, Object?>{
         'item_id': projection.eventId,
         'category': projection.category,
-        'price_amount': projection.priceAmount,
+        'price_minor_units': projection.priceAmount.minorUnits,
+        'currency_code': projection.priceAmount.currency.value,
       },
     );
     if (projection.isFree) {

@@ -1,3 +1,9 @@
+import '../../../../shared/primitives/money/currency_metadata.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
@@ -25,11 +31,7 @@ class DiscoverFeedController extends ChangeNotifier {
     required AnalyticsService analyticsService,
     DiscoverQuery? initialQuery,
     BuildTimeWindowUseCase? buildTimeWindow,
-    DiscoverRuntimeDefaults runtimeDefaults = const DiscoverRuntimeDefaults(
-      timezoneId: 'UTC',
-      originLat: 0,
-      originLng: 0,
-    ),
+    required DiscoverRuntimeDefaults runtimeDefaults,
   }) : _getDiscoverFeedUseCase = getDiscoverFeedUseCase,
        _discoverPreferencesRepository = discoverPreferencesRepository,
        _analyticsService = analyticsService,
@@ -48,11 +50,24 @@ class DiscoverFeedController extends ChangeNotifier {
   final DiscoverRuntimeDefaults _runtimeDefaults;
 
   String get marketTimezoneId => _runtimeDefaults.timezoneId;
+  CurrencyCode get marketCurrency => _runtimeDefaults.currency;
+  MoneyParseResult parseBudgetInput(String text, {required String locale}) {
+    final result = MoneyParser().parse(
+      text,
+      currency: marketCurrency,
+      locale: locale,
+    );
+    if (result.value != null && result.value!.minorUnits < 0) {
+      return const MoneyParseResult.failure(MoneyParseError.outOfRange);
+    }
+    return result;
+  }
 
   DiscoverFeedState _state;
   DiscoverFeedState get state => _state;
 
   bool _requestedOnce = false;
+  bool _queryReadBlocked = false;
   bool _savedSearchesRequested = false;
   bool _smartSearchHistoryRequested = false;
 
@@ -64,7 +79,7 @@ class DiscoverFeedController extends ChangeNotifier {
     String? queryText,
     int? peopleCount,
     bool clearPeopleCount = false,
-    double? budgetMax,
+    Money? budgetMax,
     bool clearBudgetMax = false,
     DateTime? dateFrom,
     bool clearDateFrom = false,
@@ -227,11 +242,12 @@ class DiscoverFeedController extends ChangeNotifier {
   Future<void> ensureLoaded() async {
     if (_requestedOnce) return;
     _requestedOnce = true;
-    await _restoreLastQuery();
+    if (!await _restoreLastQuery()) return;
     await loadFeed();
   }
 
   Future<void> loadFeed() async {
+    if (_queryReadBlocked && !await _restoreLastQuery()) return;
     if (_state.status == DiscoverFeedStatus.loading) return;
 
     _analyticsService.track(
@@ -414,8 +430,8 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> setBudgetRange({
-    required double? min,
-    required double? max,
+    required Money? min,
+    required Money? max,
   }) async {
     await _applyGlobalQueryUpdate(
       _state.appliedQuery.copyWith(
@@ -446,43 +462,63 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> ensureSavedSearchesLoaded() async {
-    if (_savedSearchesRequested) return;
-    _savedSearchesRequested = true;
-    final List<SavedSearchEntity> searches =
-        await _discoverPreferencesRepository.loadSavedSearches();
-    _setState(_state.copyWith(savedSearches: searches));
+    try {
+      if (_savedSearchesRequested) return;
+      _savedSearchesRequested = true;
+      final List<SavedSearchEntity> searches =
+          await _discoverPreferencesRepository.loadSavedSearches();
+      _setState(_state.copyWith(savedSearches: searches));
+    } on Object {
+      _savedSearchesRequested = false;
+      _preferencesFailure();
+    }
   }
 
   Future<void> ensureSmartSearchHistoryLoaded() async {
-    if (_smartSearchHistoryRequested) return;
-    _smartSearchHistoryRequested = true;
-    final List<SmartSearchHistoryEntity> history =
-        await _discoverPreferencesRepository.loadSmartSearchHistory();
-    _setState(_state.copyWith(smartSearchHistory: history));
+    try {
+      if (_smartSearchHistoryRequested) return;
+      _smartSearchHistoryRequested = true;
+      final List<SmartSearchHistoryEntity> history =
+          await _discoverPreferencesRepository.loadSmartSearchHistory();
+      _setState(_state.copyWith(smartSearchHistory: history));
+    } on Object {
+      _smartSearchHistoryRequested = false;
+      _preferencesFailure();
+    }
   }
 
   Future<void> saveCurrentSearch() async {
-    final SavedSearchEntity search = _savedSearchForQuery(_state.appliedQuery);
-    await _discoverPreferencesRepository.saveSavedSearch(search);
-    final List<SavedSearchEntity> next = <SavedSearchEntity>[
-      search,
-      ..._state.savedSearches.where(
-        (SavedSearchEntity item) => item.id != search.id,
-      ),
-    ].take(8).toList(growable: false);
-    _setState(_state.copyWith(savedSearches: next));
+    try {
+      final SavedSearchEntity search = _savedSearchForQuery(
+        _state.appliedQuery,
+      );
+      await _discoverPreferencesRepository.saveSavedSearch(search);
+      final List<SavedSearchEntity> next = <SavedSearchEntity>[
+        search,
+        ..._state.savedSearches.where(
+          (SavedSearchEntity item) => item.id != search.id,
+        ),
+      ].take(8).toList(growable: false);
+      _setState(_state.copyWith(savedSearches: next));
+    } on Object {
+      _preferencesFailure();
+    }
   }
 
   Future<void> recordRecentSearch(DiscoverQuery query) async {
-    final SavedSearchEntity search = _savedSearchForQuery(query);
-    await _discoverPreferencesRepository.saveSavedSearch(search);
-    final List<SavedSearchEntity> next = <SavedSearchEntity>[
-      search,
-      ..._state.savedSearches.where(
-        (SavedSearchEntity item) => item.id != search.id,
-      ),
-    ].take(8).toList(growable: false);
-    _setState(_state.copyWith(savedSearches: next));
+    try {
+      final SavedSearchEntity search = _savedSearchForQuery(query);
+      await _discoverPreferencesRepository.saveSavedSearch(search);
+      final List<SavedSearchEntity> next = <SavedSearchEntity>[
+        search,
+        ..._state.savedSearches.where(
+          (SavedSearchEntity item) => item.id != search.id,
+        ),
+      ].take(8).toList(growable: false);
+      _setState(_state.copyWith(savedSearches: next));
+    } on Object {
+      _preferencesFailure();
+    }
   }
 
   Future<void> applySavedSearch(SavedSearchEntity search) async {
@@ -495,33 +531,41 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> deleteSavedSearch(String id) async {
-    await _discoverPreferencesRepository.deleteSavedSearch(id);
-    _setState(
-      _state.copyWith(
-        savedSearches: _state.savedSearches
-            .where((SavedSearchEntity item) => item.id != id)
-            .toList(growable: false),
-      ),
-    );
+    try {
+      await _discoverPreferencesRepository.deleteSavedSearch(id);
+      _setState(
+        _state.copyWith(
+          savedSearches: _state.savedSearches
+              .where((SavedSearchEntity item) => item.id != id)
+              .toList(growable: false),
+        ),
+      );
+    } on Object {
+      _preferencesFailure();
+    }
   }
 
   Future<void> saveSmartSearchPrompt({
     required String prompt,
     required DiscoverQuery query,
   }) async {
-    final SmartSearchHistoryEntity? item = _smartSearchHistoryForQuery(
-      prompt,
-      query,
-    );
-    if (item == null) return;
-    await _discoverPreferencesRepository.saveSmartSearchPrompt(item);
-    final List<SmartSearchHistoryEntity> next = <SmartSearchHistoryEntity>[
-      item,
-      ..._state.smartSearchHistory.where(
-        (SmartSearchHistoryEntity current) => current.id != item.id,
-      ),
-    ].take(6).toList(growable: false);
-    _setState(_state.copyWith(smartSearchHistory: next));
+    try {
+      final SmartSearchHistoryEntity? item = _smartSearchHistoryForQuery(
+        prompt,
+        query,
+      );
+      if (item == null) return;
+      await _discoverPreferencesRepository.saveSmartSearchPrompt(item);
+      final List<SmartSearchHistoryEntity> next = <SmartSearchHistoryEntity>[
+        item,
+        ..._state.smartSearchHistory.where(
+          (SmartSearchHistoryEntity current) => current.id != item.id,
+        ),
+      ].take(6).toList(growable: false);
+      _setState(_state.copyWith(smartSearchHistory: next));
+    } on Object {
+      _preferencesFailure();
+    }
   }
 
   Future<void> applySmartSearchHistory(SmartSearchHistoryEntity item) async {
@@ -535,14 +579,18 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> deleteSmartSearchPrompt(String id) async {
-    await _discoverPreferencesRepository.deleteSmartSearchPrompt(id);
-    _setState(
-      _state.copyWith(
-        smartSearchHistory: _state.smartSearchHistory
-            .where((SmartSearchHistoryEntity item) => item.id != id)
-            .toList(growable: false),
-      ),
-    );
+    try {
+      await _discoverPreferencesRepository.deleteSmartSearchPrompt(id);
+      _setState(
+        _state.copyWith(
+          smartSearchHistory: _state.smartSearchHistory
+              .where((SmartSearchHistoryEntity item) => item.id != id)
+              .toList(growable: false),
+        ),
+      );
+    } on Object {
+      _preferencesFailure();
+    }
   }
 
   Future<void> applySearchConditions({
@@ -550,9 +598,9 @@ class DiscoverFeedController extends ChangeNotifier {
     List<String>? selectedCategoryIds,
     List<String>? selectedSubcategoryIds,
     bool? freeOnly,
-    double? budgetMin,
+    Money? budgetMin,
     bool clearBudgetMin = false,
-    double? budgetMax,
+    Money? budgetMax,
     bool clearBudgetMax = false,
     DateTime? dateFrom,
     bool clearDateFrom = false,
@@ -662,15 +710,7 @@ class DiscoverFeedController extends ChangeNotifier {
       queryVersion: 2,
       appliedAtUtc: DateTime.now().toUtc(),
     );
-    _setState(
-      _state.copyWith(
-        appliedQuery: applied,
-        draftQuery: applied,
-        searchAreaDirty: false,
-      ),
-    );
-    await _discoverPreferencesRepository.saveLastQuery(applied);
-    await loadFeed();
+    await _applyGlobalQueryUpdate(applied);
   }
 
   Future<void> useCurrentLocation() async {
@@ -699,28 +739,65 @@ class DiscoverFeedController extends ChangeNotifier {
     String? selectedItemId,
     bool clearSelectedItem = false,
   }) async {
-    _setState(
-      _state.copyWith(
-        appliedQuery: appliedQuery,
-        draftQuery: appliedQuery,
-        searchAreaDirty: false,
-        selectedItemId: selectedItemId,
-        clearSelectedItem: clearSelectedItem,
-      ),
-    );
-    await _discoverPreferencesRepository.saveLastQuery(appliedQuery);
-    await loadFeed();
+    try {
+      _validateQueryMoney(appliedQuery);
+      await _discoverPreferencesRepository.saveLastQuery(appliedQuery);
+      _setState(
+        _state.copyWith(
+          appliedQuery: appliedQuery,
+          draftQuery: appliedQuery,
+          searchAreaDirty: false,
+          selectedItemId: selectedItemId,
+          clearSelectedItem: clearSelectedItem,
+        ),
+      );
+      await loadFeed();
+    } on Object {
+      _preferencesFailure();
+    }
   }
 
-  Future<void> _restoreLastQuery() async {
-    final DiscoverQuery? lastQuery = await _discoverPreferencesRepository
-        .loadLastQuery();
-    if (lastQuery == null) return;
+  Future<bool> _restoreLastQuery() async {
+    try {
+      final DiscoverQuery? lastQuery = await _discoverPreferencesRepository
+          .loadLastQuery();
+      if (lastQuery == null) {
+        _queryReadBlocked = false;
+        return true;
+      }
+      _validateQueryMoney(lastQuery);
+      _setState(
+        _state.copyWith(
+          appliedQuery: lastQuery,
+          draftQuery: lastQuery,
+          searchAreaDirty: false,
+        ),
+      );
+      _queryReadBlocked = false;
+      return true;
+    } on Object {
+      _queryReadBlocked = true;
+      _requestedOnce = false;
+      _preferencesFailure();
+      return false;
+    }
+  }
+
+  void _validateQueryMoney(DiscoverQuery query) {
+    for (final value in [query.budgetMin, query.budgetMax]) {
+      if (value != null &&
+          CurrencyMetadataRegistry.eurOnly.lookup(value.currency) == null) {
+        throw const MoneyReadException(MoneyParseError.unknownCurrency);
+      }
+    }
+  }
+
+  void _preferencesFailure() {
     _setState(
       _state.copyWith(
-        appliedQuery: lastQuery,
-        draftQuery: lastQuery,
-        searchAreaDirty: false,
+        status: DiscoverFeedStatus.error,
+        message:
+            'Не удалось восстановить или сохранить условия поиска. Данные сохранены без изменений.',
       ),
     );
   }
@@ -785,7 +862,9 @@ String _savedSearchIdFor(DiscoverQuery query) {
     query.queryText.trim().toLowerCase(),
     query.selectedCategoryIds.join('-'),
     query.freeOnly ? 'free' : 'paid',
-    query.budgetMax?.round().toString() ?? 'any_budget',
+    query.budgetMax == null
+        ? 'any_budget'
+        : '${query.budgetMax!.minorUnits}_${query.budgetMax!.currency.value}',
     query.dateFrom?.toIso8601String() ?? 'any_date',
     query.dateTo?.toIso8601String() ?? 'any_date_to',
     query.radiusMeters.round().toString(),
@@ -826,7 +905,9 @@ String _smartSearchHistoryIdFor(String prompt, DiscoverQuery query) {
     query.queryText.trim().toLowerCase(),
     query.selectedCategoryIds.join('-'),
     query.freeOnly ? 'free' : 'paid',
-    query.budgetMax?.round().toString() ?? 'any_budget',
+    query.budgetMax == null
+        ? 'any_budget'
+        : '${query.budgetMax!.minorUnits}_${query.budgetMax!.currency.value}',
     query.radiusMeters.round().toString(),
     query.unlimitedRadius ? 'any_area' : 'radius',
   ].join('_');
@@ -859,7 +940,8 @@ String _savedSearchSubtitleFor(DiscoverQuery query) {
     if (query.selectedCategoryIds.isNotEmpty)
       _categoryLabel(query.selectedCategoryIds.first),
     if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'up to ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.budgetMax != null)
+      'up to ${MoneyFormatter().decimal(query.budgetMax!, locale: 'en', omitZeroFraction: true)}',
     if (query.dateFrom != null || query.dateTo != null) 'date set',
     query.unlimitedRadius
         ? 'any area'

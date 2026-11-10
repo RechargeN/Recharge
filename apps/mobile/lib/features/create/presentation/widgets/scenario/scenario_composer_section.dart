@@ -595,6 +595,7 @@ class _TransportLegCard extends StatelessWidget {
                       await showScenarioManualLegEditor(
                         context,
                         initialMode: data.constraints.primaryTravelMode,
+                        currencyCode: data.displayCurrencyCode,
                         current: leg,
                       );
                   if (result != null) {

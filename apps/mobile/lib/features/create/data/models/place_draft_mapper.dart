@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../core/parsing/money_legacy_adapter.dart';
 import '../../domain/entities/place_draft_data.dart';
 
 class PlaceDraftMapper {
@@ -132,10 +134,17 @@ class PlaceDraftMapper {
       'amenityUnknownIds': value.amenityUnknownIds.toList(growable: false),
       'pricing': <String, Object?>{
         'entryType': value.pricing.entryType?.name,
-        'entryPriceFrom': value.pricing.entryPriceFrom,
-        'entryPriceTo': value.pricing.entryPriceTo,
-        'typicalSpendFrom': value.pricing.typicalSpendFrom,
-        'typicalSpendTo': value.pricing.typicalSpendTo,
+        'entryPriceFromMinorUnits': value.pricing.entryPriceFrom?.minorUnitsIn(
+          CurrencyCode.parse(value.pricing.currencyCode),
+        ),
+        'entryPriceToMinorUnits': value.pricing.entryPriceTo?.minorUnitsIn(
+          CurrencyCode.parse(value.pricing.currencyCode),
+        ),
+        'typicalSpendFromMinorUnits': value.pricing.typicalSpendFrom
+            ?.minorUnitsIn(CurrencyCode.parse(value.pricing.currencyCode)),
+        'typicalSpendToMinorUnits': value.pricing.typicalSpendTo?.minorUnitsIn(
+          CurrencyCode.parse(value.pricing.currencyCode),
+        ),
         'currencyCode': value.pricing.currencyCode,
         'pricingNote': value.pricing.pricingNote,
         'officialPricingUrl': value.pricing.officialPricingUrl,
@@ -288,10 +297,30 @@ class PlaceDraftMapper {
     final Map<String, Object?> json = _map(raw) ?? const <String, Object?>{};
     return PlacePricingDraft(
       entryType: _enumValue(PlaceEntryType.values, json['entryType']),
-      entryPriceFrom: _double(json['entryPriceFrom']),
-      entryPriceTo: _double(json['entryPriceTo']),
-      typicalSpendFrom: _double(json['typicalSpendFrom']),
-      typicalSpendTo: _double(json['typicalSpendTo']),
+      entryPriceFrom: MoneyLegacyAdapter().readOptional(
+        hasCanonicalMinorUnits: json.containsKey('entryPriceFromMinorUnits'),
+        canonicalMinorUnits: json['entryPriceFromMinorUnits'],
+        legacyMajorAmount: json['entryPriceFrom'],
+        currencyCode: _string(json['currencyCode']) ?? defaultCurrency,
+      ),
+      entryPriceTo: MoneyLegacyAdapter().readOptional(
+        hasCanonicalMinorUnits: json.containsKey('entryPriceToMinorUnits'),
+        canonicalMinorUnits: json['entryPriceToMinorUnits'],
+        legacyMajorAmount: json['entryPriceTo'],
+        currencyCode: _string(json['currencyCode']) ?? defaultCurrency,
+      ),
+      typicalSpendFrom: MoneyLegacyAdapter().readOptional(
+        hasCanonicalMinorUnits: json.containsKey('typicalSpendFromMinorUnits'),
+        canonicalMinorUnits: json['typicalSpendFromMinorUnits'],
+        legacyMajorAmount: json['typicalSpendFrom'],
+        currencyCode: _string(json['currencyCode']) ?? defaultCurrency,
+      ),
+      typicalSpendTo: MoneyLegacyAdapter().readOptional(
+        hasCanonicalMinorUnits: json.containsKey('typicalSpendToMinorUnits'),
+        canonicalMinorUnits: json['typicalSpendToMinorUnits'],
+        legacyMajorAmount: json['typicalSpendTo'],
+        currencyCode: _string(json['currencyCode']) ?? defaultCurrency,
+      ),
       currencyCode: _string(json['currencyCode']) ?? defaultCurrency,
       pricingNote: _string(json['pricingNote']),
       officialPricingUrl: _string(json['officialPricingUrl']),

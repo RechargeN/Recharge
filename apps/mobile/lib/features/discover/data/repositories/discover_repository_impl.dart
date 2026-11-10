@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
 import 'dart:math' as math;
 
 import '../../../../core/config/recharge_taxonomy.dart';
@@ -11,11 +13,13 @@ import '../datasources/discover_remote_datasource.dart';
 class DiscoverRepositoryImpl implements DiscoverRepository {
   DiscoverRepositoryImpl({
     required DiscoverRemoteDataSource remoteDataSource,
+    required this.currency,
     PublishedRouteDiscoveryPort? publishedRoutes,
   }) : _remoteDataSource = remoteDataSource,
        _publishedRoutes = publishedRoutes;
 
   final DiscoverRemoteDataSource _remoteDataSource;
+  final CurrencyCode currency;
   final PublishedRouteDiscoveryPort? _publishedRoutes;
 
   @override
@@ -111,10 +115,14 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
 
     if (query.freeOnly && !item.isFree) return false;
 
-    if (query.budgetMin != null && item.priceAmount < query.budgetMin!) {
+    if (query.budgetMin != null &&
+        (item.priceAmount.currency != query.budgetMin!.currency ||
+            item.priceAmount.compareTo(query.budgetMin!) < 0)) {
       return false;
     }
-    if (query.budgetMax != null && item.priceAmount > query.budgetMax!) {
+    if (query.budgetMax != null &&
+        (item.priceAmount.currency != query.budgetMax!.currency ||
+            item.priceAmount.compareTo(query.budgetMax!) > 0)) {
       return false;
     }
 
@@ -189,7 +197,7 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
 
   double _toRadians(double degree) => degree * (math.pi / 180);
 
-  static DiscoverItemEntity _routeItem(PublishedRouteDiscoveryEntity route) =>
+  DiscoverItemEntity _routeItem(PublishedRouteDiscoveryEntity route) =>
       DiscoverItemEntity(
         id: route.routeId,
         title: route.title,
@@ -200,7 +208,7 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
         startsAtUtc: route.publishedAtUtc,
         latitude: route.startPoint.latitude,
         longitude: route.startPoint.longitude,
-        priceAmount: 0,
+        priceAmount: Money(minorUnits: 0, currency: currency),
         distanceKm: 0,
         isFree: true,
         coverImageUrl: route.coverImage,

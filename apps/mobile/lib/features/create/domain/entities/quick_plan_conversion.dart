@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money.dart';
 import 'scenario_draft_data.dart';
 import 'scenario_item_draft.dart';
 
@@ -11,6 +12,7 @@ enum QuickPlanConversionIssueCode {
   selectionEmpty,
   legacySourceIdentityMissing,
   privateNoteNotCopied,
+  invalidPrice,
 }
 
 class QuickPlanConversionIssue {
@@ -35,7 +37,7 @@ class QuickPlanConversionStopSnapshot {
     required this.latitude,
     required this.longitude,
     required this.isFree,
-    required this.priceMinorUnits,
+    required this.price,
     required this.available,
     this.distanceKm,
     this.sourceObjectId,
@@ -49,7 +51,7 @@ class QuickPlanConversionStopSnapshot {
   final double latitude;
   final double longitude;
   final bool isFree;
-  final int? priceMinorUnits;
+  final Money? price;
   final bool available;
   final double? distanceKm;
   final String? sourceObjectId;

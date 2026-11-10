@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -42,6 +43,7 @@ class CreateLocalDataSource {
     this.activeTimezone = 'UTC',
     this.activeCountry = '',
     this.activeCity = '',
+    this.activeCurrency,
   });
 
   final FlutterSecureStorage _storage;
@@ -49,6 +51,7 @@ class CreateLocalDataSource {
   final String activeTimezone;
   final String activeCountry;
   final String activeCity;
+  final String? activeCurrency;
   final Map<String, Future<void>> _conditionalSaveQueues =
       <String, Future<void>>{};
 
@@ -75,6 +78,8 @@ class CreateLocalDataSource {
   Future<CreateDraftModel?> loadDraft(String userId) async {
     try {
       return await _loadDraftStrict(userId);
+    } on MoneyReadException {
+      rethrow;
     } on Object {
       return null;
     }
@@ -90,6 +95,7 @@ class CreateLocalDataSource {
       activeTimezone: activeTimezone,
       activeCountry: activeCountry,
       activeCity: activeCity,
+      activeCurrency: activeCurrency,
     );
   }
 
@@ -441,6 +447,7 @@ class CreateLocalDataSource {
       activeTimezone: activeTimezone,
       activeCountry: activeCountry,
       activeCity: activeCity,
+      activeCurrency: activeCurrency,
     );
   }
 
@@ -482,6 +489,7 @@ class CreateLocalDataSource {
           activeTimezone: activeTimezone,
           activeCountry: activeCountry,
           activeCity: activeCity,
+          activeCurrency: activeCurrency,
         );
         model.toEntity();
         if (model.organizerId == ownerId &&
@@ -701,6 +709,7 @@ class CreateLocalDataSource {
         activeTimezone: activeTimezone,
         activeCountry: activeCountry,
         activeCity: activeCity,
+        activeCurrency: activeCurrency,
       );
       await _writeDraftUnlocked(userId, promoted);
       return RentalPromotionResult(

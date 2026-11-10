@@ -63,21 +63,24 @@ class CollectionBudgetSuggestionPolicy {
     final double coverage = pricesInMarketCurrency.length / readyItems.length;
     if (coverage < minPriceCoverage) return null;
 
-    final num median = _median(pricesInMarketCurrency);
-    if (median <= 0) return CollectionBudgetTier.free;
-    if (median <= marketConfig.lowMaxMinorUnits) {
+    final BigInt twiceMedian = _twiceMedian(pricesInMarketCurrency);
+    if (twiceMedian <= BigInt.zero) return CollectionBudgetTier.free;
+    if (twiceMedian <=
+        BigInt.from(marketConfig.lowMaxMinorUnits) * BigInt.two) {
       return CollectionBudgetTier.low;
     }
-    if (median <= marketConfig.mediumMaxMinorUnits) {
+    if (twiceMedian <=
+        BigInt.from(marketConfig.mediumMaxMinorUnits) * BigInt.two) {
       return CollectionBudgetTier.medium;
     }
     return CollectionBudgetTier.high;
   }
 
-  static num _median(List<int> values) {
+  // Compare the exact rational median without rounding half a minor unit.
+  static BigInt _twiceMedian(List<int> values) {
     final List<int> sorted = List<int>.of(values)..sort();
     final int mid = sorted.length ~/ 2;
-    if (sorted.length.isOdd) return sorted[mid];
-    return (sorted[mid - 1] + sorted[mid]) / 2;
+    if (sorted.length.isOdd) return BigInt.from(sorted[mid]) * BigInt.two;
+    return BigInt.from(sorted[mid - 1]) + BigInt.from(sorted[mid]);
   }
 }

@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 
@@ -325,8 +326,12 @@ class _PublishedRouteCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                DetailsPill(label: routeProfileLabelForDetails(route.routingProfileId)),
-                DetailsPill(label: routeDifficultyLabelForDetails(route.difficultyId)),
+                DetailsPill(
+                  label: routeProfileLabelForDetails(route.routingProfileId),
+                ),
+                DetailsPill(
+                  label: routeDifficultyLabelForDetails(route.difficultyId),
+                ),
                 if (route.recommendedDifficultyId.isNotEmpty &&
                     route.recommendedDifficultyId != route.difficultyId)
                   DetailsPill(
@@ -1109,11 +1114,7 @@ class HighlightsCard extends StatelessWidget {
 }
 
 class LocationCard extends StatelessWidget {
-  const LocationCard({
-    super.key,
-    required this.item,
-    required this.onOpenMap,
-  });
+  const LocationCard({super.key, required this.item, required this.onOpenMap});
 
   final DiscoverItemEntity item;
   final VoidCallback onOpenMap;
@@ -1299,7 +1300,7 @@ String routeDifficultyLabelForDetails(String difficultyId) {
 
 String priceLabelForDetails(DiscoverItemEntity item) {
   if (item.isFree) return 'Free';
-  return '${item.priceAmount.toStringAsFixed(0)} €';
+  return '${MoneyFormatter().decimal(item.priceAmount, locale: 'en', omitZeroFraction: true)} €';
 }
 
 String timeFitLabelForDetails(TimeFitEvaluation evaluation) =>

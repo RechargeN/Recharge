@@ -1,3 +1,7 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
+import '../support/publisher_access_test_support.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1191,7 +1195,7 @@ void main() {
     expect(find.text('pendingReview'), findsOneWidget);
     expect(find.text('Art, culture & museums'), findsOneWidget);
     expect(find.text('Museum'), findsOneWidget);
-    expect(find.text('12 EUR'), findsOneWidget);
+    expect(find.text('12.00 EUR'), findsOneWidget);
 
     await tester.scrollPageUntilVisible(find.text('Open Create').first, 220);
     await tester.tap(find.text('Open Create').first);
@@ -1209,7 +1213,7 @@ void main() {
     expect(find.text('Search page'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
     expect(find.text('art_culture_museums'), findsOneWidget);
-    expect(find.text('12'), findsOneWidget);
+    expect(find.text('12.00'), findsOneWidget);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -1604,7 +1608,7 @@ void main() {
       expect(find.text('Search page'), findsOneWidget);
       expect(find.text('Draft pottery workshop'), findsOneWidget);
       expect(find.text('art_culture_museums'), findsOneWidget);
-      expect(find.text('8'), findsOneWidget);
+      expect(find.text('8.00'), findsOneWidget);
 
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();
@@ -1822,6 +1826,12 @@ DiscoverFeedController _discoverController({
       initialSmartSearchHistory: smartSearchHistory,
     ),
     analyticsService: _NoopAnalyticsService(),
+    runtimeDefaults: const DiscoverRuntimeDefaults(
+      timezoneId: 'Europe/Riga',
+      originLat: 56.9496,
+      originLng: 24.1052,
+      currency: CurrencyCode.eur,
+    ),
   );
 }
 
@@ -1830,6 +1840,7 @@ CreateController _createController({CreateDraftEntity? initialDraft}) {
     initialDraft: initialDraft,
   );
   return CreateController(
+    publisherAccessCheck: const TestPersonalPublisherAccess(),
     loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
     saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
     publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
@@ -1888,7 +1899,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,
@@ -1907,7 +1918,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
         startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
         latitude: query.centerLat,
         longitude: query.centerLng,
-        priceAmount: 0,
+        priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
         distanceKm: 1.2,
         isFree: true,
         relevanceScore: 0.8,
@@ -1981,9 +1992,7 @@ class _FakeDiscoverPreferencesRepository
 
 class _FakeFavoritesRepository implements FavoritesRepository {
   _FakeFavoritesRepository({List<FavoriteItemEntity>? initial})
-    : _items = List<FavoriteItemEntity>.from(
-        initial ?? const <FavoriteItemEntity>[],
-      );
+    : _items = List<FavoriteItemEntity>.from(initial ?? <FavoriteItemEntity>[]);
 
   final List<FavoriteItemEntity> _items;
 
@@ -2036,7 +2045,7 @@ FavoriteItemEntity _scenarioFavorite() {
     category: 'scenario',
     startsAtUtc: DateTime.parse('2026-04-20T12:00:00Z'),
     distanceKm: 2.4,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     isFree: true,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
     targetRoute:
@@ -2052,7 +2061,7 @@ SavedSearchEntity _savedSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -2067,7 +2076,7 @@ SmartSearchHistoryEntity _smartSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),

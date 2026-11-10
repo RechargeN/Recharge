@@ -1,3 +1,5 @@
+import 'package:recharge/features/create/domain/entities/scenario_budget_draft.dart';
+import 'package:recharge/features/create/presentation/widgets/scenario/scenario_transport_editor_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/id/id_generator.dart';
@@ -17,6 +19,108 @@ import 'package:recharge/features/create/presentation/widgets/scenario/scenario_
 import '../support/event_create_test_support.dart';
 
 void main() {
+  testWidgets(
+    'opening an existing manual leg preserves its price without re-entry',
+    (tester) async {
+      ScenarioManualLegInput? result;
+      const current = ScenarioLegDraft(
+        id: 'leg',
+        dayId: 'day',
+        fromLocationId: 'a',
+        toLocationId: 'b',
+        mode: ScenarioTravelMode.car,
+        source: ScenarioLegSource.manual,
+        status: ScenarioLegStatus.ready,
+        distanceM: 1000,
+        durationMinutes: 15,
+        cost: ScenarioCostDraft(
+          components: [
+            ScenarioMoneyEstimateDraft(
+              componentCode: 'travel_extra',
+              knowledge: ScenarioPriceKnowledge.known,
+              amount: ScenarioMoneyDraft(minorUnits: 1234, currencyCode: 'EUR'),
+              basis: ScenarioPriceBasis.perGroup,
+              source: ScenarioPriceSource.manual,
+            ),
+          ],
+        ),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () async {
+                  result = await showScenarioManualLegEditor(
+                    context,
+                    initialMode: ScenarioTravelMode.car,
+                    currencyCode: 'EUR',
+                    current: current,
+                  );
+                },
+                child: const Text('Edit'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Edit'));
+      await tester.pumpAndSettle();
+      expect(find.text('12.34'), findsOneWidget);
+      await tester.ensureVisible(find.text('Save travel'));
+      await tester.tap(find.text('Save travel'));
+      await tester.pumpAndSettle();
+      expect(result?.otherCostMinorUnits, 1234);
+    },
+  );
+
+  testWidgets(
+    'manual Scenario transport preserves exact cost and rejects rounding',
+    (tester) async {
+      ScenarioManualLegInput? result;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () async {
+                  result = await showScenarioManualLegEditor(
+                    context,
+                    initialMode: ScenarioTravelMode.car,
+                    currencyCode: 'EUR',
+                  );
+                },
+                child: const Text('Edit travel'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Edit travel'));
+      await tester.pumpAndSettle();
+      final amount = find.byWidgetPredicate(
+        (w) =>
+            w is TextField &&
+            w.decoration?.labelText ==
+                'Parking / ticket / other cost (optional)',
+      );
+      await tester.enterText(amount, '1.005');
+      await tester.ensureVisible(find.text('Save travel'));
+      await tester.tap(find.text('Save travel'));
+      await tester.pumpAndSettle();
+      expect(result, isNull);
+      expect(
+        find.textContaining('extra decimals are not rounded'),
+        findsOneWidget,
+      );
+      await tester.enterText(amount, '0.29');
+      await tester.ensureVisible(find.text('Save travel'));
+      await tester.tap(find.text('Save travel'));
+      await tester.pumpAndSettle();
+      expect(result?.otherCostMinorUnits, 29);
+    },
+  );
+
   testWidgets(
     'Scenario Create shows own car and labels planned transport as not live',
     (WidgetTester tester) async {

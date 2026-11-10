@@ -1,3 +1,5 @@
+import '../../../../core/parsing/money_legacy_adapter.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import '../../domain/entities/activity_draft_data.dart';
 import '../../domain/entities/publisher_ref.dart';
 
@@ -58,6 +60,13 @@ class ActivityDraftMapper {
         value.optionalContribution;
     final ActivityContributionAmountDraft? amountHint =
         contribution?.amountHint;
+    if (amountHint != null) {
+      MoneyLegacyAdapter().readOptional(
+        hasCanonicalMinorUnits: true,
+        canonicalMinorUnits: amountHint.amountMinor,
+        currencyCode: amountHint.currencyCode,
+      );
+    }
     final ActivityBestTimeDraft? bestTime = value.bestTime;
     return <String, Object?>{
       ...value.unknownFields,
@@ -163,15 +172,19 @@ class ActivityDraftMapper {
     final String? note = _text(raw['note']);
     final Object? amountRaw = raw['amount_hint'];
     ActivityContributionAmountDraft? amountHint;
-    if (amountRaw is Map) {
-      final int? amountMinor = _int(amountRaw['amount_minor']);
-      final String? currencyCode = _text(amountRaw['currency_code']);
-      if (amountMinor != null && currencyCode != null) {
-        amountHint = ActivityContributionAmountDraft(
-          amountMinor: amountMinor,
-          currencyCode: currencyCode,
-        );
+    if (amountRaw != null) {
+      if (amountRaw is! Map || amountRaw['amount_minor'] == null) {
+        throw const MoneyReadException(MoneyParseError.invalidCanonicalValue);
       }
+      final amount = MoneyLegacyAdapter().readOptional(
+        hasCanonicalMinorUnits: true,
+        canonicalMinorUnits: amountRaw['amount_minor'],
+        currencyCode: amountRaw['currency_code'],
+      )!;
+      amountHint = ActivityContributionAmountDraft(
+        amountMinor: amount.minorUnits,
+        currencyCode: amount.currency.value,
+      );
     }
     if (kind == null && note == null && amountHint == null) return null;
     return ActivityOptionalContributionDraft(

@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
@@ -20,6 +22,41 @@ void main() {
     ids = _SequentialIdGenerator();
     expand = ExpandQuickPlanToScenarioUseCase(source: source, idGenerator: ids);
   });
+
+  test(
+    'direct conversion rejects malformed or incompatible source prices',
+    () async {
+      for (final snapshot in [
+        _snapshot(currencyCode: 'invalid'),
+        _snapshot(
+          firstPrice: Money(
+            minorUnits: 10,
+            currency: CurrencyCode.parse('USD'),
+          ),
+        ),
+        _snapshot(
+          firstPrice: Money(minorUnits: -1, currency: CurrencyCode.eur),
+        ),
+      ]) {
+        source.put(snapshot);
+        final result = await expand(
+          const ExpandQuickPlanToScenarioRequest(
+            quickPlanId: 'quick-plan-1',
+            expectedQuickPlanRevision: 4,
+            selectedStopIds: {'stop-a'},
+            copyPrivateNotes: false,
+            requesterId: 'owner-1',
+          ),
+        );
+        expect(result.scenario, isNull);
+        expect(
+          result.issues.single.code,
+          QuickPlanConversionIssueCode.invalidPrice,
+        );
+        expect(ids._value, 0);
+      }
+    },
+  );
 
   test('creates an independent Scenario in source stop order', () async {
     final QuickPlanConversionSnapshot snapshot = _snapshot();
@@ -203,11 +240,7 @@ void main() {
   });
 
   test('preserves a catalog ref for every repeated occurrence', () async {
-    source.put(
-      _snapshot(
-        repeatCatalogObject: true,
-      ),
-    );
+    source.put(_snapshot(repeatCatalogObject: true));
 
     final result = await expand(
       const ExpandQuickPlanToScenarioRequest(
@@ -236,32 +269,37 @@ void main() {
     );
   });
 
-  test('keeps missing legacy identity as a typed custom-location issue', () async {
-    source.put(_snapshot());
+  test(
+    'keeps missing legacy identity as a typed custom-location issue',
+    () async {
+      source.put(_snapshot());
 
-    final result = await expand(
-      const ExpandQuickPlanToScenarioRequest(
-        quickPlanId: 'quick-plan-1',
-        expectedQuickPlanRevision: 4,
-        selectedStopIds: <String>{'stop-b'},
-        copyPrivateNotes: false,
-        requesterId: 'owner-1',
-      ),
-    );
+      final result = await expand(
+        const ExpandQuickPlanToScenarioRequest(
+          quickPlanId: 'quick-plan-1',
+          expectedQuickPlanRevision: 4,
+          selectedStopIds: <String>{'stop-b'},
+          copyPrivateNotes: false,
+          requesterId: 'owner-1',
+        ),
+      );
 
-    expect(
-      result.scenario!.items.single.source,
-      isA<ScenarioCustomLocationSourceDraft>(),
-    );
-    expect(
-      result.issues.map((issue) => issue.code),
-      contains(QuickPlanConversionIssueCode.legacySourceIdentityMissing),
-    );
-  });
+      expect(
+        result.scenario!.items.single.source,
+        isA<ScenarioCustomLocationSourceDraft>(),
+      );
+      expect(
+        result.issues.map((issue) => issue.code),
+        contains(QuickPlanConversionIssueCode.legacySourceIdentityMissing),
+      );
+    },
+  );
 }
 
 QuickPlanConversionSnapshot _snapshot({
   int revision = 4,
+  String currencyCode = 'EUR',
+  Money? firstPrice,
   bool secondAvailable = true,
   bool repeatCatalogObject = false,
 }) {
@@ -271,17 +309,17 @@ QuickPlanConversionSnapshot _snapshot({
     ownerId: 'owner-1',
     title: 'Quick evening',
     timezoneId: 'Europe/Riga',
-    currencyCode: 'EUR',
+    currencyCode: currencyCode,
     readableByUserIds: const <String>{'owner-1'},
     stops: <QuickPlanConversionStopSnapshot>[
-      const QuickPlanConversionStopSnapshot(
+      QuickPlanConversionStopSnapshot(
         id: 'stop-a',
         title: 'Coffee',
         durationMinutes: 45,
         latitude: 56.95,
         longitude: 24.1,
         isFree: false,
-        priceMinorUnits: 500,
+        price: firstPrice ?? Money(minorUnits: 500, currency: CurrencyCode.eur),
         available: true,
         sourceObjectId: 'place-123',
         sourceObjectType: ScenarioCatalogObjectType.place,
@@ -294,7 +332,7 @@ QuickPlanConversionSnapshot _snapshot({
         latitude: 56.96,
         longitude: 24.11,
         isFree: false,
-        priceMinorUnits: 1200,
+        price: Money(minorUnits: 1200, currency: CurrencyCode.eur),
         available: secondAvailable,
         sourceObjectId: repeatCatalogObject ? 'place-123' : null,
         sourceObjectType: repeatCatalogObject

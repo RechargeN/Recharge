@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/money.dart';
+
 import 'publisher_verification_display_state.dart';
 
 enum PublishedFindPeopleScheduleMode { single, timePoll, recurring }
@@ -192,7 +194,7 @@ final class PublishedFindPeopleDiscoveryEntity {
   final String accessibilityNote;
 
   final PublishedFindPeopleCostType costType;
-  final double? expectedSpendAmount;
+  final Money? expectedSpendAmount;
   final String currencyCode;
   final String costNote;
 
@@ -284,14 +286,23 @@ final class PublishedFindPeopleDiscoveryEntity {
         'must be within target group size',
       );
     }
+    final amount = expectedSpendAmount;
+    if (amount != null &&
+        (amount.minorUnits < 0 ||
+            amount.currency.value != currencyCode.trim().toUpperCase())) {
+      throw ArgumentError(
+        'Expected spend needs a nonnegative amount in the declared currency.',
+      );
+    }
     switch (costType) {
       case PublishedFindPeopleCostType.free:
-        if (expectedSpendAmount != null && expectedSpendAmount! > 0) {
+        if (expectedSpendAmount != null &&
+            expectedSpendAmount!.minorUnits > 0) {
           throw ArgumentError('Free request cannot have a positive spend.');
         }
       case PublishedFindPeopleCostType.estimated:
         if (expectedSpendAmount == null ||
-            expectedSpendAmount! <= 0 ||
+            expectedSpendAmount!.minorUnits <= 0 ||
             currencyCode.trim().isEmpty) {
           throw ArgumentError(
             'Estimated cost requires a positive amount and currency.',

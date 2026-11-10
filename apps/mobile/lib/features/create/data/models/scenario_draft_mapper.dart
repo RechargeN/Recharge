@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import '../../domain/entities/scenario_budget_draft.dart';
 import '../../domain/entities/scenario_draft_data.dart';
 import '../../domain/entities/scenario_item_draft.dart';
@@ -873,22 +876,33 @@ class ScenarioDraftMapper {
   };
 
   static ScenarioMoneyDraft? _money(Object? value) {
-    final Map<String, Object?> json = _map(value);
-    final int? minorUnits = _int(json['minorUnits']);
-    final String currencyCode = _string(json['currencyCode'], '').toUpperCase();
-    return minorUnits == null || currencyCode.isEmpty
-        ? null
-        : ScenarioMoneyDraft(
-            minorUnits: minorUnits,
-            currencyCode: currencyCode,
-          );
+    if (value == null) return null;
+    final json = _map(value);
+    final minor = json['minorUnits'];
+    if (minor is! int) {
+      throw const MoneyReadException(MoneyParseError.invalidCanonicalValue);
+    }
+    try {
+      return ScenarioMoneyDraft.fromMoney(
+        Money(
+          minorUnits: minor,
+          currency: CurrencyCode.parse(_string(json['currencyCode'], '')),
+        ),
+      );
+    } on FormatException {
+      throw const MoneyReadException(MoneyParseError.missingCurrency);
+    } on MoneyArithmeticException {
+      throw const MoneyReadException(MoneyParseError.outOfRange);
+    }
   }
 
-  static Map<String, Object?> _moneyToJson(ScenarioMoneyDraft value) =>
-      <String, Object?>{
-        'minorUnits': value.minorUnits,
-        'currencyCode': value.currencyCode,
-      };
+  static Map<String, Object?> _moneyToJson(ScenarioMoneyDraft value) {
+    final money = value.toMoney();
+    return <String, Object?>{
+      'minorUnits': money.minorUnits,
+      'currencyCode': money.currency.value,
+    };
+  }
 
   static ScenarioTotalsDraft _totals(Object? value) {
     final Map<String, Object?> json = _map(value);

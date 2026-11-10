@@ -143,6 +143,7 @@ class ManageCreateTemplateUseCase {
     );
     final DateTime now = (nowUtc ?? DateTime.now()).toUtc();
     return fresh.copyWith(
+      publisherRef: event.publisherRef,
       id: 'loc_${now.microsecondsSinceEpoch}',
       objectType: CreateObjectType.event,
       title: source.title,
@@ -244,6 +245,7 @@ class ManageCreateTemplateUseCase {
       unsupportedFieldIds: const {},
     );
     return draft.copyWith(
+      clearPublisher: true,
       eventData: event,
       clearStartDateTimeUtc: true,
       clearEndDateTimeUtc: true,
@@ -354,6 +356,7 @@ class ManageCreateTemplateUseCase {
       ),
     );
     return fresh.copyWith(
+      publisherRef: resolvedPublisher,
       id: 'loc_${now.microsecondsSinceEpoch}',
       objectType: CreateObjectType.rental,
       title: source.title,
@@ -439,6 +442,7 @@ class ManageCreateTemplateUseCase {
       ),
     );
     return draft.copyWith(
+      clearPublisher: true,
       rentalData: sanitized,
       media: const MediaEntity(coverImage: '', gallery: []),
       draftStatus: DraftStatus.draft,

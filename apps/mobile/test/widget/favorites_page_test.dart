@@ -1,3 +1,6 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -542,6 +545,12 @@ DiscoverFeedController _discoverController({
       initialSmartSearchHistory: smartSearchHistory,
     ),
     analyticsService: _NoopAnalyticsService(),
+    runtimeDefaults: const DiscoverRuntimeDefaults(
+      timezoneId: 'Europe/Riga',
+      originLat: 56.9496,
+      originLng: 24.1052,
+      currency: CurrencyCode.eur,
+    ),
   );
 }
 
@@ -549,7 +558,7 @@ FavoriteItemEntity _favorite(
   String id,
   String title, {
   bool isFree = true,
-  double priceAmount = 0,
+  Money? priceAmount,
   String category = 'wellness',
   String? targetRoute,
 }) {
@@ -561,7 +570,8 @@ FavoriteItemEntity _favorite(
     category: category,
     startsAtUtc: DateTime.parse('2026-04-20T10:00:00Z'),
     distanceKm: 1.8,
-    priceAmount: priceAmount,
+    priceAmount:
+        priceAmount ?? Money(minorUnits: 0, currency: CurrencyCode.eur),
     isFree: isFree,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
     targetRoute: targetRoute,
@@ -576,7 +586,7 @@ SavedSearchEntity _savedSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -591,7 +601,7 @@ SmartSearchHistoryEntity _smartSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -632,7 +642,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,
@@ -641,7 +651,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
 
   @override
   Future<List<DiscoverItemEntity>> getFeed(DiscoverQuery query) async {
-    return const <DiscoverItemEntity>[];
+    return <DiscoverItemEntity>[];
   }
 }
 

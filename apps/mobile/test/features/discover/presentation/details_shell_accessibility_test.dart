@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -38,21 +40,18 @@ void main() {
   }
 
   group('DetailsShell at 360dp / 150% text scale', () {
-    testWidgets(
-      'a sticky action with an oversized label does not overflow the '
-      'bottom bar',
-      (tester) async {
-        await pumpAtNarrowWidthAndLargeTextScale(
-          tester,
-          DetailsShell(
-            state: DetailsScreenAvailable(renderer: const _LongLabelRenderer()),
-          ),
-        );
-        await tester.pumpAndSettle();
+    testWidgets('a sticky action with an oversized label does not overflow the '
+        'bottom bar', (tester) async {
+      await pumpAtNarrowWidthAndLargeTextScale(
+        tester,
+        DetailsShell(
+          state: DetailsScreenAvailable(renderer: const _LongLabelRenderer()),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        expect(tester.takeException(), isNull);
-      },
-    );
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets(
       'CompatibilityObjectRenderer (the real DTL-FND-01 consumer) renders '
@@ -88,31 +87,30 @@ void main() {
       },
     );
 
-    testWidgets(
-      'loading and unavailable states also render without overflow',
-      (tester) async {
-        await pumpAtNarrowWidthAndLargeTextScale(
-          tester,
-          const DetailsShell(state: DetailsScreenLoading()),
-        );
-        // A single pump only: the loading state's CircularProgressIndicator
-        // is an indeterminate spinner with a never-ending animation, so
-        // pumpAndSettle would time out waiting for it to stop.
-        await tester.pump();
-        expect(tester.takeException(), isNull);
+    testWidgets('loading and unavailable states also render without overflow', (
+      tester,
+    ) async {
+      await pumpAtNarrowWidthAndLargeTextScale(
+        tester,
+        const DetailsShell(state: DetailsScreenLoading()),
+      );
+      // A single pump only: the loading state's CircularProgressIndicator
+      // is an indeterminate spinner with a never-ending animation, so
+      // pumpAndSettle would time out waiting for it to stop.
+      await tester.pump();
+      expect(tester.takeException(), isNull);
 
-        await pumpAtNarrowWidthAndLargeTextScale(
-          tester,
-          const DetailsShell(
-            state: DetailsScreenUnavailable(
-              reason: DetailsUnavailableReason.temporarilyUnavailable,
-            ),
+      await pumpAtNarrowWidthAndLargeTextScale(
+        tester,
+        const DetailsShell(
+          state: DetailsScreenUnavailable(
+            reason: DetailsUnavailableReason.temporarilyUnavailable,
           ),
-        );
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-      },
-    );
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
   });
 }
 
@@ -167,7 +165,7 @@ final DiscoverItemEntity _longTitleItem = DiscoverItemEntity(
   startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
   latitude: 56.5099,
   longitude: 27.3332,
-  priceAmount: 0,
+  priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
   distanceKm: 1.2,
   isFree: true,
   objectKind: DiscoverObjectKind.activity,

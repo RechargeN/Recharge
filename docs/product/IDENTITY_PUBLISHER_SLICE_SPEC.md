@@ -1,8 +1,8 @@
 # Identity, Creator Verification And Professional Publisher Slice
 
 Status: Approved; bounded local/mock implementation allowed during stabilization
-Version: 1.3.1
-Date: 2026-08-11
+Version: 1.3.4
+Date: 2026-10-29
 Related: ADR 0013, ADR 0015, ADR 0016, ADR 0017,
 `docs/architecture/FIREBASE_ARCHITECTURE.md`
 
@@ -556,7 +556,212 @@ Partial activation must be guarded so the personal consumer flow remains
 usable. A local page workspace is demo/test state and must not be labelled
 production-verified.
 
-### 14.2 Local/mock rollback
+### 14.1.1 IDP-04A local Create envelope completion
+
+Owner approved this bounded scope and file plan on 2026-10-28. During
+stabilization, all ten Create types may persist one local Create-envelope
+publisher through the existing `CreateDraftModel` (schema v9):
+`publisherEnvelope {schemaVersion: 1, publisherRef: {type, id}}`.
+This supplements section 14's production migration row: typed aggregate/backend
+migration and production authority remain IDP-03B/04B/05B work.
+
+The canonical `draft_publisher.dart` reader resolves the envelope first. Existing
+six typed publisher representations remain compatibility projections; conflicting
+valid identities fail closed without rewriting either. New block initialization
+and type switches retain the Create draft identity. Workspace is read only when
+creating a fresh draft or a new template/duplicate copy. Applying the existing
+Event/Rental template command materializes a new draft ID; ordinary edits of an
+existing draft retain its publisher. Template snapshots contain no envelope or
+publisher identity from the source.
+
+Restore reads explicit legacy publisher IDs through the existing model/mappers,
+never the currently active workspace. Missing/invalid legacy identity, malformed
+or unsupported envelope versions remain `publisherSelectionRequired`; typed
+mapper defaults cannot authorize these drafts. Unknown envelope and reference
+fields and future envelope versions roundtrip without granting access. No bulk
+migration is performed.
+
+Scenario keeps its User-owned personal planning contract: the optional local
+Create envelope is not Scenario ownership and is not required for personal save.
+Page publication remains disabled for Session, Scenario, Route and Class /
+Workshop even when their local envelope captures a Page. Existing publication
+policies for the other six types remain unchanged, including Rental's restriction
+on trusted Page direct publication. Fresh exact-ID Page access checks remain in
+the existing application port; no production grants or backend integration are
+introduced.
+
+Local coverage matrix (`CreateController.ensureLoaded`/reset capture the fresh
+identity; `setObjectType` reuses it; `CreateDraftModel` restores it for every row):
+
+| Create type | Shared local publisher | Existing typed compatibility source | Page publication |
+|---|---|---|---|
+| Event | Create envelope | `eventData.publisherRef`; Event template creates a new copy | Existing policy only |
+| Place | Create envelope | `placeData.publisherRef` | Existing policy only |
+| Recharge Activity | Create envelope | `activityData.publisherRef` | Existing policy only |
+| Find People | Create envelope | `publisherType` + `publisherId` | Existing policy only |
+| Rental / Equipment | Create envelope | `rentalData.publisherRef`; template/duplicate creates a new copy | Existing policy; trusted direct remains personal-only |
+| Collection / Guide | Create envelope | `collectionData.publisherRef` | Existing policy only |
+| Bookable Session | Create envelope | None; aggregate migration deferred | Disabled |
+| Scenario | Optional Create envelope, not Scenario ownership | None; personal save independent | Disabled |
+| Route | Create envelope | None; existing `RoutePublisherRef` publication contract unchanged | Disabled |
+| Class / Workshop | Create envelope | None; aggregate migration deferred | Disabled |
+
+All ten rows have parameterized Personal/Page creation, workspace/type-switch,
+content edit, save/restore and fresh-reset tests. Restore does not read the active
+workspace. Legacy compatibility does not invent a publisher from organizer text
+or mapper defaults. Quick Plan remains outside this matrix.
+
+Additional local acceptance criteria:
+
+- **IDP-04A-L01:** Each of the ten types captures Personal/Page identity for a
+  fresh draft; Page A -> Page B -> Personal, type switches, ordinary content
+  edits and persisted restore do not rewrite that draft identity.
+- **IDP-04A-L02:** Reset and template/duplicate copies create a fresh identity
+  using current workspace; snapshots never transfer source publisher authority.
+- **IDP-04A-L03:** Explicit valid legacy publisher survives; missing, invalid,
+  conflicting and future identity remains selection-required without Page inference.
+- **IDP-04A-L04:** Missing/revoked/foreign Page access denies publication with
+  unchanged draft and zero publication mutations; local capture does not enable
+  Page publication for the four previously personal-only types.
+- **IDP-04A-L05:** Full analyze/test, boundary and diff checks complete green.
+
+Rollback disables new envelope capture, preserves stored publisher values and
+keeps unknown versions readable but ineligible. It never backfills from active
+workspace or rewrites existing identities. Old clients must not be used to
+publish v9 local envelopes because they do not enforce this completion contract.
+
+Local verification on 2026-10-28 at base `be17822ed1ee7b750274430b39ba38e07c0c4a0a`:
+full `flutter analyze --no-pub` reports no issues; full `flutter test --no-pub`
+passes 1295 tests. The final boundary and diff results are recorded in the
+completion report. This is local/mock evidence only, not Emulator, device or
+cloud acceptance; IDP-04A remains Review pending owner review.
+
+### 14.2 IDP-03A / IDP-05A bounded local completion
+
+The owner approved the foundation-hardening and application/router file plan
+on 2026-10-28, including regeneration of the existing boundary inventory.
+This extends the local verification of IDP-04A in the same checkout; it does
+not promote these slices to Accepted or grant production authority.
+
+Canonical composition:
+
+- `IdentityWorkspaceRepository` / `IdentityAccessSnapshot` remain the access
+  source. The app binds the repository to the current Auth actor; caller-supplied
+  capabilities, route parameters, workspace preferences and Admin preview
+  cannot grant access. Existing explicit local fixture grants are not expanded.
+- `ownedPages` counts ownership independently of workspace availability.
+  Create/request commands serialize on the existing repository; the existing
+  owner-record datasource serializes durable read-modify-write across repository
+  instances. The quota is checked inside that write. Duplicate pending requests
+  return the same persisted id. Creation retries carry the same page/request id.
+- Page-created notification recipients come from the persisted page owner.
+  Notification failure leaves the command retryable with stable event ids.
+  User and moderator events use the existing local notification sink; there is
+  no new notification writer, remote delivery or production outbox claim.
+- Identity controller generations discard stale completions. Actor changes
+  clear access and preview before awaiting reads. A local invalidation signal
+  on the same repository refreshes open surfaces; lifecycle resume and every
+  protected action also recheck access. Failed reads expose no cached authority.
+- The existing `PublisherAccessCheck` covers Personal and Page publication;
+  it requires the fresh subject, Creator eligibility and operation capability.
+  Page additionally requires exact active membership, lifecycle and page-submit
+  capability. Missing composition denies. Draft publisher values are preserved.
+- The app composes the existing `RouteAuthoringPolicy` with fresh Identity;
+  its operation-to-capability mapping stays in the existing demo policy.
+  Protected queue reads and direct application actions use these same checks.
+- `/admin` is a separate capability-gated destination requiring Admin and
+  `admin.tools.view`; Admin experience preview additionally requires its own
+  capability. Neither destination nor preview changes workspace or publisher.
+  Existing Page editor/team dependencies are composed through their existing
+  repositories and use cases. No verification/grant/quota decision is added.
+
+Bounded access matrix (all privileged rows require the current local session):
+
+| Action | Personal | Exact Page | Admin |
+|---|---|---|---|
+| Local draft / Upgrade | Existing Viewer contract retained | Exact membership and page-create capability for Page entry | Ordinary Personal/Page rules |
+| Create Page / request additional quota | Verified Creator + `page.create`; ownership quota 3; one pending request | Same actor ownership rules | No quota bypass or approval |
+| Page workspace / private preview | Requires exact active Page membership and a recognized page capability | Only that page; no A-to-B inference | Admin capability alone is insufficient |
+| Submit / publish | Verified Creator, matching user publisher, exact operation/type capability | Same eligibility plus exact Page submit capability | No privilege from preview |
+| Page management / team actions | Requires matching Page membership | `page.manage` / `page.team.manage`, fresh lifecycle and subject | No membership bypass |
+| Admin tools / Route moderation | Denied without explicit Admin access | Page membership is insufficient | Admin + `admin.tools.view`, plus applicable operation capability |
+| Revoked / capless / stale / foreign / unavailable | Privileged operation denied | Personal fallback; preserve stored publisher | Protected tools and preview removed |
+
+Unique local acceptance criteria (these do not renumber the legacy global ACs):
+
+- **IDP-03A-L01:** zero-page default, explicit owner membership and quota remain
+  correct for revoked/suspended ownership and concurrent repository instances.
+- **IDP-03A-L02:** concurrent quota requests resolve to one pending id; successful
+  page creates survive restore without lost writes; retry after notification
+  failure does not create a second page or duplicate events.
+- **IDP-03A-L03:** owner-scoped storage, notification recipient and current actor
+  remain isolated across asynchronous account switches.
+- **IDP-03A-L04:** Admin-only preview changes presentation only and is cleared
+  when its capability is revoked; foreign snapshots cannot select workspaces.
+- **IDP-05A-L01:** route and application policies consume the same fresh access
+  source; role/capability arguments supplied by a caller cannot authorize action.
+- **IDP-05A-L02:** real GoRouter deep links deny foreign Page, missing Admin/page
+  capability and failed reads; authentication preserves the intended local URI.
+- **IDP-05A-L03:** membership/capability revocation closes an already open protected
+  surface, clears stale authority and returns to a safe permitted destination.
+- **IDP-05A-L04:** logout and account switch invalidate previous access and pending
+  completions; direct protected calls recheck actor and capability.
+- **IDP-05A-L05:** all ten IDP-04A publisher capture/restore/non-rewrite contracts
+  remain intact. Session/Scenario/Route/Class Page publication stays disabled.
+- **IDP-05A-L06:** full analyzer/test, boundary self-test/rules/generated-inventory
+  freshness and diff checks complete successfully on this combined tree.
+
+Evidence is provided by `identity_workspace_usecase_test`,
+`identity_workspace_repository_test`, `identity_access_guards_test`,
+`identity_router_guards_test`, `admin_tools_page_test`, existing Page/team tests
+and the shared Create publisher suites. Integration tests use the real app
+router and canonical local repositories with mock storage. Emulator, device,
+cloud and authoritative backend enforcement are not established by this slice.
+
+Previous combined-tree local evidence, 2026-10-28, base
+`be17822ed1ee7b750274430b39ba38e07c0c4a0a` plus reviewed working-tree changes:
+`flutter analyze --no-pub` completed with exit 0 and no issues (39.7 s);
+full `flutter test --no-pub --reporter expanded` completed with exit 0,
+1334 passed (2 min 43 s). Boundary self-test, rules, generated inventory
+freshness and `git diff --check` each completed with exit 0: 542 scanned
+feature Dart files, 71 findings covered by 71 existing exceptions, 0 violations,
+0 stale/expired exceptions, budget 71/71. Earlier failed or interrupted runs
+are diagnostic history, not acceptance evidence. Formal slice status remains
+Review pending owner review.
+
+### 14.2.1 Review hardening, 2026-10-29
+
+Nine additional deterministic negative regressions exposed gaps in the prior
+local evidence. The bounded IDP-05A scope now also requires:
+
+- **IDP-05A-L07:** access invalidation during a busy workspace command or an
+  in-flight refresh clears usable access immediately, queues a fresh read and
+  never exposes the stale completion. A new actor cannot join the previous
+  actor's pending refresh.
+- **IDP-05A-L08:** Route candidate creation/acceptance, restoration and publication
+  recheck the existing policy after intervening reads and before the protected
+  write. Replaying an already decided candidate still requires access. Queue
+  reads recheck access before returning protected data.
+
+The existing Identity controller/state and Route coordinators implement these
+checks; no new access source, controller or writer is introduced. Regression
+coverage lives in `identity_access_guards_test` and `route_publication_test`
+and uses the real Identity Route policy with revocation at explicit async
+boundaries. If access is revoked between an authorized safety-report decision
+and the subsequent restore step, the recorded decision remains, but restore
+is denied; this local multi-step path is not a server transaction claim.
+
+Current review evidence, 2026-10-29, same base HEAD plus working-tree fixes:
+all nine new regressions failed before their fixes; the completed focused
+Identity/router/Route set then passed 71 tests. Fresh full
+`flutter test --no-pub --reporter expanded`: exit 0, 1343 passed (02:47).
+`flutter analyze --no-pub`: exit 0, no issues (80.5 s). Boundary self-test,
+rules, inventory freshness and diff checks: exit 0, unchanged budget 71/71,
+542 scanned files and 0 violations/stale/expired exceptions. The earlier
+1334-test result is historical evidence and did not cover these nine cases.
+Formal status remains Review; no production authority is established.
+
+### 14.3 Local/mock rollback
 
 Rollback disables page workspace activation and returns to the personal shell.
 Workspace preferences and local user-created pages may remain readable, but

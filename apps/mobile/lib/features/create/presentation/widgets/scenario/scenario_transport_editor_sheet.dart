@@ -1,3 +1,7 @@
+import '../../../../../shared/primitives/money/money_formatter.dart';
+import '../../../../../shared/primitives/money/currency_code.dart';
+import '../../../../../shared/primitives/money/money_parser.dart';
+import '../../../../../shared/primitives/money/money_parse_result.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/parsing/input_parsers.dart';
@@ -183,6 +187,7 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
 Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
   BuildContext context, {
   required ScenarioTravelMode initialMode,
+  required String currencyCode,
   ScenarioLegDraft? current,
 }) {
   ScenarioTravelMode mode = current?.mode ?? initialMode;
@@ -190,7 +195,27 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
   String distance = current?.distanceM == null
       ? '1.0'
       : (current!.distanceM! / 1000).toStringAsFixed(1);
+  final existingCost = current?.cost.components
+      .where((item) => item.componentCode == 'travel_extra')
+      .firstOrNull
+      ?.amount;
   String otherCost = '';
+  MoneyParseError? initialMoneyError;
+  if (existingCost != null) {
+    try {
+      otherCost = MoneyFormatter().decimal(
+        existingCost.toMoney(),
+        locale: Localizations.localeOf(context).toLanguageTag(),
+      );
+    } on MoneyFormatException catch (error) {
+      initialMoneyError = error.code;
+    }
+  }
+  MoneyParseError? moneyError =
+      initialMoneyError ??
+      (existingCost != null && existingCost.currencyCode != currencyCode
+          ? MoneyParseError.invalidCanonicalValue
+          : null);
   return showModalBottomSheet<ScenarioManualLegInput>(
     context: context,
     isScrollControlled: true,
@@ -271,24 +296,49 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Parking / ticket / other cost (optional)',
-                  suffixText: 'EUR',
+                  suffixText: currencyCode,
+                  errorText: moneyError == null
+                      ? null
+                      : 'Enter an exact non-negative amount; extra decimals are not rounded',
                   border: OutlineInputBorder(),
                 ),
-                onChanged: (String value) => otherCost = value,
+                onChanged: (String value) {
+                  otherCost = value;
+                  moneyError = null;
+                },
               ),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () {
                   final int? minutes = int.tryParse(duration.trim());
                   final double? km = _number(distance);
-                  final double? cost = _number(otherCost);
-                  if (minutes == null ||
-                      minutes <= 0 ||
-                      km == null ||
-                      km < 0 ||
-                      (cost != null && cost < 0)) {
+                  if (moneyError != null && existingCost != null) return;
+                  MoneyParseResult? cost;
+                  if (otherCost.trim().isNotEmpty) {
+                    try {
+                      cost = MoneyParser().parse(
+                        otherCost,
+                        currency: CurrencyCode.parse(currencyCode),
+                        locale: Localizations.localeOf(context).toLanguageTag(),
+                      );
+                    } on FormatException {
+                      cost = const MoneyParseResult.failure(
+                        MoneyParseError.missingCurrency,
+                      );
+                    }
+                    if (!cost.isSuccess || cost.value!.minorUnits < 0) {
+                      setState(
+                        () => moneyError =
+                            cost!.error ??
+                            MoneyParseError.invalidCanonicalValue,
+                      );
+                      return;
+                    }
+                  }
+                  setState(() => moneyError = null);
+                  if (minutes == null || minutes <= 0 || km == null || km < 0) {
                     return;
                   }
                   Navigator.of(context).pop(
@@ -296,9 +346,7 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                       mode: mode,
                       durationMinutes: minutes,
                       distanceKm: km,
-                      otherCostMinorUnits: cost == null
-                          ? null
-                          : (cost * 100).round(),
+                      otherCostMinorUnits: cost?.value?.minorUnits,
                     ),
                   );
                 },

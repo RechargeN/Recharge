@@ -3,7 +3,7 @@
 **ID:** MOB-ARCH-M2-P
 **Версия:** 1.0
 **Дата:** 2026-08-11
-**Статус:** Approved — M2-A Done; M2-B–M2-E not started
+**Статус:** Approved — M2-A/B Done (local/mock); M2-C–M2-E not started
 **Parent:** [Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
 **Depends on:** MOB-ARCH-M1 — Done, merged as `f893a931a58cff9ef9f779e17517af0d28c2f454`
 **Нормативные AC:** MOB-ARCH-AC-05–06, AC-52–53, AC-56–60, AC-74
@@ -532,3 +532,85 @@ time/locale/market, backend, Firebase или продуктовых UI-изме�
 
 Это закрывает только M2-A. Compatibility exports остаются осознанным долгом
 M2-D; M2-B–M2-E и весь M2 остаются незавершёнными.
+
+## 15. M2-B local progress — 2026-11-02
+
+Scope остаётся Approved local/mock. Выполнение начато на detached HEAD
+`be17822ed1ee7b750274430b39ba38e07c0c4a0a` с сохранением исходного IDP WIP.
+Отдельные checkpoint diffs отделяют Money foundation от миграции Create.
+
+Реализованы shared CurrencyCode/Money, exact decimal parser/formatter и единый
+legacy adapter. Общий Create draft, Place и Find People используют Money;
+current local writers пишут integer minor units. Event/Scenario wrappers
+сохраняются как lossless adapters до M2-D. Typed read failure блокирует
+перезапись draft; mutation коллекции templates не удаляет нечитаемый Money
+record. Невалидный price input не округляется и не заменяет прежнюю сумму.
+
+Event/Session и Scenario transport используют тот же exact input parser;
+Scenario totals проверяют overflow и currency compatibility через Money.
+Повторное открытие transport editor сохраняет введённую сумму. Strict mutation
+read templates сохраняет повреждённые и неизвестные records без перезаписи.
+
+Find People public projection использует Money; Details formatting для него
+и integer Rental/Session amounts не проходит через double.
+Query/saved-search/history persistence перенесён из domain в единственные
+data mappers; прежние domain readers/writers удалены после переноса всех
+вызовов. Legacy read без записи сохраняет raw record и использует явный
+geographic config context. Discover/Favorites/query budgets, Smart Search и
+legacy Scenario/Quick Plan consumers используют Money; exact input/formatting
+не округляет cents. Corrupt/future saved records блокируют mutation без
+перезаписи, direct conversion проверяет currency до создания новых IDs.
+
+Activity contribution input/restore использует общий parser/formatter и
+strict Money adapter без double rounding или удаления повреждённой суммы.
+Collection budget median сравнивается точно через integer arithmetic.
+Reference scan не выявил normalized monetary double declarations; coverage
+ratios, geo/duration/confidence и pixels не являются денежными суммами.
+
+Проверенный checkpoint: `flutter analyze --no-pub` — exit 0, 0 issues;
+полный `flutter test --no-pub --reporter expanded` — 1395 passed, exit 0,
+02:50. Boundary self-test/rules/inventory/diff — exit 0; 545 scanned,
+71 findings/suppressions, 0 violations/stale/expired, budget 71/71.
+
+Local implementation готова к review. Обязательный Linux GitHub Actions для
+данного diff отсутствует; M2-B остаётся Doing, M2-C/D/E не начаты.
+Это не M2-B Done, не приёмка R1 и не Emulator/device/cloud evidence.
+Compatibility paths не удалялись; production authority не добавлялась.
+
+## 16. M2-B completed local/mock checkpoint — 2026-11-10
+
+M2-B technical acceptance is complete on
+`2ad3e474acf61e591fb6c3113e0e56cc3a7b7ec1`, in draft PR #10 against
+the frozen task baseline `be17822`. This establishes this checkout's bounded
+Money/consumer scope, not compatibility with the newer integration branch,
+formal IDP acceptance, R1, Emulator/device or production readiness.
+
+AC-16–26 and AC-35–38 are covered by the canonical Money primitive/parser/
+formatter/legacy-adapter tests and affected consumer, mapper, controller and
+widget tests in the complete suite. Money uses exact integer minor units,
+checked BigInt intermediates, explicit currency, no silent rounding or FX;
+canonical presence wins and invalid/future records are not destructively
+rewritten. Event/Scenario wrappers remain until M2-D zero-reference cleanup.
+M8 remote writes remain outside this scope.
+
+Windows: full `flutter test --no-pub --reporter expanded` 1395 passed,
+exit 0, 02:32; `flutter analyze --no-pub` no issues, exit 0, 13.9 seconds.
+Linux: full mobile-tests run
+[42799083937](https://github.com/RechargeN/Recharge/actions/runs/42799083937)
+1395 passed, success; mobile-ci run
+[42799083935](https://github.com/RechargeN/Recharge/actions/runs/42799083935)
+analyzer no issues (19.9 seconds), boundary self/scan/inventory success.
+Both boundary scans: 545 files, 71 findings/suppressions, zero violations/
+stale/expired; budget 71/71. Diff and exported binary-patch checks passed.
+Codegen reports build_runner not configured; no generation evidence claimed.
+
+The user authorized the separate seventeen-file platform golden scope.
+Windows PNGs remain byte-identical; Linux references were visually reviewed,
+with the default exact comparator and no skips/tolerances. The initial
+Activity image differed in displayed time, not only rasterization; it was
+rejected and the visual fixture made explicit about host-local 10:00 supplied
+as a UTC instant. Its corrected Linux image was reviewed before acceptance.
+This fixture change does not establish product timezone behavior.
+Provenance and host policy: `apps/mobile/test/support/PLATFORM_GOLDENS.md`.
+The intermediate full Linux run had 1394 passed / 1 failed; only the final
+complete green run above closes the gate.

@@ -47,6 +47,7 @@ import 'package:recharge/features/create/data/gpx/route_gpx_inspector.dart';
 import 'package:recharge/features/create/data/repositories/route_gpx_repository_impl.dart';
 
 import '../support/event_create_test_support.dart';
+import '../support/platform_golden.dart';
 
 void main() {
   // Root cause (see commit 0e5a499,
@@ -75,7 +76,9 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<String>('route-create-golden-surface')),
-      matchesGoldenFile('goldens/route_create_block_method.png'),
+      matchesGoldenFile(
+        platformGoldenPath('goldens/route_create_block_method.png'),
+      ),
     );
     await tester.pumpWidget(const SizedBox.shrink());
     await fixture.dispose();
@@ -270,9 +273,7 @@ void main() {
       fixture.recordingController.state.status,
       RouteRecordingStatus.recording,
     );
-    final finishButton = find.byKey(
-      const ValueKey<String>('route-gps-finish'),
-    );
+    final finishButton = find.byKey(const ValueKey<String>('route-gps-finish'));
     await tester.ensureVisible(finishButton);
     tester.widget<FilledButton>(finishButton).onPressed!();
     await tester.runAsync(
@@ -287,9 +288,7 @@ void main() {
     expect(fixture.recordingController.state.preview, isNotNull);
     expect(find.text('Review recorded track'), findsOneWidget);
     expect(find.byType(RouteRecordingPreviewMap), findsOneWidget);
-    final applyButton = find.byKey(
-      const ValueKey<String>('route-gps-apply'),
-    );
+    final applyButton = find.byKey(const ValueKey<String>('route-gps-apply'));
     await tester.ensureVisible(applyButton);
     tester.widget<FilledButton>(applyButton).onPressed!();
     await tester.runAsync(
@@ -323,13 +322,13 @@ Future<void> _loadGoldenFonts() async {
   }
   final String fontRoot = '$flutterRoot/bin/cache/artifacts/material_fonts';
   await (FontLoader('Roboto')
-        ..addFont(_goldenFontData('$fontRoot/roboto-regular.ttf'))
-        ..addFont(_goldenFontData('$fontRoot/roboto-medium.ttf'))
-        ..addFont(_goldenFontData('$fontRoot/roboto-bold.ttf')))
+        ..addFont(_goldenFontData('$fontRoot/Roboto-Regular.ttf'))
+        ..addFont(_goldenFontData('$fontRoot/Roboto-Medium.ttf'))
+        ..addFont(_goldenFontData('$fontRoot/Roboto-Bold.ttf')))
       .load();
   await (FontLoader(
     'MaterialIcons',
-  )..addFont(_goldenFontData('$fontRoot/materialicons-regular.otf'))).load();
+  )..addFont(_goldenFontData('$fontRoot/MaterialIcons-Regular.otf'))).load();
 }
 
 Future<ByteData> _goldenFontData(String path) async {

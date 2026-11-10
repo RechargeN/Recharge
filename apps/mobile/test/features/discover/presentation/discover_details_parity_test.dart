@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -113,9 +115,7 @@ void main() {
     tester,
   ) async {
     final List<MethodCall> clipboardCalls = <MethodCall>[];
-    TestDefaultBinaryMessengerBinding
-        .instance
-        .defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (call) async {
           if (call.method == 'Clipboard.setData') {
             clipboardCalls.add(call);
@@ -162,10 +162,7 @@ void main() {
       await tester.tap(find.text('Join activity').first);
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('Join activity: заявка отправлена'),
-        findsOneWidget,
-      );
+      expect(find.text('Join activity: заявка отправлена'), findsOneWidget);
       final _SpyAnalyticsService spy =
           sl<AnalyticsService>() as _SpyAnalyticsService;
       expect(spy.eventNames, contains('discover_details_cta_clicked'));
@@ -207,8 +204,7 @@ void main() {
       final _SpyAnalyticsService spy =
           sl<AnalyticsService>() as _SpyAnalyticsService;
       expect(spy.eventNames, contains('route_safety_report_submitted'));
-      final _FakeRouteSafetyReportingPort port =
-          _fakeRouteSafetyReportingPort!;
+      final _FakeRouteSafetyReportingPort port = _fakeRouteSafetyReportingPort!;
       expect(port.submittedReasonCodes, contains('trail_closed'));
     },
   );
@@ -251,9 +247,7 @@ Future<Widget> _detailsApp() async {
     overrides: <Override>[
       authControllerProvider.overrideWith((ref) => authController),
       favoritesControllerProvider.overrideWith((ref) => favoritesController),
-      visitedPlacesControllerProvider.overrideWith(
-        (ref) => visitedController,
-      ),
+      visitedPlacesControllerProvider.overrideWith((ref) => visitedController),
     ],
     child: MaterialApp.router(
       routerConfig: GoRouter(
@@ -268,21 +262,17 @@ Future<Widget> _detailsApp() async {
           ),
           GoRoute(
             path: RouteNames.discoverMap,
-            builder: (context, state) => const Scaffold(
-              body: Text('Map page'),
-            ),
+            builder: (context, state) => const Scaffold(body: Text('Map page')),
           ),
           GoRoute(
             path: RouteNames.search,
-            builder: (context, state) => const Scaffold(
-              body: Text('Search page'),
-            ),
+            builder: (context, state) =>
+                const Scaffold(body: Text('Search page')),
           ),
           GoRoute(
             path: RouteNames.create,
-            builder: (context, state) => const Scaffold(
-              body: Text('Create page'),
-            ),
+            builder: (context, state) =>
+                const Scaffold(body: Text('Create page')),
           ),
         ],
       ),
@@ -420,7 +410,7 @@ DiscoverItemEntity _activityItem() {
     startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
     latitude: 56.5099,
     longitude: 27.3332,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     distanceKm: 1.2,
     isFree: true,
     objectKind: DiscoverObjectKind.activity,
@@ -446,7 +436,7 @@ DiscoverItemEntity _routeItem() {
     startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
     latitude: 56.9496,
     longitude: 24.1052,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     distanceKm: 0.4,
     isFree: true,
     objectKind: DiscoverObjectKind.route,

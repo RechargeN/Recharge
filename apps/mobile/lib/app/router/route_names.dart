@@ -17,6 +17,7 @@ class RouteNames {
   static const String favorites = '/favorites';
   static const String notifications = '/notifications';
   static const String settings = '/settings';
+  static const String adminTools = '/admin';
   static const String professionalPage = '/page';
   static const String professionalPageContent = '/page/content';
   static const String professionalPageCreate = '/page/create';

@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
@@ -68,6 +69,43 @@ Future<void> _pumpSessionBlock(
 
 void main() {
   testWidgets(
+    'Session price input rejects excess scale and preserves the exact value',
+    (tester) async {
+      final controller = _buildController(_MemoryRepository());
+      addTearDown(controller.dispose);
+      await controller.ensureLoaded(
+        userId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      controller.setObjectType(CreateObjectType.session);
+      controller.setSessionPriceFixed(amountMinor: 1234, currencyCode: 'EUR');
+      await _pumpSessionBlock(tester, controller);
+      final price = find.byWidgetPredicate(
+        (w) =>
+            w is TextField && w.decoration?.labelText == 'Price per slot, EUR',
+      );
+      await tester.ensureVisible(price);
+      await tester.enterText(price, '1.005');
+      await tester.pump();
+      expect(
+        controller.moneyInputErrors['session.price'],
+        MoneyParseError.excessiveFractionDigits,
+      );
+      expect(
+        controller.state.draft.sessionData?.price.amount?.amountMinor,
+        1234,
+      );
+      await tester.enterText(price, '0.29');
+      await tester.pump();
+      expect(controller.moneyInputErrors, isEmpty);
+      expect(controller.state.draft.sessionData?.price.amount?.amountMinor, 29);
+      expect(controller.state.draft.basePrice?.minorUnits, 29);
+      await tester.pump(const Duration(milliseconds: 800));
+    },
+  );
+
+  testWidgets(
     'renders the required blocks and an optional-fields toggle for a fresh Session draft',
     (WidgetTester tester) async {
       final _MemoryRepository repository = _MemoryRepository();
@@ -85,40 +123,45 @@ void main() {
       expect(find.text('What and where'), findsOneWidget);
       expect(find.text('When'), findsOneWidget);
       expect(find.text('Price and booking'), findsOneWidget);
-      expect(find.text('Optional — add now or after publishing'), findsOneWidget);
+      expect(
+        find.text('Optional — add now or after publishing'),
+        findsOneWidget,
+      );
       expect(find.text('Publish'), findsOneWidget);
       // Everything not marked "required" stays collapsed by default.
       expect(find.text('Blocked dates'), findsNothing);
     },
   );
 
-  testWidgets(
-    'a weekly preset tap materializes offers shown as chips',
-    (WidgetTester tester) async {
-      final _MemoryRepository repository = _MemoryRepository();
-      final CreateController controller = _buildController(repository);
-      addTearDown(controller.dispose);
-      await controller.ensureLoaded(
-        userId: 'user-1',
-        organizerEmail: 'user@example.com',
-        organizerName: 'Creator',
-      );
-      controller.setObjectType(CreateObjectType.session);
-      controller.confirmSessionTimezone('Europe/Riga');
+  testWidgets('a weekly preset tap materializes offers shown as chips', (
+    WidgetTester tester,
+  ) async {
+    final _MemoryRepository repository = _MemoryRepository();
+    final CreateController controller = _buildController(repository);
+    addTearDown(controller.dispose);
+    await controller.ensureLoaded(
+      userId: 'user-1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'Creator',
+    );
+    controller.setObjectType(CreateObjectType.session);
+    controller.confirmSessionTimezone('Europe/Riga');
 
-      await _pumpSessionBlock(tester, controller);
+    await _pumpSessionBlock(tester, controller);
 
-      expect(find.text('Every day 9:00–21:00'), findsOneWidget);
-      await tester.ensureVisible(find.text('Every day 9:00–21:00'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Every day 9:00–21:00'));
-      await tester.pumpAndSettle();
-      await tester.pump(const Duration(milliseconds: 800));
+    expect(find.text('Every day 9:00–21:00'), findsOneWidget);
+    await tester.ensureVisible(find.text('Every day 9:00–21:00'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Every day 9:00–21:00'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 800));
 
-      expect(controller.state.draft.sessionData!.schedule.weeklyRules, hasLength(7));
-      expect(find.text('Next offers'), findsOneWidget);
-    },
-  );
+    expect(
+      controller.state.draft.sessionData!.schedule.weeklyRules,
+      hasLength(7),
+    );
+    expect(find.text('Next offers'), findsOneWidget);
+  });
 }
 
 class _NoopAnalyticsService implements AnalyticsService {

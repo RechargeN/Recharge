@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/models/create_draft_model.dart';
 import 'package:recharge/features/create/data/models/event_draft_mapper.dart';
@@ -5,6 +6,48 @@ import 'package:recharge/features/create/domain/entities/create_draft_entity.dar
 import 'package:recharge/features/create/domain/entities/event_draft_data.dart';
 
 void main() {
+  test('Money canonical Event writer and legacy minor-unit reader agree', () {
+    final defaults = EventDraftData.defaults(
+      marketCityId: 'riga',
+      countryCode: 'LV',
+      city: 'Riga',
+      timezoneId: 'Europe/Riga',
+      currencyCode: 'EUR',
+    );
+    final source = defaults.copyWith(
+      price: const EventMoneyDraft(amountMinor: 1234, currencyCode: 'EUR'),
+    );
+    final json = EventDraftMapper.toJson(source);
+    expect(json['price'], {'minorUnits': 1234, 'currencyCode': 'EUR'});
+    expect(
+      EventDraftMapper.fromJson(json, defaults: defaults).price?.toMoney(),
+      source.price?.toMoney(),
+    );
+    json['price'] = {'amountMinor': '1234', 'currencyCode': 'EUR'};
+    expect(
+      EventDraftMapper.fromJson(json, defaults: defaults).price?.amountMinor,
+      1234,
+    );
+    json['price'] = {
+      'minorUnits': 17,
+      'amountMinor': 1234,
+      'currencyCode': 'EUR',
+    };
+    expect(
+      EventDraftMapper.fromJson(json, defaults: defaults).price?.amountMinor,
+      17,
+    );
+    json['price'] = {
+      'minorUnits': 17.5,
+      'amountMinor': 1234,
+      'currencyCode': 'EUR',
+    };
+    expect(
+      () => EventDraftMapper.fromJson(json, defaults: defaults),
+      throwsA(isA<MoneyReadException>()),
+    );
+  });
+
   test('Event draft round-trips typed and unknown fields', () {
     final EventDraftData defaults = EventDraftData.defaults(
       marketCityId: 'riga',
@@ -103,7 +146,7 @@ void main() {
       activeCity: 'Riga',
     ).toEntity();
 
-    expect(json['schemaVersion'], 8);
+    expect(json['schemaVersion'], 9);
     expect(restored.eventData!.format, EventFormat.online);
     expect(restored.eventData!.publicOnlineUrl, 'https://events.example/live');
     expect(restored.eventData!.unknownFields['futureEventField'], 42);

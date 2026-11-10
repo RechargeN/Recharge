@@ -1,4 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/features/create/application/route_create_coordinator.dart';
+import 'package:recharge/features/create/application/route_create_config.dart';
+import 'package:recharge/features/create/application/route_draft_autosave_coordinator.dart';
+import 'package:recharge/features/create/domain/entities/route_draft_save_result.dart';
+import 'package:recharge/features/create/domain/repositories/route_draft_persistence_repository.dart';
+import 'package:recharge/features/create/domain/repositories/route_routing_repository.dart';
+import '../support/route_domain_fixtures.dart';
+import 'package:recharge/features/create/data/models/create_draft_model.dart';
+import 'package:recharge/features/create/domain/entities/draft_publisher.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
@@ -16,6 +26,112 @@ const PublisherRef _page = PublisherRef(type: PublisherType.page, id: 'page-1');
 const PublisherRef _user = PublisherRef(type: PublisherType.user, id: 'user-1');
 
 void main() {
+  const types = <CreateObjectType>[
+    CreateObjectType.event,
+    CreateObjectType.place,
+    CreateObjectType.activity,
+    CreateObjectType.findPeople,
+    CreateObjectType.rental,
+    CreateObjectType.collection,
+    CreateObjectType.session,
+    CreateObjectType.scenario,
+    CreateObjectType.route,
+    CreateObjectType.classWorkshop,
+  ];
+  for (final type in types) {
+    for (final publisher in <PublisherRef>[_user, _page]) {
+      test(
+        '${type.name}: captures once, survives switches, save and restore (${publisher.type.name})',
+        () async {
+          final repository = _MemoryRepository();
+          final controller = await _loaded(publisher, repository: repository);
+          addTearDown(controller.dispose);
+          controller.setObjectType(type);
+          expect(controller.state.draft.objectType, type);
+          expect(controller.state.draft.effectivePublisher, publisher);
+          final id = controller.state.draft.id;
+          for (final next in <PublisherRef>[
+            const PublisherRef(type: PublisherType.page, id: 'page-2'),
+            _user,
+          ]) {
+            await controller.ensureLoaded(
+              userId: 'user-1',
+              organizerEmail: '',
+              organizerName: '',
+              activePublisherRef: next,
+              capabilities: const ['create.route', 'create.collection'],
+            );
+            // Initializing a different block is not a new draft identity.
+            controller.setObjectType(CreateObjectType.classWorkshop);
+            controller.setObjectType(type);
+            expect(controller.state.draft.id, id);
+            expect(controller.state.draft.effectivePublisher, publisher);
+          }
+          controller.updateTitle('Content edit keeps draft identity');
+          expect(controller.state.draft.effectivePublisher, publisher);
+          if (type == CreateObjectType.route) {
+            final coordinator = RouteCreateCoordinator(
+              idGenerator: _Ids(),
+              routingRepository: _NoRouting(),
+              autosaveCoordinator: RouteDraftAutosaveCoordinator(repository),
+              config: RouteCreateConfig(
+                version: 1,
+                validationPolicy: routeValidationPolicy(
+                  requirePermanentIds: false,
+                ),
+              ),
+            );
+            controller.attachRouteCoordinator(coordinator);
+            addTearDown(coordinator.dispose);
+          }
+          await controller.saveDraft();
+          expect(repository.stored, isNotNull);
+          final restored = await _loaded(_user, repository: repository);
+          addTearDown(restored.dispose);
+          expect(restored.state.draft.objectType, type);
+          expect(restored.state.draft.effectivePublisher, publisher);
+          expect(restored.state.draft.publisherSelectionRequired, isFalse);
+          restored.resetToFreshDraft(
+            organizerId: 'user-1',
+            organizerEmail: '',
+            organizerName: '',
+          );
+          restored.setObjectType(type);
+          expect(restored.state.draft.id, isNot(id));
+          expect(restored.state.draft.effectivePublisher, _user);
+        },
+      );
+    }
+  }
+  for (final type in <CreateObjectType>[
+    CreateObjectType.place,
+    CreateObjectType.findPeople,
+  ]) {
+    test(
+      '${type.name}: missing restored block never captures current Page',
+      () async {
+        final repository = _MemoryRepository();
+        repository.stored =
+            CreateDraftEntity.defaults(
+              organizerId: 'user-1',
+              organizerEmail: '',
+              organizerName: '',
+            ).copyWith(
+              objectType: type,
+              clearEventData: true,
+              clearPublisher: true,
+            );
+        final controller = await _loaded(_page, repository: repository);
+        addTearDown(controller.dispose);
+        expect(controller.state.draft.publisherSelectionRequired, isTrue);
+        await controller.saveDraft();
+        final restored = await _loaded(_page, repository: repository);
+        addTearDown(restored.dispose);
+        expect(restored.state.draft.publisherSelectionRequired, isTrue);
+        expect(await restored.publishDraft(), isFalse);
+      },
+    );
+  }
   group('IDP-04A new-draft publisher defaults', () {
     test('Place and Activity capture the active Page', () async {
       final CreateController controller = await _loaded(_page);
@@ -94,12 +210,17 @@ void main() {
 
 Future<CreateController> _loaded(
   PublisherRef publisher, {
-  List<String> capabilities = const <String>[],
+  List<String> capabilities = const <String>[
+    'create.route',
+    'create.collection',
+  ],
+  _MemoryRepository? repository,
 }) async {
+  final store = repository ?? _MemoryRepository();
   final CreateController controller = CreateController(
-    loadCreateDraftUseCase: LoadCreateDraftUseCase(_MemoryRepository()),
-    saveCreateDraftUseCase: SaveCreateDraftUseCase(_MemoryRepository()),
-    publishCreateDraftUseCase: PublishCreateDraftUseCase(_MemoryRepository()),
+    loadCreateDraftUseCase: LoadCreateDraftUseCase(store),
+    saveCreateDraftUseCase: SaveCreateDraftUseCase(store),
+    publishCreateDraftUseCase: PublishCreateDraftUseCase(store),
     analyticsService: _NoopAnalyticsService(),
     eventCreateCoordinator: createTestEventCoordinator(),
     runtimeDefaults: const CreateRuntimeDefaults(
@@ -125,7 +246,22 @@ class _NoopAnalyticsService implements AnalyticsService {
   void track(String eventName, {Map<String, Object?> params = const {}}) {}
 }
 
-class _MemoryRepository implements CreateRepository {
+class _MemoryRepository
+    implements CreateRepository, RouteDraftPersistenceRepository {
+  @override
+  Future<RouteDraftSaveResult> saveRouteDraft({
+    required String userId,
+    required CreateDraftEntity draft,
+    required int? expectedRevision,
+  }) async {
+    await saveDraft(userId, draft);
+    return RouteDraftSaveResult(
+      status: RouteDraftSaveStatus.saved,
+      requestedRevision: draft.routeData!.revision,
+      persistedRevision: draft.routeData!.revision,
+    );
+  }
+
   CreateDraftEntity? stored;
 
   @override
@@ -133,7 +269,9 @@ class _MemoryRepository implements CreateRepository {
 
   @override
   Future<void> saveDraft(String userId, CreateDraftEntity draft) async {
-    stored = draft;
+    stored = CreateDraftModel.fromJson(
+      CreateDraftModel.fromEntity(draft).toJson(),
+    ).toEntity();
   }
 
   @override
@@ -141,7 +279,25 @@ class _MemoryRepository implements CreateRepository {
     String userId,
     CreateDraftEntity draft,
   ) async {
-    stored = draft;
+    stored = CreateDraftModel.fromJson(
+      CreateDraftModel.fromEntity(draft).toJson(),
+    ).toEntity();
     return draft;
   }
+}
+
+class _Ids implements IdGenerator {
+  int value = 0;
+  @override
+  String generate() => 'test-id-${value++}';
+}
+
+class _NoRouting implements RouteRoutingRepository {
+  @override
+  Future<RouteRoutingResult> route(RouteRoutingRequest request) =>
+      throw StateError('No routing needed for publisher persistence');
+  @override
+  Future<List<RouteGeneratedCandidate>> generate(
+    RouteGenerationRequest request,
+  ) => throw StateError('No generation needed');
 }

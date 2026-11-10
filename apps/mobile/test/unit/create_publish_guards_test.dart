@@ -71,22 +71,25 @@ void main() {
       },
     );
 
-    test('types without a typed publisher resolve to the personal user', () {
-      final CreateDraftEntity draft = CreateDraftEntity.defaults(
-        organizerId: 'user-1',
-        organizerEmail: 'u@example.com',
-        organizerName: 'U',
-      ).copyWith(objectType: CreateObjectType.classWorkshop);
-      expect(
-        draft.effectivePublisher,
-        const PublisherRef(type: PublisherType.user, id: 'user-1'),
-      );
-    });
+    test(
+      'legacy types without a stored publisher require explicit selection',
+      () {
+        final CreateDraftEntity draft = CreateDraftEntity.defaults(
+          organizerId: 'user-1',
+          organizerEmail: 'u@example.com',
+          organizerName: 'U',
+        ).copyWith(objectType: CreateObjectType.classWorkshop);
+        expect(draft.publisherSelectionRequired, isTrue);
+      },
+    );
 
     test('a second publishDraft during a running publish is ignored', () async {
       final Completer<void> gate = Completer<void>();
       final _Repo repo = _Repo(publishGate: gate.future);
-      final CreateController controller = _controller(repo);
+      final CreateController controller = _controller(
+        repo,
+        access: _FakeAccess(allowed: true),
+      );
       addTearDown(controller.dispose);
       await controller.ensureLoaded(
         userId: 'user-1',
@@ -114,7 +117,10 @@ void main() {
 
   group('failure and restart recovery', () {
     Future<CreateController> readyClassWorkshop(_Repo repo) async {
-      final CreateController controller = _controller(repo);
+      final CreateController controller = _controller(
+        repo,
+        access: _FakeAccess(allowed: true),
+      );
       await controller.ensureLoaded(
         userId: 'user-1',
         organizerEmail: 'u@example.com',
@@ -327,6 +333,8 @@ class _FakeAccess implements PublisherAccessCheck {
   Future<bool> canPublishAs({
     required String actorUserId,
     required PublisherRef publisher,
+    Set<String> requiredCapabilities = const {},
+    bool requireAdmin = false,
   }) async => allowed;
 }
 

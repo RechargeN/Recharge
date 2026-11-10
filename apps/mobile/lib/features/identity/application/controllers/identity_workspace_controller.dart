@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../../app/config/market_config.dart';
@@ -8,6 +9,7 @@ import '../../domain/entities/managed_page_entity.dart';
 import '../../domain/entities/page_limit_increase_request_entity.dart';
 import '../../domain/entities/professional_page_creation_input.dart';
 import '../../domain/entities/workspace_ref.dart';
+import '../../domain/repositories/identity_workspace_repository.dart';
 import '../../domain/usecases/create_professional_page_usecase.dart';
 import '../../domain/usecases/load_identity_workspace_usecase.dart';
 import '../../domain/usecases/request_page_limit_increase_usecase.dart';
@@ -29,7 +31,17 @@ class IdentityWorkspaceController extends ChangeNotifier {
        _requestPageLimitIncreaseUseCase = requestPageLimitIncreaseUseCase,
        _notificationSink = notificationSink,
        _marketConfig = marketConfig,
-       _analyticsService = analyticsService;
+       _analyticsService = analyticsService {
+    _accessChanges = IdentityWorkspaceRepository.accessChanges.listen((actor) {
+      if (actor == _state.userId) {
+        // A write may invalidate access while an earlier read or command is
+        // still in flight. Remove usable authority now and drain one fresh
+        // read after that operation settles; never publish its stale snapshot.
+        _pendingAccessRefresh = true;
+        _setState(_state);
+      }
+    });
+  }
 
   final LoadIdentityWorkspaceUseCase _loadIdentityWorkspaceUseCase;
   final SelectWorkspaceUseCase _selectWorkspaceUseCase;
@@ -43,14 +55,50 @@ class IdentityWorkspaceController extends ChangeNotifier {
   IdentityWorkspaceState get state => _state;
 
   int _operationRevision = 0;
+  late final StreamSubscription<String> _accessChanges;
+  bool _disposed = false;
+  String? _createRequestId;
+  String? _createRequestInput;
+  Future<bool>? _refresh;
+  bool _pendingAccessRefresh = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    _operationRevision++;
+    unawaited(_accessChanges.cancel());
+    super.dispose();
+  }
+
+  void clearSession() {
+    _operationRevision++;
+    _refresh = null;
+    _pendingAccessRefresh = false;
+    _createRequestId = null;
+    _createRequestInput = null;
+    _setState(IdentityWorkspaceState.initial());
+  }
+
+  bool _current(int revision, String actor) =>
+      !_disposed && revision == _operationRevision && _state.userId == actor;
 
   Future<void> ensureLoaded(String userId) async {
-    if (userId.trim().isEmpty) return;
+    if (userId.trim().isEmpty) {
+      clearSession();
+      return;
+    }
     if (_state.userId == userId && _state.isLoaded) return;
 
+    if (_state.userId != userId) {
+      _refresh = null;
+      _pendingAccessRefresh = false;
+    }
+
+    _createRequestId = null;
+    _createRequestInput = null;
     final int operationRevision = ++_operationRevision;
     _setState(
-      _state.copyWith(
+      IdentityWorkspaceState.initial().copyWith(
         status: IdentityWorkspaceStatus.loading,
         userId: userId,
         clearMessage: true,
@@ -83,7 +131,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
           'recovered': result.recoveryReasonCode != null,
         },
       );
-    } on Exception {
+    } on Object {
       if (operationRevision != _operationRevision) return;
       _setState(
         _state.copyWith(
@@ -98,23 +146,44 @@ class IdentityWorkspaceController extends ChangeNotifier {
   /// whose membership was revoked or whose lifecycle left `active` drops the
   /// user back to the personal profile (fail-closed, preference repaired by
   /// the load use case). Returns `true` when the active workspace changed.
-  Future<bool> revalidateAccess() async {
-    if (!_state.isLoaded || _state.userId.isEmpty || _state.isBusy) {
-      return false;
-    }
+  Future<bool> revalidateAccess() {
+    final pending = _refresh;
+    if (pending != null) return pending;
+    final result = _revalidateAccess();
+    _refresh = result;
+    return result.whenComplete(() {
+      if (identical(_refresh, result)) {
+        _refresh = null;
+        _drainAccessRefresh();
+      }
+    });
+  }
+
+  Future<bool> _revalidateAccess() async {
+    if (_state.userId.isEmpty || _state.isBusy) return false;
+    final actor = _state.userId;
+    final previous = _state;
     final int operationRevision = ++_operationRevision;
+    _setState(
+      IdentityWorkspaceState.initial().copyWith(
+        userId: actor,
+        status: IdentityWorkspaceStatus.loading,
+      ),
+    );
     try {
       final IdentityWorkspaceLoadResult result =
-          await _loadIdentityWorkspaceUseCase(_state.userId);
+          await _loadIdentityWorkspaceUseCase(actor);
       if (operationRevision != _operationRevision) return false;
-      final bool changed = result.activeWorkspace != _state.activeWorkspace;
+      final bool changed = result.activeWorkspace != previous.activeWorkspace;
       _setState(
-        _state.copyWith(
+        previous.copyWith(
+          status: IdentityWorkspaceStatus.ready,
           accessSnapshot: result.accessSnapshot,
           activeWorkspace: result.activeWorkspace,
           pendingLimitRequest: result.pendingLimitRequest,
           clearPendingLimitRequest: result.pendingLimitRequest == null,
-          clearAdminPreview: changed,
+          clearAdminPreview:
+              changed || !result.accessSnapshot.canPreviewExperience,
           message: result.recoveryReasonCode == null
               ? null
               : 'Недоступная страница сброшена на личный профиль',
@@ -122,7 +191,17 @@ class IdentityWorkspaceController extends ChangeNotifier {
         ),
       );
       return changed;
-    } on Exception {
+    } on Object {
+      if (_current(operationRevision, actor)) {
+        _setState(
+          IdentityWorkspaceState.initial().copyWith(
+            userId: actor,
+            status: IdentityWorkspaceStatus.error,
+            activeWorkspace: WorkspaceRef.personal(actor),
+            message: 'Доступ недоступен. Повторите проверку.',
+          ),
+        );
+      }
       return false;
     }
   }
@@ -131,7 +210,6 @@ class IdentityWorkspaceController extends ChangeNotifier {
     if (!_state.isLoaded || _state.userId.isEmpty || _state.isBusy) {
       return false;
     }
-    if (_state.activeWorkspace == workspace) return true;
 
     final int operationRevision = ++_operationRevision;
     _setState(
@@ -174,7 +252,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
         ),
       );
       return false;
-    } on Exception {
+    } on Object {
       if (operationRevision != _operationRevision) return false;
       _setState(
         _state.copyWith(
@@ -186,11 +264,16 @@ class IdentityWorkspaceController extends ChangeNotifier {
     }
   }
 
-  bool selectAdminPreview(AdminExperiencePreview preview) {
+  Future<bool> selectAdminPreview(AdminExperiencePreview preview) async {
+    final actor = _state.userId;
+    if (actor.isEmpty || _state.isBusy) return false;
+    await revalidateAccess();
+    if (_state.userId != actor) return false;
     final access = _state.accessSnapshot;
     if (_state.status != IdentityWorkspaceStatus.ready ||
         access == null ||
-        !access.hasGlobalCapability('admin.experience.preview')) {
+        !access.belongsTo(_state.userId) ||
+        !access.canPreviewExperience) {
       return false;
     }
     _setState(
@@ -214,6 +297,12 @@ class IdentityWorkspaceController extends ChangeNotifier {
         _state.userId.isEmpty) {
       return false;
     }
+    final actor = _state.userId;
+    final inputKey = '$actor:${kind.name}:${displayName.trim()}';
+    if (_createRequestInput != inputKey) {
+      _createRequestInput = inputKey;
+      _createRequestId = _createProfessionalPageUseCase.newRequestId();
+    }
     final int operationRevision = ++_operationRevision;
     _setState(
       _state.copyWith(
@@ -224,7 +313,8 @@ class IdentityWorkspaceController extends ChangeNotifier {
 
     try {
       final ManagedPageEntity page = await _createProfessionalPageUseCase(
-        userId: _state.userId,
+        userId: actor,
+        requestId: _createRequestId,
         input: ProfessionalPageCreationInput(
           kind: kind,
           displayName: displayName,
@@ -236,19 +326,23 @@ class IdentityWorkspaceController extends ChangeNotifier {
           supportedLocales: _marketConfig.supportedLocaleCodes,
         ),
       );
+      await _notifyPageCreated(page);
+      if (!_current(operationRevision, actor)) return false;
       await _selectWorkspaceUseCase(
-        userId: _state.userId,
+        userId: actor,
         workspace: WorkspaceRef.page(page.id),
       );
+      if (!_current(operationRevision, actor)) return false;
       final IdentityWorkspaceLoadResult result =
-          await _loadIdentityWorkspaceUseCase(_state.userId);
-      await _notifyPageCreated(page);
+          await _loadIdentityWorkspaceUseCase(actor);
       if (operationRevision != _operationRevision) return false;
 
+      _createRequestId = null;
+      _createRequestInput = null;
       _setState(
         IdentityWorkspaceState(
           status: IdentityWorkspaceStatus.ready,
-          userId: _state.userId,
+          userId: actor,
           accessSnapshot: result.accessSnapshot,
           activeWorkspace: result.activeWorkspace,
           adminPreview: null,
@@ -276,7 +370,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
         ),
       );
       return false;
-    } on Exception {
+    } on Object {
       if (operationRevision != _operationRevision) return false;
       _setState(
         _state.copyWith(
@@ -327,7 +421,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
         ),
       );
       return false;
-    } on Exception {
+    } on Object {
       if (operationRevision != _operationRevision) return false;
       _setState(
         _state.copyWith(
@@ -345,7 +439,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
       AppNotificationEvent(
         id: 'professional-page-created-${page.id}-user',
         audience: AppNotificationAudience.user,
-        recipientUserId: _state.userId,
+        recipientUserId: page.ownerUserId,
         title: 'Professional Page создана',
         body: '${page.displayName}: статус проверки — Pending review.',
         createdAtUtc: page.createdAtUtc,
@@ -394,16 +488,33 @@ class IdentityWorkspaceController extends ChangeNotifier {
   Future<void> _appendNotificationSafely(AppNotificationEvent event) async {
     try {
       await _notificationSink.appendNotification(event);
-    } on Exception {
+    } on Object {
       _analyticsService.track(
         'identity_notification_append_failed',
         params: <String, Object?>{'notification_id': event.id},
       );
+      rethrow;
     }
   }
 
   void _setState(IdentityWorkspaceState state) {
-    _state = state;
+    if (_disposed) return;
+    _state = _pendingAccessRefresh
+        ? state.copyWith(clearAccessSnapshot: true, clearAdminPreview: true)
+        : state;
     notifyListeners();
+    _drainAccessRefresh();
+  }
+
+  void _drainAccessRefresh() {
+    if (_disposed ||
+        !_pendingAccessRefresh ||
+        _refresh != null ||
+        _state.isBusy ||
+        _state.status == IdentityWorkspaceStatus.loading) {
+      return;
+    }
+    _pendingAccessRefresh = false;
+    unawaited(revalidateAccess());
   }
 }

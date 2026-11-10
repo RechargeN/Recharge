@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../core/parsing/money_legacy_adapter.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import '../../domain/entities/find_people_draft_data.dart';
 
 class FindPeopleDraftMapper {
@@ -55,7 +58,9 @@ class FindPeopleDraftMapper {
       'attendanceConfirmationRequired': value.attendanceConfirmationRequired,
       'guestPolicy': value.guestPolicy,
       'costType': value.costType.name,
-      'expectedSpendAmount': value.expectedSpendAmount,
+      'expectedSpendAmountMinorUnits': value.expectedSpendAmount?.minorUnitsIn(
+        CurrencyCode.parse(value.currencyCode),
+      ),
       'currencyCode': value.currencyCode,
       'costNote': value.costNote,
       'expenseSplitMode': value.expenseSplitMode.name,
@@ -64,7 +69,8 @@ class FindPeopleDraftMapper {
             (FindPeopleExpenseItemDraft item) => <String, Object?>{
               'id': item.id,
               'category': item.category,
-              'amount': item.amount,
+              'amountMinorUnits': item.amount.minorUnits,
+              'currencyCode': item.amount.currency.value,
               'payerNote': item.payerNote,
             },
           )
@@ -235,10 +241,24 @@ class FindPeopleDraftMapper {
       costType:
           _enumValue(FindPeopleCostType.values, json['costType']) ??
           defaults.costType,
-      expectedSpendAmount: _double(json['expectedSpendAmount']),
+      expectedSpendAmount: MoneyLegacyAdapter().readOptional(
+        hasCanonicalMinorUnits: json.containsKey(
+          'expectedSpendAmountMinorUnits',
+        ),
+        canonicalMinorUnits: json['expectedSpendAmountMinorUnits'],
+        legacyMajorAmount: json['expectedSpendAmount'],
+        currencyCode: _text(json['currencyCode']) ?? defaults.currencyCode,
+      ),
       clearExpectedSpendAmount:
-          json.containsKey('expectedSpendAmount') &&
-          _double(json['expectedSpendAmount']) == null,
+          MoneyLegacyAdapter().readOptional(
+            hasCanonicalMinorUnits: json.containsKey(
+              'expectedSpendAmountMinorUnits',
+            ),
+            canonicalMinorUnits: json['expectedSpendAmountMinorUnits'],
+            legacyMajorAmount: json['expectedSpendAmount'],
+            currencyCode: _text(json['currencyCode']) ?? defaults.currencyCode,
+          ) ==
+          null,
       currencyCode: _text(json['currencyCode']) ?? defaults.currencyCode,
       costNote: _text(json['costNote']),
       clearCostNote:
@@ -249,7 +269,10 @@ class FindPeopleDraftMapper {
             json['expenseSplitMode'],
           ) ??
           defaults.expenseSplitMode,
-      plannedExpenseItems: _expenses(json['plannedExpenseItems']),
+      plannedExpenseItems: _expenses(
+        json['plannedExpenseItems'],
+        _text(json['currencyCode']) ?? defaults.currencyCode,
+      ),
       cancellationPolicyId:
           _text(json['cancellationPolicyId']) ?? defaults.cancellationPolicyId,
       publisherType:
@@ -363,7 +386,10 @@ class FindPeopleDraftMapper {
         .toList(growable: false);
   }
 
-  static List<FindPeopleExpenseItemDraft> _expenses(Object? source) {
+  static List<FindPeopleExpenseItemDraft> _expenses(
+    Object? source,
+    String currencyCode,
+  ) {
     if (source is! List<dynamic>) return const <FindPeopleExpenseItemDraft>[];
     return source
         .whereType<Map<dynamic, dynamic>>()
@@ -371,7 +397,16 @@ class FindPeopleDraftMapper {
           return FindPeopleExpenseItemDraft(
             id: _text(json['id']) ?? '',
             category: _text(json['category']) ?? '',
-            amount: _double(json['amount']) ?? 0,
+            amount:
+                MoneyLegacyAdapter().readOptional(
+                  hasCanonicalMinorUnits: json.containsKey('amountMinorUnits'),
+                  canonicalMinorUnits: json['amountMinorUnits'],
+                  legacyMajorAmount: json['amount'],
+                  currencyCode: _text(json['currencyCode']) ?? currencyCode,
+                ) ??
+                (throw const MoneyReadException(
+                  MoneyParseError.invalidCanonicalValue,
+                )),
             payerNote: _text(json['payerNote']) ?? '',
           );
         })

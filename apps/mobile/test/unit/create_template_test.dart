@@ -1,5 +1,10 @@
+import 'dart:convert';
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
+import 'package:recharge/features/create/data/models/create_template_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/features/create/domain/entities/rental_draft_data.dart';
+import 'package:recharge/features/create/domain/entities/draft_publisher.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/features/create/data/datasources/create_template_local_datasource.dart';
 import 'package:recharge/features/create/data/repositories/create_template_repository_impl.dart';
@@ -9,12 +14,65 @@ import 'package:recharge/features/create/domain/entities/event_classification.da
 import 'package:recharge/features/create/domain/entities/event_admission.dart';
 import 'package:recharge/features/create/domain/entities/event_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/event_inventory.dart';
-import 'package:recharge/features/create/domain/entities/publisher_ref.dart';
 import 'package:recharge/features/create/domain/usecases/manage_create_template_usecase.dart';
 
 void main() {
   late ManageCreateTemplateUseCase useCase;
-
+  for (final location in ['base', 'currency', 'nested']) {
+    test(
+      'unreadable $location template money blocks mutation without deleting raw record',
+      () async {
+        const storage = FlutterSecureStorage();
+        final template = useCase.create(
+          userId: 'user-1',
+          name: 'original',
+          draft: _eventDraft(),
+          nowUtc: DateTime.utc(2026),
+        );
+        final wire = CreateTemplateModel.fromEntity(template).toJson();
+        final snapshot = wire['snapshot'] as Map;
+        if (location == 'base') snapshot['basePriceMinorUnits'] = 1.5;
+        if (location == 'currency') {
+          snapshot['basePriceMinorUnits'] = 100;
+          snapshot['currency'] = 123;
+        }
+        if (location == 'nested') {
+          ((snapshot['sectionData'] as Map)['event_details'] as Map)['price'] =
+              {'minorUnits': 1.5, 'currencyCode': 'EUR'};
+        }
+        final raw = jsonEncode({
+          'schemaVersion': 1,
+          'templates': [wire],
+        });
+        await storage.write(key: 'create_templates_v1_user-1', value: raw);
+        final source = CreateTemplateLocalDataSource(
+          storage,
+          activeMarketCityId: 'riga',
+          activeTimezone: 'Europe/Riga',
+          activeCountry: 'LV',
+          activeCity: 'Riga',
+          activeCurrency: 'EUR',
+        );
+        final repository = CreateTemplateRepositoryImpl(source);
+        expect(
+          await repository.listTemplates(
+            userId: 'user-1',
+            objectType: CreateObjectType.event,
+          ),
+          isEmpty,
+        );
+        await expectLater(
+          repository.upsertTemplate(userId: 'user-1', template: template),
+          throwsA(isA<MoneyReadException>()),
+        );
+        await expectLater(
+          repository.deleteTemplate(userId: 'user-1', templateId: template.id),
+          throwsA(isA<MoneyReadException>()),
+        );
+        expect(await storage.read(key: 'create_templates_v1_user-1'), raw);
+      },
+    );
+  }
   setUp(() {
     FlutterSecureStorage.setMockInitialValues(<String, String>{});
     useCase = ManageCreateTemplateUseCase(_SequentialIdGenerator());
@@ -23,6 +81,14 @@ void main() {
   test('template materialization strips instance data and creates new ids', () {
     final CreateDraftEntity source = _eventDraft().copyWith(
       id: 'loc-source',
+      publisherRef: const PublisherRef(
+        type: PublisherType.page,
+        id: 'page-source',
+      ),
+      publisherEnvelope: const {
+        'schemaVersion': 1,
+        'publisherRef': {'type': 'page', 'id': 'page-source'},
+      },
       media: const MediaEntity(
         coverImage: 'local://cover.jpg',
         gallery: <String>['local://gallery.jpg'],
@@ -85,6 +151,14 @@ void main() {
 
     expect(template.name, 'Friday meetup');
     expect(template.snapshot.eventData!.publisherRef, isNull);
+    expect(template.snapshot.publisherRef, isNull);
+    expect(template.snapshot.publisherEnvelope, isNull);
+    expect(template.snapshot.publisherSelectionRequired, isTrue);
+    expect(
+      materialized.effectivePublisher,
+      const PublisherRef(type: PublisherType.page, id: 'page-active'),
+    );
+    expect(source.effectivePublisher.id, 'page-source');
     expect(
       template.snapshot.eventData!.classification!.archetype,
       EventArchetype.socialMeetup,
@@ -110,6 +184,62 @@ void main() {
     expect(materialized.moderationStatus, ModerationStatus.none);
     expect(materialized.publishedAtUtc, isNull);
   });
+
+  test(
+    'Rental template and duplicate renew envelope publisher without changing source',
+    () {
+      const sourcePublisher = PublisherRef(
+        type: PublisherType.page,
+        id: 'source-page',
+      );
+      const activePublisher = PublisherRef(
+        type: PublisherType.page,
+        id: 'active-page',
+      );
+      final source = _eventDraft().copyWith(
+        objectType: CreateObjectType.rental,
+        clearEventData: true,
+        publisherRef: sourcePublisher,
+        publisherEnvelope: const {
+          'schemaVersion': 1,
+          'publisherRef': {'type': 'page', 'id': 'source-page'},
+        },
+        rentalData: RentalDraftData.defaults(
+          userId: 'user-1',
+          currencyCode: 'EUR',
+          timeZoneId: 'Europe/Riga',
+        ).copyWith(publisherRef: sourcePublisher),
+      );
+      final template = useCase.createRentalTemplate(
+        userId: 'user-1',
+        name: 'Rental',
+        draft: source,
+      );
+      expect(template.snapshot.publisherRef, isNull);
+      expect(template.snapshot.publisherEnvelope, isNull);
+      expect(template.snapshot.publisherSelectionRequired, isTrue);
+      final copy = useCase.materializeRental(
+        template: template,
+        userId: 'user-1',
+        currencyCode: 'EUR',
+        timeZoneId: 'Europe/Riga',
+        publisherRef: activePublisher,
+      );
+      final duplicate = useCase.duplicateRental(
+        draft: source,
+        userId: 'user-1',
+        currencyCode: 'EUR',
+        timeZoneId: 'Europe/Riga',
+        publisherRef: activePublisher,
+      );
+      for (final draft in <CreateDraftEntity>[copy, duplicate]) {
+        expect(draft.id, isNot(source.id));
+        expect(draft.effectivePublisher, activePublisher);
+        expect(draft.rentalData!.publisherRef, activePublisher);
+      }
+      expect(source.effectivePublisher, sourcePublisher);
+    },
+  );
 
   test('ECL-02 template strips authority and secrets and renews local ids', () {
     final CreateDraftEntity source = _eventDraft().copyWith(

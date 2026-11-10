@@ -1,3 +1,5 @@
+import 'package:recharge/app/application/active_creator_verification_provider.dart';
+import '../support/publisher_access_test_support.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -51,6 +53,7 @@ void main() {
       );
       final createRepository = _FakeCreateRepository();
       final createController = CreateController(
+        publisherAccessCheck: const TestPersonalPublisherAccess(),
         loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
         saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
         publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
@@ -76,6 +79,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: <Override>[
+            activeCreateCapabilitiesProvider.overrideWith(
+              (ref) =>
+                  ref.watch(authControllerProvider).state.user?.capabilities ??
+                  const [],
+            ),
             authControllerProvider.overrideWith((ref) => authController),
             createControllerProvider.overrideWith((ref) => createController),
             scenarioConversionHandoffStoreProvider.overrideWithValue(handoff),
@@ -120,6 +128,7 @@ void main() {
 
     final createRepository = _FakeCreateRepository();
     final createController = CreateController(
+      publisherAccessCheck: const TestPersonalPublisherAccess(),
       loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
@@ -141,6 +150,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
+          activeCreateCapabilitiesProvider.overrideWith(
+            (ref) =>
+                ref.watch(authControllerProvider).state.user?.capabilities ??
+                const [],
+          ),
           authControllerProvider.overrideWith((ref) => authController),
           createControllerProvider.overrideWith((ref) => createController),
         ],
@@ -203,11 +217,13 @@ void main() {
 
     final createRepository = _FakeCreateRepository();
     final createController = CreateController(
+      publisherAccessCheck: const TestPersonalPublisherAccess(),
       loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
       eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: _testCreateDefaults,
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -223,6 +239,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
+          activeCreateCapabilitiesProvider.overrideWith(
+            (ref) =>
+                ref.watch(authControllerProvider).state.user?.capabilities ??
+                const [],
+          ),
           authControllerProvider.overrideWith((ref) => authController),
           createControllerProvider.overrideWith((ref) => createController),
         ],
@@ -282,7 +303,10 @@ void main() {
 
     expect(categoryField.controller?.text, 'workshops_masterclasses');
     expect(subcategoryField.controller?.text, 'masterclass');
-    expect(createController.state.draft.mainCategory, 'workshops_masterclasses');
+    expect(
+      createController.state.draft.mainCategory,
+      'workshops_masterclasses',
+    );
     expect(createController.state.draft.subcategory, 'masterclass');
   });
 
@@ -305,11 +329,13 @@ void main() {
 
     final createRepository = _FakeCreateRepository();
     final createController = CreateController(
+      publisherAccessCheck: const TestPersonalPublisherAccess(),
       loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
       eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: _testCreateDefaults,
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -320,6 +346,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
+          activeCreateCapabilitiesProvider.overrideWith(
+            (ref) =>
+                ref.watch(authControllerProvider).state.user?.capabilities ??
+                const [],
+          ),
           authControllerProvider.overrideWith((ref) => authController),
           createControllerProvider.overrideWith((ref) => createController),
         ],
@@ -352,11 +383,13 @@ void main() {
 
     final createRepository = _FakeCreateRepository();
     final createController = CreateController(
+      publisherAccessCheck: const TestPersonalPublisherAccess(),
       loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
       eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: _testCreateDefaults,
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -391,6 +424,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
+          activeCreateCapabilitiesProvider.overrideWith(
+            (ref) =>
+                ref.watch(authControllerProvider).state.user?.capabilities ??
+                const [],
+          ),
           authControllerProvider.overrideWith((ref) => authController),
           createControllerProvider.overrideWith((ref) => createController),
         ],
@@ -457,11 +495,13 @@ void main() {
 
     final createRepository = _FakeCreateRepository();
     final createController = CreateController(
+      publisherAccessCheck: const TestPersonalPublisherAccess(),
       loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
       eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: _testCreateDefaults,
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -472,6 +512,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
+          activeCreateCapabilitiesProvider.overrideWith(
+            (ref) =>
+                ref.watch(authControllerProvider).state.user?.capabilities ??
+                const [],
+          ),
           authControllerProvider.overrideWith((ref) => authController),
           createControllerProvider.overrideWith((ref) => createController),
         ],
@@ -502,7 +547,8 @@ void main() {
     expect(draft.subcategory, 'museum');
     expect(draft.city, 'Rezekne');
     expect(draft.isFree, isFalse);
-    expect(draft.basePrice, 10);
+    expect(draft.basePrice?.minorUnits, 1000);
+    expect(draft.basePrice?.currency.value, 'EUR');
     expect(draft.media.coverImage, isNotEmpty);
     expect(
       draft.startDateTimeUtc?.toIso8601String(),
@@ -534,11 +580,13 @@ void main() {
 
     final createRepository = _FakeCreateRepository();
     final createController = CreateController(
+      publisherAccessCheck: const TestPersonalPublisherAccess(),
       loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
       eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: _testCreateDefaults,
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -549,6 +597,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
+          activeCreateCapabilitiesProvider.overrideWith(
+            (ref) =>
+                ref.watch(authControllerProvider).state.user?.capabilities ??
+                const [],
+          ),
           authControllerProvider.overrideWith((ref) => authController),
           createControllerProvider.overrideWith((ref) => createController),
         ],
@@ -610,11 +663,13 @@ void main() {
 
     final createRepository = _FakeCreateRepository();
     final createController = CreateController(
+      publisherAccessCheck: const TestPersonalPublisherAccess(),
       loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
       eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: _testCreateDefaults,
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -639,6 +694,11 @@ void main() {
     Widget app() {
       return ProviderScope(
         overrides: <Override>[
+          activeCreateCapabilitiesProvider.overrideWith(
+            (ref) =>
+                ref.watch(authControllerProvider).state.user?.capabilities ??
+                const [],
+          ),
           authControllerProvider.overrideWith((ref) => authController),
           createControllerProvider.overrideWith((ref) => createController),
         ],
@@ -738,11 +798,13 @@ void main() {
   test('Route publish fails safely without its publication service', () async {
     final createRepository = _FakeCreateRepository();
     final createController = CreateController(
+      publisherAccessCheck: const TestPersonalPublisherAccess(),
       loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
       saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
       eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: _testCreateDefaults,
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -778,6 +840,7 @@ void main() {
 
       final createRepository = _FakeCreateRepository();
       final createController = CreateController(
+        publisherAccessCheck: const TestPersonalPublisherAccess(),
         loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
         saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
         publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
@@ -813,6 +876,11 @@ void main() {
       Widget app() {
         return ProviderScope(
           overrides: <Override>[
+            activeCreateCapabilitiesProvider.overrideWith(
+              (ref) =>
+                  ref.watch(authControllerProvider).state.user?.capabilities ??
+                  const [],
+            ),
             authControllerProvider.overrideWith((ref) => authController),
             createControllerProvider.overrideWith((ref) => createController),
           ],
@@ -879,7 +947,7 @@ void main() {
       expect(find.text('pendingReview'), findsWidgets);
       expect(find.text('Art, culture & museums'), findsOneWidget);
       expect(find.text('Museum'), findsOneWidget);
-      expect(find.text('12 EUR'), findsOneWidget);
+      expect(find.text('12.00 EUR'), findsOneWidget);
 
       await tester.ensureVisible(find.text('Search similar'));
       await tester.tap(find.text('Search similar'));
@@ -887,7 +955,7 @@ void main() {
       expect(find.text('Search page'), findsOneWidget);
       expect(find.text('Museum evening route'), findsOneWidget);
       expect(find.text('art_culture_museums'), findsOneWidget);
-      expect(find.text('12'), findsOneWidget);
+      expect(find.text('12.00'), findsOneWidget);
 
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();
@@ -928,6 +996,7 @@ void main() {
 
       final createRepository = _FakeCreateRepository();
       final createController = CreateController(
+        publisherAccessCheck: const TestPersonalPublisherAccess(),
         loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
         saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
         publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
@@ -945,6 +1014,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: <Override>[
+            activeCreateCapabilitiesProvider.overrideWith(
+              (ref) =>
+                  ref.watch(authControllerProvider).state.user?.capabilities ??
+                  const [],
+            ),
             authControllerProvider.overrideWith((ref) => authController),
             createControllerProvider.overrideWith((ref) => createController),
           ],

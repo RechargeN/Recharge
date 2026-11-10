@@ -1,3 +1,4 @@
+import '../support/publisher_access_test_support.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/id/id_generator.dart';
@@ -74,6 +75,7 @@ void main() {
         const CollectionCreateRuntimeConfig(),
   }) {
     return CreateController(
+      publisherAccessCheck: const TestPersonalPublisherAccess(),
       loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
       saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
@@ -121,23 +123,29 @@ void main() {
     controller.dispose();
   });
 
-  test('missing create.collection refuses both setObjectType and attach', () async {
-    final controller = buildController();
-    await controller.ensureLoaded(
-      userId: 'u1',
-      organizerEmail: 'e@example.com',
-      organizerName: 'n',
-      capabilities: const <String>[],
-    );
+  test(
+    'missing create.collection refuses both setObjectType and attach',
+    () async {
+      final controller = buildController();
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'e@example.com',
+        organizerName: 'n',
+        capabilities: const <String>[],
+      );
 
-    controller.setObjectType(CreateObjectType.collection);
-    expect(controller.state.draft.objectType, isNot(CreateObjectType.collection));
-    expect(controller.state.message, contains('create.collection'));
+      controller.setObjectType(CreateObjectType.collection);
+      expect(
+        controller.state.draft.objectType,
+        isNot(CreateObjectType.collection),
+      );
+      expect(controller.state.message, contains('create.collection'));
 
-    controller.attachCollectionCoordinator(_buildCoordinator(sink: sink));
-    expect(controller.collectionCreateState, isNull);
-    controller.dispose();
-  });
+      controller.attachCollectionCoordinator(_buildCoordinator(sink: sink));
+      expect(controller.collectionCreateState, isNull);
+      controller.dispose();
+    },
+  );
 
   test('collectionPublishingEnabled:false blocks publish independently of '
       'capability — coordinator.publish is never reached', () async {
@@ -150,7 +158,10 @@ void main() {
       userId: 'u1',
       organizerEmail: 'e@example.com',
       organizerName: 'n',
-      capabilities: const <String>['create.collection', 'publish.collection.direct'],
+      capabilities: const <String>[
+        'create.collection',
+        'publish.collection.direct',
+      ],
     );
     controller.setObjectType(CreateObjectType.collection);
     controller.attachCollectionCoordinator(_buildCoordinator(sink: sink));
@@ -340,7 +351,8 @@ class _RecordingSink implements CollectionPublicationIndexSink {
   }
 }
 
-class _NoopCatalogSearchRepository implements CollectionCatalogSearchRepository {
+class _NoopCatalogSearchRepository
+    implements CollectionCatalogSearchRepository {
   @override
   Future<List<CollectionCatalogSearchResult>> search(
     CollectionCatalogSearchQuery query,

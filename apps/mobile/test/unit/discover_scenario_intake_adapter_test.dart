@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/adapters/discover_scenario_intake_adapter.dart';
 import 'package:recharge/features/create/domain/entities/scenario_item_draft.dart';
@@ -71,7 +73,7 @@ void main() {
       startsAtUtc: DateTime.utc(2026, 8, 8, 19),
       latitude: 56.95,
       longitude: 24.11,
-      priceAmount: 5,
+      priceAmount: Money(minorUnits: 500, currency: CurrencyCode.eur),
       distanceKm: 2,
       isFree: false,
       objectKind: DiscoverObjectKind.activity,
@@ -114,7 +116,7 @@ void main() {
       startsAtUtc: DateTime.utc(2026, 8, 3),
       latitude: 95,
       longitude: 24.1,
-      priceAmount: 0,
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       distanceKm: 0,
       isFree: true,
       objectKind: DiscoverObjectKind.place,
@@ -133,7 +135,7 @@ DiscoverItemEntity _item({required DiscoverObjectKind kind}) =>
       startsAtUtc: DateTime.utc(2026, 8, 8, 17),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 12,
+      priceAmount: Money(minorUnits: 1200, currency: CurrencyCode.eur),
       distanceKm: 1.2,
       isFree: false,
       objectKind: kind,
@@ -159,7 +161,7 @@ PublishedEventDiscoveryEntity _publishedEvent(EventOccurrenceStatus status) =>
       latitude: 25.08,
       longitude: 55.14,
       distanceKm: 3.2,
-      priceAmount: 12,
+      priceAmount: Money(minorUnits: 1200, currency: CurrencyCode.eur),
       isFree: false,
       currencyCode: 'EUR',
       scheduleMode: EventScheduleMode.oneTime,

@@ -13,11 +13,13 @@ class RechargeAppShell extends ConsumerStatefulWidget {
     required this.currentLocation,
     required this.child,
     this.userId = '',
+    this.routerGuardsWorkspace = false,
   });
 
   final String currentLocation;
   final Widget child;
   final String userId;
+  final bool routerGuardsWorkspace;
 
   @override
   ConsumerState<RechargeAppShell> createState() => _RechargeAppShellState();
@@ -113,7 +115,9 @@ class _RechargeAppShellState extends ConsumerState<RechargeAppShell> {
         : ref.watch(identityWorkspaceControllerProvider);
     _ensureIdentityLoaded(widget.userId);
     final AccountExperience experience =
-        identityController?.state.effectiveExperience ??
+        (identityController?.state.userId == widget.userId
+            ? identityController?.state.effectiveExperience
+            : null) ??
         AccountExperience.viewer;
     final bool isProfessional =
         experience == AccountExperience.professionalPage;
@@ -169,6 +173,11 @@ class _RechargeAppShellState extends ConsumerState<RechargeAppShell> {
         widget.currentLocation == RouteNames.professionalPageContent ||
         widget.currentLocation == RouteNames.professionalPageCreate ||
         widget.currentLocation == RouteNames.professionalPageAccount;
+    // In the app composition, permission fallback belongs to GoRouter.
+    // Standalone shell previews still support presentation-only switching.
+    if (widget.routerGuardsWorkspace && !isProfessional && onProfessionalRoute) {
+      return;
+    }
     final String? target = isProfessional && !onProfessionalRoute
         ? widget.currentLocation == RouteNames.notifications
               ? null
@@ -185,6 +194,7 @@ class _RechargeAppShellState extends ConsumerState<RechargeAppShell> {
     _scheduledRedirectKey = key;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      if (_scheduledRedirectKey != key) return;
       context.go(target);
     });
   }

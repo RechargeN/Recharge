@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -227,7 +229,7 @@ final DiscoverItemEntity _item = DiscoverItemEntity(
   startsAtUtc: DateTime.utc(2026, 8, 8, 17),
   latitude: 56.5099,
   longitude: 27.3332,
-  priceAmount: 0,
+  priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
   distanceKm: 1,
   isFree: true,
   objectKind: DiscoverObjectKind.place,

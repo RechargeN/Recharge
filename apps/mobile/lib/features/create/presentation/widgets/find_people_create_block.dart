@@ -1,6 +1,6 @@
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/parsing/input_parsers.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../application/create_taxonomy.dart';
 import '../../application/find_people_create_config.dart';
@@ -908,17 +908,17 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
           if (data.costType == FindPeopleCostType.estimated)
             _DraftTextField(
               label: 'Expected spend per person (${data.currencyCode}) *',
-              value: data.expectedSpendAmount?.toString() ?? '',
+              value: MoneyFormatter().optionalDecimal(
+                data.expectedSpendAmount,
+                locale: Localizations.localeOf(context).toLanguageTag(),
+              ),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
               onChanged: (String value) {
-                final double? amount = parseLocaleDecimalInput(value);
-                _update(
-                  data.copyWith(
-                    expectedSpendAmount: amount,
-                    clearExpectedSpendAmount: amount == null,
-                  ),
+                widget.controller.updateFindPeopleExpectedSpend(
+                  value,
+                  locale: Localizations.localeOf(context).toLanguageTag(),
                 );
               },
             ),
@@ -988,7 +988,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 contentPadding: EdgeInsets.zero,
                 title: Text(item.category),
                 subtitle: Text(
-                  '${item.amount.toStringAsFixed(2)} ${data.currencyCode} • ${item.payerNote}',
+                  '${MoneyFormatter().decimal(item.amount, locale: Localizations.localeOf(context).toLanguageTag())} ${item.amount.currency.value} • ${item.payerNote}',
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
@@ -1474,22 +1474,13 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
   }
 
   void _addExpense(FindPeopleDraftData data) {
-    final String? category = _text(_expenseCategory.text);
-    final double? amount = parseLocaleDecimalInput(_expenseAmount.text);
-    if (category == null || amount == null || amount <= 0) return;
-    _update(
-      data.copyWith(
-        plannedExpenseItems: <FindPeopleExpenseItemDraft>[
-          ...data.plannedExpenseItems,
-          FindPeopleExpenseItemDraft(
-            id: 'loc_${DateTime.now().toUtc().microsecondsSinceEpoch}',
-            category: category,
-            amount: amount,
-            payerNote: 'shared',
-          ),
-        ],
-      ),
-    );
+    if (!widget.controller.addFindPeopleExpense(
+      category: _expenseCategory.text,
+      text: _expenseAmount.text,
+      locale: Localizations.localeOf(context).toLanguageTag(),
+    )) {
+      return;
+    }
     _expenseCategory.clear();
     _expenseAmount.clear();
   }

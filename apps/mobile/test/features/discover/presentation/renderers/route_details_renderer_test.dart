@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -15,20 +17,21 @@ import '../../../../widget/widget_test_viewport.dart';
 /// first-class, safety reporting, navigation action — plus parity for the
 /// generic sections reused from `CompatibilityObjectRenderer`.
 void main() {
-  fullPageTestWidgets('renders an interactive map hero with an "open on map" action', (
-    tester,
-  ) async {
-    bool mapOpened = false;
-    await tester.pumpWidget(_app(_renderer(onMap: () => mapOpened = true)));
-    await tester.pumpAndSettle();
+  fullPageTestWidgets(
+    'renders an interactive map hero with an "open on map" action',
+    (tester) async {
+      bool mapOpened = false;
+      await tester.pumpWidget(_app(_renderer(onMap: () => mapOpened = true)));
+      await tester.pumpAndSettle();
 
-    expect(find.byType(GoogleMap), findsOneWidget);
-    expect(find.text('Открыть на карте'), findsOneWidget);
+      expect(find.byType(GoogleMap), findsOneWidget);
+      expect(find.text('Открыть на карте'), findsOneWidget);
 
-    await tester.tap(find.text('Открыть на карте'));
-    await tester.pump();
-    expect(mapOpened, isTrue);
-  });
+      await tester.tap(find.text('Открыть на карте'));
+      await tester.pump();
+      expect(mapOpened, isTrue);
+    },
+  );
 
   fullPageTestWidgets(
     'elevation summary shows ascent/descent and the partial-data note — '
@@ -52,36 +55,32 @@ void main() {
       expect(find.text('80 m'), findsOneWidget);
       expect(find.text('Ascent'), findsOneWidget);
       expect(find.text('Descent'), findsOneWidget);
-      expect(
-        find.textContaining('not presented as complete'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('not presented as complete'), findsOneWidget);
     },
   );
 
-  fullPageTestWidgets(
-    'unavailable elevation data is not shown as zero',
-    (tester) async {
-      await tester.pumpWidget(
-        _app(
-          _renderer(
-            route: _route(
-              ascentMeters: null,
-              descentMeters: null,
-              elevationAvailability: 'unavailable',
-            ),
+  fullPageTestWidgets('unavailable elevation data is not shown as zero', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        _renderer(
+          route: _route(
+            ascentMeters: null,
+            descentMeters: null,
+            elevationAvailability: 'unavailable',
           ),
         ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.text('—'), findsWidgets);
-      expect(
-        find.textContaining('is unavailable and is not shown as zero'),
-        findsOneWidget,
-      );
-    },
-  );
+    expect(find.text('—'), findsWidgets);
+    expect(
+      find.textContaining('is unavailable and is not shown as zero'),
+      findsOneWidget,
+    );
+  });
 
   fullPageTestWidgets(
     'difficulty/profile/POI/field-verified/surface render as a first-class '
@@ -194,7 +193,7 @@ DiscoverItemEntity _item(PublishedRouteDiscoveryEntity route) {
     startsAtUtc: DateTime.utc(2026, 8, 1),
     latitude: 56.9496,
     longitude: 24.1052,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     distanceKm: 0.4,
     isFree: true,
     objectKind: DiscoverObjectKind.route,

@@ -1,3 +1,6 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/models/scenario_draft_mapper.dart';
 import 'package:recharge/features/create/domain/entities/scenario_budget_draft.dart';
@@ -6,6 +9,29 @@ import 'package:recharge/features/create/domain/entities/scenario_item_draft.dar
 import 'package:recharge/features/create/domain/entities/scenario_logistics_draft.dart';
 
 void main() {
+  test('Scenario wrappers preserve distinct currencies without exchange', () {
+    const eur = ScenarioMoneyDraft(minorUnits: 1234, currencyCode: 'EUR');
+    const usd = ScenarioMoneyDraft(minorUnits: 1234, currencyCode: 'USD');
+    expect(eur.toMoney().currency, CurrencyCode.eur);
+    expect(ScenarioMoneyDraft.fromMoney(usd.toMoney()).currencyCode, 'USD');
+    expect(
+      () => eur.toMoney() + usd.toMoney(),
+      throwsA(isA<MoneyArithmeticException>()),
+    );
+  });
+  test('Scenario canonical monetary fields reject fractional minor units', () {
+    final json = ScenarioDraftMapper.toJson(_fixture());
+    final totals = json['totals'] as Map<String, Object?>;
+    totals['displayFromTotalCost'] = {
+      'minorUnits': 12.5,
+      'currencyCode': 'EUR',
+    };
+    expect(
+      () => ScenarioDraftMapper.fromJson(json),
+      throwsA(isA<MoneyReadException>()),
+    );
+  });
+
   test('Scenario schema v2 survives a typed round-trip', () {
     final ScenarioDraftData source = _fixture();
 

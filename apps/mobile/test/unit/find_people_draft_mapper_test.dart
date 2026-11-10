@@ -1,9 +1,44 @@
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
+import 'package:recharge/features/create/data/models/find_people_draft_mapper.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/models/create_draft_model.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/entities/find_people_draft_data.dart';
 
 void main() {
+  test('Find People expected and itemized money roundtrip without doubles', () {
+    final defaults = FindPeopleDraftData.defaults(
+      userId: 'u',
+      currencyCode: 'EUR',
+    );
+    final expense = <String, Object?>{
+      'id': 'e',
+      'category': 'transport',
+      'amount': 0.29,
+      'payerNote': 'shared',
+    };
+    final json = <String, Object?>{
+      'expectedSpendAmount': 12.34,
+      'currencyCode': 'EUR',
+      'plannedExpenseItems': [expense],
+    };
+    final read = FindPeopleDraftMapper.fromJson(json, defaults: defaults);
+    expect(read.expectedSpendAmount?.minorUnits, 1234);
+    expect(read.plannedExpenseItems.single.amount.minorUnits, 29);
+    final wire = FindPeopleDraftMapper.toJson(read);
+    expect(wire['expectedSpendAmountMinorUnits'], 1234);
+    expect(wire.containsKey('expectedSpendAmount'), isFalse);
+    final item = (wire['plannedExpenseItems'] as List).single as Map;
+    expect(item['amountMinorUnits'], 29);
+    expect(item['currencyCode'], 'EUR');
+    expect(item.containsKey('amount'), isFalse);
+    expense['amountMinorUnits'] = 2.5;
+    expect(
+      () => FindPeopleDraftMapper.fromJson(json, defaults: defaults),
+      throwsA(isA<MoneyReadException>()),
+    );
+  });
+
   test('Find People typed draft survives current schema round-trip', () {
     final CreateDraftEntity source =
         CreateDraftEntity.defaults(
@@ -42,7 +77,7 @@ void main() {
       json,
     ).toEntity();
 
-    expect(json['schemaVersion'], 8);
+    expect(json['schemaVersion'], 9);
     expect(restored.objectType, CreateObjectType.findPeople);
     expect(restored.findPeopleData, isNotNull);
     expect(

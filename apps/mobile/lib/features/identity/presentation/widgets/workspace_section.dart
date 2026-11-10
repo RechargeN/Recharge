@@ -13,7 +13,9 @@ import '../../domain/entities/workspace_ref.dart';
 /// Pages, page creation/limit request and admin preview. Designed to be
 /// embedded inline (e.g. in Settings) instead of pushed as a separate route.
 class WorkspaceSection extends ConsumerStatefulWidget {
-  const WorkspaceSection({super.key, required this.userId});
+  const WorkspaceSection({super.key, required this.userId, this.onAdminTools});
+
+  final VoidCallback? onAdminTools;
 
   final String userId;
 
@@ -50,6 +52,7 @@ class _WorkspaceSectionState extends ConsumerState<WorkspaceSection> {
     final controller = ref.watch(identityWorkspaceControllerProvider);
     final IdentityWorkspaceState state = controller.state;
 
+    if (state.userId != widget.userId) return const CircularProgressIndicator();
     return switch (state.status) {
       IdentityWorkspaceStatus.initial ||
       IdentityWorkspaceStatus.loading => const Padding(
@@ -83,7 +86,7 @@ class _WorkspaceSectionState extends ConsumerState<WorkspaceSection> {
         onPreview: (AdminExperiencePreview preview) {
           controller.selectAdminPreview(preview);
         },
-        onAdminTools: () => _showAdminAccess(context),
+        onAdminTools: widget.onAdminTools ?? () {},
       ),
     };
   }
@@ -118,25 +121,6 @@ class _WorkspaceSectionState extends ConsumerState<WorkspaceSection> {
         context,
       ).showSnackBar(SnackBar(content: Text(message)));
     }
-  }
-
-  void _showAdminAccess(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('Admin access active'),
-        content: const Text(
-          'This mock account has explicit Admin capabilities. '
-          'Operational Admin tools are connected in IDP-05A.',
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 }
 
@@ -183,7 +167,13 @@ class _WorkspaceList extends StatelessWidget {
         const _SectionLabel('PROFESSIONAL PAGES'),
         const SizedBox(height: 8),
         if (snapshot.availablePages.isEmpty)
-          _EmptyPages(enabled: !state.isBusy, onCreatePage: onCreatePage)
+          _EmptyPages(
+            enabled:
+                !state.isBusy &&
+                snapshot.canCreatePage &&
+                snapshot.ownedPages.length < 3,
+            onCreatePage: onCreatePage,
+          )
         else
           for (final ManagedPageEntity page in snapshot.availablePages) ...[
             _WorkspaceTile(
@@ -207,7 +197,9 @@ class _WorkspaceList extends StatelessWidget {
         if (snapshot.ownedPages.isNotEmpty && snapshot.ownedPages.length < 3)
           OutlinedButton.icon(
             key: const ValueKey<String>('create-professional-page'),
-            onPressed: state.isBusy ? null : onCreatePage,
+            onPressed: state.isBusy || !snapshot.canCreatePage
+                ? null
+                : onCreatePage,
             icon: const Icon(Icons.add_business_outlined),
             label: const Text('Create Professional Page'),
           )
@@ -220,18 +212,21 @@ class _WorkspaceList extends StatelessWidget {
               subtitle: Text('Moderators will review your request.'),
             ),
           )
-        else
+        else if (snapshot.ownedPages.length >= 3)
           OutlinedButton.icon(
             key: const ValueKey<String>('request-additional-page'),
-            onPressed: state.isBusy ? null : onRequestAdditionalPage,
+            onPressed: state.isBusy || !snapshot.canCreatePage
+                ? null
+                : onRequestAdditionalPage,
             icon: const Icon(Icons.forward_to_inbox_outlined),
             label: const Text('Request additional page'),
           ),
-        if (snapshot.hasGlobalCapability('admin.tools.view')) ...<Widget>[
+        if (snapshot.canUseAdminTools ||
+            snapshot.canPreviewExperience) ...<Widget>[
           const SizedBox(height: 18),
           const _SectionLabel('ADMINISTRATION'),
           const SizedBox(height: 8),
-          if (snapshot.hasGlobalCapability('admin.experience.preview')) ...[
+          if (snapshot.canPreviewExperience) ...[
             _AdminPreviewCard(
               selected: state.adminPreview,
               enabled: !state.isBusy,
@@ -239,15 +234,16 @@ class _WorkspaceList extends StatelessWidget {
             ),
             const SizedBox(height: 8),
           ],
-          _WorkspaceTile(
-            key: const ValueKey<String>('admin-tools-entry'),
-            icon: Icons.admin_panel_settings_outlined,
-            title: 'Admin tools',
-            subtitle: 'Admin access active · separate from publishing',
-            selected: false,
-            enabled: !state.isBusy,
-            onTap: onAdminTools,
-          ),
+          if (snapshot.canUseAdminTools)
+            _WorkspaceTile(
+              key: const ValueKey<String>('admin-tools-entry'),
+              icon: Icons.admin_panel_settings_outlined,
+              title: 'Admin tools',
+              subtitle: 'Admin access active · separate from publishing',
+              selected: false,
+              enabled: !state.isBusy,
+              onTap: onAdminTools,
+            ),
         ],
         if (state.isBusy) ...<Widget>[
           const SizedBox(height: 18),

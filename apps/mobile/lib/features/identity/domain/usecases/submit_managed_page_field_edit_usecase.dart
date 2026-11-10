@@ -66,6 +66,13 @@ class SubmitManagedPageFieldEditUseCase {
 
     final IdentityAccessSnapshot access = await _workspaceRepository
         .loadAccessSnapshot(normalizedActor);
+    if (!access.belongsTo(normalizedActor) ||
+        (!access.isVerifiedCreator ||
+            access.pageById(page.id)?.isActive != true)) {
+      throw const SubmitManagedPageFieldEditException(
+        'page_access_unavailable',
+      );
+    }
     final ManagedPageMembershipEntity? membership = access.membershipFor(
       page.id,
     );
@@ -120,6 +127,14 @@ class SubmitManagedPageFieldEditUseCase {
           revision: current.revision + 1,
           schemaVersion: 1,
         );
+    final fresh = await _workspaceRepository.loadAccessSnapshot(
+      normalizedActor,
+    );
+    if (!fresh.canUsePage(normalizedActor, page.id, pageManageCapability)) {
+      throw const SubmitManagedPageFieldEditException(
+        'page_access_unavailable',
+      );
+    }
     await _moderationRepository.saveOverlay(resolved);
     return resolved;
   }

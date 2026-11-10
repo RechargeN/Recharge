@@ -4,6 +4,7 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../../../support/platform_golden.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/domain/entities/published_find_people_discovery_entity.dart';
 import 'package:recharge/features/discover/domain/entities/publisher_verification_display_state.dart';
@@ -60,7 +61,9 @@ void main() {
         find.byKey(
           const ValueKey<String>('object-offer-find-people-golden-surface'),
         ),
-        matchesGoldenFile('goldens/object_offer_find_people_reference.png'),
+        matchesGoldenFile(
+          platformGoldenPath('goldens/object_offer_find_people_reference.png'),
+        ),
       );
     },
   );
@@ -73,13 +76,13 @@ Future<void> _loadGoldenFonts() async {
   }
   final String fontRoot = '$flutterRoot/bin/cache/artifacts/material_fonts';
   await (FontLoader('Roboto')
-        ..addFont(_fontData('$fontRoot/roboto-regular.ttf'))
-        ..addFont(_fontData('$fontRoot/roboto-medium.ttf'))
-        ..addFont(_fontData('$fontRoot/roboto-bold.ttf')))
+        ..addFont(_fontData('$fontRoot/Roboto-Regular.ttf'))
+        ..addFont(_fontData('$fontRoot/Roboto-Medium.ttf'))
+        ..addFont(_fontData('$fontRoot/Roboto-Bold.ttf')))
       .load();
   await (FontLoader(
     'MaterialIcons',
-  )..addFont(_fontData('$fontRoot/materialicons-regular.otf'))).load();
+  )..addFont(_fontData('$fontRoot/MaterialIcons-Regular.otf'))).load();
 }
 
 Future<ByteData> _fontData(String path) async {
