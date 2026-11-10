@@ -27,9 +27,13 @@ old Linux output shows 07:00 while Windows shows 10:00. That Linux output was
 rejected. The visual fixture now explicitly creates local 10:00 and supplies
 its UTC instant, with a separate text assertion. This makes visual content
 stable without changing product timezone behavior or claiming zoned-schedule
-acceptance. The Linux Activity reference currently uses the original Windows
-image as a content-correct provisional reference; its new Linux rasterization
-must be inspected and recorded before this checkpoint can pass.
+acceptance. The corrected Linux Activity rendering was inspected against the
+unchanged Windows master: both display 10:00 and retain the same labels,
+wrapping and layout. Its reference comes from run 42798288038, head 977e957,
+artifact 13754848572. Archive SHA-256:
+c1062708aeafed81a231db8903be6291d37270139d32fafab5c075ce3b7e0686.
+The full run passed the other seven goldens; a new complete run must verify
+the accepted Activity reference as well.
 
 ## Updating references
 
