@@ -3,10 +3,16 @@ import '../../../../shared/primitives/money/currency_metadata.dart';
 import '../../../../core/parsing/money_legacy_adapter.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/time_window.dart';
+import '../../domain/repositories/timezone_repository.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
+import '../../../../shared/primitives/time/iana_time_zone.dart';
 
 /// The single local record mapper; domain values do not own storage shapes.
 class DiscoverQueryModel {
-  static Map<String, Object?> toMap(DiscoverQuery value) {
+  static Map<String, Object?> toMap(
+    DiscoverQuery value, {
+    TimezoneRepository? timezoneRepository,
+  }) {
     for (final amount in [value.budgetMin, value.budgetMax]) {
       if (amount != null &&
           CurrencyMetadataRegistry.eurOnly.lookup(amount.currency) == null) {
@@ -39,7 +45,9 @@ class DiscoverQueryModel {
       'source_screen': value.sourceScreen,
       'query_version': 2,
       'applied_at_utc': value.appliedAtUtc.toIso8601String(),
-      'time_window': value.timeWindow?.toMap(),
+      'time_window': value.timeWindow == null
+          ? null
+          : _timeWindowToMap(value.timeWindow!, timezoneRepository),
       'travel_context': value.travelContext?.toMap(),
     };
   }
@@ -50,6 +58,7 @@ class DiscoverQueryModel {
     required double defaultCenterLat,
     required double defaultCenterLng,
     String? legacyCurrencyCode,
+    TimezoneRepository? timezoneRepository,
   }) {
     final Object? rawVersion = map['query_version'];
     if (rawVersion != null && rawVersion is! int) {
@@ -78,7 +87,11 @@ class DiscoverQueryModel {
       centerLat = defaultCenterLat;
       centerLng = defaultCenterLng;
     }
-    final Map<String, Object?>? timeWindowMap = _mapOrNull(map['time_window']);
+    final rawTimeWindow = map['time_window'];
+    if (rawTimeWindow != null &&
+        (sourceVersion < 2 || rawTimeWindow is! Map<String, Object?>)) {
+      throw const FormatException('Invalid stored time window');
+    }
     final Map<String, Object?>? travelContextMap = _mapOrNull(
       map['travel_context'],
     );
@@ -130,13 +143,70 @@ class DiscoverQueryModel {
       queryVersion: 2,
       appliedAtUtc:
           _dateOrNull(map['applied_at_utc']) ?? DateTime.now().toUtc(),
-      timeWindow: sourceVersion < 2 || timeWindowMap == null
+      timeWindow: rawTimeWindow == null
           ? null
-          : TimeWindow.fromMap(timeWindowMap),
+          : _timeWindowFromMap(
+              rawTimeWindow as Map<String, Object?>,
+              timezoneRepository,
+            ),
       travelContext: sourceVersion < 2 || travelContextMap == null
           ? null
           : TravelContext.fromMap(travelContextMap),
     );
+  }
+
+  static String _knownTimezone(Object? raw, TimezoneRepository? repository) {
+    if (raw is! String) {
+      throw const FormatException('Missing time window timezone');
+    }
+    final zone = IanaTimeZone.parse(raw);
+    if (repository == null || !repository.isValidTimezone(zone.value)) {
+      throw const FormatException('Time window requires a known timezone');
+    }
+    return zone.value;
+  }
+
+  static Map<String, Object?> _timeWindowToMap(
+    TimeWindow value,
+    TimezoneRepository? repository,
+  ) => {
+    'start_at_utc': value.startAtUtc.toIso8601String(),
+    'end_at_utc': value.endAtUtc.toIso8601String(),
+    'timezone_id': _knownTimezone(value.timezoneId, repository),
+    'mode': value.mode.name,
+    'flexibility_minutes': value.flexibilityMinutes,
+    'resolved_at_utc': value.resolvedAtUtc.toIso8601String(),
+  };
+
+  static TimeWindow _timeWindowFromMap(
+    Map<String, Object?> map,
+    TimezoneRepository? repository,
+  ) {
+    DateTime instant(String key) {
+      final raw = map[key];
+      if (raw is! String) throw FormatException('Missing UTC field: $key');
+      return UtcInstant.parse(raw).value;
+    }
+
+    final mode = TimeWindowMode.values.where(
+      (value) => value.name == map['mode'],
+    );
+    final flexibility = map['flexibility_minutes'];
+    if (mode.length != 1 || flexibility is! int) {
+      throw const FormatException('Invalid time window mode or flexibility');
+    }
+    try {
+      return TimeWindow(
+        startAtUtc: instant('start_at_utc'),
+        endAtUtc: instant('end_at_utc'),
+        resolvedAtUtc: instant('resolved_at_utc'),
+        timezoneId: _knownTimezone(map['timezone_id'], repository),
+        mode: mode.single,
+        flexibilityMinutes: flexibility,
+      );
+    } on ArgumentError {
+      throw const FormatException('Invalid time window interval');
+    }
   }
 }
 

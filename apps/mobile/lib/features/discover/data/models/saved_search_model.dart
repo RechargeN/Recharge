@@ -1,14 +1,21 @@
 import '../../domain/entities/saved_search_entity.dart';
 import 'discover_query_model.dart';
+import '../../domain/repositories/timezone_repository.dart';
 
 /// The single local record mapper; domain values do not own storage shapes.
 class SavedSearchModel {
-  static Map<String, Object?> toMap(SavedSearchEntity value) {
+  static Map<String, Object?> toMap(
+    SavedSearchEntity value, {
+    TimezoneRepository? timezoneRepository,
+  }) {
     return <String, Object?>{
       'id': value.id,
       'title': value.title,
       'subtitle': value.subtitle,
-      'query': DiscoverQueryModel.toMap(value.query),
+      'query': DiscoverQueryModel.toMap(
+        value.query,
+        timezoneRepository: timezoneRepository,
+      ),
       'created_at_utc': value.createdAtUtc.toIso8601String(),
     };
   }
@@ -19,6 +26,7 @@ class SavedSearchModel {
     required double defaultCenterLat,
     required double defaultCenterLng,
     String? legacyCurrencyCode,
+    TimezoneRepository? timezoneRepository,
   }) {
     final Object? rawQuery = map['query'];
     final Map<String, Object?> queryMap;
@@ -42,6 +50,7 @@ class SavedSearchModel {
         defaultCenterLat: defaultCenterLat,
         defaultCenterLng: defaultCenterLng,
         legacyCurrencyCode: legacyCurrencyCode,
+        timezoneRepository: timezoneRepository,
       ),
       createdAtUtc: map['created_at_utc'] == null
           ? DateTime.now().toUtc()

@@ -1010,6 +1010,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     ..registerLazySingleton<DiscoverPreferencesLocalDataSource>(
       () => DiscoverPreferencesLocalDataSource(
         sl(),
+        timezoneRepository: sl(),
         legacyCurrencyCode: sl<MarketConfig>().currencyCode,
         defaultMarketCityId: sl<MarketConfig>().marketCityId,
         defaultCenterLat: sl<MarketConfig>().centerLat,

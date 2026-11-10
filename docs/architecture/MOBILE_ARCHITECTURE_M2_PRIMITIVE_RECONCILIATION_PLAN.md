@@ -647,3 +647,36 @@ UTC/zone persistence and existing Event/Session policies; C3 retains Scenario/
 transit service-day rules; C4 must use the Place zone for Visit History; C5
 must integrate market/locale values through explicit adapters. No compatibility
 deletion, backend/Firebase runtime, l10n readiness or R1 acceptance is claimed.
+
+## 18. M2-C2a1 persisted Discover window checkpoint — 2026-11-10
+
+This bounded checkpoint follows C1 on `92ffe51`, whose complete Windows/Linux
+suites passed with 1407 tests and clean analyzer/boundary gates. It uses the
+existing TimeWindow aggregate, DiscoverQueryModel, preferences datasource
+and injected TimezoneRepository; there is no new schedule, writer or resolver.
+
+TimeWindow holds shared UtcInstant/IanaTimeZone values internally. Its existing
+DateTime/String consumer accessors remain transitional until the M2-D audit.
+The sole persisted window shape now belongs to DiscoverQueryModel, including
+saved-search and history nesting. Current keys and query version are unchanged.
+Window reads/writes require a known zone through the existing TZDB repository.
+Missing validation, malformed non-null windows, unknown modes, noninteger or
+invalid flexibility and unsupported version/window combinations fail closed.
+
+UtcInstant parses explicit UTC Z text with component validation, microsecond
+precision and range checks; it rejects silent calendar normalization, offsets
+and zone-less text. Application now and timezone conversion reject local
+DateTime even on UTC hosts. Feature DST gap/overlap and interval policies stay
+in Discover. Valid old Z records read without writes; corrupt last/saved/history
+records block replacement/insertion/deletion and retain their original bytes.
+
+Focused tests cover all three persisted query paths, primitive parsing,
+non-UTC rejection, existing DST rules and Money regressions. Complete gate
+results are recorded in checkpoint evidence. Initial focused fixture failures
+omitted the aggregate's required TravelContext; fixtures were corrected without
+weakening the invariant.
+
+C2a2 still owns Map/Results route parsing and Search wall-clock UI conversion.
+C2b Event/Session, C3 Scenario/transit, C4 Visit and C5 MarketConfig remain open.
+This checkpoint does not claim those paths are canonical, remove compatibility
+APIs, migrate records on startup or establish device/Emulator/cloud evidence.

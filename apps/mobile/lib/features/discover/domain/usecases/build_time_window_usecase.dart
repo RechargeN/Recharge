@@ -1,4 +1,5 @@
 import 'package:recharge/shared/primitives/time/local_date.dart';
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../entities/time_window.dart';
 import '../repositories/timezone_repository.dart';
 
@@ -31,6 +32,11 @@ class BuildTimeWindowUseCase {
     DateTime? endLocal,
     int flexibilityMinutes = 0,
   }) {
+    try {
+      UtcInstant(nowUtc);
+    } on ArgumentError {
+      throw const TimeWindowValidationException('Explicit UTC now is required');
+    }
     if (!_timezoneRepository.isValidTimezone(timezoneId)) {
       throw const TimeWindowValidationException(
         TimeWindowIssue.unknownTimezone,
@@ -51,12 +57,12 @@ class BuildTimeWindowUseCase {
         throw const TimeWindowValidationException(TimeWindowIssue.dayEnded);
       }
       return TimeWindow(
-        startAtUtc: nowUtc.toUtc(),
+        startAtUtc: nowUtc,
         endAtUtc: end.instantUtc!,
         timezoneId: timezoneId,
         mode: mode,
         flexibilityMinutes: 0,
-        resolvedAtUtc: nowUtc.toUtc(),
+        resolvedAtUtc: nowUtc,
       );
     }
     if (startLocal == null || endLocal == null) {
@@ -90,7 +96,7 @@ class BuildTimeWindowUseCase {
       flexibilityMinutes: mode == TimeWindowMode.flexible
           ? flexibilityMinutes
           : 0,
-      resolvedAtUtc: nowUtc.toUtc(),
+      resolvedAtUtc: nowUtc,
     );
   }
 }
