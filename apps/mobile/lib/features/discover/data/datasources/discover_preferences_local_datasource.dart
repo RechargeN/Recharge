@@ -8,10 +8,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/smart_search_history_entity.dart';
+import '../../domain/repositories/timezone_repository.dart';
 
 class DiscoverPreferencesLocalDataSource {
   DiscoverPreferencesLocalDataSource(
     this._secureStorage, {
+    required this.timezoneRepository,
     required String defaultMarketCityId,
     required double defaultCenterLat,
     required double defaultCenterLng,
@@ -21,6 +23,7 @@ class DiscoverPreferencesLocalDataSource {
        _defaultCenterLng = defaultCenterLng;
 
   final FlutterSecureStorage _secureStorage;
+  final TimezoneRepository timezoneRepository;
   final String? legacyCurrencyCode;
   final String _defaultMarketCityId;
   final double _defaultCenterLat;
@@ -33,7 +36,9 @@ class DiscoverPreferencesLocalDataSource {
 
   Future<void> saveLastQuery(DiscoverQuery query) async {
     await loadLastQuery(); // Validate existing data before any explicit replacement.
-    final String encoded = jsonEncode(DiscoverQueryModel.toMap(query));
+    final String encoded = jsonEncode(
+      DiscoverQueryModel.toMap(query, timezoneRepository: timezoneRepository),
+    );
     await _secureStorage.write(key: _lastQueryKey, value: encoded);
   }
 
@@ -54,6 +59,7 @@ class DiscoverPreferencesLocalDataSource {
         defaultCenterLat: _defaultCenterLat,
         defaultCenterLng: _defaultCenterLng,
         legacyCurrencyCode: legacyCurrencyCode,
+        timezoneRepository: timezoneRepository,
       );
     } on FormatException {
       rethrow;
@@ -79,6 +85,7 @@ class DiscoverPreferencesLocalDataSource {
               defaultCenterLat: _defaultCenterLat,
               defaultCenterLng: _defaultCenterLng,
               legacyCurrencyCode: legacyCurrencyCode,
+              timezoneRepository: timezoneRepository,
             ),
           )
           .toList(growable: false);
@@ -125,6 +132,7 @@ class DiscoverPreferencesLocalDataSource {
               defaultCenterLat: _defaultCenterLat,
               defaultCenterLng: _defaultCenterLng,
               legacyCurrencyCode: legacyCurrencyCode,
+              timezoneRepository: timezoneRepository,
             ),
           )
           .where(
@@ -162,7 +170,12 @@ class DiscoverPreferencesLocalDataSource {
   Future<void> _writeSavedSearches(List<SavedSearchEntity> searches) async {
     final String encoded = jsonEncode(
       searches
-          .map((SavedSearchEntity item) => SavedSearchModel.toMap(item))
+          .map(
+            (SavedSearchEntity item) => SavedSearchModel.toMap(
+              item,
+              timezoneRepository: timezoneRepository,
+            ),
+          )
           .toList(),
     );
     await _secureStorage.write(key: _savedSearchesKey, value: encoded);
@@ -174,8 +187,10 @@ class DiscoverPreferencesLocalDataSource {
     final String encoded = jsonEncode(
       items
           .map(
-            (SmartSearchHistoryEntity item) =>
-                SmartSearchHistoryModel.toMap(item),
+            (SmartSearchHistoryEntity item) => SmartSearchHistoryModel.toMap(
+              item,
+              timezoneRepository: timezoneRepository,
+            ),
           )
           .toList(),
     );

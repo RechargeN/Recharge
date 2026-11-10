@@ -5,6 +5,7 @@ import 'package:recharge/app/config/travel_policy_config.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/geo_point.dart';
 import 'package:recharge/features/discover/domain/entities/time_window.dart';
+import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 
 void main() {
   test('active market is Riga and query defaults are v2', () {
@@ -90,7 +91,11 @@ void main() {
         );
 
     final DiscoverQuery restored = DiscoverQueryModel.fromMap(
-      DiscoverQueryModel.toMap(source),
+      DiscoverQueryModel.toMap(
+        source,
+        timezoneRepository: TimezoneRepositoryImpl(),
+      ),
+      timezoneRepository: TimezoneRepositoryImpl(),
       defaultMarketCityId: 'riga',
       defaultCenterLat: 56.9496,
       defaultCenterLng: 24.1052,

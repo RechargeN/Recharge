@@ -1,7 +1,9 @@
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
-import '../../domain/entities/local_date.dart';
+import 'package:recharge/shared/primitives/time/local_date.dart';
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
+import 'package:recharge/shared/primitives/time/iana_time_zone.dart';
 import '../../domain/repositories/timezone_repository.dart';
 
 class TimezoneRepositoryImpl implements TimezoneRepository {
@@ -17,8 +19,10 @@ class TimezoneRepositoryImpl implements TimezoneRepository {
   @override
   bool isValidTimezone(String timezoneId) {
     try {
-      tz.getLocation(timezoneId);
+      tz.getLocation(IanaTimeZone.parse(timezoneId).value);
       return true;
+    } on FormatException {
+      return false;
     } on tz.LocationNotFoundException {
       return false;
     }
@@ -27,8 +31,8 @@ class TimezoneRepositoryImpl implements TimezoneRepository {
   @override
   LocalDateTimeValue toLocal(DateTime instantUtc, String timezoneId) {
     final tz.TZDateTime local = tz.TZDateTime.from(
-      instantUtc.toUtc(),
-      tz.getLocation(timezoneId),
+      UtcInstant(instantUtc).value,
+      tz.getLocation(IanaTimeZone.parse(timezoneId).value),
     );
     return LocalDateTimeValue(
       date: LocalDate(local.year, local.month, local.day),
@@ -92,9 +96,13 @@ class TimezoneRepositoryImpl implements TimezoneRepository {
     }
 
     final int direction = policy == LocalBoundaryPolicy.openingStart ? 1 : -1;
-    final DateTime naive = date.asUtcMidnight.add(
-      Duration(minutes: minutesSinceMidnight),
-    );
+    // Wall-clock arithmetic belongs to this TZDB adapter. This value is not
+    // an instant until a valid offset candidate is resolved.
+    final DateTime naive = DateTime.utc(
+      date.year,
+      date.month,
+      date.day,
+    ).add(Duration(minutes: minutesSinceMidnight));
     for (int delta = 1; delta <= 180; delta++) {
       final DateTime shifted = naive.add(Duration(minutes: direction * delta));
       final LocalDate shiftedDate = LocalDate(

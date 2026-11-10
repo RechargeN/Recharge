@@ -28,6 +28,7 @@ import 'package:recharge/features/favorites/domain/usecases/add_favorite_usecase
 import 'package:recharge/features/favorites/domain/usecases/get_favorites_usecase.dart';
 import 'package:recharge/features/favorites/domain/usecases/remove_favorite_usecase.dart';
 import 'package:recharge/features/scenarios/domain/entities/scenario_draft_entity.dart';
+import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 
 Money eur(int minor) => Money(minorUnits: minor, currency: CurrencyCode.eur);
 
@@ -488,6 +489,7 @@ Map<String, dynamic> favoriteRecord() =>
 DiscoverPreferencesLocalDataSource preferences() =>
     DiscoverPreferencesLocalDataSource(
       const FlutterSecureStorage(),
+      timezoneRepository: TimezoneRepositoryImpl(),
       defaultMarketCityId: 'test',
       defaultCenterLat: 0,
       defaultCenterLng: 0,

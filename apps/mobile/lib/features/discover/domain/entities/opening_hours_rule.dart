@@ -1,4 +1,4 @@
-import 'local_date.dart';
+import 'package:recharge/shared/primitives/time/local_date.dart';
 
 enum DayOfWeek {
   monday,

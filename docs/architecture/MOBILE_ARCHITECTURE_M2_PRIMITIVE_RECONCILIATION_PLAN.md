@@ -3,7 +3,7 @@
 **ID:** MOB-ARCH-M2-P
 **Версия:** 1.0
 **Дата:** 2026-08-11
-**Статус:** Approved — M2-A/B Done (local/mock); M2-C–M2-E not started
+**Статус:** Approved — M2-A/B Done (local/mock); M2-C Doing; M2-D/E not started
 **Parent:** [Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
 **Depends on:** MOB-ARCH-M1 — Done, merged as `f893a931a58cff9ef9f779e17517af0d28c2f454`
 **Нормативные AC:** MOB-ARCH-AC-05–06, AC-52–53, AC-56–60, AC-74
@@ -614,3 +614,129 @@ This fixture change does not establish product timezone behavior.
 Provenance and host policy: `apps/mobile/test/support/PLATFORM_GOLDENS.md`.
 The intermediate full Linux run had 1394 passed / 1 failed; only the final
 complete green run above closes the gate.
+
+## 17. M2-C1 primitive checkpoint — 2026-11-10
+
+C1 starts from the completed B tree, documentation checkpoint `b2d3e96`,
+on separate branch `codex/m2c-primitives-local-review-20261110`.
+The user authorized sequential B/C/D/E implementation. The C1 file map adds
+only the LAUNCH_STATUS progress row to the nineteen-file plan; canonical
+inventory is regenerated/checked without increasing exceptions.
+
+Shared LocalDate validates Gregorian years 1–9999, strict calendar text,
+weekday, ordering and bounded day arithmetic. Discover's old import path
+forwards to it until D; all current direct consumers use the shared type.
+There is no public date-as-UTC-midnight API. The existing TZDB adapter owns
+wall-clock candidate calculation and keeps its gap/overlap feature policy.
+
+UtcInstant rejects non-UTC DateTime, including local values on UTC hosts.
+IanaTimeZone validates structural identity only; existence and alias resolution
+remain adapter responsibilities. LocaleTag supports language/script/region
+with explicit rejection of unsupported extensions/variants. MarketRef stores
+a stable ID without city-name resolution or inferred market configuration.
+Primitive validation is explicit and does not rely on debug assertions.
+
+Focused primitive/property + existing timezone/time-fit tests: 23 passed.
+The date property cases span a 400-year Gregorian cycle. Boundary self/scan/
+inventory checks passed at unchanged budget 71/71, zero violations. Complete
+Windows/Linux gates remain required; their results are recorded separately
+in the checkpoint review evidence, not inferred from focused tests.
+
+C remains Doing: C1 is not complete schedule integration. C2 must reconcile
+UTC/zone persistence and existing Event/Session policies; C3 retains Scenario/
+transit service-day rules; C4 must use the Place zone for Visit History; C5
+must integrate market/locale values through explicit adapters. No compatibility
+deletion, backend/Firebase runtime, l10n readiness or R1 acceptance is claimed.
+
+## 18. M2-C2a1 persisted Discover window checkpoint — 2026-11-10
+
+This bounded checkpoint follows C1 on `92ffe51`, whose complete Windows/Linux
+suites passed with 1407 tests and clean analyzer/boundary gates. It uses the
+existing TimeWindow aggregate, DiscoverQueryModel, preferences datasource
+and injected TimezoneRepository; there is no new schedule, writer or resolver.
+
+TimeWindow holds shared UtcInstant/IanaTimeZone values internally. Its existing
+DateTime/String consumer accessors remain transitional until the M2-D audit.
+The sole persisted window shape now belongs to DiscoverQueryModel, including
+saved-search and history nesting. Current keys and query version are unchanged.
+Window reads/writes require a known zone through the existing TZDB repository.
+Missing validation, malformed non-null windows, unknown modes, noninteger or
+invalid flexibility and unsupported version/window combinations fail closed.
+
+UtcInstant parses explicit UTC Z text with component validation, microsecond
+precision and range checks; it rejects silent calendar normalization, offsets
+and zone-less text. Application now and timezone conversion reject local
+DateTime even on UTC hosts. Feature DST gap/overlap and interval policies stay
+in Discover. Valid old Z records read without writes; corrupt last/saved/history
+records block replacement/insertion/deletion and retain their original bytes.
+
+Focused tests cover all three persisted query paths, primitive parsing,
+non-UTC rejection, existing DST rules and Money regressions. Complete gate
+results are recorded in checkpoint evidence. Initial focused fixture failures
+omitted the aggregate's required TravelContext; fixtures were corrected without
+weakening the invariant.
+
+C2a2 still owns Map/Results route parsing and Search wall-clock UI conversion.
+C2b Event/Session, C3 Scenario/transit, C4 Visit and C5 MarketConfig remain open.
+This checkpoint does not claim those paths are canonical, remove compatibility
+APIs, migrate records on startup or establish device/Emulator/cloud evidence.
+
+## 19. M2-C2a2 Discover route boundary checkpoint — 2026-11-11
+
+C2a1 on `20de14e` passed complete Windows/Linux suites with 1419 tests,
+analyzer, boundary and diff checks. C2a2 replaces the two presentation time/
+travel parsers and three route writers with one implementation in the existing
+DiscoverFeedController. The existing TimezoneRepository is injected through
+the existing provider composition; persisted shapes remain in DiscoverQueryModel.
+
+Route decoding validates the complete coupled window/travel group before any
+query mutation. UTC text uses UtcInstant; known zones use TZDB. Partial fields,
+unknown modes/zones, invalid flexibility/origin/return flag, absent zone service
+and conflicting legacy date bounds fail closed. Without a window, valid UTC
+date bounds remain supported. Route names and parameter keys are unchanged.
+
+Map/Results preserve applied/draft query and storage on invalid input. The
+initial page transitions to an error state instead of remaining on a loading
+indicator; existing loaded results are retained. Search/Results/Map delegate
+to the single route writer. Superseded helper names have no production or test
+references. The primitive/parser and existing aggregate invariants remain the
+owners of structural semantics; no additional controller or storage path exists.
+
+Behavioral tests cover every time mode, exact UTC precision, explicit zone,
+travel fields, rejected routes and actual Results deep-link application with
+storage/recent-query checks. A first test run exposed the initial spinner defect,
+which was fixed; another test incorrectly expected regular history in Smart
+Search storage and was corrected to the canonical SavedSearch path.
+
+C2a3 must still replace Search's host-local editor initialization and preserve
+the selected zone during editing. Event/Session and C3–C5 remain separate.
+Complete host/CI gate results are in checkpoint evidence; native Google Maps,
+device, Emulator, production authority and R1 acceptance are not claimed.
+
+## 20. M2-C2a3 live time editor checkpoint — 2026-11-11
+
+C2a2 `99c7542` passed complete Windows/Linux suites with 1426 tests and all
+analyzer/boundary/diff gates. C2a3 migrates the live Search filter editor and
+BuildTimeWindowUseCase input to the existing LocalDateTimeValue, containing
+shared LocalDate and a validated local minute. Wall-clock day rollover uses
+bounded calendar arithmetic without host-zone normalization. Feature-specific
+gap/overlap resolution stays in the existing TimezoneRepository.
+
+The existing controller prepares editor values in the stored window zone, or
+the explicit configured market zone for a new window. The UI displays that zone;
+there is no device fallback. Unavailable zones/services fail visibly. Unchanged
+displayed bounds preserve original UTC seconds/microseconds and overlap offsets;
+an entirely unchanged window also retains resolvedAtUtc. Mode/flexibility-only
+edits retain bounds. Changed local times use the existing builder and DST rules.
+
+Time validation precedes other staged filter changes, so rejected edits do not
+partially replace date bounds. Existing manual origin remains unchanged when
+its type was not changed. Tests cover midnight/leap-day rollover, invalid local
+minute/weekday/range, explicit nonmarket zones, DST gap rejection, late overlap
+non-rewrite and actual filter-sheet open/apply behavior.
+
+Legacy quick-date shortcuts, their host-local labels and the unused legacy
+time-editor widget are not claimed migrated here: C2a4 owns active date flows;
+M2-D owns unused compatibility removal after reference proof. C2b and C3–C5
+remain open. Checkpoint gate logs are separate evidence, not R1/device/Emulator/
+cloud or production acceptance.

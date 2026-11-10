@@ -10,6 +10,8 @@ import '../../../../app/router/route_names.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_query.dart';
+import '../../domain/repositories/timezone_repository.dart';
+import '../../domain/usecases/build_time_window_usecase.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/time_window.dart';
 
@@ -306,6 +308,20 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     DiscoverFeedController controller,
     DiscoverQuery query,
   ) async {
+    final ({
+      String timezoneId,
+      LocalDateTimeValue start,
+      LocalDateTimeValue end,
+    })
+    editor;
+    try {
+      editor = controller.timeEditorValues(window: query.timeWindow);
+    } on TimeWindowValidationException catch (error) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+      return;
+    }
     final _SearchFilterSelection? selection =
         await showModalBottomSheet<_SearchFilterSelection>(
           context: context,
@@ -316,18 +332,55 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           builder: (BuildContext context) => _SearchFiltersSheet(
             query: query,
             currency: controller.marketCurrency,
+            initialTime: editor,
+            resetTimeValues: () => controller.timeEditorValues(),
           ),
         );
     if (selection == null) return;
+    if (selection.timeWindowMode == null) {
+      controller.clearTimeWindowSelection(clearLegacyDates: false);
+    } else {
+      final existingManual =
+          query.travelContext?.originType == TravelOriginType.manualPin;
+      final String? error = controller.stageTimeWindowSelection(
+        mode: selection.timeWindowMode!,
+        startLocal: selection.startLocal,
+        endLocal: selection.endLocal,
+        timezoneId: selection.timezoneId,
+        flexibilityMinutes: selection.flexibilityMinutes,
+        originType: selection.originType,
+        originLat: selection.originType == TravelOriginType.manualPin
+            ? (existingManual
+                  ? query.travelContext!.origin.latitude
+                  : query.centerLat)
+            : null,
+        originLng: selection.originType == TravelOriginType.manualPin
+            ? (existingManual
+                  ? query.travelContext!.origin.longitude
+                  : query.centerLng)
+            : null,
+        transportMode: selection.transportMode,
+        includeReturnTrip: selection.includeReturnTrip,
+      );
+      if (error != null) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(error)));
+        }
+        return;
+      }
+    }
+    final activeWindow = controller.state.draftQuery.timeWindow;
     controller.stageSearchConditions(
       peopleCount: selection.peopleCount,
       clearPeopleCount: selection.peopleCount == null,
       budgetMax: selection.budgetMax,
       clearBudgetMax: selection.budgetMax == null,
-      dateFrom: selection.dateWindow?.from,
-      clearDateFrom: selection.dateWindow == null,
-      dateTo: selection.dateWindow?.to,
-      clearDateTo: selection.dateWindow == null,
+      dateFrom: activeWindow?.startAtUtc ?? selection.dateWindow?.from,
+      clearDateFrom: activeWindow == null && selection.dateWindow == null,
+      dateTo: activeWindow?.endAtUtc ?? selection.dateWindow?.to,
+      clearDateTo: activeWindow == null && selection.dateWindow == null,
       radiusMeters: selection.radiusMeters,
       unlimitedRadius: selection.unlimitedRadius,
       openNow: selection.openNow,
@@ -337,30 +390,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       mood: selection.mood,
       clearMood: selection.mood == null,
     );
-    if (selection.timeWindowMode == null) {
-      controller.clearTimeWindowSelection(clearLegacyDates: false);
-    } else {
-      final String? error = controller.stageTimeWindowSelection(
-        mode: selection.timeWindowMode!,
-        startLocal: selection.startLocal,
-        endLocal: selection.endLocal,
-        flexibilityMinutes: selection.flexibilityMinutes,
-        originType: selection.originType,
-        originLat: selection.originType == TravelOriginType.manualPin
-            ? query.centerLat
-            : null,
-        originLng: selection.originType == TravelOriginType.manualPin
-            ? query.centerLng
-            : null,
-        transportMode: selection.transportMode,
-        includeReturnTrip: selection.includeReturnTrip,
-      );
-      if (error != null && mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error)));
-      }
-    }
   }
 
   void _showAllRecent(
@@ -1434,7 +1463,17 @@ Color _quickPlanColor(ColorScheme colors, int tone) => switch (tone) {
 };
 
 class _SearchFiltersSheet extends StatefulWidget {
-  const _SearchFiltersSheet({required this.query, required this.currency});
+  const _SearchFiltersSheet({
+    required this.query,
+    required this.currency,
+    required this.initialTime,
+    required this.resetTimeValues,
+  });
+  final ({String timezoneId, LocalDateTimeValue start, LocalDateTimeValue end})
+  initialTime;
+  final ({String timezoneId, LocalDateTimeValue start, LocalDateTimeValue end})
+  Function()
+  resetTimeValues;
   final CurrencyCode currency;
   final DiscoverQuery query;
 
@@ -1453,12 +1492,9 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
   late String? _mood = widget.query.mood;
   late String _date = _dateChoice(widget.query);
   late TimeWindowMode? _timeWindowMode = widget.query.timeWindow?.mode;
-  late DateTime _startLocal =
-      widget.query.timeWindow?.startAtUtc.toLocal() ??
-      DateTime.now().add(const Duration(minutes: 30));
-  late DateTime _endLocal =
-      widget.query.timeWindow?.endAtUtc.toLocal() ??
-      DateTime.now().add(const Duration(hours: 2));
+  late String _timezoneId = widget.initialTime.timezoneId;
+  late LocalDateTimeValue _startLocal = widget.initialTime.start;
+  late LocalDateTimeValue _endLocal = widget.initialTime.end;
   late int _flexibilityMinutes =
       widget.query.timeWindow?.flexibilityMinutes ?? 30;
   late TravelOriginType _originType =
@@ -1536,6 +1572,7 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                     const _FilterSectionDivider(),
                     _TimeFilterBlock(
                       mode: _timeWindowMode,
+                      timezoneId: _timezoneId,
                       start: _startLocal,
                       end: _endLocal,
                       flexibilityMinutes: _flexibilityMinutes,
@@ -1744,29 +1781,30 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
           .contains(_budgetMax);
 
   Future<void> _pickFilterTime({required bool isStart}) async {
-    final DateTime initial = isStart ? _startLocal : _endLocal;
+    final initial = isStart ? _startLocal : _endLocal;
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(initial),
+      initialTime: TimeOfDay(
+        hour: initial.minutesSinceMidnight ~/ 60,
+        minute: initial.minutesSinceMidnight % 60,
+      ),
     );
     if (picked == null || !mounted) return;
     setState(() {
-      final DateTime value = DateTime(
-        initial.year,
-        initial.month,
-        initial.day,
-        picked.hour,
-        picked.minute,
+      final value = LocalDateTimeValue(
+        date: initial.date,
+        minutesSinceMidnight: picked.hour * 60 + picked.minute,
+        weekday: initial.date.weekday,
       );
       if (isStart) {
         _startLocal = value;
-        if (!_endLocal.isAfter(_startLocal)) {
-          _endLocal = _startLocal.add(const Duration(hours: 1));
+        if (_endLocal.compareTo(_startLocal) <= 0) {
+          _endLocal = _startLocal.addMinutes(60);
         }
       } else {
-        _endLocal = value.isAfter(_startLocal)
+        _endLocal = value.compareTo(_startLocal) > 0
             ? value
-            : value.add(const Duration(days: 1));
+            : value.addMinutes(1440);
       }
     });
   }
@@ -1850,6 +1888,7 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
       durationMinutes: _duration,
       mood: _mood,
       timeWindowMode: _timeWindowMode,
+      timezoneId: _timezoneId,
       startLocal: _startLocal,
       endLocal: _endLocal,
       flexibilityMinutes: _flexibilityMinutes,
@@ -1859,24 +1898,41 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
     );
   }
 
-  void _reset() => setState(() {
-    _peopleCount = null;
-    _budgetMax = null;
-    _date = 'any';
-    _radiusMeters = 5000;
-    _unlimited = false;
-    _openNow = false;
-    _onlyAvailable = false;
-    _duration = null;
-    _mood = null;
-    _timeWindowMode = null;
-    _startLocal = DateTime.now().add(const Duration(minutes: 30));
-    _endLocal = DateTime.now().add(const Duration(hours: 2));
-    _flexibilityMinutes = 30;
-    _originType = TravelOriginType.currentLocation;
-    _transportMode = TransportMode.walking;
-    _includeReturnTrip = true;
-  });
+  void _reset() {
+    final ({
+      String timezoneId,
+      LocalDateTimeValue start,
+      LocalDateTimeValue end,
+    })
+    reset;
+    try {
+      reset = widget.resetTimeValues();
+    } on TimeWindowValidationException catch (error) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+      return;
+    }
+    setState(() {
+      _peopleCount = null;
+      _budgetMax = null;
+      _date = 'any';
+      _radiusMeters = 5000;
+      _unlimited = false;
+      _openNow = false;
+      _onlyAvailable = false;
+      _duration = null;
+      _mood = null;
+      _timeWindowMode = null;
+      _timezoneId = reset.timezoneId;
+      _startLocal = reset.start;
+      _endLocal = reset.end;
+      _flexibilityMinutes = 30;
+      _originType = TravelOriginType.currentLocation;
+      _transportMode = TransportMode.walking;
+      _includeReturnTrip = true;
+    });
+  }
 }
 
 class _NumberInputDialog<T> extends StatefulWidget {
@@ -2133,6 +2189,7 @@ class _CompactSwitchRow extends StatelessWidget {
 class _TimeFilterBlock extends StatelessWidget {
   const _TimeFilterBlock({
     required this.mode,
+    required this.timezoneId,
     required this.start,
     required this.end,
     required this.flexibilityMinutes,
@@ -2143,8 +2200,9 @@ class _TimeFilterBlock extends StatelessWidget {
   });
 
   final TimeWindowMode? mode;
-  final DateTime start;
-  final DateTime end;
+  final String timezoneId;
+  final LocalDateTimeValue start;
+  final LocalDateTimeValue end;
   final int flexibilityMinutes;
   final ValueChanged<TimeWindowMode?> onModeChanged;
   final VoidCallback onStartTap;
@@ -2163,6 +2221,7 @@ class _TimeFilterBlock extends StatelessWidget {
           icon: Icons.schedule_outlined,
           label: 'When',
         ),
+        Text(timezoneId, key: const Key('filter-timezone')),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
@@ -2202,7 +2261,7 @@ class _TimeFilterBlock extends StatelessWidget {
               Expanded(
                 child: _InlineTimeField(
                   key: const Key('filter-start-time'),
-                  value: _formatClock(start),
+                  value: _formatLocalClock(start),
                   onTap: onStartTap,
                 ),
               ),
@@ -2218,7 +2277,7 @@ class _TimeFilterBlock extends StatelessWidget {
               Expanded(
                 child: _InlineTimeField(
                   key: const Key('filter-end-time'),
-                  value: _formatClock(end),
+                  value: _formatLocalClock(end),
                   onTap: onEndTap,
                 ),
               ),
@@ -2974,6 +3033,7 @@ class _SearchFilterSelection {
     required this.durationMinutes,
     required this.mood,
     required this.timeWindowMode,
+    required this.timezoneId,
     required this.startLocal,
     required this.endLocal,
     required this.flexibilityMinutes,
@@ -2991,8 +3051,9 @@ class _SearchFilterSelection {
   final int? durationMinutes;
   final String? mood;
   final TimeWindowMode? timeWindowMode;
-  final DateTime startLocal;
-  final DateTime endLocal;
+  final String timezoneId;
+  final LocalDateTimeValue startLocal;
+  final LocalDateTimeValue endLocal;
   final int flexibilityMinutes;
   final TravelOriginType originType;
   final TransportMode transportMode;
@@ -3004,6 +3065,10 @@ class _DateWindow {
   final DateTime from;
   final DateTime to;
 }
+
+String _formatLocalClock(LocalDateTimeValue value) =>
+    '${(value.minutesSinceMidnight ~/ 60).toString().padLeft(2, '0')}:'
+    '${(value.minutesSinceMidnight % 60).toString().padLeft(2, '0')}';
 
 String _formatClock(DateTime value) =>
     '${value.hour.toString().padLeft(2, '0')}:'
@@ -3144,21 +3209,7 @@ String _resultsLocation(
       if (query.availableDurationMinutes != null)
         'duration': '${query.availableDurationMinutes}',
       if (query.mood != null) 'mood': query.mood!,
-      if (query.timeWindow != null) ...<String, String>{
-        'timeMode': query.timeWindow!.mode.name,
-        'timeStart': query.timeWindow!.startAtUtc.toIso8601String(),
-        'timeEnd': query.timeWindow!.endAtUtc.toIso8601String(),
-        'timezone': query.timeWindow!.timezoneId,
-        'flexibility': '${query.timeWindow!.flexibilityMinutes}',
-        'resolvedAt': query.timeWindow!.resolvedAtUtc.toIso8601String(),
-      },
-      if (query.travelContext != null) ...<String, String>{
-        'originType': query.travelContext!.originType.name,
-        'originLat': '${query.travelContext!.origin.latitude}',
-        'originLng': '${query.travelContext!.origin.longitude}',
-        'transport': query.travelContext!.transportMode.name,
-        'returnTrip': query.travelContext!.includeReturnTrip ? '1' : '0',
-      },
+      ...DiscoverFeedController.timeRouteParameters(query),
     },
   ).toString();
 }

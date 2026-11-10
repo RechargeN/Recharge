@@ -32,8 +32,185 @@ import 'package:recharge/features/discover/presentation/pages/discover_results_p
 import 'package:recharge/features/discover/presentation/pages/search_page.dart';
 
 import 'widget_test_viewport.dart';
+import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
+import 'package:recharge/features/discover/domain/usecases/build_time_window_usecase.dart';
+import 'package:recharge/features/discover/domain/entities/time_window.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 
 void main() {
+  fullPageTestWidgets(
+    'filter editor preserves selected zone and precise unchanged window',
+    (tester) async {
+      final window = TimeWindow(
+        startAtUtc: DateTime.utc(2026, 7, 20, 20, 30, 22, 123, 456),
+        endAtUtc: DateTime.utc(2026, 7, 20, 21, 30, 33, 456, 789),
+        resolvedAtUtc: DateTime.utc(2026, 7, 19),
+        timezoneId: 'Pacific/Honolulu',
+        mode: TimeWindowMode.exact,
+        flexibilityMinutes: 0,
+      );
+      final travel = TravelContext(
+        originType: TravelOriginType.manualPin,
+        origin: const GeoPoint(latitude: 21.3, longitude: -157.8),
+        transportMode: TransportMode.walking,
+        includeReturnTrip: false,
+      );
+      final initial = DiscoverQuery.defaults().copyWith(
+        timeWindow: window,
+        travelContext: travel,
+        dateFrom: window.startAtUtc,
+        dateTo: window.endAtUtc,
+      );
+      final zones = TimezoneRepositoryImpl();
+      final controller = DiscoverFeedController(
+        getDiscoverFeedUseCase: GetDiscoverFeedUseCase(
+          _FakeDiscoverRepository(),
+        ),
+        discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
+        analyticsService: _NoopAnalyticsService(),
+        timezoneRepository: zones,
+        buildTimeWindow: BuildTimeWindowUseCase(zones),
+        initialQuery: initial,
+        runtimeDefaults: const DiscoverRuntimeDefaults(
+          timezoneId: 'Europe/Riga',
+          originLat: 1,
+          originLng: 2,
+          currency: CurrencyCode.eur,
+        ),
+      );
+      await tester.pumpWidget(_SearchLandingTestApp(controller: controller));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('regular-search-filters')));
+      await tester.pumpAndSettle();
+      expect(find.text('Pacific/Honolulu'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('filter-start-time')),
+          matching: find.text('10:30'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('filter-end-time')),
+          matching: find.text('11:30'),
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const Key('filter-apply-button')));
+      await tester.pumpAndSettle();
+      expect(controller.state.draftQuery.timeWindow, same(window));
+      expect(controller.state.draftQuery.dateFrom, window.startAtUtc);
+      expect(controller.state.draftQuery.dateTo, window.endAtUtc);
+      expect(controller.state.draftQuery.travelContext!.origin, travel.origin);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  fullPageTestWidgets('invalid time deep link preserves query and storage', (
+    tester,
+  ) async {
+    final preferences = _FakeDiscoverPreferencesRepository();
+    final initial = DiscoverQuery.defaults().copyWith(queryText: 'original');
+    final controller = DiscoverFeedController(
+      getDiscoverFeedUseCase: GetDiscoverFeedUseCase(_FakeDiscoverRepository()),
+      discoverPreferencesRepository: preferences,
+      analyticsService: _NoopAnalyticsService(),
+      timezoneRepository: TimezoneRepositoryImpl(),
+      initialQuery: initial,
+      runtimeDefaults: const DiscoverRuntimeDefaults(
+        timezoneId: 'Europe/Riga',
+        originLat: 1,
+        originLng: 2,
+        currency: CurrencyCode.eur,
+      ),
+    );
+    await tester.pumpWidget(
+      _SearchTestApp(
+        controller: controller,
+        initialLocation: Uri(
+          path: RouteNames.search,
+          queryParameters: {
+            'timeStart': '2026-01-01T00:00:00Z',
+            'source': 'regular_search',
+          },
+        ).toString(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Invalid time filter. Edit the search filters.'),
+      findsWidgets,
+    );
+    expect(controller.state.appliedQuery, same(initial));
+    expect(controller.state.draftQuery, same(initial));
+    expect(preferences._savedQuery, isNull);
+    expect(preferences._savedSearches, isEmpty);
+    expect(preferences._smartSearchHistory, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
+  fullPageTestWidgets('complete UTC time deep link preserves zone and bounds', (
+    tester,
+  ) async {
+    final preferences = _FakeDiscoverPreferencesRepository();
+    final controller = DiscoverFeedController(
+      getDiscoverFeedUseCase: GetDiscoverFeedUseCase(_FakeDiscoverRepository()),
+      discoverPreferencesRepository: preferences,
+      analyticsService: _NoopAnalyticsService(),
+      timezoneRepository: TimezoneRepositoryImpl(),
+      runtimeDefaults: const DiscoverRuntimeDefaults(
+        timezoneId: 'Europe/Riga',
+        originLat: 1,
+        originLng: 2,
+        currency: CurrencyCode.eur,
+      ),
+    );
+    final seed = <String, String>{
+      'q': 'museum',
+      'source': 'regular_search',
+      'timeMode': 'exact',
+      'timeStart': '2026-10-25T00:30:00.123456Z',
+      'timeEnd': '2026-10-25T01:30:00.123456Z',
+      'resolvedAt': '2026-10-24T00:00:00.000Z',
+      'timezone': 'Europe/London',
+      'flexibility': '0',
+      'originType': 'manualPin',
+      'originLat': '51.5',
+      'originLng': '-0.1',
+      'transport': 'walking',
+      'returnTrip': '0',
+    };
+    await tester.pumpWidget(
+      _SearchTestApp(
+        controller: controller,
+        initialLocation: Uri(
+          path: RouteNames.search,
+          queryParameters: seed,
+        ).toString(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final query = controller.state.appliedQuery;
+    expect(query.timeWindow!.timezoneId, 'Europe/London');
+    expect(
+      query.timeWindow!.startAtUtc,
+      DateTime.utc(2026, 10, 25, 0, 30, 0, 123, 456),
+    );
+    expect(query.dateFrom, query.timeWindow!.startAtUtc);
+    expect(query.dateTo, query.timeWindow!.endAtUtc);
+    expect(preferences._savedQuery!.timeWindow!.timezoneId, 'Europe/London');
+    expect(
+      preferences._savedSearches.single.query.timeWindow!.timezoneId,
+      'Europe/London',
+    );
+    expect(
+      find.text('Invalid time filter. Edit the search filters.'),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   fullPageTestWidgets(
     'custom budget rejects rounding and preserves cents through navigation',
     (tester) async {
@@ -596,20 +773,24 @@ void main() {
 }
 
 class _SearchLandingTestApp extends StatelessWidget {
-  _SearchLandingTestApp()
-    : _controller = DiscoverFeedController(
-        getDiscoverFeedUseCase: GetDiscoverFeedUseCase(
-          _FakeDiscoverRepository(),
-        ),
-        discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
-        analyticsService: _NoopAnalyticsService(),
-        runtimeDefaults: const DiscoverRuntimeDefaults(
-          timezoneId: 'Europe/Riga',
-          originLat: 56.9496,
-          originLng: 24.1052,
-          currency: CurrencyCode.eur,
-        ),
-      );
+  _SearchLandingTestApp({DiscoverFeedController? controller})
+    : _controller =
+          controller ??
+          DiscoverFeedController(
+            getDiscoverFeedUseCase: GetDiscoverFeedUseCase(
+              _FakeDiscoverRepository(),
+            ),
+            discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
+            analyticsService: _NoopAnalyticsService(),
+            timezoneRepository: TimezoneRepositoryImpl(),
+            buildTimeWindow: BuildTimeWindowUseCase(TimezoneRepositoryImpl()),
+            runtimeDefaults: const DiscoverRuntimeDefaults(
+              timezoneId: 'Europe/Riga',
+              originLat: 56.9496,
+              originLng: 24.1052,
+              currency: CurrencyCode.eur,
+            ),
+          );
 
   final DiscoverFeedController _controller;
 

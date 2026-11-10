@@ -31,7 +31,6 @@ import '../../application/smart_search_parser.dart';
 import '../../application/state/discover_feed_state.dart';
 import '../../application/state/scenario_intake_selection_state.dart';
 import '../../domain/entities/discover_item_entity.dart';
-import '../../domain/entities/geo_point.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/smart_search_history_entity.dart';
 import '../../domain/entities/time_window.dart';
@@ -608,14 +607,29 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       return;
     }
     final Money? budgetMax = budgetResult?.value;
-    final DateTime? dateFrom = _dateFromSeed(seedParameters['dateFrom']);
-    final DateTime? dateTo = _dateFromSeed(seedParameters['dateTo']);
+    final ({
+      TimeWindow? window,
+      TravelContext? travel,
+      DateTime? from,
+      DateTime? to,
+    })
+    time;
+    try {
+      time = controller.decodeTimeRouteParameters(seedParameters);
+    } on FormatException {
+      controller.reportInvalidTimeRoute();
+      if (mounted) {
+        _searchController.text = controller.state.appliedQuery.queryText;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invalid time filter. Edit the search filters.'),
+          ),
+        );
+      }
+      return;
+    }
     final double? itemLat = _doubleFromSeed(seedParameters['itemLat']);
     final double? itemLng = _doubleFromSeed(seedParameters['itemLng']);
-    final TimeWindow? timeWindow = _mapTimeWindowFromSeed(seedParameters);
-    final TravelContext? travelContext = _mapTravelContextFromSeed(
-      seedParameters,
-    );
     await controller.applySearchConditions(
       queryText: _queryTextFromSeed(seedParameters),
       selectedCategoryIds: _categoriesFromSeed(seedParameters),
@@ -623,10 +637,10 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       budgetMax: budgetMax,
       clearBudgetMin: true,
       clearBudgetMax: budgetMax == null,
-      dateFrom: dateFrom,
-      clearDateFrom: dateFrom == null,
-      dateTo: dateTo,
-      clearDateTo: dateTo == null,
+      dateFrom: time.from,
+      clearDateFrom: time.from == null,
+      dateTo: time.to,
+      clearDateTo: time.to == null,
       radiusMeters: _doubleFromSeed(seedParameters['radius']),
       unlimitedRadius: seedParameters['unlimited'] == '1',
       openNow: seedParameters['openNow'] == '1',
@@ -635,10 +649,10 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       centerLng: itemLng,
       manualAreaSelected: itemLat != null && itemLng != null,
       selectedItemId: _itemIdFromSeed(seedParameters),
-      timeWindow: timeWindow,
-      clearTimeWindow: timeWindow == null,
-      travelContext: travelContext,
-      clearTravelContext: travelContext == null,
+      timeWindow: time.window,
+      clearTimeWindow: time.window == null,
+      travelContext: time.travel,
+      clearTravelContext: time.travel == null,
       sourceScreen: 'map_search',
     );
   }
@@ -981,7 +995,8 @@ bool _hasSearchSeed(Map<String, String> seedParameters) {
     'openNow',
     'onlyAvailable',
   ];
-  return supportedKeys.any(seedParameters.containsKey);
+  return supportedKeys.any(seedParameters.containsKey) ||
+      DiscoverFeedController.hasTimeRouteParameters(seedParameters);
 }
 
 String? _queryTextFromSeed(Map<String, String> seedParameters) {
@@ -1009,11 +1024,6 @@ List<String>? _categoriesFromSeed(Map<String, String> seedParameters) {
 double? _doubleFromSeed(String? value) {
   if (value == null || value.trim().isEmpty) return null;
   return double.tryParse(value.trim());
-}
-
-DateTime? _dateFromSeed(String? value) {
-  if (value == null || value.trim().isEmpty) return null;
-  return DateTime.tryParse(value.trim())?.toUtc();
 }
 
 String mapCreateLocationForQuery(DiscoverQuery query) {
@@ -1196,78 +1206,7 @@ Map<String, String> _mapQueryParameters(DiscoverQuery query) {
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
     'unlimited': query.unlimitedRadius ? '1' : '0',
-    ..._mapTimeRouteParameters(query),
-  };
-}
-
-TimeWindow? _mapTimeWindowFromSeed(Map<String, String> values) {
-  final String? mode = values['timeMode'];
-  final String? start = values['timeStart'];
-  final String? end = values['timeEnd'];
-  final String? timezone = values['timezone'];
-  final String? resolvedAt = values['resolvedAt'];
-  if (mode == null ||
-      start == null ||
-      end == null ||
-      timezone == null ||
-      resolvedAt == null) {
-    return null;
-  }
-  try {
-    return TimeWindow(
-      startAtUtc: DateTime.parse(start).toUtc(),
-      endAtUtc: DateTime.parse(end).toUtc(),
-      timezoneId: timezone,
-      mode: TimeWindowMode.values.firstWhere(
-        (TimeWindowMode value) => value.name == mode,
-      ),
-      flexibilityMinutes: int.tryParse(values['flexibility'] ?? '') ?? 0,
-      resolvedAtUtc: DateTime.parse(resolvedAt).toUtc(),
-    );
-  } on Exception {
-    return null;
-  }
-}
-
-TravelContext? _mapTravelContextFromSeed(Map<String, String> values) {
-  if (!values.containsKey('originLat') || !values.containsKey('originLng')) {
-    return null;
-  }
-  try {
-    return TravelContext(
-      originType: TravelOriginType.values.firstWhere(
-        (TravelOriginType value) => value.name == values['originType'],
-      ),
-      origin: GeoPoint(
-        latitude: double.parse(values['originLat']!),
-        longitude: double.parse(values['originLng']!),
-      ),
-      transportMode: TransportMode.values.firstWhere(
-        (TransportMode value) => value.name == values['transport'],
-      ),
-      includeReturnTrip: values['returnTrip'] == '1',
-    );
-  } on Exception {
-    return null;
-  }
-}
-
-Map<String, String> _mapTimeRouteParameters(DiscoverQuery query) {
-  final TimeWindow? window = query.timeWindow;
-  final TravelContext? travel = query.travelContext;
-  if (window == null || travel == null) return const <String, String>{};
-  return <String, String>{
-    'timeMode': window.mode.name,
-    'timeStart': window.startAtUtc.toIso8601String(),
-    'timeEnd': window.endAtUtc.toIso8601String(),
-    'timezone': window.timezoneId,
-    'flexibility': '${window.flexibilityMinutes}',
-    'resolvedAt': window.resolvedAtUtc.toIso8601String(),
-    'originType': travel.originType.name,
-    'originLat': '${travel.origin.latitude}',
-    'originLng': '${travel.origin.longitude}',
-    'transport': travel.transportMode.name,
-    'returnTrip': travel.includeReturnTrip ? '1' : '0',
+    ...DiscoverFeedController.timeRouteParameters(query),
   };
 }
 
