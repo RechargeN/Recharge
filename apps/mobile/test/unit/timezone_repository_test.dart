@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
-import 'package:recharge/features/discover/domain/entities/local_date.dart';
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'package:recharge/features/discover/domain/repositories/timezone_repository.dart';
 import 'package:recharge/features/discover/domain/entities/time_window.dart';
 import 'package:recharge/features/discover/domain/usecases/build_time_window_usecase.dart';
@@ -10,7 +10,7 @@ void main() {
 
   test('rejects nonexistent Riga user time in spring DST gap', () {
     final LocalTimeResolution result = repository.resolveLocal(
-      date: const LocalDate(2026, 3, 29),
+      date: LocalDate(2026, 3, 29),
       minutesSinceMidnight: 3 * 60 + 30,
       timezoneId: 'Europe/Riga',
       policy: LocalBoundaryPolicy.userStart,
@@ -22,13 +22,13 @@ void main() {
 
   test('ambiguous user start is early and end is late', () {
     final LocalTimeResolution start = repository.resolveLocal(
-      date: const LocalDate(2026, 10, 25),
+      date: LocalDate(2026, 10, 25),
       minutesSinceMidnight: 3 * 60 + 30,
       timezoneId: 'Europe/Riga',
       policy: LocalBoundaryPolicy.userStart,
     );
     final LocalTimeResolution end = repository.resolveLocal(
-      date: const LocalDate(2026, 10, 25),
+      date: LocalDate(2026, 10, 25),
       minutesSinceMidnight: 3 * 60 + 30,
       timezoneId: 'Europe/Riga',
       policy: LocalBoundaryPolicy.userEnd,
@@ -42,13 +42,13 @@ void main() {
 
   test('opening gap shifts open forward and close backward', () {
     final LocalTimeResolution open = repository.resolveLocal(
-      date: const LocalDate(2026, 3, 29),
+      date: LocalDate(2026, 3, 29),
       minutesSinceMidnight: 3 * 60 + 30,
       timezoneId: 'Europe/Riga',
       policy: LocalBoundaryPolicy.openingStart,
     );
     final LocalTimeResolution close = repository.resolveLocal(
-      date: const LocalDate(2026, 3, 29),
+      date: LocalDate(2026, 3, 29),
       minutesSinceMidnight: 3 * 60 + 30,
       timezoneId: 'Europe/Riga',
       policy: LocalBoundaryPolicy.openingEnd,
