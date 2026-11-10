@@ -6,6 +6,7 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../../../support/platform_golden.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/domain/entities/event_occurrence.dart';
 import 'package:recharge/features/discover/domain/entities/published_event_discovery_entity.dart';
@@ -72,7 +73,9 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<String>('object-offer-event-golden-surface')),
-      matchesGoldenFile('goldens/object_offer_event_reference.png'),
+      matchesGoldenFile(
+        platformGoldenPath('goldens/object_offer_event_reference.png'),
+      ),
     );
   });
 }

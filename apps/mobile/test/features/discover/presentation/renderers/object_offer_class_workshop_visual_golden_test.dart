@@ -4,6 +4,7 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../../../support/platform_golden.dart';
 import 'package:recharge/features/discover/presentation/renderers/object_offer_details_renderer.dart';
 import 'package:recharge/features/discover/domain/entities/published_class_workshop_discovery_entity.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
@@ -69,9 +70,11 @@ void main() {
           const ValueKey<String>('object-offer-class-workshop-golden-surface'),
         ),
         matchesGoldenFile(
-          infoOnly
-              ? 'goldens/object_offer_class_workshop_info_reference.png'
-              : 'goldens/object_offer_class_workshop_reference.png',
+          platformGoldenPath(
+            infoOnly
+                ? 'goldens/object_offer_class_workshop_info_reference.png'
+                : 'goldens/object_offer_class_workshop_reference.png',
+          ),
         ),
       );
     });

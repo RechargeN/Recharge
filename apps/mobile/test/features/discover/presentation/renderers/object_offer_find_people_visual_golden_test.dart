@@ -4,6 +4,7 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../../../support/platform_golden.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/domain/entities/published_find_people_discovery_entity.dart';
 import 'package:recharge/features/discover/domain/entities/publisher_verification_display_state.dart';
@@ -60,7 +61,9 @@ void main() {
         find.byKey(
           const ValueKey<String>('object-offer-find-people-golden-surface'),
         ),
-        matchesGoldenFile('goldens/object_offer_find_people_reference.png'),
+        matchesGoldenFile(
+          platformGoldenPath('goldens/object_offer_find_people_reference.png'),
+        ),
       );
     },
   );

@@ -4,6 +4,7 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../../../support/platform_golden.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/domain/entities/bookable_session_schedule_evaluation.dart';
 import 'package:recharge/features/discover/domain/entities/published_bookable_session_discovery_entity.dart';
@@ -69,7 +70,9 @@ void main() {
           ),
         ),
         matchesGoldenFile(
-          'goldens/object_offer_bookable_session_reference.png',
+          platformGoldenPath(
+            'goldens/object_offer_bookable_session_reference.png',
+          ),
         ),
       );
     },

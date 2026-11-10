@@ -6,6 +6,7 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../../../support/platform_golden.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/domain/entities/time_slot.dart';
 import 'package:recharge/features/discover/presentation/renderers/object_offer_details_renderer.dart';
@@ -64,12 +65,15 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      expect(find.text('12.09.2026 · 10:00'), findsOneWidget);
 
       await expectLater(
         find.byKey(
           const ValueKey<String>('object-offer-activity-golden-surface'),
         ),
-        matchesGoldenFile('goldens/object_offer_activity_reference.png'),
+        matchesGoldenFile(
+          platformGoldenPath('goldens/object_offer_activity_reference.png'),
+        ),
       );
     },
   );
@@ -107,6 +111,10 @@ ButtonStyle _buttonStyleWithFont(ButtonStyle? style) {
 }
 
 DiscoverItemEntity _activityFixture() {
+  // This legacy renderer displays host-local time. Keep the visual fixture's
+  // civil time identical on every host, while its input remains explicitly UTC.
+  // Zoned schedule behavior is covered separately, not by this visual fixture.
+  final startsAtUtc = DateTime(2026, 9, 12, 10).toUtc();
   return DiscoverItemEntity(
     id: 'activity_visual',
     title: 'Утренняя йога в парке',
@@ -116,7 +124,7 @@ DiscoverItemEntity _activityFixture() {
     city: 'Рига',
     category: 'Wellness',
     subcategory: 'Йога',
-    startsAtUtc: DateTime.utc(2026, 9, 12, 7),
+    startsAtUtc: startsAtUtc,
     latitude: 56.956,
     longitude: 24.112,
     priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
@@ -133,8 +141,8 @@ DiscoverItemEntity _activityFixture() {
     scheduleSlots: <TimeSlot>[
       TimeSlot(
         slotId: 'slot_visual',
-        startAtUtc: DateTime.utc(2026, 9, 12, 7),
-        endAtUtc: DateTime.utc(2026, 9, 12, 8),
+        startAtUtc: startsAtUtc,
+        endAtUtc: startsAtUtc.add(const Duration(hours: 1)),
       ),
     ],
     ctaLabel: 'Присоединиться',
