@@ -8,6 +8,40 @@ import 'package:recharge/features/discover/domain/usecases/build_time_window_use
 void main() {
   final TimezoneRepositoryImpl repository = TimezoneRepositoryImpl();
 
+  test('instant boundaries reject local values even on UTC hosts', () {
+    expect(
+      () => repository.toLocal(DateTime(2026), 'Europe/Riga'),
+      throwsArgumentError,
+    );
+    for (final mode in TimeWindowMode.values) {
+      expect(
+        () => BuildTimeWindowUseCase(repository)(
+          mode: mode,
+          timezoneId: 'Europe/Riga',
+          nowUtc: DateTime(2026),
+          startLocal: DateTime(2026, 1, 1, 12),
+          endLocal: DateTime(2026, 1, 1, 13),
+          flexibilityMinutes: 30,
+        ),
+        throwsA(isA<TimeWindowValidationException>()),
+      );
+    }
+  });
+
+  test('known timezone validation rejects malformed and unknown zones', () {
+    for (final zone in [
+      'Unknown/Nowhere',
+      ' Europe/Riga',
+      'Europe/Riga\n',
+      '+03:00',
+      '',
+    ]) {
+      expect(repository.isValidTimezone(zone), isFalse, reason: zone);
+    }
+    expect(repository.isValidTimezone('Europe/Riga'), isTrue);
+    expect(repository.isValidTimezone('UTC'), isTrue);
+  });
+
   test('rejects nonexistent Riga user time in spring DST gap', () {
     final LocalTimeResolution result = repository.resolveLocal(
       date: LocalDate(2026, 3, 29),

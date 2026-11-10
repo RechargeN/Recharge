@@ -6,6 +6,7 @@ import 'package:recharge/features/discover/data/models/discover_query_model.dart
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/saved_search_entity.dart';
 import 'package:recharge/features/discover/domain/entities/smart_search_history_entity.dart';
+import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,7 @@ void main() {
     () async {
       final source = DiscoverPreferencesLocalDataSource(
         const FlutterSecureStorage(),
+        timezoneRepository: TimezoneRepositoryImpl(),
         defaultMarketCityId: 'test-market',
         defaultCenterLat: 1,
         defaultCenterLng: 2,
@@ -70,6 +72,7 @@ void main() {
       const storage = FlutterSecureStorage();
       final source = DiscoverPreferencesLocalDataSource(
         storage,
+        timezoneRepository: TimezoneRepositoryImpl(),
         defaultMarketCityId: 'test-market',
         defaultCenterLat: 1,
         defaultCenterLng: 2,

@@ -2,6 +2,8 @@ import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
 import 'package:recharge/shared/primitives/time/local_date.dart';
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
+import 'package:recharge/shared/primitives/time/iana_time_zone.dart';
 import '../../domain/repositories/timezone_repository.dart';
 
 class TimezoneRepositoryImpl implements TimezoneRepository {
@@ -17,8 +19,10 @@ class TimezoneRepositoryImpl implements TimezoneRepository {
   @override
   bool isValidTimezone(String timezoneId) {
     try {
-      tz.getLocation(timezoneId);
+      tz.getLocation(IanaTimeZone.parse(timezoneId).value);
       return true;
+    } on FormatException {
+      return false;
     } on tz.LocationNotFoundException {
       return false;
     }
@@ -27,8 +31,8 @@ class TimezoneRepositoryImpl implements TimezoneRepository {
   @override
   LocalDateTimeValue toLocal(DateTime instantUtc, String timezoneId) {
     final tz.TZDateTime local = tz.TZDateTime.from(
-      instantUtc.toUtc(),
-      tz.getLocation(timezoneId),
+      UtcInstant(instantUtc).value,
+      tz.getLocation(IanaTimeZone.parse(timezoneId).value),
     );
     return LocalDateTimeValue(
       date: LocalDate(local.year, local.month, local.day),
