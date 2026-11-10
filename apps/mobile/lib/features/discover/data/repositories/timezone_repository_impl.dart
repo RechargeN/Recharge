@@ -1,7 +1,7 @@
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
-import '../../domain/entities/local_date.dart';
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import '../../domain/repositories/timezone_repository.dart';
 
 class TimezoneRepositoryImpl implements TimezoneRepository {
@@ -92,9 +92,13 @@ class TimezoneRepositoryImpl implements TimezoneRepository {
     }
 
     final int direction = policy == LocalBoundaryPolicy.openingStart ? 1 : -1;
-    final DateTime naive = date.asUtcMidnight.add(
-      Duration(minutes: minutesSinceMidnight),
-    );
+    // Wall-clock arithmetic belongs to this TZDB adapter. This value is not
+    // an instant until a valid offset candidate is resolved.
+    final DateTime naive = DateTime.utc(
+      date.year,
+      date.month,
+      date.day,
+    ).add(Duration(minutes: minutesSinceMidnight));
     for (int delta = 1; delta <= 180; delta++) {
       final DateTime shifted = naive.add(Duration(minutes: direction * delta));
       final LocalDate shiftedDate = LocalDate(

@@ -3,7 +3,7 @@
 **ID:** MOB-ARCH-M2-P
 **Версия:** 1.0
 **Дата:** 2026-08-11
-**Статус:** Approved — M2-A/B Done (local/mock); M2-C–M2-E not started
+**Статус:** Approved — M2-A/B Done (local/mock); M2-C Doing; M2-D/E not started
 **Parent:** [Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
 **Depends on:** MOB-ARCH-M1 — Done, merged as `f893a931a58cff9ef9f779e17517af0d28c2f454`
 **Нормативные AC:** MOB-ARCH-AC-05–06, AC-52–53, AC-56–60, AC-74
@@ -614,3 +614,36 @@ This fixture change does not establish product timezone behavior.
 Provenance and host policy: `apps/mobile/test/support/PLATFORM_GOLDENS.md`.
 The intermediate full Linux run had 1394 passed / 1 failed; only the final
 complete green run above closes the gate.
+
+## 17. M2-C1 primitive checkpoint — 2026-11-10
+
+C1 starts from the completed B tree, documentation checkpoint `b2d3e96`,
+on separate branch `codex/m2c-primitives-local-review-20261110`.
+The user authorized sequential B/C/D/E implementation. The C1 file map adds
+only the LAUNCH_STATUS progress row to the nineteen-file plan; canonical
+inventory is regenerated/checked without increasing exceptions.
+
+Shared LocalDate validates Gregorian years 1–9999, strict calendar text,
+weekday, ordering and bounded day arithmetic. Discover's old import path
+forwards to it until D; all current direct consumers use the shared type.
+There is no public date-as-UTC-midnight API. The existing TZDB adapter owns
+wall-clock candidate calculation and keeps its gap/overlap feature policy.
+
+UtcInstant rejects non-UTC DateTime, including local values on UTC hosts.
+IanaTimeZone validates structural identity only; existence and alias resolution
+remain adapter responsibilities. LocaleTag supports language/script/region
+with explicit rejection of unsupported extensions/variants. MarketRef stores
+a stable ID without city-name resolution or inferred market configuration.
+Primitive validation is explicit and does not rely on debug assertions.
+
+Focused primitive/property + existing timezone/time-fit tests: 23 passed.
+The date property cases span a 400-year Gregorian cycle. Boundary self/scan/
+inventory checks passed at unchanged budget 71/71, zero violations. Complete
+Windows/Linux gates remain required; their results are recorded separately
+in the checkpoint review evidence, not inferred from focused tests.
+
+C remains Doing: C1 is not complete schedule integration. C2 must reconcile
+UTC/zone persistence and existing Event/Session policies; C3 retains Scenario/
+transit service-day rules; C4 must use the Place zone for Visit History; C5
+must integrate market/locale values through explicit adapters. No compatibility
+deletion, backend/Firebase runtime, l10n readiness or R1 acceptance is claimed.

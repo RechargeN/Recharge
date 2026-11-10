@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import '../entities/discover_item_entity.dart';
 import '../entities/discover_query.dart';
 import '../entities/geo_point.dart';
-import '../entities/local_date.dart';
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import '../entities/opening_hours_rule.dart';
 import '../entities/time_fit_evaluation.dart';
 import '../entities/time_slot.dart';
@@ -398,7 +398,7 @@ class ApplyTimeWindowUseCase {
         .where((OpeningHoursRule rule) => rule.exceptionDate == date)
         .toList(growable: false);
     if (exceptions.isNotEmpty) return exceptions;
-    final int weekday = date.asUtcMidnight.weekday;
+    final int weekday = date.weekday;
     return rules
         .where(
           (OpeningHoursRule rule) =>
