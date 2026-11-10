@@ -712,3 +712,31 @@ C2a3 must still replace Search's host-local editor initialization and preserve
 the selected zone during editing. Event/Session and C3–C5 remain separate.
 Complete host/CI gate results are in checkpoint evidence; native Google Maps,
 device, Emulator, production authority and R1 acceptance are not claimed.
+
+## 20. M2-C2a3 live time editor checkpoint — 2026-11-11
+
+C2a2 `99c7542` passed complete Windows/Linux suites with 1426 tests and all
+analyzer/boundary/diff gates. C2a3 migrates the live Search filter editor and
+BuildTimeWindowUseCase input to the existing LocalDateTimeValue, containing
+shared LocalDate and a validated local minute. Wall-clock day rollover uses
+bounded calendar arithmetic without host-zone normalization. Feature-specific
+gap/overlap resolution stays in the existing TimezoneRepository.
+
+The existing controller prepares editor values in the stored window zone, or
+the explicit configured market zone for a new window. The UI displays that zone;
+there is no device fallback. Unavailable zones/services fail visibly. Unchanged
+displayed bounds preserve original UTC seconds/microseconds and overlap offsets;
+an entirely unchanged window also retains resolvedAtUtc. Mode/flexibility-only
+edits retain bounds. Changed local times use the existing builder and DST rules.
+
+Time validation precedes other staged filter changes, so rejected edits do not
+partially replace date bounds. Existing manual origin remains unchanged when
+its type was not changed. Tests cover midnight/leap-day rollover, invalid local
+minute/weekday/range, explicit nonmarket zones, DST gap rejection, late overlap
+non-rewrite and actual filter-sheet open/apply behavior.
+
+Legacy quick-date shortcuts, their host-local labels and the unused legacy
+time-editor widget are not claimed migrated here: C2a4 owns active date flows;
+M2-D owns unused compatibility removal after reference proof. C2b and C3–C5
+remain open. Checkpoint gate logs are separate evidence, not R1/device/Emulator/
+cloud or production acceptance.
