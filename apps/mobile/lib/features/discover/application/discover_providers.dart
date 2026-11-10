@@ -10,6 +10,7 @@ import '../domain/usecases/get_discover_feed_usecase.dart';
 import 'controllers/discover_feed_controller.dart';
 import 'discover_runtime_defaults.dart';
 import '../domain/usecases/build_time_window_usecase.dart';
+import '../domain/repositories/timezone_repository.dart';
 import '../domain/usecases/submit_route_safety_report_usecase.dart';
 
 final discoverFeedControllerProvider =
@@ -20,6 +21,7 @@ final discoverFeedControllerProvider =
         analyticsService: sl<AnalyticsService>(),
         initialQuery: sl<DiscoverQuery>(),
         buildTimeWindow: sl<BuildTimeWindowUseCase>(),
+        timezoneRepository: sl<TimezoneRepository>(),
         runtimeDefaults: sl<DiscoverRuntimeDefaults>(),
       );
     });

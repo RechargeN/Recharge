@@ -12,6 +12,9 @@ import 'package:recharge/features/discover/domain/entities/smart_search_history_
 import 'package:recharge/features/discover/domain/repositories/discover_preferences_repository.dart';
 import 'package:recharge/features/discover/domain/repositories/discover_repository.dart';
 import 'package:recharge/features/discover/domain/usecases/get_discover_feed_usecase.dart';
+import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
+import 'package:recharge/features/discover/domain/entities/time_window.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 
 void main() {
   late _FakeDiscoverRepository repository;
@@ -23,6 +26,7 @@ void main() {
       getDiscoverFeedUseCase: GetDiscoverFeedUseCase(repository),
       discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
       analyticsService: _NoopAnalyticsService(),
+      timezoneRepository: TimezoneRepositoryImpl(),
       runtimeDefaults: const DiscoverRuntimeDefaults(
         timezoneId: 'Europe/Riga',
         originLat: 56.9496,
@@ -38,6 +42,138 @@ void main() {
     expect(controller.state.status, DiscoverFeedStatus.ready);
     expect(controller.state.items, isNotEmpty);
   });
+
+  DiscoverQuery timedQuery(TimeWindowMode mode) =>
+      DiscoverQuery.defaults().copyWith(
+        timeWindow: TimeWindow(
+          startAtUtc: DateTime.utc(2026, 10, 25, 0, 30, 0, 123, 456),
+          endAtUtc: DateTime.utc(2026, 10, 25, 1, 30, 0, 123, 456),
+          resolvedAtUtc: DateTime.utc(2026, 10, 24),
+          timezoneId: 'Europe/Riga',
+          mode: mode,
+          flexibilityMinutes: mode == TimeWindowMode.flexible ? 30 : 0,
+        ),
+        travelContext: TravelContext(
+          originType: TravelOriginType.manualPin,
+          origin: const GeoPoint(latitude: 56.95, longitude: 24.1),
+          transportMode: TransportMode.transit,
+          includeReturnTrip: true,
+        ),
+      );
+
+  test('time routes roundtrip every mode, zone, precision and travel', () {
+    for (final mode in TimeWindowMode.values) {
+      final query = timedQuery(mode);
+      final seed = DiscoverFeedController.timeRouteParameters(query);
+      final restored = controller.decodeTimeRouteParameters(seed);
+      expect(restored.window!.startAtUtc, query.timeWindow!.startAtUtc);
+      expect(restored.window!.endAtUtc, query.timeWindow!.endAtUtc);
+      expect(restored.window!.resolvedAtUtc, query.timeWindow!.resolvedAtUtc);
+      expect(restored.window!.timezoneId, 'Europe/Riga');
+      expect(restored.window!.mode, mode);
+      expect(
+        restored.window!.flexibilityMinutes,
+        query.timeWindow!.flexibilityMinutes,
+      );
+      expect(restored.travel!.origin, query.travelContext!.origin);
+      expect(restored.travel!.transportMode, TransportMode.transit);
+      expect(restored.travel!.includeReturnTrip, isTrue);
+      expect(restored.from, query.timeWindow!.startAtUtc);
+      expect(restored.to, query.timeWindow!.endAtUtc);
+    }
+  });
+
+  test(
+    'invalid coupled time routes fail without changing controller state',
+    () {
+      final valid = DiscoverFeedController.timeRouteParameters(
+        timedQuery(TimeWindowMode.exact),
+      );
+      final state = controller.state;
+      final invalid = <Map<String, String>>[
+        for (final key in valid.keys) Map.of(valid)..remove(key),
+        {...valid, 'timeMode': 'future'},
+        {...valid, 'timezone': 'Unknown/Nowhere'},
+        {...valid, 'timezone': 'Europe/Riga\n'},
+        {...valid, 'timeStart': '2026-10-25T00:30:00'},
+        {...valid, 'timeEnd': '2026-10-25T04:30:00+03:00'},
+        {...valid, 'resolvedAt': '2026-02-30T00:00:00Z'},
+        {...valid, 'timeEnd': valid['timeStart']!},
+        {...valid, 'flexibility': '0.5'},
+        {...valid, 'flexibility': '-1'},
+        {...valid, 'flexibility': '999999999999999999999999'},
+        {...valid, 'flexibility': '30'},
+        {...valid, 'timeMode': 'flexible'},
+        {...valid, 'originLat': 'NaN'},
+        {...valid, 'originLng': '181'},
+        {...valid, 'originType': 'future'},
+        {...valid, 'transport': 'future'},
+        {...valid, 'returnTrip': 'false'},
+        {...valid, 'dateFrom': '2026-01-01T00:00:00Z'},
+        {...valid, 'dateTo': '2026-01-01T00:00:00Z'},
+      ];
+      for (final seed in invalid) {
+        expect(
+          () => controller.decodeTimeRouteParameters(seed),
+          throwsFormatException,
+          reason: '$seed',
+        );
+        expect(controller.state, same(state));
+      }
+      expect(repository.requestCount, 0);
+    },
+  );
+
+  test(
+    'routes without windows keep explicit UTC dates and reject invalid bounds',
+    () {
+      final empty = controller.decodeTimeRouteParameters({});
+      expect(empty.window, isNull);
+      expect(empty.travel, isNull);
+      expect(empty.from, isNull);
+      final valid = controller.decodeTimeRouteParameters({
+        'dateFrom': '2026-01-01T00:00:00Z',
+      });
+      expect(valid.from, DateTime.utc(2026));
+      for (final seed in [
+        {'dateFrom': '2026-01-01'},
+        {'dateTo': '2026-01-01T00:00:00+00:00'},
+        {'dateFrom': '2026-01-02T00:00:00Z', 'dateTo': '2026-01-01T00:00:00Z'},
+      ]) {
+        expect(
+          () => controller.decodeTimeRouteParameters(seed),
+          throwsFormatException,
+        );
+      }
+    },
+  );
+
+  test(
+    'missing timezone service never grants a time route a fallback zone',
+    () {
+      final withoutZones = DiscoverFeedController(
+        getDiscoverFeedUseCase: GetDiscoverFeedUseCase(repository),
+        discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
+        analyticsService: _NoopAnalyticsService(),
+        runtimeDefaults: const DiscoverRuntimeDefaults(
+          timezoneId: 'Europe/Riga',
+          originLat: 1,
+          originLng: 2,
+          currency: CurrencyCode.eur,
+        ),
+      );
+      addTearDown(withoutZones.dispose);
+      expect(
+        () => withoutZones.decodeTimeRouteParameters(
+          DiscoverFeedController.timeRouteParameters(
+            timedQuery(TimeWindowMode.exact),
+          ),
+        ),
+        throwsFormatException,
+      );
+      expect(withoutZones.decodeTimeRouteParameters({}).window, isNull);
+    },
+  );
 
   test('loadFeed empty -> empty state', () async {
     repository.shouldReturnEmpty = true;

@@ -21,6 +21,8 @@ import '../../domain/usecases/get_discover_feed_usecase.dart';
 import '../../domain/usecases/build_time_window_usecase.dart';
 import '../discover_runtime_defaults.dart';
 import '../state/discover_feed_state.dart';
+import '../../domain/repositories/timezone_repository.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 
 enum TimeFitRelaxation { widenWindow, skipReturnTrip, removeTimeFilter }
 
@@ -31,12 +33,14 @@ class DiscoverFeedController extends ChangeNotifier {
     required AnalyticsService analyticsService,
     DiscoverQuery? initialQuery,
     BuildTimeWindowUseCase? buildTimeWindow,
+    TimezoneRepository? timezoneRepository,
     required DiscoverRuntimeDefaults runtimeDefaults,
   }) : _getDiscoverFeedUseCase = getDiscoverFeedUseCase,
        _discoverPreferencesRepository = discoverPreferencesRepository,
        _analyticsService = analyticsService,
        _initialQuery = initialQuery ?? DiscoverQuery.defaults(),
        _buildTimeWindow = buildTimeWindow,
+       _timezoneRepository = timezoneRepository,
        _runtimeDefaults = runtimeDefaults,
        _state = DiscoverFeedState.initial(
          initialQuery ?? DiscoverQuery.defaults(),
@@ -47,10 +51,133 @@ class DiscoverFeedController extends ChangeNotifier {
   final AnalyticsService _analyticsService;
   final DiscoverQuery _initialQuery;
   final BuildTimeWindowUseCase? _buildTimeWindow;
+  final TimezoneRepository? _timezoneRepository;
   final DiscoverRuntimeDefaults _runtimeDefaults;
 
   String get marketTimezoneId => _runtimeDefaults.timezoneId;
   CurrencyCode get marketCurrency => _runtimeDefaults.currency;
+
+  static const _timeRouteKeys = <String>{
+    'timeMode',
+    'timeStart',
+    'timeEnd',
+    'timezone',
+    'flexibility',
+    'resolvedAt',
+    'originType',
+    'originLat',
+    'originLng',
+    'transport',
+    'returnTrip',
+  };
+
+  static bool hasTimeRouteParameters(Map<String, String> values) =>
+      _timeRouteKeys.any(values.containsKey);
+
+  void reportInvalidTimeRoute() {
+    _setState(
+      _state.copyWith(
+        status: _state.status == DiscoverFeedStatus.initial
+            ? DiscoverFeedStatus.error
+            : _state.status,
+        message: 'Invalid time filter. Edit the search filters.',
+      ),
+    );
+  }
+
+  /// Decode the coupled route fields before any draft, feed or storage mutation.
+  ({TimeWindow? window, TravelContext? travel, DateTime? from, DateTime? to})
+  decodeTimeRouteParameters(Map<String, String> values) {
+    DateTime? date(String key) {
+      final value = values[key];
+      return value == null ? null : UtcInstant.parse(value).value;
+    }
+
+    final from = date('dateFrom');
+    final to = date('dateTo');
+    if (!hasTimeRouteParameters(values)) {
+      if (from != null && to != null && !from.isBefore(to)) {
+        throw const FormatException('Invalid search date bounds');
+      }
+      return (window: null, travel: null, from: from, to: to);
+    }
+    if (!_timeRouteKeys.every(values.containsKey)) {
+      throw const FormatException('Incomplete time filter');
+    }
+    final timezone = values['timezone']!;
+    if (_timezoneRepository?.isValidTimezone(timezone) != true) {
+      throw const FormatException('Time filter requires a known timezone');
+    }
+    final flexibilityText = values['flexibility']!;
+    if (RegExp(r'^[0-9]+$').stringMatch(flexibilityText) != flexibilityText) {
+      throw const FormatException('Invalid time flexibility');
+    }
+    final flexibility = int.tryParse(flexibilityText);
+    if (flexibility == null || !{'0', '1'}.contains(values['returnTrip'])) {
+      throw const FormatException('Invalid time or travel filter');
+    }
+    try {
+      final window = TimeWindow(
+        startAtUtc: date('timeStart')!,
+        endAtUtc: date('timeEnd')!,
+        resolvedAtUtc: date('resolvedAt')!,
+        timezoneId: timezone,
+        mode: TimeWindowMode.values.firstWhere(
+          (v) => v.name == values['timeMode'],
+        ),
+        flexibilityMinutes: flexibility,
+      );
+      final travel = TravelContext(
+        originType: TravelOriginType.values.firstWhere(
+          (v) => v.name == values['originType'],
+        ),
+        origin: GeoPoint(
+          latitude: double.parse(values['originLat']!),
+          longitude: double.parse(values['originLng']!),
+        ),
+        transportMode: TransportMode.values.firstWhere(
+          (v) => v.name == values['transport'],
+        ),
+        includeReturnTrip: values['returnTrip'] == '1',
+      );
+      if ((from != null && from != window.startAtUtc) ||
+          (to != null && to != window.endAtUtc)) {
+        throw const FormatException('Conflicting time filter bounds');
+      }
+      return (
+        window: window,
+        travel: travel,
+        from: window.startAtUtc,
+        to: window.endAtUtc,
+      );
+    } on StateError {
+      throw const FormatException('Unknown time or travel mode');
+    } on ArgumentError {
+      throw const FormatException('Invalid time or travel filter');
+    }
+  }
+
+  /// The one route shape used by Search, Results and Map.
+  static Map<String, String> timeRouteParameters(DiscoverQuery query) {
+    final window = query.timeWindow;
+    final travel = query.travelContext;
+    if (window == null) return const {};
+    if (travel == null) throw const FormatException('Missing travel context');
+    return {
+      'timeMode': window.mode.name,
+      'timeStart': window.startAtUtc.toIso8601String(),
+      'timeEnd': window.endAtUtc.toIso8601String(),
+      'timezone': window.timezoneId,
+      'flexibility': '${window.flexibilityMinutes}',
+      'resolvedAt': window.resolvedAtUtc.toIso8601String(),
+      'originType': travel.originType.name,
+      'originLat': '${travel.origin.latitude}',
+      'originLng': '${travel.origin.longitude}',
+      'transport': travel.transportMode.name,
+      'returnTrip': travel.includeReturnTrip ? '1' : '0',
+    };
+  }
+
   MoneyParseResult parseBudgetInput(String text, {required String locale}) {
     final result = MoneyParser().parse(
       text,

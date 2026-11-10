@@ -3144,21 +3144,7 @@ String _resultsLocation(
       if (query.availableDurationMinutes != null)
         'duration': '${query.availableDurationMinutes}',
       if (query.mood != null) 'mood': query.mood!,
-      if (query.timeWindow != null) ...<String, String>{
-        'timeMode': query.timeWindow!.mode.name,
-        'timeStart': query.timeWindow!.startAtUtc.toIso8601String(),
-        'timeEnd': query.timeWindow!.endAtUtc.toIso8601String(),
-        'timezone': query.timeWindow!.timezoneId,
-        'flexibility': '${query.timeWindow!.flexibilityMinutes}',
-        'resolvedAt': query.timeWindow!.resolvedAtUtc.toIso8601String(),
-      },
-      if (query.travelContext != null) ...<String, String>{
-        'originType': query.travelContext!.originType.name,
-        'originLat': '${query.travelContext!.origin.latitude}',
-        'originLng': '${query.travelContext!.origin.longitude}',
-        'transport': query.travelContext!.transportMode.name,
-        'returnTrip': query.travelContext!.includeReturnTrip ? '1' : '0',
-      },
+      ...DiscoverFeedController.timeRouteParameters(query),
     },
   ).toString();
 }
