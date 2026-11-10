@@ -3,7 +3,7 @@
 **ID:** MOB-ARCH-M2-P
 **Версия:** 1.0
 **Дата:** 2026-08-11
-**Статус:** Approved — M2-A Done; M2-B Doing; M2-C–M2-E not started
+**Статус:** Approved — M2-A/B Done (local/mock); M2-C–M2-E not started
 **Parent:** [Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
 **Depends on:** MOB-ARCH-M1 — Done, merged as `f893a931a58cff9ef9f779e17517af0d28c2f454`
 **Нормативные AC:** MOB-ARCH-AC-05–06, AC-52–53, AC-56–60, AC-74
@@ -576,3 +576,41 @@ Local implementation готова к review. Обязательный Linux GitH
 данного diff отсутствует; M2-B остаётся Doing, M2-C/D/E не начаты.
 Это не M2-B Done, не приёмка R1 и не Emulator/device/cloud evidence.
 Compatibility paths не удалялись; production authority не добавлялась.
+
+## 16. M2-B completed local/mock checkpoint — 2026-11-10
+
+M2-B technical acceptance is complete on
+`2ad3e474acf61e591fb6c3113e0e56cc3a7b7ec1`, in draft PR #10 against
+the frozen task baseline `be17822`. This establishes this checkout's bounded
+Money/consumer scope, not compatibility with the newer integration branch,
+formal IDP acceptance, R1, Emulator/device or production readiness.
+
+AC-16–26 and AC-35–38 are covered by the canonical Money primitive/parser/
+formatter/legacy-adapter tests and affected consumer, mapper, controller and
+widget tests in the complete suite. Money uses exact integer minor units,
+checked BigInt intermediates, explicit currency, no silent rounding or FX;
+canonical presence wins and invalid/future records are not destructively
+rewritten. Event/Scenario wrappers remain until M2-D zero-reference cleanup.
+M8 remote writes remain outside this scope.
+
+Windows: full `flutter test --no-pub --reporter expanded` 1395 passed,
+exit 0, 02:32; `flutter analyze --no-pub` no issues, exit 0, 13.9 seconds.
+Linux: full mobile-tests run
+[42799083937](https://github.com/RechargeN/Recharge/actions/runs/42799083937)
+1395 passed, success; mobile-ci run
+[42799083935](https://github.com/RechargeN/Recharge/actions/runs/42799083935)
+analyzer no issues (19.9 seconds), boundary self/scan/inventory success.
+Both boundary scans: 545 files, 71 findings/suppressions, zero violations/
+stale/expired; budget 71/71. Diff and exported binary-patch checks passed.
+Codegen reports build_runner not configured; no generation evidence claimed.
+
+The user authorized the separate seventeen-file platform golden scope.
+Windows PNGs remain byte-identical; Linux references were visually reviewed,
+with the default exact comparator and no skips/tolerances. The initial
+Activity image differed in displayed time, not only rasterization; it was
+rejected and the visual fixture made explicit about host-local 10:00 supplied
+as a UTC instant. Its corrected Linux image was reviewed before acceptance.
+This fixture change does not establish product timezone behavior.
+Provenance and host policy: `apps/mobile/test/support/PLATFORM_GOLDENS.md`.
+The intermediate full Linux run had 1394 passed / 1 failed; only the final
+complete green run above closes the gate.
