@@ -680,3 +680,35 @@ C2a2 still owns Map/Results route parsing and Search wall-clock UI conversion.
 C2b Event/Session, C3 Scenario/transit, C4 Visit and C5 MarketConfig remain open.
 This checkpoint does not claim those paths are canonical, remove compatibility
 APIs, migrate records on startup or establish device/Emulator/cloud evidence.
+
+## 19. M2-C2a2 Discover route boundary checkpoint — 2026-11-11
+
+C2a1 on `20de14e` passed complete Windows/Linux suites with 1419 tests,
+analyzer, boundary and diff checks. C2a2 replaces the two presentation time/
+travel parsers and three route writers with one implementation in the existing
+DiscoverFeedController. The existing TimezoneRepository is injected through
+the existing provider composition; persisted shapes remain in DiscoverQueryModel.
+
+Route decoding validates the complete coupled window/travel group before any
+query mutation. UTC text uses UtcInstant; known zones use TZDB. Partial fields,
+unknown modes/zones, invalid flexibility/origin/return flag, absent zone service
+and conflicting legacy date bounds fail closed. Without a window, valid UTC
+date bounds remain supported. Route names and parameter keys are unchanged.
+
+Map/Results preserve applied/draft query and storage on invalid input. The
+initial page transitions to an error state instead of remaining on a loading
+indicator; existing loaded results are retained. Search/Results/Map delegate
+to the single route writer. Superseded helper names have no production or test
+references. The primitive/parser and existing aggregate invariants remain the
+owners of structural semantics; no additional controller or storage path exists.
+
+Behavioral tests cover every time mode, exact UTC precision, explicit zone,
+travel fields, rejected routes and actual Results deep-link application with
+storage/recent-query checks. A first test run exposed the initial spinner defect,
+which was fixed; another test incorrectly expected regular history in Smart
+Search storage and was corrected to the canonical SavedSearch path.
+
+C2a3 must still replace Search's host-local editor initialization and preserve
+the selected zone during editing. Event/Session and C3–C5 remain separate.
+Complete host/CI gate results are in checkpoint evidence; native Google Maps,
+device, Emulator, production authority and R1 acceptance are not claimed.
