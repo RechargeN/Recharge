@@ -57,6 +57,39 @@ class DiscoverFeedController extends ChangeNotifier {
   String get marketTimezoneId => _runtimeDefaults.timezoneId;
   CurrencyCode get marketCurrency => _runtimeDefaults.currency;
 
+  ({String timezoneId, LocalDateTimeValue start, LocalDateTimeValue end})
+  timeEditorValues({TimeWindow? window, DateTime? nowUtc}) {
+    final repository = _timezoneRepository;
+    final zone = window?.timezoneId ?? marketTimezoneId;
+    if (repository == null || !repository.isValidTimezone(zone)) {
+      throw const TimeWindowValidationException(
+        'Time-window timezone is unavailable',
+      );
+    }
+    final now = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
+    try {
+      return (
+        timezoneId: zone,
+        start: repository.toLocal(
+          window?.startAtUtc ?? now.add(const Duration(minutes: 30)),
+          zone,
+        ),
+        end: repository.toLocal(
+          window?.endAtUtc ?? now.add(const Duration(hours: 2)),
+          zone,
+        ),
+      );
+    } on FormatException {
+      throw const TimeWindowValidationException(
+        'Local date is outside the supported range',
+      );
+    } on ArgumentError {
+      throw const TimeWindowValidationException(
+        'Local date is outside the supported range',
+      );
+    }
+  }
+
   static const _timeRouteKeys = <String>{
     'timeMode',
     'timeStart',
@@ -256,8 +289,10 @@ class DiscoverFeedController extends ChangeNotifier {
 
   String? stageTimeWindowSelection({
     required TimeWindowMode mode,
-    DateTime? startLocal,
-    DateTime? endLocal,
+    LocalDateTimeValue? startLocal,
+    LocalDateTimeValue? endLocal,
+    String? timezoneId,
+    DateTime? nowUtc,
     required int flexibilityMinutes,
     required TravelOriginType originType,
     double? originLat,
@@ -268,14 +303,48 @@ class DiscoverFeedController extends ChangeNotifier {
     final BuildTimeWindowUseCase? builder = _buildTimeWindow;
     if (builder == null) return 'Time-window service is unavailable';
     try {
-      final TimeWindow timeWindow = builder(
-        mode: mode,
-        timezoneId: _runtimeDefaults.timezoneId,
-        nowUtc: DateTime.now().toUtc(),
-        startLocal: startLocal,
-        endLocal: endLocal,
-        flexibilityMinutes: flexibilityMinutes,
-      );
+      final existing = _state.draftQuery.timeWindow;
+      final zone = timezoneId ?? existing?.timezoneId ?? marketTimezoneId;
+      final repository = _timezoneRepository;
+      if (repository == null || !repository.isValidTimezone(zone)) {
+        return 'Time-window timezone is unavailable';
+      }
+      final now = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
+      final flex = mode == TimeWindowMode.flexible ? flexibilityMinutes : 0;
+      final sameBounds =
+          existing != null &&
+          mode != TimeWindowMode.anytimeToday &&
+          existing.timezoneId == zone &&
+          startLocal != null &&
+          endLocal != null &&
+          repository.toLocal(existing.startAtUtc, zone).compareTo(startLocal) ==
+              0 &&
+          repository.toLocal(existing.endAtUtc, zone).compareTo(endLocal) == 0;
+      final TimeWindow timeWindow;
+      if (sameBounds) {
+        // Minute-resolution UI must not discard precision or choose another
+        // offset in an overlapping hour when the displayed bounds did not change.
+        timeWindow =
+            existing.mode == mode && existing.flexibilityMinutes == flex
+            ? existing
+            : TimeWindow(
+                startAtUtc: existing.startAtUtc,
+                endAtUtc: existing.endAtUtc,
+                resolvedAtUtc: now,
+                timezoneId: zone,
+                mode: mode,
+                flexibilityMinutes: flex,
+              );
+      } else {
+        timeWindow = builder(
+          mode: mode,
+          timezoneId: zone,
+          nowUtc: now,
+          startLocal: startLocal,
+          endLocal: endLocal,
+          flexibilityMinutes: flexibilityMinutes,
+        );
+      }
       final TravelContext travelContext = TravelContext(
         originType: originType,
         origin: GeoPoint(
@@ -302,6 +371,8 @@ class DiscoverFeedController extends ChangeNotifier {
       return null;
     } on TimeWindowValidationException catch (error) {
       return error.message;
+    } on FormatException {
+      return 'Local date is outside the supported range';
     } on ArgumentError catch (error) {
       return error.message?.toString() ?? 'Invalid travel context';
     }

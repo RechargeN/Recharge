@@ -1,4 +1,3 @@
-import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../entities/time_window.dart';
 import '../repositories/timezone_repository.dart';
@@ -17,8 +16,8 @@ class BuildTimeWindowUseCase {
     required TimeWindowMode mode,
     required String timezoneId,
     required DateTime nowUtc,
-    DateTime? startLocal,
-    DateTime? endLocal,
+    LocalDateTimeValue? startLocal,
+    LocalDateTimeValue? endLocal,
     int flexibilityMinutes = 0,
   }) {
     try {
@@ -56,14 +55,14 @@ class BuildTimeWindowUseCase {
       throw const TimeWindowValidationException('Start and end are required');
     }
     final LocalTimeResolution start = _timezoneRepository.resolveLocal(
-      date: LocalDate(startLocal.year, startLocal.month, startLocal.day),
-      minutesSinceMidnight: startLocal.hour * 60 + startLocal.minute,
+      date: startLocal.date,
+      minutesSinceMidnight: startLocal.minutesSinceMidnight,
       timezoneId: timezoneId,
       policy: LocalBoundaryPolicy.userStart,
     );
     final LocalTimeResolution end = _timezoneRepository.resolveLocal(
-      date: LocalDate(endLocal.year, endLocal.month, endLocal.day),
-      minutesSinceMidnight: endLocal.hour * 60 + endLocal.minute,
+      date: endLocal.date,
+      minutesSinceMidnight: endLocal.minutesSinceMidnight,
       timezoneId: timezoneId,
       policy: LocalBoundaryPolicy.userEnd,
     );
