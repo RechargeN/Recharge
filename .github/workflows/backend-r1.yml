@@ -23,7 +23,9 @@ jobs:
   verify:
     name: Credential-free R1 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
+    # 2026-11-09: the full Emulator suite alone takes ~40 min on windows-2025
+    # (R0 runs the same suite under 118); 25 cancelled the job mid-suite.
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
