@@ -8,7 +8,7 @@ import type { NotificationEffect } from './notification_effect.js';
  * was first claimed with.
  */
 export type NotificationCategory = 'booking.receipts' | 'booking.changes';
-export type NotificationChannel = 'inApp';
+export type NotificationChannel = 'inApp' | 'push';
 
 export const notificationCategories: readonly NotificationCategory[] = [
   'booking.receipts',
@@ -87,6 +87,17 @@ const revisionOne: NotificationPolicyRevision = Object.freeze({
   },
 });
 
+/**
+ * N3c (2026-11-13, BCK13-OD-04): the same categories and routes with the FCM
+ * push hint as a second channel. A locked category keeps its inbox record;
+ * only its push can be switched off.
+ */
+const revisionTwo: NotificationPolicyRevision = Object.freeze({
+  ...revisionOne,
+  revision: 2,
+  channels: Object.freeze(['inApp', 'push'] as const),
+});
+
 export class NotificationPolicyRegistry {
   readonly #revisions: ReadonlyMap<number, NotificationPolicyRevision>;
 
@@ -108,7 +119,11 @@ export class NotificationPolicyRegistry {
 }
 
 export const notificationPolicyRevisionOne = revisionOne;
-export const defaultNotificationPolicies = new NotificationPolicyRegistry([revisionOne], 1);
+export const notificationPolicyRevisionTwo = revisionTwo;
+export const defaultNotificationPolicies = new NotificationPolicyRegistry(
+  [revisionOne, revisionTwo],
+  2,
+);
 
 /** Stored per account; only unlocked categories are ever stored. */
 export interface NotificationPreferences {
@@ -116,8 +131,9 @@ export interface NotificationPreferences {
   readonly userId: string;
   readonly revision: number;
   readonly policyRevision: number;
+  /** N3c: a stored entry holds the switched channels only (inApp, push or both). */
   readonly categories: Readonly<
-    Partial<Record<NotificationCategory, Readonly<{ inApp: boolean }>>>
+    Partial<Record<NotificationCategory, Readonly<{ inApp?: boolean; push?: boolean }>>>
   >;
   /** Set only by the Notifications privacy restriction task. */
   readonly processingRestricted: boolean;
@@ -149,19 +165,24 @@ export function parseStoredPreferences(userId: string, data: unknown): Notificat
     Array.isArray(categories)
   )
     throw new PreferencesUnreadable();
-  const parsed: Partial<Record<NotificationCategory, { inApp: boolean }>> = {};
+  const parsed: Partial<Record<NotificationCategory, { inApp?: boolean; push?: boolean }>> = {};
   for (const [key, value] of Object.entries(categories as Record<string, unknown>)) {
     if (!notificationCategories.includes(key as NotificationCategory))
       throw new PreferencesUnreadable();
     const entry = value as Record<string, unknown> | null;
+    if (typeof entry !== 'object' || entry === null || Array.isArray(entry))
+      throw new PreferencesUnreadable();
+    const keys = Object.keys(entry);
     if (
-      typeof entry !== 'object' ||
-      entry === null ||
-      Object.keys(entry).length !== 1 ||
-      typeof entry.inApp !== 'boolean'
+      keys.length === 0 ||
+      keys.some((channel) => channel !== 'inApp' && channel !== 'push') ||
+      keys.some((channel) => typeof entry[channel] !== 'boolean')
     )
       throw new PreferencesUnreadable();
-    parsed[key as NotificationCategory] = { inApp: entry.inApp };
+    parsed[key as NotificationCategory] = {
+      ...(entry.inApp === undefined ? {} : { inApp: entry.inApp as boolean }),
+      ...(entry.push === undefined ? {} : { push: entry.push as boolean }),
+    };
   }
   return {
     schemaVersion: 1,
@@ -210,15 +231,13 @@ export function applyPreferenceUpdate(input: {
     return { kind: 'invalid_preference', detail: 'categories_invalid' };
   const entries = Object.entries(raw as Record<string, unknown>);
   if (entries.length === 0) return { kind: 'invalid_preference', detail: 'categories_empty' };
-  const next: Partial<Record<NotificationCategory, { inApp: boolean }>> = {
+  const next: Partial<Record<NotificationCategory, { inApp?: boolean; push?: boolean }>> = {
     ...(input.current?.categories ?? {}),
   };
   for (const [key, value] of entries) {
     if (!notificationCategories.includes(key as NotificationCategory))
       return { kind: 'invalid_preference', detail: 'category_unknown' };
     const category = key as NotificationCategory;
-    if (input.policy.categories[category].locked)
-      return { kind: 'invalid_preference', detail: 'category_locked' };
     if (typeof value !== 'object' || value === null || Array.isArray(value))
       return { kind: 'invalid_preference', detail: 'channels_invalid' };
     const channels = Object.entries(value as Record<string, unknown>);
@@ -228,8 +247,11 @@ export function applyPreferenceUpdate(input: {
         return { kind: 'invalid_preference', detail: 'channel_unknown' };
       if (typeof enabled !== 'boolean')
         return { kind: 'invalid_preference', detail: 'channel_value_invalid' };
+      // A locked category keeps its inbox record; only push may be switched.
+      if (channel === 'inApp' && input.policy.categories[category].locked)
+        return { kind: 'invalid_preference', detail: 'category_locked' };
     }
-    next[category] = { inApp: (value as { inApp: boolean }).inApp };
+    next[category] = { ...next[category], ...(value as { inApp?: boolean; push?: boolean }) };
   }
   return {
     kind: 'updated',

@@ -144,6 +144,12 @@
           "additionalProperties": false,
           "properties": { "enabled": { "type": "boolean" }, "locked": { "type": "boolean" } },
           "required": ["enabled", "locked"]
+        },
+        "push": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "enabled": { "type": "boolean" }, "locked": { "type": "boolean" } },
+          "required": ["enabled", "locked"]
         }
       },
       "required": ["category", "inApp"]
@@ -159,7 +165,7 @@
         "kind": { "const": "succeeded" },
         "revision": { "type": "integer", "minimum": 0 },
         "policyRevision": { "type": "integer", "minimum": 1 },
-        "channels": { "type": "array", "items": { "const": "inApp" } },
+        "channels": { "type": "array", "items": { "enum": ["inApp", "push"] } },
         "categories": { "type": "array", "items": { "$ref": "#/$defs/categoryDecision" } },
         "replayed": { "const": true }
       },

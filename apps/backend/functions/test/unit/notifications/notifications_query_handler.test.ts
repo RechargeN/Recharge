@@ -132,9 +132,18 @@ void test('getPreferences shows the explicit category policy and locks', async (
   const { query } = await world();
   const preferences = await query('recipient-1', request('getPreferences', {}));
   assert.equal(preferences.revision, 0);
-  assert.deepEqual(preferences.channels, ['inApp']);
+  // N3c (2026-11-13): push is on by default and never locked.
+  assert.deepEqual(preferences.channels, ['inApp', 'push']);
   assert.deepEqual(preferences.categories, [
-    { category: 'booking.receipts', inApp: { enabled: true, locked: false } },
-    { category: 'booking.changes', inApp: { enabled: true, locked: true } },
+    {
+      category: 'booking.receipts',
+      inApp: { enabled: true, locked: false },
+      push: { enabled: true, locked: false },
+    },
+    {
+      category: 'booking.changes',
+      inApp: { enabled: true, locked: true },
+      push: { enabled: true, locked: false },
+    },
   ]);
 });

@@ -9,6 +9,7 @@ import {
   inAppDecision,
   notificationCategories,
 } from '../domain/notification_policy.js';
+import { pushEnabled } from '../domain/push.js';
 import type { CommandReceiptRecord, NotificationsTransaction } from '../domain/repositories.js';
 import {
   refusal,
@@ -266,6 +267,9 @@ async function execute(
       categories: notificationCategories.map((category) => ({
         category,
         inApp: inAppDecision(policy, update.preferences, category),
+        ...(policy.channels.includes('push')
+          ? { push: { enabled: pushEnabled(update.preferences, category), locked: false } }
+          : {}),
       })),
     },
   };

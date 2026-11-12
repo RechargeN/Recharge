@@ -67,8 +67,9 @@ void test('one allowed effect and recipient create exactly one logical record; r
   );
   const receipt = store.snapshot().receipts.get(receiptId) as LiveReceipt;
   assert.equal(receipt.status, 'created');
+  // N3c (2026-11-13): new effects pin policy revision 2 (push channel added).
   assert.deepEqual(receipt.pinned, {
-    policyRevision: 1,
+    policyRevision: 2,
     category: 'booking.receipts',
     templateKey: 'booking.confirmed',
     templateRevision: 1,
@@ -103,7 +104,7 @@ void test('preferences change behaviour: receipts can be switched off, booking.c
   assert.equal(minimal.shape, 'minimal');
   assert.equal(minimal.shape === 'minimal' && minimal.reason, 'user_preference');
   assert.deepEqual(minimal.shape === 'minimal' && minimal.evidence, {
-    policyRevision: 1,
+    policyRevision: 2,
     templateRevision: 1,
     preferenceRevision: 3,
   });

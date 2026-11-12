@@ -138,11 +138,16 @@ export const operationalTaskRegistry: readonly OperationalTaskFamily[] = deepFre
     owner: 'notifications',
     producer: 'booking → bookingOutbox',
     consumer: 'notification effect consumer',
-    effect: 'inbox item',
-    receipt: 'notificationEffectReceipts + attempt records',
+    // N3c (2026-11-13): after the inbox item, a best-effort FCM push hint with
+    // its own idempotent attempt, retry budget, dead letter and reconciliation.
+    effect: 'inbox item, then an FCM push hint',
+    receipt: 'notificationEffectReceipts + attempt records; notificationPushAttempts',
     sources: [
       mod('notifications', 'application/consume_notification_effect.ts'),
       mod('notifications', 'application/notification_reconciler.ts'),
+      mod('notifications', 'application/push_dispatcher.ts'),
+      mod('notifications', 'domain/push.ts'),
+      mod('notifications', 'infrastructure/in_memory_push_store.ts'),
       mod('notifications', 'domain/delivery_attempt.ts'),
       mod('notifications', 'infrastructure/firestore_notifications_repository.ts'),
       mod('notifications', 'infrastructure/in_memory_notifications_repository.ts'),

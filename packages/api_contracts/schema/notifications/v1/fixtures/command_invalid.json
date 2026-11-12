@@ -15,10 +15,10 @@
     "detail": "channel_unknown",
     "request": {
       "schemaVersion": 1,
-      "requestId": "req-push",
-      "idempotencyKey": "idem-push-0001",
+      "requestId": "req-email",
+      "idempotencyKey": "idem-email-0001",
       "commandType": "updatePreferences",
-      "payload": { "expectedRevision": 0, "categories": { "booking.receipts": { "push": true } } }
+      "payload": { "expectedRevision": 0, "categories": { "booking.receipts": { "email": true } } }
     }
   },
   {

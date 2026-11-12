@@ -64,7 +64,8 @@ void test('local policy rev 1 maps every allowed effect to an explicit category 
 void test('Booking notifications are not all mandatory: only booking.changes is locked', () => {
   assert.deepEqual(policy.categories['booking.receipts'], { inAppDefault: true, locked: false });
   assert.deepEqual(policy.categories['booking.changes'], { inAppDefault: true, locked: true });
-  assert.deepEqual([...policy.channels], ['inApp']);
+  // N3c (2026-11-13): revision 2 adds the FCM push hint as a second channel.
+  assert.deepEqual([...policy.channels], ['inApp', 'push']);
 });
 
 function preferences(categories: NotificationPreferences['categories']): NotificationPreferences {
@@ -111,7 +112,6 @@ void test('updates are versioned and refuse locked, unknown and out-of-policy ch
   const refusals: [unknown, string][] = [
     [{ 'booking.changes': { inApp: false } }, 'category_locked'],
     [{ 'booking.marketing': { inApp: true } }, 'category_unknown'],
-    [{ 'booking.receipts': { push: true } }, 'channel_unknown'],
     [{ 'booking.receipts': { email: true } }, 'channel_unknown'],
     [{ 'booking.receipts': { sms: true } }, 'channel_unknown'],
     [{ 'booking.receipts': { inApp: 'no' } }, 'channel_value_invalid'],
@@ -149,7 +149,8 @@ void test('stored preferences parse strictly and fail closed', () => {
   for (const broken of [
     null,
     { ...stored, userId: 'user-2' },
-    { ...stored, categories: { 'booking.changes': { inApp: true, push: true } } },
+    { ...stored, categories: { 'booking.changes': { inApp: true, email: true } } },
+    { ...stored, categories: { 'booking.changes': {} } },
     { ...stored, categories: { unknown: { inApp: true } } },
     { ...stored, processingRestricted: 'no' },
   ])

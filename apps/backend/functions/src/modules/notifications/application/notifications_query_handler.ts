@@ -8,6 +8,7 @@ import {
   notificationCategories,
   type NotificationPolicyRegistry,
 } from '../domain/notification_policy.js';
+import { pushEnabled } from '../domain/push.js';
 import {
   defaultNotificationTemplates,
   isNotificationLocale,
@@ -201,6 +202,9 @@ export async function handleNotificationsQueryRequest(
         categories: notificationCategories.map((category) => ({
           category,
           inApp: inAppDecision(policy, preferences, category),
+          ...(policy.channels.includes('push')
+            ? { push: { enabled: pushEnabled(preferences, category), locked: false } }
+            : {}),
         })),
       });
     }

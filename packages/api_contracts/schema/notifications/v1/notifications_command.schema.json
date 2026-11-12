@@ -103,8 +103,8 @@
     "channels": {
       "type": "object",
       "additionalProperties": false,
-      "properties": { "inApp": { "type": "boolean" } },
-      "required": ["inApp"]
+      "properties": { "inApp": { "type": "boolean" }, "push": { "type": "boolean" } },
+      "minProperties": 1
     }
   }
 }

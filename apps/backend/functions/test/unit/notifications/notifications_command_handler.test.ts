@@ -109,7 +109,7 @@ void test('markAllRead is bounded by its cutoff and maximum and reports what rem
   assert.deepEqual([rest.updated, rest.remaining], [1, false]);
 });
 
-void test('updatePreferences changes only unlocked categories and refuses push, email and SMS', async () => {
+void test('updatePreferences: a locked category switches push only; email and SMS are refused', async () => {
   const { command } = await world();
   const updated = await command('recipient-1', 'updatePreferences', {
     expectedRevision: 0,
@@ -119,7 +119,8 @@ void test('updatePreferences changes only unlocked categories and refuses push, 
   assert.equal(updated.revision, 1);
   for (const [categories, detail] of [
     [{ 'booking.changes': { inApp: false } }, 'category_locked'],
-    [{ 'booking.receipts': { push: true } }, 'channel_unknown'],
+    [{ 'booking.receipts': { email: true } }, 'channel_unknown'],
+    [{ 'booking.receipts': { sms: true } }, 'channel_unknown'],
   ] as const) {
     const refused = await command('recipient-1', 'updatePreferences', {
       expectedRevision: 1,
