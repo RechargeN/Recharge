@@ -817,6 +817,20 @@
         "compositeIndexes": []
       },
       {
+        "name": "notificationPushAttempts",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
+        "name": "notificationPushRegistrations",
+        "clientAccess": "deny",
+        "owner": "firebase_cli",
+        "ttlFields": [],
+        "compositeIndexes": []
+      },
+      {
         "name": "notificationReconcileCheckpoints",
         "clientAccess": "deny",
         "owner": "firebase_cli",

@@ -23,7 +23,8 @@ export type ReconcileFindingCode =
   | 'dead_letter'
   | 'inbox_item_missing'
   | 'payload_conflict'
-  | 'source_missing';
+  | 'source_missing'
+  | 'push_reconcile_failed';
 
 export interface ReconcileFinding {
   readonly code: ReconcileFindingCode;
@@ -37,6 +38,8 @@ export interface ReconcileReport {
   readonly startedAtSafe: boolean;
   readonly outcomes: Readonly<Partial<Record<ConsumeOutcome | 'expired_by_reconcile', number>>>;
   readonly findings: readonly ReconcileFinding[];
+  /** N3c: push retries sent and stale registrations revoked in this pass. */
+  readonly push?: Readonly<{ retried: number; revoked: number }>;
 }
 
 export type ReplayResult =
@@ -80,6 +83,9 @@ export class NotificationReconciler {
     private readonly consumer: NotificationEffectConsumer,
     private readonly clock: ServerClock,
     config: Partial<NotificationReconcileConfig> = {},
+    private readonly push?: {
+      reconcile(): Promise<Readonly<{ retried: number; revoked: number }>>;
+    },
   ) {
     this.#config = { ...notificationReconcileConfig, ...config };
   }
@@ -152,6 +158,14 @@ export class NotificationReconciler {
     for (const receipt of await this.store.deadLetters(this.#config.dueLimit))
       findings.push({ code: 'dead_letter', ref: receipt.receiptId });
     const open = await this.store.hasOpenReceipts();
+    // N3c: a push failure is reported, never a reason to stop the inbox pass.
+    const push =
+      this.push === undefined
+        ? undefined
+        : await this.push.reconcile().catch(() => {
+            findings.push({ code: 'push_reconcile_failed', ref: 'push' });
+            return { retried: 0, revoked: 0 };
+          });
     return {
       complete: findings.length === 0 && startedAtSafe && reachedEnd && contiguous && !open,
       scanned,
@@ -159,6 +173,7 @@ export class NotificationReconciler {
       startedAtSafe,
       outcomes,
       findings,
+      ...(push === undefined ? {} : { push }),
     };
   }
 

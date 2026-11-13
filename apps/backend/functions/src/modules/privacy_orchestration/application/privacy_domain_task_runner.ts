@@ -17,6 +17,8 @@ import {
 import { NotificationsPrivacyTaskHandler } from '../../notifications/application/notifications_privacy_task_handler.js';
 import type { NotificationsStore } from '../../notifications/domain/repositories.js';
 import { FirestoreNotificationsStore } from '../../notifications/infrastructure/firestore_notifications_repository.js';
+import { erasePushSubject } from '../../notifications/application/push_dispatcher.js';
+import { FirestorePushStore } from '../../notifications/infrastructure/firestore_push_store.js';
 import { privacyPolicyRevision } from '../domain/privacy_writer_registry.js';
 import type { PrivacyLegalHold } from '../domain/privacy_legal_hold.js';
 import { privacyHoldCollections } from '../infrastructure/firestore_privacy_legal_hold_service.js';
@@ -347,6 +349,10 @@ export class PrivacyDomainTaskRunner {
               await new NotificationsPrivacyTaskHandler(
                 this.options.notificationsStore ?? new FirestoreNotificationsStore(db),
                 { now: () => new Date(run.nowUtc) },
+                // N3c: push registrations and attempts go with the subject.
+                {
+                  eraseSubject: (userId) => erasePushSubject(new FirestorePushStore(db), userId),
+                },
               ).handle({
                 taskType: run.taskType,
                 subjectId: run.subjectId,

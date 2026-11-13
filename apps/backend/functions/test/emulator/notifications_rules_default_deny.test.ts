@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
+import { pushCollections } from '../../src/modules/notifications/infrastructure/firestore_push_store.js';
 
 import { notificationCollections } from '../../src/modules/notifications/infrastructure/firestore_notifications_repository.js';
 import { emulatorFirestore } from '../support/booking_emulator.js';
 
 const projectId = 'demo-recharge';
 const firestore = emulatorFirestore();
-const collections = Object.values(notificationCollections);
+// N3c (2026-11-13): push registrations and attempts are server-only too.
+const collections = [...Object.values(notificationCollections), ...Object.values(pushCollections)];
 
 function requireHost(name: string): string {
   const value = process.env[name];
@@ -67,13 +69,15 @@ const cleanup = async () => {
 before(cleanup);
 after(cleanup);
 
-void test('F1 names exactly the six server-only Notifications collections', () => {
+void test('F1 and N3c name exactly the eight server-only Notifications collections', () => {
   assert.deepEqual([...collections].sort(), [
     'notificationCommandReceipts',
     'notificationDeliveryAttempts',
     'notificationEffectReceipts',
     'notificationInboxItems',
     'notificationPreferences',
+    'notificationPushAttempts',
+    'notificationPushRegistrations',
     'notificationReconcileCheckpoints',
   ]);
 });

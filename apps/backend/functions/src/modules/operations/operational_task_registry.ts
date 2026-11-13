@@ -148,6 +148,7 @@ export const operationalTaskRegistry: readonly OperationalTaskFamily[] = deepFre
       mod('notifications', 'application/push_dispatcher.ts'),
       mod('notifications', 'domain/push.ts'),
       mod('notifications', 'infrastructure/in_memory_push_store.ts'),
+      mod('notifications', 'infrastructure/firestore_push_store.ts'),
       mod('notifications', 'domain/delivery_attempt.ts'),
       mod('notifications', 'infrastructure/firestore_notifications_repository.ts'),
       mod('notifications', 'infrastructure/in_memory_notifications_repository.ts'),

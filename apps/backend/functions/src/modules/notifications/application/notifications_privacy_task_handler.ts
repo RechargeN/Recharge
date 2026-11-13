@@ -31,6 +31,8 @@ export class NotificationsPrivacyTaskHandler {
   constructor(
     private readonly store: NotificationsStore,
     private readonly clock: ServerClock,
+    /** N3c: push registrations and attempts of the subject. */
+    private readonly push?: { eraseSubject(userId: string): Promise<number> },
   ) {}
 
   /**
@@ -104,6 +106,11 @@ export class NotificationsPrivacyTaskHandler {
   ): Promise<NotificationsPrivacyTaskResult> {
     let recordCount = 0;
     let erasedCount = 0;
+    if (this.push !== undefined && !(await held())) {
+      const pushRecords = await this.push.eraseSubject(subjectId);
+      recordCount += pushRecords;
+      erasedCount += pushRecords;
+    }
     const visited = new Set<string>();
     for (;;) {
       const receipts = (await this.store.subjectReceipts(subjectId, pageSize)).filter(

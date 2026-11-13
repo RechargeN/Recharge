@@ -182,6 +182,9 @@ export const privacyWriterRegistry: readonly PrivacyRegistryEntry[] = deepFreeze
     ['notificationDeliveryAttempts', null, del],
     ['notificationPreferences', '$id', del],
     ['notificationCommandReceipts', 'userId', del],
+    // N3c (2026-11-13): FCM registrations (server-only tokens) and push attempts.
+    ['notificationPushRegistrations', 'userId', del],
+    ['notificationPushAttempts', 'userId', del],
   ]),
   ...rows('W12', null, [['notificationReconcileCheckpoints', null, none]]),
   ...rows('W13', 'library', [

@@ -24,6 +24,16 @@ import {
   FirestoreBookingOutboxSource,
 } from './modules/notifications/infrastructure/firestore_notification_sources.js';
 import { FirestoreNotificationsStore } from './modules/notifications/infrastructure/firestore_notifications_repository.js';
+import { info } from 'firebase-functions/logger';
+import {
+  PushDispatcher,
+  type PushProviderPort,
+} from './modules/notifications/application/push_dispatcher.js';
+import { FakePushProvider } from './modules/notifications/infrastructure/fake_push_provider.js';
+import {
+  FirestorePushSessions,
+  FirestorePushStore,
+} from './modules/notifications/infrastructure/firestore_push_store.js';
 import { FirestoreFeatureFlagGate } from './platform/config/firestore_feature_flag_gate.js';
 import { notificationsFlagIds, operationsEmergencySwitchIds } from './shared/feature_flags.js';
 import { systemServerClock, type ServerClock } from './shared/server_clock.js';
@@ -37,6 +47,8 @@ export interface NotificationsCaller {
 
 export interface NotificationsComposition {
   readonly store: NotificationsStore;
+  /** N3c: the FCM push hint after the inbox item (fake provider in the Emulator). */
+  readonly push: PushDispatcher;
   readonly consumer: NotificationEffectConsumer;
   readonly reconciler: NotificationReconciler;
   readonly privacy: NotificationsPrivacyTaskHandler;
@@ -49,13 +61,19 @@ export interface NotificationsComposition {
  */
 export function createEmulatorNotifications(
   firestore: Firestore,
-  options: Readonly<{ clock?: ServerClock; store?: NotificationsStore }> = {},
+  options: Readonly<{
+    clock?: ServerClock;
+    store?: NotificationsStore;
+    pushProvider?: PushProviderPort;
+  }> = {},
 ): NotificationsComposition {
   const clock = options.clock ?? systemServerClock;
   const store = options.store ?? new FirestoreNotificationsStore(firestore);
+  const push = createPushDispatcher(firestore, store, clock, options.pushProvider);
   const consumer = new NotificationEffectConsumer({
     store,
     clock,
+    afterInboxCreated: (notificationId) => dispatchPushFor(store, push, notificationId),
     contained: async () =>
       (await emergencySwitchState(
         firestore,
@@ -64,15 +82,53 @@ export function createEmulatorNotifications(
   });
   return {
     store,
+    push,
     consumer,
     reconciler: new NotificationReconciler(
       store,
       new FirestoreBookingOutboxSource(firestore),
       consumer,
       clock,
+      {},
+      push,
     ),
-    privacy: new NotificationsPrivacyTaskHandler(store, clock),
+    privacy: new NotificationsPrivacyTaskHandler(store, clock, push),
   };
+}
+
+/**
+ * N3c (2026-11-13): push over Firestore state and the Identity Sessions. The
+ * Emulator never reaches FCM: without a provider it uses the fake one.
+ */
+export function createPushDispatcher(
+  firestore: Firestore,
+  store: NotificationsStore,
+  clock: ServerClock = systemServerClock,
+  provider: PushProviderPort = new FakePushProvider(),
+): PushDispatcher {
+  return new PushDispatcher({
+    store: new FirestorePushStore(firestore),
+    provider,
+    sessions: new FirestorePushSessions(firestore),
+    preferences: (userId) => store.transact((tx) => tx.preferences(userId)),
+    clock,
+    log: (event, fields) => info(event, fields),
+  });
+}
+
+/** Reads the committed inbox item and sends its push hint. */
+export async function dispatchPushFor(
+  store: NotificationsStore,
+  push: PushDispatcher,
+  notificationId: string,
+): Promise<void> {
+  const item = await store.transact((tx) => tx.inboxItem(notificationId));
+  if (item === undefined || item === 'foreign') return;
+  await push.dispatch({
+    notificationId: item.notificationId,
+    recipientId: item.recipientId,
+    category: item.category,
+  });
 }
 
 /**

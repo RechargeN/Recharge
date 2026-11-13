@@ -194,12 +194,8 @@ export class PushDispatcher {
   }
 
   /** DSR erasure: registrations and attempts of the subject are deleted. */
-  async eraseSubject(userId: string, limit = 200): Promise<number> {
-    const registrations = await this.deps.store.subjectRegistrationIds(userId, limit);
-    const attempts = await this.deps.store.subjectAttemptIds(userId, limit);
-    await this.deps.store.deleteRegistrations(registrations);
-    await this.deps.store.deleteAttempts(attempts);
-    return registrations.length + attempts.length;
+  eraseSubject(userId: string, limit = 200): Promise<number> {
+    return erasePushSubject(this.deps.store, userId, limit);
   }
 
   private async send(attempt: PushAttempt, registration: PushRegistration): Promise<PushAttempt> {
@@ -248,4 +244,17 @@ export class PushDispatcher {
   ): void {
     this.deps.log?.(event, { tokenFingerprint: registration.tokenFingerprint, ...fields });
   }
+}
+
+/** DSR erasure of a subject's push registrations and attempts (also used by L1). */
+export async function erasePushSubject(
+  store: PushStore,
+  userId: string,
+  limit = 200,
+): Promise<number> {
+  const registrations = await store.subjectRegistrationIds(userId, limit);
+  const attempts = await store.subjectAttemptIds(userId, limit);
+  await store.deleteRegistrations(registrations);
+  await store.deleteAttempts(attempts);
+  return registrations.length + attempts.length;
 }

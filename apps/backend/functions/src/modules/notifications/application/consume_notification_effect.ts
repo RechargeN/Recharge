@@ -97,6 +97,11 @@ export interface NotificationConsumerDependencies {
    * the inbox write. A read that throws counts as contained.
    */
   readonly contained?: () => Promise<boolean>;
+  /**
+   * N3c (2026-11-13): runs after the inbox item is committed (FCM push hint).
+   * Its failure never changes the inbox, the receipt or the outcome.
+   */
+  readonly afterInboxCreated?: (notificationId: string) => Promise<void>;
 }
 
 function failureCode(error: unknown): string {
@@ -125,6 +130,7 @@ export class NotificationEffectConsumer {
   readonly #templates: NotificationTemplateRegistry;
   readonly #newLeaseId: () => string;
   readonly #contained: () => Promise<boolean>;
+  readonly #afterInboxCreated: ((notificationId: string) => Promise<void>) | undefined;
 
   constructor(dependencies: NotificationConsumerDependencies) {
     this.#store = dependencies.store;
@@ -132,6 +138,7 @@ export class NotificationEffectConsumer {
     this.#policies = dependencies.policies ?? defaultNotificationPolicies;
     this.#templates = dependencies.templates ?? defaultNotificationTemplates;
     this.#newLeaseId = dependencies.newLeaseId ?? randomUUID;
+    this.#afterInboxCreated = dependencies.afterInboxCreated;
     const contained = dependencies.contained;
     this.#contained =
       contained === undefined ? () => Promise.resolve(false) : () => contained().catch(() => true);
@@ -141,7 +148,10 @@ export class NotificationEffectConsumer {
     const claimed = await this.claim(eventId, data);
     if (claimed.kind !== 'claimed') return claimed.kind;
     try {
-      return (await this.complete(claimed.claim)).kind;
+      const completed = await this.complete(claimed.claim);
+      if (completed.kind === 'created' && this.#afterInboxCreated !== undefined)
+        await this.#afterInboxCreated(completed.notificationId).catch(() => undefined);
+      return completed.kind;
     } catch (error) {
       try {
         return (await this.fail(claimed.claim, error)).kind;
