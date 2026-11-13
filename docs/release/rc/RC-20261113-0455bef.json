@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "releaseCandidateId": "RC-20261113-0455bef",
+  "sourceSha": "0455bef5884181babc4ebff432917601b8ece059",
+  "createdAtUtc": "2026-11-13T20:53:30Z",
+  "targets": [
+    "recharge-dev-n2a01",
+    "recharge-staging-y9y2y"
+  ],
+  "production": false,
+  "contracts": {
+    "root": "packages/api_contracts/schema",
+    "treeSha256": "3eb4949e0629554ac70e33491374dc07367323b0bec50c772aab78032e37efd3",
+    "files": 137
+  },
+  "config": {
+    "executionManifestSha256": "9ff3f547118d045a571addbc494d1beed0fe34ca2ff6efadafb54a258e9bac39",
+    "firestoreRulesSha256": "2ecc2e0d82dfe035cab09f4ec4c0ab89fc9167468873197daa2c5ba48c5c6293",
+    "firestoreIndexesSha256": "fd5879402b5de9966f11d704d9529d77df22554a1db1a42b5ea2810ea871d737",
+    "deployedIndexGroups": [
+      "contentEffects",
+      "contentPublishedRevisions",
+      "contentSubmissions",
+      "notificationInboxItems"
+    ],
+    "ttlFieldOverrides": "not-deployed"
+  },
+  "reference": {
+    "root": "packages/api_contracts/schema/reference_data/v1/artifacts",
+    "treeSha256": "9a2bac13c70a67551631aba4ac420955c4213b20f3fc5f0eda2da0f228e0026e",
+    "files": 2
+  },
+  "toolchain": {
+    "node": "22.23.2",
+    "terraform": "1.15.9",
+    "googleProvider": "7.43.0",
+    "firebaseTools": "15.34.0",
+    "flutter": "3.44.9"
+  },
+  "lockfiles": [
+    {
+      "path": "apps/backend/functions/package-lock.json",
+      "sha256": "ee0ea796cae5c8a18ee8c2633a6bac7fb08cda0eb4c9544a85b0a9c13d447d38"
+    },
+    {
+      "path": "apps/backend/n2c-identity-runtime/package-lock.json",
+      "sha256": "f1edc4023f252a492255d6e6802600ce09d43043b4f4b6d15cd493858a76d777"
+    },
+    {
+      "path": "apps/backend/n3a2-content-media-runtime/package-lock.json",
+      "sha256": "ebf2cbadaa0c7a3836c99669bf3ac206c7ce6cb78571a969855d96bceb9d4a7b"
+    },
+    {
+      "path": "apps/backend/n3c-notifications-runtime/package-lock.json",
+      "sha256": "a50d98550302f77607f943e764d717858d26be585f7d726fa3dd26243fba860c"
+    },
+    {
+      "path": "apps/backend/infra/terraform/bootstrap/dev/.terraform.lock.hcl",
+      "sha256": "c817f28e2244eb7e4496bec7f1df6ee2b3099bcc1b32735cf05a71f0fa97b6c6"
+    },
+    {
+      "path": "pubspec.lock",
+      "sha256": "dbe788b59490b9017195684f1f87cc09d8f430e70f2a4f2f4ed3edd0d5e74328"
+    }
+  ],
+  "artifacts": {
+    "n2c-identity": {
+      "entry": "lib/src/dev_identity_entry.js",
+      "codeTreeSha256": "e828045605bcb18b32d088234aff00737f53bf7617ad0950beaab1426e66a647",
+      "files": 22
+    },
+    "n3a2-content-media": {
+      "entry": "lib/src/dev_content_media_entry.js",
+      "codeTreeSha256": "98189d94a082aed5eb44bf9b57dd09ecea4df04e2d428e8f3e5b03ac70806836",
+      "files": 168
+    },
+    "n3c-notifications": {
+      "entry": "lib/src/dev_notifications_entry.js",
+      "codeTreeSha256": "05bbe11592bf54055cd1f7c0db1c16fc4b04c3f6894b26945b61dd567925be76",
+      "files": 32
+    },
+    "media-tools": {
+      "imageDigest": "sha256:6807585364949f0b13e67df93a9ac5e25e8da4571be99ff266d47c4815936a91"
+    }
+  },
+  "notices": {
+    "noticeSha256": "2372443f69168e729acf12abb92ecb8e02c7f77dba62a57f687afc06f96ad80b"
+  }
+}
