@@ -50,7 +50,7 @@ const reviewedPackageLicenses = new Map([
   ["@img/sharp-libvips-linux-x64@1.3.4", "LGPL-3.0-or-later"],
   // 2026-11-08: the musl build of the same libvips 1.3.4, which npm installs on
   // the Linux CI runner next to the glibc one. Same review, same limits: local
-  // and CI gates only, never distributed.
+  // and CI gates only, never distributed. Owner-accepted 2026-11-13 (NOTICE.md).
   ["@img/sharp-libvips-linuxmusl-x64@1.3.4", "LGPL-3.0-or-later"],
 ]);
 const allowedLifecycleHooks = new Set([
