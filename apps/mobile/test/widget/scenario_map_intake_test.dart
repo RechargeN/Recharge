@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/application/scenario_object_intake_config.dart';
 import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -189,7 +190,7 @@ DiscoverItemEntity _item(int index) => DiscoverItemEntity(
   startsAtUtc: DateTime.utc(2026, 8, 3, 12),
   latitude: 56.94 + index / 100,
   longitude: 24.10 + index / 100,
-  priceAmount: 0,
+  priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
   distanceKm: index.toDouble(),
   isFree: true,
 );

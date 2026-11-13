@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
 import '../../application/create_providers.dart';
 import '../../domain/entities/route_publication_data.dart';
 import '../../domain/entities/route_quality_workflow_data.dart';
@@ -49,20 +51,18 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
   @override
   Widget build(BuildContext context) {
     final controller = ref.watch(createControllerProvider);
-    final qualityController = ref.watch(
-      routeQualityAdminControllerProvider,
-    );
+    final qualityController = ref.watch(routeQualityAdminControllerProvider);
     final requests = controller.state.routeModerationRequests;
     final canManageQuality = widget.capabilities.contains('manage.route');
     final canModerateSafety = widget.capabilities.contains('moderate.route');
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Route moderation'),
+        title: Text(context.l10n.createRouteRouteModeration),
         actions: <Widget>[
           IconButton(
             onPressed: _loading ? null : _load,
             icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
+            tooltip: context.l10n.createRouteRefresh,
           ),
         ],
       ),
@@ -87,7 +87,7 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
                     ),
                   ),
                 if (controller.canModerateRoute) ...<Widget>[
-                  const _QueueHeading('Publication review'),
+                  _QueueHeading(context.l10n.createRoutePublicationReview),
                   for (final request in requests) ...<Widget>[
                     _RequestCard(
                       request: request,
@@ -98,7 +98,7 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
                   ],
                 ],
                 if (canManageQuality) ...<Widget>[
-                  const _QueueHeading('Map update candidates'),
+                  _QueueHeading(context.l10n.createRouteMapUpdateCandidates),
                   for (final candidate
                       in qualityController.candidates) ...<Widget>[
                     _CandidateCard(
@@ -120,7 +120,7 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
                   ],
                 ],
                 if (canModerateSafety) ...<Widget>[
-                  const _QueueHeading('Safety reports'),
+                  _QueueHeading(context.l10n.createRouteSafetyReports),
                   for (final report in qualityController.reports) ...<Widget>[
                     _SafetyReportCard(
                       report: report,
@@ -131,18 +131,15 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
                       onResolve: () => _decideSafety(
                         report,
                         RouteSafetyReportState.resolved,
-                        restore: report.severity ==
-                            RouteSafetySeverity.critical,
+                        restore:
+                            report.severity == RouteSafetySeverity.critical,
                       ),
                     ),
                     const SizedBox(height: 12),
                   ],
                 ],
                 if (qualityController.lastCreatedRevision != null)
-                  const Text(
-                    'A new Route revision draft was created. Published '
-                    'geometry was not changed.',
-                  ),
+                  Text(context.l10n.createRouteNewRouteRevisionDraftWasCreated),
               ],
             ),
     );
@@ -179,16 +176,18 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
   ) async {
     String? reason;
     if (decision != RouteCandidateDecision.accepted) {
-      reason = await _reason('Candidate decision reason');
+      reason = await _reason(context.l10n.createRouteCandidateDecisionReason);
       if (reason == null) return;
     }
-    await ref.read(routeQualityAdminControllerProvider).decideCandidate(
-      candidateId: candidate.id,
-      decision: decision,
-      actorId: widget.userId,
-      capabilities: widget.capabilities.toSet(),
-      reasonCode: reason,
-    );
+    await ref
+        .read(routeQualityAdminControllerProvider)
+        .decideCandidate(
+          candidateId: candidate.id,
+          decision: decision,
+          actorId: widget.userId,
+          capabilities: widget.capabilities.toSet(),
+          reasonCode: reason,
+        );
   }
 
   Future<void> _decideSafety(
@@ -196,16 +195,18 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
     RouteSafetyReportState state, {
     bool restore = false,
   }) async {
-    final reason = await _reason('Safety decision reason');
+    final reason = await _reason(context.l10n.createRouteSafetyDecisionReason);
     if (reason == null) return;
-    await ref.read(routeQualityAdminControllerProvider).decideSafety(
-      reportId: report.id,
-      state: state,
-      actorId: widget.userId,
-      capabilities: widget.capabilities.toSet(),
-      reasonCode: reason,
-      restoreRoute: restore,
-    );
+    await ref
+        .read(routeQualityAdminControllerProvider)
+        .decideSafety(
+          reportId: report.id,
+          state: state,
+          actorId: widget.userId,
+          capabilities: widget.capabilities.toSet(),
+          reasonCode: reason,
+          restoreRoute: restore,
+        );
   }
 
   Future<String?> _reason(String title) async {
@@ -217,16 +218,18 @@ class _RouteModerationPageState extends ConsumerState<RouteModerationPage> {
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Reason code'),
+          decoration: InputDecoration(
+            labelText: context.l10n.createRouteReasonCode,
+          ),
         ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.createRouteCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, controller.text.trim()),
-            child: const Text('Confirm'),
+            child: Text(context.l10n.createRouteConfirm),
           ),
         ],
       ),
@@ -274,14 +277,14 @@ class _CandidateCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            'Route ${candidate.routeId}',
+            '${context.l10n.discoverRouteLabel} ${candidate.routeId}',
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
           ),
           Text(
-            '${candidate.diff.distanceDeltaMeters.toStringAsFixed(0)} m · '
-            '${candidate.diff.candidatePointCount} points · '
+            '${context.l10n.createFormMetersValue(RechargeFormats.decimal(candidate.diff.distanceDeltaMeters, context.l10n.localeName, maxFractionDigits: 0))} · '
+            '${context.l10n.createFormPointsCount(candidate.diff.candidatePointCount)} · '
             '${candidate.sourceSnapshotId}',
           ),
           Text(candidate.sourceAttribution),
@@ -289,9 +292,18 @@ class _CandidateCard extends StatelessWidget {
           Wrap(
             spacing: 8,
             children: <Widget>[
-              TextButton(onPressed: onDefer, child: const Text('Defer')),
-              OutlinedButton(onPressed: onReject, child: const Text('Reject')),
-              FilledButton(onPressed: onAccept, child: const Text('Accept')),
+              TextButton(
+                onPressed: onDefer,
+                child: Text(context.l10n.createRouteDefer),
+              ),
+              OutlinedButton(
+                onPressed: onReject,
+                child: Text(context.l10n.createRouteReject),
+              ),
+              FilledButton(
+                onPressed: onAccept,
+                child: Text(context.l10n.createRouteAccept),
+              ),
             ],
           ),
         ],
@@ -324,7 +336,10 @@ class _SafetyReportCard extends StatelessWidget {
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
           ),
-          Text('Route ${report.routeId} · version ${report.versionId}'),
+          Text(
+            '${context.l10n.discoverRouteLabel} ${report.routeId} · '
+            '${context.l10n.createRouteVersionLabel} ${report.versionId}',
+          ),
           if (report.safeNote != null) Text(report.safeNote!),
           const SizedBox(height: 10),
           Row(
@@ -332,7 +347,7 @@ class _SafetyReportCard extends StatelessWidget {
               Expanded(
                 child: OutlinedButton(
                   onPressed: onDismiss,
-                  child: const Text('Dismiss'),
+                  child: Text(context.l10n.createRouteDismiss),
                 ),
               ),
               const SizedBox(width: 8),
@@ -341,8 +356,8 @@ class _SafetyReportCard extends StatelessWidget {
                   onPressed: onResolve,
                   child: Text(
                     report.severity == RouteSafetySeverity.critical
-                        ? 'Resolve & restore'
-                        : 'Resolve',
+                        ? context.l10n.createRouteResolveRestore
+                        : context.l10n.createRouteResolve,
                   ),
                 ),
               ),
@@ -388,8 +403,8 @@ class _RequestCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              'Route ${version.routeId}\n'
-              'Geometry ${version.geometryHash}',
+              '${context.l10n.discoverRouteLabel} ${version.routeId}\n'
+              '${context.l10n.createRouteGeometryLabel} ${version.geometryHash}',
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall,
@@ -401,7 +416,7 @@ class _RequestCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onReject,
                     icon: const Icon(Icons.close),
-                    label: const Text('Reject'),
+                    label: Text(context.l10n.createRouteReject),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -409,7 +424,7 @@ class _RequestCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onApprove,
                     icon: const Icon(Icons.check),
-                    label: const Text('Approve'),
+                    label: Text(context.l10n.createRouteApprove),
                   ),
                 ),
               ],
@@ -439,22 +454,22 @@ class _RejectDialogState extends State<_RejectDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('Reject Route version'),
+    title: Text(context.l10n.createRouteRejectRouteVersion),
     content: TextField(
       controller: _controller,
       autofocus: true,
-      decoration: const InputDecoration(
-        labelText: 'Reason code or concise reason',
+      decoration: InputDecoration(
+        labelText: context.l10n.createRouteReasonCodeConciseReason,
       ),
     ),
     actions: <Widget>[
       TextButton(
         onPressed: () => Navigator.pop(context),
-        child: const Text('Cancel'),
+        child: Text(context.l10n.createRouteCancel),
       ),
       FilledButton(
         onPressed: () => Navigator.pop(context, _controller.text),
-        child: const Text('Reject'),
+        child: Text(context.l10n.createRouteReject),
       ),
     ],
   );
@@ -464,10 +479,10 @@ class _AccessDenied extends StatelessWidget {
   const _AccessDenied();
 
   @override
-  Widget build(BuildContext context) => const Center(
+  Widget build(BuildContext context) => Center(
     child: Padding(
       padding: EdgeInsets.all(24),
-      child: Text('The moderate.route capability is required.'),
+      child: Text(context.l10n.createRouteModerateRouteCapabilityRequired),
     ),
   );
 }
@@ -476,10 +491,10 @@ class _EmptyQueue extends StatelessWidget {
   const _EmptyQueue();
 
   @override
-  Widget build(BuildContext context) => const Center(
+  Widget build(BuildContext context) => Center(
     child: Padding(
       padding: EdgeInsets.all(24),
-      child: Text('No Route versions are waiting for review.'),
+      child: Text(context.l10n.createRouteNoRouteVersionsAreWaitingReview),
     ),
   );
 }

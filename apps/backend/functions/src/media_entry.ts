@@ -1,0 +1,220 @@
+import { getApps, initializeApp } from 'firebase-admin/app';
+import { getFirestore, type Firestore } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
+
+import { validateMediaContract } from './contracts/validate_media_contract.js';
+import type { MediaActor } from './modules/media/application/ports/actor_authority_port.js';
+import { toMediaWireResult, type MediaResultType } from './modules/media/domain/failures.js';
+import { isSessionExpired } from './modules/media/domain/upload_session.js';
+import type { MediaRetentionPolicy } from './modules/media/domain/media_retention.js';
+import {
+  createEmulatorMediaComposition,
+  type EmulatorMediaComposition,
+} from './modules/media/infrastructure/emulator_media_composition.js';
+import { FirestoreModerationRepository } from './modules/moderation/infrastructure/firestore_moderation_repository.js';
+import { MediaRestrictionVerifier } from './modules/moderation/infrastructure/media_restriction_verifier.js';
+import { parseUtcInstant } from './shared/utc_instant.js';
+import { systemServerClock, type ServerClock } from './shared/server_clock.js';
+
+const emulatorBucket = 'demo-recharge.appspot.com';
+
+const commandResultTypes: Readonly<Record<string, MediaResultType>> = Object.freeze({
+  createUploadSession: 'uploadSession',
+  confirmUpload: 'assetStatus',
+  finalizeAsset: 'assetStatus',
+});
+const queryResultTypes: Readonly<Record<string, MediaResultType>> = Object.freeze({
+  getAssetStatus: 'assetStatus',
+  getProcessingReceipt: 'processingReceipt',
+});
+
+/** What the three owner handlers need from a Media composition. */
+export interface MediaHandlerComposition {
+  readonly service: EmulatorMediaComposition['service'];
+  readonly repository: Pick<EmulatorMediaComposition['repository'], 'transact'>;
+  readonly authority: Pick<EmulatorMediaComposition['authority'], 'evaluate'>;
+  readonly objectStore: { put(objectKeyHandle: string, bytes: Buffer): Promise<void> };
+}
+
+/** Server-resolved caller. The Session was already validated by the Booking access authority. */
+export interface MediaCaller {
+  readonly actor: MediaActor;
+  readonly firestore: Firestore;
+  /**
+   * N3a.2: a ready composition (the dev-cloud one). Absent: the Emulator
+   * composition, exactly as before.
+   */
+  readonly composition?: MediaHandlerComposition;
+}
+
+const compositionFor = (caller: MediaCaller): MediaHandlerComposition =>
+  caller.composition ?? mediaComposition(caller.firestore);
+
+export function mediaComposition(
+  firestore: Firestore,
+  options: { readonly clock?: ServerClock; readonly retention?: MediaRetentionPolicy } = {},
+): EmulatorMediaComposition {
+  const app = getApps().find((candidate) => candidate.name === '[DEFAULT]') ?? initializeApp();
+  return createEmulatorMediaComposition({
+    firestore,
+    bucket: getStorage(app).bucket(emulatorBucket) as never,
+    // D2 §7: a restriction is accepted only for a recorded staff decision.
+    restrictionAuthority: new MediaRestrictionVerifier(
+      new FirestoreModerationRepository(firestore),
+    ),
+    ...(options.clock === undefined ? {} : { clock: options.clock }),
+    ...(options.retention === undefined ? {} : { retention: options.retention }),
+  });
+}
+
+export function mediaFirestore(): Firestore | undefined {
+  if (
+    process.env.FUNCTIONS_EMULATOR !== 'true' ||
+    process.env.GCLOUD_PROJECT !== 'demo-recharge' ||
+    process.env.FIRESTORE_EMULATOR_HOST === undefined
+  ) {
+    return undefined;
+  }
+  const app =
+    getApps().find((candidate) => candidate.name === '[DEFAULT]') ??
+    initializeApp({ projectId: 'demo-recharge' });
+  return getFirestore(app);
+}
+
+function stripTransport(data: unknown): unknown {
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) return data;
+  const { sessionContext, ...rest } = data as Record<string, unknown>;
+  void sessionContext;
+  return rest;
+}
+
+export async function handleMediaCommand(
+  caller: MediaCaller,
+  data: unknown,
+): Promise<Readonly<Record<string, unknown>>> {
+  const body = stripTransport(data);
+  const commandType =
+    typeof body === 'object' && body !== null
+      ? (body as Record<string, unknown>).commandType
+      : undefined;
+  const resultType = typeof commandType === 'string' ? commandResultTypes[commandType] : undefined;
+  if (resultType === undefined) {
+    // Delete, detach and system instructions are never a client command here.
+    return { schemaVersion: 1, kind: 'rejected', code: 'capability_denied' };
+  }
+  const { service } = compositionFor(caller);
+  return toMediaWireResult(resultType, await service.execute(caller.actor, body));
+}
+
+export async function handleMediaQuery(
+  caller: MediaCaller,
+  data: unknown,
+): Promise<Readonly<Record<string, unknown>>> {
+  const body = stripTransport(data);
+  const queryType =
+    typeof body === 'object' && body !== null
+      ? (body as Record<string, unknown>).queryType
+      : undefined;
+  const resultType = typeof queryType === 'string' ? queryResultTypes[queryType] : undefined;
+  if (resultType === undefined) {
+    return { schemaVersion: 1, kind: 'rejected', code: 'invalid_contract' };
+  }
+  const { service } = compositionFor(caller);
+  return toMediaWireResult(resultType, await service.query(caller.actor, body));
+}
+
+/** D2: the delivery gate needs no actor: the publication decides who may see it. */
+export interface MediaDeliveryCaller {
+  readonly firestore: Firestore;
+}
+
+/**
+ * Emulator-only D2 delivery (`MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md` §4): the
+ * bytes of one public variant, decided again from authoritative records on every
+ * request. No URL, handle or cache header exists; every refusal is `not_found`.
+ */
+export async function handleMediaDelivery(
+  caller: MediaDeliveryCaller,
+  data: unknown,
+): Promise<Readonly<Record<string, unknown>>> {
+  const body = stripTransport(data);
+  const parsed = await validateMediaContract<{
+    readonly contentId: string;
+    readonly assetId: string;
+    readonly profile: string;
+  }>('deliveryRequest', body);
+  if (!parsed.ok) return { schemaVersion: 1, kind: 'rejected', code: 'invalid_contract' };
+  const result = await mediaComposition(caller.firestore).delivery.deliver(parsed.value);
+  if (result.kind !== 'succeeded')
+    return { schemaVersion: 1, kind: result.kind, code: result.code };
+  const { bytes, ...identity } = result.data;
+  return {
+    schemaVersion: 1,
+    kind: 'succeeded',
+    resultType: 'mediaDelivery',
+    data: { ...identity, bytesBase64: bytes.toString('base64') },
+  };
+}
+
+/**
+ * Emulator-only byte transfer. Real providers hand the client an upload target;
+ * the Emulator cannot sign one and Storage rules stay closed, so the owner of an
+ * open upload session sends the bytes here and the backend writes them through
+ * the Admin SDK. The caller never learns or chooses the object key.
+ */
+export async function handleMediaBytes(
+  caller: MediaCaller,
+  data: unknown,
+): Promise<Readonly<Record<string, unknown>>> {
+  const reject = (code: string) => ({ schemaVersion: 1, kind: 'rejected', code });
+  const body = stripTransport(data);
+  if (typeof body !== 'object' || body === null || Array.isArray(body))
+    return reject('invalid_contract');
+  const record = body as Record<string, unknown>;
+  const keys = Object.keys(record).sort().join(',');
+  if (
+    keys !== 'bytesBase64,schemaVersion,uploadSessionId' ||
+    record.schemaVersion !== 1 ||
+    typeof record.uploadSessionId !== 'string' ||
+    typeof record.bytesBase64 !== 'string' ||
+    record.bytesBase64.length > 2_000_000
+  )
+    return reject('invalid_contract');
+  const composition = compositionFor(caller);
+  const now = parseUtcInstant(systemServerClock.now().toISOString());
+  const decision = await composition.repository.transact(async (tx) => {
+    const session = await tx.session(record.uploadSessionId as string);
+    // Another subject's session does not exist for the caller.
+    if (session === null || session.ownerSubjectId !== caller.actor.userId)
+      return { code: 'not_found' } as const;
+    const asset = await tx.asset(session.assetId);
+    if (asset === null) return { code: 'not_found' } as const;
+    return { session, asset } as const;
+  });
+  if ('code' in decision) return reject(decision.code);
+  const { session, asset } = decision;
+  // The same backend-time upload authority as the Media service applies.
+  const allowed = await composition.authority.evaluate({
+    actor: caller.actor,
+    marketId: asset.marketId,
+    ...(asset.publisherRef === undefined ? {} : { publisherRef: asset.publisherRef }),
+    family: asset.family,
+    action: 'upload',
+    nowUtc: now,
+  });
+  if (!allowed.allowed)
+    return reject(allowed.reason === 'session_invalid' ? 'unauthenticated' : allowed.reason);
+  if (session.state !== 'open' || isSessionExpired(session, now)) return reject('session_expired');
+  if (asset.lifecycle !== 'reserved' && asset.lifecycle !== 'uploading')
+    return reject('invalid_state');
+  const bytes = Buffer.from(record.bytesBase64, 'base64');
+  if (bytes.length === 0 || bytes.length > session.maxBytes) return reject('limit_exceeded');
+  if (bytes.length !== session.declaredByteLength) return reject('generation_mismatch');
+  await composition.objectStore.put(asset.objectKeyHandle, bytes);
+  return {
+    schemaVersion: 1,
+    kind: 'succeeded',
+    resultType: 'bytesAccepted',
+    data: { uploadSessionId: session.uploadSessionId, received: bytes.length },
+  };
+}

@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-enum AccountExperience { viewer, creator, professionalPage }
+enum AccountExperience { personal, professionalPage }
 
 class AccountExperienceScope extends InheritedWidget {
   const AccountExperienceScope({

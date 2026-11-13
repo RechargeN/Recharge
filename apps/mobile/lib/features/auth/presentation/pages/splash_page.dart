@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/auth_providers.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
@@ -26,22 +27,19 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              'Recharge',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              context.l10n.appTitle,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 12),
-            CircularProgressIndicator(),
-            SizedBox(height: 12),
-            Text('Восстанавливаем сессию...'),
+            const SizedBox(height: 12),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 12),
+            Text(context.l10n.authRestoringSession),
           ],
         ),
       ),

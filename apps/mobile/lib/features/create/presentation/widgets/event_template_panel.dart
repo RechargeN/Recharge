@@ -1,7 +1,10 @@
+import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 
 import '../../application/controllers/create_controller.dart';
 import '../../domain/entities/create_template_entity.dart';
+import '../../../../core/localization/l10n_context.dart';
+import 'create_texts.dart';
 
 class EventTemplatePanel extends StatelessWidget {
   const EventTemplatePanel({super.key, required this.controller});
@@ -11,56 +14,58 @@ class EventTemplatePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<CreateTemplateEntity> templates = controller.eventTemplates;
-    return Card(
+    return CreateFlowSection(
       key: const Key('event-template-panel'),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                const Icon(Icons.auto_awesome_motion_outlined),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Event templates',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              const Icon(
+                Icons.auto_awesome_motion_outlined,
+                color: RechargeTheme.emerald900,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  context.l10n.createFormEventTemplates,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                Text('${templates.length} saved'),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: <Widget>[
-                OutlinedButton.icon(
-                  key: const Key('open-event-templates'),
-                  onPressed: () => _openManager(context),
-                  icon: const Icon(Icons.view_list_outlined),
-                  label: const Text('Choose or manage'),
-                ),
-                FilledButton.tonalIcon(
-                  key: const Key('save-event-template'),
-                  onPressed: () => _saveCurrent(context),
-                  icon: const Icon(Icons.bookmark_add_outlined),
-                  label: const Text('Save current'),
-                ),
-              ],
-            ),
-            if (controller.lastEventTemplate case final template?) ...<Widget>[
-              const SizedBox(height: 8),
-              Text(
-                'Next “Create another Event” will use: ${template.name}',
-                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              Text('${templates.length} saved'),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: <Widget>[
+              OutlinedButton.icon(
+                key: const Key('open-event-templates'),
+                onPressed: () => _openManager(context),
+                icon: const Icon(Icons.view_list_outlined),
+                label: Text(context.l10n.createFormChooseManage),
+              ),
+              FilledButton.tonalIcon(
+                key: const Key('save-event-template'),
+                onPressed: () => _saveCurrent(context),
+                icon: const Icon(Icons.bookmark_add_outlined),
+                label: Text(context.l10n.createFormSaveCurrent),
               ),
             ],
+          ),
+          if (controller.lastEventTemplate case final template?) ...<Widget>[
+            const SizedBox(height: 8),
+            Text(
+              context.l10n.createFormNextCreateAnotherEventWillUse,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            // The template name is the owner's own content, shown verbatim.
+            Text(template.name, style: Theme.of(context).textTheme.bodySmall),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -68,7 +73,7 @@ class EventTemplatePanel extends StatelessWidget {
   Future<void> _saveCurrent(BuildContext context) async {
     final String? name = await _requestName(
       context,
-      title: 'Save Event template',
+      title: context.l10n.createFormSaveEventTemplate,
       initialValue: controller.state.draft.title,
     );
     if (name == null || !context.mounted) return;
@@ -106,19 +111,19 @@ class _EventTemplateManager extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
               child: Text(
-                'Your Event templates',
+                context.l10n.createFormYourEventTemplates,
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
               ),
             ),
             if (templates.isEmpty)
-              const Expanded(
+              Expanded(
                 child: Center(
                   child: Padding(
                     padding: EdgeInsets.all(24),
                     child: Text(
-                      'No templates yet. Save the current Event to reuse it.',
+                      context.l10n.createFormNoTemplatesYetSaveCurrentEvent,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -139,32 +144,34 @@ class _EventTemplateManager extends StatelessWidget {
                         title: Text(template.name),
                         subtitle: Text(
                           template.snapshot.title.trim().isEmpty
-                              ? 'Untitled Event'
+                              ? context.l10n.createFormUntitledEvent2
                               : template.snapshot.title,
                         ),
                         leading: index == 0
-                            ? const Tooltip(
-                                message: 'Last template',
+                            ? Tooltip(
+                                message: context.l10n.createFormLastTemplate,
                                 child: Icon(Icons.history),
                               )
                             : const Icon(Icons.bookmark_outline),
                         onTap: () => _use(context, template),
                         trailing: PopupMenuButton<String>(
-                          tooltip: 'Template actions',
+                          tooltip: context.l10n.createFormTemplateActions,
                           onSelected: (String action) =>
                               _handleAction(context, template, action),
-                          itemBuilder: (_) => const <PopupMenuEntry<String>>[
+                          itemBuilder: (_) => <PopupMenuEntry<String>>[
                             PopupMenuItem(
                               value: 'rename',
-                              child: Text('Rename'),
+                              child: Text(context.l10n.createFormRename),
                             ),
                             PopupMenuItem(
                               value: 'replace',
-                              child: Text('Replace with current'),
+                              child: Text(
+                                context.l10n.createFormReplaceWithCurrent,
+                              ),
                             ),
                             PopupMenuItem(
                               value: 'delete',
-                              child: Text('Delete'),
+                              child: Text(context.l10n.createFormDelete),
                             ),
                           ],
                         ),
@@ -193,7 +200,7 @@ class _EventTemplateManager extends StatelessWidget {
       case 'rename':
         final String? name = await _requestName(
           context,
-          title: 'Rename template',
+          title: context.l10n.createFormRenameTemplate,
           initialValue: template.name,
         );
         if (name != null) {
@@ -203,16 +210,16 @@ class _EventTemplateManager extends StatelessWidget {
       case 'replace':
         final bool confirmed = await _confirm(
           context,
-          title: 'Replace template?',
-          body: 'The reusable content will be replaced with the current Event.',
+          title: context.l10n.createFormReplaceTemplate,
+          body: context.l10n.createFormReusableContentWillReplacedWithCurrent,
         );
         if (confirmed) await controller.replaceEventTemplate(template.id);
         break;
       case 'delete':
         final bool confirmed = await _confirm(
           context,
-          title: 'Delete template?',
-          body: 'Active drafts and published Events will not be affected.',
+          title: context.l10n.createFormDeleteTemplate,
+          body: context.l10n.createFormActiveDraftsPublishedEventsWillNot,
         );
         if (confirmed) await controller.deleteEventTemplate(template.id);
         break;
@@ -236,7 +243,9 @@ Future<String?> _requestName(
         initialValue: input,
         autofocus: true,
         maxLength: 80,
-        decoration: const InputDecoration(labelText: 'Template name'),
+        decoration: InputDecoration(
+          labelText: context.l10n.createFormTemplateName,
+        ),
         onChanged: (String value) => input = value,
         onFieldSubmitted: (String value) =>
             Navigator.of(dialogContext).pop(value),
@@ -244,11 +253,11 @@ Future<String?> _requestName(
       actions: <Widget>[
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(),
-          child: const Text('Cancel'),
+          child: Text(context.l10n.createFormCancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(dialogContext).pop(input),
-          child: const Text('Save'),
+          child: Text(context.l10n.createFormSave),
         ),
       ],
     ),
@@ -269,11 +278,11 @@ Future<bool> _confirm(
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+              child: Text(context.l10n.createFormCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Confirm'),
+              child: Text(context.l10n.createFormConfirm),
             ),
           ],
         ),
@@ -281,7 +290,9 @@ Future<bool> _confirm(
       false;
 }
 
-void _showMessage(BuildContext context, String? message) {
-  if (message == null) return;
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+void _showMessage(BuildContext context, String? code) {
+  if (code == null) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(CreateTexts.notice(context.l10n, code))),
+  );
 }

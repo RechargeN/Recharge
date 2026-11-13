@@ -1,0 +1,4444 @@
+{
+  "description": "D3.6 CW-V1 (Class/Workshop v1.2 §34) shared mobile/backend fixture. nowUtc 2026-10-19T10:00:00Z; Europe/Riga.",
+  "serverOwnerUserId": "11111111-1111-4111-8111-111111111111",
+  "nowUtc": "2026-10-19T10:00:00Z",
+  "cases": [
+    {
+      "name": "valid",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": []
+    },
+    {
+      "name": "valid_series_hybrid_area",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "course",
+          "context_kind": "fixed_series",
+          "delivery_format": "hybrid",
+          "public_location_mode": "area_only",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            },
+            {
+              "id": "3b13498e-0d01-500f-a979-6e7274f62dc2",
+              "local_date": "2027-05-22",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-22T07:00:00.000Z",
+              "end_at_utc": "2027-05-22T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": false,
+            "display_name": "Anna Ozola",
+            "short_bio": "Ceramic artist teaching wheel throwing since 2015."
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            }
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "price": {
+            "mode": "free"
+          },
+          "enrollment": {
+            "mode": "information_only",
+            "information_reason": "on_site"
+          },
+          "safe_area_label": "Riga centre",
+          "online_provider_label": "Video call"
+        }
+      },
+      "expectedIssues": []
+    },
+    {
+      "name": "valid_online_live",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "class",
+          "context_kind": "single_class",
+          "delivery_format": "online_live",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            }
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "not_provided"
+          },
+          "enrollment": {
+            "mode": "information_only",
+            "information_reason": "not_provided"
+          },
+          "online_provider_label": "Video call"
+        }
+      },
+      "expectedIssues": []
+    },
+    {
+      "name": "valid_full_series_price",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "fixed_series",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            },
+            {
+              "id": "3b13498e-0d01-500f-a979-6e7274f62dc2",
+              "local_date": "2027-05-22",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-22T07:00:00.000Z",
+              "end_at_utc": "2027-05-22T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_full_series"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": []
+    },
+    {
+      "name": "valid_dst_overlap_fold",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-10-31",
+              "start_minute_local": 210,
+              "end_minute_local": 300,
+              "fold": "earlier",
+              "start_at_utc": "2027-10-31T00:30:00.000Z",
+              "end_at_utc": "2027-10-31T03:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": []
+    },
+    {
+      "name": "unknown_top_level",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        },
+        "spotsLeft": 3
+      },
+      "expectedIssues": [
+        "class_workshop.unknown_field:spotsLeft"
+      ]
+    },
+    {
+      "name": "unknown_payload",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          },
+          "future": true
+        }
+      },
+      "expectedIssues": [
+        "class_workshop.payload.unknown_field:future"
+      ]
+    },
+    {
+      "name": "verified_claim",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true,
+            "verified": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop.instructor.unknown_field:verified"
+      ]
+    },
+    {
+      "name": "legacy_event_slots",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        },
+        "eventSlots": []
+      },
+      "expectedIssues": [
+        "class_workshop.unknown_field:eventSlots"
+      ]
+    },
+    {
+      "name": "schema_v2",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 2,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop.schema_unsupported"
+      ]
+    },
+    {
+      "name": "category_not_allowed",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "tennis",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_category_not_allowed"
+      ]
+    },
+    {
+      "name": "criteria_missing",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop.criterion_required:equipment_provided"
+      ]
+    },
+    {
+      "name": "single_two_occurrences",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            },
+            {
+              "id": "3b13498e-0d01-500f-a979-6e7274f62dc2",
+              "local_date": "2027-05-22",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-22T07:00:00.000Z",
+              "end_at_utc": "2027-05-22T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_context_count"
+      ]
+    },
+    {
+      "name": "series_one",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "fixed_series",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_context_count"
+      ]
+    },
+    {
+      "name": "overlap",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "fixed_series",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            },
+            {
+              "id": "3b13498e-0d01-500f-a979-6e7274f62dc2",
+              "local_date": "2027-05-15",
+              "start_minute_local": 720,
+              "end_minute_local": 840,
+              "start_at_utc": "2027-05-15T09:00:00.000Z",
+              "end_at_utc": "2027-05-15T11:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_occurrence_overlap"
+      ]
+    },
+    {
+      "name": "end_not_after_start",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 600,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_occurrence_invalid"
+      ]
+    },
+    {
+      "name": "duration_short",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 610,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T07:10:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_duration_out_of_range"
+      ]
+    },
+    {
+      "name": "duration_long",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 480,
+              "end_minute_local": 1260,
+              "start_at_utc": "2027-05-15T05:00:00.000Z",
+              "end_at_utc": "2027-05-15T18:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_duration_out_of_range"
+      ]
+    },
+    {
+      "name": "dst_gap",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-03-28",
+              "start_minute_local": 210,
+              "end_minute_local": 360,
+              "start_at_utc": "2027-03-28T01:30:00.000Z",
+              "end_at_utc": "2027-03-28T03:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_dst_gap"
+      ]
+    },
+    {
+      "name": "dst_overlap_without_fold",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-10-31",
+              "start_minute_local": 210,
+              "end_minute_local": 300,
+              "start_at_utc": "2027-10-31T00:30:00.000Z",
+              "end_at_utc": "2027-10-31T03:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_dst_overlap_unresolved"
+      ]
+    },
+    {
+      "name": "fold_unexpected",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z",
+              "fold": "earlier"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_dst_fold_unexpected"
+      ]
+    },
+    {
+      "name": "utc_mismatch",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T08:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_utc_mismatch"
+      ]
+    },
+    {
+      "name": "past_occurrence",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2026-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2026-05-15T07:00:00.000Z",
+              "end_at_utc": "2026-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_no_future_occurrence"
+      ]
+    },
+    {
+      "name": "timezone_unconfirmed",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": false,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_timezone_invalid"
+      ]
+    },
+    {
+      "name": "online_with_location",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "online_live",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          },
+          "online_provider_label": "Video call"
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_location_mismatch"
+      ]
+    },
+    {
+      "name": "offline_without_pin",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": false
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_location_missing"
+      ]
+    },
+    {
+      "name": "area_only_without_label",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "area_only",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop.safe_area_label"
+      ]
+    },
+    {
+      "name": "http_url",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "http://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_enrollment_url_invalid"
+      ]
+    },
+    {
+      "name": "credential_url",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://user:secret@studio.example.org"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_enrollment_url_invalid"
+      ]
+    },
+    {
+      "name": "internal_enrollment_claim",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "information_only",
+            "information_reason": "unsupported_internal"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_enrollment_invalid"
+      ]
+    },
+    {
+      "name": "fixed_without_currency",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_price_invalid"
+      ]
+    },
+    {
+      "name": "fixed_foreign_currency",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "USD",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_price_invalid"
+      ]
+    },
+    {
+      "name": "fixed_zero",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 0,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_price_invalid"
+      ]
+    },
+    {
+      "name": "free_with_amount",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "free",
+            "amount_minor": 100
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_price_invalid"
+      ]
+    },
+    {
+      "name": "single_full_series_scope",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_full_series"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_price_scope_invalid"
+      ]
+    },
+    {
+      "name": "group_limit_too_large",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 501,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop.declared_group_limit"
+      ]
+    },
+    {
+      "name": "masterclass_without_bio",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "masterclass",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_masterclass_bio_required"
+      ]
+    },
+    {
+      "name": "workshop_without_result",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            }
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_take_home_required"
+      ]
+    },
+    {
+      "name": "outcomes_empty",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_outcomes_invalid"
+      ]
+    },
+    {
+      "name": "prerequisites_listed_empty",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "listed",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_prerequisites_invalid"
+      ]
+    },
+    {
+      "name": "separate_instructor_without_bio",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": false,
+            "display_name": "Anna Ozola"
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_instructor_missing"
+      ]
+    },
+    {
+      "name": "title_too_short",
+      "body": {
+        "title": "Ri",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop.title"
+      ]
+    },
+    {
+      "name": "rights_missing",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [],
+          "rightsConfirmed": false
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_media_incomplete"
+      ]
+    },
+    {
+      "name": "alt_missing",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {}
+          },
+          "gallery": [],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop_media_incomplete"
+      ]
+    },
+    {
+      "name": "gallery_too_large",
+      "body": {
+        "title": "Riga pottery workshop",
+        "shortDescription": "Hands-on wheel throwing for beginners in Riga.",
+        "fullDescription": "A guided pottery workshop: learn centring and throwing on the wheel, then take home your own cup after firing.",
+        "contentLocale": "en",
+        "categoryId": "workshops_masterclasses",
+        "subcategoryId": "pottery",
+        "criteria": {
+          "skill_level": "beginner",
+          "equipment_provided": "provided"
+        },
+        "location": {
+          "countryCode": "LV",
+          "city": "Riga",
+          "venueName": "Clay studio",
+          "addressLine1": "Riga studio 1",
+          "latitude": 56.9496,
+          "longitude": 24.1052,
+          "pinConfirmed": true
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "33333333-3333-4333-8333-333333333333",
+            "altText": {
+              "en": "Potter at the wheel"
+            }
+          },
+          "gallery": [
+            {
+              "mediaId": "66666666-6666-4666-8666-666666666600",
+              "altText": {
+                "en": "Gallery image 1"
+              }
+            },
+            {
+              "mediaId": "66666666-6666-4666-8666-666666666601",
+              "altText": {
+                "en": "Gallery image 2"
+              }
+            },
+            {
+              "mediaId": "66666666-6666-4666-8666-666666666602",
+              "altText": {
+                "en": "Gallery image 3"
+              }
+            },
+            {
+              "mediaId": "66666666-6666-4666-8666-666666666603",
+              "altText": {
+                "en": "Gallery image 4"
+              }
+            },
+            {
+              "mediaId": "66666666-6666-4666-8666-666666666604",
+              "altText": {
+                "en": "Gallery image 5"
+              }
+            },
+            {
+              "mediaId": "66666666-6666-4666-8666-666666666605",
+              "altText": {
+                "en": "Gallery image 6"
+              }
+            },
+            {
+              "mediaId": "66666666-6666-4666-8666-666666666606",
+              "altText": {
+                "en": "Gallery image 7"
+              }
+            },
+            {
+              "mediaId": "66666666-6666-4666-8666-666666666607",
+              "altText": {
+                "en": "Gallery image 8"
+              }
+            },
+            {
+              "mediaId": "66666666-6666-4666-8666-666666666608",
+              "altText": {
+                "en": "Gallery image 9"
+              }
+            },
+            {
+              "mediaId": "66666666-6666-4666-8666-666666666609",
+              "altText": {
+                "en": "Gallery image 10"
+              }
+            },
+            {
+              "mediaId": "66666666-6666-4666-8666-666666666610",
+              "altText": {
+                "en": "Gallery image 11"
+              }
+            }
+          ],
+          "rightsConfirmed": true
+        },
+        "class_workshop": {
+          "schema_version": 1,
+          "offering_kind": "workshop",
+          "context_kind": "single_class",
+          "delivery_format": "offline",
+          "public_location_mode": "point",
+          "timezone_id": "Europe/Riga",
+          "timezone_confirmed": true,
+          "dst_policy_version": 1,
+          "occurrences": [
+            {
+              "id": "60f07edb-cc40-5881-9f3e-bd14c9609569",
+              "local_date": "2027-05-15",
+              "start_minute_local": 600,
+              "end_minute_local": 780,
+              "start_at_utc": "2027-05-15T07:00:00.000Z",
+              "end_at_utc": "2027-05-15T10:00:00.000Z"
+            }
+          ],
+          "instructor": {
+            "same_as_publisher": true
+          },
+          "learning": {
+            "outcomes": [
+              "Centre clay on the wheel",
+              "Throw a simple cup"
+            ],
+            "modules": [
+              {
+                "id": "af940461-9ca1-59c2-ac9a-fc68bf33a9ff",
+                "title": "Wedging and centring"
+              },
+              {
+                "id": "f4e81040-541d-5016-92b2-45f35bfa9a1f",
+                "title": "Throwing a cup"
+              }
+            ],
+            "prerequisites": {
+              "mode": "none",
+              "items": []
+            },
+            "take_home_result": "Your own glazed cup after firing"
+          },
+          "included_materials": [
+            "Clay",
+            "Glazes"
+          ],
+          "requirements": [],
+          "declared_group_limit": 8,
+          "price": {
+            "mode": "fixed",
+            "amount_minor": 4500,
+            "currency_code": "EUR",
+            "scope": "per_person_per_class"
+          },
+          "enrollment": {
+            "mode": "external",
+            "external_url": "https://studio.example.org/pottery"
+          }
+        }
+      },
+      "expectedIssues": [
+        "class_workshop.gallery_too_large"
+      ]
+    }
+  ]
+}

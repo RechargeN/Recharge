@@ -82,13 +82,11 @@ class NormalizeEventAdmissionPresetUseCase {
       confirmationMode: confirmation,
     );
 
-    EventValidationIssue required(String fieldId, String message) =>
-        EventValidationIssue(
-          code: 'admission_preset_choice_required',
-          fieldId: fieldId,
-          step: 3,
-          message: message,
-        );
+    EventValidationIssue required(String fieldId) => EventValidationIssue(
+      code: 'admission_preset_choice_required',
+      fieldId: fieldId,
+      step: 3,
+    );
 
     switch (preset) {
       case EventAdmissionPreset.noRegistration:
@@ -120,16 +118,8 @@ class NormalizeEventAdmissionPresetUseCase {
             admissionMode == AdmissionMode.rsvp ||
             admissionMode == AdmissionMode.booking;
         final List<EventValidationIssue> issues = <EventValidationIssue>[
-          if (!validAdmission)
-            required(
-              'admissionMode',
-              'Choose RSVP or booking before applying this preset.',
-            ),
-          if (confirmationMode == null)
-            required(
-              'confirmationMode',
-              'Choose how external registration is confirmed.',
-            ),
+          if (!validAdmission) required('admissionMode'),
+          if (confirmationMode == null) required('confirmationMode'),
         ];
         return AdmissionPresetNormalizationResult(
           admission: issues.isEmpty
@@ -156,12 +146,7 @@ class NormalizeEventAdmissionPresetUseCase {
         if (!validConfirmation) {
           return AdmissionPresetNormalizationResult(
             admission: null,
-            issues: <EventValidationIssue>[
-              required(
-                'confirmationMode',
-                'Choose instant or manual approval before applying this preset.',
-              ),
-            ],
+            issues: <EventValidationIssue>[required('confirmationMode')],
           );
         }
         return AdmissionPresetNormalizationResult(
@@ -176,16 +161,8 @@ class NormalizeEventAdmissionPresetUseCase {
             registrationMode == EventRegistrationMode.internal ||
             registrationMode == EventRegistrationMode.external;
         final List<EventValidationIssue> issues = <EventValidationIssue>[
-          if (!validRegistration)
-            required(
-              'registrationMode',
-              'Choose internal or external team registration.',
-            ),
-          if (confirmationMode == null)
-            required(
-              'confirmationMode',
-              'Choose how team registration is confirmed.',
-            ),
+          if (!validRegistration) required('registrationMode'),
+          if (confirmationMode == null) required('confirmationMode'),
         ];
         return AdmissionPresetNormalizationResult(
           admission: issues.isEmpty

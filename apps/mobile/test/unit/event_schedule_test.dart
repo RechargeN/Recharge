@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/repositories/event_timezone_repository_impl.dart';
 import 'package:recharge/features/create/domain/entities/event_draft_data.dart';
 import 'package:recharge/features/create/domain/repositories/event_timezone_repository.dart';
+import 'package:recharge/features/create/domain/usecases/build_event_content_body.dart';
 import 'package:recharge/features/create/domain/usecases/materialize_event_schedule_usecase.dart';
 
 void main() {
@@ -98,4 +99,54 @@ void main() {
 
     expect(later.utc.difference(earlier.utc), const Duration(hours: 1));
   });
+
+  test('F2: moving a one-time Event keeps its occurrence and server id', () {
+    final EventDraftData first = defaults().copyWith(
+      localStartDate: '2026-11-10',
+      startMinute: 18 * 60,
+      durationMinutes: 120,
+    );
+    final EventOccurrenceDraft original = materialize(first).single;
+    final EventDraftData published = first.copyWith(
+      occurrences: <EventOccurrenceDraft>[original],
+    );
+    final EventOccurrenceDraft moved = materialize(
+      published.copyWith(localStartDate: '2026-11-12', startMinute: 19 * 60),
+    ).single;
+    expect(moved.id, original.id);
+    expect(moved.localDate, '2026-11-12');
+    expect(moved.startAtUtc, DateTime.utc(2026, 11, 12, 17));
+    expect(
+      EventContentBodyMapper.serverOccurrenceId('loc_draft_f2', moved.id),
+      EventContentBodyMapper.serverOccurrenceId('loc_draft_f2', original.id),
+    );
+  });
+
+  test(
+    'F2: multi-date dates stay identities; a replaced date is a new one',
+    () {
+      final EventDraftData first = defaults().copyWith(
+        scheduleMode: EventScheduleMode.multiDate,
+        multiDateLocalDates: <String>['2026-11-10', '2026-11-11'],
+        startMinute: 18 * 60,
+        durationMinutes: 60,
+      );
+      final List<EventOccurrenceDraft> original = materialize(first);
+      final List<EventOccurrenceDraft> edited = materialize(
+        first.copyWith(
+          occurrences: original,
+          multiDateLocalDates: <String>['2026-11-10', '2026-11-20'],
+        ),
+      );
+      expect(edited.first.id, original.first.id, reason: 'kept date');
+      expect(edited.last.id, isNot(original.last.id), reason: 'replaced date');
+      final List<EventOccurrenceDraft> removed = materialize(
+        first.copyWith(
+          occurrences: original,
+          multiDateLocalDates: <String>['2026-11-10'],
+        ),
+      );
+      expect(removed.single.id, original.first.id);
+    },
+  );
 }

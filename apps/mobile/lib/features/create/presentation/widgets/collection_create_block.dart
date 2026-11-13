@@ -1,0 +1,600 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import '../../application/collection_create_config.dart';
+import '../../application/collection_create_coordinator.dart';
+import '../../application/controllers/create_controller.dart';
+import 'content_language_field.dart';
+import '../../application/create_providers.dart';
+import '../../application/state/collection_create_state.dart';
+import '../../application/state/create_state.dart';
+import '../../domain/entities/collection_draft_data.dart';
+import '../../domain/entities/collection_item_draft.dart';
+import '../../domain/entities/collection_validation_issue.dart';
+import '../../domain/entities/create_draft_entity.dart';
+import '../../domain/entities/location_search_suggestion.dart';
+import 'collection_curator_notes_section.dart';
+import 'items_picker_section.dart';
+import 'location_search_suggestion_list.dart';
+import 'create_texts.dart';
+import '../../../../core/localization/l10n_context.dart';
+import 'create_form_texts.dart';
+
+/// Collection / Guide 5-step create flow
+/// (COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md §7). Functionally complete
+/// against the coordinator built in this slice; visual polish matching the
+/// long-lived Place/Route/FindPeople blocks is later, incremental work —
+/// this covers the same ground those blocks did in their first cut.
+class CollectionCreateBlock extends ConsumerStatefulWidget {
+  const CollectionCreateBlock({
+    super.key,
+    required this.controller,
+    required this.state,
+    required this.onPublished,
+  });
+
+  final CreateController controller;
+  final CreateState state;
+  final VoidCallback onPublished;
+
+  @override
+  ConsumerState<CollectionCreateBlock> createState() =>
+      _CollectionCreateBlockState();
+}
+
+class _CollectionCreateBlockState extends ConsumerState<CollectionCreateBlock> {
+  CollectionCreateCoordinator? _attachedCoordinator;
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _shortDescriptionController =
+      TextEditingController();
+  final TextEditingController _areaController = TextEditingController();
+
+  // Matches LocationSearchRuntimeConfig.debounceMilliseconds' default.
+  static const Duration _locationSearchDebounce = Duration(milliseconds: 350);
+  Timer? _locationSearchDebounceTimer;
+
+  @override
+  void dispose() {
+    final CollectionCreateCoordinator? coordinator = _attachedCoordinator;
+    if (coordinator != null) {
+      widget.controller.detachCollectionCoordinator(coordinator);
+    }
+    _titleController.dispose();
+    _shortDescriptionController.dispose();
+    _areaController.dispose();
+    _locationSearchDebounceTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onAreaLabelChanged(String value) {
+    widget.controller.setCollectionAreaLabel(value);
+    _locationSearchDebounceTimer?.cancel();
+    final String trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      widget.controller.clearCollectionAreaLocationSuggestions();
+      return;
+    }
+    _locationSearchDebounceTimer = Timer(_locationSearchDebounce, () {
+      if (!mounted) return;
+      widget.controller.searchCollectionAreaLocation(trimmed);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final CollectionCreateCoordinator coordinator = ref.watch(
+      collectionCreateCoordinatorProvider,
+    );
+    if (!identical(_attachedCoordinator, coordinator)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final CollectionCreateCoordinator? previous = _attachedCoordinator;
+        if (previous != null) {
+          widget.controller.detachCollectionCoordinator(previous);
+        }
+        _attachedCoordinator = coordinator;
+        widget.controller.attachCollectionCoordinator(coordinator);
+        setState(() {});
+      });
+      return _Panel(
+        child: Text(context.l10n.createFormPreparingCollectionDraft),
+      );
+    }
+
+    final CollectionCreateState? collectionState =
+        widget.controller.collectionCreateState;
+    if (collectionState == null) {
+      return _Panel(
+        child: Text(context.l10n.createFormCollectionDraftBeingPrepared),
+      );
+    }
+    final CreateDraftEntity draft = collectionState.createDraft;
+    final CollectionDraftData? data = draft.collectionData;
+    if (data == null) {
+      return _Panel(
+        child: Text(context.l10n.createFormCollectionDraftDataBeingPrepared),
+      );
+    }
+
+    final int step = widget.state.collectionStep.clamp(
+      0,
+      collectionCreateSteps.length - 1,
+    );
+    final CollectionCreateStepConfig config = collectionCreateSteps[step];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        _StepHeader(
+          step: step,
+          config: config,
+          onStepSelected: widget.controller.goToCollectionStep,
+        ),
+        const SizedBox(height: 12),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 180),
+          child: KeyedSubtree(
+            key: ValueKey<int>(step),
+            child: switch (step) {
+              0 => _basicsStep(collectionState, draft, data),
+              1 => _itemsStep(collectionState, data),
+              2 => _curatorNotesStep(data),
+              3 => _budgetStep(draft, data),
+              _ => _publishStep(collectionState, draft, data),
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        _navigation(step, data),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------
+  // Шаг 1 — Основное + медиа
+  // ---------------------------------------------------------------------
+
+  Widget _basicsStep(
+    CollectionCreateState collectionState,
+    CreateDraftEntity draft,
+    CollectionDraftData data,
+  ) {
+    _syncText(_titleController, draft.title);
+    _syncText(_shortDescriptionController, draft.shortDescription);
+    _syncText(_areaController, data.areaLabel);
+    return _StepCard(
+      title: createFormText(context.l10n, collectionCreateSteps[0].titleId),
+      children: <Widget>[
+        ContentLanguageField(controller: widget.controller),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _titleController,
+          decoration: InputDecoration(labelText: context.l10n.createFormTitle),
+          onChanged: widget.controller.updateTitle,
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _shortDescriptionController,
+          decoration: InputDecoration(
+            labelText: context.l10n.createFormShortPitch,
+          ),
+          maxLines: 2,
+          onChanged: widget.controller.updateShortDescription,
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _areaController,
+          decoration: InputDecoration(
+            labelText: context.l10n.createFormAreaCity,
+            helperText: context.l10n.createFormTypeSearchTapMapBelow7,
+          ),
+          onChanged: _onAreaLabelChanged,
+        ),
+        if (collectionState.areaLocationSearchLoading)
+          const Padding(
+            padding: EdgeInsets.only(top: 4, bottom: 4),
+            child: LinearProgressIndicator(minHeight: 2),
+          ),
+        if (collectionState.areaLocationSuggestions.isNotEmpty)
+          LocationSearchSuggestionList(
+            suggestions: collectionState.areaLocationSuggestions,
+            onSelected: (LocationSearchSuggestion suggestion) {
+              widget.controller.selectCollectionAreaLocationSuggestion(
+                suggestion.id,
+              );
+            },
+          ),
+        const SizedBox(height: 12),
+        Text(
+          context.l10n.createFormAreaAnchor,
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          context.l10n.createFormOneReferencePointWholeGuideNot,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 180,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: LatLng(
+                  data.anchorLatitude ?? widget.controller.marketCenterLat,
+                  data.anchorLongitude ?? widget.controller.marketCenterLng,
+                ),
+                zoom: 12,
+              ),
+              markers:
+                  data.anchorLatitude == null || data.anchorLongitude == null
+                  ? const <Marker>{}
+                  : <Marker>{
+                      Marker(
+                        markerId: const MarkerId('collection-area-anchor'),
+                        position: LatLng(
+                          data.anchorLatitude!,
+                          data.anchorLongitude!,
+                        ),
+                      ),
+                    },
+              onTap: (LatLng point) {
+                widget.controller.setCollectionAreaAnchor(
+                  latitude: point.latitude,
+                  longitude: point.longitude,
+                );
+              },
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
+              mapToolbarEnabled: false,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------
+  // Шаг 2 — Состав (ItemsPickerSection)
+  // ---------------------------------------------------------------------
+
+  Widget _itemsStep(CollectionCreateState state, CollectionDraftData data) {
+    return _StepCard(
+      title: context.l10n.createFormItems,
+      children: <Widget>[
+        ItemsPickerSection(
+          state: state,
+          data: data,
+          onSearch: widget.controller.searchCollectionCatalog,
+          onAddItem: widget.controller.addCollectionItem,
+          onRemoveItem: widget.controller.removeCollectionItem,
+          onAddSection: widget.controller.addCollectionSection,
+          onRemoveSection: widget.controller.removeCollectionSection,
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------
+  // Шаг 3 — Заметки куратора
+  // ---------------------------------------------------------------------
+
+  Widget _curatorNotesStep(CollectionDraftData data) {
+    return _StepCard(
+      title: context.l10n.createFormCuratorNotes,
+      children: <Widget>[
+        CollectionCuratorNotesSection(
+          data: data,
+          onToggleHighlight: widget.controller.toggleCollectionHighlight,
+          onSetCuratorNote: widget.controller.setCollectionCuratorNote,
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------
+  // Шаг 4 — Бюджет и публикатор
+  // ---------------------------------------------------------------------
+
+  Widget _budgetStep(CreateDraftEntity draft, CollectionDraftData data) {
+    return _StepCard(
+      title: createFormText(context.l10n, collectionCreateSteps[3].titleId),
+      children: <Widget>[
+        Text(context.l10n.createFormBudgetIndicator),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: <Widget>[
+            _budgetChip(null, context.l10n.createFormNotSet, data.budgetTier),
+            _budgetChip(
+              CollectionBudgetTier.free,
+              context.l10n.createFormFree,
+              data.budgetTier,
+            ),
+            _budgetChip(CollectionBudgetTier.low, r'$', data.budgetTier),
+            _budgetChip(CollectionBudgetTier.medium, r'$$', data.budgetTier),
+            _budgetChip(CollectionBudgetTier.high, r'$$$', data.budgetTier),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            icon: const Icon(Icons.auto_awesome, size: 18),
+            label: Text(context.l10n.createFormSuggestFromItemPrices),
+            onPressed: () {
+              final CollectionBudgetTier? suggestion = widget.controller
+                  .suggestCollectionBudgetTier();
+              if (suggestion == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      context.l10n.createFormNotEnoughPricedItemsYetSuggest,
+                    ),
+                  ),
+                );
+                return;
+              }
+              widget.controller.setCollectionBudgetIndicator(suggestion);
+            },
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(context.l10n.createFormPublisherLine(data.publisherRef.type.name)),
+        Text(
+          context.l10n.createFormVisibilityLine(
+            createOptionText(context.l10n, draft.visibility),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _budgetChip(
+    CollectionBudgetTier? value,
+    String label,
+    CollectionBudgetTier? current,
+  ) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: value == current,
+      onSelected: (_) => widget.controller.setCollectionBudgetIndicator(value),
+    );
+  }
+
+  // ---------------------------------------------------------------------
+  // Шаг 5 — Превью и публикация
+  // ---------------------------------------------------------------------
+
+  Widget _publishStep(
+    CollectionCreateState state,
+    CreateDraftEntity draft,
+    CollectionDraftData data,
+  ) {
+    final bool hasUnavailable = data.items.any(
+      (CollectionItemDraft item) =>
+          item.sourceStatus == CollectionSourceStatus.unavailable,
+    );
+    final bool reviewed =
+        data.compositionReview?.draftRevision == state.revision;
+    return _StepCard(
+      title: createFormText(context.l10n, collectionCreateSteps[4].titleId),
+      children: <Widget>[
+        Text(
+          draft.title.isEmpty
+              ? context.l10n.createCollectionNoTitleYet
+              : draft.title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        Text(data.areaLabel),
+        const SizedBox(height: 8),
+        Text('${data.items.length} items'),
+        if (hasUnavailable)
+          Text(
+            context.l10n.createFormSomeItemsAreNoLongerAvailable,
+            style: TextStyle(color: Colors.orange),
+          ),
+        for (final CollectionValidationIssue issue in state.issues)
+          Text(
+            '• ${CreateTexts.collection(context.l10n, issue)}',
+            style: TextStyle(
+              color: issue.severity == CollectionValidationSeverity.error
+                  ? Colors.red
+                  : Colors.orange,
+            ),
+          ),
+        const SizedBox(height: 16),
+        FilledButton.icon(
+          icon: const Icon(Icons.visibility_outlined),
+          label: Text(context.l10n.createFormRefreshLivePreview),
+          onPressed: () => widget.controller.buildCollectionPreview(),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.fact_check_outlined),
+          label: Text(
+            reviewed
+                ? context.l10n.createFormCompositionReviewed
+                : context.l10n.createFormAcknowledgeComposition,
+          ),
+          onPressed: reviewed
+              ? null
+              : () =>
+                    widget.controller.acknowledgeCollectionCompositionReview(),
+        ),
+        const SizedBox(height: 16),
+        FilledButton(
+          onPressed: () async {
+            final bool published = await widget.controller.publishCollection();
+            if (published) widget.onPublished();
+          },
+          child: Text(context.l10n.createFormPublish),
+        ),
+        if (state.status == CollectionCreateStatus.published) ...<Widget>[
+          const Divider(height: 32),
+          Text(
+            context.l10n.createCollectionPublishedRemove,
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          Text(
+            context.l10n.createFormRemovingItemHereAppliesInstantlyNo,
+            style: TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+          for (final CollectionItemDraft item in data.items)
+            ListTile(
+              dense: true,
+              title: Text(item.snapshot.title),
+              trailing: IconButton(
+                tooltip: context.l10n.createFormRemoveWithoutReview,
+                icon: const Icon(Icons.remove_circle_outline),
+                onPressed: () async {
+                  try {
+                    await widget.controller
+                        .removeCollectionItemsFromActiveVersion(<String>{
+                          item.ref.stableKey,
+                        });
+                  } catch (error) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(context.l10n.createFormCouldNotRemove),
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------
+
+  Widget _navigation(int step, CollectionDraftData data) {
+    return Row(
+      children: <Widget>[
+        if (step > 0)
+          Flexible(
+            child: TextButton(
+              onPressed: () => widget.controller.goToCollectionStep(step - 1),
+              child: Text(context.l10n.createFormBack),
+            ),
+          ),
+        const Spacer(),
+        if (step < collectionCreateSteps.length - 1)
+          Flexible(
+            child: FilledButton(
+              onPressed: () => widget.controller.goToCollectionStep(step + 1),
+              child: Text(context.l10n.createFormNext),
+            ),
+          ),
+      ],
+    );
+  }
+
+  void _syncText(TextEditingController controller, String value) {
+    if (controller.text == value) return;
+    controller.value = controller.value.copyWith(
+      text: value,
+      selection: TextSelection.collapsed(offset: value.length),
+    );
+  }
+}
+
+class _StepHeader extends StatelessWidget {
+  const _StepHeader({
+    required this.step,
+    required this.config,
+    required this.onStepSelected,
+  });
+
+  final int step;
+  final CollectionCreateStepConfig config;
+  final ValueChanged<int> onStepSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          createFormText(context.l10n, config.titleId),
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        Text(
+          createFormText(context.l10n, config.descriptionId),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: <Widget>[
+            for (int i = 0; i < collectionCreateSteps.length; i++)
+              Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: InkWell(
+                  onTap: () => onStepSelected(i),
+                  child: CircleAvatar(
+                    radius: 12,
+                    backgroundColor: i == step
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.surfaceContainerHighest,
+                    child: Text(
+                      '${i + 1}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: i == step
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : null,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _StepCard extends StatelessWidget {
+  const _StepCard({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
+        ),
+      ),
+    );
+  }
+}
+
+class _Panel extends StatelessWidget {
+  const _Panel({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Center(child: child),
+    );
+  }
+}

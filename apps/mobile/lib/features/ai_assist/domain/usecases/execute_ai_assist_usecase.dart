@@ -34,7 +34,7 @@ class ExecuteAiAssistUseCase {
     if (definition == null) {
       throw const AiAssistException(
         AiAssistFailureCode.promptNotFound,
-        'The requested AI prompt definition is not registered.',
+        'The requested AI prompt definition is not registered.', // l10n-ignore: developer description; the UI uses the failure or issue code
       );
     }
     if (!definition.isValid ||
@@ -43,13 +43,13 @@ class ExecuteAiAssistUseCase {
         definition.version != request.promptVersion) {
       throw const AiAssistException(
         AiAssistFailureCode.invalidPromptDefinition,
-        'The AI prompt definition does not match this capability.',
+        'The AI prompt definition does not match this capability.', // l10n-ignore: developer description; the UI uses the failure or issue code
       );
     }
     if (!definition.supportedLocales.contains(request.locale)) {
       throw const AiAssistException(
         AiAssistFailureCode.unsupportedLocale,
-        'This AI prompt does not support the requested locale.',
+        'This AI prompt does not support the requested locale.', // l10n-ignore: developer description; the UI uses the failure or issue code
       );
     }
 
@@ -58,7 +58,7 @@ class ExecuteAiAssistUseCase {
         normalizedInput.length > definition.maximumInputCharacters) {
       throw const AiAssistException(
         AiAssistFailureCode.invalidRequest,
-        'AI input is empty or exceeds the prompt limit.',
+        'AI input is empty or exceeds the prompt limit.', // l10n-ignore: developer description; the UI uses the failure or issue code
       );
     }
     _validateStructuredValue(
@@ -88,7 +88,7 @@ class ExecuteAiAssistUseCase {
     )) {
       throw const AiAssistException(
         AiAssistFailureCode.quotaExceeded,
-        'The local AI assistance session quota is exhausted.',
+        'The local AI assistance session quota is exhausted.', // l10n-ignore: developer description; the UI uses the failure or issue code
       );
     }
 
@@ -116,7 +116,7 @@ class ExecuteAiAssistUseCase {
       if (fallback == null) {
         throw const AiAssistException(
           AiAssistFailureCode.fallbackUnavailable,
-          'The deterministic AI fallback is unavailable.',
+          'The deterministic AI fallback is unavailable.', // l10n-ignore: developer description; the UI uses the failure or issue code
         );
       }
       try {
@@ -139,12 +139,14 @@ class ExecuteAiAssistUseCase {
       if (redactions.isNotEmpty)
         const AiAssistIssue(
           code: AiAssistIssueCode.personalDataRedacted,
-          message: 'Personal contact data was redacted before processing.',
+          message:
+              'Personal contact data was redacted before processing.', // l10n-ignore: developer description; the UI uses the failure or issue code
         ),
       if (fallbackUsed)
         const AiAssistIssue(
           code: AiAssistIssueCode.fallbackUsed,
-          message: 'A deterministic local fallback produced this result.',
+          message:
+              'A deterministic local fallback produced this result.', // l10n-ignore: developer description; the UI uses the failure or issue code
         ),
     ];
 
@@ -174,19 +176,19 @@ class ExecuteAiAssistUseCase {
     if (!policy.isValid) {
       throw const AiAssistException(
         AiAssistFailureCode.invalidConfiguration,
-        'The AI assistance runtime policy is invalid.',
+        'The AI assistance runtime policy is invalid.', // l10n-ignore: developer description; the UI uses the failure or issue code
       );
     }
     if (!policy.platformEnabled) {
       throw const AiAssistException(
         AiAssistFailureCode.platformDisabled,
-        'AI assistance is disabled.',
+        'AI assistance is disabled.', // l10n-ignore: developer description; the UI uses the failure or issue code
       );
     }
     if (!policy.enabledCapabilities.contains(request.capability)) {
       throw const AiAssistException(
         AiAssistFailureCode.capabilityDisabled,
-        'This AI assistance capability is disabled.',
+        'This AI assistance capability is disabled.', // l10n-ignore: developer description; the UI uses the failure or issue code
       );
     }
     if (request.operationId.trim().isEmpty ||
@@ -194,7 +196,7 @@ class ExecuteAiAssistUseCase {
         request.promptVersion <= 0) {
       throw const AiAssistException(
         AiAssistFailureCode.invalidRequest,
-        'AI request identifiers and versions must be valid.',
+        'AI request identifiers and versions must be valid.', // l10n-ignore: developer description; the UI uses the failure or issue code
       );
     }
   }
@@ -229,7 +231,7 @@ class ExecuteAiAssistUseCase {
     if (envelopeInvalid) {
       throw const AiAssistException(
         AiAssistFailureCode.malformedOutput,
-        'The AI gateway returned an invalid result envelope.',
+        'The AI gateway returned an invalid result envelope.', // l10n-ignore: developer description; the UI uses the failure or issue code
       );
     }
     final String? forbiddenTool = response.usedToolIds
@@ -238,7 +240,7 @@ class ExecuteAiAssistUseCase {
     if (forbiddenTool != null) {
       throw const AiAssistException(
         AiAssistFailureCode.forbiddenTool,
-        'The AI gateway reported a tool outside the prompt allowlist.',
+        'The AI gateway reported a tool outside the prompt allowlist.', // l10n-ignore: developer description; the UI uses the failure or issue code
       );
     }
     _validateStructuredValue(
@@ -254,7 +256,7 @@ class ExecuteAiAssistUseCase {
     )) {
       throw const AiAssistException(
         AiAssistFailureCode.malformedOutput,
-        'The AI result contains raw personal input.',
+        'The AI result contains raw personal input.', // l10n-ignore: developer description; the UI uses the failure or issue code
       );
     }
   }
@@ -326,7 +328,7 @@ class ExecuteAiAssistUseCase {
     if (!inspect(value, 0)) {
       throw AiAssistException(
         failureCode,
-        'AI structured data exceeds its safety bounds.',
+        'AI structured data exceeds its safety bounds.', // l10n-ignore: developer description; the UI uses the failure or issue code
       );
     }
   }

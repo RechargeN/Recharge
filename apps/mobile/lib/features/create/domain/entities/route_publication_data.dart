@@ -70,9 +70,7 @@ class PublishedRouteWaypoint {
     required Iterable<String> technicalAttributeIds,
     required Iterable<String> photoIds,
     required this.verifiedAtUtc,
-  }) : technicalAttributeIds = List<String>.unmodifiable(
-         technicalAttributeIds,
-       ),
+  }) : technicalAttributeIds = List<String>.unmodifiable(technicalAttributeIds),
        photoIds = List<String>.unmodifiable(photoIds);
 
   final String id;

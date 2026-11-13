@@ -1,0 +1,163 @@
+{
+  "account": {
+    "schemaVersion": 1,
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "status": "active",
+    "systemRoles": ["User"],
+    "revision": 1,
+    "securityRevision": 1,
+    "revokeBeforeSecurityRevision": 0,
+    "createdAtUtc": "2026-09-22T00:00:00.000Z",
+    "updatedAtUtc": "2026-09-22T00:00:00.000Z"
+  },
+  "authIdentity": {
+    "schemaVersion": 1,
+    "identityId": "018FQ2Z8Q9N4M7K2T6V3W1X5YB",
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "provider": "google",
+    "providerTenant": "consumer",
+    "subjectHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "status": "active",
+    "revision": 1,
+    "linkedAtUtc": "2026-09-22T00:00:00.000Z"
+  },
+  "session": {
+    "schemaVersion": 1,
+    "sessionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "status": "active",
+    "revision": 1,
+    "authzRevision": 1,
+    "firebaseUid": "firebase-user-1",
+    "installationId": "install-1",
+    "handleHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "issuedAtUtc": "2026-09-22T00:00:01.000Z",
+    "lastActiveAtUtc": "2026-09-22T00:00:01.000Z",
+    "idleExpiresAtUtc": "2026-10-22T00:00:01.000Z"
+  },
+  "accessSnapshot": {
+    "schemaVersion": 1,
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "sessionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+    "accountRevision": 1,
+    "sessionRevision": 1,
+    "authzRevision": 1,
+    "capabilityPolicyRevision": 1,
+    "capabilityIds": ["booking.self_service", "content.publish"],
+    "evaluatedAtUtc": "2026-09-22T00:00:01.000Z",
+    "expiresAtUtc": "2026-09-22T00:05:01.000Z"
+  },
+  "creatorVerification": {
+    "schemaVersion": 1,
+    "verificationId": "018FQ2Z8Q9N4M7K2T6V3W1X5YD",
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "status": "verified",
+    "revision": 2,
+    "submittedAtUtc": "2026-09-22T00:00:00.000Z",
+    "decidedAtUtc": "2026-09-22T00:02:00.000Z",
+    "evidenceRefIds": ["018FQ2Z8Q9N4M7K2T6V3W1X5YE"]
+  },
+  "managedPage": {
+    "schemaVersion": 1,
+    "pageId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+    "ownerUserId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "marketId": "LV",
+    "status": "pendingReview",
+    "verificationStatus": "unverified",
+    "revision": 1,
+    "createdAtUtc": "2026-09-22T00:03:00.000Z",
+    "updatedAtUtc": "2026-09-22T00:03:00.000Z"
+  },
+  "pageMembership": {
+    "schemaVersion": 1,
+    "membershipId": "018FQ2Z8Q9N4M7K2T6V3W1X5YG",
+    "pageId": "018FQ2Z8Q9N4M7K2T6V3W1X5YF",
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "role": "owner",
+    "status": "active",
+    "capabilityIds": ["manage_page", "content.publish"],
+    "revision": 1,
+    "createdAtUtc": "2026-09-22T00:03:00.000Z",
+    "updatedAtUtc": "2026-09-22T00:03:00.000Z"
+  },
+  "identitySessionCommand": {
+    "schemaVersion": 1,
+    "commandType": "establishIdentitySession",
+    "requestId": "req_identity_session_1",
+    "installationId": "install-1"
+  },
+  "identitySessionResult": {
+    "schemaVersion": 1,
+    "commandType": "establishIdentitySession",
+    "requestId": "req_identity_session_1",
+    "serverTime": "2026-09-22T00:04:00.000Z",
+    "kind": "succeeded",
+    "data": {
+      "sessionContext": {
+        "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+        "sessionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YC",
+        "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "installationId": "install-1",
+        "expiresAtUtc": "2026-09-22T00:19:00.000Z"
+      }
+    }
+  },
+  "publisherEligibility": {
+    "schemaVersion": 1,
+    "publisherRef": {
+      "type": "page",
+      "id": "018FQ2Z8Q9N4M7K2T6V3W1X5YF"
+    },
+    "eligible": true,
+    "reason": "eligible",
+    "authorityRevision": 2,
+    "evaluatedAtUtc": "2026-09-22T00:04:00.000Z"
+  },
+  "sellerDeclaration": {
+    "schemaVersion": 1,
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "declaration": {
+      "status": "trader",
+      "contact": {
+        "email": "seller@example.com"
+      },
+      "trader": {
+        "legalName": "Example SIA",
+        "registrationNumber": "40003000000",
+        "vatId": "LV40003000000",
+        "address": {
+          "line1": "Brivibas iela 1",
+          "city": "Riga",
+          "postalCode": "LV-1010",
+          "countryCode": "LV"
+        }
+      },
+      "dac7ActivityTypes": ["personalServices"]
+    },
+    "revision": 1,
+    "declaredAtUtc": "2026-11-08T12:00:00.000Z"
+  },
+  "sellerDeclarationCommand": {
+    "schemaVersion": 1,
+    "commandType": "declareSeller",
+    "requestId": "req-1",
+    "sessionContext": {
+      "sessionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+      "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "installationId": "install-1"
+    },
+    "expectedRevision": 0,
+    "declaration": {
+      "status": "private",
+      "contact": {
+        "phone": "+37120000000"
+      },
+      "dac7ActivityTypes": []
+    }
+  },
+  "sellerDeclarationResult": {
+    "schemaVersion": 1,
+    "kind": "rejected",
+    "code": "revision_conflict"
+  }
+}

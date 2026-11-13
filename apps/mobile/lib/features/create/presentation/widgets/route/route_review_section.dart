@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'route_issue_texts.dart';
+import '../../../../../core/localization/l10n_context.dart';
 import '../../../../../core/geo/geo_bounds.dart';
 import '../../../../../core/geo/geo_point.dart';
 import '../../../../../core/map/map_scene.dart';
@@ -75,7 +77,10 @@ class RouteReviewSection extends StatelessWidget {
             ),
             _Metric(
               icon: Icons.schedule,
-              label: _duration(route.metrics.effectiveDurationSeconds),
+              label: _duration(
+                context.l10n,
+                route.metrics.effectiveDurationSeconds,
+              ),
             ),
             _Metric(icon: Icons.route, label: route.shape.name),
             _Metric(
@@ -91,8 +96,8 @@ class RouteReviewSection extends StatelessWidget {
         const SizedBox(height: 12),
         _IssuePanel(
           title: blocking.isEmpty
-              ? 'Route draft is structurally ready'
-              : '${blocking.length} blocking checks',
+              ? context.l10n.createRouteRouteDraftStructurallyReady
+              : context.l10n.createRouteBlockingChecks(blocking.length),
           issues: blocking,
           color: blocking.isEmpty
               ? Theme.of(context).colorScheme.primary
@@ -101,7 +106,7 @@ class RouteReviewSection extends StatelessWidget {
         if (warnings.isNotEmpty) ...<Widget>[
           const SizedBox(height: 10),
           _IssuePanel(
-            title: '${warnings.length} warnings to review',
+            title: context.l10n.createRouteWarningsToReview(warnings.length),
             issues: warnings,
             color: Theme.of(context).colorScheme.tertiary,
           ),
@@ -109,8 +114,7 @@ class RouteReviewSection extends StatelessWidget {
         const SizedBox(height: 12),
         if (demoProviderOnly)
           Text(
-            'Investor demo: this version uses the bundled offline trail graph '
-            'and is marked demo-only. No paid routing call is made.',
+            context.l10n.createRouteInvestorDemoVersionUsesBundledOffline,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         const SizedBox(height: 12),
@@ -119,14 +123,16 @@ class RouteReviewSection extends StatelessWidget {
           onPressed: state.hasPendingOperations ? null : onSave,
           icon: const Icon(Icons.save_outlined),
           label: Text(
-            state.hasPendingOperations ? 'Routing in progress…' : 'Save draft',
+            state.hasPendingOperations
+                ? context.l10n.createRouteRoutingProgress
+                : context.l10n.createRouteSaveDraft,
           ),
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
           onPressed: onRestore,
           icon: const Icon(Icons.restore),
-          label: const Text('Restore last saved revision'),
+          label: Text(context.l10n.createRouteRestoreLastSavedRevision),
         ),
         const SizedBox(height: 8),
         FilledButton.icon(
@@ -141,13 +147,15 @@ class RouteReviewSection extends StatelessWidget {
                 : Icons.rate_review_outlined,
           ),
           label: Text(
-            publishesDirectly ? 'Publish Route' : 'Submit Route for review',
+            publishesDirectly
+                ? context.l10n.createRoutePublishRoute
+                : context.l10n.createRouteSubmitRouteReview,
           ),
         ),
         if (!canSubmit) ...<Widget>[
           const SizedBox(height: 6),
           Text(
-            'Your profile does not have permission to submit this Route.',
+            context.l10n.createRouteYourProfileDoesNotHavePermission,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
@@ -155,10 +163,10 @@ class RouteReviewSection extends StatelessWidget {
     );
   }
 
-  static String _duration(int seconds) {
+  static String _duration(AppLocalizations l10n, int seconds) {
     final minutes = (seconds / 60).round();
-    if (minutes < 60) return '$minutes min';
-    return '${minutes ~/ 60} h ${minutes % 60} min';
+    if (minutes < 60) return l10n.discoverMinutes(minutes);
+    return l10n.discoverHoursMinutes(minutes ~/ 60, minutes % 60);
   }
 }
 
@@ -180,7 +188,7 @@ class _RouteQualityPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              'Route quality',
+              context.l10n.createRouteRouteQuality,
               style: Theme.of(
                 context,
               ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
@@ -210,8 +218,9 @@ class _RouteQualityPanel extends StatelessWidget {
                 ),
                 _Metric(
                   icon: Icons.layers_outlined,
-                  label:
-                      '${quality.unknownSurfaceDistanceMeters.round()} m unknown',
+                  label: context.l10n.createRouteUnknownSurfaceMeters(
+                    '${quality.unknownSurfaceDistanceMeters.round()}',
+                  ),
                 ),
                 _Metric(
                   icon: Icons.verified_outlined,
@@ -221,17 +230,15 @@ class _RouteQualityPanel extends StatelessWidget {
             ),
             if (quality.difficulty.differsFromAuthorSelection) ...<Widget>[
               const SizedBox(height: 8),
-              const Text(
-                'The selected difficulty differs from the calculated '
-                'recommendation and requires review.',
+              Text(
+                context
+                    .l10n
+                    .createRouteSelectedDifficultyDiffersFromCalculatedRecommendation,
               ),
             ],
             if (elevation.attribution case final attribution?) ...<Widget>[
               const SizedBox(height: 8),
-              Text(
-                attribution,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text(attribution, style: Theme.of(context).textTheme.bodySmall),
             ],
           ],
         ),
@@ -284,7 +291,11 @@ class _IssuePanel extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 6),
               child: Text(
-                '• ${issue.code} — ${issue.location.sectionId}',
+                routeIssueLine(
+                  context.l10n,
+                  issue.code,
+                  issue.location.sectionId,
+                ),
                 key: ValueKey<String>('route-issue-${issue.stableId}'),
               ),
             ),

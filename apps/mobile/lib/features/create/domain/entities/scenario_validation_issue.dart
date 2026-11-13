@@ -13,7 +13,6 @@ class ScenarioValidationIssue {
     required this.code,
     required this.severity,
     required this.path,
-    required this.message,
     this.dayId,
     this.itemId,
     this.legId,
@@ -22,7 +21,6 @@ class ScenarioValidationIssue {
   final String code;
   final ScenarioValidationSeverity severity;
   final String path;
-  final String message;
   final String? dayId;
   final String? itemId;
   final String? legId;

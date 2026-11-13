@@ -33,6 +33,7 @@ class Booking {
     required this.id,
     required this.revision,
     required this.userId,
+    required this.marketId,
     required this.eventId,
     required this.occurrenceId,
     required this.admissionMode,
@@ -48,6 +49,8 @@ class Booking {
     this.auxiliaryTrackId,
     this.eligibilitySnapshotRef,
     this.activeHoldId,
+    this.reconfirmationRequiredForRevision,
+    this.reconfirmationDeadlineUtc,
     this.terminalReason,
     this.confirmedAtUtc,
     this.cancelledAtUtc,
@@ -58,6 +61,7 @@ class Booking {
   final String id;
   final int revision;
   final String userId;
+  final String marketId;
   final String eventId;
   final String occurrenceId;
   final String? inventoryPoolId;
@@ -71,6 +75,8 @@ class Booking {
   final String? eligibilitySnapshotRef;
   final String? activeHoldId;
   final BookingReconfirmationState reconfirmationState;
+  final int? reconfirmationRequiredForRevision;
+  final DateTime? reconfirmationDeadlineUtc;
   final BookingTerminalReason? terminalReason;
   final DateTime createdAtUtc;
   final DateTime updatedAtUtc;

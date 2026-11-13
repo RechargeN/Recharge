@@ -12,14 +12,17 @@ class DiscoverPreferencesLocalDataSource {
     required String defaultMarketCityId,
     required double defaultCenterLat,
     required double defaultCenterLng,
+    required String defaultCurrencyCode,
   }) : _defaultMarketCityId = defaultMarketCityId,
        _defaultCenterLat = defaultCenterLat,
-       _defaultCenterLng = defaultCenterLng;
+       _defaultCenterLng = defaultCenterLng,
+       _defaultCurrencyCode = defaultCurrencyCode;
 
   final FlutterSecureStorage _secureStorage;
   final String _defaultMarketCityId;
   final double _defaultCenterLat;
   final double _defaultCenterLng;
+  final String _defaultCurrencyCode;
   static const String _lastQueryKey = 'discover.last_query';
   static const String _savedSearchesKey = 'discover.saved_searches';
   static const String _smartSearchHistoryKey = 'discover.smart_search_history';
@@ -47,6 +50,7 @@ class DiscoverPreferencesLocalDataSource {
         defaultMarketCityId: _defaultMarketCityId,
         defaultCenterLat: _defaultCenterLat,
         defaultCenterLng: _defaultCenterLng,
+        defaultCurrencyCode: _defaultCurrencyCode,
       );
     } on FormatException {
       return null;
@@ -71,6 +75,7 @@ class DiscoverPreferencesLocalDataSource {
               defaultMarketCityId: _defaultMarketCityId,
               defaultCenterLat: _defaultCenterLat,
               defaultCenterLng: _defaultCenterLng,
+              defaultCurrencyCode: _defaultCurrencyCode,
             ),
           )
           .toList(growable: false);
@@ -116,6 +121,7 @@ class DiscoverPreferencesLocalDataSource {
               defaultMarketCityId: _defaultMarketCityId,
               defaultCenterLat: _defaultCenterLat,
               defaultCenterLng: _defaultCenterLng,
+              defaultCurrencyCode: _defaultCurrencyCode,
             ),
           )
           .where(

@@ -1,0 +1,230 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/core/telemetry/analytics_service.dart';
+import 'package:recharge/features/create/application/controllers/create_controller.dart';
+import 'package:recharge/features/create/application/create_runtime_defaults.dart';
+import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
+import 'package:recharge/features/create/domain/repositories/create_repository.dart';
+import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
+import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
+import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
+import 'package:recharge/features/create/presentation/widgets/activity_create_block.dart';
+import 'package:recharge/features/create/presentation/widgets/content_language_field.dart';
+import 'package:recharge/generated/l10n/app_localizations.dart';
+
+import '../support/event_create_test_support.dart';
+
+void main() {
+  testWidgets(
+    'renders server validation feedback beside the existing title field',
+    (WidgetTester tester) async {
+      final _MemoryRepository repository = _MemoryRepository();
+      final CreateController controller = CreateController(
+        loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+        saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+        publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+        analyticsService: _NoopAnalyticsService(),
+        eventCreateCoordinator: createTestEventCoordinator(),
+        runtimeDefaults: const CreateRuntimeDefaults(
+          marketCityId: 'riga',
+          timezone: 'Europe/Riga',
+          country: 'LV',
+          city: 'Riga',
+          currency: 'EUR',
+        ),
+      );
+      addTearDown(controller.dispose);
+      await controller.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'Creator',
+      );
+      controller.setObjectType(CreateObjectType.activity);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AnimatedBuilder(
+              animation: controller,
+              builder: (BuildContext context, Widget? child) {
+                return SingleChildScrollView(
+                  child: ActivityCreateBlock(
+                    controller: controller,
+                    state: controller.state,
+                    onPublished: () {},
+                    serverValidationFailed: true,
+                    serverErrors: const {'/body/title': 'Use 5–80 characters.'},
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      // Flush the 700ms autosave timer scheduled by setObjectType(activity)
+      // so no pending Timer remains when the test ends.
+      await tester.pump(const Duration(milliseconds: 800));
+
+      expect(find.text('Title'), findsOneWidget);
+      expect(find.text('Use 5–80 characters.'), findsOneWidget);
+      expect(
+        find.text('Check the Activity fields and submit again.'),
+        findsOneWidget,
+      );
+      expect(find.byType(TextFormField), findsWidgets);
+    },
+  );
+
+  testWidgets('the author chooses the text language; nothing is preselected', (
+    WidgetTester tester,
+  ) async {
+    final _MemoryRepository repository = _MemoryRepository();
+    final CreateController controller = CreateController(
+      loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+      saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+      publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+      analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: const CreateRuntimeDefaults(
+        marketCityId: 'riga',
+        timezone: 'Europe/Riga',
+        country: 'LV',
+        city: 'Riga',
+        currency: 'EUR',
+      ),
+    );
+    addTearDown(controller.dispose);
+    await controller.ensureLoaded(
+      userId: 'user-1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'Creator',
+    );
+    controller.setObjectType(CreateObjectType.activity);
+    expect(controller.draftContentLanguage, isNull);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: AnimatedBuilder(
+            animation: controller,
+            builder: (BuildContext context, Widget? child) =>
+                SingleChildScrollView(
+                  child: ContentLanguageField(controller: controller),
+                ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Language of this text'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('content-language-field')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Latviešu').last);
+    await tester.pumpAndSettle();
+    expect(controller.draftContentLanguage, 'lv');
+    expect(controller.state.draft.declaredContentLocale, 'lv');
+
+    controller.updateDraftContentLanguage('de');
+    expect(controller.draftContentLanguage, 'lv', reason: 'unsupported');
+    // Let the draft autosave timer finish before the tree is disposed.
+    await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('Basics step fits 360 dp at 1.5 text scale without overflow', (
+    WidgetTester tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(360, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view
+        ..resetPhysicalSize()
+        ..resetDevicePixelRatio();
+    });
+
+    final _MemoryRepository repository = _MemoryRepository();
+    final CreateController controller = CreateController(
+      loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+      saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+      publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+      analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: const CreateRuntimeDefaults(
+        marketCityId: 'riga',
+        timezone: 'Europe/Riga',
+        country: 'LV',
+        city: 'Riga',
+        currency: 'EUR',
+      ),
+    );
+    addTearDown(controller.dispose);
+    await controller.ensureLoaded(
+      userId: 'user-1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'Creator',
+    );
+    controller.setObjectType(CreateObjectType.activity);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          final MediaQueryData media = MediaQuery.of(context);
+          return MediaQuery(
+            data: media.copyWith(textScaler: const TextScaler.linear(1.5)),
+            child: child!,
+          );
+        },
+        home: Scaffold(
+          body: AnimatedBuilder(
+            animation: controller,
+            builder: (BuildContext context, Widget? child) {
+              return SingleChildScrollView(
+                child: ActivityCreateBlock(
+                  controller: controller,
+                  state: controller.state,
+                  onPublished: () {},
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 800));
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Title'), findsOneWidget);
+  });
+}
+
+class _NoopAnalyticsService implements AnalyticsService {
+  @override
+  void track(String eventName, {Map<String, Object?> params = const {}}) {}
+}
+
+class _MemoryRepository implements CreateRepository {
+  CreateDraftEntity? stored;
+
+  @override
+  Future<CreateDraftEntity?> loadDraft(String userId) async => stored;
+
+  @override
+  Future<void> saveDraft(String userId, CreateDraftEntity draft) async {
+    stored = draft;
+  }
+
+  @override
+  Future<CreateDraftEntity> publishDraft(
+    String userId,
+    CreateDraftEntity draft,
+  ) async {
+    stored = draft;
+    return draft;
+  }
+}

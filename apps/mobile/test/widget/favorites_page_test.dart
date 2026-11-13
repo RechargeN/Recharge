@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -16,15 +17,80 @@ import 'package:recharge/features/discover/domain/usecases/get_discover_feed_use
 import 'package:recharge/features/favorites/application/controllers/favorites_controller.dart';
 import 'package:recharge/features/favorites/application/favorites_providers.dart';
 import 'package:recharge/features/favorites/domain/entities/favorite_item_entity.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/favorites/domain/repositories/favorites_repository.dart';
 import 'package:recharge/features/favorites/domain/usecases/add_favorite_usecase.dart';
 import 'package:recharge/features/favorites/domain/usecases/get_favorites_usecase.dart';
 import 'package:recharge/features/favorites/domain/usecases/remove_favorite_usecase.dart';
 import 'package:recharge/features/favorites/presentation/pages/favorites_page.dart';
+import 'package:recharge/features/library/data/library_sync_client.dart';
 
+import '../support/l10n/l10n_screen_harness.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
+  fullPageTestWidgets('L4.8: a coded load failure is said in words, not as a '
+      'code', (tester) async {
+    final repository = _RefusingFavoritesRepository();
+    final controller = FavoritesController(
+      getFavoritesUseCase: GetFavoritesUseCase(repository),
+      addFavoriteUseCase: AddFavoriteUseCase(repository),
+      removeFavoriteUseCase: RemoveFavoriteUseCase(repository),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          favoritesControllerProvider.overrideWith((ref) => controller),
+          discoverFeedControllerProvider.overrideWith(
+            (ref) => _discoverController(),
+          ),
+        ],
+        child: const MaterialApp(home: FavoritesPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text(l10nFor(const Locale('en')).errorProcessingRestricted),
+      findsOneWidget,
+    );
+    expect(find.text('processing_restricted'), findsNothing);
+  });
+
+  // L4.6: Favorites in lv, en and ru at 360 dp; saved titles stay as is.
+  l10nSmallScreenTestWidgets('Favorites lists saved plans', (
+    tester,
+    locale,
+    scale,
+  ) async {
+    final FavoritesController controller = _favoritesController(
+      initial: <FavoriteItemEntity>[
+        _favorite('evt_1', 'Morning yoga'),
+        _favorite('place_1', 'Coffee house', category: 'place'),
+        _favorite('route_1', 'Quiet route', category: 'route'),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          favoritesControllerProvider.overrideWith((ref) => controller),
+          discoverFeedControllerProvider.overrideWith(
+            (ref) => _discoverController(),
+          ),
+        ],
+        child: l10nTestApp(
+          locale: locale,
+          scale: scale,
+          home: const FavoritesPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Morning yoga'), findsOneWidget);
+    expect(find.text(l10nFor(locale).favoritesAll), findsWidgets);
+  });
+
   fullPageTestWidgets('shows empty state when favorites list is empty', (
     tester,
   ) async {
@@ -48,7 +114,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Пока нет сохраненных событий'), findsOneWidget);
+    expect(find.text('No saved events yet'), findsOneWidget);
   });
 
   fullPageTestWidgets('renders favorites item in list', (tester) async {
@@ -78,6 +144,46 @@ void main() {
     expect(find.text('Утренняя йога'), findsOneWidget);
   });
 
+  fullPageTestWidgets(
+    'route favorite with unknown distance shows no km value',
+    (tester) async {
+      final repository = _FakeFavoritesRepository(
+        initial: <FavoriteItemEntity>[
+          _favorite(
+            'route_1',
+            'Server route',
+            category: 'route',
+            distanceKm: null,
+          ),
+          _favorite('route_2', 'Local route', category: 'route'),
+        ],
+      );
+      final controller = FavoritesController(
+        getFavoritesUseCase: GetFavoritesUseCase(repository),
+        addFavoriteUseCase: AddFavoriteUseCase(repository),
+        removeFavoriteUseCase: RemoveFavoriteUseCase(repository),
+        analyticsService: _NoopAnalyticsService(),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: <Override>[
+            favoritesControllerProvider.overrideWith((ref) => controller),
+            discoverFeedControllerProvider.overrideWith(
+              (ref) => _discoverController(),
+            ),
+          ],
+          child: const MaterialApp(home: FavoritesPage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Server route'), findsOneWidget);
+      expect(find.textContaining('0.0 km'), findsNothing);
+      expect(find.textContaining('Rezekne · 1.8 km'), findsOneWidget);
+    },
+  );
+
   fullPageTestWidgets('type filters show only matching saved plans', (
     tester,
   ) async {
@@ -85,7 +191,7 @@ void main() {
       initial: <FavoriteItemEntity>[
         _favorite('evt_1', 'Утренняя йога'),
         _favorite('place_1', 'Кофейня', category: 'place'),
-        _favorite('route_1', 'Тихий маршрут', category: 'scenario'),
+        _favorite('route_1', 'Тихий маршрут', category: 'route'),
       ],
     );
     final controller = FavoritesController(
@@ -126,7 +232,7 @@ void main() {
     expect(find.text('Кофейня'), findsNothing);
   });
 
-  fullPageTestWidgets('opens saved scenario in builder', (tester) async {
+  fullPageTestWidgets('removes saved Scenario from Favorites', (tester) async {
     final repository = _FakeFavoritesRepository(
       initial: <FavoriteItemEntity>[
         _favorite(
@@ -134,7 +240,7 @@ void main() {
           'Calm recharge scenario',
           category: 'scenario',
           targetRoute:
-              '${RouteNames.scenarioBuilder}?mood=active&steps=sport.tennis',
+              '${RouteNames.legacyScenarioBuilder}?mood=active&steps=sport.tennis',
         ),
       ],
     );
@@ -162,7 +268,7 @@ void main() {
                 builder: (context, state) => const FavoritesPage(),
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) =>
                     const Scaffold(body: Center(child: Text('Builder page'))),
               ),
@@ -173,17 +279,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('ROUTE'), findsOneWidget);
-
-    await tester.tap(find.byTooltip('More actions').first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Edit'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
+    expect(find.text('Calm recharge scenario'), findsNothing);
+    expect(find.text('ROUTE'), findsNothing);
   });
 
-  fullPageTestWidgets('opens saved scenario route on map', (tester) async {
+  fullPageTestWidgets('does not expose saved Scenario map actions', (
+    tester,
+  ) async {
     final repository = _FakeFavoritesRepository(
       initial: <FavoriteItemEntity>[
         _favorite(
@@ -191,7 +293,7 @@ void main() {
           'Calm recharge scenario',
           category: 'scenario',
           targetRoute:
-              '${RouteNames.scenarioBuilder}?mood=calm&steps=food_drinks.coffee',
+              '${RouteNames.legacyScenarioBuilder}?mood=calm&steps=food_drinks.coffee',
         ),
       ],
     );
@@ -237,16 +339,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('ROUTE'), findsOneWidget);
-
-    await tester.tap(find.byTooltip('More actions').first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
-    expect(find.text('food_drinks.coffee'), findsOneWidget);
+    expect(find.text('Calm recharge scenario'), findsNothing);
+    expect(find.byTooltip('More actions'), findsNothing);
   });
 
   fullPageTestWidgets('opens saved conditions from favorites workspace', (
@@ -289,14 +383,7 @@ void main() {
     expect(find.text('museum'), findsOneWidget);
     expect(find.text('art'), findsOneWidget);
 
-    await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Build route from saved conditions'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('social'), findsOneWidget);
-    expect(find.textContaining('museum'), findsOneWidget);
+    expect(find.byTooltip('Build route from saved conditions'), findsNothing);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -356,14 +443,7 @@ void main() {
     expect(find.text('museum'), findsOneWidget);
     expect(find.text('art'), findsOneWidget);
 
-    await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Build route from smart search'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('social'), findsOneWidget);
-    expect(find.text('museum today under 10'), findsOneWidget);
+    expect(find.byTooltip('Build route from smart search'), findsNothing);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -412,14 +492,7 @@ void main() {
     expect(find.text('120 min'), findsOneWidget);
     expect(find.text('2 stops'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Build route from smart search'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('120'), findsOneWidget);
-    expect(find.text(prompt), findsOneWidget);
-    expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
+    expect(find.byTooltip('Build route from smart search'), findsNothing);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -427,7 +500,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.textContaining('wellness_recharge.calm_walk'), findsOneWidget);
 
     await tester.pumpWidget(app());
@@ -436,10 +509,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
+    expect(find.text('route'), findsWidgets);
     expect(find.text('Calm recharge route'), findsOneWidget);
     expect(find.text(prompt), findsOneWidget);
-    expect(find.text('event'), findsOneWidget);
+    expect(find.text('route'), findsWidgets);
     expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
   });
 }
@@ -511,7 +584,7 @@ class _FavoritesRouteTestApp extends StatelessWidget {
               ),
             ),
             GoRoute(
-              path: RouteNames.scenarioBuilder,
+              path: RouteNames.legacyScenarioBuilder,
               builder: (context, state) => Scaffold(
                 body: Column(
                   children: <Widget>[
@@ -575,6 +648,12 @@ DiscoverFeedController _discoverController({
       initialSmartSearchHistory: smartSearchHistory,
     ),
     analyticsService: _NoopAnalyticsService(),
+    runtimeDefaults: const DiscoverRuntimeDefaults(
+      timezoneId: 'Europe/Riga',
+      originLat: 56.9496,
+      originLng: 24.1052,
+      currencyCode: 'EUR',
+    ),
   );
 }
 
@@ -582,9 +661,10 @@ FavoriteItemEntity _favorite(
   String id,
   String title, {
   bool isFree = true,
-  double priceAmount = 0,
+  Money priceAmount = const Money(minorUnits: 0, currencyCode: 'EUR'),
   String category = 'wellness',
   String? targetRoute,
+  double? distanceKm = 1.8,
 }) {
   return FavoriteItemEntity(
     id: id,
@@ -593,7 +673,7 @@ FavoriteItemEntity _favorite(
     city: 'Rezekne',
     category: category,
     startsAtUtc: DateTime.parse('2026-04-20T10:00:00Z'),
-    distanceKm: 1.8,
+    distanceKm: distanceKm,
     priceAmount: priceAmount,
     isFree: isFree,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
@@ -609,7 +689,7 @@ SavedSearchEntity _savedSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -624,7 +704,7 @@ SmartSearchHistoryEntity _smartSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -665,7 +745,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,
@@ -764,4 +844,10 @@ class _FakeFavoritesRepository implements FavoritesRepository {
   Future<void> removeFavorite(String itemId) async {
     _storage.removeWhere((FavoriteItemEntity element) => element.id == itemId);
   }
+}
+
+class _RefusingFavoritesRepository extends _FakeFavoritesRepository {
+  @override
+  Future<List<FavoriteItemEntity>> getFavorites() async =>
+      throw const LibraryFailure('processing_restricted');
 }

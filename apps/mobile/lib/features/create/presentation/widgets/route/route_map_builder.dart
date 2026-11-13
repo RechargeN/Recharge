@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/localization/l10n_context.dart';
 import '../../../../../core/geo/geo_bounds.dart';
 import '../../../../../core/geo/geo_point.dart';
 import '../../../../../core/map/map_scene.dart';
@@ -41,8 +42,8 @@ class _RouteMapBuilderState extends State<RouteMapBuilder> {
     return Semantics(
       container: true,
       label: _isFreehand
-          ? 'Offline trail map. Draw a continuous route with one finger.'
-          : 'Offline trail map. Tap to add a route anchor.',
+          ? context.l10n.createRouteOfflineTrailMapDrawContinuousRoute
+          : context.l10n.createRouteOfflineTrailMapTapAddRoute,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[

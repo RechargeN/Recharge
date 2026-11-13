@@ -3,6 +3,8 @@ import 'dart:collection';
 const int bookingContractSchemaVersion = 1;
 const int bookingPolicyVersion = 1;
 const int bookingMaxConcurrentFiniteAllocations = 5;
+const int bookingMaxActiveUnlimitedBookings = 50;
+const int bookingMaxSafeInteger = 9007199254740991;
 
 enum BookingAdmissionMode { rsvp, booking, application }
 
@@ -45,10 +47,16 @@ enum BookingResultKind {
   unsupportedContract,
 }
 
+enum BookingCommandOutcome { reconfirmed }
+
 enum BookingErrorCode {
   notAuthenticated('not_authenticated'),
   notAuthorized('not_authorized'),
   featureDisabled('feature_disabled'),
+  appCheckRequired('app_check_required'),
+  sessionRefreshRequired('session_refresh_required'),
+  sessionRevoked('session_revoked'),
+  sessionExpired('session_expired'),
   eventUnavailable('event_unavailable'),
   occurrenceCancelled('occurrence_cancelled'),
   registrationNotOpen('registration_not_open'),
@@ -60,9 +68,14 @@ enum BookingErrorCode {
   soldOut('sold_out'),
   alreadyActive('already_active'),
   concurrencyCapReached('concurrency_cap_reached'),
+  activeBookingLimitReached('active_booking_limit_reached'),
+  rateLimited('rate_limited'),
   revisionConflict('revision_conflict'),
   holdExpired('hold_expired'),
   cancellationDeadlinePassed('cancellation_deadline_passed'),
+  reconfirmationNotRequired('reconfirmation_not_required'),
+  reconfirmationDeadlinePassed('reconfirmation_deadline_passed'),
+  materialRevisionMismatch('material_revision_mismatch'),
   idempotencyConflict('idempotency_conflict'),
   contention('contention'),
   forbidden('forbidden'),
@@ -80,6 +93,7 @@ enum BookingTerminalReason {
   organizerCancelled,
   applicationRejected,
   occurrenceCancelled,
+  privacyErasure,
   eventCancelled,
   missedReconfirmation,
   waitlistOfferDeclined,
@@ -128,8 +142,10 @@ String requireNonBlankString(Object? raw, String field) {
 }
 
 int requireNonNegativeInt(Object? raw, String field) {
-  if (raw is! int || raw < 0) {
-    throw BookingContractFormatException('$field must be a non-negative int');
+  if (raw is! int || raw < 0 || raw > bookingMaxSafeInteger) {
+    throw BookingContractFormatException(
+      '$field must be a non-negative safe int',
+    );
   }
   return raw;
 }

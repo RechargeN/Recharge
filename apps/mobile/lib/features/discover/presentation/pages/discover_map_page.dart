@@ -1,3 +1,8 @@
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
+import '../../../../core/localization/user_message_catalog.dart';
+import '../discover_formats.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -11,11 +16,11 @@ import '../../../../app/application/scenario_object_intake_providers.dart';
 import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
-import '../../../../core/geo/geometry_encoding.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/application/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/auth_gate_sheet.dart';
-import '../../../create/application/create_taxonomy.dart';
 import '../../../favorites/application/controllers/favorites_controller.dart';
 import '../../../favorites/application/favorites_providers.dart';
 import '../../../favorites/domain/entities/favorite_item_entity.dart';
@@ -37,6 +42,9 @@ import '../widgets/scenario_intake_marker_icon_factory.dart';
 import '../widgets/scenario_intake_selection_tray.dart';
 import '../widgets/map_marker_utils.dart';
 import '../widgets/map_style.dart';
+import '../widgets/published_route_polyline_builder.dart';
+import '../widgets/route_catalog_labels.dart';
+import '../widgets/route_segment_polylines.dart';
 
 class DiscoverMapPage extends ConsumerStatefulWidget {
   const DiscoverMapPage({
@@ -66,15 +74,16 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
   final Set<String> _loadingMarkers = <String>{};
 
   static final List<_MapFilterOption> _categoryFilters = <_MapFilterOption>[
-    const _MapFilterOption(
+    _MapFilterOption(
       id: null,
-      label: 'All',
+      // The "All" option; its text comes from l10n when shown.
+      label: '',
       icon: Icons.grid_view_rounded,
     ),
     for (final RechargeContentGroup group in rechargeVisibleContentGroups)
       _MapFilterOption(
         id: group.id,
-        label: group.title,
+        label: group.id,
         icon: _mapCategoryIcon(group.id),
       ),
   ];
@@ -160,13 +169,17 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(selection.active ? 'Select for Scenario' : 'Map'),
+        title: Text(
+          selection.active
+              ? context.l10n.discoverSelectForScenario
+              : context.l10n.discoverMap,
+        ),
         actions: <Widget>[
           if (scenarioRoute == null && multiSelectEnabled)
             IconButton(
               tooltip: selection.active
-                  ? 'Cancel Scenario selection'
-                  : 'Select for Scenario',
+                  ? context.l10n.discoverCancelScenarioSelection
+                  : context.l10n.discoverSelectForScenario,
               onPressed: selection.active
                   ? _scenarioSelectionController.cancel
                   : () => _startScenarioSelection(authController),
@@ -175,7 +188,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               ),
             ),
           IconButton(
-            tooltip: 'Search',
+            tooltip: context.l10n.discoverSearch,
             onPressed: () => context.go(RouteNames.search),
             icon: const Icon(Icons.search_rounded),
           ),
@@ -305,7 +318,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
                         ),
                       ),
                       icon: const Icon(Icons.travel_explore_rounded),
-                      label: const Text('Search this area'),
+                      label: Text(context.l10n.discoverSearchThisArea),
                     ),
                   ),
                 ),
@@ -356,7 +369,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
                 final DiscoverQuery query = state.draftQuery.copyWith(
                   queryText: _searchController.text,
                 );
-                context.go(mapCreateLocationForQuery(query));
+                context.go(mapCreateLocationForQuery(context.l10n, query));
               },
               savedSearches: showSavedIntents
                   ? state.savedSearches
@@ -379,7 +392,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
                 controller.applySmartSearchHistory(item);
               },
               onCreateSmartSearch: (SmartSearchHistoryEntity item) {
-                context.go(mapCreateLocationForSmartSearch(item));
+                context.go(mapCreateLocationForSmartSearch(context.l10n, item));
               },
               onRouteSmartSearch: (SmartSearchHistoryEntity item) {
                 context.go(mapScenarioBuilderLocationForSmartSearch(item));
@@ -393,7 +406,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
               children: <Widget>[
                 FloatingActionButton.small(
                   heroTag: 'my_location',
-                  tooltip: 'Use current location',
+                  tooltip: context.l10n.discoverUseCurrentLocation,
                   onPressed: controller.useCurrentLocation,
                   backgroundColor: Colors.white,
                   foregroundColor: RechargeTheme.travelGreenDark,
@@ -402,7 +415,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
                 const SizedBox(height: 8),
                 FloatingActionButton.small(
                   heroTag: 'recenter',
-                  tooltip: 'Recenter',
+                  tooltip: context.l10n.discoverRecenter,
                   onPressed: () {
                     controller.recenterToAppliedArea();
                     _mapController?.animateCamera(
@@ -440,13 +453,24 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
                 _scenarioSelectionController.toggle(item);
               } else {
                 controller.selectItem(item.id);
-                _mapController?.animateCamera(
-                  CameraUpdate.newLatLng(LatLng(item.latitude, item.longitude)),
-                );
+                if (_hasMapPoint(item)) {
+                  _mapController?.animateCamera(
+                    CameraUpdate.newLatLng(
+                      LatLng(item.latitude, item.longitude),
+                    ),
+                  );
+                }
               }
             },
             onOpenDetails: (DiscoverItemEntity item) {
-              context.push('${RouteNames.discoverDetails}/${item.id}');
+              context.push(
+                RouteNames.discoverDetailsCanonicalFor(
+                  CatalogObjectRef(
+                    objectType: item.catalogObjectType,
+                    objectId: item.id,
+                  ),
+                ),
+              );
             },
             onToggleSave: (DiscoverItemEntity item) => _onMapSaveTap(
               item: item,
@@ -577,7 +601,9 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
     }
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Added ${result.itemCount} to Scenario')),
+      SnackBar(
+        content: Text(context.l10n.discoverAddedToScenario(result.itemCount)),
+      ),
     );
   }
 
@@ -585,7 +611,13 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
     DiscoverFeedController controller,
     Map<String, String> seedParameters,
   ) async {
-    final double? budgetMax = _doubleFromSeed(seedParameters['budgetMax']);
+    final String? rawBudgetMax = seedParameters['budgetMax'];
+    final Money? budgetMax = rawBudgetMax == null
+        ? null
+        : Money.tryParseMajor(
+            rawBudgetMax,
+            currencyCode: controller.marketCurrencyCode,
+          );
     final DateTime? dateFrom = _dateFromSeed(seedParameters['dateFrom']);
     final DateTime? dateTo = _dateFromSeed(seedParameters['dateTo']);
     final double? itemLat = _doubleFromSeed(seedParameters['itemLat']);
@@ -667,7 +699,9 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
   }) {
     final List<DiscoverItemEntity> items = state.items;
 
-    final Set<Marker> markers = items.map((DiscoverItemEntity item) {
+    final Set<Marker> markers = items.where(_hasMapPoint).map((
+      DiscoverItemEntity item,
+    ) {
       final bool selected = item.id == selectedItemId;
       final int? scenarioOrder = scenarioSelection.orderOf(item.id);
       final BitmapDescriptor? customIcon = _customMarkers[item.id];
@@ -683,7 +717,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
                   ? BitmapDescriptor.hueOrange
                   : selected
                   ? BitmapDescriptor.hueYellow
-                  : item.isPublishedRoute
+                  : item.isRoute
                   ? BitmapDescriptor.hueAzure
                   : BitmapDescriptor.hueGreen,
             ),
@@ -692,11 +726,20 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
           title: scenarioOrder == null
               ? item.title
               : '$scenarioOrder. ${item.title}',
-          snippet: item.isPublishedRoute
-              ? _publishedRouteMapMetric(item)
+          snippet: item.isRoute
+              ? _publishedRouteMapMetric(context.l10n, item)
+              : item.activityCatalog != null
+              ? (item.activityCatalog!.contributionKind == null
+                    ? context.l10n.discoverNoContribution
+                    : context.l10n.discoverOptionalContribution)
               : item.isFree
-              ? 'Free'
-              : '${item.priceAmount.toStringAsFixed(0)} €',
+              ? context.l10n.discoverFree
+              : item.priceAmount == null
+              ? '—'
+              : RechargeFormats.money(
+                  item.priceAmount!,
+                  context.l10n.localeName,
+                ),
         ),
       );
     }).toSet();
@@ -715,7 +758,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
           onTap: () => onScenarioStopTap?.call(entry.key),
           infoWindow: InfoWindow(
             title: '${entry.key + 1}. ${entry.value.title}',
-            snippet: '${entry.value.durationMinutes} min',
+            snippet: context.l10n.discoverMinutes(entry.value.durationMinutes),
           ),
         ),
       ),
@@ -730,37 +773,23 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
   ) {
     final Set<Polyline> polylines = <Polyline>{};
     final publishedRoute = selectedItem?.publishedRoute;
-    if (publishedRoute != null && publishedRoute.isCoherent) {
-      try {
-        final points = GeometryEncoding.decode(
-          publishedRoute.fullEncodedPolyline,
-          policy: GeometryEncodingPolicy(
-            precision: publishedRoute.encodingPrecision,
-          ),
-        );
-        if (points.length >= 2) {
-          polylines.add(
-            Polyline(
-              polylineId: PolylineId(
-                'published_route_${publishedRoute.routeId}_'
-                '${publishedRoute.versionId}',
-              ),
-              points: points
-                  .map((point) => LatLng(point.latitude, point.longitude))
-                  .toList(growable: false),
-              color: RechargeTheme.travelGreen,
-              width: 6,
-              startCap: Cap.roundCap,
-              endCap: Cap.roundCap,
-              jointType: JointType.round,
-            ),
-          );
-        }
-      } on FormatException {
-        // A malformed snapshot is ignored instead of triggering rerouting.
-      } on RangeError {
-        // Unsupported precision is treated as an unreadable snapshot.
-      }
+    if (publishedRoute != null) {
+      // Extracted to a pure function (DTL-RTE-01), reused by
+      // RouteDetailsRenderer's map-hero — only this branch moved; the
+      // Scenario-route branch below is untouched.
+      final Polyline? polyline = buildPublishedRoutePolyline(publishedRoute);
+      if (polyline != null) polylines.add(polyline);
+    }
+    // DTL-RTE-02 RD-04: a Catalog Route shows only its preview line, one line
+    // per segment, gaps left open.
+    final routeCatalog = selectedItem?.routeCatalog;
+    if (routeCatalog != null) {
+      polylines.addAll(
+        buildRouteSegmentPolylines(
+          routeCatalog.preview,
+          idPrefix: 'catalog_route_${selectedItem!.id}',
+        ),
+      );
     }
     if (scenarioRoute != null && scenarioRoute.stops.length >= 2) {
       polylines.add(
@@ -849,7 +878,12 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
         action: ProtectedAction.favorite,
         sourceScreen: 'discover_map',
         sourceAction: 'favorite_tap',
-        originRoute: '${RouteNames.discoverDetails}/${item.id}',
+        originRoute: RouteNames.discoverDetailsCanonicalFor(
+          CatalogObjectRef(
+            objectType: item.catalogObjectType,
+            objectId: item.id,
+          ),
+        ),
         onContinueAsGuest: () {
           authController.trackGuestContinueClicked(
             sourceScreen: 'discover_map',
@@ -893,27 +927,46 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       return;
     }
 
-    await favoritesController.addFavorite(
-      _toScenarioFavorite(route),
-      sourceScreen: 'discover_map',
-    );
+    try {
+      await favoritesController.addFavorite(
+        _toScenarioFavorite(route),
+        sourceScreen: 'discover_map',
+      );
+    } on CodedRefusal catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            UserMessageCatalog.forError(
+              context.l10n,
+              error,
+              fallback: context.l10n.errorGeneric,
+            ),
+          ),
+        ),
+      );
+      return;
+    }
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Scenario saved')));
+    ).showSnackBar(SnackBar(content: Text(context.l10n.discoverScenarioSaved)));
   }
 
   Future<void> _copyScenarioRoute(_ScenarioMapRoute route) async {
-    await Clipboard.setData(ClipboardData(text: _scenarioRouteSummary(route)));
+    await Clipboard.setData(
+      ClipboardData(text: _scenarioRouteSummary(context.l10n, route)),
+    );
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Scenario copied')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.discoverScenarioCopied)),
+    );
   }
 
   FavoriteItemEntity _toFavorite(DiscoverItemEntity item) {
     return FavoriteItemEntity(
       id: item.id,
+      objectType: item.objectKind.name,
       title: item.title,
       subtitle: item.subtitle,
       city: item.city,
@@ -935,29 +988,32 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
         .join('_');
     return FavoriteItemEntity(
       id: 'scenario_map_${route.moodKey}_$categoryKey',
-      title: '${route.moodLabel} recharge scenario',
+      title: context.l10n.discoverMoodRechargeScenario(route.moodKey),
       subtitle:
-          '${route.stops.length} stops · '
-          '${route.totalDurationMinutes} min',
-      city: 'Riga',
+          '${context.l10n.discoverStops(route.stops.length)} · '
+          '${context.l10n.discoverMinutes(route.totalDurationMinutes)}',
+      city: 'Riga', // l10n-ignore: market city data
       category: 'scenario',
       startsAtUtc: now,
       distanceKm: route.totalDistanceKm,
       priceAmount: route.totalPriceAmount,
-      isFree: route.totalPriceAmount == 0,
+      isFree: route.totalPriceAmount.minorUnits == 0,
       savedAtUtc: now,
       targetRoute: route.builderLocation,
     );
   }
 }
 
-String _publishedRouteMapMetric(DiscoverItemEntity item) {
+String _publishedRouteMapMetric(
+  AppLocalizations l10n,
+  DiscoverItemEntity item,
+) {
+  final routeCatalog = item.routeCatalog;
+  if (routeCatalog != null) return routeCatalogMetricLabel(l10n, routeCatalog);
   final route = item.publishedRoute;
-  if (route == null) return 'Route';
-  final String distance =
-      '${(route.distanceMeters / 1000).toStringAsFixed(1)} км';
-  final int minutes = (route.durationSeconds / 60).round();
-  return '$distance · $minutes min';
+  if (route == null) return l10n.discoverRouteLabel;
+  return '${discoverKm(l10n, route.distanceMeters / 1000)} · '
+      '${l10n.discoverMinutes((route.durationSeconds / 60).round())}';
 }
 
 bool _hasSearchSeed(Map<String, String> seedParameters) {
@@ -1013,12 +1069,12 @@ DateTime? _dateFromSeed(String? value) {
   return DateTime.tryParse(value.trim())?.toUtc();
 }
 
-String mapCreateLocationForQuery(DiscoverQuery query) {
+String mapCreateLocationForQuery(AppLocalizations l10n, DiscoverQuery query) {
   final Map<String, String> params = <String, String>{
     'source': 'map',
     'type': 'event',
-    'title': _mapCreateTitleForQuery(query),
-    'subtitle': _mapCreateSubtitleForQuery(query),
+    'title': _mapCreateTitleForQuery(l10n, query),
+    'subtitle': _mapCreateSubtitleForQuery(l10n, query),
     'q': query.queryText.trim(),
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
@@ -1044,7 +1100,10 @@ String mapCreateLocationForSavedSearch(SavedSearchEntity search) {
   );
 }
 
-String mapCreateLocationForSmartSearch(SmartSearchHistoryEntity item) {
+String mapCreateLocationForSmartSearch(
+  AppLocalizations l10n,
+  SmartSearchHistoryEntity item,
+) {
   final SmartSearchParseResult? parseResult = _mapSmartRouteParseForSmartSearch(
     item,
   );
@@ -1054,21 +1113,22 @@ String mapCreateLocationForSmartSearch(SmartSearchHistoryEntity item) {
       path: RouteNames.create,
       queryParameters: <String, String>{
         ..._mapSmartRouteParameters(parseResult, includeMode: false),
-        'source': 'scenario',
-        'type': 'event',
-        'title': '${_capitalized(routeIntent.mood)} recharge route',
+        'source': 'smart_route_seed',
+        'type': 'route',
+        'title':
+            '${_capitalized(routeIntent.mood)} recharge route', // l10n-ignore: Create seed prefill data
         'subtitle':
-            '${routeIntent.stepCategories.length} stops · '
-            '${routeIntent.durationMinutes} min · smart route',
+            '${routeIntent.stepCategories.length} stops · ' // l10n-ignore: Create seed prefill data
+            '${routeIntent.durationMinutes} min · smart route', // l10n-ignore: Create seed prefill data
         'q': parseResult.originalText.trim(),
-        'category': 'scenario',
+        'category': 'route',
       },
     ).toString();
   }
   return _mapCreateLocationForQuery(
     item.query,
     source: 'smart_search',
-    title: _mapTitleForQuery(item.query),
+    title: _mapTitleForQuery(l10n, item.query),
     subtitle: item.prompt,
   );
 }
@@ -1079,11 +1139,13 @@ String mapScenarioBuilderLocationForSmartSearch(SmartSearchHistoryEntity item) {
   );
   if (parseResult != null) {
     return Uri(
-      path: RouteNames.scenarioBuilder,
-      queryParameters: _mapSmartRouteParameters(
-        parseResult,
-        includeMode: false,
-      ),
+      path: RouteNames.create,
+      queryParameters: <String, String>{
+        ..._mapSmartRouteParameters(parseResult, includeMode: false),
+        'source': 'smart_route_seed',
+        'type': 'route',
+        'category': 'route',
+      },
     ).toString();
   }
   return mapScenarioBuilderLocationForQuery(item.query, prompt: item.prompt);
@@ -1120,8 +1182,13 @@ String mapScenarioBuilderLocationForQuery(
     if (routePrompt.isNotEmpty) 'prompt': routePrompt,
   };
   return Uri(
-    path: RouteNames.scenarioBuilder,
-    queryParameters: params,
+    path: RouteNames.create,
+    queryParameters: <String, String>{
+      ...params,
+      'source': 'saved_search_route_seed',
+      'type': 'route',
+      'category': 'route',
+    },
   ).toString();
 }
 
@@ -1139,7 +1206,7 @@ Map<String, String> _mapSmartRouteParameters(
 }) {
   final SmartRouteIntent routeIntent = parseResult.routeIntent!;
   return <String, String>{
-    if (includeMode) 'mode': 'scenario',
+    if (includeMode) 'mode': 'route',
     'mood': routeIntent.mood,
     'duration': routeIntent.durationMinutes.toString(),
     'free': routeIntent.freeOnly ? '1' : '0',
@@ -1249,26 +1316,31 @@ Map<String, String> _mapTimeRouteParameters(DiscoverQuery query) {
   };
 }
 
-String _mapCreateTitleForQuery(DiscoverQuery query) {
+String _mapCreateTitleForQuery(AppLocalizations l10n, DiscoverQuery query) {
   final String queryText = query.queryText.trim();
   if (queryText.isNotEmpty) {
-    return '${queryText[0].toUpperCase()}${queryText.substring(1)} idea';
+    // The reader's own query feeds the Create seed title, as before.
+    return '${queryText[0].toUpperCase()}${queryText.substring(1)} idea'; // l10n-ignore: Create seed prefill data
   }
   if (query.selectedCategoryIds.isNotEmpty) {
-    return '${query.selectedCategoryIds.first} idea';
+    return l10n.discoverIdeaForCategory(
+      taxonomyLabel(l10n, query.selectedCategoryIds.first),
+    );
   }
-  return 'Map area idea';
+  return l10n.discoverMapAreaIdea;
 }
 
-String _mapTitleForQuery(DiscoverQuery query) {
+String _mapTitleForQuery(AppLocalizations l10n, DiscoverQuery query) {
   final String queryText = query.queryText.trim();
   if (queryText.isNotEmpty) {
     return queryText[0].toUpperCase() + queryText.substring(1);
   }
   if (query.selectedCategoryIds.isNotEmpty) {
-    return '${query.selectedCategoryIds.first} idea';
+    return l10n.discoverIdeaForCategory(
+      taxonomyLabel(l10n, query.selectedCategoryIds.first),
+    );
   }
-  return 'Recharge idea';
+  return l10n.discoverRechargeIdea;
 }
 
 String _capitalized(String value) {
@@ -1277,14 +1349,15 @@ String _capitalized(String value) {
   return trimmed[0].toUpperCase() + trimmed.substring(1);
 }
 
-String _mapCreateSubtitleForQuery(DiscoverQuery query) {
+String _mapCreateSubtitleForQuery(AppLocalizations l10n, DiscoverQuery query) {
   final List<String> parts = <String>[
-    'Map area',
+    'Map area', // l10n-ignore: Create seed prefill data
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
-    if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.freeOnly) 'free', // l10n-ignore: Create seed prefill data
+    if (query.budgetMax != null)
+      'under ${query.budgetMax!.toStringAsFixed(0)}', // l10n-ignore: Create seed prefill data
     query.unlimitedRadius
-        ? 'any area'
+        ? 'any area' // l10n-ignore: Create seed prefill data
         : '${(query.radiusMeters / 1000).round()} km',
   ];
   return parts.join(' · ');
@@ -1294,39 +1367,56 @@ String _mapPromptForQuery(DiscoverQuery query) {
   final List<String> parts = <String>[
     if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
-    if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
+    if (query.freeOnly) 'free', // l10n-ignore: Scenario builder prompt
+    if (query.budgetMax != null)
+      'under ${query.budgetMax!.toStringAsFixed(0)}', // l10n-ignore: Scenario builder prompt
     query.unlimitedRadius
-        ? 'any area'
-        : 'near ${(query.radiusMeters / 1000).round()} km',
+        ? 'any area' // l10n-ignore: Scenario builder prompt
+        : 'near ${(query.radiusMeters / 1000).round()} km', // l10n-ignore: Scenario builder prompt
   ];
   return parts.join(' · ');
 }
 
-String _mapIntentRadiusLabel(DiscoverQuery query) {
-  return query.unlimitedRadius
-      ? 'Any area'
-      : '${(query.radiusMeters / 1000).round()} km';
+/// The reader-facing version of [_mapPromptForQuery].
+String _mapPromptTextForQuery(AppLocalizations l10n, DiscoverQuery query) {
+  return <String>[
+    if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
+    if (query.selectedCategoryIds.isNotEmpty)
+      taxonomyLabel(l10n, query.selectedCategoryIds.first),
+    ...discoverQueryConditionTexts(l10n, query),
+  ].join(' · ');
 }
 
-String _mapSmartSearchSubtitle(SmartSearchHistoryEntity item) {
+String _mapIntentRadiusLabel(AppLocalizations l10n, DiscoverQuery query) {
+  return query.unlimitedRadius
+      ? l10n.discoverAnyArea
+      : l10n.discoverDistanceKm('${(query.radiusMeters / 1000).round()}');
+}
+
+String _mapSmartSearchSubtitle(
+  AppLocalizations l10n,
+  SmartSearchHistoryEntity item,
+) {
   final SmartSearchParseResult? parseResult = _mapSmartRouteParseForSmartSearch(
     item,
   );
-  if (parseResult == null) return _mapPromptForQuery(item.query);
+  if (parseResult == null) return _mapPromptTextForQuery(l10n, item.query);
   return parseResult.routeIntent!.stepCategories
-      .map(createTaxonomyLabelForPath)
+      .map((String category) => taxonomyLabel(l10n, category))
       .join(' · ');
 }
 
-String _mapSmartSearchTrailingLabel(SmartSearchHistoryEntity item) {
+String _mapSmartSearchTrailingLabel(
+  AppLocalizations l10n,
+  SmartSearchHistoryEntity item,
+) {
   final SmartSearchParseResult? parseResult = _mapSmartRouteParseForSmartSearch(
     item,
   );
-  if (parseResult == null) return _mapIntentRadiusLabel(item.query);
+  if (parseResult == null) return _mapIntentRadiusLabel(l10n, item.query);
   final SmartRouteIntent routeIntent = parseResult.routeIntent!;
-  return '${routeIntent.durationMinutes} min · '
-      '${routeIntent.stepCategories.length} stops';
+  return '${l10n.discoverMinutes(routeIntent.durationMinutes)} · '
+      '${l10n.discoverStops(routeIntent.stepCategories.length)}';
 }
 
 String _mapScenarioMoodForQuery(DiscoverQuery query) {
@@ -1352,11 +1442,13 @@ String _mapScenarioMoodForQuery(DiscoverQuery query) {
 String _mapMarketCityLabel(String marketCityId) {
   switch (marketCityId.toLowerCase()) {
     case 'riga':
-      return 'Riga';
+      return 'Riga'; // l10n-ignore: market city name
     case 'rezekne':
-      return 'Rezekne';
+      return 'Rezekne'; // l10n-ignore: market city name
   }
-  return marketCityId.trim().isEmpty ? 'Riga' : _capitalized(marketCityId);
+  return marketCityId.trim().isEmpty
+      ? 'Riga' // l10n-ignore: market city name
+      : _capitalized(marketCityId);
 }
 
 class _MapFilterPanel extends StatelessWidget {
@@ -1429,7 +1521,7 @@ class _MapFilterPanel extends StatelessWidget {
                   textInputAction: TextInputAction.search,
                   onSubmitted: (_) => onSubmitSearch(),
                   decoration: InputDecoration(
-                    hintText: 'Search on map',
+                    hintText: context.l10n.discoverSearchOnMap,
                     prefixIcon: const Icon(Icons.search_rounded),
                     suffixIcon: SizedBox(
                       width: 96,
@@ -1437,12 +1529,12 @@ class _MapFilterPanel extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
                           IconButton(
-                            tooltip: 'Clear',
+                            tooltip: context.l10n.discoverClear,
                             onPressed: onClearSearch,
                             icon: const Icon(Icons.close_rounded),
                           ),
                           IconButton(
-                            tooltip: 'Search',
+                            tooltip: context.l10n.discoverSearch,
                             onPressed: onSubmitSearch,
                             icon: const Icon(Icons.arrow_forward_rounded),
                           ),
@@ -1464,7 +1556,11 @@ class _MapFilterPanel extends StatelessWidget {
                             return ChoiceChip(
                               selected: selectedCategoryId == filter.id,
                               avatar: Icon(filter.icon, size: 18),
-                              label: Text(filter.label),
+                              label: Text(
+                                filter.id == null
+                                    ? context.l10n.discoverAll
+                                    : taxonomyLabel(context.l10n, filter.id!),
+                              ),
                               onSelected: (_) => onCategorySelected(filter.id),
                             );
                           },
@@ -1477,7 +1573,7 @@ class _MapFilterPanel extends StatelessWidget {
                     FilterChip(
                       selected: freeOnly,
                       avatar: const Icon(Icons.bolt_outlined, size: 18),
-                      label: const Text('Free'),
+                      label: Text(context.l10n.discoverFree),
                       onSelected: onFreeOnlyChanged,
                     ),
                   ],
@@ -1487,7 +1583,7 @@ class _MapFilterPanel extends StatelessWidget {
                   children: <Widget>[
                     Expanded(
                       child: Text(
-                        '$resultCount places and activities in area',
+                        context.l10n.discoverResultsInArea(resultCount),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelMedium
@@ -1502,7 +1598,7 @@ class _MapFilterPanel extends StatelessWidget {
                     const SizedBox(width: 8),
                     IconButton.filledTonal(
                       onPressed: onCreateHere,
-                      tooltip: 'Create here',
+                      tooltip: context.l10n.discoverCreateHere,
                       icon: const Icon(
                         Icons.add_location_alt_outlined,
                         size: 20,
@@ -1560,14 +1656,14 @@ class _MapSavedIntentShelf extends StatelessWidget {
       ...savedSearches.map(
         (SavedSearchEntity search) => _MapSavedIntentCard(
           icon: Icons.tune,
-          label: 'Saved',
+          label: context.l10n.discoverSaved,
           title: search.title,
           subtitle: search.subtitle,
           query: search.query,
-          trailingLabel: _mapIntentRadiusLabel(search.query),
-          applyTooltip: 'Apply saved conditions to map',
-          createTooltip: 'Create listing from saved conditions',
-          routeTooltip: 'Build route from saved conditions',
+          trailingLabel: _mapIntentRadiusLabel(context.l10n, search.query),
+          applyTooltip: context.l10n.discoverApplySavedToMap,
+          createTooltip: context.l10n.discoverCreateFromSaved,
+          routeTooltip: context.l10n.discoverRouteFromSaved,
           onApply: () => onApplySavedSearch(search),
           onCreate: () => onCreateSavedSearch(search),
           onRoute: () => onRouteSavedSearch(search),
@@ -1576,14 +1672,14 @@ class _MapSavedIntentShelf extends StatelessWidget {
       ...smartSearchHistory.map(
         (SmartSearchHistoryEntity item) => _MapSavedIntentCard(
           icon: Icons.psychology_alt_outlined,
-          label: 'Smart',
+          label: context.l10n.discoverSmart,
           title: item.prompt,
-          subtitle: _mapSmartSearchSubtitle(item),
+          subtitle: _mapSmartSearchSubtitle(context.l10n, item),
           query: item.query,
-          trailingLabel: _mapSmartSearchTrailingLabel(item),
-          applyTooltip: 'Apply smart search to map',
-          createTooltip: 'Create listing from smart search',
-          routeTooltip: 'Build route from smart search',
+          trailingLabel: _mapSmartSearchTrailingLabel(context.l10n, item),
+          applyTooltip: context.l10n.discoverApplySmartToMap,
+          createTooltip: context.l10n.discoverCreateFromSmart,
+          routeTooltip: context.l10n.discoverRouteFromSmart,
           onApply: () => onApplySmartSearch(item),
           onCreate: () => onCreateSmartSearch(item),
           onRoute: () => onRouteSmartSearch(item),
@@ -1604,7 +1700,7 @@ class _MapSavedIntentShelf extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Text(
-              'Saved on map',
+              context.l10n.discoverSavedOnMap,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w800,
@@ -1718,7 +1814,7 @@ class _MapSavedIntentCard extends StatelessWidget {
                       child: FilledButton.icon(
                         onPressed: onApply,
                         icon: const Icon(Icons.travel_explore),
-                        label: const Text('Apply'),
+                        label: Text(context.l10n.discoverApply),
                       ),
                     ),
                   ),
@@ -1833,7 +1929,7 @@ class _MapResultsSheet extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      'Map results',
+                      context.l10n.discoverMapResults,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
@@ -1883,14 +1979,18 @@ class _MapResultsSheet extends StatelessWidget {
                 )
               else if (state.status == DiscoverFeedStatus.error)
                 _SheetStateMessage(
-                  message: state.message ?? 'Map search failed',
-                  actionLabel: 'Retry',
+                  message:
+                      discoverFeedNoticeText(context.l10n, state.message) ??
+                      context.l10n.discoverMapSearchFailed,
+                  actionLabel: context.l10n.discoverRetry,
                   onAction: onRetry,
                 )
               else if (state.items.isEmpty)
                 _SheetStateMessage(
-                  message: state.message ?? 'No activities in this area',
-                  actionLabel: 'Search this area',
+                  message:
+                      discoverFeedNoticeText(context.l10n, state.message) ??
+                      context.l10n.discoverNoActivitiesInArea,
+                  actionLabel: context.l10n.discoverSearchThisArea,
                   onAction: onApplyArea,
                 )
               else ...<Widget>[
@@ -2003,7 +2103,7 @@ class _ScenarioRouteCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Scenario route',
+                    context.l10n.discoverScenarioRoute,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: RechargeTheme.travelGreenDark,
                       fontWeight: FontWeight.w900,
@@ -2011,7 +2111,7 @@ class _ScenarioRouteCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${route.stops.length} stops',
+                  context.l10n.discoverStops(route.stops.length),
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: RechargeTheme.travelGreenDark,
                     fontWeight: FontWeight.w800,
@@ -2021,16 +2121,17 @@ class _ScenarioRouteCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              '${route.moodLabel} · ${route.totalDurationMinutes} min · '
-              '${route.totalDistanceKm.toStringAsFixed(1)} km · '
-              '${route.priceLabel}',
+              '${route.moodText(context.l10n)} · '
+              '${context.l10n.discoverMinutes(route.totalDurationMinutes)} · '
+              '${discoverKm(context.l10n, route.totalDistanceKm)} · '
+              '${route.priceText(context.l10n)}',
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
-            if (route.promptLabel.isNotEmpty) ...<Widget>[
+            if (route.promptText(context.l10n).isNotEmpty) ...<Widget>[
               const SizedBox(height: 8),
-              _ScenarioIntentBanner(label: route.promptLabel),
+              _ScenarioIntentBanner(label: route.promptText(context.l10n)),
             ],
             if (selectedStopIndex != null) ...<Widget>[
               const SizedBox(height: 8),
@@ -2117,9 +2218,11 @@ class _ScenarioRouteCard extends StatelessWidget {
                                 const SizedBox(height: 2),
                                 Text(
                                   completed
-                                      ? 'Completed · ${step.durationMinutes} min'
-                                      : '${createTaxonomyLabelForPath(step.category)} · '
-                                            '${step.durationMinutes} min',
+                                      ? context.l10n.discoverCompletedDuration(
+                                          step.durationMinutes,
+                                        )
+                                      : '${taxonomyLabel(context.l10n, step.category)} · '
+                                            '${context.l10n.discoverMinutes(step.durationMinutes)}',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -2164,18 +2267,18 @@ class _ScenarioRouteCard extends StatelessWidget {
                     child: FilledButton.icon(
                       onPressed: onOpenBuilder,
                       icon: const Icon(Icons.edit_location_alt),
-                      label: const Text('Edit route'),
+                      label: Text(context.l10n.discoverEditRoute),
                     ),
                   ),
                   const SizedBox(width: 8),
                   IconButton.outlined(
-                    tooltip: 'Search similar route',
+                    tooltip: context.l10n.discoverSearchSimilarRoute,
                     onPressed: onSearchSimilar,
                     icon: const Icon(Icons.search),
                   ),
                   const SizedBox(width: 8),
                   IconButton.filledTonal(
-                    tooltip: 'Create route listing',
+                    tooltip: context.l10n.discoverCreateRouteListing,
                     onPressed: onCreateRoute,
                     icon: const Icon(Icons.add_business_outlined),
                   ),
@@ -2211,7 +2314,7 @@ class _ScenarioIntentBanner extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Intent: $label',
+                '${context.l10n.discoverIntentLabel} $label',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -2257,10 +2360,10 @@ class _FocusedStopBanner extends StatelessWidget {
             Expanded(
               child: Text(
                 routeComplete
-                    ? 'Completed at stop ${index + 1}: ${step.title}'
+                    ? '${context.l10n.discoverCompletedAtStopLabel(index + 1)} ${step.title}'
                     : routeActive
-                    ? 'Now: stop ${index + 1} · ${step.title}'
-                    : 'Focused stop ${index + 1}: ${step.title}',
+                    ? '${context.l10n.discoverNowAtStopLabel(index + 1)} ${step.title}'
+                    : '${context.l10n.discoverFocusedStopLabel(index + 1)} ${step.title}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -2306,8 +2409,7 @@ class _RouteCompleteBanner extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Route complete · ${route.stops.length} stops · '
-                    '${route.totalDurationMinutes} min',
+                    '${context.l10n.discoverRouteComplete} · ${context.l10n.discoverStops(route.stops.length)} · ${context.l10n.discoverMinutes(route.totalDurationMinutes)}',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: colorScheme.tertiary,
                       fontWeight: FontWeight.w900,
@@ -2327,7 +2429,7 @@ class _RouteCompleteBanner extends StatelessWidget {
                             await onSave!();
                           },
                     icon: const Icon(Icons.bookmark_add),
-                    label: const Text('Save'),
+                    label: Text(context.l10n.discoverSave),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -2339,7 +2441,7 @@ class _RouteCompleteBanner extends StatelessWidget {
                             await onCopy!();
                           },
                     icon: const Icon(Icons.copy),
-                    label: const Text('Copy'),
+                    label: Text(context.l10n.discoverCopy),
                   ),
                 ),
               ],
@@ -2382,10 +2484,10 @@ class _RouteProgressControls extends StatelessWidget {
         selectedStopIndex != null &&
         selectedStopIndex == route.stops.length - 1;
     final String status = routeComplete
-        ? 'Route complete'
+        ? context.l10n.discoverRouteComplete
         : routeActive
-        ? 'Stop $currentStop of ${route.stops.length}'
-        : 'Ready to start';
+        ? context.l10n.discoverStopOf(currentStop, route.stops.length)
+        : context.l10n.discoverReadyToStart;
     final double progressValue = route.stops.isEmpty
         ? 0
         : completedStopCount / route.stops.length;
@@ -2422,7 +2524,7 @@ class _RouteProgressControls extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${route.totalDurationMinutes} min',
+                  context.l10n.discoverMinutes(route.totalDurationMinutes),
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w700,
@@ -2459,18 +2561,18 @@ class _RouteProgressControls extends StatelessWidget {
                     ),
                     label: Text(
                       routeComplete
-                          ? 'Restart'
+                          ? context.l10n.discoverRestart
                           : routeActive
                           ? atLastStop
-                                ? 'Finish'
-                                : 'Next stop'
-                          : 'Start route',
+                                ? context.l10n.discoverFinish
+                                : context.l10n.discoverNextStop
+                          : context.l10n.discoverStartRoute,
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton.outlined(
-                  tooltip: 'Reset route progress',
+                  tooltip: context.l10n.discoverResetRouteProgress,
                   onPressed: routeActive || selectedStopIndex != null
                       ? onResetRoute
                       : null,
@@ -2528,7 +2630,9 @@ class _RadiusControl extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    unlimited ? 'Radius: any area' : 'Radius: $radiusKm km',
+                    unlimited
+                        ? context.l10n.discoverRadiusAnyArea
+                        : context.l10n.discoverRadiusKm('$radiusKm'),
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -2537,7 +2641,7 @@ class _RadiusControl extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    const Text('Any'),
+                    Text(context.l10n.discoverAny),
                     Checkbox(
                       value: unlimited,
                       onChanged: (bool? value) {
@@ -2559,7 +2663,7 @@ class _RadiusControl extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onApplyArea,
                 icon: const Icon(Icons.travel_explore_rounded),
-                label: const Text('Search this area'),
+                label: Text(context.l10n.discoverSearchThisArea),
               ),
           ],
         ),
@@ -2616,7 +2720,9 @@ class _CompactRadiusControl extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        unlimited ? 'Any distance' : '$radiusKm km',
+                        unlimited
+                            ? context.l10n.discoverAnyDistance
+                            : context.l10n.discoverDistanceKm('$radiusKm'),
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                           fontWeight: FontWeight.w900,
                           color: colorScheme.primary,
@@ -2652,7 +2758,7 @@ class _CompactRadiusControl extends StatelessWidget {
                       children: <Widget>[
                         Expanded(
                           child: Text(
-                            'Search radius',
+                            context.l10n.discoverSearchRadius,
                             style: Theme.of(context).textTheme.titleSmall
                                 ?.copyWith(fontWeight: FontWeight.w800),
                           ),
@@ -2662,7 +2768,7 @@ class _CompactRadiusControl extends StatelessWidget {
                           onChanged: (bool? v) =>
                               onUnlimitedChanged(v ?? false),
                         ),
-                        const Text('Any'),
+                        Text(context.l10n.discoverAny),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -2727,7 +2833,7 @@ class _SelectedMapItem extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              _metaLabel(item),
+              _metaLabel(context.l10n, item),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w600,
@@ -2739,12 +2845,12 @@ class _SelectedMapItem extends StatelessWidget {
                 Expanded(
                   child: FilledButton(
                     onPressed: onOpenDetails,
-                    child: const Text('Open details'),
+                    child: Text(context.l10n.discoverOpenDetails),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  tooltip: 'Save',
+                  tooltip: context.l10n.discoverSave,
                   onPressed: onToggleSave,
                   icon: Icon(isSaved ? Icons.favorite : Icons.favorite_border),
                 ),
@@ -2764,9 +2870,11 @@ class _SelectedMapItem extends StatelessWidget {
                 label: Text(
                   selectionMode
                       ? selectionOrder == null
-                            ? 'Select for Scenario'
-                            : 'Remove #$selectionOrder from selection'
-                      : 'Add to Scenario',
+                            ? context.l10n.discoverSelectForScenario
+                            : context.l10n.discoverRemoveFromSelection(
+                                selectionOrder!,
+                              )
+                      : context.l10n.discoverAddToScenario,
                 ),
               ),
           ],
@@ -2819,7 +2927,7 @@ class _MapListItem extends StatelessWidget {
                 alignment: Alignment.center,
                 child: selectionOrder == null
                     ? Icon(
-                        item.isPublishedRoute
+                        item.isRoute
                             ? Icons.route_outlined
                             : Icons.place_outlined,
                         color: RechargeTheme.travelGreenDark,
@@ -2843,7 +2951,7 @@ class _MapListItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _metaLabel(item),
+                      _metaLabel(context.l10n, item),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
@@ -2859,12 +2967,12 @@ class _MapListItem extends StatelessWidget {
                 )
               else ...<Widget>[
                 IconButton(
-                  tooltip: 'Save',
+                  tooltip: context.l10n.discoverSave,
                   onPressed: onToggleSave,
                   icon: Icon(isSaved ? Icons.favorite : Icons.favorite_border),
                 ),
                 IconButton(
-                  tooltip: 'Open details',
+                  tooltip: context.l10n.discoverOpenDetails,
                   onPressed: onOpenDetails,
                   icon: const Icon(Icons.chevron_right_rounded),
                 ),
@@ -2952,10 +3060,11 @@ class _ScenarioMapRoute {
     );
   }
 
-  double get totalPriceAmount {
-    return stops.fold<double>(
-      0,
-      (double total, ScenarioStepEntity step) => total + step.priceAmount,
+  Money get totalPriceAmount {
+    final String currencyCode = stops.first.priceAmount.currencyCode;
+    return stops.fold<Money>(
+      Money.zero(currencyCode),
+      (Money total, ScenarioStepEntity step) => total + step.priceAmount,
     );
   }
 
@@ -2976,16 +3085,19 @@ class _ScenarioMapRoute {
   }
 
   String get priceLabel {
-    if (totalPriceAmount == 0) return 'Free';
-    return '${totalPriceAmount.toStringAsFixed(0)} €';
+    if (totalPriceAmount.minorUnits == 0) {
+      return 'Free'; // l10n-ignore: Create seed prefill data
+    }
+    return '${totalPriceAmount.toStringAsFixed(0)} '
+        '${totalPriceAmount.currencyCode}';
   }
 
   String get moodLabel {
     return switch (seedParameters['mood']) {
-      'calm' => 'Calm',
-      'social' => 'Social',
-      'active' => 'Active',
-      _ => 'Custom',
+      'calm' => 'Calm', // l10n-ignore: Create seed prefill data
+      'social' => 'Social', // l10n-ignore: Create seed prefill data
+      'active' => 'Active', // l10n-ignore: Create seed prefill data
+      _ => 'Custom', // l10n-ignore: Create seed prefill data
     };
   }
 
@@ -2998,28 +3110,47 @@ class _ScenarioMapRoute {
   String get promptLabel {
     final String? value = seedParameters['prompt']?.trim();
     if (value != null && value.isNotEmpty) return value;
-    return '$moodLabel route with ${stops.length} stops';
+    return '$moodLabel route with ${stops.length} stops'; // l10n-ignore: Create seed prefill data
+  }
+
+  String moodText(AppLocalizations l10n) => l10n.discoverMood(moodKey);
+
+  String priceText(AppLocalizations l10n) => totalPriceAmount.minorUnits == 0
+      ? l10n.discoverFree
+      : RechargeFormats.money(totalPriceAmount, l10n.localeName);
+
+  /// The reader's own prompt as typed, or a localized description.
+  String promptText(AppLocalizations l10n) {
+    final String? value = seedParameters['prompt']?.trim();
+    if (value != null && value.isNotEmpty) return value;
+    return '${l10n.discoverMoodRoute(moodKey)} · ${l10n.discoverStops(stops.length)}';
   }
 
   String get builderLocation {
     return Uri(
-      path: RouteNames.scenarioBuilder,
-      queryParameters: scenarioParameters,
+      path: RouteNames.create,
+      queryParameters: <String, String>{
+        ...scenarioParameters,
+        'source': 'map_route_seed',
+        'type': 'route',
+        'category': 'route',
+      },
     ).toString();
   }
 
   String get createLocation {
     final Map<String, String> params = <String, String>{
       ...scenarioParameters,
-      'source': 'scenario',
-      'type': 'event',
-      'title': '$moodLabel recharge route',
+      'source': 'map_route_seed',
+      'type': 'route',
+      'title':
+          '$moodLabel recharge route', // l10n-ignore: Create seed prefill data
       'subtitle':
-          '${stops.length} stops · '
-          '$totalDurationMinutes min · '
+          '${stops.length} stops · ' // l10n-ignore: Create seed prefill data
+          '$totalDurationMinutes min · ' // l10n-ignore: Create seed prefill data
           '${totalDistanceKm.toStringAsFixed(1)} km',
       'q': promptLabel,
-      'category': 'scenario',
+      'category': 'route',
     };
     return Uri(path: RouteNames.create, queryParameters: params).toString();
   }
@@ -3029,7 +3160,7 @@ class _ScenarioMapRoute {
     final Map<String, String> params = <String, String>{
       'q': promptLabel,
       if (category != null) 'category': category,
-      'free': totalPriceAmount == 0 ? '1' : '0',
+      'free': totalPriceAmount.minorUnits == 0 ? '1' : '0',
       'radius': '5000',
       'unlimited': '0',
     };
@@ -3086,31 +3217,39 @@ String? _searchCategoryForScenarioRoute(_ScenarioMapRoute route) {
   return null;
 }
 
-String _metaLabel(DiscoverItemEntity item) {
+String _metaLabel(AppLocalizations l10n, DiscoverItemEntity item) {
+  final routeCatalog = item.routeCatalog;
+  if (routeCatalog != null) {
+    return '${l10n.discoverRouteLabel} · '
+        '${routeCatalogMetricLabel(l10n, routeCatalog)}';
+  }
   final route = item.publishedRoute;
   if (route != null) {
-    return '${item.city} · Route · '
-        '${(route.distanceMeters / 1000).toStringAsFixed(1)} км · '
-        '${(route.durationSeconds / 60).round()} min';
+    return '${item.city} · ${l10n.discoverRouteLabel} · '
+        '${discoverKm(l10n, route.distanceMeters / 1000)} · '
+        '${l10n.discoverMinutes((route.durationSeconds / 60).round())}';
   }
   final String price = item.isFree
-      ? 'Free'
-      : '${item.priceAmount.toStringAsFixed(0)} €';
-  return '${item.city} · ${rechargeTaxonomyLabel(item.category)} · '
-      '${item.distanceKm.toStringAsFixed(1)} км · $price';
+      ? l10n.discoverFree
+      : item.priceAmount == null
+      ? '—'
+      : RechargeFormats.money(item.priceAmount!, l10n.localeName);
+  return '${item.city} · ${taxonomyLabel(l10n, item.category)} · '
+      '${discoverKm(l10n, item.distanceKm)} · $price';
 }
 
-String _scenarioRouteSummary(_ScenarioMapRoute route) {
+String _scenarioRouteSummary(AppLocalizations l10n, _ScenarioMapRoute route) {
   final List<String> lines = <String>[
-    '${route.moodLabel} recharge scenario',
-    '${route.stops.length} stops · ${route.totalDurationMinutes} min · '
-        '${route.totalDistanceKm.toStringAsFixed(1)} km',
-    route.priceLabel,
+    l10n.discoverMoodRechargeScenario(route.moodKey),
+    '${l10n.discoverStops(route.stops.length)} · '
+        '${l10n.discoverMinutes(route.totalDurationMinutes)} · '
+        '${discoverKm(l10n, route.totalDistanceKm)}',
+    route.priceText(l10n),
     '',
     ...List<String>.generate(route.stops.length, (int index) {
       final ScenarioStepEntity step = route.stops[index];
       return '${index + 1}. ${step.title} - '
-          '${createTaxonomyLabelForPath(step.category)}, '
+          '${taxonomyLabel(l10n, step.category)}, '
           '${step.durationMinutes} min';
     }),
   ];
@@ -3153,3 +3292,8 @@ IconData _mapCategoryIcon(String categoryId) {
     _ => Icons.category_outlined,
   };
 }
+
+/// An item without a public point (an online Event, or one without a confirmed
+/// pin) stays in the list but gets no marker: never a fake coordinate (E2).
+bool _hasMapPoint(DiscoverItemEntity item) =>
+    item.latitude.isFinite && item.longitude.isFinite;

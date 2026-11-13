@@ -1,0 +1,157 @@
+import type { EntityId } from '../shared/ids.js';
+import type { UtcInstant } from '../shared/utc_instant.js';
+import type { MarketId } from '../modules/reference_data/domain/identifiers.js';
+
+export type IdentityProvider = 'google' | 'apple';
+export type AccountStatus = 'active' | 'restricted' | 'blocked' | 'deleted';
+export type IdentitySessionStatus =
+  'active' | 'stepUpRequired' | 'revoked' | 'expired' | 'compromised';
+export type CreatorVerificationStatus =
+  'pendingReview' | 'verified' | 'rejected' | 'suspended' | 'revoked';
+
+export interface AccountV1 {
+  readonly schemaVersion: 1;
+  readonly userId: EntityId;
+  readonly status: AccountStatus;
+  /** ADR 0023: User and Admin only; a stored legacy `Creator` is read as `User`. */
+  readonly systemRoles: readonly ('User' | 'Admin')[];
+  readonly revision: number;
+  readonly securityRevision: number;
+  readonly revokeBeforeSecurityRevision: number;
+  readonly createdAtUtc: UtcInstant;
+  readonly updatedAtUtc: UtcInstant;
+  /** ADR 0023: suspected fraud; paid or bookable publishing needs identity verification. */
+  readonly stepUpRequired?: boolean;
+}
+
+/** ADR 0023 (2026-11-08): DSA Art. 30 trader traceability, DAC7 activity types. */
+export type SellerStatus = 'private' | 'trader';
+export type Dac7ActivityType = 'personalServices' | 'rentalOfGoods';
+export interface SellerDeclarationBodyV1 {
+  readonly status: SellerStatus;
+  readonly contact: { readonly email?: string; readonly phone?: string };
+  readonly trader?: {
+    readonly legalName: string;
+    readonly registrationNumber: string;
+    readonly vatId?: string;
+    readonly address: {
+      readonly line1: string;
+      readonly city: string;
+      readonly postalCode: string;
+      readonly countryCode: string;
+    };
+  };
+  readonly dac7ActivityTypes: readonly Dac7ActivityType[];
+}
+export interface SellerDeclarationV1 {
+  readonly schemaVersion: 1;
+  readonly userId: EntityId;
+  readonly declaration: SellerDeclarationBodyV1;
+  readonly revision: number;
+  readonly declaredAtUtc: UtcInstant;
+}
+
+export interface AuthIdentityV1 {
+  readonly schemaVersion: 1;
+  readonly identityId: EntityId;
+  readonly userId: EntityId;
+  readonly provider: IdentityProvider;
+  readonly providerTenant: string;
+  readonly subjectHash: string;
+  readonly status: 'active' | 'disabled';
+  readonly revision: number;
+  readonly linkedAtUtc: UtcInstant;
+}
+
+export interface IdentitySessionV1 {
+  readonly schemaVersion: 1;
+  readonly sessionId: EntityId;
+  readonly userId: EntityId;
+  readonly status: IdentitySessionStatus;
+  readonly revision: number;
+  readonly authzRevision: number;
+  readonly firebaseUid: string;
+  readonly installationId: string;
+  readonly handleHash: string;
+  readonly issuedAtUtc: UtcInstant;
+  readonly lastActiveAtUtc: UtcInstant;
+  readonly idleExpiresAtUtc: UtcInstant;
+  readonly revokedAtUtc?: UtcInstant;
+  readonly revocationReason?: 'replaced' | 'recovery' | 'logoutAll' | 'manual';
+}
+
+export interface PublisherRefV1 {
+  readonly type: 'user' | 'page';
+  readonly id: EntityId;
+}
+
+export interface AccessSnapshotV1 {
+  readonly schemaVersion: 1;
+  readonly userId: EntityId;
+  readonly sessionId: EntityId;
+  readonly pageId?: EntityId;
+  readonly accountRevision: number;
+  readonly sessionRevision: number;
+  readonly authzRevision: number;
+  readonly membershipRevision?: number;
+  readonly capabilityPolicyRevision: number;
+  readonly capabilityIds: readonly string[];
+  readonly evaluatedAtUtc: UtcInstant;
+  readonly expiresAtUtc: UtcInstant;
+}
+
+export interface CreatorVerificationV1 {
+  readonly schemaVersion: 1;
+  readonly verificationId: EntityId;
+  readonly userId: EntityId;
+  readonly status: CreatorVerificationStatus;
+  readonly revision: number;
+  readonly submittedAtUtc: UtcInstant;
+  readonly decidedAtUtc?: UtcInstant;
+  readonly evidenceRefIds: readonly EntityId[];
+}
+
+export interface ManagedPageV1 {
+  readonly schemaVersion: 1;
+  readonly pageId: EntityId;
+  readonly ownerUserId: EntityId;
+  readonly marketId: MarketId;
+  readonly status: 'pendingReview' | 'active' | 'restricted' | 'archived';
+  readonly verificationStatus:
+    'unverified' | 'pendingReview' | 'verified' | 'rejected' | 'suspended' | 'revoked';
+  readonly revision: number;
+  readonly createdAtUtc: UtcInstant;
+  readonly updatedAtUtc: UtcInstant;
+}
+
+export interface PageMembershipV1 {
+  readonly schemaVersion: 1;
+  readonly membershipId: EntityId;
+  readonly pageId: EntityId;
+  readonly userId: EntityId;
+  readonly role: 'owner' | 'manager' | 'analyst' | 'bookingManager';
+  readonly status: 'active' | 'revoked';
+  readonly capabilityIds: readonly string[];
+  readonly revision: number;
+  readonly createdAtUtc: UtcInstant;
+  readonly updatedAtUtc: UtcInstant;
+}
+
+export interface PublisherEligibilityV1 {
+  readonly schemaVersion: 1;
+  readonly publisherRef: PublisherRefV1;
+  readonly eligible: boolean;
+  readonly reason:
+    | 'eligible'
+    | 'account_inactive'
+    | 'creator_verification_required'
+    | 'identity_verification_required'
+    | 'seller_declaration_required'
+    | 'creator_verification_unavailable'
+    | 'membership_inactive'
+    | 'capability_denied'
+    | 'publisher_not_accessible'
+    | 'snapshot_stale';
+  readonly authorityRevision: number;
+  readonly evaluatedAtUtc: UtcInstant;
+}

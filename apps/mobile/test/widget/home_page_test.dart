@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -16,6 +17,7 @@ import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/auth/presentation/pages/discover_hub_page.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -58,6 +60,10 @@ void main() {
     expect(find.text('For you'), findsWidgets);
     expect(find.text('Nearly'), findsNothing);
     expect(find.text('Утренняя йога в парке'), findsWidgets);
+    expect(find.text('Quick scenarios'), findsNothing);
+    expect(find.text('Route ideas'), findsNothing);
+    expect(find.text('Continue your route'), findsNothing);
+    expect(find.text('Quick Plan'), findsNothing);
 
     final List<Finder> scenarioFeeds = <Finder>[
       find.byKey(const Key('home-feed-Categories')),
@@ -222,7 +228,21 @@ void main() {
     expect(find.byKey(const Key('subcategory-all')), findsOneWidget);
   });
 
-  fullPageTestWidgets('opens saved scenario from home continue panel', (
+  fullPageTestWidgets('does not render saved Scenario on Main', (tester) async {
+    await tester.pumpWidget(
+      _HomeTestApp(favoriteItems: <FavoriteItemEntity>[_scenarioFavorite()]),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Continue your route'), findsNothing);
+    expect(find.text('Calm recharge route'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('home-saved-scenario-edit')),
+      findsNothing,
+    );
+  });
+
+  fullPageTestWidgets('does not render saved Scenario map action on Main', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -230,98 +250,38 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.scrollPageUntilVisible(
-      find.text('Continue your route'),
-      260,
-      scrollable: find.byType(Scrollable).first,
+    expect(
+      find.byKey(const ValueKey('home-saved-scenario-route')),
+      findsNothing,
     );
-    expect(find.text('Continue your route'), findsOneWidget);
-    expect(find.text('Calm recharge route'), findsOneWidget);
-
-    await tester.tap(find.byKey(const ValueKey('home-saved-scenario-edit')));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('food_drinks.coffee'), findsOneWidget);
   });
 
-  fullPageTestWidgets('opens saved scenario route on map from home', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _HomeTestApp(favoriteItems: <FavoriteItemEntity>[_scenarioFavorite()]),
-    );
-    await tester.pumpAndSettle();
-
-    await tester.scrollPageUntilVisible(
-      find.text('Continue your route'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.byKey(const ValueKey('home-saved-scenario-route')));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
-    expect(find.text('food_drinks.coffee'), findsOneWidget);
-  });
-
-  fullPageTestWidgets('opens route template builder from home', (tester) async {
-    await tester.pumpWidget(_HomeTestApp());
-    await tester.pumpAndSettle();
-
-    await tester.scrollPageUntilVisible(
-      find.text('Build').first,
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text('Build').first);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
-    expect(find.textContaining('wellness_recharge.calm_walk'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('coffee reset walk'), findsOneWidget);
-  });
-
-  fullPageTestWidgets('opens route template on map from home', (tester) async {
-    await tester.pumpWidget(_HomeTestApp());
-    await tester.pumpAndSettle();
-
-    await tester.scrollPageUntilVisible(
-      find.byTooltip('Map Coffee reset route'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.byTooltip('Map Coffee reset route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
-    expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
-    expect(find.textContaining('wellness_recharge.calm_walk'), findsOneWidget);
-  });
-
-  fullPageTestWidgets('opens create from route template on home', (
+  fullPageTestWidgets('does not render legacy route templates on Main', (
     tester,
   ) async {
     await tester.pumpWidget(_HomeTestApp());
     await tester.pumpAndSettle();
 
-    await tester.scrollPageUntilVisible(
-      find.byTooltip('Create Coffee reset route'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.byTooltip('Create Coffee reset route'));
+    expect(find.text('Route ideas'), findsNothing);
+    expect(find.text('Build'), findsNothing);
+  });
+
+  fullPageTestWidgets('does not render legacy template map action on Main', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_HomeTestApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
-    expect(find.text('Coffee reset route'), findsOneWidget);
-    expect(find.text('coffee reset walk'), findsOneWidget);
-    expect(find.text('event'), findsOneWidget);
+    expect(find.byTooltip('Map Coffee reset route'), findsNothing);
+  });
+
+  fullPageTestWidgets('does not render legacy template create action on Main', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_HomeTestApp());
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Create Coffee reset route'), findsNothing);
   });
 
   fullPageTestWidgets('opens saved search from home continuation panel', (
@@ -370,7 +330,7 @@ void main() {
     expect(find.text('10'), findsOneWidget);
   });
 
-  fullPageTestWidgets('opens route builder from saved search on home', (
+  fullPageTestWidgets('does not build Scenario from saved search on Main', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -383,12 +343,7 @@ void main() {
       260,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.byTooltip('Build route from saved search'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('social'), findsOneWidget);
-    expect(find.textContaining('museum'), findsOneWidget);
+    expect(find.byTooltip('Build route from saved search'), findsNothing);
   });
 
   fullPageTestWidgets('opens create from saved search on home', (tester) async {
@@ -455,19 +410,7 @@ void main() {
     expect(find.text('art'), findsOneWidget);
     expect(find.text('10'), findsOneWidget);
 
-    await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
-    await tester.scrollPageUntilVisible(
-      find.text('Continue smart search'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.byTooltip('Build route from smart search'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('social'), findsOneWidget);
-    expect(find.text('museum today under 10'), findsOneWidget);
+    expect(find.byTooltip('Build route from smart search'), findsNothing);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -514,13 +457,7 @@ void main() {
     expect(find.text('120 min'), findsWidgets);
     expect(find.text('2 stops'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Build route from smart search'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text(prompt), findsOneWidget);
+    expect(find.byTooltip('Build route from smart search'), findsNothing);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -533,7 +470,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.textContaining('wellness_recharge.calm_walk'), findsOneWidget);
 
     await tester.pumpWidget(app());
@@ -547,10 +484,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
+    expect(find.text('route'), findsWidgets);
     expect(find.text('Calm recharge route'), findsOneWidget);
     expect(find.text(prompt), findsOneWidget);
-    expect(find.text('event'), findsOneWidget);
+    expect(find.text('route'), findsWidgets);
     expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
   });
 }
@@ -584,6 +521,12 @@ class _HomeTestApp extends StatelessWidget {
         ),
         discoverPreferencesRepository: _discoverPreferencesRepository,
         analyticsService: _NoopAnalyticsService(),
+        runtimeDefaults: const DiscoverRuntimeDefaults(
+          timezoneId: 'Europe/Riga',
+          originLat: 56.9496,
+          originLng: 24.1052,
+          currencyCode: 'EUR',
+        ),
       );
 
   late final FavoritesController _favoritesController = FavoritesController(
@@ -621,6 +564,11 @@ class _HomeTestApp extends StatelessWidget {
               builder: (context, state) => CategoryPage(
                 categoryId: state.pathParameters['categoryId'] ?? '',
               ),
+            ),
+            GoRoute(
+              path: '${RouteNames.discoverDetails}/:objectType/:objectId',
+              builder: (context, state) =>
+                  const Scaffold(body: Center(child: Text('Details page'))),
             ),
             GoRoute(
               path: '${RouteNames.discoverDetails}/:itemId',
@@ -672,7 +620,7 @@ class _HomeTestApp extends StatelessWidget {
               ),
             ),
             GoRoute(
-              path: RouteNames.scenarioBuilder,
+              path: RouteNames.legacyScenarioBuilder,
               builder: (context, state) => Scaffold(
                 body: Center(
                   child: Column(
@@ -772,7 +720,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,
@@ -792,7 +740,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
         startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
         latitude: query.centerLat,
         longitude: query.centerLng,
-        priceAmount: 0,
+        priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
         distanceKm: 1.2,
         isFree: true,
         relevanceScore: 0.8,
@@ -807,7 +755,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
         startsAtUtc: DateTime.parse('2026-04-18T10:00:00Z'),
         latitude: query.centerLat,
         longitude: query.centerLng,
-        priceAmount: 0,
+        priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
         distanceKm: 2.1,
         isFree: true,
         relevanceScore: 0.75,
@@ -901,11 +849,11 @@ FavoriteItemEntity _scenarioFavorite() {
     category: 'scenario',
     startsAtUtc: DateTime.parse('2026-04-20T12:00:00Z'),
     distanceKm: 2.4,
-    priceAmount: 0,
+    priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
     isFree: true,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
     targetRoute:
-        '${RouteNames.scenarioBuilder}?mood=calm&steps=food_drinks.coffee',
+        '${RouteNames.legacyScenarioBuilder}?mood=calm&steps=food_drinks.coffee',
   );
 }
 
@@ -917,7 +865,7 @@ SavedSearchEntity _savedSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -932,7 +880,7 @@ SmartSearchHistoryEntity _smartSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),

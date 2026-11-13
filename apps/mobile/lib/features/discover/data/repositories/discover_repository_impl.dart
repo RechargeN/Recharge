@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/published_route_discovery_entity.dart';
@@ -61,7 +62,7 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
     scored.sort((DiscoverItemEntity a, DiscoverItemEntity b) {
       final int scoreCompare = b.relevanceScore.compareTo(a.relevanceScore);
       if (scoreCompare != 0) return scoreCompare;
-      return a.startsAtUtc.compareTo(b.startsAtUtc);
+      return a.compareStart(b);
     });
 
     return scored;
@@ -111,23 +112,31 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
 
     if (query.freeOnly && !item.isFree) return false;
 
-    if (query.budgetMin != null && item.priceAmount < query.budgetMin!) {
+    if (query.budgetMin != null &&
+        (item.priceAmount == null ||
+            item.priceAmount!.currencyCode != query.budgetMin!.currencyCode ||
+            item.priceAmount!.compareTo(query.budgetMin!) < 0)) {
       return false;
     }
-    if (query.budgetMax != null && item.priceAmount > query.budgetMax!) {
+    if (query.budgetMax != null &&
+        (item.priceAmount == null ||
+            item.priceAmount!.currencyCode != query.budgetMax!.currencyCode ||
+            item.priceAmount!.compareTo(query.budgetMax!) > 0)) {
       return false;
     }
 
     if (!item.isPublishedRoute &&
         query.timeWindow == null &&
         query.dateFrom != null &&
-        item.startsAtUtc.isBefore(query.dateFrom!)) {
+        (item.startsAtUtc == null ||
+            item.startsAtUtc!.isBefore(query.dateFrom!))) {
       return false;
     }
     if (!item.isPublishedRoute &&
         query.timeWindow == null &&
         query.dateTo != null &&
-        item.startsAtUtc.isAfter(query.dateTo!)) {
+        (item.startsAtUtc == null ||
+            item.startsAtUtc!.isAfter(query.dateTo!))) {
       return false;
     }
 
@@ -164,7 +173,7 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
   double _score(DiscoverItemEntity item, DateTime nowUtc) {
     final double distanceScore = (1 - (item.distanceKm / 30)).clamp(0, 1);
     final double hoursAhead =
-        item.startsAtUtc.difference(nowUtc).inMinutes / 60;
+        (item.startsAtUtc?.difference(nowUtc).inMinutes ?? 0) / 60;
     final double freshnessScore = (1 - (hoursAhead.abs() / 48)).clamp(0, 1);
     return distanceScore * 0.65 + freshnessScore * 0.35;
   }
@@ -200,17 +209,18 @@ class DiscoverRepositoryImpl implements DiscoverRepository {
         startsAtUtc: route.publishedAtUtc,
         latitude: route.startPoint.latitude,
         longitude: route.startPoint.longitude,
-        priceAmount: 0,
+        priceAmount: const Money(minorUnits: 0, currencyCode: 'XXX'),
         distanceKm: 0,
         isFree: true,
         coverImageUrl: route.coverImage,
         organizerName: route.publisherName,
-        venueName: 'Route start',
+        // L4.5: no display text here; the UI names the start point.
+        venueName: '',
         marketCityId: route.marketCityId,
         timezoneId: route.timezoneId,
         durationMinutes: (route.durationSeconds / 60).ceil(),
         durationConfidence: DurationConfidence.exact,
-        ctaLabel: 'Open Route',
+        ctaLabel: '',
         highlights: <String>[
           '${(route.distanceMeters / 1000).toStringAsFixed(1)} km',
           route.routingProfileId,

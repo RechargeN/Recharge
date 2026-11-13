@@ -10,17 +10,21 @@ import '../../domain/usecases/save_settings_usecase.dart';
 import '../state/explore_state.dart';
 
 class ExploreController extends ChangeNotifier {
+  /// L4: stable message codes; the UI localizes them.
+  static const String loadFailedMessage = 'profile_load_failed';
+  static const String profileSavedMessage = 'profile_saved';
+
   ExploreController({
     required LoadProfileEditableUseCase loadProfileEditableUseCase,
     required SaveProfileEditableUseCase saveProfileEditableUseCase,
     required LoadSettingsUseCase loadSettingsUseCase,
     required SaveSettingsUseCase saveSettingsUseCase,
     required AnalyticsService analyticsService,
-  })  : _loadProfileEditableUseCase = loadProfileEditableUseCase,
-        _saveProfileEditableUseCase = saveProfileEditableUseCase,
-        _loadSettingsUseCase = loadSettingsUseCase,
-        _saveSettingsUseCase = saveSettingsUseCase,
-        _analyticsService = analyticsService;
+  }) : _loadProfileEditableUseCase = loadProfileEditableUseCase,
+       _saveProfileEditableUseCase = saveProfileEditableUseCase,
+       _loadSettingsUseCase = loadSettingsUseCase,
+       _saveSettingsUseCase = saveSettingsUseCase,
+       _analyticsService = analyticsService;
 
   final LoadProfileEditableUseCase _loadProfileEditableUseCase;
   final SaveProfileEditableUseCase _saveProfileEditableUseCase;
@@ -47,14 +51,12 @@ class ExploreController extends ChangeNotifier {
     }
 
     _setState(
-      _state.copyWith(
-        status: ExploreStatus.loading,
-        clearMessage: true,
-      ),
+      _state.copyWith(status: ExploreStatus.loading, clearMessage: true),
     );
 
     try {
-      final ProfileEditableEntity profile = await _loadProfileEditableUseCase(userId) ??
+      final ProfileEditableEntity profile =
+          await _loadProfileEditableUseCase(userId) ??
           ProfileEditableEntity.defaults(email: email);
       final SettingsEntity settings =
           await _loadSettingsUseCase(userId) ?? SettingsEntity.defaults();
@@ -83,7 +85,7 @@ class ExploreController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: ExploreStatus.error,
-          message: 'Не удалось загрузить профиль',
+          message: loadFailedMessage,
         ),
       );
     }
@@ -91,39 +93,27 @@ class ExploreController extends ChangeNotifier {
 
   void updateDisplayName(String value) {
     _setState(
-      _state.copyWith(
-        profile: _state.profile.copyWith(displayName: value),
-      ),
+      _state.copyWith(profile: _state.profile.copyWith(displayName: value)),
     );
   }
 
   void updateAbout(String value) {
-    _setState(
-      _state.copyWith(
-        profile: _state.profile.copyWith(about: value),
-      ),
-    );
+    _setState(_state.copyWith(profile: _state.profile.copyWith(about: value)));
   }
 
   void updateCity(String value) {
-    _setState(
-      _state.copyWith(
-        profile: _state.profile.copyWith(city: value),
-      ),
-    );
+    _setState(_state.copyWith(profile: _state.profile.copyWith(city: value)));
   }
 
   void updateAvatar(String value) {
-    _setState(
-      _state.copyWith(
-        profile: _state.profile.copyWith(avatar: value),
-      ),
-    );
+    _setState(_state.copyWith(profile: _state.profile.copyWith(avatar: value)));
   }
 
   Future<void> saveProfile() async {
     if (_state.userId.isEmpty) return;
-    _setState(_state.copyWith(status: ExploreStatus.saving, clearMessage: true));
+    _setState(
+      _state.copyWith(status: ExploreStatus.saving, clearMessage: true),
+    );
     await _saveProfileEditableUseCase(
       userId: _state.userId,
       profile: _state.profile,
@@ -131,7 +121,7 @@ class ExploreController extends ChangeNotifier {
     _setState(
       _state.copyWith(
         status: ExploreStatus.ready,
-        message: 'Профиль сохранен',
+        message: profileSavedMessage,
       ),
     );
     _analyticsService.track(
@@ -140,37 +130,21 @@ class ExploreController extends ChangeNotifier {
     );
   }
 
-  Future<void> updateLanguage(String value) async {
-    final SettingsEntity next = _state.settings.copyWith(language: value);
-    _setState(_state.copyWith(settings: next));
-    await _saveSettings(next);
-  }
-
-  Future<void> updateCurrency(String value) async {
-    final SettingsEntity next = _state.settings.copyWith(currency: value);
-    _setState(_state.copyWith(settings: next));
-    await _saveSettings(next);
-  }
-
   Future<void> updateNotifications(bool enabled) async {
-    final SettingsEntity next =
-        _state.settings.copyWith(notificationsEnabled: enabled);
+    final SettingsEntity next = _state.settings.copyWith(
+      notificationsEnabled: enabled,
+    );
     _setState(_state.copyWith(settings: next));
     await _saveSettings(next);
   }
 
   Future<void> _saveSettings(SettingsEntity next) async {
     if (_state.userId.isEmpty) return;
-    await _saveSettingsUseCase(
-      userId: _state.userId,
-      settings: next,
-    );
+    await _saveSettingsUseCase(userId: _state.userId, settings: next);
     _analyticsService.track(
       'explore_settings_updated',
       params: <String, Object?>{
         'user_id': _state.userId,
-        'language': next.language,
-        'currency': next.currency,
         'notifications_enabled': next.notificationsEnabled,
       },
     );

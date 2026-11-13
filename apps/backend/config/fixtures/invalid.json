@@ -1,0 +1,134 @@
+{
+  "cases": [
+    {
+      "target": "environment",
+      "reason": "unknown environment fails closed",
+      "value": {
+        "schemaVersion": 1,
+        "environmentId": "preview",
+        "identity": {
+          "logicalName": "recharge-preview",
+          "bindingState": "unbound"
+        },
+        "cloudAllowed": false
+      }
+    },
+    {
+      "target": "environment",
+      "reason": "R1 cannot enable cloud",
+      "value": {
+        "schemaVersion": 1,
+        "environmentId": "dev",
+        "identity": {
+          "logicalName": "recharge-dev",
+          "bindingState": "unbound"
+        },
+        "cloudAllowed": true
+      }
+    },
+    {
+      "target": "regionPolicy",
+      "reason": "region policy remains disabled",
+      "value": {
+        "schemaVersion": 1,
+        "policyId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "revision": 1,
+        "environmentId": "local",
+        "firestoreLocation": "eur3",
+        "functionsRegion": "europe-west1",
+        "storageRegion": "europe-west1",
+        "exportLocation": "EU",
+        "activationState": "enabled"
+      }
+    },
+    {
+      "target": "marketCapability",
+      "reason": "all R1 capabilities are disabled",
+      "value": {
+        "schemaVersion": 1,
+        "configId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "revision": 1,
+        "environmentId": "local",
+        "marketId": "LV",
+        "capabilityId": "platform.foundation",
+        "status": "enabled",
+        "currency": "EUR",
+        "defaultTimezone": "Europe/Riga",
+        "supportedLocales": ["lv-LV"],
+        "defaultLocale": "lv-LV",
+        "policyPointers": {
+          "mandatoryCopyManifestRevision": null,
+          "privacyPolicyRevision": null,
+          "minorsPolicyRevision": null,
+          "trustSafetyPolicyRevision": null,
+          "retentionDsrPolicyRevision": null,
+          "supportPolicyRevision": null
+        },
+        "createdAtUtc": "2026-09-21T10:00:00.000Z"
+      }
+    },
+    {
+      "target": "marketCapability",
+      "reason": "currency is explicit and uppercase",
+      "value": {
+        "schemaVersion": 1,
+        "configId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "revision": 1,
+        "environmentId": "local",
+        "marketId": "LV",
+        "capabilityId": "platform.foundation",
+        "status": "disabled",
+        "currency": "eur",
+        "defaultTimezone": "Europe/Riga",
+        "supportedLocales": ["lv-LV"],
+        "defaultLocale": "lv-LV",
+        "policyPointers": {
+          "mandatoryCopyManifestRevision": null,
+          "privacyPolicyRevision": null,
+          "minorsPolicyRevision": null,
+          "trustSafetyPolicyRevision": null,
+          "retentionDsrPolicyRevision": null,
+          "supportPolicyRevision": null
+        },
+        "createdAtUtc": "2026-09-21T10:00:00.000Z"
+      }
+    },
+    {
+      "target": "releaseManifest",
+      "reason": "release status cannot activate R1",
+      "value": {
+        "schemaVersion": 1,
+        "manifestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "revision": 1,
+        "environmentId": "local",
+        "marketId": "LV",
+        "capabilityId": "platform.foundation",
+        "status": "enabled",
+        "artifactDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "apiSchemaRevision": "platform-v1",
+        "marketConfigRevision": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "securityPrivacyEvidenceRevision": "synthetic-r1",
+        "retentionDsrRevision": "synthetic-r1",
+        "residencyTransferRevision": "synthetic-r1",
+        "observabilityPolicyRevision": "synthetic-r1",
+        "rollbackTargetManifestId": null,
+        "createdAtUtc": "2026-09-21T10:00:00.000Z",
+        "effectiveAtUtc": "2026-09-21T10:00:00.000Z",
+        "approvedBy": []
+      }
+    },
+    {
+      "target": "secretReference",
+      "reason": "secret material is forbidden",
+      "value": {
+        "schemaVersion": 1,
+        "environmentId": "local",
+        "logicalName": "PROVIDER_API_KEY",
+        "provider": "gcpSecretManager",
+        "referenceName": "provider-api-key",
+        "bindingState": "unbound",
+        "value": "forbidden"
+      }
+    }
+  ]
+}

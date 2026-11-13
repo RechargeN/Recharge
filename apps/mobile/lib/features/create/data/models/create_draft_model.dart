@@ -1,17 +1,28 @@
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../domain/entities/activity_draft_data.dart';
+import '../../domain/entities/collection_draft_data.dart';
 import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/event_draft_data.dart';
 import '../../domain/entities/find_people_draft_data.dart';
 import '../../domain/entities/place_draft_data.dart';
+import '../../domain/entities/rental_draft_data.dart';
 import '../../domain/entities/route_draft_data.dart';
 import '../../domain/entities/scenario_draft_data.dart';
 import '../../domain/usecases/classify_legacy_planning_draft_usecase.dart';
+import 'activity_draft_mapper.dart';
+import 'collection_draft_mapper.dart';
 import 'find_people_draft_mapper.dart';
 import 'event_draft_mapper.dart';
 import 'place_draft_mapper.dart';
+import 'rental_draft_mapper.dart';
 import 'route_draft_mapper.dart';
 import 'scenario_draft_mapper.dart';
+import '../../../../shared/primitives/money/money.dart';
+import 'session_draft_mapper.dart';
+import 'class_workshop_draft_mapper.dart';
+import '../../domain/entities/session_draft_data.dart';
+import '../../domain/entities/class_workshop_draft_data.dart';
 
 class CreateDraftModel {
   const CreateDraftModel({
@@ -125,7 +136,7 @@ class CreateDraftModel {
   final bool petFriendly;
   final bool wheelchairAccessible;
   final bool isFree;
-  final double? basePrice;
+  final Money? basePrice;
   final String currency;
   final String pricingModel;
   final bool registrationRequired;
@@ -162,6 +173,28 @@ class CreateDraftModel {
     return value is num && value.isFinite ? value.toInt() : null;
   }
 
+  /// RNT-PUB-01 §1.2.1 `expectedRentalRevision` CAS guard. `null` when this
+  /// draft has no typed Rental payload at all (peeked at the raw
+  /// `rental_details` section, mirroring [routeRevision]/[scenarioRevision]
+  /// — the datasource layer never decodes into domain entities).
+  int? get rentalRevision {
+    final Object? payload = sectionData['rental_details'];
+    if (payload is! Map) return null;
+    final Object? value = payload['revision'];
+    return value is num && value.isFinite ? value.toInt() : null;
+  }
+
+  /// RNT-PUB-01 §1.2.1 owner check. `{'type': 'user'|'page', 'id': String}`
+  /// as stored by `RentalDraftMapper.toJson`, or `null` if this draft has no
+  /// typed Rental payload / the section is malformed.
+  Map<String, Object?>? get rentalPublisherRefJson {
+    final Object? payload = sectionData['rental_details'];
+    if (payload is! Map) return null;
+    final Object? ref = payload['publisherRef'];
+    if (ref is! Map) return null;
+    return Map<String, Object?>.from(ref);
+  }
+
   factory CreateDraftModel.fromEntity(CreateDraftEntity entity) {
     final Map<String, dynamic> serializedSections = Map<String, dynamic>.from(
       entity.sectionData,
@@ -174,6 +207,11 @@ class CreateDraftModel {
     if (entity.placeData != null) {
       serializedSections['place_details'] = PlaceDraftMapper.toJson(
         entity.placeData!,
+      );
+    }
+    if (entity.activityData != null) {
+      serializedSections['activity_details'] = ActivityDraftMapper.toJson(
+        entity.activityData!,
       );
     }
     if (entity.findPeopleData != null) {
@@ -191,8 +229,27 @@ class CreateDraftModel {
         entity.routeData!,
       );
     }
+    if (entity.rentalData != null) {
+      serializedSections['rental_details'] = RentalDraftMapper.toJson(
+        entity.rentalData!,
+      );
+    }
+    if (entity.sessionData != null) {
+      serializedSections['session_details'] = SessionDraftMapper.toJson(
+        entity.sessionData!,
+      );
+    }
+    if (entity.classWorkshopData != null) {
+      serializedSections['class_workshop_details'] =
+          ClassWorkshopDraftMapper.toJson(entity.classWorkshopData!);
+    }
+    if (entity.collectionData != null) {
+      serializedSections['collection_details'] = CollectionDraftMapper.toJson(
+        entity.collectionData!,
+      );
+    }
     return CreateDraftModel(
-      schemaVersion: 8,
+      schemaVersion: 9,
       id: entity.id,
       basedOnPublishedVersionId: entity.basedOnPublishedVersionId,
       objectType: entity.objectType.taxonomyId,
@@ -299,8 +356,8 @@ class CreateDraftModel {
           price: isFree || basePrice == null
               ? null
               : EventMoneyDraft(
-                  amountMinor: (basePrice! * 100).round(),
-                  currencyCode: currency,
+                  amountMinor: basePrice!.minorUnits,
+                  currencyCode: basePrice!.currencyCode,
                 ),
           capacityMode: maxParticipants == null
               ? EventCapacityMode.unknown
@@ -363,6 +420,17 @@ class CreateDraftModel {
             defaults: legacyPlaceDefaults,
           )
         : null;
+    final ActivityDraftData legacyActivityDefaults = ActivityDraftData.defaults(
+      userId: organizerId,
+      currencyCode: currency,
+    );
+    final ActivityDraftData? activityData =
+        parsedObjectType == CreateObjectType.activity
+        ? ActivityDraftMapper.fromJson(
+            migratedSectionData['activity_details'],
+            defaults: legacyActivityDefaults,
+          )
+        : null;
     final FindPeopleDraftData? findPeopleData =
         parsedObjectType == CreateObjectType.findPeople
         ? FindPeopleDraftMapper.fromJson(
@@ -370,6 +438,55 @@ class CreateDraftModel {
             defaults: FindPeopleDraftData.defaults(
               userId: organizerId,
               currencyCode: currency,
+            ),
+          )
+        : null;
+    final Object? classWorkshopPayload =
+        migratedSectionData['class_workshop_details'];
+    // D3.6: a typed Class draft is read losslessly; a generic legacy Class
+    // draft gets empty typed defaults and keeps its legacy slots untouched. A
+    // newer schema stays raw in sectionData (guarded read-only, spec §7.4).
+    ClassWorkshopDraftData? classWorkshopData;
+    if (parsedObjectType == CreateObjectType.classWorkshop) {
+      try {
+        classWorkshopData = classWorkshopPayload is Map<String, Object?>
+            ? ClassWorkshopDraftMapper.fromJson(
+                classWorkshopPayload,
+                defaultTimezoneId: timezone,
+              )
+            : classWorkshopPayload == null
+            ? ClassWorkshopDraftData.defaults(timezoneId: timezone)
+            : null;
+      } on UnsupportedClassWorkshopSchemaException {
+        classWorkshopData = null;
+      }
+    }
+    final Object? sessionPayload = migratedSectionData['session_details'];
+    final SessionDraftData? sessionData =
+        parsedObjectType != CreateObjectType.session
+        ? null
+        : sessionPayload is Map<String, Object?>
+        ? SessionDraftMapper.fromJson(sessionPayload)
+        : SessionDraftData.defaults(
+            resourceName: venueName,
+            timezoneId: timezone,
+          ).copyWith(
+            legacySchedule: scheduleSlots.isEmpty
+                ? null
+                : SessionDraftMapper.migrateLegacyEventSlots(
+                    scheduleSlots
+                        .map(CreateTimeSlotDraft.fromMap)
+                        .toList(growable: false),
+                  ),
+          );
+    final RentalDraftData? rentalData =
+        parsedObjectType == CreateObjectType.rental
+        ? RentalDraftMapper.fromJson(
+            migratedSectionData['rental_details'],
+            defaults: RentalDraftData.defaults(
+              userId: organizerId,
+              currencyCode: currency,
+              timeZoneId: timezone,
             ),
           )
         : null;
@@ -385,6 +502,18 @@ class CreateDraftModel {
             defaults: ScenarioDraftData.defaults(
               timezoneId: timezone,
               currencyCode: currency,
+            ),
+          )
+        : null;
+    final CollectionDraftData? collectionData =
+        parsedObjectType == CreateObjectType.collection
+        ? CollectionDraftMapper.fromJson(
+            migratedSectionData['collection_details'],
+            defaults: CollectionDraftData.defaults(
+              publisherRef: PublisherRef(
+                type: PublisherType.user,
+                id: organizerId,
+              ),
             ),
           )
         : null;
@@ -419,9 +548,14 @@ class CreateDraftModel {
       sectionData: runtimeSectionData,
       eventData: eventData,
       placeData: placeData,
+      activityData: activityData,
       findPeopleData: findPeopleData,
       routeData: routeData,
       scenarioData: scenarioData,
+      collectionData: collectionData,
+      rentalData: rentalData,
+      sessionData: sessionData,
+      classWorkshopData: classWorkshopData,
       startDateTimeUtc: startDateTimeUtcIso == null
           ? null
           : DateTime.parse(startDateTimeUtcIso!).toUtc(),
@@ -522,7 +656,7 @@ class CreateDraftModel {
       }
     }
     return CreateDraftModel(
-      schemaVersion: 8,
+      schemaVersion: 9,
       id: json['id'] as String,
       basedOnPublishedVersionId: json['basedOnPublishedVersionId'] as String?,
       objectType: json['objectType'] as String,
@@ -574,7 +708,10 @@ class CreateDraftModel {
       petFriendly: json['petFriendly'] as bool? ?? false,
       wheelchairAccessible: json['wheelchairAccessible'] as bool? ?? false,
       isFree: json['isFree'] as bool? ?? true,
-      basePrice: (json['basePrice'] as num?)?.toDouble(),
+      basePrice: Money.fromJsonOrNull(
+        json['basePrice'],
+        legacyCurrencyCode: json['currency'] as String? ?? 'EUR',
+      ),
       currency: json['currency'] as String? ?? 'EUR',
       pricingModel: json['pricingModel'] as String? ?? 'fixed',
       registrationRequired: json['registrationRequired'] as bool? ?? true,
@@ -607,7 +744,7 @@ class CreateDraftModel {
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      'schemaVersion': 8,
+      'schemaVersion': 9,
       'id': id,
       'basedOnPublishedVersionId': basedOnPublishedVersionId,
       'objectType': objectType,
@@ -650,7 +787,7 @@ class CreateDraftModel {
       'petFriendly': petFriendly,
       'wheelchairAccessible': wheelchairAccessible,
       'isFree': isFree,
-      'basePrice': basePrice,
+      'basePrice': basePrice?.toJson(),
       'currency': currency,
       'pricingModel': pricingModel,
       'registrationRequired': registrationRequired,

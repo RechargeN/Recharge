@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/platform/v1/event_envelope.schema.json",
+  "title": "Recharge Platform v1 event envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "eventId": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/entityReference"
+    },
+    "eventType": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[a-z][A-Za-z0-9]*(?:\\.[a-z][A-Za-z0-9]*)+$"
+    },
+    "eventVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "producer": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9_-]*$"
+    },
+    "aggregateType": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z][A-Za-z0-9]*$"
+    },
+    "aggregateId": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/entityReference"
+    },
+    "aggregateRevision": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/revision"
+    },
+    "occurredAt": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/utcInstant"
+    },
+    "correlationId": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/entityReference"
+    },
+    "causationId": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/entityReference"
+    },
+    "marketId": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/marketId"
+    },
+    "dataClass": {
+      "type": "string",
+      "enum": ["public", "protected", "sensitive", "operational", "derived"]
+    },
+    "payload": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/jsonObject"
+    }
+  },
+  "required": [
+    "eventId",
+    "eventType",
+    "eventVersion",
+    "producer",
+    "aggregateType",
+    "aggregateId",
+    "aggregateRevision",
+    "occurredAt",
+    "correlationId",
+    "dataClass",
+    "payload"
+  ]
+}

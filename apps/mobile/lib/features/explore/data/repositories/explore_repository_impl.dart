@@ -6,16 +6,15 @@ import '../models/profile_editable_model.dart';
 import '../models/settings_model.dart';
 
 class ExploreRepositoryImpl implements ExploreRepository {
-  ExploreRepositoryImpl({
-    required ExploreLocalDataSource localDataSource,
-  }) : _localDataSource = localDataSource;
+  ExploreRepositoryImpl({required ExploreLocalDataSource localDataSource})
+    : _localDataSource = localDataSource;
 
   final ExploreLocalDataSource _localDataSource;
 
   @override
   Future<ProfileEditableEntity?> loadProfileEditable(String userId) async {
-    final ProfileEditableModel? model =
-        await _localDataSource.loadProfileEditable(userId);
+    final ProfileEditableModel? model = await _localDataSource
+        .loadProfileEditable(userId);
     return model?.toEntity();
   }
 
@@ -37,10 +36,7 @@ class ExploreRepositoryImpl implements ExploreRepository {
   }
 
   @override
-  Future<void> saveSettings(
-    String userId,
-    SettingsEntity settings,
-  ) {
+  Future<void> saveSettings(String userId, SettingsEntity settings) {
     return _localDataSource.saveSettings(
       userId,
       SettingsModel.fromEntity(settings),

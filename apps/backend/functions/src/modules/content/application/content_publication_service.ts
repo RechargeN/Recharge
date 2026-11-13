@@ -1,0 +1,1928 @@
+import { isRecord, isInt } from '../domain/type_rules/validation_context.js';
+import { classWorkshopPastOccurrenceIssues } from '../domain/type_rules/class_workshop_rules.js';
+import type { LinkedPlaceEligibilityPort } from './ports/linked_place_eligibility_port.js';
+import type {
+  PublishedObjectMembershipPort,
+  PublishedObjectMembershipStatus,
+} from './ports/published_object_membership_port.js';
+import { publicValidationDetails } from '../domain/validation_details.js';
+import {
+  findPeopleHostUserId,
+  findPeopleMeetingEnd,
+  findPeoplePublicBody,
+  validateFindPeoplePublishedBody,
+} from '../domain/type_rules/find_people_rules.js';
+import type { FindPeoplePrivacyPort } from './ports/find_people_privacy_port.js';
+import type {
+  ApplyModerationDispositionCommandV1,
+  ChangeClass,
+  ContentBody,
+  ContentCommandV1,
+  ContentEffectV1,
+  ContentQueryByBindingV1,
+  ContentFailureCode,
+  ContentQueryV1,
+  ContentReferenceRevisionsV1,
+  ContentTypeId,
+  ExternalBindingLookupV1,
+  LocalImportBindingV1,
+  ModerationAcknowledgementV1,
+  PublicationStatusV1,
+} from '../../../contracts/content_v1.js';
+import type { PublisherEligibilityV1, PublisherRefV1 } from '../../../contracts/identity_v1.js';
+import { validateContentContract } from '../../../contracts/validate_content_contract.js';
+import type { EntityId } from '../../../shared/ids.js';
+import { deepFreeze } from '../../../shared/immutable.js';
+import type { ServerClock } from '../../../shared/server_clock.js';
+import { parseUtcInstant, type UtcInstant } from '../../../shared/utc_instant.js';
+import type { MarketId } from '../../reference_data/domain/identifiers.js';
+import {
+  assertSubmittable,
+  createContentDraft,
+  directProvenance,
+  importProvenance,
+  updateContentDraftBody,
+  withDraftStatus,
+  type ContentDraft,
+} from '../domain/content_draft.js';
+import {
+  contentTypeRegistry,
+  isContentTypeAvailable,
+  resolveContentType,
+  type ContentAction,
+  type ContentTypeRegistryEntry,
+  type ContentTypeRule,
+} from '../domain/content_type_registry.js';
+import { contentCommerce } from '../domain/personal_publishing_policy.js';
+import {
+  ContentDomainRefusal,
+  ContentRepositoryConflict,
+  rejected,
+  succeeded,
+  unsupported,
+  type ContentResult,
+} from '../domain/failures.js';
+import {
+  activateRevision,
+  applyModerationHold,
+  contentEffect,
+  isPubliclyVisible,
+  mediaNeedsConfirmation,
+  restoreModerationHold,
+  withdrawByOwner,
+  type PublicationPointer,
+} from '../domain/publication_pointer.js';
+import {
+  applyReviewDisposition,
+  assertPublishable,
+  createPublicationSubmission,
+  withSubmissionState,
+  type PublicationSubmission,
+} from '../domain/publication_submission.js';
+import {
+  canonicalJson,
+  createPublishedRevision,
+  sha256Hex,
+  type PublishedRevision,
+} from '../domain/published_revision.js';
+import type {
+  ContentAuthorization,
+  ContentRepository,
+  ContentTransaction,
+} from '../domain/repositories.js';
+import { openImportGeneration } from '../domain/local_import_binding.js';
+import {
+  completeImportCleanup,
+  getImportBinding,
+  releaseImportCleanup,
+  reserveImportCleanup,
+  rollbackImportedDraft,
+  type LocalImportLifecycleContext,
+} from './content_local_import_lifecycle.js';
+import type { MediaReadiness, MediaReadinessPort } from './ports/media_readiness_port.js';
+import type { ModerationDispositionPort } from './ports/moderation_disposition_port.js';
+import type {
+  ContentActor,
+  DelegatedActor,
+  PublisherEligibilityPort,
+} from './ports/publisher_eligibility_port.js';
+import type { ReferenceDataPort, ReferenceResolution } from './ports/reference_data_port.js';
+import { collectionRuleConfig } from '../domain/type_rules/collection_rules.js';
+import { scenarioStopRefs } from '../domain/type_rules/scenario_rules.js';
+import type { ScenarioRevisionPort } from './ports/scenario_revision_port.js';
+import type { RouteRevisionPort } from './ports/route_revision_port.js';
+import { isEntityId } from '../../../shared/ids.js';
+import type {
+  CollectionObjectType,
+  ContentValidationContext,
+  PublishedObjectLookup,
+} from '../domain/type_rules/validation_context.js';
+
+export interface ContentIdGenerator {
+  newId(): EntityId;
+}
+
+/**
+ * What an approved server module may do without a user Session. The grant is
+ * server-owned configuration: with no entry a module can do nothing.
+ */
+export interface DelegatedModuleGrant {
+  readonly operations: ReadonlySet<string>;
+  readonly typeIds: ReadonlySet<ContentTypeId>;
+}
+
+export interface DelegatedModuleCaller {
+  readonly moduleId: string;
+  readonly operation: string;
+}
+
+export interface ContentPublicationServiceDeps {
+  readonly linkedPlaceEligibility?: LinkedPlaceEligibilityPort;
+  readonly enforceLinkedPlaceEligibility?: boolean;
+  readonly repository: ContentRepository;
+  readonly eligibility: PublisherEligibilityPort;
+  readonly referenceData: ReferenceDataPort;
+  readonly moderation: ModerationDispositionPort;
+  readonly media: MediaReadinessPort;
+  readonly clock: ServerClock;
+  readonly ids: ContentIdGenerator;
+  /** Server-owned type flags. Every type is disabled unless listed here. */
+  readonly enabledTypes: ReadonlySet<ContentTypeId>;
+  /** Live status of published objects a Collection references (Catalog/Content owners). */
+  readonly publishedObjects?: PublishedObjectLookup;
+  /**
+   * D3.4: Catalog-owned membership of Collection items, read fresh for the exact
+   * body at submit, publish and activation. When given it replaces
+   * `publishedObjects` for Collection (default: none, behaviour unchanged).
+   */
+  readonly publishedObjectMembership?: PublishedObjectMembershipPort;
+  /**
+   * SCN-PUB-01: Planning's answer about the pinned immutable revision, and the
+   * Catalog-owned status of every catalog stop, read fresh at submit, publish and
+   * activation. Without them a Scenario is refused (fail closed).
+   */
+  readonly scenarioRevisions?: ScenarioRevisionPort;
+  readonly scenarioStops?: PublishedObjectMembershipPort;
+  /**
+   * J2 / RTE-PUB-01: Route's answer about the pinned immutable revision, read
+   * fresh at create, submit, publish and activation. Without it a Route is
+   * refused (fail closed).
+   */
+  readonly routeRevisions?: RouteRevisionPort;
+  /** Approved delegated-import modules by module id (default: none). */
+  readonly delegatedModules?: ReadonlyMap<string, DelegatedModuleGrant>;
+  /**
+   * Rules a composition adds on top of a type's accepted validator (default:
+   * none). They can only add issues, never lift one: a dependency the
+   * composition cannot resolve fails closed here (D3.2 §2.4).
+   */
+  readonly compositionRules?: ReadonlyMap<ContentTypeId, ContentTypeRule>;
+  /**
+   * Types whose `activatePublishedRevision` this composition does not offer
+   * (default: none). Activation is refused before any state is read further,
+   * so the pointer, revisions and effects stay as they are (D3.3 §2 Q4).
+   */
+  readonly activationClosedTypes?: ReadonlySet<ContentTypeId>;
+  /**
+   * D3.7: consent, synthetic 18+ attestation and the public read gate of Find
+   * People. Without it every Find People path fails closed.
+   */
+  readonly findPeoplePrivacy?: FindPeoplePrivacyPort;
+}
+
+export type ContentCommandData =
+  | ContentDraft
+  | PublicationSubmission
+  | PublishedRevision
+  | PublicationPointer
+  | LocalImportBindingV1;
+export type ContentQueryData =
+  ContentDraft | PublicationStatusV1 | PublishedRevision | LocalImportBindingV1;
+
+type ResolvedReferences = Extract<ReferenceResolution, { ok: true }>;
+
+/**
+ * Fresh Catalog-owned membership of one Collection body (D3.4). `lookup` feeds
+ * the accepted validator (`withheld`, `unknown` and `forbidden` read as
+ * unavailable, an outage as unresolved); `refusals` are the references that may
+ * never be published, whatever the composition review says.
+ */
+interface CollectionMembership {
+  readonly lookup: PublishedObjectLookup;
+  readonly refusals: readonly string[];
+  readonly unresolved: boolean;
+}
+
+type Principal =
+  | { readonly kind: 'session'; readonly actor: ContentActor }
+  | { readonly kind: 'delegated'; readonly delegated: DelegatedActor };
+
+interface CommandContext {
+  readonly tx: ContentTransaction;
+  readonly principal: Principal;
+  readonly nowUtc: UtcInstant;
+  /** Every authority check this command relied on, so a replay can repeat them. */
+  readonly authorizations: ContentAuthorization[];
+  /**
+   * Media evidence gathered before any Content transaction was opened. Holding a
+   * Content transaction while waiting for Media (which may wait for Content) made
+   * the two modules deadlock, so the port is never called under a lock.
+   */
+  readonly media?: PreparedMedia | undefined;
+}
+
+/** Media readiness taken from a snapshot; only valid for exactly that snapshot. */
+type PreparedMedia =
+  | {
+      readonly kind: 'draft';
+      readonly draftId: string;
+      readonly draftRevision: number;
+      readonly readiness: MediaReadiness;
+    }
+  | {
+      readonly kind: 'rollback';
+      readonly publishedRevisionId: string;
+      readonly readiness: MediaReadiness;
+    };
+
+/** Stable identity used for idempotency scope, audit and attribution. */
+function principalId(principal: Principal): string {
+  return principal.kind === 'session' ? principal.actor.userId : principal.delegated.actorRef;
+}
+
+/** Commands a delegated import module may issue; it can never activate or publish. */
+const delegatedCommands = new Set(['createDraft', 'updateDraft', 'submitForPublication']);
+
+/**
+ * Single writer of Content records (BCK-07). Moderation, Media, Catalog and
+ * delivery stay behind ports; authority is re-evaluated on every command.
+ */
+export class ContentPublicationService {
+  constructor(private readonly deps: ContentPublicationServiceDeps) {}
+
+  async execute(
+    actor: ContentActor | undefined,
+    rawCommand: unknown,
+  ): Promise<ContentResult<ContentCommandData>> {
+    if (actor === undefined) return rejected('unauthenticated');
+    return this.run({ kind: 'session', actor }, rawCommand);
+  }
+
+  /**
+   * Entry point for an approved server module (delegated import). There is no
+   * user Session, but authorization never weakens: the module and operation
+   * must be granted, the requested Publisher is evaluated by the identity
+   * authority, and the module can only create, refresh and submit its own bound
+   * drafts. It can never publish, activate, withdraw or moderate.
+   */
+  async executeDelegated(
+    caller: DelegatedModuleCaller | undefined,
+    rawCommand: unknown,
+  ): Promise<ContentResult<ContentCommandData>> {
+    const delegated = this.delegatedActor(caller);
+    if (delegated === undefined) return rejected('unauthenticated');
+    if (delegated === null) return rejected('capability_denied');
+    return this.run({ kind: 'delegated', delegated }, rawCommand);
+  }
+
+  private delegatedActor(
+    caller: DelegatedModuleCaller | undefined,
+  ): DelegatedActor | null | undefined {
+    if (caller === undefined) return undefined;
+    const grant = this.deps.delegatedModules?.get(caller.moduleId);
+    if (grant === undefined || !grant.operations.has(caller.operation)) return null;
+    return {
+      moduleId: caller.moduleId,
+      operation: caller.operation,
+      actorRef: `module:${caller.moduleId}/${caller.operation}`,
+    };
+  }
+
+  private async run(
+    principal: Principal,
+    rawCommand: unknown,
+  ): Promise<ContentResult<ContentCommandData>> {
+    const early = preflight(rawCommand, 'commandType');
+    if (early !== undefined) return early;
+    const parsed = await validateContentContract<ContentCommandV1>('command', rawCommand);
+    if (!parsed.ok) return rejected('invalid_contract');
+    const command = parsed.value;
+    // A moderation disposition is a BCK-22 instruction, not a user command: it
+    // is only accepted through `applyModerationDisposition` after verification.
+    if ((command as { commandType: string }).commandType === 'applyModerationDisposition')
+      return rejected('capability_denied');
+    const gate = this.principalGate(principal, command);
+    if (gate !== undefined) return gate;
+    const actorId = principalId(principal);
+    const semanticHash = sha256Hex(
+      canonicalJson({
+        algorithm: 'content_semantic_hash_v1',
+        actorUserId: actorId,
+        commandType: command.commandType,
+        payload: command.payload,
+      }),
+    );
+    const nowUtc = this.now();
+    // A command that already completed is replayed from its stored result: Media is
+    // not consulted again (it may be unavailable now), only the caller authority is
+    // re-checked inside the transaction. Only a new command gathers media evidence.
+    const existing = await this.deps.repository.transact((tx) =>
+      tx.idempotency(actorId, command.commandType, command.idempotencyKey),
+    );
+    const media = existing === null ? await this.prepareMedia(command) : undefined;
+    try {
+      return await this.deps.repository.transact(async (tx) => {
+        const context: CommandContext = { tx, principal, nowUtc, authorizations: [], media };
+        const prior = await tx.idempotency(actorId, command.commandType, command.idempotencyKey);
+        if (prior !== undefined && prior !== null) {
+          if (prior.semanticHash !== semanticHash)
+            throw new ContentDomainRefusal('idempotency_conflict');
+          // A stored result is idempotency, not a standing permission: the caller's
+          // current authority is checked again before anything is handed back.
+          for (const recorded of prior.authorizations)
+            await this.authorize(
+              { ...context, authorizations: [] },
+              recorded.publisherRef,
+              recorded.typeId,
+              recorded.action,
+              recorded.marketId,
+            );
+          return succeeded(deepFreeze(structuredClone(prior.outcome)) as ContentCommandData);
+        }
+        const outcome = await this.dispatch(context, command);
+        tx.putIdempotency({
+          actorUserId: actorId,
+          commandType: command.commandType,
+          idempotencyKey: command.idempotencyKey,
+          semanticHash,
+          outcome: structuredClone(outcome),
+          authorizations: structuredClone(context.authorizations),
+          createdAtUtc: nowUtc,
+        });
+        return succeeded(outcome);
+      });
+    } catch (error) {
+      return this.toRefusal(error);
+    }
+  }
+
+  /**
+   * Import inputs (origin, source refresh, change class) exist only for an
+   * approved delegated module; a signed-in user can never claim an import
+   * origin, and a module can only run its allow-listed commands for granted types.
+   */
+  private principalGate(
+    principal: Principal,
+    command: ContentCommandV1,
+  ): ContentResult<never> | undefined {
+    const payload = command.payload as Record<string, unknown>;
+    const importInputs =
+      payload.origin !== undefined ||
+      payload.sourceRefresh !== undefined ||
+      payload.changeClass !== undefined;
+    if (principal.kind === 'session')
+      return importInputs ? rejected('capability_denied') : undefined;
+    if (!delegatedCommands.has(command.commandType)) return rejected('capability_denied');
+    const grant = this.deps.delegatedModules?.get(principal.delegated.moduleId);
+    if (grant === undefined) return rejected('capability_denied');
+    if (
+      command.commandType === 'createDraft' &&
+      (command.payload.origin === undefined ||
+        command.payload.origin.delegatedActorRef !== principal.delegated.actorRef ||
+        !grant.typeIds.has(command.payload.typeId))
+    )
+      return rejected('capability_denied');
+    return undefined;
+  }
+
+  /** Lookup of the draft and publication bound to an external source record. */
+  async findByExternalBinding(
+    caller: DelegatedModuleCaller | undefined,
+    rawQuery: unknown,
+  ): Promise<ContentResult<ExternalBindingLookupV1>> {
+    const delegated = this.delegatedActor(caller);
+    if (delegated === undefined) return rejected('unauthenticated');
+    if (delegated === null) return rejected('capability_denied');
+    const early = preflight(rawQuery, 'queryType');
+    if (early !== undefined) return early;
+    const parsed = await validateContentContract<ContentQueryByBindingV1>('query', rawQuery);
+    if (!parsed.ok || parsed.value.queryType !== 'findByExternalBinding')
+      return rejected('invalid_contract');
+    const ref = parsed.value.payload.externalBindingRef;
+    try {
+      return await this.deps.repository.transact(async (tx) => {
+        const draft = await tx.draftByExternalBinding(ref);
+        // A module only sees drafts bound by itself; anything else does not exist for it.
+        if (
+          draft === null ||
+          draft.provenance.originBinding.kind !== 'delegatedImport' ||
+          !draft.provenance.originBinding.delegatedActorRef.startsWith(
+            `module:${delegated.moduleId}/`,
+          )
+        )
+          throw new ContentDomainRefusal('not_found');
+        const pointer = await tx.pointer(draft.contentId);
+        const currentRevision =
+          pointer?.currentPublishedRevisionId == null
+            ? null
+            : await tx.publishedRevision(pointer.currentPublishedRevisionId);
+        return succeeded<ExternalBindingLookupV1>(
+          deepFreeze({
+            externalBindingRef: ref,
+            draft,
+            pointer,
+            currentRevision,
+          }),
+        );
+      });
+    } catch (error) {
+      return this.toRefusal(error);
+    }
+  }
+
+  async query(
+    actor: ContentActor | undefined,
+    rawQuery: unknown,
+  ): Promise<ContentResult<ContentQueryData>> {
+    if (actor === undefined) return rejected('unauthenticated');
+    const early = preflight(rawQuery, 'queryType');
+    if (early !== undefined) return early;
+    const parsed = await validateContentContract<ContentQueryV1>('query', rawQuery);
+    if (!parsed.ok) return rejected('invalid_contract');
+    const query = parsed.value;
+    // Binding lookups belong to the delegated import path only.
+    if ((query as { queryType: string }).queryType === 'findByExternalBinding')
+      return rejected('capability_denied');
+    const nowUtc = this.now();
+    try {
+      return await this.deps.repository.transact(async (tx) => {
+        const context: CommandContext = {
+          tx,
+          principal: { kind: 'session', actor },
+          nowUtc,
+          authorizations: [],
+        };
+        switch (query.queryType) {
+          case 'getDraft': {
+            const draft = await tx.draft(query.payload.draftId);
+            if (draft === null) throw new ContentDomainRefusal('not_found');
+            await this.authorize(context, draft.publisherRef, draft.typeId, 'read', draft.marketId);
+            // D3.7 §4: the private source is read by its author only.
+            this.assertFindPeopleAuthor(context, draft);
+            return succeeded<ContentQueryData>(draft);
+          }
+          case 'getPublicationStatus': {
+            const draft = await tx.draftByContentId(query.payload.contentId);
+            if (draft === null) throw new ContentDomainRefusal('not_found');
+            await this.authorize(context, draft.publisherRef, draft.typeId, 'read', draft.marketId);
+            this.assertFindPeopleAuthor(context, draft);
+            const status: PublicationStatusV1 = deepFreeze({
+              contentId: draft.contentId,
+              pointer: await tx.pointer(draft.contentId),
+              submissions: await tx.submissionsForContent(draft.contentId),
+            });
+            return succeeded<ContentQueryData>(status);
+          }
+          case 'getPublishedRevision': {
+            const pointer = await tx.pointer(query.payload.contentId);
+            // Withdrawn, archived and restricted content is not served publicly.
+            if (!isPubliclyVisible(pointer) || pointer?.currentPublishedRevisionId == null)
+              throw new ContentDomainRefusal('not_found');
+            const revision = await tx.publishedRevision(pointer.currentPublishedRevisionId);
+            if (revision === null) throw new ContentDomainRefusal('not_found');
+            // BCK-07: an authorized immutable source, not a Session public projection.
+            // D3.5/Session §11.3 keeps exception notes/audit and private location owner-only.
+            if (revision.typeId === 'session') {
+              if (
+                revision.publisherRef.type !== 'user' ||
+                revision.publisherRef.id !== actor.userId
+              )
+                throw new ContentDomainRefusal('not_found');
+              await this.authorize(
+                context,
+                revision.publisherRef,
+                'session',
+                'read',
+                revision.marketId,
+              );
+            }
+            if (revision.typeId === 'find_people')
+              await this.assertFindPeoplePublicRead(actor.userId, revision, nowUtc);
+            return succeeded<ContentQueryData>(revision);
+          }
+          case 'getImportBinding':
+            return succeeded<ContentQueryData>(
+              await getImportBinding(tx, actor.userId, query.payload.importSourceKey),
+            );
+        }
+      });
+    } catch (error) {
+      return this.toRefusal(error);
+    }
+  }
+
+  private now(): UtcInstant {
+    return parseUtcInstant(this.deps.clock.now().toISOString());
+  }
+
+  private toRefusal<T>(error: unknown): ContentResult<T> {
+    if (error instanceof ContentDomainRefusal) return rejected(error.code, error.violations);
+    if (error instanceof ContentRepositoryConflict) return rejected('revision_conflict');
+    throw error;
+  }
+
+  private async dispatch(
+    context: CommandContext,
+    command: ContentCommandV1,
+  ): Promise<ContentCommandData> {
+    switch (command.commandType) {
+      case 'createDraft':
+        return this.createDraft(context, command.payload);
+      case 'updateDraft':
+        return this.updateDraft(context, command.payload);
+      case 'submitForPublication':
+        return this.submit(context, command.payload);
+      case 'publishApprovedRevision':
+        return this.publish(context, command.payload);
+      case 'withdrawPublication':
+        return this.withdraw(context, command.payload);
+      case 'activatePublishedRevision':
+        return this.activate(context, command.payload);
+      case 'rollbackImportedDraft':
+        return rollbackImportedDraft(this.lifecycle(context), command.payload);
+      case 'reserveImportCleanup':
+        return reserveImportCleanup(this.lifecycle(context), command.payload);
+      case 'completeImportCleanup':
+        return completeImportCleanup(this.lifecycle(context), command.payload);
+      case 'releaseImportCleanup':
+        return releaseImportCleanup(this.lifecycle(context), command.payload);
+    }
+  }
+
+  /** D4.1: lifecycle commands act for the signed-in author only. */
+  private lifecycle(context: CommandContext): LocalImportLifecycleContext {
+    const { principal } = context;
+    if (principal.kind !== 'session') throw new ContentDomainRefusal('capability_denied');
+    return {
+      tx: context.tx,
+      userId: principal.actor.userId,
+      nowUtc: context.nowUtc,
+      authorizeDraftChange: async (draft) => {
+        this.usableType(draft.typeId, draft.typeSchemaMajor);
+        await this.authorize(context, draft.publisherRef, draft.typeId, 'update', draft.marketId);
+      },
+      audit: (action, subjectId) => this.audit(context, action, subjectId),
+    };
+  }
+
+  private async createDraft(
+    context: CommandContext,
+    payload: Extract<ContentCommandV1, { commandType: 'createDraft' }>['payload'],
+  ): Promise<ContentDraft> {
+    const entry = this.usableType(payload.typeId);
+    if (!entry.allowedPublisherTypes.includes(payload.publisherRef.type))
+      throw new ContentDomainRefusal('publisher_not_eligible');
+    await this.authorize(context, payload.publisherRef, payload.typeId, 'create', payload.marketId);
+    if (payload.typeId === 'find_people')
+      await this.assertFindPeopleActor(context, payload.marketId, null);
+    const { principal } = context;
+    if (principal.kind === 'delegated' && payload.origin !== undefined) {
+      // One external source record is bound to at most one Content draft.
+      const bound = await context.tx.draftByExternalBinding(payload.origin.externalBindingRef);
+      if (bound !== null) throw new ContentDomainRefusal('revision_conflict');
+    }
+    // D4: a user's local import source maps to exactly one draft. Importing it
+    // again, under any idempotency key, returns that draft; the same source for
+    // another type, publisher or market is a conflict, never a second draft.
+    // D4.1: after a rollback the next import opens the next generation, in the
+    // same transaction as its one new draft.
+    const importBinding =
+      principal.kind === 'session' && payload.importSourceKey !== undefined
+        ? await context.tx.importBinding(principal.actor.userId, payload.importSourceKey)
+        : null;
+    if (
+      principal.kind === 'session' &&
+      payload.importSourceKey !== undefined &&
+      importBinding?.state === 'active'
+    ) {
+      const imported = await context.tx.draftByImportSource(
+        principal.actor.userId,
+        payload.importSourceKey,
+      );
+      if (imported === null) throw new ContentDomainRefusal('revision_conflict');
+      if (
+        imported.typeId !== payload.typeId ||
+        imported.marketId !== payload.marketId ||
+        imported.publisherRef.type !== payload.publisherRef.type ||
+        imported.publisherRef.id !== payload.publisherRef.id
+      )
+        throw new ContentDomainRefusal('idempotency_conflict');
+      this.audit(context, 'content.draft.import_replayed', imported.draftId);
+      return imported;
+    }
+    const references = await this.pin(payload.marketId, payload.typeId, context.nowUtc);
+    const contentId = await this.newContentId(context, payload.typeId, payload.body);
+    const draft = createContentDraft({
+      draftId: this.deps.ids.newId(),
+      contentId,
+      typeId: payload.typeId,
+      publisherRef: payload.publisherRef,
+      marketId: payload.marketId,
+      body: payload.body,
+      referenceRevisions: references,
+      createdByUserId: principal.kind === 'session' ? principal.actor.userId : null,
+      provenance:
+        principal.kind === 'session' || payload.origin === undefined
+          ? directProvenance(principalId(principal))
+          : importProvenance(payload.origin),
+      ...(payload.importSourceKey === undefined
+        ? {}
+        : { importSourceKey: payload.importSourceKey }),
+      ...(payload.importSourceKey === undefined || principal.kind !== 'session'
+        ? {}
+        : { importGeneration: (importBinding?.generation ?? 0) + 1 }),
+      nowUtc: context.nowUtc,
+    });
+    if (principal.kind === 'session' && payload.importSourceKey !== undefined)
+      context.tx.putImportBinding(
+        openImportGeneration(
+          principal.actor.userId,
+          payload.importSourceKey,
+          importBinding,
+          draft.draftId,
+        ),
+        importBinding?.bindingRevision ?? 0,
+      );
+    context.tx.putDraft(draft);
+    this.audit(context, 'content.draft.created', draft.draftId);
+    return draft;
+  }
+
+  /**
+   * SCN-PUB-01 §9: a Scenario has exactly one publication, identified by the
+   * Scenario id itself; a second draft for the same Scenario is a conflict.
+   * J2 / RTE-PUB-01: the same for a Route, and only its author may reserve the
+   * id, so nobody can hold another user's Route hostage with an early draft.
+   */
+  private async newContentId(
+    context: CommandContext,
+    typeId: ContentTypeId,
+    body: ContentBody,
+  ): Promise<EntityId> {
+    if (typeId === 'route') {
+      const route = isRecord(body.route) ? body.route : undefined;
+      const ref = isRecord(route?.ref) ? route.ref : undefined;
+      if (!isEntityId(ref?.routeId))
+        throw new ContentDomainRefusal('validation_failed', publicValidationDetails(['route.ref']));
+      if (context.principal.kind !== 'session') throw new ContentDomainRefusal('capability_denied');
+      await this.assertRouteSource('route', body, context.principal.actor.userId);
+      if ((await context.tx.draftByContentId(ref.routeId)) !== null)
+        throw new ContentDomainRefusal('revision_conflict');
+      return ref.routeId;
+    }
+    if (typeId !== 'scenario') return this.deps.ids.newId();
+    const scenario = isRecord(body.scenario) ? body.scenario : undefined;
+    const ref = isRecord(scenario?.ref) ? scenario.ref : undefined;
+    if (!isEntityId(ref?.scenarioId))
+      throw new ContentDomainRefusal(
+        'validation_failed',
+        publicValidationDetails(['scenario.ref']),
+      );
+    if ((await context.tx.draftByContentId(ref.scenarioId)) !== null)
+      throw new ContentDomainRefusal('revision_conflict');
+    return ref.scenarioId;
+  }
+
+  private async updateDraft(
+    context: CommandContext,
+    payload: Extract<ContentCommandV1, { commandType: 'updateDraft' }>['payload'],
+  ): Promise<ContentDraft> {
+    const draft = await context.tx.draft(payload.draftId);
+    if (draft === null) throw new ContentDomainRefusal('not_found');
+    this.usableType(draft.typeId, draft.typeSchemaMajor);
+    this.assertBoundToCaller(context, draft);
+    await this.authorize(context, draft.publisherRef, draft.typeId, 'update', draft.marketId);
+    await this.assertFindPeopleActor(context, draft.marketId, draft);
+    const references = await this.pin(draft.marketId, draft.typeId, context.nowUtc);
+    const updated = updateContentDraftBody(
+      draft,
+      payload.expectedRevision,
+      payload.body,
+      references,
+      context.nowUtc,
+      payload.sourceRefresh,
+    );
+    context.tx.putDraft(updated);
+    this.audit(context, 'content.draft.updated', updated.draftId);
+    return updated;
+  }
+
+  private async submit(
+    context: CommandContext,
+    payload: Extract<ContentCommandV1, { commandType: 'submitForPublication' }>['payload'],
+  ): Promise<PublicationSubmission> {
+    const draft = await context.tx.draft(payload.draftId);
+    if (draft === null) throw new ContentDomainRefusal('not_found');
+    const entry = this.usableType(draft.typeId, draft.typeSchemaMajor);
+    this.assertBoundToCaller(context, draft);
+    const eligibility = await this.authorize(
+      context,
+      draft.publisherRef,
+      draft.typeId,
+      'submit',
+      draft.marketId,
+      draft.body,
+    );
+    assertSubmittable(draft, payload.expectedDraftRevision);
+    await this.assertFindPeopleActor(context, draft.marketId, draft, 'consent');
+    await this.assertChangeClass(context, draft, payload.changeClass);
+    const resolved = await this.resolveReferences(draft.marketId, draft.typeId, context.nowUtc);
+    const membership = await this.collectionMembership(draft.typeId, draft.body, draft.marketId);
+    this.assertValid(
+      entry,
+      draft,
+      resolved,
+      context.nowUtc,
+      principalId(context.principal),
+      membership,
+    );
+    await this.assertSessionScheduleSequence(context, draft);
+    this.assertClassWorkshopFuture(draft, context.nowUtc);
+    await this.assertLinkedPlace(draft.typeId, draft.body, draft.marketId);
+    await this.assertScenarioSource(draft.typeId, draft.body, draft.publisherRef);
+    await this.assertRouteSource(draft.typeId, draft.body, draft.createdByUserId);
+    // Early feedback only: the binding check runs where the pointer switches.
+    await this.assertTransition(
+      context.tx,
+      entry,
+      await context.tx.pointer(draft.contentId),
+      draft.body,
+    );
+    const references = resolved.revisions;
+    const profile = await this.deps.moderation.profileFor({
+      typeId: draft.typeId,
+      marketId: draft.marketId,
+      publisherRef: draft.publisherRef,
+      ...(payload.changeClass === undefined ? {} : { changeClass: payload.changeClass }),
+    });
+    if (!profile.available) throw new ContentDomainRefusal('policy_unavailable');
+    this.mediaEvidence(context, draft);
+    const submission = createPublicationSubmission({
+      submissionId: this.deps.ids.newId(),
+      draft,
+      moderation: {
+        profileId: profile.profileId,
+        requiresPrePublicationModeration: profile.requiresPrePublicationModeration,
+        policyRevision: profile.policyRevision,
+        ...(profile.policyDecisionId === undefined
+          ? {}
+          : { policyDecisionId: profile.policyDecisionId }),
+      },
+      eligibilityAuthorityRevision: eligibility.authorityRevision,
+      ...(payload.changeClass === undefined ? {} : { changeClass: payload.changeClass }),
+      referenceRevisions: references,
+      nowUtc: context.nowUtc,
+    });
+    context.tx.putSubmission(submission);
+    context.tx.putDraft(withDraftStatus(draft, 'submitted', context.nowUtc));
+    this.audit(context, 'content.publication.submitted', submission.submissionId);
+    return submission;
+  }
+
+  private async publish(
+    context: CommandContext,
+    payload: Extract<ContentCommandV1, { commandType: 'publishApprovedRevision' }>['payload'],
+  ): Promise<PublishedRevision> {
+    const { tx, nowUtc } = context;
+    const submission = await tx.submission(payload.submissionId);
+    if (submission === null) throw new ContentDomainRefusal('not_found');
+    assertPublishable(submission);
+    const draft = await tx.draft(submission.draftId);
+    if (draft === null) throw new ContentDomainRefusal('not_found');
+    if (draft.revision !== submission.draftRevision)
+      throw new ContentDomainRefusal('source_revision_stale');
+    const entry = this.usableType(submission.typeId, draft.typeSchemaMajor);
+    // Authority is re-read at publish time; the submit-time result is not reused.
+    await this.authorize(
+      context,
+      submission.publisherRef,
+      submission.typeId,
+      'publish',
+      submission.marketId,
+      draft.body,
+    );
+    await this.assertFindPeopleActor(context, draft.marketId, draft, 'consent');
+    const resolved = await this.resolveReferences(submission.marketId, submission.typeId, nowUtc);
+    // Membership is read again: the submit-time answer is not reused.
+    const membership = await this.collectionMembership(draft.typeId, draft.body, draft.marketId);
+    this.assertValid(entry, draft, resolved, nowUtc, principalId(context.principal), membership);
+    await this.assertSessionScheduleSequence(context, draft);
+    this.assertClassWorkshopFuture(draft, context.nowUtc);
+    await this.assertLinkedPlace(draft.typeId, draft.body, draft.marketId);
+    await this.assertScenarioSource(draft.typeId, draft.body, draft.publisherRef);
+    await this.assertRouteSource(draft.typeId, draft.body, draft.createdByUserId);
+    const references = resolved.revisions;
+    const media = this.mediaEvidence(context, draft);
+    const pointer = await tx.pointer(submission.contentId);
+    // Binding: in the very transaction that switches the pointer.
+    await this.assertTransition(tx, entry, pointer, draft.body);
+    const existing = await tx.publishedRevisionsForContent(submission.contentId);
+    const revision = createPublishedRevision({
+      publishedRevisionId: this.deps.ids.newId(),
+      revisionNumber: existing.length + 1,
+      // D3.7 §3.2: Find People publishes the server-built public projection,
+      // never the private source; the validator above guaranteed its policy.
+      draft:
+        draft.typeId === 'find_people'
+          ? { ...draft, body: findPeoplePublicBody(draft.body, this.findPeopleGeo(resolved)) }
+          : draft,
+      submission,
+      referenceRevisions: references,
+      mediaRevision: media.mediaRevision,
+      mediaAttachments: media.attachments,
+      nowUtc,
+    });
+    const nextPointer = activateRevision(
+      pointer,
+      payload.expectedPointerRevision,
+      submission.contentId,
+      revision.publishedRevisionId,
+      nowUtc,
+      media.confirmations,
+    );
+    tx.putPublishedRevision(revision);
+    tx.putPointer(nextPointer, pointer?.revision ?? 0);
+    for (const prior of await tx.submissionsForContent(submission.contentId))
+      if (prior.state === 'published')
+        tx.putSubmission(withSubmissionState(prior, 'superseded', nowUtc));
+    tx.putSubmission(withSubmissionState(submission, 'published', nowUtc));
+    tx.putDraft(withDraftStatus(draft, 'editing', nowUtc));
+    tx.effects.append(this.publishEffect(revision, nextPointer, existing.length === 0, nowUtc));
+    this.audit(context, 'content.publication.published', revision.publishedRevisionId);
+    return revision;
+  }
+
+  private publishEffect(
+    revision: PublishedRevision,
+    pointer: PublicationPointer,
+    first: boolean,
+    nowUtc: UtcInstant,
+  ): ContentEffectV1 {
+    const kind = first ? 'ContentPublished' : 'ContentRevisionActivated';
+    return this.effectBase(
+      revision,
+      pointer,
+      kind,
+      `${revision.publishedRevisionId}:${kind}`,
+      nowUtc,
+    );
+  }
+
+  private effectBase(
+    revision: PublishedRevision,
+    pointer: PublicationPointer,
+    kind: ContentEffectV1['kind'],
+    effectId: string,
+    nowUtc: UtcInstant,
+  ): ContentEffectV1 {
+    return contentEffect(revision, pointer, kind, effectId, nowUtc);
+  }
+
+  /**
+   * Visibility changes are committed with the pointer and carry its revision, so
+   * a consumer can drop stale replays and a tombstone always beats stale cache.
+   */
+  private async visibilityEffect(
+    tx: ContentTransaction,
+    pointer: PublicationPointer,
+    nowUtc: UtcInstant,
+  ): Promise<ContentEffectV1> {
+    const current = pointer.currentPublishedRevisionId;
+    const revision = current === null ? null : await tx.publishedRevision(current);
+    if (revision === null) throw new ContentDomainRefusal('not_found');
+    return this.effectBase(
+      revision,
+      pointer,
+      'ContentVisibilityChanged',
+      `${revision.contentId}:visibility:${pointer.revision}`,
+      nowUtc,
+    );
+  }
+
+  /** Owner withdrawal/archival: always allowed to reduce visibility, even if the type is later disabled. */
+  private async withdraw(
+    context: CommandContext,
+    payload: Extract<ContentCommandV1, { commandType: 'withdrawPublication' }>['payload'],
+  ): Promise<PublicationPointer> {
+    const { tx, nowUtc } = context;
+    const draft = await tx.draftByContentId(payload.contentId);
+    if (draft === null) throw new ContentDomainRefusal('not_found');
+    // Taking content down is authorized by the publisher's current authority but
+    // never by the type flag: a disabled type must still be withdrawable.
+    await this.authorize(context, draft.publisherRef, draft.typeId, 'withdraw', draft.marketId);
+    const pointer = await tx.pointer(payload.contentId);
+    const next = withdrawByOwner(pointer, payload.expectedPointerRevision, payload.mode, nowUtc);
+    tx.putPointer(next, pointer?.revision ?? 0);
+    tx.effects.append(await this.visibilityEffect(tx, next, nowUtc));
+    this.audit(context, `content.publication.${payload.mode}`, payload.contentId);
+    return next;
+  }
+
+  /** Compatible rollback: select an earlier immutable revision, never edit history. */
+  private async activate(
+    context: CommandContext,
+    payload: Extract<ContentCommandV1, { commandType: 'activatePublishedRevision' }>['payload'],
+  ): Promise<PublicationPointer> {
+    const { tx, nowUtc } = context;
+    const draft = await tx.draftByContentId(payload.contentId);
+    if (draft === null) throw new ContentDomainRefusal('not_found');
+    const entry = this.usableType(draft.typeId, draft.typeSchemaMajor);
+    if (this.deps.activationClosedTypes?.has(draft.typeId) === true)
+      throw new ContentDomainRefusal('type_disabled');
+    await this.authorize(context, draft.publisherRef, draft.typeId, 'publish', draft.marketId);
+    await this.assertFindPeopleActor(context, draft.marketId, draft, 'consent');
+    const target = await tx.publishedRevision(payload.publishedRevisionId);
+    if (target === null || target.contentId !== payload.contentId)
+      throw new ContentDomainRefusal('not_found');
+    // Compatible = same type, still available, market and media still valid.
+    if (target.typeId !== draft.typeId) throw new ContentDomainRefusal('content_type_unsupported');
+    // ADR 0023: the revision that goes live decides what is sold or booked.
+    await this.authorize(
+      context,
+      draft.publisherRef,
+      draft.typeId,
+      'publish',
+      draft.marketId,
+      target.body,
+    );
+    const resolved = await this.resolveReferences(target.marketId, target.typeId, nowUtc);
+    // D3.5/D3.6/SCN-PUB-01: revalidate the immutable target, never the draft.
+    if (
+      target.typeId === 'session' ||
+      target.typeId === 'class_workshop' ||
+      target.typeId === 'scenario' ||
+      target.typeId === 'route'
+    ) {
+      if (
+        target.typeId !== 'class_workshop' &&
+        canonicalJson(target.referenceRevisions) !== canonicalJson(resolved.revisions)
+      )
+        throw new ContentDomainRefusal('source_revision_stale');
+      const membership = await this.collectionMembership(
+        target.typeId,
+        target.body,
+        target.marketId,
+      );
+      const issues = entry.validate?.(
+        target.body,
+        this.validationContext(
+          { ...draft, body: target.body },
+          resolved,
+          nowUtc,
+          principalId(context.principal),
+          membership?.lookup ?? this.deps.publishedObjects,
+        ),
+      ) ?? ['no_source_contract'];
+      this.assertSourceIssues(target.typeId, issues);
+    }
+    // D3.7 §8: Find People re-checks exactly the immutable public body.
+    if (target.typeId === 'find_people') {
+      const issues = validateFindPeoplePublishedBody(
+        target.body,
+        this.validationContext(
+          { ...draft, body: target.body },
+          resolved,
+          nowUtc,
+          principalId(context.principal),
+        ),
+      );
+      if (issues.length > 0)
+        throw new ContentDomainRefusal('validation_failed', publicValidationDetails(issues));
+    }
+    // The composition's rules apply to the target immutable body, not the draft.
+    this.assertCompositionRules(
+      target.typeId,
+      target.body,
+      this.validationContext(draft, resolved, nowUtc, principalId(context.principal)),
+    );
+    await this.assertLinkedPlace(target.typeId, target.body, target.marketId);
+    await this.assertScenarioSource(target.typeId, target.body, target.publisherRef);
+    await this.assertRouteSource(target.typeId, target.body, draft.createdByUserId);
+    await this.assertCollectionTargetMembership(target.typeId, target.body, target.marketId);
+    // Rollback verifies exactly the references stored in the target revision; the
+    // evidence was taken for this very immutable revision before the transaction.
+    const evidence = context.media;
+    if (
+      evidence?.kind !== 'rollback' ||
+      evidence.publishedRevisionId !== target.publishedRevisionId
+    )
+      throw new ContentDomainRefusal('source_revision_stale');
+    if (!evidence.readiness.ready || evidence.readiness.mediaRevision !== target.mediaRevision)
+      throw new ContentDomainRefusal('media_not_ready');
+    const pointer = await tx.pointer(payload.contentId);
+    if (pointer === null) throw new ContentDomainRefusal('not_found');
+    // A rollback is a pointer switch too: it may not leave a forbidden transition.
+    await this.assertTransition(tx, entry, pointer, target.body);
+    const confirmations = evidence.readiness.confirmations;
+    const sameVisibleRevision =
+      pointer.currentPublishedRevisionId === target.publishedRevisionId &&
+      pointer.ownerHold === null &&
+      pointer.moderationHold === null;
+    // Re-selecting what is already public is a no-op conflict, not a new state,
+    // unless the publisher confirms media again after a suppression or after
+    // Media revoked what was confirmed (D2 §5.4).
+    if (sameVisibleRevision && !mediaNeedsConfirmation(pointer, confirmations))
+      throw new ContentDomainRefusal('revision_conflict');
+    const next = activateRevision(
+      pointer,
+      payload.expectedPointerRevision,
+      payload.contentId,
+      target.publishedRevisionId,
+      nowUtc,
+      confirmations,
+    );
+    tx.putPointer(next, pointer.revision);
+    // Only the media changed: visibility and revision stay, so Booking sees no fact.
+    tx.effects.append(
+      sameVisibleRevision
+        ? this.effectBase(
+            target,
+            next,
+            'ContentMediaAvailabilityChanged',
+            `${target.contentId}:media:${next.revision}`,
+            nowUtc,
+          )
+        : this.effectBase(
+            target,
+            next,
+            'ContentRevisionActivated',
+            `${target.publishedRevisionId}:ContentRevisionActivated:${next.revision}`,
+            nowUtc,
+          ),
+    );
+    this.audit(
+      context,
+      sameVisibleRevision
+        ? 'content.publication.media_confirmed'
+        : 'content.publication.rolled_back',
+      target.publishedRevisionId,
+    );
+    return next;
+  }
+
+  /**
+   * System path for BCK-22 enforcement instructions. It verifies the instruction
+   * through the moderation port first; unknown, unsigned, stale or foreign
+   * instructions mutate nothing. Replays are idempotent by decision.
+   */
+  async applyModerationDisposition(
+    rawCommand: unknown,
+  ): Promise<ContentResult<ModerationAcknowledgementV1>> {
+    const early = preflight(rawCommand, 'commandType');
+    if (early !== undefined) return early;
+    const parsed = await validateContentContract<
+      ContentCommandV1 | { commandType: 'applyModerationDisposition'; payload: unknown }
+    >('command', rawCommand);
+    if (!parsed.ok) return rejected('invalid_contract');
+    const command = parsed.value as ApplyModerationDispositionCommandV1;
+    if (command.commandType !== 'applyModerationDisposition') return rejected('invalid_contract');
+    const payload = command.payload;
+    const nowUtc = this.now();
+    const verification = await this.deps.moderation.verifyDisposition({ payload, nowUtc });
+    if (!verification.verified) return rejected('capability_denied');
+    // An instruction that is not yet in effect cannot be applied early.
+    if (Date.parse(payload.effectiveAtUtc) > Date.parse(nowUtc))
+      return rejected('moderation_decision_stale');
+    const systemActor = `moderation:${verification.issuer}`;
+    const semanticHash = sha256Hex(
+      canonicalJson({
+        algorithm: 'content_disposition_hash_v1',
+        decisionId: payload.decisionId,
+        disposition: payload.disposition,
+        policyRevision: payload.policyRevision,
+        reasonCategory: payload.reasonCategory,
+        target: payload.target,
+        restoresDecisionId: payload.restoresDecisionId ?? null,
+      }),
+    );
+    const key = `${payload.decisionId}:${payload.disposition}`.slice(0, 128);
+    try {
+      return await this.deps.repository.transact(async (tx) => {
+        const prior = await tx.idempotency(systemActor, 'applyModerationDisposition', key);
+        if (prior !== null) {
+          if (prior.semanticHash !== semanticHash)
+            throw new ContentDomainRefusal('idempotency_conflict');
+          const stored = deepFreeze(structuredClone(prior.outcome)) as ModerationAcknowledgementV1;
+          return succeeded<ModerationAcknowledgementV1>({ ...stored, outcome: 'already_applied' });
+        }
+        const pointerRevision = await this.applyDisposition(
+          tx,
+          payload,
+          systemActor,
+          nowUtc,
+          verification,
+        );
+        const ack: ModerationAcknowledgementV1 = {
+          instructionId: payload.instructionId,
+          decisionId: payload.decisionId,
+          outcome: 'applied',
+          disposition: payload.disposition,
+          contentId: payload.target.contentId,
+          pointerRevision,
+        };
+        tx.putIdempotency({
+          actorUserId: systemActor,
+          commandType: 'applyModerationDisposition',
+          idempotencyKey: key,
+          semanticHash,
+          outcome: structuredClone(ack),
+          // A verified system instruction carries its own authority; no user check to repeat.
+          authorizations: [],
+          createdAtUtc: nowUtc,
+        });
+        return succeeded(deepFreeze(ack));
+      });
+    } catch (error) {
+      return this.toRefusal(error);
+    }
+  }
+
+  private async applyDisposition(
+    tx: ContentTransaction,
+    payload: ApplyModerationDispositionCommandV1['payload'],
+    systemActor: string,
+    nowUtc: UtcInstant,
+    expectations: {
+      readonly expectedPointerRevision?: number;
+      readonly expectedSubmissionRevision?: number;
+    },
+  ): Promise<number | null> {
+    const { disposition, target, decisionId } = payload;
+    if (
+      disposition === 'approve' ||
+      disposition === 'request_revision' ||
+      disposition === 'reject'
+    ) {
+      // Exact submission only; a foreign or unknown target is a stale decision.
+      const submission =
+        target.submissionId === undefined ? null : await tx.submission(target.submissionId);
+      if (
+        submission === null ||
+        submission.contentId !== target.contentId ||
+        (expectations.expectedSubmissionRevision !== undefined &&
+          submission.revision !== expectations.expectedSubmissionRevision)
+      )
+        throw new ContentDomainRefusal('moderation_decision_stale');
+      const updated = applyReviewDisposition(submission, disposition, decisionId, nowUtc);
+      tx.putSubmission(updated);
+      if (disposition !== 'approve') {
+        const draft = await tx.draft(submission.draftId);
+        // The draft returns to the author only if it is still the reviewed one.
+        if (
+          draft !== null &&
+          draft.status === 'submitted' &&
+          draft.revision === submission.draftRevision
+        )
+          tx.putDraft(
+            withDraftStatus(
+              draft,
+              disposition === 'reject' ? 'editing' : 'revision_requested',
+              nowUtc,
+            ),
+          );
+      }
+      this.auditAs(
+        tx,
+        systemActor,
+        `content.moderation.${disposition}`,
+        submission.submissionId,
+        nowUtc,
+      );
+      return null;
+    }
+    const pointer = await tx.pointer(target.contentId);
+    if (
+      expectations.expectedPointerRevision !== undefined &&
+      pointer?.revision !== expectations.expectedPointerRevision
+    )
+      throw new ContentDomainRefusal('moderation_decision_stale');
+    let next: PublicationPointer;
+    if (disposition === 'restore') {
+      if (payload.restoresDecisionId === undefined)
+        throw new ContentDomainRefusal('moderation_decision_stale');
+      next = restoreModerationHold(pointer, payload.restoresDecisionId, nowUtc);
+    } else {
+      next = applyModerationHold(
+        pointer,
+        target.publishedRevisionId,
+        disposition === 'withdraw' ? 'withdrawn' : 'restricted',
+        decisionId,
+        nowUtc,
+      );
+    }
+    tx.putPointer(next, pointer?.revision ?? 0);
+    tx.effects.append(await this.visibilityEffect(tx, next, nowUtc));
+    this.auditAs(tx, systemActor, `content.moderation.${disposition}`, target.contentId, nowUtc);
+    return next.revision;
+  }
+
+  /** D3.6 CLS-OD-04: submit and approved publish need every declared class ahead. */
+  private assertClassWorkshopFuture(draft: ContentDraft, nowUtc: UtcInstant): void {
+    if (draft.typeId !== 'class_workshop') return;
+    const issues = classWorkshopPastOccurrenceIssues(draft.body, nowUtc);
+    if (issues.length > 0)
+      throw new ContentDomainRefusal('validation_failed', publicValidationDetails(issues));
+  }
+
+  /** D3.5: authoring allocates the next schedule number; rollback never allocates. */
+  private async assertSessionScheduleSequence(
+    context: CommandContext,
+    draft: ContentDraft,
+  ): Promise<void> {
+    if (draft.typeId !== 'session') return;
+    type Payload = { timezone_id: string; schedule: Record<string, unknown>; exceptions: unknown };
+    const payloadOf = (body: ContentBody): Payload => {
+      if (
+        !isRecord(body.session) ||
+        !isRecord(body.session.schedule) ||
+        !isInt(body.session.schedule.schedule_revision, 1, Number.MAX_SAFE_INTEGER)
+      )
+        throw new ContentDomainRefusal('source_revision_stale');
+      return body.session as Payload;
+    };
+    const next = payloadOf(draft.body);
+    const pointer = await context.tx.pointer(draft.contentId);
+    const current =
+      pointer?.currentPublishedRevisionId == null
+        ? null
+        : await context.tx.publishedRevision(pointer.currentPublishedRevisionId);
+    const fingerprint = (body: ContentBody) => {
+      const value = payloadOf(body);
+      const { schedule_revision, ...rules } = value.schedule;
+      void schedule_revision;
+      return canonicalJson({ timezone: value.timezone_id, rules, exceptions: value.exceptions });
+    };
+    const history = await context.tx.publishedRevisionsForContent(draft.contentId);
+    const maximum = history.reduce(
+      (max, revision) => Math.max(max, Number(payloadOf(revision.body).schedule.schedule_revision)),
+      0,
+    );
+    const same = current !== null && fingerprint(current.body) === fingerprint(draft.body);
+    const expected = same ? payloadOf(current.body).schedule.schedule_revision : maximum + 1;
+    if (next.schedule.schedule_revision !== expected)
+      throw new ContentDomainRefusal('source_revision_stale');
+  }
+
+  /** D3.7 §4: only the draft's author reads or changes a Find People source. */
+  private assertFindPeopleAuthor(context: CommandContext, draft: ContentDraft): void {
+    if (draft.typeId !== 'find_people') return;
+    const { principal } = context;
+    if (principal.kind !== 'session' || principal.actor.userId !== draft.createdByUserId)
+      throw new ContentDomainRefusal('capability_denied');
+  }
+
+  /**
+   * D3.7 §7: the acting author of Find People must hold a current synthetic
+   * 18+ attestation (FP-OD-04) and, to submit, publish or activate, an active
+   * unexpired BCK-06 consent for exactly this publication. A missing port, a
+   * delegated module or a non-author is refused before anything is written.
+   */
+  private async assertFindPeopleActor(
+    context: CommandContext,
+    marketId: string,
+    draft: ContentDraft | null,
+    need?: 'consent',
+  ): Promise<void> {
+    if (draft !== null && draft.typeId !== 'find_people') return;
+    const { principal } = context;
+    if (principal.kind !== 'session') throw new ContentDomainRefusal('capability_denied');
+    if (draft !== null) this.assertFindPeopleAuthor(context, draft);
+    const privacy = this.deps.findPeoplePrivacy;
+    if (privacy === undefined) throw new ContentDomainRefusal('age_eligibility_required');
+    const userId = principal.actor.userId;
+    let adult = false;
+    try {
+      adult = await privacy.isAdult({ userId, marketId, nowUtc: context.nowUtc });
+    } catch {
+      adult = false;
+    }
+    if (!adult) throw new ContentDomainRefusal('age_eligibility_required');
+    if (need !== 'consent' || draft === null) return;
+    let state = 'unavailable';
+    try {
+      state = (
+        await privacy.consent({ contentId: draft.contentId, userId, nowUtc: context.nowUtc })
+      ).state;
+    } catch {
+      state = 'unavailable';
+    }
+    if (state !== 'active') throw new ContentDomainRefusal('privacy_consent_required');
+  }
+
+  /**
+   * D3.7 §6: an exact-ID read of a Find People revision is a public read; it
+   * applies the same fresh gate as the Catalog, including for the author.
+   */
+  private async assertFindPeoplePublicRead(
+    viewerUserId: string,
+    revision: PublishedRevision,
+    nowUtc: UtcInstant,
+  ): Promise<void> {
+    if (!this.deps.enabledTypes.has('find_people')) throw new ContentDomainRefusal('not_found');
+    let allowed = false;
+    try {
+      allowed =
+        (await this.deps.findPeoplePrivacy?.publicReadAllowed({
+          viewerUserId,
+          contentId: revision.contentId,
+          publisherRef: revision.publisherRef,
+          hostUserId: findPeopleHostUserId(revision.body),
+          meetingEndUtc: findPeopleMeetingEnd(revision.body),
+          nowUtc,
+        })) === true;
+    } catch {
+      allowed = false;
+    }
+    if (!allowed) throw new ContentDomainRefusal('not_found');
+  }
+
+  private findPeopleGeo(resolved: ResolvedReferences): {
+    readonly precisionMeters: number;
+    readonly policyRevision: string;
+  } {
+    const policy = resolved.lookups.findPeoplePublicGeo?.();
+    if (policy === undefined) throw new ContentDomainRefusal('policy_unavailable');
+    return policy;
+  }
+
+  private usableType(typeId: ContentTypeId, storedSchemaMajor?: number): ContentTypeRegistryEntry {
+    const entry = resolveContentType(typeId);
+    if (entry === null || !isContentTypeAvailable(entry))
+      throw new ContentDomainRefusal('content_type_unsupported');
+    // A stored record from a newer/incompatible type schema is never coerced.
+    if (storedSchemaMajor !== undefined && storedSchemaMajor !== entry.typeSchemaMajor)
+      throw new ContentDomainRefusal('unsupported_version');
+    if (!this.deps.enabledTypes.has(typeId)) throw new ContentDomainRefusal('type_disabled');
+    return entry;
+  }
+
+  private validationContext(
+    draft: ContentDraft,
+    resolved: ResolvedReferences,
+    nowUtc: UtcInstant,
+    actorUserId: string,
+    publishedObjects: PublishedObjectLookup | undefined = this.deps.publishedObjects,
+  ): ContentValidationContext {
+    return {
+      typeId: draft.typeId,
+      marketId: draft.marketId,
+      publisherRef: draft.publisherRef,
+      // Imported drafts have no authoring user; the importer stands in.
+      createdByUserId: draft.createdByUserId ?? draft.provenance.importerActorRef,
+      actorUserId,
+      nowUtc,
+      draftRevision: draft.revision,
+      ...(publishedObjects === undefined ? {} : { publishedObjects }),
+      market: resolved.market,
+      lookups: resolved.lookups,
+    };
+  }
+
+  /**
+   * At submit and publish the draft is exactly the submitted revision (publish
+   * refuses a draft that moved on), so its body is the body being published.
+   */
+  private assertSourceIssues(typeId: ContentTypeId, issues: readonly string[]): void {
+    // CW-V1 §34.5: future schemas refuse identically on all publication paths.
+    if (typeId === 'class_workshop' && issues.includes('class_workshop.schema_unsupported'))
+      throw new ContentDomainRefusal('content_type_unsupported');
+    if (issues.length > 0)
+      throw new ContentDomainRefusal('validation_failed', publicValidationDetails(issues));
+  }
+
+  private assertValid(
+    entry: ContentTypeRegistryEntry,
+    draft: ContentDraft,
+    resolved: ResolvedReferences,
+    nowUtc: UtcInstant,
+    actorUserId: string,
+    membership?: CollectionMembership,
+  ): void {
+    const context = this.validationContext(
+      draft,
+      resolved,
+      nowUtc,
+      actorUserId,
+      membership === undefined ? this.deps.publishedObjects : membership.lookup,
+    );
+    const issues = [
+      ...(entry.validate?.(draft.body, context) ?? ['no_source_contract']),
+      ...(membership?.refusals ?? []),
+    ];
+    this.assertSourceIssues(draft.typeId, issues);
+    this.assertCompositionRules(draft.typeId, draft.body, context);
+  }
+
+  /**
+   * The composition's rules (D3.2 §2.4) over the exact body that would become
+   * public: the submitted draft revision at submit and publish, the target
+   * immutable revision at activation. A revision published before a rule
+   * existed cannot be made public again past it.
+   */
+  private async assertLinkedPlace(
+    typeId: ContentTypeId,
+    body: ContentBody,
+    marketId: string,
+  ): Promise<void> {
+    if (
+      typeId !== 'activity' ||
+      (!this.deps.enforceLinkedPlaceEligibility && !this.deps.linkedPlaceEligibility)
+    )
+      return;
+    const location = body.location;
+    if (typeof location !== 'object' || location === null || Array.isArray(location)) return;
+    const id = (location as Readonly<Record<string, unknown>>).linkedPlaceId;
+    if (id === undefined) return;
+    let status: string = 'unavailable';
+    try {
+      status =
+        typeof id === 'string'
+          ? ((await this.deps.linkedPlaceEligibility?.check({ placeId: id, marketId }))?.status ??
+            'unavailable')
+          : 'unknown';
+    } catch {
+      status = 'unavailable';
+    }
+    if (status !== 'eligible')
+      throw new ContentDomainRefusal(
+        'validation_failed',
+        publicValidationDetails([
+          `activity.linked_place_${status === 'unknown' ? 'unknown' : status === 'forbidden' ? 'forbidden' : 'unresolved'}`,
+        ]),
+      );
+  }
+
+  /**
+   * D3.4: asks the Catalog-owned port, item by item, about the exact body that
+   * would become public. Nothing for other types or without the port. An
+   * oversized list is left to the validator and never resolved.
+   */
+  private async collectionMembership(
+    typeId: ContentTypeId,
+    body: ContentBody,
+    marketId: string,
+  ): Promise<CollectionMembership | undefined> {
+    if (typeId === 'scenario') return this.scenarioStopMembership(body, marketId);
+    const port = this.deps.publishedObjectMembership;
+    if (typeId !== 'collection' || port === undefined) return undefined;
+    const statuses = new Map<string, PublishedObjectMembershipStatus>();
+    const items = Array.isArray(body.items) ? (body.items as unknown[]) : [];
+    if (items.length <= collectionRuleConfig.maxItems)
+      for (const item of items) {
+        const ref = collectionRef(item);
+        if (ref === null || statuses.has(ref.stableKey)) continue;
+        let status: PublishedObjectMembershipStatus = 'unavailable';
+        try {
+          status = await port.statusOf({
+            objectType: ref.objectType,
+            objectId: ref.objectId,
+            marketId,
+          });
+        } catch {
+          status = 'unavailable';
+        }
+        statuses.set(ref.stableKey, status);
+      }
+    const values = [...statuses.values()];
+    return {
+      lookup: {
+        statusOf: (objectType, objectId) => {
+          const status = statuses.get(`${objectType}:${objectId}`);
+          if (status === undefined || status === 'unavailable') return undefined;
+          return status === 'ready' ? 'ready' : 'unavailable';
+        },
+      },
+      refusals: [
+        ...(values.includes('unknown') ? ['collection.item_ref_unknown'] : []),
+        ...(values.includes('forbidden') ? ['collection.item_ref_forbidden'] : []),
+      ],
+      unresolved: values.includes('unavailable'),
+    };
+  }
+
+  /**
+   * SCN-PUB-01 SP-08: every catalog stop of the exact distribution must be
+   * published and visible now. Anything else is `unavailable`, an outage is
+   * unresolved; no stop data is ever returned with the refusal.
+   */
+  private async scenarioStopMembership(
+    body: ContentBody,
+    marketId: string,
+  ): Promise<CollectionMembership> {
+    const scenario = isRecord(body.scenario) ? body.scenario : undefined;
+    const statuses = new Map<string, 'ready' | 'unavailable' | undefined>();
+    for (const ref of scenarioStopRefs(scenario?.distribution)) {
+      let status: PublishedObjectMembershipStatus = 'unavailable';
+      try {
+        status = (await this.deps.scenarioStops?.statusOf({ ...ref, marketId })) ?? 'unavailable';
+      } catch {
+        status = 'unavailable';
+      }
+      statuses.set(
+        `${ref.objectType}:${ref.objectId}`,
+        status === 'ready' ? 'ready' : status === 'unavailable' ? undefined : 'unavailable',
+      );
+    }
+    return {
+      lookup: { statusOf: (objectType, objectId) => statuses.get(`${objectType}:${objectId}`) },
+      refusals: [],
+      unresolved: [...statuses.values()].includes(undefined),
+    };
+  }
+
+  /** SP-06: the body is pinned to the publisher's own immutable public revision. */
+  private async assertScenarioSource(
+    typeId: ContentTypeId,
+    body: ContentBody,
+    publisherRef: PublisherRefV1,
+  ): Promise<void> {
+    if (typeId !== 'scenario') return;
+    const scenario = isRecord(body.scenario) ? body.scenario : undefined;
+    const ref = isRecord(scenario?.ref) ? scenario.ref : undefined;
+    let status: string = 'unavailable';
+    try {
+      status =
+        ref === undefined || publisherRef.type !== 'user'
+          ? 'forbidden'
+          : ((await this.deps.scenarioRevisions?.verify({
+              scenarioId: String(ref.scenarioId),
+              scenarioRevisionId: String(ref.scenarioRevisionId),
+              contentHash: String(ref.contentHash),
+              ownerUserId: publisherRef.id,
+            })) ?? 'unavailable');
+    } catch {
+      status = 'unavailable';
+    }
+    if (status !== 'ok')
+      throw new ContentDomainRefusal(
+        'validation_failed',
+        publicValidationDetails([`scenario.source_${status}`]),
+      );
+  }
+
+  /**
+   * RP-01: the body is pinned to the author's own immutable Route revision. The
+   * author owns the Route even when a Page publishes it (RP-04).
+   */
+  private async assertRouteSource(
+    typeId: ContentTypeId,
+    body: ContentBody,
+    authorUserId: string | null,
+  ): Promise<void> {
+    if (typeId !== 'route') return;
+    const route = isRecord(body.route) ? body.route : undefined;
+    const ref = isRecord(route?.ref) ? route.ref : undefined;
+    let status: string = 'unavailable';
+    try {
+      status =
+        ref === undefined || authorUserId === null
+          ? 'forbidden'
+          : ((await this.deps.routeRevisions?.verify({
+              routeId: String(ref.routeId),
+              routeRevisionId: String(ref.routeRevisionId),
+              contentHash: String(ref.contentHash),
+              authorUserId,
+            })) ?? 'unavailable');
+    } catch {
+      status = 'unavailable';
+    }
+    if (status !== 'ok')
+      throw new ContentDomainRefusal(
+        'validation_failed',
+        publicValidationDetails([`route.source_${status}`]),
+      );
+  }
+
+  /**
+   * Activation makes an immutable Collection revision public again (D3.4): its
+   * references must still be resolvable and allowed. Items that became
+   * unavailable since (natural decay, CLG §3.10) do not block it, and the
+   * composition review of that revision is not re-checked.
+   */
+  private async assertCollectionTargetMembership(
+    typeId: ContentTypeId,
+    body: ContentBody,
+    marketId: string,
+  ): Promise<void> {
+    const membership = await this.collectionMembership(typeId, body, marketId);
+    if (membership === undefined) return;
+    const issues = [
+      ...membership.refusals,
+      ...(membership.unresolved ? ['collection.published_objects_unavailable'] : []),
+    ];
+    if (issues.length > 0)
+      throw new ContentDomainRefusal('validation_failed', publicValidationDetails(issues));
+  }
+
+  private assertCompositionRules(
+    typeId: ContentTypeId,
+    body: ContentBody,
+    context: ContentValidationContext,
+  ): void {
+    const added = this.deps.compositionRules?.get(typeId)?.(body, context) ?? [];
+    if (added.length > 0)
+      throw new ContentDomainRefusal('validation_failed', publicValidationDetails(added));
+  }
+
+  /**
+   * The type's forbidden transitions (E2.0 §2), against the revision the
+   * pointer holds now, whatever its hold. A refusal is `validation_failed`.
+   */
+  private async assertTransition(
+    tx: ContentTransaction,
+    entry: ContentTypeRegistryEntry,
+    pointer: PublicationPointer | null,
+    nextBody: ContentBody,
+  ): Promise<void> {
+    if (entry.validateTransition === undefined) return;
+    const currentId = pointer?.currentPublishedRevisionId ?? null;
+    const current = currentId === null ? null : await tx.publishedRevision(currentId);
+    if (entry.validateTransition(current?.body ?? null, nextBody).length > 0)
+      throw new ContentDomainRefusal('validation_failed');
+  }
+
+  /** A Media port that fails is "not ready": a typed refusal, never a thrown error. */
+  private async checkMedia(
+    input: Parameters<MediaReadinessPort['check']>[0],
+  ): Promise<MediaReadiness> {
+    try {
+      return await this.deps.media.check(input);
+    } catch {
+      return { ready: false, reason: 'not_ready' };
+    }
+  }
+
+  /**
+   * The media evidence for a draft, valid only if the draft is exactly the one it
+   * was taken for: a draft edited since is a stale source, never silently reused.
+   */
+  private mediaEvidence(
+    context: CommandContext,
+    draft: ContentDraft,
+  ): Extract<MediaReadiness, { ready: true }> {
+    const evidence = context.media;
+    if (
+      evidence?.kind !== 'draft' ||
+      evidence.draftId !== draft.draftId ||
+      evidence.draftRevision !== draft.revision
+    )
+      throw new ContentDomainRefusal('source_revision_stale');
+    if (!evidence.readiness.ready) throw new ContentDomainRefusal('media_not_ready');
+    return evidence.readiness;
+  }
+
+  /**
+   * Reads the draft (or the rollback target) in a short read-only transaction,
+   * releases it, and only then asks Media. The result is bound to that snapshot
+   * and re-checked against the record inside the command transaction.
+   */
+  private async prepareMedia(command: ContentCommandV1): Promise<PreparedMedia | undefined> {
+    if (
+      command.commandType !== 'submitForPublication' &&
+      command.commandType !== 'publishApprovedRevision' &&
+      command.commandType !== 'activatePublishedRevision'
+    )
+      return undefined;
+    const snapshot = await this.deps.repository.transact(async (tx) => {
+      if (command.commandType === 'activatePublishedRevision') {
+        const draft = await tx.draftByContentId(command.payload.contentId);
+        const target = await tx.publishedRevision(command.payload.publishedRevisionId);
+        return draft === null || target === null || target.contentId !== command.payload.contentId
+          ? undefined
+          : ({ kind: 'rollback', draft, target } as const);
+      }
+      const draftId =
+        command.commandType === 'submitForPublication'
+          ? command.payload.draftId
+          : (await tx.submission(command.payload.submissionId))?.draftId;
+      const draft = draftId === undefined ? null : await tx.draft(draftId);
+      return draft === null ? undefined : ({ kind: 'draft', draft } as const);
+    });
+    if (snapshot === undefined) return undefined;
+    const entry = resolveContentType(snapshot.draft.typeId);
+    if (entry === null || !isContentTypeAvailable(entry)) return undefined;
+    if (snapshot.kind === 'rollback') {
+      const { target } = snapshot;
+      const readiness = await this.checkMedia({
+        contentId: target.contentId,
+        typeId: target.typeId,
+        marketId: target.marketId,
+        publisherRef: target.publisherRef,
+        mediaIds: entry.mediaIds?.(target.body) ?? [],
+        pinned: target.mediaAttachments,
+      });
+      return { kind: 'rollback', publishedRevisionId: target.publishedRevisionId, readiness };
+    }
+    const { draft } = snapshot;
+    const readiness = await this.checkMedia({
+      contentId: draft.contentId,
+      typeId: draft.typeId,
+      marketId: draft.marketId,
+      publisherRef: draft.publisherRef,
+      mediaIds: entry.mediaIds?.(draft.body) ?? [],
+    });
+    return { kind: 'draft', draftId: draft.draftId, draftRevision: draft.revision, readiness };
+  }
+
+  private async resolveReferences(
+    marketId: MarketId,
+    typeId: ContentTypeId,
+    nowUtc: UtcInstant,
+  ): Promise<ResolvedReferences> {
+    let resolution: ReferenceResolution;
+    try {
+      resolution = await this.deps.referenceData.resolve({ marketId, typeId, nowUtc });
+    } catch (error) {
+      if (typeId === 'session' || typeId === 'class_workshop')
+        throw new ContentDomainRefusal('policy_unavailable');
+      throw error;
+    }
+    if (!resolution.ok) throw new ContentDomainRefusal(resolution.code);
+    return resolution;
+  }
+
+  private async pin(
+    marketId: MarketId,
+    typeId: ContentTypeId,
+    nowUtc: UtcInstant,
+  ): Promise<ContentReferenceRevisionsV1> {
+    return (await this.resolveReferences(marketId, typeId, nowUtc)).revisions;
+  }
+
+  private async authorize(
+    context: CommandContext,
+    publisherRef: PublisherRefV1,
+    typeId: ContentTypeId,
+    action: ContentAction,
+    marketId: MarketId,
+    // ADR 0023: the body where content leaves the draft (marketplace rule).
+    leavingBody?: ContentBody,
+  ): Promise<PublisherEligibilityV1> {
+    const entry = resolveContentType(typeId);
+    if (entry === null) throw new ContentDomainRefusal('content_type_unsupported');
+    const { principal } = context;
+    const result =
+      principal.kind === 'session'
+        ? await this.deps.eligibility.evaluate({
+            actor: principal.actor,
+            publisherRef,
+            typeId,
+            action,
+            marketId,
+            requiredCapability: entry.requiredCapabilities[action],
+            nowUtc: context.nowUtc,
+            ...(leavingBody === undefined
+              ? {}
+              : { commerce: contentCommerce(typeId, leavingBody) }),
+          })
+        : await this.deps.eligibility.evaluateDelegated({
+            delegatedActor: principal.delegated,
+            publisherRef,
+            typeId,
+            action,
+            marketId,
+            requiredCapability: entry.requiredCapabilities[action],
+            nowUtc: context.nowUtc,
+          });
+    // A response about another publisher is never accepted as authority.
+    const sameRef =
+      result.publisherRef.type === publisherRef.type && result.publisherRef.id === publisherRef.id;
+    if (result.eligible && sameRef) {
+      const recorded = { publisherRef, typeId, action, marketId };
+      if (
+        !context.authorizations.some(
+          (item) =>
+            item.action === action &&
+            item.typeId === typeId &&
+            item.marketId === marketId &&
+            item.publisherRef.type === publisherRef.type &&
+            item.publisherRef.id === publisherRef.id,
+        )
+      )
+        context.authorizations.push(recorded);
+      return result;
+    }
+    throw new ContentDomainRefusal(sameRef ? failureFor(result.reason) : 'publisher_not_eligible');
+  }
+
+  private audit(context: CommandContext, action: string, subjectId: string): void {
+    this.auditAs(context.tx, principalId(context.principal), action, subjectId, context.nowUtc);
+  }
+
+  /**
+   * A delegated module may only touch drafts it bound itself; a signed-in user
+   * keeps editing imported drafts through their own Publisher authority.
+   */
+  private assertBoundToCaller(context: CommandContext, draft: ContentDraft): void {
+    const { principal } = context;
+    if (principal.kind === 'session') return;
+    const binding = draft.provenance.originBinding;
+    if (
+      binding.kind !== 'delegatedImport' ||
+      !binding.delegatedActorRef.startsWith(`module:${principal.delegated.moduleId}/`)
+    )
+      throw new ContentDomainRefusal('capability_denied');
+  }
+
+  /**
+   * An imported submission states what changed relative to what is public:
+   * `new` exactly when nothing has been published yet. A signed-in user never
+   * supplies it (gated earlier); a module must.
+   */
+  private async assertChangeClass(
+    context: CommandContext,
+    draft: ContentDraft,
+    changeClass: ChangeClass | undefined,
+  ): Promise<void> {
+    if (context.principal.kind === 'session') return;
+    if (changeClass === undefined) throw new ContentDomainRefusal('validation_failed');
+    const published = await context.tx.publishedRevisionsForContent(draft.contentId);
+    if ((changeClass === 'new') !== (published.length === 0))
+      throw new ContentDomainRefusal('validation_failed');
+  }
+
+  private auditAs(
+    tx: ContentTransaction,
+    actorUserId: string,
+    action: string,
+    subjectId: string,
+    nowUtc: UtcInstant,
+  ): void {
+    tx.appendAudit({
+      auditId: this.deps.ids.newId(),
+      occurredAtUtc: nowUtc,
+      actorUserId,
+      action,
+      subjectId,
+      outcome: 'succeeded',
+    });
+  }
+}
+
+function failureFor(reason: PublisherEligibilityV1['reason']): ContentFailureCode {
+  switch (reason) {
+    // ADR 0023: the refusal is about the identity verification fact, not a role.
+    case 'creator_verification_required':
+    case 'identity_verification_required':
+      return 'identity_verification_required';
+    case 'seller_declaration_required':
+      return 'seller_declaration_required';
+    case 'membership_inactive':
+      return 'membership_inactive';
+    case 'capability_denied':
+      return 'capability_denied';
+    default:
+      return 'publisher_not_eligible';
+  }
+}
+
+/** Early, contract-independent rejection of newer schemas and unknown types. */
+function preflight(raw: unknown, discriminator: 'commandType' | 'queryType') {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw))
+    return rejected('invalid_contract');
+  const record = raw as Record<string, unknown>;
+  if (typeof record.schemaVersion === 'number' && record.schemaVersion !== 1)
+    return unsupported('unsupported_version');
+  const payload = record.payload;
+  if (
+    discriminator === 'commandType' &&
+    record.commandType === 'createDraft' &&
+    typeof payload === 'object' &&
+    payload !== null &&
+    'typeId' in payload &&
+    resolveContentType((payload as Record<string, unknown>).typeId) === null
+  )
+    return unsupported('content_type_unsupported');
+  return undefined;
+}
+
+export const registeredContentTypeIds = contentTypeRegistry.map((item) => item.typeId);
+export type { PublicationPointer };
+
+/** The `{objectType, objectId}` reference of a Collection item, or null when malformed. */
+function collectionRef(item: unknown): {
+  readonly objectType: CollectionObjectType;
+  readonly objectId: string;
+  readonly stableKey: string;
+} | null {
+  if (typeof item !== 'object' || item === null || Array.isArray(item)) return null;
+  const ref = (item as Readonly<Record<string, unknown>>).ref;
+  if (typeof ref !== 'object' || ref === null || Array.isArray(ref)) return null;
+  const { objectType, objectId } = ref as Readonly<Record<string, unknown>>;
+  if (typeof objectType !== 'string' || typeof objectId !== 'string') return null;
+  return {
+    objectType: objectType as CollectionObjectType,
+    objectId,
+    stableKey: `${objectType}:${objectId}`,
+  };
+}

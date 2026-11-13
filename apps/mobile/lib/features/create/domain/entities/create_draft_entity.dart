@@ -1,9 +1,15 @@
+import 'activity_draft_data.dart';
+import 'class_workshop_draft_data.dart';
+import 'collection_draft_data.dart';
 import 'create_availability.dart';
 import 'event_draft_data.dart';
 import 'find_people_draft_data.dart';
 import 'place_draft_data.dart';
+import 'rental_draft_data.dart';
+import 'session_draft_data.dart';
 import 'route_draft_data.dart';
 import 'scenario_draft_data.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 enum CreateObjectType {
   event,
@@ -60,7 +66,7 @@ CreateObjectType createObjectTypeFromId(String value) {
 
 enum DraftStatus { draft, pendingReview, published, archived, hidden, deleted }
 
-enum ModerationStatus { none, pending, approved, rejected }
+enum ModerationStatus { none, pending, approved, rejected, flaggedForReview }
 
 enum PublishStatus {
   draft,
@@ -87,6 +93,9 @@ class MediaEntity {
   }
 }
 
+/// ADR 0022: section holding the language the author declared for this text.
+const String draftContentLanguageSection = 'content_language';
+
 class CreateDraftEntity {
   const CreateDraftEntity({
     required this.id,
@@ -102,9 +111,14 @@ class CreateDraftEntity {
     required this.sectionData,
     this.eventData,
     this.placeData,
+    this.activityData,
     this.findPeopleData,
     this.routeData,
     this.scenarioData,
+    this.collectionData,
+    this.rentalData,
+    this.sessionData,
+    this.classWorkshopData,
     required this.startDateTimeUtc,
     required this.endDateTimeUtc,
     required this.durationMinutes,
@@ -163,6 +177,13 @@ class CreateDraftEntity {
   final String? basedOnPublishedVersionId;
   final CreateObjectType objectType;
 
+  /// The author's declared text language, `null` until they choose one; Create
+  /// never fills it in, so a wrong language cannot reach a translation.
+  String? get declaredContentLocale {
+    final Object? value = sectionData[draftContentLanguageSection];
+    return value is String && value.isNotEmpty ? value : null;
+  }
+
   final String title;
   final String eventType;
   final String mainCategory;
@@ -173,9 +194,16 @@ class CreateDraftEntity {
   final Map<String, Object?> sectionData;
   final EventDraftData? eventData;
   final PlaceDraftData? placeData;
+  final ActivityDraftData? activityData;
   final FindPeopleDraftData? findPeopleData;
   final RouteDraftData? routeData;
   final ScenarioDraftData? scenarioData;
+  final CollectionDraftData? collectionData;
+  final RentalDraftData? rentalData;
+  final SessionDraftData? sessionData;
+
+  /// D3.6 CW-V1 typed payload of a Class / Workshop draft.
+  final ClassWorkshopDraftData? classWorkshopData;
 
   final DateTime? startDateTimeUtc;
   final DateTime? endDateTimeUtc;
@@ -211,7 +239,7 @@ class CreateDraftEntity {
   final bool wheelchairAccessible;
 
   final bool isFree;
-  final double? basePrice;
+  final Money? basePrice;
   final String currency;
   final String pricingModel;
 
@@ -266,15 +294,13 @@ class CreateDraftEntity {
         city: city,
         timezoneId: timezone,
         currencyCode: currency,
-        publisherRef: PublisherRef(
-          type: PublisherType.user,
-          id: organizerId,
-        ),
+        publisherRef: PublisherRef(type: PublisherType.user, id: organizerId),
       ),
       placeData: null,
       findPeopleData: null,
       routeData: null,
       scenarioData: null,
+      collectionData: null,
       startDateTimeUtc: null,
       endDateTimeUtc: null,
       durationMinutes: null,
@@ -347,12 +373,22 @@ class CreateDraftEntity {
     bool clearEventData = false,
     PlaceDraftData? placeData,
     bool clearPlaceData = false,
+    ActivityDraftData? activityData,
+    bool clearActivityData = false,
     FindPeopleDraftData? findPeopleData,
     bool clearFindPeopleData = false,
     RouteDraftData? routeData,
     bool clearRouteData = false,
     ScenarioDraftData? scenarioData,
     bool clearScenarioData = false,
+    CollectionDraftData? collectionData,
+    bool clearCollectionData = false,
+    RentalDraftData? rentalData,
+    bool clearRentalData = false,
+    SessionDraftData? sessionData,
+    bool clearSessionData = false,
+    ClassWorkshopDraftData? classWorkshopData,
+    bool clearClassWorkshopData = false,
     DateTime? startDateTimeUtc,
     bool clearStartDateTimeUtc = false,
     DateTime? endDateTimeUtc,
@@ -395,7 +431,7 @@ class CreateDraftEntity {
     bool? petFriendly,
     bool? wheelchairAccessible,
     bool? isFree,
-    double? basePrice,
+    Money? basePrice,
     bool clearBasePrice = false,
     String? currency,
     String? pricingModel,
@@ -435,6 +471,9 @@ class CreateDraftEntity {
       sectionData: sectionData ?? this.sectionData,
       eventData: clearEventData ? null : (eventData ?? this.eventData),
       placeData: clearPlaceData ? null : (placeData ?? this.placeData),
+      activityData: clearActivityData
+          ? null
+          : (activityData ?? this.activityData),
       findPeopleData: clearFindPeopleData
           ? null
           : (findPeopleData ?? this.findPeopleData),
@@ -442,6 +481,14 @@ class CreateDraftEntity {
       scenarioData: clearScenarioData
           ? null
           : (scenarioData ?? this.scenarioData),
+      collectionData: clearCollectionData
+          ? null
+          : (collectionData ?? this.collectionData),
+      rentalData: clearRentalData ? null : (rentalData ?? this.rentalData),
+      sessionData: clearSessionData ? null : (sessionData ?? this.sessionData),
+      classWorkshopData: clearClassWorkshopData
+          ? null
+          : (classWorkshopData ?? this.classWorkshopData),
       startDateTimeUtc: clearStartDateTimeUtc
           ? null
           : (startDateTimeUtc ?? this.startDateTimeUtc),

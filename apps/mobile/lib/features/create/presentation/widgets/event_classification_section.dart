@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/event_classification_section.dart';
 import '../../domain/entities/event_classification.dart';
+import 'create_texts.dart';
 
 class EventClassificationSection extends StatelessWidget {
   const EventClassificationSection({
@@ -30,19 +32,18 @@ class EventClassificationSection extends StatelessWidget {
     final EventClassificationDraft? value = state.classification;
     return Semantics(
       container: true,
-      label: 'Event classification',
+      label: context.l10n.createFormEventClassification,
       child: Column(
         key: const Key('event-classification-section'),
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            'How does this event work?',
+            context.l10n.createFormHowDoesEventWork,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 4),
           Text(
-            'Mechanics and attendee roles are independent from the category, '
-            'format, access and price.',
+            context.l10n.createFormMechanicsAttendeeRolesAreIndependentFrom,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if (state.suggestion case final suggestion?) ...<Widget>[
@@ -55,10 +56,13 @@ class EventClassificationSection extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    Text('Suggested: ${_label(suggestion.archetype.wireName)}'),
+                    Text(
+                      '${context.l10n.createEventSuggestedLabel}: '
+                      '${context.l10n.createEventArchetype(suggestion.archetype.wireName)}',
+                    ),
                     const SizedBox(height: 4),
                     Text(
-                      'This is only a suggestion. Confirm it or choose another.',
+                      context.l10n.createFormOnlySuggestionConfirmChooseAnother,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     const SizedBox(height: 8),
@@ -69,7 +73,7 @@ class EventClassificationSection extends StatelessWidget {
                           'event-classification-confirm-suggestion',
                         ),
                         onPressed: onConfirmSuggestion,
-                        child: const Text('Use suggestion'),
+                        child: Text(context.l10n.createFormUseSuggestion),
                       ),
                     ),
                   ],
@@ -83,15 +87,17 @@ class EventClassificationSection extends StatelessWidget {
             initialValue: value?.archetype,
             isExpanded: true,
             decoration: InputDecoration(
-              labelText: 'Event mechanics *',
-              errorText: state.errorFor('eventArchetype'),
+              labelText: context.l10n.createFormEventMechanics,
+              errorText: _errorText(context, state, 'eventArchetype'),
             ),
             items: EventArchetype.values
                 .map(
                   (EventArchetype archetype) =>
                       DropdownMenuItem<EventArchetype>(
                         value: archetype,
-                        child: Text(_label(archetype.wireName)),
+                        child: Text(
+                          context.l10n.createEventArchetype(archetype.wireName),
+                        ),
                       ),
                 )
                 .toList(growable: false),
@@ -109,8 +115,12 @@ class EventClassificationSection extends StatelessWidget {
               minLines: 2,
               maxLines: 4,
               decoration: InputDecoration(
-                labelText: 'Explain the event mechanics *',
-                errorText: state.errorFor('eventArchetypeOtherReason'),
+                labelText: context.l10n.createFormExplainEventMechanics,
+                errorText: _errorText(
+                  context,
+                  state,
+                  'eventArchetypeOtherReason',
+                ),
               ),
               onChanged: onOtherReasonChanged,
             ),
@@ -121,15 +131,19 @@ class EventClassificationSection extends StatelessWidget {
             initialValue: value?.primaryParticipationMode,
             isExpanded: true,
             decoration: InputDecoration(
-              labelText: 'Primary attendee role *',
-              errorText: state.errorFor('primaryParticipationMode'),
+              labelText: context.l10n.createFormPrimaryAttendeeRole,
+              errorText: _errorText(context, state, 'primaryParticipationMode'),
             ),
             items: ParticipationMode.values
                 .map(
                   (ParticipationMode mode) =>
                       DropdownMenuItem<ParticipationMode>(
                         value: mode,
-                        child: Text(_label(mode.wireName)),
+                        child: Text(
+                          context.l10n.createEventParticipationMode(
+                            'mode_${mode.wireName}',
+                          ),
+                        ),
                       ),
                 )
                 .toList(growable: false),
@@ -139,7 +153,7 @@ class EventClassificationSection extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Additional roles (up to 3)',
+            context.l10n.createFormAdditionalRolesUp3,
             style: Theme.of(context).textTheme.labelLarge,
           ),
           const SizedBox(height: 8),
@@ -156,11 +170,19 @@ class EventClassificationSection extends StatelessWidget {
                   final bool canSelect =
                       selected || (!isPrimary && state.canAddParticipationMode);
                   return Semantics(
-                    label: '${_label(mode.wireName)} additional attendee role',
+                    label: context.l10n.createEventAdditionalRole(
+                      context.l10n.createEventParticipationMode(
+                        'mode_${mode.wireName}',
+                      ),
+                    ),
                     selected: selected,
                     child: FilterChip(
                       key: Key('event-additional-${mode.wireName}'),
-                      label: Text(_label(mode.wireName)),
+                      label: Text(
+                        context.l10n.createEventParticipationMode(
+                          'mode_${mode.wireName}',
+                        ),
+                      ),
                       selected: selected,
                       onSelected: canSelect
                           ? (bool next) =>
@@ -171,7 +193,8 @@ class EventClassificationSection extends StatelessWidget {
                 })
                 .toList(growable: false),
           ),
-          if (state.errorFor('additionalParticipationModes') case final error?)
+          if (_errorText(context, state, 'additionalParticipationModes')
+              case final error?)
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
@@ -186,7 +209,7 @@ class EventClassificationSection extends StatelessWidget {
               child: TextButton(
                 key: const Key('event-classification-clear'),
                 onPressed: onClear,
-                child: const Text('Clear classification'),
+                child: Text(context.l10n.createFormClearClassification),
               ),
             ),
           ],
@@ -196,13 +219,12 @@ class EventClassificationSection extends StatelessWidget {
   }
 }
 
-String _label(String wireName) {
-  return wireName
-      .split('_')
-      .map(
-        (String word) => word.isEmpty
-            ? word
-            : '${word.substring(0, 1).toUpperCase()}${word.substring(1)}',
-      )
-      .join(' ');
-}
+/// L4: a section field error, resolved from its message id.
+String? _errorText(
+  BuildContext context,
+  EventClassificationSectionState section,
+  String fieldId,
+) => switch (section.errorIdFor(fieldId)) {
+  final String id => CreateTexts.fieldError(context.l10n, id),
+  null => null,
+};

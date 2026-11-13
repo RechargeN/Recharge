@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../shared/primitives/errors/coded_refusal.dart';
+import '../../../../core/product_analytics/product_analytics_contract.dart';
+import '../../../../core/product_analytics/product_analytics_recorder.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/favorite_item_entity.dart';
 import '../../domain/usecases/add_favorite_usecase.dart';
@@ -13,20 +16,30 @@ class FavoritesController extends ChangeNotifier {
     required AddFavoriteUseCase addFavoriteUseCase,
     required RemoveFavoriteUseCase removeFavoriteUseCase,
     required AnalyticsService analyticsService,
-  })  : _getFavoritesUseCase = getFavoritesUseCase,
-        _addFavoriteUseCase = addFavoriteUseCase,
-        _removeFavoriteUseCase = removeFavoriteUseCase,
-        _analyticsService = analyticsService;
+    ProductAnalyticsRecorder? productAnalytics,
+  }) : _getFavoritesUseCase = getFavoritesUseCase,
+       _addFavoriteUseCase = addFavoriteUseCase,
+       _removeFavoriteUseCase = removeFavoriteUseCase,
+       _analyticsService = analyticsService,
+       _productAnalytics = productAnalytics;
 
   final GetFavoritesUseCase _getFavoritesUseCase;
   final AddFavoriteUseCase _addFavoriteUseCase;
   final RemoveFavoriteUseCase _removeFavoriteUseCase;
   final AnalyticsService _analyticsService;
+  final ProductAnalyticsRecorder? _productAnalytics;
 
   FavoritesState _state = FavoritesState.initial();
   FavoritesState get state => _state;
 
   bool _requestedOnce = false;
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
 
   Future<void> ensureLoaded() async {
     if (_requestedOnce) return;
@@ -36,10 +49,7 @@ class FavoritesController extends ChangeNotifier {
 
   Future<void> loadFavorites() async {
     _setState(
-      _state.copyWith(
-        status: FavoritesStatus.loading,
-        clearMessage: true,
-      ),
+      _state.copyWith(status: FavoritesStatus.loading, clearMessage: true),
     );
     try {
       final List<FavoriteItemEntity> favorites = await _getFavoritesUseCase();
@@ -52,22 +62,20 @@ class FavoritesController extends ChangeNotifier {
       );
       _analyticsService.track(
         'favorites_loaded',
-        params: <String, Object?>{
-          'item_count': favorites.length,
-        },
+        params: <String, Object?>{'item_count': favorites.length},
       );
-    } on Exception {
+    } on Exception catch (error) {
       _setState(
         _state.copyWith(
           status: FavoritesStatus.error,
-          message: 'Не удалось загрузить избранное',
+          items: const [],
+          message: 'favorites_load_failed',
+          failure: error is CodedRefusal ? error : null,
         ),
       );
       _analyticsService.track(
         'favorites_load_failed',
-        params: const <String, Object?>{
-          'error_group': 'storage',
-        },
+        params: const <String, Object?>{'error_group': 'storage'},
       );
     }
   }
@@ -96,6 +104,24 @@ class FavoritesController extends ChangeNotifier {
         'item_id': item.id,
       },
     );
+    // L3 `favorite_added` v1: object type and surface only; not Library
+    // evidence of the saved entry.
+    final ProductAnalyticsObjectKind? kind =
+        ProductAnalyticsObjectKind.fromObjectType(item.objectType);
+    if (kind != null) {
+      _productAnalytics?.record(
+        FavoriteAdded(kind, _entrySurface(sourceScreen)),
+      );
+    }
+  }
+
+  static ProductAnalyticsEntrySurface _entrySurface(String sourceScreen) {
+    return switch (sourceScreen) {
+      'discover_details' => ProductAnalyticsEntrySurface.details,
+      'discover_map' => ProductAnalyticsEntrySurface.map,
+      'quick_plan' => ProductAnalyticsEntrySurface.planner,
+      _ => ProductAnalyticsEntrySurface.other,
+    };
   }
 
   Future<void> removeFavorite(
@@ -132,6 +158,7 @@ class FavoritesController extends ChangeNotifier {
   }
 
   void _setState(FavoritesState state) {
+    if (_disposed) return;
     _state = state;
     notifyListeners();
   }

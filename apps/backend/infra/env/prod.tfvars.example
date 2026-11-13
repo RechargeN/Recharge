@@ -1,0 +1,3 @@
+environment_id = "prod"
+project_id      = null
+cloud_enabled  = false

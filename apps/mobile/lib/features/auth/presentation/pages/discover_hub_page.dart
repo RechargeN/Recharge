@@ -3,8 +3,12 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../../../discover/application/discover_providers.dart';
 import '../../../discover/domain/entities/discover_query.dart';
 import '../../../discover/application/smart_search_parser.dart';
@@ -16,6 +20,10 @@ import '../../../favorites/application/favorites_providers.dart';
 import '../../../favorites/application/state/favorites_state.dart';
 import '../../../favorites/domain/entities/favorite_item_entity.dart';
 import '../../application/auth_providers.dart';
+
+// Kept as a non-constant compatibility gate until the M10 code deletion.
+// Main intentionally exposes neither Scenario nor legacy Quick Plan.
+bool _legacyPlanningOnMainEnabled() => false;
 
 class DiscoverHubPage extends ConsumerStatefulWidget {
   const DiscoverHubPage({super.key, required this.favoriteApplied});
@@ -42,39 +50,37 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
   ];
 
   static final List<_HomeCategory> _categories = <_HomeCategory>[
-    const _HomeCategory(id: null, label: 'All', icon: Icons.grid_view_rounded),
+    // The "All" chip; its text comes from l10n when shown.
+    const _HomeCategory(id: null, label: '', icon: Icons.grid_view_rounded),
     for (final String categoryId in _homeCategoryPriority)
       if (rechargeContentGroupById(categoryId) case final group?)
         _HomeCategory(
           id: group.id,
-          label: _homeCategoryLabel(group.id, group.title),
+          label: group.id,
           icon: _homeCategoryIcon(group.id),
         ),
     for (final RechargeContentGroup group in rechargeVisibleContentGroups)
       if (!_homeCategoryPriority.contains(group.id))
         _HomeCategory(
           id: group.id,
-          label: group.title,
+          label: group.id,
           icon: _homeCategoryIcon(group.id),
         ),
   ];
 
   static const List<_ScenarioCardData> _scenarios = <_ScenarioCardData>[
     _ScenarioCardData(
-      title: 'Free today',
-      subtitle: 'Activities nearby without tickets',
+      id: 'freeToday',
       icon: Icons.bolt_outlined,
       freeOnly: true,
     ),
     _ScenarioCardData(
-      title: 'Near me',
-      subtitle: 'Use the map radius and quick list',
+      id: 'nearMe',
       icon: Icons.near_me_outlined,
       opensMap: true,
     ),
     _ScenarioCardData(
-      title: 'Evening plans',
-      subtitle: 'Find something after work',
+      id: 'eveningPlans',
       icon: Icons.nightlight_outlined,
       queryText: 'evening',
     ),
@@ -82,50 +88,50 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
 
   static const List<_HomeRouteTemplate> _routeTemplates = <_HomeRouteTemplate>[
     _HomeRouteTemplate(
-      title: 'Coffee reset',
-      subtitle: 'A calm cafe start with an easy city walk.',
+      id: 'coffeeReset',
       icon: Icons.local_cafe_outlined,
       mood: 'calm',
       durationMinutes: 90,
       freeOnly: false,
       walkingOnly: true,
-      prompt: 'coffee reset walk',
+      prompt:
+          'coffee reset walk', // l10n-ignore: search prompt text, not UI copy
       steps: <String>['food_drinks.coffee', 'wellness_recharge.calm_walk'],
     ),
     _HomeRouteTemplate(
-      title: 'Free city reset',
-      subtitle: 'A free low-pressure route for a quick recharge.',
+      id: 'freeCityReset',
       icon: Icons.self_improvement,
       mood: 'calm',
       durationMinutes: 90,
       freeOnly: true,
       walkingOnly: true,
-      prompt: 'free calm city walk',
+      prompt:
+          'free calm city walk', // l10n-ignore: search prompt text, not UI copy
       steps: <String>['wellness_recharge.calm_walk'],
     ),
     _HomeRouteTemplate(
-      title: 'Social evening',
-      subtitle: 'Start social, then keep the night nearby.',
+      id: 'socialEvening',
       icon: Icons.groups_outlined,
       mood: 'social',
       durationMinutes: 150,
       freeOnly: false,
       walkingOnly: true,
-      prompt: 'social evening near me',
+      prompt:
+          'social evening near me', // l10n-ignore: search prompt text, not UI copy
       steps: <String>[
         'games_indoor.board_games',
         'music_nightlife.afterwork_drinks',
       ],
     ),
     _HomeRouteTemplate(
-      title: 'Active boost',
-      subtitle: 'Move first, then cool down on a walk.',
+      id: 'activeBoost',
       icon: Icons.directions_run,
       mood: 'active',
       durationMinutes: 120,
       freeOnly: false,
       walkingOnly: true,
-      prompt: 'active tennis and walk',
+      prompt:
+          'active tennis and walk', // l10n-ignore: search prompt text, not UI copy
       steps: <String>['sport.tennis', 'outdoor_nature_walking.city_walk'],
     ),
   ];
@@ -149,9 +155,9 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
       _snackShown = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Сохранено в избранное')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.detailsSavedToFavorites)),
+        );
       });
     }
   }
@@ -201,8 +207,8 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
               ),
               const SizedBox(height: 18),
               _SectionHeader(
-                title: 'Categories',
-                actionLabel: 'View all',
+                title: context.l10n.discoverCategories,
+                actionLabel: context.l10n.homeViewAll,
                 onAction: () => context.push(RouteNames.categories),
               ),
               const SizedBox(height: 10),
@@ -228,43 +234,58 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
                 state: discoverState,
                 onViewAll: () => context.go(RouteNames.search),
                 onOpenDetails: (DiscoverItemEntity item) {
-                  context.push('${RouteNames.discoverDetails}/${item.id}');
+                  context.push(
+                    RouteNames.discoverDetailsCanonicalFor(
+                      CatalogObjectRef(
+                        objectType: item.catalogObjectType,
+                        objectId: item.id,
+                      ),
+                    ),
+                  );
                 },
               ),
-              const SizedBox(height: 18),
-              _SectionHeader(
-                title: 'Quick scenarios',
-                actionLabel: 'Smart search',
-                onAction: () => context.go(RouteNames.search),
-              ),
-              const SizedBox(height: 10),
-              Column(
-                children: _scenarios
-                    .map(
-                      (_ScenarioCardData scenario) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: _ScenarioCard(
-                          scenario: scenario,
-                          onTap: () => _openScenario(scenario),
+              if (_legacyPlanningOnMainEnabled()) ...<Widget>[
+                const SizedBox(height: 18),
+                _SectionHeader(
+                  title: context.l10n.discoverQuickScenarios,
+                  actionLabel: context.l10n.discoverSmartSearch,
+                  onAction: () => context.go(RouteNames.search),
+                ),
+                const SizedBox(height: 10),
+                Column(
+                  children: _scenarios
+                      .map(
+                        (_ScenarioCardData scenario) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _ScenarioCard(
+                            scenario: scenario,
+                            onTap: () => _openScenario(scenario),
+                          ),
                         ),
-                      ),
-                    )
-                    .toList(growable: false),
-              ),
-              const SizedBox(height: 18),
-              _SectionHeader(
-                title: 'Route ideas',
-                actionLabel: 'Builder',
-                onAction: () => context.go(RouteNames.scenarioBuilder),
-              ),
-              const SizedBox(height: 10),
-              _HomeRouteTemplateRail(
-                templates: _routeTemplates,
-                onBuild: _openRouteTemplate,
-                onMap: _openRouteTemplateMap,
-                onCreate: _openRouteTemplateCreate,
-              ),
-              if (savedScenario != null) ...<Widget>[
+                      )
+                      .toList(growable: false),
+                ),
+                const SizedBox(height: 18),
+                _SectionHeader(
+                  title: context.l10n.discoverRouteIdeas,
+                  actionLabel: context.l10n.discoverBuilder,
+                  onAction: () => context.go(
+                    Uri(
+                      path: RouteNames.create,
+                      queryParameters: const <String, String>{'type': 'route'},
+                    ).toString(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _HomeRouteTemplateRail(
+                  templates: _routeTemplates,
+                  onBuild: _openRouteTemplate,
+                  onMap: _openRouteTemplateMap,
+                  onCreate: _openRouteTemplateCreate,
+                ),
+              ],
+              if (_legacyPlanningOnMainEnabled() &&
+                  savedScenario != null) ...<Widget>[
                 const SizedBox(height: 12),
                 _SavedScenarioPanel(
                   scenario: savedScenario,
@@ -278,7 +299,6 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
                   item: smartSearch,
                   onResume: () => _openSmartSearch(smartSearch),
                   onMap: () => _openSmartSearchMap(smartSearch),
-                  onRoute: () => _openSmartSearchRoute(smartSearch),
                   onCreate: () => _openSmartSearchCreate(smartSearch),
                 ),
               ],
@@ -288,16 +308,24 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
                   search: savedSearch,
                   onResume: () => _openSavedSearch(savedSearch),
                   onMap: () => _openSavedSearchMap(savedSearch),
-                  onRoute: () => _openSavedSearchRoute(savedSearch),
                   onCreate: () => _openSavedSearchCreate(savedSearch),
                 ),
               ],
-              const SizedBox(height: 14),
-              _ForYouStrip(
-                onPopular: () => context.go(RouteNames.search),
-                onScenario: () => context.go(RouteNames.scenarioBuilder),
-                onCreate: () => context.push(RouteNames.create),
-              ),
+              if (_legacyPlanningOnMainEnabled()) ...<Widget>[
+                const SizedBox(height: 14),
+                _ForYouStrip(
+                  onPopular: () => context.go(RouteNames.search),
+                  onScenario: () => context.go(
+                    Uri(
+                      path: RouteNames.create,
+                      queryParameters: const <String, String>{
+                        'type': 'scenario',
+                      },
+                    ).toString(),
+                  ),
+                  onCreate: () => context.push(RouteNames.create),
+                ),
+              ],
               if (authState.message != null) ...<Widget>[
                 const SizedBox(height: 16),
                 Text(
@@ -323,7 +351,12 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
   void _openSavedScenario(FavoriteItemEntity scenario) {
     final String? targetRoute = scenario.targetRoute;
     if (targetRoute == null || targetRoute.trim().isEmpty) {
-      context.go(RouteNames.scenarioBuilder);
+      context.go(
+        Uri(
+          path: RouteNames.create,
+          queryParameters: const <String, String>{'type': 'scenario'},
+        ).toString(),
+      );
       return;
     }
     context.go(targetRoute);
@@ -341,10 +374,6 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
     context.go(_mapRouteForSavedSearch(search));
   }
 
-  void _openSavedSearchRoute(SavedSearchEntity search) {
-    context.go(_scenarioBuilderRouteForSavedSearch(search));
-  }
-
   void _openSavedSearchCreate(SavedSearchEntity search) {
     context.go(_createRouteForSavedSearch(search));
   }
@@ -355,10 +384,6 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
 
   void _openSmartSearchMap(SmartSearchHistoryEntity item) {
     context.go(_mapRouteForSmartSearch(item));
-  }
-
-  void _openSmartSearchRoute(SmartSearchHistoryEntity item) {
-    context.go(_scenarioBuilderRouteForSmartSearch(item));
   }
 
   void _openSmartSearchCreate(SmartSearchHistoryEntity item) {
@@ -391,7 +416,7 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
   }
 
   void _openRouteTemplateCreate(_HomeRouteTemplate template) {
-    context.go(_createRouteForTemplate(template));
+    context.go(_createRouteForTemplate(context.l10n, template));
   }
 }
 
@@ -438,13 +463,13 @@ class _SavedScenarioPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        'Continue your route',
+                        context.l10n.homeContinueRoute,
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        scenario.title,
+                        homeScenarioTitle(context.l10n, scenario.id),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodyMedium,
@@ -456,7 +481,7 @@ class _SavedScenarioPanel extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              scenario.subtitle,
+              homeScenarioSubtitle(context.l10n, scenario.id),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -465,17 +490,25 @@ class _SavedScenarioPanel extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                _SavedScenarioChip(icon: Icons.flag, label: 'Saved route'),
-                _SavedScenarioChip(icon: Icons.place, label: scenario.city),
                 _SavedScenarioChip(
-                  icon: Icons.near_me,
-                  label: '${scenario.distanceKm.toStringAsFixed(1)} km',
+                  icon: Icons.flag,
+                  label: context.l10n.homeSavedRoute,
                 ),
+                _SavedScenarioChip(icon: Icons.place, label: scenario.city),
+                if (scenario.distanceKm case final double distanceKm)
+                  _SavedScenarioChip(
+                    icon: Icons.near_me,
+                    label: '${distanceKm.toStringAsFixed(1)} km',
+                  ),
                 _SavedScenarioChip(
                   icon: Icons.payments,
-                  label: scenario.isFree
-                      ? 'Free'
-                      : '${scenario.priceAmount.toStringAsFixed(0)} EUR',
+                  // L4: the price keeps its own currency.
+                  label: scenario.isFree || scenario.priceAmount == null
+                      ? (scenario.isFree ? context.l10n.homeFree : '—')
+                      : RechargeFormats.money(
+                          scenario.priceAmount!,
+                          context.l10n.localeName,
+                        ),
                 ),
               ],
             ),
@@ -487,7 +520,7 @@ class _SavedScenarioPanel extends StatelessWidget {
                     key: const ValueKey<String>('home-saved-scenario-edit'),
                     onPressed: onEdit,
                     icon: const Icon(Icons.edit_location_alt),
-                    label: const Text('Edit'),
+                    label: Text(context.l10n.createScenarioEdit),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -496,7 +529,7 @@ class _SavedScenarioPanel extends StatelessWidget {
                     key: const ValueKey<String>('home-saved-scenario-route'),
                     onPressed: onRoute,
                     icon: const Icon(Icons.route),
-                    label: const Text('Route'),
+                    label: Text(context.l10n.discoverRouteLabel),
                   ),
                 ),
               ],
@@ -547,14 +580,12 @@ class _SavedSearchPanel extends StatelessWidget {
     required this.search,
     required this.onResume,
     required this.onMap,
-    required this.onRoute,
     required this.onCreate,
   });
 
   final SavedSearchEntity search;
   final VoidCallback onResume;
   final VoidCallback onMap;
-  final VoidCallback onRoute;
   final VoidCallback onCreate;
 
   @override
@@ -591,7 +622,7 @@ class _SavedSearchPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        'Continue saved search',
+                        context.l10n.homeContinueSavedSearch,
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w800),
                       ),
@@ -614,22 +645,33 @@ class _SavedSearchPanel extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                _SavedScenarioChip(icon: Icons.search, label: 'Conditions'),
+                _SavedScenarioChip(
+                  icon: Icons.search,
+                  label: context.l10n.discoverConditions,
+                ),
                 if (search.query.selectedCategoryIds.isNotEmpty)
                   _SavedScenarioChip(
                     icon: Icons.category_outlined,
-                    label: search.query.selectedCategoryIds.first,
+                    label: taxonomyLabel(
+                      context.l10n,
+                      search.query.selectedCategoryIds.first,
+                    ),
                   ),
                 _SavedScenarioChip(
                   icon: Icons.near_me_outlined,
                   label: search.query.unlimitedRadius
-                      ? 'Any area'
-                      : '${(search.query.radiusMeters / 1000).round()} km',
+                      ? context.l10n.homeAnyArea
+                      : context.l10n.homeRadiusKm(
+                          RechargeFormats.decimal(
+                            (search.query.radiusMeters / 1000).round(),
+                            context.l10n.localeName,
+                          ),
+                        ),
                 ),
                 if (search.query.freeOnly)
-                  const _SavedScenarioChip(
+                  _SavedScenarioChip(
                     icon: Icons.payments_outlined,
-                    label: 'Free',
+                    label: context.l10n.discoverFree,
                   ),
               ],
             ),
@@ -640,7 +682,7 @@ class _SavedSearchPanel extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onResume,
                     icon: const Icon(Icons.search_rounded),
-                    label: const Text('Resume'),
+                    label: Text(context.l10n.discoverResume),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -649,18 +691,12 @@ class _SavedSearchPanel extends StatelessWidget {
                     key: const ValueKey<String>('home-saved-search-map'),
                     onPressed: onMap,
                     icon: const Icon(Icons.map_outlined),
-                    label: const Text('Map'),
+                    label: Text(context.l10n.discoverMap),
                   ),
                 ),
                 const SizedBox(width: 10),
                 IconButton.filledTonal(
-                  tooltip: 'Build route from saved search',
-                  onPressed: onRoute,
-                  icon: const Icon(Icons.route_outlined),
-                ),
-                const SizedBox(width: 10),
-                IconButton.filledTonal(
-                  tooltip: 'Create listing from saved search',
+                  tooltip: context.l10n.homeCreateFromSavedSearch,
                   onPressed: onCreate,
                   icon: const Icon(Icons.add_circle_outline),
                 ),
@@ -678,14 +714,12 @@ class _SmartSearchPanel extends StatelessWidget {
     required this.item,
     required this.onResume,
     required this.onMap,
-    required this.onRoute,
     required this.onCreate,
   });
 
   final SmartSearchHistoryEntity item;
   final VoidCallback onResume;
   final VoidCallback onMap;
-  final VoidCallback onRoute;
   final VoidCallback onCreate;
 
   @override
@@ -726,7 +760,7 @@ class _SmartSearchPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        'Continue smart search',
+                        context.l10n.homeContinueSmartSearch,
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w800),
                       ),
@@ -747,36 +781,56 @@ class _SmartSearchPanel extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                _SavedScenarioChip(icon: Icons.psychology, label: 'Smart'),
+                _SavedScenarioChip(
+                  icon: Icons.psychology,
+                  label: context.l10n.discoverSmart,
+                ),
                 if (routeIntent != null) ...<Widget>[
-                  const _SavedScenarioChip(
+                  _SavedScenarioChip(
                     icon: Icons.route_outlined,
-                    label: 'Smart route',
+                    label: context.l10n.homeSmartRoute,
                   ),
                   _SavedScenarioChip(
                     icon: Icons.timer_outlined,
-                    label: '${routeIntent.durationMinutes} min',
+                    label: context.l10n.discoverMinutes(
+                      routeIntent.durationMinutes,
+                    ),
                   ),
                   _SavedScenarioChip(
                     icon: Icons.flag_outlined,
-                    label: '${routeIntent.stepCategories.length} stops',
+                    label: context.l10n.discoverStops(
+                      routeIntent.stepCategories.length,
+                    ),
                   ),
                 ],
                 if (item.query.selectedCategoryIds.isNotEmpty)
                   _SavedScenarioChip(
                     icon: Icons.category_outlined,
-                    label: item.query.selectedCategoryIds.first,
+                    label: taxonomyLabel(
+                      context.l10n,
+                      item.query.selectedCategoryIds.first,
+                    ),
                   ),
                 _SavedScenarioChip(
                   icon: Icons.near_me_outlined,
                   label: item.query.unlimitedRadius
-                      ? 'Any area'
-                      : '${(item.query.radiusMeters / 1000).round()} km',
+                      ? context.l10n.homeAnyArea
+                      : context.l10n.homeRadiusKm(
+                          RechargeFormats.decimal(
+                            (item.query.radiusMeters / 1000).round(),
+                            context.l10n.localeName,
+                          ),
+                        ),
                 ),
                 if (item.query.budgetMax != null)
                   _SavedScenarioChip(
                     icon: Icons.payments_outlined,
-                    label: 'Under ${item.query.budgetMax!.toStringAsFixed(0)}',
+                    label: context.l10n.discoverUpToBudget(
+                      RechargeFormats.money(
+                        item.query.budgetMax!,
+                        context.l10n.localeName,
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -787,7 +841,7 @@ class _SmartSearchPanel extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onResume,
                     icon: const Icon(Icons.search_rounded),
-                    label: const Text('Resume'),
+                    label: Text(context.l10n.discoverResume),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -796,18 +850,12 @@ class _SmartSearchPanel extends StatelessWidget {
                     key: const ValueKey<String>('home-smart-search-map'),
                     onPressed: onMap,
                     icon: const Icon(Icons.map_outlined),
-                    label: const Text('Map'),
+                    label: Text(context.l10n.discoverMap),
                   ),
                 ),
                 const SizedBox(width: 10),
                 IconButton.filledTonal(
-                  tooltip: 'Build route from smart search',
-                  onPressed: onRoute,
-                  icon: const Icon(Icons.route_outlined),
-                ),
-                const SizedBox(width: 10),
-                IconButton.filledTonal(
-                  tooltip: 'Create listing from smart search',
+                  tooltip: context.l10n.homeCreateFromSmartSearch,
                   onPressed: onCreate,
                   icon: const Icon(Icons.add_circle_outline),
                 ),
@@ -832,7 +880,7 @@ class _HomeHero extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         const Text(
-          'RECHARGE',
+          'RECHARGE', // l10n-ignore: brand wordmark
           style: TextStyle(
             color: Colors.white,
             fontSize: 24,
@@ -841,8 +889,8 @@ class _HomeHero extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 3),
-        const Text(
-          'VACATION APP',
+        Text(
+          context.l10n.discoverHomeTagline,
           style: TextStyle(
             color: RechargeTheme.homeMuted,
             fontSize: 10,
@@ -857,7 +905,7 @@ class _HomeHero extends StatelessWidget {
               child: _HomeActionPill(
                 key: const Key('home-search-action'),
                 icon: Icons.search_rounded,
-                label: 'Search',
+                label: context.l10n.discoverSearch,
                 onPressed: onSearch,
               ),
             ),
@@ -866,7 +914,7 @@ class _HomeHero extends StatelessWidget {
               child: _HomeActionPill(
                 key: const Key('home-map-action'),
                 icon: Icons.map_outlined,
-                label: 'Map',
+                label: context.l10n.discoverMap,
                 onPressed: onMap,
               ),
             ),
@@ -1001,7 +1049,9 @@ class _CategoryPill extends StatelessWidget {
             ),
             const SizedBox(height: 7),
             Text(
-              category.label,
+              category.id == null
+                  ? context.l10n.discoverAll
+                  : _homeCategoryLabel(context.l10n, category.id!),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
@@ -1049,8 +1099,8 @@ class _HomeActivitySections extends StatelessWidget {
             (_HomeChoiceSectionData section) => Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: _HomeContentSection(
-                key: ValueKey<String>('home-feed-${section.title}'),
-                title: section.title,
+                key: ValueKey<String>('home-feed-${section.id}'),
+                title: _homeSectionTitle(context.l10n, section.id),
                 items: section.items,
                 onViewAll: onViewAll,
                 onOpenDetails: onOpenDetails,
@@ -1065,18 +1115,32 @@ class _HomeActivitySections extends StatelessWidget {
     List<DiscoverItemEntity> items,
   ) {
     return <_HomeChoiceSectionData>[
+      // Section ids are stable widget keys, not copy; the title comes from
+      // _homeSectionTitle.
       _HomeChoiceSectionData(
-        title: 'Categories',
+        id: 'Categories', // l10n-ignore: section id
         items: _categoryMixItems(items),
       ),
-      _HomeChoiceSectionData(title: 'New', items: _newItems(items)),
-      _HomeChoiceSectionData(title: 'For you', items: _forYouItems(items)),
       _HomeChoiceSectionData(
-        title: 'Quick events',
+        id: 'New', // l10n-ignore: section id
+        items: _newItems(items),
+      ),
+      _HomeChoiceSectionData(
+        id: 'For you', // l10n-ignore: section id
+        items: _forYouItems(items),
+      ),
+      _HomeChoiceSectionData(
+        id: 'Quick events', // l10n-ignore: section id
         items: _quickEventItems(items),
       ),
-      _HomeChoiceSectionData(title: 'Nearby', items: _nearbyItems(items)),
-      _HomeChoiceSectionData(title: 'Popular', items: _popularItems(items)),
+      _HomeChoiceSectionData(
+        id: 'Nearby', // l10n-ignore: section id
+        items: _nearbyItems(items),
+      ),
+      _HomeChoiceSectionData(
+        id: 'Popular', // l10n-ignore: section id
+        items: _popularItems(items),
+      ),
     ];
   }
 
@@ -1101,10 +1165,7 @@ class _HomeActivitySections extends StatelessWidget {
 
   List<DiscoverItemEntity> _newItems(List<DiscoverItemEntity> items) {
     final List<DiscoverItemEntity> sorted = List<DiscoverItemEntity>.from(items)
-      ..sort(
-        (DiscoverItemEntity a, DiscoverItemEntity b) =>
-            a.startsAtUtc.compareTo(b.startsAtUtc),
-      );
+      ..sort((DiscoverItemEntity a, DiscoverItemEntity b) => a.compareStart(b));
     return sorted.take(6).toList(growable: false);
   }
 
@@ -1131,7 +1192,7 @@ class _HomeActivitySections extends StatelessWidget {
           b,
         ).compareTo(_quickDurationRank(a));
         if (durationCompare != 0) return durationCompare;
-        return a.startsAtUtc.compareTo(b.startsAtUtc);
+        return a.compareStart(b);
       });
     return sorted.take(6).toList(growable: false);
   }
@@ -1154,9 +1215,10 @@ class _HomeActivitySections extends StatelessWidget {
 }
 
 class _HomeChoiceSectionData {
-  const _HomeChoiceSectionData({required this.title, required this.items});
+  const _HomeChoiceSectionData({required this.id, required this.items});
 
-  final String title;
+  /// Stable section id (also the widget key); the title comes from l10n.
+  final String id;
   final List<DiscoverItemEntity> items;
 }
 
@@ -1181,7 +1243,7 @@ class _HomeContentSection extends StatelessWidget {
       children: <Widget>[
         _SectionHeader(
           title: title,
-          actionLabel: 'View all',
+          actionLabel: context.l10n.homeViewAll,
           onAction: onViewAll,
         ),
         const SizedBox(height: 8),
@@ -1263,7 +1325,7 @@ class _HomeFeatureCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _homeCardMeta(item),
+                      _homeCardMeta(context.l10n, item),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -1387,11 +1449,14 @@ class _HomeEmptyCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onViewAll,
-        child: const Padding(
-          padding: EdgeInsets.all(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
           child: Text(
-            'No activities yet',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+            context.l10n.homeNoActivities,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ),
       ),
@@ -1434,7 +1499,7 @@ class _ScenarioCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    scenario.title,
+                    homeScenarioTitle(context.l10n, scenario.id),
                     style: const TextStyle(
                       color: Color(0xFF073F35),
                       fontSize: 16,
@@ -1443,7 +1508,7 @@ class _ScenarioCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    scenario.subtitle,
+                    homeScenarioSubtitle(context.l10n, scenario.id),
                     style: const TextStyle(color: Color(0xFF62756F)),
                   ),
                 ],
@@ -1535,7 +1600,7 @@ class _HomeRouteTemplateCard extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    template.title,
+                    homeScenarioTitle(context.l10n, template.id),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -1549,7 +1614,7 @@ class _HomeRouteTemplateCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              template.subtitle,
+              homeScenarioSubtitle(context.l10n, template.id),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: Color(0xFF62756F)),
@@ -1565,11 +1630,15 @@ class _HomeRouteTemplateCard extends StatelessWidget {
                 ),
                 _SavedScenarioChip(
                   icon: Icons.directions_walk,
-                  label: template.walkingOnly ? 'Walkable' : 'Flexible',
+                  label: template.walkingOnly
+                      ? context.l10n.discoverWalkable
+                      : context.l10n.discoverFlexibleTime,
                 ),
                 _SavedScenarioChip(
                   icon: Icons.payments,
-                  label: template.freeOnly ? 'Free' : 'Mixed',
+                  label: template.freeOnly
+                      ? context.l10n.discoverFree
+                      : context.l10n.discoverMixedPrice,
                 ),
               ],
             ),
@@ -1580,18 +1649,22 @@ class _HomeRouteTemplateCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onBuild,
                     icon: const Icon(Icons.route),
-                    label: const Text('Build'),
+                    label: Text(context.l10n.discoverBuild),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton.outlined(
-                  tooltip: 'Map ${template.title} route',
+                  tooltip: context.l10n.discoverMapTemplateRoute(
+                    homeScenarioTitle(context.l10n, template.id),
+                  ),
                   onPressed: onMap,
                   icon: const Icon(Icons.map_outlined),
                 ),
                 const SizedBox(width: 8),
                 IconButton.outlined(
-                  tooltip: 'Create ${template.title} route',
+                  tooltip: context.l10n.discoverCreateTemplateRoute(
+                    homeScenarioTitle(context.l10n, template.id),
+                  ),
                   onPressed: onCreate,
                   icon: const Icon(Icons.add_business_outlined),
                 ),
@@ -1626,18 +1699,21 @@ class _ForYouStrip extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          const Text(
-            'For you',
-            style: TextStyle(
+          Text(
+            _homeSectionTitle(
+              context.l10n,
+              'For you', // l10n-ignore: stable section id (widget key)
+            ), // l10n-ignore: stable section id (widget key)
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Personal picks, saved ideas and creator tools stay one tap away.',
-            style: TextStyle(color: Color(0xFFD5EEE5)),
+          Text(
+            context.l10n.discoverForYouHint,
+            style: const TextStyle(color: Color(0xFFD5EEE5)),
           ),
           const SizedBox(height: 12),
           LayoutBuilder(
@@ -1651,19 +1727,22 @@ class _ForYouStrip extends StatelessWidget {
                     width: buttonWidth,
                     onPressed: onPopular,
                     icon: Icons.star_outline_rounded,
-                    label: 'Popular',
+                    label: _homeSectionTitle(
+                      context.l10n,
+                      'Popular', // l10n-ignore: section id
+                    ),
                   ),
                   _ForYouButton(
                     width: buttonWidth,
                     onPressed: onScenario,
                     icon: Icons.route,
-                    label: 'Builder',
+                    label: context.l10n.discoverBuilder,
                   ),
                   _ForYouButton(
                     width: buttonWidth,
                     onPressed: onCreate,
                     icon: Icons.add_circle_outline_rounded,
-                    label: 'Create',
+                    label: context.l10n.discoverCreate,
                   ),
                 ],
               );
@@ -1733,17 +1812,18 @@ IconData _homeCategoryIcon(String categoryId) {
   };
 }
 
-String _homeCategoryLabel(String categoryId, String fallback) {
+/// L4.9.5: the short home chip name; other categories use their full name.
+String _homeCategoryLabel(AppLocalizations l10n, String categoryId) {
   return switch (normalizeRechargeContentGroupId(categoryId)) {
-    'sport' => 'Sport',
-    'outdoor_nature_walking' => 'Walks',
-    'games_indoor' => 'Games',
-    'dance' => 'Dance',
-    'music_nightlife' => 'Music',
-    'art_culture_museums' => 'Art',
-    'food_drinks' => 'Food',
-    'wellness_recharge' => 'Wellness',
-    _ => fallback,
+    'sport' => l10n.discoverHomeShortSport,
+    'outdoor_nature_walking' => l10n.discoverHomeShortWalks,
+    'games_indoor' => l10n.discoverHomeShortGames,
+    'dance' => l10n.discoverHomeShortDance,
+    'music_nightlife' => l10n.discoverHomeShortMusic,
+    'art_culture_museums' => l10n.discoverHomeShortArt,
+    'food_drinks' => l10n.discoverHomeShortFood,
+    'wellness_recharge' => l10n.discoverHomeShortWellness,
+    final String id => taxonomyLabel(l10n, id),
   };
 }
 
@@ -1761,16 +1841,15 @@ class _HomeCategory {
 
 class _ScenarioCardData {
   const _ScenarioCardData({
-    required this.title,
-    required this.subtitle,
+    required this.id,
     required this.icon,
     this.freeOnly = false,
     this.opensMap = false,
     this.queryText,
   });
 
-  final String title;
-  final String subtitle;
+  /// Stable card id; title and subtitle come from l10n.
+  final String id;
   final IconData icon;
   final bool freeOnly;
   final bool opensMap;
@@ -1779,8 +1858,7 @@ class _ScenarioCardData {
 
 class _HomeRouteTemplate {
   const _HomeRouteTemplate({
-    required this.title,
-    required this.subtitle,
+    required this.id,
     required this.icon,
     required this.mood,
     required this.durationMinutes,
@@ -1790,8 +1868,8 @@ class _HomeRouteTemplate {
     required this.steps,
   });
 
-  final String title;
-  final String subtitle;
+  /// Stable template id; title and subtitle come from l10n.
+  final String id;
   final IconData icon;
   final String mood;
   final int durationMinutes;
@@ -1801,15 +1879,28 @@ class _HomeRouteTemplate {
   final List<String> steps;
 }
 
-String _homeCardMeta(DiscoverItemEntity item) {
-  final DateTime local = item.startsAtUtc.toLocal();
-  final String hour = local.hour.toString().padLeft(2, '0');
-  final String minute = local.minute.toString().padLeft(2, '0');
+/// L4: price in the item's own currency and start time in the item's own
+/// zone (the device zone only when the item carries none).
+String _homeCardMeta(AppLocalizations l10n, DiscoverItemEntity item) {
+  final DateTime? start = item.startsAtUtc;
   final String price = item.isFree
-      ? 'Free'
-      : '${item.priceAmount.toStringAsFixed(0)} EUR';
+      ? l10n.homeFree
+      : item.priceAmount == null
+      ? '—'
+      : RechargeFormats.money(item.priceAmount!, l10n.localeName);
+  final String time = start == null
+      ? (item.activityCatalog == null
+            ? l10n.homeAnyTime
+            : _activityDuration(
+                l10n,
+                item.activityCatalog!.durationMinMinutes,
+                item.activityCatalog!.durationMaxMinutes,
+              ))
+      : item.timezoneId.isEmpty
+      ? RechargeFormats.deviceTime(start, l10n.localeName)
+      : RechargeFormats.time(start, item.timezoneId, l10n.localeName);
   final String venue = item.venueName.isEmpty ? item.city : item.venueName;
-  return '$price · $hour:$minute · $venue';
+  return l10n.homeCardMeta(price, time, venue);
 }
 
 IconData _categoryIconForHome(String category) {
@@ -1910,14 +2001,15 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
       path: RouteNames.create,
       queryParameters: <String, String>{
         ..._smartRouteParameters(parseResult, includeMode: false),
-        'source': 'scenario',
-        'type': 'event',
-        'title': '${_capitalized(routeIntent.mood)} recharge route',
+        'source': 'smart_route_seed',
+        'type': 'route',
+        'title':
+            '${_capitalized(routeIntent.mood)} recharge route', // l10n-ignore: Create seed prefill data
         'subtitle':
-            '${routeIntent.stepCategories.length} stops · '
-            '${routeIntent.durationMinutes} min · smart route',
+            '${routeIntent.stepCategories.length} stops · ' // l10n-ignore: Create seed prefill data
+            '${routeIntent.durationMinutes} min · smart route', // l10n-ignore: Create seed prefill data
         'q': parseResult.originalText.trim(),
-        'category': 'scenario',
+        'category': 'route',
       },
     ).toString();
   }
@@ -1933,28 +2025,37 @@ String _createRouteForSmartSearch(SmartSearchHistoryEntity item) {
 
 String _scenarioBuilderRouteForTemplate(_HomeRouteTemplate template) {
   return Uri(
-    path: RouteNames.scenarioBuilder,
-    queryParameters: _scenarioTemplateParameters(template),
+    path: RouteNames.create,
+    queryParameters: <String, String>{
+      ..._scenarioTemplateParameters(template),
+      'source': 'route_template_seed',
+      'type': 'route',
+      'category': 'route',
+    },
   ).toString();
 }
 
 String _mapRouteForTemplate(_HomeRouteTemplate template) {
   final Map<String, String> params = <String, String>{
     ..._scenarioTemplateParameters(template),
-    'mode': 'scenario',
+    'mode': 'route',
   };
   return Uri(path: RouteNames.discoverMap, queryParameters: params).toString();
 }
 
-String _createRouteForTemplate(_HomeRouteTemplate template) {
+/// The Create seed is prefilled in the reader's language.
+String _createRouteForTemplate(
+  AppLocalizations l10n,
+  _HomeRouteTemplate template,
+) {
   final Map<String, String> params = <String, String>{
     ..._scenarioTemplateParameters(template),
-    'source': 'scenario',
-    'type': 'event',
-    'title': '${template.title} route',
-    'subtitle': template.subtitle,
+    'source': 'route_template_seed',
+    'type': 'route',
+    'title': l10n.discoverHomeIdeaTitle(template.id),
+    'subtitle': l10n.discoverHomeIdeaSubtitle(template.id),
     'q': template.prompt,
-    'category': 'scenario',
+    'category': 'route',
   };
   return Uri(path: RouteNames.create, queryParameters: params).toString();
 }
@@ -1991,28 +2092,6 @@ Map<String, String> _queryParametersForSavedSearch(DiscoverQuery query) {
   };
 }
 
-String _scenarioBuilderRouteForSavedSearch(SavedSearchEntity search) {
-  final DiscoverQuery query = search.query;
-  final String prompt = _promptForSavedSearch(query);
-  return _scenarioBuilderRouteForQuery(query, prompt: prompt);
-}
-
-String _scenarioBuilderRouteForSmartSearch(SmartSearchHistoryEntity item) {
-  final SmartSearchParseResult? parseResult = _smartRouteParseForSmartSearch(
-    item,
-  );
-  if (parseResult != null) {
-    return Uri(
-      path: RouteNames.scenarioBuilder,
-      queryParameters: _smartRouteParameters(parseResult, includeMode: false),
-    ).toString();
-  }
-  final String prompt = item.prompt.trim().isEmpty
-      ? _promptForSavedSearch(item.query)
-      : item.prompt.trim();
-  return _scenarioBuilderRouteForQuery(item.query, prompt: prompt);
-}
-
 SmartSearchParseResult? _smartRouteParseForSmartSearch(
   SmartSearchHistoryEntity item,
 ) {
@@ -2027,7 +2106,7 @@ Map<String, String> _smartRouteParameters(
 }) {
   final SmartRouteIntent routeIntent = parseResult.routeIntent!;
   return <String, String>{
-    if (includeMode) 'mode': 'scenario',
+    if (includeMode) 'mode': 'route',
     'mood': routeIntent.mood,
     'duration': routeIntent.durationMinutes.toString(),
     'free': routeIntent.freeOnly ? '1' : '0',
@@ -2039,32 +2118,15 @@ Map<String, String> _smartRouteParameters(
   };
 }
 
-String _scenarioBuilderRouteForQuery(
-  DiscoverQuery query, {
-  required String prompt,
-}) {
-  final Map<String, String> params = <String, String>{
-    'mood': _scenarioMoodForSavedSearch(query),
-    'duration': query.radiusMeters <= 5000 ? '120' : '180',
-    'walking': query.unlimitedRadius ? '0' : '1',
-    if (query.freeOnly) 'free': '1',
-    if (prompt.isNotEmpty) 'prompt': prompt,
-  };
-  return Uri(
-    path: RouteNames.scenarioBuilder,
-    queryParameters: params,
-  ).toString();
-}
-
 String _titleForSmartSearch(DiscoverQuery query) {
   final String queryText = query.queryText.trim();
   if (queryText.isNotEmpty) {
     return queryText[0].toUpperCase() + queryText.substring(1);
   }
   if (query.selectedCategoryIds.isNotEmpty) {
-    return '${query.selectedCategoryIds.first} idea';
+    return '${query.selectedCategoryIds.first} idea'; // l10n-ignore: Create seed prefill data
   }
-  return 'Smart search idea';
+  return 'Smart search idea'; // l10n-ignore: Create seed prefill data
 }
 
 String _capitalized(String value) {
@@ -2073,35 +2135,23 @@ String _capitalized(String value) {
   return trimmed[0].toUpperCase() + trimmed.substring(1);
 }
 
-String _scenarioMoodForSavedSearch(DiscoverQuery query) {
-  final String queryText = query.queryText.toLowerCase();
-  final Set<String> normalizedCategories = query.selectedCategoryIds
-      .map(normalizeRechargeContentGroupId)
-      .toSet();
-  if (queryText.contains('run') ||
-      queryText.contains('sport') ||
-      queryText.contains('tennis') ||
-      normalizedCategories.contains('sport') ||
-      normalizedCategories.contains('outdoor_nature_walking')) {
-    return 'active';
-  }
-  if (normalizedCategories.contains('art_culture_museums') ||
-      normalizedCategories.contains('music_nightlife') ||
-      normalizedCategories.contains('family_kids')) {
-    return 'social';
-  }
-  return 'calm';
-}
+// The cases are the stable section ids of _homeChoiceSections.
+String _homeSectionTitle(AppLocalizations l10n, String id) => switch (id) {
+  'Categories' => l10n.discoverCategories, // l10n-ignore: section id
+  'New' => l10n.discoverHomeNew, // l10n-ignore: section id
+  'For you' => l10n.discoverHomeForYou, // l10n-ignore: section id
+  'Quick events' => l10n.discoverHomeQuickEvents, // l10n-ignore: section id
+  'Nearby' => l10n.discoverHomeNearby, // l10n-ignore: section id
+  _ => l10n.discoverHomePopular,
+};
 
-String _promptForSavedSearch(DiscoverQuery query) {
-  final List<String> parts = <String>[
-    if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
-    if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
-    if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'under ${query.budgetMax!.toStringAsFixed(0)}',
-    query.unlimitedRadius
-        ? 'any area'
-        : 'near ${(query.radiusMeters / 1000).round()} km',
-  ];
-  return parts.join(' · ');
-}
+String homeScenarioTitle(AppLocalizations l10n, String id) =>
+    l10n.discoverHomeIdeaTitle(id);
+
+String homeScenarioSubtitle(AppLocalizations l10n, String id) =>
+    l10n.discoverHomeIdeaSubtitle(id);
+
+/// The declared duration of a catalog Activity: one value or a range.
+String _activityDuration(AppLocalizations l10n, int min, int max) => min == max
+    ? l10n.discoverMinutes(min)
+    : l10n.discoverMinutesRange(min, max);

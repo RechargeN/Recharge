@@ -1,6 +1,11 @@
+import '../../../../shared/primitives/money/money.dart';
+
+enum FavoritePlanningTargetKind { quickPlan, scenario, route }
+
 class FavoriteItemEntity {
   const FavoriteItemEntity({
     required this.id,
+    this.objectType,
     required this.title,
     required this.subtitle,
     required this.city,
@@ -11,30 +16,40 @@ class FavoriteItemEntity {
     required this.isFree,
     required this.savedAtUtc,
     required this.targetRoute,
+    this.planningTargetKind,
+    this.planningTargetId,
     this.coverImageUrl = '',
   });
 
   final String id;
+  final String? objectType;
   final String title;
   final String subtitle;
   final String city;
   final String category;
-  final DateTime startsAtUtc;
-  final double distanceKm;
-  final double priceAmount;
+  final DateTime? startsAtUtc;
+
+  /// Null when the distance is unknown, e.g. for server-owned Library entries.
+  final double? distanceKm;
+  final Money? priceAmount;
   final bool isFree;
   final DateTime savedAtUtc;
   final String? targetRoute;
+  final FavoritePlanningTargetKind? planningTargetKind;
+  final String? planningTargetId;
   final String coverImageUrl;
 
   FavoriteItemEntity copyWith({
     DateTime? savedAtUtc,
     String? targetRoute,
     String? coverImageUrl,
+    FavoritePlanningTargetKind? planningTargetKind,
+    String? planningTargetId,
     bool clearTargetRoute = false,
   }) {
     return FavoriteItemEntity(
       id: id,
+      objectType: objectType,
       title: title,
       subtitle: subtitle,
       city: city,
@@ -45,6 +60,8 @@ class FavoriteItemEntity {
       isFree: isFree,
       savedAtUtc: savedAtUtc ?? this.savedAtUtc,
       targetRoute: clearTargetRoute ? null : (targetRoute ?? this.targetRoute),
+      planningTargetKind: planningTargetKind ?? this.planningTargetKind,
+      planningTargetId: planningTargetId ?? this.planningTargetId,
       coverImageUrl: coverImageUrl ?? this.coverImageUrl,
     );
   }

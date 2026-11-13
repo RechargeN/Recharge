@@ -10,12 +10,24 @@ enum ScenarioTransitDisclosureFreshness {
   notApplicable,
 }
 
+/// L4: a caution shown with a planned transport item; the UI turns it into
+/// text. Planned/not-live wording follows Scenario spec v1.7.
+enum ScenarioTransitWarning {
+  manualNotVerified,
+  plannedNotLive,
+  freshnessCurrent,
+  freshnessStale,
+  freshnessUnknown,
+  freshnessUnavailable,
+  manualNoFreshness,
+  limitations,
+}
+
 class ScenarioTransitDisclosure {
   const ScenarioTransitDisclosure({
     required this.kind,
     required this.freshness,
     required this.title,
-    required this.statusLabel,
     required this.warnings,
     this.providerLabel,
     this.licenseLabel,
@@ -30,8 +42,9 @@ class ScenarioTransitDisclosure {
 
   final ScenarioTransitDisclosureKind kind;
   final ScenarioTransitDisclosureFreshness freshness;
-  final String title;
-  final String statusLabel;
+
+  /// The service label from the source; null shows the localized fallback.
+  final String? title;
   final String? providerLabel;
   final String? licenseLabel;
   final String? serviceDateLabel;
@@ -41,7 +54,7 @@ class ScenarioTransitDisclosure {
   final String? destinationLabel;
   final String? departureLabel;
   final String? arrivalLabel;
-  final List<String> warnings;
+  final List<ScenarioTransitWarning> warnings;
 
   bool get isOfficial => kind == ScenarioTransitDisclosureKind.official;
 }
@@ -49,43 +62,38 @@ class ScenarioTransitDisclosure {
 class BuildScenarioTransitDisclosure {
   const BuildScenarioTransitDisclosure();
 
-  static const String limitations =
-      'Fare, tickets, seats, availability, delays and cancellations are '
-      'unknown. Recheck with the operator before travel.';
-
   ScenarioTransitDisclosure call(ScenarioPlannedTransportSourceDraft source) {
     final snapshot = source.scheduleSnapshot;
     final providerCode = snapshot?.providerCode?.trim();
-    final isManual = snapshot == null ||
+    final isManual =
+        snapshot == null ||
         providerCode == null ||
         providerCode.isEmpty ||
         providerCode == 'manual';
-    final title = _nonEmpty(source.publicServiceLabel) ??
+    final title =
+        _nonEmpty(source.publicServiceLabel) ??
         _nonEmpty(source.carrierName) ??
-        _nonEmpty(snapshot?.serviceLabel) ??
-        'Planned transport';
+        _nonEmpty(snapshot?.serviceLabel);
     if (isManual) {
       return ScenarioTransitDisclosure(
         kind: ScenarioTransitDisclosureKind.manual,
         freshness: ScenarioTransitDisclosureFreshness.notApplicable,
         title: title,
-        statusLabel: 'Entered manually · not verified',
         serviceDateLabel: snapshot?.serviceDate?.iso8601,
         retrievedAtLabel: _utc(snapshot?.retrievedAtUtc),
         originLabel: _nonEmpty(snapshot?.originLabel),
         destinationLabel: _nonEmpty(snapshot?.destinationLabel),
         departureLabel: snapshot?.plannedDeparture?.hhmm,
         arrivalLabel: snapshot?.plannedArrival?.hhmm,
-        warnings: const <String>[
-          'Planned schedule · not live. Manual values are not verified '
-              'against an operator timetable.',
-          limitations,
+        warnings: const <ScenarioTransitWarning>[
+          ScenarioTransitWarning.manualNotVerified,
+          ScenarioTransitWarning.limitations,
         ],
       );
     }
 
-    final providerLabel = _nonEmpty(snapshot.providerDisplayName) ??
-        providerCode;
+    final providerLabel =
+        _nonEmpty(snapshot.providerDisplayName) ?? providerCode;
     final completeProvenance =
         _nonEmpty(snapshot.providerDisplayName) != null &&
         _nonEmpty(snapshot.licenseName) != null &&
@@ -99,7 +107,6 @@ class BuildScenarioTransitDisclosure {
       kind: ScenarioTransitDisclosureKind.official,
       freshness: freshness,
       title: title,
-      statusLabel: _statusLabel(freshness),
       providerLabel: providerLabel,
       licenseLabel: _nonEmpty(snapshot.licenseName),
       serviceDateLabel: snapshot.serviceDate?.iso8601,
@@ -109,10 +116,10 @@ class BuildScenarioTransitDisclosure {
       destinationLabel: _nonEmpty(snapshot.destinationLabel),
       departureLabel: snapshot.plannedDeparture?.hhmm,
       arrivalLabel: snapshot.plannedArrival?.hhmm,
-      warnings: <String>[
-        'Planned schedule · not live.',
+      warnings: <ScenarioTransitWarning>[
+        ScenarioTransitWarning.plannedNotLive,
         _freshnessWarning(freshness),
-        limitations,
+        ScenarioTransitWarning.limitations,
       ],
     );
   }
@@ -122,45 +129,27 @@ class BuildScenarioTransitDisclosure {
   ) => switch (freshness) {
     ScenarioScheduleFreshness.current =>
       ScenarioTransitDisclosureFreshness.current,
-    ScenarioScheduleFreshness.stale =>
-      ScenarioTransitDisclosureFreshness.stale,
+    ScenarioScheduleFreshness.stale => ScenarioTransitDisclosureFreshness.stale,
     ScenarioScheduleFreshness.unknown =>
       ScenarioTransitDisclosureFreshness.unknown,
     ScenarioScheduleFreshness.notApplicable =>
       ScenarioTransitDisclosureFreshness.unavailable,
   };
 
-  String _statusLabel(ScenarioTransitDisclosureFreshness freshness) =>
-      switch (freshness) {
-        ScenarioTransitDisclosureFreshness.current =>
-          'Feed snapshot was current when saved · not live',
-        ScenarioTransitDisclosureFreshness.stale =>
-          'Stale feed snapshot · recheck required',
-        ScenarioTransitDisclosureFreshness.unknown =>
-          'Feed freshness unknown · recheck required',
-        ScenarioTransitDisclosureFreshness.unavailable =>
-          'Provenance or feed unavailable · saved data retained',
-        ScenarioTransitDisclosureFreshness.notApplicable =>
-          'Entered manually · not verified',
-      };
-
-  String _freshnessWarning(ScenarioTransitDisclosureFreshness freshness) =>
-      switch (freshness) {
-        ScenarioTransitDisclosureFreshness.current =>
-          'Current describes feed freshness when saved. It confirms neither '
-              'service operation, delays nor punctuality.',
-        ScenarioTransitDisclosureFreshness.stale =>
-          'The saved feed snapshot is stale. Recheck the service before '
-              'travel.',
-        ScenarioTransitDisclosureFreshness.unknown =>
-          'Feed freshness is unknown. Do not treat the saved times as '
-              'confirmed.',
-        ScenarioTransitDisclosureFreshness.unavailable =>
-          'The saved item remains available, but its official provenance or '
-              'feed cannot be verified.',
-        ScenarioTransitDisclosureFreshness.notApplicable =>
-          'Manual values have no official feed freshness.',
-      };
+  ScenarioTransitWarning _freshnessWarning(
+    ScenarioTransitDisclosureFreshness freshness,
+  ) => switch (freshness) {
+    ScenarioTransitDisclosureFreshness.current =>
+      ScenarioTransitWarning.freshnessCurrent,
+    ScenarioTransitDisclosureFreshness.stale =>
+      ScenarioTransitWarning.freshnessStale,
+    ScenarioTransitDisclosureFreshness.unknown =>
+      ScenarioTransitWarning.freshnessUnknown,
+    ScenarioTransitDisclosureFreshness.unavailable =>
+      ScenarioTransitWarning.freshnessUnavailable,
+    ScenarioTransitDisclosureFreshness.notApplicable =>
+      ScenarioTransitWarning.manualNoFreshness,
+  };
 
   String? _nonEmpty(String? value) {
     final normalized = value?.trim();

@@ -524,9 +524,7 @@ class RouteCreateCoordinator {
       (RouteAsyncOperationDraft operation) =>
           operation.status == RouteAsyncOperationStatus.failed,
     );
-    final route = failed
-        ? current.route
-        : _withCurrentQuality(current.route);
+    final route = failed ? current.route : _withCurrentQuality(current.route);
     _state = current.copyWith(
       status: failed ? RouteCreateStatus.failed : RouteCreateStatus.ready,
       createDraft: _withRoute(current.createDraft, route),

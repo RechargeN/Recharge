@@ -1,15 +1,20 @@
-# Event Classification Model v2.2.3 — canonical specification
+# Event Classification Model v2.2.4 — canonical specification
 
-Версия: 2026-08-04 (rev. 2.2.3)
+Версия: 2026-10-19 (rev. 2.2.4; rev. 2.2.3 — 2026-08-04)
 Статус: **Accepted — канонический продуктовый/доменный контракт Recharge.**
 Назначение: фасетная классификация Event для Recharge без создания нового
 Create-типа и без смешения Event с Place, Route, Scenario, Quick Plan,
-Bookable Session или Find People.
+Bookable Session, Class / Workshop или Find People.
 
 Решение владельца продукта: спецификация принята 2026-08-04 как источник
 истины для дальнейшего развития Event ecosystem. Все новые Event, Booking,
 inventory, provider и admission slices обязаны расширять эту модель, а не
 создавать параллельный контракт.
+
+Ревизия 2.2.4 принята владельцем 2026-10-19 (T2, «все принимаю, реалищзовывай»): добавлена
+граница Event ↔ Class / Workshop в §1.1, §1.2 и §6.2 по решению CLS-OD-01
+(вариант A, [Class/Workshop §2.6](create/CLASS_WORKSHOP_EXPERIENCE_CREATE_SPEC.md)).
+Инварианты Event, архетипы и admission/inventory semantics не изменены.
 
 Принятие документа не означает, что весь контракт уже реализован, и само по
 себе не разрешает production backend, Payments, Firebase или provider
@@ -21,7 +26,7 @@ ADR.
 Связанные источники истины:
 
 - [EVENT_CREATE_SPEC.md](EVENT_CREATE_SPEC.md) — Creator UX и form flow;
-- [EVENT_CREATE_CORE_SCHEDULE_SLICE_SPEC.md](EVENT_CREATE_CORE_SCHEDULE_SLICE_SPEC.md)
+- [EVENT_CREATE_CORE_SCHEDULE_SLICE_SPEC.md](create/EVENT_CREATE_CORE_SCHEDULE_SLICE_SPEC.md)
   — уже реализованное local/mock подмножество EVT-CRT-01;
 - [CATEGORY_SYSTEM.md](CATEGORY_SYSTEM.md) — каноническая тематическая
   таксономия v1.4.3;
@@ -64,6 +69,10 @@ Event — публикуемая сущность с хотя бы одной о
 - **Quick Plan** — лёгким personal/invited utility-flow;
 - **Bookable Session** — постоянно доступной услугой/ресурсом с выбором
   произвольного слота;
+- **Class / Workshop** — самостоятельным учебным предложением Publisher'а с
+  обязательными outcomes и ведущим (Create-тип `class_workshop`); занятие как
+  организованное событие или часть Event-программы остаётся Event с
+  архетипом `workshop` либо `class_session`;
 - **Find People** — неформальным поиском компании без полноценного
   организованного события;
 - **Collection/Guide** — подборкой объектов;
@@ -84,6 +93,9 @@ Event — публикуемая сущность с хотя бы одной о
 | «План посещения фестиваля пользователем» | Scenario |
 | «Концерт, дата будет объявлена» | Draft до появления даты; не обычный published Event |
 | «Фестиваль анонсирован, даты нет, идёт сбор интереса/blind-продажа» | Не Event; внешний discovery candidate либо будущий отдельный продукт (§1.3) |
+| «Курс керамики: 4 занятия, программа, ведущий; Publisher предлагает его как учебное предложение» | Class / Workshop |
+| «Мастер-класс по керамике в программе фестиваля» | Event + Program Item либо child Event (`workshop`) |
+| «Гончарный круг можно забронировать на любой свободный час» | Bookable Session |
 
 §1.2 является нормативным источником решений `Event vs adjacent aggregate`.
 §6.2 — тематическая проекция и пояснение этой таблицы, а не второй источник
@@ -346,6 +358,7 @@ Event использует все пользовательские группы 
 | Организованное происходящее в определённое время | Event | музейная ночь, тематический ужин, футбольный турнир |
 | Постоянное место, бизнес или достопримечательность | Place | музей, ресторан, стадион |
 | Услуга/ресурс с выбираемыми повторяемыми слотами | Bookable Session | столик, корт, массаж, ежедневная экскурсия |
+| Самостоятельное учебное предложение с программой и ведущим | Class / Workshop | курс керамики из четырёх занятий |
 | Неформальный поиск участников без организованного события | Find People | найти игроков на сегодня |
 | Непрерывный географический трек | Route | маршрут забега или похода |
 | План из независимых остановок и логистики | Scenario | план культурного дня или поездки |
@@ -1491,6 +1504,15 @@ Recharge использует фасетную Event-модель:
 ---
 
 ## 26. Changelog
+
+### v2.2.4 (2026-10-19)
+
+- владелец принял ревизию в T2 («все принимаю, реалищзовывай») по решению CLS-OD-01, вариант A:
+  Class / Workshop назван смежным Create-типом в §1.1, получил строки в §1.2
+  и проекцию в §6.2; категория по-прежнему не выбирает тип;
+- архетипы `workshop`/`class_session`, инварианты §2, admission, inventory и
+  Booking semantics не изменены; Class не несёт Event archetype/admission,
+  Event не несёт learning-полей Class.
 
 ### v2.2.3 (2026-08-04)
 

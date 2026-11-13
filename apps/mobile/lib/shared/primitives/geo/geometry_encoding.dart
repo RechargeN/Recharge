@@ -82,7 +82,7 @@ abstract final class GeometryEncoding {
       );
       if (!point.isValid) {
         throw const FormatException(
-          'Encoded geometry contains an invalid coordinate.',
+          'Encoded geometry contains an invalid coordinate.', // l10n-ignore: developer error; the UI receives a code
         );
       }
       points.add(point);
@@ -113,7 +113,7 @@ abstract final class GeometryEncoding {
       final codeUnit = encoded.codeUnitAt(cursor++);
       if (codeUnit < 63 || codeUnit > 126) {
         throw const FormatException(
-          'Encoded geometry contains an unsupported character.',
+          'Encoded geometry contains an unsupported character.', // l10n-ignore: developer error; the UI receives a code
         );
       }
 

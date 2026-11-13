@@ -1,4 +1,5 @@
 import 'scenario_draft_data.dart';
+import 'scenario_item_draft.dart';
 
 enum QuickPlanConversionIssueSeverity { warning, error }
 
@@ -8,7 +9,7 @@ enum QuickPlanConversionIssueCode {
   stopNotFound,
   stopUnavailable,
   selectionEmpty,
-  legacyStopBecamePrivateCustomLocation,
+  legacySourceIdentityMissing,
   privateNoteNotCopied,
 }
 
@@ -16,13 +17,11 @@ class QuickPlanConversionIssue {
   const QuickPlanConversionIssue({
     required this.code,
     required this.severity,
-    required this.message,
     this.quickPlanStopId,
   });
 
   final QuickPlanConversionIssueCode code;
   final QuickPlanConversionIssueSeverity severity;
-  final String message;
   final String? quickPlanStopId;
 }
 
@@ -36,6 +35,9 @@ class QuickPlanConversionStopSnapshot {
     required this.isFree,
     required this.priceMinorUnits,
     required this.available,
+    this.distanceKm,
+    this.sourceObjectId,
+    this.sourceObjectType,
     this.requesterPrivateNote,
   });
 
@@ -47,6 +49,9 @@ class QuickPlanConversionStopSnapshot {
   final bool isFree;
   final int? priceMinorUnits;
   final bool available;
+  final double? distanceKm;
+  final String? sourceObjectId;
+  final ScenarioCatalogObjectType? sourceObjectType;
   final String? requesterPrivateNote;
 }
 

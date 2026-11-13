@@ -40,8 +40,17 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AuthResultEntity?> restoreSession() async {
+    if (_localDataSource.environment != AuthCacheEnvironment.local &&
+        _remoteDataSource is MockAuthRemoteDataSource) {
+      await _localDataSource.clear();
+      return null;
+    }
     final cachedSession = await _localDataSource.readSession();
     if (cachedSession == null) {
+      if (_localDataSource.environment != AuthCacheEnvironment.local ||
+          _remoteDataSource is! MockAuthRemoteDataSource) {
+        return null;
+      }
       final result = _demoFullAccessResult();
       await _persistResult(result);
       return result.toEntity();
@@ -66,6 +75,11 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AuthUserEntity?> getCurrentUser() async {
+    if (_localDataSource.environment != AuthCacheEnvironment.local &&
+        _remoteDataSource is MockAuthRemoteDataSource) {
+      await _localDataSource.clear();
+      return null;
+    }
     final user = await _localDataSource.readUser();
     return user?.toEntity();
   }
@@ -84,6 +98,14 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   Future<void> _persistResult(AuthResultModel result) async {
+    if (_localDataSource.environment != AuthCacheEnvironment.local &&
+        _remoteDataSource is MockAuthRemoteDataSource) {
+      await _localDataSource.clear();
+      throw const AuthException(
+        code: 'mock_auth_environment_forbidden',
+        message: 'mock_auth_environment_forbidden',
+      );
+    }
     await _localDataSource.saveSession(result.session);
     await _localDataSource.saveUser(result.user);
   }

@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/scenarios/application/controllers/scenario_builder_controller.dart';
 import 'package:recharge/features/scenarios/domain/entities/scenario_draft_entity.dart';
+import 'package:recharge/features/scenarios/application/state/scenario_builder_state.dart';
 
 void main() {
   test('legacy Quick Plan runtime has stable identity and revision', () {
@@ -55,7 +57,10 @@ void main() {
       ),
       isTrue,
     );
-    expect(controller.state.draft.totalPriceAmount, 0);
+    expect(
+      controller.state.draft.totalPriceAmount,
+      const Money(minorUnits: 0, currencyCode: 'EUR'),
+    );
   });
 
   test('mood change rebuilds scenario steps', () {
@@ -138,6 +143,37 @@ void main() {
     );
   });
 
+  test('allows multiple occurrences from the same category', () {
+    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioStepEntity suggestion = controller.state.draft.steps.first;
+    final int before = controller.state.draft.steps.length;
+
+    controller.addSuggestedStep(suggestion);
+    controller.addSuggestedStep(suggestion);
+
+    final added = controller.state.draft.steps.skip(before).toList();
+    expect(added, hasLength(2));
+    expect(added.map((step) => step.category).toSet(), <String>{
+      suggestion.category,
+    });
+    expect(added.map((step) => step.id).toSet(), hasLength(2));
+  });
+
+  test('suggestions do not suppress an already used category or object', () {
+    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioStepEntity existing = controller.state.draft.steps.first;
+    controller.applySeed(
+      mood: ScenarioMood.calm,
+      maxDurationMinutes: 720,
+      stepCategories: <String>[existing.category],
+    );
+
+    expect(
+      controller.suggestedSteps.map((step) => step.category),
+      contains(existing.category),
+    );
+  });
+
   test('route fit reports overloaded seeded route', () {
     final ScenarioBuilderController controller = ScenarioBuilderController();
 
@@ -153,11 +189,21 @@ void main() {
     );
 
     expect(controller.state.routeFit.score, lessThan(85));
-    expect(controller.state.routeFit.label, isNot('Ready'));
-    expect(controller.state.routeFit.insights, contains('Trim about 35 min'));
+    expect(controller.state.routeFit.level, isNot(ScenarioFitLevel.ready));
     expect(
       controller.state.routeFit.insights,
-      contains('Remove paid stops for free-only mode'),
+      contains(
+        const ScenarioFitInsight(
+          ScenarioFitInsightKind.trimMinutes,
+          minutes: 35,
+        ),
+      ),
+    );
+    expect(
+      controller.state.routeFit.insights,
+      contains(
+        const ScenarioFitInsight(ScenarioFitInsightKind.removePaidStops),
+      ),
     );
   });
 
@@ -185,6 +231,6 @@ void main() {
       isTrue,
     );
     expect(controller.state.routeFit.score, greaterThanOrEqualTo(85));
-    expect(controller.state.routeFit.label, 'Ready');
+    expect(controller.state.routeFit.level, ScenarioFitLevel.ready);
   });
 }

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "registryRevision": "pa-l3-v1",
+  "purposeId": "product_usage_measurement",
+  "legalBasisRef": null,
+  "subjectMode": "none",
+  "dataClass": "personal",
+  "limits": {
+    "batchMaxEvents": 20,
+    "batchMaxBytes": 8192,
+    "eventMaxBytes": 512,
+    "queueMaxEvents": 100,
+    "queueMaxBytes": 32768,
+    "maxAttempts": 5,
+    "sendTimeoutSeconds": 10,
+    "futureSkewMinutes": 5,
+    "aggregateReadMaxDays": 31
+  },
+  "enums": {
+    "objectKind": [
+      "event",
+      "activity",
+      "route",
+      "place",
+      "session",
+      "scenario",
+      "find_people",
+      "class_workshop",
+      "rental",
+      "collection"
+    ],
+    "entrySurface": ["details", "map", "planner", "other"],
+    "publishOutcome": ["published", "submitted", "denied", "failed"]
+  },
+  "events": [
+    {
+      "eventName": "details_opened",
+      "eventVersion": 1,
+      "productQuestion": "Which object types do people open in Details?",
+      "eventOwner": "product.discover",
+      "processingOwner": "data_platform",
+      "producer": "apps/mobile/lib/features/discover/presentation/pages/discover_details_page.dart",
+      "retentionClass": "pa.raw_event",
+      "fields": { "object_kind": "objectKind" }
+    },
+    {
+      "eventName": "favorite_added",
+      "eventVersion": 1,
+      "productQuestion": "Which object types do people save to Favorites, and from which surface?",
+      "eventOwner": "product.library",
+      "processingOwner": "data_platform",
+      "producer": "apps/mobile/lib/features/favorites/application/controllers/favorites_controller.dart",
+      "retentionClass": "pa.raw_event",
+      "fields": { "object_kind": "objectKind", "entry_surface": "entrySurface" }
+    },
+    {
+      "eventName": "create_publish_finished",
+      "eventVersion": 1,
+      "productQuestion": "For which Create types does a publish attempt end in refusal?",
+      "eventOwner": "product.create",
+      "processingOwner": "data_platform",
+      "producer": "apps/mobile/lib/features/create/application/controllers/create_controller.dart",
+      "retentionClass": "pa.raw_event",
+      "fields": { "create_type": "objectKind", "outcome": "publishOutcome" }
+    }
+  ]
+}

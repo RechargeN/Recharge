@@ -12,9 +12,13 @@ void main() {
       'booking_command.schema.json',
       'booking_result.schema.json',
       'booking_error.schema.json',
+      'booking_query.schema.json',
+      'booking_read.schema.json',
+      'booking_page.schema.json',
+      'booking_availability.schema.json',
     ];
 
-    test('all six roots use Draft 2020-12 and the bounded vocabulary', () {
+    test('all ten roots use Draft 2020-12 and the bounded vocabulary', () {
       final validator = BookingSchemaFixtureValidator();
       for (final fileName in rootSchemas) {
         final schema = readJsonObject('$bookingSchemaRoot/$fileName');
@@ -24,10 +28,20 @@ void main() {
           reason: fileName,
         );
         expect(schema[r'$id'], contains('/booking/v1/'));
-        expect(
-          (schema['properties'] as Map).containsKey('schemaVersion'),
-          isTrue,
-        );
+        if ({
+          'booking_command.schema.json',
+          'booking_query.schema.json',
+          'booking_read.schema.json',
+          'booking_page.schema.json',
+          'booking_availability.schema.json',
+        }.contains(fileName)) {
+          expect(schema['oneOf'], isA<List<Object?>>());
+        } else {
+          expect(
+            (schema['properties'] as Map).containsKey('schemaVersion'),
+            isTrue,
+          );
+        }
       }
     });
 
@@ -51,14 +65,26 @@ void main() {
     expect(BookingCommandType.values, hasLength(9));
     expect(BookingHoldState.values, hasLength(5));
     expect(
-        BookingErrorCode.values.map((value) => value.wireValue),
-        containsAll(<String>{
-          'sold_out',
-          'concurrency_cap_reached',
-          'revision_conflict',
-          'idempotency_conflict',
-          'unsupported_schema',
-        }));
+      BookingErrorCode.values.map((value) => value.wireValue),
+      containsAll(<String>{
+        'sold_out',
+        'concurrency_cap_reached',
+        'revision_conflict',
+        'idempotency_conflict',
+        'unsupported_schema',
+      }),
+    );
+  });
+
+  test('safe revisions reject values above the cross-language maximum', () {
+    expect(
+      requireNonNegativeInt(bookingMaxSafeInteger, 'revision'),
+      bookingMaxSafeInteger,
+    );
+    expect(
+      () => requireNonNegativeInt(bookingMaxSafeInteger + 1, 'revision'),
+      throwsFormatException,
+    );
   });
 
   test('policy v1 is exact and cannot be silently broadened', () {
@@ -66,10 +92,12 @@ void main() {
       'schemaVersion': 1,
       'policyVersion': 1,
       'maxConcurrentFiniteAllocations': 5,
+      'maxActiveUnlimitedBookings': 50,
       'countingRule': 'onePerBookingOrActiveHold',
       'unlimitedBookingCounts': false,
     });
     expect(policy.maxConcurrentFiniteAllocations, 5);
+    expect(policy.maxActiveUnlimitedBookings, 50);
     expect(policy.unlimitedBookingCounts, isFalse);
     expect(
       () => BookingPolicyDto.fromJson({
@@ -80,35 +108,122 @@ void main() {
     );
   });
 
-  test('command is immutable and rejects actor authority or unknown fields',
-      () {
-    final mutablePayload = <String, Object?>{
-      'bookingId': 'booking-1',
-    };
-    final command = BookingCommandDto(
-      schemaVersion: 1,
-      commandType: BookingCommandType.cancelBooking,
-      requestId: 'request-1',
-      idempotencyKey: 'idempotency-1',
-      payload: mutablePayload,
-    );
-    mutablePayload['bookingId'] = 'changed';
-    expect(command.payload['bookingId'], 'booking-1');
-    expect(() => command.payload['x'] = true, throwsUnsupportedError);
+  test(
+    'command is immutable and rejects actor authority or unknown fields',
+    () {
+      final mutablePayload = <String, Object?>{'bookingId': 'booking-1'};
+      final command = BookingCommandDto(
+        schemaVersion: 1,
+        commandType: BookingCommandType.cancelBooking,
+        requestId: 'request-1',
+        idempotencyKey: 'idempotency-1',
+        expectedBookingRevision: 0,
+        payload: mutablePayload,
+      );
+      mutablePayload['bookingId'] = 'changed';
+      expect(command.payload['bookingId'], 'booking-1');
+      expect(() => command.payload['x'] = true, throwsUnsupportedError);
 
+      expect(
+        () => BookingCommandDto.fromJson({
+          ...command.toJson(),
+          'payload': {'bookingId': 'booking-1', 'actorId': 'admin-1'},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => BookingCommandDto.fromJson({
+          ...command.toJson(),
+          'unexpected': true,
+        }),
+        throwsFormatException,
+      );
+    },
+  );
+
+  test('command schema freezes all nine variants and revision ownership', () {
+    final schema = readJsonObject(
+      '$bookingSchemaRoot/booking_command.schema.json',
+    );
+    final variants = (schema['oneOf']! as List)
+        .map((value) => (value as Map).cast<String, Object?>())
+        .toList(growable: false);
+    expect(variants, hasLength(BookingCommandType.values.length));
+
+    final requiresExpectedRevision = <String>{
+      'cancelBooking',
+      'approveApplication',
+      'rejectApplication',
+      'leaveWaitlist',
+      'acceptWaitlistHold',
+      'declineWaitlistHold',
+      'reconfirmBooking',
+    };
+    final seen = <String>{};
+    for (final variant in variants) {
+      final properties = (variant['properties']! as Map)
+          .cast<String, Object?>();
+      final commandType =
+          ((properties['commandType']! as Map)['const']! as String);
+      final required = (variant['required']! as List).cast<String>().toSet();
+      expect(seen.add(commandType), isTrue);
+      expect(
+        required.contains('expectedBookingRevision'),
+        requiresExpectedRevision.contains(commandType),
+        reason: commandType,
+      );
+      expect(
+        properties.containsKey('expectedBookingRevision'),
+        requiresExpectedRevision.contains(commandType),
+        reason: commandType,
+      );
+      expect(variant['additionalProperties'], isFalse);
+    }
+    expect(seen, BookingCommandType.values.map((value) => value.name).toSet());
+  });
+
+  test('Booking request IDs use the safe opaque identifier whitelist', () {
+    BookingCommandDto command(String requestId) => BookingCommandDto(
+      schemaVersion: 1,
+      commandType: BookingCommandType.createBooking,
+      requestId: requestId,
+      idempotencyKey: 'stable-test-key',
+      payload: const {'occurrenceId': 'occurrence-1', 'participantUnits': 1},
+    );
+
+    expect(command('Request-A_1').requestId, 'Request-A_1');
     expect(
-      () => BookingCommandDto.fromJson({
-        ...command.toJson(),
-        'payload': {'bookingId': 'booking-1', 'actorId': 'admin-1'},
-      }),
+      command('Request-A').requestId,
+      isNot(command('request-a').requestId),
+    );
+    expect(command(List<String>.filled(128, 'a').join()).requestId.length, 128);
+    for (final invalid in [
+      ' Request-A ',
+      'é',
+      'e\u0301',
+      '😀',
+      '/',
+      '.',
+      '..',
+      '__name__',
+    ]) {
+      expect(() => command(invalid), throwsFormatException, reason: invalid);
+    }
+    expect(
+      () => command(List<String>.filled(129, 'a').join()),
       throwsFormatException,
     );
+    expect(() => command(String.fromCharCode(0xD800)), throwsFormatException);
+  });
+
+  test('bounded validator rejects unsupported normative keywords', () {
+    final schema = readJsonObject(
+      '$bookingSchemaRoot/booking_command.schema.json',
+    );
+    final mutated = <String, Object?>{...schema, r'$dynamicRef': '#'};
     expect(
-      () => BookingCommandDto.fromJson({
-        ...command.toJson(),
-        'unexpected': true,
-      }),
-      throwsFormatException,
+      BookingSchemaFixtureValidator().validateSchemaDocument(mutated),
+      contains(contains(r'uses unapproved keyword $dynamicRef')),
     );
   });
 

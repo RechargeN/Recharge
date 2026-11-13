@@ -1,0 +1,99 @@
+{
+  "account": {
+    "schemaVersion": 1,
+    "userId": "loc_user",
+    "status": "active",
+    "revision": -1
+  },
+  "authIdentity": {
+    "schemaVersion": 1,
+    "provider": "email",
+    "subjectHash": "raw-subject"
+  },
+  "session": {
+    "schemaVersion": 1,
+    "status": "active",
+    "rawToken": "forbidden"
+  },
+  "accessSnapshot": {
+    "schemaVersion": 1,
+    "capabilityIds": ["ADMIN"]
+  },
+  "creatorVerification": {
+    "schemaVersion": 1,
+    "status": "approved"
+  },
+  "managedPage": {
+    "schemaVersion": 1,
+    "pageId": "by-name"
+  },
+  "pageMembership": {
+    "schemaVersion": 1,
+    "role": "admin"
+  },
+  "identitySessionCommand": {
+    "schemaVersion": 1,
+    "commandType": "establishIdentitySession",
+    "requestId": "bad/path",
+    "installationId": "install-1"
+  },
+  "identitySessionResult": {
+    "schemaVersion": 1,
+    "commandType": "establishIdentitySession",
+    "requestId": "req_identity_session_1",
+    "serverTime": "not-an-instant",
+    "kind": "succeeded",
+    "data": {}
+  },
+  "publisherEligibility": {
+    "schemaVersion": 1,
+    "publisherRef": {
+      "type": "admin",
+      "id": "loc_admin"
+    }
+  },
+  "sellerDeclaration": {
+    "schemaVersion": 1,
+    "userId": "018FQ2Z8Q9N4M7K2T6V3W1X5YA",
+    "declaration": {
+      "status": "private",
+      "contact": {
+        "email": "a@example.com"
+      },
+      "trader": {
+        "legalName": "Example SIA",
+        "registrationNumber": "40003000000",
+        "address": {
+          "line1": "Brivibas iela 1",
+          "city": "Riga",
+          "postalCode": "LV-1010",
+          "countryCode": "LV"
+        }
+      },
+      "dac7ActivityTypes": []
+    },
+    "revision": 1,
+    "declaredAtUtc": "2026-11-08T12:00:00.000Z"
+  },
+  "sellerDeclarationCommand": {
+    "schemaVersion": 1,
+    "commandType": "declareSeller",
+    "requestId": "req-1",
+    "sessionContext": {
+      "sessionId": "018FQ2Z8Q9N4M7K2T6V3W1X5YE",
+      "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "installationId": "install-1"
+    },
+    "expectedRevision": 0,
+    "declaration": {
+      "status": "trader",
+      "contact": {},
+      "dac7ActivityTypes": []
+    }
+  },
+  "sellerDeclarationResult": {
+    "schemaVersion": 1,
+    "kind": "rejected",
+    "code": "anything_else"
+  }
+}

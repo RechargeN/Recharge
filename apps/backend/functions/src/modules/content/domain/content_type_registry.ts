@@ -1,0 +1,266 @@
+import {
+  contentTypeIds,
+  type ContentBody,
+  type ContentTypeId,
+} from '../../../contracts/content_v1.js';
+import { sessionMediaIds, validateSessionBody } from './type_rules/session_rules.js';
+import { scenarioMediaIds, validateScenarioBody } from './type_rules/scenario_rules.js';
+import { routeMediaIds, validateRouteBody } from './type_rules/route_rules.js';
+import {
+  classWorkshopMediaIds,
+  validateClassWorkshopBody,
+} from './type_rules/class_workshop_rules.js';
+import { activityMediaIds, validateActivityBody } from './type_rules/activity_rules.js';
+import { collectionMediaIds, validateCollectionBody } from './type_rules/collection_rules.js';
+import { rentalMediaIds, validateRentalBody } from './type_rules/rental_rules.js';
+import { eventMediaIds, validateEventBody } from './type_rules/event_rules.js';
+import { eventTransitionIssues } from './event_internal_registration.js';
+import { placeMediaIds, validatePlaceBody } from './type_rules/place_rules.js';
+import { findPeopleMediaIds, validateFindPeopleBody } from './type_rules/find_people_rules.js';
+import type { ContentValidationContext } from './type_rules/validation_context.js';
+
+export type ContentAction = 'create' | 'update' | 'read' | 'submit' | 'publish' | 'withdraw';
+
+/** Bump when an entry's policy or availability changes; pinned by tests. */
+export const contentTypeRegistryRevision = 'content-type-registry-v10';
+
+/** How the publication adapter obtains and pins the type's source. */
+export type ContentSourceResolver =
+  /** The draft body itself is the source, validated by the type validator. */
+  | 'inline_body'
+  /** An immutable revision owned by another BCK is pinned by reference. */
+  | 'pinned_immutable_revision'
+  /** Stable IDs of already published objects, order-checked. */
+  | 'published_object_membership';
+
+export type ContentTypeUnavailableReason =
+  /** Approved spec exists but its backend rules are not implemented yet. */
+  | 'source_contract_pending'
+  /** The type's specification is not yet approved. */
+  | 'spec_not_approved'
+  /** Publication needs an accepted consent/legal decision first. */
+  | 'consent_gate_pending'
+  /** The source lives in another BCK whose contract is not implemented. */
+  | 'dependency_pending';
+
+export type ContentTypeAvailability =
+  | { readonly status: 'available' }
+  | {
+      readonly status: 'unavailable';
+      readonly reason: ContentTypeUnavailableReason;
+      /** Owning authority or decision the type is waiting for. */
+      readonly dependency?: string;
+    };
+
+export type ContentTypeRule = (
+  body: ContentBody,
+  context: ContentValidationContext,
+) => readonly string[];
+
+export interface ContentTypeRegistryEntry {
+  readonly typeId: ContentTypeId;
+  readonly typeSchemaMajor: 1;
+  readonly validatorRevision: string;
+  /** Authority that owns the source the adapter validates or pins. */
+  readonly sourceAuthority: string;
+  readonly sourceResolver: ContentSourceResolver;
+  readonly requiredCapabilities: Readonly<Record<ContentAction, string>>;
+  readonly allowedPublisherTypes: readonly ('user' | 'page')[];
+  readonly moderationProfileId: string;
+  readonly visibilityPolicy: 'public_catalog' | 'consent_limited';
+  readonly marketPolicy: 'single_market_per_content';
+  readonly localizedTextPolicy: 'per_locale_with_declared_fallback';
+  readonly discoverFamily: string;
+  readonly mapperRevision: string;
+  readonly availability: ContentTypeAvailability;
+  /**
+   * Typed source rule: returns bounded issue codes (empty = valid). Present
+   * exactly when the type is available; otherwise the type fails closed.
+   */
+  readonly validate?: ContentTypeRule;
+  /** Media ids the body references; Media readiness is checked for exactly these. */
+  readonly mediaIds?: (body: ContentBody) => readonly string[];
+  /**
+   * Transitions a published object may not make (issue codes; empty = allowed),
+   * checked where the publication pointer switches, against the revision it held.
+   */
+  readonly validateTransition?: (from: ContentBody | null, to: ContentBody) => readonly string[];
+}
+
+const capabilities: Readonly<Record<ContentAction, string>> = Object.freeze({
+  create: 'content.create',
+  update: 'content.create',
+  read: 'content.create',
+  submit: 'content.submit',
+  publish: 'content.publish',
+  // Taking content down is governed by the publish authority.
+  withdraw: 'content.publish',
+});
+
+interface EntryInput {
+  readonly discoverFamily: string;
+  readonly sourceAuthority: string;
+  readonly sourceResolver: ContentSourceResolver;
+  readonly visibilityPolicy?: ContentTypeRegistryEntry['visibilityPolicy'];
+  /** Exactly one of `rules` and `unavailable` must be given. */
+  readonly rules?: {
+    readonly validate: ContentTypeRule;
+    readonly mediaIds: (body: ContentBody) => readonly string[];
+    readonly validateTransition?: ContentTypeRegistryEntry['validateTransition'];
+  };
+  readonly unavailable?: {
+    readonly reason: ContentTypeUnavailableReason;
+    readonly dependency?: string;
+  };
+}
+
+function entry(typeId: ContentTypeId, input: EntryInput): ContentTypeRegistryEntry {
+  if ((input.rules === undefined) === (input.unavailable === undefined))
+    throw new Error(`content_type_registry_entry_invalid:${typeId}`);
+  const availability: ContentTypeAvailability =
+    input.rules !== undefined
+      ? { status: 'available' }
+      : {
+          status: 'unavailable',
+          reason: input.unavailable?.reason ?? 'source_contract_pending',
+          ...(input.unavailable?.dependency === undefined
+            ? {}
+            : { dependency: input.unavailable.dependency }),
+        };
+  return Object.freeze({
+    typeId,
+    typeSchemaMajor: 1,
+    validatorRevision: input.rules === undefined ? 'unavailable' : `${typeId}-source-v1`,
+    sourceAuthority: input.sourceAuthority,
+    sourceResolver: input.sourceResolver,
+    requiredCapabilities: capabilities,
+    allowedPublisherTypes: Object.freeze(
+      typeId === 'session' || typeId === 'scenario' || typeId === 'class_workshop'
+        ? (['user'] as const)
+        : (['user', 'page'] as const),
+    ),
+    moderationProfileId: `${typeId}.default`,
+    visibilityPolicy: input.visibilityPolicy ?? 'public_catalog',
+    marketPolicy: 'single_market_per_content',
+    localizedTextPolicy: 'per_locale_with_declared_fallback',
+    discoverFamily: input.discoverFamily,
+    mapperRevision: `${typeId}-mapper-v1`,
+    availability: Object.freeze(availability),
+    ...(input.rules === undefined
+      ? {}
+      : {
+          validate: input.rules.validate,
+          mediaIds: input.rules.mediaIds,
+          ...(input.rules.validateTransition === undefined
+            ? {}
+            : { validateTransition: input.rules.validateTransition }),
+        }),
+  });
+}
+
+// Exactly the accepted ten Create types (BCK-07 §33.1). An adapter is
+// registered for every type, but only types with a ready, approved source rule
+// are available; the rest are explicit, carry their reason and fail closed
+// instead of falling back to a generic schema or Event.
+const entries: readonly ContentTypeRegistryEntry[] = Object.freeze([
+  entry('event', {
+    discoverFamily: 'Event',
+    sourceAuthority: 'Event classification v2.2.3, EVT-CRT-01 (C0 + schedule-C1 subset)',
+    sourceResolver: 'inline_body',
+    rules: {
+      validate: validateEventBody,
+      mediaIds: eventMediaIds,
+      validateTransition: eventTransitionIssues,
+    },
+  }),
+  entry('activity', {
+    discoverFamily: 'Activity',
+    sourceAuthority: 'Recharge Activity create block (ACT-CRT-01 v1.4, Approved)',
+    sourceResolver: 'inline_body',
+    rules: { validate: validateActivityBody, mediaIds: activityMediaIds },
+  }),
+  entry('route', {
+    discoverFamily: 'Route',
+    sourceAuthority: 'BCK-11 immutable RouteRevision (RTE-PUB-01)',
+    sourceResolver: 'pinned_immutable_revision',
+    rules: { validate: validateRouteBody, mediaIds: routeMediaIds },
+  }),
+  entry('place', {
+    discoverFamily: 'Place',
+    sourceAuthority: 'Place create block (PLC-ADP-01, v1.0 Approved)',
+    sourceResolver: 'inline_body',
+    rules: { validate: validatePlaceBody, mediaIds: placeMediaIds },
+  }),
+  entry('session', {
+    discoverFamily: 'Session',
+    sourceAuthority: 'Bookable Session create block (SES-CRT-01)',
+    sourceResolver: 'inline_body',
+    rules: { validate: validateSessionBody, mediaIds: sessionMediaIds },
+  }),
+  entry('scenario', {
+    discoverFamily: 'Scenario',
+    sourceAuthority: 'BCK-10 immutable ScenarioRevision (SCN-PUB-01, BCK-10 v0.4 §33)',
+    sourceResolver: 'pinned_immutable_revision',
+    rules: { validate: validateScenarioBody, mediaIds: scenarioMediaIds },
+  }),
+  // D3.7: the draft body is the private source; publication stores a server-built
+  // public projection, and every read checks BCK-06 consent and age (§5–§6).
+  entry('find_people', {
+    discoverFamily: 'Find People',
+    sourceAuthority: 'Find People create block v3.1, bounded T3 subset (D3.7) + BCK-06 consent',
+    sourceResolver: 'inline_body',
+    visibilityPolicy: 'consent_limited',
+    rules: { validate: validateFindPeopleBody, mediaIds: findPeopleMediaIds },
+  }),
+  entry('class_workshop', {
+    discoverFamily: 'Class/Workshop',
+    sourceAuthority: 'Class / Workshop CW-V1 (v1.2 §34, Approved slice spec)',
+    sourceResolver: 'inline_body',
+    rules: { validate: validateClassWorkshopBody, mediaIds: classWorkshopMediaIds },
+  }),
+  entry('rental', {
+    discoverFamily: 'Rental',
+    sourceAuthority: 'Rental / Equipment create block (RNT-CRT-01, Approved)',
+    sourceResolver: 'inline_body',
+    rules: { validate: validateRentalBody, mediaIds: rentalMediaIds },
+  }),
+  entry('collection', {
+    discoverFamily: 'Collection',
+    sourceAuthority: 'Collection / Guide create block (CLG-CRT-01 v1.0, Approved)',
+    sourceResolver: 'published_object_membership',
+    rules: { validate: validateCollectionBody, mediaIds: collectionMediaIds },
+  }),
+]);
+
+const byId: ReadonlyMap<string, ContentTypeRegistryEntry> = new Map(
+  entries.map((item) => [item.typeId, item]),
+);
+
+// Load-time invariants: a broken registry must never start serving.
+if (
+  entries.length !== contentTypeIds.length ||
+  byId.size !== entries.length ||
+  contentTypeIds.some((id) => !byId.has(id))
+)
+  throw new Error('content_type_registry_incomplete');
+for (const item of entries)
+  if (
+    (item.availability.status === 'available') !== (item.validate !== undefined) ||
+    (item.validate !== undefined) !== (item.mediaIds !== undefined)
+  )
+    throw new Error(`content_type_registry_inconsistent:${item.typeId}`);
+
+export const contentTypeRegistry = entries;
+
+/** Returns the registered entry, or null for unknown/newer/foreign type ids. */
+export function resolveContentType(typeId: unknown): ContentTypeRegistryEntry | null {
+  return typeof typeId === 'string' ? (byId.get(typeId) ?? null) : null;
+}
+
+/** True only for a type whose source rules are implemented (fail closed otherwise). */
+export function isContentTypeAvailable(item: ContentTypeRegistryEntry): boolean {
+  return item.availability.status === 'available' && item.validate !== undefined;
+}
+
+/** Kept for existing call sites: a source contract exists iff the type is available. */
+export const hasSourceContract = isContentTypeAvailable;

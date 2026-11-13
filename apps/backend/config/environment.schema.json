@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/config/r1/environment.schema.json",
+  "title": "Recharge R1 logical environment",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "environmentId": { "enum": ["local", "dev", "stage", "prod"] },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "logicalName": {
+          "type": "string",
+          "pattern": "^recharge-(local|dev|stage|prod)$"
+        },
+        "bindingState": { "const": "unbound" }
+      },
+      "required": ["logicalName", "bindingState"]
+    },
+    "cloudAllowed": { "const": false }
+  },
+  "required": ["schemaVersion", "environmentId", "identity", "cloudAllowed"]
+}

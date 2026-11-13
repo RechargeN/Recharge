@@ -1,0 +1,321 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "bookings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "occurrenceId", "order": "ASCENDING" },
+        { "fieldPath": "__name__", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bookings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" },
+        { "fieldPath": "__name__", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bookings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "state", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" },
+        { "fieldPath": "__name__", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bookings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "reconfirmationState", "order": "ASCENDING" },
+        { "fieldPath": "reconfirmationDeadlineUtc", "order": "ASCENDING" },
+        { "fieldPath": "__name__", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "platformReleaseManifests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "environmentId", "order": "ASCENDING" },
+        { "fieldPath": "marketId", "order": "ASCENDING" },
+        { "fieldPath": "capabilityId", "order": "ASCENDING" },
+        { "fieldPath": "createdAtUtc", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "platformFeatureFlagRevisions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "environmentId", "order": "ASCENDING" },
+        { "fieldPath": "marketId", "order": "ASCENDING" },
+        { "fieldPath": "capabilityId", "order": "ASCENDING" },
+        { "fieldPath": "createdAtUtc", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "referenceMarketConfigRevisions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "marketId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "publishedAtUtc", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bookingProjectionDeliveries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "nextAttemptAtUtc", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bookingReconfirmationDeadlineJobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "nextAttemptAtUtc", "order": "ASCENDING" },
+        { "fieldPath": "__name__", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "contentPublishedRevisions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "contentId", "order": "ASCENDING" },
+        { "fieldPath": "revisionNumber", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "contentEffects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "contentId", "order": "ASCENDING" },
+        { "fieldPath": "pointerRevision", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notificationInboxItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "recipientId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAtUtc", "order": "DESCENDING" },
+        { "fieldPath": "__name__", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notificationInboxItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "recipientId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAtUtc", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notificationEffectReceipts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "nextAttemptAtUtc", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notificationEffectReceipts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "deliverUntilUtc", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "libraryEntries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerId", "order": "ASCENDING" },
+        { "fieldPath": "ownerRevision", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "contentSubmissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "state", "order": "ASCENDING" },
+        { "fieldPath": "marketId", "order": "ASCENDING" },
+        { "fieldPath": "typeId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "moderationRemoderationQueue",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "marketId", "order": "ASCENDING" },
+        { "fieldPath": "typeId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "trustSafetyReports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "marketId", "order": "ASCENDING" },
+        { "fieldPath": "typeId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "reviews",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "contentId", "order": "ASCENDING" },
+        { "fieldPath": "deleted", "order": "ASCENDING" },
+        { "fieldPath": "moderationHold", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bookings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "eventId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "contentSafetyHolds",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "subjectUserId", "order": "ASCENDING" },
+        { "fieldPath": "desired", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "contentSafetyHolds",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "contentId", "order": "ASCENDING" },
+        { "fieldPath": "desired", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "catalogSafetyHolds",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "subjectUserId", "order": "ASCENDING" },
+        { "fieldPath": "desired", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "catalogSafetyHolds",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "contentId", "order": "ASCENDING" },
+        { "fieldPath": "desired", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bookingSafetyHolds",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "subjectUserId", "order": "ASCENDING" },
+        { "fieldPath": "desired", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bookingSafetyHolds",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "contentId", "order": "ASCENDING" },
+        { "fieldPath": "desired", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "bookings",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "bookingIdempotency",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "bookingOutbox",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "bookingAudit",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "securityRateLimitAttempts",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "securityRateLimitCounters",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "bookingProjectionDeliveries",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "bookingProjectionOperatorAudit",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "bookingReconfirmationDeadlineJobs",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "bookingReconfirmationDeadlineOperatorAudit",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "notificationInboxItems",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "notificationEffectReceipts",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "notificationDeliveryAttempts",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "notificationCommandReceipts",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    }
+  ]
+}

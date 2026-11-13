@@ -1,13 +1,7 @@
 import '../../domain/entities/profile_editable_entity.dart';
 import '../../domain/entities/settings_entity.dart';
 
-enum ExploreStatus {
-  initial,
-  loading,
-  ready,
-  saving,
-  error,
-}
+enum ExploreStatus { initial, loading, ready, saving, error }
 
 class ExploreState {
   const ExploreState({
@@ -43,7 +37,8 @@ class ExploreState {
   final SettingsEntity settings;
   final String? message;
 
-  bool get isLoaded => status == ExploreStatus.ready || status == ExploreStatus.saving;
+  bool get isLoaded =>
+      status == ExploreStatus.ready || status == ExploreStatus.saving;
 
   ExploreState copyWith({
     ExploreStatus? status,

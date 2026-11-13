@@ -18,7 +18,7 @@ class RouteQualityWorkflowException implements Exception {
   final String reasonCode;
 
   @override
-  String toString() => 'Route quality workflow failed: $reasonCode';
+  String toString() => 'Route quality workflow failed: $reasonCode'; // l10n-ignore: debug
 }
 
 class RouteQualityWorkflowCoordinator {

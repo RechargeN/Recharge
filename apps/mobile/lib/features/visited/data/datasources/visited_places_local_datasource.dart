@@ -11,7 +11,11 @@ class VisitedPlacesLocalDataSource {
   final FlutterSecureStorage _storage;
 
   Future<List<VisitedPlaceModel>> readVisitedPlaces(String userId) async {
-    final String? raw = await _storage.read(key: _storageKey(userId));
+    final String? raw =
+        await _storage.read(key: _storageKey(userId)) ??
+        await _storage.read(
+          key: '$keyPrefix${userId.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_')}',
+        );
     if (raw == null || raw.isEmpty) return const <VisitedPlaceModel>[];
 
     try {
@@ -23,7 +27,7 @@ class VisitedPlacesLocalDataSource {
             item as Map<String, dynamic>,
           );
           model.toEntity();
-          result.add(model);
+          if (model.userId == userId) result.add(model);
         } on Object {
           // A corrupt or future record is ignored without hiding valid records.
         }
@@ -47,7 +51,7 @@ class VisitedPlacesLocalDataSource {
   }
 
   String _storageKey(String userId) {
-    final String safeUserId = userId.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
-    return '$keyPrefix$safeUserId';
+    if (userId.trim().isEmpty) throw ArgumentError('Visit owner is required');
+    return 'visit_history_v3_${base64Url.encode(utf8.encode(userId))}';
   }
 }

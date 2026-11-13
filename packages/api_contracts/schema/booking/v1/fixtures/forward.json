@@ -22,6 +22,17 @@
       }
     },
     {
+      "reason": "unknown command outcome is unsupported",
+      "value": {
+        "schemaVersion": 1,
+        "kind": "succeeded",
+        "requestId": "request-future-outcome",
+        "correlationId": "correlation-future-outcome",
+        "serverTime": "2026-08-09T08:00:00.000Z",
+        "outcome": "partiallyReconfirmed"
+      }
+    },
+    {
       "reason": "unknown nested Booking state is unsupported",
       "value": {
         "schemaVersion": 1,
@@ -34,6 +45,7 @@
           "id": "booking-future",
           "revision": 1,
           "userId": "user-1",
+          "marketId": "LV",
           "eventId": "event-1",
           "occurrenceId": "occurrence-1",
           "admissionMode": "booking",

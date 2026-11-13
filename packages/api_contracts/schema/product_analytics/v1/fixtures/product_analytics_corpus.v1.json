@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "note": "Synthetic L3 corpus. Every value is invented; markers L3SYNTH* must never reach storage or logs.",
+  "validEvents": [
+    {
+      "eventId": "3f2b8c1e-7a4d-4e5f-9b6a-1c2d3e4f5a61",
+      "eventName": "details_opened",
+      "eventVersion": 1,
+      "occurredAtUtc": "2026-10-25T09:00:00.000Z",
+      "policyRevision": "synthetic-l3-policy-1",
+      "fields": { "object_kind": "route" }
+    },
+    {
+      "eventId": "3f2b8c1e-7a4d-4e5f-9b6a-1c2d3e4f5a62",
+      "eventName": "favorite_added",
+      "eventVersion": 1,
+      "occurredAtUtc": "2026-10-25T09:00:00.000Z",
+      "policyRevision": "synthetic-l3-policy-1",
+      "fields": { "object_kind": "place", "entry_surface": "map" }
+    },
+    {
+      "eventId": "3f2b8c1e-7a4d-4e5f-9b6a-1c2d3e4f5a63",
+      "eventName": "create_publish_finished",
+      "eventVersion": 1,
+      "occurredAtUtc": "2026-10-25T09:00:00.000Z",
+      "policyRevision": "synthetic-l3-policy-1",
+      "fields": { "create_type": "event", "outcome": "denied" }
+    }
+  ],
+  "invalidEvents": [
+    { "case": "unknown_event", "patch": { "eventName": "details_viewed" } },
+    { "case": "unknown_version", "patch": { "eventVersion": 2 } },
+    { "case": "version_as_string", "patch": { "eventVersion": "1" } },
+    { "case": "unknown_field_raw_id", "fields": { "object_kind": "route", "item_id": "L3SYNTH-01JABCDEF" } },
+    { "case": "missing_field", "fields": {} },
+    { "case": "free_text_value", "fields": { "object_kind": "L3SYNTH free text walk with Anna" } },
+    { "case": "search_query_field", "fields": { "object_kind": "route", "query": "L3SYNTH riga sauna" } },
+    { "case": "secret_value", "fields": { "object_kind": "L3SYNTH-sk_live_0000" } },
+    { "case": "raw_url", "fields": { "object_kind": "https://l3synth.test/a?token=L3SYNTHTOKEN" } },
+    { "case": "exact_location", "fields": { "object_kind": "route", "lat": 56.9496, "lng": 24.1052 } },
+    { "case": "gpx_payload", "fields": { "object_kind": "route", "gpx": "<gpx>L3SYNTHGPX</gpx>" } },
+    { "case": "route_geometry", "fields": { "object_kind": "route", "geometry": [[56.9, 24.1], [56.95, 24.2]] } },
+    { "case": "nested_object", "fields": { "object_kind": { "kind": "route" } } },
+    { "case": "array_value", "fields": { "object_kind": ["route"] } },
+    { "case": "proto_key", "rawFields": "{\"object_kind\":\"route\",\"__proto__\":{\"polluted\":\"L3SYNTH\"}}" },
+    { "case": "legacy_quick_plan", "eventName": "create_publish_finished", "fields": { "create_type": "quick_plan", "outcome": "failed" } },
+    { "case": "account_id_key", "patch": { "accountId": "L3SYNTH-user" } },
+    { "case": "session_handle_key", "patch": { "sessionHandle": "L3SYNTHSESSIONHANDLE000000000000000000000000" } },
+    { "case": "invitation_token_key", "patch": { "invitationToken": "L3SYNTHINVITE" } },
+    { "case": "client_consent_claim", "patch": { "consent": "granted" } },
+    { "case": "client_dob_claim", "patch": { "dateOfBirth": "2012-01-01" } },
+    { "case": "event_id_ulid", "patch": { "eventId": "01JBQ3Y4ZK8L3SYNTH000000000" } },
+    { "case": "event_id_uppercase", "patch": { "eventId": "3F2B8C1E-7A4D-4E5F-9B6A-1C2D3E4F5A61" } },
+    { "case": "event_id_not_v4", "patch": { "eventId": "3f2b8c1e-7a4d-1e5f-9b6a-1c2d3e4f5a61" } },
+    { "case": "occurred_not_on_hour", "patch": { "occurredAtUtc": "2026-10-25T09:27:11.000Z" } },
+    { "case": "occurred_not_string", "patch": { "occurredAtUtc": 1761382800000 } },
+    { "case": "policy_revision_invalid", "patch": { "policyRevision": "L3SYNTH policy with spaces" } },
+    { "case": "fields_null", "patch": { "fields": null } }
+  ],
+  "invalidBatches": [
+    { "case": "batch_wrong_schema_version", "batch": { "schemaVersion": 2, "events": [] } },
+    { "case": "batch_events_not_array", "batch": { "schemaVersion": 1, "events": {} } },
+    { "case": "batch_empty", "batch": { "schemaVersion": 1, "events": [] } },
+    { "case": "batch_extra_key_device", "batch": { "schemaVersion": 1, "events": [], "deviceId": "L3SYNTH-device" } },
+    { "case": "batch_too_many_events", "repeatValidEvents": 21 }
+  ]
+}

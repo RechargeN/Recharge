@@ -1,6 +1,10 @@
+import '../../../../../core/localization/recharge_formats.dart';
+import '../../../../../core/localization/taxonomy_labels.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
+import '../create_media_pick_actions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/geo/geo_point.dart';
@@ -22,6 +26,9 @@ import '../../../domain/entities/route_recording_data.dart';
 import 'route_editor_section.dart';
 import 'route_recording_panel.dart';
 import 'route_review_section.dart';
+import '../create_form_texts.dart';
+import '../create_texts.dart';
+import '../../../../../core/localization/l10n_context.dart';
 
 class RouteCreateBlock extends ConsumerStatefulWidget {
   const RouteCreateBlock({
@@ -57,19 +64,19 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
   Widget build(BuildContext context) {
     final runtime = ref.watch(routeCreateRuntimeProvider);
     return runtime.when(
-      loading: () => const _StatusPanel(
+      loading: () => _StatusPanel(
         icon: Icons.map_outlined,
-        title: 'Loading offline trail editor…',
-        message: 'No network or paid routing call is required.',
+        title: context.l10n.createRouteLoadingOfflineTrailEditor,
+        message: context.l10n.createRouteNoNetworkPaidRoutingCallRequired,
       ),
       error: (Object error, StackTrace _) => _StatusPanel(
         icon: Icons.error_outline,
-        title: 'Offline map could not be loaded',
+        title: context.l10n.createRouteOfflineMapCouldNotLoaded,
         message: '$error',
         action: FilledButton.icon(
           onPressed: () => ref.invalidate(routeCreateRuntimeProvider),
           icon: const Icon(Icons.refresh),
-          label: const Text('Retry'),
+          label: Text(context.l10n.createRouteRetry),
         ),
       ),
       data: _buildRuntime,
@@ -87,18 +94,18 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
         _attachedCoordinator = runtime.coordinator;
         widget.controller.attachRouteCoordinator(runtime.coordinator);
       });
-      return const _StatusPanel(
+      return _StatusPanel(
         icon: Icons.route,
-        title: 'Preparing Route draft…',
-        message: 'Restoring the latest persisted revision.',
+        title: context.l10n.createRoutePreparingRouteDraft,
+        message: context.l10n.createRouteRestoringLatestPersistedRevision,
       );
     }
     final routeState = widget.controller.routeCreateState;
     if (routeState == null) {
-      return const _StatusPanel(
+      return _StatusPanel(
         icon: Icons.hourglass_top,
-        title: 'Preparing Route draft…',
-        message: 'The editor will be ready in a moment.',
+        title: context.l10n.createRoutePreparingRouteDraft,
+        message: context.l10n.createRouteEditorWillReadyMoment,
       );
     }
     final gpxTransfer = ref.watch(routeGpxTransferControllerProvider);
@@ -119,7 +126,9 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
         ),
         if (widget.state.message != null) ...<Widget>[
           const SizedBox(height: 10),
-          _MessageBanner(widget.state.message!),
+          _MessageBanner(
+            CreateTexts.notice(context.l10n, widget.state.message!),
+          ),
         ],
         if (routeState.status == RouteCreateStatus.routing ||
             routeState.status == RouteCreateStatus.saving ||
@@ -187,33 +196,31 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
     RouteGpxTransferController gpxTransfer,
     RouteRecordingController recording,
   ) => _SectionCard(
-    title: 'How will you create the track?',
-    subtitle:
-        'All methods use one canonical Route model. This demo enables points and freehand without paid services.',
+    title: context.l10n.createRouteHowWillYouCreateTrack,
+    subtitle: context.l10n.createRouteAllMethodsUseOneCanonicalRoute,
     child: Column(
       children: <Widget>[
         _MethodTile(
           icon: Icons.add_location_alt_outlined,
-          title: 'Points',
-          subtitle:
-              'Place anchors and connect them along the offline trail graph.',
+          title: context.l10n.createRoutePoints,
+          subtitle: context.l10n.createRoutePlaceAnchorsConnectThemAlongOffline,
           selected: state.route.creationMethod == RouteCreationMethod.points,
           onTap: () => _selectMethod(state, RouteCreationMethod.points),
         ),
         const SizedBox(height: 8),
         _MethodTile(
           icon: Icons.gesture,
-          title: 'Freehand',
-          subtitle: 'Draw one continuous line and keep its exact geometry.',
+          title: context.l10n.createRouteFreehand,
+          subtitle: context.l10n.createRouteDrawOneContinuousLineKeepIts,
           selected: state.route.creationMethod == RouteCreationMethod.freehand,
           onTap: () => _selectMethod(state, RouteCreationMethod.freehand),
         ),
         const SizedBox(height: 8),
         _MethodTile(
           icon: Icons.gps_fixed,
-          title: 'Record with GPS',
+          title: context.l10n.createRouteRecordWithGps,
           subtitle:
-              'Record movement on this device, then review accuracy, gaps and privacy trimming.',
+              context.l10n.createRouteRecordMovementDeviceThenReviewAccuracy,
           selected:
               state.route.creationMethod == RouteCreationMethod.recordedGps ||
               recording.state.status != RouteRecordingStatus.idle,
@@ -231,9 +238,8 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
         const SizedBox(height: 8),
         _MethodTile(
           icon: Icons.upload_file_outlined,
-          title: 'Import GPX',
-          subtitle:
-              'Inspect a GPX file locally, choose one track and remove private metadata.',
+          title: context.l10n.createRouteImportGpx,
+          subtitle: context.l10n.createRouteInspectGpxFileLocallyChooseOne,
           selected:
               state.route.creationMethod == RouteCreationMethod.importedGpx,
           onTap: gpxTransfer.isBusy
@@ -276,21 +282,20 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
     RouteCreateState state,
     RouteGpxTransferController transfer,
   ) => _SectionCard(
-    title: 'GPX export',
-    subtitle:
-        'Export only the track and optional route POI. Draft IDs, notes, safety data and timestamps are excluded.',
+    title: context.l10n.createRouteGpxExport,
+    subtitle: context.l10n.createRouteExportOnlyTrackOptionalRoutePoi,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         if (transfer.status == RouteGpxTransferStatus.exported)
-          const Padding(
-            padding: EdgeInsets.only(bottom: 10),
-            child: Text('GPX file saved.'),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(context.l10n.createRouteGpxSaved),
           ),
         if (transfer.status == RouteGpxTransferStatus.failed)
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: Text(_gpxFailureMessage(transfer.failureCode)),
+            child: Text(_gpxFailureMessage(context.l10n, transfer.failureCode)),
           ),
         FilledButton.icon(
           key: const ValueKey<String>('route-export-gpx'),
@@ -298,7 +303,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
               ? null
               : () => unawaited(_exportGpx(state, transfer)),
           icon: const Icon(Icons.download_outlined),
-          label: const Text('Export GPX'),
+          label: Text(context.l10n.createRouteExportGpx),
         ),
       ],
     ),
@@ -336,16 +341,16 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Export GPX'),
+          title: Text(context.l10n.createRouteExportGpx),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Include elevation'),
+                title: Text(context.l10n.createRouteIncludeElevation),
                 subtitle: includeElevation
                     ? null
-                    : const Text('Unavailable for this track'),
+                    : Text(context.l10n.createRouteUnavailableTrack),
                 value: includeElevation,
                 onChanged: includeElevation
                     ? (value) => setDialogState(
@@ -355,7 +360,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
               ),
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Include route POI'),
+                title: Text(context.l10n.createRouteIncludeRoutePoi),
                 value: includeWaypoints,
                 onChanged: state.route.waypoints.isEmpty
                     ? null
@@ -363,20 +368,20 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
                         () => includeWaypoints = value ?? false,
                       ),
               ),
-              const Text(
-                'Private metadata, notes and timestamps are never exported.',
+              Text(
+                context.l10n.createRoutePrivateMetadataNotesTimestampsAreNever,
               ),
             ],
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(context.l10n.createRouteCancel),
             ),
             FilledButton(
               onPressed: () =>
                   Navigator.pop(context, (includeElevation, includeWaypoints)),
-              child: const Text('Save file'),
+              child: Text(context.l10n.createRouteSaveFile),
             ),
           ],
         ),
@@ -392,92 +397,93 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
     );
   }
 
-  Widget _profileStep(
-    RouteCreateState state,
-    RouteCreateRuntime runtime,
-  ) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: <Widget>[
-      _SectionCard(
-        title: 'Movement profile',
-        subtitle:
-            'The bundled Mežaparks graph currently validates walking routes locally.',
-        child: DropdownButtonFormField<String>(
-          key: const ValueKey<String>('route-profile'),
-          initialValue: state.route.profile.id,
-          decoration: const InputDecoration(labelText: 'Profile'),
-          items: runtime.supportedProfiles
-              .map(
-                (profile) => DropdownMenuItem<String>(
-                  value: profile.id,
-                  child: Text(_label(profile.id)),
+  Widget _profileStep(RouteCreateState state, RouteCreateRuntime runtime) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          _SectionCard(
+            title: context.l10n.createRouteMovementProfile,
+            subtitle:
+                context.l10n.createRouteBundledMeAparksGraphCurrentlyValidates,
+            child: DropdownButtonFormField<String>(
+              isExpanded: true,
+              key: const ValueKey<String>('route-profile'),
+              initialValue: state.route.profile.id,
+              decoration: InputDecoration(
+                labelText: context.l10n.createRouteProfile,
+              ),
+              items: runtime.supportedProfiles
+                  .map(
+                    (profile) => DropdownMenuItem<String>(
+                      value: profile.id,
+                      child: Text(context.l10n.createOption(profile.id)),
+                    ),
+                  )
+                  .toList(growable: false),
+              onChanged: (String? id) {
+                if (id == null) return;
+                final profile = runtime.supportedProfiles.firstWhere(
+                  (candidate) => candidate.id == id,
+                );
+                unawaited(
+                  widget.controller.applyRouteCommand(
+                    ChangeRouteProfile(profile: profile),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          _SectionCard(
+            title: context.l10n.createRouteRouteShape,
+            child: SegmentedButton<RouteShape>(
+              key: const ValueKey<String>('route-shape'),
+              segments: <ButtonSegment<RouteShape>>[
+                ButtonSegment<RouteShape>(
+                  value: RouteShape.oneWay,
+                  label: Text(context.l10n.createRouteOneWay),
                 ),
-              )
-              .toList(growable: false),
-          onChanged: (String? id) {
-            if (id == null) return;
-            final profile = runtime.supportedProfiles.firstWhere(
-              (candidate) => candidate.id == id,
-            );
-            unawaited(
-              widget.controller.applyRouteCommand(
-                ChangeRouteProfile(profile: profile),
-              ),
-            );
-          },
-        ),
-      ),
-      const SizedBox(height: 12),
-      _SectionCard(
-        title: 'Route shape',
-        child: SegmentedButton<RouteShape>(
-          key: const ValueKey<String>('route-shape'),
-          segments: const <ButtonSegment<RouteShape>>[
-            ButtonSegment<RouteShape>(
-              value: RouteShape.oneWay,
-              label: Text('One way'),
+                ButtonSegment<RouteShape>(
+                  value: RouteShape.loop,
+                  label: Text(context.l10n.createRouteLoop),
+                ),
+                ButtonSegment<RouteShape>(
+                  value: RouteShape.outAndBack,
+                  label: Text(context.l10n.createRouteOutAndBack),
+                ),
+              ],
+              selected: <RouteShape>{state.route.shape},
+              onSelectionChanged: (Set<RouteShape> values) {
+                unawaited(
+                  widget.controller.applyRouteCommand(
+                    ChangeRouteShape(values.single),
+                  ),
+                );
+              },
             ),
-            ButtonSegment<RouteShape>(
-              value: RouteShape.loop,
-              label: Text('Loop'),
+          ),
+          const SizedBox(height: 12),
+          _SectionCard(
+            title: context.l10n.createRouteRoutingPreferences,
+            child: Column(
+              children: <Widget>[
+                _PreferenceSwitch(
+                  title: context.l10n.createRouteAvoidStairs,
+                  value: _boolPreference(state.route, 'avoid_stairs'),
+                  onChanged: (bool value) =>
+                      _setPreference(state.route, 'avoid_stairs', value),
+                ),
+                _PreferenceSwitch(
+                  title: context.l10n.createRoutePreferUnpavedTrails,
+                  value: _boolPreference(state.route, 'prefer_unpaved'),
+                  onChanged: (bool value) =>
+                      _setPreference(state.route, 'prefer_unpaved', value),
+                ),
+              ],
             ),
-            ButtonSegment<RouteShape>(
-              value: RouteShape.outAndBack,
-              label: Text('Out & back'),
-            ),
-          ],
-          selected: <RouteShape>{state.route.shape},
-          onSelectionChanged: (Set<RouteShape> values) {
-            unawaited(
-              widget.controller.applyRouteCommand(
-                ChangeRouteShape(values.single),
-              ),
-            );
-          },
-        ),
-      ),
-      const SizedBox(height: 12),
-      _SectionCard(
-        title: 'Routing preferences',
-        child: Column(
-          children: <Widget>[
-            _PreferenceSwitch(
-              title: 'Avoid stairs',
-              value: _boolPreference(state.route, 'avoid_stairs'),
-              onChanged: (bool value) =>
-                  _setPreference(state.route, 'avoid_stairs', value),
-            ),
-            _PreferenceSwitch(
-              title: 'Prefer unpaved trails',
-              value: _boolPreference(state.route, 'prefer_unpaved'),
-              onChanged: (bool value) =>
-                  _setPreference(state.route, 'prefer_unpaved', value),
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
+          ),
+        ],
+      );
 
   Widget _detailsStep(RouteCreateState state) {
     final draft = widget.state.draft;
@@ -488,18 +494,18 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         _SectionCard(
-          title: 'Route details',
+          title: context.l10n.createRouteRouteDetails,
           child: Column(
             children: <Widget>[
               _DraftField(
                 fieldKey: 'route-title',
-                label: 'Title *',
+                label: context.l10n.createFormTitleRequired,
                 value: draft.title,
                 onChanged: widget.controller.updateTitle,
               ),
               _DraftField(
                 fieldKey: 'route-short-description',
-                label: 'Short description *',
+                label: context.l10n.createRouteShortDescription,
                 value: draft.shortDescription,
                 minLines: 2,
                 maxLines: 3,
@@ -507,36 +513,44 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
               ),
               _DraftField(
                 fieldKey: 'route-full-description',
-                label: 'Full description',
+                label: context.l10n.createRouteFullDescription,
                 value: draft.fullDescription,
                 minLines: 3,
                 maxLines: 7,
                 onChanged: widget.controller.updateFullDescription,
               ),
-              _DraftField(
-                fieldKey: 'route-cover',
-                label: 'Cover image URL',
-                value: draft.media.coverImage,
-                onChanged: widget.controller.updateCoverImage,
+              CreateMediaPickActions(
+                controller: widget.controller,
+                target: CreateMediaTarget.cover,
               ),
+              if (showCreateMediaPathField(widget.controller))
+                _DraftField(
+                  fieldKey: 'route-cover',
+                  label: context.l10n.createRouteCoverImageUrl,
+                  value: draft.media.coverImage,
+                  onChanged: widget.controller.updateCoverImage,
+                ),
             ],
           ),
         ),
         const SizedBox(height: 12),
         _SectionCard(
-          title: 'Taxonomy',
+          title: context.l10n.createRouteTaxonomy,
           child: Column(
             children: <Widget>[
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 key: const ValueKey<String>('route-category'),
                 initialValue: category.id,
-                decoration: const InputDecoration(labelText: 'Category'),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createRouteCategory,
+                ),
                 items: rechargeCreateTaxonomy
                     .where((item) => item.allows(CreateObjectType.route))
                     .map(
                       (item) => DropdownMenuItem<String>(
                         value: item.id,
-                        child: Text(item.title),
+                        child: Text(taxonomyLabel(context.l10n, item.id)),
                       ),
                     )
                     .toList(growable: false),
@@ -554,6 +568,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 key: ValueKey<String>('route-subcategory-${category.id}'),
                 initialValue:
                     category.subcategories.any(
@@ -561,13 +576,15 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
                     )
                     ? draft.subcategory
                     : null,
-                decoration: const InputDecoration(labelText: 'Subcategory'),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createRouteSubcategory,
+                ),
                 items: category.subcategories
                     .where((item) => item.allows(CreateObjectType.route))
                     .map(
                       (item) => DropdownMenuItem<String>(
                         value: item.id,
-                        child: Text(item.title),
+                        child: Text(taxonomyLabel(context.l10n, item.id)),
                       ),
                     )
                     .toList(growable: false),
@@ -585,25 +602,28 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
         ),
         const SizedBox(height: 12),
         _SectionCard(
-          title: 'Conditions',
+          title: context.l10n.createRouteConditions,
           child: Column(
             children: <Widget>[
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 key: const ValueKey<String>('route-difficulty'),
                 initialValue: state.route.conditions.difficultyId,
-                decoration: const InputDecoration(labelText: 'Difficulty'),
-                items: const <DropdownMenuItem<String>>[
+                decoration: InputDecoration(
+                  labelText: context.l10n.createRouteDifficulty,
+                ),
+                items: <DropdownMenuItem<String>>[
                   DropdownMenuItem<String>(
                     value: 'easy.v1',
-                    child: Text('Easy'),
+                    child: Text(context.l10n.createRouteEasy),
                   ),
                   DropdownMenuItem<String>(
                     value: 'moderate.v1',
-                    child: Text('Moderate'),
+                    child: Text(context.l10n.createRouteModerate),
                   ),
                   DropdownMenuItem<String>(
                     value: 'hard.v1',
-                    child: Text('Hard'),
+                    child: Text(context.l10n.createRouteHard),
                   ),
                 ],
                 onChanged: (String? value) {
@@ -614,7 +634,7 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
                 type: MaterialType.transparency,
                 child: SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Marked trail'),
+                  title: Text(context.l10n.createRouteMarkedTrail),
                   value: state.route.conditions.isMarked ?? false,
                   onChanged: (bool value) => _changeMarked(state.route, value),
                 ),
@@ -631,14 +651,14 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
       if (step > 0)
         OutlinedButton(
           onPressed: () => widget.controller.goToRouteStep(step - 1),
-          child: const Text('Back'),
+          child: Text(context.l10n.createRouteBack),
         ),
       const Spacer(),
       if (step < routeCreateSteps.length - 1)
         FilledButton(
           key: const ValueKey<String>('route-next-step'),
           onPressed: () => widget.controller.goToRouteStep(step + 1),
-          child: const Text('Continue'),
+          child: Text(context.l10n.createRouteContinue),
         ),
     ],
   );
@@ -682,18 +702,18 @@ class _RouteCreateBlockState extends ConsumerState<RouteCreateBlock> {
       await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Replace existing track?'),
-          content: const Text(
-            'The current geometry will remain available through Undo.',
+          title: Text(context.l10n.createRouteReplaceExistingTrack),
+          content: Text(
+            context.l10n.createRouteCurrentGeometryWillRemainAvailableThrough,
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(context.l10n.createRouteCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Replace'),
+              child: Text(context.l10n.createRouteReplace),
             ),
           ],
         ),
@@ -770,8 +790,11 @@ class _StepHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _SectionCard(
-    title: 'Route builder',
-    subtitle: 'Step ${activeStep + 1} of ${routeCreateSteps.length}',
+    title: context.l10n.createRouteRouteBuilder,
+    subtitle: context.l10n.createFormStepOf(
+      activeStep + 1,
+      routeCreateSteps.length,
+    ),
     child: Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -779,7 +802,9 @@ class _StepHeader extends StatelessWidget {
           .map(
             (entry) => ChoiceChip(
               key: ValueKey<String>('route-step-${entry.$2.id}'),
-              label: Text('${entry.$1 + 1}. ${entry.$2.title}'),
+              label: Text(
+                '${entry.$1 + 1}. ${createFormText(context.l10n, entry.$2.titleId)}',
+              ),
               selected: entry.$1 == activeStep,
               onSelected: (_) => onSelected(entry.$1),
             ),
@@ -862,22 +887,24 @@ class _GpxPreviewCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '${_formatBytes(inspection.file.sizeBytes)} · '
-              '${inspection.pointCount} points · '
-              '${inspection.waypointCount} POI',
+              '${_formatBytes(context.l10n, inspection.file.sizeBytes)} · '
+              '${context.l10n.createFormPointsCount(inspection.pointCount)} · '
+              '${context.l10n.discoverPoiCount(inspection.waypointCount)}',
             ),
             if (inspection.containsPrivateMetadata ||
                 inspection.candidates.any(
                   (item) => item.hasTimestamps,
                 )) ...<Widget>[
               const SizedBox(height: 8),
-              const Text(
-                'Private metadata and timestamps will be removed during import.',
+              Text(
+                context
+                    .l10n
+                    .createRoutePrivateMetadataTimestampsWillRemovedDuring,
               ),
             ],
             const SizedBox(height: 10),
             Text(
-              'Choose one track',
+              context.l10n.createRouteChooseOneTrack,
               style: Theme.of(context).textTheme.labelLarge,
             ),
             RadioGroup<String>(
@@ -899,12 +926,12 @@ class _GpxPreviewCard extends StatelessWidget {
                           title: Text(
                             candidate.name?.trim().isNotEmpty == true
                                 ? candidate.name!
-                                : '${_label(candidate.kind.name)} ${candidate.sourceIndex + 1}',
+                                : '${context.l10n.createRouteGpxKind(candidate.kind.name)} ${candidate.sourceIndex + 1}',
                           ),
                           subtitle: Text(
-                            '${(candidate.distanceMeters / 1000).toStringAsFixed(1)} km · '
-                            '${candidate.pointCount} points · '
-                            '${candidate.segmentCount} segment(s)',
+                            '${context.l10n.createFormDistanceKm(RechargeFormats.decimal(candidate.distanceMeters / 1000, context.l10n.localeName, maxFractionDigits: 1))} · '
+                            '${context.l10n.createFormPointsCount(candidate.pointCount)} · '
+                            '${context.l10n.createRouteSegmentsCount(candidate.segmentCount)}',
                           ),
                         ),
                       ),
@@ -924,10 +951,12 @@ class _GpxPreviewCard extends StatelessWidget {
                       : (value) =>
                             controller.setConnectGapsConfirmed(value ?? false),
                   title: Text(
-                    'Connect ${selected.gapCount} gap(s) with straight lines',
+                    context.l10n.createRouteConnectGaps(selected.gapCount),
                   ),
-                  subtitle: const Text(
-                    'Review these connectors on the map before publishing.',
+                  subtitle: Text(
+                    context
+                        .l10n
+                        .createRouteReviewTheseConnectorsMapBeforePublishing,
                   ),
                 ),
               ),
@@ -941,9 +970,11 @@ class _GpxPreviewCard extends StatelessWidget {
                   onChanged: controller.isBusy
                       ? null
                       : controller.setImportWaypoints,
-                  title: Text('Import ${inspection.waypointCount} POI'),
-                  subtitle: const Text(
-                    'They remain off-track until reviewed and positioned.',
+                  title: Text(
+                    context.l10n.createRouteImportPoi(inspection.waypointCount),
+                  ),
+                  subtitle: Text(
+                    context.l10n.createRouteTheyRemainOffTrackUntilReviewed,
                   ),
                 ),
               ),
@@ -955,13 +986,13 @@ class _GpxPreviewCard extends StatelessWidget {
               children: <Widget>[
                 TextButton(
                   onPressed: controller.isBusy ? null : onCancel,
-                  child: const Text('Cancel'),
+                  child: Text(context.l10n.createRouteCancel),
                 ),
                 FilledButton.icon(
                   key: const ValueKey<String>('route-gpx-import-confirm'),
                   onPressed: controller.canImport ? onImport : null,
                   icon: const Icon(Icons.upload_file),
-                  label: const Text('Import track'),
+                  label: Text(context.l10n.createRouteImportTrack),
                 ),
               ],
             ),
@@ -988,9 +1019,9 @@ class _GpxFailurePanel extends StatelessWidget {
         children: <Widget>[
           const Icon(Icons.error_outline),
           const SizedBox(width: 8),
-          Expanded(child: Text(_gpxFailureMessage(code))),
+          Expanded(child: Text(_gpxFailureMessage(context.l10n, code))),
           IconButton(
-            tooltip: 'Dismiss',
+            tooltip: context.l10n.createRouteDismiss,
             onPressed: onDismiss,
             icon: const Icon(Icons.close),
           ),
@@ -1131,34 +1162,32 @@ class _MessageBanner extends StatelessWidget {
   );
 }
 
-String _label(String value) => value
-    .replaceAll('_', ' ')
-    .split(' ')
-    .map(
-      (part) => part.isEmpty
-          ? part
-          : '${part.substring(0, 1).toUpperCase()}${part.substring(1)}',
-    )
-    .join(' ');
-
-String _formatBytes(int bytes) {
-  if (bytes < 1024) return '$bytes B';
-  if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-  return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+String _formatBytes(AppLocalizations l10n, int bytes) {
+  String number(double value) =>
+      RechargeFormats.decimal(value, l10n.localeName, maxFractionDigits: 1);
+  if (bytes < 1024) {
+    return l10n.createFormBytes('$bytes');
+  }
+  if (bytes < 1024 * 1024) {
+    return l10n.createFormKilobytes(number(bytes / 1024));
+  }
+  return l10n.createFormMegabytes(number(bytes / (1024 * 1024)));
 }
 
-String _gpxFailureMessage(String? code) => switch (code) {
-  'gpx_file_too_large' => 'The GPX file is too large.',
-  'gpx_file_type_unsupported' ||
-  'gpx_media_type_unsupported' => 'Choose a valid GPX file.',
-  'gpx_xml_malformed' || 'gpx_root_invalid' =>
-    'The GPX file is damaged or has an unsupported structure.',
-  'gpx_point_limit_exceeded' => 'The GPX track contains too many points.',
-  'gpx_export_geometry_invalid' || 'gpx_export_geometry_discontinuous' =>
-    'Only one continuous Route track can be exported.',
-  'gpx_export_destination_unavailable' =>
-    'Saving GPX files is not available on this device yet.',
-  'multipleGpxTracksRequireSeparateDrafts' =>
-    'Choose one continuous track for this Route draft.',
-  _ => 'The GPX operation could not be completed.',
-};
+String _gpxFailureMessage(AppLocalizations l10n, String? code) =>
+    switch (code) {
+      'gpx_file_too_large' => l10n.createRouteGpxFileTooLarge,
+      'gpx_file_type_unsupported' ||
+      'gpx_media_type_unsupported' => l10n.createRouteChooseValidGpxFile,
+      'gpx_xml_malformed' || 'gpx_root_invalid' =>
+        l10n.createRouteGpxFileDamagedHasUnsupportedStructure,
+      'gpx_point_limit_exceeded' =>
+        l10n.createRouteGpxTrackContainsTooManyPoints,
+      'gpx_export_geometry_invalid' || 'gpx_export_geometry_discontinuous' =>
+        l10n.createRouteOnlyOneContinuousRouteTrackCan,
+      'gpx_export_destination_unavailable' =>
+        l10n.createRouteSavingGpxFilesNotAvailableDevice,
+      'multipleGpxTracksRequireSeparateDrafts' =>
+        l10n.createRouteChooseOneContinuousTrackRouteDraft,
+      _ => l10n.createRouteGpxOperationCouldNotCompleted,
+    };

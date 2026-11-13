@@ -1,0 +1,29 @@
+{
+  "complete": true,
+  "results": [
+    {
+      "name": "stand-c3",
+      "code": 0,
+      "ms": 334267,
+      "log": "C:/Users/User/AppData/Local/Temp/recharge-d11-stand-c3.log"
+    },
+    {
+      "name": "stand-d3-1",
+      "code": 0,
+      "ms": 458726,
+      "log": "C:/Users/User/AppData/Local/Temp/recharge-d11-stand-d3-1.log"
+    },
+    {
+      "name": "stand-d3-2",
+      "code": 0,
+      "ms": 452719,
+      "log": "C:/Users/User/AppData/Local/Temp/recharge-d11-stand-d3-2.log"
+    },
+    {
+      "name": "activity-media-after-extraction",
+      "code": 0,
+      "ms": 75938,
+      "log": "C:/Users/User/AppData/Local/Temp/recharge-d11-activity-media-after-extraction.log"
+    }
+  ]
+}

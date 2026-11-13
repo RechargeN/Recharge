@@ -80,7 +80,7 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
     } on Object {
       _state = _state.copyWith(
         stage: ScenarioObjectIntakeStage.error,
-        message: 'Scenario targets are unavailable. Retry from Details.',
+        message: ScenarioObjectIntakeNotice.targetsUnavailable,
       );
     }
     notifyListeners();
@@ -122,7 +122,7 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
 
   Future<void> continueFromTarget() async {
     if (!_state.newTargetSelected && _state.selectedTargetId == null) {
-      _message('Choose a Scenario or create a new one.');
+      _message(ScenarioObjectIntakeNotice.chooseTarget);
       return;
     }
     _state = _state.copyWith(
@@ -152,7 +152,7 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
         _targetDraft = null;
         _state = _state.copyWith(
           stage: ScenarioObjectIntakeStage.target,
-          message: 'This Scenario is no longer editable.',
+          message: ScenarioObjectIntakeNotice.targetNotEditable,
         );
       } else {
         _preparePlacement(target);
@@ -160,12 +160,12 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
     } on FormatException {
       _state = _state.copyWith(
         stage: ScenarioObjectIntakeStage.target,
-        message: 'Enter a Scenario title.',
+        message: ScenarioObjectIntakeNotice.titleRequired,
       );
     } on Object {
       _state = _state.copyWith(
         stage: ScenarioObjectIntakeStage.target,
-        message: 'Could not open this Scenario.',
+        message: ScenarioObjectIntakeNotice.openFailed,
       );
     }
     notifyListeners();
@@ -259,20 +259,20 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
     if (target == null) return;
     if (!authenticated) {
       _trackApply(ScenarioObjectIntakeTelemetryResult.authRequired);
-      _message('Sign in again before adding items to Scenario.');
+      _message(ScenarioObjectIntakeNotice.signInAgain);
       return;
     }
     if (duplicateConfirmationRequired && !_state.confirmDuplicate) {
-      _message('Confirm adding another occurrence.');
+      _message(ScenarioObjectIntakeNotice.confirmDuplicate);
       return;
     }
     if (unavailableConfirmationRequired && !_state.confirmUnavailable) {
-      _message('Confirm use of the unavailable saved snapshot.');
+      _message(ScenarioObjectIntakeNotice.confirmUnavailable);
       return;
     }
     if (scheduleAdjustmentConfirmationRequired &&
         !_state.confirmScheduleAdjustment) {
-      _message('Confirm conversion to a flexible template stop.');
+      _message(ScenarioObjectIntakeNotice.confirmScheduleAdjustment);
       return;
     }
     _state = _state.copyWith(
@@ -432,42 +432,46 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
     return day.single.itemIds
         .where(byId.containsKey)
         .map(
-          (id) =>
-              ScenarioIntakeAnchorOption(id: id, title: _itemTitle(byId[id]!)),
+          (id) => ScenarioIntakeAnchorOption(
+            id: id,
+            title: _itemTitle(byId[id]!),
+            kind: byId[id]!.kind,
+          ),
         )
         .toList(growable: false);
   }
 
-  String _itemTitle(ScenarioItemDraft item) {
+  String? _itemTitle(ScenarioItemDraft item) {
     final source = item.source;
     if (source is ScenarioCatalogObjectSourceDraft) {
       return source.snapshot.title;
     }
     if (source is ScenarioTimeBlockSourceDraft) return source.title;
-    return item.kind.name;
+    return null;
   }
 
-  void _message(String value) {
+  void _message(ScenarioObjectIntakeNotice value) {
     _state = _state.copyWith(message: value);
     notifyListeners();
   }
 
-  String _failureMessage(ScenarioIntakeFailure? failure) => switch (failure) {
-    ScenarioIntakeFailure.revisionConflict =>
-      'Scenario changed. Go back, reopen it and review again.',
-    ScenarioIntakeFailure.intentExpired =>
-      'This selection expired. Return to Details and try again.',
-    ScenarioIntakeFailure.targetUnavailable ||
-    ScenarioIntakeFailure.targetNotFound =>
-      'This Scenario is no longer available. Choose another one.',
-    ScenarioIntakeFailure.duplicateConfirmationRequired =>
-      'Confirm adding another occurrence.',
-    ScenarioIntakeFailure.scheduleConfirmationRequired =>
-      'Confirm conversion to a flexible template stop.',
-    ScenarioIntakeFailure.lockedLegBoundary =>
-      'A locked logistics leg protects this insertion point.',
-    ScenarioIntakeFailure.persistenceUnavailable =>
-      'Could not save. Your selection is retained; retry Apply.',
-    _ => 'Could not add this object. Review the selection and retry.',
-  };
+  ScenarioObjectIntakeNotice _failureMessage(ScenarioIntakeFailure? failure) =>
+      switch (failure) {
+        ScenarioIntakeFailure.revisionConflict =>
+          ScenarioObjectIntakeNotice.revisionConflict,
+        ScenarioIntakeFailure.intentExpired =>
+          ScenarioObjectIntakeNotice.intentExpired,
+        ScenarioIntakeFailure.targetUnavailable ||
+        ScenarioIntakeFailure.targetNotFound =>
+          ScenarioObjectIntakeNotice.targetGone,
+        ScenarioIntakeFailure.duplicateConfirmationRequired =>
+          ScenarioObjectIntakeNotice.confirmDuplicate,
+        ScenarioIntakeFailure.scheduleConfirmationRequired =>
+          ScenarioObjectIntakeNotice.confirmScheduleAdjustment,
+        ScenarioIntakeFailure.lockedLegBoundary =>
+          ScenarioObjectIntakeNotice.lockedLegBoundary,
+        ScenarioIntakeFailure.persistenceUnavailable =>
+          ScenarioObjectIntakeNotice.persistenceUnavailable,
+        _ => ScenarioObjectIntakeNotice.applyFailed,
+      };
 }

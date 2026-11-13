@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/identity/v1/identity_common.schema.json",
+  "title": "Recharge Identity v1 common values",
+  "$defs": {
+    "entityId": {
+      "type": "string",
+      "anyOf": [{ "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" }, { "format": "uuid" }]
+    },
+    "utcInstant": { "type": "string", "format": "date-time", "pattern": "Z$" },
+    "revision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "capabilityId": { "type": "string", "pattern": "^[a-z][a-z0-9._-]{0,95}$" },
+    "marketId": { "enum": ["LV", "EE", "LT"] },
+    "provider": { "enum": ["google", "apple"] },
+    "publisherRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "enum": ["user", "page"] },
+        "id": { "$ref": "#/$defs/entityId" }
+      }
+    }
+  }
+}

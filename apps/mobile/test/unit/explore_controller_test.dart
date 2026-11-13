@@ -52,8 +52,9 @@ void main() {
 
     await controller.saveProfile();
 
-    final ProfileEditableEntity? stored =
-        await repository.loadProfileEditable('usr_1');
+    final ProfileEditableEntity? stored = await repository.loadProfileEditable(
+      'usr_1',
+    );
     expect(stored, isNotNull);
     expect(stored!.displayName, 'RechargeN');
     expect(stored.city, 'Riga');
@@ -67,15 +68,11 @@ void main() {
       favoritesCount: 0,
     );
 
-    await controller.updateLanguage('en');
-    await controller.updateCurrency('USD');
     await controller.updateNotifications(false);
 
     final SettingsEntity? stored = await repository.loadSettings('usr_1');
     expect(stored, isNotNull);
-    expect(stored!.language, 'en');
-    expect(stored.currency, 'USD');
-    expect(stored.notificationsEnabled, isFalse);
+    expect(stored!.notificationsEnabled, isFalse);
   });
 }
 
@@ -85,7 +82,8 @@ class _NoopAnalyticsService implements AnalyticsService {
 }
 
 class _FakeExploreRepository implements ExploreRepository {
-  final Map<String, ProfileEditableEntity> _profiles = <String, ProfileEditableEntity>{};
+  final Map<String, ProfileEditableEntity> _profiles =
+      <String, ProfileEditableEntity>{};
   final Map<String, SettingsEntity> _settings = <String, SettingsEntity>{};
 
   @override
@@ -107,10 +105,7 @@ class _FakeExploreRepository implements ExploreRepository {
   }
 
   @override
-  Future<void> saveSettings(
-    String userId,
-    SettingsEntity settings,
-  ) async {
+  Future<void> saveSettings(String userId, SettingsEntity settings) async {
     _settings[userId] = settings;
   }
 }

@@ -9,6 +9,8 @@ class AppNotificationEvent {
     required this.createdAtUtc,
     this.recipientUserId,
     this.targetRoute,
+    this.templateCode,
+    this.templateCount,
   });
 
   final String id;
@@ -18,6 +20,12 @@ class AppNotificationEvent {
   final String body;
   final DateTime createdAtUtc;
   final String? targetRoute;
+
+  /// L4.6: a stable local template; the inbox renders it in the reader's
+  /// language. [title] stays as a fallback and [body] carries only content
+  /// that is shown as is (a page name).
+  final String? templateCode;
+  final int? templateCount;
 }
 
 abstract class AppNotificationSink {

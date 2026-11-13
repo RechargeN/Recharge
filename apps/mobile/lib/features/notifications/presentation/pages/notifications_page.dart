@@ -3,14 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
+import '../../../../app/adapters/legacy_notification_route_resolver.dart';
+import '../../../../app/application/planning_navigation_intent.dart';
+import '../../../../app/application/planning_navigation_resolver.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../create/application/create_taxonomy.dart';
 import '../../application/controllers/notifications_controller.dart';
 import '../../application/notifications_providers.dart';
 import '../../application/state/notifications_state.dart';
 import '../../domain/entities/notification_item_entity.dart';
+import '../../domain/repositories/notification_channel_settings_repository.dart';
+import '../widgets/notification_channel_settings_sheet.dart';
 
-enum _NotificationFeedFilter { all, newItems, reminders, updates }
+enum _NotificationFeedFilter { all, newItems, reminders, updates, scenarios }
 
 const Color _notificationsBackground = Color(0xFFF8FAF7);
 const Color _rechargeGreen = Color(0xFF0B3028);
@@ -44,11 +52,14 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     );
     final NotificationsState state = controller.state;
     final user = authState.user;
+    final NotificationChannelSettingsRepository? channelSettings = ref.watch(
+      notificationChannelSettingsProvider,
+    );
 
     if (user == null) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: _notificationsBackground,
-        body: Center(child: Text('Требуется авторизация')),
+        body: Center(child: Text(context.l10n.commonSignInRequired)),
       );
     }
 
@@ -69,25 +80,46 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         elevation: 0,
         centerTitle: true,
         title: const Text(
-          'RECHARGE',
+          'RECHARGE', // l10n-ignore: brand wordmark
           style: TextStyle(fontWeight: FontWeight.w900),
         ),
         actions: <Widget>[
           if (state.status == NotificationsStatus.ready &&
               state.unreadCount > 0)
             IconButton(
-              tooltip: 'Read all',
+              tooltip: context.l10n.notificationsReadAll,
               onPressed: controller.markAllAsRead,
               icon: const Icon(Icons.done_all),
             ),
+          if (channelSettings != null) ...<Widget>[
+            IconButton(
+              key: const Key('notifications-push-test'),
+              tooltip: context.l10n.notificationsPushTest,
+              onPressed: () =>
+                  _sendTestNotification(channelSettings, controller, user.id),
+              icon: const Icon(Icons.campaign_outlined),
+            ),
+            IconButton(
+              key: const Key('notifications-channel-settings'),
+              tooltip: context.l10n.notificationsChannelSettings,
+              onPressed: () => showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                builder: (_) => NotificationChannelSettingsSheet(
+                  repository: channelSettings,
+                ),
+              ),
+              icon: const Icon(Icons.tune),
+            ),
+          ],
         ],
       ),
       body: switch (state.status) {
         NotificationsStatus.initial || NotificationsStatus.loading =>
           const Center(child: CircularProgressIndicator()),
         NotificationsStatus.error => _StateMessage(
-          message: state.message ?? 'Не удалось загрузить уведомления',
-          actionLabel: 'Повторить',
+          message: context.l10n.notificationsLoadFailed,
+          actionLabel: context.l10n.commonRetry,
           onAction: () => controller.loadNotifications(userId: user.id),
         ),
         NotificationsStatus.ready => _buildReadyState(
@@ -100,6 +132,30 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     );
   }
 
+  /// N3c dev: time to put the app in the background, then one synthetic
+  /// notification (inbox record first, then the push hint).
+  Future<void> _sendTestNotification(
+    NotificationChannelSettingsRepository settings,
+    NotificationsController controller,
+    String userId,
+  ) async {
+    final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(
+      context,
+    );
+    final String failed = context.l10n.notificationsPushTestFailed;
+    messenger?.showSnackBar(
+      SnackBar(content: Text(context.l10n.notificationsPushTestScheduled)),
+    );
+    await Future<void>.delayed(const Duration(seconds: 5));
+    try {
+      await settings.sendTestNotification();
+    } on Object {
+      messenger?.showSnackBar(SnackBar(content: Text(failed)));
+      return;
+    }
+    if (mounted) await controller.loadNotifications(userId: userId);
+  }
+
   Widget _buildReadyState({
     required BuildContext context,
     required NotificationsController controller,
@@ -108,8 +164,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   }) {
     if (state.items.isEmpty) {
       return _StateMessage(
-        message: 'Пока нет уведомлений',
-        actionLabel: 'Обновить',
+        message: context.l10n.notificationsEmpty,
+        actionLabel: context.l10n.commonRefresh,
         onAction: () => controller.loadNotifications(userId: userId),
       );
     }
@@ -130,12 +186,12 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
             textInputAction: TextInputAction.search,
             onChanged: controller.updateSearchQuery,
             decoration: InputDecoration(
-              hintText: 'Search notifications',
+              hintText: context.l10n.notificationsSearchHint,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: state.searchQuery.isEmpty
                   ? null
                   : IconButton(
-                      tooltip: 'Clear search',
+                      tooltip: context.l10n.notificationsClearSearch,
                       onPressed: () {
                         _searchController.clear();
                         controller.clearSearch();
@@ -199,8 +255,13 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         items
             .where(
               (NotificationItemEntity item) =>
-                  item.type != NotificationType.reminder,
+                  item.type != NotificationType.reminder &&
+                  item.scenarioContext == null,
             )
+            .toList(growable: false),
+      _NotificationFeedFilter.scenarios =>
+        items
+            .where((item) => item.scenarioContext != null)
             .toList(growable: false),
     };
   }
@@ -223,10 +284,54 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   }) async {
     await ref.read(notificationsControllerProvider).markAsRead(item.id);
     if (!mounted) return;
-    final String? route = targetRoute ?? item.targetRoute;
+    final String? route =
+        targetRoute ?? _typedSubjectRoute(item.subjectRef) ?? item.targetRoute;
     if (route == null || route.isEmpty) return;
-    context.push(route);
+    final resolved = const LegacyNotificationRouteResolver().resolve(route);
+    if (resolved != null) context.push(resolved);
   }
+}
+
+String? _typedSubjectRoute(NotificationSubjectRef? subject) {
+  if (subject == null || subject.id.trim().isEmpty) return null;
+  return switch (subject.kind) {
+    NotificationSubjectKind.route => const PlanningNavigationResolver().resolve(
+      PlanningNavigationIntent.openRoute(subject.id),
+    ),
+    NotificationSubjectKind.system => null,
+    // Event/Activity/Place/bookableSession all already know their type at
+    // this point (`subject.kind`), so they build the typed canonical link
+    // (`DTL-LINK-01`) rather than the legacy untyped one. `bookableSession`
+    // maps to `CatalogObjectType.session`, which has no registered loader
+    // in this slice yet — it resolves to a safe `notFound`, not a crash;
+    // that is an improvement over today's behavior (a `session` id was
+    // never a valid Discover item id to begin with).
+    NotificationSubjectKind.event => RouteNames.discoverDetailsCanonicalFor(
+      CatalogObjectRef(
+        objectType: CatalogObjectType.event,
+        objectId: subject.id,
+      ),
+    ),
+    NotificationSubjectKind.place => RouteNames.discoverDetailsCanonicalFor(
+      CatalogObjectRef(
+        objectType: CatalogObjectType.place,
+        objectId: subject.id,
+      ),
+    ),
+    NotificationSubjectKind.activity => RouteNames.discoverDetailsCanonicalFor(
+      CatalogObjectRef(
+        objectType: CatalogObjectType.activity,
+        objectId: subject.id,
+      ),
+    ),
+    NotificationSubjectKind.bookableSession =>
+      RouteNames.discoverDetailsCanonicalFor(
+        CatalogObjectRef(
+          objectType: CatalogObjectType.session,
+          objectId: subject.id,
+        ),
+      ),
+  };
 }
 
 class _NotificationFilterBar extends StatelessWidget {
@@ -246,30 +351,37 @@ class _NotificationFilterBar extends StatelessWidget {
         children: <Widget>[
           _NotificationFilterChip(
             icon: Icons.apps_rounded,
-            label: 'All',
+            label: context.l10n.notificationsFilterAll,
             selected: selected == _NotificationFeedFilter.all,
             onTap: () => onChanged(_NotificationFeedFilter.all),
           ),
           const SizedBox(width: 8),
           _NotificationFilterChip(
             icon: Icons.fiber_new_outlined,
-            label: 'New',
+            label: context.l10n.notificationsFilterNew,
             selected: selected == _NotificationFeedFilter.newItems,
             onTap: () => onChanged(_NotificationFeedFilter.newItems),
           ),
           const SizedBox(width: 8),
           _NotificationFilterChip(
             icon: Icons.notifications_none,
-            label: 'Reminders',
+            label: context.l10n.notificationsFilterReminders,
             selected: selected == _NotificationFeedFilter.reminders,
             onTap: () => onChanged(_NotificationFeedFilter.reminders),
           ),
           const SizedBox(width: 8),
           _NotificationFilterChip(
             icon: Icons.sync,
-            label: 'Updates',
+            label: context.l10n.notificationsFilterUpdates,
             selected: selected == _NotificationFeedFilter.updates,
             onTap: () => onChanged(_NotificationFeedFilter.updates),
+          ),
+          const SizedBox(width: 8),
+          _NotificationFilterChip(
+            icon: Icons.event_note_outlined,
+            label: context.l10n.notificationsFilterScenarios,
+            selected: selected == _NotificationFeedFilter.scenarios,
+            onTap: () => onChanged(_NotificationFeedFilter.scenarios),
           ),
         ],
       ),
@@ -382,7 +494,7 @@ class _NotificationCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        item.title,
+                        _itemTitle(context.l10n, item),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -392,7 +504,7 @@ class _NotificationCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        item.body,
+                        _itemBody(context.l10n, item),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -403,7 +515,9 @@ class _NotificationCard extends StatelessWidget {
                       if (hasTargetRoute) ...<Widget>[
                         const SizedBox(height: 5),
                         Text(
-                          destination.label,
+                          context.l10n.notificationDestination(
+                            destination.kind,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.labelSmall
@@ -423,11 +537,22 @@ class _NotificationCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Text(
-                        _formatTime(item.createdAtUtc),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.82),
-                          fontWeight: FontWeight.w800,
+                      // L4: the arrival time belongs to the reader, so it is
+                      // shown in the device zone, in the locale's own format;
+                      // it scales down instead of overflowing the column.
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          RechargeFormats.deviceTime(
+                            item.createdAtUtc,
+                            context.l10n.localeName,
+                          ),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.82),
+                                fontWeight: FontWeight.w800,
+                              ),
                         ),
                       ),
                       if (hasMenu) ...<Widget>[
@@ -470,7 +595,7 @@ class _NotificationActionsMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<_NotificationMenuAction>(
-      tooltip: 'Notification actions',
+      tooltip: context.l10n.notificationsActions,
       icon: const Icon(Icons.more_horiz, color: Colors.white, size: 18),
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(minWidth: 38, minHeight: 32),
@@ -490,7 +615,9 @@ class _NotificationActionsMenu extends StatelessWidget {
               children: <Widget>[
                 Icon(destination.icon, size: 18),
                 const SizedBox(width: 8),
-                Text(destination.actionLabel),
+                Text(
+                  context.l10n.notificationDestinationAction(destination.kind),
+                ),
               ],
             ),
           ),
@@ -575,23 +702,28 @@ class _NotificationRoutePreview {
   String get promptLabel {
     final String? promptValue = prompt;
     if (promptValue != null && promptValue.isNotEmpty) return promptValue;
-    final String moodValue = moodLabel ?? 'Custom';
+    final String moodValue =
+        moodLabel ?? 'Custom'; // l10n-ignore: Create seed prefill data
     final int stopCount = stepCategories.length;
     return stopCount == 0
-        ? '$moodValue recharge route'
-        : '$moodValue route with $stopCount stops';
+        ? '$moodValue recharge route' // l10n-ignore: Create seed prefill data
+        : '$moodValue route with $stopCount stops'; // l10n-ignore: Create seed prefill data
   }
 
-  String get titleLabel => '${moodLabel ?? 'Custom'} recharge route';
+  String get titleLabel =>
+      '${moodLabel ?? 'Custom'} recharge route'; // l10n-ignore: Create seed prefill data
 
   String get subtitleLabel {
     final List<String> parts = <String>[
-      if (stepLabels.isNotEmpty) '${stepLabels.length} stops',
+      if (stepLabels.isNotEmpty)
+        '${stepLabels.length} stops', // l10n-ignore: Create seed prefill data
       if (durationLabel != null) durationLabel!,
-      if (freeOnly) 'Free',
-      if (walkingOnly) 'Walking',
+      if (freeOnly) 'Free', // l10n-ignore: Create seed prefill data
+      if (walkingOnly) 'Walking', // l10n-ignore: Create seed prefill data
     ];
-    return parts.isEmpty ? 'Scenario route' : parts.join(' · ');
+    return parts.isEmpty
+        ? 'Scenario route' // l10n-ignore: Create seed prefill data
+        : parts.join(' · ');
   }
 
   Map<String, String> _routeParameters({required bool includeMode}) {
@@ -608,7 +740,7 @@ class _NotificationRoutePreview {
 
   String get builderLocation {
     return Uri(
-      path: RouteNames.scenarioBuilder,
+      path: RouteNames.legacyScenarioBuilder,
       queryParameters: _routeParameters(includeMode: false),
     ).toString();
   }
@@ -635,33 +767,16 @@ class _NotificationRoutePreview {
     ).toString();
   }
 
-  List<_NotificationRouteAction> get actionTargets {
-    return <_NotificationRouteAction>[
-      if (targetPath != RouteNames.scenarioBuilder)
-        _NotificationRouteAction(
-          icon: Icons.tune,
-          label: 'Edit route',
-          location: builderLocation,
-        ),
-      if (targetPath != RouteNames.discoverMap)
-        _NotificationRouteAction(
-          icon: Icons.map_outlined,
-          label: 'Map route',
-          location: mapLocation,
-        ),
-      _NotificationRouteAction(
-        icon: Icons.add_circle_outline,
-        label: 'Create route',
-        location: createLocation,
-      ),
-    ];
-  }
+  // Legacy raw planning links remain openable during the observation period,
+  // but Notifications must not expose Scenario/Builder route actions.
+  List<_NotificationRouteAction> get actionTargets =>
+      const <_NotificationRouteAction>[];
 
   static _NotificationRoutePreview? fromTargetRoute(String? targetRoute) {
     final String path = _pathForTargetRoute(targetRoute);
     final Map<String, String> query = _queryForTargetRoute(targetRoute);
     final bool isRouteTarget =
-        path == RouteNames.scenarioBuilder ||
+        path == RouteNames.legacyScenarioBuilder ||
         (path == RouteNames.discoverMap && query['mode'] == 'scenario');
     if (!isRouteTarget) return null;
 
@@ -722,96 +837,67 @@ class _NotificationRouteAction {
 }
 
 class _NotificationDestination {
-  const _NotificationDestination({
-    required this.icon,
-    required this.label,
-    required this.actionLabel,
-  });
+  const _NotificationDestination({required this.icon, required this.kind});
 
   final IconData icon;
-  final String label;
-  final String actionLabel;
+
+  /// L4: a stable destination id; its label and action are localized.
+  final String kind;
 }
 
 _NotificationDestination _notificationDestinationFor(String? targetRoute) {
   final String path = _pathForTargetRoute(targetRoute);
   final Map<String, String> query = _queryForTargetRoute(targetRoute);
 
-  if (path == RouteNames.scenarioBuilder) {
+  if (path == RouteNames.legacyScenarioBuilder) {
     return const _NotificationDestination(
-      icon: Icons.route,
-      label: 'Route scenario',
-      actionLabel: 'Open route',
+      icon: Icons.notifications_outlined,
+      kind: 'legacy',
     );
   }
   if (path == RouteNames.discoverMap && query['mode'] == 'scenario') {
-    return const _NotificationDestination(
-      icon: Icons.route,
-      label: 'Route map',
-      actionLabel: 'Open route',
-    );
+    return const _NotificationDestination(icon: Icons.route, kind: 'routeMap');
   }
   if (path == RouteNames.discoverMap) {
-    return const _NotificationDestination(
-      icon: Icons.map,
-      label: 'Map',
-      actionLabel: 'Open map',
-    );
+    return const _NotificationDestination(icon: Icons.map, kind: 'map');
   }
   if (path.startsWith(RouteNames.discoverDetails)) {
     return const _NotificationDestination(
       icon: Icons.local_activity,
-      label: 'Details',
-      actionLabel: 'Open details',
+      kind: 'details',
     );
   }
   if (path == RouteNames.favorites) {
-    return const _NotificationDestination(
-      icon: Icons.favorite,
-      label: 'Saved plan',
-      actionLabel: 'Open saved',
-    );
+    return const _NotificationDestination(icon: Icons.favorite, kind: 'saved');
   }
   if (path == RouteNames.search) {
-    return const _NotificationDestination(
-      icon: Icons.search,
-      label: 'Search',
-      actionLabel: 'Search',
-    );
+    return const _NotificationDestination(icon: Icons.search, kind: 'search');
   }
   if (path == RouteNames.create) {
     if (query['source'] == 'publish' || query['status'] == 'pendingReview') {
       return const _NotificationDestination(
         icon: Icons.fact_check_outlined,
-        label: 'Publish status',
-        actionLabel: 'Open listing',
+        kind: 'publishStatus',
       );
     }
     return const _NotificationDestination(
       icon: Icons.add_circle,
-      label: 'Create',
-      actionLabel: 'Open create',
+      kind: 'create',
     );
   }
   if (path == RouteNames.profile) {
     return const _NotificationDestination(
       icon: Icons.storefront_outlined,
-      label: 'Creator profile',
-      actionLabel: 'Open profile',
+      kind: 'creatorProfile',
     );
   }
   if (path == RouteNames.discover) {
     return const _NotificationDestination(
       icon: Icons.explore,
-      label: 'Discover',
-      actionLabel: 'Open feed',
+      kind: 'discover',
     );
   }
-  return const _NotificationDestination(
-    icon: Icons.info,
-    label: 'Update',
-    actionLabel: 'Open',
-  );
+  return const _NotificationDestination(icon: Icons.info, kind: 'other');
 }
 
 String _pathForTargetRoute(String? targetRoute) {
@@ -898,13 +984,13 @@ class _FilteredNotificationsEmpty extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             hasSearchQuery
-                ? 'По вашему запросу ничего не найдено'
-                : 'В этом фильтре пока пусто',
+                ? context.l10n.notificationsNoSearchResults
+                : context.l10n.notificationsFilterEmpty,
           ),
           const SizedBox(height: 10),
           OutlinedButton(
             onPressed: onShowAll,
-            child: const Text('Показать все'),
+            child: Text(context.l10n.notificationsShowAll),
           ),
         ],
       ),
@@ -941,9 +1027,36 @@ class _StateMessage extends StatelessWidget {
   }
 }
 
-String _formatTime(DateTime value) {
-  final DateTime local = value.toLocal();
-  final String hour = local.hour.toString().padLeft(2, '0');
-  final String minute = local.minute.toString().padLeft(2, '0');
-  return '$hour:$minute';
+/// L4: a server item whose text could not be rendered in the reader's
+/// language says so; no other language is substituted.
+String _itemTitle(AppLocalizations l10n, NotificationItemEntity item) {
+  if (item.templateCode case final String code) {
+    return l10n.identityInboxTitle(code);
+  }
+  return item.contentAvailability == NotificationContentAvailability.rendered
+      ? item.title
+      : l10n.notificationFallbackTitle;
 }
+
+String _itemBody(AppLocalizations l10n, NotificationItemEntity item) {
+  if (item.templateCode case final String code) {
+    // The page name (user content) is shown as is before the template text.
+    final String text = code == 'identity_page_limit_request_moderators'
+        ? l10n.identityInboxLimitBody(item.templateCount ?? 0)
+        : l10n.identityInboxBody(code);
+    return <String>[
+      if (item.body.trim().isNotEmpty) item.body.trim(),
+      if (text.isNotEmpty) text,
+    ].join(' · ');
+  }
+  return _renderedBody(l10n, item);
+}
+
+String _renderedBody(AppLocalizations l10n, NotificationItemEntity item) =>
+    switch (item.contentAvailability) {
+      NotificationContentAvailability.rendered => item.body,
+      NotificationContentAvailability.unsupportedLocale =>
+        l10n.notificationUnsupportedLocale,
+      NotificationContentAvailability.templateUnavailable =>
+        l10n.notificationTemplateUnavailable,
+    };

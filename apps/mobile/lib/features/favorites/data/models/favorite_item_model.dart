@@ -1,8 +1,10 @@
 import '../../domain/entities/favorite_item_entity.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 class FavoriteItemModel {
   const FavoriteItemModel({
     required this.id,
+    this.objectType,
     required this.title,
     required this.subtitle,
     required this.city,
@@ -13,35 +15,63 @@ class FavoriteItemModel {
     required this.isFree,
     required this.savedAtUtcIso,
     required this.targetRoute,
+    required this.planningTargetKind,
+    required this.planningTargetId,
     required this.coverImageUrl,
   });
 
   final String id;
+  final String? objectType;
   final String title;
   final String subtitle;
   final String city;
   final String category;
-  final String startsAtUtcIso;
-  final double distanceKm;
-  final double priceAmount;
+  final String? startsAtUtcIso;
+
+  /// Null when the distance is unknown, e.g. for server-owned Library entries.
+  final double? distanceKm;
+  final Money? priceAmount;
   final bool isFree;
   final String savedAtUtcIso;
   final String? targetRoute;
+  final String? planningTargetKind;
+  final String? planningTargetId;
   final String coverImageUrl;
 
-  factory FavoriteItemModel.fromJson(Map<String, dynamic> json) {
+  factory FavoriteItemModel.fromJson(
+    Map<String, dynamic> json, {
+    required String defaultCurrencyCode,
+  }) {
     return FavoriteItemModel(
       id: json['id'] as String,
+      objectType: json['objectType'] as String?,
       title: json['title'] as String,
       subtitle: json['subtitle'] as String,
       city: json['city'] as String,
       category: json['category'] as String,
-      startsAtUtcIso: json['startsAtUtcIso'] as String,
-      distanceKm: (json['distanceKm'] as num).toDouble(),
-      priceAmount: (json['priceAmount'] as num).toDouble(),
+      startsAtUtcIso: json['evergreen'] == true
+          ? json['startsAtUtcIso'] as String?
+          : json['startsAtUtcIso'] as String,
+      distanceKm: (json['distanceKm'] as num?)?.toDouble(),
+      priceAmount:
+          json['evergreen'] == true &&
+              json['price'] == null &&
+              json['priceAmount'] == null
+          ? null
+          : Money.fromJsonOrNull(
+                  json['price'],
+                  legacyCurrencyCode: defaultCurrencyCode,
+                ) ??
+                Money.fromJsonOrNull(
+                  json['priceAmount'],
+                  legacyCurrencyCode: defaultCurrencyCode,
+                ) ??
+                (throw const FormatException('Favorite Money is invalid')),
       isFree: json['isFree'] as bool,
       savedAtUtcIso: json['savedAtUtcIso'] as String,
       targetRoute: json['targetRoute'] as String?,
+      planningTargetKind: json['planningTargetKind'] as String?,
+      planningTargetId: json['planningTargetId'] as String?,
       coverImageUrl: json['coverImageUrl'] as String? ?? '',
     );
   }
@@ -49,16 +79,20 @@ class FavoriteItemModel {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'id': id,
+      'objectType': objectType,
       'title': title,
       'subtitle': subtitle,
       'city': city,
       'category': category,
       'startsAtUtcIso': startsAtUtcIso,
       'distanceKm': distanceKm,
-      'priceAmount': priceAmount,
+      'price': priceAmount?.toJson(),
+      if (startsAtUtcIso == null && priceAmount == null) 'evergreen': true,
       'isFree': isFree,
       'savedAtUtcIso': savedAtUtcIso,
       'targetRoute': targetRoute,
+      'planningTargetKind': planningTargetKind,
+      'planningTargetId': planningTargetId,
       'coverImageUrl': coverImageUrl,
     };
   }
@@ -66,16 +100,19 @@ class FavoriteItemModel {
   factory FavoriteItemModel.fromEntity(FavoriteItemEntity entity) {
     return FavoriteItemModel(
       id: entity.id,
+      objectType: entity.objectType,
       title: entity.title,
       subtitle: entity.subtitle,
       city: entity.city,
       category: entity.category,
-      startsAtUtcIso: entity.startsAtUtc.toUtc().toIso8601String(),
+      startsAtUtcIso: entity.startsAtUtc?.toUtc().toIso8601String(),
       distanceKm: entity.distanceKm,
       priceAmount: entity.priceAmount,
       isFree: entity.isFree,
       savedAtUtcIso: entity.savedAtUtc.toUtc().toIso8601String(),
       targetRoute: entity.targetRoute,
+      planningTargetKind: entity.planningTargetKind?.name,
+      planningTargetId: entity.planningTargetId,
       coverImageUrl: entity.coverImageUrl,
     );
   }
@@ -83,16 +120,23 @@ class FavoriteItemModel {
   FavoriteItemEntity toEntity() {
     return FavoriteItemEntity(
       id: id,
+      objectType: objectType,
       title: title,
       subtitle: subtitle,
       city: city,
       category: category,
-      startsAtUtc: DateTime.parse(startsAtUtcIso).toUtc(),
+      startsAtUtc: startsAtUtcIso == null
+          ? null
+          : DateTime.parse(startsAtUtcIso!).toUtc(),
       distanceKm: distanceKm,
       priceAmount: priceAmount,
       isFree: isFree,
       savedAtUtc: DateTime.parse(savedAtUtcIso).toUtc(),
       targetRoute: targetRoute,
+      planningTargetKind: FavoritePlanningTargetKind.values
+          .where((value) => value.name == planningTargetKind)
+          .firstOrNull,
+      planningTargetId: planningTargetId,
       coverImageUrl: coverImageUrl,
     );
   }

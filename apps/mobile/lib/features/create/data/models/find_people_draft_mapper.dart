@@ -1,4 +1,5 @@
 import '../../domain/entities/find_people_draft_data.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 class FindPeopleDraftMapper {
   const FindPeopleDraftMapper._();
@@ -55,7 +56,7 @@ class FindPeopleDraftMapper {
       'attendanceConfirmationRequired': value.attendanceConfirmationRequired,
       'guestPolicy': value.guestPolicy,
       'costType': value.costType.name,
-      'expectedSpendAmount': value.expectedSpendAmount,
+      'expectedSpendAmount': value.expectedSpendAmount?.toJson(),
       'currencyCode': value.currencyCode,
       'costNote': value.costNote,
       'expenseSplitMode': value.expenseSplitMode.name,
@@ -64,7 +65,7 @@ class FindPeopleDraftMapper {
             (FindPeopleExpenseItemDraft item) => <String, Object?>{
               'id': item.id,
               'category': item.category,
-              'amount': item.amount,
+              'amount': item.amount.toJson(),
               'payerNote': item.payerNote,
             },
           )
@@ -235,10 +236,19 @@ class FindPeopleDraftMapper {
       costType:
           _enumValue(FindPeopleCostType.values, json['costType']) ??
           defaults.costType,
-      expectedSpendAmount: _double(json['expectedSpendAmount']),
+      expectedSpendAmount: Money.fromJsonOrNull(
+        json['expectedSpendAmount'],
+        legacyCurrencyCode:
+            _text(json['currencyCode']) ?? defaults.currencyCode,
+      ),
       clearExpectedSpendAmount:
           json.containsKey('expectedSpendAmount') &&
-          _double(json['expectedSpendAmount']) == null,
+          Money.fromJsonOrNull(
+                json['expectedSpendAmount'],
+                legacyCurrencyCode:
+                    _text(json['currencyCode']) ?? defaults.currencyCode,
+              ) ==
+              null,
       currencyCode: _text(json['currencyCode']) ?? defaults.currencyCode,
       costNote: _text(json['costNote']),
       clearCostNote:
@@ -249,7 +259,10 @@ class FindPeopleDraftMapper {
             json['expenseSplitMode'],
           ) ??
           defaults.expenseSplitMode,
-      plannedExpenseItems: _expenses(json['plannedExpenseItems']),
+      plannedExpenseItems: _expenses(
+        json['plannedExpenseItems'],
+        _text(json['currencyCode']) ?? defaults.currencyCode,
+      ),
       cancellationPolicyId:
           _text(json['cancellationPolicyId']) ?? defaults.cancellationPolicyId,
       publisherType:
@@ -363,7 +376,10 @@ class FindPeopleDraftMapper {
         .toList(growable: false);
   }
 
-  static List<FindPeopleExpenseItemDraft> _expenses(Object? source) {
+  static List<FindPeopleExpenseItemDraft> _expenses(
+    Object? source,
+    String currencyCode,
+  ) {
     if (source is! List<dynamic>) return const <FindPeopleExpenseItemDraft>[];
     return source
         .whereType<Map<dynamic, dynamic>>()
@@ -371,7 +387,12 @@ class FindPeopleDraftMapper {
           return FindPeopleExpenseItemDraft(
             id: _text(json['id']) ?? '',
             category: _text(json['category']) ?? '',
-            amount: _double(json['amount']) ?? 0,
+            amount:
+                Money.fromJsonOrNull(
+                  json['amount'],
+                  legacyCurrencyCode: currencyCode,
+                ) ??
+                Money.zero(currencyCode),
             payerNote: _text(json['payerNote']) ?? '',
           );
         })

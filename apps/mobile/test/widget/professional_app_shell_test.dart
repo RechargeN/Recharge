@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:recharge/app/config/market_config.dart';
 import 'package:recharge/app/presentation/recharge_app_shell.dart';
 import 'package:recharge/app/router/route_names.dart';
+import 'package:recharge/core/identity/account_experience.dart';
+import 'package:recharge/features/identity/presentation/pages/professional_page_workspace_page.dart';
+import 'package:recharge/features/identity/presentation/widgets/workspace_section.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/core/notifications/app_notification_sink.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
@@ -49,6 +52,7 @@ void main() {
       );
       await controller.ensureLoaded(userId);
       controller.selectAdminPreview(AdminExperiencePreview.professionalPage);
+      final actualSnapshot = controller.state.accessSnapshot;
 
       await tester.pumpWidget(
         ProviderScope(
@@ -74,6 +78,46 @@ void main() {
       expect(find.text('Content preview'), findsOneWidget);
       expect(controller.state.accessSnapshot!.pages, isEmpty);
       expect(controller.state.activeWorkspace, WorkspaceRef.personal(userId));
+      await tester.tap(find.byKey(const Key('bottom-nav-account')));
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.text('Account'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Create or select Professional Page'), findsOneWidget);
+      await tester.tap(find.text('Create or select Professional Page'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('workspace-personal')), findsOneWidget);
+      expect(find.text('Viewer'), findsNothing);
+      await tester.ensureVisible(
+        find.byKey(const Key('admin-preview-creator')),
+      );
+      await tester.tap(find.byKey(const Key('admin-preview-creator')));
+      await tester.pumpAndSettle();
+      expect(controller.state.effectiveExperience, AccountExperience.personal);
+      expect(controller.state.accessSnapshot, same(actualSnapshot));
+      expect(controller.state.activeWorkspace, WorkspaceRef.personal(userId));
+      (tester.widget<MaterialApp>(find.byType(MaterialApp)).routerConfig
+              as GoRouter)
+          .go(RouteNames.discover);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('bottom-nav-profile')), findsOneWidget);
+      expect(find.byKey(const Key('bottom-nav-smart-search')), findsOneWidget);
+      expect(find.byKey(const Key('bottom-nav-account')), findsNothing);
+      expect(
+        AccountExperienceScope.maybeOf(
+          tester.element(
+            find.descendant(
+              of: find.byType(_ShellBody),
+              matching: find.text('Home'),
+            ),
+          ),
+        )!.experience,
+        AccountExperience.personal,
+      );
     },
   );
 }
@@ -89,6 +133,14 @@ class _ProfessionalShellApp extends StatelessWidget {
       routerConfig: GoRouter(
         initialLocation: RouteNames.professionalPage,
         routes: <RouteBase>[
+          GoRoute(
+            path: RouteNames.settings,
+            builder: (context, state) => Scaffold(
+              body: SingleChildScrollView(
+                child: WorkspaceSection(userId: userId),
+              ),
+            ),
+          ),
           ShellRoute(
             builder: (BuildContext context, GoRouterState state, Widget child) {
               return RechargeAppShell(
@@ -120,7 +172,9 @@ class _ProfessionalShellApp extends StatelessWidget {
               GoRoute(
                 path: RouteNames.professionalPageAccount,
                 builder: (context, state) =>
-                    const _ShellBody('Account preview'),
+                    const ProfessionalPageWorkspacePage(
+                      section: ProfessionalPageSection.account,
+                    ),
               ),
               GoRoute(
                 path: RouteNames.discover,

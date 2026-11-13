@@ -24,10 +24,7 @@ class ExploreLocalDataSource {
     }
   }
 
-  Future<void> saveProfileEditable(
-    String userId,
-    ProfileEditableModel model,
-  ) {
+  Future<void> saveProfileEditable(String userId, ProfileEditableModel model) {
     return _storage.write(
       key: _profileKey(userId),
       value: jsonEncode(model.toJson()),
@@ -45,13 +42,27 @@ class ExploreLocalDataSource {
     }
   }
 
-  Future<void> saveSettings(
-    String userId,
-    SettingsModel model,
-  ) {
+  /// L4.9.4: writes only the live settings. Whatever else an old record holds
+  /// (`language`, `currency`) stays as it was: no value is written to those
+  /// fields and nothing is rewritten or cleared behind the user's back.
+  Future<void> saveSettings(String userId, SettingsModel model) async {
+    final String key = _settingsKey(userId);
     return _storage.write(
-      key: _settingsKey(userId),
-      value: jsonEncode(model.toJson()),
+      key: key,
+      value: jsonEncode(<String, dynamic>{
+        ..._storedSettings(await _storage.read(key: key)),
+        ...model.toJson(),
+      }),
     );
+  }
+
+  static Map<String, dynamic> _storedSettings(String? raw) {
+    if (raw == null || raw.isEmpty) return const <String, dynamic>{};
+    try {
+      final Object? json = jsonDecode(raw);
+      return json is Map<String, dynamic> ? json : const <String, dynamic>{};
+    } on FormatException {
+      return const <String, dynamic>{};
+    }
   }
 }

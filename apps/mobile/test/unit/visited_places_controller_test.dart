@@ -1,4 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/app/application/visit_history_facade.dart';
+import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
+import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/visited/application/controllers/visited_places_controller.dart';
 import 'package:recharge/features/visited/application/state/visited_places_state.dart';
@@ -7,6 +10,56 @@ import 'package:recharge/features/visited/domain/repositories/visited_places_rep
 import 'package:recharge/features/visited/domain/usecases/get_visited_places_usecase.dart';
 
 void main() {
+  test('place calendar day follows IANA timezone across midnight and DST', () {
+    final controller = VisitedPlacesController(
+      getVisitedPlacesUseCase: GetVisitedPlacesUseCase(
+        _FakeVisitedPlacesRepository(),
+      ),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    final facade = VisitHistoryFacade(
+      controller: controller,
+      timezoneRepository: TimezoneRepositoryImpl.new,
+    );
+    DiscoverItemEntity place(String zone) => DiscoverItemEntity(
+      id: 'place',
+      title: '',
+      subtitle: '',
+      city: '',
+      category: '',
+      startsAtUtc: DateTime.utc(2026),
+      latitude: 0,
+      longitude: 0,
+      priceAmount: null,
+      distanceKm: 0,
+      isFree: true,
+      objectKind: DiscoverObjectKind.place,
+      timezoneId: zone,
+    );
+    expect(
+      facade.todayAtPlace(
+        place('Europe/Riga'),
+        nowUtc: DateTime.utc(2026, 7, 21, 22),
+      ),
+      DateTime(2026, 7, 22),
+    );
+    expect(
+      facade.todayAtPlace(
+        place('America/Los_Angeles'),
+        nowUtc: DateTime.utc(2026, 7, 21, 2),
+      ),
+      DateTime(2026, 7, 20),
+    );
+    expect(
+      facade.todayAtPlace(
+        place('Europe/Riga'),
+        nowUtc: DateTime.utc(2026, 10, 25, 1),
+      ),
+      DateTime(2026, 10, 25),
+    );
+    expect(() => facade.todayAtPlace(place('')), throwsArgumentError);
+    controller.dispose();
+  });
   test('loads visits for the requested creator', () async {
     final repository = _FakeVisitedPlacesRepository(
       items: <VisitedPlaceEntity>[_visit()],

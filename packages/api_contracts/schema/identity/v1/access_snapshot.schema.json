@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/identity/v1/access_snapshot.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "userId",
+    "sessionId",
+    "accountRevision",
+    "sessionRevision",
+    "authzRevision",
+    "capabilityPolicyRevision",
+    "capabilityIds",
+    "evaluatedAtUtc",
+    "expiresAtUtc"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "userId": { "$ref": "identity_common.schema.json#/$defs/entityId" },
+    "sessionId": { "$ref": "identity_common.schema.json#/$defs/entityId" },
+    "pageId": { "$ref": "identity_common.schema.json#/$defs/entityId" },
+    "accountRevision": {
+      "$ref": "identity_common.schema.json#/$defs/revision"
+    },
+    "sessionRevision": {
+      "$ref": "identity_common.schema.json#/$defs/revision"
+    },
+    "authzRevision": { "$ref": "identity_common.schema.json#/$defs/revision" },
+    "membershipRevision": {
+      "$ref": "identity_common.schema.json#/$defs/revision"
+    },
+    "capabilityPolicyRevision": {
+      "$ref": "identity_common.schema.json#/$defs/revision"
+    },
+    "capabilityIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 64,
+      "items": { "$ref": "identity_common.schema.json#/$defs/capabilityId" }
+    },
+    "evaluatedAtUtc": {
+      "$ref": "identity_common.schema.json#/$defs/utcInstant"
+    },
+    "expiresAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" }
+  }
+}

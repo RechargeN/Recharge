@@ -2,10 +2,7 @@ import '../entities/auth_result_entity.dart';
 import '../entities/auth_user_entity.dart';
 
 class AuthException implements Exception {
-  const AuthException({
-    required this.code,
-    required this.message,
-  });
+  const AuthException({required this.code, required this.message});
 
   final String code;
   final String message;
@@ -25,4 +22,9 @@ abstract class AuthRepository {
   Future<AuthUserEntity?> getCurrentUser();
 
   Future<void> signOut();
+}
+
+/// Federated entry is explicit; legacy password repositories do not implement it.
+abstract interface class FederatedAuthRepository implements AuthRepository {
+  Future<AuthResultEntity> signInWithGoogle();
 }

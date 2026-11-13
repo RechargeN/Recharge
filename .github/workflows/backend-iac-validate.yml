@@ -1,0 +1,109 @@
+name: Backend IaC and execution manifest validation
+
+# Validation only. This workflow has no secrets, no id-token, no cloud step and no
+# apply: writing infrastructure code grants no authority to apply it (BCK-05 §36).
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/backend-iac-validate.yml"
+      - "apps/backend/infra/**"
+      - "apps/backend/config/**"
+      - "apps/backend/firestore.rules"
+      - "apps/backend/firestore.indexes.json"
+      - "apps/backend/scripts/verify-execution-manifest.mjs"
+      - "apps/backend/scripts/verify-iac-topology.mjs"
+      - "apps/backend/scripts/verify-dev-apply-approval.mjs"
+      - "apps/backend/scripts/verify-dev-apply-approval.test.mjs"
+      - "apps/backend/scripts/wait-dev-budget-delivery*.mjs"
+      - "apps/backend/scripts/check-dev-bootstrap-plan*.mjs"
+      - "apps/backend/scripts/check-n2c-plan*.mjs"
+      - "apps/backend/scripts/check-n3b-plan*.mjs"
+      - "apps/backend/scripts/check-n3a2-plan*.mjs"
+      - "apps/backend/scripts/package-n3a2-content-media-runtime*.mjs"
+      - "apps/backend/scripts/verify-n3a2-stage.mjs"
+      - "apps/backend/n3a2-content-media-runtime/**"
+      - "apps/backend/scripts/check-n3c-plan*.mjs"
+      - "apps/backend/scripts/package-n3c-notifications-runtime*.mjs"
+      - "apps/backend/n3c-notifications-runtime/**"
+      - "apps/backend/scripts/package-media-tools-runtime*.mjs"
+      - "apps/backend/media-tools-runtime/**"
+      - "apps/backend/scripts/package-n2c-identity-runtime*.mjs"
+      - "apps/backend/scripts/verify-n2c-stage.mjs"
+      - "apps/backend/n2c-identity-runtime/**"
+      - ".github/workflows/backend-deploy.yml"
+      - "docs/runbooks/backend-*.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-iac-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: IaC ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+
+    steps:
+      - name: Checkout without persisted authority
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          clean: false
+          set-safe-directory: false
+          fetch-depth: 1
+          fetch-tags: false
+          lfs: false
+          submodules: false
+
+      - name: Set up exact Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 22.23.2
+          check-latest: false
+          package-manager-cache: false
+
+      - name: Reject cloud and credential context
+        run: node apps/backend/scripts/verify-no-cloud-context.mjs
+
+      - name: Install verified Terraform archive
+        run: node apps/backend/scripts/install-terraform.mjs
+
+      - name: Frozen dependency install
+        working-directory: apps/backend/functions
+        run: npm ci --ignore-scripts --no-audit --fund=false
+
+      - name: Execution manifest gate
+        working-directory: apps/backend/functions
+        run: npm run verify:execution-manifest
+
+      - name: Reject plan-only or mismatched apply records (local fixtures)
+        run: node --test apps/backend/scripts/verify-dev-apply-approval.test.mjs apps/backend/scripts/wait-dev-budget-delivery.test.mjs apps/backend/scripts/check-dev-bootstrap-plan.test.mjs apps/backend/scripts/check-n2c-plan.test.mjs apps/backend/scripts/check-n3b-plan.test.mjs apps/backend/scripts/package-media-tools-runtime.test.mjs apps/backend/scripts/check-n3a2-plan.test.mjs apps/backend/scripts/check-n3c-plan.test.mjs
+
+      - name: N3b media-tools runtime (typecheck, host and mirror tests, local stage)
+        working-directory: apps/backend/media-tools-runtime
+        run: |
+          npm test
+          node ../scripts/package-media-tools-runtime.mjs
+
+      - name: IaC topology, Terraform validate and gate behaviour
+        working-directory: apps/backend/functions
+        run: npm run verify:iac:topology -- --require-terraform
+
+      - name: Bootstrap providers (local backend, no credentials)
+        working-directory: apps/backend/infra/terraform/bootstrap/dev
+        run: terraform init -backend=false -input=false -lockfile=readonly
+
+      - name: Bootstrap schema and offline mocked gates
+        working-directory: apps/backend/infra/terraform/bootstrap/dev
+        run: |
+          terraform validate -no-color
+          terraform test -no-color

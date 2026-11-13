@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/adapters/discover_scenario_intake_adapter.dart';
 import 'package:recharge/features/discover/application/controllers/scenario_intake_selection_controller.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/discover/application/state/scenario_intake_selection_state.dart';
 
 void main() {
   const adapter = DiscoverScenarioIntakeAdapter();
@@ -63,7 +65,7 @@ void main() {
     expect(result, ScenarioIntakeToggleResult.limitReached);
     expect(controller.state.count, 20);
     expect(controller.state.selectedItems.last.id, 'item-20');
-    expect(controller.state.message, contains('up to 20'));
+    expect(controller.state.message, ScenarioIntakeIssue.limitReached);
   });
 
   test('unsupported result explains the issue and cancel clears all state', () {
@@ -87,7 +89,7 @@ void main() {
       controller.toggle(invalidLocation),
       ScenarioIntakeToggleResult.unsupported,
     );
-    expect(controller.state.message, contains('no usable catalog location'));
+    expect(controller.state.message, ScenarioIntakeIssue.noLocation);
     expect(controller.state.selectedItems, isEmpty);
 
     controller.toggle(_item(2));
@@ -107,7 +109,7 @@ DiscoverItemEntity _item(int index) => DiscoverItemEntity(
   startsAtUtc: DateTime.utc(2026, 8, 3, 12),
   latitude: 56.94 + index / 10000,
   longitude: 24.10 + index / 10000,
-  priceAmount: 0,
+  priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
   distanceKm: 1,
   isFree: true,
 );

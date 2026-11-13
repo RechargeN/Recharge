@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/controllers/auth_controller.dart';
 
 Future<void> showAuthGateSheet(
@@ -26,15 +27,15 @@ Future<void> showAuthGateSheet(
           children: <Widget>[
             Text(
               allowGuest
-                  ? 'Войдите, чтобы сохранить и управлять'
-                  : 'Войдите, чтобы продолжить',
+                  ? context.l10n.authSignInHeadline
+                  : context.l10n.authSignInToContinue,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
               allowGuest
-                  ? 'Без входа вы можете смотреть события и места. Вход нужен для избранного, профиля и создания активностей.'
-                  : 'Личный Scenario доступен только авторизованному пользователю.',
+                  ? context.l10n.authSignInBody
+                  : context.l10n.authScenarioRequiresSignIn,
             ),
             const SizedBox(height: 16),
             FilledButton(
@@ -51,7 +52,7 @@ Future<void> showAuthGateSheet(
                 context.pop();
                 parentContext.push(uri.toString());
               },
-              child: const Text('Войти'),
+              child: Text(context.l10n.commonSignIn),
             ),
             if (allowGuest) ...<Widget>[
               const SizedBox(height: 8),
@@ -60,7 +61,7 @@ Future<void> showAuthGateSheet(
                   onContinueAsGuest();
                   context.pop();
                 },
-                child: const Text('Продолжить как гость'),
+                child: Text(context.l10n.commonContinueAsGuest),
               ),
             ],
           ],

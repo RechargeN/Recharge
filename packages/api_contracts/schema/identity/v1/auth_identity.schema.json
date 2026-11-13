@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/identity/v1/auth_identity.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "identityId",
+    "userId",
+    "provider",
+    "providerTenant",
+    "subjectHash",
+    "status",
+    "revision",
+    "linkedAtUtc"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "identityId": { "$ref": "identity_common.schema.json#/$defs/entityId" },
+    "userId": { "$ref": "identity_common.schema.json#/$defs/entityId" },
+    "provider": { "$ref": "identity_common.schema.json#/$defs/provider" },
+    "providerTenant": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9._-]+$"
+    },
+    "subjectHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "status": { "enum": ["active", "disabled"] },
+    "revision": { "$ref": "identity_common.schema.json#/$defs/revision" },
+    "linkedAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" }
+  }
+}

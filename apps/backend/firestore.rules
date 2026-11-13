@@ -1,0 +1,147 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // R1 platform records are server-owned. Local Admin SDK tests may exercise
+    // them, but no mobile/client identity has direct access.
+    match /platformReleaseManifests/{document} { allow read, write: if false; }
+    match /platformActiveReleasePointers/{document} { allow read, write: if false; }
+    match /platformFeatureFlagRevisions/{document} { allow read, write: if false; }
+    match /platformActiveFeatureFlagPointers/{document} { allow read, write: if false; }
+    match /referenceMarketConfigRevisions/{document} { allow read, write: if false; }
+    match /referenceActivationPointers/{document} { allow read, write: if false; }
+
+    // K3 Admin/Support records are server-owned; no client role grants direct access.
+    match /adminReadAudit/{document} { allow read, write: if false; }
+    match /adminRepairApprovals/{document} { allow read, write: if false; }
+    match /adminRepairExecutions/{document} { allow read, write: if false; }
+    match /adminRepairProposals/{document} { allow read, write: if false; }
+    match /adminSupportCases/{document} { allow read, write: if false; }
+
+    // Security/Privacy foundation records are server-owned. The actor-owned
+    // direct-client allowlist is intentionally empty until an owning domain
+    // approves an exact record contract and Rules slice.
+    match /privacyRequests/{document} { allow read, write: if false; }
+    match /privacyDomainTasks/{document} { allow read, write: if false; }
+    // L1: sweep checkpoints and the legal hold authority stay server-only.
+    match /privacyTaskProgress/{document} { allow read, write: if false; }
+    match /privacyLegalHolds/{document} { allow read, write: if false; }
+    match /privacyLegalHoldAudit/{document} { allow read, write: if false; }
+    match /privacyHoldAuthority/{document} { allow read, write: if false; }
+    match /operationsOperatorAuthority/{document} { allow read, write: if false; }
+    match /operationsOperatorAudit/{document} { allow read, write: if false; }
+    // L3: product analytics raw events, aggregates and access records are
+    // server-only; no client reads raw events or aggregates.
+    match /productAnalyticsEvents/{document} { allow read, write: if false; }
+    match /productAnalyticsDailyAggregates/{document} { allow read, write: if false; }
+    match /productAnalyticsAccessAuthority/{document} { allow read, write: if false; }
+    match /productAnalyticsAccessAudit/{document} { allow read, write: if false; }
+    match /securityAuditEvents/{document} { allow read, write: if false; }
+    match /securityRateLimitCounters/{document} { allow read, write: if false; }
+    match /securityRateLimitAttempts/{document} { allow read, write: if false; }
+    match /securityAudit/{document} { allow read, write: if false; }
+
+    // Identity/Publisher local authority may be exercised through the
+    // Emulator-only Admin repository. It remains server-owned and no client
+    // role, page, provider assertion or session handle is accepted directly.
+    match /identityAccounts/{document} { allow read, write: if false; }
+    match /identityProviderLinks/{document} { allow read, write: if false; }
+    match /identitySessions/{document} { allow read, write: if false; }
+    match /identityAccessSnapshots/{document} { allow read, write: if false; }
+    match /identityCreatorVerifications/{document} { allow read, write: if false; }
+    match /identitySellerDeclarations/{document} { allow read, write: if false; }
+    match /identityManagedPages/{document} { allow read, write: if false; }
+    match /identityPageMemberships/{document} { allow read, write: if false; }
+
+    // Content persistence (BCK07-PERSIST-01) is Emulator-only and server-owned.
+    // No client, owner, page member or moderator has direct access; every write
+    // goes through the Content service and its Admin repository.
+    match /contentDrafts/{document} { allow read, write: if false; }
+    match /contentExternalBindings/{document} { allow read, write: if false; }
+    match /contentSubmissions/{document} { allow read, write: if false; }
+    match /contentPublishedRevisions/{document} { allow read, write: if false; }
+    match /contentPublicationPointers/{document} { allow read, write: if false; }
+    match /contentIdempotency/{document} { allow read, write: if false; }
+    match /contentAudit/{document} { allow read, write: if false; }
+    match /contentEffects/{document} { allow read, write: if false; }
+    // D2 media availability reaction (Emulator-only, Content-owned): checkpoints
+    // and receipts of its two consumers. Server-only.
+    match /contentMediaAvailabilityStatus/{document} { allow read, write: if false; }
+    match /contentMediaAvailabilityReceipts/{document} { allow read, write: if false; }
+
+    // E2.0 Event → Booking handoff (Emulator-only, Content-owned): checkpoint,
+    // receipts and per-object state. Server-only, like the outbox it writes.
+    match /eventBookingHandoffCheckpoints/{document} { allow read, write: if false; }
+    match /eventBookingHandoffReceipts/{document} { allow read, write: if false; }
+    match /eventBookingHandoffStates/{document} { allow read, write: if false; }
+
+    // F1 Notifications inbox (Emulator-only). Server-only: clients read and
+    // change their inbox only through the Session-checked callables.
+    match /notificationInboxItems/{document} { allow read, write: if false; }
+    match /notificationEffectReceipts/{document} { allow read, write: if false; }
+    match /notificationDeliveryAttempts/{document} { allow read, write: if false; }
+    match /notificationPreferences/{document} { allow read, write: if false; }
+    match /notificationCommandReceipts/{document} { allow read, write: if false; }
+    match /notificationPushRegistrations/{document} { allow read, write: if false; }
+    match /notificationPushAttempts/{document} { allow read, write: if false; }
+    match /notificationReconcileCheckpoints/{document} { allow read, write: if false; }
+
+    // RAW-C authoritative records are Admin-SDK-only. There is deliberately no
+    // client exception, including for owners, flags, projections or outbox.
+    match /bookingEventProjections/{document} { allow read, write: if false; }
+    match /bookings/{document} { allow read, write: if false; }
+    match /bookingHolds/{document} { allow read, write: if false; }
+    match /bookingPoolLedgers/{document} { allow read, write: if false; }
+    match /bookingUserUsage/{document} { allow read, write: if false; }
+    match /bookingActiveKeys/{document} { allow read, write: if false; }
+    match /bookingIdempotency/{document} { allow read, write: if false; }
+    match /bookingAudit/{document} { allow read, write: if false; }
+    match /bookingOutbox/{document} { allow read, write: if false; }
+    match /bookingPrivacyProgress/{document} { allow read, write: if false; }
+    match /eventBookingOutbox/{document} { allow read, write: if false; }
+    match /bookingProjectionDeliveries/{document} { allow read, write: if false; }
+    match /bookingProjectionDiscoveryCheckpoints/{document} { allow read, write: if false; }
+    match /bookingProjectionOperatorAudit/{document} { allow read, write: if false; }
+    match /bookingReconfirmationDeadlineJobs/{document} { allow read, write: if false; }
+    match /bookingReconfirmationDeadlineCheckpoints/{document} { allow read, write: if false; }
+    match /bookingReconfirmationDeadlineOperatorAudit/{document} { allow read, write: if false; }
+    match /libraryEntries/{document} { allow read, write: if false; }
+    match /contentTranslations/{document} { allow read, write: if false; }
+    match /contentTranslationLeases/{document} { allow read, write: if false; }
+    match /contentTranslationAccountUsage/{document} { allow read, write: if false; }
+    match /contentTranslationObjectUsage/{document} { allow read, write: if false; }
+    match /contentTranslationBudgets/{document} { allow read, write: if false; }
+    match /contentTranslationCostLedger/{document} { allow read, write: if false; }
+    match /moderationRemoderationQueue/{document} { allow read, write: if false; }
+    match /trustSafetyReports/{document} { allow read, write: if false; }
+    match /reviews/{document} { allow read, write: if false; }
+    match /contentSafetyHolds/{document} { allow read, write: if false; }
+    match /catalogSafetyHolds/{document} { allow read, write: if false; }
+    match /bookingSafetyHolds/{document} { allow read, write: if false; }
+    // I1 Quick Plan records are owner-scoped on the server (quickPlanCommandV1/QueryV1);
+    // no client identity reads or writes them directly.
+    match /scenarios/{document} { allow read, write: if false; }
+    match /scenarioMembers/{document} { allow read, write: if false; }
+    match /scenarioInvites/{document} { allow read, write: if false; }
+    match /scenarioCommandReceipts/{document} { allow read, write: if false; }
+    match /scenarioRevisions/{document} { allow read, write: if false; }
+    match /scenarioShares/{document} { allow read, write: if false; }
+    match /quickPlans/{document} { allow read, write: if false; }
+    match /quickPlanCommandReceipts/{document} { allow read, write: if false; }
+    // J1 Route geometry is owner-scoped on the server (routeCommandV1/QueryV1) only.
+    match /routes/{document} { allow read, write: if false; }
+    match /routeCommandReceipts/{document} { allow read, write: if false; }
+    // J2 immutable Route distribution snapshots and Route publisher trust (RTE-PUB-01).
+    match /routeRevisions/{document} { allow read, write: if false; }
+    match /moderationPublisherTrust/{document} { allow read, write: if false; }
+    // D3.7 Find People (BCK-06): consent, its receipts and the synthetic 18+
+    // attestation are server-owned; the attestation is written by server fixtures only.
+    match /identityFindPeopleConsents/{document} { allow read, write: if false; }
+    match /identityFindPeopleConsentReceipts/{document} { allow read, write: if false; }
+    match /identityAgeAttestations/{document} { allow read, write: if false; }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

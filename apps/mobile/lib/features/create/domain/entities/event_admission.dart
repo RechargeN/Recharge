@@ -237,6 +237,7 @@ class EventAdmissionDraft {
     this.registrationWindow,
     this.applicationWindow,
     this.waitlistPolicy,
+    this.cancellationClosesBeforeOccurrenceMinutes,
   });
 
   final AdmissionMode? admissionMode;
@@ -249,6 +250,10 @@ class EventAdmissionDraft {
   final EventAccessWindow? registrationWindow;
   final EventAccessWindow? applicationWindow;
   final WaitlistConfiguration? waitlistPolicy;
+
+  /// E2.0 internal registration: cancellation closes this many minutes before
+  /// the start of each occurrence. Only what the user entered; never defaulted.
+  final int? cancellationClosesBeforeOccurrenceMinutes;
 
   bool get isComplete =>
       admissionMode != null &&
@@ -284,6 +289,8 @@ class EventAdmissionDraft {
     bool clearApplicationWindow = false,
     WaitlistConfiguration? waitlistPolicy,
     bool clearWaitlistPolicy = false,
+    int? cancellationClosesBeforeOccurrenceMinutes,
+    bool clearCancellationClosesBeforeOccurrenceMinutes = false,
   }) => EventAdmissionDraft(
     admissionMode: clearAdmissionMode
         ? null
@@ -311,5 +318,10 @@ class EventAdmissionDraft {
     waitlistPolicy: clearWaitlistPolicy
         ? null
         : (waitlistPolicy ?? this.waitlistPolicy),
+    cancellationClosesBeforeOccurrenceMinutes:
+        clearCancellationClosesBeforeOccurrenceMinutes
+        ? null
+        : (cancellationClosesBeforeOccurrenceMinutes ??
+              this.cancellationClosesBeforeOccurrenceMinutes),
   );
 }

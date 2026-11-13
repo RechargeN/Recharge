@@ -6,12 +6,17 @@ import '../models/auth_session_model.dart';
 import '../models/auth_user_model.dart';
 
 class AuthLocalDataSource {
-  const AuthLocalDataSource(this._secureStorage);
+  const AuthLocalDataSource(
+    this._secureStorage, {
+    this.environment = AuthCacheEnvironment.local,
+  });
+
+  final AuthCacheEnvironment environment;
 
   final FlutterSecureStorage _secureStorage;
 
-  static const String _sessionKey = 'auth.session';
-  static const String _userKey = 'auth.user';
+  String get _sessionKey => '${environment.namespace}.session';
+  String get _userKey => '${environment.namespace}.user';
 
   Future<void> saveSession(AuthSessionModel session) {
     return _secureStorage.write(
@@ -49,4 +54,14 @@ class AuthLocalDataSource {
     await _secureStorage.delete(key: _sessionKey);
     await _secureStorage.delete(key: _userKey);
   }
+}
+
+/// Persisted authority must never cross Local, Emulator, and dev boundaries.
+enum AuthCacheEnvironment {
+  local('auth'),
+  emulator('auth.emulator.demo-recharge'),
+  dev('auth.dev.recharge-dev-n2a01');
+
+  const AuthCacheEnvironment(this.namespace);
+  final String namespace;
 }

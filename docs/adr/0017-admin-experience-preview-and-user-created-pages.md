@@ -1,6 +1,7 @@
 # ADR 0017: Admin Experience Preview And User-Created Professional Pages
 
 - Status: Accepted
+- Superseded in part by: [ADR 0023](0023-user-creator-professional-page-admin-model.md) (2026-11-06) — утверждения о сохранении ролей User/Creator/Admin
 - Date: 2026-07-31
 - Deciders: Recharge team
 - Supersedes: ADR 0016 only where this ADR explicitly changes local/mock

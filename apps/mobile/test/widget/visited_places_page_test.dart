@@ -21,7 +21,40 @@ import 'package:recharge/features/visited/domain/repositories/visited_places_rep
 import 'package:recharge/features/visited/domain/usecases/get_visited_places_usecase.dart';
 import 'package:recharge/features/visited/presentation/pages/visited_places_page.dart';
 
+import '../support/l10n/l10n_screen_harness.dart';
+
 void main() {
+  // L4.6: Visit history in lv, en and ru at 360 dp; the place title stays
+  // as published.
+  l10nSmallScreenTestWidgets('Visit history', (tester, locale, scale) async {
+    final AuthController authController = await _signedInAuth(role: 'creator');
+    final VisitedPlacesController visitedController = VisitedPlacesController(
+      getVisitedPlacesUseCase: GetVisitedPlacesUseCase(
+        _FakeVisitedPlacesRepository(items: <VisitedPlaceEntity>[_visit()]),
+      ),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          authControllerProvider.overrideWith((ref) => authController),
+          visitedPlacesControllerProvider.overrideWith(
+            (ref) => visitedController,
+          ),
+        ],
+        child: l10nTestApp(
+          locale: locale,
+          scale: scale,
+          home: const VisitedPlacesPage(userId: 'creator-1'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Lake walk'), findsOneWidget);
+    expect(find.text(l10nFor(locale).visitedMonth), findsOneWidget);
+    await l10nScrollThrough(tester);
+  });
+
   testWidgets('shows creator visit history and opens place details', (
     tester,
   ) async {
@@ -49,6 +82,12 @@ void main() {
                 path: RouteNames.visitedPlaces,
                 builder: (context, state) =>
                     const VisitedPlacesPage(userId: 'creator-1'),
+              ),
+              GoRoute(
+                path: '${RouteNames.discoverDetails}/:objectType/:objectId',
+                builder: (context, state) => Scaffold(
+                  body: Text('Details ${state.pathParameters['objectId']}'),
+                ),
               ),
               GoRoute(
                 path: '${RouteNames.discoverDetails}/:itemId',

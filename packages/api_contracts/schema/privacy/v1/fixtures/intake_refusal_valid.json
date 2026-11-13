@@ -1,0 +1,26 @@
+[
+  {
+    "ok": false,
+    "code": "access_denied"
+  },
+  {
+    "ok": false,
+    "code": "idempotency_conflict"
+  },
+  {
+    "ok": false,
+    "code": "invalid_contract"
+  },
+  {
+    "ok": false,
+    "code": "request_not_found"
+  },
+  {
+    "ok": false,
+    "code": "revision_conflict"
+  },
+  {
+    "ok": false,
+    "code": "subject_mismatch"
+  }
+]

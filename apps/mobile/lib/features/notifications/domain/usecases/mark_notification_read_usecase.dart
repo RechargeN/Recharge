@@ -5,10 +5,7 @@ class MarkNotificationReadUseCase {
 
   final NotificationsRepository _repository;
 
-  Future<void> call({
-    required String userId,
-    required String notificationId,
-  }) {
+  Future<void> call({required String userId, required String notificationId}) {
     return _repository.markNotificationRead(
       userId: userId,
       notificationId: notificationId,

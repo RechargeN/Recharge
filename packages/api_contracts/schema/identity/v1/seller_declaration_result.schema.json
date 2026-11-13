@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/identity/v1/seller_declaration_result.schema.json",
+  "title": "SellerDeclarationResultV1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "kind", "data"],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "kind": {
+          "const": "succeeded"
+        },
+        "data": {
+          "oneOf": [
+            {
+              "$ref": "seller_declaration.schema.json"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "kind", "code"],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "kind": {
+          "const": "rejected"
+        },
+        "code": {
+          "enum": [
+            "unauthenticated",
+            "invalid_contract",
+            "revision_conflict",
+            "account_inactive",
+            "unavailable"
+          ]
+        }
+      }
+    }
+  ]
+}

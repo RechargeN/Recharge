@@ -1,0 +1,1975 @@
+{
+  "serverOwnerUserId": "11111111-1111-4111-8111-111111111111",
+  "nowUtc": "2026-10-19T10:00:00.000Z",
+  "cases": [
+    {
+      "name": "valid",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": []
+    },
+    {
+      "name": "time_poll",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "time_poll",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.schedule_mode_unsupported"
+      ]
+    },
+    {
+      "name": "recurring",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "recurring",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.schedule_mode_unsupported"
+      ]
+    },
+    {
+      "name": "online",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "online",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.meeting_mode_unsupported"
+      ]
+    },
+    {
+      "name": "unlisted",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "unlisted",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.visibility_unsupported"
+      ]
+    },
+    {
+      "name": "co_hosts",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          },
+          "coHosts": []
+        }
+      },
+      "expectedIssues": [
+        "find_people.co_hosts_unsupported"
+      ]
+    },
+    {
+      "name": "media",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        },
+        "media": {
+          "coverImage": {
+            "mediaId": "11111111-1111-4111-8111-111111111111"
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.media_unsupported"
+      ]
+    },
+    {
+      "name": "client_public_geo",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            },
+            "publicGeo": {
+              "latitude": 56.95,
+              "longitude": 24.08
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.public_geo_forbidden",
+        "find_people.meeting.unknown_field:publicGeo"
+      ]
+    },
+    {
+      "name": "top_level_location",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        },
+        "location": {
+          "latitude": 56.95182,
+          "longitude": 24.08571
+        }
+      },
+      "expectedIssues": [
+        "find_people.unknown_field:location",
+        "find_people.public_geo_forbidden"
+      ]
+    },
+    {
+      "name": "coordinates_in_group",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only",
+            "latitude": 56.95182
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.public_geo_forbidden",
+        "find_people.group.unknown_field:latitude"
+      ]
+    },
+    {
+      "name": "coordinates_in_title",
+      "body": {
+        "title": "Run from 56.95182, 24.08571",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.public_coordinates_forbidden"
+      ]
+    },
+    {
+      "name": "coordinates_in_area_label",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Near 56.95182,24.08571",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.public_coordinates_forbidden"
+      ]
+    },
+    {
+      "name": "contact_in_description",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Write me at runner@example.org to join",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.public_contact_forbidden"
+      ]
+    },
+    {
+      "name": "client_age",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          },
+          "birthDate": "1990-01-01"
+        }
+      },
+      "expectedIssues": [
+        "find_people.client_age_forbidden",
+        "find_people.unknown_field:birthDate"
+      ]
+    },
+    {
+      "name": "exact_missing",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.exact_location_required"
+      ]
+    },
+    {
+      "name": "outside_market",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 59.437,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.location_outside_market"
+      ]
+    },
+    {
+      "name": "residential",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Home address, apartment 5",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.unsafe_location"
+      ]
+    },
+    {
+      "name": "foreign_host",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "22222222-2222-4222-8222-222222222222"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.responsible_host"
+      ]
+    },
+    {
+      "name": "deadline_after_start",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-15T06:30:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.application_deadline"
+      ]
+    },
+    {
+      "name": "meeting_ended",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2026-01-10T06:00:00.000Z",
+              "endAtUtc": "2026-01-10T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2026-01-09T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.meeting_ended"
+      ]
+    },
+    {
+      "name": "itemized_costs",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "itemized",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": true
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.expense_items_unsupported"
+      ]
+    },
+    {
+      "name": "age_unconfirmed",
+      "body": {
+        "title": "Morning run along the Daugava",
+        "shortDescription": "Easy 8 km jog at a relaxed pace, all levels welcome.",
+        "fullDescription": "We meet by the river and run an easy loop together. No pressure on speed: we wait for each other at every turn.",
+        "contentLocale": "en",
+        "categoryId": "sport",
+        "subcategoryId": "running",
+        "tags": [
+          "running"
+        ],
+        "findPeople": {
+          "schemaVersion": 1,
+          "revision": 3,
+          "skillLevel": "beginner",
+          "languageCodes": [
+            "en",
+            "lv"
+          ],
+          "participationGoal": "social",
+          "experienceRequirements": [
+            "Comfortable running 5 km"
+          ],
+          "equipmentNotes": "Running shoes and water.",
+          "houseRuleIds": [
+            "be_on_time",
+            "respect_boundaries"
+          ],
+          "visibility": "public",
+          "schedule": {
+            "mode": "single",
+            "timezoneId": "Europe/Riga",
+            "slot": {
+              "id": "30ab1125-6d20-55b3-870b-81c4c60e195b",
+              "startAtUtc": "2027-05-15T06:00:00.000Z",
+              "endAtUtc": "2027-05-15T07:30:00.000Z"
+            },
+            "applicationDeadlineUtc": "2027-05-14T18:00:00.000Z"
+          },
+          "meeting": {
+            "mode": "in_person",
+            "publicAreaLabel": "Ķīpsala, Riga",
+            "publicPlaceConfirmed": true,
+            "exact": {
+              "latitude": 56.95182,
+              "longitude": 24.08571,
+              "placeName": "Ķīpsala riverside steps",
+              "addressLine": "Ķīpsalas iela 6, Riga",
+              "instructions": "By the blue bench."
+            }
+          },
+          "group": {
+            "targetGroupSize": 6,
+            "hostSeatCount": 1,
+            "approvalMode": "manual",
+            "allowPartyApplications": false,
+            "maxSeatsPerApplication": 1,
+            "verificationRequirement": "none",
+            "waitlistEnabled": true,
+            "waitlistPolicy": "first_come",
+            "waitlistSeatFitPolicy": "strict_order",
+            "attendanceConfirmationRequired": true,
+            "guestPolicy": "authenticated_adults_only"
+          },
+          "cost": {
+            "costType": "free",
+            "expenseSplitMode": "none",
+            "cancellationPolicyId": "standard_respectful_notice"
+          },
+          "hosts": {
+            "responsibleHostUserIds": [
+              "11111111-1111-4111-8111-111111111111"
+            ],
+            "conversationPolicy": "applicants_and_accepted",
+            "quietHoursStartMinute": 1320,
+            "quietHoursEndMinute": 480
+          },
+          "confirmations": {
+            "safetyRulesAccepted": true,
+            "accuracyConfirmed": true,
+            "ageRequirementConfirmed": false
+          }
+        }
+      },
+      "expectedIssues": [
+        "find_people.adult_only"
+      ]
+    }
+  ]
+}

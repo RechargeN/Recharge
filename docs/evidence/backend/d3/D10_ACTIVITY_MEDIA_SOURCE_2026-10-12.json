@@ -1,0 +1,19 @@
+{
+  "parent": "901bf0d25d9b7448d1fc0b456b2d1ee4a920b462",
+  "files": [
+    {
+      "path": "apps/backend/functions/test/emulator/content_place_media_delivery.test.ts",
+      "sha256": "01b6c759c5dc51a76c826f3578db3415f4de3113c8fdbfd7490a1f771cb4976e"
+    },
+    {
+      "path": "apps/backend/functions/test/support/content_activity_world.ts",
+      "sha256": "5676d99772000162f7699ed8b0380eecf51526ad5143738df327c42f7403db38"
+    },
+    {
+      "path": "apps/backend/scripts/stand-d3-1-gate.mjs",
+      "sha256": "0c748da8e13fc7dab62f5aafcf561168a0ef60a39b861c5336a8fe17d81d704a"
+    }
+  ],
+  "fingerprint": "b8436179b716aa053a1e3b101db7552ac485831fde8313e2e67702e822f5193d",
+  "normalization": "CRLF to LF; SHA256 compact sorted-key JSON files list"
+}

@@ -7,6 +7,7 @@ import 'package:recharge/features/favorites/domain/repositories/favorites_reposi
 import 'package:recharge/features/favorites/domain/usecases/add_favorite_usecase.dart';
 import 'package:recharge/features/favorites/domain/usecases/get_favorites_usecase.dart';
 import 'package:recharge/features/favorites/domain/usecases/remove_favorite_usecase.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   late _FakeFavoritesRepository repository;
@@ -58,7 +59,7 @@ FavoriteItemEntity _favorite(String id) {
     category: 'outdoor',
     startsAtUtc: DateTime.parse('2026-04-20T10:00:00Z'),
     distanceKm: 2.4,
-    priceAmount: 0,
+    priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
     isFree: true,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
     targetRoute: null,

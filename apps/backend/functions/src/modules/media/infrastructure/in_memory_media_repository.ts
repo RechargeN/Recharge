@@ -1,0 +1,195 @@
+import type { MediaEffectV1 } from '../../../contracts/media_v1.js';
+import { deepFreeze } from '../../../shared/immutable.js';
+import { MediaRepositoryConflict } from '../domain/failures.js';
+import type { MediaAsset } from '../domain/media_asset.js';
+import type {
+  MediaAuditEntry,
+  MediaIdempotencyRecord,
+  MediaRepository,
+  MediaTransaction,
+  StoredDeletionStatus,
+  StoredProcessingReceipt,
+} from '../domain/repositories.js';
+import type { UploadSession } from '../domain/upload_session.js';
+
+interface Store {
+  readonly assets: Map<string, MediaAsset>;
+  readonly sessions: Map<string, UploadSession>;
+  readonly receipts: Map<string, StoredProcessingReceipt>;
+  readonly deletions: Map<string, StoredDeletionStatus>;
+  readonly idempotency: Map<string, MediaIdempotencyRecord>;
+  readonly audit: MediaAuditEntry[];
+  readonly effects: MediaEffectV1[];
+}
+
+/**
+ * Deterministic local adapter with serialized transactions. Writes are staged
+ * and become visible only if the whole operation succeeds (all-or-nothing).
+ * It is test infrastructure and carries no production authority.
+ */
+export class InMemoryMediaRepository implements MediaRepository {
+  #store: Store = emptyStore();
+  #tail: Promise<void> = Promise.resolve();
+
+  async transact<T>(operation: (transaction: MediaTransaction) => T | Promise<T>): Promise<T> {
+    let release: (() => void) | undefined;
+    const previous = this.#tail;
+    this.#tail = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await previous;
+    const working = cloneStore(this.#store);
+    try {
+      const result = await operation(transactionFor(working));
+      this.#store = working;
+      return result;
+    } finally {
+      release?.();
+    }
+  }
+
+  /** Test-only feed of committed facts in `(occurredAtUtc, effectId)` order (D2). */
+  effectsAfter(
+    after: { readonly occurredAtUtc: string; readonly effectId: string } | null,
+    limit: number,
+  ): Promise<readonly MediaEffectV1[]> {
+    const ordered = [...this.#store.effects].sort((left, right) =>
+      left.occurredAtUtc === right.occurredAtUtc
+        ? left.effectId < right.effectId
+          ? -1
+          : 1
+        : left.occurredAtUtc < right.occurredAtUtc
+          ? -1
+          : 1,
+    );
+    return Promise.resolve(
+      ordered
+        .filter(
+          (item) =>
+            after === null ||
+            item.occurredAtUtc > after.occurredAtUtc ||
+            (item.occurredAtUtc === after.occurredAtUtc && item.effectId > after.effectId),
+        )
+        .slice(0, limit),
+    );
+  }
+
+  /** Test-only inspection of committed state. */
+  snapshot(): Readonly<{
+    assets: readonly MediaAsset[];
+    sessions: readonly UploadSession[];
+    receipts: readonly StoredProcessingReceipt[];
+    deletions: readonly StoredDeletionStatus[];
+    audit: readonly MediaAuditEntry[];
+    effects: readonly MediaEffectV1[];
+  }> {
+    return deepFreeze({
+      assets: [...this.#store.assets.values()],
+      sessions: [...this.#store.sessions.values()],
+      receipts: [...this.#store.receipts.values()],
+      deletions: [...this.#store.deletions.values()],
+      audit: [...this.#store.audit],
+      effects: [...this.#store.effects],
+    });
+  }
+}
+
+function emptyStore(): Store {
+  return {
+    assets: new Map(),
+    sessions: new Map(),
+    receipts: new Map(),
+    deletions: new Map(),
+    idempotency: new Map(),
+    audit: [],
+    effects: [],
+  };
+}
+
+function cloneStore(store: Store): Store {
+  // Stored values are deep-frozen and never mutated; copying containers suffices.
+  return {
+    assets: new Map(store.assets),
+    sessions: new Map(store.sessions),
+    receipts: new Map(store.receipts),
+    deletions: new Map(store.deletions),
+    idempotency: new Map(store.idempotency),
+    audit: [...store.audit],
+    effects: [...store.effects],
+  };
+}
+
+function copy<T>(value: T): T {
+  return deepFreeze(structuredClone(value)) as T;
+}
+
+function receiptKey(assetId: string, attemptNumber: number): string {
+  return `${assetId}#${attemptNumber}`;
+}
+
+function idempotencyKey(actorUserId: string, commandType: string, key: string): string {
+  return `${actorUserId.length}:${actorUserId}|${commandType}|${key}`;
+}
+
+function transactionFor(store: Store): MediaTransaction {
+  return {
+    asset: (assetId) => Promise.resolve(store.assets.get(assetId) ?? null),
+    assetIdsPage: (afterAssetId, limit) =>
+      Promise.resolve(
+        [...store.assets.keys()]
+          .filter((id) => afterAssetId === null || id > afterAssetId)
+          .sort()
+          .slice(0, limit),
+      ),
+    putAsset(asset, expectedStoredRevision) {
+      const stored = store.assets.get(asset.assetId)?.revision ?? 0;
+      if (stored !== expectedStoredRevision) throw new MediaRepositoryConflict('asset_revision');
+      store.assets.set(asset.assetId, copy(asset));
+    },
+    session: (uploadSessionId) => Promise.resolve(store.sessions.get(uploadSessionId) ?? null),
+    putSession(session, expectedStoredRevision) {
+      const stored = store.sessions.get(session.uploadSessionId)?.revision ?? 0;
+      if (stored !== expectedStoredRevision) throw new MediaRepositoryConflict('session_revision');
+      store.sessions.set(session.uploadSessionId, copy(session));
+    },
+    sessionForAsset: (assetId) =>
+      Promise.resolve(
+        [...store.sessions.values()].find((item) => item.assetId === assetId) ?? null,
+      ),
+    deletion: (assetId) => Promise.resolve(store.deletions.get(assetId) ?? null),
+    putDeletion(status, expectedStoredRevision) {
+      const stored = store.deletions.get(status.assetId)?.deletionRevision ?? 0;
+      if (stored !== expectedStoredRevision) throw new MediaRepositoryConflict('asset_revision');
+      store.deletions.set(status.assetId, copy(status));
+    },
+    receipt: (assetId, attemptNumber) =>
+      Promise.resolve(store.receipts.get(receiptKey(assetId, attemptNumber)) ?? null),
+    receiptsForAsset: (assetId) =>
+      Promise.resolve(
+        [...store.receipts.values()]
+          .filter((item) => item.assetId === assetId)
+          .sort((left, right) => left.attemptNumber - right.attemptNumber),
+      ),
+    putReceipt(receipt) {
+      const key = receiptKey(receipt.assetId, receipt.attemptNumber);
+      if (store.receipts.has(key)) throw new MediaRepositoryConflict('immutable_receipt');
+      store.receipts.set(key, copy(receipt));
+    },
+    idempotency: (actorUserId, commandType, key) =>
+      Promise.resolve(store.idempotency.get(idempotencyKey(actorUserId, commandType, key)) ?? null),
+    putIdempotency(record) {
+      store.idempotency.set(
+        idempotencyKey(record.actorUserId, record.commandType, record.idempotencyKey),
+        copy(record),
+      );
+    },
+    appendAudit(entry) {
+      store.audit.push(copy(entry));
+    },
+    effects: {
+      append(effect) {
+        store.effects.push(copy(effect));
+      },
+    },
+  };
+}

@@ -26,8 +26,12 @@ class AuthSessionModel {
   final String? expiresAtUtcIso;
 
   Map<String, dynamic> toJson() {
-    final expiresAt = expiresAtUtcIso ??
-        DateTime.now().toUtc().add(Duration(seconds: expiresInSeconds)).toIso8601String();
+    final expiresAt =
+        expiresAtUtcIso ??
+        DateTime.now()
+            .toUtc()
+            .add(Duration(seconds: expiresInSeconds))
+            .toIso8601String();
     return <String, dynamic>{
       'access_token': accessToken,
       'refresh_token': refreshToken,

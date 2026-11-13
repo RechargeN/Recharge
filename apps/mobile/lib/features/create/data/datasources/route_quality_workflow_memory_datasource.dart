@@ -16,21 +16,27 @@ class RouteQualityWorkflowMemoryDataSource {
       _candidates[candidateId];
 
   List<RouteMapSnapshotCandidate> candidatesForRoute(String routeId) {
-    final values = _candidates.values
-        .where((candidate) => candidate.routeId == routeId)
-        .toList(growable: false)
-      ..sort((left, right) => left.createdAtUtc.compareTo(right.createdAtUtc));
+    final values =
+        _candidates.values
+            .where((candidate) => candidate.routeId == routeId)
+            .toList(growable: false)
+          ..sort(
+            (left, right) => left.createdAtUtc.compareTo(right.createdAtUtc),
+          );
     return List<RouteMapSnapshotCandidate>.unmodifiable(values);
   }
 
   List<RouteMapSnapshotCandidate> pendingCandidates() {
-    final values = _candidates.values
-        .where(
-          (candidate) =>
-              candidate.decision == RouteCandidateDecision.pending,
-        )
-        .toList(growable: false)
-      ..sort((left, right) => left.createdAtUtc.compareTo(right.createdAtUtc));
+    final values =
+        _candidates.values
+            .where(
+              (candidate) =>
+                  candidate.decision == RouteCandidateDecision.pending,
+            )
+            .toList(growable: false)
+          ..sort(
+            (left, right) => left.createdAtUtc.compareTo(right.createdAtUtc),
+          );
     return List<RouteMapSnapshotCandidate>.unmodifiable(values);
   }
 
@@ -42,18 +48,24 @@ class RouteQualityWorkflowMemoryDataSource {
   RouteSafetyReport? safetyReportById(String reportId) => _reports[reportId];
 
   List<RouteSafetyReport> safetyReportsForRoute(String routeId) {
-    final values = _reports.values
-        .where((report) => report.routeId == routeId)
-        .toList(growable: false)
-      ..sort((left, right) => left.createdAtUtc.compareTo(right.createdAtUtc));
+    final values =
+        _reports.values
+            .where((report) => report.routeId == routeId)
+            .toList(growable: false)
+          ..sort(
+            (left, right) => left.createdAtUtc.compareTo(right.createdAtUtc),
+          );
     return List<RouteSafetyReport>.unmodifiable(values);
   }
 
   List<RouteSafetyReport> openSafetyReports() {
-    final values = _reports.values
-        .where((report) => report.state == RouteSafetyReportState.open)
-        .toList(growable: false)
-      ..sort((left, right) => left.createdAtUtc.compareTo(right.createdAtUtc));
+    final values =
+        _reports.values
+            .where((report) => report.state == RouteSafetyReportState.open)
+            .toList(growable: false)
+          ..sort(
+            (left, right) => left.createdAtUtc.compareTo(right.createdAtUtc),
+          );
     return List<RouteSafetyReport>.unmodifiable(values);
   }
 }

@@ -17,14 +17,21 @@ class MockIdentityFixture {
         'create.place',
         'create.route',
         'create.scenario',
+        'create.collection',
         'submit.event',
         'submit.place',
         'submit.route',
         'submit.scenario',
+        'submit.collection',
         'page.create',
         'admin.tools.view',
         'admin.experience.preview',
         'moderate.route',
+        // CLG-CRT-01 §6: this fixture backs the admin identity snapshot,
+        // same rationale as `moderate.route` above — exercises the real
+        // accept/reject path even though no dedicated moderation page
+        // ships in this slice.
+        'moderate.collection',
       },
       pages: const [],
       memberships: const [],

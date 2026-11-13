@@ -3,6 +3,10 @@ import 'package:recharge/app/adapters/discover_scenario_intake_adapter.dart';
 import 'package:recharge/features/create/domain/entities/scenario_item_draft.dart';
 import 'package:recharge/features/create/domain/entities/scenario_object_intake.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/discover/domain/entities/event_occurrence.dart';
+import 'package:recharge/features/discover/domain/entities/published_event_discovery_entity.dart';
+import 'package:recharge/features/discover/application/state/scenario_intake_selection_state.dart';
 
 void main() {
   const adapter = DiscoverScenarioIntakeAdapter();
@@ -44,6 +48,20 @@ void main() {
     expect(candidate.location!.address, 'Atbrivosanas aleja 93');
   });
 
+  test('typed cancelled Event enters Scenario as unavailable', () {
+    final intent = adapter.toEventIntent(
+      event: _publishedEvent(EventOccurrenceStatus.cancelled),
+      intentId: 'intent-cancelled',
+      requesterId: 'user-1',
+      checkedAtUtc: DateTime.utc(2026, 8, 3),
+    );
+
+    expect(
+      intent.candidates.single.sourceStatus,
+      ScenarioSourceStatus.unavailable,
+    );
+  });
+
   test('Search batch preserves tap order and copies no search context', () {
     final first = _item(kind: DiscoverObjectKind.place);
     final second = DiscoverItemEntity(
@@ -55,7 +73,7 @@ void main() {
       startsAtUtc: DateTime.utc(2026, 8, 8, 19),
       latitude: 56.95,
       longitude: 24.11,
-      priceAmount: 5,
+      priceAmount: const Money(minorUnits: 500, currencyCode: 'EUR'),
       distanceKm: 2,
       isFree: false,
       objectKind: DiscoverObjectKind.activity,
@@ -98,12 +116,12 @@ void main() {
       startsAtUtc: DateTime.utc(2026, 8, 3),
       latitude: 95,
       longitude: 24.1,
-      priceAmount: 0,
+      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
       distanceKm: 0,
       isFree: true,
       objectKind: DiscoverObjectKind.place,
     );
-    expect(adapter.supportIssue(invalid), contains('no usable'));
+    expect(adapter.supportIssue(invalid), ScenarioIntakeIssue.noLocation);
   });
 }
 
@@ -117,7 +135,7 @@ DiscoverItemEntity _item({required DiscoverObjectKind kind}) =>
       startsAtUtc: DateTime.utc(2026, 8, 8, 17),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 12,
+      priceAmount: const Money(minorUnits: 1200, currencyCode: 'EUR'),
       distanceKm: 1.2,
       isFree: false,
       objectKind: kind,
@@ -127,4 +145,35 @@ DiscoverItemEntity _item({required DiscoverObjectKind kind}) =>
       marketCityId: 'rezekne',
       timezoneId: 'Europe/Riga',
       durationMinutes: 90,
+    );
+
+PublishedEventDiscoveryEntity _publishedEvent(EventOccurrenceStatus status) =>
+    PublishedEventDiscoveryEntity(
+      eventId: 'evt-1',
+      publisherId: 'page-1',
+      publisherType: 'page',
+      publisherName: 'Marine Tennis Club',
+      title: 'Sunset Tennis Meetup',
+      subtitle: 'Evening tennis',
+      fullDescription: 'Tennis at sunset.',
+      category: 'sport',
+      city: 'Dubai',
+      latitude: 25.08,
+      longitude: 55.14,
+      distanceKm: 3.2,
+      priceAmount: 12,
+      isFree: false,
+      currencyCode: 'EUR',
+      scheduleMode: EventScheduleMode.oneTime,
+      occurrences: <EventOccurrence>[
+        EventOccurrence(
+          id: 'occ-1',
+          startAtUtc: DateTime.utc(2026, 6, 21, 14),
+          endAtUtc: DateTime.utc(2026, 6, 21, 16, 30),
+          status: status,
+        ),
+      ],
+      displayOccurrenceId: 'occ-1',
+      timezoneId: 'Asia/Dubai',
+      publishedAtUtc: DateTime.utc(2026, 5, 1),
     );

@@ -83,7 +83,7 @@ class LocalAiAssistGateway implements AiAssistGateway {
         _costPolicy.providerId != providerId) {
       throw const AiAssistGatewayException(
         AiAssistFailureCode.gatewayFailure,
-        'The local AI cost policy is invalid or disabled.',
+        'The local AI cost policy is invalid or disabled.', // l10n-ignore: local stub text, not shown; the UI uses codes
       );
     }
     invocationCount++;
@@ -102,17 +102,17 @@ class LocalAiAssistGateway implements AiAssistGateway {
       case LocalAiAssistBehavior.timeout:
         throw const AiAssistGatewayException(
           AiAssistFailureCode.timeout,
-          'The local AI simulator timed out.',
+          'The local AI simulator timed out.', // l10n-ignore: local stub text, not shown; the UI uses codes
         );
       case LocalAiAssistBehavior.offline:
         throw const AiAssistGatewayException(
           AiAssistFailureCode.offline,
-          'The local AI simulator is offline.',
+          'The local AI simulator is offline.', // l10n-ignore: local stub text, not shown; the UI uses codes
         );
       case LocalAiAssistBehavior.gatewayFailure:
         throw const AiAssistGatewayException(
           AiAssistFailureCode.gatewayFailure,
-          'The local AI simulator failed.',
+          'The local AI simulator failed.', // l10n-ignore: local stub text, not shown; the UI uses codes
         );
       case LocalAiAssistBehavior.success:
       case LocalAiAssistBehavior.malformedOutput:
@@ -142,13 +142,15 @@ class LocalAiAssistGateway implements AiAssistGateway {
       evidence: const <AiAssistEvidence>[
         AiAssistEvidence(
           kind: AiAssistEvidenceKind.localRule,
-          label: 'Deterministic local fixture',
+          label:
+              'Deterministic local fixture', // l10n-ignore: local stub text, not shown; the UI uses codes
         ),
       ],
       issues: const <AiAssistIssue>[
         AiAssistIssue(
           code: AiAssistIssueCode.localDemo,
-          message: 'Local demo: no external AI or live data were used.',
+          message:
+              'Local demo: no external AI or live data were used.', // l10n-ignore: local stub text, not shown; the UI uses codes
         ),
       ],
       usedToolIds: usedToolIds,

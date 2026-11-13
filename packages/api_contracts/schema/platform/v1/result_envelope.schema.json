@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/platform/v1/result_envelope.schema.json",
+  "title": "Recharge Platform v1 result envelope",
+  "$defs": {
+    "base": {
+      "type": "object",
+      "properties": {
+        "contractVersion": {
+          "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/contractVersion"
+        },
+        "requestId": {
+          "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/entityReference"
+        },
+        "correlationId": {
+          "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/entityReference"
+        },
+        "serverTime": {
+          "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/utcInstant"
+        },
+        "resourceRevision": {
+          "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/revision"
+        },
+        "clientPolicy": {
+          "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/minimumClientPolicy"
+        }
+      },
+      "required": [
+        "contractVersion",
+        "requestId",
+        "correlationId",
+        "serverTime"
+      ]
+    },
+    "success": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "properties": {
+            "outcome": { "const": "success" },
+            "result": {
+              "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/jsonObject"
+            }
+          },
+          "required": ["outcome", "result"]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "failure": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "properties": {
+            "outcome": { "const": "failure" },
+            "error": {
+              "$ref": "https://recharge.app/schemas/platform/v1/error.schema.json"
+            }
+          },
+          "required": ["outcome", "error"]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "cancelled": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "properties": {
+            "outcome": { "const": "cancelled" },
+            "cancelReasonCode": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          },
+          "required": ["outcome", "cancelReasonCode"]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "unknown": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "properties": {
+            "outcome": { "const": "unknown" },
+            "unknownReason": {
+              "type": "string",
+              "enum": [
+                "transportTimeout",
+                "connectionLost",
+                "clientCancelledAfterSend",
+                "responseLost"
+              ]
+            },
+            "reconciliation": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "idempotencyKey": {
+                  "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/idempotencyKey"
+                },
+                "semanticPayloadHash": {
+                  "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/semanticPayloadHash"
+                },
+                "statusQuerySupported": { "type": "boolean" }
+              },
+              "required": [
+                "idempotencyKey",
+                "semanticPayloadHash",
+                "statusQuerySupported"
+              ]
+            }
+          },
+          "required": ["outcome", "unknownReason", "reconciliation"]
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/success" },
+    { "$ref": "#/$defs/failure" },
+    { "$ref": "#/$defs/cancelled" },
+    { "$ref": "#/$defs/unknown" }
+  ]
+}

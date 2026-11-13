@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "typeId": "rental",
+  "policyId": "test-only-rental-policy-1",
+  "taxonomyRevision": "BCK-20 category-system-1.4.3 (pairs must exist there)",
+  "source": "TEST-ONLY Emulator Rental policy (RENTAL_D3_3_PUBLICATION_AMENDMENT.md §2 Q1a/Q1b). Not an accepted policy: BCK-20 has no Rental policy contract. Category whitelist and required flags follow the accepted Category System and apps/mobile RentalCreatePolicy.safeFallback; duration bounds follow RNT-CRT-01 §10.1; coverageFreshnessDays, minApproximatePrecisionMeters, maxDeliveryRadiusKm and policyVersion are proposals.",
+  "categories": ["sport", "water_activities", "winter_seasonal", "adrenaline_entertainment", "auto_moto"],
+  "pairs": [
+    { "categoryId": "sport", "subcategoryId": "cycling" },
+    { "categoryId": "water_activities", "subcategoryId": "sup" },
+    { "categoryId": "water_activities", "subcategoryId": "kayak" },
+    { "categoryId": "winter_seasonal", "subcategoryId": "skiing" },
+    { "categoryId": "auto_moto", "subcategoryId": "offroad_trip" }
+  ],
+  "base": {
+    "policyVersion": "1.0",
+    "coverageFreshnessDays": 7,
+    "absoluteMinMinutes": 60,
+    "absoluteMaxMinutes": 129600,
+    "minApproximatePrecisionMeters": 500,
+    "maxDeliveryRadiusKm": 50
+  },
+  "requirements": {
+    "sport": { "requiresSizeOrVariant": true, "requiresMinRenterAge": false, "requiresIdAtHandover": false, "requiresSafetyNotice": false },
+    "water_activities": { "requiresSizeOrVariant": false, "requiresMinRenterAge": false, "requiresIdAtHandover": false, "requiresSafetyNotice": true },
+    "winter_seasonal": { "requiresSizeOrVariant": true, "requiresMinRenterAge": false, "requiresIdAtHandover": false, "requiresSafetyNotice": false },
+    "adrenaline_entertainment": { "requiresSizeOrVariant": false, "requiresMinRenterAge": true, "requiresIdAtHandover": false, "requiresSafetyNotice": true },
+    "auto_moto": { "requiresSizeOrVariant": false, "requiresMinRenterAge": true, "requiresIdAtHandover": true, "requiresSafetyNotice": true }
+  }
+}

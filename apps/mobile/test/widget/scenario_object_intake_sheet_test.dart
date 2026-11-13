@@ -8,6 +8,7 @@ import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/app/di/service_locator.dart';
 import 'package:recharge/app/presentation/scenario_object_intake_sheet.dart';
 import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/scenario_create_coordinator.dart';
 import 'package:recharge/features/create/data/datasources/create_local_datasource.dart';
@@ -107,7 +108,7 @@ void main() {
     await tester.tap(find.text('Add 1'));
     await tester.pumpAndSettle();
     expect(find.text('Complete'), findsOneWidget);
-    expect(find.textContaining('Added 1 to'), findsOneWidget);
+    expect(find.textContaining('Added 1 stop to'), findsOneWidget);
     expect(await facade.listTargets('user-1'), hasLength(1));
   });
 
@@ -203,7 +204,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(
-      find.bySemanticsLabel(RegExp('Success.*Added 1 stops')),
+      find.bySemanticsLabel(RegExp('Added 1 stop to the Scenario')),
       findsOneWidget,
     );
     semantics.dispose();
@@ -227,7 +228,7 @@ final DiscoverItemEntity _item = DiscoverItemEntity(
   startsAtUtc: DateTime.utc(2026, 8, 8, 17),
   latitude: 56.5099,
   longitude: 27.3332,
-  priceAmount: 0,
+  priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
   distanceKm: 1,
   isFree: true,
   objectKind: DiscoverObjectKind.place,

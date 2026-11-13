@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_query.dart';
@@ -22,20 +23,26 @@ class SmartSearchPage extends ConsumerStatefulWidget {
 }
 
 class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
+  // The prompt text is sent to the query parser; it comes from l10n at
+  // build time (see `_promptText`).
   static const List<_PromptSuggestion> _popularPrompts = <_PromptSuggestion>[
     _PromptSuggestion(
       icon: Icons.local_bar_outlined,
-      label: 'Хочу спокойный вечер рядом',
+      label: 'calmEveningNearby',
     ),
     _PromptSuggestion(
       icon: Icons.auto_awesome_outlined,
-      label: 'Найди что-то интересное на 2 часа',
+      label: 'somethingForTwoHours',
     ),
-    _PromptSuggestion(
-      icon: Icons.group_outlined,
-      label: 'Куда сходить вдвоём недалеко',
-    ),
+    _PromptSuggestion(icon: Icons.group_outlined, label: 'forTwoNearby'),
   ];
+
+  String _promptText(String id) => switch (id) {
+    'calmEveningNearby' => context.l10n.discoverSmartPromptCalmEveningNearby,
+    'somethingForTwoHours' =>
+      context.l10n.discoverSmartPromptSomethingForTwoHours,
+    _ => context.l10n.discoverSmartPromptForTwoNearby,
+  };
 
   late final TextEditingController _promptController;
   SmartSearchParseResult? _parseResult;
@@ -46,7 +53,14 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
     super.initState();
     final String prompt = widget.seedParameters['prompt']?.trim() ?? '';
     _promptController = TextEditingController(text: prompt);
-    _parseResult = prompt.isEmpty ? null : parseSmartSearch(prompt);
+    _parseResult = prompt.isEmpty
+        ? null
+        : parseSmartSearch(
+            prompt,
+            currencyCode: ref
+                .read(discoverFeedControllerProvider)
+                .marketCurrencyCode,
+          );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(discoverFeedControllerProvider).ensureSmartSearchHistoryLoaded();
     });
@@ -71,10 +85,10 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Smart Search'),
+        title: Text(context.l10n.discoverSmartSearch),
         actions: <Widget>[
           IconButton(
-            tooltip: 'Как работает Smart Search',
+            tooltip: context.l10n.discoverSmartSearchHow,
             onPressed: _showHelp,
             icon: const Icon(Icons.help_outline_rounded),
           ),
@@ -92,13 +106,13 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
             onChanged: _parsePrompt,
             onSubmitted: (_) => _startSearch(controller),
             decoration: InputDecoration(
-              hintText: 'Напишите или скажите,\nчто хотите найти',
+              hintText: context.l10n.discoverSmartSearchPromptTwoLines,
               prefixIcon: const Padding(
                 padding: EdgeInsets.only(bottom: 28),
                 child: Icon(Icons.search_rounded),
               ),
               suffixIcon: IconButton(
-                tooltip: 'Голосовой запрос',
+                tooltip: context.l10n.discoverVoiceQuery,
                 onPressed: _showVoicePromptSheet,
                 icon: const Icon(Icons.mic_none_rounded),
               ),
@@ -106,9 +120,7 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
           ),
           const SizedBox(height: 10),
           _ExampleHint(
-            onTap: () => _usePrompt(
-              'Хочу сегодня вечером что-то спокойное рядом, до 20 EUR',
-            ),
+            onTap: () => _usePrompt(context.l10n.discoverSmartPromptExample),
           ),
           if (_parseResult != null) ...<Widget>[
             const SizedBox(height: 12),
@@ -121,35 +133,40 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
               children: <Widget>[
                 _QuickPromptChip(
                   icon: Icons.near_me_outlined,
-                  label: 'Рядом сейчас',
-                  onPressed: () => _usePrompt('Что-то интересное рядом сейчас'),
+                  label: context.l10n.discoverChipNearNow,
+                  onPressed: () =>
+                      _usePrompt(context.l10n.discoverSmartPromptNearNow),
                 ),
                 _QuickPromptChip(
                   icon: Icons.group_outlined,
-                  label: 'Для двоих',
-                  onPressed: () => _usePrompt('Куда сходить вдвоём'),
+                  label: context.l10n.discoverChipForTwo,
+                  onPressed: () =>
+                      _usePrompt(context.l10n.discoverSmartPromptForTwo),
                 ),
                 _QuickPromptChip(
                   icon: Icons.nightlight_outlined,
-                  label: 'Спокойный вечер',
-                  onPressed: () => _usePrompt('Хочу спокойный вечер'),
+                  label: context.l10n.discoverChipCalmEvening,
+                  onPressed: () =>
+                      _usePrompt(context.l10n.discoverSmartPromptCalmEvening),
                 ),
                 _QuickPromptChip(
                   icon: Icons.schedule_outlined,
-                  label: '1–2 часа',
-                  onPressed: () => _usePrompt('Найди план на 2 часа'),
+                  label: context.l10n.discoverChipOneTwoHours,
+                  onPressed: () =>
+                      _usePrompt(context.l10n.discoverSmartPromptTwoHours),
                 ),
                 _QuickPromptChip(
                   icon: Icons.payments_outlined,
-                  label: 'До €20',
-                  onPressed: () => _usePrompt('Найди что-то до 20 EUR'),
+                  label: context.l10n.discoverChipUpTo20,
+                  onPressed: () =>
+                      _usePrompt(context.l10n.discoverSmartPromptUpTo20),
                 ),
               ],
             ),
           ],
           const SizedBox(height: 22),
           Text(
-            'Популярные запросы',
+            context.l10n.discoverPopularQueries,
             style: Theme.of(
               context,
             ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
@@ -175,9 +192,10 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
                         _popularPrompts[index].icon,
                         color: colorScheme.primary,
                       ),
-                      title: Text(_popularPrompts[index].label),
+                      title: Text(_promptText(_popularPrompts[index].label)),
                       trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: () => _usePrompt(_popularPrompts[index].label),
+                      onTap: () =>
+                          _usePrompt(_promptText(_popularPrompts[index].label)),
                     ),
                     if (index != _popularPrompts.length - 1)
                       const Divider(height: 1),
@@ -189,7 +207,7 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
           if (history.isNotEmpty) ...<Widget>[
             const SizedBox(height: 22),
             Text(
-              'Недавние Smart Search',
+              context.l10n.discoverRecentSmartSearches,
               style: Theme.of(
                 context,
               ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
@@ -202,7 +220,7 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
                   leading: const Icon(Icons.history_rounded),
                   title: Text(item.prompt, maxLines: 2),
                   trailing: IconButton(
-                    tooltip: 'Удалить запрос',
+                    tooltip: context.l10n.discoverDeleteQuery,
                     onPressed: () =>
                         controller.deleteSmartSearchPrompt(item.id),
                     icon: const Icon(Icons.close_rounded),
@@ -221,7 +239,7 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
                       dimension: 22,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Начать поиск'),
+                  : Text(context.l10n.discoverStartSearch),
             ),
           ),
         ],
@@ -231,7 +249,14 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
 
   void _parsePrompt(String value) {
     setState(() {
-      _parseResult = value.trim().isEmpty ? null : parseSmartSearch(value);
+      _parseResult = value.trim().isEmpty
+          ? null
+          : parseSmartSearch(
+              value,
+              currencyCode: ref
+                  .read(discoverFeedControllerProvider)
+                  .marketCurrencyCode,
+            );
     });
   }
 
@@ -247,12 +272,15 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
     final String prompt = _promptController.text.trim();
     if (prompt.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Напишите или скажите, что найти')),
+        SnackBar(content: Text(context.l10n.discoverSmartSearchPrompt)),
       );
       return;
     }
 
-    final SmartSearchParseResult parsed = parseSmartSearch(prompt);
+    final SmartSearchParseResult parsed = parseSmartSearch(
+      prompt,
+      currencyCode: controller.marketCurrencyCode,
+    );
     final _DateWindow? window = switch (parsed.datePreset) {
       SmartSearchDatePreset.today => _todayWindow(),
       SmartSearchDatePreset.tonight => _tonightWindow(),
@@ -298,7 +326,7 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
               const Icon(Icons.mic_none_rounded, size: 36),
               const SizedBox(height: 8),
               Text(
-                'Скажите, что хотите найти',
+                context.l10n.discoverSayWhatToFind,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 12),
@@ -320,16 +348,12 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
     showDialog<void>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Как работает Smart Search'),
-        content: const Text(
-          'Введите текстовый запрос или используйте '
-          'голосовой ввод. Recharge разберёт время, место, '
-          'бюджет и настроение и покажет подходящие варианты.',
-        ),
+        title: Text(context.l10n.discoverSmartSearchHow),
+        content: Text(context.l10n.discoverSmartSearchHowBody),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Понятно'),
+            child: Text(context.l10n.discoverGotIt),
           ),
         ],
       ),
@@ -351,17 +375,14 @@ class _ExampleHint extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: onTap,
-        child: const Padding(
-          padding: EdgeInsets.all(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
           child: Row(
             children: <Widget>[
-              Icon(Icons.lightbulb_outline_rounded),
-              SizedBox(width: 10),
+              const Icon(Icons.lightbulb_outline_rounded),
+              const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  'Например: «Хочу сегодня вечером\n'
-                  'что-то спокойное рядом, до 20 €»',
-                ),
+                child: Text(context.l10n.discoverSmartPromptExampleHint),
               ),
             ],
           ),
@@ -379,13 +400,13 @@ class _UnderstoodParameters extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> chips = parseResult.explanationChips.isEmpty
-        ? <String>['Текстовый запрос']
+        ? <String>[context.l10n.discoverTextQuery]
         : parseResult.explanationChips;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Понятые параметры',
+          context.l10n.discoverUnderstoodParameters,
           style: Theme.of(
             context,
           ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),

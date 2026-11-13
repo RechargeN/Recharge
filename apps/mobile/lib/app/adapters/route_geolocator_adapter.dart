@@ -1,18 +1,34 @@
 import 'dart:io';
 
+import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../core/geo/geo_point.dart';
+import '../../core/localization/l10n_context.dart';
 import '../../features/create/domain/entities/route_recording_data.dart';
 import '../../features/create/domain/repositories/route_location_recording_port.dart';
 
 class RouteGeolocatorAdapter implements RouteLocationRecordingPort {
-  const RouteGeolocatorAdapter();
+  /// L4.6: [languageCode] is the app language for the Android background
+  /// recording notification, which is shown outside the widget tree.
+  ///
+  /// [check] and [request] default to the plugin; tests pass their own.
+  RouteGeolocatorAdapter({
+    String Function()? languageCode,
+    Future<LocationPermission> Function()? check,
+    Future<LocationPermission> Function()? request,
+  }) : _languageCode = languageCode ?? (() => 'en'),
+       _check = check ?? Geolocator.checkPermission,
+       _request = request ?? Geolocator.requestPermission;
+
+  final String Function() _languageCode;
+  final Future<LocationPermission> Function() _check;
+  final Future<LocationPermission> Function() _request;
 
   @override
   Future<RouteLocationPermission> checkPermission() async {
     try {
-      return _permission(await Geolocator.checkPermission());
+      return _permission(await _check());
     } catch (_) {
       throw const RouteLocationException('gps_permission_check_failed');
     }
@@ -45,9 +61,18 @@ class RouteGeolocatorAdapter implements RouteLocationRecordingPort {
     }
   }
 
+  /// B1D-ROUTE-BG-01 (Samsung A34, Android 16, 2026-11-04): geolocator adds
+  /// ACCESS_BACKGROUND_LOCATION to its request only while the status is
+  /// `whileInUse`, so with "Allow all the time" already granted (the path the
+  /// app sends people to in Settings) a new request asks for the foreground
+  /// permissions alone and answers `whileInUse`. A granted `always` is kept
+  /// as it is; otherwise the plugin request runs as before.
   @override
-  Future<RouteLocationPermission> requestBackgroundPermission() =>
-      _requestPermission();
+  Future<RouteLocationPermission> requestBackgroundPermission() async {
+    final RouteLocationPermission current = await checkPermission();
+    if (current == RouteLocationPermission.always) return current;
+    return _requestPermission();
+  }
 
   @override
   Future<RouteLocationPermission> requestForegroundPermission() =>
@@ -55,7 +80,7 @@ class RouteGeolocatorAdapter implements RouteLocationRecordingPort {
 
   Future<RouteLocationPermission> _requestPermission() async {
     try {
-      return _permission(await Geolocator.requestPermission());
+      return _permission(await _request());
     } catch (_) {
       throw const RouteLocationException('gps_permission_request_failed');
     }
@@ -108,6 +133,18 @@ class RouteGeolocatorAdapter implements RouteLocationRecordingPort {
         });
   }
 
+  ForegroundNotificationConfig _backgroundNotification() {
+    final AppLocalizations l10n = lookupAppLocalizations(
+      Locale(_languageCode()),
+    );
+    return ForegroundNotificationConfig(
+      notificationTitle: l10n.routeRecordingNotificationTitle,
+      notificationText: l10n.routeRecordingNotificationText,
+      enableWakeLock: true,
+      setOngoing: true,
+    );
+  }
+
   LocationSettings _platformSettings(RouteLocationRecordingSettings settings) {
     if (Platform.isAndroid) {
       return AndroidSettings(
@@ -115,13 +152,7 @@ class RouteGeolocatorAdapter implements RouteLocationRecordingPort {
         distanceFilter: settings.distanceFilterMeters,
         intervalDuration: settings.minimumInterval,
         foregroundNotificationConfig: settings.backgroundEnabled
-            ? const ForegroundNotificationConfig(
-                notificationTitle: 'Route recording is active',
-                notificationText:
-                    'Recharge is saving your route while the app is in the background.',
-                enableWakeLock: true,
-                setOngoing: true,
-              )
+            ? _backgroundNotification()
             : null,
       );
     }

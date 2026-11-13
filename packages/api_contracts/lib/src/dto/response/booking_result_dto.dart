@@ -12,16 +12,22 @@ class BookingResultDto {
     required this.correlationId,
     required this.serverTime,
     this.booking,
+    this.outcome,
     this.hold,
     this.policy,
     this.error,
     Map<String, Object?>? unsupportedPayload,
   }) : unsupportedPayload = unsupportedPayload == null
-            ? null
-            : freezeJsonMap(unsupportedPayload, 'unsupportedPayload') {
+           ? null
+           : freezeJsonMap(unsupportedPayload, 'unsupportedPayload') {
     if (kind == BookingResultKind.succeeded && error != null) {
       throw const BookingContractFormatException(
         'Succeeded result cannot contain error',
+      );
+    }
+    if (outcome != null && kind != BookingResultKind.succeeded) {
+      throw const BookingContractFormatException(
+        'Only a succeeded result may contain a command outcome',
       );
     }
     if ((kind == BookingResultKind.rejected ||
@@ -52,6 +58,7 @@ class BookingResultDto {
       allowed: <String>{
         ...required,
         'booking',
+        'outcome',
         'hold',
         'policy',
         'error',
@@ -85,6 +92,13 @@ class BookingResultDto {
       booking: json['booking'] == null
           ? null
           : BookingDto.fromJson(freezeJsonMap(json['booking'], 'booking')),
+      outcome: json['outcome'] == null
+          ? null
+          : parseWireEnum(
+              json['outcome'],
+              BookingCommandOutcome.values,
+              field: 'outcome',
+            ),
       hold: json['hold'] == null
           ? null
           : BookingHoldDto.fromJson(freezeJsonMap(json['hold'], 'hold')),
@@ -115,11 +129,11 @@ class BookingResultDto {
             : 'unsupported-request',
         correlationId:
             correlationId is String && correlationId.trim().isNotEmpty
-                ? correlationId
-                : 'unsupported-correlation',
+            ? correlationId
+            : 'unsupported-correlation',
         serverTime: serverTime is String && serverTime.endsWith('Z')
             ? DateTime.tryParse(serverTime)?.toUtc() ??
-                DateTime.fromMillisecondsSinceEpoch(0, isUtc: true)
+                  DateTime.fromMillisecondsSinceEpoch(0, isUtc: true)
             : DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
         unsupportedPayload: json,
       );
@@ -132,22 +146,24 @@ class BookingResultDto {
   final String correlationId;
   final DateTime serverTime;
   final BookingDto? booking;
+  final BookingCommandOutcome? outcome;
   final BookingHoldDto? hold;
   final BookingPolicyDto? policy;
   final BookingErrorDto? error;
   final Map<String, Object?>? unsupportedPayload;
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'schemaVersion': schemaVersion,
-        'kind': kind.name,
-        'requestId': requestId,
-        'correlationId': correlationId,
-        'serverTime': utcTimestamp(serverTime),
-        if (booking != null) 'booking': booking!.toJson(),
-        if (hold != null) 'hold': hold!.toJson(),
-        if (policy != null) 'policy': policy!.toJson(),
-        if (error != null) 'error': error!.toJson(),
-        if (unsupportedPayload != null)
-          'unsupportedPayload': thawJsonMap(unsupportedPayload!),
-      };
+    'schemaVersion': schemaVersion,
+    'kind': kind.name,
+    'requestId': requestId,
+    'correlationId': correlationId,
+    'serverTime': utcTimestamp(serverTime),
+    if (booking != null) 'booking': booking!.toJson(),
+    if (outcome != null) 'outcome': outcome!.name,
+    if (hold != null) 'hold': hold!.toJson(),
+    if (policy != null) 'policy': policy!.toJson(),
+    if (error != null) 'error': error!.toJson(),
+    if (unsupportedPayload != null)
+      'unsupportedPayload': thawJsonMap(unsupportedPayload!),
+  };
 }

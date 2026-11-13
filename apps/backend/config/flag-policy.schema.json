@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/config/r1/flag-policy.schema.json",
+  "title": "Recharge feature flag policy (default off)",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "excludedFromDev": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][A-Za-z0-9._]*$" },
+          "disposition": { "const": "excluded" },
+          "reason": { "const": "no-approved-cloud-runtime-in-minimal-dev" }
+        },
+        "required": ["id", "disposition", "reason"]
+      }
+    },
+    "flags": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][A-Za-z0-9.]*$"
+          },
+          "kind": {
+            "enum": ["feature", "emergencySwitch"]
+          },
+          "defaultState": {
+            "const": "off"
+          }
+        },
+        "required": ["id", "kind", "defaultState"]
+      }
+    }
+  },
+  "required": ["excludedFromDev", "flags"]
+}

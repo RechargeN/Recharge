@@ -1,0 +1,379 @@
+# Recharge Backend — D1 Reconciliation and Decision Package
+
+- ID: **BCK-D1-DEC-01**
+- Version: **0.18**
+- Date: **2026-09-17**
+- Status: **Accepted reconciliation record — D1 exit remains blocked**
+- Runtime status: **N/A; documentation decision evidence only**
+- Accountable coordinator: **RechargeN / Product owner**
+- Parent architecture: [BCK-01 v0.4.66](RECHARGE_BACKEND_MASTER_SPEC.md)
+- Coordination baseline: [BCK-02 v2.4.70](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Related owner decision: [BCK-D1-OWN-A-DEC-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_A_DECISION.md)
+- Related Operations decision: [BCK03-OPS-DEC-01 v0.1](BACKEND_API_OPERATIONS_OWNER_DECISION.md)
+- Related Security/Privacy decision: [BCK03-SEC-DEC-01 v0.1](BACKEND_API_SECURITY_PRIVACY_OWNER_DECISION.md)
+- Related BCK-04 technical decision: [BCK04-SEC-DEC-01 v0.1](BACKEND_SECURITY_PRIVACY_OWNER_DECISION.md)
+- Related threat-model technical decision: [BCK04-OD01-DEC-01 v0.1](BACKEND_SECURITY_THREAT_MODEL_OWNER_DECISION.md)
+- Related BCK-20 technical decision: [BCK20-OWN-DEC-01 v0.1](REFERENCE_DATA_LOCALIZATION_OWNER_DECISION.md)
+- Related translation-governance decision: [BCK20-OD02-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_GOVERNANCE_OWNER_DECISION.md)
+- Related Product/Content pre-review decision: [BCK20-OD02-PC-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_PRODUCT_CONTENT_PRE_REVIEW_DECISION.md)
+- Related Product/Content combined-owner decision: [BCK20-OD02-PC-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_COMBINED_OWNER_DECISION.md)
+- Related Mobile/Security pre-review decision: [BCK20-OD02-MS-PRE-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_MOBILE_SECURITY_PRE_REVIEW_DECISION.md)
+- Related exact-v0.4 combined-owner decision: [BCK20-OD02-V04-COMB-DEC-01 v0.1](REFERENCE_DATA_TRANSLATION_V04_COMBINED_OWNER_DECISION.md)
+- Related source-authority decision: [BCK20-OD02-SRC-AUTH-DEC-01 v0.1](REFERENCE_DATA_SOURCE_AUTHORITY_OWNER_DECISION.md)
+- Related source-record decision: [BCK20-OD02-SRC-REC-DEC-01 v0.1](REFERENCE_DATA_SOURCE_RECORDS_OWNER_DECISION.md)
+- Related external-evidence plan decision: [BCK20-OD02-EXT-EV-PLAN-DEC-01 v0.1](REFERENCE_DATA_EXTERNAL_EVIDENCE_COLLECTION_OWNER_DECISION.md)
+- Related Mobile decision: [BCK03-MOB-DEC-01 v0.1](BACKEND_API_MOBILE_OWNER_DECISION.md)
+- Runtime effect: **none**
+- Canonical path: `docs/product/BACKEND_PLATFORM_D1_DECISION_PACKAGE.md`
+
+---
+
+## 0. Revision note
+
+v0.18 reconciles BCK20-OD02-EXT-EV-PLAN-DEC-01 and BCK-20 v0.2.18. EXT-G0 is
+satisfied only for the frozen plan under five combined roles with zero
+independence. EXT-G1–G6, all markets, network/external evidence/independent/
+qualified, OD and runtime gates remain closed; D1 exit remains blocked.
+
+v0.17 reconciles BCK20-OD02-SRC-REC-DEC-01 and BCK-20 v0.2.17. Twenty-three
+internal records are accepted only as documentation inputs and eight external
+candidates only as a work queue under six combined roles with zero
+independence. All markets, external/source-copy/independent/qualified, OD and
+runtime gates remain closed; D1 exit remains blocked.
+
+v0.16 reconciles BCK20-OD02-SRC-AUTH-DEC-01 and BCK-20 v0.2.16. The
+source-authority matrix is accepted only as a design boundary under six
+combined roles with zero independence. Actual source records, external-source
+license/terms and pinned ingestion evidence, independent/qualified review, OD
+and runtime gates remain open; D1 exit remains blocked.
+
+v0.15 reconciles BCK20-OD02-V04-COMB-DEC-01 and BCK-20 v0.2.15. Four
+separate exact-v0.4 design verdicts are recorded under one disclosed owner
+with zero independence. Source-authority, independent Security/Privacy,
+qualified Legal, OD and runtime gates remain open; D1 exit remains blocked.
+
+v0.14 reconciles BCK20-OD02-MS-PRE-DEC-01, workflow v0.4 and BCK-20
+v0.2.14. The seven corrections are documentation-only. Product/Content v0.3
+verdicts remain historical exact-hash evidence; exact-v0.4
+Product/Content/Mobile/Security and applicable Legal gates remain Pending.
+BCK-20, OD-02 and OD-10 remain unaccepted, BCK20-OD-03 remains Deferred and
+no runtime authority is created.
+
+v0.13 reconciles BCK20-OD02-PC-COMB-DEC-01 and BCK-20 v0.2.13. Two separate
+Product Localization and Content verdicts are effective for exact workflow
+v0.3 with shared ownership and zero independence disclosed. BCK-20, OD-02 and
+OD-10 remain unaccepted; Mobile, Security/Privacy, qualified Legal,
+source-authority and runtime gates remain blocked.
+
+v0.12 reconciles BCK20-OD02-PC-PRE-DEC-01, workflow v0.3 and BCK-20 v0.2.12
+without accepting BCK-20, OD-02 or OD-10. Both specialist signatures remain
+Pending and no source-authority content, provider, schema, Legal or runtime
+authority is created.
+
+v0.11 reconciles BCK20-OD02-DEC-01, workflow v0.2 and BCK-20 v0.2.11 without
+accepting BCK-20, OD-02 or OD-10. Five BCK20 decisions remain Deferred,
+OD-02/05 remain Open and all specialist, Legal, D1/G1 and runtime gates remain
+blocked.
+
+v0.9 reconciles the combined-owner technical threat-model verdict and twenty
+amendments through BCK04-OD01-DEC-01 and exact model v0.2. BCK04-OD-01 remains
+Proposed pending independent/cross-boundary evidence; all Legal, D1/G1 and
+runtime gates remain blocked.
+
+v0.8 reconciles the combined-owner technical BCK-04 verdict and fourteen
+amendments through BCK04-SEC-DEC-01. BCK-04 remains Draft; independent
+Security/Privacy, qualified Legal, BCK04-OD-01/09, OD-11, D1/G1 and runtime
+remain blocked. Existing split-key and OD-07 decisions are unchanged.
+
+v0.7 reconciles this package to the bounded BCK03-MOB-DEC-01 verdict. It does
+not accept BCK-18/BCK-20, replace independent Mobile evidence or authorize
+runtime. The v0.6 BCK03-SEC-DEC-01 reconciliation remains intact. It does
+not alter the existing split-key/OD-07 decisions or approve BCK-04, Legal,
+independent review, runtime or deployment.
+
+v0.5 reconciles this package to BCK03-OPS-DEC-01 and the current platform
+snapshot. The Operations verdict is limited to the BCK-03 boundary and does
+not alter this package's decisions or authorize BCK-05/runtime.
+
+v0.4 reconciles this existing Accepted split-key/OD-07 record to BCK-01
+v0.4.52 and BCK-02 v2.4.56 after Owner Batch A. The separate
+BCK-D1-OWN-A-DEC-01 records API dispositions; this package does not absorb or
+expand that verdict and creates no runtime authority.
+
+v0.3 is a traceability-only D1-B amendment. It points the existing Accepted
+split-key reconciliation and OD-07 disposition to BCK-01 v0.4.51/BCK-02
+v2.4.55. It does not alter any decision, approve a child BCK, close G1 or grant
+runtime/Firebase authority.
+
+v0.2 preserves the Accepted Booking split-key decision and reconciles the
+later exact [OD07-DEC-01 v0.2](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md)
+verdict: OD-07 is Accepted at `OD07-A1-EU-MR-v1` with controls. No D1 exit,
+G1/R1, cloud or runtime authority is added.
+
+## 1. Purpose
+
+This package records the first evidence-backed D1 reconciliation across
+BCK-03, BCK-04, BCK-05, BCK-09 and BCK-20. It closes the Booking v1
+`requestId`/`idempotencyKey` contradiction without changing committed wire
+shape, and records the exact status of OD-07, OD-09, OD-10 and OD-11.
+
+It is a documentation decision package. It does not create `apps/backend`,
+Firebase projects, schemas, generated code, endpoints, credentials,
+deployments or production processing. Acceptance of one decision below is not
+acceptance of the entire D1 platform set.
+
+## 2. Source hierarchy and scope
+
+Conflict priority remains:
+
+1. Accepted ADR;
+2. Approved/Accepted owning domain specification and explicit decision record;
+3. BCK-01 architecture;
+4. BCK-02 coordination and gates;
+5. owning BCK specification;
+6. fixture/code evidence for current-state truth.
+
+This package changes no Accepted ADR invariant. The Booking key correction is
+an explicit versioned contract reconciliation authorized by the Product owner
+and recorded as `ECL03-D11` in the owning Event/Booking decision package.
+
+## 3. Evidence read
+
+The reconciliation uses:
+
+- Booking v1 JSON Schema, valid/invalid/forward fixtures and Dart DTO tests;
+- ECL-03 Approved parent, ECL-03B Done evidence and ECL-03C Review plan;
+- BCK-09 Review full Booking/Firebase target;
+- BCK-03 API standard and BCK-04 security/privacy blocker register;
+- BCK-05 operations and BCK-20 reference/localization specifications;
+- BCK-01/BCK-02 status, decision and gate registries.
+
+Repository evidence before this decision:
+
+- `booking_command.schema.json` requires both `requestId` and
+  `idempotencyKey`;
+- committed valid fixtures use distinct values;
+- DTO parsing preserves both fields independently;
+- BCK-09 and ECL-03C incorrectly required equality;
+- no backend runtime or persistence exists, therefore no stored production
+  record requires migration.
+
+## 4. Accepted decision D1-DEC-01 / ECL03-D11
+
+### 4.1 Semantic roles
+
+For Booking command contract v1:
+
+- `requestId` identifies one transport/application request attempt and is used
+  for correlation and diagnostics;
+- `idempotencyKey` identifies one logical mutation across retries and unknown
+  outcomes;
+- both are required non-empty opaque identifiers within existing Booking v1
+  schema bounds;
+- values may be equal, but equality is neither required nor inferred;
+- a retry reuses the original `idempotencyKey` and normalized semantic payload,
+  while it may carry a new `requestId`;
+- every new attempt generates a fresh `requestId`; known reuse of one request
+  ID with another logical key or semantic command is `invalid_argument` and
+  creates no mutation;
+- neither field supplies actor identity, authorization or global uniqueness.
+
+### 4.2 Effective key and request hash
+
+The effective idempotency namespace is:
+
+```text
+(resolvedActorOrServiceIdentity, commandType, idempotencyKey)
+```
+
+The canonical request hash covers schema-known semantic command inputs and
+excludes transport-only correlation metadata, including `requestId`.
+The exact canonicalization algorithm/version remains `API-DEC-03` and must be
+Accepted before mutation runtime.
+
+### 4.3 Replay outcomes
+
+| Condition | Outcome | Mutation |
+|---|---|---|
+| New effective key | Validate and execute command | At most one committed effect |
+| Same key, same canonical hash | Return original committed semantic outcome in an envelope for the current attempt | None |
+| Same key, different canonical hash | `idempotency_conflict` | None |
+| Same request ID, different idempotency key or semantic command | `invalid_argument` when detected; caller must generate a fresh request ID | None |
+| Timeout/unknown outcome | Retry with original idempotency key and payload or query authoritative state | No blind new key |
+
+### 4.4 Safety rules
+
+- idempotency lookup occurs only after verified actor binding;
+- request IDs remain traceable but are not deduplication authority;
+- replay response echoes the current attempt's `requestId`; the committed
+  domain outcome/resource identity/revision remains identical to the original,
+  while correlation metadata may be attempt-specific;
+- success is returned only after durable commit;
+- retry cannot duplicate allocation, ledger, audit or outbox obligation;
+- logs do not contain raw payload or personal data;
+- retention must exceed the maximum supported retry/offline-result window;
+- domain duplicate-active, revision and capacity invariants still apply when a
+  caller deliberately uses a new idempotency key.
+
+## 5. Compatibility and migration verdict
+
+The chosen split-key rule is backward compatible with the committed Booking v1
+wire format and fixtures:
+
+- no schema field is added, removed or renamed;
+- callers that currently send equal values remain valid;
+- callers that send distinct values become explicitly valid;
+- no fixture rewrite is required;
+- future executable tests must add equal-value, distinct-value and retry-with-
+  new-request-ID cases;
+- no production data migration exists because runtime/persistence is absent.
+
+This is not permission to edit schemas or generate backend consumers. Those
+actions remain gated by an Approved executable slice and API-DEC decisions.
+
+## 6. Governed decision dispositions
+
+| Decision | Status after this package | Evidence / reason | Next gate |
+|---|---|---|---|
+| `D1-DEC-01` / `ECL03-D11` | **Accepted** | Product owner approved split-key reconciliation; matches committed Booking v1 wire/fixtures | Executable contract tests before mutation runtime |
+| `OD-07` | **Accepted with controls** | OD07-DEC-01 v0.2 accepts exact `OD07-A1-EU-MR-v1`; evidence v0.6 records locations, residency limits, thresholds, export/replacement and revalidation | G1 plus exact Approved R1 slice before provisioning; qualified Legal/Privacy before production processing |
+| `OD-09` | **Proposed** | BCK-03 defines an envelope and BCK-05 defines the operational boundary; delivery/retention/replay evidence is incomplete | Proposed is sufficient for D1 planning; Accepted before D3 effects/workers |
+| `OD-10` | **Proposed, acceptance-ready only after evidence** | BCK-20 defines LocalizedText v1 and deterministic fallback; LV/EE/LT fixtures, Content/Mobile/Legal review and migration evidence are absent | Accepted before BCK-20/BCK-07 Approval and G1 |
+| `OD-11` | **Open** | No authorized Legal/Privacy owner decision establishes minors/age policy | Accepted before production account creation and every applicable age-sensitive path |
+
+No Proposed or Open item is promoted by implication.
+
+## 7. BCK status verdict
+
+| Spec | Status after reconciliation | What this package closes | What still blocks next status |
+|---|---|---|---|
+| BCK-01 | Review | D1 conflict/status traceability updated | Independent specialist Approval and complete D1 sign-off |
+| BCK-03 | Draft | Booking split-key conflict closed | Delegated BCK-04/05/18 reviews and API-DEC evidence |
+| BCK-04 | Draft | split-key/DSR amendments plus BCK-04 and threat-model combined-owner technical verdicts recorded; OD-07 engineering topology Accepted | BCK04-OD-01 remains Proposed pending independent/cross-boundary evidence; qualified Legal, OD-09/11 and tabletop remain |
+| BCK-05 | Draft | API dependency reconciled; OD-07 architecture Accepted | Operations specialist, remaining BCK05 decisions, SLO/budget/IAM/recovery evidence |
+| BCK-20 | Draft | API dependency and OD-10 disposition clarified | OD-10 fixtures and Reference/API/Content/Mobile/Legal review |
+| BCK-09 | Review | Target idempotency semantics now match Booking v1 fixtures | Physical implementation remains separately gated |
+
+## 8. D1 exit assessment
+
+D1 is **not complete**. The package closes one semantic blocker and creates a
+single sign-off surface, but D1 exit still requires:
+
+1. BCK-03/04/05/20 Review and then Approved evidence under their own DoR/DoD;
+2. Accepted OD-07 and OD-10;
+3. OD-09 and OD-11 at least at the BCK-02-required D1 status;
+4. independent Security/Privacy, Legal, Operations, API, Mobile and affected
+   domain acknowledgements rather than Product-owner substitution;
+5. a final D1 conflict/sign-off report showing no unresolved double writer or
+   incompatible contract.
+
+Until then G1–G7, Firebase provisioning and backend runtime remain forbidden.
+
+## 9. Verification contract
+
+Documentation verification for this revision must prove:
+
+- every equality rule is removed from normative Booking/BCK text;
+- every effective key uses `idempotencyKey`, not `requestId`;
+- existing Booking schema and fixtures are unchanged;
+- local Markdown links resolve;
+- AC sequences remain stable and sequential;
+- boundary and diff checks pass;
+- `apps/backend` remains absent.
+
+Executable verification, only after a separately Approved slice, must include:
+
+- equal request/key values accepted;
+- distinct request/key values accepted;
+- same logical key/hash with new request ID replays the committed semantic
+  outcome in a current-attempt response envelope;
+- same logical key with changed semantic payload conflicts;
+- new logical key cannot bypass duplicate-active/capacity/revision rules;
+- timeout-after-commit retry creates exactly one durable effect.
+
+### 9.1 Documentation-revision evidence (2026-08-20)
+
+- Booking contract package: **9/9 passed**;
+- direct Dart analyzer for `apps/mobile/lib`, `test`, `integration_test`:
+  **no issues**;
+- boundary checker: **380 Dart files, 71 findings, 71 allowed, 0 violations,
+  0 stale, 0 expired**;
+- 16 changed Markdown files: local links and code fences pass;
+- AC sequences pass: D1 1–20, BCK-03 1–87, BCK-04 1–59, BCK-05 1–50,
+  BCK-20 1–50 and ECL-03 1–51;
+- `git diff --check` passes and the tracked change scope is Markdown-only;
+- full Flutter suite is **not green**: 663 tests passed and one existing Route
+  golden comparison failed (`2.52%`, 11,229 pixels). The focused retry
+  reproduced the same golden mismatch; no code, golden or asset belongs to this
+  D1 change. The result is recorded as a repository gate blocker, not hidden or
+  misreported as pass.
+
+## 10. Acceptance criteria
+
+1. **BCK-D1-AC-01:** `requestId` and `idempotencyKey` have distinct documented roles.
+2. **BCK-D1-AC-02:** equality of the two values is permitted but never required.
+3. **BCK-D1-AC-03:** effective deduplication includes resolved actor, command type and idempotency key.
+4. **BCK-D1-AC-04:** request ID is excluded from semantic idempotency hash.
+5. **BCK-D1-AC-05:** retry may use a new request ID only with the original logical key and payload.
+6. **BCK-D1-AC-06:** same key/hash returns the committed semantic outcome in a current-attempt response envelope without mutation.
+7. **BCK-D1-AC-07:** same key/different hash returns `idempotency_conflict`.
+8. **BCK-D1-AC-08:** a new key never bypasses domain invariants.
+9. **BCK-D1-AC-09:** committed Booking v1 wire and fixtures require no migration.
+10. **BCK-D1-AC-10:** API-DEC-03 still gates canonical hash implementation.
+11. **BCK-D1-AC-11:** OD-07 is Accepted with controls but does not authorize provisioning.
+12. **BCK-D1-AC-12:** OD-09 remains Proposed and blocks effects/workers until Accepted.
+13. **BCK-D1-AC-13:** OD-10 remains Proposed until fixture and owner evidence exists.
+14. **BCK-D1-AC-14:** OD-11 remains Open and age-sensitive paths fail closed.
+15. **BCK-D1-AC-15:** no Draft spec becomes Review or Approved by implication.
+16. **BCK-D1-AC-16:** Product-owner coordination does not replace specialist approval.
+17. **BCK-D1-AC-17:** D1 remains incomplete until all BCK-02 exit conditions pass.
+18. **BCK-D1-AC-18:** no runtime/schema/Firebase artifact is authorized.
+19. **BCK-D1-AC-19:** documentation and executable evidence are reported separately.
+20. **BCK-D1-AC-20:** rollback is the previous documentation revision; no data rollback exists.
+21. **BCK-D1-AC-21:** BCK04-OD01-DEC-01 and threat-model v0.2 are recorded
+    without accepting OD-01, satisfying independent/cross-boundary review or
+    authorizing runtime.
+22. **BCK-D1-AC-22:** BCK20-OWN-DEC-01 records only decision triage and does
+    not accept BCK-20, OD-10 or any specialist/Legal/runtime gate.
+23. **BCK-D1-AC-23:** BCK20-OD02-DEC-01 records only the amended technical
+    translation-governance boundary and does not close OD-02 or authorize
+    provider, schema, runtime or infrastructure work.
+24. **BCK-D1-AC-24:** BCK20-OD02-PC-PRE-DEC-01 integrates F-001–F-008 only
+    as documentation corrections and preserves every specialist, Legal,
+    source-authority, provider, schema and runtime gate.
+25. **BCK-D1-AC-25:** BCK20-OD02-PC-COMB-DEC-01 makes only the two separate
+    non-independent Product/Content verdicts effective and preserves every
+    remaining OD, specialist, Legal and runtime gate.
+26. **BCK-D1-AC-26:** BCK20-OD02-MS-PRE-DEC-01 integrates seven
+    documentation corrections only; it does not itself supply exact-v0.4
+    owner verdicts or runtime/infrastructure authority.
+27. **BCK-D1-AC-27:** BCK20-OD02-V04-COMB-DEC-01 records four separate
+    exact-v0.4 combined-owner design verdicts with zero independence without
+    closing source-authority, independent Security/Privacy, qualified Legal,
+    OD, D1 or implementation gates.
+28. **BCK-D1-AC-28:** BCK20-OD02-SRC-AUTH-DEC-01 accepts only the frozen
+    source-authority design boundary; actual source records, external evidence,
+    independent/qualified review, OD, D1 and implementation gates remain open.
+29. **BCK-D1-AC-29:** BCK20-OD02-SRC-REC-DEC-01 accepts internal records only
+    as documentation inputs and external candidates only as a work queue; all
+    market, evidence, independent/qualified, OD, D1 and implementation gates
+    remain closed.
+30. **BCK-D1-AC-30:** BCK20-OD02-EXT-EV-PLAN-DEC-01 satisfies only EXT-G0;
+    EXT-G1–G6, market, network/evidence, independent/qualified, OD, D1 and
+    implementation gates remain closed.
+
+## 11. Rollback
+
+Before runtime exists, rollback of the Booking split-key decision means a new
+explicit owner decision; silently restoring the previous equality proposal
+would reopen the known fixture contradiction. OD-07 is governed separately by
+OD07-DEC-01 and can be changed only through its versioned supersession process,
+not by reverting this reconciliation package.
+
+## 12. Final statement
+
+`D1-DEC-01` is Accepted and closes the Booking v1 key-semantics contradiction;
+OD-07 is separately Accepted at `OD07-A1-EU-MR-v1` with controls. The backend
+platform is still documentation-only. D1 exit, G1, physical Firebase,
+deployments and production data processing remain blocked by the statuses and
+evidence listed above.

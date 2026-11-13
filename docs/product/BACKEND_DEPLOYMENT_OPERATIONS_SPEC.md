@@ -1,0 +1,1854 @@
+# Recharge Backend — Deployment & Operations Specification
+
+- ID: **BCK-05**
+- Version: **0.2.43**
+- Date: **2026-10-01**
+- Spec status: **Review — local R1 operations foundation verified; dev/staging/production evidence pending**
+- Runtime status: **Local R0/R1 tooling, composition, config/release repositories and credential-free CI Present; product/cloud operations runtime Absent**
+- Accountable owner: **Platform Operations owner**
+- Interim review coordinator: **RechargeN / Product owner**
+- Local R1 technical decision: **Accepted and verified locally — no cloud authority**
+- Dev-cloud and production approval: **Pending**
+- Parent architecture: [BCK-01 v0.4.84](RECHARGE_BACKEND_MASTER_SPEC.md) (Review; local foundation verified)
+- Coordination baseline: [BCK-02 v2.4.99](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- API boundary: [BCK-03 v0.3.21](BACKEND_API_CONTRACT_STANDARD.md) (Review; local platform contracts verified)
+- Security/privacy boundary: [BCK-04 v0.4.35](BACKEND_SECURITY_PRIVACY_SPEC.md) (Review; local foundation verified; production gates retained)
+- Incident-response evidence: [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) v0.1 (Draft)
+- Tabletop package: [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md) v0.1 (ready; not executed)
+- Infrastructure/cost evidence: [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md) v0.4 (Draft; OD-04 Proposed; numerical baseline unchanged)
+- Infrastructure decision evidence: [BCK-D1-OD07-EV-01](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md) v0.6 (OD-07 Accepted with controls)
+- Infrastructure owner decision: [OD07-DEC-01](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) v0.2 (Accepted)
+- Reliability evidence: [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md) v0.1 (Draft; OD-03 Proposed)
+- Recovery evidence: [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md) v0.1 (Draft; OD-05 Proposed)
+- Numeric owner review: [BCK05-NUM-REV-01](BACKEND_OPERATIONS_NUMERIC_OWNER_REVIEW.md) v0.2 (bounded Product-owner baseline recorded; specialist evidence pending)
+- Operations specialist review: [BCK05-OPS-REV-02 v0.1](BACKEND_OPERATIONS_SPECIALIST_REVIEW_PACKAGE.md) (prepared; five verdicts Pending)
+- D1 internal blocker matrix: [BCK-D1-INT-BLOCK-01 v0.1](BACKEND_PLATFORM_D1_INTERNAL_BLOCKER_MATRIX.md) (prepared factual work queue)
+- D1 Owner Batch D: [BCK-D1-OWN-D-REV-01 v0.1](BACKEND_PLATFORM_D1_OWNER_BATCH_D_REVIEW_PACKAGE.md) (prepared; all verdicts Pending)
+- IAM/workload identity evidence: [BCK05-OD02-IAM-01](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md) v0.2.1 (Accepted baseline with controls)
+- IAM owner decision: [BCK05-OD02-DEC-01](BACKEND_IAM_WORKLOAD_IDENTITY_OWNER_DECISION.md) v0.2 (Accepted)
+- Release/provenance evidence: [BCK05-OD07-REL-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md) v0.2.1 (Accepted baseline with controls)
+- Release owner decision: [BCK05-OD07-DEC-01](BACKEND_RELEASE_PROVENANCE_PROMOTION_OWNER_DECISION.md) v0.2 (Accepted)
+- Runtime/toolchain evidence: [BCK05-OD01-TCH-01](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md) v0.3.4 (Accepted baseline v0.3.3 with controls)
+- Runtime/toolchain technical review: [BCK05-OD01-TCH-REV-01](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md) v0.2.4 (completed; bounded R0 Pass)
+- Runtime/toolchain owner decision: [BCK05-OD01-DEC-01](BACKEND_RUNTIME_TOOLCHAIN_OWNER_DECISION.md) v0.2 (Accepted)
+- Executed R0 slice: [BCK-R0-TCH-01](BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md) v0.2.2 (Pass — bounded tooling feasibility only)
+- R0 approval record: [BCK-R0-TCH-DEC-01](BACKEND_R0_APPROVAL_DECISION_RECORD.md) v0.2 (bounded execution and advisory disposition; no production approval)
+- Environment policy: [ENV_FLAVORS_SECRETS](../architecture/ENV_FLAVORS_SECRETS.md)
+- Infrastructure input: [FIREBASE_ARCHITECTURE v2.2](../architecture/FIREBASE_ARCHITECTURE.md) (Proposed)
+- Delivery annex: [BCK-02-A1 v1.28](RECHARGE_BACKEND_LATVIA_IMPLEMENTATION_ROADMAP.md) (Draft)
+- Runtime effect: **local Booking TTL configuration and tests only; no cloud/deployment effect**
+- Canonical repository path: `docs/product/BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md`
+
+---
+
+## 0. Changelog
+
+### v0.2.42 — 2026-10-01
+
+- authorizes stage 3.1, the **execution manifest and infrastructure code**, in a
+  new §36: a machine-readable manifest, shared IaC modules with per-environment
+  roots, validation gates, Draft runbooks and the exact closed file map;
+- **writing IaC grants no authority to apply it.** Every resource is guarded by a
+  flag that is false by default and opens only with a signed record reference;
+  no project, service account, binding, secret, state bucket or budget is
+  created; no cloud call is made;
+- fixes four execution decisions: Firebase CLI alone owns Rules, indexes, TTL and
+  Functions deployment (no double management by Terraform); no automatic billing
+  detach; one state bucket per environment with its own bootstrap and destroy
+  protection; the validation workflow runs with minimal permissions and no
+  secrets or `id-token`;
+- records that the pinned Terraform 1.15.9 and the google provider 7.43.0 are
+  already present as verified local copies, so no download is needed; any future
+  download must come from the official source with checksum/signature and pinned
+  versions;
+- keeps BCK05-OD-03/04/05/08 Proposed: their numbers enter the manifest as
+  proposed and still block provisioning.
+
+### v0.2.41 — 2026-09-27
+
+- closes the local Event delivery operational gap with a durable ordered
+  discovery cursor, fenced renewable worker leases, retry/dead-letter state and
+  audited idempotent manual replay;
+- fixes retention ownership: immutable Event source facts and unresolved dead
+  letters have no TTL, terminal delivered metadata has 90 days and operator
+  replay decisions have 180 days;
+- records exact local evidence only. No scheduler deployment, cloud worker,
+  project, credential, activation or production operations claim is added.
+
+### v0.2.40 — 2026-09-24
+
+- records the bounded local callable surface, immutable Event outbox delivery,
+  five-attempt retry/dead-letter behavior and truthful feature-flag failures;
+- keeps Event delivery and DSR local/Emulator-only and separates exact
+  Node/Java evidence from inconclusive timed-out runs;
+- creates no cloud worker, schedule deployment or market activation.
+
+### v0.2.39 — 2026-09-24
+
+- records the common R1 immutable feature-flag revision plus activation-pointer
+  adapter now used by disabled local Booking instead of a domain-owned flag
+  collection;
+- records transaction-time flag reads with no kill-switch cache and preserves
+  the default-off/no-cloud posture;
+- changes no project, credential, deployment, worker, schedule or market gate.
+
+### v0.2.38 — 2026-09-24
+
+- integrates the technical owner decision `BCK09-RETENTION-DEC-01` for local
+  Booking TTL configuration, cleanup/reconciliation and restore evidence;
+- fixes the 72-hour physical-deletion target, hold precedence and
+  restore-time re-deletion rule without claiming general OD-05 recovery or a
+  qualified Legal/Privacy verdict;
+- keeps cloud provisioning, deployment, market activation, push and merge
+  outside the decision.
+
+### v0.2.37 — 2026-09-23
+
+- records the verified local R1 composition/config/release foundation,
+  credential-free CI and no-cloud gates instead of the stale pre-execution
+  status;
+- keeps dev/staging/production provisioning, billing, IAM, secrets,
+  deployment, SLO/cost, backup/restore and incident-drill evidence Pending;
+- aligns BCK-01/02/03/04 and roadmap references without changing historical
+  R0/RAW-C evidence or authorizing product modules.
+
+### v0.2.36 — 2026-09-21
+
+- reconciles Operations to BCK-01 v0.4.81, BCK-03 v0.3.19, BCK-04 v0.4.30
+  and the sole BCK-02 v2.4.87 exact R1 manifest;
+- separates local credential-free implementation acceptance from dev-cloud,
+  staging and production authorization;
+- confirms one service layout, five collection writers, ordered migration,
+  bounded rollback, default-off flags and no-cloud CI;
+- delegates exact owner approval to BCK-02 §29 and changes no runtime/cloud.
+
+### v0.2.35 — 2026-09-21
+
+- bound Operations to the sole exact R1 manifest in BCK-02 §26;
+- specified exact verification scripts, CI responsibility, logical identities,
+  migration order, evidence and fail-closed rollback for R1;
+- preserved current R0/RAW-C compatibility and prohibited new external
+  product exports, workers, cloud writes, deployment and activation.
+
+### v0.2.34 — 2026-09-21
+
+- added Stage 6 `MarketCapabilityReleaseManifest` and exact
+  environment/market/capability activation semantics;
+- bound release state to BCK-20 market pointers, BCK-04 compliance evidence,
+  domain revisions, support, monitoring, cohort thresholds and rollback;
+- required smallest-safe isolation with broader containment for shared defects;
+- preserved no-runtime/no-deployment status and all R1/G1/production gates.
+
+### v0.2.33 — 2026-09-20
+
+- added the Stage 2 normalized Operations entity inventory;
+- separated platform configuration/release/recovery authority from product
+  domain and analytics records;
+- aligned lifecycle, IAM, retention, audit, rollback, flags and evidence with
+  BCK-01 §30 and the BCK-02 writer ledger.
+
+### v0.2.32 — 2026-09-20
+
+- closed the D1 operations design boundary and reconciled it with BCK-01
+  v0.4.72, BCK-03 v0.3.16, BCK-04 v0.4.26 and BCK-20 v0.2.23;
+- fixed logical environments `local/dev/stage/prod`, one isolated Firebase/GCP
+  project per cloud environment, deterministic provider-project naming rules
+  and mandatory environment labels without inventing actual project IDs;
+- unified the target source tree under `src/platform`, `src/modules`,
+  `src/workers` and `src/generated`, preserving RAW-C as disabled compatibility
+  source until an exact migration slice;
+- accepted the technical OD-09 contract while leaving concrete queue/trigger,
+  capacity, retention and measured SLO/cost/recovery values to exact slices;
+- advanced the specification to Review for exact R1 planning only; G1, project
+  creation, credentials, deployment and production processing remain blocked.
+
+### v0.2.31 — 2026-09-20
+
+- prepared one hash-pinned specialist package for the five remaining
+  BCK05-OD-03/04/05/06/08 documentation decisions;
+- separated pre-G1 design verdicts from evidence that correctly requires a
+  separately Approved R1 environment;
+- prepared Batch D and the internal blocker matrix without recording any
+  specialist verdict or promoting an OD/BCK/gate;
+- retained BCK-05 Draft, D1/G1 Blocked and all runtime/cloud gates closed.
+
+### v0.2.30 — 2026-09-15
+
+- reconciled BCK04-OD01-DEC-01, threat-model v0.2 and BCK-04 v0.4.23 without
+  accepting BCK-05 or changing its 50 criteria;
+- preserved BCK04-OD-01 Proposed and every independent, Legal, executable and
+  cloud gate;
+- changed no runtime, Firebase, credential, deployment, push or merge state.
+
+### v0.2.29 — 2026-09-12
+
+- reconciled BCK04-SEC-DEC-01 and BCK-04 v0.4.22 without accepting BCK-05;
+- retained all Operations, Finance, independent/Legal, executable cloud and
+  production gates;
+- changed no runtime, Firebase, deployment, push or merge state.
+
+### v0.2.28 — 2026-09-09
+
+- reconciled BCK03-MOB-DEC-01 and BCK-03 v0.3.12 without accepting BCK-05;
+- retained all specialist/stage/R1/product-cloud blockers;
+- changed no resource, credential, runtime, deployment, push or merge state.
+
+### v0.2.27 — 2026-09-08
+
+- reconciled bounded BCK-03 Security/Privacy boundary acceptance and current
+  BCK-01/02/03/04/roadmap anchors;
+- retained BCK-05 Draft, all Operations specialist/stage evidence blockers,
+  R1/G1 and product/cloud runtime gates.
+
+### v0.2.26 — 2026-09-08
+
+- recorded BCK03-OPS-DEC-01 as a bounded BCK-03 boundary verdict;
+- retained BCK-05 Draft, independent Operations evidence, R1 and all
+  product/cloud gates;
+- reconciled parent/API/Security/roadmap anchors without runtime changes.
+
+### v0.2.25 — 2026-09-08
+
+- reconciled BCK-01 v0.4.52, BCK-02 v2.4.56, BCK-03 v0.3.9, BCK-04
+  v0.4.18 and BCK-02-A1 v1.3 after Owner Batch A;
+- retained BCK-05 Draft, all Operations signatures and BCK05-OD-03/04/05/08
+  blockers; the BCK-03 owner verdict does not supply an Operations signature;
+- preserved bounded R0 Pass and blocked R1/product-cloud runtime;
+- changed no workflow, repository setting, cloud resource, deployment or runtime.
+
+### v0.2.24 — 2026-09-07
+
+- reconciled current anchors to BCK-01 v0.4.51, BCK-02 v2.4.55,
+  BCK-03 v0.3.8, BCK-04 v0.4.17 and BCK-02-A1 v1.2;
+- recorded bounded R0 and disabled RAW-C source evidence without claiming R1,
+  cloud resources, release execution, deployment or product runtime;
+- clarified BCK04-OD and BCK05-OD namespaces and retained every open specialist,
+  SLO, cost, recovery, incident and executable-control blocker;
+- changed no workflow, infrastructure, credential, Firebase or runtime file.
+
+### v0.2.23 — 2026-08-25
+
+- recorded the exact BCK05-OD07-DEC-01 v0.2 owner verdict and accepted
+  `BCK05-REL-A1-DUAL-PROV-v1` with controls;
+- retained BCK-05 Draft, executable release/IAM/policy/provider evidence,
+  D1/G1, separately Approved R0/R1 and every production gate;
+- created no workflow, GitHub setting, release, attestation, WIF/cloud resource,
+  deployment, runtime or `main` merge authority.
+
+### v0.2.22 — 2026-08-25
+
+- prepared decision-ready `BCK05-REL-A1-DUAL-PROV-v1` with separate release
+  manifest, environment plan, provider receipt, promotion record and guarded
+  last-known-healthy pointer;
+- selected GitHub keyless caller provenance, immutable release assets and
+  environment-local exact-byte mirrors while preserving honest Functions
+  provider-build evidence and deferring direct OCI/Binary Authorization;
+- added unsigned BCK05-OD07-DEC-01; BCK05-OD-07 remains Proposed and no
+  workflow, GitHub setting, artifact, cloud resource, deploy or runtime is
+  authorized.
+
+### v0.2.21 — 2026-08-24
+
+- recorded the exact BCK05-OD02-DEC-01 v0.2 owner verdict and accepted
+  `BCK05-IAM-A1-ENV-WIF-v1` with all stated controls;
+- preserved BCK-05 Draft, D1/G1/R1, executable claim/permission/binding/JIT
+  evidence and every other operations decision as independent gates;
+- created no GitHub/GCP mutation, IAM binding, secret, credential, deployment,
+  runtime or `main` merge authority.
+
+### v0.2.20 — 2026-08-24
+
+- selected the decision-ready `BCK05-IAM-A1-ENV-WIF-v1` candidate: three
+  environment-local WIF providers, immutable GitHub identity claims, keyless
+  deployment identities and fail-closed permission/break-glass controls;
+- added exact current repository evidence and the unsigned
+  `BCK05-OD02-DEC-01` owner-verdict contract;
+- kept BCK05-OD-02 Proposed and every GitHub/GCP mutation, IAM binding,
+  secret, executable R1 slice and product/cloud runtime blocked.
+
+### v0.2.19 — 2026-08-24
+
+- recorded the exact OD07-DEC-01 owner verdict and accepted
+  `OD07-A1-EU-MR-v1` with all stated controls;
+- preserved BCK-05 Draft, qualified production Legal/Privacy review, complete
+  D1/G1, exact R1 approval and every cloud/product gate;
+- created no project, billing link, credential, resource, deployment, runtime
+  effect or permission to merge into `main`.
+
+### v0.2.18 — 2026-08-24
+
+- completed the review-ready `OD07-A1-EU-MR-v1` resource/location matrix and
+  added the exact unsigned `OD07-DEC-01` owner-decision contract;
+- distinguished European location-controlled customer-content resources from
+  Firebase Authentication/global service processing and retained the qualified
+  Legal/Privacy production gate;
+- kept OD-07 Proposed, BCK-05 Draft, D1/G1/R1 blocked and cloud runtime Absent.
+
+### v0.2.17 — 2026-08-24
+
+- recorded the exact `BCK05-OD01-DEC-01` owner verdict and advanced only
+  `BCK05-OD-01` to Accepted at baseline v0.3.3 with controls;
+- retained BCK-05 Draft and OD-02/03/04/05/07/08 Proposed, with OD-07 and the
+  complete D1/G1 set still blocking R1;
+- required a fresh dependency audit/reachability review before R1 and updated
+  BCK-01/BCK-02 traceability to v0.4.22/v2.4.26.
+
+### v0.2.16 — 2026-08-24
+
+- added `BCK05-OD01-DEC-01` as the exact owner-decision candidate after
+  bounded R0 Pass, without silently accepting OD-01;
+- reconciled the current R0 facts in the D1 review/workbook/sign-off package;
+- retained BCK-05 Draft, every other OD status and all G1/R1/product-cloud
+  blockers; updated BCK-01/BCK-02 traceability to v0.4.21/v2.4.25.
+
+### v0.2.15 — 2026-08-24
+
+- recorded owner acceptance of `BCK-R0-TCH-ADV-01` for the two root Moderate
+  advisories under expiring demo-only R0 controls;
+- advanced R0 to Pass for bounded tooling feasibility while retaining
+  `BCK05-OD-01` and all other OD items as Proposed;
+- kept BCK-05 Draft and all product/cloud runtime, R1/G1, credentials,
+  provisioning and deployment blocked; updated BCK-01/BCK-02 traceability to
+  v0.4.20/v2.4.24.
+
+### v0.2.14 — 2026-08-24
+
+- recorded green hosted R0 parity for `ubuntu-24.04` and `windows-2025` in
+  draft PR #7, run `32684234236`;
+- closed the hosted-parity blocker without accepting OD-01 or authorizing
+  product/cloud runtime;
+- retained the explicit Moderate advisory disposition and specialist/cloud
+  evidence as open blockers; updated BCK-01/BCK-02 traceability to
+  v0.4.19/v2.4.23.
+
+### v0.2.13 — 2026-08-24
+
+- reconciled the Approved local R0 scaffold and execution evidence without
+  accepting OD-01 or authorizing cloud/product runtime;
+- recorded green local build/emulator/Rules/Terraform/reproducibility results,
+  Pending hosted parity and unresolved Moderate advisory disposition;
+- updated BCK-01/BCK-02 traceability to v0.4.18/v2.4.22.
+
+### v0.2.12 — 2026-08-23
+
+- added exact verified full-SHA identities for the three admitted R0 Actions;
+- rejected the unsigned reviewed Terraform Action and selected signed-archive
+  Terraform 1.15.9 installation with exact Windows/Linux checksums;
+- fixed explicit runner/action inputs and added the formal R0 decision record;
+- retained OD-01 as Proposed, R0 as Review/not Approved, BCK-05 as Draft and
+  runtime as Absent.
+
+### v0.2.11 — 2026-08-23
+
+- added the exact runtime/toolchain technical pre-review and bounded R0
+  toolchain/emulator slice specification with 40 and 52 AC respectively;
+- recorded proposed exact Firebase SDK, lint/format, JDK and test-runner
+  resolutions while keeping compatibility and named owner/security evidence
+  blocked;
+- retained BCK05-OD-01 as Proposed, BCK-R0-TCH-01 as Review/not Approved,
+  BCK-05 as Draft and runtime as Absent; no backend/package/cloud effect exists.
+
+### v0.2.10 — 2026-08-21
+
+- selected a dated Node.js 22/TypeScript/npm/Firebase CLI/Terraform candidate
+  in BCK05-OD01-TCH-01 with deterministic install, build, emulator, IaC,
+  upgrade and 50-AC contracts;
+- advanced `BCK05-OD-01` from Open to Proposed while preserving exact R0
+  compatibility, remaining tool pins, owner/security review and executable
+  evidence as blockers;
+- retained BCK-05 as Draft and runtime as Absent; no backend file, package,
+  workflow, cloud resource or deployment was created.
+
+### v0.2.9 — 2026-08-21
+
+- added complete Draft IAM/workload-identity and release-provenance evidence
+  models with 50 AC each;
+- advanced `BCK05-OD-02` and `BCK05-OD-07` from Open to Proposed while keeping
+  exact permissions, GitHub plan controls, toolchain, provider enforcement and
+  executable evidence blocked;
+- retained OD-07 platform topology as Proposed, BCK-05 as Draft and runtime as
+  Absent; no WIF pool, identity, workflow, artifact or deployment was created.
+
+### v0.2.8 — 2026-08-21
+
+- recorded the Product owner's exact bounded disposition for SLO v0.1, Cost
+  v0.2 and Recovery v0.1 as non-production stage-validation baselines;
+- retained Operations/Security evidence conditions and Inconclusive Finance/
+  Legal scopes without claiming independent specialist review;
+- retained OD-03/04/05 as Proposed, BCK-05 as Draft and runtime as Absent.
+
+### v0.2.7 — 2026-08-21
+
+- completed the exact-version technical owner review of SLO v0.1, cost v0.2
+  and recovery v0.1;
+- corrected retained-backup cost from four to 26 prod full-size equivalents,
+  exposed the L3 guardrail conflict and reconciled reliability/spend,
+  cold-start and soft-delete cost boundaries;
+- retained OD-03/04/05 as Proposed and BCK-05 as Draft; explicit owner,
+  Finance/Legal, stage/restore and runtime evidence remain blocked.
+
+### v0.2.6 — 2026-08-21
+
+- added independent numerical reliability and recovery evidence models with
+  user-journey SLIs/SLOs/error budgets plus record-family RPO/RTO, protection,
+  isolated restore, privacy re-deletion and drill contracts;
+- advanced `BCK05-OD-03` and `BCK05-OD-05` from Open to Proposed; owner verdicts,
+  stage measurement, executable alerts/backups/restores and provisioning remain
+  blocked;
+- BCK-05 remains Draft, OD-07 remains Proposed and runtime remains Absent.
+
+### v0.2.5 — 2026-08-21
+
+- added a dated infrastructure/cost model with reproducible formulas, five
+  workload envelopes, directional provider estimates and proposed EUR budgets;
+- advanced `BCK05-OD-04` from Open to Proposed; Product/Finance/Operations
+  verdict, actual EUR SKU export, stage reconciliation and provisioning remain
+  blocked;
+- OD-07 remains Proposed, BCK-05 remains Draft and runtime remains Absent.
+
+### v0.2.4 — 2026-08-20
+
+- added the ready-but-unexecuted incident tabletop package and its explicit
+  operations checkpoints;
+- `BCK05-OD-08` remains Proposed because real routing, break-glass, executable
+  alert evidence, named exercise participants and a completed result are absent;
+- operations semantics, 50 stable AC, Draft status and runtime Absent are
+  unchanged.
+
+### v0.2.3 — 2026-08-20
+
+- added the shared security/privacy incident response model without creating a
+  second severity vocabulary;
+- advanced `BCK05-OD-08` from Open to Proposed; real routes, break-glass,
+  tabletop and executable alert evidence remain absent;
+- operations semantics, 50 stable AC, Draft status and runtime Absent are
+  unchanged.
+
+### v0.2.2 — 2026-08-20
+
+- recorded the combined Platform Operations/Security/Legal/Finance assignments;
+- retained Pending verdicts and the qualified Legal evidence boundary;
+- operations semantics, 50 stable AC, Draft status and runtime Absent are
+  unchanged.
+
+### v0.2.1 — 2026-08-20
+
+- removed OD-09 `Open/Proposed` ambiguity: its factual status is Proposed;
+- removed the OD-07 evidence/provisioning circularity by separating
+  pre-Acceptance modelled evidence from post-provision synthetic validation;
+- added explicit current DoR state and D1 owner sign-off ledger;
+- operations semantics, 50 stable AC, Draft status and runtime Absent are
+  unchanged.
+
+### v0.2 — 2026-08-20
+
+- added BCK-D1-OD07-EV-01 with official per-resource location constraints,
+  three candidate topologies and exact latency/cost/residency/IAM/recovery
+  evidence required before acceptance;
+- clarified that new Storage placement is a separate decision from Firestore
+  and that alerts-only budgets do not cap spending;
+- linked OD-09 failure/owner evidence; both decisions retain their existing
+  statuses and no infrastructure/runtime is authorized.
+
+### v0.1.1 — 2026-08-20
+
+- synchronized with BCK-D1-DEC-01, BCK-03 v0.3 and BCK-04 v0.4.4;
+- Booking split-key reconciliation closes the API fixture contradiction without
+  changing OD-07/OD-09 or operations authority;
+- OD-07 remains Proposed, all numeric/IAM/recovery specialist evidence remains
+  open, and runtime remains Absent.
+
+### v0.1 — 2026-08-20
+
+- defined the one-platform operations boundary for local Emulator, dev, stage
+  and prod without provisioning any resource;
+- proposed OD-07 topology for evidence review, not acceptance by implication;
+- specified environment isolation, IAM, secrets, release promotion, flags,
+  observability, SLO/error-budget governance, cost containment, backup/restore,
+  incident and rollback contracts;
+- separated operational telemetry from product analytics and domain audit;
+- added exact conditional implementation map, test/evidence matrix, Open
+  Decisions, 50 sequential AC and explicit unimplemented list.
+
+## 1. Verdict
+
+Recharge operates **one logical backend platform** with isolated `dev`,
+`stage` and `prod` environments. Local Emulator Suite is a deterministic test
+surface, not a fourth environment and not production evidence.
+
+BCK-05 owns how approved backend artifacts are built, promoted, observed,
+contained, backed up and recovered. It does not own domain state, authorization
+policy, product analytics, Legal decisions or market/reference semantics.
+
+This Review closes the D1 operations design boundary but creates no Firebase
+project, database, bucket, function, service account, secret, deployment,
+backup or production data. OD-07 is Accepted only as the controlled technical
+architecture in §19.2. The recorded numerical baselines authorize future test
+design only; they do not open G1, R1 or any cloud action.
+
+## 2. Authority and conflict priority
+
+1. Accepted ADR.
+2. Approved bounded domain/runtime slice.
+3. Frozen Architecture Baseline and accepted cross-cutting policies.
+4. BCK-02 coordination/gates and BCK-01 Review architecture.
+5. Approved BCK-03/BCK-04/BCK-20 where applicable.
+6. This BCK-05 after Approval.
+7. Proposed Firebase Architecture and BCK-02-A1 only as inputs.
+
+Conflicts involving irreversible location, IAM authority, data residency,
+retention, recovery or production blast radius block Approval. A console value,
+local script or deployed fact never silently supersedes repository authority.
+
+## 3. Product outcome and measurable non-goals
+
+### 3.1 Outcome
+
+- one repeatable path from verified source to immutable release artifact;
+- isolated environments with least-privilege identities and no shared secrets;
+- server-owned default-off mutation flags and bounded emergency disable;
+- measurable service health, cost and recovery evidence;
+- Latvia-first activation without automatically enabling EE/LT;
+- runbooks generated from actual deployed topology before production use.
+
+### 3.2 Non-goals
+
+- no backend/Firebase runtime in this documentation slice;
+- no domain command, Firestore collection or mobile adapter implementation;
+- no production project IDs, credentials or billing account identifiers;
+- no claim that Firebase budgets automatically stop spending;
+- no promise of zero downtime or zero data loss;
+- no product analytics destination, event taxonomy or marketing consent policy;
+- no microservice split, paid provider, AI or Payments enablement.
+
+## 4. BCK-02 §14 completeness map
+
+| # | Mandatory section | BCK-05 evidence |
+|---:|---|---|
+| 1 | ID/version/date/status/runtime/owner | Header |
+| 2 | Parent sources/conflict priority | §2 |
+| 3 | Outcome/non-goals | §3 |
+| 4 | Included/excluded scope | §5 |
+| 5 | Aggregate/writer/consumer ownership | §6 |
+| 6 | Data classes/projections | §7 |
+| 7 | Commands/queries/events/errors | §8 |
+| 8 | Versions/evolution/minimum client | §9 |
+| 9 | Authorization/revocation | §10 |
+| 10 | Persistence/index/transaction boundaries | §11 |
+| 11 | IDs/time/reference semantics | §12 |
+| 12 | Idempotency/concurrency/retries/partial failure | §13 |
+| 13 | Offline/cache/freshness/degraded states | §14 |
+| 14 | Migration/compatibility | §15 |
+| 15 | Outbox/delivery/replay/dedupe | §16 |
+| 16 | Privacy/retention/export/deletion/Legal | §17 |
+| 17 | Abuse/rate/App Check/fraud | §18 |
+| 18 | Logs/SLO/alerts/analytics/cost | §19–21 |
+| 19 | Flags/rollout/rollback/emergency disable | §22–23 |
+| 20 | Exact implementation map | §24 |
+| 21 | Test/evidence matrix | §25 |
+| 22 | AC/DoR/DoD/unimplemented | §27–30 |
+
+## 5. Scope
+
+### 5.1 Included
+
+- environment/project/resource topology and OD-07 evidence contract;
+- Firestore edition/location recommendation and migration boundary;
+- workload identities, privileged access, secret lifecycle and audit;
+- CI/CD provenance, artifact promotion and configuration drift controls;
+- operations registry, server flags and deployment state;
+- operational logs, metrics, traces, SLI/SLO, alerts and incident handoff;
+- quotas, budgets, cost attribution and automatic containment controls;
+- Firestore backup/PITR/export, restore, reconciliation and DR evidence;
+- release, rollback, emergency disable and market-safe activation;
+- operations portions of OD-09 and future RUN-01/02/05/06.
+
+### 5.2 Excluded and delegated
+
+| Concern | Owner |
+|---|---|
+| API envelope/idempotency wire semantics | BCK-03 |
+| AuthZ/data classes/DSR/Legal retention | BCK-04 + owning domain |
+| Identity/capability lifecycle | BCK-06 |
+| Domain collections/transactions/projections | BCK-06–22 |
+| Reference/localization revisions | BCK-20 |
+| Product analytics taxonomy/destination | BCK-21 / OD-05 |
+| Trust & Safety enforcement | BCK-22 |
+| Payments/provider/AI operations | Their gated BCK specs and ADR |
+
+## 6. Operational ownership
+
+Platform Operations is the sole writer of:
+
+- environment registry and resource-location evidence;
+- release manifests, promotion/rollback records and deployment leases;
+- server flag definitions, environment/market activation state and kill-switch
+  audit, without granting domain capability;
+- operational SLO/budget/alert configuration and incident markers;
+- backup schedules, restore drill records and recovery evidence.
+
+Platform Operations is **not** writer of User, Page, Content, Booking, Media,
+Reference Data, product analytics or domain audit facts. A repair or restore
+cannot bypass owning-domain validation and reconciliation.
+
+| Consumer | Read/use allowed | Write forbidden |
+|---|---|---|
+| Deployment pipeline | release manifest, environment policy | domain records |
+| Domain runtime | effective operational flags/budgets | flag policy/source |
+| Mobile | bounded public service status/version | environment secrets/IAM |
+| Admin/Support | incident and approved operations projection | direct deploy/restore |
+| BCK-21 | correlation/release/environment dimensions | operational log source |
+
+## 7. Operational record families and classification
+
+| Record family | Class | Source/projection | Retention owner |
+|---|---|---|---|
+| Environment descriptor | Operational | immutable source + sanitized status | Platform Operations |
+| Resource inventory/location decision | Operational | source | Platform + Security/Privacy |
+| Release manifest/promotion record | Operational | append-only source | Release Operations |
+| Deployment lease/state | Operational | ephemeral source | Platform Operations |
+| Server flag policy/effective snapshot | Operational | source + bounded runtime projection | Platform Operations |
+| SLI samples/alerts/incidents | Operational; may become Sensitive by content | telemetry source | BCK-05 + BCK-04 |
+| Cost/quota samples | Operational | provider input + aggregation | Platform Operations |
+| Backup/export/restore evidence | Operational; metadata may be Sensitive | source evidence, never user export | Platform + Privacy |
+| Public service status | Public/Derived | sanitized projection | Platform Operations |
+
+Raw payloads, secrets, tokens, private locations, email, uploaded content and
+authorization evidence are prohibited in operational logs by default.
+
+## 8. Operations command/query/event contract
+
+All surfaces inherit BCK-03 envelopes and typed failures after BCK-03
+Approval. Logical operations include:
+
+### 8.1 Commands
+
+- `RegisterEnvironmentDescriptor`
+- `PublishReleaseManifest`
+- `PromoteRelease`
+- `RollbackRelease`
+- `SetServerFlagPolicy`
+- `ActivateFlagRevision`
+- `RecordBackupEvidence`
+- `StartRestoreDrill`
+- `CompleteRestoreDrill`
+- `OpenIncidentMarker` / `ResolveIncidentMarker`
+
+Production mutations require a change/release/incident reference, expected
+revision, idempotency key and server-resolved operator authority.
+
+### 8.2 Queries
+
+- `GetEnvironmentStatus`
+- `GetEffectiveFlags`
+- `GetReleaseStatus`
+- `GetOperationalHealth`
+- `GetBudgetStatus`
+- `GetRecoveryReadiness`
+
+Public/mobile status is a separate sanitized projection. It never exposes
+project IDs, resource names, staff identity, alert thresholds or incident
+evidence that increases attackability.
+
+### 8.3 Events
+
+`ReleasePromoted`, `ReleaseRolledBack`, `FlagRevisionActivated`,
+`BudgetThresholdCrossed`, `BackupCompleted`, `RestoreDrillCompleted` and
+`IncidentStateChanged` are future internal events. Delivery follows OD-09;
+until OD-09 is Accepted, cross-domain consumers remain disabled or use an
+explicit synchronous bounded path owned by their slice.
+
+### 8.4 Typed failures
+
+Common BCK-03 codes are extended with stable domain codes such as
+`environment_mismatch`, `approval_missing`, `promotion_conflict`,
+`artifact_unverified`, `location_not_accepted`, `budget_guard_active`,
+`restore_evidence_missing` and `unsafe_rollback`. Provider/SDK errors never
+cross the boundary raw.
+
+## 9. Versioning and compatibility
+
+Independent versions:
+
+- operations contract major;
+- environment descriptor revision;
+- release manifest revision;
+- flag schema/policy/effective revision;
+- SLO/budget policy revision;
+- backup/restore policy revision;
+- deployed application/function/rules/index artifact versions.
+
+Unknown critical revision fails closed. A newer read-only status projection may
+be displayed as unsupported/stale but never enables a mutation. Minimum mobile
+client is checked by the API layer, not inferred from deployment version.
+
+Release manifests are immutable and content-addressed. Rollback points to a
+previous verified manifest; it does not edit history.
+
+## 10. Authorization, IAM and revocation
+
+| Actor | Allowed | Required controls | Denied |
+|---|---|---|---|
+| CI build identity | build/test/sign artifact | workload identity, repo/ref policy | production deploy |
+| Stage deploy identity | stage promotion only | approved artifact, protected environment | prod access |
+| Prod deploy identity | prod promotion/rollback | protected environment, named approval | interactive domain writes |
+| Runtime service identity | exact service resources | least privilege per module/task | broad owner/editor |
+| Backup identity | backup/restore metadata and exact resources | separate duty, audit | domain repair |
+| Incident operator | bounded emergency actions | incident reference, TTL, audit | permanent policy bypass |
+| Human maintainer | review/approve | MFA and just-in-time scope where supported | shared credentials |
+
+Revocation is evaluated at operation time. Removing repository access does not
+replace revoking cloud/IAM/session credentials. Break-glass access is
+time-bounded, separately logged and reviewed after use; it cannot disable
+immutable audit or reopen Security Rules.
+
+## 11. Persistence and transaction boundaries
+
+- version-controlled policy/manifests are canonical for intended state;
+- cloud inventory is observed state and must reconcile to intended state;
+- deployment history and restore evidence are append-only;
+- flag activation uses expected revision and atomic effective-pointer update;
+- a deployment lease prevents two promotions to one environment concurrently;
+- domain data is never written in the deployment transaction;
+- console-only change is drift and blocks next promotion until reconciled;
+- indexes/rules/functions are independently versioned but promoted under one
+  release manifest with an explicit compatibility order.
+
+No operational collection/path is authorized by this Draft. Exact persistence
+technology is decided in the executable slice after Approval.
+
+## 12. IDs, time and reference semantics
+
+- operation/release/incident/evidence IDs are opaque ULID/UUID strings;
+- authoritative timestamps use backend UTC/RFC 3339;
+- maintenance windows include IANA timezone plus normalized UTC interval;
+- environment, market, country, locale, currency and timezone are separate;
+- resource and policy references use stable ID + revision;
+- project IDs, bucket names and function regions are deployment facts, never
+  parsed into business authority;
+- local Emulator uses `demo-*` identifiers and cannot be promoted.
+
+## 13. Idempotency, concurrency and partial failure
+
+- promotion key binds environment + target manifest + change reference;
+- same key/same manifest returns the committed result;
+- same key/different manifest returns `idempotency_conflict`;
+- stale expected environment revision returns `revision_conflict`;
+- timeout after provider call is `unknown_outcome` until observed-state
+  reconciliation completes;
+- retries are bounded exponential backoff with jitter and a hard attempt/deadline;
+- partial artifact promotion is not success; pipeline either completes the
+  ordered compatibility plan or enters typed `degraded/recovery_required`;
+- rollback itself is idempotent and must not oscillate between manifests.
+
+## 14. Offline, cache, freshness and degraded states
+
+Operations mutations are online-only. Cached health, flags or inventory are
+never deployment authority.
+
+Required states: `fresh`, `stale`, `unavailable`, `unsupported`, `degraded`,
+`unknown_outcome`, `recovery_required`. Public status may be coarser but cannot
+report healthy when the authoritative status is unknown.
+
+A domain runtime caches the last accepted fail-safe flag snapshot only when the
+flag declares its outage behavior. Risky mutation flags default to disabled on
+unknown/newer configuration.
+
+## 15. Migration and compatibility
+
+- infrastructure changes are additive and rehearsed in dev, then stage;
+- immutable-location/edition change is a new-resource migration, never an
+  in-place assumption;
+- migration plan includes export, verification, destination configuration,
+  indexes/TTL/backup recreation, cutover, rollback window and deletion hold;
+- environment promotion never copies production personal data to dev/stage;
+- synthetic/anonymized stage data has documented generation/provenance;
+- configuration schema supports current and explicitly supported previous
+  revisions; unknown critical values fail closed;
+- local/mock-to-cloud imports remain owned by BCK-18/domain specs.
+
+## 16. Tasks, events and OD-09 boundary
+
+Scheduled/async work is disabled until the owning domain and BCK-05 define:
+
+- producer/outbox authority and event version;
+- task identity, region, max attempts, deadline, concurrency and rate;
+- idempotency/deduplication key and retention;
+- poison handling, replay window, ordering/gap behavior;
+- cost budget, alert and emergency disable;
+- privacy classification and payload minimization.
+
+BCK-05 owns transport operation, not event business meaning. OD-09 is an
+**Accepted technical contract with retained executable gates** in BCK-03. No
+worker, queue, schedule, replay or cross-domain effect may activate before its
+exact Approved slice proves the controls above.
+
+## 17. Privacy, retention and Legal boundary
+
+- operational records are classified by contents, not by collection name;
+- raw request/response bodies are not logged by default;
+- access and retention follow BCK-04 and applicable domain rules;
+- backup retention never silently extends lawful domain retention;
+- deletion/rectification propagation into backups follows an Accepted policy
+  and documented restore-time re-deletion/reconciliation procedure;
+- production data export/restore requires authorized purpose and audit;
+- region selection requires recorded residency/processor/transfer review;
+- stage uses synthetic/anonymized data unless a separately approved exception
+  provides legal basis, minimization, TTL and deletion evidence.
+
+For Booking only, `BCK09-RETENTION-DEC-01` is an Accepted technical owner
+baseline: `bookingIdempotency` expires 7 days from `createdAt`;
+`bookingOutbox` expires 30 days after both delivery and reconciliation finish,
+anchored to the later completion; `bookingAudit` expires 365 days from
+`occurredAt`. Undelivered or unreconciled outbox has no TTL timestamp. An
+active legal/security hold removes or suppresses TTL eligibility until
+explicit release. Account deletion removes or pseudonymizes direct identifiers
+while minimum audit keeps its original deadline. Physical deletion target is
+72 hours after expiry and requires overdue monitoring/reconciliation.
+
+The baseline applies to LV/EE/LT without enabling any market. A market-specific
+override requires a separate accepted revision. This owner decision is not a
+qualified Legal/Privacy verdict and does not accept general `BCK05-OD-05`.
+
+## 18. Abuse, rate, App Check and supply-chain controls
+
+App Check is defense-in-depth for exposed Firebase surfaces; it is not IAM,
+AuthZ or a budget stop. Required controls include:
+
+- per-operation/user/service quotas and bounded payloads;
+- provider quota monitoring and retry-storm circuit breakers;
+- secret, dependency, SAST and provenance checks;
+- immutable lockfiles and generated-file integrity;
+- signed/attested artifacts where the selected toolchain supports them;
+- webhook replay/SSRF controls in owning integration specs;
+- no production mock adapter or emulator host in release artifacts.
+
+## 19. Environments and Accepted OD-07 boundary
+
+### 19.1 Environment isolation
+
+| Surface | Local Emulator | dev | stage | prod |
+|---|---|---|---|---|
+| Purpose | deterministic tests | disposable integration | RC/migration/load rehearsal | live cohort/GA |
+| Production data | prohibited | prohibited | synthetic/anonymized only | allowed after gates |
+| Credentials | local demo only | separate | separate | protected, least privilege |
+| Mutation flags | off unless test | default off | default off | default off until cohort gate |
+| Promotion | never | verified artifact | same verified artifact | same stage-proven artifact |
+
+Logical environment names are exactly `local`, `dev`, `stage` and `prod`.
+`local` uses Emulator Suite and has no cloud project. Each cloud environment
+maps to exactly one isolated Firebase/GCP project. Actual immutable provider
+project IDs are selected only in the Approved R1 provisioning slice after
+availability checks, using `recharge-<env>-<uniqueSuffix>`; examples without a
+verified suffix are not reserved facts and must never be invented. Provider
+labels include `app=recharge`, `environment=<dev|stage|prod>`, the accepted
+region policy and `managedBy=<approved automation identity>`.
+
+### 19.2 OD-07 — Accepted architecture, no runtime authority
+
+The complete comparison and sign-off checklist is
+[BCK-D1-OD07-EV-01 v0.6](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md). The exact
+owner verdict is recorded in
+[OD07-DEC-01 v0.2](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md). OD-07 is
+Accepted only as the controlled architecture baseline below; BCK-05, G1/R1
+and all runtime effects remain unapproved.
+
+OD-07 Acceptance uses dated vendor facts, explicit cost/latency models,
+predeclared thresholds and an approved validation plan; it does not require
+creating cloud resources first. Actual synthetic measurements are collected
+only after G1 and a separately Approved R1 non-production provisioning slice,
+and must pass those thresholds before production traffic. This removes a
+circular dependency without weakening the irreversible-location gate.
+
+**Accepted exact baseline `OD07-A1-EU-MR-v1`:**
+
+- three isolated Firebase/GCP projects: dev, stage, prod, with logical handles
+  and deterministic provider-ID rules rather than invented availability;
+- Firestore **Standard edition, Native mode, `(default)`, `eur3`**;
+- Functions **2nd gen `europe-west1`**, explicitly configured in backend and
+  callable clients;
+- runtime media Storage **regional `europe-west1`**; disabled recovery/export
+  bucket **`EU` multi-region**;
+- EE/LT use the same platform/projects initially with market-level activation,
+  unless Legal/residency/blast-radius evidence later requires a superseding ADR;
+- location-controlled customer content is European; Authentication/global
+  services and mandatory/global logs are disclosed separately and remain
+  production-disabled until their Security/Privacy/Legal gates;
+- Analytics and every other disabled product/global service require their own
+  activation decision and may not inherit this location claim.
+
+Acceptance does not freeze vendor facts forever or authorize provisioning.
+Firestore edition/location and several resource locations are creation-time or
+migration-significant choices, so every revalidation trigger, cost gate,
+rollback/export control and post-provision threshold in the evidence remains
+mandatory and fail-closed.
+
+Official verification anchors:
+
+- <https://firebase.google.com/docs/projects/locations>
+- <https://firebase.google.com/docs/firestore/locations>
+- <https://firebase.google.com/docs/functions/locations>
+- <https://cloud.google.com/firestore>
+- <https://cloud.google.com/storage/docs/locations>
+- <https://cloud.google.com/billing/docs/how-to/budgets>
+
+## 20. CI/CD, release and provenance
+
+Pipeline stages:
+
+```text
+source + lockfiles
+  -> lint/static/boundary/contract/codegen checks
+  -> unit + emulator + Rules/security tests
+  -> immutable artifact + manifest + provenance
+  -> dev deploy/smoke
+  -> stage promotion/migration rehearsal/load/restore evidence
+  -> named prod approval
+  -> prod promotion with all risky flags off
+  -> observation and automatic/manual containment
+```
+
+No environment rebuilds a release from a different source. Generated files are
+produced by the pinned generator only. A failed, skipped, timed-out or manually
+asserted gate is inconclusive and blocks promotion.
+
+## 21. SLI/SLO, alert and cost policy
+
+### 21.1 Service classes
+
+| Class | Examples | Initial proposed indicators |
+|---|---|---|
+| C1 authority mutation | identity grant, publish, Booking | availability, error rate, latency, invariant drift |
+| C2 interactive query | details, library, catalog | availability, latency, stale/error ratio |
+| C3 async effect | outbox, notification, projection | age/lag, retry/poison, completion ratio |
+| C4 operations | deploy, backup, restore | success, duration, evidence completeness |
+
+Exact production objectives and measurement windows are `BCK05-OD-03`; they
+must be numeric before Approval, based on stage load and cost evidence. Domain
+specs may be stricter, never weaker without explicit reconciliation.
+
+The concrete Draft proposal is
+[BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md): 28-day
+journey-scoped availability, latency/freshness/lag targets, zero-tolerance
+invariants, burn alerts and deterministic release policy. `BCK05-OD-03` is
+Proposed; stage measurement and Product/domain/Operations verdicts are absent.
+
+Alerts are actionable: owner, severity, threshold/window, runbook, dedupe,
+escalation and recovery signal are mandatory. Alert presence without tested
+routing is not evidence.
+
+### 21.2 Cost controls
+
+- cost labels/dimensions by environment, service and bounded module where possible;
+- budget thresholds proposed at 50/75/90/100% plus anomaly alerts;
+- provider budget alerts are notification signals, not guaranteed hard stops;
+- separate server flags/quotas/circuit breakers perform safe containment;
+- stage load tests report reads, writes, storage, egress, function/task
+  invocations and projected monthly cost per critical journey;
+- each optional provider/AI/payment channel has its own budget and kill switch.
+
+The concrete Draft proposal and dated unit-price model are in
+[BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md): dev €5 (owner
+target 2026-11-04, earlier €25), stage €75,
+prod L1 €150 and L2 €500 monthly guardrails, with L3 stress separately
+authorized. `BCK05-OD-04` is Proposed; these numbers block provisioning until
+Product/Finance/Operations verdict and actual EUR SKU reconciliation.
+
+## 22. Backup, restore and disaster recovery
+
+The initial candidate combines Firestore scheduled backups and PITR where
+supported/cost-approved. Current official limits and features must be verified
+again at acceptance: <https://firebase.google.com/docs/firestore/disaster-recovery>
+and <https://firebase.google.com/docs/firestore/pitr>.
+
+Required contract:
+
+- backup schedule, retention, encryption/residency/access and cost;
+- RPO/RTO by record class and service class;
+- immutable evidence of backup completion and failure alerts;
+- restore to isolated destination, never blind overwrite of live truth;
+- schema/index/TTL/Rules/IAM/config reconstruction inventory;
+- post-restore domain reconciliation and privacy re-deletion propagation;
+- quarterly restore drill before source-of-truth production and after major
+  topology changes;
+- delete/retire procedure only after verified export, observation and owner approval.
+
+Booking restore additionally re-evaluates `BCK09-RETENTION-DEC-01` before
+cutover: expired records are not reintroduced, overdue records are queued for
+deletion, and legal/security hold state is preserved rather than cleared by
+the restore. Local tests prove the decision logic only; no backup service,
+schedule, cloud restore or production evidence exists.
+
+Exact RPO/RTO/retention are `BCK05-OD-05`; no invented value is called Accepted.
+The concrete Draft proposal is
+[BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md): record-family recovery
+classes, numerical RPO/safe/full RTO, candidate PITR/backup/Storage protection,
+isolated restore, privacy re-deletion, reconciliation and drills.
+`BCK05-OD-05` is Proposed; no protection or restore runtime exists.
+
+## 23. Flags, rollout, rollback and emergency disable
+
+Every risky capability has a server-owned flag with:
+
+- stable ID, owner, scope (`environment`, optional `market`, capability);
+- schema/policy/effective revision and default-off value;
+- allowed transitions, prerequisites, expiry/review date;
+- audit, propagation/freshness SLI and fail-safe outage behavior;
+- explicit distinction between disable-new, read-only, drain and full deny.
+
+Rollback layers:
+
+1. feature containment — disable new mutations/effects safely;
+2. artifact rollback — promote previous compatible verified manifest;
+3. configuration rollback — restore previous accepted flag/policy revision;
+4. data reconciliation — owning domain repairs through typed commands/audit;
+5. disaster restore — only under the approved recovery plan.
+
+Rules rollback never reopens access. Emergency disable cannot erase evidence or
+bypass mandatory safe exits such as viewing/cancelling already committed state.
+
+## 24. Exact conditional implementation map
+
+The complete product/operations tree below remains a **future target**. Its
+small R0-owned subset now exists only as the Approved local tooling scaffold;
+all product modules and cloud/deploy authority remain absent:
+
+```text
+apps/backend/
+  firebase.json
+  .firebaserc.example              # aliases only; no credentials
+  firestore.rules
+  storage.rules
+  firestore.indexes.json
+  functions/
+    package.json
+    tsconfig.json
+    src/
+      platform/
+        bootstrap/
+        config/
+        auth/
+        iam/
+        contracts/
+        errors/
+        ids/
+        money/
+        time/
+        transactions/
+        flags/
+        observability/
+        release/
+        recovery/
+      modules/<domain>/
+        domain/
+        application/
+        infrastructure/
+        transport/
+      workers/
+        outbox/
+        schedules/
+        projections/
+        cleanup/
+      generated/
+    test/
+      unit/
+      emulator/
+      rules/
+      integration/
+      load/
+      recovery/
+  config/
+    environment.schema.json
+    region-policy.schema.json
+    flag-policy.schema.json
+    slo-policy.schema.json
+    budget-policy.schema.json
+  scripts/
+    verify-config.*
+    verify-release-manifest.*
+    seed-emulator.*
+    backup-evidence.*
+    restore-drill.*
+
+docs/runbooks/
+  backend-incident.md
+  backend-rollback.md
+  backend-disaster-recovery.md
+  backend-security-abuse.md
+```
+
+Executable slice must replace `*` with one cross-platform implementation path,
+pin runtime/tool versions, identify exact files and prove no generated/manual
+or secret content. Runbooks are authored from real topology, not this target map.
+Existing disabled RAW-C source under legacy `src/booking`, `src/shared` or
+root-level transport paths remains compatibility-only until an exact migration
+slice moves it without changing behavior; no wholesale move is authorized here.
+
+## 25. Test and evidence matrix
+
+| Family | Required proof | First gate |
+|---|---|---|
+| Config schema | invalid/unknown environment/location/flag fails closed | R0 |
+| Unit | promotion, flags, retry, budget and recovery policy | R0 |
+| Contract/fixture | BCK-03 parity and compatible revisions | R0 |
+| Emulator | Functions/Firestore/Storage integration | R0/R1 |
+| Rules/IAM negative | direct/cross-env/cross-user/cross-page denied | R1/R2 |
+| Environment isolation | prod cannot select mock/dev/stage resources | R1 |
+| Provenance | same verified artifact promoted; no manual generated edit | R1 |
+| Drift | console/cloud state differs from repository intent and blocks | R1 |
+| Flags | default-off, scope, revocation, stale/newer fail-safe | Every rollout |
+| Retry/fault | duplicate/timeout/partial promotion safe | R1 |
+| Load/soak | SLI and cost per critical flow | G5/G6 |
+| Budget/quota | thresholds route; containment works independently | G5 |
+| Backup | schedule/failure/access/residency evidence | G5 |
+| Restore/DR | isolated restore + reconciliation within accepted RTO/RPO | G6 |
+| Rollback | artifact/config/data paths rehearsed on stage | G5/G6 |
+| Incident | alert-to-owner/runbook/tabletop evidence | G6 |
+| Market isolation | LV change does not enable EE/LT | Every market gate |
+| Privacy/security | log redaction, access, retention, deletion propagation | G5/G6 |
+
+Evidence includes commit/build/manifest ID, environment, UTC date, exact
+command, result, owner and limitations. Emulator success is not proof of real
+indexes, IAM, provider configuration, billing, backup or latency.
+
+## 26. Open decisions
+
+| ID | Status | Owner | Decision/evidence | Blocks |
+|---|---|---|---|---|
+| OD-07 | Accepted — `OD07-A1-EU-MR-v1` with controls | Platform + Security/Privacy + Product/Finance | exact verdict recorded in [OD07-DEC-01 v0.2](BACKEND_OD_07_INFRASTRUCTURE_OWNER_DECISION.md) with [evidence v0.6](BACKEND_OD_07_INFRASTRUCTURE_EVIDENCE.md); no runtime authority | revalidation before provisioning; BCK-05 Approval and G1/R1 remain independent |
+| BCK05-OD-01 | Accepted — baseline v0.3.3 with controls | Platform Operations + Platform Security | [standard status record v0.3.4](BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md), [technical review v0.2.4](BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md), [owner decision v0.2](BACKEND_RUNTIME_TOOLCHAIN_OWNER_DECISION.md), [R0 decision record v0.2](BACKEND_R0_APPROVAL_DECISION_RECORD.md) and [execution result](../evidence/backend/r0/BCK-R0-TCH-01_RESULT.md); R0 advisory exception does not propagate into R1 | fresh audit/reachability review before any R1 execution |
+| BCK05-OD-02 | Accepted — `BCK05-IAM-A1-ENV-WIF-v1` with controls | Platform Security/Operations | exact verdict recorded in [BCK05-OD02-DEC-01 v0.2](BACKEND_IAM_WORKLOAD_IDENTITY_OWNER_DECISION.md) against [IAM model v0.2](BACKEND_IAM_WORKLOAD_IDENTITY_MODEL.md); no runtime authority | executable claims, permissions, bindings, JIT/roster, BCK-05/G1/R1 remain separate gates |
+| BCK05-OD-03 | Proposed | Platform Operations + domain owners | [BCK05-OD03-SLO-01](BACKEND_SERVICE_RELIABILITY_SLO_MODEL.md): Product baseline recorded; stage telemetry/alerts and specialist verdict pending | BCK-05 Approval |
+| BCK05-OD-04 | Proposed | Product + Finance/Operations | [BCK05-OD04-COST-01](BACKEND_INFRASTRUCTURE_COST_MODEL.md): Product baseline recorded; Finance remains Inconclusive pending EUR SKU/tax/stage evidence | R1 provisioning |
+| BCK05-OD-05 | Proposed | Platform + Privacy + domains | [BCK05-OD05-REC-01](BACKEND_BACKUP_RECOVERY_MODEL.md): Product baseline recorded; drills, IAM/privacy and specialist verdicts pending | BCK-05 Approval |
+| BCK05-OD-06 | Accepted technical boundary via OD-09; executable topology retained | API Platform + Operations | BCK-03 OD-09 contract; exact queue/task/provider, replay window and measured delivery evidence belong to the executable slice | no worker/effect activation before domain and operations evidence |
+| BCK05-OD-07 | Accepted with controls | Release Operations + Platform Security | [BCK05-OD07-REL-01 v0.2.1](BACKEND_RELEASE_PROVENANCE_PROMOTION_MODEL.md) and exact [BCK05-OD07-DEC-01 v0.2](BACKEND_RELEASE_PROVENANCE_PROMOTION_OWNER_DECISION.md) accept `BCK05-REL-A1-DUAL-PROV-v1`; executable/policy/provider evidence remains pending | separately Approved executable R0 |
+| BCK05-OD-08 | Proposed | Incident/Security owners | [BCK04-OD09-IR-01](BACKEND_SECURITY_INCIDENT_RESPONSE_MODEL.md) plus ready-but-unexecuted [BCK04-OD09-TTX-01](BACKEND_SECURITY_INCIDENT_TABLETOP_EXERCISE.md); real routes/break-glass/executable evidence and completed result pending | G5/G6 |
+
+Each Open/Proposed decision has a fail-closed default above. Acceptance records
+option, evidence links, reviewers, decision date, migration and rollback.
+
+OD-09 failure/compatibility review evidence is maintained in
+[BCK-D1-OD09-EV-01](BACKEND_OD_09_EVENT_DELIVERY_EVIDENCE.md); transport and
+worker activation stay blocked.
+
+## 27. Definition of Ready for Review
+
+- BCK-01 is Review and BCK-02 lists BCK-05 Present/Review;
+- 22/22 coverage matrix exists and links pass;
+- Platform Operations accountable person/team is named;
+- Security/Privacy reviews OD-07 and log/backup boundaries;
+- BCK-03/04 conflicts are explicitly listed, not assumed resolved;
+- no project/resource/credential/runtime file is created;
+- all Open Decisions have owner, gate and fail-closed default.
+
+Current readiness: the Platform Operations and delegated Security/Legal/Finance
+roles are assigned to the combined owner in
+[BCK-D1-SIG-01](BACKEND_PLATFORM_D1_OWNER_SIGNOFF_LEDGER.md). IAM and release
+design evidence is now Present and OD-02/07 are Accepted with controls, but exact claim/role/
+toolchain/provider decisions, specialist verdicts, qualified Legal evidence,
+actual EUR SKU and measured stage/restore/runtime proof remain absent. The D1
+technical boundary is closed and BCK-05 is Review; those gaps still block
+Approved/provisioned/production status.
+
+## 28. Definition of Done for Approved BCK-05
+
+- BCK-03, BCK-04 and BCK-20 technical boundaries are Review/reconciled
+  atomically as the D1 platform set;
+- OD-07 is Accepted with exact project/edition/location evidence;
+- OD-09 is Accepted as a technical contract; effects/workers remain disabled
+  until executable evidence;
+- BCK05-OD-01–05, 07 and 08 are Accepted or explicitly Deferred without
+  bypassing their gates;
+- numeric SLO, cost, RPO/RTO and retention policies are recorded;
+- IAM, secrets, environment isolation, release, flags, observability, backup,
+  restore, incident and rollback plans are reviewable and consistent;
+- 80 AC are sequential and coverage/reconciliation checks pass;
+- runtime remains Absent until a separate Approved executable slice.
+
+## 29. Acceptance criteria
+
+1. **BCK-05-AC-01:** one operations standard governs the logical backend.
+2. **BCK-05-AC-02:** dev, stage and prod are isolated environments.
+3. **BCK-05-AC-03:** Local Emulator is not a production environment/evidence.
+4. **BCK-05-AC-04:** production cannot select mock, emulator or dev adapters.
+5. **BCK-05-AC-05:** project/resource creation waits for Accepted OD-07.
+6. **BCK-05-AC-06:** OD-07 records edition and every location independently.
+7. **BCK-05-AC-07:** `OD07-A1-EU-MR-v1` is Accepted only through the exact OD07-DEC-01 verdict and every recorded control remains binding.
+8. **BCK-05-AC-08:** LV activation never enables EE/LT implicitly.
+9. **BCK-05-AC-09:** one writer owns each operational record family.
+10. **BCK-05-AC-10:** Operations cannot mutate domain authority directly.
+11. **BCK-05-AC-11:** intended repository state reconciles observed cloud state.
+12. **BCK-05-AC-12:** console-only drift blocks promotion.
+13. **BCK-05-AC-13:** releases are immutable/content-addressed manifests.
+14. **BCK-05-AC-14:** the same verified artifact is promoted across environments.
+15. **BCK-05-AC-15:** skipped/timed-out/manual gate is inconclusive, not pass.
+16. **BCK-05-AC-16:** generated artifacts are never manually edited.
+17. **BCK-05-AC-17:** CI and runtime use separate least-privilege identities.
+18. **BCK-05-AC-18:** production deploy requires protected named approval.
+19. **BCK-05-AC-19:** revocation is checked at operation time.
+20. **BCK-05-AC-20:** break-glass is TTL-bound, audited and reviewed.
+21. **BCK-05-AC-21:** secrets never enter Git/docs/logs/client artifacts.
+22. **BCK-05-AC-22:** provider raw errors/secrets never cross the API boundary.
+23. **BCK-05-AC-23:** promotions use idempotency and expected revision.
+24. **BCK-05-AC-24:** mutation timeout produces typed unknown outcome.
+25. **BCK-05-AC-25:** partial promotion is never reported as success.
+26. **BCK-05-AC-26:** operations mutations are online-only.
+27. **BCK-05-AC-27:** cached health/flags never become deployment authority.
+28. **BCK-05-AC-28:** unknown critical config fails closed.
+29. **BCK-05-AC-29:** risky flags default off on missing/stale/newer config.
+30. **BCK-05-AC-30:** every flag has owner/scope/revision/audit/outage behavior.
+31. **BCK-05-AC-31:** Remote Config/client flags cannot authorize server mutation.
+32. **BCK-05-AC-32:** operational telemetry is separate from product analytics.
+33. **BCK-05-AC-33:** logs exclude raw sensitive payloads by default.
+34. **BCK-05-AC-34:** alerts have owner, severity, runbook and recovery signal.
+35. **BCK-05-AC-35:** numeric SLO/error budgets are required before Approval.
+36. **BCK-05-AC-36:** budgets/alerts do not claim automatic spend shutdown.
+37. **BCK-05-AC-37:** containment uses independent quotas/flags/circuit breakers.
+38. **BCK-05-AC-38:** load evidence reports unit cost per critical flow.
+39. **BCK-05-AC-39:** backup metadata never substitutes restore proof.
+40. **BCK-05-AC-40:** restore occurs into isolation before reconciliation.
+41. **BCK-05-AC-41:** RPO/RTO/retention require recorded owner approval.
+42. **BCK-05-AC-42:** restored data passes privacy re-deletion/reconciliation.
+43. **BCK-05-AC-43:** Rules rollback never reopens access.
+44. **BCK-05-AC-44:** artifact/config/data/DR rollback are distinct.
+45. **BCK-05-AC-45:** OD-09 governs async delivery/replay/dedupe/poison handling.
+46. **BCK-05-AC-46:** every task has bounded attempts/deadline/rate/concurrency.
+47. **BCK-05-AC-47:** runbooks derive from actual deployed topology.
+48. **BCK-05-AC-48:** target file map is not runtime authorization.
+49. **BCK-05-AC-49:** Approval still requires a separate executable slice/G1.
+50. **BCK-05-AC-50:** v0.2.33 creates no backend/Firebase/resource/runtime effect.
+51. **BCK-05-AC-51:** BCK05-OPS-REV-02 and Batch D prepare review routing
+    only; all five specialist verdicts remain Pending, OD-03/04/05/08 remain
+    Proposed, OD-06 is only a technical contract and R1 remains separately unauthorized.
+52. **BCK-05-AC-52:** logical environments are exactly local/dev/stage/prod;
+    local is Emulator-only and each cloud environment has one isolated project.
+53. **BCK-05-AC-53:** provider project IDs are availability-checked in R1 and
+    follow `recharge-<env>-<uniqueSuffix>`; documentation never invents them.
+54. **BCK-05-AC-54:** platform, bounded modules, workers and generated
+    artifacts use the single canonical source layout in §24.
+55. **BCK-05-AC-55:** Accepted technical OD-09 does not activate workers,
+    queues, schedules, replay or cross-domain effects.
+56. **BCK-05-AC-56:** Review permits exact R1 design only; G1, provisioning,
+    credentials, Firebase, deployment and production data remain unauthorized.
+57. **BCK-05-AC-57:** measured SLO, cost, backup/restore and incident evidence
+    remains required at the named later gates and is never inferred from D1.
+58. **BCK-05-AC-58:** the smallest release/activation key is exact
+    environment, market, capability and immutable release revision.
+59. **BCK-05-AC-59:** a MarketCapabilityReleaseManifest references but never
+    authors domain, MarketConfig, compliance or Legal decisions.
+60. **BCK-05-AC-60:** a release manifest cannot become active with missing,
+    stale, unsupported, expired or mutually incompatible prerequisite revisions.
+61. **BCK-05-AC-61:** LV, EE and LT have independent flags, cohorts,
+    observation evidence, support routing, go/no-go and rollback.
+62. **BCK-05-AC-62:** a client flag, Remote Config value or UI visibility can
+    never activate or authorize a server mutation.
+63. **BCK-05-AC-63:** every cohort has numeric entry/stop/exit thresholds,
+    named on-call/support ownership and a tested disable/rollback procedure
+    before activation.
+64. **BCK-05-AC-64:** optional capability failure remains isolated when the
+    required market profile is complete and independent of that capability.
+65. **BCK-05-AC-65:** shared artifact/schema/IAM/secret/data-integrity defects
+    trigger containment across every affected market, not a misleading local flag.
+66. **BCK-05-AC-66:** rollback preserves security, erasure, immutable financial/
+    Booking facts and explicit compatibility; unsafe rollback disables traffic.
+67. **BCK-05-AC-67:** v0.2.34 is documentation-only and creates no manifest,
+    flag, Firebase resource, deployment, traffic, push or merge authority.
+68. **BCK-05-AC-68:** BCK-02 §26 is the sole exact R1 path/action manifest;
+    BCK-05 may refine responsibilities but cannot invent alternate paths.
+69. **BCK-05-AC-69:** R1 adds no externally reachable product callable,
+    scheduled worker, queue consumer or domain mutation.
+70. **BCK-05-AC-70:** R1 package scripts expose layout, config, export,
+    unit, contract, Emulator, Rules, integration and infrastructure checks
+    without deploy or apply behavior.
+71. **BCK-05-AC-71:** R1 CI uses only synthetic data, Emulator/local tooling
+    and validation commands and receives no cloud credential.
+72. **BCK-05-AC-72:** `ci-build`, `ci-deploy`, `runtime-platform`,
+    `config-publisher`, `reference-publisher` and `break-glass` remain distinct
+    logical identities; documenting them does not create an identity or grant.
+73. **BCK-05-AC-73:** the five R1 collection families and their indexes are
+    owned exactly as recorded in BCK-02 §26.7 and are default-deny to clients.
+74. **BCK-05-AC-74:** existing disabled RAW-C Booking files remain
+    compatibility-only and cannot be moved, activated or represented as R1.
+75. **BCK-05-AC-75:** R1 migration proceeds schema/fixture first, then shared
+    contracts, config/security, composition, Rules/indexes, infra/CI and evidence.
+76. **BCK-05-AC-76:** R1 rollback starts with safe-off configuration and
+    preserves default-deny Rules before code or pointer reversal.
+77. **BCK-05-AC-77:** infrastructure commands stop at format, validate and
+    no-refresh plan; apply, destroy, provisioning and remote state are absent.
+78. **BCK-05-AC-78:** generated artifacts are rebuilt only from the canonical
+    BCK-03 schema source and never edited as a second source of truth.
+79. **BCK-05-AC-79:** every R1 evidence result records command, exit status,
+    source revision, toolchain and limitation; timeout or skip is inconclusive.
+80. **BCK-05-AC-80:** v0.2.35 and its exact map are documentation-only and
+    create no file, credential, project, resource, runtime, deployment, push
+    or merge authority.
+81. **BCK-05-AC-81:** v0.2.36 is reconciled to BCK-02 v2.4.87 §26 as the sole
+    exact R1 path/action and execution-order manifest.
+82. **BCK-05-AC-82:** local-R1 acceptance is credential-free and permits no
+    project, billing link, remote state, cloud authentication or deployment.
+83. **BCK-05-AC-83:** all five collection families retain their single writer,
+    exact indexes and default-deny direct-client posture.
+84. **BCK-05-AC-84:** migration is additive and ordered; rollback begins with
+    safe-off/default-deny and never defaults to destroy or broad deletion.
+85. **BCK-05-AC-85:** dev/stage/prod topology remains logical configuration
+    until separate project, region revalidation, IAM, billing and deploy approval.
+86. **BCK-05-AC-86:** this preflight runs no tool, creates no file/resource,
+    changes no lock, and performs no deployment, push or merge.
+87. **BCK-05-AC-87:** `BCK09-RETENTION-DEC-01` fixes the local Booking TTL
+    baseline at 7 days for idempotency, completion-and-reconciliation plus 30
+    days for outbox, and 365 days for audit.
+88. **BCK-05-AC-88:** undelivered/unreconciled outbox and every active
+    legal/security hold remain ineligible for automatic TTL deletion.
+89. **BCK-05-AC-89:** Booking physical deletion is monitored against a
+    72-hour post-expiry target; delay never silently extends policy.
+90. **BCK-05-AC-90:** isolated restore blocks expired Booking records,
+    preserves holds and completes re-deletion/reconciliation before cutover.
+91. **BCK-05-AC-91:** the Booking owner decision neither accepts general
+    BCK05-OD-05 nor claims qualified Legal/Privacy, cloud or production proof.
+
+AC numbers are stable; new criteria append. Semantic removal/change requires a
+new revision and reference migration note.
+
+## 30. Explicitly unimplemented
+
+At v0.2.36 the following remain absent:
+
+- product/domain backend modules and handlers beyond the local R0 scaffold;
+- Firebase/GCP projects, databases, buckets, functions and app registrations;
+- IAM/service accounts/workload identity and production credentials;
+- deploy pipelines, manifests, flags, telemetry, alerts and budgets;
+- backups, PITR/export schedules, restore drills and backend runbooks;
+- accepted numeric SLO/RPO/RTO/cost limits;
+- executable OD-09 topology and remaining production BCK-05 evidence;
+- executable market-capability manifests, LV/EE/LT cohort evidence and
+  market-specific on-call/support routing;
+- production data, migration, traffic or activation.
+
+## 31. Next executable step
+
+Design one exact R1 non-production platform slice covering project bootstrap,
+workload identity, default-deny Rules, config/flag schemas, release provenance,
+observability and rollback. It must list exact files, pinned tools, commands,
+negative tests and evidence outputs, use no production data or credentials and
+keep every mutation default-off. G1 and a separate approval remain mandatory
+before provisioning or execution.
+
+## 32. Stage 2 normalized Operations entity contract
+
+All rows inherit BCK-01 §30 and the BCK-02 writer ledger; existing domain
+sections remain authoritative for commands, queries, events and typed outcomes.
+
+| Entity family | Accountable owner / single writer | Readers/projections | ID/reference contract |
+|---|---|---|---|
+| EnvironmentConfigRevision | Platform Operations / config registry | bootstrap, CI/CD and every runtime module | environment + immutable revision/hash; local/dev/stage/prod only |
+| ServerFlagRevision | Platform Operations / flag service; owning Product policy supplies approval input only | server command guards and read-only client hints | flagId/revision/scope/market/cohort; missing/stale/newer is safe-off |
+| ReleaseManifest | Release Operations / build pipeline | deploy/promote/rollback controllers and audit | content-addressed buildId, source commit, SBOM/provenance refs |
+| DeploymentRecord | Release Operations / deployment controller | environment status and incident responders | deploymentId + environment + releaseManifestId + UTC timeline |
+| BackupRestoreEvidence | Platform Operations / recovery controller | Privacy, Security and owning domains | evidenceId, source/destination environment, policy revision, checksums |
+| OperationalSignalConfig | Platform Operations / observability config registry | services and alert router | signal/SLO/budget revision; contains no product-event payload authority |
+
+Config and flags are draft → reviewed → active → superseded; release artifacts
+are built → verified → promoted or rejected; deployments are planned → running
+→ succeeded/failed/rolled back; recovery evidence is append-only. Forbidden
+transitions include direct prod promotion, mutable artifact replacement,
+cross-environment credential reuse and “backup exists” treated as restore pass.
+Promotion commands are idempotent by environment/release/intent hash and use
+expected active revision. Release/config changes are atomic per environment;
+domain data repair remains with the domain. Operational records are classified
+under BCK-04, authorized through workload/human IAM, governed by explicit
+retention/deletion policy and audited without secrets. Operational telemetry carries bounded
+signal/release/environment metadata, not product payloads. Migration is
+additive and rehearsed; rollback keeps
+Rules closed and data reconciliation separate. All risky flags default off.
+Evidence includes config/negative isolation/provenance/drift/rollback/restore/
+alert/cost tests and exact BCK-03/04/20 dependencies.
+
+## 33. Stage 6 market release and rollback contract
+
+### 33.1 `MarketCapabilityReleaseManifest`
+
+BCK-05 is the only writer of operational market release state. The target
+immutable manifest contains at least:
+
+```text
+manifestId
+environmentId: dev | stage | prod
+marketId: LV | EE | LT
+capabilityId
+status: disabled | internal | invited | cohort | enabled | suspended
+artifactDigest
+apiSchemaRevision
+domainContractRevision
+marketConfigRevision
+mandatoryCopyManifestRevision?
+securityPrivacyEvidenceRevision
+legalDecisionRevision?
+agePolicyRevision?
+ugcDsaPolicyRevision?
+retentionDsrRevision
+residencyTransferRevision
+providerCoverageRevision?
+supportRoutingRevision
+observabilityPolicyRevision
+cohortPolicyRevision
+rollbackTargetManifestId?
+effectiveAtUtc
+approvedBy[]
+createdAtUtc
+```
+
+The manifest binds evidence; it does not author product, domain, Legal,
+Security/Privacy, localization or provider facts. Optional references require
+an exact reviewed `not_applicable` disposition. Unsupported/newer/expired or
+mutually incompatible references make activation fail closed.
+
+### 33.2 Flag and rollout semantics
+
+- server flags are scoped to exact `environment × market × capability`;
+- default is `disabled`, including new/unknown capabilities and markets;
+- release status changes use expected active revision, idempotency key, reason,
+  approvers and audit evidence;
+- artifact promotion and market traffic activation are separate commands;
+- a cohort specifies bounded population, observation window, entry/stop/exit
+  thresholds, error/cost/privacy/safety signals and named responders;
+- support/contact readiness and incident escalation are activation inputs, not
+  a post-launch TODO;
+- client flags and UI visibility may only consume server state and never widen it.
+
+Latvia, Estonia and Lithuania have separate manifests and pointers even when
+they run the same content-addressed artifact. A successful Latvia cohort is
+useful engineering evidence but cannot satisfy Estonia or Lithuania market,
+copy, Legal/Privacy, provider or support gates.
+
+### 33.3 Isolation and rollback
+
+Default containment targets one `market × capability`. A release controller
+must widen the stop for a shared artifact, API/schema incompatibility, IAM or
+secret defect, cross-market authorization/data leak, corrupted shared source,
+unsafe migration or platform-level SLO breach.
+
+Rollback requires a previously verified compatible manifest and separates:
+
+1. traffic/feature disable;
+2. config/policy pointer rollback;
+3. artifact rollback;
+4. projection rebuild/reconciliation;
+5. domain compensation under the owning BCK;
+6. backup restore under BCK-04 privacy re-deletion controls.
+
+Rollback never weakens Rules, re-enables revoked access, resurrects erased
+data, invents provider/Booking/Payment success or rewrites immutable history.
+If no compatible target exists, the capability remains disabled with a typed
+service-unavailable state and support route.
+
+### 33.4 Required evidence
+
+Before a production cohort, evidence covers manifest signature/digest,
+dependency compatibility, market-isolation negatives, mandatory-copy lookup,
+support/incident routing, monitoring/alert delivery, budget/quota, stop
+automation, manual kill path, rollback rehearsal and post-rollback
+reconciliation. Each result records market, capability, environment, commit/
+artifact, policy revisions, time, owner and limitations. Timeout, skipped step
+or manual assertion without artifact is inconclusive.
+
+This section authorizes documentation only. It creates no project, credential,
+flag, manifest, CI secret, Firebase resource, deployment or traffic change.
+
+## 34. Stage 7 exact R1 operations execution map
+
+### 34.1 Manifest authority and scope
+
+[BCK-02 §26](RECHARGE_BACKEND_DELIVERY_MAP.md) is the sole exact R1
+file/action manifest. Its `C`, `M`, `R` and `K` classifications are normative;
+this section assigns operational responsibility and execution order only. A
+path absent from that manifest is outside R1. Existing disabled RAW-C Booking
+source remains `K` compatibility-only and is neither relocated nor activated.
+
+R1 creates platform composition, typed configuration/security ports and local
+evidence only. It creates no externally reachable product callable, scheduled
+worker, queue consumer, domain handler or production adapter. The root
+`apps/backend/functions/src/index.ts` must continue exporting only the existing
+R0 probe and five disabled Emulator-only RAW-C Booking callables.
+
+### 34.2 Required local scripts and evidence
+
+The R1 implementation amends `apps/backend/functions/package.json` with these
+exact non-deploying script names:
+
+```text
+verify:r1:layout
+verify:r1:config
+verify:r1:exports
+test:r1
+test:r1:unit
+test:r1:contract
+test:r1:emulator
+test:r1:rules
+test:r1:integration
+infra:r1:validate
+infra:r1:plan
+```
+
+`test:r1` composes the bounded R1 checks; none of these scripts may provision,
+deploy, activate, mutate a cloud project or obtain credentials. The exact CI
+owner is `.github/workflows/backend-r1.yml`; it installs pinned dependencies,
+runs toolchain/layout/config/export/schema tests, starts only disposable local
+Emulators where required, runs Rules/integration negatives and uploads bounded
+test reports. It receives no cloud secret, deploy identity or remote Terraform
+state.
+
+Infrastructure verification is limited to:
+
+```text
+terraform fmt -check
+terraform validate
+terraform plan -refresh=false
+```
+
+`terraform apply`, `terraform destroy`, imports, state migration and any cloud
+write are outside R1.
+
+### 34.3 Operational ownership
+
+- Platform Operations owns release-manifest, active-release-pointer and
+  server-flag repositories and the R1 composition root.
+- Reference Data owns market-config revision and activation-pointer writes;
+  Operations may validate compatible pointers but cannot author them.
+- BCK-03 owns canonical JSON Schemas and generated-contract policy.
+- BCK-04 owns authorization policy, data classification and default-deny
+  Rules; BCK-05 owns deployment evidence, not access meaning.
+- The logical identities are `ci-build`, `ci-deploy`, `runtime-platform`,
+  `config-publisher`, `reference-publisher` and `break-glass`. R1 implements
+  typed identity names and negative policy fixtures only; it creates no
+  service account, binding, credential or grant.
+
+The five exact R1 collection families, index requirements and client access
+posture are exclusively those in BCK-02 §26.7. No alternate collection,
+shadow writer or direct mobile write is permitted.
+
+### 34.4 Ordered migration
+
+R1 is implemented as one reviewable slice in this order:
+
+1. freeze and verify the existing R0/RAW-C inventory and export set;
+2. add canonical schemas and synthetic valid/invalid fixtures;
+3. add shared primitives and generated-contract boundary checks;
+4. add config repositories, security ports and fail-closed in-memory adapters;
+5. add platform repositories/use cases and the internal composition root;
+6. amend Rules and indexes, then run positive server/negative client tests;
+7. add bounded infrastructure validation and credential-free CI;
+8. run the complete evidence matrix and reconcile documentation/status.
+
+No later step may compensate for a failed earlier step. Schema incompatibility,
+unexpected export, Rules widening, unavailable pinned tool or skipped check
+stops the slice as inconclusive/failed.
+
+### 34.5 Rollback
+
+Before implementation, capture the exact base commit, dependency lock hash,
+export inventory, Rules/index files and R0/RAW-C gate result. Rollback then:
+
+1. keeps all R1 server flags and markets safe-off;
+2. preserves or restores default-deny Rules before any code reversal;
+3. points only to a previously verified compatible immutable revision;
+4. reverts the exact R1 commit with `git revert <exact-r1-commit>`;
+5. runs `npm ci`, `npm run verify:toolchain`, `npm run verify:r1:exports` and
+   `npm run test:r1` against the restored tree;
+6. records data/pointer reconciliation separately from source rollback.
+
+Rollback never deletes audit facts, weakens Rules, rewrites immutable records,
+activates RAW-C, or uses Terraform destroy. If compatibility is unproven, the
+affected capability remains disabled.
+
+This map is documentation only. It does not approve R1 execution, G1,
+provisioning, credentials, Firebase changes, deployment, activation, push or
+merge.
+
+## 35. Local R1 technical-approval preflight
+
+BCK-05 is technically consistent with all 120 unique rows of BCK-02 v2.4.87
+§26: 90 create, 6 modify and 24 retain actions, with no duplicate or wildcard
+path. The local workflow is credential-free, cannot authenticate to cloud and
+keeps every market/capability default-off. Existing RAW-C remains disabled and
+compatibility-only.
+
+The owner subsequently accepted `BCK-R1-FOUNDATION-TECH-DEC-01`; Stage 8
+verified the exact local R1 operations foundation, credential-free CI,
+rollback guards and no-cloud posture. R1 is therefore no longer blocked as a
+local implementation. Dev-cloud project creation, billing, IAM bindings,
+secrets, deployment, persistent staging, measured backup/restore, traffic and
+production remain separately Pending. No item-6 product slice inherits cloud
+authority from this result.
+
+92. **BCK-05-AC-92:** local R1 exposes exactly the R0 probe, five disabled
+    Booking callables, three disabled Identity Session callables, one Event
+    outbox trigger and one retry schedule. Product handlers resolve only the
+    loopback `demo-recharge` Emulator and remain default-off; no deployment or
+    cloud activation is implied.
+93. **BCK-05-AC-93:** Event→Booking delivery uses an immutable Event outbox,
+    an idempotent Booking consumer checkpoint, five-attempt retry and explicit
+    dead-letter state.
+94. **BCK-05-AC-94:** feature-flag absence or invalid revision means disabled,
+    while Firestore transport failure propagates to typed operational failure
+    and safe logging rather than being silently converted to disabled.
+95. **BCK-05-AC-95:** local Event delivery has Emulator-only trigger/scheduler
+    entry points and DSR remains a test/application service. Their source
+    presence does not imply a deployed worker, cloud schedule or activation.
+96. **BCK-05-AC-96:** exact Node 22/Java 21 evidence must be reported separately
+    from a timed-out contention run; inconclusive evidence cannot be called
+    green.
+97. **BCK-05-AC-97:** Event delivery discovery persists one ordered
+    `createdAt + documentId` cursor and can recover source facts missed by the
+    document-created trigger without duplicating delivery.
+98. **BCK-05-AC-98:** every delivery worker owns a fenced renewable lease and
+    durable lifecycle checkpoint; an expired or superseded worker cannot
+    commit terminal state.
+99. **BCK-05-AC-99:** immutable source outbox facts and unresolved dead letters
+    have no TTL. Only terminal delivered metadata receives a 90-day
+    `expiresAt`; a replay makes it non-terminal and removes that eligibility.
+100. **BCK-05-AC-100:** manual dead-letter replay requires an immutable,
+     idempotent operator-audit record retained for 180 days; reason, actor,
+     correlation and exact target are mandatory.
+
+## 36. Stage 3.1 — execution manifest and infrastructure code (no authority)
+
+### 36.1 Decision and limits
+
+Stage 3.1 writes, in the repository only, everything a later approved
+provisioning slice needs: one **execution manifest**, shared IaC modules with a
+root per environment, verifiers, a credential-free validation workflow and Draft
+runbooks. It does not create a project, service account, IAM binding, workload
+identity pool, secret, state bucket, budget or any resource, performs no cloud
+call and does not select provider project IDs: those are chosen only in the
+approved provisioning slice after availability checks, by the rule
+`recharge-<env>-<uniqueSuffix>` of §19.1, so the manifest holds the rule with an
+unresolved suffix. **Writing IaC does not authorize `apply`.**
+
+### 36.2 Execution manifest (single source, per `dev`, `stage`, `prod`)
+
+The manifest records, without secret values: project-ID rule with unresolved
+suffix; Firestore `(default)`, Standard, Native, `eur3`; Functions 2nd gen
+`europe-west1`; media Storage regional `europe-west1` and the disabled `EU`
+recovery bucket (OD-07); service-account catalogue names from
+`BCK05-IAM-A1-ENV-WIF-v1` (`deploy-<env>`, `runtime-<module>`) and their role
+families; workload-identity provider names per environment; secret **references**
+(names and owners, never values or versions); collections, composite indexes and
+TTL fields, **derived and cross-checked** against `firestore.rules` and
+`firestore.indexes.json`; feature flags (all default off); CI environments; App
+Check mode per stage; budgets (50/75/90/100 % thresholds, guardrails €5 / €75 /
+€150: stage/prod **as proposed by BCK05-OD-04**, dev by the owner's 2026-11-04
+target), limits and quotas (`null` until decided);
+deployment order, rollback, backup/recovery, smoke and destroy procedure
+references. Every unresolved value is `null`, never invented.
+
+### 36.3 Ownership of each resource (no double management)
+
+| Resource | Single owner |
+|---|---|
+| Firestore Rules, indexes, TTL policies | **Firebase CLI**, from the verified release artifact |
+| Functions deployment | **Firebase CLI**, from the verified release artifact |
+| Firestore database (create-only), media/recovery buckets, project service enablement, service accounts and IAM, workload identity, secret containers, App Check configuration, budgets and notification channels | **Terraform** |
+| Flags and release pointers | the application repositories (BCK-05 release model) |
+
+The manifest names the owner of each resource and the verifier fails if one
+resource has two owners.
+
+### 36.4 Budget and containment
+
+Provider budget alerts are notifications, not hard stops. **No automatic billing
+detach**: it can destroy data. Containment is by server-side flags, quotas and
+kill switches, with a documented manual billing action only as the last resort.
+Containment must never block cancellation of an existing Booking or a mandatory
+privacy operation (DSR export, deletion, restriction): the manifest lists these
+as `neverBlocked` and the verifier fails a containment rule that touches them.
+The owner and the reaction steps are named in a Draft runbook; an alert without
+a tested route is not evidence.
+
+### 36.5 State, bootstrap and destroy protection
+
+Each environment has its own Terraform state bucket in its own project, its own
+provider configuration and its own parameters; dev, stage and prod share
+modules, never state or rights. Bootstrap is a documented, separately
+authorized procedure (local state first, then migration) and is not performed
+here. State buckets and all data resources carry `prevent_destroy` or
+`deletion_protection`. The destroy procedure: dev only by default; stage needs
+a dated record; prod is forbidden except through a superseding decision; any
+destroy requires a verified export and a data-protection check first.
+
+### 36.6 Exact file map (closed; paths from the repository root)
+
+```text
+apps/backend/config/execution-manifest.schema.json
+apps/backend/config/budget-policy.schema.json
+apps/backend/config/flag-policy.schema.json
+apps/backend/config/manifests/execution-manifest.json
+apps/backend/config/manifests/fixtures/valid.json
+apps/backend/config/manifests/fixtures/invalid.json
+apps/backend/config/manifests/fixtures/forward.json
+apps/backend/scripts/verify-execution-manifest.mjs
+apps/backend/scripts/verify-iac-topology.mjs
+apps/backend/functions/test/contract/execution_manifest.test.ts
+
+apps/backend/infra/terraform/modules/project_baseline/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/firestore/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/storage/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/runtime_identities/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/ci_wif/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/budget_alerts/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/secret_containers/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/app_check/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/modules/state_bucket/{main,variables,outputs,versions}.tf
+apps/backend/infra/terraform/envs/{dev,stage,prod}/{main,variables,outputs,providers,versions}.tf
+apps/backend/infra/terraform/envs/{dev,stage,prod}/backend.tf.example
+apps/backend/infra/terraform/envs/{dev,stage,prod}/terraform.tfvars.example
+
+.github/workflows/backend-iac-validate.yml
+
+docs/runbooks/backend-deploy-order.md
+docs/runbooks/backend-rollback.md
+docs/runbooks/backend-disaster-recovery.md
+docs/runbooks/backend-cost-response.md
+docs/runbooks/backend-provisioning-and-destroy.md
+```
+
+`apps/backend/functions/package.json` gains only the scripts that run the two
+verifiers and the Terraform validation of the environment roots; the existing R1
+root under `infra/terraform` and its gates stay unchanged. Extending this list
+needs a further amendment confirmed by the Product owner.
+
+### 36.7 Gates
+
+- `verify-execution-manifest`: schema parity, fixtures, derived collections,
+  indexes and TTL equal to Rules and `firestore.indexes.json`, flags equal to the
+  code registry and default off, regions equal to the accepted policy, IAM names
+  equal to the catalogue, no invented project ID, no secret value or real
+  address, every `authorized` false, one owner per resource, containment never
+  touches `neverBlocked`.
+- `verify-iac-topology`: no credentials, project literal, real backend value,
+  executable `apply` or `id-token` in validation CI; root execution is blocked
+  by preconditions, independently of stable desired resource cardinality;
+  per-environment state keys distinct; required labels; with the pinned
+  Terraform, `fmt -check` and `init -backend=false` plus `validate` of every
+  environment root using the local verified provider copy; mock-provider plans
+  reject unauthorized execution. No real provider plan is part of local checks.
+- The workflow `backend-iac-validate.yml` has `contents: read` only, no secrets,
+  no `id-token`, pinned actions and no cloud step.
+
+### 36.8 Acceptance addendum
+
+101. **BCK-05-AC-101:** the execution manifest holds no invented project ID, no
+     secret value and no real address; every unresolved value is `null` and every
+     `authorized` is false.
+102. **BCK-05-AC-102:** missing/invalid approval blocks execution with a failing
+     precondition, never by reducing count/for_each. Every root module depends on
+     the execution guard. Record digest, environment, project, commit, manifest,
+     owner evidence, operations and expiry must match; Draft manifests remain
+     denied even with a complete record. The protected future runner verifies
+     real approval provenance, revocation/expiry and saved-plan digest at apply.
+103. **BCK-05-AC-103:** dev, stage and prod share modules and never state, rights
+     or parameters.
+104. **BCK-05-AC-104:** each resource has exactly one owner (Firebase CLI or
+     Terraform); Rules, indexes, TTL and Functions deployment are not managed by
+     Terraform.
+105. **BCK-05-AC-105:** containment never blocks cancellation of an existing
+     Booking or a mandatory privacy operation, and there is no automatic billing
+     detach.
+106. **BCK-05-AC-106:** the validation workflow has minimal permissions, no
+     secrets and no `id-token`; writing IaC grants no authority to apply it.
+
+
+### 36.9 Implementation status (2026-10-01)
+
+Implemented within the §36.6 map (the secrets module is named
+`secret_containers` because `**/secrets/**` is git-ignored, which would have
+dropped it silently). Evidence, all local and offline with the pinned Terraform
+1.15.9 and the local verified google 7.43.0 copy:
+
+- `verify-execution-manifest`: 44 collections, 13 flags and three environments
+  equal Rules, `firestore.indexes.json` and the code flag registry; 16 invalid and
+  3 forward fixtures are rejected; nine contract tests fail on mutations
+  (invented project, secret or address, collection or TTL drift, flag defaults,
+  cross-environment identity, double ownership, containment touching Booking
+  cancellation or privacy operations).
+- `verify-iac-topology`: nine modules and three isolated roots; `fmt -check`,
+  `init -backend=false` and `validate` pass for every root; the gate behaves as
+  specified at the original 3.1 commit: a closed gate, wrong manifest hash and
+  missing reference each planned zero resources. This behavior is superseded
+  by the blocking preconditions in §36.10, not retained as a safety guarantee.
+  Mutations (an unguarded resource, a provider
+  credential, a bypassed gate) are detected.
+- Limits stated: the IAM role bindings are not written (BCK05-OD-02 architecture
+  is Accepted; exact permission manifests/bindings remain pending), no budget channel exists, App Check mode and
+  limits/quotas are `null`, and OD-03/04/05/08 stay Proposed. None of this is
+  evidence of real IAM, billing, provider configuration or recovery.
+
+### 36.10 Bounded local hardening and dev preflight (2026-10-01)
+
+The owner requested a local correction pass, not provisioning. It edits only
+existing §36.6 paths, the existing execution-manifest contract test and the
+coordination/status rows; no new approval package, cloud runner or resource.
+
+- Authorization is separate from desired topology. An invalid record or the
+  checked-in denied manifest fails a `terraform_data.execution_guard`
+  precondition; this builtin has no provisioner. Resource counts never depend on
+  the authorization predicate. Mock-only test copies isolate record checks from
+  the Draft-manifest denial; no real provider plan/apply is executed.
+- WIF follows the Accepted IAM §6.1: exact issuer, audience, immutable subject,
+  repository/owner IDs, visibility, workflow on main, environment and event.
+  Missing identity inputs disable trust. Validation CI never receives OIDC.
+  Real subject opt-in, sanitized token evidence, branch/environment protections
+  and least-privilege IAM bindings remain required before cloud use.
+- The existing provisioning runbook owns dev-preflight, the unsigned authorization
+  template, expected inventory command, read-only vs active smoke, monitoring and
+  cost requirements. OD-08 keeps its G5/G6 gate; dev still needs a named incident
+  contact and bounded stop/escalation policy. No Proposed OD is promoted here.
+- `verify-execution-manifest --dev-inventory` emits manifest-hash-bound candidate
+  resources/config and unresolved items, not observed or authorized cloud state.
+- Approval fields/hashes alone are not a signature. The future protected runner
+  must verify actual owner evidence and expiry/revocation again before applying
+  the exact reviewed saved plan. That runner is not implemented by this pass.
+
+Local verification for this working-tree correction (not commit-bound release or
+cloud evidence): Terraform 1.15.9 / local Google provider 7.43.0 fmt and validate,
+48 mock-provider plan scenarios across the three roots (including an isolated
+temporary override to test record validation independently of the Draft denial),
+11 execution-manifest contract tests, TypeScript and changed-test lint passed.
+Manifest/no-cloud checks, Flutter analyze, all 1230 Flutter tests, boundary
+(zero violations, 71/71 exception budget) and diff checks passed. Flutter used the
+already installed CLI snapshot with `--no-pub`; no SDK changes or downloads.
+No real provider plan/apply, Emulator rerun, cloud read/write, deployment, push or
+merge was performed. Real WIF token exchange and GCP permission evidence remain
+Pending, not implied by the mock checks.
+
+#### Follow-up verification and persistence (2026-10-01)
+
+The correction above is saved as `bb930eb18dbf52fa2aefc82271d403ff12db627b`.
+On that runtime/config source: format/lint, TypeScript build, 763 backend
+unit/contract/integration tests, all 121 full Emulator/Rules tests, Flutter
+analyze and all 1230 Flutter tests passed. Exact toolchain validation passed
+with Node 22.23.2, npm 10.9.8, **portable Temurin 21.0.12+8** and Terraform
+1.15.9. An initial Emulator pass used system Java 21.0.12.1+1 and is not the
+pinned-toolchain evidence; the full suite was repeated with the exact version.
+Terraform fmt/validate and 48 mock-only authorization scenarios passed;
+manifest, export, Content-persistence, no-cloud and mobile-boundary checks passed.
+These are local checks, not hosted CI or deployment evidence.
+The logical build is reproducible:
+`ffa386a75317847e0dabb2d48569466c5fdf86aa8c2cd353106dbe9613d0d4e7`.
+
+The historical R1 layout checker was red: its 133-path count predated the
+approved deadline worker, and it omitted 15 approved subsequent-slice files.
+The bounded follow-up changes only that checker and documentation: exactly
+134 base paths, the existing 20 foundation exceptions, 15 individually named
+BCK-05/07/14 paths and 38 retained RAW-C paths. Section bounds and duplicate
+rows are checked; no wildcard authorization is added. The corrected gate and
+three negative mutations (count, missing file, unregistered file) pass.
+Full runtime tests above are attributed to `bb930eb`, not falsely relabelled as
+a full run on the later checker/docs commit; product sources and schemas did
+not change in that follow-up.
+
+The runbook corrects the budget/owner preflight against roadmap §3.5: EUR25 dev
+and RechargeN's roles are already accepted verification baselines, not cloud
+spend authorization. Notification destination, quotas, permission manifests,
+source/WIF gate and a bounded execution approval remain open. No cloud API
+operation, IAM binding, provisioning, deployment, activation, push or merge.

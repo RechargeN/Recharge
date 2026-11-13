@@ -5,6 +5,7 @@ import 'package:recharge/features/create/domain/entities/place_creation_policy.d
 import 'package:recharge/features/create/domain/entities/place_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/place_validation_issue.dart';
 import 'package:recharge/features/create/domain/usecases/validate_place_draft_usecase.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   const ValidatePlaceDraftUseCase validate = ValidatePlaceDraftUseCase();
@@ -105,7 +106,7 @@ void main() {
         pricing: const PlacePricingDraft(
           currencyCode: 'EUR',
           entryType: PlaceEntryType.mixed,
-          entryPriceFrom: 5,
+          entryPriceFrom: Money(minorUnits: 500, currencyCode: 'EUR'),
         ),
       ),
     );
@@ -121,9 +122,9 @@ void main() {
     const PlacePricingDraft paid = PlacePricingDraft(
       currencyCode: 'EUR',
       entryType: PlaceEntryType.paid,
-      entryPriceFrom: 10,
-      entryPriceTo: 20,
-      typicalSpendFrom: 7,
+      entryPriceFrom: Money(minorUnits: 1000, currencyCode: 'EUR'),
+      entryPriceTo: Money(minorUnits: 2000, currencyCode: 'EUR'),
+      typicalSpendFrom: Money(minorUnits: 700, currencyCode: 'EUR'),
     );
 
     final PlacePricingDraft result = paid.copyWith(
@@ -132,7 +133,10 @@ void main() {
 
     expect(result.entryPriceFrom, isNull);
     expect(result.entryPriceTo, isNull);
-    expect(result.typicalSpendFrom, 7);
+    expect(
+      result.typicalSpendFrom,
+      const Money(minorUnits: 700, currencyCode: 'EUR'),
+    );
   });
 
   test('simple landmark publishes without venue-only facts', () {

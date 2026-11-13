@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n_context.dart';
 import '../../application/event_inventory_section.dart';
 import '../../domain/entities/event_availability_projection.dart';
 import '../../domain/entities/event_inventory.dart';
@@ -20,7 +21,7 @@ class EventAvailabilityPreview extends StatelessWidget {
     final EventAvailabilityProjection projection = state.availabilityPreview;
     return Semantics(
       container: true,
-      label: 'Local mock availability preview',
+      label: context.l10n.createFormLocalMockAvailabilityPreview,
       child: Card(
         key: const Key('event-availability-preview'),
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -30,19 +31,23 @@ class EventAvailabilityPreview extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text(
-                'Local mock preview — not live availability',
+                context.l10n.createFormLocalMockPreviewNotLiveAvailability,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 4),
               Text(
-                'State: ${_label(projection.state.name)} · '
-                '${_label(projection.freshness.name)}',
+                '${context.l10n.createEventAvailabilityLabel}: '
+                '${context.l10n.createEventAvailabilityState(projection.state.name)} · '
+                '${context.l10n.createEventAvailabilityFreshness(projection.freshness.name)}',
                 key: const Key('event-availability-state'),
               ),
               for (final MapEntry<InventoryChannel, EventAvailabilityState>
                   entry
                   in projection.channelStates.entries)
-                Text('${_label(entry.key.name)}: ${_label(entry.value.name)}'),
+                Text(
+                  '${context.l10n.createOption('InventoryChannel_${entry.key.name}')}: '
+                  '${context.l10n.createEventAvailabilityState(entry.value.name)}',
+                ),
               const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerLeft,
@@ -52,8 +57,8 @@ class EventAvailabilityPreview extends StatelessWidget {
                   icon: const Icon(Icons.refresh),
                   label: Text(
                     state.refreshingPreview
-                        ? 'Checking local fixture…'
-                        : 'Refresh preview',
+                        ? context.l10n.createFormCheckingLocalFixture
+                        : context.l10n.createFormRefreshPreview,
                   ),
                 ),
               ),
@@ -64,11 +69,3 @@ class EventAvailabilityPreview extends StatelessWidget {
     );
   }
 }
-
-String _label(String value) => value
-    .replaceAllMapped(
-      RegExp(r'([a-z])([A-Z])'),
-      (match) => '${match.group(1)} ${match.group(2)}',
-    )
-    .replaceAll('_', ' ')
-    .toLowerCase();

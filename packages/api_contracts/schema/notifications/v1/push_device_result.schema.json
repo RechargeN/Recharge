@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/notifications/v1/push_device_result.schema.json",
+  "title": "PushDeviceResultV1 (N3c, 2026-11-13)",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "requestId", "kind", "registered"],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "requestId": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "succeeded"
+        },
+        "registered": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "kind", "code"],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "requestId": {
+          "type": ["string", "null"]
+        },
+        "kind": {
+          "const": "rejected"
+        },
+        "code": {
+          "enum": [
+            "unauthenticated",
+            "request_invalid",
+            "feature_disabled",
+            "temporarily_unavailable"
+          ]
+        }
+      }
+    }
+  ]
+}

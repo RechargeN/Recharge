@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/privacy/v1/privacy_intake_refusal.schema.json",
+  "title": "PrivacyIntakeRefusalV1",
+  "description": "L4.8: refusals of PrivacyRequestIntakeService. It has no callable or client yet, so these codes reach no screen.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ok",
+    "code"
+  ],
+  "properties": {
+    "ok": {
+      "const": false
+    },
+    "code": {
+      "$ref": "#/$defs/refusalCode"
+    }
+  },
+  "$defs": {
+    "refusalCode": {
+      "enum": [
+        "access_denied",
+        "idempotency_conflict",
+        "invalid_contract",
+        "request_not_found",
+        "revision_conflict",
+        "subject_mismatch"
+      ]
+    }
+  }
+}

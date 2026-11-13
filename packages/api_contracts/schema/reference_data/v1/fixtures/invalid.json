@@ -1,0 +1,31 @@
+{
+  "localizedText": {
+    "schemaVersion": 1,
+    "defaultLocale": "lv-LV",
+    "values": {}
+  },
+  "marketConfigRevision": {
+    "schemaVersion": 1,
+    "marketId": "LV",
+    "countryCode": "EE",
+    "status": "enabled"
+  },
+  "mandatoryCopyReference": {
+    "schemaVersion": 1,
+    "marketId": "LV",
+    "fallbackPolicy": "silent"
+  },
+  "sourceRecord": {
+    "schemaVersion": 1,
+    "eligibility": "eligible",
+    "licenseDecision": "pending"
+  },
+  "activationPointer": {
+    "schemaVersion": 1,
+    "environmentId": "local",
+    "marketId": "LV",
+    "capabilityId": "booking.create",
+    "activeRevisionId": "temporary-id",
+    "pointerRevision": 0
+  }
+}

@@ -1,6 +1,6 @@
 # RECHARGE — инструкции для coding-агентов
 
-Версия: 2026-08-10. Канонический файл инструкций репозитория.
+Версия: 2026-11-03. Канонический файл инструкций репозитория.
 CLAUDE.md ссылается сюда. При обновлении меняй дату версии.
 
 ## Приоритет документов (при конфликте — верхний побеждает)
@@ -19,7 +19,7 @@ Accepted ADR — прав ADR; исправление кода оформляе�
 
 ```
 apps/mobile/               # Flutter-приложение
-apps/backend/              # Accepted ADR 0019 target; физически ещё не создан
+apps/backend/              # local R1 + disabled Booking/Emulator foundation; cloud runtime отсутствует
 packages/design_system/    # дизайн-токены, общие UI-компоненты
 packages/api_contracts/    # контракты данных
 docs/adr/                  # ADR (источник истины по решениям)
@@ -41,27 +41,43 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
   `flutter test`, `flutter run`
 - Перед завершением любого slice: `flutter analyze` и `flutter test`
   должны быть зелёными. Slice без зелёных проверок не считается Done.
+- Если тестам или запуску нужно Android-устройство: сначала проверить
+  `adb devices -l` (или `flutter devices`). К машине подключается Samsung
+  A34 (SM-A346B, serial `RFCW91QHWWJ`); в статусе `device` запускать на нём
+  через `-d RFCW91QHWWJ`, не поднимая Android-эмулятор. Если A34 не виден
+  или `unauthorized` — сообщить об этом и только потом решать про AVD.
+  Firebase Emulator gates это правило не заменяет.
 
 ## Разрешённые конфликты (решения приняты, не пересматривать молча)
 
-1. **Роли и identity** — по ADR 0013 и ADR 0015:
-   `User / Creator / Admin` + capability-based permissions. Viewer —
-   обязательно авторизованный User. Creator требует отдельной
-   подтверждённой identity verification; Google/Apple auth сам по себе
-   Creator не даёт. Creator остаётся тем же личным Viewer-интерфейсом с
-   дополнительными create/submit/publish capabilities; пользователь не
-   переключается вручную между Viewer и Creator. Professional Page
-   (`ManagedPage`) — отдельный рабочий контекст verified Creator с active
-   membership и page-scoped capabilities (`manage_page`, `view_insights`,
-   `manage_bookings`). Один аккаунт может управлять несколькими страницами и
+1. **Роли и identity** — по ADR 0013, ADR 0015 и Accepted ADR 0023
+   (2026-11-06, суперсидит ADR 0015 §2–§4 и перечень ролей): три вида
+   аккаунта — **User (он же Creator)**, **Professional Page**, **Admin**.
+   Глобальные роли только `User` и `Admin` + capability-based permissions;
+   старое значение `Creator` читается как `User`. Viewer — обязательно
+   авторизованный User. Любой User публикует бесплатный личный контент без
+   проверки личности (модерация, лимиты); платное, бронирование, аренда и сбор
+   денег — только от проверенной Professional Page или при серверном факте
+   проверки личности. Google/Apple auth прав сам по себе не даёт; роли, права,
+   членство и проверки выдаёт только сервер. По ADR 0021 единый личный
+   интерфейс называется Creator; пользователь не переключается между Viewer и
+   Creator. Professional Page (`ManagedPage`) — членство (owner/manager) в
+   конкретной странице с page-scoped capabilities (`manage_page`,
+   `view_insights`, `manage_bookings`), а не глобальная роль; права одной
+   страницы не открывают другую; владелец места (Place) — проверенная
+   страница. Один аккаунт может управлять несколькими страницами и
    переключает только `Personal profile ↔ Professional Page`; Admin tools —
    отдельная capability-gated поверхность, не профиль, workspace или
    publisher. Термин `Pro generator` — legacy UI и не целевая модель.
+   Реализация ADR 0023 (контракт → сервер → правила → клиент) — отдельный срез.
    Guest mode более не является целевой продуктовой политикой.
-2. **ID** — по ADR: ULID/UUID, генерация на клиенте. Временные `loc_*`
-   допустимы ТОЛЬКО для несохранённых локальных черновиков и обязаны
-   заменяться постоянным ULID при публикации. Все связи между
-   сущностями — только по id, без ссылок по имени.
+2. **ID** — по ADR 0013: server IDs — immutable ULID/UUID-style IDs.
+   Permanent client-generated ID допустим только там, где это явно принимает
+   domain contract; иначе authoritative create возвращает permanent ID и
+   explicit mapping. Временные `loc_*` допустимы ТОЛЬКО для несохранённых
+   локальных черновиков и обязаны заменяться постоянным ID при authoritative
+   create/publish. Все связи между сущностями — только по id, без ссылок по
+   имени.
 3. **Firebase** — целевой бэкенд (Auth: Google/Apple, Firestore,
    Storage). Текущее состояние — mock datasources. Accepted ADR 0019
    разрешает целевую архитектуру authoritative Booking backend и staged
@@ -83,7 +99,7 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
    не считается одиннадцатым Create-типом. `quickPlan` сохраняется внутри
    Create taxonomy только как скрытый read-compatibility тип для legacy drafts.
    Для Event принят канонический продуктовый/доменный контракт
-   `docs/product/EVENT_CLASSIFICATION_SPEC.md` v2.2.3. Все будущие Event,
+   `docs/product/EVENT_CLASSIFICATION_SPEC.md` v2.2.4. Все будущие Event,
    Booking, admission, inventory, availability и provider slices обязаны
    расширять его, а не создавать параллельную модель. Реализованный
    EVT-CRT-01 остаётся совместимым C0 + schedule-C1 подмножеством и не означает
@@ -92,8 +108,8 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
    production backend, Payments или provider integration.
 5. **Регион запуска** — Рига/Латвия, EUR. Дефолтные координаты
    в конфиге: 56.9496, 24.1052 (сейчас неверные — задача бэклога).
-   Локализация en/ru/lv — целевая, фактически НЕ настроена
-   (нет lib/l10n) — отдельный slice.
+   Локализация en/ru/lv — целевая; механизм `lib/l10n` добавлен slice L4
+   (Review), большая часть экранов ещё не переведена.
 6. **Route ≠ Scenario ≠ Quick Plan** — Route является непрерывным треком
    по местности с anchors/segments/GPX/elevation/POI. Scenario —
    самостоятельный personal/public план из независимых остановок с
@@ -161,22 +177,25 @@ acceptance criteria, `flutter analyze`, `flutter test`, boundary и diff checks;
 
 | Область | Статус |
 |---|---|
-| Discover (search/map/feed/details) | mock-данные; Search/Filters/time-fit v2 реализован, travel fallback за repository contract |
-| Create Hub: 10 типов | config-driven runtime; Place / Business, Event, Find People и Scenario имеют типизированные Create-блоки на mock; Place получил PLC-ADP-01: трёхшаговую адаптивную форму по профилю места, релевантные часы/вход/расходы/контакты и explicit local-demo Creator Assist без автоматической публикации; Event получил local-first пользовательские templates CRT-TPL-01 (несколько шаблонов, выбор, управление и новый независимый draft из последнего шаблона); видимый planning-slot занимает Scenario, `quickPlan` скрыт как legacy read-compatibility type |
-| Event Classification v2.2.3 | Accepted canonical product/domain contract; 34 архетипа, полное покрытие Category System v1.4.3 и provider-neutral roadmap. ECL-00–ECL-03B Done. ECL-03A: ADR 0019 Accepted, ECL-03 spec v1.1 Approved и D01-D10 Accepted. ECL-03B: shared Booking v1 JSON schemas/fixtures, immutable fixture-verified Dart DTOs и независимый pure mobile Booking domain/readiness/transition validation; package analyze 0 и 9 tests, mobile analyzer 0 и полный suite 659 passed, boundary 59 прежних suppressions без новых. ECL-03C-P exact transaction-core plan v1.0 в Review: пять callable surfaces, finite general-capacity/explicit unlimited instant-free paths, atomic ledger/usage/audit/outbox/idempotency, exact file map и 38 AC; runtime effect none. Нет client/network/repository/data/application/presentation/DI/Create/backend/Firebase runtime. Физическая ECL-03C реализация требует explicit plan acceptance, post-stabilization backend authorization и production Identity/Platform prerequisites; provider sync/Payments также не реализованы |
+| Discover (search/map/feed/details) | mock-данные; Search/Filters/time-fit v2 реализован, travel fallback за repository contract. Типизированные Details: Rental (DTL-OBJ-01 Done), Bookable Session и Class / Workshop (DTL-SES-01, DTL-CLS-01 — Review); у Collection отдельная `CollectionDetailsPage` |
+| Create Hub: 10 типов | config-driven runtime на mock для всех 10 типов. Типизированные блоки: Place (PLC-ADP-01), Event (EVT-CRT-01, шаблоны CRT-TPL-01), Find People, Scenario, Route, Collection / Guide (CLG-CRT-01 Done, публикация и Discover включены); в Review — Recharge Activity (ACT-CRT-01), Bookable Session (SES-CRT-01, спека v1.2 Approved; публикация D3.5 — Review, только local/LV Emulator, default-off), Rental / Equipment (RNT-CRT-01). Class / Workshop — typed CW-V1 block и Emulator-публикация (D3.6/T2, Review). Поиск места через Google Places (LOC-SRCH-01, Review) — только Place и Collection. `quickPlan` — скрытый legacy read-compatibility тип. Общее открытое до Done: Creator-capability и Page-scope на publish (IDP-03A/04A), l10n, тесты 360 dp/150%. Подробности — LAUNCH_STATUS |
+| Event Classification v2.2.4 | Accepted canonical contract; ECL-00–03B Done. BCK-09 v1.25: disabled local/Emulator Booking vertical с Identity, reconfirmation, deadline release и privacy/retention; после объединения общий mobile gate остаётся открытым. BCK-13 delivery, cloud/production, markets, independent Security/Legal, оставшиеся ECL-03D–H, provider sync и Payments отсутствуют |
+| Find People publication (D3.7/T3) | Review: local/LV Emulator, default-off private source/public cell, consent и синтетическая 18+ аттестация; локальные gates завершены. Production authority, Legal/Privacy, device и staging остаются открыты; см. D3_7_FIND_PEOPLE_PUBLICATION_AMENDMENT.md. |
 | Category System v1.4.3 | реализовано: 28 категорий / 530 подкатегорий, legacy migration; `route` означает только Route; 14 place-only типов поддерживают адаптивный Place Create |
 | Auth | mock; целевое по ADR 0015: обязательная авторизация Viewer через Firebase Google/Apple, без guest mode |
-| Creator verification / roles / capabilities | IDP-03A local/mock в Review: access snapshot явно содержит Admin и verified Creator; Admin-only presentation preview Viewer/Creator/Professional Page реализован без смены authority; production shell скрывает legacy manual profile-mode selector; production verification НЕ реализована |
-| Professional Page / Active workspace / PublisherRef | IDP-03A в Review и IDP-04A в Doing: fixture начинается с 0 страниц; пользователь создаёт страницы сам, ownership limit 3, далее pending-заявка модераторам; exact-ID access, локальные уведомления, Settings switcher и page navigation реализованы. ECL-01 добавил shared PublisherRef и active-workspace default/non-rewrite для Event; остальные 9 Create типов ещё не переведены, production authority gated |
+| Personal Profile / Viewer retirement | PVR-01 In progress: единый личный Creator UI и архив Viewer реализованы локально по ADR 0021; роли, verification и page guards сохранены. До Done открыты Saved isolation и регрессионные сценарии auth/workspace/publisher; подробности — LAUNCH_STATUS и PVR verification |
+| Creator verification / roles / capabilities | IDP-03A local/mock в Review: access snapshot явно содержит Admin и verified Creator; Admin-only preview Creator/Professional Page без смены authority; production shell скрывает legacy-переключатель режимов; production verification НЕ реализована |
+| Professional Page / Active workspace / PublisherRef | IDP-03A в Review, IDP-04A в Doing: пользователь сам создаёт страницы (с нуля, лимит 3, дальше pending-заявка модераторам), exact-ID доступ, локальные уведомления, switcher и навигация страниц. Локально в Review: публичная страница (PPP-01A), редактор профиля (PP-01A), приглашения в команду (PP-03A). PublisherRef с active-workspace default есть у Event (ECL-01) и Route (J2), остальные 8 типов не переведены; production authority gated |
 | Отзывы (Review) | запланировано (в MVP) |
-| Visit History | VIS-HIST-01 local-first Done: только явная self-reported отметка Place с today/past датой, idempotency place/day, несколько дат и удаление; v1 demo-seed игнорируется, v2 начинается пустым; booking/view/favorite/GPS автоматически не считаются посещением |
+| Visit History | VIS-HIST-01 Done: только явная self-reported отметка Place (сегодня или раньше), idempotency place/day, несколько дат, удаление; v2 начинается пустым; просмотр, избранное, бронь и GPS посещением не считаются |
 | Smart Search | реализовано: rule-based parser, история и route-intent; mock-хранилище |
-| AI assistance platform | AI-PLAT-LOCAL-01 Done: отдельный provider-neutral local/mock foundation с immutable transient contracts, versioned prompt registry, en/ru/lv locale contracts, redaction до gateway, bounded validation, read-tool allowlist, typed failures, kill switches, session quota, explicit deterministic fallback и zero-cost ledger; зарегистрирован в DI, но не подключён к Scenario, Place, Smart Search или UI; production provider/network/secrets/persistence остаются gated |
-| Quick Plan | локальный лёгкий план остановок реализован частично; runtime-черновик получил стабильные id/revision и явный one-way `Expand to Scenario` через SCN-SB-03; остаётся personal/invited utility вне Create Hub/Discover, legacy Scenario/Route naming требует cleanup |
-| Scenario Builder | самостоятельный Latvia-wide city/day/weekend/trip продукт по Accepted Scenario spec v1.7; canonical domain/schema v2/mapper/validation/readiness и personal Create runtime с catalog/custom/time-block composer, undo/redo, autosave/readiness реализованы; Quick Plan имеет только explicit one-way conversion; own-car, manual locked legs и official planned-transport snapshots работают с обязательной честной пометкой `not live`; SCN-FUEL-CLEANUP-01 Done удалил fuel consumption/price/budget UI, fuel-поля/вычисление и legacy derived component из normalized runtime, сохранив car, duration/distance и explicit `travel_extra`; SCN-AI-01 остаётся скрытым optional local-demo experiment; SCN-LV-DATA-01 и SCN-LV-DATA-02A–02E Done обеспечивают static GTFS foundation, picker, atomic Apply/Recheck/Replace, offline fallback, telemetry и rollback; SCN-INTAKE-01A–01D и parent Done: Details/Search/Map поддерживают auth-only single/ordered batch Add to Scenario, owner-scoped target/new private target, placement/review, atomic Apply, privacy-safe telemetry, surface kill switches и 360 dp/150% accessibility gate. Transport snapshot остаётся внутренним механизмом, основной UI должен показывать понятные planned/not-live freshness и Recheck states. Public/unlisted publish, external AI/live planning, transfers/fares/booking и explicit legacy migration write ещё не реализованы |
-| Route Builder (creation) | Route-only spec v3.2; RTE-01–07 Done; RTE-08–11 Review. RTE-11 реализует GPS start/pause/resume/finish, foreground/background permissions, crash-safe chunked AES-256-GCM journal с ключом в platform secure storage, восстановление без auto-resume, fail-closed filtering, preview-карту, privacy trim, явные gap decisions и atomic `recordedGps` apply; 22 GPS unit + 1 end-to-end widget test зелёные, targeted analyzer чист. До Done нужны Android/iOS device-проверки и общий stabilization gate. Безопасные GPX inspection/import/apply/export и UI также реализованы локально; production adapters — последующие gates |
-| Локализация en/ru/lv | не настроена |
-| Бронирование | MVP: редирект на externalBookingUrl; оплата — post-MVP |
+| AI assistance platform | AI-PLAT-LOCAL-01 Done: provider-neutral local/mock foundation (ADR 0018), зарегистрирован в DI, но не подключён к Scenario, Place, Smart Search и UI; production provider, сеть и секреты — gated |
+| Quick Plan | локальный лёгкий план остановок реализован частично; стабильные id/revision и явный one-way `Expand to Scenario` (SCN-SB-03); остаётся personal/invited utility вне Create Hub и Discover; legacy-названия Scenario/Route требуют cleanup |
+| Scenario Builder | самостоятельный Latvia-wide city/day/weekend/trip продукт по Scenario spec v1.7: canonical domain/schema v2 и personal Create runtime (composer, undo/redo, autosave, readiness); own-car, ручные legs и официальные planned-transport snapshots с пометкой `not live` (SCN-LV-DATA-01/02 Done); в основном UI — понятные planned/not-live и Recheck-состояния, snapshot остаётся внутренним механизмом; добавление объектов из Details/Search/Map (SCN-INTAKE-01 Done); топливо удалено (SCN-FUEL-CLEANUP-01); SCN-AI-01 — скрытый local-demo. Public/unlisted publish — I3 local Emulator (Review, SCN-PUB-01). Не реализованы: внешний AI и live planning, transfers/fares/booking, явная legacy migration write |
+| Route Builder (creation) | Route-only spec v3.2; RTE-01–07 Done, RTE-08–11 Review. Локально работают GPS-запись (RTE-11: зашифрованный журнал, восстановление без auto-resume) и GPX inspection/import/export с UI; J1 (Review, только Emulator) — owner sync геометрии, безопасный GPX и серверный privacy trim для экспорта; J2 (Done в local/Emulator объёме) — публикация через Content, модерацию с доверием автора и Catalog (RTE-PUB-01); DTL-RTE-02 (Done в local/Emulator объёме, default-off) — показ опубликованного Route из Catalog в Discover/Details. До Done — проверки на Android/iOS и общий stabilization gate; production adapters — RTE-12 |
+| Локализация en/ru/lv | L4 в Review: механизм gen-l10n (`lib/l10n`), выбор языка на устройстве, каталог серверных кодов и локализованные серверные R1-поверхности (shell, настройки, вход, бронирование, тестовые пути публикации, импорт, уведомления); остальные экраны, названия категорий, Legal-тексты и языковой review открыты — `docs/product/LOCALIZATION_L4_R1_AMENDMENT.md` |
+| Бронирование | Видимый Mobile MVP по-прежнему использует externalBookingUrl. Добавлен provider-neutral Booking callable adapter с persistent local receipts/checkpoints и только loopback Emulator binding; production binding выключен. Backend имеет disabled local/Emulator-only free Booking authority, Event projection consumer, create/cancel/queries, finite/unlimited inventory, atomic Identity/flag authorization и privacy/retention evidence. Popular-pool escrow только pure/default-off model; Firebase cloud, UI cutover, market activation, production load proof и Payments отсутствуют |
+| Backend (Release R1, Latvia-first) | Локальные foundations в `apps/backend`; состав R1 и baseline проверки приняты владельцем (roadmap §3.5); Payments, AI, Providers и Event Ingestion вне R1. Cloud, deployment и активация рынков закрыты до отдельных разрешений |
 | Геолокация | Discover current location остаётся mock в центре Riga; Route GPS recording подключён через `geolocator` и изолирован provider-neutral port |
 
 ## Правила разработки
@@ -202,6 +221,12 @@ acceptance criteria, `flutter analyze`, `flutter test`, boundary и diff checks;
 10. Ссылки/детали продуктового видения (экраны, filter flow, роли UI,
     10 create-типов) — см. docs/product/VISION.md (перенести туда
     текущий CLAUDE-контент; до переноса — раздел ниже).
+11. Статусные документы пишутся коротко. Ячейка таблицы «Статусы фич» —
+    1–3 предложения: статус, ID slices, главное открытое; подробности — в
+    LAUNCH_STATUS. Строка LAUNCH_STATUS — статус, дата, суть в 1–2
+    предложениях, что открыто до Done, ссылка на спеку. В статусные документы
+    не пишутся число тестов, вывод gates, команды, история проходов и
+    откатов, «кто что нашёл» — для этого есть коммиты, PR и slice spec.
 
 ## Product vision (кратко; приоритет 4)
 
@@ -209,7 +234,7 @@ Recharge — приложение подбора и создания досуг�
 маршруты, активности. Ядро: единый filter flow
 search → filters → map → feed → details с одним общим состоянием
 фильтров (обычный Search, Smart Search, карта, категории, лента). В личном
-workspace Viewer и Creator используют один bottom nav:
+workspace единый профиль Creator использует bottom nav:
 Home / Favorites / Smart Search / Notifications / Profile. Creator tools
 открываются внутри Profile/Create Hub, а не заменяют Smart Search. В
 Professional Page workspace навигация:
@@ -225,3 +250,23 @@ Route, Scenario и Quick Plan — разные aggregates. Основная ка
 Google Maps, outdoor renderer Route Builder утверждается отдельным ADR. Отзывы и
 рейтинги — в MVP.
 Find People — полноценный MapObject в общей выдаче.
+
+## PVR-01 — единый личный профиль, фактический статус 2026-10-10
+
+По Accepted [ADR 0021](docs/adr/0021-unified-personal-profile.md) личный экран называется Creator для
+любого авторизованного User. Отдельная Viewer-композиция снимается; Admin
+presentation preview предлагает creator | professionalPage. UI-название и
+preview не меняют User / Creator / Admin, verification, capabilities,
+WorkspaceRef, PublisherRef или exact page membership. Personal libraries,
+Saved/Favorites, Visit History, Scenario/Quick Plan, настройки и edit/save
+не требуют publishing verification. Конкретные операции сохраняют свои
+owning-contract guards; Professional Pages остаются отдельными контекстами.
+Базовая публичная проекция и eligible public Creator card имеют разные
+visibility gates; смена названия не создаёт searchable identity.
+
+Единая local/mock композиция и retirement документов реализованы; исходные
+Viewer snapshots сохранены в docs/archive/viewer-profile/2026-10-10.
+PVR-01 остаётся In progress: Saved isolation и часть auth/workspace/publisher
+регрессии не закрыты. Draft/Open profile требования, Follow, Legal/minors,
+retention и step-up сохраняют прежнюю зрелость; production gates не изменены.
+Фактическое evidence — docs/verification/PVR_01_VERIFICATION.md.

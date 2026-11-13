@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/reference-data/v1/localized_text.schema.json",
+  "title": "LocalizedText v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "defaultLocale": { "$ref": "#/$defs/localeId" },
+    "values": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 32,
+      "propertyNames": { "$ref": "#/$defs/localeId" },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 10000,
+        "pattern": "\\S"
+      }
+    }
+  },
+  "required": ["schemaVersion", "defaultLocale", "values"],
+  "$defs": {
+    "localeId": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 35,
+      "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+    }
+  }
+}

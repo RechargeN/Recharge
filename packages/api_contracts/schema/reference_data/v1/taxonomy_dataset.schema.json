@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:recharge:reference-data:taxonomy-dataset:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "taxonomyId",
+    "semanticVersion",
+    "sourceRecordId",
+    "sourceDocumentSha256",
+    "categories",
+    "profiles"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "taxonomyId": {
+      "const": "category-system"
+    },
+    "semanticVersion": {
+      "const": "1.4.3"
+    },
+    "sourceRecordId": {
+      "const": "SRCREC-CATEGORY-143-001"
+    },
+    "sourceDocumentSha256": {
+      "const": "5dfe5347363eeb7d72933812424f22667e730a6edfb16aeb7c79fbeb8ef259f9"
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 28,
+      "maxItems": 28,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "subcategories"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "subcategories": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "profileId",
+                "applicableTypes"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$"
+                },
+                "profileId": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$"
+                },
+                "applicableTypes": {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": {
+                    "enum": [
+                      "activity",
+                      "class_workshop",
+                      "collection",
+                      "event",
+                      "find_people",
+                      "place",
+                      "rental",
+                      "route",
+                      "scenario",
+                      "session"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "profiles": {
+      "type": "array",
+      "minItems": 22,
+      "maxItems": 22,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "fieldIds",
+          "requiredFieldIds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fieldIds": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          },
+          "requiredFieldIds": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          }
+        }
+      }
+    }
+  }
+}

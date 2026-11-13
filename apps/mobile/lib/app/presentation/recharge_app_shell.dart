@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/identity/account_experience.dart';
 import '../../features/identity/application/controllers/identity_workspace_controller.dart';
 import '../../features/identity/application/identity_workspace_providers.dart';
+import '../../core/localization/l10n_context.dart';
 import '../router/route_names.dart';
 
 class RechargeAppShell extends ConsumerStatefulWidget {
@@ -28,35 +29,35 @@ class _RechargeAppShellState extends ConsumerState<RechargeAppShell> {
       <_RechargeDestination>[
         _RechargeDestination(
           id: 'home',
-          label: 'Home',
+          label: _NavLabel.navHome,
           icon: Icons.home_outlined,
           selectedIcon: Icons.home_rounded,
           route: RouteNames.discover,
         ),
         _RechargeDestination(
           id: 'favorites',
-          label: 'Favorites',
+          label: _NavLabel.navFavorites,
           icon: Icons.favorite_border_rounded,
           selectedIcon: Icons.favorite_rounded,
           route: RouteNames.favorites,
         ),
         _RechargeDestination(
           id: 'smart-search',
-          label: 'Smart Search',
+          label: _NavLabel.navSmartSearch,
           icon: Icons.auto_awesome_outlined,
           selectedIcon: Icons.auto_awesome,
           route: RouteNames.smartSearch,
         ),
         _RechargeDestination(
           id: 'notifications',
-          label: 'Notifications',
+          label: _NavLabel.navNotifications,
           icon: Icons.notifications_none_rounded,
           selectedIcon: Icons.notifications_rounded,
           route: RouteNames.notifications,
         ),
         _RechargeDestination(
           id: 'profile',
-          label: 'Profile',
+          label: _NavLabel.navProfile,
           icon: Icons.person_outline_rounded,
           selectedIcon: Icons.person_rounded,
           route: RouteNames.profile,
@@ -67,35 +68,35 @@ class _RechargeAppShellState extends ConsumerState<RechargeAppShell> {
       <_RechargeDestination>[
         _RechargeDestination(
           id: 'page',
-          label: 'Page',
+          label: _NavLabel.navPage,
           icon: Icons.storefront_outlined,
           selectedIcon: Icons.storefront_rounded,
           route: RouteNames.professionalPage,
         ),
         _RechargeDestination(
           id: 'content',
-          label: 'Content',
+          label: _NavLabel.navContent,
           icon: Icons.grid_view_outlined,
           selectedIcon: Icons.grid_view_rounded,
           route: RouteNames.professionalPageContent,
         ),
         _RechargeDestination(
           id: 'create',
-          label: 'Create',
+          label: _NavLabel.navCreate,
           icon: Icons.add_circle_outline_rounded,
           selectedIcon: Icons.add_circle_rounded,
           route: RouteNames.professionalPageCreate,
         ),
         _RechargeDestination(
           id: 'notifications',
-          label: 'Notifications',
+          label: _NavLabel.navNotifications,
           icon: Icons.notifications_none_rounded,
           selectedIcon: Icons.notifications_rounded,
           route: RouteNames.notifications,
         ),
         _RechargeDestination(
           id: 'account',
-          label: 'Account',
+          label: _NavLabel.navAccount,
           icon: Icons.manage_accounts_outlined,
           selectedIcon: Icons.manage_accounts_rounded,
           route: RouteNames.professionalPageAccount,
@@ -114,7 +115,7 @@ class _RechargeAppShellState extends ConsumerState<RechargeAppShell> {
     _ensureIdentityLoaded(widget.userId);
     final AccountExperience experience =
         identityController?.state.effectiveExperience ??
-        AccountExperience.viewer;
+        AccountExperience.personal;
     final bool isProfessional =
         experience == AccountExperience.professionalPage;
     final List<_RechargeDestination> destinations = isProfessional
@@ -146,7 +147,7 @@ class _RechargeAppShellState extends ConsumerState<RechargeAppShell> {
                 key: ValueKey<String>('bottom-nav-${destination.id}'),
                 icon: Icon(destination.icon),
                 selectedIcon: Icon(destination.selectedIcon),
-                label: destination.label,
+                label: destination.label.text(context.l10n),
               ),
             )
             .toList(growable: false),
@@ -229,8 +230,34 @@ class _RechargeDestination {
   });
 
   final String id;
-  final String label;
+  final _NavLabel label;
   final IconData icon;
   final IconData selectedIcon;
   final String route;
+}
+
+/// L4: navigation labels (also the accessibility labels of the hidden-label
+/// bar) as stable keys; the text is resolved per locale at build time.
+enum _NavLabel {
+  navHome,
+  navFavorites,
+  navSmartSearch,
+  navNotifications,
+  navProfile,
+  navPage,
+  navContent,
+  navCreate,
+  navAccount;
+
+  String text(AppLocalizations l10n) => switch (this) {
+    _NavLabel.navHome => l10n.navHome,
+    _NavLabel.navFavorites => l10n.navFavorites,
+    _NavLabel.navSmartSearch => l10n.navSmartSearch,
+    _NavLabel.navNotifications => l10n.navNotifications,
+    _NavLabel.navProfile => l10n.navProfile,
+    _NavLabel.navPage => l10n.navPage,
+    _NavLabel.navContent => l10n.navContent,
+    _NavLabel.navCreate => l10n.navCreate,
+    _NavLabel.navAccount => l10n.navAccount,
+  };
 }

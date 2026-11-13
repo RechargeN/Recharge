@@ -1,7 +1,37 @@
-enum NotificationType {
-  system,
-  reminder,
+enum NotificationType { system, reminder, activity }
+
+/// L4: whether the server could render the item's text in the requested
+/// language. The text is never replaced by another language.
+enum NotificationContentAvailability {
+  rendered,
+  unsupportedLocale,
+  templateUnavailable,
+}
+
+enum NotificationSubjectKind {
+  event,
+  place,
+  route,
   activity,
+  bookableSession,
+  system,
+}
+
+class NotificationSubjectRef {
+  const NotificationSubjectRef({required this.kind, required this.id});
+
+  final NotificationSubjectKind kind;
+  final String id;
+}
+
+class ScenarioNotificationContext {
+  const ScenarioNotificationContext({
+    required this.scenarioDraftId,
+    required this.scenarioItemId,
+  });
+
+  final String scenarioDraftId;
+  final String scenarioItemId;
 }
 
 class NotificationItemEntity {
@@ -13,6 +43,11 @@ class NotificationItemEntity {
     required this.createdAtUtc,
     required this.isRead,
     required this.targetRoute,
+    this.subjectRef,
+    this.scenarioContext,
+    this.contentAvailability = NotificationContentAvailability.rendered,
+    this.templateCode,
+    this.templateCount,
   });
 
   final String id;
@@ -22,10 +57,16 @@ class NotificationItemEntity {
   final DateTime createdAtUtc;
   final bool isRead;
   final String? targetRoute;
+  final NotificationSubjectRef? subjectRef;
+  final ScenarioNotificationContext? scenarioContext;
+  final NotificationContentAvailability contentAvailability;
 
-  NotificationItemEntity copyWith({
-    bool? isRead,
-  }) {
+  /// L4.6: a local template rendered in the reader's language (see
+  /// `AppNotificationEvent.templateCode`).
+  final String? templateCode;
+  final int? templateCount;
+
+  NotificationItemEntity copyWith({bool? isRead}) {
     return NotificationItemEntity(
       id: id,
       title: title,
@@ -34,6 +75,11 @@ class NotificationItemEntity {
       createdAtUtc: createdAtUtc,
       isRead: isRead ?? this.isRead,
       targetRoute: targetRoute,
+      subjectRef: subjectRef,
+      scenarioContext: scenarioContext,
+      contentAvailability: contentAvailability,
+      templateCode: templateCode,
+      templateCount: templateCount,
     );
   }
 }

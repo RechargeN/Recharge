@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -21,8 +22,10 @@ import 'package:recharge/features/notifications/domain/repositories/notification
 import 'package:recharge/features/notifications/domain/usecases/get_notifications_usecase.dart';
 import 'package:recharge/features/notifications/domain/usecases/mark_notification_read_usecase.dart';
 import 'package:recharge/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:recharge/generated/l10n/app_localizations.dart';
 
 import 'widget_test_viewport.dart';
+import '../support/l10n/l10n_screenshot.dart';
 
 void main() {
   fullPageTestWidgets('marks notification as read', (tester) async {
@@ -70,7 +73,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(notificationsController.state.unreadCount, 0);
-    expect(find.byTooltip('Read all'), findsNothing);
+    expect(find.byTooltip('Mark all as read'), findsNothing);
   });
 
   fullPageTestWidgets('mark all read clears unread inbox actions', (
@@ -112,12 +115,12 @@ void main() {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
-    expect(find.byTooltip('Read all'), findsOneWidget);
+    expect(find.byTooltip('Mark all as read'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Read all'));
+    await tester.tap(find.byTooltip('Mark all as read'));
     await tester.pumpAndSettle();
 
-    expect(find.byTooltip('Read all'), findsNothing);
+    expect(find.byTooltip('Mark all as read'), findsNothing);
     expect(notificationsController.state.unreadCount, 0);
   });
 
@@ -148,7 +151,7 @@ void main() {
           createdAtUtc: DateTime.parse('2026-04-20T12:00:00Z'),
           isRead: false,
           targetRoute:
-              '${RouteNames.scenarioBuilder}?mood=calm&duration=90&free=1'
+              '${RouteNames.legacyScenarioBuilder}?mood=calm&duration=90&free=1'
               '&walking=1&steps=food_drinks.coffee',
         ),
         NotificationItemEntity(
@@ -236,7 +239,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('По вашему запросу ничего не найдено'), findsOneWidget);
+    expect(find.text('Nothing matches your search'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Clear search'));
     await tester.pumpAndSettle();
@@ -292,7 +295,7 @@ void main() {
           createdAtUtc: DateTime.parse('2026-04-20T11:00:00Z'),
           isRead: false,
           targetRoute:
-              '${RouteNames.scenarioBuilder}?mood=calm&duration=90&free=1'
+              '${RouteNames.legacyScenarioBuilder}?mood=calm&duration=90&free=1'
               '&walking=1'
               '&steps=food_drinks.coffee,wellness_recharge.calm_walk',
         ),
@@ -321,7 +324,7 @@ void main() {
                 builder: (context, state) => const NotificationsPage(),
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => Scaffold(
                   body: Column(
                     children: <Widget>[
@@ -368,47 +371,14 @@ void main() {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
-    expect(find.text('Route scenario'), findsOneWidget);
+    expect(find.text('Legacy notification'), findsOneWidget);
     await tester.tap(find.byTooltip('Notification actions').first);
     await tester.pumpAndSettle();
-    expect(find.text('Map route'), findsOneWidget);
-    expect(find.text('Create route'), findsOneWidget);
-    expect(find.text('Open route'), findsOneWidget);
+    expect(find.text('Map route'), findsNothing);
+    expect(find.text('Create route'), findsNothing);
+    expect(find.text('Open'), findsOneWidget);
 
-    await tester.tap(find.text('Map route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Map route target'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
-    expect(
-      find.text('food_drinks.coffee,wellness_recharge.calm_walk'),
-      findsOneWidget,
-    );
-    expect(notificationsController.state.items.single.isRead, isTrue);
-
-    await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byTooltip('Notification actions').first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Create route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Create route target'), findsOneWidget);
-    expect(find.text('event'), findsOneWidget);
-    expect(find.text('Calm recharge route'), findsOneWidget);
-    expect(find.text('Calm route with 2 stops'), findsOneWidget);
-    expect(
-      find.text('food_drinks.coffee,wellness_recharge.calm_walk'),
-      findsOneWidget,
-    );
-
-    await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byTooltip('Notification actions').first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Open route'));
+    await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
 
     expect(find.text('Scenario builder target'), findsOneWidget);
@@ -530,6 +500,94 @@ void main() {
     expect(find.text('pendingReview'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
   });
+
+  for (final String language in <String>['en', 'lv', 'ru']) {
+    fullPageTestWidgets(
+      'L4: $language: a server item without text in the reader language says '
+      'so; rendered server text is shown as delivered',
+      (tester) async {
+        final authController = AuthController(
+          signInUseCase: SignInUseCase(_NoopAuthRepository()),
+          restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+          signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+          getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+          analyticsService: _NoopAnalyticsService(),
+        );
+        await authController.signIn(
+          email: 'user@example.com',
+          password: 'password123',
+          sourceScreen: 'test',
+          sourceAction: 'seed',
+        );
+        final _FakeNotificationsRepository repository =
+            _FakeNotificationsRepository(
+              initial: <NotificationItemEntity>[
+                NotificationItemEntity(
+                  id: 'ntf-missing',
+                  title: '',
+                  body: '',
+                  type: NotificationType.reminder,
+                  createdAtUtc: DateTime.parse('2026-08-29T21:30:00Z'),
+                  isRead: false,
+                  targetRoute: null,
+                  contentAvailability:
+                      NotificationContentAvailability.unsupportedLocale,
+                ),
+                NotificationItemEntity(
+                  id: 'ntf-rendered',
+                  title: 'Pasākums atcelts',
+                  body: 'Organizators atcēla šo pasākumu.',
+                  type: NotificationType.reminder,
+                  createdAtUtc: DateTime.parse('2026-08-29T20:00:00Z'),
+                  isRead: true,
+                  targetRoute: null,
+                ),
+              ],
+            );
+        final notificationsController = NotificationsController(
+          getNotificationsUseCase: GetNotificationsUseCase(repository),
+          markNotificationReadUseCase: MarkNotificationReadUseCase(repository),
+          analyticsService: _NoopAnalyticsService(),
+        );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: <Override>[
+              authControllerProvider.overrideWith((ref) => authController),
+              notificationsControllerProvider.overrideWith(
+                (ref) => notificationsController,
+              ),
+            ],
+            child: MaterialApp(
+              locale: Locale(language),
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: const <LocalizationsDelegate<Object>>[
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: const TextScaler.linear(2)),
+                child: child!,
+              ),
+              home: const NotificationsPage(),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await l10nCaptureScreen(tester);
+        final AppLocalizations l10n = lookupAppLocalizations(Locale(language));
+        expect(find.text(l10n.notificationFallbackTitle), findsOneWidget);
+        expect(find.text(l10n.notificationUnsupportedLocale), findsOneWidget);
+        // Text the server rendered is shown as delivered: never retranslated.
+        expect(find.text('Pasākums atcelts'), findsOneWidget);
+        expect(find.textContaining('unsupported_locale'), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 }
 
 class _NoopAnalyticsService implements AnalyticsService {

@@ -27,11 +27,183 @@ import 'package:recharge/features/create/domain/usecases/save_create_draft_useca
 import 'package:recharge/features/create/presentation/pages/create_hub_page.dart';
 import 'package:recharge/features/create/presentation/pages/create_page.dart';
 import 'package:recharge/features/create/presentation/pages/create_success_page.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/create/presentation/widgets/activity_create_block.dart';
+import 'package:recharge/features/create/presentation/widgets/server_publication_requirements.dart';
 
+import 'package:recharge/features/create/application/content_server_path.dart';
+import 'package:recharge/features/create/domain/entities/content_validation_violation.dart';
+
+import '../fixtures/create/user_collection_draft.dart';
+import '../fixtures/create/user_place_draft.dart';
+import '../fixtures/create/user_rental_draft.dart';
 import '../support/event_create_test_support.dart';
 import 'widget_test_viewport.dart';
+import 'package:recharge/features/create/application/state/create_notice.dart';
 
 void main() {
+  // M1 stage 3 (3-Б): the real Create page shows what the server publication
+  // still needs, only while the type's server path is enabled.
+  Future<CreateController> pumpCreate(
+    WidgetTester tester,
+    CreateDraftEntity draft, {
+    ContentServerPath? path,
+    ContentValidationFeedbackStore? refusals,
+  }) async {
+    final authController = AuthController(
+      signInUseCase: SignInUseCase(_NoopAuthRepository()),
+      restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+      signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+      getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await authController.signIn(
+      email: 'user@example.com',
+      password: 'password123',
+      sourceScreen: 'test',
+      sourceAction: 'server-requirements',
+    );
+    final createRepository = _FakeCreateRepository();
+    await createRepository.saveDraft('u', draft);
+    final createController = CreateController(
+      loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
+      saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
+      publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
+      analyticsService: _NoopAnalyticsService(),
+      eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: _testCreateDefaults,
+    );
+    await createController.ensureLoaded(
+      userId: 'u',
+      organizerEmail: 'user@example.com',
+      organizerName: 'user',
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          authControllerProvider.overrideWith((ref) => authController),
+          createControllerProvider.overrideWith((ref) => createController),
+          // The same overrides on every pump (Riverpod forbids changing them).
+          contentServerPathProvider.overrideWithValue(
+            path ?? ContentServerPath.disabled,
+          ),
+          contentValidationFeedbackProvider(
+            draft.objectType,
+          ).overrideWith((ref) => refusals ?? ContentValidationFeedbackStore()),
+        ],
+        child: const MaterialApp(home: CreatePage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    return createController;
+  }
+
+  final ContentServerPath serverOn = ContentServerPath(
+    isEnabled: (CreateObjectType type) => true,
+    marketCurrencyCode: 'EUR',
+    clock: () => DateTime.utc(2026, 10, 12, 10),
+  );
+  const Key card = Key('server-publication-requirements');
+
+  fullPageTestWidgets(
+    'M1 stage 3: Place requirements show only while the server path is on',
+    (tester) async {
+      final CreateDraftEntity draft =
+          placeCompatCases['short_description_short']!();
+      await pumpCreate(tester, draft);
+      expect(find.byKey(card), findsNothing, reason: 'server path off');
+
+      await pumpCreate(tester, draft, path: serverOn);
+      expect(find.byKey(card), findsOneWidget);
+      expect(
+        find.byKey(const Key('server-requirement-/body/shortDescription')),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Short description: Use 20–180 characters.'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  fullPageTestWidgets(
+    'M1 stage 3: an accepted Place draft needs nothing more',
+    (tester) async {
+      await pumpCreate(tester, placeCompatCases['valid']!(), path: serverOn);
+      expect(find.byKey(card), findsNothing);
+    },
+  );
+
+  fullPageTestWidgets(
+    'M1 stage 3: a server refusal of this draft names its field',
+    (tester) async {
+      final CreateDraftEntity draft = placeCompatCases['valid']!();
+      final ContentValidationFeedbackStore refusals =
+          ContentValidationFeedbackStore();
+      final CreateController created = await pumpCreate(
+        tester,
+        draft,
+        path: serverOn,
+        refusals: refusals,
+      );
+      refusals.capture(
+        accountId: 'u',
+        draft: created.state.draft,
+        message: 'validation_failed',
+        violations: const <ContentValidationViolation>[
+          ContentValidationViolation(
+            code: 'place.location.outside_service_area',
+            fieldPath: '/body/location/point',
+          ),
+        ],
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Map pin: The pin is outside the service area.'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  fullPageTestWidgets(
+    'M1 stage 3: Rental names the booking link with a fragment',
+    (tester) async {
+      await pumpCreate(
+        tester,
+        rentalCompatCases['external_url_fragment']!(),
+        path: serverOn,
+      );
+      expect(
+        find.text('Booking link: Remove the # part from the booking link.'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets('M1 stage 3: Collection names the missing short description', (
+    tester,
+  ) async {
+    final CollectionCompatCase item = collectionCompatCases().firstWhere(
+      (CollectionCompatCase c) => c.name == 'short_description_missing',
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          contentServerPathProvider.overrideWithValue(serverOn),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: DraftServerRequirements(draft: item.draft, accountId: 'u'),
+          ),
+        ),
+      ),
+    );
+    expect(
+      find.text('Short description: Add a short description.'),
+      findsOneWidget,
+    );
+  });
+
   fullPageTestWidgets(
     'accepts converted Scenario handoff without seed rewrite',
     (tester) async {
@@ -95,7 +267,7 @@ void main() {
         createController.state.draft.objectType,
         CreateObjectType.scenario,
       );
-      expect(find.text('Scenario Builder'), findsOneWidget);
+      expect(find.text('Scenario plan'), findsOneWidget);
       expect(handoff.contains('converted-scenario-1'), isFalse);
     },
   );
@@ -131,7 +303,10 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    createController.setObjectType(CreateObjectType.activity);
+    // D3.6: Class/Workshop renders its typed CW-V1 block; the shared publish
+    // validation still requires a cover and the block shows that error on
+    // its cover field.
+    createController.setObjectType(CreateObjectType.classWorkshop);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -145,29 +320,23 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.scrollPageUntilVisible(
-      find.widgetWithText(TextField, 'Title *'),
+      find.byKey(const Key('class-workshop-title')),
       240,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.enterText(
-      find.widgetWithText(TextField, 'Title *'),
-      'Event title',
+      find.byKey(const Key('class-workshop-title')),
+      'Class title',
     );
     await tester.scrollPageUntilVisible(
-      find.widgetWithText(TextField, 'Main category *'),
+      find.byKey(const Key('class-workshop-city')),
       240,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.enterText(
-      find.widgetWithText(TextField, 'Main category *'),
-      'wellness',
+      find.byKey(const Key('class-workshop-city')),
+      'Rezekne',
     );
-    await tester.scrollPageUntilVisible(
-      find.widgetWithText(TextField, 'City *'),
-      240,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.enterText(find.widgetWithText(TextField, 'City *'), 'Rezekne');
     await tester.scrollPageUntilVisible(
       find.text('Publish'),
       300,
@@ -176,7 +345,16 @@ void main() {
     await tester.tap(find.text('Publish'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Cover image обязательна'), findsOneWidget);
+    expect(
+      createController.state.validationErrors['coverImage'],
+      'create.validation.cover_required',
+    );
+    await tester.scrollPageUntilVisible(
+      find.text('Add a cover image'),
+      -240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Add a cover image'), findsOneWidget);
   });
 
   fullPageTestWidgets('taxonomy picker updates draft form fields', (
@@ -203,13 +381,17 @@ void main() {
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
       eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: _testCreateDefaults,
     );
     await createController.ensureLoaded(
       userId: 'u',
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    createController.setObjectType(CreateObjectType.activity);
+    // D3.6: Class/Workshop keeps the shared _CreateTaxonomyPicker above its
+    // typed CW-V1 block (no generic text fields any more), so the picker's
+    // selection is asserted on the draft itself.
+    createController.setObjectType(CreateObjectType.classWorkshop);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -227,40 +409,47 @@ void main() {
       260,
       scrollable: find.byType(Scrollable).first,
     );
-    final Finder sportGroup = find.text('Sport');
+    // Scoped to the rail: the group tile text can also match the
+    // _SelectedTaxonomySummary duplicate rendered for the active category.
+    final Finder taxonomyRail = find.byKey(
+      const ValueKey<String>('create-taxonomy-group-rail'),
+    );
+    final Finder workshopsGroup = find.descendant(
+      of: taxonomyRail,
+      matching: find.text('Workshops & masterclasses'),
+    );
     await tester.scrollUntilVisible(
-      sportGroup,
+      workshopsGroup,
       300,
       scrollable: find.descendant(
-        of: find.byKey(const ValueKey<String>('create-taxonomy-group-rail')),
+        of: taxonomyRail,
         matching: find.byType(Scrollable),
       ),
     );
-    await tester.ensureVisible(sportGroup);
+    await tester.ensureVisible(workshopsGroup);
     await tester.pumpAndSettle();
-    await tester.tap(sportGroup);
+    await tester.tap(workshopsGroup);
     await tester.pumpAndSettle();
-    expect(find.text('sport.tennis · practice'), findsOneWidget);
-
-    await tester.tap(find.text('Yoga'));
-    await tester.pumpAndSettle();
-
-    await tester.scrollPageUntilVisible(
-      find.widgetWithText(TextField, 'Main category *'),
-      240,
-      scrollable: find.byType(Scrollable).first,
-    );
-    final TextField categoryField = tester.widget<TextField>(
-      find.widgetWithText(TextField, 'Main category *'),
-    );
-    final TextField subcategoryField = tester.widget<TextField>(
-      find.widgetWithText(TextField, 'Subcategory'),
+    // Class/Workshop's participation mode for its default subcategory
+    // (Workshop) is 'learn' — see
+    // CreateTaxonomySubcategory.participationModeFor(objectType).
+    expect(
+      find.text('workshops_masterclasses.workshop · learn'),
+      findsOneWidget,
     );
 
-    expect(categoryField.controller?.text, 'sport');
-    expect(subcategoryField.controller?.text, 'yoga');
-    expect(createController.state.draft.mainCategory, 'sport');
-    expect(createController.state.draft.subcategory, 'yoga');
+    await tester.tap(find.text('Masterclass'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('class-workshop-section-basics')),
+      findsOneWidget,
+    );
+    expect(
+      createController.state.draft.mainCategory,
+      'workshops_masterclasses',
+    );
+    expect(createController.state.draft.subcategory, 'masterclass');
   });
 
   fullPageTestWidgets('generic visual clutter is absent from Create forms', (
@@ -439,6 +628,7 @@ void main() {
       publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
       analyticsService: _NoopAnalyticsService(),
       eventCreateCoordinator: createTestEventCoordinator(),
+      runtimeDefaults: _testCreateDefaults,
     );
     await createController.ensureLoaded(
       userId: 'u',
@@ -479,7 +669,7 @@ void main() {
     expect(draft.subcategory, 'museum');
     expect(draft.city, 'Rezekne');
     expect(draft.isFree, isFalse);
-    expect(draft.basePrice, 10);
+    expect(draft.basePrice, const Money(minorUnits: 1000, currencyCode: 'EUR'));
     expect(draft.media.coverImage, isNotEmpty);
     expect(
       draft.startDateTimeUtc?.toIso8601String(),
@@ -628,11 +818,26 @@ void main() {
             routes: <RouteBase>[
               GoRoute(
                 path: RouteNames.create,
-                builder: (context, state) =>
-                    CreatePage(seedParameters: state.uri.queryParameters),
+                builder: (context, state) {
+                  if (state.uri.queryParameters['source'] == 'route_seed') {
+                    return Scaffold(
+                      body: Column(
+                        children: <Widget>[
+                          const Text('Route Create page'),
+                          Text(state.uri.queryParameters['type'] ?? ''),
+                          Text(state.uri.queryParameters['category'] ?? ''),
+                          Text(state.uri.queryParameters['mood'] ?? ''),
+                          Text(state.uri.queryParameters['prompt'] ?? ''),
+                          Text(state.uri.queryParameters['steps'] ?? ''),
+                        ],
+                      ),
+                    );
+                  }
+                  return CreatePage(seedParameters: state.uri.queryParameters);
+                },
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => Scaffold(
                   body: Column(
                     children: <Widget>[
@@ -673,8 +878,8 @@ void main() {
     await tester.tap(find.text('Edit route'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('no-mode'), findsOneWidget);
+    expect(find.text('Route Create page'), findsOneWidget);
+    expect(find.text('route'), findsNWidgets(2));
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('Calm route with 2 stops'), findsOneWidget);
     expect(
@@ -688,7 +893,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('Calm route with 2 stops'), findsOneWidget);
     expect(
@@ -717,7 +922,10 @@ void main() {
 
     expect(published, isFalse);
     expect(createController.state.publishedDraft, isNull);
-    expect(createController.state.message, contains('Сервис публикации Route'));
+    expect(
+      createController.state.message,
+      CreateNotice.routePublicationUnavailable,
+    );
     createController.dispose();
   });
 
@@ -752,11 +960,15 @@ void main() {
         organizerEmail: 'user@example.com',
         organizerName: 'user',
       );
-      createController.setObjectType(CreateObjectType.activity);
+      // Class / Workshop (generic success-hub flow; Recharge Activity needs
+      // its own accessNotes/location fields per ACT-CRT-01 and Session its
+      // own resource/schedule/price per SES-CRT-01, which this generic-fields
+      // draft never sets).
+      createController.setObjectType(CreateObjectType.classWorkshop);
       createController.updateTitle('Museum evening route');
       createController.applyTaxonomySelection(
-        mainCategory: 'art_culture_museums',
-        subcategory: 'museum',
+        mainCategory: 'workshops_masterclasses',
+        subcategory: 'workshop',
       );
       createController.updateCity('Rezekne');
       createController.updateVenueName('City museum');
@@ -835,17 +1047,17 @@ void main() {
 
       expect(find.text('Sent to moderation'), findsOneWidget);
       expect(find.text('Museum evening route'), findsWidgets);
-      expect(find.text('pendingReview'), findsWidgets);
-      expect(find.text('Art, culture & museums'), findsOneWidget);
-      expect(find.text('Museum'), findsOneWidget);
-      expect(find.text('12 EUR'), findsOneWidget);
+      expect(find.text('Pending review'), findsWidgets);
+      expect(find.text('Workshops & masterclasses'), findsOneWidget);
+      expect(find.text('Workshop'), findsOneWidget);
+      expect(find.text('€12.00'), findsOneWidget);
 
       await tester.ensureVisible(find.text('Search similar'));
       await tester.tap(find.text('Search similar'));
       await tester.pumpAndSettle();
       expect(find.text('Search page'), findsOneWidget);
       expect(find.text('Museum evening route'), findsOneWidget);
-      expect(find.text('art_culture_museums'), findsOneWidget);
+      expect(find.text('workshops_masterclasses'), findsOneWidget);
       expect(find.text('12'), findsOneWidget);
 
       await tester.pumpWidget(app());
@@ -855,7 +1067,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Map page'), findsOneWidget);
       expect(find.text('Museum evening route'), findsOneWidget);
-      expect(find.text('art_culture_museums'), findsOneWidget);
+      expect(find.text('workshops_masterclasses'), findsOneWidget);
 
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();
@@ -865,6 +1077,58 @@ void main() {
       expect(find.text('Create page'), findsOneWidget);
       expect(createController.state.draft.title, isEmpty);
       expect(createController.state.publishedDraft, isNull);
+    },
+  );
+
+  fullPageTestWidgets(
+    'CreatePage renders ActivityCreateBlock for CreateObjectType.activity',
+    (tester) async {
+      final authController = AuthController(
+        signInUseCase: SignInUseCase(_NoopAuthRepository()),
+        restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+        signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+        getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+        analyticsService: _NoopAnalyticsService(),
+      );
+      await authController.signIn(
+        email: 'user@example.com',
+        password: 'password123',
+        sourceScreen: 'test',
+        sourceAction: 'seed',
+      );
+
+      final createRepository = _FakeCreateRepository();
+      final createController = CreateController(
+        loadCreateDraftUseCase: LoadCreateDraftUseCase(createRepository),
+        saveCreateDraftUseCase: SaveCreateDraftUseCase(createRepository),
+        publishCreateDraftUseCase: PublishCreateDraftUseCase(createRepository),
+        analyticsService: _NoopAnalyticsService(),
+        eventCreateCoordinator: createTestEventCoordinator(),
+        runtimeDefaults: _testCreateDefaults,
+      );
+      await createController.ensureLoaded(
+        userId: 'u',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      createController.setObjectType(CreateObjectType.activity);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: <Override>[
+            authControllerProvider.overrideWith((ref) => authController),
+            createControllerProvider.overrideWith((ref) => createController),
+          ],
+          child: const MaterialApp(home: CreatePage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ActivityCreateBlock), findsOneWidget);
+
+      // Flush the 700ms autosave timer so no pending Timer remains at test
+      // end.
+      await tester.pump(const Duration(milliseconds: 800));
     },
   );
 }
@@ -908,7 +1172,13 @@ class _NoopAuthRepository implements AuthRepository {
         id: 'u',
         email: 'user@example.com',
         role: 'creator',
-        capabilities: <String>['create.event', 'create.place', 'create.route'],
+        capabilities: <String>[
+          'create.event',
+          'create.place',
+          'create.route',
+          'create.rental',
+          'create.collection',
+        ],
         profileStatus: 'active',
       ),
     );

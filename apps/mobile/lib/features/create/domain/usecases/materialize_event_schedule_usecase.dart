@@ -28,6 +28,15 @@ class MaterializeEventScheduleUseCase {
       for (final EventOccurrenceDraft value in draft.occurrences)
         value.localDate: value.id,
     };
+    // D07: a one-time Event has exactly one occurrence; moving its date or
+    // time is a reschedule of that occurrence, so it keeps its id (and with it
+    // the server occurrence id, the bookings and their allocation). Multi-date
+    // and recurring occurrences stay identified by their local date.
+    final String? oneTimeId =
+        draft.scheduleMode == EventScheduleMode.oneTime &&
+            draft.occurrences.length == 1
+        ? draft.occurrences.single.id
+        : null;
     final EventRecurrenceRuleDraft? rule = draft.recurrence;
     final List<EventOccurrenceDraft> result = <EventOccurrenceDraft>[];
     for (final _LocalDate date in dates) {
@@ -63,6 +72,7 @@ class MaterializeEventScheduleUseCase {
       result.add(
         EventOccurrenceDraft(
           id:
+              oneTimeId ??
               existingIds[date.iso] ??
               'loc_occ_${date.iso.replaceAll('-', '')}_${draft.startMinute}',
           localDate: date.iso,

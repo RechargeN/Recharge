@@ -200,15 +200,15 @@
     {
       "id": "BND-LEGACY-0016",
       "rule": "cross_feature_import",
-      "source": "apps/mobile/lib/features/discover/presentation/pages/discover_details_page.dart",
+      "source": "apps/mobile/lib/features/discover/presentation/shell/compatibility_object_renderer.dart",
       "target": "apps/mobile/lib/features/create/application/create_taxonomy.dart",
       "owner": "discover-feature",
-      "reason": "Legacy direct cross-feature import pending facade migration.",
+      "reason": "Legacy direct cross-feature import pending facade migration. Source path updated by DTL-FND-01: the import moved unchanged from discover_details_page.dart into CompatibilityObjectRenderer (same underlying dependency, no new coupling introduced).",
       "introducedBefore": "2026-08-10",
       "targetSlice": "BND-REM-DISCOVER-CREATE",
       "expiresOn": null,
       "expiryRationale": "No removal date accepted; registry budget cannot increase.",
-      "fingerprint": "f4faaed4"
+      "fingerprint": "f898fa82"
     },
     {
       "id": "BND-LEGACY-0017",
@@ -287,19 +287,6 @@
       "expiresOn": null,
       "expiryRationale": "No removal date accepted; registry budget cannot increase.",
       "fingerprint": "e0d16424"
-    },
-    {
-      "id": "BND-LEGACY-0023",
-      "rule": "cross_feature_import",
-      "source": "apps/mobile/lib/features/discover/presentation/pages/discover_map_page.dart",
-      "target": "apps/mobile/lib/features/create/application/create_taxonomy.dart",
-      "owner": "discover-feature",
-      "reason": "Legacy direct cross-feature import pending facade migration.",
-      "introducedBefore": "2026-08-10",
-      "targetSlice": "BND-REM-DISCOVER-CREATE",
-      "expiresOn": null,
-      "expiryRationale": "No removal date accepted; registry budget cannot increase.",
-      "fingerprint": "b4a3332c"
     },
     {
       "id": "BND-LEGACY-0024",
@@ -651,19 +638,6 @@
       "expiresOn": null,
       "expiryRationale": "No removal date accepted; registry budget cannot increase.",
       "fingerprint": "7cabc8a7"
-    },
-    {
-      "id": "BND-LEGACY-0051",
-      "rule": "cross_feature_import",
-      "source": "apps/mobile/lib/features/scenarios/presentation/pages/scenario_builder_page.dart",
-      "target": "apps/mobile/lib/features/create/application/create_taxonomy.dart",
-      "owner": "scenarios-feature",
-      "reason": "Legacy direct cross-feature import pending facade migration.",
-      "introducedBefore": "2026-08-10",
-      "targetSlice": "BND-REM-SCENARIOS-CREATE",
-      "expiresOn": null,
-      "expiryRationale": "No removal date accepted; registry budget cannot increase.",
-      "fingerprint": "a0d655e8"
     },
     {
       "id": "BND-LEGACY-0052",

@@ -1,6 +1,7 @@
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/opening_hours_rule.dart';
 import '../../domain/entities/time_slot.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 class DiscoverItemModel extends DiscoverItemEntity {
   const DiscoverItemModel({
@@ -51,7 +52,16 @@ class DiscoverItemModel extends DiscoverItemEntity {
       startsAtUtc: DateTime.parse(map['starts_at_utc']! as String),
       latitude: (map['latitude']! as num).toDouble(),
       longitude: (map['longitude']! as num).toDouble(),
-      priceAmount: (map['price_amount']! as num).toDouble(),
+      priceAmount:
+          Money.fromJsonOrNull(
+            map['price'],
+            legacyCurrencyCode: map['currency_code'] as String?,
+          ) ??
+          Money.fromJsonOrNull(
+            map['price_amount'],
+            legacyCurrencyCode: map['currency_code'] as String?,
+          ) ??
+          (throw const FormatException('Discover item Money is invalid')),
       distanceKm: (map['distance_km']! as num).toDouble(),
       isFree: map['is_free']! as bool,
       objectKind: DiscoverObjectKind.values.firstWhere(

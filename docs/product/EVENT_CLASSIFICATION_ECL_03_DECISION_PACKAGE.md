@@ -1,8 +1,8 @@
-# ECL-03 — Decision package D01–D10
+# ECL-03 — Decision package D01–D12
 
-- Версия: 1.1
-- Дата: 2026-08-08
-- Статус: **Accepted — normative D01–D10 product/architecture decisions**
+- Версия: 1.3
+- Дата: 2026-08-27
+- Статус: **Accepted — normative D01–D12 product/architecture decisions**
 - Parent spec:
   [EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md)
 - Architecture proposal:
@@ -11,7 +11,7 @@
 
 ## 1. Назначение
 
-Этот пакет фиксирует принятые значения ECL03-D01–D10. Parent spec включает
+Этот пакет фиксирует принятые значения ECL03-D01–D12. Parent spec включает
 его по ссылке как normative contract, ADR 0019 имеет статус Accepted. Принятие
 не включает runtime/deployment: production activation остаётся за Identity,
 Privacy/Legal, Platform, notification и operations gates.
@@ -33,6 +33,8 @@ Booking, минимального operational риска и честного fai
 | `ECL03-D08` | Launch with general-capacity pools only, including channel/auxiliary pools; complex shapes remain config-only | Accepted |
 | `ECL03-D09` | 99.9% command availability target, p95 command 1.5s, zero oversell, one-minute worker targets, mandatory contention tests | Accepted |
 | `ECL03-D10` | Audited backend-only repair; two-person approval for allocation/state repair; no direct document editing | Accepted |
+| `ECL03-D11` | `requestId` is request correlation; `idempotencyKey` is logical-mutation identity; equality is optional | Accepted; runtime remains gated |
+| `ECL03-D12` | Booking v1 `requestId` is an opaque bounded client-generated attempt ID, not a ULID requirement | Accepted; wire conformance remains separately gated |
 
 ## 3. D01 — Backend topology
 
@@ -188,8 +190,10 @@ Rules:
   by Privacy/Legal before production;
 - changing retention is a versioned policy migration, not a console-only edit.
 
-These values are product recommendations, not legal advice. D04 remains open
-until Privacy/Legal/Product approve the exact table and backup behavior.
+These values are an Accepted product-policy baseline, not legal advice or
+production-processing authority. Privacy/Legal validation of the exact table,
+backup propagation and exceptional holds remains an activation gate; it does
+not change D04 back to Open.
 
 ## 7. D05 — Notification and reconfirmation delivery
 
@@ -405,9 +409,84 @@ Read-only investigation may use one authorized support actor. Any data export
 or broad participant query requires a separately audited privacy-approved
 workflow.
 
-## 13. Acceptance effect
+## 13. D11 — Booking request and idempotency identity
 
-D01–D10 are accepted exactly as recommended:
+### Accepted decision
+
+Booking command v1 keeps both required fields with different responsibilities:
+
+- `requestId` identifies and correlates one request attempt;
+- `idempotencyKey` identifies one logical mutation across retry attempts;
+- values may be equal, but equality is not required;
+- a retry reuses the original idempotency key and semantic payload, while a
+  transport/application retry may allocate a new request ID;
+- effective deduplication is scoped by resolved actor/service identity,
+  command type and idempotency key;
+- the canonical semantic hash excludes request-only correlation metadata;
+- same effective key/hash returns the stored result; same key/different hash
+  returns `idempotency_conflict` without mutation.
+
+This decision reconciles the Approved parent with committed Booking v1 schema,
+fixtures and DTO behavior. Equal-value callers remain compatible; no wire or
+data migration is required because backend persistence is absent. Exact hash
+canonicalization remains gated by `API-DEC-03` in BCK-03.
+
+The owner decision and compatibility evidence are recorded in
+[BCK-D1-DEC-01](BACKEND_PLATFORM_D1_DECISION_PACKAGE.md). Acceptance does not
+authorize schema edits, generated consumers or Booking runtime.
+
+## 14. D12 — Booking request ID representation
+
+### Accepted decision
+
+For Booking wire v1, `requestId` is an opaque, bounded, client-generated
+attempt identifier. ULID and UUID values are valid examples, but their syntax
+is not required and the server must not apply a hidden ULID-only rule.
+
+Normative semantics:
+
+- JSON type is string;
+- length is 1–128 Unicode scalar values and the value contains at least one
+  scalar outside the versioned `booking_request_id_v1` blank set;
+- comparison is exact and case-sensitive;
+- no trimming, case folding or Unicode normalization changes the stored or
+  compared value; blank-set membership is used only to reject an all-blank value;
+- invalid Unicode/JSON input fails before contract parsing;
+- the value is never interpreted as time, ordering, actor identity,
+  authorization, Booking/entity ID or logical idempotency identity;
+- uniqueness is actor-scoped, not global: the atomic attempt binding is derived
+  from resolved actor identity plus exact request ID;
+- the raw request ID is never a Firestore path segment, log label, metric
+  dimension or analytics value; only the domain-separated deterministic hash
+  may be used for an operational document key;
+- one logical retry may use a fresh request ID only while preserving the
+  original idempotency key and semantic payload;
+- reuse by the same actor for another command, logical key or semantic hash
+  returns `invalid_contract` without mutation.
+
+`booking_request_id_v1` defines blank scalars exactly as Unicode 15.1
+`White_Space`: `U+0009–U+000D`, `U+0020`, `U+0085`, `U+00A0`, `U+1680`,
+`U+2000–U+200A`, `U+2028`, `U+2029`, `U+202F`, `U+205F`, `U+3000`.
+Leading/trailing blank scalars are valid when another scalar exists and remain
+part of exact identity; implementations do not trim them. Unpaired UTF-16
+surrogates are not Unicode scalar values and fail contract parsing. A future
+Unicode-policy change requires a new request-ID rule version and fixtures.
+The frozen source is the Unicode 15.1
+[PropList `White_Space`](https://www.unicode.org/Public/15.1.0/ucd/PropList.txt).
+
+This supersedes only the literal `requestId: ULID` representation in ECL-03
+v1.2. It does not change stable entity-ID requirements, `idempotencyKey`
+semantics, D11, Booking result shape or any non-Booking API contract.
+
+Current Booking v1 fixtures already contain non-ULID opaque IDs and backend
+persistence is absent, so no stored-data migration exists. However, the JSON
+Schema and Dart validator do not yet enforce one identical bounded/non-blank
+rule. Their conformance is mandatory work in `BCK09-API-CORR-01`; D12 acceptance
+does not itself edit or approve those artifacts.
+
+## 15. Acceptance effect
+
+D01–D12 are accepted exactly as recorded:
 
 1. copy the decisions into parent ECL-03 spec as normative values;
 2. update ADR 0019 from Proposed to Accepted with decision evidence;
@@ -423,10 +502,17 @@ Acceptance of this package does not authorize Firebase deployment,
 production secrets, data collection or ECL-03 runtime by itself. Those actions
 remain bounded by the approved implementation stages and environment gates.
 
-## 14. Acceptance record
+## 16. Acceptance record
 
 The product owner instructed the work to continue on 2026-08-08 immediately
 after the assistant requested explicit acceptance of D01–D10, ADR 0019 and the
 ECL-03 spec. The instruction is recorded as acceptance of the single complete
 recommended package presented in v1.0; v1.1 changes status/record only and does
-not alter the accepted values.
+not alter the accepted values. On 2026-08-20 the Product owner approved the D1
+file plan and explicit split-key recommendation. Version 1.2 records that
+approval as ECL03-D11 and reconciles the existing Booking v1 fixtures without
+authorizing runtime. On 2026-08-27 the Product owner instructed `давай`
+immediately after the proposed next step explicitly named formalization of
+`ECL03-D12`; version 1.3 records the bounded opaque request-ID decision above.
+This instruction does not approve schema/DTO edits, specialist signatures or
+runtime.

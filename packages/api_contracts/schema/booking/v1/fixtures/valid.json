@@ -5,6 +5,7 @@
       "id": "01JBOOKING0000000000000001",
       "revision": 3,
       "userId": "01JUSER000000000000000001",
+      "marketId": "LV",
       "eventId": "01JEVENT00000000000000001",
       "occurrenceId": "01JOCCURRENCE000000000001",
       "inventoryPoolId": "01JPOOL000000000000000001",
@@ -13,6 +14,7 @@
       "confirmationMode": "instant",
       "state": "confirmed",
       "participantUnits": 2,
+      "cancellationDeadlineSnapshot": "2026-08-10T08:00:00.000Z",
       "namedGuests": [{ "displayName": "Guest" }],
       "reconfirmationState": "notRequired",
       "createdAt": "2026-08-09T08:00:00.000Z",
@@ -24,6 +26,7 @@
       "id": "01JBOOKING0000000000000002",
       "revision": 1,
       "userId": "01JUSER000000000000000002",
+      "marketId": "LV",
       "eventId": "01JEVENT00000000000000001",
       "occurrenceId": "01JOCCURRENCE000000000001",
       "inventoryPoolId": "01JPOOL000000000000000001",
@@ -36,6 +39,27 @@
       "reconfirmationState": "notOpen",
       "createdAt": "2026-08-09T08:00:00.000Z",
       "updatedAt": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "01JBOOKING0000000000000003",
+      "revision": 4,
+      "userId": "01JUSER000000000000000003",
+      "marketId": "LV",
+      "eventId": "01JEVENT00000000000000001",
+      "occurrenceId": "01JOCCURRENCE000000000001",
+      "inventoryPoolId": "01JPOOL000000000000000001",
+      "channel": "onsite",
+      "admissionMode": "booking",
+      "confirmationMode": "instant",
+      "state": "cancelled",
+      "participantUnits": 1,
+      "reconfirmationState": "missed",
+      "terminalReason": "missedReconfirmation",
+      "createdAt": "2026-08-09T08:00:00.000Z",
+      "updatedAt": "2026-08-10T08:00:00.000Z",
+      "confirmedAt": "2026-08-09T08:01:00.000Z",
+      "cancelledAt": "2026-08-10T08:00:00.000Z"
     }
   ],
   "holds": [
@@ -74,6 +98,7 @@
       "schemaVersion": 1,
       "policyVersion": 1,
       "maxConcurrentFiniteAllocations": 5,
+      "maxActiveUnlimitedBookings": 50,
       "countingRule": "onePerBookingOrActiveHold",
       "unlimitedBookingCounts": false
     }
@@ -82,7 +107,12 @@
     {
       "schemaVersion": 1,
       "commandType": "createBooking",
-      "requestId": "01JREQUEST0000000000000001",
+      "requestId": "attempt_create_opaque",
+      "sessionContext": {
+        "sessionId": "session-1",
+        "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "installationId": "install-1"
+      },
       "idempotencyKey": "01JIDEMPOTENCY000000000001",
       "occurredAgainstEventRevision": 4,
       "payload": {
@@ -95,13 +125,148 @@
     },
     {
       "schemaVersion": 1,
+      "commandType": "cancelBooking",
+      "requestId": "attempt-cancel",
+      "sessionContext": {
+        "sessionId": "session-1",
+        "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "installationId": "install-1"
+      },
+      "idempotencyKey": "idempotency-cancel",
+      "expectedBookingRevision": 3,
+      "payload": {
+        "bookingId": "01JBOOKING0000000000000001",
+        "reasonCode": "user_cancelled"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "approveApplication",
+      "requestId": "attempt-approve",
+      "idempotencyKey": "idempotency-approve",
+      "expectedBookingRevision": 1,
+      "payload": {
+        "bookingId": "01JBOOKING0000000000000002",
+        "inventoryPoolId": "01JPOOL000000000000000001"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "rejectApplication",
+      "requestId": "attempt-reject",
+      "idempotencyKey": "idempotency-reject",
+      "expectedBookingRevision": 1,
+      "payload": {
+        "bookingId": "01JBOOKING0000000000000002",
+        "reasonCode": "eligibility_not_satisfied"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "joinWaitlist",
+      "requestId": "attempt-waitlist",
+      "idempotencyKey": "idempotency-waitlist",
+      "payload": {
+        "occurrenceId": "01JOCCURRENCE000000000001",
+        "inventoryPoolId": "01JPOOL000000000000000001",
+        "channel": "onsite",
+        "participantUnits": 1
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "leaveWaitlist",
+      "requestId": "attempt-leave",
+      "idempotencyKey": "idempotency-leave",
+      "expectedBookingRevision": 2,
+      "payload": {
+        "bookingId": "01JBOOKING0000000000000002"
+      }
+    },
+    {
+      "schemaVersion": 1,
       "commandType": "acceptWaitlistHold",
-      "requestId": "01JREQUEST0000000000000002",
+      "requestId": "attempt-accept-hold",
       "idempotencyKey": "01JIDEMPOTENCY000000000002",
       "expectedBookingRevision": 1,
       "payload": {
         "bookingId": "01JBOOKING0000000000000002",
         "holdId": "01JHOLD000000000000000001"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "declineWaitlistHold",
+      "requestId": "attempt-decline-hold",
+      "idempotencyKey": "idempotency-decline-hold",
+      "expectedBookingRevision": 1,
+      "payload": {
+        "bookingId": "01JBOOKING0000000000000002",
+        "holdId": "01JHOLD000000000000000001"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "reconfirmBooking",
+      "requestId": "attempt-reconfirm",
+      "idempotencyKey": "idempotency-reconfirm",
+      "expectedBookingRevision": 3,
+      "payload": {
+        "bookingId": "01JBOOKING0000000000000001",
+        "materialRevision": 5
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "createBooking",
+      "requestId": "opaque_request",
+      "idempotencyKey": "idempotency-retained-blanks",
+      "payload": {
+        "occurrenceId": "01JOCCURRENCE000000000001",
+        "participantUnits": 1,
+        "applicationFields": {
+          "answer": ["yes", { "nested": true }]
+        }
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "createBooking",
+      "requestId": "unicode_nfc",
+      "idempotencyKey": "idempotency-nfc",
+      "payload": {
+        "occurrenceId": "01JOCCURRENCE000000000001",
+        "participantUnits": 1
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "createBooking",
+      "requestId": "unicode_nfd",
+      "idempotencyKey": "idempotency-nfd",
+      "payload": {
+        "occurrenceId": "01JOCCURRENCE000000000001",
+        "participantUnits": 1
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "createBooking",
+      "requestId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "idempotencyKey": "idempotency-128-scalars",
+      "payload": {
+        "occurrenceId": "01JOCCURRENCE000000000001",
+        "participantUnits": 1
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "commandType": "createBooking",
+      "requestId": "attempt_supplementary",
+      "idempotencyKey": "idempotency-supplementary-scalar",
+      "payload": {
+        "occurrenceId": "01JOCCURRENCE000000000001",
+        "participantUnits": 1
       }
     }
   ],
@@ -121,11 +286,13 @@
       "requestId": "01JREQUEST0000000000000001",
       "correlationId": "01JCORRELATION000000000002",
       "serverTime": "2026-08-09T08:01:00.000Z",
+      "outcome": "reconfirmed",
       "booking": {
         "schemaVersion": 1,
         "id": "01JBOOKING0000000000000001",
         "revision": 3,
         "userId": "01JUSER000000000000000001",
+        "marketId": "LV",
         "eventId": "01JEVENT00000000000000001",
         "occurrenceId": "01JOCCURRENCE000000000001",
         "inventoryPoolId": "01JPOOL000000000000000001",
@@ -134,7 +301,9 @@
         "confirmationMode": "instant",
         "state": "confirmed",
         "participantUnits": 2,
-        "reconfirmationState": "notRequired",
+        "reconfirmationState": "confirmed",
+        "reconfirmationRequiredForRevision": 5,
+        "reconfirmationDeadlineUtc": "2026-08-10T08:00:00.000Z",
         "createdAt": "2026-08-09T08:00:00.000Z",
         "updatedAt": "2026-08-09T08:01:00.000Z",
         "confirmedAt": "2026-08-09T08:01:00.000Z"

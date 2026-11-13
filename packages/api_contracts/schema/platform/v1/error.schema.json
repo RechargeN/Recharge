@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/platform/v1/error.schema.json",
+  "title": "Recharge Platform v1 typed error",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "type": "string",
+      "enum": [
+        "invalid_argument",
+        "unauthenticated",
+        "permission_denied",
+        "not_found",
+        "conflict",
+        "idempotency_conflict",
+        "failed_precondition",
+        "rate_limited",
+        "unavailable",
+        "deadline_exceeded",
+        "unsupported_client",
+        "unsupported_contract",
+        "unsupported_schema",
+        "stale_revision",
+        "internal"
+      ]
+    },
+    "domainCode": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 96,
+      "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)?$"
+    },
+    "messageKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-z][A-Za-z0-9]*(?:\\.[a-zA-Z][A-Za-z0-9]*)+$"
+    },
+    "retryable": { "type": "boolean" },
+    "retryAfterSeconds": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 86400
+    },
+    "fieldViolations": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z][A-Za-z0-9.[\\]]*$"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_]*$"
+          }
+        },
+        "required": ["field", "code"]
+      }
+    },
+    "details": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/jsonObject"
+    }
+  },
+  "required": ["code", "retryable", "fieldViolations", "details"]
+}

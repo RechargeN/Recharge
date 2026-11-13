@@ -1,6 +1,7 @@
 import '../domain/entities/event_admission.dart';
 import '../domain/entities/event_validation_issue.dart';
 import '../domain/usecases/normalize_event_admission_preset_usecase.dart';
+import 'create_message_ids.dart';
 
 class EventAdmissionSectionDefinition {
   const EventAdmissionSectionDefinition({
@@ -29,15 +30,27 @@ enum EventAccessDisclosureCode {
   assignedSeatingUnavailable,
 }
 
+/// L4: which explanation a disclosure shows; the UI turns it into text.
+enum EventAccessDisclosureTopic {
+  localConfiguration,
+  internalNotActive,
+  internalLocalStand,
+  providerConfirmationNotConnected,
+  waitlistConfigurationOnly,
+  capacityIsConfiguration,
+  externalInventoryUnverified,
+  assignedSeatingUnavailable,
+}
+
 class EventAccessCapabilityDisclosure {
   const EventAccessCapabilityDisclosure({
     required this.code,
-    required this.message,
+    required this.topic,
     this.blocking = false,
   });
 
   final EventAccessDisclosureCode code;
-  final String message;
+  final EventAccessDisclosureTopic topic;
   final bool blocking;
 }
 
@@ -60,9 +73,12 @@ class EventAdmissionSectionState {
   final List<EventAccessCapabilityDisclosure> disclosures;
   final List<EventValidationIssue> issues;
 
-  String? errorFor(String fieldId) {
+  /// The field-error message id (L4: the UI resolves it to text).
+  String? errorIdFor(String fieldId) {
     for (final EventValidationIssue issue in issues) {
-      if (issue.isBlocking && issue.fieldId == fieldId) return issue.message;
+      if (issue.isBlocking && issue.fieldId == fieldId) {
+        return eventIssueMessageId(issue);
+      }
     }
     return null;
   }

@@ -4,13 +4,19 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../app/config/legal_links.dart';
+import '../../../../core/localization/app_locale_policy.dart';
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/locale_controller.dart';
+import '../../../../core/localization/locale_providers.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../application/controllers/explore_controller.dart';
 import '../../application/explore_providers.dart';
 import '../../application/state/explore_state.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({super.key, this.workspaceSectionBuilder});
+
+  final Widget Function(String userId)? workspaceSectionBuilder;
 
   @override
   ConsumerState<SettingsPage> createState() => _SettingsPageState();
@@ -21,6 +27,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   final TextEditingController _aboutController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _avatarController = TextEditingController();
+  String? _loadKey;
 
   @override
   void dispose() {
@@ -39,48 +46,56 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       exploreControllerProvider,
     );
     final ExploreState state = exploreController.state;
+    final LocaleController localeController = ref.watch(
+      localeControllerProvider,
+    );
+    final AppLocalizations l10n = context.l10n;
 
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Требуется авторизация')));
+      return Scaffold(body: Center(child: Text(l10n.commonSignInRequired)));
     }
 
     if (!state.isLoaded || state.userId != user.id) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref
-            .read(exploreControllerProvider)
-            .ensureLoaded(
-              userId: user.id,
-              email: user.email,
-              role: user.role,
-              favoritesCount: state.favoritesCount,
-            );
-      });
+      _scheduleLoad(
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        favoritesCount: state.favoritesCount,
+      );
     }
     _syncControllers(state);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Настройки')),
+      appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: switch (state.status) {
         ExploreStatus.initial || ExploreStatus.loading => const Center(
           child: CircularProgressIndicator(),
         ),
-        ExploreStatus.error => const Center(
-          child: Text('Не удалось загрузить настройки'),
+        ExploreStatus.error => _StateMessage(
+          text: l10n.settingsLoadFailed,
+          actionLabel: l10n.commonRetry,
+          onTap: () {
+            _loadKey = null;
+            _scheduleLoad(
+              userId: user.id,
+              email: user.email,
+              role: user.role,
+              favoritesCount: state.favoritesCount,
+              force: true,
+            );
+          },
         ),
         ExploreStatus.ready || ExploreStatus.saving => ListView(
           padding: const EdgeInsets.all(16),
           children: <Widget>[
-            const _SettingsSectionTitle('ACCOUNT AND WORKSPACE'),
-            ListTile(
-              key: const ValueKey<String>('settings-switch-workspace'),
-              leading: const Icon(Icons.switch_account_outlined),
-              title: const Text('Switch workspace'),
-              subtitle: const Text(
-                'Personal profile, Professional Pages and Admin access',
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push(RouteNames.workspaceSwitcher),
-            ),
+            _SettingsSectionTitle(l10n.settingsSectionAccount),
+            const SizedBox(height: 8),
+            widget.workspaceSectionBuilder?.call(user.id) ??
+                ListTile(
+                  leading: const Icon(Icons.account_tree_outlined),
+                  title: Text(l10n.settingsSwitchWorkspace),
+                  subtitle: Text(l10n.settingsSwitchWorkspaceHint),
+                ),
             const Divider(height: 28),
             _ProfileEditSection(
               displayNameController: _displayNameController,
@@ -95,97 +110,98 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ? null
                   : exploreController.saveProfile,
               saving: state.status == ExploreStatus.saving,
+              saved: state.message == ExploreController.profileSavedMessage,
             ),
             const Divider(height: 28),
-            const _SettingsSectionTitle('CONTENT & ACTIVITY'),
+            _SettingsSectionTitle(l10n.settingsSectionContent),
             ListTile(
               leading: const Icon(Icons.favorite_border),
-              title: const Text('Saved plans'),
-              subtitle: const Text('Saved ideas and personal plans'),
+              title: Text(l10n.settingsSavedPlans),
+              subtitle: Text(l10n.settingsSavedPlansHint),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push(RouteNames.favorites),
             ),
             ListTile(
               leading: const Icon(Icons.search_outlined),
-              title: const Text('Search and conditions'),
-              subtitle: const Text('Saved searches and discovery filters'),
+              title: Text(l10n.settingsSearch),
+              subtitle: Text(l10n.settingsSearchHint),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push(RouteNames.search),
             ),
             ListTile(
               leading: const Icon(Icons.notifications_none),
-              title: const Text('Notifications'),
-              subtitle: const Text('Inbox and route updates'),
+              title: Text(l10n.navNotifications),
+              subtitle: Text(l10n.settingsNotificationsHint),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push(RouteNames.notifications),
             ),
             const Divider(height: 28),
-            const _SettingsSectionTitle('PREFERENCES'),
-            DropdownButtonFormField<String>(
-              initialValue: state.settings.language,
-              decoration: const InputDecoration(
-                labelText: 'Language',
-                border: OutlineInputBorder(),
+            _SettingsSectionTitle(l10n.settingsSectionPreferences),
+            // L4: the device-scoped UI language. It changes text only, never
+            // the market, currency, coordinates or event times.
+            DropdownButtonFormField<AppLocaleChoice>(
+              key: const Key('settings-language'),
+              initialValue: localeController.choice,
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: l10n.languageSectionTitle,
+                helperText: l10n.languageHint,
+                helperMaxLines: 3,
+                border: const OutlineInputBorder(),
               ),
-              items: const <DropdownMenuItem<String>>[
-                DropdownMenuItem(value: 'ru', child: Text('Русский')),
-                DropdownMenuItem(value: 'en', child: Text('English')),
-                DropdownMenuItem(value: 'lv', child: Text('Latviešu')),
+              items: <DropdownMenuItem<AppLocaleChoice>>[
+                DropdownMenuItem<AppLocaleChoice>(
+                  value: AppLocaleChoice.system,
+                  child: Text(l10n.languageSystem),
+                ),
+                DropdownMenuItem<AppLocaleChoice>(
+                  value: AppLocaleChoice.en,
+                  child: Text(l10n.languageNameEn),
+                ),
+                DropdownMenuItem<AppLocaleChoice>(
+                  value: AppLocaleChoice.lv,
+                  child: Text(l10n.languageNameLv),
+                ),
+                DropdownMenuItem<AppLocaleChoice>(
+                  value: AppLocaleChoice.ru,
+                  child: Text(l10n.languageNameRu),
+                ),
               ],
-              onChanged: (String? value) {
-                if (value != null) {
-                  exploreController.updateLanguage(value);
-                }
-              },
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              initialValue: state.settings.currency,
-              decoration: const InputDecoration(
-                labelText: 'Currency',
-                border: OutlineInputBorder(),
-              ),
-              items: const <DropdownMenuItem<String>>[
-                DropdownMenuItem(value: 'EUR', child: Text('EUR')),
-                DropdownMenuItem(value: 'USD', child: Text('USD')),
-              ],
-              onChanged: (String? value) {
-                if (value != null) {
-                  exploreController.updateCurrency(value);
-                }
+              onChanged: (AppLocaleChoice? value) {
+                if (value != null) localeController.select(value);
               },
             ),
             const SizedBox(height: 8),
             SwitchListTile(
-              title: const Text('Notification preferences'),
+              title: Text(l10n.settingsNotificationPreferences),
               value: state.settings.notificationsEnabled,
               onChanged: exploreController.updateNotifications,
             ),
             const Divider(height: 28),
             ListTile(
-              title: const Text('Support / Help'),
+              title: Text(l10n.settingsSupport),
               trailing: const Icon(Icons.open_in_new),
               onTap: () => _showLinkDialog(
                 context,
-                title: 'Support / Help',
+                title: l10n.settingsSupport,
                 url: LegalLinks.support,
               ),
             ),
             ListTile(
-              title: const Text('Privacy Policy'),
+              title: Text(l10n.settingsPrivacyPolicy),
               trailing: const Icon(Icons.open_in_new),
               onTap: () => _showLinkDialog(
                 context,
-                title: 'Privacy Policy',
+                title: l10n.settingsPrivacyPolicy,
                 url: LegalLinks.privacyPolicy,
               ),
             ),
             ListTile(
-              title: const Text('Terms of Service'),
+              title: Text(l10n.settingsTerms),
               trailing: const Icon(Icons.open_in_new),
               onTap: () => _showLinkDialog(
                 context,
-                title: 'Terms of Service',
+                title: l10n.settingsTerms,
                 url: LegalLinks.termsOfService,
               ),
             ),
@@ -197,12 +213,35 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   context.go(RouteNames.discover);
                 }
               },
-              child: const Text('Выйти'),
+              child: Text(l10n.settingsSignOut),
             ),
           ],
         ),
       },
     );
+  }
+
+  void _scheduleLoad({
+    required String userId,
+    required String email,
+    required String role,
+    required int favoritesCount,
+    bool force = false,
+  }) {
+    final String key = '$userId:$role:$favoritesCount';
+    if (!force && _loadKey == key) return;
+    _loadKey = key;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref
+          .read(exploreControllerProvider)
+          .ensureLoaded(
+            userId: userId,
+            email: email,
+            role: role,
+            favoritesCount: favoritesCount,
+          );
+    });
   }
 
   void _syncControllers(ExploreState state) {
@@ -235,9 +274,38 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text(context.l10n.commonOk),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _StateMessage extends StatelessWidget {
+  const _StateMessage({
+    required this.text,
+    required this.actionLabel,
+    required this.onTap,
+  });
+
+  final String text;
+  final String actionLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(text),
+            const SizedBox(height: 10),
+            OutlinedButton(onPressed: onTap, child: Text(actionLabel)),
+          ],
+        ),
       ),
     );
   }
@@ -276,6 +344,7 @@ class _ProfileEditSection extends StatelessWidget {
     required this.onAvatarChanged,
     required this.onSave,
     required this.saving,
+    required this.saved,
   });
 
   final TextEditingController displayNameController;
@@ -288,37 +357,39 @@ class _ProfileEditSection extends StatelessWidget {
   final ValueChanged<String> onAvatarChanged;
   final Future<void> Function()? onSave;
   final bool saving;
+  final bool saved;
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Profile information',
+          l10n.settingsProfileInformation,
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 10),
         _LabeledField(
-          label: 'Display name',
+          label: l10n.settingsDisplayName,
           controller: displayNameController,
           onChanged: onDisplayNameChanged,
         ),
         _LabeledField(
-          label: 'About',
+          label: l10n.settingsAbout,
           controller: aboutController,
           onChanged: onAboutChanged,
           maxLines: 4,
         ),
         _LabeledField(
-          label: 'City',
+          label: l10n.settingsCity,
           controller: cityController,
           onChanged: onCityChanged,
         ),
         _LabeledField(
-          label: 'Avatar URL/Path',
+          label: l10n.settingsAvatar,
           controller: avatarController,
           onChanged: onAvatarChanged,
         ),
@@ -326,8 +397,12 @@ class _ProfileEditSection extends StatelessWidget {
         FilledButton.icon(
           onPressed: onSave,
           icon: const Icon(Icons.save_outlined),
-          label: Text(saving ? 'Сохраняем...' : 'Сохранить профиль'),
+          label: Text(saving ? l10n.settingsSaving : l10n.settingsSaveProfile),
         ),
+        if (saved) ...<Widget>[
+          const SizedBox(height: 6),
+          Text(l10n.settingsProfileSaved),
+        ],
       ],
     );
   }

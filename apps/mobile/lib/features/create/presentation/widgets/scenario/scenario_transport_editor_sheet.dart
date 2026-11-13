@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/localization/l10n_context.dart';
+import '../../../../../core/parsing/input_parsers.dart';
 import '../../../domain/entities/scenario_item_draft.dart';
 import '../../../domain/entities/scenario_logistics_draft.dart';
+import '../../../../../shared/primitives/money/money.dart';
+import '../create_form_texts.dart';
 
 class ScenarioPlannedTransportInput {
   const ScenarioPlannedTransportInput({
@@ -61,18 +65,19 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text(
-                'Add planned transport',
+                context.l10n.createScenarioAddPlannedTransport,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 4),
-              const Text(
-                'Planned schedule · not live. Recheck the service before travel.',
+              Text(
+                context.l10n.createScenarioPlannedScheduleNotLiveRecheckService,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<ScenarioPlannedTransportKind>(
+                isExpanded: true,
                 initialValue: kind,
-                decoration: const InputDecoration(
-                  labelText: 'Transport',
+                decoration: InputDecoration(
+                  labelText: context.l10n.createScenarioTransport,
                   border: OutlineInputBorder(),
                 ),
                 items: ScenarioPlannedTransportKind.values
@@ -80,7 +85,7 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
                       (ScenarioPlannedTransportKind value) =>
                           DropdownMenuItem<ScenarioPlannedTransportKind>(
                             value: value,
-                            child: Text(_enumLabel(value.name)),
+                            child: Text(createOptionText(context.l10n, value)),
                           ),
                     )
                     .toList(growable: false),
@@ -93,9 +98,9 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
               const SizedBox(height: 10),
               TextFormField(
                 initialValue: carrier,
-                decoration: const InputDecoration(
-                  labelText: 'Carrier (optional)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createScenarioCarrierOptional,
+                  border: const OutlineInputBorder(),
                 ),
                 onChanged: (String value) => carrier = value,
               ),
@@ -103,9 +108,9 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
               TextFormField(
                 key: const ValueKey<String>('scenario-service-label'),
                 initialValue: service,
-                decoration: const InputDecoration(
-                  labelText: 'Service or route *',
-                  hintText: 'Train 802 / Bus 7480',
+                decoration: InputDecoration(
+                  labelText: context.l10n.createScenarioServiceRoute,
+                  hintText: context.l10n.createScenarioServiceHint,
                   border: OutlineInputBorder(),
                 ),
                 onChanged: (String value) => service = value,
@@ -114,9 +119,9 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
               TextFormField(
                 initialValue: duration,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Duration, min *',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createScenarioDurationMinRequired,
+                  border: const OutlineInputBorder(),
                 ),
                 onChanged: (String value) => duration = value,
               ),
@@ -127,8 +132,8 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
                     child: TextFormField(
                       initialValue: departure,
                       keyboardType: TextInputType.datetime,
-                      decoration: const InputDecoration(
-                        labelText: 'Departure (HH:mm)',
+                      decoration: InputDecoration(
+                        labelText: context.l10n.createScenarioDepartureHhMm,
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (String value) => departure = value,
@@ -139,8 +144,8 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
                     child: TextFormField(
                       initialValue: arrival,
                       keyboardType: TextInputType.datetime,
-                      decoration: const InputDecoration(
-                        labelText: 'Arrival (HH:mm)',
+                      decoration: InputDecoration(
+                        labelText: context.l10n.createScenarioArrivalHhMm,
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (String value) => arrival = value,
@@ -169,7 +174,7 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
                     ),
                   );
                 },
-                child: const Text('Add to Scenario'),
+                child: Text(context.l10n.createScenarioAddScenario),
               ),
             ],
           ),
@@ -182,6 +187,7 @@ Future<ScenarioPlannedTransportInput?> showScenarioPlannedTransportEditor(
 Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
   BuildContext context, {
   required ScenarioTravelMode initialMode,
+  required String currencyCode,
   ScenarioLegDraft? current,
 }) {
   ScenarioTravelMode mode = current?.mode ?? initialMode;
@@ -207,16 +213,17 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text(
-                'Travel between stops',
+                context.l10n.createScenarioTravelBetweenStops,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 4),
-              const Text('Manual values stay locked until you edit them.'),
+              Text(context.l10n.createScenarioManualValuesStayLockedUntilYou),
               const SizedBox(height: 16),
               DropdownButtonFormField<ScenarioTravelMode>(
+                isExpanded: true,
                 initialValue: mode,
-                decoration: const InputDecoration(
-                  labelText: 'Travel mode',
+                decoration: InputDecoration(
+                  labelText: context.l10n.createScenarioTravelMode,
                   border: OutlineInputBorder(),
                 ),
                 items: ScenarioTravelMode.values
@@ -224,7 +231,7 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                       (ScenarioTravelMode value) =>
                           DropdownMenuItem<ScenarioTravelMode>(
                             value: value,
-                            child: Text(_travelModeLabel(value)),
+                            child: Text(_travelModeLabel(context.l10n, value)),
                           ),
                     )
                     .toList(growable: false),
@@ -241,9 +248,9 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                     child: TextFormField(
                       initialValue: duration,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Duration, min',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.createScenarioDurationMin,
+                        border: const OutlineInputBorder(),
                       ),
                       onChanged: (String value) => duration = value,
                     ),
@@ -255,9 +262,9 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Distance, km',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.createScenarioDistanceKm,
+                        border: const OutlineInputBorder(),
                       ),
                       onChanged: (String value) => distance = value,
                     ),
@@ -270,10 +277,10 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'Parking / ticket / other cost (optional)',
-                  suffixText: 'EUR',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createScenarioOtherCost,
+                  suffixText: currencyCode,
+                  border: const OutlineInputBorder(),
                 ),
                 onChanged: (String value) => otherCost = value,
               ),
@@ -282,12 +289,17 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                 onPressed: () {
                   final int? minutes = int.tryParse(duration.trim());
                   final double? km = _number(distance);
-                  final double? cost = _number(otherCost);
+                  final Money? cost = otherCost.trim().isEmpty
+                      ? null
+                      : Money.tryParseMajor(
+                          otherCost,
+                          currencyCode: currencyCode,
+                        );
                   if (minutes == null ||
                       minutes <= 0 ||
                       km == null ||
                       km < 0 ||
-                      (cost != null && cost < 0)) {
+                      (otherCost.trim().isNotEmpty && cost == null)) {
                     return;
                   }
                   Navigator.of(context).pop(
@@ -295,13 +307,11 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
                       mode: mode,
                       durationMinutes: minutes,
                       distanceKm: km,
-                      otherCostMinorUnits: cost == null
-                          ? null
-                          : (cost * 100).round(),
+                      otherCostMinorUnits: cost?.minorUnits,
                     ),
                   );
                 },
-                child: const Text('Save travel'),
+                child: Text(context.l10n.createScenarioSaveTravel),
               ),
             ],
           ),
@@ -329,22 +339,8 @@ ScenarioLocalTimeDraft? _time(String value) {
 }
 
 double? _number(String value) {
-  final String normalized = value.trim().replaceAll(',', '.');
-  return normalized.isEmpty ? null : double.tryParse(normalized);
+  return parseLocaleDecimalInput(value);
 }
 
-String _travelModeLabel(ScenarioTravelMode mode) => switch (mode) {
-  ScenarioTravelMode.walking => 'Walking',
-  ScenarioTravelMode.bicycle => 'Bicycle',
-  ScenarioTravelMode.car => 'Own car',
-  ScenarioTravelMode.taxi => 'Taxi',
-  ScenarioTravelMode.transit => 'Public transport',
-  ScenarioTravelMode.other => 'Other',
-};
-
-String _enumLabel(String value) => value
-    .replaceAllMapped(
-      RegExp(r'([a-z])([A-Z])'),
-      (Match match) => '${match.group(1)} ${match.group(2)}',
-    )
-    .replaceAll('_', ' ');
+String _travelModeLabel(AppLocalizations l10n, ScenarioTravelMode mode) =>
+    createOptionText(l10n, mode);

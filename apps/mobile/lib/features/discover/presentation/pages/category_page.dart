@@ -4,9 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_query.dart';
+import '../widgets/collection_discover_section.dart';
 import '../widgets/discover_category_icon.dart';
 import '../widgets/discover_feed_section.dart';
 
@@ -45,8 +48,8 @@ class _CategoryPageState extends ConsumerState<CategoryPage> {
     );
     if (group == null || group.isHidden) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Categories')),
-        body: const Center(child: Text('Category not found')),
+        appBar: AppBar(title: Text(context.l10n.discoverCategories)),
+        body: Center(child: Text(context.l10n.discoverCategoryNotFound)),
       );
     }
 
@@ -69,10 +72,12 @@ class _CategoryPageState extends ConsumerState<CategoryPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(group.title),
+        title: Text(taxonomyLabel(context.l10n, group.id)),
         actions: <Widget>[
           IconButton(
-            tooltip: 'Map ${group.title}',
+            // The category name is shown as is (G04).
+            tooltip:
+                '${context.l10n.discoverMap}: ${taxonomyLabel(context.l10n, group.id)}',
             onPressed: () => context.push(RouteNames.discoverMap),
             icon: const Icon(Icons.map_outlined),
           ),
@@ -86,7 +91,7 @@ class _CategoryPageState extends ConsumerState<CategoryPage> {
           Row(
             children: <Widget>[
               Text(
-                'Subcategories',
+                context.l10n.discoverSubcategories,
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
@@ -112,7 +117,7 @@ class _CategoryPageState extends ConsumerState<CategoryPage> {
                 if (index == 0) {
                   return _SubcategoryTile(
                     key: const Key('subcategory-all'),
-                    label: 'All',
+                    label: context.l10n.discoverAll,
                     icon: Icons.grid_view_rounded,
                     selected: selectedSubcategoryId == null,
                     onTap: () => _selectSubcategory(controller, group.id, null),
@@ -122,7 +127,7 @@ class _CategoryPageState extends ConsumerState<CategoryPage> {
                     subcategories[index - 1];
                 return _SubcategoryTile(
                   key: Key('subcategory-${subcategory.slug}'),
-                  label: subcategory.title,
+                  label: taxonomyLabel(context.l10n, subcategory.id),
                   icon: discoverCategoryIcon(group.id),
                   selected: selectedSubcategoryId == subcategory.slug,
                   onTap: () => _selectSubcategory(
@@ -133,6 +138,11 @@ class _CategoryPageState extends ConsumerState<CategoryPage> {
                 );
               },
             ),
+          ),
+          const SizedBox(height: 18),
+          CollectionDiscoverSection(
+            onOpenCollection: (String collectionId) =>
+                context.push('${RouteNames.collectionDetails}/$collectionId'),
           ),
           const SizedBox(height: 18),
           DiscoverFeedSection(
@@ -188,7 +198,7 @@ class _CategoryHeading extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                group.title,
+                taxonomyLabel(context.l10n, group.id),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w900,
                 ),

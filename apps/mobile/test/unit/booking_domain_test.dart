@@ -91,6 +91,7 @@ Booking _booking({
     id: 'booking-1',
     revision: 2,
     userId: 'user-1',
+    marketId: 'LV',
     eventId: 'event-1',
     occurrenceId: 'occurrence-1',
     inventoryPoolId: inventoryPoolId,

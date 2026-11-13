@@ -1,31 +1,33 @@
 class ScenarioCreateStepConfig {
   const ScenarioCreateStepConfig({
     required this.id,
-    required this.title,
-    required this.description,
+    required this.titleId,
+    required this.descriptionId,
   });
 
   final String id;
-  final String title;
-  final String description;
+
+  /// ARB message ids; the UI resolves them with `createFormText` (L4).
+  final String titleId;
+  final String descriptionId;
 }
 
 const List<ScenarioCreateStepConfig> scenarioCreateSteps =
     <ScenarioCreateStepConfig>[
       ScenarioCreateStepConfig(
         id: 'context',
-        title: 'Context',
-        description: 'Format, date mode, party, pace and budget',
+        titleId: 'createStepScenarioContextTitle',
+        descriptionId: 'createStepScenarioContextDescription',
       ),
       ScenarioCreateStepConfig(
         id: 'composer',
-        title: 'Plan',
-        description: 'Independent stops, time blocks and their order',
+        titleId: 'createStepScenarioComposerTitle',
+        descriptionId: 'createStepScenarioComposerDescription',
       ),
       ScenarioCreateStepConfig(
         id: 'review',
-        title: 'Review',
-        description: 'Totals, warnings and personal save readiness',
+        titleId: 'createStepScenarioReviewTitle',
+        descriptionId: 'createStepScenarioReviewDescription',
       ),
     ];
 

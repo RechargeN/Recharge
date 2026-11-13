@@ -1,11 +1,20 @@
+import 'activity_place_link_controller.dart';
+import '../domain/repositories/activity_place_link_repository.dart';
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/service_locator.dart';
+import '../../../core/product_analytics/product_analytics_recorder.dart';
 import '../../../core/telemetry/analytics_service.dart';
+import 'collection_create_config.dart';
+import 'collection_create_coordinator.dart';
 import 'create_runtime_defaults.dart';
 import 'event_create_coordinator.dart';
+import 'session_create_coordinator.dart';
+import 'class_workshop_create_coordinator.dart';
+import 'location_search_config.dart';
+import '../domain/repositories/location_search_repository.dart';
 import 'scenario_create_coordinator.dart';
 import 'scenario_generation_coordinator.dart';
 import 'scenario_transit_schedule_coordinator.dart';
@@ -14,10 +23,14 @@ import 'scenario_transit_telemetry.dart';
 import 'place_enrichment_coordinator.dart';
 import 'route_create_runtime.dart';
 import 'route_publication_coordinator.dart';
+import '../domain/entities/rental_direct_publish_policy.dart';
 import '../domain/repositories/catalog_object_picker_port.dart';
 import '../domain/repositories/create_template_repository.dart';
+import '../domain/repositories/publisher_access_check.dart';
+import '../domain/repositories/rental_publication_index_sink.dart';
 import '../domain/usecases/load_create_draft_usecase.dart';
 import '../domain/usecases/manage_create_template_usecase.dart';
+import '../domain/usecases/promote_rental_to_published_usecase.dart';
 import '../domain/usecases/publish_create_draft_usecase.dart';
 import '../domain/usecases/save_create_draft_usecase.dart';
 import '../domain/usecases/check_place_duplicates_usecase.dart';
@@ -26,7 +39,11 @@ import 'controllers/route_gpx_transfer_controller.dart';
 import 'controllers/route_recording_controller.dart';
 import 'controllers/route_quality_admin_controller.dart';
 import 'controllers/scenario_transit_picker_controller.dart';
+import '../domain/repositories/create_image_normalizer.dart';
+import '../domain/repositories/create_image_picker_port.dart';
+import '../domain/repositories/create_media_store.dart';
 import '../domain/repositories/route_gpx_file_picker_port.dart';
+import 'create_media_picking.dart';
 import '../domain/repositories/route_gpx_repository.dart';
 import '../domain/usecases/export_route_gpx_usecase.dart';
 import '../domain/usecases/inspect_route_gpx_usecase.dart';
@@ -41,8 +58,23 @@ final createControllerProvider = ChangeNotifierProvider<CreateController>((
     saveCreateDraftUseCase: sl<SaveCreateDraftUseCase>(),
     publishCreateDraftUseCase: sl<PublishCreateDraftUseCase>(),
     analyticsService: sl<AnalyticsService>(),
+    productAnalytics: sl.isRegistered<ProductAnalyticsRecorder>()
+        ? sl<ProductAnalyticsRecorder>()
+        : null,
     runtimeDefaults: sl<CreateRuntimeDefaults>(),
     eventCreateCoordinator: sl<EventCreateCoordinator>(),
+    sessionCreateCoordinator: sl<SessionCreateCoordinator>(),
+    classWorkshopCreateCoordinator: sl<ClassWorkshopCreateCoordinator>(),
+    locationSearchRepository: sl<LocationSearchRepository>(),
+    locationSearchConfig: sl<LocationSearchRuntimeConfig>(),
+    mediaPicking: sl.isRegistered<CreateImagePickerPort>()
+        ? CreateMediaPicking(
+            picker: sl<CreateImagePickerPort>(),
+            normalizer: sl<CreateImageNormalizer>(),
+            store: sl<CreateMediaStore>(),
+            config: sl<CreateMediaPickerConfig>(),
+          )
+        : null,
     eventAdmissionConfigurationEnabled: true,
     eventMockAvailabilityEnabled: true,
     createTemplateRepository: sl<CreateTemplateRepository>(),
@@ -53,8 +85,25 @@ final createControllerProvider = ChangeNotifierProvider<CreateController>((
     placeEnrichmentCoordinator: sl<PlaceEnrichmentCoordinator>(),
     catalogObjectPicker: sl<CatalogObjectPickerPort>(),
     checkPlaceDuplicates: sl<CheckPlaceDuplicatesUseCase>(),
+    // RNT-PUB-01 §1.3: local/mock composition explicitly opts into the
+    // trusted direct-publish policy — the domain default is `false`.
+    rentalDirectPublishPolicy: const RentalDirectPublishPolicy(isTrusted: true),
+    promoteRentalToPublished: sl<PromoteRentalToPublishedUseCase>(),
+    rentalPublicationIndexSink: sl<RentalPublicationIndexSink>(),
+    // CLG-CRT-01: the same `CollectionCreateRuntimeConfig` instance the
+    // coordinator factory and the Discover-side providers read — one
+    // composition-wide source of truth for the three kill switches.
+    collectionCreateConfig: sl<CollectionCreateRuntimeConfig>(),
+    publisherAccessCheck: sl.isRegistered<PublisherAccessCheck>()
+        ? sl<PublisherAccessCheck>()
+        : null,
   );
 });
+
+final collectionCreateCoordinatorProvider =
+    Provider.autoDispose<CollectionCreateCoordinator>((ref) {
+      return sl<CollectionCreateCoordinator>();
+    });
 
 final routeCreateRuntimeProvider =
     FutureProvider.autoDispose<RouteCreateRuntime>((ref) async {
@@ -98,3 +147,16 @@ final scenarioTransitPickerControllerProvider =
       ref.onDispose(controller.dispose);
       return controller;
     });
+
+final activityPlaceLinkControllerProvider = ChangeNotifierProvider.autoDispose
+    .family<
+      ActivityPlaceLinkController,
+      ({String draftId, String? selectedId})
+    >(
+      (ref, key) => ActivityPlaceLinkController(
+        sl.isRegistered<ActivityPlaceLinkRepository>()
+            ? sl<ActivityPlaceLinkRepository>()
+            : const UnavailableActivityPlaceLinkRepository(),
+        selectedId: key.selectedId,
+      ),
+    );

@@ -7,6 +7,9 @@ import '../../domain/usecases/mark_notification_read_usecase.dart';
 import '../state/notifications_state.dart';
 
 class NotificationsController extends ChangeNotifier {
+  /// L4: stable message code; the UI localizes it.
+  static const String loadFailedMessage = 'notifications_load_failed';
+
   NotificationsController({
     required GetNotificationsUseCase getNotificationsUseCase,
     required MarkNotificationReadUseCase markNotificationReadUseCase,
@@ -64,7 +67,7 @@ class NotificationsController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: NotificationsStatus.error,
-          message: 'Не удалось загрузить уведомления',
+          message: loadFailedMessage,
         ),
       );
       _analyticsService.track(
@@ -224,7 +227,8 @@ class NotificationsController extends ChangeNotifier {
   String _normalizeSearchText(String value) {
     return value
         .toLowerCase()
-        .replaceAll('ё', 'е')
+        // Folds ё into е for ru query matching; not UI copy.
+        .replaceAll('ё', 'е') // l10n-ignore: search normalization
         .replaceAll(RegExp(r'\s*:\s*'), ':')
         .replaceAll(
           RegExp(r'[^a-z0-9а-я:]+', caseSensitive: false, unicode: true),
@@ -236,9 +240,12 @@ class NotificationsController extends ChangeNotifier {
 
   String _typeSearchText(NotificationType type) {
     return switch (type) {
-      NotificationType.system => 'system системное система',
-      NotificationType.reminder => 'reminder напоминание',
-      NotificationType.activity => 'activity активность обновление',
+      NotificationType.system =>
+        'system системное система', // l10n-ignore: search synonyms (lv/ru query matching), not UI copy
+      NotificationType.reminder =>
+        'reminder напоминание', // l10n-ignore: search synonyms (lv/ru query matching), not UI copy
+      NotificationType.activity =>
+        'activity активность обновление', // l10n-ignore: search synonyms (lv/ru query matching), not UI copy
     };
   }
 

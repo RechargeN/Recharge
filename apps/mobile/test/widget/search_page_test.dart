@@ -6,6 +6,7 @@ import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/app/application/scenario_object_intake_config.dart';
 import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -17,6 +18,7 @@ import 'package:recharge/features/auth/domain/usecases/restore_session_usecase.d
 import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -28,9 +30,39 @@ import 'package:recharge/features/discover/domain/usecases/get_discover_feed_use
 import 'package:recharge/features/discover/presentation/pages/discover_results_page.dart';
 import 'package:recharge/features/discover/presentation/pages/search_page.dart';
 
+import 'package:recharge/core/localization/l10n_context.dart';
 import 'widget_test_viewport.dart';
+import '../support/l10n/l10n_screenshot.dart';
 
 void main() {
+  // L4.5: Discover in lv, en and ru on a 360 dp phone at text scale 1 and 2.
+  group('L4.5: Search results in lv, en and ru at 360 dp', () {
+    for (final String language in const <String>['en', 'lv', 'ru']) {
+      for (final double scale in const <double>[1, 2]) {
+        testWidgets('$language at ${scale}x', (WidgetTester tester) async {
+          tester.view
+            ..physicalSize = const Size(360, 800)
+            ..devicePixelRatio = 1;
+          tester.platformDispatcher.textScaleFactorTestValue = scale;
+          addTearDown(() {
+            tester.view
+              ..resetPhysicalSize()
+              ..resetDevicePixelRatio();
+            tester.platformDispatcher.clearTextScaleFactorTestValue();
+          });
+          await tester.pumpWidget(_SearchTestApp(locale: Locale(language)));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          await l10nCaptureScreen(tester);
+          final AppLocalizations l10n = lookupAppLocalizations(
+            Locale(language),
+          );
+          // A known interface string is in the reader's language.
+          expect(find.text(l10n.discoverSearchRecharge), findsWidgets);
+        });
+      }
+    }
+  });
   fullPageTestWidgets('search intake flag hides single and multi actions', (
     tester,
   ) async {
@@ -51,7 +83,7 @@ void main() {
     );
 
     expect(find.byTooltip('Select for Scenario'), findsNothing);
-    expect(find.byTooltip('Add Утренняя йога to Scenario'), findsNothing);
+    expect(find.byTooltip('Add to Scenario: Утренняя йога'), findsNothing);
   });
 
   fullPageTestWidgets(
@@ -70,8 +102,8 @@ void main() {
       await tester.tap(find.byTooltip('Select for Scenario'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Войдите, чтобы продолжить'), findsOneWidget);
-      expect(find.text('Продолжить как гость'), findsNothing);
+      expect(find.text('Sign in to continue'), findsOneWidget);
+      expect(find.text('Continue as guest'), findsNothing);
     },
   );
 
@@ -98,7 +130,7 @@ void main() {
         320,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(find.byTooltip('Add Утренняя йога to Scenario'), findsOneWidget);
+      expect(find.byTooltip('Add to Scenario: Утренняя йога'), findsOneWidget);
 
       await tester.tap(find.byTooltip('Select for Scenario'));
       await tester.pump();
@@ -315,13 +347,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Custom · 7'), findsOneWidget);
 
-    expect(find.text('€0'), findsOneWidget);
+    expect(find.text('€0.00'), findsOneWidget);
     await tester.tap(find.byKey(const Key('budget-custom')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('custom-number-input')), '35');
     await tester.tap(find.byKey(const Key('custom-number-save')));
     await tester.pumpAndSettle();
-    expect(find.text('Custom · €35'), findsOneWidget);
+    expect(find.text('Custom · €35.00'), findsOneWidget);
   });
 
   fullPageTestWidgets('renders search controls and results', (tester) async {
@@ -503,7 +535,7 @@ void main() {
     expect(find.text('10'), findsOneWidget);
   });
 
-  fullPageTestWidgets('opens scenario builder from saved conditions', (
+  fullPageTestWidgets('does not build Scenario from saved conditions', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -516,13 +548,7 @@ void main() {
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(
-      find.byTooltip('Build route from saved conditions'),
-    );
-    await tester.tap(find.byTooltip('Build route from saved conditions'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
+    expect(find.byTooltip('Build route from saved conditions'), findsNothing);
   });
 
   fullPageTestWidgets('opens create from saved conditions', (tester) async {
@@ -575,6 +601,12 @@ class _SearchLandingTestApp extends StatelessWidget {
         ),
         discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
         analyticsService: _NoopAnalyticsService(),
+        runtimeDefaults: const DiscoverRuntimeDefaults(
+          timezoneId: 'Europe/Riga',
+          originLat: 56.9496,
+          originLng: 24.1052,
+          currencyCode: 'EUR',
+        ),
       );
 
   final DiscoverFeedController _controller;
@@ -621,7 +653,7 @@ class _SearchLandingTestApp extends StatelessWidget {
               ),
             ),
             GoRoute(
-              path: RouteNames.scenarioBuilder,
+              path: RouteNames.legacyScenarioBuilder,
               builder: (context, state) => const SizedBox.shrink(),
             ),
           ],
@@ -634,6 +666,7 @@ class _SearchLandingTestApp extends StatelessWidget {
 class _SearchTestApp extends StatelessWidget {
   _SearchTestApp({
     this.initialLocation = RouteNames.search,
+    this.locale,
     DiscoverFeedController? controller,
     this.additionalOverrides = const <Override>[],
   }) : _controller =
@@ -645,10 +678,17 @@ class _SearchTestApp extends StatelessWidget {
              discoverPreferencesRepository:
                  _FakeDiscoverPreferencesRepository(),
              analyticsService: _NoopAnalyticsService(),
+             runtimeDefaults: const DiscoverRuntimeDefaults(
+               timezoneId: 'Europe/Riga',
+               originLat: 56.9496,
+               originLng: 24.1052,
+               currencyCode: 'EUR',
+             ),
            );
 
   final String initialLocation;
   final List<Override> additionalOverrides;
+  final Locale? locale;
 
   final DiscoverFeedController _controller;
 
@@ -660,6 +700,13 @@ class _SearchTestApp extends StatelessWidget {
         ...additionalOverrides,
       ],
       child: MaterialApp.router(
+        locale: locale,
+        localizationsDelegates: locale == null
+            ? null
+            : AppLocalizations.localizationsDelegates,
+        supportedLocales: locale == null
+            ? const <Locale>[Locale('en', 'US')]
+            : AppLocalizations.supportedLocales,
         routerConfig: GoRouter(
           initialLocation: initialLocation,
           routes: <RouteBase>[
@@ -691,7 +738,7 @@ class _SearchTestApp extends StatelessWidget {
               ),
             ),
             GoRoute(
-              path: RouteNames.scenarioBuilder,
+              path: RouteNames.legacyScenarioBuilder,
               builder: (context, state) => Scaffold(
                 body: Center(
                   child: Column(
@@ -728,6 +775,11 @@ class _SearchTestApp extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+            GoRoute(
+              path: '${RouteNames.discoverDetails}/:objectType/:objectId',
+              builder: (context, state) =>
+                  const Scaffold(body: Center(child: Text('Details page'))),
             ),
             GoRoute(
               path: '${RouteNames.discoverDetails}/:itemId',
@@ -799,7 +851,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.8,
@@ -813,7 +865,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T10:00:00Z'),
       latitude: 56.51,
       longitude: 27.34,
-      priceAmount: 0,
+      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
       distanceKm: 1.8,
       isFree: true,
       relevanceScore: 0.7,
@@ -827,7 +879,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T12:00:00Z'),
       latitude: 56.51,
       longitude: 27.34,
-      priceAmount: 8,
+      priceAmount: const Money(minorUnits: 800, currencyCode: 'EUR'),
       distanceKm: 1.4,
       isFree: false,
       relevanceScore: 0.75,
@@ -854,7 +906,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
             return false;
           }
           if (query.freeOnly && !item.isFree) return false;
-          if (query.budgetMax != null && item.priceAmount > query.budgetMax!) {
+          if (query.budgetMax != null && item.priceAmount! > query.budgetMax!) {
             return false;
           }
           return true;

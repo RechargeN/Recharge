@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/application/state/discover_feed_state.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -9,6 +10,7 @@ import 'package:recharge/features/discover/domain/entities/smart_search_history_
 import 'package:recharge/features/discover/domain/repositories/discover_preferences_repository.dart';
 import 'package:recharge/features/discover/domain/repositories/discover_repository.dart';
 import 'package:recharge/features/discover/domain/usecases/get_discover_feed_usecase.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   late _FakeDiscoverRepository repository;
@@ -20,6 +22,12 @@ void main() {
       getDiscoverFeedUseCase: GetDiscoverFeedUseCase(repository),
       discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
       analyticsService: _NoopAnalyticsService(),
+      runtimeDefaults: const DiscoverRuntimeDefaults(
+        timezoneId: 'Europe/Riga',
+        originLat: 56.9496,
+        originLng: 24.1052,
+        currencyCode: 'EUR',
+      ),
     );
   });
 
@@ -80,7 +88,7 @@ void main() {
       queryText: ' yoga ',
       selectedCategoryIds: const <String>['wellness'],
       freeOnly: true,
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
       radiusMeters: 20000,
       unlimitedRadius: false,
     );
@@ -90,7 +98,10 @@ void main() {
       'wellness',
     ]);
     expect(controller.state.appliedQuery.freeOnly, isTrue);
-    expect(controller.state.appliedQuery.budgetMax, 10);
+    expect(
+      controller.state.appliedQuery.budgetMax,
+      const Money(minorUnits: 1000, currencyCode: 'EUR'),
+    );
     expect(controller.state.appliedQuery.radiusMeters, 20000);
     expect(repository.requestCount, 1);
     expect(repository.lastQuery?.queryText, 'yoga');
@@ -126,7 +137,7 @@ void main() {
       queryText: 'art',
       selectedCategoryIds: const <String>['art'],
       freeOnly: true,
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
     );
 
     await controller.resetSearchConditions();
@@ -176,7 +187,7 @@ void main() {
     final DiscoverQuery query = DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
       radiusMeters: 5000,
     );
 
@@ -197,7 +208,10 @@ void main() {
 
     expect(controller.state.appliedQuery.queryText, 'museum');
     expect(controller.state.appliedQuery.selectedCategoryIds, <String>['art']);
-    expect(controller.state.appliedQuery.budgetMax, 10);
+    expect(
+      controller.state.appliedQuery.budgetMax,
+      const Money(minorUnits: 1000, currencyCode: 'EUR'),
+    );
 
     await controller.deleteSmartSearchPrompt(
       controller.state.smartSearchHistory.first.id,
@@ -229,7 +243,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,
@@ -260,7 +274,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
         startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
         latitude: query.centerLat,
         longitude: query.centerLng,
-        priceAmount: 0,
+        priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
         distanceKm: 1.2,
         isFree: true,
         relevanceScore: 0.8,

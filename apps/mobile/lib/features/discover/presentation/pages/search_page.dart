@@ -3,11 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/time_window.dart';
+import '../../domain/usecases/build_time_window_usecase.dart';
+import '../discover_formats.dart';
 
 abstract final class _SearchLandingStyle {
   static const Color ink = Color(0xFF10231F);
@@ -72,8 +77,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         titleSpacing: 16,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: const Text(
-          'Search Recharge',
+        title: Text(
+          context.l10n.discoverSearchRecharge,
           style: TextStyle(
             color: _SearchLandingStyle.ink,
             fontSize: 17,
@@ -97,7 +102,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 fontSize: 13,
               ),
               decoration: InputDecoration(
-                hintText: 'Search activity, place or plan',
+                hintText: context.l10n.discoverSearchHint,
                 hintStyle: const TextStyle(
                   color: _SearchLandingStyle.mutedInk,
                   fontSize: 12,
@@ -113,7 +118,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 ),
                 suffixIcon: IconButton(
                   key: const Key('regular-search-filters'),
-                  tooltip: 'Search filters',
+                  tooltip: context.l10n.discoverSearchFilters,
                   visualDensity: VisualDensity.compact,
                   onPressed: () => _openFilters(controller, query),
                   icon: const Icon(
@@ -163,7 +168,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               );
             },
             onForTwo: () => controller.stageSearchConditions(peopleCount: 2),
-            onLowBudget: () => controller.stageSearchConditions(budgetMax: 10),
+            onLowBudget: () => controller.stageSearchConditions(
+              budgetMax: Money(
+                minorUnits: 1000,
+                currencyCode: controller.marketCurrencyCode,
+              ),
+            ),
             onOneHour: () =>
                 controller.stageSearchConditions(availableDurationMinutes: 60),
             onCalmEvening: () {
@@ -177,8 +187,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           ),
           const SizedBox(height: 16),
           _SectionHeader(
-            title: 'Recent searches',
-            action: recent.length > 3 ? 'See all' : null,
+            title: context.l10n.discoverRecentSearches,
+            action: recent.length > 3 ? context.l10n.discoverSeeAll : null,
             onAction: recent.length > 3
                 ? () => _showAllRecent(controller, recent)
                 : null,
@@ -193,10 +203,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           ),
           const SizedBox(height: 16),
           _SectionHeader(
-            title: 'Quick plans',
-            action: 'See all',
-            onAction: () =>
-                context.go('${RouteNames.scenarioBuilder}?preview=1'),
+            title: context.l10n.discoverQuickPlans,
+            action: null,
+            onAction: null,
           ),
           const SizedBox(height: 6),
           _QuickPlanRail(onOpen: (String location) => context.go(location)),
@@ -265,11 +274,16 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           useRootNavigator: true,
           backgroundColor: Colors.transparent,
           builder: (BuildContext context) =>
-              _QuickBudgetSheet(selected: query.budgetMax),
+              _QuickBudgetSheet(selected: query.budgetMax?.round()),
         );
     if (selection == null) return;
     controller.stageSearchConditions(
-      budgetMax: selection.budgetMax,
+      budgetMax: selection.budgetMax == null
+          ? null
+          : Money(
+              minorUnits: selection.budgetMax! * 100,
+              currencyCode: controller.marketCurrencyCode,
+            ),
       clearBudgetMax: selection.budgetMax == null,
     );
   }
@@ -310,7 +324,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     controller.stageSearchConditions(
       peopleCount: selection.peopleCount,
       clearPeopleCount: selection.peopleCount == null,
-      budgetMax: selection.budgetMax,
+      budgetMax: selection.budgetMax == null
+          ? null
+          : Money(
+              minorUnits: selection.budgetMax! * 100,
+              currencyCode: controller.marketCurrencyCode,
+            ),
       clearBudgetMax: selection.budgetMax == null,
       dateFrom: selection.dateWindow?.from,
       clearDateFrom: selection.dateWindow == null,
@@ -328,7 +347,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     if (selection.timeWindowMode == null) {
       controller.clearTimeWindowSelection(clearLegacyDates: false);
     } else {
-      final String? error = controller.stageTimeWindowSelection(
+      final TimeWindowIssue? error = controller.stageTimeWindowSelection(
         mode: selection.timeWindowMode!,
         startLocal: selection.startLocal,
         endLocal: selection.endLocal,
@@ -344,9 +363,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         includeReturnTrip: selection.includeReturnTrip,
       );
       if (error != null && mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.discoverTimeWindowIssue(error.name)),
+          ),
+        );
       }
     }
   }
@@ -364,7 +385,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         child: ListView(
           children: <Widget>[
             Text(
-              'Recent searches',
+              context.l10n.discoverRecentSearches,
               style: Theme.of(
                 sheetContext,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
@@ -408,52 +429,56 @@ class _SearchConditionChips extends StatelessWidget {
         _SearchConditionChip(
           icon: Icons.schedule_outlined,
           label: query.timeWindow!.mode == TimeWindowMode.flexible
-              ? 'Flexible ±${query.timeWindow!.flexibilityMinutes} min'
+              ? context.l10n.discoverFlexibleWindow(
+                  query.timeWindow!.flexibilityMinutes,
+                )
               : query.timeWindow!.mode == TimeWindowMode.anytimeToday
-              ? 'Until end of day'
-              : 'Exact time',
+              ? context.l10n.discoverUntilEndOfDay
+              : context.l10n.discoverExactTime,
         ),
       _SearchConditionChip(
         key: const Key('search-date-chip'),
         icon: Icons.calendar_today_outlined,
-        label: _dateLabel(query),
+        label: _dateLabel(context.l10n, query),
         onTap: onDate,
       ),
       _SearchConditionChip(
         key: const Key('search-people-chip'),
         icon: Icons.group_outlined,
         label: query.peopleCount == null
-            ? 'Any group'
-            : '${query.peopleCount} people',
+            ? context.l10n.discoverAnyGroup
+            : context.l10n.discoverPeopleCount(query.peopleCount!),
         onTap: onPeople,
       ),
       _SearchConditionChip(
         key: const Key('search-budget-chip'),
         icon: Icons.payments_outlined,
         label: query.budgetMax == null
-            ? 'Any budget'
-            : query.budgetMax == 0
-            ? 'Free'
-            : '€${query.budgetMax!.round()}',
+            ? context.l10n.discoverAnyBudget
+            : query.budgetMax!.minorUnits == 0
+            ? context.l10n.discoverFree
+            : RechargeFormats.money(query.budgetMax!, context.l10n.localeName),
         onTap: onBudget,
       ),
       _SearchConditionChip(
         key: const Key('search-radius-chip'),
         icon: Icons.location_on_outlined,
         label: query.unlimitedRadius
-            ? 'Any area'
-            : '${(query.radiusMeters / 1000).round()} km',
+            ? context.l10n.discoverAnyArea
+            : context.l10n.discoverDistanceKm(
+                '${(query.radiusMeters / 1000).round()}',
+              ),
         onTap: onRadius,
       ),
       if (query.availableDurationMinutes != null)
         _SearchConditionChip(
           icon: Icons.schedule_outlined,
-          label: '${query.availableDurationMinutes} min',
+          label: context.l10n.discoverMinutes(query.availableDurationMinutes!),
         ),
       if (query.mood != null)
         _SearchConditionChip(
           icon: Icons.nightlight_outlined,
-          label: '${query.mood![0].toUpperCase()}${query.mood!.substring(1)}',
+          label: context.l10n.discoverMood(query.mood!),
         ),
     ];
     return SingleChildScrollView(
@@ -524,7 +549,7 @@ class _QuickPeopleSelection {
 class _QuickBudgetSelection {
   const _QuickBudgetSelection(this.budgetMax);
 
-  final double? budgetMax;
+  final int? budgetMax;
 }
 
 class _QuickRadiusSelection {
@@ -549,32 +574,32 @@ class _QuickDateSheet extends StatelessWidget {
     final _DateWindow weekend = _weekendWindow();
     return _QuickPickerSurface(
       key: const Key('search-date-sheet'),
-      title: 'Choose date',
+      title: context.l10n.discoverChooseDate,
       onReset: () => Navigator.of(context).pop(const _QuickDateSelection(null)),
       child: _FilterPillWrap(
         children: <Widget>[
           _FilterPill(
-            label: 'Any date',
+            label: context.l10n.discoverAnyDate,
             selected: query.dateFrom == null && query.dateTo == null,
             onTap: () =>
                 Navigator.of(context).pop(const _QuickDateSelection(null)),
           ),
           _FilterPill(
             key: const Key('quick-date-today'),
-            label: 'Today',
+            label: context.l10n.discoverToday,
             selected: _sameLocalDay(query.dateFrom, today.from),
             onTap: () => Navigator.of(context).pop(_QuickDateSelection(today)),
           ),
           _FilterPill(
             key: const Key('quick-date-tomorrow'),
-            label: 'Tomorrow',
+            label: context.l10n.discoverTomorrow,
             selected: _sameLocalDay(query.dateFrom, tomorrow.from),
             onTap: () =>
                 Navigator.of(context).pop(_QuickDateSelection(tomorrow)),
           ),
           _FilterPill(
             key: const Key('quick-date-weekend'),
-            label: 'This weekend',
+            label: context.l10n.discoverThisWeekend,
             selected:
                 _sameLocalDay(query.dateFrom, weekend.from) &&
                 _sameLocalDay(query.dateTo, weekend.to),
@@ -583,7 +608,7 @@ class _QuickDateSheet extends StatelessWidget {
           ),
           _FilterPill(
             key: const Key('quick-date-custom'),
-            label: 'Choose dates',
+            label: context.l10n.discoverChooseDates,
             selected: false,
             onTap: () => _pickCustomRange(context),
           ),
@@ -599,7 +624,7 @@ class _QuickDateSheet extends StatelessWidget {
       context: context,
       firstDate: firstDate,
       lastDate: firstDate.add(const Duration(days: 730)),
-      helpText: 'Choose search dates',
+      helpText: context.l10n.discoverChooseSearchDates,
     );
     if (picked == null || !context.mounted) return;
     final DateTime from = DateTime(
@@ -627,7 +652,7 @@ class _QuickPeopleSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _QuickPickerSurface(
     key: const Key('search-people-sheet'),
-    title: 'Group size',
+    title: context.l10n.discoverGroupSize,
     onReset: () => Navigator.of(context).pop(const _QuickPeopleSelection(null)),
     child: _FilterPillWrap(
       children: <Widget>[
@@ -635,12 +660,12 @@ class _QuickPeopleSheet extends StatelessWidget {
           _FilterPill(
             key: value == null ? null : Key('quick-people-$value'),
             label: value == null
-                ? 'Any group'
+                ? context.l10n.discoverAnyGroup
                 : value == 1
-                ? 'Just me'
+                ? context.l10n.discoverJustMe
                 : value == 5
                 ? '5+'
-                : '$value people',
+                : context.l10n.discoverPeopleCount(value),
             selected: selected == value,
             onTap: () =>
                 Navigator.of(context).pop(_QuickPeopleSelection(value)),
@@ -648,8 +673,8 @@ class _QuickPeopleSheet extends StatelessWidget {
         _FilterPill(
           key: const Key('quick-people-custom'),
           label: selected != null && selected! > 5
-              ? 'Custom · $selected'
-              : 'Custom',
+              ? context.l10n.discoverCustomValue('$selected')
+              : context.l10n.discoverCustom,
           selected: selected != null && selected! > 5,
           onTap: () => _editCustom(context),
         ),
@@ -661,12 +686,12 @@ class _QuickPeopleSheet extends StatelessWidget {
     final int? result = await showDialog<int>(
       context: context,
       builder: (BuildContext context) => _NumberInputDialog<int>(
-        title: 'Number of people',
-        hint: 'For example, 8',
+        title: context.l10n.discoverNumberOfPeople,
+        hint: context.l10n.discoverExampleEight,
         initialValue: selected != null && selected! > 5 ? '$selected' : '',
         parser: (String value) => int.tryParse(value),
         isValid: (int value) => value >= 1 && value <= 99,
-        errorMessage: 'Enter a number from 1 to 99',
+        errorMessage: context.l10n.discoverEnterPeople,
       ),
     );
     if (result == null || !context.mounted) return;
@@ -677,30 +702,32 @@ class _QuickPeopleSheet extends StatelessWidget {
 class _QuickBudgetSheet extends StatelessWidget {
   const _QuickBudgetSheet({required this.selected});
 
-  final double? selected;
+  final int? selected;
 
   @override
   Widget build(BuildContext context) => _QuickPickerSurface(
     key: const Key('search-budget-sheet'),
-    title: 'Budget per person',
+    title: context.l10n.discoverBudgetPerPerson,
     onReset: () => Navigator.of(context).pop(const _QuickBudgetSelection(null)),
     child: _FilterPillWrap(
       children: <Widget>[
-        for (final double? value in <double?>[null, 0, 10, 20, 50])
+        for (final int? value in <int?>[null, 0, 10, 20, 50])
           _FilterPill(
-            key: value == null ? null : Key('quick-budget-${value.round()}'),
+            key: value == null ? null : Key('quick-budget-$value'),
             label: value == null
-                ? 'Any budget'
+                ? context.l10n.discoverAnyBudget
                 : value == 0
-                ? 'Free'
-                : 'Up to €${value.round()}',
+                ? context.l10n.discoverFree
+                : context.l10n.discoverUpToBudget(_euros(context, value)),
             selected: selected == value,
             onTap: () =>
                 Navigator.of(context).pop(_QuickBudgetSelection(value)),
           ),
         _FilterPill(
           key: const Key('quick-budget-custom'),
-          label: _isCustom ? 'Custom · €${selected!.round()}' : 'Custom',
+          label: _isCustom
+              ? context.l10n.discoverCustomValue(_euros(context, selected!))
+              : context.l10n.discoverCustom,
           selected: _isCustom,
           onTap: () => _editCustom(context),
         ),
@@ -709,18 +736,18 @@ class _QuickBudgetSheet extends StatelessWidget {
   );
 
   bool get _isCustom =>
-      selected != null && !<double>[0, 10, 20, 50].contains(selected);
+      selected != null && !<int>[0, 10, 20, 50].contains(selected);
 
   Future<void> _editCustom(BuildContext context) async {
-    final double? result = await showDialog<double>(
+    final int? result = await showDialog<int>(
       context: context,
-      builder: (BuildContext context) => _NumberInputDialog<double>(
-        title: 'Budget per person',
-        hint: 'Amount in EUR',
-        initialValue: _isCustom ? '${selected!.round()}' : '',
-        parser: (String value) => double.tryParse(value.replaceAll(',', '.')),
-        isValid: (double value) => value >= 0 && value <= 10000,
-        errorMessage: 'Enter an amount from €0 to €10,000',
+      builder: (BuildContext context) => _NumberInputDialog<int>(
+        title: context.l10n.discoverBudgetPerPerson,
+        hint: context.l10n.discoverAmountInEur,
+        initialValue: _isCustom ? '$selected' : '',
+        parser: (String value) => int.tryParse(value),
+        isValid: (int value) => value >= 0 && value <= 10000,
+        errorMessage: context.l10n.discoverEnterBudget,
       ),
     );
     if (result == null || !context.mounted) return;
@@ -744,7 +771,7 @@ class _QuickRadiusSheetState extends State<_QuickRadiusSheet> {
   @override
   Widget build(BuildContext context) => _QuickPickerSurface(
     key: const Key('search-radius-sheet'),
-    title: 'Search radius',
+    title: context.l10n.discoverSearchRadius,
     onReset: () => Navigator.of(
       context,
     ).pop(const _QuickRadiusSelection(radiusMeters: 5000, unlimited: false)),
@@ -756,7 +783,7 @@ class _QuickRadiusSheetState extends State<_QuickRadiusSheet> {
             for (final int value in <int>[1, 3, 5, 10, 20, 50])
               _FilterPill(
                 key: Key('quick-radius-$value'),
-                label: '$value km',
+                label: context.l10n.discoverDistanceKm('$value'),
                 selected: !_unlimited && _radiusKm.round() == value,
                 onTap: () => setState(() {
                   _radiusKm = value.toDouble();
@@ -765,7 +792,7 @@ class _QuickRadiusSheetState extends State<_QuickRadiusSheet> {
               ),
             _FilterPill(
               key: const Key('quick-radius-any'),
-              label: 'Any distance',
+              label: context.l10n.discoverAnyDistance,
               selected: _unlimited,
               onTap: () => setState(() => _unlimited = true),
             ),
@@ -774,9 +801,13 @@ class _QuickRadiusSheetState extends State<_QuickRadiusSheet> {
         const SizedBox(height: 18),
         Row(
           children: <Widget>[
-            const Text('Custom radius'),
+            Text(context.l10n.discoverCustomRadius),
             const Spacer(),
-            Text(_unlimited ? 'Any distance' : '${_radiusKm.round()} km'),
+            Text(
+              _unlimited
+                  ? context.l10n.discoverAnyDistance
+                  : context.l10n.discoverDistanceKm('${_radiusKm.round()}'),
+            ),
           ],
         ),
         Slider(
@@ -799,7 +830,7 @@ class _QuickRadiusSheetState extends State<_QuickRadiusSheet> {
               unlimited: _unlimited,
             ),
           ),
-          child: const Text('Apply radius'),
+          child: Text(context.l10n.discoverApplyRadius),
         ),
       ],
     ),
@@ -838,7 +869,7 @@ class _QuickPickerSurface extends StatelessWidget {
               const _SheetDragHandle(),
               _SheetHeader(
                 title: title,
-                actionLabel: 'Reset',
+                actionLabel: context.l10n.discoverReset,
                 onAction: onReset,
               ),
               const SizedBox(height: 12),
@@ -869,13 +900,29 @@ class _QuickSearchActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<_QuickActionData> actions = <_QuickActionData>[
-      _QuickActionData(Icons.navigation_outlined, 'Near me now', onNearNow),
-      _QuickActionData(Icons.group_outlined, 'For two', onForTwo),
-      _QuickActionData(Icons.sell_outlined, 'Low budget', onLowBudget),
-      _QuickActionData(Icons.schedule_outlined, '1 hour', onOneHour),
+      _QuickActionData(
+        Icons.navigation_outlined,
+        context.l10n.discoverNearMeNow,
+        onNearNow,
+      ),
+      _QuickActionData(
+        Icons.group_outlined,
+        context.l10n.discoverForTwo,
+        onForTwo,
+      ),
+      _QuickActionData(
+        Icons.sell_outlined,
+        context.l10n.discoverLowBudget,
+        onLowBudget,
+      ),
+      _QuickActionData(
+        Icons.schedule_outlined,
+        context.l10n.discoverHoursLong(1),
+        onOneHour,
+      ),
       _QuickActionData(
         Icons.nightlight_outlined,
-        'Calm evening',
+        context.l10n.discoverCalmEvening,
         onCalmEvening,
       ),
     ];
@@ -999,8 +1046,8 @@ class _RecentSearches extends StatelessWidget {
           color: _SearchLandingStyle.softSurface,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Text(
-          'Your regular searches will appear here automatically.',
+        child: Text(
+          context.l10n.discoverRegularSearchesHint,
           style: TextStyle(color: _SearchLandingStyle.mutedInk, fontSize: 12),
         ),
       );
@@ -1036,11 +1083,12 @@ class _RecentSearchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> details = search.subtitle
-        .split(' · ')
-        .where((String value) => value.trim().isNotEmpty)
-        .take(3)
-        .toList(growable: false);
+    // The stored subtitle is legacy English; the reader sees the conditions
+    // of the saved query in their own language.
+    final List<String> details = discoverQueryConditionTexts(
+      context.l10n,
+      search.query,
+    ).take(3).toList(growable: false);
     final Color iconSurface = switch (tone % 3) {
       1 => const Color(0xFFF0E8FF),
       2 => const Color(0xFFE8F5E9),
@@ -1167,50 +1215,50 @@ class _QuickPlanRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const List<_QuickPlanData> plans = <_QuickPlanData>[
+    List<_QuickPlanData> plans = <_QuickPlanData>[
       _QuickPlanData(
-        'After work',
-        '~ 1 hour',
+        context.l10n.discoverAfterWork,
+        context.l10n.discoverAboutOneHour,
         Icons.local_cafe_outlined,
         0,
         'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085'
             '?auto=format&fit=crop&w=600&q=80',
         'calm',
         60,
-        'food_drinks.coffee,wellness_recharge.calm_walk',
+        'food_drinks.coffee,wellness_recharge.calm_walk', // l10n-ignore: category ids
       ),
       _QuickPlanData(
-        'Sunset break',
-        '1–2 hours',
+        context.l10n.discoverSunsetBreak,
+        context.l10n.discoverHoursRange(1, 2),
         Icons.wb_twilight_outlined,
         1,
         'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429'
             '?auto=format&fit=crop&w=600&q=80',
         'calm',
         120,
-        'wellness_recharge.calm_walk,art_culture_museums.museum',
+        'wellness_recharge.calm_walk,art_culture_museums.museum', // l10n-ignore: category ids
       ),
       _QuickPlanData(
-        'Active morning',
-        '2–3 hours',
+        context.l10n.discoverActiveMorning,
+        context.l10n.discoverHoursRange(2, 3),
         Icons.directions_run_outlined,
         2,
         'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee'
             '?auto=format&fit=crop&w=600&q=80',
         'active',
         150,
-        'outdoor_nature_walking.city_walk,sport.tennis',
+        'outdoor_nature_walking.city_walk,sport.tennis', // l10n-ignore: category ids
       ),
       _QuickPlanData(
-        'Social evening',
-        '2–3 hours',
+        context.l10n.discoverSocialEvening,
+        context.l10n.discoverHoursRange(2, 3),
         Icons.celebration_outlined,
         3,
         'https://images.unsplash.com/photo-1501386761578-eac5c94b800a'
             '?auto=format&fit=crop&w=600&q=80',
         'social',
         180,
-        'games_indoor.board_games,music_nightlife.afterwork_drinks',
+        'games_indoor.board_games,music_nightlife.afterwork_drinks', // l10n-ignore: category ids
       ),
     ];
     return SizedBox(
@@ -1302,7 +1350,7 @@ class _QuickPlanData {
   final String steps;
 
   String get location => Uri(
-    path: RouteNames.scenarioBuilder,
+    path: RouteNames.quickPlanFor('quick-template-$mood-$minutes'),
     queryParameters: <String, String>{
       'preview': '1',
       'title': title,
@@ -1381,7 +1429,7 @@ class _SearchFiltersSheet extends StatefulWidget {
 
 class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
   late int? _peopleCount = widget.query.peopleCount;
-  late double? _budgetMax = widget.query.budgetMax;
+  late int? _budgetMax = widget.query.budgetMax?.round();
   late double _radiusMeters = widget.query.radiusMeters;
   late bool _unlimited = widget.query.unlimitedRadius;
   late bool _openNow = widget.query.openNow;
@@ -1426,8 +1474,8 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
             children: <Widget>[
               const _SheetDragHandle(),
               _SheetHeader(
-                title: 'Search filters',
-                actionLabel: 'Reset',
+                title: context.l10n.discoverSearchFilters,
+                actionLabel: context.l10n.discoverReset,
                 onAction: _reset,
               ),
               Divider(height: 1, color: colors.outlineVariant),
@@ -1436,15 +1484,15 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                   controller: scrollController,
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                   children: <Widget>[
-                    const _FilterTitle('When'),
+                    _FilterTitle(context.l10n.discoverWhen),
                     const SizedBox(height: 8),
                     _FilterPillWrap(
                       children: <Widget>[
                         for (final (String, String) option
                             in <(String, String)>[
-                              ('any', 'Any'),
-                              ('today', 'Today'),
-                              ('tonight', 'Tonight'),
+                              ('any', context.l10n.discoverAny),
+                              ('today', context.l10n.discoverToday),
+                              ('tonight', context.l10n.discoverTonight),
                             ])
                           _FilterPill(
                             label: option.$2,
@@ -1454,17 +1502,15 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                       ],
                     ),
                     const SizedBox(height: 14),
-                    const _FilterTitle('Time available'),
+                    _FilterTitle(context.l10n.discoverTimeAvailable),
                     const SizedBox(height: 8),
                     _FilterPillWrap(
                       children: <Widget>[
                         for (final int? value in <int?>[null, 60, 120, 180])
                           _FilterPill(
                             label: value == null
-                                ? 'Any'
-                                : value == 60
-                                ? '1 hour'
-                                : '${value ~/ 60} hours',
+                                ? context.l10n.discoverAny
+                                : context.l10n.discoverHoursLong(value ~/ 60),
                             selected: _duration == value,
                             onTap: () => setState(() => _duration = value),
                           ),
@@ -1496,79 +1542,81 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                           setState(() => _includeReturnTrip = value),
                     ),
                     const _FilterSectionDivider(),
-                    const _FilterTitle('Availability'),
+                    _FilterTitle(context.l10n.discoverAvailability),
                     const SizedBox(height: 2),
                     _CompactSwitchRow(
-                      label: 'Open now',
+                      label: context.l10n.discoverOpenNow,
                       value: _openNow,
                       onChanged: (bool value) =>
                           setState(() => _openNow = value),
                     ),
                     _CompactSwitchRow(
-                      label: 'Only available',
+                      label: context.l10n.discoverOnlyAvailable,
                       value: _onlyAvailable,
                       onChanged: (bool value) =>
                           setState(() => _onlyAvailable = value),
                     ),
                     const _FilterSectionDivider(),
-                    const _FilterTitle('People'),
+                    _FilterTitle(context.l10n.discoverPeople),
                     const SizedBox(height: 8),
                     _FilterPillWrap(
                       children: <Widget>[
                         for (final int? value in <int?>[null, 1, 2, 4])
                           _FilterPill(
-                            label: value == null ? 'Any' : '$value',
+                            label: value == null
+                                ? context.l10n.discoverAny
+                                : '$value',
                             selected: _peopleCount == value,
                             onTap: () => setState(() => _peopleCount = value),
                           ),
                         _FilterPill(
                           key: const Key('people-custom'),
                           label: _isCustomPeople
-                              ? 'Custom · $_peopleCount'
-                              : 'Custom',
+                              ? context.l10n.discoverCustomValue(
+                                  '$_peopleCount',
+                                )
+                              : context.l10n.discoverCustom,
                           selected: _isCustomPeople,
                           onTap: _editPeopleCount,
                         ),
                       ],
                     ),
                     const SizedBox(height: 14),
-                    const _FilterTitle('Budget per person'),
+                    _FilterTitle(context.l10n.discoverBudgetPerPerson),
                     const SizedBox(height: 8),
                     _FilterPillWrap(
                       children: <Widget>[
-                        for (final double? value in <double?>[
-                          null,
-                          0,
-                          10,
-                          20,
-                          40,
-                        ])
+                        for (final int? value in <int?>[null, 0, 10, 20, 40])
                           _FilterPill(
-                            label: value == null ? 'Any' : '€${value.round()}',
+                            label: value == null
+                                ? context.l10n.discoverAny
+                                : _euros(context, value),
                             selected: _budgetMax == value,
                             onTap: () => setState(() => _budgetMax = value),
                           ),
                         _FilterPill(
                           key: const Key('budget-custom'),
                           label: _isCustomBudget
-                              ? 'Custom · €${_budgetMax!.round()}'
-                              : 'Custom',
+                              ? context.l10n.discoverCustomValue(
+                                  _euros(context, _budgetMax!),
+                                )
+                              : context.l10n.discoverCustom,
                           selected: _isCustomBudget,
                           onTap: _editBudget,
                         ),
                       ],
                     ),
                     const SizedBox(height: 14),
-                    const _FilterTitle('Mood'),
+                    _FilterTitle(context.l10n.discoverMoodTitle),
                     const SizedBox(height: 8),
                     _FilterPillWrap(
                       children: <Widget>[
                         for (final (String?, String) option
                             in <(String?, String)>[
-                              (null, 'Any'),
-                              ('calm', 'Calm'),
-                              ('social', 'Social'),
-                              ('active', 'Active'),
+                              (null, context.l10n.discoverAny),
+                              ('calm', context.l10n.discoverMood('calm')),
+                              ('social', context.l10n.discoverMood('social')),
+                              ('active', context.l10n.discoverMood('active')),
                             ])
                           _FilterPill(
                             label: option.$2,
@@ -1580,12 +1628,14 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                     const _FilterSectionDivider(),
                     Row(
                       children: <Widget>[
-                        const _FilterTitle('Distance'),
+                        _FilterTitle(context.l10n.discoverDistance),
                         const Spacer(),
                         Text(
                           _unlimited
-                              ? 'Any area'
-                              : '${(_radiusMeters / 1000).round()} km',
+                              ? context.l10n.discoverAnyArea
+                              : context.l10n.discoverDistanceKm(
+                                  '${(_radiusMeters / 1000).round()}',
+                                ),
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                       ],
@@ -1612,7 +1662,7 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                       ),
                     ),
                     _CompactSwitchRow(
-                      label: 'Any distance',
+                      label: context.l10n.discoverAnyDistance,
                       value: _unlimited,
                       onChanged: (bool value) =>
                           setState(() => _unlimited = value),
@@ -1633,17 +1683,15 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
 
   String get _summary {
     final String date = switch (_date) {
-      'today' => 'Today',
-      'tonight' => 'Tonight',
-      _ => 'Any date',
+      'today' => context.l10n.discoverToday,
+      'tonight' => context.l10n.discoverTonight,
+      _ => context.l10n.discoverAnyDate,
     };
     final String duration = _duration == null
-        ? 'Any duration'
-        : _duration == 60
-        ? '1 hour'
-        : '${_duration! ~/ 60} hours';
+        ? context.l10n.discoverAnyDuration
+        : context.l10n.discoverHoursLong(_duration! ~/ 60);
     final String radius = _unlimited
-        ? 'Any area'
+        ? context.l10n.discoverAnyArea
         : '${(_radiusMeters / 1000).round()} km';
     return <String>[
       date,
@@ -1657,7 +1705,7 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
       _peopleCount != null && !<int>[1, 2, 4].contains(_peopleCount);
 
   bool get _isCustomBudget =>
-      _budgetMax != null && !<double>[0, 10, 20, 40].contains(_budgetMax);
+      _budgetMax != null && !<int>[0, 10, 20, 40].contains(_budgetMax);
 
   Future<void> _pickFilterTime({required bool isStart}) async {
     final DateTime initial = isStart ? _startLocal : _endLocal;
@@ -1689,24 +1737,24 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
 
   Future<void> _editPeopleCount() async {
     final int? result = await _showNumberDialog<int>(
-      title: 'Number of people',
-      hint: 'For example, 6',
+      title: context.l10n.discoverNumberOfPeople,
+      hint: context.l10n.discoverExampleSix,
       initialValue: _isCustomPeople ? '$_peopleCount' : '',
       parser: (String value) => int.tryParse(value),
       isValid: (int value) => value >= 1 && value <= 99,
-      errorMessage: 'Enter a number from 1 to 99',
+      errorMessage: context.l10n.discoverEnterPeople,
     );
     if (result != null && mounted) setState(() => _peopleCount = result);
   }
 
   Future<void> _editBudget() async {
-    final double? result = await _showNumberDialog<double>(
-      title: 'Budget per person',
-      hint: 'Amount in EUR',
-      initialValue: _isCustomBudget ? '${_budgetMax!.round()}' : '',
-      parser: (String value) => double.tryParse(value.replaceAll(',', '.')),
-      isValid: (double value) => value >= 0 && value <= 10000,
-      errorMessage: 'Enter an amount from €0 to €10,000',
+    final int? result = await _showNumberDialog<int>(
+      title: context.l10n.discoverBudgetPerPerson,
+      hint: context.l10n.discoverAmountInEur,
+      initialValue: _isCustomBudget ? '$_budgetMax' : '',
+      parser: (String value) => int.tryParse(value),
+      isValid: (int value) => value >= 0 && value <= 10000,
+      errorMessage: context.l10n.discoverEnterBudget,
     );
     if (result != null && mounted) setState(() => _budgetMax = result);
   }
@@ -1828,12 +1876,12 @@ class _NumberInputDialogState<T extends num>
     actions: <Widget>[
       TextButton(
         onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Cancel'),
+        child: Text(context.l10n.discoverCancel),
       ),
       FilledButton(
         key: const Key('custom-number-save'),
         onPressed: _submit,
-        child: const Text('Save'),
+        child: Text(context.l10n.discoverSave),
       ),
     ],
   );
@@ -2057,9 +2105,9 @@ class _TimeFilterBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const _ReferenceBlockTitle(
+        _ReferenceBlockTitle(
           icon: Icons.schedule_outlined,
-          label: 'When',
+          label: context.l10n.discoverWhen,
         ),
         const SizedBox(height: 10),
         Wrap(
@@ -2067,14 +2115,14 @@ class _TimeFilterBlock extends StatelessWidget {
           runSpacing: 8,
           children: <Widget>[
             _ReferencePill(
-              label: 'Exact',
+              label: context.l10n.discoverExact,
               selected: mode == TimeWindowMode.exact,
               onTap: () => onModeChanged(
                 mode == TimeWindowMode.exact ? null : TimeWindowMode.exact,
               ),
             ),
             _ReferencePill(
-              label: 'Flexible',
+              label: context.l10n.discoverFlexibleTime,
               selected: mode == TimeWindowMode.flexible,
               onTap: () => onModeChanged(
                 mode == TimeWindowMode.flexible
@@ -2083,7 +2131,7 @@ class _TimeFilterBlock extends StatelessWidget {
               ),
             ),
             _ReferencePill(
-              label: 'Today',
+              label: context.l10n.discoverToday,
               selected: mode == TimeWindowMode.anytimeToday,
               onTap: () => onModeChanged(
                 mode == TimeWindowMode.anytimeToday
@@ -2127,7 +2175,7 @@ class _TimeFilterBlock extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  'Window edge buffer',
+                  context.l10n.discoverWindowEdgeBuffer,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colors.onSurfaceVariant,
                   ),
@@ -2135,19 +2183,21 @@ class _TimeFilterBlock extends StatelessWidget {
               ),
               if (mode == TimeWindowMode.flexible)
                 PopupMenuButton<int>(
-                  tooltip: 'Change flexibility',
+                  tooltip: context.l10n.discoverChangeFlexibility,
                   initialValue: flexibilityMinutes,
                   onSelected: onFlexibilityChanged,
                   itemBuilder: (BuildContext context) => <int>[15, 30, 45, 60]
                       .map(
                         (int value) => PopupMenuItem<int>(
                           value: value,
-                          child: Text('±$value min'),
+                          child: Text(
+                            context.l10n.discoverFlexibilityMinutes(value),
+                          ),
                         ),
                       )
                       .toList(),
                   child: Text(
-                    '±$flexibilityMinutes min',
+                    context.l10n.discoverFlexibilityMinutes(flexibilityMinutes),
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: colors.primary,
                       fontWeight: FontWeight.w800,
@@ -2156,7 +2206,7 @@ class _TimeFilterBlock extends StatelessWidget {
                 )
               else
                 Text(
-                  'No buffer',
+                  context.l10n.discoverNoBuffer,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: colors.onSurfaceVariant,
                   ),
@@ -2190,9 +2240,9 @@ class _TravelFilterBlock extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: <Widget>[
-      const _ReferenceBlockTitle(
+      _ReferenceBlockTitle(
         icon: Icons.location_on_outlined,
-        label: 'Travel',
+        label: context.l10n.discoverTravel,
       ),
       const SizedBox(height: 10),
       Wrap(
@@ -2207,7 +2257,7 @@ class _TravelFilterBlock extends StatelessWidget {
           ),
           _ReferencePill(
             icon: Icons.location_on_outlined,
-            label: 'Map point',
+            label: context.l10n.discoverMapPoint,
             selected: originType == TravelOriginType.manualPin,
             onTap: () => onOriginChanged(TravelOriginType.manualPin),
           ),
@@ -2217,21 +2267,21 @@ class _TravelFilterBlock extends StatelessWidget {
       Row(
         children: <Widget>[
           _TransportButton(
-            tooltip: 'Walking',
+            tooltip: context.l10n.discoverWalking,
             icon: Icons.directions_walk_rounded,
             selected: transportMode == TransportMode.walking,
             onTap: () => onTransportChanged(TransportMode.walking),
           ),
           const SizedBox(width: 10),
           _TransportButton(
-            tooltip: 'Driving',
+            tooltip: context.l10n.discoverDriving,
             icon: Icons.directions_car_outlined,
             selected: transportMode == TransportMode.driving,
             onTap: () => onTransportChanged(TransportMode.driving),
           ),
           const SizedBox(width: 10),
           _TransportButton(
-            tooltip: 'Transit',
+            tooltip: context.l10n.discoverTransit,
             icon: Icons.directions_transit_outlined,
             selected: transportMode == TransportMode.transit,
             onTap: () => onTransportChanged(TransportMode.transit),
@@ -2267,7 +2317,7 @@ class _TravelFilterBlock extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Include return trip',
+                context.l10n.discoverIncludeReturnTrip,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
@@ -2474,7 +2524,7 @@ class _FilterApplyFooter extends StatelessWidget {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 onPressed: onApply,
-                child: const Text('Apply filters'),
+                child: Text(context.l10n.discoverApplyFilters),
               ),
             ),
           ],
@@ -2550,10 +2600,10 @@ class _TimeWindowEditorSheetState extends State<_TimeWindowEditorSheet> {
             children: <Widget>[
               const _SheetDragHandle(),
               _SheetHeader(
-                title: 'Exact time',
-                actionLabel: 'Reset',
+                title: context.l10n.discoverExactTime,
+                actionLabel: context.l10n.discoverReset,
                 leading: IconButton(
-                  tooltip: 'Back to filters',
+                  tooltip: context.l10n.discoverBackToFilters,
                   onPressed: () => Navigator.of(context).pop(),
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
@@ -2571,18 +2621,18 @@ class _TimeWindowEditorSheetState extends State<_TimeWindowEditorSheet> {
                   controller: scrollController,
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
                   children: <Widget>[
-                    const _FilterTitle('Mode'),
+                    _FilterTitle(context.l10n.discoverFilterMode),
                     const SizedBox(height: 8),
                     _FilterPillWrap(
                       children: <Widget>[
                         _FilterPill(
-                          label: 'Exact',
+                          label: context.l10n.discoverExact,
                           selected: _mode == TimeWindowMode.exact,
                           onTap: () =>
                               setState(() => _mode = TimeWindowMode.exact),
                         ),
                         _FilterPill(
-                          label: 'Flexible',
+                          label: context.l10n.discoverFlexibleTime,
                           selected: _mode == TimeWindowMode.flexible,
                           onTap: () =>
                               setState(() => _mode = TimeWindowMode.flexible),
@@ -2594,14 +2644,14 @@ class _TimeWindowEditorSheetState extends State<_TimeWindowEditorSheet> {
                       children: <Widget>[
                         Expanded(
                           child: Text(
-                            _formatLocalDate(_start),
+                            _formatLocalDate(context.l10n, _start),
                             style: Theme.of(context).textTheme.bodyLarge
                                 ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                         ),
                         TextButton(
                           onPressed: _pickDate,
-                          child: const Text('Change date'),
+                          child: Text(context.l10n.discoverChangeDate),
                         ),
                       ],
                     ),
@@ -2610,7 +2660,7 @@ class _TimeWindowEditorSheetState extends State<_TimeWindowEditorSheet> {
                       children: <Widget>[
                         Expanded(
                           child: _CompactTimeInput(
-                            label: 'Start',
+                            label: context.l10n.discoverStart,
                             value: _formatClock(_start),
                             onTap: () => _pickTime(isStart: true),
                           ),
@@ -2618,7 +2668,7 @@ class _TimeWindowEditorSheetState extends State<_TimeWindowEditorSheet> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _CompactTimeInput(
-                            label: 'End',
+                            label: context.l10n.discoverEnd,
                             value: _formatClock(_end),
                             onTap: () => _pickTime(isStart: false),
                           ),
@@ -2627,7 +2677,7 @@ class _TimeWindowEditorSheetState extends State<_TimeWindowEditorSheet> {
                     ),
                     if (_mode == TimeWindowMode.flexible) ...<Widget>[
                       const _FilterSectionDivider(),
-                      const _FilterTitle('Buffer on each side'),
+                      _FilterTitle(context.l10n.discoverBufferEachSide),
                       const SizedBox(height: 8),
                       _FilterPillWrap(
                         children: <Widget>[
@@ -2661,7 +2711,7 @@ class _TimeWindowEditorSheetState extends State<_TimeWindowEditorSheet> {
                               ),
                               const SizedBox(width: 7),
                               Text(
-                                'Effective window',
+                                context.l10n.discoverEffectiveWindow,
                                 style: Theme.of(context).textTheme.bodyMedium
                                     ?.copyWith(fontWeight: FontWeight.w700),
                               ),
@@ -2680,9 +2730,11 @@ class _TimeWindowEditorSheetState extends State<_TimeWindowEditorSheet> {
                           const SizedBox(height: 4),
                           Text(
                             effectiveFlex == 0
-                                ? 'Used as entered for time matching.'
-                                : 'Used for matching instead of '
-                                      '${_formatClock(_start)}–${_formatClock(_end)}.',
+                                ? context.l10n.discoverWindowAsEntered
+                                : context.l10n.discoverUsedInsteadOf(
+                                    _formatClock(_start),
+                                    _formatClock(_end),
+                                  ),
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: colors.onSurfaceVariant),
                           ),
@@ -2712,7 +2764,7 @@ class _TimeWindowEditorSheetState extends State<_TimeWindowEditorSheet> {
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       onPressed: _submit,
-                      child: const Text('Done'),
+                      child: Text(context.l10n.discoverDone),
                     ),
                   ),
                 ),
@@ -2880,7 +2932,7 @@ class _SearchFilterSelection {
     required this.includeReturnTrip,
   });
   final int? peopleCount;
-  final double? budgetMax;
+  final int? budgetMax;
   final _DateWindow? dateWindow;
   final double radiusMeters;
   final bool unlimitedRadius;
@@ -2907,27 +2959,15 @@ String _formatClock(DateTime value) =>
     '${value.hour.toString().padLeft(2, '0')}:'
     '${value.minute.toString().padLeft(2, '0')}';
 
-String _formatLocalDate(DateTime value) {
-  const List<String> months = <String>[
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
+/// A date the reader picked (their own moment, so the device zone).
+String _formatLocalDate(AppLocalizations l10n, DateTime value) {
   final DateTime now = DateTime.now();
   final bool today =
       value.year == now.year &&
       value.month == now.month &&
       value.day == now.day;
-  return '${today ? 'Today, ' : ''}${months[value.month - 1]} ${value.day}';
+  final String date = RechargeFormats.wallMonthDay(value, l10n.localeName);
+  return today ? l10n.discoverTodayDate(date) : date;
 }
 
 _DateWindow _todayWindow() {
@@ -2969,18 +3009,20 @@ _DateWindow _tonightWindow() {
   );
 }
 
-String _dateLabel(DiscoverQuery query) {
-  if (query.dateFrom == null && query.dateTo == null) return 'Any date';
+String _dateLabel(AppLocalizations l10n, DiscoverQuery query) {
+  if (query.dateFrom == null && query.dateTo == null) {
+    return l10n.discoverAnyDate;
+  }
   final DateTime now = DateTime.now();
   final DateTime? from = query.dateFrom?.toLocal();
   final DateTime? to = query.dateTo?.toLocal();
   if (_sameLocalDay(from, now)) {
-    return 'Today';
+    return l10n.discoverToday;
   }
   if (_sameLocalDay(from, now.add(const Duration(days: 1)))) {
-    return 'Tomorrow';
+    return l10n.discoverTomorrow;
   }
-  if (from == null) return 'Date set';
+  if (from == null) return l10n.discoverDateSet;
   final String fromLabel = _numericDate(from);
   if (to == null || _sameLocalDay(from, to)) return fromLabel;
   return '$fromLabel–${_numericDate(to)}';
@@ -3056,3 +3098,9 @@ String _resultsLocation(
     },
   ).toString();
 }
+
+/// Whole euros of the EUR-only budget pickers (their stored value is EUR).
+String _euros(BuildContext context, int value) => RechargeFormats.money(
+  Money(minorUnits: value * 100, currencyCode: 'EUR'),
+  context.l10n.localeName,
+);

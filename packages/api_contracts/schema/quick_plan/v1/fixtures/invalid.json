@@ -1,0 +1,17 @@
+[
+  {
+    "schemaVersion": 1,
+    "kind": "rejected"
+  },
+  {
+    "schemaVersion": 1,
+    "kind": "succeeded",
+    "code": "request_invalid"
+  },
+  {
+    "schemaVersion": 1,
+    "kind": "rejected",
+    "code": "request_invalid",
+    "message": "server text is not contract"
+  }
+]

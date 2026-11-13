@@ -1,0 +1,293 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/platform/v1/request_context.schema.json",
+  "title": "Recharge Platform v1 request context and common primitives",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": { "$ref": "#/$defs/contractVersion" },
+    "requestId": { "$ref": "#/$defs/entityReference" },
+    "client": { "$ref": "#/$defs/clientContext" },
+    "locale": { "$ref": "#/$defs/locale" },
+    "marketId": { "$ref": "#/$defs/marketId" },
+    "payload": { "$ref": "#/$defs/jsonObject" }
+  },
+  "required": ["contractVersion", "requestId", "client", "locale", "payload"],
+  "$defs": {
+    "contractVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "safeInteger": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "ulid": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "entityReference": {
+      "oneOf": [{ "$ref": "#/$defs/ulid" }, { "$ref": "#/$defs/uuid" }]
+    },
+    "utcInstant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "ianaTimezone": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "format": "iana-time-zone"
+    },
+    "isoCurrency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "format": "iso-4217-currency"
+    },
+    "money": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "minorUnits": { "$ref": "#/$defs/safeInteger" },
+        "currency": { "$ref": "#/$defs/isoCurrency" }
+      },
+      "required": ["minorUnits", "currency"]
+    },
+    "locale": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 35,
+      "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+    },
+    "marketId": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 32,
+      "pattern": "^[a-z][a-z0-9_-]+$"
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "semanticPayloadHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "opaqueCursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^[\\u0020-\\u007E]+$"
+    },
+    "clientContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "appId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9.-]+$"
+        },
+        "platform": {
+          "type": "string",
+          "enum": ["android", "ios", "web"]
+        },
+        "appVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
+        },
+        "buildNumber": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      },
+      "required": ["appId", "platform", "appVersion", "buildNumber"]
+    },
+    "jsonScalar": {
+      "anyOf": [
+        { "type": "string" },
+        { "type": "boolean" },
+        { "type": "integer" },
+        { "type": "null" }
+      ]
+    },
+    "jsonValue": {
+      "anyOf": [
+        { "$ref": "#/$defs/jsonScalar" },
+        {
+          "type": "array",
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/jsonValue" }
+        },
+        { "$ref": "#/$defs/jsonObject" }
+      ]
+    },
+    "jsonObject": {
+      "type": "object",
+      "maxProperties": 64,
+      "additionalProperties": { "$ref": "#/$defs/jsonValue" }
+    },
+    "commandEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contractVersion": { "$ref": "#/$defs/contractVersion" },
+        "commandType": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 128,
+          "pattern": "^[a-z][A-Za-z0-9]*(?:\\.[a-z][A-Za-z0-9]*)+$"
+        },
+        "commandVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "requestId": { "$ref": "#/$defs/entityReference" },
+        "idempotencyKey": { "$ref": "#/$defs/idempotencyKey" },
+        "expectedRevision": { "$ref": "#/$defs/revision" },
+        "client": { "$ref": "#/$defs/clientContext" },
+        "locale": { "$ref": "#/$defs/locale" },
+        "marketId": { "$ref": "#/$defs/marketId" },
+        "payload": { "$ref": "#/$defs/jsonObject" }
+      },
+      "required": [
+        "contractVersion",
+        "commandType",
+        "commandVersion",
+        "requestId",
+        "idempotencyKey",
+        "client",
+        "locale",
+        "payload"
+      ]
+    },
+    "pageRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20
+        },
+        "cursor": {
+          "anyOf": [{ "$ref": "#/$defs/opaqueCursor" }, { "type": "null" }]
+        }
+      },
+      "required": ["limit", "cursor"]
+    },
+    "queryEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contractVersion": { "$ref": "#/$defs/contractVersion" },
+        "queryType": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 128,
+          "pattern": "^[a-z][A-Za-z0-9]*(?:\\.[a-z][A-Za-z0-9]*)+$"
+        },
+        "queryVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "requestId": { "$ref": "#/$defs/entityReference" },
+        "client": { "$ref": "#/$defs/clientContext" },
+        "locale": { "$ref": "#/$defs/locale" },
+        "marketId": { "$ref": "#/$defs/marketId" },
+        "filters": { "$ref": "#/$defs/jsonObject" },
+        "sort": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-z][A-Za-z0-9]*$"
+        },
+        "page": { "$ref": "#/$defs/pageRequest" }
+      },
+      "required": [
+        "contractVersion",
+        "queryType",
+        "queryVersion",
+        "requestId",
+        "client",
+        "locale",
+        "filters",
+        "sort",
+        "page"
+      ]
+    },
+    "minimumClientPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "policyRevision": { "$ref": "#/$defs/revision" },
+        "platform": {
+          "type": "string",
+          "enum": ["android", "ios", "web"]
+        },
+        "minSupportedBuild": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "recommendedBuild": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "supportedContractMajors": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        },
+        "hardBlockReasonCode": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "sunsetAt": { "$ref": "#/$defs/utcInstant" },
+        "updateTargetRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "effectiveAt": { "$ref": "#/$defs/utcInstant" }
+      },
+      "required": [
+        "policyRevision",
+        "platform",
+        "minSupportedBuild",
+        "recommendedBuild",
+        "supportedContractMajors",
+        "effectiveAt"
+      ]
+    }
+  }
+}

@@ -9,11 +9,19 @@ class VisitedPlacesRepositoryImpl implements VisitedPlacesRepository {
   }) : _localDataSource = localDataSource;
 
   final VisitedPlacesLocalDataSource _localDataSource;
+  Future<void> _pending = Future<void>.value();
+
+  Future<T> _enqueue<T>(Future<T> Function() command) {
+    final result = _pending.then((_) => command());
+    _pending = result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return result;
+  }
 
   @override
   Future<List<VisitedPlaceEntity>> getVisitedPlaces({
     required String userId,
   }) async {
+    await _pending;
     final List<VisitedPlaceModel> models = await _localDataSource
         .readVisitedPlaces(userId);
     final List<VisitedPlaceEntity> visits = models
@@ -25,49 +33,49 @@ class VisitedPlacesRepositoryImpl implements VisitedPlacesRepository {
   }
 
   @override
-  Future<VisitedPlaceEntity> recordVisit(VisitedPlaceEntity visit) async {
-    final List<VisitedPlaceModel> current = await _localDataSource
-        .readVisitedPlaces(visit.userId);
-    final List<VisitedPlaceEntity> entities = current
-        .map((VisitedPlaceModel model) => model.toEntity())
-        .where(
-          (VisitedPlaceEntity existing) => existing.userId == visit.userId,
-        )
-        .toList(growable: true);
-    for (final VisitedPlaceEntity existing in entities) {
-      if (existing.placeId == visit.placeId &&
-          existing.localDayKey == visit.localDayKey) {
-        return existing;
-      }
-    }
-    entities.add(visit);
-    entities.sort(_compareVisits);
-    await _localDataSource.writeVisitedPlaces(
-      visit.userId,
-      entities.map(VisitedPlaceModel.fromEntity).toList(growable: false),
-    );
-    return visit;
-  }
+  Future<VisitedPlaceEntity> recordVisit(VisitedPlaceEntity visit) =>
+      _enqueue(() async {
+        final List<VisitedPlaceModel> current = await _localDataSource
+            .readVisitedPlaces(visit.userId);
+        final List<VisitedPlaceEntity> entities = current
+            .map((VisitedPlaceModel model) => model.toEntity())
+            .where(
+              (VisitedPlaceEntity existing) => existing.userId == visit.userId,
+            )
+            .toList(growable: true);
+        for (final VisitedPlaceEntity existing in entities) {
+          if (existing.placeId == visit.placeId &&
+              existing.localDayKey == visit.localDayKey) {
+            return existing;
+          }
+        }
+        entities.add(visit);
+        entities.sort(_compareVisits);
+        await _localDataSource.writeVisitedPlaces(
+          visit.userId,
+          entities.map(VisitedPlaceModel.fromEntity).toList(growable: false),
+        );
+        return visit;
+      });
 
   @override
-  Future<void> removeVisit({
-    required String userId,
-    required String visitId,
-  }) async {
-    final List<VisitedPlaceModel> current = await _localDataSource
-        .readVisitedPlaces(userId);
-    final List<VisitedPlaceModel> remaining = current
-        .where(
-          (VisitedPlaceModel model) =>
-              model.userId != userId || model.id != visitId,
-        )
-        .toList(growable: false);
-    await _localDataSource.writeVisitedPlaces(userId, remaining);
-  }
+  Future<void> removeVisit({required String userId, required String visitId}) =>
+      _enqueue(() async {
+        final List<VisitedPlaceModel> current = await _localDataSource
+            .readVisitedPlaces(userId);
+        final List<VisitedPlaceModel> remaining = current
+            .where(
+              (VisitedPlaceModel model) =>
+                  model.userId != userId || model.id != visitId,
+            )
+            .toList(growable: false);
+        await _localDataSource.writeVisitedPlaces(userId, remaining);
+      });
 }
 
 int _compareVisits(VisitedPlaceEntity left, VisitedPlaceEntity right) {
   final int byDay = right.localDayKey.compareTo(left.localDayKey);
   if (byDay != 0) return byDay;
-  return right.recordedAtUtc.compareTo(left.recordedAtUtc);
+  final byTime = right.recordedAtUtc.compareTo(left.recordedAtUtc);
+  return byTime != 0 ? byTime : left.id.compareTo(right.id);
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../../core/localization/l10n_context.dart';
 import '../../../application/controllers/scenario_transit_picker_controller.dart';
 import '../../../application/state/scenario_transit_picker_state.dart';
 import '../../../domain/entities/scenario_transit_schedule.dart';
@@ -22,23 +23,27 @@ Future<ScenarioTransitEntryChoice?> showScenarioTransitEntryChoice(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            'Add planned transport',
+            context.l10n.createScenarioAddPlannedTransport,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           ListTile(
             key: const ValueKey<String>('scenario-transit-choice-manual'),
             leading: const Icon(Icons.edit_outlined),
-            title: const Text('Enter manually'),
-            subtitle: const Text('Works offline and stays editable.'),
+            title: Text(context.l10n.createScenarioEnterManually),
+            subtitle: Text(
+              context.l10n.createScenarioWorksOfflineStaysEditable,
+            ),
             onTap: () =>
                 Navigator.of(context).pop(ScenarioTransitEntryChoice.manual),
           ),
           ListTile(
             key: const ValueKey<String>('scenario-transit-choice-official'),
             leading: const Icon(Icons.travel_explore_outlined),
-            title: const Text('Find in official schedule'),
-            subtitle: const Text('Static timetable snapshot · not live.'),
+            title: Text(context.l10n.createScenarioFindOfficialSchedule),
+            subtitle: Text(
+              context.l10n.createScenarioStaticTimetableSnapshotNotLive,
+            ),
             onTap: () =>
                 Navigator.of(context).pop(ScenarioTransitEntryChoice.official),
           ),
@@ -127,12 +132,12 @@ class _ScenarioTransitSchedulePickerSheetState
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    'Official schedule',
+                    context.l10n.createScenarioOfficialSchedule,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Close official schedule',
+                  tooltip: context.l10n.createScenarioCloseOfficialSchedule,
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close),
                 ),
@@ -164,7 +169,7 @@ class _ScenarioTransitSchedulePickerSheetState
                   ),
                   const SizedBox(height: 12),
                   _StopSearch(
-                    title: 'Origin',
+                    title: context.l10n.createScenarioOrigin,
                     fieldKey: const ValueKey<String>(
                       'scenario-transit-origin-query',
                     ),
@@ -182,7 +187,7 @@ class _ScenarioTransitSchedulePickerSheetState
                   ),
                   const SizedBox(height: 12),
                   _StopSearch(
-                    title: 'Destination',
+                    title: context.l10n.createScenarioDestination,
                     fieldKey: const ValueKey<String>(
                       'scenario-transit-destination-query',
                     ),
@@ -202,8 +207,10 @@ class _ScenarioTransitSchedulePickerSheetState
                   if (state.initializationStatus ==
                           ScenarioTransitPickerStatus.ready &&
                       state.selectedCache?.isUsable != true) ...<Widget>[
-                    const Text(
-                      'Download a schedule before searching for stops.',
+                    Text(
+                      context
+                          .l10n
+                          .createScenarioDownloadScheduleBeforeSearchingStops,
                       key: ValueKey<String>('scenario-transit-cache-required'),
                     ),
                     const SizedBox(height: 8),
@@ -226,12 +233,14 @@ class _ScenarioTransitSchedulePickerSheetState
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.search),
-                    label: const Text('Find direct services'),
+                    label: Text(context.l10n.createScenarioFindDirectServices),
                   ),
                   if (state.serviceDate == null) ...<Widget>[
                     const SizedBox(height: 6),
-                    const Text(
-                      'Choose a date to check the official schedule.',
+                    Text(
+                      context
+                          .l10n
+                          .createScenarioChooseDateCheckOfficialSchedule,
                       key: ValueKey<String>('scenario-transit-date-required'),
                     ),
                   ],
@@ -248,17 +257,20 @@ class _ScenarioTransitSchedulePickerSheetState
                               context,
                             ).pop(ScenarioTransitPickerSheetResult.apply)
                           : null,
-                      child: const Text('Apply to Scenario'),
+                      child: Text(context.l10n.createScenarioApplyScenario),
                     ),
                     if (!widget.controller.canApplySelectedService)
-                      const Text(
-                        'This service has no valid stop coordinates and cannot '
-                        'be applied safely.',
+                      Text(
+                        context
+                            .l10n
+                            .createScenarioServiceHasNoValidStopCoordinates,
                         textAlign: TextAlign.center,
                       ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Apply creates one undoable Scenario change.',
+                    Text(
+                      context
+                          .l10n
+                          .createScenarioApplyCreatesOneUndoableScenarioChange,
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -269,7 +281,9 @@ class _ScenarioTransitSchedulePickerSheetState
                       context,
                     ).pop(ScenarioTransitPickerSheetResult.manual),
                     icon: const Icon(Icons.edit_outlined),
-                    label: const Text('Enter schedule manually'),
+                    label: Text(
+                      context.l10n.createScenarioEnterScheduleManually,
+                    ),
                   ),
                 ],
               ),
@@ -289,13 +303,13 @@ class _NonLiveNotice extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
     liveRegion: true,
-    label: _statusAnnouncement(state),
+    label: _statusAnnouncement(context.l10n, state),
     child: DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.tertiaryContainer,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Padding(
+      child: Padding(
         padding: EdgeInsets.all(12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,8 +318,7 @@ class _NonLiveNotice extends StatelessWidget {
             SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Planned schedule · not live. Delays, tickets, fares, seats '
-                'and transfers are not confirmed. Recheck before travel.',
+                context.l10n.createScenarioPlannedScheduleNotLiveDelaysTickets,
               ),
             ),
           ],
@@ -329,10 +342,11 @@ class _ProviderAndCache extends StatelessWidget {
     }
     if (state.providers.isEmpty) {
       return _MessageCard(
-        text: 'Official schedule providers are unavailable.',
+        text:
+            context.l10n.createScenarioOfficialScheduleProvidersAreUnavailable,
         actionLabel:
             state.retryAction == ScenarioTransitPickerRetryAction.initialize
-            ? 'Retry'
+            ? context.l10n.createScenarioRetry
             : null,
         onAction:
             state.retryAction == ScenarioTransitPickerRetryAction.initialize
@@ -353,10 +367,11 @@ class _ProviderAndCache extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         DropdownButtonFormField<String>(
+          isExpanded: true,
           key: const ValueKey<String>('scenario-transit-provider'),
           initialValue: state.selectedProviderCode,
-          decoration: const InputDecoration(
-            labelText: 'Schedule provider',
+          decoration: InputDecoration(
+            labelText: context.l10n.createScenarioScheduleProvider,
             border: OutlineInputBorder(),
           ),
           items: state.providers
@@ -375,7 +390,7 @@ class _ProviderAndCache extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         _MessageCard(
-          text: _cacheDescription(inspection),
+          text: _cacheDescription(context.l10n, inspection),
           icon: _cacheIcon(inspection?.status),
         ),
         const SizedBox(height: 8),
@@ -398,27 +413,29 @@ class _ProviderAndCache extends StatelessWidget {
                       )
                     : Icon(needsDownload ? Icons.download : Icons.refresh),
                 label: Text(
-                  needsDownload ? 'Download schedule' : 'Update schedule',
+                  needsDownload
+                      ? context.l10n.createScenarioDownloadSchedule
+                      : context.l10n.createScenarioUpdateSchedule,
                 ),
               ),
             if (hasCache)
               TextButton(
                 onPressed: () =>
                     controller.useCachedProvider(state.selectedProviderCode!),
-                child: const Text('Use cached'),
+                child: Text(context.l10n.createScenarioUseCached),
               ),
             if (state.retryAction != ScenarioTransitPickerRetryAction.none)
               TextButton.icon(
                 key: const ValueKey<String>('scenario-transit-retry'),
                 onPressed: controller.retry,
                 icon: const Icon(Icons.replay),
-                label: const Text('Retry'),
+                label: Text(context.l10n.createScenarioRetry),
               ),
           ],
         ),
         if (state.failureCode != null)
           Text(
-            _failureLabel(state.failureCode!),
+            _failureLabel(context.l10n, state.failureCode!),
             key: const ValueKey<String>('scenario-transit-failure'),
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
@@ -450,8 +467,8 @@ class _DateAndTime extends StatelessWidget {
           label: Text(
             state.serviceDate == null
                 ? dateLocked
-                      ? 'Scenario date is missing'
-                      : 'Choose date'
+                      ? context.l10n.createScenarioScenarioDateMissing
+                      : context.l10n.createScenarioChooseDate
                 : '${state.serviceDate!.iso8601}${dateLocked ? ' · Scenario' : ''}',
           ),
         ),
@@ -462,7 +479,11 @@ class _DateAndTime extends StatelessWidget {
           key: const ValueKey<String>('scenario-transit-depart-after'),
           onPressed: () => _chooseTime(context),
           icon: const Icon(Icons.schedule_outlined),
-          label: Text('After ${_clockLabel(state.departAfter)}'),
+          label: Text(
+            context.l10n.createScenarioAfterTime(
+              _clockLabel(state.departAfter),
+            ),
+          ),
         ),
       ),
     ],
@@ -552,11 +573,11 @@ class _StopSearch extends StatelessWidget {
       ),
       if (selected != null) ...<Widget>[
         const SizedBox(height: 4),
-        Text('Selected: ${selected!.name}'),
+        Text(context.l10n.createScenarioSelectedStop(selected!.name)),
       ],
       if (status == ScenarioTransitPickerStatus.empty) ...<Widget>[
         const SizedBox(height: 4),
-        Text('No $title stops found.'),
+        Text(context.l10n.createScenarioNoStopsFound),
       ],
       ...results
           .take(6)
@@ -583,16 +604,16 @@ class _ServiceResults extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (state.serviceSearchStatus == ScenarioTransitPickerStatus.empty) {
-      return const _MessageCard(
-        text: 'No direct services found after the selected time.',
+      return _MessageCard(
+        text: context.l10n.createScenarioNoDirectServicesFoundAfterSelected,
         icon: Icons.search_off_outlined,
       );
     }
     if (state.serviceSearchStatus == ScenarioTransitPickerStatus.failure) {
       return _MessageCard(
         text: state.failureCode == null
-            ? 'Schedule search failed.'
-            : _failureLabel(state.failureCode!),
+            ? context.l10n.createScenarioScheduleSearchFailed
+            : _failureLabel(context.l10n, state.failureCode!),
         icon: Icons.error_outline,
       );
     }
@@ -600,9 +621,11 @@ class _ServiceResults extends StatelessWidget {
       children: state.serviceOptions
           .map(
             (option) => Semantics(
-              label:
-                  '${option.departure.hhmm} to ${option.arrival.hhmm}, '
-                  '${option.durationMinutes} minutes, planned schedule not live',
+              label: context.l10n.createScenarioDepartureSemantics(
+                option.departure.hhmm,
+                option.arrival.hhmm,
+                option.durationMinutes,
+              ),
               child: Card.outlined(
                 child: ListTile(
                   key: ValueKey<String>(
@@ -615,7 +638,7 @@ class _ServiceResults extends StatelessWidget {
                   subtitle: Text(
                     '${option.agencyName ?? option.manifest.providerDisplayName} · '
                     '${option.routeLabel ?? option.headsign ?? option.routeId}\n'
-                    '${option.durationMinutes} min · Planned schedule · not live',
+                    '${context.l10n.createScenarioMinutesNotLive(option.durationMinutes)}',
                   ),
                   isThreeLine: true,
                   trailing: state.selectedService?.tripId == option.tripId
@@ -646,7 +669,7 @@ class _SelectedServicePreview extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Selection preview',
+            context.l10n.createScenarioSelectionPreview,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 6),
@@ -659,13 +682,18 @@ class _SelectedServicePreview extends StatelessWidget {
             '${option.manifest.providerDisplayName} · '
             '${option.manifest.licenseName}',
           ),
-          Text('Feed retrieved ${option.manifest.retrievedAtUtc.toUtc()}'),
-          Text('Freshness: ${_freshnessLabel(option.manifest.freshness)}'),
-          const SizedBox(height: 6),
-          const Text(
-            'Planned schedule · not live. This selection is not yet applied '
-            'to the Scenario.',
+          // The feed timestamp is provenance data, shown in UTC as saved.
+          Text(
+            context.l10n.createScenarioFeedRetrievedLine(
+              '${option.manifest.retrievedAtUtc.toUtc()}',
+            ),
           ),
+          Text(
+            '${context.l10n.createScenarioFreshnessLabel}: '
+            '${context.l10n.createScenarioFreshness(option.manifest.freshness.name)}',
+          ),
+          const SizedBox(height: 6),
+          Text(context.l10n.createScenarioPlannedScheduleNotLiveSelectionNot),
         ],
       ),
     ),
@@ -702,22 +730,29 @@ class _MessageCard extends StatelessWidget {
   );
 }
 
-String _cacheDescription(ScenarioTransitCacheInspection? inspection) {
-  if (inspection == null) return 'Checking cached schedule…';
+String _cacheDescription(
+  AppLocalizations l10n,
+  ScenarioTransitCacheInspection? inspection,
+) {
+  if (inspection == null) return l10n.createScenarioCheckingCachedSchedule;
   final retrieved = inspection.manifest?.retrievedAtUtc.toUtc();
   return switch (inspection.status) {
     ScenarioTransitCacheStatus.current =>
-      'Cached schedule is current${retrieved == null ? '' : ' · $retrieved'}.',
+      retrieved == null
+          ? l10n.createScenarioCacheCurrent
+          : l10n.createScenarioCacheCurrentAt('$retrieved'),
     ScenarioTransitCacheStatus.stale =>
-      'Cached schedule is stale${retrieved == null ? '' : ' · $retrieved'}. '
-          'You may use it with a warning or update it.',
+      retrieved == null
+          ? l10n.createScenarioCacheStale
+          : l10n.createScenarioCacheStaleAt('$retrieved'),
     ScenarioTransitCacheStatus.unknown =>
-      'Cached schedule freshness is unknown. Recheck before travel.',
+      l10n.createScenarioCachedScheduleFreshnessUnknownRecheckBefore,
     ScenarioTransitCacheStatus.missing =>
-      'No schedule is downloaded for this provider.',
+      l10n.createScenarioNoScheduleDownloadedProvider,
     ScenarioTransitCacheStatus.corrupt =>
-      'Cached schedule is damaged and cannot be used.',
-    ScenarioTransitCacheStatus.failed => 'Cached schedule could not be read.',
+      l10n.createScenarioCachedScheduleDamagedCannotUsed,
+    ScenarioTransitCacheStatus.failed =>
+      l10n.createScenarioCachedScheduleCouldNotRead,
   };
 }
 
@@ -731,55 +766,54 @@ IconData _cacheIcon(ScenarioTransitCacheStatus? status) => switch (status) {
   null => Icons.hourglass_empty,
 };
 
-String _failureLabel(ScenarioTransitPickerFailureCode value) => switch (value) {
+String _failureLabel(
+  AppLocalizations l10n,
+  ScenarioTransitPickerFailureCode value,
+) => switch (value) {
   ScenarioTransitPickerFailureCode.pickerDisabled =>
-    'Official schedule is temporarily unavailable.',
+    l10n.createScenarioOfficialScheduleTemporarilyUnavailable,
   ScenarioTransitPickerFailureCode.noProviders =>
-    'No official schedule providers are configured.',
+    l10n.createScenarioNoOfficialScheduleProvidersAreConfigured,
   ScenarioTransitPickerFailureCode.invalidProvider =>
-    'Choose a valid schedule provider.',
+    l10n.createScenarioChooseValidScheduleProvider,
   ScenarioTransitPickerFailureCode.noUsableCache =>
-    'Download or select a usable cached schedule first.',
+    l10n.createScenarioDownloadSelectUsableCachedScheduleFirst,
   ScenarioTransitPickerFailureCode.networkDisabled =>
-    'Schedule downloads are disabled. Cached data remains available.',
+    l10n.createScenarioScheduleDownloadsAreDisabledCachedData,
   ScenarioTransitPickerFailureCode.offline =>
-    'You appear to be offline. Cached data remains available.',
+    l10n.createScenarioYouAppearOfflineCachedDataRemains,
   ScenarioTransitPickerFailureCode.downloadFailed =>
-    'The schedule could not be downloaded.',
+    l10n.createScenarioScheduleCouldNotDownloaded,
   ScenarioTransitPickerFailureCode.invalidFeed =>
-    'The downloaded schedule is invalid and was not saved.',
+    l10n.createScenarioDownloadedScheduleInvalidWasNotSaved,
   ScenarioTransitPickerFailureCode.cacheReadFailed =>
-    'The cached schedule could not be read.',
+    l10n.createScenarioCachedScheduleCouldNotRead2,
   ScenarioTransitPickerFailureCode.cacheWriteFailed =>
-    'The new schedule could not be saved. Existing cache was kept.',
+    l10n.createScenarioNewScheduleCouldNotSavedExisting,
   ScenarioTransitPickerFailureCode.invalidSelection =>
-    'Complete the provider, stops, date and time selection.',
+    l10n.createScenarioCompleteProviderStopsDateTimeSelection,
   ScenarioTransitPickerFailureCode.stopSearchFailed =>
-    'Stop search failed. Try again.',
+    l10n.createScenarioStopSearchFailedTryAgain,
   ScenarioTransitPickerFailureCode.serviceSearchFailed =>
-    'Schedule search failed. Try again.',
+    l10n.createScenarioScheduleSearchFailedTryAgain,
 };
 
-String _freshnessLabel(ScenarioTransitFreshness value) => switch (value) {
-  ScenarioTransitFreshness.current => 'current',
-  ScenarioTransitFreshness.stale => 'stale',
-  ScenarioTransitFreshness.unknown => 'unknown',
-  ScenarioTransitFreshness.unavailable => 'unavailable',
-};
-
-String _statusAnnouncement(ScenarioTransitPickerState state) {
+String _statusAnnouncement(
+  AppLocalizations l10n,
+  ScenarioTransitPickerState state,
+) {
   final failure = state.failureCode;
-  if (failure != null) return _failureLabel(failure);
+  if (failure != null) return _failureLabel(l10n, failure);
   if (state.serviceSearchStatus == ScenarioTransitPickerStatus.loading) {
-    return 'Searching direct planned services.';
+    return l10n.createScenarioSearchingDirectPlannedServices;
   }
   if (state.serviceSearchStatus == ScenarioTransitPickerStatus.empty) {
-    return 'No direct planned services found.';
+    return l10n.createScenarioNoDirectPlannedServicesFound;
   }
   if (state.selectedService != null) {
-    return 'Planned service selected for preview. Not applied to Scenario.';
+    return l10n.createScenarioPlannedServiceSelectedPreviewNotApplied;
   }
-  return 'Planned schedule, not live.';
+  return l10n.createScenarioPlannedScheduleNotLive;
 }
 
 String _clockLabel(ScenarioTransitTime value) {

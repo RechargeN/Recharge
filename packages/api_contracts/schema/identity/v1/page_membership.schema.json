@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/identity/v1/page_membership.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "membershipId",
+    "pageId",
+    "userId",
+    "role",
+    "status",
+    "capabilityIds",
+    "revision",
+    "createdAtUtc",
+    "updatedAtUtc"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "membershipId": { "$ref": "identity_common.schema.json#/$defs/entityId" },
+    "pageId": { "$ref": "identity_common.schema.json#/$defs/entityId" },
+    "userId": { "$ref": "identity_common.schema.json#/$defs/entityId" },
+    "role": { "enum": ["owner", "manager", "analyst", "bookingManager"] },
+    "status": { "enum": ["active", "revoked"] },
+    "capabilityIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 32,
+      "items": { "$ref": "identity_common.schema.json#/$defs/capabilityId" }
+    },
+    "revision": { "$ref": "identity_common.schema.json#/$defs/revision" },
+    "createdAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" },
+    "updatedAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" }
+  }
+}

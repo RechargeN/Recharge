@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/identity/v1/session.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sessionId",
+    "userId",
+    "status",
+    "revision",
+    "authzRevision",
+    "firebaseUid",
+    "installationId",
+    "handleHash",
+    "issuedAtUtc",
+    "lastActiveAtUtc",
+    "idleExpiresAtUtc"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "sessionId": { "$ref": "identity_common.schema.json#/$defs/entityId" },
+    "userId": { "$ref": "identity_common.schema.json#/$defs/entityId" },
+    "status": {
+      "enum": ["active", "stepUpRequired", "revoked", "expired", "compromised"]
+    },
+    "revision": { "$ref": "identity_common.schema.json#/$defs/revision" },
+    "authzRevision": { "$ref": "identity_common.schema.json#/$defs/revision" },
+    "firebaseUid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^(?!__name__$)[A-Za-z0-9._:-]+$"
+    },
+    "installationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^(?!__name__$)[A-Za-z0-9._:-]+$"
+    },
+    "handleHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "issuedAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" },
+    "lastActiveAtUtc": {
+      "$ref": "identity_common.schema.json#/$defs/utcInstant"
+    },
+    "idleExpiresAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" },
+    "revokedAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" },
+    "revocationReason": {
+      "enum": ["replaced", "recovery", "logoutAll", "manual"]
+    }
+  }
+}

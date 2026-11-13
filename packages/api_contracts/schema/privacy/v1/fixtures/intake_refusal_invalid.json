@@ -1,0 +1,9 @@
+[
+  {
+    "ok": false
+  },
+  {
+    "ok": true,
+    "code": "access_denied"
+  }
+]

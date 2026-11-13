@@ -1,0 +1,10 @@
+# Copy this file to google_maps.properties for local Google Maps builds.
+# Keep the real API key out of source control.
+GOOGLE_MAPS_API_KEY=replace-with-local-key
+
+# Optional: enables live Google Places (New) search in Place/Collection
+# Create (name/area autocomplete that prefills the map pin). Leave unset to
+# keep those steps working with manual map-tap only — nothing breaks either
+# way. Requires "Places API (New)" enabled on the same GCP project and run
+# with: flutter run --dart-define-from-file=google_maps.properties
+GOOGLE_PLACES_API_KEY=replace-with-local-key

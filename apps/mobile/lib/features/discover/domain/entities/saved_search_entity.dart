@@ -30,6 +30,7 @@ class SavedSearchEntity {
     required String defaultMarketCityId,
     required double defaultCenterLat,
     required double defaultCenterLng,
+    required String defaultCurrencyCode,
   }) {
     final Object? rawQuery = map['query'];
     final Map<String, Object?> queryMap;
@@ -44,13 +45,18 @@ class SavedSearchEntity {
 
     return SavedSearchEntity(
       id: (map['id'] as String?) ?? 'search_legacy',
-      title: (map['title'] as String?) ?? 'Saved search',
-      subtitle: (map['subtitle'] as String?) ?? 'Nearby activities',
+      title:
+          (map['title'] as String?) ??
+          'Saved search', // l10n-ignore: legacy persisted default; the UI builds text from the query
+      subtitle:
+          (map['subtitle'] as String?) ??
+          'Nearby activities', // l10n-ignore: legacy persisted default; the UI builds text from the query
       query: DiscoverQuery.fromMap(
         queryMap,
         defaultMarketCityId: defaultMarketCityId,
         defaultCenterLat: defaultCenterLat,
         defaultCenterLng: defaultCenterLng,
+        defaultCurrencyCode: defaultCurrencyCode,
       ),
       createdAtUtc: map['created_at_utc'] == null
           ? DateTime.now().toUtc()

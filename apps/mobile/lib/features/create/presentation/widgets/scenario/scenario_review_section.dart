@@ -8,6 +8,8 @@ import '../../../domain/entities/scenario_item_draft.dart';
 import '../../../domain/entities/scenario_validation_issue.dart';
 import '../../../domain/usecases/evaluate_scenario_readiness_usecase.dart';
 import 'scenario_transit_disclosure_card.dart';
+import '../create_texts.dart';
+import '../../../../../core/localization/l10n_context.dart';
 
 class ScenarioReviewSection extends StatelessWidget {
   const ScenarioReviewSection({
@@ -23,7 +25,7 @@ class ScenarioReviewSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final ScenarioReadinessResult? readiness = controller.scenarioReadiness;
     if (readiness == null) {
-      return const Text('Scenario data is unavailable.');
+      return Text(context.l10n.createScenarioScenarioDataUnavailable);
     }
     final ScenarioDraftData data = state.draft.scenarioData!;
     final List<ScenarioItemDraft> plannedTransport = data.items
@@ -46,31 +48,31 @@ class ScenarioReviewSection extends StatelessWidget {
           runSpacing: 8,
           children: <Widget>[
             _Metric(
-              label: 'Active stops',
+              label: context.l10n.createScenarioActiveStops,
               value: '${readiness.totals.activeItemCount}',
             ),
             _Metric(
-              label: 'Activity',
+              label: context.l10n.createScenarioActivity,
               value: '${readiness.totals.activityMinutes} min',
             ),
             _Metric(
-              label: 'Time blocks',
+              label: context.l10n.createScenarioTimeBlocks,
               value: '${readiness.totals.plannedBlockMinutes} min',
             ),
             _Metric(
-              label: 'Private / local travel',
+              label: context.l10n.createScenarioPrivateLocalTravel,
               value: '${readiness.totals.localTravelMinutes} min',
             ),
             _Metric(
-              label: 'Planned transport',
+              label: context.l10n.createScenarioPlannedTransport,
               value: '${readiness.totals.plannedTransportMinutes} min',
             ),
             _Metric(
-              label: 'Unknown travel',
+              label: context.l10n.createScenarioUnknownTravel,
               value: '${readiness.totals.unresolvedLegCount}',
             ),
             _Metric(
-              label: 'Warnings',
+              label: context.l10n.createScenarioWarnings,
               value: '${readiness.validation.warningCount}',
             ),
           ],
@@ -86,16 +88,16 @@ class ScenarioReviewSection extends StatelessWidget {
           ),
           title: Text(
             readiness.canSaveToMyScenarios
-                ? 'Ready for My Scenarios'
-                : '${blocking.length} blocking issue(s)',
+                ? context.l10n.createScenarioReadyMyScenarios
+                : context.l10n.createScenarioBlockingIssues(blocking.length),
           ),
-          subtitle: const Text(
-            'This action saves a personal Scenario. It does not publish it to the catalog.',
+          subtitle: Text(
+            context.l10n.createScenarioActionSavesPersonalScenarioDoesNot,
           ),
         ),
         if (plannedTransport.isNotEmpty) ...<Widget>[
           const SizedBox(height: 12),
-          const DecoratedBox(
+          DecoratedBox(
             decoration: BoxDecoration(
               color: Color(0xFFFFF5D9),
               borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -109,7 +111,9 @@ class ScenarioReviewSection extends StatelessWidget {
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Planned schedule · not live. Recheck departures, delays and cancellations before travel.',
+                      context
+                          .l10n
+                          .createScenarioPlannedScheduleNotLiveRecheckDepartures,
                     ),
                   ),
                 ],
@@ -132,12 +136,12 @@ class ScenarioReviewSection extends StatelessWidget {
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.chevron_right),
-                  title: Text(issue.message),
+                  title: Text(CreateTexts.scenario(context.l10n, issue.code)),
                   subtitle: Text(issue.path),
                 ),
               ),
         const SizedBox(height: 8),
-        const DecoratedBox(
+        DecoratedBox(
           decoration: BoxDecoration(
             color: Color(0xFFF3F5F4),
             borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -145,8 +149,9 @@ class ScenarioReviewSection extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.all(12),
             child: Text(
-              'Public and unlisted Scenario publishing remains disabled until '
-              'publisher capabilities and moderation are implemented.',
+              context
+                  .l10n
+                  .createScenarioPublicUnlistedScenarioPublishingRemainsDisabled,
             ),
           ),
         ),

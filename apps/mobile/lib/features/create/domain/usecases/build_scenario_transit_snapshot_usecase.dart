@@ -105,7 +105,7 @@ class BuildScenarioTransitSnapshotUseCase {
     }
     if (manifest.freshness == ScenarioTransitFreshness.unavailable) {
       throw const FormatException(
-        'Unavailable feed cannot produce a snapshot.',
+        'Unavailable feed cannot produce a snapshot.', // l10n-ignore: developer error, never displayed
       );
     }
   }
@@ -116,7 +116,7 @@ class BuildScenarioTransitSnapshotUseCase {
       ScenarioTransitFreshness.stale => ScenarioScheduleFreshness.stale,
       ScenarioTransitFreshness.unknown => ScenarioScheduleFreshness.unknown,
       ScenarioTransitFreshness.unavailable => throw const FormatException(
-        'Unavailable feed cannot produce a snapshot.',
+        'Unavailable feed cannot produce a snapshot.', // l10n-ignore: developer error, never displayed
       ),
     };
   }

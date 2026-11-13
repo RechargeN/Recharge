@@ -1,0 +1,65 @@
+name: Backend D1 Linux gate
+
+# D1-L (docs/product/MEDIA_D1_REAL_TOOLS_AMENDMENT.md §15). Runs only when the
+# owner changes this workflow or the stage file on the integration branch:
+# `inspect` checks ClamAV and the official databases and reports their
+# versions, SHA-256 and license notices; `test` runs the gate. The databases
+# stay on the runner: no artifacts, no cache, no mirror. No deployment.
+on:
+  push:
+    branches:
+      - codex/recharge-integration
+    paths:
+      - ".github/workflows/backend-d1-linux.yml"
+      - "apps/backend/ci/d1-linux-stage.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-d1-linux-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  d1-linux:
+    name: D1 Linux gate (ubuntu-24.04)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout without persisted authority
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          clean: false
+          set-safe-directory: false
+          fetch-depth: 1
+          fetch-tags: false
+          lfs: false
+          submodules: false
+
+      - name: Set up exact Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 22.23.2
+          check-latest: false
+          package-manager-cache: false
+
+      - name: Set up exact emulator JDK
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: 21.0.12+8.0.LTS
+          check-latest: false
+          verify-signature: true
+          overwrite-settings: false
+
+      - name: Reject cloud context
+        run: node apps/backend/scripts/verify-no-cloud-context.mjs
+
+      - name: Frozen dependency install without lifecycle scripts
+        working-directory: apps/backend/functions
+        run: npm ci --ignore-scripts --no-audit --fund=false
+
+      - name: D1 Linux gate (stage from apps/backend/ci/d1-linux-stage.json)
+        working-directory: apps/backend/functions
+        run: node ../scripts/stand-d1-linux-gate.mjs --yes

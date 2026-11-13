@@ -1,0 +1,104 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import {
+  computeBookingSemanticHash,
+  inspectBookingCommand,
+} from '../../src/contracts/booking_v1.js';
+import {
+  lengthPrefixedHash,
+  logicalMutationId,
+  requestAttemptId,
+} from '../../src/booking/idempotency.js';
+import { bookingUserUsageId, finitePoolLedgerId } from '../../src/booking/transactions.js';
+import { createCommand } from '../support/booking_fixtures.js';
+import { asRecord, readBookingJson } from '../support/booking_schema_registry.js';
+
+void test('split logical and attempt identities are deterministic and domain-separated', () => {
+  const logical = logicalMutationId('user', 'createBooking', 'same');
+  const attempt = requestAttemptId('user', 'same');
+  assert.match(logical, /^m1_[0-9a-f]{64}$/u);
+  assert.match(attempt, /^r1_[0-9a-f]{64}$/u);
+  assert.notEqual(logical.slice(3), attempt.slice(3));
+  assert.equal(logical, logicalMutationId('user', 'createBooking', 'same'));
+  assert.notEqual(logical, logicalMutationId('user', 'cancelBooking', 'same'));
+});
+
+void test('length prefixes prevent concatenation ambiguity', () => {
+  assert.notEqual(lengthPrefixedHash('ab', 'c'), lengthPrefixedHash('a', 'bc'));
+});
+
+void test('finite ledger ids are fixed-width and tuple collision resistant', () => {
+  const first = finitePoolLedgerId('a', 'b__c', 'onsite');
+  const second = finitePoolLedgerId('a__b', 'c', 'onsite');
+  assert.match(first, /^bpl2_[0-9a-f]{64}$/u);
+  assert.notEqual(first, second);
+  assert.equal(first, finitePoolLedgerId('a', 'b__c', 'onsite'));
+  assert.notEqual(first, finitePoolLedgerId('a', 'b__c', 'online'));
+});
+
+void test('user usage document key is deterministic and never exposes raw UID', () => {
+  const id = bookingUserUsageId('firebase-user-123', 'LV');
+  assert.match(id, /^buu2_[0-9a-f]{64}$/u);
+  assert.equal(id, bookingUserUsageId('firebase-user-123', 'LV'));
+  assert.notEqual(id, bookingUserUsageId('firebase-user-124', 'LV'));
+  assert.notEqual(id, bookingUserUsageId('firebase-user-123', 'EE'));
+  assert.equal(id.includes('firebase-user-123'), false);
+});
+
+void test('runtime contract rejects path-like and reserved identifiers', () => {
+  for (const occurrenceId of ['events/occurrence', '.', '..', '__name__']) {
+    const command = createCommand({
+      payload: {
+        ...createCommand().payload,
+        occurrenceId,
+      },
+    });
+    const inspected = inspectBookingCommand(
+      Buffer.from(JSON.stringify({ data: command }), 'utf8'),
+      command,
+    );
+    assert.deepEqual(inspected, { ok: false, reason: 'invalid_contract' });
+  }
+});
+
+void test('semantic hash ignores transport identity but includes domain meaning', () => {
+  const first = createCommand();
+  const replay = { ...first, requestId: 'req_other', idempotencyKey: 'idem_other' };
+  assert.equal(
+    computeBookingSemanticHash(first, 'user'),
+    computeBookingSemanticHash(replay, 'user'),
+  );
+  assert.notEqual(
+    computeBookingSemanticHash(first, 'user'),
+    computeBookingSemanticHash(
+      {
+        ...first,
+        payload: { ...first.payload, participantUnits: 2, namedGuests: [{ displayName: 'Guest' }] },
+      },
+      'user',
+    ),
+  );
+});
+
+void test('product adapter preserves every applicable frozen semantic-hash vector', async () => {
+  const container = asRecord(await readBookingJson('fixtures/semantic_hash_vectors.json'));
+  assert.ok(Array.isArray(container.vectors));
+  let checked = 0;
+  for (const rawVector of container.vectors) {
+    const vector = asRecord(rawVector);
+    const rawCommand = String(vector.rawCommandJson);
+    const decoded = JSON.parse(rawCommand) as unknown;
+    const commandType = asRecord(decoded).commandType;
+    if (commandType !== 'createBooking' && commandType !== 'cancelBooking') continue;
+    const inspected = inspectBookingCommand(Buffer.from(`{"data":${rawCommand}}`, 'utf8'), decoded);
+    assert.equal(inspected.ok, true, String(vector.id));
+    if (!inspected.ok) continue;
+    assert.equal(
+      computeBookingSemanticHash(inspected.value, String(asRecord(vector.resolvedActorScope).id)),
+      vector.expectedDigest,
+      String(vector.id),
+    );
+    checked += 1;
+  }
+  assert.ok(checked >= 10);
+});

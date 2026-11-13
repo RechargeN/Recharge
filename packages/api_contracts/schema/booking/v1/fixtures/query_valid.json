@@ -1,0 +1,402 @@
+{
+  "queries": [
+    {
+      "schemaVersion": 1,
+      "queryType": "getMyBooking",
+      "requestId": "read-1",
+      "sessionContext": {
+        "sessionId": "session-1",
+        "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "installationId": "install-1"
+      },
+      "payload": { "bookingId": "booking-1" }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "listMyBookings",
+      "requestId": "list-first",
+      "sessionContext": {
+        "sessionId": "session-1",
+        "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "installationId": "install-1"
+      },
+      "payload": {}
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "listMyBookings",
+      "requestId": "list-filtered",
+      "sessionContext": {
+        "sessionId": "session-1",
+        "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "installationId": "install-1"
+      },
+      "payload": {
+        "pageSize": 50,
+        "cursor": "v1.opaque-token",
+        "stateFilter": "confirmed"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "requestId": "availability-1",
+      "sessionContext": {
+        "sessionId": "session-1",
+        "sessionHandle": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "installationId": "install-1"
+      },
+      "payload": {
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "channel": "onsite"
+      }
+    }
+  ],
+  "reads": [
+    {
+      "schemaVersion": 1,
+      "queryType": "getMyBooking",
+      "requestId": "read-1",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "found",
+      "booking": {
+        "schemaVersion": 1,
+        "id": "booking-1",
+        "revision": 3,
+        "userId": "user-1",
+        "marketId": "LV",
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "admissionMode": "booking",
+        "confirmationMode": "instant",
+        "state": "confirmed",
+        "participantUnits": 1,
+        "reconfirmationState": "notRequired",
+        "createdAt": "2026-08-27T10:00:00.000Z",
+        "updatedAt": "2026-08-27T10:01:00.000Z"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getMyBooking",
+      "requestId": "read-missing",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "notFound"
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getMyBooking",
+      "requestId": "read-rejected",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "rejected",
+      "error": {
+        "schemaVersion": 1,
+        "code": "not_authenticated",
+        "retryable": false,
+        "correlationId": "read-rejected"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getMyBooking",
+      "requestId": "read-retryable",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "retryableFailure",
+      "error": {
+        "schemaVersion": 1,
+        "code": "temporarily_unavailable",
+        "retryable": true,
+        "correlationId": "read-retryable"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getMyBooking",
+      "requestId": "read-forward",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "unsupportedContract",
+      "unsupportedPayload": { "schemaVersion": 2 }
+    }
+  ],
+  "pages": [
+    {
+      "schemaVersion": 1,
+      "queryType": "listMyBookings",
+      "requestId": "page-empty",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "page": {
+        "items": [],
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "sort": "createdAtDescIdDesc",
+        "consistency": "liveKeyset"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "listMyBookings",
+      "requestId": "page-more",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "page": {
+        "items": [],
+        "nextCursor": "v1.next",
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "sort": "createdAtDescIdDesc",
+        "consistency": "liveKeyset"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "listMyBookings",
+      "requestId": "page-non-empty-final",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "page": {
+        "items": [
+          {
+            "schemaVersion": 1,
+            "id": "booking-1",
+            "revision": 3,
+            "userId": "user-1",
+            "marketId": "LV",
+            "eventId": "event-1",
+            "occurrenceId": "occurrence-1",
+            "admissionMode": "booking",
+            "confirmationMode": "instant",
+            "state": "confirmed",
+            "participantUnits": 1,
+            "reconfirmationState": "notRequired",
+            "createdAt": "2026-08-27T10:00:00.000Z",
+            "updatedAt": "2026-08-27T10:01:00.000Z"
+          }
+        ],
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "sort": "createdAtDescIdDesc",
+        "consistency": "liveKeyset"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "listMyBookings",
+      "requestId": "page-rejected",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "rejected",
+      "error": {
+        "schemaVersion": 1,
+        "code": "feature_disabled",
+        "retryable": false,
+        "correlationId": "page-rejected"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "listMyBookings",
+      "requestId": "page-retryable",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "retryableFailure",
+      "error": {
+        "schemaVersion": 1,
+        "code": "contention",
+        "retryable": true,
+        "correlationId": "page-retryable"
+      }
+    }
+  ],
+  "availability": [
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "requestId": "finite",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "availability": {
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "channel": "onsite",
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "eventRevision": 7,
+        "status": "limited",
+        "authority": "authoritative",
+        "capacityMode": "finite",
+        "ledgerRevision": 9,
+        "availableUnits": 2
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "requestId": "unlimited",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "availability": {
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "channel": "online",
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "eventRevision": 7,
+        "status": "available",
+        "authority": "authoritative",
+        "capacityMode": "unlimited"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "requestId": "not-open",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "availability": {
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "channel": "onsite",
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "eventRevision": 7,
+        "status": "notOpen",
+        "authority": "authoritative",
+        "capacityMode": "notApplicable",
+        "registrationOpensAt": "2026-08-28T12:00:00.000Z"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "requestId": "closed",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "availability": {
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "channel": "onsite",
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "eventRevision": 7,
+        "status": "closed",
+        "authority": "authoritative",
+        "capacityMode": "notApplicable",
+        "registrationClosesAt": "2026-08-26T12:00:00.000Z"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "requestId": "stale",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "availability": {
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "eventRevision": 7,
+        "status": "stale",
+        "authority": "nonAuthoritative",
+        "capacityMode": "notApplicable",
+        "reasonCode": "source_stale"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "requestId": "availability-rejected",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "rejected",
+      "error": {
+        "schemaVersion": 1,
+        "code": "event_unavailable",
+        "retryable": false,
+        "correlationId": "availability-rejected"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "requestId": "availability-retryable",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "retryableFailure",
+      "error": {
+        "schemaVersion": 1,
+        "code": "temporarily_unavailable",
+        "retryable": true,
+        "correlationId": "availability-retryable"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "requestId": "terms-finite",
+      "availability": {
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-1",
+        "channel": "onsite",
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "eventRevision": 1,
+        "status": "available",
+        "authority": "authoritative",
+        "capacityMode": "finite",
+        "ledgerRevision": 0,
+        "availableUnits": 10,
+        "terms": {
+          "inventoryPoolId": "pool_0123456789abcdef0123456789abcdef",
+          "channel": "onsite",
+          "partyMode": "partyWithoutNames",
+          "maxParticipantUnits": 3,
+          "registrationOpensAt": "2026-08-20T15:00:00.000Z",
+          "registrationClosesAt": "2026-08-27T14:00:00.000Z",
+          "cancellationDeadline": "2026-08-27T13:00:00.000Z"
+        }
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "requestId": "terms-unlimited",
+      "availability": {
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-2",
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "eventRevision": 1,
+        "status": "available",
+        "authority": "authoritative",
+        "capacityMode": "unlimited",
+        "terms": {
+          "partyMode": "selfOnly",
+          "maxParticipantUnits": 1,
+          "registrationOpensAt": "2026-08-20T15:00:00.000Z",
+          "registrationClosesAt": "2026-08-27T14:00:00.000Z",
+          "cancellationDeadline": "2026-08-27T13:00:00.000Z"
+        }
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "queryType": "getEventAvailability",
+      "serverTime": "2026-08-27T12:00:00.000Z",
+      "kind": "succeeded",
+      "requestId": "terms-not-open",
+      "availability": {
+        "eventId": "event-1",
+        "occurrenceId": "occurrence-3",
+        "channel": "onsite",
+        "asOf": "2026-08-27T12:00:00.000Z",
+        "eventRevision": 1,
+        "status": "notOpen",
+        "authority": "authoritative",
+        "capacityMode": "notApplicable",
+        "registrationOpensAt": "2026-09-01T00:00:00.000Z",
+        "terms": {
+          "inventoryPoolId": "pool_0123456789abcdef0123456789abcdef",
+          "channel": "onsite",
+          "partyMode": "partyWithoutNames",
+          "maxParticipantUnits": 3,
+          "registrationOpensAt": "2026-08-20T15:00:00.000Z",
+          "registrationClosesAt": "2026-08-27T14:00:00.000Z",
+          "cancellationDeadline": "2026-08-27T13:00:00.000Z"
+        }
+      }
+    }
+  ]
+}

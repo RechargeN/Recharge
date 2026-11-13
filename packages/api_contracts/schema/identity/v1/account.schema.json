@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/identity/v1/account.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "userId",
+    "status",
+    "systemRoles",
+    "revision",
+    "securityRevision",
+    "revokeBeforeSecurityRevision",
+    "createdAtUtc",
+    "updatedAtUtc"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "userId": { "$ref": "identity_common.schema.json#/$defs/entityId" },
+    "status": { "enum": ["active", "restricted", "blocked", "deleted"] },
+    "systemRoles": {
+      "type": "array",
+      "uniqueItems": true,
+      "minItems": 1,
+      "maxItems": 3,
+      "items": { "enum": ["User", "Admin"] }
+    },
+    "revision": { "$ref": "identity_common.schema.json#/$defs/revision" },
+    "securityRevision": {
+      "$ref": "identity_common.schema.json#/$defs/revision"
+    },
+    "revokeBeforeSecurityRevision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "createdAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" },
+    "updatedAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" },
+    "stepUpRequired": { "type": "boolean" }
+  }
+}

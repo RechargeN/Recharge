@@ -1,0 +1,125 @@
+export type BookingFailureCode =
+  | 'feature_disabled'
+  | 'app_check_required'
+  | 'unauthenticated'
+  | 'permission_denied'
+  | 'session_refresh_required'
+  | 'session_revoked'
+  | 'session_expired'
+  | 'invalid_contract'
+  | 'unsupported_schema'
+  | 'unsupported_flow'
+  | 'event_unavailable'
+  | 'registration_not_open'
+  | 'registration_closed'
+  | 'cancellation_deadline_passed'
+  | 'reconfirmation_not_required'
+  | 'reconfirmation_deadline_passed'
+  | 'material_revision_mismatch'
+  | 'sold_out'
+  | 'already_active'
+  | 'concurrency_cap_reached'
+  | 'active_booking_limit_reached'
+  | 'rate_limited'
+  | 'revision_conflict'
+  | 'idempotency_conflict'
+  | 'contention'
+  | 'temporarily_unavailable';
+
+/** L4.8: what the shared `prepareTransport` refuses before a module runs. */
+export const moduleTransportRefusalCodes = [
+  'app_check_required',
+  'feature_disabled',
+  'permission_denied',
+  'temporarily_unavailable',
+  'unauthenticated',
+] as const;
+
+export type BookingResult<T> =
+  | Readonly<{ kind: 'succeeded'; data: T }>
+  | Readonly<{ kind: 'rejected'; code: BookingFailureCode }>
+  | Readonly<{
+      kind: 'retryableFailure';
+      code: 'contention' | 'temporarily_unavailable' | 'rate_limited' | 'session_refresh_required';
+      retryAfterSeconds?: number;
+    }>
+  | Readonly<{ kind: 'unsupportedContract'; code: 'unsupported_schema' | 'unsupported_flow' }>;
+
+export const succeeded = <T>(data: T): BookingResult<T> => ({ kind: 'succeeded', data });
+export const rejected = <T = never>(code: BookingFailureCode): BookingResult<T> => ({
+  kind: 'rejected',
+  code,
+});
+export const retryable = <T = never>(
+  code: 'contention' | 'temporarily_unavailable' | 'rate_limited' | 'session_refresh_required',
+  retryAfterSeconds?: number,
+): BookingResult<T> => ({
+  kind: 'retryableFailure',
+  code,
+  ...(retryAfterSeconds === undefined ? {} : { retryAfterSeconds }),
+});
+export const unsupported = <T = never>(
+  code: 'unsupported_schema' | 'unsupported_flow',
+): BookingResult<T> => ({ kind: 'unsupportedContract', code });
+
+export class BookingDomainRefusal extends Error {
+  constructor(readonly code: BookingFailureCode) {
+    super(code);
+    this.name = 'BookingDomainRefusal';
+  }
+}
+
+export class BookingRetryableFailure extends Error {
+  constructor(
+    readonly code:
+      'contention' | 'temporarily_unavailable' | 'rate_limited' | 'session_refresh_required',
+  ) {
+    super(code);
+    this.name = 'BookingRetryableFailure';
+  }
+}
+
+export function toBookingCommandWireResult<
+  T extends Readonly<{ booking: unknown; outcome?: 'reconfirmed' }>,
+>(
+  result: BookingResult<T>,
+  requestId: string,
+  serverTime: string,
+): Readonly<Record<string, unknown>> {
+  const base = {
+    schemaVersion: 1,
+    kind: result.kind,
+    requestId,
+    correlationId: requestId,
+    serverTime,
+  } as const;
+  if (result.kind === 'succeeded') {
+    return {
+      ...base,
+      booking: result.data.booking,
+      ...(result.data.outcome === undefined ? {} : { outcome: result.data.outcome }),
+    };
+  }
+  if (result.kind === 'unsupportedContract') {
+    return { ...base, unsupportedPayload: { reason: result.code } };
+  }
+  const code = bookingWireErrorCode(result.code);
+  return {
+    ...base,
+    error: {
+      schemaVersion: 1,
+      code,
+      retryable: result.kind === 'retryableFailure',
+      correlationId: requestId,
+      ...(result.kind === 'retryableFailure' && result.retryAfterSeconds !== undefined
+        ? { details: { retryAfterSeconds: result.retryAfterSeconds } }
+        : {}),
+    },
+  };
+}
+
+export function bookingWireErrorCode(code: BookingFailureCode): string {
+  if (code === 'unauthenticated') return 'not_authenticated';
+  if (code === 'permission_denied') return 'not_authorized';
+  return code;
+}

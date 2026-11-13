@@ -1,0 +1,2187 @@
+# Recharge Backend — Content Publication Specification
+
+- ID: **BCK-07**
+- Version: **0.17**
+- Date: **2026-10-20**
+- Spec status: **Review — BCK07-LOCAL-01 and BCK07-PERSIST-01 approved and implemented as local/Emulator-only slices; production approval pending**
+- Runtime status: **Content aggregate Present locally (in-memory) and in an Emulator-only Firestore repository, all types and markets disabled; production runtime Absent; bounded Event outbox→Booking delivery/lifecycle handoff Present locally/Emulator-only**
+- Accountable owner: **Content Platform owner**
+- Review owners: **Identity, API, Security/Privacy, Mobile, Reference Data,
+  Media, Discover, Event, Planning, Route, Trust & Safety, Operations and Legal**
+- Markets: **Latvia first; Estonia and Lithuania prepared but independently gated**
+- Coordination baseline: [BCK-02 v2.4.98](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Coverage evidence: [BCK-07-PRE v0.4](BACKEND_CONTENT_PUBLICATION_COVERAGE_MATRIX.md)
+- Canonical path: `docs/product/CONTENT_PUBLICATION_BACKEND_SPEC.md`
+- Runtime effect of this revision: **none**
+
+## 0. Changelog
+
+### v0.17 — 2026-10-20 — common local integration (Review)
+
+- Consolidates the previously owner-authorized D3.5 Session, D3.6 CW-V1 and
+  D3.7 Find People contracts on the common I1/I2/Scenario publication base;
+  no new product scope, authority, type enablement or production permission.
+- Class keeps §47/§47.1; Find People moves from its branch-local §47 to §48.
+  Registry v9 records their combined availability; independent default-off
+  flags and each source's publisher/visibility policy remain unchanged.
+- Current common-build validation and acceptance boundary:
+  [28–29 evidence](../verification/T1_T2_COMMON_VERIFICATION.md).
+
+### v0.16 — 2026-10-19
+
+- records the explicit owner decision T2 (CLS-OD-01…10) and the Approved
+  Class / Workshop CW-V1 slice spec (Class spec v1.2 §2.6, §34); adds the
+  D3.6 documentation amendment (§47, Review) and exact planned paths;
+- the owner then accepted the D3.6 §6 file plan and Event Classification
+  2.2.4 (§47.1); bounded local/LV Emulator implementation is authorized,
+  default-off; no production, commit, push or deployment.
+- records the T3 owner decisions FP-OD-01…04 and adds the D3.7 Find People
+  amendment (§48): the draft body is the private source, publication stores a
+  server-built public projection (~1 km cell centre), and submit, approved
+  publish, immutable activate and every exact-ID read check BCK-06 consent and
+  the synthetic 18+ attestation; local/LV Emulator only, default-off.
+
+### v0.15 — 2026-10-18
+
+- records the explicit owner decision T1 and Approved Session create spec
+  v1.2; adds the D3.5 documentation amendment (§46) and exact planned paths;
+- Session backend validation covers schedule rules and closing exceptions,
+  never slot materialization, stored availability or ECL-03/BCK-09 authority;
+- D3.5 file plan remains Review: this revision authorizes documents only,
+  changes no runtime, registry, flag, schema, migration or environment.
+
+
+### v0.14 — 2026-09-30
+
+- second audit remediation inside the existing maps: a completed command is
+  replayed from its stored result without consulting Media again, and an
+  unreachable Media is a typed refusal (`media_not_ready`) for new commands
+  (§38.11.5); adds BCK-07-AC-109;
+- changes no product rule, market, type flag, export, Firebase, cloud, push or
+  merge decision.
+
+### v0.13 — 2026-09-30
+
+- records the remediation of an independent audit of stages 1-2, inside the
+  existing maps (no new paths): a stored idempotent result is no longer a
+  standing permission (§38.11.1); no Content or Media port call is made while a
+  repository transaction is held (§38.11.2); the Firestore adapter verifies the
+  endpoint the client really targets (§38.11.3); effects are read and verified in
+  stable pages and targeted reads instead of one capped read (§38.11.4);
+- adds BCK-07-AC-106..AC-108; amends AC-101 and AC-104 accordingly;
+- changes no product rule, market, type flag, export, Firebase, cloud, push or
+  merge decision; all types stay disabled.
+
+### v0.12 — 2026-09-30
+
+- authorizes `BCK07-PERSIST-01`, a bounded Emulator-only Content persistence
+  slice (item 2.6), in a new §38: exact collection manifest, exact file map,
+  buffered-transaction semantics, bounded history and document size, technical
+  Emulator-only enforcement, narrow integrity/replay recovery and a scenario
+  suite that runs on both the in-memory and the Firestore adapter;
+- adds one additive failure code, `storage_limit_exceeded`, for a history or
+  document that would exceed the local storage bounds;
+- keeps every type, market and flag disabled; adds no callable, export, worker,
+  scheduler, cloud resource, Catalog projection or product rule; production
+  approval stays a separate decision;
+- 2.6 is not complete without a successful Emulator and Rules run on the exact
+  toolchain (Node 22.23.2, npm 10.9.8, Temurin 21.0.12+8).
+
+### v0.11 — 2026-09-30
+
+- amends the closed §34.2 map for the Media integration required by
+  BCK14-LOCAL-01: one new file and the exact existing files in §37 change;
+  nothing else;
+- the immutable published revision stores generation-pinned media
+  attachments; `mediaRevision` becomes a canonical hash of them; rollback
+  verifies the stored references; readiness checks are evidence, never an
+  attach;
+- changes no product rule, market, type flag, export, Firebase, cloud, push or
+  merge decision; all types stay disabled.
+
+### v0.10 — 2026-09-30
+
+- closes BCK07-LOCAL-01 item 2.4 (local acceptance) inside the v0.8 map, with
+  no new paths: delegated import through `executeDelegated` only, exact
+  `ownerImport` provenance, `originBinding {directAuthoring | delegatedImport}`,
+  `changeClass`, non-session actor idempotency (`module:<id>/<op>`) and lookup
+  by `externalBindingRef` (BCK-07-AC-92..AC-97);
+- adds §36, the agreed EVS hook register for Content, Identity, Catalog and
+  Place: what the local slice already provides, what is deferred and to which
+  small slice; it adds no EVS runtime, module path, flag or network permission;
+- changes no product rule, market, type flag, export, Firebase, cloud, push or
+  merge decision; all types stay disabled; BCK-23 stays Draft/Proposed.
+
+### v0.9 — 2026-09-30
+
+- records the additive local publication-lifecycle contract implemented by
+  BCK07-LOCAL-01 item 2.3 inside the v0.8 map (no new paths):
+  `withdrawPublication` (`withdraw | archive`) and `activatePublishedRevision`
+  (compatible rollback to an earlier immutable revision) as actor commands, and
+  `applyModerationDisposition` as a system-only BCK-22 instruction verified
+  through the moderation port and never accepted from a client;
+- the `PublicationPointer` carries two independent holds, `ownerHold` and
+  `moderationHold {kind, decisionId}`, and a derived `visibility`; lifting one
+  never lifts the other, a newer decision replaces the chain, `restore` lifts
+  only the decision it names, and publishing cannot bypass a moderation hold
+  (`publication_restricted`, an additive failure code);
+- visibility facts (`ContentVisibilityChanged`) carry the monotonic pointer
+  revision so a tombstone always beats stale cache; dispositions are idempotent
+  by decision;
+- changes no product rule, market, type flag, export, Firebase, cloud, push or
+  merge decision; all types stay disabled.
+
+### v0.8 — 2026-09-29
+
+- amends the closed §34.2 map with thirteen exact files for typed source rules
+  (`domain/type_rules/` and their unit tests); `content_type_registry.ts`
+  stays the registry and only wires the rules and records unavailability
+  reasons;
+- scopes the rules to Place, Event (C0 + schedule-C1 only, unsupported variants
+  rejected explicitly), Activity, Rental and Collection, each read from its
+  current approved specification;
+- keeps Session, Class/Workshop, Find People, Route and Scenario registered but
+  unavailable with an explicit reason and negative tests, without a generic
+  validator;
+- changes no product rule, slice scope, contract schema or fixture; enables no
+  type, market, export, Firebase, cloud, push or merge.
+
+### v0.7 — 2026-09-27
+
+- reserves additive delegated-import command inputs for a future governed Event
+  Ingestion module without granting it Content collection write authority;
+- keeps `ownerImport` provenance, exact origin binding, change classification
+  and non-session actor idempotency inside ordinary validation/moderation;
+- authorizes no Event Ingestion schema, fetcher, worker, callable, resource,
+  network access, cloud deployment or publication bypass.
+
+### v0.6 — 2026-09-25
+
+- adds the immutable local Event Booking outbox and idempotent Booking delivery
+  checkpoint with bounded retry/dead-letter evidence;
+- adds Booking-owned occurrence cancellation and material-reschedule effects
+  without giving Booking write authority over Event publication state.
+- records exact Node 22.23.2/Java 21 focused delivery/lifecycle evidence while
+  retaining the bounded 100-way contention caveat in BCK-09.
+
+### v0.5 — 2026-09-25
+
+- adds the bounded BCK-07/BCK-09 `EventRevisionPublished` handoff without
+  starting BCK07-LOCAL-01 or creating a second Content aggregate;
+- keeps Event as publication-state writer and gives the BCK-09 consumer sole
+  write ownership of the minimal operational `bookingEventProjections` view;
+- verifies duplicate/out-of-order delivery, unpublish, occurrence cancellation,
+  material reschedule and deterministic rebuild in the local Emulator; that
+  v0.5 evidence used Java 21 and Node 24 compatibility mode and is superseded
+  for the v0.6 delivery/lifecycle paths by the exact-toolchain focused rerun.
+
+### v0.4 — 2026-09-23
+
+- defines BCK07-LOCAL-01 as the first item-6 product slice with exact local
+  paths, dependencies, tests, migration and rollback boundaries;
+- authorizes only a disabled framework-neutral Content foundation with
+  canonical schemas, in-memory repositories and local evidence;
+- retains mobile/UI, callable exports, Firestore/Firebase product runtime,
+  Media, Catalog workers, cloud, deployment and activation as later gates.
+
+### v0.3 — 2026-09-20
+
+- completed the Stage 3 ten-type publication adapter matrix and exact
+  Identity→draft→submission→immutable revision→Catalog handoff;
+- fixed PublisherRef pinning, moderation disposition consumption, publication
+  transaction/outbox semantics and typed rollback/withdrawal behavior;
+- preserved missing source contracts, OD-03/10/11, Money, Media, T&S,
+  Firebase and execution dependencies as independent fail-closed gates.
+
+### v0.2.1 — 2026-09-20
+
+- added the Stage 2 normalized Content entity inventory;
+- separated Content publication authority from Media blobs, Discover
+  projections, T&S enforcement and BCK-18 import orchestration;
+- aligned publisher, lifecycle, transaction and evidence semantics.
+
+### v0.2 — 2026-08-25
+
+- completed the 22/22 BCK-02 design contract and promoted it to Review;
+- established exactly ten publishable Create types with Scenario replacing the
+  legacy Quick Plan taxonomy slot;
+- separated publication manifest/current public revision from source-domain,
+  Media, Identity, Catalog, Booking and moderation authority;
+- recorded 60 AC and ten owner decisions without authorizing contracts,
+  Firebase, migration, runtime, deployment or production data.
+
+### v0.1 — 2026-08-25
+
+- created the documentation-only target from canonical docs and current
+  local/mock Create runtime audit;
+- recorded unknown-type, pending-review timestamp, PublisherRef, Money, media,
+  provenance and parallel-publication migration debt.
+
+## 1. Verdict and status semantics
+
+BCK-07 defines the target authoritative publication lifecycle for the ten
+accepted Create Hub content types. It is complete enough for cross-owner Review,
+not Approved or implemented. Runtime is Absent.
+
+This specification does not treat OD-10 technical acceptance as source,
+content, Legal, fixture or runtime approval. Missing source-domain contracts make their type disabled, not
+implicitly generic. Document Review creates no Firebase, backend handlers,
+mobile adapter, import, public catalog item or production permission.
+
+## 2. Parents, priority and compatibility
+
+Priority:
+
+1. Accepted ADR;
+2. Approved owning product/domain specification;
+3. Approved BCK coordination and architecture decisions;
+4. this BCK-07 publication contract;
+5. Draft/Proposed documents and current runtime evidence.
+
+Inputs:
+
+- [ADR 0013](../adr/0013-domain-policy-baseline.md): lifecycle, ownership,
+  capability, IDs, moderation, privacy, audit and media separation;
+- [ADR 0015](../adr/0015-authenticated-viewer-verified-creator-professional-page.md):
+  authenticated User drafting and verified Creator/PublisherRef authority;
+- [BCK-03](BACKEND_API_CONTRACT_STANDARD.md): typed wire and idempotency;
+- [BCK-04](BACKEND_SECURITY_PRIVACY_SPEC.md): privacy/security/age gates;
+- [BCK-06](IDENTITY_PUBLISHER_BACKEND_SPEC.md): account/access/publisher truth;
+- [BCK-14](MEDIA_STORAGE_BACKEND_SPEC.md): ready media generations;
+- [BCK-18](MOBILE_BACKEND_INTEGRATION_STANDARD.md): mobile/import seam;
+- [BCK-20](REFERENCE_DATA_LOCALIZATION_SPEC.md): stable reference revisions
+  and Proposed, not Accepted, LocalizedText contract;
+- [Event Classification v2.2.3](EVENT_CLASSIFICATION_SPEC.md): canonical Event
+  axes and aggregate boundaries;
+- [Vision](VISION.md): ten-type Create Hub and product boundaries.
+
+An existing local/mock behavior is compatibility evidence, not authority. A
+type-specific Draft/Ready-for-approval spec cannot be silently promoted here.
+
+## 3. Outcome and non-goals
+
+### 3.1 Outcome
+
+One provider-neutral publication service that:
+
+- persists actor-owned revisioned drafts where a domain permits cloud drafts;
+- validates a typed source revision through the owning domain;
+- records persistent PublisherRef and immutable provenance;
+- submits, reviews, activates, revises, hides, archives and deletes through
+  trusted state transitions;
+- emits catalog-consumable facts without writing Catalog projections;
+- coordinates Media readiness and moderation/DSR effects without stealing
+  their ownership;
+- supports migration, compatibility, rollback and Baltic market gates.
+
+### 3.2 Non-goals
+
+BCK-07 does not own:
+
+- account/session/Creator/Page/capability decisions;
+- category, locale, market or currency datasets;
+- Scenario, Quick Plan, Route/GPX or Booking source aggregates;
+- Media bytes, object generations or transforms;
+- search/feed/map/details projections or ranking;
+- report cases, sanctions, appeals or staff case management;
+- payments, provider availability, notification delivery or analytics datasets;
+- Firebase provisioning, UI/form composition or direct SDK access.
+
+## 4. Canonical scope and type registry
+
+Exactly these stable type IDs may be registered for publication:
+
+```text
+event
+activity
+route
+place
+session
+scenario
+find_people
+class_workshop
+rental
+collection
+```
+
+The registry entry includes type ID, schema family/version, owning validator,
+source-revision resolver, publication policy revision, required capability,
+allowed visibility, moderation profile, market/age gates and projection mapper
+version. It is server-controlled and fail-closed.
+
+`quick_plan` is a BCK-10 private/invited utility and legacy read discriminator.
+It cannot be submitted, activated or projected by BCK-07. Unknown/newer IDs
+return typed unsupported state; they never default to Event.
+
+Each type is enabled independently. A generic shared form or base draft does
+not authorize publication if the type validator/contract is missing.
+
+## 5. Ownership and single writers
+
+| Record/decision | Single writer | BCK-07 boundary |
+|---|---|---|
+| `PublicationRecord`/current public revision | BCK-07 | Full lifecycle truth |
+| Generic draft envelope/revision | BCK-07 where cloud draft is enabled | Actor/publisher/type/revision, not foreign aggregate mutation |
+| Event content source/config | Event domain through BCK-07 adapter | Validate and pin accepted revision |
+| Scenario source aggregate | BCK-10 | BCK-07 stores distribution snapshot ref only |
+| Quick Plan | BCK-10 | Never publish |
+| Route/GPX source aggregate | BCK-11 | BCK-07 stores publication snapshot ref only |
+| Booking/inventory ledger | BCK-09 | BCK-07 exposes pinned Event config only |
+| Media asset/object generation | BCK-14 | Consume ready receipt |
+| Access/PublisherRef eligibility | BCK-06 | Consume current access result |
+| Catalog/search/map/feed/details projection | BCK-08 | Consume published/revoked facts |
+| Moderation case/sanction | BCK-22 | Apply typed authorized effect to Content |
+| Reference/localization datasets | BCK-20 | Pin stable IDs/revisions |
+
+Publication is an owning command, not a database copy performed by a consumer.
+Discover, Media, Mobile, Admin and moderation workers never directly edit the
+Content source record.
+
+## 6. Actors and authorization boundary
+
+Actors:
+
+- authenticated personal author;
+- verified Creator acting as personal PublisherRef;
+- verified Creator with active exact-page membership;
+- trusted review/moderation effect principal;
+- privacy deletion/restriction orchestrator;
+- migration worker using BCK-18 checkpoint and explicit mappings.
+
+An authenticated User may create/save a permitted personal or
+pre-verification draft. Under the current Accepted baseline, generic
+pre-verification authoring is local-only; this BCK does not silently promote it
+to remote unverified storage. Submit/publish requires backend-time verified
+Creator, required capability, exact personal/page PublisherRef eligibility,
+current membership, market/type policy and expected revision.
+
+Personal Scenario authoring/distribution semantics remain BCK-10: ordinary User
+may keep a private personal Scenario; public/unlisted distribution invokes the
+applicable BCK-07/BCK-10 contract and capability. No manual User/Creator role
+switch grants authority.
+
+Workspace switching supplies a default only for a **new** draft. It never
+rewrites a saved draft's PublisherRef. Cached access and client booleans never
+authorize a mutation.
+
+## 7. Domain model
+
+### 7.1 ContentDraftEnvelope
+
+```text
+ContentDraftEnvelope {
+  draftId: ULID
+  ownerSubjectId: UserId
+  publisherRef: PublisherRef?
+  contentTypeId: canonical type ID
+  sourceRef: {aggregateId, revision, schemaVersion}
+  basePublishedRevisionId: ULID?
+  state: draft | submitted | superseded | deleted
+  visibilityIntent: private | unlisted | public
+  marketRefs: MarketId[]
+  referenceDatasetRevision
+  contentLanguageRefs
+  provenanceRef
+  revision
+  createdAt/updatedAt: UTC
+}
+```
+
+PublisherRef may be absent only in an owning-domain private aggregate that
+explicitly permits it, such as personal Scenario semantics delegated to BCK-10.
+A generic local pre-verification draft is not uploaded merely because this
+envelope exists. PublisherRef is mandatory and eligible before Content submit/
+distribution. Draft payload is typed by the source domain; unbounded
+`sectionData` is not wire authority.
+
+### 7.2 PublicationRecord
+
+```text
+PublicationRecord {
+  publicationId: ULID
+  contentTypeId
+  sourceRef + immutable sourceSnapshotHash
+  publisherRef
+  ownerSubjectId
+  lifecycle: pendingReview | published | archived | hidden | deleted
+  currentPublicRevisionId: ULID?
+  candidateRevisionId: ULID?
+  moderationProfileRevision
+  provenanceRef
+  marketRefs + visibility
+  revision
+  submittedAt/publishedAt/updatedAt/deletedAt: UTC?
+}
+```
+
+`publishedAt` is non-null only after successful public/unlisted activation. A
+record in `pendingReview` is not published and has no public catalog effect.
+The lifecycle field is the sole publication state authority. Legacy
+`draftStatus`, `publishStatus` and `moderationStatus` values are migration
+inputs, not independently writable backend state. Review and sanction outcomes
+are immutable typed references rather than parallel lifecycle enums.
+
+### 7.3 ContentRevision
+
+An immutable revision pins source schema/version/hash, publisher, market,
+reference/localization revisions, generation-pinned Media refs, age/restriction
+classification, provenance and policy versions. Material edit produces a new
+candidate revision; it never mutates the current public revision in place.
+
+### 7.4 Provenance
+
+```text
+ContentProvenance {
+  kind: creatorSubmission | ownerImport | licensedSeed | officialSource |
+        derivedMigration
+  sourceId + sourceRevision + snapshotHash?
+  sourceUrlRef?
+  licensePolicyRef?
+  attributionRef?
+  acquiredAt + checkedAt?
+  correctionRemovalPolicyRef
+  importer/actorRef
+  originBinding {
+    kind: directAuthoring | delegatedImport
+    delegatedActorRef?
+    externalBindingRef?
+  }
+}
+```
+
+Raw URLs and UI seed labels are not sufficient. A licensed/official seed does
+not impersonate a user/page. Until OD-03 defines eligible publisher/attribution,
+seeded public activation is disabled.
+
+`delegatedImport` is an additive command origin, not a PublisherRef and not a
+staff impersonation mechanism. Its actor reference identifies the approved
+server module and operation; the requested PublisherRef is revalidated by
+BCK-06 and bound only by BCK-07. Imported Event submissions carry a typed
+change class through the same validation and moderation path as manual
+content. For a non-session server actor, semantic idempotency binds module
+actor, source/binding, logical operation, normalized payload hash and expected
+revision; absence of a mobile Session never weakens authorization or audit.
+
+## 8. State machines and revision semantics
+
+### 8.1 Draft/candidate
+
+```text
+draft -> submitted -> pendingReview
+draft -> deleted
+submitted -> draft (typed remediation only)
+submitted -> superseded
+```
+
+### 8.2 Publication
+
+```text
+pendingReview -> published | archived | deleted
+published -> archived | hidden | deleted
+archived -> pendingReview | published | deleted
+hidden -> published | archived | deleted
+```
+
+`hidden` is moderation/system visibility restriction. It is not an author
+archive and cannot be cleared by ordinary author edit. `deleted` is terminal
+for that revision/record identity; restore, where policy permits, is a trusted
+explicit command and never automatic backup resurrection.
+
+### 8.3 Material revision
+
+For an already published item:
+
+1. current public revision remains immutable and readable unless separately
+   hidden/archived/deleted;
+2. edit creates a candidate based on exact public revision;
+3. review policy decides whether the candidate needs pending review;
+4. activation atomically switches the current revision pointer;
+5. catalog consumers receive one ordered/revisioned change fact.
+
+If activation fails, the prior public revision remains authoritative. A
+candidate is never partially visible.
+
+### 8.4 Direct publish
+
+Default is pending review. Direct publish exists only for an Accepted
+type/market/publisher policy with trusted server flag, exact capability,
+current access snapshot, validated source and revision, ready media and audit.
+One type-specific local shortcut never becomes a global backend rule.
+
+## 9. Commands
+
+| Command | Result | Key controls |
+|---|---|---|
+| `content.createDraft` | draft envelope | actor/type/market policy; permanent ID |
+| `content.saveDraftRevision` | saved/replayed/conflict | owner, expected revision, typed validator |
+| `content.bindPublisher` | new draft revision | exact eligible PublisherRef; no workspace rewrite |
+| `content.submitForReview` | pending-review receipt | readiness, source/media/ref revisions, capability |
+| `content.activateRevision` | published revision | trusted review/direct policy, expected publication revision |
+| `content.rejectCandidate` | remediation/rejected receipt | trusted review decision/ref |
+| `content.archive` | archived receipt | owner/capability/revision |
+| `content.hide` | hidden receipt | trusted moderation/safety command |
+| `content.restoreVisibility` | published/archived receipt | trusted effect; sanction resolved |
+| `content.delete` | deletion receipt | owner/privacy/admin authority, retention/holds |
+| `content.correctProvenance` | new candidate/effect | OD-03 policy and audit |
+| `content.removeSeededSource` | revoked/deleted effect | source removal policy |
+
+No command takes a client-provided `isAuthorized`, `isVerifiedCreator`,
+`approved`, `publishedAt` or moderation verdict as truth.
+
+## 10. Queries and public handoff
+
+| Query | Projection |
+|---|---|
+| `content.getDraft` | owner-scoped typed draft envelope/revision |
+| `content.listDrafts` | owner/workspace/type cursor page |
+| `content.getPublicationStatus` | lifecycle, candidate/current revisions, actions/failures |
+| `content.getPublishedRevision` | authorized immutable source snapshot |
+| `content.listPublisherContent` | publisher-scoped management projection |
+| `content.getProvenanceDisclosure` | visibility-appropriate attribution/freshness/removal info |
+
+BCK-08 receives minimal `content.publishedRevisionChanged` and
+`content.visibilityChanged` facts and builds feed/map/search/details
+projections. It never reads mutable drafts as catalog truth. BCK-07 does not
+write search indexes or promise Discover query freshness; BCK-08 owns revision
+and projection parity.
+
+Booking/provider consumers receive only explicit Event/config revision refs and
+never infer availability from Content lifecycle alone.
+
+## 11. Events and typed failures
+
+### 11.1 Events
+
+- `content.draftSaved`
+- `content.submitted`
+- `content.revisionActivated`
+- `content.candidateRejected`
+- `content.archived`
+- `content.visibilityRestricted`
+- `content.visibilityRestored`
+- `content.deleted`
+- `content.provenanceCorrected`
+- `content.sourceRemoved`
+
+Events are semantic until the BCK-03 OD-09 envelope is Accepted. Consumers
+dedupe and tolerate replay/out-of-order delivery. Events never grant authority
+or carry raw private drafts.
+
+### 11.2 Failure vocabulary
+
+```text
+unauthenticated
+permissionDenied
+creatorVerificationRequired
+publisherUnavailable
+membershipInactive
+unsupportedContentType
+unsupportedContractVersion
+typeDisabled
+marketDisabled
+agePolicyUnavailable
+referenceRevisionUnsupported
+sourceRevisionUnavailable
+sourceValidationFailed
+mediaNotReady
+rightsEvidenceRequired
+provenanceRequired
+reviewRequired
+moderationRestricted
+staleRevision
+conflict
+notFound
+alreadyDeleted
+rateLimited
+temporarilyUnavailable
+unknownOutcome
+cancelled
+```
+
+Unsupported/unknown type is not reinterpreted. Cancellation before send is
+neutral; cancellation after possible commit is unknown outcome unless the
+server proves no commit.
+
+## 12. Contract versions and evolution
+
+- wire DTO, generic envelope and typed domain payload remain separate;
+- each content type has a registered schema family/version and validator;
+- newer unsupported type/schema/reference/policy revision fails closed;
+- unknown fields may round-trip only under an explicit compatibility contract;
+- generated files are never manually edited;
+- non-Booking Content schema/codegen requires BCK07-OD-01/API approval;
+- material breaking change uses parallel versions/migration, not silent cast;
+- minimum supported client and deprecation window precede removal;
+- stable AC identifiers are not renumbered within accepted review history.
+
+The generic layer does not normalize an unknown typed payload into Event or a
+loosely typed map. Schema version and source revision are both pinned.
+
+## 13. Authorization, revocation and policy
+
+Every mutation re-evaluates backend session, revocation, verified Creator where
+required, capability, exact PublisherRef, active page membership, owner,
+market/type/age policy, source/media/reference revision and expected content
+revision.
+
+Draft read/write is owner/workspace scoped. A personal draft cannot be read by
+a page member merely because the same user manages the page. A page draft
+requires exact active membership and capability. Account/workspace/environment
+caches never mix.
+
+Revoked verification/membership/capability stops submit/activation immediately.
+It does not silently rewrite already published ownership. Subsequent visibility,
+transfer, remediation or archive follows an explicit policy/command and audit.
+
+App Check is defense in depth only. Direct authoritative client Firestore
+writes, client moderation state and cached authorization are forbidden.
+
+## 14. Persistence, indexes and transactions
+
+Logical stores:
+
+- draft envelopes and immutable draft revisions;
+- publication records and immutable content revisions;
+- provenance/source records;
+- idempotency/command result records;
+- moderation/visibility effect references;
+- deletion/retention task records;
+- audit and outbox.
+
+Indexes support owner/workspace/type/state/updated time, publisher/type/state,
+and source/provenance removal lookup. Query shape, cardinality, document size
+and cost are measured before implementation; no unbounded arrays/history live
+inside one mutable document.
+
+Atomic publication transaction validates expected record/candidate/source/
+media/reference revisions, records the immutable revision, switches the current
+pointer, writes audit/idempotency result and outbox. Source aggregates and
+Media objects are not assumed to share that database transaction; their
+generation-pinned receipts make the check deterministic. Reconciliation
+detects partial effects without inventing success.
+
+## 15. IDs, time, Money and reference data
+
+- permanent content/draft/revision/source IDs are ULID/UUID;
+- `loc_*` never crosses authoritative command boundary;
+- server-authoritative timestamps are UTC;
+- local occurrence/place semantics retain IANA timezone;
+- category/subcategory/market/currency/language use stable BCK-20 IDs/revisions;
+- relations are ID-based, never display-name-based;
+- Money is integer minor units plus ISO currency and scale semantics;
+- M2 normalized Money migration must complete before price-bearing remote writes;
+- OD-10 LocalizedText/fallback remains disabled until its retained
+  source/content/Legal/fixture/runtime gates pass;
+- public `publishedAt` is backend activation time, never submit time.
+
+## 16. Idempotency, concurrency, retry and failure
+
+Every logical command uses stable idempotency key and normalized payload hash;
+each attempt uses a fresh request ID. Same key/same hash returns recorded result;
+same key/different hash performs no mutation.
+
+Draft save, submit, activation, archive/hide/restore/delete and provenance
+correction use expected revisions. Last-write-wins is not authoritative remote
+policy. Conflicts return current revision and safe remediation without exposing
+another actor's data.
+
+Unknown outcome is reconciled by command result/idempotency lookup before a new
+logical operation. A repeated already-completed transition may be idempotent
+only when actor, target, requested outcome and revision lineage match.
+
+## 17. Offline, cache and freshness
+
+Offline local drafts remain supported through BCK-18/mobile repositories.
+Offline clients may queue explicit draft intent but cannot claim submit,
+review, publish, hide or delete success. Public/cached projection never
+authorizes edit or activation.
+
+Client state distinguishes local-only, queued, syncing, saved-fresh,
+saved-cached, conflict, pending review, published, stale, hidden, archived,
+deleted, unsupported and unknown outcome. Entries pin account/workspace,
+environment, type/schema, draft/publication/source/reference revision and
+freshness metadata.
+
+A deletion/hide/revocation tombstone wins over stale public cache. Switching
+workspace does not rewrite existing draft PublisherRef or migrate ownership.
+
+## 18. Migration, import and compatibility
+
+Migration uses BCK-18 sessions/checkpoints and BCK-06 identity mappings. Each
+item routes through a BCK-07 command and its owning type validator.
+
+Required phases:
+
+1. inventory local records without remote mutation;
+2. classify exact type, schema, owner, PublisherRef, ID/revision, Money, media,
+   provenance and visibility gaps;
+3. keep unknown/newer/legacy types opaque;
+4. map `quick_plan` only to BCK-10 legacy/private handling, never Scenario or
+   public Content by inference;
+5. replace `loc_*` using explicit durable mapping;
+6. never import mock verification, capability, moderation or approval as truth;
+7. validate Media URLs through BCK-14 and Money after M2;
+8. dry-run, disclose conflicts/skips, checkpoint and support rollback;
+9. preserve public source until a replacement revision is safely activated.
+
+Legacy unknown type default-to-Event and pendingReview-with-publishedAt are read
+debt only. They are normalized by explicit migration rules, not trusted.
+
+## 19. Outbox, moderation and reconciliation
+
+Publication and visibility changes record audit/outbox in the authoritative
+transaction. BCK-08, Notifications and other consumers process idempotently;
+replay cannot republish deleted/hidden content or grant access.
+
+BCK-22 owns reports, sanctions and appeals. It issues a typed, authorized effect
+reference; BCK-07 conditionally applies `hidden`/restore/delete as Content
+writer. A report count, client request or scanner result is not itself a final
+sanction.
+
+Reconciliation detects:
+
+- publication current pointer to absent/incompatible revision;
+- published revision with non-ready Media generation;
+- invalid/revoked publisher eligibility requiring policy action;
+- catalog projection lag (reported to BCK-08, not directly repaired there);
+- source/license removal affecting published revisions;
+- incomplete outbox/visibility/deletion task;
+- parallel legacy publication record.
+
+## 20. Privacy, minors, retention and Legal
+
+Drafts are private by default. Public revisions contain only allowlisted fields
+for the content type/market/visibility. Private organizer contact, exact private
+meeting data, unpublished coordinates, identity evidence, internal moderation
+notes and raw source documents never enter public projections.
+
+`PublisherRef` identifies the publishing subject/context; it is not a public
+contact card. Legacy organizer ID/name/phone/email fields are reconciled into
+typed private contact and explicitly allowlisted public attribution projections
+rather than copied wholesale.
+
+Find People, age-restricted content and any minor/guardian-dependent path remain
+server-disabled until OD-11 is Accepted for the market and qualified
+Legal/Privacy evidence exists. No age is invented here.
+
+Retention is separate for drafts, superseded revisions, published/archived/
+hidden/deleted content, provenance/license evidence, moderation refs,
+idempotency/outbox/audit and backups. No numeric term is Accepted by inheritance
+from a generic class or provider default. Exact policy is BCK07-OD-07.
+
+DSR/export/restriction/delete delegates scoped tasks to source domains, Media,
+Catalog and backups and records privacy-safe completion evidence. Deletion first
+blocks live access. Restore replays newer deletion/restriction/sanction facts
+before any user/public access. Legal/security hold is explicit, scoped,
+time-bound and never creates visibility.
+
+## 21. Abuse, eligibility and App Check
+
+Controls include:
+
+- per actor/publisher/type/market draft/submit/publish limits;
+- duplicate/source/hash similarity signals without cross-owner disclosure;
+- category/tag/reference allowlists;
+- URL/contact/markup normalization and injection-safe rendering;
+- server-side readiness and capability validation;
+- suspicious seeded provenance/license checks;
+- OD-11 age/eligibility enforcement where applicable;
+- App Check monitor/enforce under BCK-04, never as AuthZ;
+- type/market/submit/direct-publish/import kill switches.
+
+ADR 0013 numeric baselines remain applicable only in their accepted scope and
+do not silently become full production quotas. Exact quotas/sanctions need
+owner evidence. Abuse checks cannot silently rewrite content or become a
+moderation verdict.
+
+## 22. Observability, SLO, analytics and cost
+
+Metrics:
+
+- draft create/save/conflict and sync outcomes;
+- submit/readiness failures by safe typed code;
+- pending-review queue age and activation latency;
+- published/candidate/hidden/archived/deleted counts;
+- publisher/type/market policy denials;
+- source/provenance freshness/correction/removal lag;
+- Media/source/reference mismatch;
+- outbox/catalog projection lag;
+- storage/read/write/task cost by environment/type/market.
+
+Logs exclude raw draft bodies, personal contact/location, media URLs/tokens,
+identity evidence and free-text moderation content. Analytics receives governed
+event IDs/minimized dimensions, never Content authority.
+
+Numeric availability, latency, review, deletion, cost and quota targets remain
+BCK07-OD-10. Degradation may disable submit/activation/type/market and retain
+safe drafts; it never bypasses validation or exposes a candidate.
+
+## 23. Flags, rollout and rollback
+
+Server flags are independent by environment, market, type and command:
+
+- cloud draft read/write;
+- submit/review/activation;
+- direct publish policy;
+- unlisted/public visibility;
+- seeded source/import;
+- catalog event emission;
+- age-sensitive surface.
+
+Rollout: documentation → contract fixtures → unit → emulator → synthetic stage
+→ staff cohort → bounded market cohort → owner-approved expansion. Status at
+one stage does not prove the next.
+
+Rollback disables new risky commands, preserves local/remote drafts and last
+safe public revision, drains/quarantines effects and keeps deletion/restriction
+duties. It never restores mock grants, old unsafe schema, hidden content or a
+candidate as public. Public rollback is an explicit pointer transition with
+audit, not an object overwrite.
+
+## 24. Dependency and delivery gates
+
+Before Approval:
+
+- BCK-03/04/05/06/18/20 compatibility disposition and owner review;
+- OD-03 Accepted and OD-10 retained source/content/Legal/fixture gates passed;
+- OD-11 Accepted for enabled age-sensitive scope, otherwise that scope is
+  explicitly disabled with tests;
+- ten BCK07 decisions resolved or formally deferred with controls;
+- canonical source contract/test fixtures for each enabled type;
+- BCK-10/11/14/22 handoffs reconciled where their types/effects are enabled;
+- qualified Security/Privacy/Legal and Operations verdicts.
+
+Before executable work:
+
+- separate Approved bounded R3 slice and exact file/resource map;
+- M2 Money complete for price-bearing writes;
+- BCK-18 adapter/import gates and no mock authority;
+- G1/R1/R2 prerequisites appropriate to environment;
+- no new boundary suppression or explicit approved debt change.
+
+Before production:
+
+- contracts, handlers, persistence, Rules/IAM and negative AuthZ evidence;
+- type parity, migration, source/provenance and rollback evidence;
+- Media/Catalog/moderation/DSR integration and recovery drills;
+- load/SLO/cost, incident and owner sign-off;
+- market-specific Legal/Privacy and feature activation decision.
+
+## 25. Conditional exact file map
+
+The earlier pre-R1 placeholder roots are superseded. Content never uses
+`packages/api_contracts/content/`, `apps/backend/src/content/` or
+`apps/backend/test/content/`; those paths would create a parallel layout.
+
+The only approved BCK07-LOCAL-01 path map is §34.2:
+
+```text
+packages/api_contracts/schema/content/v1/
+apps/backend/functions/src/contracts/          # three exact files in §34.2
+apps/backend/functions/src/modules/content/{domain,application,infrastructure}/
+apps/backend/functions/test/{contract,unit/content,integration}/
+```
+
+Later transport, persistence, workers, migration/recovery or mobile adapter
+paths require their own BCK-02/BCK-07/BCK-18 amendment and executable slice.
+Scenario, Route, Media, Booking, Catalog and Trust & Safety implementations
+stay in their owning modules. Generated artifacts follow the accepted workflow
+and are never manually edited.
+
+## 26. Test and evidence matrix
+
+| Layer | Required evidence |
+|---|---|
+| Domain/unit | ten-type allowlist, Quick Plan denial, lifecycle/revisions, direct-publish policy |
+| Contract | typed schemas/fixtures/errors, unknown/newer fail-closed, split idempotency |
+| Source adapters | exact source revision and validator parity per enabled type |
+| Security | unauthenticated, unverified, cross-user/page, revoked membership, client state injection |
+| Media/reference | non-ready generation, stale taxonomy/locale/market and Money rejection |
+| Publication | candidate/current atomic switch, between-step failure, prior revision preserved |
+| Moderation | typed effect only, report count cannot hide, restore requires resolved sanction |
+| Catalog | ordered revision facts, replay/dedupe, no draft leakage, tombstone propagation |
+| Privacy/Legal | public allowlists, OD-11 gates, DSR/delete/restore no resurrection |
+| Migration | unknown→not Event, Quick Plan non-public, `loc_*`, PublisherRef, provenance, dry run/rollback |
+| Load/cost | draft/submit/review/publish throughput, queue/lag, storage/task/read/write forecast |
+| Rollout | flags, disabled type/market, previous client, rollback to last safe revision |
+
+Documentation checks prove structure and reconciliation only. Emulator does not
+prove production IAM, service limits, latency, Legal review or recovery.
+
+## 27. Definition of Ready
+
+For Approval review:
+
+1. 22/22 coverage remains current;
+2. exactly ten registered types and all missing type contracts are dispositioned;
+3. OD-03/10 and applicable OD-11 have owner verdicts;
+4. ten BCK07 decisions have dated evidence;
+5. dependency owners sign the single-writer/handoff matrix;
+6. runtime remains absent unless separately authorized.
+
+For executable slice:
+
+1. BCK-07 Approved;
+2. exact type/market/command/file/resource scope approved;
+3. contracts/fixtures/readiness and failure vocabulary frozen;
+4. G/R prerequisites and production mock exclusion satisfied;
+5. rollback, kill-switch, cost and migration thresholds predeclared;
+6. no unresolved policy is implemented by assumption.
+
+## 28. Definition of Done
+
+Runtime is Done only when:
+
+- authoritative drafts/revisions/publication records and commands exist in
+  owned layers;
+- every enabled type passes validator/source/contract parity;
+- Identity, Media, Reference, Catalog and moderation handoffs preserve writers;
+- security, integration, privacy, migration, recovery and load gates pass;
+- observability/runbooks/on-call/cost controls are active;
+- runtime evidence/status is updated without conflating Done and Enabled.
+
+Production Enabled additionally requires owner-approved market cohort,
+Legal/Privacy, recovery and incident readiness. Review, Approved, Done,
+deployed and Enabled are distinct.
+
+## 29. Acceptance criteria
+
+1. **BCK-07-AC-01:** Exactly ten canonical content types may be registered.
+2. **BCK-07-AC-02:** Scenario occupies the planning Create slot.
+3. **BCK-07-AC-03:** Quick Plan is never submitted or catalog-published.
+4. **BCK-07-AC-04:** Unknown/newer type never defaults to Event.
+5. **BCK-07-AC-05:** Missing type validator disables that type.
+6. **BCK-07-AC-06:** One lifecycle writer replaces parallel draft/publish/moderation status authority.
+7. **BCK-07-AC-07:** Scenario/Route/Booking source aggregates retain their writers.
+8. **BCK-07-AC-08:** Catalog/Search remains BCK-08 projection authority.
+9. **BCK-07-AC-09:** Media ready receipt never publishes Content itself.
+10. **BCK-07-AC-10:** Identity snapshot never becomes Content ownership data.
+11. **BCK-07-AC-11:** Authenticated User draft does not grant Submit/Publish.
+12. **BCK-07-AC-12:** Submit rechecks verified Creator and exact capability.
+13. **BCK-07-AC-13:** Page publish requires active exact-page membership.
+14. **BCK-07-AC-14:** Workspace switch never rewrites saved PublisherRef.
+15. **BCK-07-AC-15:** Cached/client authorization never grants mutation.
+16. **BCK-07-AC-16:** Pending review is not public/published.
+17. **BCK-07-AC-17:** `publishedAt` is assigned only on activation.
+18. **BCK-07-AC-18:** Material edit creates an immutable candidate revision.
+19. **BCK-07-AC-19:** Current public revision remains until atomic activation.
+20. **BCK-07-AC-20:** Failed candidate activation preserves prior public truth.
+21. **BCK-07-AC-21:** Direct publish is explicit per type/market/publisher policy.
+22. **BCK-07-AC-22:** One local type shortcut never becomes a global rule.
+23. **BCK-07-AC-23:** Hidden is trusted moderation/system state, not author archive.
+24. **BCK-07-AC-24:** Report count/client request cannot directly hide Content.
+25. **BCK-07-AC-25:** Restore requires typed resolved effect and current revision.
+26. **BCK-07-AC-26:** Deleted/restricted tombstone wins over cache/replay.
+27. **BCK-07-AC-27:** Content wire never uses unbounded section map as authority.
+28. **BCK-07-AC-28:** Source schema, revision and snapshot hash are pinned.
+29. **BCK-07-AC-29:** Media refs pin ready asset generation.
+30. **BCK-07-AC-30:** Reference/market/localization revisions are explicit.
+31. **BCK-07-AC-31:** Money remote writes wait for M2 minor units.
+32. **BCK-07-AC-32:** `loc_*` never crosses authoritative boundary.
+33. **BCK-07-AC-33:** Published relations use IDs, never display names.
+34. **BCK-07-AC-34:** Same idempotency key/different hash creates no mutation.
+35. **BCK-07-AC-35:** Retry uses fresh request ID and stable logical key.
+36. **BCK-07-AC-36:** Unknown outcome is reconciled before new logical command.
+37. **BCK-07-AC-37:** Stale revision cannot overwrite newer lifecycle state.
+38. **BCK-07-AC-38:** Offline client never claims submit/publish/delete success.
+39. **BCK-07-AC-39:** Draft/public caches are account/workspace/environment scoped.
+40. **BCK-07-AC-40:** Newer unsupported contract fails closed.
+41. **BCK-07-AC-41:** Migration never imports mock grants/approval/moderation.
+42. **BCK-07-AC-42:** Legacy Quick Plan is not inferred as Scenario/public Content.
+43. **BCK-07-AC-43:** Legacy unknown type is not inferred as Event.
+44. **BCK-07-AC-44:** Seeded source never impersonates a user/page PublisherRef.
+45. **BCK-07-AC-45:** OD-03 blocks seeded catalog activation.
+46. **BCK-07-AC-46:** OD-10 technical acceptance is not treated as
+    source/content/Legal/fixture/runtime approval.
+47. **BCK-07-AC-47:** OD-11 blocks age-sensitive publication where unresolved.
+48. **BCK-07-AC-48:** Public projection excludes private contact/location/evidence.
+49. **BCK-07-AC-49:** Retention is per family/state/purpose with owner evidence.
+50. **BCK-07-AC-50:** Restore replays newer deletion/restriction/sanction facts.
+51. **BCK-07-AC-51:** Outbox replay cannot republish hidden/deleted Content.
+52. **BCK-07-AC-52:** Logs contain no raw private draft or sensitive payload.
+53. **BCK-07-AC-53:** Numeric SLO/quota/cost claims require evidence.
+54. **BCK-07-AC-54:** Degradation never exposes unreviewed candidate.
+55. **BCK-07-AC-55:** Every risky type/command/market has a server kill switch.
+56. **BCK-07-AC-56:** Rollback preserves last safe revision and privacy duties.
+57. **BCK-07-AC-57:** No new boundary suppression is introduced by this revision.
+58. **BCK-07-AC-58:** Documentation/emulator/stage/production evidence remain distinct.
+59. **BCK-07-AC-59:** Executable files require a separate Approved slice.
+60. **BCK-07-AC-60:** Runtime stays Absent until measured evidence exists.
+
+## 30. Explicit unimplemented list
+
+- Content API schemas, fixtures, generated clients and typed DTOs;
+- authoritative draft/revision/publication/provenance persistence;
+- Firebase/GCP handlers, Rules, IAM, indexes, tasks or deployment;
+- ten type source adapters and complete canonical type specs;
+- BCK-10 Scenario/Quick Plan and BCK-11 Route/GPX backend handoffs;
+- BCK-14 Media runtime and BCK-08 Catalog runtime;
+- BCK-22 moderation/report/sanction integration;
+- OD-03 seeded source/licence/provenance/removal decision;
+- OD-10 source/content/Legal/fixture gates for production LocalizedText and
+  content-language use;
+- Accepted OD-11 age/minors policy for sensitive scope;
+- mobile remote adapters, import and mock-authority removal;
+- Money minor-unit migration for price-bearing records;
+- legacy type/ID/publisher/media/provenance migration;
+- exact retention, Legal/Privacy, SLO, quota and cost evidence;
+- production cloud resources, data, traffic, deployment or enablement.
+
+## 31. Final statement
+
+BCK-07 v0.3 is a production-grade Review design for one Content publication
+authority. It closes semantic ownership gaps while deliberately leaving every
+unapproved type, policy and runtime surface disabled.
+
+## 32. Stage 2 normalized Content entity contract
+
+All rows inherit BCK-01 §30 and the BCK-02 writer ledger; existing domain
+sections remain authoritative for commands, queries, events and typed outcomes.
+
+| Entity family | Accountable owner / single writer | Readers/projections | ID/reference contract |
+|---|---|---|---|
+| ContentDraft | Content Publication / draft handler | owner workspace and BCK-18 import orchestration | draftId; `loc_*` only before authoritative create; publisherRef immutable unless explicit command |
+| PublicationSubmission | Content Publication / submit-review handler | moderation/T&S review projection and owner status | submissionId + draftId + expected draft revision |
+| PublishedRevision | Content Publication / publish handler | Discover, Media links, Booking config reader and Mobile | contentId + immutable publishedRevisionId; references by IDs only |
+| PublicationPointer | Content Publication / activate-withdraw handler | Discover projection workers and Details | contentId → one visible compatible revision |
+| SeedProvenance | Content Publication / governed import handler | Admin, Discover and audit | provenanceId + source/license/revision; seed never bypasses ownership/policy |
+| ModerationDispositionRef | Trust & Safety / BCK-22 decision handler; Content writes only its separate publication transition | owner/public status projections | decisionId + policy revision; not duplicated moderation evidence |
+
+Drafts move editing → ready/submitted → revision-required or publishable;
+published revisions are immutable and pointers may activate, replace or
+withdraw them. Direct draft-to-public, publisher rewrite, partial publish and
+projection-as-authority are forbidden. Save/submit/publish commands use stable
+idempotency keys and expected revision; draft update, immutable revision create
+and pointer activation have explicit atomic boundaries. Authorization resolves
+current User/Creator/Admin and PublisherRef through BCK-06. Classification,
+retention, deletion/holds and audit follow BCK-04; telemetry excludes content
+body. Migration is per type with dry-run and permanent-ID mapping from BCK-18;
+rollback selects a prior compatible revision or disables visibility. Type,
+market and publication flags are server-owned. Evidence covers all 10 types,
+publisher isolation, concurrency, moderation handoff, projection rebuild,
+migration and rollback.
+
+## 33. Stage 3 complete Create-to-Publication contract
+
+This section defines one publication mechanism for the accepted ten Create
+types. It does not make incomplete type source contracts executable and never
+turns Quick Plan into catalog Content.
+
+### 33.1 Ten-type source adapter registry
+
+| Stable type ID | Source authority and pinned input | Publication adapter obligation | Discover family |
+|---|---|---|---|
+| `event` | Accepted Event classification/source revision | validate Event/config revision; never copy Booking inventory | Event |
+| `activity` | typed Activity source/draft revision | validate activity-specific schedule/participation fields | Activity |
+| `route` | BCK-11 immutable RouteRevision | pin privacy-trimmed publication revision and ready Media refs | Route |
+| `place` | typed Place source/draft revision | validate place profile, geo visibility, hours and publisher authority | Place |
+| `session` | typed Session source/draft revision | validate session schedule/instructor/participation semantics | Session |
+| `scenario` | BCK-10 immutable ScenarioRevision | pin publishable Scenario snapshot; never embed Quick Plan | Scenario |
+| `find_people` | BCK-06 purpose-limited consented profile revision | publish only policy-allowed fields while consent/OD-11 gates pass | Find People |
+| `class_workshop` | typed Class/Workshop experience revision | validate host, schedule, participation and market policy | Class/Workshop |
+| `rental` | typed Rental source/draft revision | validate offer terms, Money minor units and availability-source declaration | Rental |
+| `collection` | typed Collection revision containing stable published object IDs | validate membership/order and forbid embedding unpublished objects | Collection |
+
+Each registry entry pins type schema major, validator revision, source resolver,
+required BCK-06 capability, PublisherRef scopes, moderation profile,
+visibility/market policy, localized-text policy and BCK-08 mapper revision.
+Missing/newer/incompatible entry returns `content_type_unsupported`; it never
+falls back to a generic schema or Event.
+
+### 33.2 Draft and publisher binding
+
+Authoritative draft creation returns permanent `draftId` and initial revision.
+An imported `loc_*` remains only an import source key recorded by BCK-18. Every
+draft stores one immutable publisher-binding origin and current PublisherRef
+revision. Changing active workspace does not rewrite the draft. A separately
+authorized `changeDraftPublisher` command may create a new revision only before
+submission, after validating both old and new scopes; published revisions are
+never reassigned.
+
+BCK-07 consumes `identity.getPublisherEligibility` for the exact
+`{PublisherRef,typeId,action,market}` immediately before submit and publish.
+Cached/mobile AccessSnapshot may pre-shape UI but is not transaction authority.
+Loss of authority blocks later commands and may request restriction/withdrawal
+according to accepted policy; it does not rewrite historical authorship.
+
+### 33.3 Publication lifecycle
+
+```text
+draft.editing
+  -> draft.ready
+  -> submitted
+  -> under_review | revision_requested | rejected
+  -> approved_for_publication
+  -> published(revision N)
+  -> superseded(revision N+1) | withdrawn | restricted | deleted
+```
+
+Types whose policy permits no pre-publication moderation may move from
+submitted to approved_for_publication through a recorded policy decision, not
+by skipping the state. Rejection/revision request never mutates an earlier
+published revision. Update creates a new immutable candidate; the current
+pointer changes only after the candidate is fully validated and approved.
+
+Forbidden transitions include direct local draft→published, partial revision
+activation, publisher rewrite, reactivation of deleted content, publication
+with pending Media, unknown type/default Event, stale eligibility and
+projection-driven publication.
+
+### 33.4 Moderation handoff
+
+BCK-07 creates a `PublicationSubmission` and emits a minimized review request
+containing submission/content/draft revision IDs, PublisherRef, type, market,
+moderation profile and policy revisions. BCK-22 owns case, evidence, decision,
+sanction and appeal. BCK-07 consumes only a verified typed disposition:
+
+| Disposition | BCK-07 effect |
+|---|---|
+| `approve` | mark exact candidate approved; publication still rechecks Identity/type/market/media |
+| `request_revision` | return draft workflow to revision-required with safe reason category |
+| `reject` | close exact submission; do not delete draft/history automatically |
+| `restrict` | restrict current pointer/surface scope according to exact decision |
+| `withdraw` | atomically withdraw current public pointer and emit event |
+| `restore` | create a new audited activation decision; never erase prior restriction history |
+
+Disposition replay is idempotent by decision ID and target revision. Unknown,
+stale, foreign or unsigned disposition creates no Content mutation.
+
+### 33.5 Publication transaction and Catalog handoff
+
+The authoritative publish transaction atomically:
+
+1. revalidates current Identity/Creator/page capability and PublisherRef;
+2. validates exact type/source/schema, MarketConfig, localization and Media
+   readiness revisions;
+3. creates one immutable `PublishedRevision`;
+4. advances the `PublicationPointer` from expected previous revision;
+5. stores audit and idempotency result;
+6. appends `ContentPublished` or `ContentRevisionActivated` to the outbox.
+
+BCK-08 writes Catalog projections only after consuming the committed event.
+Catalog failure cannot roll back committed Content; replay/rebuild is required.
+Events include contentId, publishedRevisionId, typeId, PublisherRef, visibility,
+market/service-area references, mapper/reference/policy revisions and occurred
+UTC instant—never draft body, private evidence or raw moderation notes.
+
+Withdrawal/restriction/deletion uses the same transaction/outbox boundary and
+must propagate a tombstone/effect that BCK-08 and BCK-18 treat as stronger than
+stale cache.
+
+### 33.6 Typed commands and outcomes
+
+Stage 3 requires typed contracts for `createDraft`, `updateDraft`,
+`changeDraftPublisher`, `submitForPublication`, `publishApprovedRevision`,
+`withdrawPublication`, `applyModerationDisposition`, `getDraft`,
+`getPublicationStatus` and `getPublishedRevision`.
+
+Required failures include `unauthenticated`, `capability_denied`,
+`publisher_not_eligible`, `identity_verification_required` (ADR 0023; legacy `creator_verification_required` maps to it),
+`membership_inactive`, `type_disabled`, `source_revision_stale`,
+`validation_failed`, `media_not_ready`, `moderation_required`,
+`moderation_decision_stale`, `market_disabled`, `policy_unavailable`,
+`revision_conflict`, `idempotency_conflict`, `unsupported_version` and
+`unknown_outcome`.
+
+### 33.7 Rollback
+
+Publication rollback never mutates an immutable revision. It may atomically
+select a previously compatible revision, withdraw visibility, disable a type or
+market, stop new commands, and replay Catalog tombstones/events. Mobile may
+return to local-only authoring through BCK-18, but local/mock state cannot claim
+server publication, preserve invalid visibility or overwrite the current
+server pointer.
+
+### 33.8 Stage 3 acceptance addendum
+
+61. **BCK-07-AC-61:** all ten stable Create type IDs have one registered typed
+    source adapter and fail closed when its contract is unavailable.
+62. **BCK-07-AC-62:** Quick Plan is never publishable Content or Scenario input.
+63. **BCK-07-AC-63:** draft permanent ID and PublisherRef are server-validated;
+    `loc_*` remains import provenance only.
+64. **BCK-07-AC-64:** workspace switching cannot rewrite draft or published
+    publisher authority.
+65. **BCK-07-AC-65:** submit and publish re-evaluate exact current BCK-06
+    capability, verification and page membership.
+66. **BCK-07-AC-66:** moderation case/decision remains BCK-22 authority and is
+    consumed through typed idempotent disposition.
+67. **BCK-07-AC-67:** published revisions are immutable and pointer activation
+    is expected-revision guarded.
+68. **BCK-07-AC-68:** publish commits revision, pointer, audit, idempotency and
+    outbox atomically.
+69. **BCK-07-AC-69:** BCK-08 cannot publish, withdraw or repair Content.
+70. **BCK-07-AC-70:** Catalog failure is replay/rebuild work and never causes
+    silent Content rollback.
+71. **BCK-07-AC-71:** withdrawal/restriction/deletion emits a versioned effect
+    that defeats stale projections/cache.
+72. **BCK-07-AC-72:** Event publication never copies or mutates Booking
+    inventory/availability authority.
+73. **BCK-07-AC-73:** imported mock moderation, grants and publication status
+    cannot become authority.
+74. **BCK-07-AC-74:** rollback selects compatible revision or withdraws; it
+    never edits revision history.
+75. **BCK-07-AC-75:** v0.3 grants no contracts/runtime/Firebase/deployment or
+    type activation authority and retains every named gate.
+
+## 34. BCK07-LOCAL-01 — disabled local Content Publication foundation
+
+### 34.1 Decision and exact scope
+
+`BCK07-LOCAL-01` is the approved next bounded item-6 slice. It may implement
+only framework-neutral contracts, domain/application code, in-memory adapters
+and local tests. Runtime status remains Absent until those files are created
+and all gates pass; this v0.4 decision is not implementation evidence.
+
+The slice covers:
+
+- the exact ten-type registry from §33.1;
+- `ContentDraft`, `PublicationSubmission`, immutable `PublishedRevision` and
+  expected-revision `PublicationPointer`;
+- typed create/update/submit/publish/withdraw/query commands and outcomes;
+- server-current BCK-06 PublisherRef eligibility revalidation;
+- BCK-20 MarketConfig/taxonomy/localization revision pinning;
+- semantic idempotency, optimistic concurrency and compatible rollback;
+- deterministic in-memory repositories and synthetic valid/invalid/forward
+  fixtures.
+
+Moderation is represented only by a typed disposition port. Media readiness,
+Catalog projection and event delivery are ports/fakes; BCK-22, BCK-14 and
+BCK-08 remain their authorities and no worker is created.
+
+### 34.2 Exact implementation map
+
+Only these new path families are allowed in the later implementation turn:
+
+```text
+packages/api_contracts/schema/content/v1/
+  content_common.schema.json
+  content_draft.schema.json
+  publication_submission.schema.json
+  published_revision.schema.json
+  publication_pointer.schema.json
+  content_command.schema.json
+  content_query.schema.json
+  content_result.schema.json
+  fixtures/valid.json
+  fixtures/invalid.json
+  fixtures/forward.json
+
+apps/backend/functions/src/contracts/
+  content_v1.ts
+  content_schema_registry.ts
+  validate_content_contract.ts
+
+apps/backend/functions/src/modules/content/
+  domain/content_type_registry.ts
+  domain/content_draft.ts
+  domain/publication_submission.ts
+  domain/published_revision.ts
+  domain/publication_pointer.ts
+  domain/failures.ts
+  domain/repositories.ts
+  application/content_publication_service.ts
+  application/ports/publisher_eligibility_port.ts
+  application/ports/reference_data_port.ts
+  application/ports/moderation_disposition_port.ts
+  application/ports/media_readiness_port.ts
+  application/ports/publication_effect_sink.ts
+  infrastructure/in_memory_content_repository.ts
+
+apps/backend/functions/test/
+  contract/content_fixture_parity.test.ts
+  unit/content/content_domain.test.ts
+  integration/content_publication_service.test.ts
+  integration/content_publication_security.test.ts
+```
+
+Amendment v0.8 adds exactly these thirteen paths; no `<type>` placeholder or
+other file is authorized:
+
+```text
+apps/backend/functions/src/modules/content/domain/type_rules/
+  validation_context.ts
+  place_rules.ts
+  event_rules.ts
+  activity_rules.ts
+  rental_rules.ts
+  collection_rules.ts
+
+apps/backend/functions/test/unit/content/
+  type_rules_common.test.ts
+  type_rules_place.test.ts
+  type_rules_event.test.ts
+  type_rules_activity.test.ts
+  type_rules_rental.test.ts
+  type_rules_collection.test.ts
+  type_rules_unavailable.test.ts
+```
+
+Existing map files change only as follows: `content_type_registry.ts` wires the
+rules and extends unavailability reasons to `source_contract_pending`,
+`spec_not_approved`, `consent_gate_pending` and `dependency_pending`;
+`reference_data_port.ts` adds supported-locale and subcategory-applicability
+lookups whose failure fails closed; `content_publication_service.ts` passes the
+resulting validation context; their tests are updated. Event rules cover the
+approved C0 + schedule-C1 subset only.
+
+No existing export registry, Firebase config, Rules, indexes, mobile file or
+product collection may be changed by this slice. If implementation needs a
+path outside this map, the slice stops and BCK-07/BCK-02 must be amended first.
+
+### 34.3 Dependency and authority rules
+
+Content may import shared/contracts/security interfaces and the published
+BCK-06/BCK-20 ports. It cannot import Firebase Admin, transport handlers,
+Booking, Catalog, Media implementations, mobile code or test fixtures from
+another domain. The only Content writer is its application service through
+the Content repository transaction boundary. Admin and moderation consumers
+must issue typed commands; neither writes Content records directly.
+
+All ten types remain disabled. A type with missing source validator,
+PublisherRef eligibility, reference revision, policy or fake readiness result
+fails closed. No mock capability, local publication status or fixture becomes
+server authority.
+
+### 34.4 Tests, migration and rollback
+
+Required local evidence covers schema/TypeScript parity; all ten registry
+entries; unknown/newer type/schema rejection; idempotency conflict; stale
+revision; cross-user/page/market denial; revoked PublisherRef; immutable
+revision enforcement; pointer contention; withdrawal; compatible rollback;
+and confirmation that no endpoint, worker, Firebase import or cloud context
+was introduced.
+
+Migration is initially empty-state plus synthetic fixtures. Existing mobile
+drafts are not imported in this slice; later BCK-18 import must dry-run,
+revalidate owner/PublisherRef, map permanent IDs and remain idempotent.
+Rollback reverts the exact slice commit and discards in-memory test state;
+there is no production data or Firestore rollback.
+
+### 34.5 Explicit exclusions
+
+BCK07-LOCAL-01 does not authorize mobile/UI changes, callable/HTTP exports,
+Firestore/Storage collections, Rules/index changes, outbox workers, schedules,
+Media processing, Catalog indexing, moderation runtime, network/provider use,
+Firebase/GCP resources, credentials, deployment, activation, push or merge.
+
+### 34.6 Acceptance addendum
+
+76. **BCK-07-AC-76:** BCK07-LOCAL-01 uses only the exact §34.2 path families
+    as amended by v0.8 and introduces no export, worker, Firebase import or
+    mobile change; typed rules do not enable publication.
+77. **BCK-07-AC-77:** all ten Content type entries are explicit and an unknown
+    or unavailable type fails closed without generic fallback.
+78. **BCK-07-AC-78:** publish revalidates exact BCK-06 PublisherRef authority
+    and pins exact BCK-20 revisions at command time.
+79. **BCK-07-AC-79:** draft/submission/revision/pointer lifecycles enforce
+    semantic idempotency, expected revision and immutable published history.
+80. **BCK-07-AC-80:** in-memory adapters and synthetic fixtures provide no
+    production, mock-capability or external-source authority.
+81. **BCK-07-AC-81:** Media, moderation, Catalog and delivery stay behind
+    typed ports and remain owned by BCK-14/22/08/03 respectively.
+82. **BCK-07-AC-82:** implementation evidence, product activation, cloud,
+    deployment, push and merge remain separate decisions after v0.4.
+
+## 35. Bounded Event to Booking projection handoff
+
+BCK-07 emits immutable, revisioned `EventRevisionPublished`, `EventUnpublished`,
+`EventOccurrenceCancelled` and `EventMateriallyRescheduled` facts. It never
+writes Booking storage. BCK-09 alone consumes these facts into
+`bookingEventProjections/{occurrenceId}`. The projection contains only the
+operational fields required to authorize free internal Booking; drafts,
+moderation evidence, private copy and general Content state are excluded.
+
+The consumer is idempotent, ignores lower `materialRevision`, rejects an exact
+revision with conflicting meaning and preserves a typed non-bookable tombstone
+for unpublish/cancellation. Rebuild replays immutable facts in deterministic
+revision order. This local/Emulator seam is separate from BCK07-LOCAL-01 and
+does not authorize Content persistence, workers, cloud or market activation.
+
+83. **BCK-07-AC-83:** Event is the sole writer of publication state and BCK-09
+    is the sole writer of `bookingEventProjections`.
+84. **BCK-07-AC-84:** Projection identity is the exact `occurrenceId`; stale,
+    duplicate and conflicting revisions have typed deterministic outcomes.
+85. **BCK-07-AC-85:** Unpublish, occurrence cancellation and material
+    reschedule are explicit immutable events, never inferred from missing data.
+86. **BCK-07-AC-86:** The implemented handoff remains local/Emulator-only and
+    does not start the broader Content aggregate slice.
+
+87. **BCK-07-AC-87:** Event remains the sole writer of immutable
+    `eventBookingOutbox` source records; Booking writes only its projection,
+    delivery checkpoint and Booking-owned effects.
+88. **BCK-07-AC-88:** duplicate delivery is replay-safe, older material
+    revisions cannot win and malformed/conflicting facts enter explicit
+    dead-letter state.
+89. **BCK-07-AC-89:** occurrence cancellation creates a non-bookable tombstone
+    and cancels active Booking while atomically releasing active key, finite
+    ledger and user usage.
+90. **BCK-07-AC-90:** material reschedule marks affected active Booking as
+    requiring reconfirmation and records a suppressed pre-activation effect.
+91. **BCK-07-AC-91:** local delivery services add no cloud trigger, worker,
+    Content aggregate, market activation or deployment permission.
+92. **BCK-07-AC-92:** delegated import invokes only BCK-07 commands and never
+    writes Content, Booking, projection or outbox collections directly.
+93. **BCK-07-AC-93:** `ownerImport` provenance preserves exact source/binding,
+    importer actor and logical operation without fabricating missing fields.
+94. **BCK-07-AC-94:** imported content passes the same domain validation,
+    moderation and publisher eligibility checks as manual content.
+95. **BCK-07-AC-95:** staff review cannot submit or publish an Event while
+    impersonating the owning Page.
+96. **BCK-07-AC-96:** non-session actor idempotency is stable across retry and
+    restart and rejects the same key with a different semantic payload.
+97. **BCK-07-AC-97:** this additive boundary creates no Event Ingestion
+    runtime, network permission, callable export, resource or activation.
+
+## 36. Agreed EVS hook register (BCK07-LOCAL-01 item 2.4)
+
+This register agrees, ahead of time, the hooks that Event Ingestion (BCK-23,
+Draft/Proposed) will need from the core modules
+([EVS plan §2.2](EVENT_SOURCE_INGESTION_BACKEND_IMPLEMENTATION_PLAN.md)). It is
+a coordination record only: no EVS code, module path, `eventIngestion*` prefix,
+flag, network permission or resource is added, and BCK-23 keeps its status.
+
+| # | Module | Hook | State after 2.4 | Where the rest lands |
+|---|---|---|---|---|
+| 1 | Content | `ownerImport` provenance, `delegatedImport` origin with `delegatedActorRef` and `externalBindingRef`, non-session idempotency, `changeClass` (AC-92..AC-97) | **Implemented locally**, in-memory, tested | — |
+| 2 | Content | Lookup of draft and publication by `externalBindingRef` | **Implemented locally** (`findByExternalBinding`, module sees only drafts it bound) | Firestore adapter: Content persistence slice (2.6) |
+| 3 | Content | Delegated actor is never a Session; grants per module, operation and type through `DelegatedModuleGrant` | **Implemented locally** | Grant source: BCK-06 delegation (row 5) |
+| 4 | Content | `hidden` with reason `sourceMissing`, reversible only by delegated import, never by moderation | **Deferred**: the lifecycle has `ownerHold` and `moderationHold` only | Small Content slice before EVS-LOCAL-04 (B6), needs a BCK-07 revision |
+| 5 | Content | Additive `location.placeId` on Event | **Deferred**: Event without Place stays valid | Same small Content slice, additive |
+| 6 | Identity | `EventIngestionDelegation`, capabilities `event_sources.manage` and `event_sources.review_changes`, `PagePlaceOperatorLink` | **Agreed, not built**: the port `evaluateDelegated` already asks Identity whether a Publisher is eligible without a Session | BCK-06 small slice after its revision, before EVS-LOCAL-03/04 |
+| 7 | Catalog | Projections hide `hidden` content (any reason), Details reads provenance | **Agreed, not built**: Content effects carry `visibility` and a monotonic `pointerRevision`, so a tombstone beats stale cache | 6B BCK-08 |
+| 8 | Place | Published `place` with `placeKind = managedVenue` and query by ID | **Provided** by the Place type rules; enabled state is off | BCK-08 Place query |
+
+Rules kept for every later slice: Content and Identity never treat the actor
+as a Session by construction; `hidden` always carries a reason; rescheduling
+and cancellation are Content commands with a change class; the `100/day` limit
+counts per Publisher, not per Session; complaints stay in BCK-22.
+
+## 37. Media integration amendment (BCK07-LOCAL-01, v0.11)
+
+### 37.1 Where attachments are stored
+
+Decision: **the immutable Content revision stores the exact references.** BCK-14
+§8.2 makes the owning domain the recorder of generation-pinned attachments and
+Media keeps no second copy. `PublishedRevision` gains
+`mediaAttachments: MediaAttachment[]` (empty when no media), each
+`{assetId, sourceGeneration, variantManifestRevision, purpose}`. The local
+`purpose` is the single value `contentMedia`; finer purposes wait for typed
+media rules and are not invented here.
+
+`mediaRevision` is the lowercase hex SHA-256 of the canonical JSON of the
+`mediaAttachments` array (array sorted by `assetId`, object keys sorted, no
+insignificant whitespace, UTF-8). A hash alone cannot restore references, which
+is why they are stored. Publish freezes attachments and hash in the same
+transaction as the revision.
+
+### 37.2 Port contract
+
+`MediaReadinessPort.check` receives `contentId`, `typeId`, `marketId`,
+`publisherRef`, `mediaIds` and, for rollback, a **required** `pinned` list taken
+from the stored target revision; for submit and publish `pinned` is absent.
+It returns `{ready: true, mediaRevision, attachments}` or `{ready: false,
+reason}` with the internal reasons `asset_unknown`, `foreign_binding`,
+`stale_generation`, `deleted`, `restricted`, `not_ready`, `policy_unavailable`;
+all map to the unchanged public failure `media_not_ready`. Returned
+`attachments` are evidence: nothing is attached until publish freezes them.
+Rollback (`activatePublishedRevision`) passes the stored references and needs
+every one to be still `ready` with the same generation and manifest and the
+recomputed hash equal to the stored `mediaRevision`.
+
+### 37.3 Trusted binding for uploads
+
+Content implements Media's `EntityScopePort` from its own draft record: the
+draft must exist and be editable, its `publisherRef`, `marketId` and type must
+match, and the actor must pass the same Publisher eligibility check as for
+editing. It also implements `AttachmentReferencePort` (drafts referencing the
+asset through the registry's `mediaIds`, and published revisions through
+`mediaAttachments`).
+
+### 37.4 Exact Content changes
+
+New file: `apps/backend/functions/src/modules/content/application/content_media_scope.ts`.
+
+Modified existing files:
+
+```text
+apps/backend/functions/src/contracts/content_v1.ts                      (MediaAttachmentV1, PublishedRevisionV1.mediaAttachments, port-facing types)
+apps/backend/functions/src/modules/content/domain/published_revision.ts (mediaAttachments frozen with the revision)
+apps/backend/functions/src/modules/content/domain/repositories.ts       (read: content referencing an asset)
+apps/backend/functions/src/modules/content/infrastructure/in_memory_content_repository.ts
+apps/backend/functions/src/modules/content/application/ports/media_readiness_port.ts
+apps/backend/functions/src/modules/content/application/content_publication_service.ts (submit, publish and rollback call sites; publish stores attachments; rollback passes pinned)
+packages/api_contracts/schema/content/v1/content_common.schema.json     (mediaAttachment definition)
+packages/api_contracts/schema/content/v1/published_revision.schema.json (mediaAttachments required)
+packages/api_contracts/schema/content/v1/fixtures/valid.json
+packages/api_contracts/schema/content/v1/fixtures/invalid.json
+apps/backend/functions/test/unit/content/content_domain.test.ts
+apps/backend/functions/test/unit/content/type_rules_unavailable.test.ts (fake port shape)
+apps/backend/functions/test/integration/content_publication_service.test.ts
+apps/backend/functions/test/integration/content_publication_security.test.ts
+```
+
+`fixtures/forward.json` and `content_fixture_parity.test.ts` change only if the
+parity run shows a needed case; then they are added with a further amendment.
+No published data exists, so `mediaAttachments` is required in v1 without a
+migration.
+
+### 37.5 Acceptance addendum
+
+98. **BCK-07-AC-98:** the immutable revision stores generation-pinned media
+    attachments and `mediaRevision` is their canonical hash.
+99. **BCK-07-AC-99:** rollback verifies the stored references; a stale
+    generation, foreign, deleted or restricted asset refuses it.
+100. **BCK-07-AC-100:** readiness is evidence, never an attach, and never
+     answers `ready` on missing binding data.
+
+### 37.6 Implementation note (2026-09-30)
+
+Implemented within the §37.4 list. `fixtures/forward.json` and
+`content_fixture_parity.test.ts` needed no change: forward cases stay rejected
+by their version or type. `ContentMediaScope` implements Media's entity scope
+and reference questions structurally, with no import of the Media module; the
+Media adapter does the same in the other direction. A private or protected
+Media asset is never attachable to a public revision.
+
+## 38. BCK07-PERSIST-01 — Emulator-only Content persistence (v0.12)
+
+### 38.1 Decision and scope
+
+`BCK07-PERSIST-01` gives the existing Content service a Firestore repository
+that runs only against the local Emulator, default-off, with server-only
+collections, Rules that deny every client, indexes, a composition binding and
+the tests below. It changes no product rule and adds no endpoint.
+
+### 38.2 Collection manifest (server-owned; clients get `allow read, write: if false`)
+
+| Collection | Document id | Notes |
+|---|---|---|
+| `contentDrafts` | `draftId` | fields `contentId`, `mediaAssetIds[]` (bounded) |
+| `contentExternalBindings` | sha256 of `externalBindingRef` | uniqueness of an import binding, written in the same transaction |
+| `contentSubmissions` | `submissionId` | |
+| `contentPublishedRevisions` | `publishedRevisionId` | created only if absent (immutable); fields `contentId`, `revisionNumber`, `mediaAssetIds[]` |
+| `contentPublicationPointers` | `contentId` | compare-and-set on `revision` |
+| `contentIdempotency` | sha256 of actor, command type and key | outcome stored in full |
+| `contentAudit` | `auditId` | append only |
+| `contentEffects` | `effectId` | created only if absent; fields `contentId`, `pointerRevision` |
+
+Composite indexes, exactly two: `contentPublishedRevisions(contentId ASC,
+revisionNumber ASC)` and `contentEffects(contentId ASC, pointerRevision ASC)`.
+Everything else uses automatic single-field indexes (including `array-contains`
+on `mediaAssetIds`). Documents never contain `undefined`.
+
+### 38.3 Buffered transaction semantics
+
+Firestore requires every read before any write, while the service reads after
+staging writes. The Firestore repository therefore buffers writes:
+
+- reads go to Firestore, and an overlay of the staged writes applies to both
+  single-document reads and list queries, so a read after a staged write sees it;
+- two staged changes to one document collapse to the last one;
+- a retried Firestore transaction starts a new, empty buffer and re-runs the
+  callback from its first line;
+- on commit, first every compare-and-set and uniqueness check runs against
+  freshly read documents (pointer revision, revision id, external binding,
+  idempotency record), then all writes are issued, so a conflict aborts before
+  any write;
+- audit records and effects are part of the same atomic write set; the
+  callback sends nothing outside the transaction.
+
+Tests: read-after-staged-write (document and list), two changes to one
+document, conflict and retry of a transaction, and complete rollback.
+
+### 38.4 Bounded history and document size
+
+`assertBoundedBody` bounds only the body. The service reads all revisions and
+submissions of one Content and derives the next revision number from the count,
+so history is bounded rather than assumed unlimited:
+
+- the repository reads at most `maxRevisionsPerContent` (200) revisions and
+  `maxSubmissionsPerContent` (200) submissions per Content; exceeding either is
+  a typed refusal, `storage_limit_exceeded`, never a silent truncation;
+- every stored document, including an idempotency outcome and a revision with
+  media attachments, must not exceed 900,000 bytes of canonical UTF-8 JSON; a
+  larger one is `storage_limit_exceeded` and nothing is written;
+- both adapters enforce the same bounds through one shared helper, so the
+  scenario suite proves the same behaviour on each;
+- these values are local engineering guards labelled synthetic, not product
+  limits; production values need the cost and cardinality measurement required
+  by §14 and stay a separate decision.
+
+`mediaAssetIds` is stored on drafts and on published revisions, and
+`isMediaReferenced` queries both collections inside the transaction.
+
+### 38.5 Emulator-only, enforced technically
+
+The repository constructor itself refuses anything but the Emulator, so a
+direct construction is as safe as the composition factory:
+
+- the Firestore project id must be exactly `demo-recharge`;
+- `FIRESTORE_EMULATOR_HOST` must be present and a loopback `host:port`
+  (`127.0.0.1`, `localhost` or `[::1]`);
+- no cloud fallback: `GOOGLE_APPLICATION_CREDENTIALS`, a non-demo
+  `GCLOUD_PROJECT` or `GOOGLE_CLOUD_PROJECT` and a `FIRESTORE_HOST` override make
+  it refuse;
+- the composition factory additionally requires its own default-off flag.
+
+Tests cover each refusal, including construction outside the factory.
+
+### 38.6 Recovery scope
+
+Effects cannot be rebuilt from the current pointer: it holds the current state,
+not the history of activations and visibility changes. `content_integrity_recovery`
+therefore only:
+
+- verifies integrity (pointer to an existing revision, revision body hash,
+  attachments present, an effect present for the current pointer revision);
+- replays already stored effects idempotently in `pointerRevision` order;
+- reports a missing historical fact as `corrupted` and never invents it.
+
+Rebuilding lost events would need a stored transition journal and a further
+amendment; it is deferred.
+
+### 38.7 Exact file map (closed)
+
+```text
+NEW
+apps/backend/functions/src/modules/content/domain/storage_limits.ts
+apps/backend/functions/src/modules/content/infrastructure/firestore_content_repository.ts
+apps/backend/functions/src/modules/content/infrastructure/emulator_content_composition.ts
+apps/backend/functions/src/modules/content/application/content_integrity_recovery.ts
+apps/backend/functions/test/support/content_repository_scenarios.ts
+apps/backend/functions/test/integration/content_repository_parity.test.ts
+apps/backend/functions/test/emulator/content_firestore_repository.test.ts
+apps/backend/functions/test/emulator/content_concurrency.test.ts
+apps/backend/functions/test/emulator/content_recovery.test.ts
+apps/backend/functions/test/emulator/content_rules_default_deny.test.ts
+apps/backend/functions/test/emulator/content_emulator_guard.test.ts
+apps/backend/scripts/verify-content-persistence-layout.mjs
+
+MODIFIED
+apps/backend/firestore.rules                       (eight explicit denies)
+apps/backend/firestore.indexes.json                (the two composite indexes)
+apps/backend/functions/package.json                (layout script; emulator test list)
+apps/backend/scripts/run-emulator-tests.mjs        (only if it lists test files)
+apps/backend/functions/src/contracts/content_v1.ts (failure code)
+apps/backend/functions/src/modules/content/domain/failures.ts
+apps/backend/functions/src/modules/content/domain/repositories.ts (effect replay read)
+apps/backend/functions/src/modules/content/infrastructure/in_memory_content_repository.ts (same bounds, effect replay read)
+packages/api_contracts/schema/content/v1/content_result.schema.json
+apps/backend/functions/test/integration/content_publication_security.test.ts
+```
+
+### 38.8 Tests and Definition of Done
+
+The scenario suite in `test/support/content_repository_scenarios.ts` is one
+set of scenarios executed against both adapters: the in-memory one in
+`content_repository_parity.test.ts` and the Firestore one in the Emulator
+tests. Serialization round-trips without an Emulator are useful but are not
+evidence of Firestore transactions. Emulator tests cover transactions, retries,
+concurrent publish and pointer swap, duplicate imports by external binding,
+recovery and negative Rules for every collection (unauthenticated and
+authenticated, read and write). The layout gate checks the Firestore SDK is
+confined to the two infrastructure files, eight explicit denies, exactly two
+composite indexes, the single writer and no cloud context.
+
+2.6 is Done only after a successful Emulator and Rules run on Node 22.23.2,
+npm 10.9.8 and Temurin 21.0.12+8; without it the slice is "implemented,
+Emulator evidence pending".
+
+### 38.9 Acceptance addendum
+
+101. **BCK-07-AC-101:** the Firestore repository refuses any environment other
+     than the exact `demo-recharge` loopback Emulator, including direct
+     construction.
+102. **BCK-07-AC-102:** buffered transactions apply the overlay to reads and
+     lists, retry with a fresh buffer, check compare-and-set and uniqueness
+     before writing and roll back completely.
+103. **BCK-07-AC-103:** history and document size are bounded and exceeding them
+     is the typed `storage_limit_exceeded`, identically on both adapters.
+104. **BCK-07-AC-104:** recovery verifies integrity, replays stored effects and
+     reports missing history as corrupted without inventing it.
+105. **BCK-07-AC-105:** every Content collection denies all client reads and
+     writes; Content has one writer and no callable, export or cloud context.
+
+### 38.10 Implementation status (2026-09-30)
+
+Implemented within the §38.7 map. Emulator and Rules evidence was produced on
+the exact toolchain (Node 22.23.2, npm 10.9.8, Temurin 21.0.12+8): the full
+`npm run test:emulator` gate passed, including the Content guard (5), Firestore
+repository (20: the 17-scenario suite shared with the in-memory adapter plus a
+retry double, a contention test and a storage-shape test), concurrency (2),
+recovery (3) and Rules (4) tests. A mutation that let clients read
+`contentDrafts` made the Rules test fail. The same suite passed without
+Emulator on Node 22 (unit 537, contract 33, integration 167).
+
+Known limits, stated rather than hidden:
+
+- the bounds in §38.4 are synthetic local guards; production values need the
+  measured cost and cardinality study;
+- history is not rebuilt (§38.6): a lost effect is reported as corruption;
+- the Firestore adapter buffers reads of lists up to the bound only; a Content
+  near the bound costs that many reads per transaction;
+- the Admin client attempts a GCE metadata lookup and logs
+  `MetadataLookupWarning` under the Emulator; it grants nothing and is not
+  disabled here because the repository already refuses any non-Emulator context;
+- no callable, export, worker, Catalog projection or `eventBookingOutbox`
+  hand-off exists; all types and markets stay disabled.
+
+### 38.11 Audit remediation (v0.13)
+
+1. **Replays re-check authority (AC-106).** Every idempotency record stores the
+   authority checks the command relied on (`authorizations`: Publisher, type,
+   action, market). A replay first repeats each of them with the caller's current
+   authority and only then returns the stored outcome; a revoked Session,
+   membership or eligibility refuses the replay exactly like a new command, and
+   nothing is written. A changed payload under the same key stays
+   `idempotency_conflict`. A verified system instruction (moderation
+   disposition) carries no user check.
+2. **No cross-module wait under a lock (AC-107).** Content and Media call each
+   other (readiness, entity scope, references), so a call made while holding a
+   repository transaction let two concurrent commands wait for each other
+   forever. The rule is now: **a module never calls another module's port while
+   it holds a repository transaction.** Content reads the draft (or rollback
+   target) in a short read-only transaction, asks Media outside any transaction
+   and binds the answer to that snapshot; the command transaction accepts the
+   evidence only if the draft revision (or the immutable target revision) is
+   exactly the one it was taken for, otherwise `source_revision_stale`. Media asks
+   Content for entity scope and references before opening its transaction.
+   Deletion holds delivery first (a reversible restriction, so nothing new can
+   attach), asks the owning domain, then either lifts its own hold or
+   tombstones; a plainly referenced asset is refused with no write at all.
+   Residual window, stated rather than hidden: an asset restricted or deleted
+   after Content took its evidence and before the command transaction commits can
+   still end up referenced by a published revision. The publish path keeps the
+   generation-pinned attachments, deletion is blocked while a draft references the
+   asset, and rollback re-verifies the pinned references, but detecting such a
+   revision afterwards is not implemented.
+3. **The client is verified, not only the environment (AC-101).** The repository
+   reads the endpoint the Firestore client actually targets and requires it to be
+   exactly the loopback Emulator named by the environment, without TLS; an
+   endpoint that cannot be read is refused. A client bound to the cloud is
+   refused even when the environment object claims the Emulator.
+4. **Effects are paged (AC-104, AC-108).** The whole-history read is gone. Stored
+   effects are read in `(pointerRevision, effectId)` pages from a stable cursor;
+   integrity verification uses targeted reads (the first effect at the current
+   pointer revision, a publish or activation effect per revision) that do not
+   depend on how many effects a Content has accumulated. A visibility change is
+   never refused because of a storage bound, since a tombstone must always win.
+
+Evidence after the remediation (Node 22.23.2, npm 10.9.8, Temurin 21.0.12+8):
+the full `npm run test:emulator` gate passed again, with the Content guard (6,
+including a real cloud-bound client and forged environments), Firestore
+repository (22, the shared scenario suite now also proving 1,100-effect paging and
+integrity verification at pointer revision 1,300), concurrency, recovery and
+Rules tests. Without Emulator the suite passes on Node 22, including a
+deterministic test that fails when a cross-module call sits inside a transaction
+(checked by mutation: it reports a deadlock).
+
+5. **Replay does not need Media (AC-109).** The stored idempotency record is
+   looked up first; for a command that already completed Content returns the
+   stored result after repeating the recorded authority checks and does not ask
+   Media again (it may be unavailable now). Only a new command gathers media
+   evidence, and a Media port that fails is `media_not_ready`, a typed refusal
+   and never a thrown error.
+6. **Stated limit, not a closed guarantee.** The window between media evidence
+   and the command commit (§38.11.2) remains a limit. Before a real Media
+   adapter exists, a mechanism to detect and react to revisions that reference a
+   later-restricted or deleted asset is required; it is not implemented here.
+   D2 (2026-10-09, [MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md](MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md))
+   implements it on the Emulator: the pointer confirms the Media revocation
+   epoch of every attachment, Content suppresses media that Media revoked or
+   deleted afterwards (decided from Media's current state, never from an event),
+   and only the publisher's activation of the current revision confirms it again.
+   The residual windows are stated there (§10).
+
+### 38.12 Acceptance addendum (v0.13)
+
+106. **BCK-07-AC-106:** a replay of a stored result repeats the recorded authority
+     checks with current authority before returning it, and writes nothing when
+     it is refused.
+107. **BCK-07-AC-107:** no Content or Media port is called while a repository
+     transaction is held; the two modules cannot wait for each other, and Content
+     accepts media evidence only for the exact snapshot it was taken for.
+108. **BCK-07-AC-108:** stored effects are replayed and verified through stable
+     pages and targeted reads; no history length silently cuts them short.
+109. **BCK-07-AC-109:** a completed command replays without a Media call, and an
+     unreachable Media is the typed `media_not_ready` for new commands.
+
+## 39. E2 local amendment — Event internal registration v1 and handoff history
+
+Owner-accepted 2026-10-06; authoritative text:
+[EVENT_INTERNAL_REGISTRATION_E2_0_AMENDMENT.md](EVENT_INTERNAL_REGISTRATION_E2_0_AMENDMENT.md).
+Local/Emulator only; it narrows §35 and grants no cloud, deployment or market
+activation.
+
+- The Event body accepts `registration.mode = 'internal'` only as free,
+  instant, offline registration with explicit `maxPartySize`, relative
+  registration window and cancellation deadline (bounds in
+  `eventInternalRegistrationConfig`, test-only). Nothing is defaulted.
+- A published internal Event may not leave internal registration, switch
+  capacity mode, change format or venue. The binding check runs in the very
+  transaction that switches the publication pointer (publish and rollback);
+  the submit check is early feedback only.
+- The Content-owned handoff derives the Booking projection per occurrence on
+  the server (stable server-generated pool id, deadlines from each occurrence
+  start, D07 materiality) and writes `eventBookingOutbox` create-only. It
+  processes every object in `pointerRevision` order, fills a gap from stored
+  history, never moves its checkpoint past an unhandled effect, keeps
+  terminal markers for removed occurrences and decides "removed before start"
+  by the time of the Content change. Its checkpoint, receipts and state are
+  independent of the Catalog's; reconciliation and outbox repair replay stored
+  facts only.
+
+## 40. D3.1 local amendment — Place through Content in the Emulator
+
+Owner-accepted 2026-10-10; authoritative text:
+[PLACE_D3_1_PUBLICATION_AMENDMENT.md](PLACE_D3_1_PUBLICATION_AMENDMENT.md).
+Local/Emulator only; it narrows nothing above and grants no cloud, deployment
+or market activation.
+
+- The Emulator authoring composition accepts only `event` and `place`, and only
+  with an available validator; Activity, Rental, Collection and every type
+  without a validator stay off there. The accepted Place validator and the type
+  registry are unchanged.
+- `content.place.authoring` (default off) gates the Place commands that create
+  or change publishable content (`type_disabled`); the owner's
+  `withdrawPublication` and owner reads are not gated by a type's flag. The
+  callables stay closed while no authoring flag is on.
+- Emulator reference data answers Place from a TEST-ONLY subset of the mobile
+  taxonomy (applicability and required criteria); it is not the accepted
+  BCK-20 taxonomy.
+- Create-form compatibility is a verified subset: drafts under the strict v1.0
+  rules pass; the adaptive Create rules (PLC-ADP-01) that the server refuses
+  answer `validation_failed` without validator codes.
+- Catalog keeps Place excluded (`type_disabled`, BCK08-OD-04); Booking ignores
+  Place effects; D2 applies to Place media.
+
+## 41. D3.2 local amendment — Recharge Activity through Content in the Emulator
+
+Authoritative text:
+[ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md](ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md).
+Local/Emulator only; it narrows nothing above and grants no cloud, deployment
+or market activation.
+
+- The Emulator authoring composition accepts `event`, `place` and `activity`,
+  each only with an available validator and its own default-off flag
+  (`content.activity.authoring` for Activity); Rental, Collection and every
+  type without a validator stay off there. The accepted Activity validator and
+  the type registry are unchanged.
+- The Content service takes optional `compositionRules`: rules a composition
+  adds on top of a type's validator; they can only add issues. The Emulator
+  composition refuses any Activity `location.linkedPlaceId`
+  (`validation_failed`), because the existence of the Place is not resolvable
+  there (fail closed). The rules check the body that would become public: the
+  submitted draft revision at submit and publish, and the target immutable
+  revision at `activatePublishedRevision`, so a revision published before the
+  rule cannot be made public again past it.
+- Emulator reference data answers Activity from a TEST-ONLY subset of the
+  mobile taxonomy; an unknown pair does not apply. It is not the accepted
+  BCK-20 taxonomy.
+- Create-form compatibility is a verified subset; validator codes are not sent
+  to the client.
+- Catalog keeps Activity excluded (`type_disabled`, BCK08-OD-04); Booking
+  ignores Activity effects; D2 applies to Activity media.
+
+
+
+## 42. D3.3 local amendment — Rental / Equipment through Content in the Emulator
+
+Authoritative text:
+[RENTAL_D3_3_PUBLICATION_AMENDMENT.md](RENTAL_D3_3_PUBLICATION_AMENDMENT.md).
+Local/Emulator only; it narrows nothing above and grants no cloud, deployment
+or market activation.
+
+- The Emulator authoring composition accepts `rental` too, only with its
+  available validator and its own default-off flag `content.rental.authoring`;
+  Collection and every type without a validator stay off. The accepted Rental
+  validator, `rental.cover_required` and the type registry are unchanged.
+- Emulator reference data answers `rentalPolicy` for Rental only, from a
+  TEST-ONLY policy (`test-only-rental-policy-1`, not an accepted policy; BCK-20
+  has no Rental policy contract) for an explicit list of pairs that must exist
+  in the pinned BCK-20 taxonomy revision; anything else has no policy and fails
+  closed.
+- The Content service takes optional `activationClosedTypes`; the Emulator
+  composition closes `activatePublishedRevision` for Rental (`type_disabled`,
+  nothing changes) until a re-activation semantics is accepted.
+- Only the attesting user can publish (the validator checks the acting user at
+  submit and publish); validator codes are not sent to the client.
+- Catalog keeps Rental excluded (`type_disabled`, BCK08-OD-04); Booking ignores
+  Rental effects; D2 applies to Rental media.
+- Limitation until a shared Content slice adds an owner's withdrawal of an
+  approved submission (new submit, review and publish with the same
+  `contentId`): an approved Rental whose confirmation expired can be neither
+  published nor edited. A suppressed Rental photo comes back only with a newly
+  reviewed and published revision after the restriction is lifted.
+
+## 43. D3.4 local amendment — Collection / Guide through Content in the Emulator
+
+Authoritative text:
+[COLLECTION_D3_4_PUBLICATION_AMENDMENT.md](COLLECTION_D3_4_PUBLICATION_AMENDMENT.md).
+Local/Emulator only; it narrows nothing above and grants no cloud, deployment
+or market activation. (Section 42 is reserved for D3.3 Rental.)
+
+- The Emulator authoring composition accepts `collection` too, only with its
+  available validator and its own default-off flag `content.collection.authoring`.
+  The accepted Collection validator and the type registry are unchanged.
+- The Content service takes an optional `publishedObjectMembership` port. For
+  Collection it asks the Catalog-owned exact-id evaluator, freshly, about the
+  exact body at submit, publish and activation: an eligible listing is `ready`;
+  a published listing of that type and market that its owner hid or moderation
+  restricted is `unavailable` and needs the author's acknowledgement in
+  `compositionReview`; an unknown id, another type, market or visibility
+  policy, and an unanswered question are refused (`validation_failed`). At
+  activation natural decay does not block; hard references and an outage do. A
+  refusal changes nothing.
+- The evaluator is one Catalog service for the listing types `place`, `route`,
+  `session`, `class_workshop`, `rental`; the D3.9 Place relation delegates to it
+  with unchanged answers. `discoverQueryV1` gains additive
+  `publishedObject`/`publishedObjectCandidates` queries. No Collection Catalog
+  projection or model exists; Catalog keeps Collection excluded (`type_disabled`,
+  BCK08-OD-04); Booking ignores Collection effects; D2 applies to its media.
+- Emulator reference data answers Collection from the pinned BCK-20 artifact:
+  any existing pair applies (as in the mobile taxonomy); an unknown pair does
+  not; validator codes are not sent to the client.
+
+## 44. D4 local amendment — one draft per local import source
+
+Authoritative text:
+[LOCAL_IMPORT_D4_AMENDMENT.md](LOCAL_IMPORT_D4_AMENDMENT.md). Local/Emulator
+only; it narrows nothing above.
+
+- A Session `createDraft` with `importSourceKey` binds
+  `local-import:v1:<createdByUserId>:<importSourceKey>` to the draft in
+  `contentExternalBindings`, with the same commit-time uniqueness check as a
+  delegated import binding.
+- Creating again for the same author and key, under any idempotency key,
+  returns that draft as stored (audit `content.draft.import_replayed`); the
+  same key for another type, market or PublisherRef is `idempotency_conflict`.
+  Type flags and authority are checked before the lookup. Delegated imports,
+  drafts without an import source key and the response contract are unchanged.
+
+## 45. D4.1 local amendment — import rollback and fenced cleanup
+
+Authoritative text:
+[LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md](LOCAL_IMPORT_D4_1_ROLLBACK_AMENDMENT.md).
+Local/Emulator only; it narrows nothing above and adds to §44.
+
+- The local import binding carries `generation` (≥ 1), `state` (`active` |
+  `rolledBack`), an optional `cleanup` reservation and a `bindingRevision`
+  compare-and-set. A §44 binding without them is generation 1, active, with no
+  reservation and revision 0. Only the Content service writes it, in the
+  transaction of the draft change; `putDraft` never does.
+- `createDraft` with `importSourceKey`: an active binding deduplicates as in
+  §44; a rolled-back one opens `generation + 1` with exactly one new draft in
+  the same transaction (`importGeneration` on the draft). A repeated command
+  replays its stored result of its own generation.
+- Session-only commands through `contentCommandV1`, resultType in brackets:
+  `rollbackImportedDraft` [`draft`] — own draft of the current generation at
+  the exact `expectedRevision`, no submission and no pointer, no reservation
+  of any age and no completed cleanup; the draft becomes `status: rolledBack`
+  (revision + 1, body kept) and the generation `rolledBack`, audit
+  `content.draft.import_rolled_back`. `reserveImportCleanup`,
+  `completeImportCleanup`, `releaseImportCleanup` [`importBinding`] — a
+  reservation names a fencing token, generation and installation id; another
+  token is refused even after the lease (a stand constant of 900 s) expired;
+  complete repeats idempotently; release is refused once the cleanup is done.
+  Query `getImportBinding` [`importBinding`] returns the author's view without
+  the token. Delegated modules are refused (`capability_denied`).
+- New failure codes: `import_rollback_not_allowed`,
+  `import_generation_mismatch`, `import_rolled_back`, `cleanup_reserved`,
+  `cleanup_not_reserved`, `cleanup_token_mismatch`, `original_removed`.
+  `updateDraft` and `submitForPublication` of a tombstone are
+  `import_rolled_back`.
+- Media: the body of a rolled-back draft is not a reference
+  (`isMediaReferenced`), so the asset is deleted only by the orphan reconcile
+  after grace under its fenced hold; a tombstone accepts no new Media binding.
+
+## Addendum BCK07-VALIDATION-DETAILS-01 — 2026-10-11
+
+Authorized bounded local/Emulator change: optional public details for
+`validation_failed`. This addendum supersedes the general-only wording for
+Activity in §38; the existing general response remains valid.
+
+A rejected v1 result may contain `violations: [{code, fieldPath}]` only when
+`code == validation_failed`. The list has 1–50 entries. Each violation contains
+only a stable rule code and a JSON Pointer rooted at `/body`; no field value,
+user-supplied unknown key, coordinates, contact text, stack or internal policy
+reason is returned. Server projection uses an explicit public allowlist;
+unknown/internal violations keep the general refusal. Known dynamic criterion
+failures use `activity.criterion_required` and a public criterion field path.
+
+Clients accept both the old general response and the additive response.
+Activity uses local client messages for known code/path pairs, renders errors
+by the existing Create fields, and retains a general message for an unknown
+code or unavailable field. Malformed details degrade to the general response.
+Feedback is transient, account/publisher/draft scoped and invalidated by a
+new local draft timestamp or the next command. Submit/publish/activate guards,
+transaction atomicity, authority and lifecycle are unchanged.
+
+Rollback: remove this optional projection and field feedback; the unchanged
+`validation_failed` response remains sufficient. No draft migration is needed.
+
+
+## 46. D3.5 amendment — Bookable Session, local Emulator only
+
+Owner decision: 2026-10-18, recorded separately in
+[Session v1.2 §22](create/BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md) and
+[D3.5 §1](D3_5_SESSION_PUBLICATION_AMENDMENT.md). Session v1.2 is an
+**Approved slice spec**; this BCK-07 parent stays **Review**. D3.5 is a
+**Review**; the file plan was separately accepted (§46.1), without production
+authorization. Base:
+`638f75284c710314517adb51260785600bbef1e8`, separate worktree.
+
+The planned typed validator path is
+`apps/backend/functions/src/modules/content/domain/type_rules/session_rules.ts`;
+its tests are
+`apps/backend/functions/test/unit/content/type_rules_session.test.ts` and
+`apps/backend/functions/test/unit/content/type_rules_session_create_compat.test.ts`.
+These files are implemented within the accepted D3.5 §6 map. At the initial
+docs-only checkpoint Session stayed unavailable; the subsequent §46.1
+authorization permits its personal-only registry entry under an independent
+default-off local/LV Emulator flag. Spec approval alone did not enable it.
+
+Future scope: independent default-off `content.session.authoring`, only
+local/LV Emulator, personal publisher resolved by Identity owner; C3 Content,
+C2 review, C1/D2 Media and the existing mobile Create flow (Q4 D3.1).
+Submit, approved publish and immutable activate must enforce the same Session
+validator, additive composition rules, reference policy, authority/eligibility
+and media readiness. Missing/stale/unavailable dependencies refuse explicitly.
+No permissive fallback or client-derived authority is allowed.
+
+The server validates weekly schedule rules/timezone and closing exceptions,
+rejects legacy eventSlots and unsupported fields, never materializes slots or
+stores availability. Only externalBookingUrl; ECL-03/BCK-09, internal Booking,
+hold/capacity/confirmed, Payments and providers are outside Session scope.
+Do not copy Event/Activity product rules. Only owner-service commands may
+change their domains. No parallel schedule engine, Booking engine or Create flow.
+Catalog/Discover stay excluded (BCK08-OD-04); the existing Collection evaluator
+may return eligible for a published Session without enabling its projection.
+
+Owner clarification: activate preserves the target's scheduleRevision and
+projectionWindowDays snapshot; expected-current-pointer CAS is mandatory.
+Only newly authored schedule revisions form a monotonic sequence; the active
+number can decrease on rollback. New scheduleRevision requires a new draft
+on schedule change. Current reference revision supplies window (Emulator 30);
+a different client value is validation_failed, never substituted. Activate
+refuses snapshot/current-reference mismatch as in D3.1.
+
+The initial T1 checkpoint changed documents only and stopped for plan
+confirmation. The policy answer alone did not authorize runtime; explicit
+plan acceptance followed in §46.1. No commit, push or deployment is authorized.
+Gates and limits are D3.5 §7–§9.
+
+
+### 46.1 File plan accepted — 2026-10-18
+
+After the documentation-only checkpoint, the owner explicitly accepted the
+D3.5 §6 plan: “сейчас принимаю план, реализуй”. Bounded implementation and
+local Emulator gates are now authorized. Session source rules, personal-only
+registry, trusted reference window=30 and immutable activation checks are
+present in this worktree. Authorized gates passed: full single-session Emulator
+15/15 groups (307 tests), stand clean/resumed/repeated with real controller/UI,
+backend local 1059 and Flutter analyze/full test 1665 (71 env skips). Details:
+[D3.5 evidence](../evidence/backend/d3/D3_5_SESSION_2026_10_18.md).
+This parent and D3.5 remain Review; no commit/push/deploy is authorized.
+
+
+### 46.2 Session immutable source-read boundary — 28 revalidation
+
+BCK-07 §10 defines `getPublishedRevision` as an **authorized immutable source
+snapshot**, not a public Session DTO. Session §11.3/§18 and D3.5 §3 Privacy
+keep exception private notes/audit and private source fields out of public
+responses. The Session query therefore requires the exact personal Publisher
+and a fresh Identity owner-service `read` authorization; foreign readers get
+`not_found` without source data. The original body/hash/revision is retained,
+so author reads and immutable activation remain lossless. The existing public
+Collection evaluator keeps its allowlist; no second projection/aggregate or
+new public Details endpoint is introduced. Integration and real HTTP privacy
+regressions are recorded in [28–29 evidence](../verification/T1_T2_COMMON_VERIFICATION.md).
+
+## 47. D3.6 amendment — Class / Workshop, local Emulator only
+
+Owner decision: 2026-10-19, recorded in
+[D3.6 §1](D3_6_CLASS_WORKSHOP_PUBLICATION_AMENDMENT.md) and
+[Class/Workshop v1.2 §34.8](create/CLASS_WORKSHOP_EXPERIENCE_CREATE_SPEC.md).
+The CW-V1 subset (§2.6, §34) is an **Approved slice spec**; the full-product
+§1–§33 stay Ready for approval. This BCK-07 parent and D3.6 stay **Review**.
+The initial documentation-only checkpoint stopped before runtime. The subsequent
+owner acceptance of the D3.6 §6 plan and Event Classification 2.2.4 is recorded
+in §47.1; it supersedes the earlier plan-pending state.
+
+Implemented validator:
+`apps/backend/functions/src/modules/content/domain/type_rules/class_workshop_rules.ts`;
+shared fixture:
+`packages/api_contracts/schema/content/v1/fixtures/class_workshop_create_compat.json`.
+Combined registry v9 (T2 originally v8) makes `class_workshop` available only behind the independent,
+default-off `content.class_workshop.authoring` flag, local/LV Emulator only.
+Personal publisher is resolved by the Identity owner; C3 Content, C2 review,
+C1/D2 Media and the existing config-driven mobile Create flow (Q4 D3.1) apply.
+Submit, approved publish and immutable activate enforce the same Class validator,
+composition rules, reference policy, authority/eligibility and media readiness;
+missing/stale/unavailable dependencies refuse explicitly. No permissive fallback
+or client-derived authority is allowed. A future Class schema refuses with
+`content_type_unsupported` on all three paths (Class §34.5).
+
+The server validates the CW-V1 body: explicit single/fixed-series
+occurrences (fixed series 2…60, 15…720 minutes each, no multi-day) in one
+IANA timezone, DST gap refusal and explicit overlap fold, server-recomputed
+UTC, all occurrences in the future at submit/publish and at least one at
+activate, exact allowlists refusing unknown/future/legacy fields. It never
+materializes recurrence, stores availability, treats `declared_group_limit`
+as inventory, or accepts hold/capacity/confirmed/paid claims. Only an external
+HTTPS enrollment URL or an information-only state; ECL-03/BCK-09, internal
+Booking, Payments and providers are out of scope. Do not copy Event
+archetype/admission or Session weekly-rule logic. No parallel schedule
+engine, Booking engine or Create flow. Catalog/Discover stay excluded
+(BCK08-OD-04); the existing Collection evaluator may return eligible for a
+published Class without enabling its projection.
+
+The documentation-only checkpoint is historical. Implementation and local gates
+are recorded in §47.1 and the D3.6 evidence; acceptance matrix: D3.6 §5–§7.
+
+
+### 47.1 File plan and Event Classification 2.2.4 accepted — 2026-10-19
+
+After the documentation-only checkpoint, the owner answered «все принимаю, реалищзовывай»,
+explicitly accepting the D3.6 §6 file plan and the Event Classification
+revision 2.2.4 (Class / Workshop boundary in §1.1, §1.2, §6.2). Bounded
+implementation and local Emulator gates are authorized within D3.6 §6.
+Implemented: Class source rules (`class_workshop_rules.ts`), combined registry v9 with a
+personal-only available `class_workshop`, independent default-off
+`content.class_workshop.authoring`, submit/publish future-occurrence check and
+immutable-target validation on activate. Other types' enablement is unchanged.
+Required local gates passed, including the single-session Emulator suite with
+the new `class-workshop` group and the isolated D3.6 stand gate; details in
+[D3.6 evidence](../evidence/backend/d3/D3_6_CLASS_WORKSHOP_2026_10_19.md).
+This parent and D3.6 remain Review. Implementation commits `f083d7c`, `ef1356c`,
+`0f80e12`, `32cc0d3` and documentation checkpoint `bed7b05` were subsequently
+authorized locally. The final contract correction is uncommitted; no new commit,
+push, merge or deploy is authorized by this closeout.
+## 48. D3.7 amendment — Find People, local Emulator only
+
+Owner decisions FP-OD-01…04 (T3 chat, 2026-10-19) are recorded in
+[D3.7 §1](D3_7_FIND_PEOPLE_PUBLICATION_AMENDMENT.md). They are a local owner
+policy, not OD-11 acceptance, Legal/Privacy approval or production
+authorization. D3.7 and this parent stay **Review**.
+
+`find_people` is available in combined registry v9 (T3 originally v8) with
+`apps/backend/functions/src/modules/content/domain/type_rules/find_people_rules.ts`;
+`visibilityPolicy` stays `consent_limited`, so Library, Collection membership
+and Reviews keep refusing it. The draft body is the private source: exact
+meeting data lives only in `findPeople.meeting.exact` and only its author reads
+it (`getDraft`, `getPublicationStatus`, every change; also inside a Page).
+`publishApprovedRevision` stores a new body built from an allowlist with the
+server-computed ~1 km cell centre; its `bodyHash` is over that public body.
+Activation validates exactly the immutable public body. Submit, approved
+publish and activate refuse `age_eligibility_required` without a current
+synthetic 18+ attestation and `privacy_consent_required` without active,
+unexpired BCK-06 consent; owner withdraw needs neither. A delegated module
+never authors Find People. `getPublishedRevision` applies the same fresh gate
+as the Catalog (§6 of D3.7).
+
+Retention: `find_people_private_location_retention.ts` erases `meeting.exact`
+from the draft and from its stored create/update answers 30 days after the
+earliest of consent revoke or expiry, meeting end and owner hide; never behind
+a feature flag. Only owner-service commands change domain state; no messaging,
+participation, live tracking or production infrastructure is added.

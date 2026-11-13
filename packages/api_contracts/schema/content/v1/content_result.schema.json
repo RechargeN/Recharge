@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/content/v1/content_result.schema.json",
+  "$defs": {
+    "failureCode": {
+      "enum": [
+        "unauthenticated",
+        "capability_denied",
+        "publisher_not_eligible",
+        "creator_verification_required",
+        "identity_verification_required",
+        "seller_declaration_required",
+        "membership_inactive",
+        "type_disabled",
+        "content_type_unsupported",
+        "source_revision_stale",
+        "validation_failed",
+        "media_not_ready",
+        "moderation_required",
+        "moderation_decision_stale",
+        "publication_restricted",
+        "market_disabled",
+        "policy_unavailable",
+        "revision_conflict",
+        "idempotency_conflict",
+        "unsupported_version",
+        "unknown_outcome",
+        "not_found",
+        "invalid_contract",
+        "storage_limit_exceeded",
+        "import_rollback_not_allowed",
+        "import_generation_mismatch",
+        "import_rolled_back",
+        "cleanup_reserved",
+        "cleanup_not_reserved",
+        "cleanup_token_mismatch",
+        "original_removed",
+        "privacy_consent_required",
+        "age_eligibility_required"
+      ]
+    },
+    "validationViolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "fieldPath"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$",
+          "maxLength": 128
+        },
+        "fieldPath": {
+          "type": "string",
+          "pattern": "^/body(/[A-Za-z0-9_~-]+)*$",
+          "maxLength": 256
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "kind",
+        "resultType",
+        "data"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "kind": {
+          "const": "succeeded"
+        },
+        "resultType": {
+          "enum": [
+            "draft",
+            "submission",
+            "publishedRevision",
+            "publicationStatus",
+            "publicationPointer",
+            "moderationAcknowledgement",
+            "externalBindingLookup",
+            "importBinding"
+          ]
+        },
+        "data": {
+          "type": "object"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "kind",
+        "code"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "kind": {
+          "const": "rejected"
+        },
+        "code": {
+          "$ref": "#/$defs/failureCode"
+        },
+        "violations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/validationViolation"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "violations"
+            ],
+            "properties": {
+              "violations": {}
+            }
+          },
+          "then": {
+            "properties": {
+              "code": {
+                "const": "validation_failed"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "kind",
+        "code"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "kind": {
+          "const": "unsupportedContract"
+        },
+        "code": {
+          "enum": [
+            "unsupported_version",
+            "content_type_unsupported"
+          ]
+        }
+      }
+    }
+  ]
+}

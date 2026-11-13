@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/reference-data/v1/activation_pointer.schema.json",
+  "title": "Reference activation pointer v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "environmentId": { "enum": ["local", "dev", "stage", "prod"] },
+    "marketId": { "enum": ["LV", "EE", "LT"] },
+    "capabilityId": { "const": "reference-data.bootstrap" },
+    "activeRevisionId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "pointerRevision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "environmentId",
+    "marketId",
+    "capabilityId",
+    "activeRevisionId",
+    "pointerRevision"
+  ]
+}

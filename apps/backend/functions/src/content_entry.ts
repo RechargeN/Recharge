@@ -1,0 +1,281 @@
+import { randomUUID } from 'node:crypto';
+import { safetyRestricted } from './shared/safety_instruction.js';
+import { publisherUser } from './shared/safety_visibility.js';
+import type { Firestore } from 'firebase-admin/firestore';
+
+import type { ContentTypeId } from './contracts/content_v1.js';
+import type { ContentPublicationService } from './modules/content/application/content_publication_service.js';
+import type { ContentActor } from './modules/content/application/ports/publisher_eligibility_port.js';
+import {
+  isContentTypeAvailable,
+  resolveContentType,
+} from './modules/content/domain/content_type_registry.js';
+import { toContentWireResult, type ContentResultType } from './modules/content/domain/failures.js';
+import { createEmulatorCatalogComposition } from './modules/catalog/infrastructure/emulator_catalog_composition.js';
+import { emulatorCompositionRules } from './modules/content/infrastructure/emulator_activity_dependencies.js';
+import { emulatorActivationClosedTypes } from './modules/content/infrastructure/emulator_rental_dependencies.js';
+import { CatalogCollectionMembership } from './modules/content/infrastructure/catalog_collection_membership.js';
+import { CatalogScenarioStops } from './modules/content/infrastructure/catalog_scenario_stops.js';
+import { FirestoreScenarioRevisionReader } from './modules/quick_plan/scenario_publication.js';
+import { FirestoreRouteRevisionReader } from './modules/route/route_publication.js';
+import { createEmulatorContentService } from './modules/content/infrastructure/emulator_content_composition.js';
+import { EmulatorSyntheticReferenceData } from './modules/content/infrastructure/emulator_reference_data.js';
+import type { FirestoreContentRepository } from './modules/content/infrastructure/firestore_content_repository.js';
+import { IdentityPublisherEligibility } from './modules/content/infrastructure/identity_publisher_eligibility.js';
+import { FirestoreIdentityAuthorityRepository } from './modules/identity_publisher/infrastructure/firestore_identity_authority_repository.js';
+import type { EmulatorMediaComposition } from './modules/media/infrastructure/emulator_media_composition.js';
+import {
+  createEmulatorModerationPorts,
+  createEmulatorModerationService,
+} from './modules/moderation/infrastructure/emulator_moderation_composition.js';
+import { MediaModerationAdapter } from './modules/moderation/infrastructure/media_moderation_adapter.js';
+import { ScenarioShareModerationAdapter } from './modules/moderation/infrastructure/share_moderation_adapter.js';
+import type { EntityId } from './shared/ids.js';
+import { systemServerClock, type ServerClock } from './shared/server_clock.js';
+import { mediaComposition } from './media_entry.js';
+import { FirestoreFindPeoplePrivacy } from './modules/content/infrastructure/find_people_privacy_adapter.js';
+import {
+  purgeFindPeoplePrivateLocations,
+  type FindPeopleRetentionReport,
+} from './modules/content/infrastructure/find_people_private_location_retention.js';
+
+/**
+ * Types the Emulator-only authoring path may ever enable: Event (C3), Place
+ * (D3.1), Recharge Activity (D3.2), Rental / Equipment (D3.3) and Collection /
+ * Guide (D3.4). Every other type stays off here, with or without a validator.
+ */
+export const emulatorAuthoringTypes: readonly ContentTypeId[] = Object.freeze([
+  'event',
+  'place',
+  'activity',
+  'rental',
+  'collection',
+  'session',
+  // I3 / SCN-PUB-01: public Scenario pinned to an immutable BCK-10 revision.
+  'scenario',
+  // J2 / RTE-PUB-01: public Route pinned to an immutable BCK-11 revision.
+  'route',
+  'class_workshop',
+  // D3.7: Find People, with BCK-06 consent and the synthetic 18+ attestation.
+  'find_people',
+]);
+
+/** D3.1 §2.2, D3.2 §2.2, D3.3, D3.4 §2.2: the authoring types whose own flag is on. */
+export function authoringTypesFor(flags: {
+  readonly eventAuthoring: boolean;
+  readonly placeAuthoring: boolean;
+  readonly activityAuthoring: boolean;
+  readonly rentalAuthoring: boolean;
+  readonly collectionAuthoring?: boolean;
+  readonly sessionAuthoring?: boolean;
+  readonly scenarioAuthoring?: boolean;
+  readonly routeAuthoring?: boolean;
+  readonly classWorkshopAuthoring?: boolean;
+  readonly findPeopleAuthoring?: boolean;
+}): ReadonlySet<ContentTypeId> {
+  return new Set<ContentTypeId>([
+    ...(flags.eventAuthoring ? (['event'] as const) : []),
+    ...(flags.placeAuthoring ? (['place'] as const) : []),
+    ...(flags.activityAuthoring ? (['activity'] as const) : []),
+    ...(flags.rentalAuthoring ? (['rental'] as const) : []),
+    ...(flags.collectionAuthoring === true ? (['collection'] as const) : []),
+    ...(flags.sessionAuthoring === true ? (['session'] as const) : []),
+    ...(flags.scenarioAuthoring === true ? (['scenario'] as const) : []),
+    ...(flags.routeAuthoring === true ? (['route'] as const) : []),
+    ...(flags.classWorkshopAuthoring === true ? (['class_workshop'] as const) : []),
+    ...(flags.findPeopleAuthoring === true ? (['find_people'] as const) : []),
+  ]);
+}
+
+/**
+ * A type outside `emulatorAuthoringTypes`, or one without an available
+ * validator, can never be enabled: the composition refuses to be built.
+ */
+export function assertEmulatorAuthoringTypes(types: ReadonlySet<string>): void {
+  for (const typeId of types) {
+    const entry = resolveContentType(typeId);
+    if (
+      !emulatorAuthoringTypes.includes(typeId as ContentTypeId) ||
+      entry === null ||
+      !isContentTypeAvailable(entry)
+    )
+      throw new Error(`content_authoring_type_not_allowed:${typeId}`);
+  }
+}
+
+/**
+ * C3/D3.1/D3.2/D3.4 Emulator-only authoring. Content is composed with the real ports it
+ * already has: Identity publisher eligibility (Session, verified Creator, exact
+ * Page), Media readiness of the exact revision, and the C2 moderation verifier,
+ * which makes review mandatory before publication. Only the given authoring
+ * types are enabled (default `event`), and only here; the default composition
+ * enables nothing. Reference data is the synthetic Emulator data (see
+ * `EmulatorSyntheticReferenceData`); what this composition cannot resolve
+ * fails closed through `emulatorCompositionRules` (D3.2 §2.4). Collection
+ * membership is asked from the Catalog-owned exact-id evaluator (D3.4 §2.3),
+ * which stays unavailable, and so refuses, unless the local
+ * `RECHARGE_TEST_COLLECTION_MEMBERSHIP` switch is on.
+ */
+export interface EventAuthoringComposition {
+  readonly content: ContentPublicationService;
+  readonly contentRepository: FirestoreContentRepository;
+  readonly media: EmulatorMediaComposition;
+  readonly moderation: ReturnType<typeof createEmulatorModerationService>;
+}
+
+export function eventAuthoringComposition(
+  firestore: Firestore,
+  options: {
+    readonly media?: EmulatorMediaComposition;
+    readonly clock?: ServerClock;
+    /** D3.1: the enabled authoring types (default: Event only, as in C3). */
+    readonly enabledTypes?: ReadonlySet<ContentTypeId>;
+  } = {},
+): EventAuthoringComposition {
+  const enabledTypes = options.enabledTypes ?? new Set<ContentTypeId>(['event']);
+  assertEmulatorAuthoringTypes(enabledTypes);
+  const media = options.media ?? mediaComposition(firestore);
+  const clock = options.clock ?? systemServerClock;
+  const moderationPorts = createEmulatorModerationPorts(firestore);
+  const catalog = createEmulatorCatalogComposition(firestore);
+  const { service, repository } = createEmulatorContentService({
+    contentPersistenceEnabled: true,
+    firestore,
+    ports: {
+      eligibility: new IdentityPublisherEligibility(
+        new FirestoreIdentityAuthorityRepository(firestore),
+        async (user, publisher, now) => {
+          const owner = await publisherUser(firestore, publisher);
+          return (
+            (await safetyRestricted(firestore, 'content', user, now)) ||
+            (owner !== null && (await safetyRestricted(firestore, 'content', owner, now)))
+          );
+        },
+      ),
+      referenceData: new EmulatorSyntheticReferenceData(),
+      moderation: moderationPorts.verifier,
+      media: media.readiness,
+      clock,
+      ids: { newId: () => randomUUID() as EntityId },
+      enabledTypes,
+      // D3.3 Q4: re-activating a Rental revision stays closed (§2 Q4).
+      activationClosedTypes: emulatorActivationClosedTypes,
+      compositionRules:
+        process.env.RECHARGE_TEST_ACTIVITY_LINKED_PLACE === 'true'
+          ? new Map([...emulatorCompositionRules].filter(([type]) => type !== 'activity'))
+          : emulatorCompositionRules,
+      ...(process.env.RECHARGE_TEST_ACTIVITY_LINKED_PLACE === 'true'
+        ? {
+            enforceLinkedPlaceEligibility: true,
+            linkedPlaceEligibility: catalog.placeLinks,
+          }
+        : {}),
+      publishedObjectMembership: new CatalogCollectionMembership(catalog.publishedObjects),
+      scenarioRevisions: new FirestoreScenarioRevisionReader(firestore),
+      routeRevisions: new FirestoreRouteRevisionReader(firestore),
+      scenarioStops: new CatalogScenarioStops(catalog.scenarioStops),
+      findPeoplePrivacy: new FirestoreFindPeoplePrivacy(firestore),
+    },
+  });
+  const moderation = createEmulatorModerationService({
+    firestore,
+    repository: moderationPorts.repository,
+    contentRepository: repository,
+    contentService: service,
+    // D2 §7: staff restrict or restore one Media asset through Media's own path.
+    media: new MediaModerationAdapter(media.repository, media.deletion),
+    // SCN-PUB-01: staff restrict or restore one unlisted share through Planning.
+    shares: new ScenarioShareModerationAdapter(firestore, moderationPorts.repository),
+    clock,
+  });
+  return Object.freeze({ content: service, contentRepository: repository, media, moderation });
+}
+
+/** SCN-PUB-01 SP-08: Catalog-owned status of Scenario stops, for Planning. */
+export function scenarioStopsFor(firestore: Firestore): CatalogScenarioStops {
+  return new CatalogScenarioStops(createEmulatorCatalogComposition(firestore).scenarioStops);
+}
+
+/**
+ * D3.7 §5.3: the Content-owned erasure of exact Find People meeting data,
+ * exposed for the Emulator schedule and the stand. Never behind a feature flag.
+ */
+export function purgeFindPeopleRetention(
+  firestore: Firestore,
+  nowUtc: string,
+): Promise<FindPeopleRetentionReport> {
+  return purgeFindPeoplePrivateLocations(firestore, nowUtc);
+}
+
+/** Server-resolved caller. The Session was already validated by the access authority. */
+export interface ContentCaller {
+  readonly actor: ContentActor;
+  readonly firestore: Firestore;
+  /** D3.1 §2.2: authoring types whose flag is on for this call. */
+  readonly enabledTypes: ReadonlySet<ContentTypeId>;
+  /** N3a.2: a ready Content service (the dev-cloud one). Absent: the Emulator composition. */
+  readonly content?: ContentPublicationService;
+}
+
+const contentFor = (caller: ContentCaller): ContentPublicationService =>
+  caller.content ??
+  eventAuthoringComposition(caller.firestore, { enabledTypes: caller.enabledTypes }).content;
+
+// Owner commands only. Moderation dispositions and delegated-import inputs are
+// refused by the Content service itself; nothing else is reachable here.
+const commandResultTypes: Readonly<Record<string, ContentResultType>> = Object.freeze({
+  createDraft: 'draft',
+  updateDraft: 'draft',
+  submitForPublication: 'submission',
+  publishApprovedRevision: 'publishedRevision',
+  withdrawPublication: 'publicationPointer',
+  activatePublishedRevision: 'publicationPointer',
+  // D4.1: local import rollback and cleanup reservation.
+  rollbackImportedDraft: 'draft',
+  reserveImportCleanup: 'importBinding',
+  completeImportCleanup: 'importBinding',
+  releaseImportCleanup: 'importBinding',
+});
+const queryResultTypes: Readonly<Record<string, ContentResultType>> = Object.freeze({
+  getDraft: 'draft',
+  getPublicationStatus: 'publicationStatus',
+  getPublishedRevision: 'publishedRevision',
+  getImportBinding: 'importBinding',
+});
+
+function stripTransport(data: unknown): unknown {
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) return data;
+  const { sessionContext, ...rest } = data as Record<string, unknown>;
+  void sessionContext;
+  return rest;
+}
+
+function field(body: unknown, name: string): unknown {
+  return typeof body === 'object' && body !== null
+    ? (body as Record<string, unknown>)[name]
+    : undefined;
+}
+
+export async function handleContentCommand(
+  caller: ContentCaller,
+  data: unknown,
+): Promise<Readonly<Record<string, unknown>>> {
+  const body = stripTransport(data);
+  const commandType = field(body, 'commandType');
+  const resultType = typeof commandType === 'string' ? commandResultTypes[commandType] : undefined;
+  if (resultType === undefined)
+    return { schemaVersion: 1, kind: 'rejected', code: 'capability_denied' };
+  return toContentWireResult(resultType, await contentFor(caller).execute(caller.actor, body));
+}
+
+export async function handleContentQuery(
+  caller: ContentCaller,
+  data: unknown,
+): Promise<Readonly<Record<string, unknown>>> {
+  const body = stripTransport(data);
+  const queryType = field(body, 'queryType');
+  const resultType = typeof queryType === 'string' ? queryResultTypes[queryType] : undefined;
+  if (resultType === undefined)
+    return { schemaVersion: 1, kind: 'rejected', code: 'capability_denied' };
+  return toContentWireResult(resultType, await contentFor(caller).query(caller.actor, body));
+}

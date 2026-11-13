@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../application/scenario_transit_disclosure.dart';
+import '../../../../../core/localization/l10n_context.dart';
 
 class ScenarioTransitDisclosureCard extends StatelessWidget {
   const ScenarioTransitDisclosureCard({
@@ -33,10 +34,15 @@ class ScenarioTransitDisclosureCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      disclosure.title,
+                      disclosure.title ??
+                          context.l10n.scenarioTransitPlannedTransport,
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
-                    Text(disclosure.statusLabel),
+                    Text(
+                      context.l10n.scenarioTransitStatus(
+                        disclosure.freshness.name,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -44,30 +50,39 @@ class ScenarioTransitDisclosureCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           if (disclosure.providerLabel != null)
-            _Line(label: 'Provider', value: disclosure.providerLabel!),
+            _Line(
+              label: context.l10n.createScenarioProvider,
+              value: disclosure.providerLabel!,
+            ),
           if (disclosure.serviceDateLabel != null)
-            _Line(label: 'Service date', value: disclosure.serviceDateLabel!),
+            _Line(
+              label: context.l10n.createScenarioServiceDate,
+              value: disclosure.serviceDateLabel!,
+            ),
           _Line(
-            label: 'Planned time',
+            label: context.l10n.createScenarioPlannedTime,
             value:
                 '${disclosure.departureLabel ?? 'unknown'} → '
                 '${disclosure.arrivalLabel ?? 'unknown'}',
           ),
           if (!compact) ...<Widget>[
             _Line(
-              label: 'Stops',
+              label: context.l10n.createScenarioStops,
               value:
                   '${disclosure.originLabel ?? 'unknown'} → '
                   '${disclosure.destinationLabel ?? 'unknown'}',
             ),
             if (disclosure.licenseLabel != null)
-              _Line(label: 'Licence', value: disclosure.licenseLabel!),
+              _Line(
+                label: context.l10n.createScenarioLicence,
+                value: disclosure.licenseLabel!,
+              ),
             _Line(
-              label: 'Feed retrieved',
+              label: context.l10n.createScenarioFeedRetrieved2,
               value: disclosure.retrievedAtLabel ?? 'unknown',
             ),
             _Line(
-              label: 'Feed SHA-256',
+              label: context.l10n.createScenarioFeedSha256,
               value: disclosure.digestLabel ?? 'unknown',
               selectable: true,
             ),
@@ -81,7 +96,11 @@ class ScenarioTransitDisclosureCard extends StatelessWidget {
                 children: <Widget>[
                   const Icon(Icons.info_outline, size: 16),
                   const SizedBox(width: 6),
-                  Expanded(child: Text(warning)),
+                  Expanded(
+                    child: Text(
+                      context.l10n.scenarioTransitWarning(warning.name),
+                    ),
+                  ),
                 ],
               ),
             ),

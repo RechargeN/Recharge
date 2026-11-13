@@ -35,7 +35,7 @@ class RecordPlaceVisitUseCase {
   }) {
     if (userId.trim().isEmpty || placeId.trim().isEmpty) {
       throw const VisitHistoryValidationException(
-        'Visit owner and place are required',
+        'Visit owner and place are required', // l10n-ignore: developer error
       );
     }
     final DateTime normalizedDay = DateTime(
@@ -50,7 +50,7 @@ class RecordPlaceVisitUseCase {
     );
     if (normalizedDay.isAfter(normalizedToday)) {
       throw const VisitHistoryValidationException(
-        'A visit date cannot be in the future',
+        'A visit date cannot be in the future', // l10n-ignore: developer error
       );
     }
     final String normalizedTimezone = timezoneId.trim();

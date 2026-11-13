@@ -18,9 +18,8 @@ class NotificationsLocalDataSource {
       final List<dynamic> decoded = jsonDecode(raw) as List<dynamic>;
       return decoded
           .map(
-            (dynamic item) => NotificationItemModel.fromJson(
-              item as Map<String, dynamic>,
-            ),
+            (dynamic item) =>
+                NotificationItemModel.fromJson(item as Map<String, dynamic>),
           )
           .toList(growable: false);
     } on FormatException {

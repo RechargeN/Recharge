@@ -1,0 +1,1025 @@
+import '../../../../shared/primitives/geo/geo_point.dart';
+import '../../../../shared/primitives/geo/geometry_encoding.dart';
+import '../../domain/entities/activity_catalog_facts.dart';
+import '../../domain/entities/route_catalog_facts.dart';
+// Strict readers for the Emulator-only `discoverQuery` v1 answers (E2). A
+// shape the client does not know is a FormatException, never a guess.
+
+Map<String, Object?> _map(Object? value, String field) {
+  if (value is Map) return value.cast<String, Object?>();
+  throw FormatException('catalog.$field must be an object');
+}
+
+String _string(Map<String, Object?> map, String field) {
+  final Object? value = map[field];
+  if (value is String && value.isNotEmpty) return value;
+  throw FormatException('catalog.$field must be a non-empty string');
+}
+
+String? _optionalString(Map<String, Object?> map, String field) {
+  final Object? value = map[field];
+  if (value == null) return null;
+  if (value is String) return value.isEmpty ? null : value;
+  throw FormatException('catalog.$field must be a string or null');
+}
+
+int _int(Map<String, Object?> map, String field) {
+  final Object? value = map[field];
+  if (value is int) return value;
+  throw FormatException('catalog.$field must be an integer');
+}
+
+double? _optionalDouble(Map<String, Object?> map, String field) {
+  final Object? value = map[field];
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  throw FormatException('catalog.$field must be a number or null');
+}
+
+DateTime _instant(Map<String, Object?> map, String field) {
+  final DateTime? parsed = DateTime.tryParse(_string(map, field));
+  if (parsed == null || !parsed.isUtc) {
+    throw FormatException('catalog.$field must be a UTC instant');
+  }
+  return parsed;
+}
+
+String _scheduleMode(String value) {
+  if (value == 'oneTime' || value == 'multiDate' || value == 'recurring') {
+    return value;
+  }
+  throw FormatException('catalog.item.scheduleMode $value is not supported');
+}
+
+List<Object?> _list(Map<String, Object?> map, String field) {
+  final Object? value = map[field];
+  if (value is List) return value;
+  throw FormatException('catalog.$field must be a list');
+}
+
+final class CatalogPoint {
+  const CatalogPoint(this.latitude, this.longitude);
+
+  final double latitude;
+  final double longitude;
+
+  static CatalogPoint? read(Object? value) {
+    if (value == null) return null;
+    final Map<String, Object?> map = _map(value, 'point');
+    final double? latitude = _optionalDouble(map, 'latitude');
+    final double? longitude = _optionalDouble(map, 'longitude');
+    if (latitude == null || longitude == null) {
+      throw const FormatException('catalog.point needs both coordinates');
+    }
+    return CatalogPoint(latitude, longitude);
+  }
+}
+
+/// `free`, `fixed` with an exact minor amount, or unknown (`null` on the wire).
+final class CatalogPrice {
+  const CatalogPrice.free() : amountMinor = 0, currencyCode = null, free = true;
+
+  const CatalogPrice.fixed({
+    required this.amountMinor,
+    required String this.currencyCode,
+  }) : free = false;
+
+  final bool free;
+  final int amountMinor;
+  final String? currencyCode;
+
+  static CatalogPrice? read(Object? value) {
+    if (value == null) return null;
+    final Map<String, Object?> map = _map(value, 'price');
+    final String mode = _string(map, 'mode');
+    if (mode == 'free') return const CatalogPrice.free();
+    if (mode == 'fixed') {
+      return CatalogPrice.fixed(
+        amountMinor: _int(map, 'amountMinor'),
+        currencyCode: _string(map, 'currencyCode'),
+      );
+    }
+    throw FormatException('catalog.price.mode $mode is not supported');
+  }
+}
+
+/// One Feed/Search card: the deciding occurrence of one published revision.
+final class CatalogCard {
+  const CatalogCard({
+    required this.contentId,
+    required this.publishedRevisionId,
+    required this.title,
+    required this.shortDescription,
+    required this.categoryId,
+    required this.subcategoryId,
+    required this.city,
+    required this.venueName,
+    required this.point,
+    required this.timezoneId,
+    required this.occurrenceId,
+    required this.startAtUtc,
+    required this.endAtUtc,
+    required this.price,
+    required this.distanceMeters,
+    this.activity,
+    this.findPeople,
+    this.route,
+  });
+
+  factory CatalogCard.fromWire(Object? value) {
+    final Map<String, Object?> map = _map(value, 'card');
+    final Map<String, Object?> ref = _map(map['ref'], 'card.ref');
+    if (ref['typeId'] == 'route') {
+      // DTL-RTE-02: the card is the projection without its track, plus the
+      // listing fields read here; the item reader sees only the projection.
+      final Map<String, Object?> projection = <String, Object?>{...map}
+        ..remove('ref')
+        ..remove('distanceMeters')
+        ..remove('changedSinceSnapshot')
+        ..remove('projectedAtUtc')
+        ..putIfAbsent('contentId', () => ref['contentId']);
+      final CatalogRouteItem item = CatalogRouteItem.fromWire(
+        projection,
+        card: true,
+      );
+      if (item.contentId != ref['contentId']) {
+        throw const FormatException('catalog.route.card.ref');
+      }
+      return CatalogCard(
+        contentId: item.contentId,
+        publishedRevisionId: item.publishedRevisionId,
+        title: item.title,
+        shortDescription: item.shortDescription,
+        categoryId: item.categoryId,
+        subcategoryId: item.subcategoryId,
+        city: null,
+        venueName: null,
+        point: CatalogPoint(
+          item.facts.start.latitude,
+          item.facts.start.longitude,
+        ),
+        timezoneId: '',
+        occurrenceId: '',
+        startAtUtc: null,
+        endAtUtc: null,
+        price: null,
+        distanceMeters: _optionalDouble(map, 'distanceMeters'),
+        route: item,
+      );
+    }
+    if (ref['typeId'] == 'find_people') {
+      final CatalogFindPeopleItem item = CatalogFindPeopleItem.fromWire(
+        <String, Object?>{...map, 'contentId': ref['contentId']},
+        card: true,
+      );
+      return CatalogCard(
+        contentId: item.contentId,
+        publishedRevisionId: item.publishedRevisionId,
+        title: item.title,
+        shortDescription: item.shortDescription,
+        categoryId: item.categoryId,
+        subcategoryId: item.subcategoryId,
+        city: null,
+        venueName: item.publicAreaLabel,
+        point: item.point,
+        timezoneId: item.timezoneId,
+        occurrenceId: item.occurrenceId,
+        startAtUtc: item.startAtUtc,
+        endAtUtc: item.endAtUtc,
+        price: null,
+        distanceMeters: _optionalDouble(map, 'distanceMeters'),
+        findPeople: item,
+      );
+    }
+    if (ref['typeId'] == 'activity') {
+      final CatalogActivityItem item = CatalogActivityItem.fromWire(
+        <String, Object?>{
+          ...map,
+          'typeId': 'activity',
+          'contentId': ref['contentId'],
+        },
+      );
+      return CatalogCard(
+        contentId: item.contentId,
+        publishedRevisionId: item.publishedRevisionId,
+        title: item.title,
+        shortDescription: item.shortDescription,
+        categoryId: item.categoryId,
+        subcategoryId: item.subcategoryId,
+        city: null,
+        venueName: null,
+        point: item.point,
+        timezoneId: '',
+        occurrenceId: '',
+        startAtUtc: null,
+        endAtUtc: null,
+        price: null,
+        distanceMeters: _optionalDouble(map, 'distanceMeters'),
+        activity: item,
+      );
+    }
+    if (ref['typeId'] != 'event') {
+      throw FormatException('catalog.card.ref.typeId ${ref['typeId']}');
+    }
+    final Map<String, Object?> occurrence = _map(
+      map['occurrence'],
+      'card.occurrence',
+    );
+    return CatalogCard(
+      contentId: _string(ref, 'contentId'),
+      publishedRevisionId: _string(map, 'publishedRevisionId'),
+      title: _string(map, 'title'),
+      shortDescription: _string(map, 'shortDescription'),
+      categoryId: _string(map, 'categoryId'),
+      subcategoryId: _string(map, 'subcategoryId'),
+      city: _optionalString(map, 'city'),
+      venueName: _optionalString(map, 'venueName'),
+      point: CatalogPoint.read(map['point']),
+      timezoneId: _string(map, 'timezoneId'),
+      occurrenceId: _string(occurrence, 'id'),
+      startAtUtc: _instant(occurrence, 'startAtUtc'),
+      endAtUtc: _instant(occurrence, 'endAtUtc'),
+      price: CatalogPrice.read(map['price']),
+      distanceMeters: _optionalDouble(map, 'distanceMeters'),
+    );
+  }
+
+  final String contentId;
+  final String publishedRevisionId;
+  final String title;
+  final String shortDescription;
+  final String categoryId;
+  final String subcategoryId;
+  final String? city;
+  final String? venueName;
+  final CatalogPoint? point;
+  final String timezoneId;
+  final String occurrenceId;
+  final DateTime? startAtUtc;
+  final DateTime? endAtUtc;
+  final CatalogPrice? price;
+  final double? distanceMeters;
+  final CatalogActivityItem? activity;
+  final CatalogFindPeopleItem? findPeople;
+  final CatalogRouteItem? route;
+}
+
+final class CatalogFeedPage {
+  const CatalogFeedPage({
+    required this.snapshotToken,
+    required this.projectionSetRevision,
+    required this.cards,
+    required this.nextCursor,
+  });
+
+  factory CatalogFeedPage.fromWire(Object? value) {
+    final Map<String, Object?> map = _map(value, 'page');
+    return CatalogFeedPage(
+      snapshotToken: _string(map, 'snapshotToken'),
+      projectionSetRevision: _int(map, 'projectionSetRevision'),
+      cards: _list(map, 'items').map(CatalogCard.fromWire).toList(),
+      nextCursor: _optionalString(map, 'nextCursor'),
+    );
+  }
+
+  final String snapshotToken;
+  final int projectionSetRevision;
+  final List<CatalogCard> cards;
+  final String? nextCursor;
+}
+
+final class CatalogOccurrenceWire {
+  const CatalogOccurrenceWire(
+    this.id,
+    this.startAtUtc,
+    this.endAtUtc, {
+    this.bookingRef,
+  });
+
+  final String id;
+  final DateTime startAtUtc;
+  final DateTime endAtUtc;
+  final CatalogBookingRef? bookingRef;
+}
+
+/// v3: reference to free internal Booking of one occurrence.
+final class CatalogBookingRef {
+  const CatalogBookingRef({
+    required this.eventId,
+    required this.occurrenceId,
+    this.channel,
+  });
+
+  static CatalogBookingRef? read(Object? value) {
+    if (value == null) return null;
+    final Map<String, Object?> map = _map(value, 'bookingRef');
+    final String? channel = _optionalString(map, 'channel');
+    if (channel != null && channel != 'onsite') {
+      throw FormatException('catalog.bookingRef.channel $channel');
+    }
+    return CatalogBookingRef(
+      eventId: _string(map, 'eventId'),
+      occurrenceId: _string(map, 'occurrenceId'),
+      channel: channel,
+    );
+  }
+
+  final String eventId;
+  final String occurrenceId;
+  final String? channel;
+}
+
+/// The listed Details item: one exact published revision.
+final class CatalogEventItem {
+  const CatalogEventItem({
+    required this.contentId,
+    required this.publishedRevisionId,
+    required this.publisherType,
+    required this.publisherId,
+    required this.title,
+    required this.shortDescription,
+    required this.fullDescription,
+    required this.categoryId,
+    required this.subcategoryId,
+    required this.city,
+    required this.venueName,
+    required this.point,
+    required this.timezoneId,
+    required this.scheduleMode,
+    required this.occurrences,
+    required this.price,
+    required this.publishedAtUtc,
+  });
+
+  factory CatalogEventItem.fromWire(Object? value) {
+    final Map<String, Object?> map = _map(value, 'item');
+    if (map['typeId'] != 'event') {
+      throw FormatException('catalog.item.typeId ${map['typeId']}');
+    }
+    final Map<String, Object?> publisher = _map(
+      map['publisherRef'],
+      'item.publisherRef',
+    );
+    final List<CatalogOccurrenceWire> occurrences = _list(map, 'occurrences')
+        .map((Object? entry) {
+          final Map<String, Object?> occurrence = _map(entry, 'occurrence');
+          return CatalogOccurrenceWire(
+            _string(occurrence, 'id'),
+            _instant(occurrence, 'startAtUtc'),
+            _instant(occurrence, 'endAtUtc'),
+            bookingRef: CatalogBookingRef.read(occurrence['bookingRef']),
+          );
+        })
+        .toList();
+    if (occurrences.isEmpty) {
+      throw const FormatException('catalog.item.occurrences must not be empty');
+    }
+    return CatalogEventItem(
+      contentId: _string(map, 'contentId'),
+      publishedRevisionId: _string(map, 'publishedRevisionId'),
+      publisherType: _string(publisher, 'type'),
+      publisherId: _string(publisher, 'id'),
+      title: _string(map, 'title'),
+      shortDescription: _string(map, 'shortDescription'),
+      fullDescription: _string(map, 'fullDescription'),
+      categoryId: _string(map, 'categoryId'),
+      subcategoryId: _string(map, 'subcategoryId'),
+      city: _optionalString(map, 'city'),
+      venueName: _optionalString(map, 'venueName'),
+      point: CatalogPoint.read(map['point']),
+      timezoneId: _string(map, 'timezoneId'),
+      scheduleMode: _scheduleMode(_string(map, 'scheduleMode')),
+      occurrences: occurrences,
+      price: CatalogPrice.read(map['price']),
+      publishedAtUtc: _instant(map, 'publishedAtUtc'),
+    );
+  }
+
+  final String contentId;
+  final String publishedRevisionId;
+  final String publisherType;
+  final String publisherId;
+  final String title;
+  final String shortDescription;
+  final String fullDescription;
+  final String categoryId;
+  final String subcategoryId;
+  final String? city;
+  final String? venueName;
+  final CatalogPoint? point;
+  final String timezoneId;
+  final String scheduleMode;
+  final List<CatalogOccurrenceWire> occurrences;
+  final CatalogPrice? price;
+  final DateTime publishedAtUtc;
+}
+
+final class CatalogActivityItem {
+  const CatalogActivityItem({
+    required this.contentId,
+    required this.publishedRevisionId,
+    required this.title,
+    required this.shortDescription,
+    required this.categoryId,
+    required this.subcategoryId,
+    required this.point,
+    required this.facts,
+  });
+  factory CatalogActivityItem.fromWire(Object? value) {
+    final Map<String, Object?> map = _map(value, 'activity');
+    if (map['typeId'] != 'activity' ||
+        map['schemaRevision'] != 'catalog-activity-projection-v1') {
+      throw const FormatException('catalog.activity.schema');
+    }
+    for (final String field in <String>[
+      'occurrences',
+      'price',
+      'timezoneId',
+      'bookingRef',
+      'criteria',
+    ]) {
+      if (map.containsKey(field)) {
+        throw FormatException('catalog.activity.forbidden:$field');
+      }
+    }
+    final Map<String, Object?> refs = _map(
+      map['referenceRevisions'],
+      'referenceRevisions',
+    );
+    if (_string(refs, 'taxonomyRevisionId') !=
+        'taxonomy-1.4.3-sha256:d5d4472629d52b8f3db883d9a449bcbfd5fa18e5f87a6d6aa26ae5b98168c822') {
+      throw const FormatException('catalog.activity.taxonomy');
+    }
+    final Map<String, Object?> duration = _map(
+      map['typicalDurationMinutes'],
+      'duration',
+    );
+    final int min = _int(duration, 'min'), max = _int(duration, 'max');
+    if (min <= 0 || max < min) {
+      throw const FormatException('catalog.activity.duration');
+    }
+    final Map<String, Object?>? group = map['suggestedGroupSize'] == null
+        ? null
+        : _map(map['suggestedGroupSize'], 'suggestedGroupSize');
+    if (group != null &&
+        (_int(group, 'min') <= 0 || _int(group, 'max') < _int(group, 'min'))) {
+      throw const FormatException('catalog.activity.group');
+    }
+    final CatalogPoint? point = CatalogPoint.read(map['point']);
+    if (point == null ||
+        !point.latitude.isFinite ||
+        !point.longitude.isFinite ||
+        point.latitude.abs() > 90 ||
+        point.longitude.abs() > 180) {
+      throw const FormatException('catalog.activity.point');
+    }
+    final Map<String, Object?> best = map['bestTime'] == null
+        ? <String, Object?>{}
+        : _map(map['bestTime'], 'bestTime');
+    final String? time = _optionalString(best, 'timeOfDay'),
+        season = _optionalString(best, 'season');
+    if (time != null &&
+            !<String>[
+              'morning',
+              'afternoon',
+              'evening',
+              'night',
+              'any',
+            ].contains(time) ||
+        season != null &&
+            !<String>[
+              'winter',
+              'spring',
+              'summer',
+              'autumn',
+              'any',
+            ].contains(season)) {
+      throw const FormatException('catalog.activity.bestTime');
+    }
+    final Map<String, Object?> caution = map['accessCaution'] == null
+        ? <String, Object?>{}
+        : _map(map['accessCaution'], 'accessCaution');
+    final Map<String, Object?>? contribution =
+        map['optionalContribution'] == null
+        ? null
+        : _map(map['optionalContribution'], 'optionalContribution');
+    final Map<String, Object?>? amount = contribution?['amountHint'] == null
+        ? null
+        : _map(contribution!['amountHint'], 'amountHint');
+    if (contribution != null &&
+        !<String>[
+          'purchase',
+          'donation',
+          'other',
+        ].contains(contribution['kind'])) {
+      throw const FormatException('catalog.activity.contribution');
+    }
+    if (amount != null && _int(amount, 'amountMinor') <= 0) {
+      throw const FormatException('catalog.activity.amount');
+    }
+    final List<String> gallery = _list(map, 'galleryMediaIds')
+        .map((Object? id) {
+          if (id is! String || id.isEmpty) {
+            throw const FormatException('catalog.activity.gallery');
+          }
+          return id;
+        })
+        .toList(growable: false);
+    return CatalogActivityItem(
+      contentId: _string(map, 'contentId'),
+      publishedRevisionId: _string(map, 'publishedRevisionId'),
+      title: _string(map, 'title'),
+      shortDescription: _string(map, 'shortDescription'),
+      categoryId: _string(map, 'categoryId'),
+      subcategoryId: _string(map, 'subcategoryId'),
+      point: point,
+      facts: ActivityCatalogFacts(
+        durationMinMinutes: min,
+        durationMaxMinutes: max,
+        suggestedGroupMin: group == null ? null : _int(group, 'min'),
+        suggestedGroupMax: group == null ? null : _int(group, 'max'),
+        fullDescription: _optionalString(map, 'fullDescription') ?? '',
+        addressLine: _optionalString(map, 'addressLine') ?? '',
+        accessNotes: _optionalString(map, 'accessNotes') ?? '',
+        isInformal: caution['isInformal'] == true,
+        cautionNote: _optionalString(caution, 'note') ?? '',
+        timeOfDay: time,
+        season: season,
+        contributionKind: contribution == null
+            ? null
+            : _string(contribution, 'kind'),
+        contributionNote: contribution == null
+            ? null
+            : _string(contribution, 'note'),
+        amountMinor: amount == null ? null : _int(amount, 'amountMinor'),
+        currencyCode: amount == null ? null : _string(amount, 'currencyCode'),
+        galleryMediaIds: gallery,
+        linkedPlaceId: map['linkedPlace'] == null
+            ? null
+            : _string(_map(map['linkedPlace'], 'linkedPlace'), 'contentId'),
+        linkedPlaceTitle: map['linkedPlace'] == null
+            ? null
+            : _string(_map(map['linkedPlace'], 'linkedPlace'), 'title'),
+      ),
+    );
+  }
+  final String contentId,
+      publishedRevisionId,
+      title,
+      shortDescription,
+      categoryId,
+      subcategoryId;
+  final CatalogPoint point;
+  final ActivityCatalogFacts facts;
+}
+
+/// D3.7 Find People public projection: the point is the server-computed
+/// centre of a ~1 km cell, never the meeting point. Any field that could carry
+/// private meeting data is refused here as well (defence in depth): the client
+/// fails on such an answer instead of showing it.
+final class CatalogFindPeopleItem {
+  const CatalogFindPeopleItem({
+    required this.contentId,
+    required this.publishedRevisionId,
+    required this.title,
+    required this.shortDescription,
+    required this.categoryId,
+    required this.subcategoryId,
+    required this.publicAreaLabel,
+    required this.point,
+    required this.precisionMeters,
+    required this.timezoneId,
+    required this.occurrenceId,
+    required this.startAtUtc,
+    required this.endAtUtc,
+    required this.applicationDeadlineUtc,
+    required this.skillLevel,
+    required this.languageCodes,
+    required this.targetGroupSize,
+    required this.costType,
+    required this.expectedSpendMinor,
+    required this.currencyCode,
+    this.fullDescription,
+    this.publisherType,
+    this.publisherId,
+    this.publishedAtUtc,
+  });
+
+  static const Set<String> _privateFields = <String>{
+    'exact',
+    'exactGeo',
+    'addressLine',
+    'exactAddressLine',
+    'placeName',
+    'meetingPlaceName',
+    'instructions',
+    'meetingInstructions',
+    'confirmations',
+  };
+
+  factory CatalogFindPeopleItem.fromWire(Object? value, {required bool card}) {
+    final Map<String, Object?> map = _map(value, 'findPeople');
+    for (final String field in map.keys) {
+      if (_privateFields.contains(field)) {
+        throw FormatException('catalog.findPeople.forbidden:$field');
+      }
+    }
+    if (!card &&
+        (map['typeId'] != 'find_people' ||
+            map['schemaRevision'] != 'catalog-find-people-projection-v1')) {
+      throw const FormatException('catalog.findPeople.schema');
+    }
+    final CatalogPoint? point = CatalogPoint.read(map['point']);
+    if (point == null ||
+        !point.latitude.isFinite ||
+        !point.longitude.isFinite ||
+        point.latitude.abs() > 90 ||
+        point.longitude.abs() > 180) {
+      throw const FormatException('catalog.findPeople.point');
+    }
+    final int precision = _int(map, 'publicGeoPrecisionMeters');
+    if (precision <= 0) {
+      throw const FormatException('catalog.findPeople.precision');
+    }
+    final Map<String, Object?> occurrence;
+    if (card) {
+      occurrence = _map(map['occurrence'], 'findPeople.occurrence');
+    } else {
+      final List<Object?> occurrences = _list(map, 'occurrences');
+      if (occurrences.length != 1) {
+        throw const FormatException('catalog.findPeople.occurrences');
+      }
+      occurrence = _map(occurrences.single, 'findPeople.occurrence');
+    }
+    final Map<String, Object?>? spend = map['expectedSpend'] == null
+        ? null
+        : _map(map['expectedSpend'], 'findPeople.expectedSpend');
+    final Map<String, Object?>? publisher = card
+        ? null
+        : _map(map['publisherRef'], 'findPeople.publisherRef');
+    final List<String> languages = <String>[];
+    for (final Object? code in _list(map, 'languageCodes')) {
+      if (code is! String || code.isEmpty) {
+        throw const FormatException('catalog.findPeople.languages');
+      }
+      languages.add(code);
+    }
+    return CatalogFindPeopleItem(
+      contentId: _string(map, 'contentId'),
+      publishedRevisionId: _string(map, 'publishedRevisionId'),
+      title: _string(map, 'title'),
+      shortDescription: _string(map, 'shortDescription'),
+      fullDescription: card ? null : _string(map, 'fullDescription'),
+      categoryId: _string(map, 'categoryId'),
+      subcategoryId: _string(map, 'subcategoryId'),
+      publicAreaLabel: _string(map, 'publicAreaLabel'),
+      point: point,
+      precisionMeters: precision,
+      timezoneId: _string(map, 'timezoneId'),
+      occurrenceId: _string(occurrence, 'id'),
+      startAtUtc: _instant(occurrence, 'startAtUtc'),
+      endAtUtc: _instant(occurrence, 'endAtUtc'),
+      applicationDeadlineUtc: _instant(map, 'applicationDeadlineUtc'),
+      skillLevel: _string(map, 'skillLevel'),
+      languageCodes: List<String>.unmodifiable(languages),
+      targetGroupSize: _int(map, 'targetGroupSize'),
+      costType: _string(map, 'costType'),
+      expectedSpendMinor: spend == null ? null : _int(spend, 'amountMinor'),
+      currencyCode: spend == null ? null : _string(spend, 'currencyCode'),
+      publisherType: publisher == null ? null : _string(publisher, 'type'),
+      publisherId: publisher == null ? null : _string(publisher, 'id'),
+      publishedAtUtc: card ? null : _instant(map, 'publishedAtUtc'),
+    );
+  }
+
+  final String contentId;
+  final String publishedRevisionId;
+  final String title;
+  final String shortDescription;
+  final String? fullDescription;
+  final String categoryId;
+  final String subcategoryId;
+  final String publicAreaLabel;
+  final CatalogPoint point;
+  final int precisionMeters;
+  final String timezoneId;
+  final String occurrenceId;
+  final DateTime startAtUtc;
+  final DateTime endAtUtc;
+  final DateTime applicationDeadlineUtc;
+  final String skillLevel;
+  final List<String> languageCodes;
+  final int targetGroupSize;
+  final String costType;
+  final int? expectedSpendMinor;
+  final String? currencyCode;
+  final String? publisherType;
+  final String? publisherId;
+  final DateTime? publishedAtUtc;
+}
+
+/// `listed` carries the item; `excluded`/`absent` never do.
+final class CatalogDetails {
+  const CatalogDetails({
+    required this.state,
+    required this.reason,
+    required this.item,
+    required this.changedSinceSnapshot,
+    this.activity,
+    this.findPeople,
+    this.route,
+  });
+
+  factory CatalogDetails.fromWire(Object? value) {
+    final Map<String, Object?> map = _map(value, 'details');
+    final String state = _string(map, 'state');
+    if (state != 'listed' && state != 'excluded' && state != 'absent') {
+      throw FormatException('catalog.details.state $state');
+    }
+    if (state == 'listed' &&
+        !<String>[
+          'event',
+          'activity',
+          'find_people',
+          'route',
+        ].contains(_map(map['item'], 'item')['typeId'])) {
+      throw const FormatException('catalog.details.typeId');
+    }
+    final Object? changed = map['changedSinceSnapshot'];
+    if (changed is! bool) {
+      throw const FormatException('catalog.details.changedSinceSnapshot');
+    }
+    return CatalogDetails(
+      state: state,
+      reason: _optionalString(map, 'reason'),
+      item: state == 'listed' && _map(map['item'], 'item')['typeId'] == 'event'
+          ? CatalogEventItem.fromWire(map['item'])
+          : null,
+      activity:
+          state == 'listed' && _map(map['item'], 'item')['typeId'] == 'activity'
+          ? CatalogActivityItem.fromWire(map['item'])
+          : null,
+      findPeople:
+          state == 'listed' &&
+              _map(map['item'], 'item')['typeId'] == 'find_people'
+          ? CatalogFindPeopleItem.fromWire(map['item'], card: false)
+          : null,
+      route: state == 'listed' && _map(map['item'], 'item')['typeId'] == 'route'
+          ? CatalogRouteItem.fromWire(map['item'], card: false)
+          : null,
+      changedSinceSnapshot: changed,
+    );
+  }
+
+  final String state;
+  final String? reason;
+  final CatalogEventItem? item;
+  final CatalogActivityItem? activity;
+  final CatalogFindPeopleItem? findPeople;
+  final CatalogRouteItem? route;
+  final bool changedSinceSnapshot;
+}
+
+/// DTL-RTE-02 (RD-01, RD-10): one published Route from
+/// `catalog-route-projection-v1`. An exact allowlist: only the fields below
+/// reach the client, and a projection that carries owner-only Route data
+/// (anchors, trim radii, provenance, private notes) is refused outright.
+final class CatalogRouteItem {
+  const CatalogRouteItem({
+    required this.contentId,
+    required this.publishedRevisionId,
+    required this.title,
+    required this.shortDescription,
+    required this.categoryId,
+    required this.subcategoryId,
+    required this.facts,
+  });
+
+  static const int maxPreviewPoints = 256;
+  static const Set<String> _forbidden = <String>{
+    'anchors',
+    'turningAnchorId',
+    'privacyTrim',
+    'startMeters',
+    'endMeters',
+    'provenance',
+    'distribution',
+    'ownerId',
+    'bounds',
+    'durationSeconds',
+  };
+  static const Set<String> _sourceKinds = <String>{
+    'importedGpx',
+    'recordedGps',
+    'freehand',
+    'intentionalDirect',
+    'fallbackDirect',
+  };
+
+  factory CatalogRouteItem.fromWire(Object? value, {required bool card}) {
+    final Map<String, Object?> map = _map(value, 'route');
+    if (map['typeId'] != 'route' ||
+        map['schemaRevision'] != 'catalog-route-projection-v1') {
+      throw const FormatException('catalog.route.schema');
+    }
+    for (final String field in _forbidden) {
+      if (map.containsKey(field)) {
+        throw FormatException('catalog.route.forbidden:$field');
+      }
+    }
+    if (card == map.containsKey('track')) {
+      throw const FormatException('catalog.route.track');
+    }
+    final Map<String, Object?> publisher = _map(
+      map['publisherRef'],
+      'route.publisherRef',
+    );
+    final RouteCatalogPublisherKind publisherKind = switch (_string(
+      publisher,
+      'type',
+    )) {
+      'user' => RouteCatalogPublisherKind.personal,
+      'page' => RouteCatalogPublisherKind.page,
+      _ => throw const FormatException('catalog.route.publisher'),
+    };
+    final Map<String, Object?> summary = _map(map['summary'], 'route.summary');
+    final double distance = _number(summary, 'distanceMeters');
+    final int segmentCount = _int(summary, 'segmentCount');
+    final int gapCount = _int(summary, 'gapCount');
+    final int direct = _int(map, 'directSegmentCount');
+    if (distance < 0 || segmentCount < 1 || gapCount < 0 || direct < 0) {
+      throw const FormatException('catalog.route.summary');
+    }
+    final CatalogPoint? point = CatalogPoint.read(map['point']);
+    final GeoPoint start = GeoPoint(
+      latitude: point?.latitude ?? double.nan,
+      longitude: point?.longitude ?? double.nan,
+    );
+    if (!start.isValid) throw const FormatException('catalog.route.point');
+    final Map<String, Object?> preview = _map(map['preview'], 'route.preview');
+    if (preview['policy'] != 'route-preview-dp-v1') {
+      throw const FormatException('catalog.route.preview.policy');
+    }
+    final List<RouteCatalogSegment> previewSegments = _segments(
+      _list(preview, 'segments'),
+      withKinds: false,
+    );
+    final int previewPoints = previewSegments.fold<int>(
+      0,
+      (int sum, RouteCatalogSegment s) => sum + s.points.length,
+    );
+    if (previewPoints > maxPreviewPoints) {
+      throw const FormatException('catalog.route.preview.size');
+    }
+    List<RouteCatalogSegment>? track;
+    List<RouteCatalogWaypoint>? waypoints;
+    if (!card) {
+      final Map<String, Object?> full = _map(map['track'], 'route.track');
+      track = _segments(_list(full, 'segments'), withKinds: true);
+      if (track.length != segmentCount) {
+        throw const FormatException('catalog.route.track.segments');
+      }
+      waypoints = _list(
+        full,
+        'waypoints',
+      ).map(_waypoint).toList(growable: false);
+    }
+    return CatalogRouteItem(
+      contentId: _string(map, 'contentId'),
+      publishedRevisionId: _string(map, 'publishedRevisionId'),
+      title: _string(map, 'title'),
+      shortDescription: _string(map, 'shortDescription'),
+      categoryId: _string(map, 'categoryId'),
+      subcategoryId: _string(map, 'subcategoryId'),
+      facts: RouteCatalogFacts(
+        publishedRevisionId: _string(map, 'publishedRevisionId'),
+        shape: _string(map, 'shape'),
+        profileId: _string(map, 'profileId'),
+        distanceMeters: distance,
+        ascentMeters: _optionalDouble(summary, 'ascentMeters'),
+        descentMeters: _optionalDouble(summary, 'descentMeters'),
+        minElevationMeters: _optionalDouble(summary, 'minElevationMeters'),
+        maxElevationMeters: _optionalDouble(summary, 'maxElevationMeters'),
+        segmentCount: segmentCount,
+        gapCount: gapCount,
+        directSegmentCount: direct,
+        start: start,
+        preview: previewSegments,
+        publisherKind: publisherKind,
+        fullDescription: _optionalString(map, 'fullDescription') ?? '',
+        track: track,
+        waypoints: waypoints,
+      ),
+    );
+  }
+
+  final String contentId;
+  final String publishedRevisionId;
+  final String title;
+  final String shortDescription;
+  final String categoryId;
+  final String subcategoryId;
+  final RouteCatalogFacts facts;
+
+  static double _number(Map<String, Object?> map, String field) {
+    final double? value = _optionalDouble(map, field);
+    if (value == null || !value.isFinite) {
+      throw FormatException('catalog.$field must be a number');
+    }
+    return value;
+  }
+
+  /// Server polylines are precision 7 (`wgs84-e7-dm-v1`); each segment keeps
+  /// its own points and its gap flag, nothing is joined.
+  static List<RouteCatalogSegment> _segments(
+    List<Object?> raw, {
+    required bool withKinds,
+  }) {
+    if (raw.isEmpty) throw const FormatException('catalog.route.segments');
+    final List<RouteCatalogSegment> segments = <RouteCatalogSegment>[];
+    for (final Object? entry in raw) {
+      final Map<String, Object?> segment = _map(entry, 'route.segment');
+      final Object? connected = segment['connected'];
+      if (connected is! bool || (segments.isEmpty && connected)) {
+        throw const FormatException('catalog.route.segment.connected');
+      }
+      String? kind;
+      if (withKinds) {
+        kind = _string(segment, 'sourceKind');
+        if (!_sourceKinds.contains(kind)) {
+          throw const FormatException('catalog.route.segment.kind');
+        }
+      }
+      final List<GeoPoint> points;
+      try {
+        points = GeometryEncoding.decode(
+          _string(segment, 'polyline'),
+          policy: const GeometryEncodingPolicy(precision: 7),
+        );
+      } on RangeError {
+        throw const FormatException('catalog.route.segment.polyline');
+      }
+      if (points.length < 2) {
+        throw const FormatException('catalog.route.segment.points');
+      }
+      segments.add(
+        RouteCatalogSegment(
+          points: points,
+          connected: connected,
+          direct: kind == 'intentionalDirect' || kind == 'fallbackDirect',
+        ),
+      );
+    }
+    return List<RouteCatalogSegment>.unmodifiable(segments);
+  }
+
+  static RouteCatalogWaypoint _waypoint(Object? value) {
+    final Map<String, Object?> map = _map(value, 'route.waypoint');
+    for (final String field in <String>['note', 'description', 'waypointId']) {
+      if (map.containsKey(field)) {
+        throw FormatException('catalog.route.waypoint.forbidden:$field');
+      }
+    }
+    final GeoPoint point = GeoPoint(
+      latitude: _int(map, 'latE7') / 1e7,
+      longitude: _int(map, 'lonE7') / 1e7,
+    );
+    final double along = _number(map, 'distanceFromStartMeters');
+    if (!point.isValid || along < 0) {
+      throw const FormatException('catalog.route.waypoint');
+    }
+    return RouteCatalogWaypoint(
+      typeId: _string(map, 'typeId'),
+      title: _optionalString(map, 'title'),
+      safetyNote: _optionalString(map, 'safetyNote'),
+      point: point,
+      distanceFromStartMeters: along,
+    );
+  }
+}
+
+/// The envelope: `succeeded` with exactly one body, or a typed refusal.
+final class CatalogAnswer {
+  const CatalogAnswer._({required this.kind, this.code, this.body});
+
+  factory CatalogAnswer.fromWire(Map<String, Object?> map) {
+    if (map['schemaVersion'] != 1) {
+      throw const FormatException('catalog.schemaVersion must be 1');
+    }
+    final String kind = _string(map, 'kind');
+    if (kind == 'succeeded') {
+      final Object? body = map['page'] ?? map['map'] ?? map['details'];
+      if (body == null) {
+        throw const FormatException('catalog: a success needs a body');
+      }
+      return CatalogAnswer._(kind: kind, body: body);
+    }
+    return CatalogAnswer._(kind: kind, code: _string(map, 'code'));
+  }
+
+  final String kind;
+  final String? code;
+  final Object? body;
+
+  bool get succeeded => kind == 'succeeded';
+}

@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/notifications/v1/notification_effect.schema.json",
+  "title": "Recharge Booking notification obligation v2 in the accepted OD-09 envelope (F1, local stand contract)",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "effectDisposition": { "const": "pending" },
+    "dispatchable": { "const": true },
+    "replayable": { "const": true },
+    "eventId": { "$ref": "#/$defs/id" },
+    "eventType": {
+      "enum": [
+        "booking.confirmed",
+        "booking.cancelled",
+        "booking.reconfirmationRequired",
+        "booking.reconfirmed"
+      ]
+    },
+    "eventVersion": { "const": 1 },
+    "producer": { "const": "booking" },
+    "aggregateType": { "const": "booking" },
+    "aggregateId": { "$ref": "#/$defs/id" },
+    "aggregateRevision": { "type": "integer", "minimum": 1 },
+    "occurredAt": { "$ref": "#/$defs/utcInstant" },
+    "correlationId": { "$ref": "#/$defs/id" },
+    "marketId": { "enum": ["LV", "EE", "LT"] },
+    "dataClass": { "const": "personal" },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "eventContentId": { "$ref": "#/$defs/id" },
+        "occurrenceId": { "$ref": "#/$defs/id" },
+        "cause": {
+          "enum": ["userCancelled", "occurrenceCancelled", "missedReconfirmation", "privacyErasure"]
+        },
+        "reconfirmationDeadlineUtc": { "$ref": "#/$defs/utcInstant" },
+        "deliverUntilUtc": { "$ref": "#/$defs/utcInstant" }
+      },
+      "required": ["schemaVersion", "eventContentId", "occurrenceId", "deliverUntilUtc"]
+    },
+    "actorId": { "$ref": "#/$defs/id" },
+    "createdAt": { "$ref": "#/$defs/utcInstant" },
+    "retentionClass": { "const": "bookingOutbox" },
+    "legalHold": { "const": false },
+    "expiresAt": { "$ref": "#/$defs/utcInstant" }
+  },
+  "required": [
+    "schemaVersion",
+    "effectDisposition",
+    "dispatchable",
+    "replayable",
+    "eventId",
+    "eventType",
+    "eventVersion",
+    "producer",
+    "aggregateType",
+    "aggregateId",
+    "aggregateRevision",
+    "occurredAt",
+    "correlationId",
+    "marketId",
+    "dataClass",
+    "payload",
+    "actorId",
+    "createdAt",
+    "retentionClass",
+    "legalHold",
+    "expiresAt"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": { "eventType": { "const": "booking.cancelled" } }
+      },
+      "then": {
+        "type": "object",
+        "properties": { "payload": { "$ref": "#/$defs/withCause" } }
+      },
+      "else": {
+        "type": "object",
+        "properties": { "payload": { "type": "object", "not": { "$ref": "#/$defs/withCause" } } }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": { "eventType": { "const": "booking.reconfirmationRequired" } }
+      },
+      "then": {
+        "type": "object",
+        "properties": { "payload": { "$ref": "#/$defs/withDeadline" } }
+      },
+      "else": {
+        "type": "object",
+        "properties": { "payload": { "type": "object", "not": { "$ref": "#/$defs/withDeadline" } } }
+      }
+    }
+  ],
+  "$defs": {
+    "withCause": {
+      "type": "object",
+      "properties": { "cause": true },
+      "required": ["cause"]
+    },
+    "withDeadline": {
+      "type": "object",
+      "properties": { "reconfirmationDeadlineUtc": true },
+      "required": ["reconfirmationDeadlineUtc"]
+    },
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,200}$" },
+    "utcInstant": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?Z$"
+    }
+  }
+}

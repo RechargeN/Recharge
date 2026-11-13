@@ -51,6 +51,27 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
     'moderate.route',
     'manage.route',
     'archive.route',
+    // CLG-CRT-01 §6: deliberately NOT the same shape as Route above.
+    // `CreateController.publishCollection` always takes the direct path
+    // when `publish.collection.direct` is present (§7 Шаг 5: capability
+    // alone decides, there is no caller override) — giving the one demo
+    // actor both `submit` and `publish.direct` would make every publish
+    // go direct, so `submitForReview` (and therefore the whole
+    // pendingReview -> moderate.collection flow) could never be exercised
+    // through the standard UI at all. Withholding `publish.collection.direct`
+    // here is what makes that flow reachable by this same actor.
+    // `CreateController` reads capabilities from `AuthUserEntity.capabilities`
+    // (this list), not the separate `IdentityAccessSnapshot` fixture, so
+    // `moderate.collection` has to be here too or moderation stays
+    // unreachable no matter what the kill switches are set to. No
+    // dedicated moderation page ships in this slice regardless — see
+    // `CreateController.loadPendingCollectionModerationRequests`'s own doc
+    // comment.
+    'create.collection',
+    'submit.collection',
+    'moderate.collection',
+    'manage.collection',
+    'archive.collection',
     'create.place',
     'create.venue',
     'create.bookable_slot',
@@ -81,7 +102,7 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
     if (email != _allowedEmail || password != _allowedPassword) {
       throw const AuthRemoteException(
         'AUTH_INVALID_CREDENTIALS',
-        'Invalid email or password',
+        'Invalid email or password', // l10n-ignore: developer error; the UI receives a code
       );
     }
 
@@ -113,7 +134,7 @@ class MockAuthRemoteDataSource implements AuthRemoteDataSource {
     if (!refreshToken.startsWith('ref_')) {
       throw const AuthRemoteException(
         'AUTH_REFRESH_INVALID',
-        'Refresh token invalid',
+        'Refresh token invalid', // l10n-ignore: developer error; the UI receives a code
       );
     }
     _sessionToUser[sessionId] = demoUserId;

@@ -71,7 +71,6 @@ void main() {
               code: 'event_archetype_other_reason_required',
               fieldId: 'eventArchetypeOtherReason',
               step: 0,
-              message: 'Explain the event mechanics when choosing Other.',
             ),
           ],
         ),

@@ -31,7 +31,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      _TestApp(initialLocation: RouteNames.scenarioBuilder),
+      _TestApp(initialLocation: RouteNames.legacyScenarioBuilder),
     );
     await tester.pumpAndSettle();
 
@@ -120,7 +120,7 @@ class _TestApp extends StatelessWidget {
                   builder: (context, state) => const _ShellBody('Results page'),
                 ),
                 GoRoute(
-                  path: RouteNames.scenarioBuilder,
+                  path: RouteNames.legacyScenarioBuilder,
                   builder: (context, state) => const _ShellBody('Builder page'),
                 ),
                 GoRoute(

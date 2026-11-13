@@ -78,7 +78,11 @@ class EventTimezoneRepositoryImpl implements EventTimezoneRepository {
         : overlapPolicy == EventDstOverlapPolicy.earlierOffset
         ? candidates.first
         : candidates.last;
-    return ResolvedEventLocalTime(utc: selected, shifted: shifted);
+    return ResolvedEventLocalTime(
+      utc: selected,
+      shifted: shifted,
+      ambiguousLocalTime: candidates.length > 1,
+    );
   }
 
   bool _sameLocal(

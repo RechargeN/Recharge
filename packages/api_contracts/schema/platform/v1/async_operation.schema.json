@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/platform/v1/async_operation.schema.json",
+  "title": "Recharge Platform v1 asynchronous operation",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "operationId": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/entityReference"
+    },
+    "operationType": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[a-z][A-Za-z0-9]*(?:\\.[a-z][A-Za-z0-9]*)+$"
+    },
+    "state": {
+      "type": "string",
+      "enum": ["accepted", "running", "succeeded", "failed", "cancelled"]
+    },
+    "submittedAt": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/utcInstant"
+    },
+    "updatedAt": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/utcInstant"
+    },
+    "resultRef": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/entityReference"
+    },
+    "error": {
+      "$ref": "https://recharge.app/schemas/platform/v1/error.schema.json"
+    },
+    "revision": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/revision"
+    }
+  },
+  "required": [
+    "operationId",
+    "operationType",
+    "state",
+    "submittedAt",
+    "updatedAt",
+    "revision"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": { "state": { "const": "failed" } },
+        "required": ["state"]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "https://recharge.app/schemas/platform/v1/error.schema.json"
+          }
+        },
+        "required": ["error"]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": { "state": { "const": "succeeded" } },
+        "required": ["state"]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "resultRef": {
+            "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/entityReference"
+          }
+        },
+        "required": ["resultRef"]
+      }
+    }
+  ]
+}

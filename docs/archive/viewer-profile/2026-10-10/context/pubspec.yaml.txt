@@ -1,0 +1,16 @@
+name: recharge_workspace
+description: "Recharge monorepo root package."
+publish_to: 'none'
+
+environment:
+  sdk: ">=3.12.2 <4.0.0"
+
+dependencies:
+  # No runtime dependencies at the monorepo root.
+
+dev_dependencies:
+  melos: ^8.2.2
+
+workspace:
+  - apps/mobile
+  - packages/**

@@ -1,17 +1,64 @@
+import '../../features/auth/domain/repositories/auth_session_events.dart';
+import 'dart:io';
+import 'dev_auth_bundle.dart';
+import 'dev_content_media_port.dart';
+import '../../features/identity/data/repositories/dev_identity_workspace_repository.dart';
+import '../../features/auth/domain/usecases/sign_in_with_google_usecase.dart';
+import 'package:flutter/services.dart' show appFlavor;
+import 'session_publication_composition.dart';
+import 'scenario_publication_composition.dart';
+import 'route_content_publication_composition.dart';
+import 'class_workshop_publication_composition.dart';
+import 'find_people_publication_composition.dart';
+import 'content_translation_composition.dart';
+import 'library_composition.dart';
+import '../adapters/server_library_repositories.dart';
+import '../../features/library/data/library_sync_client.dart';
+import 'dart:ui' show Locale, PlatformDispatcher;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 import '../config/market_config.dart';
+import 'backend_binding_manifest.dart';
+import 'booking_backend_selection.dart';
+import 'booking_test_entry_guard.dart';
+import 'discover_catalog_composition.dart';
+import '../../features/create/domain/repositories/activity_place_link_repository.dart';
+import '../../features/create/data/repositories/catalog_activity_place_link_repository.dart';
+import 'notifications_inbox_composition.dart';
+import 'dev_notifications_bundle.dart';
+import 'dev_push_registrar.dart';
+import 'event_publication_composition.dart';
+import 'place_publication_composition.dart';
+import 'activity_publication_composition.dart';
+import 'rental_publication_composition.dart';
+import 'collection_content_publication_composition.dart';
+import 'local_import_composition.dart';
 import '../config/travel_policy_config.dart';
+import '../adapters/collection_publication_discovery_adapter.dart';
+import '../adapters/rental_publication_discovery_adapter.dart';
 import '../adapters/route_publication_discovery_adapter.dart';
 import '../adapters/route_safety_reporting_adapter.dart';
+import '../adapters/create_image_picker_adapter.dart';
 import '../adapters/route_gpx_file_selector_adapter.dart';
+import '../../features/create/application/create_media_picking.dart';
+import '../../features/create/data/media/create_image_normalizer_impl.dart';
+import '../../features/create/data/media/file_create_media_store.dart';
+import '../../features/create/domain/repositories/create_image_normalizer.dart';
+import '../../features/create/domain/repositories/create_image_picker_port.dart';
+import '../../features/create/domain/repositories/create_media_store.dart';
 import '../adapters/route_geolocator_adapter.dart';
 import '../../core/telemetry/analytics_service.dart';
+import '../../core/product_analytics/product_analytics_recorder.dart';
 import '../../core/id/id_generator.dart';
 import '../../core/notifications/app_notification_sink.dart';
+import '../../core/localization/app_locale_policy.dart';
+import '../../core/localization/locale_controller.dart';
+import '../../core/localization/locale_preference_store.dart';
 import '../../features/ai_assist/application/ai_assist_coordinator.dart';
 import '../../features/ai_assist/application/ai_assist_runtime_config.dart';
 import '../../features/ai_assist/data/datasources/local_ai_assist_gateway.dart';
@@ -28,6 +75,10 @@ import '../../features/auth/domain/usecases/get_current_user_usecase.dart';
 import '../../features/auth/domain/usecases/restore_session_usecase.dart';
 import '../../features/auth/domain/usecases/sign_in_usecase.dart';
 import '../../features/auth/domain/usecases/sign_out_usecase.dart';
+import '../../features/booking/data/booking_callable_adapter.dart';
+import '../../features/booking/data/booking_firebase_auth_emulator.dart';
+import '../../features/booking/data/booking_functions_transport.dart';
+import '../../features/booking/data/booking_transport_runtime.dart';
 import '../../features/create/data/datasources/create_local_datasource.dart';
 import '../../features/create/data/datasources/create_template_local_datasource.dart';
 import '../../features/create/data/datasources/event_mock_inventory_datasource.dart';
@@ -39,6 +90,7 @@ import '../../features/create/data/datasources/scenario_proposal_mock_datasource
 import '../../features/create/data/datasources/gtfs_cache_datasource.dart';
 import '../../features/create/data/datasources/latvia_gtfs_datasource.dart';
 import '../../features/create/application/create_runtime_defaults.dart';
+import '../../features/create/application/location_search_config.dart';
 import '../../features/create/application/event_create_coordinator.dart';
 import '../../features/create/application/scenario_create_coordinator.dart';
 import '../../features/create/application/scenario_generation_coordinator.dart';
@@ -65,16 +117,32 @@ import '../../features/create/data/repositories/create_template_repository_impl.
 import '../../features/create/data/repositories/scenario_object_intake_repository_impl.dart';
 import '../../features/create/data/repositories/route_publication_repository_impl.dart';
 import '../../features/create/data/repositories/route_quality_workflow_repository_impl.dart';
+import '../../features/create/application/collection_create_config.dart';
+import '../../features/create/application/collection_create_coordinator.dart';
+import '../../features/create/data/datasources/collection_catalog_search_mock_datasource.dart';
+import '../../features/create/data/datasources/collection_publication_local_datasource.dart';
+import '../../features/create/data/datasources/collection_publication_store.dart';
+import '../../features/create/data/datasources/google_places_search_datasource.dart';
+import '../../features/create/data/repositories/collection_catalog_search_repository_impl.dart';
+import '../../features/create/data/repositories/catalog_collection_catalog_search_repository.dart';
+import '../../features/create/data/repositories/collection_publication_repository_impl.dart';
+import '../../features/create/data/repositories/location_search_repository_impl.dart';
 import '../../features/create/data/repositories/route_gpx_repository_impl.dart';
 import '../../features/create/data/repositories/route_recording_journal_repository_impl.dart';
 import '../../features/create/data/repositories/scenario_transit_schedule_repository_impl.dart';
 import '../../features/create/data/routing/demo_route_graph_adapter.dart';
 import '../../features/create/data/routing/demo_route_graph_asset_loader.dart';
+import '../../features/create/domain/repositories/collection_catalog_search_repository.dart';
+import '../../features/create/domain/repositories/collection_publication_index_sink.dart';
+import '../../features/create/domain/repositories/collection_publication_repository.dart';
 import '../../features/create/domain/repositories/create_repository.dart';
 import '../../features/create/domain/repositories/create_draft_collection_repository.dart';
+import '../../features/create/domain/repositories/location_search_repository.dart';
+import '../../features/create/domain/repositories/rental_promotion_repository.dart';
 import '../../features/create/domain/repositories/create_template_repository.dart';
 import '../../features/create/domain/repositories/scenario_object_intake_intent_repository.dart';
 import '../../features/create/domain/repositories/route_draft_persistence_repository.dart';
+import '../../features/create/domain/repositories/rental_publication_index_sink.dart';
 import '../../features/create/domain/repositories/route_authoring_policy.dart';
 import '../../features/create/domain/repositories/route_publication_index_sink.dart';
 import '../../features/create/domain/repositories/route_publication_repository.dart';
@@ -97,24 +165,45 @@ import '../../features/create/domain/usecases/generate_place_enrichment_proposal
 import '../../features/create/domain/usecases/load_create_draft_usecase.dart';
 import '../../features/create/domain/usecases/load_create_draft_by_id_usecase.dart';
 import '../../features/create/domain/usecases/materialize_event_schedule_usecase.dart';
+import '../../features/create/domain/usecases/validate_event_access_configuration_usecase.dart';
+import '../../features/create/domain/usecases/validate_event_draft_usecase.dart';
 import '../../features/create/domain/usecases/manage_create_template_usecase.dart';
+import '../../features/create/domain/usecases/promote_rental_to_published_usecase.dart';
 import '../../features/create/domain/usecases/publish_create_draft_usecase.dart';
 import '../../features/create/domain/usecases/save_create_draft_usecase.dart';
 import '../../features/create/domain/usecases/check_place_duplicates_usecase.dart';
 import '../../features/create/domain/usecases/build_route_publication_bundle_usecase.dart';
 import '../../features/create/domain/usecases/inspect_route_gpx_usecase.dart';
 import '../../features/create/domain/usecases/export_route_gpx_usecase.dart';
+import '../../features/discover/data/datasources/content_translation_client.dart';
 import '../../features/discover/data/datasources/discover_remote_datasource.dart';
+import '../../features/discover/domain/repositories/content_translation_port.dart';
+import '../../features/discover/data/datasources/published_collection_discovery_local_datasource.dart';
+import '../../features/discover/data/datasources/published_bookable_session_discovery_local_datasource.dart';
+import '../../features/discover/data/datasources/published_class_workshop_discovery_local_datasource.dart';
+import '../../features/discover/domain/repositories/published_class_workshop_discovery_port.dart';
+import '../../features/discover/data/datasources/catalog_query_port.dart';
+import '../../features/discover/data/datasources/published_event_discovery_local_datasource.dart';
+import '../../features/discover/data/datasources/published_find_people_discovery_local_datasource.dart';
+import '../../features/discover/data/datasources/published_rental_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/published_route_discovery_local_datasource.dart';
 import '../../features/discover/data/datasources/discover_preferences_local_datasource.dart';
+import '../../features/discover/data/repositories/collection_item_resolution_repository_impl.dart';
 import '../../features/discover/data/repositories/discover_preferences_repository_impl.dart';
+import '../../features/discover/data/repositories/catalog_snapshot_session.dart';
 import '../../features/discover/data/repositories/discover_repository_impl.dart';
 import '../../features/discover/data/repositories/timezone_repository_impl.dart';
 import '../../features/discover/data/repositories/travel_time_repository_impl.dart';
 import '../../features/discover/data/repositories/time_fit_evaluation_store_impl.dart';
 import '../../features/discover/domain/entities/discover_query.dart';
+import '../../features/discover/domain/repositories/collection_item_resolution_repository.dart';
 import '../../features/discover/domain/repositories/discover_preferences_repository.dart';
 import '../../features/discover/domain/repositories/discover_repository.dart';
+import '../../features/discover/domain/repositories/published_collection_discovery_port.dart';
+import '../../features/discover/domain/repositories/published_bookable_session_discovery_port.dart';
+import '../../features/discover/domain/repositories/published_event_discovery_port.dart';
+import '../../features/discover/domain/repositories/published_find_people_discovery_port.dart';
+import '../../features/discover/domain/repositories/published_rental_discovery_port.dart';
 import '../../features/discover/domain/repositories/published_route_discovery_port.dart';
 import '../../features/discover/domain/repositories/route_safety_reporting_port.dart';
 import '../../features/discover/domain/repositories/timezone_repository.dart';
@@ -135,14 +224,27 @@ import '../../features/explore/domain/usecases/load_profile_editable_usecase.dar
 import '../../features/explore/domain/usecases/load_settings_usecase.dart';
 import '../../features/explore/domain/usecases/save_profile_editable_usecase.dart';
 import '../../features/explore/domain/usecases/save_settings_usecase.dart';
+import '../adapters/identity_publisher_access_check.dart';
+import '../../features/create/domain/repositories/publisher_access_check.dart';
 import '../../features/identity/data/datasources/identity_workspace_local_datasource.dart';
 import '../../features/identity/data/datasources/mock_identity_fixture.dart';
+import '../../features/identity/data/datasources/public_professional_page_local_datasource.dart';
 import '../../features/identity/data/repositories/identity_workspace_repository_impl.dart';
+import '../../features/identity/data/repositories/public_professional_page_repository_impl.dart';
 import '../../features/identity/domain/repositories/identity_workspace_repository.dart';
+import '../../features/identity/domain/repositories/public_professional_page_repository.dart';
+import '../../features/identity/domain/repositories/managed_page_field_moderation_repository.dart';
+import '../../features/create/application/session_create_coordinator.dart';
+import '../../features/create/application/class_workshop_create_coordinator.dart';
+import '../../features/create/domain/usecases/build_class_workshop_content_body.dart';
+import '../../features/create/domain/usecases/materialize_session_schedule_usecase.dart';
+import '../../features/identity/data/datasources/managed_page_field_moderation_local_datasource.dart';
+import '../../features/identity/data/repositories/managed_page_field_moderation_repository_impl.dart';
 import '../../features/identity/domain/usecases/create_professional_page_usecase.dart';
 import '../../features/identity/domain/usecases/load_identity_workspace_usecase.dart';
 import '../../features/identity/domain/usecases/request_page_limit_increase_usecase.dart';
 import '../../features/identity/domain/usecases/select_workspace_usecase.dart';
+import '../../features/identity/domain/usecases/resolve_public_professional_page_usecase.dart';
 import '../../features/favorites/data/datasources/favorites_local_datasource.dart';
 import '../../features/favorites/data/repositories/favorites_repository_impl.dart';
 import '../../features/favorites/domain/repositories/favorites_repository.dart';
@@ -152,6 +254,8 @@ import '../../features/favorites/domain/usecases/remove_favorite_usecase.dart';
 import '../../features/notifications/data/datasources/notifications_local_datasource.dart';
 import '../../features/notifications/data/repositories/notifications_repository_impl.dart';
 import '../../features/notifications/domain/repositories/notifications_repository.dart';
+import '../../features/notifications/domain/repositories/notification_channel_settings_repository.dart';
+import '../../features/notifications/data/remote/server_notifications_repository.dart';
 import '../../features/notifications/domain/usecases/get_notifications_usecase.dart';
 import '../../features/notifications/domain/usecases/mark_notification_read_usecase.dart';
 import '../../features/visited/data/datasources/visited_places_local_datasource.dart';
@@ -163,9 +267,23 @@ import '../../features/visited/domain/usecases/remove_visit_usecase.dart';
 
 final GetIt sl = GetIt.instance;
 
-Future<void> setupDependencies() async {
+Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
+  final dev = appFlavor == 'dev';
+  if (dev != (devAuth != null)) {
+    throw StateError('dev_auth_composition_required');
+  }
   if (sl.isRegistered<AnalyticsService>()) {
+    if (devAuth != null && !identical(sl<AuthRepository>(), devAuth.auth)) {
+      throw StateError('dev_auth_composition_conflict');
+    }
     return;
+  }
+  Future<Directory> supportDirectory() async {
+    final root = await getApplicationSupportDirectory();
+    if (!dev) return root;
+    return Directory(
+      '${root.path}${Platform.pathSeparator}dev-recharge-dev-n2a01',
+    ).create(recursive: true);
   }
 
   sl
@@ -217,22 +335,170 @@ Future<void> setupDependencies() async {
         timezoneId: sl<MarketConfig>().timezoneId,
         originLat: sl<MarketConfig>().centerLat,
         originLng: sl<MarketConfig>().centerLng,
+        currencyCode: sl<MarketConfig>().currencyCode,
       ),
     )
     ..registerLazySingleton<AnalyticsService>(ConsoleAnalyticsService.new)
-    ..registerLazySingleton<FlutterSecureStorage>(FlutterSecureStorage.new)
+    // L3: no accepted policy and no destination, so nothing is collected.
+    ..registerLazySingleton<ProductAnalyticsRecorder>(
+      ProductAnalyticsRecorder.disabled,
+    )
+    ..registerLazySingleton<FlutterSecureStorage>(
+      () => devAuth?.storage ?? const FlutterSecureStorage(),
+    )
+    // L4: one device-scoped UI language owner; fallback from market config.
+    ..registerLazySingleton<LocalePreferenceStore>(
+      () => SecureLocalePreferenceStore(sl<FlutterSecureStorage>()),
+    )
+    ..registerLazySingleton<LocaleController>(
+      () => LocaleController(
+        policy: AppLocalePolicy(
+          supportedLanguageCodes: AppLocalePolicy.r1LanguageCodes,
+          fallbackLanguageCode: sl<MarketConfig>().defaultLocaleCode,
+        ),
+        store: sl<LocalePreferenceStore>(),
+        deviceLanguageTags: PlatformDispatcher.instance.locales
+            .map((Locale locale) => locale.toLanguageTag())
+            .toList(growable: false),
+      ),
+    )
     ..registerLazySingleton<http.Client>(http.Client.new)
+    ..registerLazySingleton<BookingBackendBindingController>(
+      _bookingBackendBindingController,
+    )
+    ..registerLazySingleton<BookingBackendEndpoint>(
+      () => dev
+          ? const BookingBackendEndpoint.productionDisabled()
+          : sl<BookingBackendBindingController>().endpoint,
+    )
+    ..registerLazySingleton<BookingTestEntryGuard>(
+      () => BookingTestEntryGuard.fromEnvironment(sl()),
+    )
+    ..registerLazySingleton<EventPublicationTestEntryGuard>(
+      () => EventPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // D3.1: default-off Place publication test entry, its own define.
+    ..registerLazySingleton<SessionPublicationTestEntryGuard>(
+      () => SessionPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // I3: default-off Scenario publication test entry, its own define.
+    ..registerLazySingleton<ScenarioPublicationTestEntryGuard>(
+      () => ScenarioPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // J2: default-off Route publication test entry, its own define.
+    ..registerLazySingleton<RoutePublicationTestEntryGuard>(
+      () => RoutePublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    ..registerLazySingleton<ClassWorkshopPublicationTestEntryGuard>(
+      () => ClassWorkshopPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    ..registerLazySingleton<PlacePublicationTestEntryGuard>(
+      () => PlacePublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // D3.7: default-off Find People publication test entry, its own define.
+    ..registerLazySingleton<FindPeoplePublicationTestEntryGuard>(
+      () => FindPeoplePublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // D3.2: default-off Recharge Activity publication test entry, its own define.
+    ..registerLazySingleton<ActivityPublicationTestEntryGuard>(
+      () => ActivityPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // D3.3: default-off Rental publication test entry, its own define.
+    ..registerLazySingleton<RentalPublicationTestEntryGuard>(
+      () => RentalPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // D3.4: default-off Collection / Guide publication test entry, its own define.
+    ..registerLazySingleton<CollectionPublicationTestEntryGuard>(
+      () => CollectionPublicationTestEntryGuard.fromEnvironment(sl()),
+    )
+    // D4: default-off local→server import test entry, its own define.
+    ..registerLazySingleton<LocalImportTestEntryGuard>(
+      () => LocalImportTestEntryGuard.fromEnvironment(sl()),
+    )
+    // E2: default-off Discover over the server Catalog; `localOnly` otherwise.
+    ..registerLazySingleton<DiscoverCatalogTestEntryGuard>(
+      () => DiscoverCatalogTestEntryGuard.fromEnvironment(sl()),
+    )
+    ..registerLazySingleton<CatalogSnapshotSession>(CatalogSnapshotSession.new)
+    ..registerLazySingleton<CatalogQueryPort>(
+      () => BookingPortCatalogAdapter(
+        runtime: () => sl.getAsync<BookingTransportRuntime>(),
+        guard: sl(),
+      ),
+    )
+    ..registerLazySingleton<ActivityPlaceLinkRepository>(
+      () => CatalogActivityPlaceLinkRepository(
+        query: sl<CatalogQueryPort>().query,
+        marketId: sl<MarketConfig>().countryCode,
+        enabled: activityLinkedPlaceTestEntryDefined && !kReleaseMode,
+      ),
+    )
+    ..registerLazySingleton<BookingSupportDirectoryProvider>(
+      () => supportDirectory,
+    )
+    ..registerLazySingleton<BookingIdentitySessionStore>(
+      () =>
+          devAuth?.sessions ??
+          SecureBookingIdentitySessionStore(
+            sl(),
+            environment:
+                sl<BookingBackendEndpoint>().binding ==
+                    BookingBackendBinding.devEmulator
+                ? BookingIdentityCacheEnvironment.emulator
+                : BookingIdentityCacheEnvironment.local,
+          ),
+    )
+    ..registerLazySingleton<BookingFirebaseIdTokenProvider>(() {
+      final endpoint = sl<BookingBackendEndpoint>();
+      return bookingFirebaseTokenProviderFor(
+        endpoint: endpoint,
+        emulator: endpoint.binding == BookingBackendBinding.devEmulator
+            ? BookingAuthEmulatorConfig(
+                host: endpoint.uri!.host,
+                port: const int.fromEnvironment(
+                  'RECHARGE_BOOKING_AUTH_EMULATOR_PORT',
+                  defaultValue: 9099,
+                ),
+              )
+            : null,
+      );
+    })
+    ..registerLazySingleton<BookingInstallationIdProvider>(
+      () => SecureBookingInstallationIdProvider(
+        sl(),
+        environment:
+            sl<BookingBackendEndpoint>().binding ==
+                BookingBackendBinding.devEmulator
+            ? BookingIdentityCacheEnvironment.emulator
+            : BookingIdentityCacheEnvironment.local,
+      ),
+    )
+    ..registerLazySingleton<BookingTransportRuntimeFactory>(
+      () => BookingTransportRuntimeFactory(
+        endpoint: sl(),
+        client: sl(),
+        tokens: sl(),
+        sessions: sl(),
+        installations: sl(),
+        supportDirectory: supportDirectory,
+      ),
+    )
+    ..registerLazySingletonAsync<BookingTransportRuntime>(
+      () => sl<BookingTransportRuntimeFactory>().create(),
+    )
     ..registerLazySingleton<RouteRecordingSecureStore>(
       () => EncryptedFileRouteRecordingStore(
         secureStorage: sl(),
-        supportDirectory: getApplicationSupportDirectory,
+        supportDirectory: supportDirectory,
       ),
     )
     ..registerLazySingleton<RouteRecordingJournalRepository>(
       () => RouteRecordingJournalRepositoryImpl(store: sl()),
     )
     ..registerLazySingleton<RouteLocationRecordingPort>(
-      RouteGeolocatorAdapter.new,
+      () => RouteGeolocatorAdapter(
+        languageCode: () => sl<LocaleController>().languageCode,
+      ),
     )
     ..registerFactory<RouteRecordingController>(
       () => RouteRecordingController(
@@ -241,22 +507,49 @@ Future<void> setupDependencies() async {
         journalRepository: sl(),
       ),
     )
-    ..registerLazySingleton<AuthRemoteDataSource>(MockAuthRemoteDataSource.new)
+    ..registerLazySingleton<AuthRemoteDataSource>(() {
+      if (dev) throw StateError('dev_mock_auth_forbidden');
+      return MockAuthRemoteDataSource();
+    })
     ..registerLazySingleton<AuthLocalDataSource>(
-      () => AuthLocalDataSource(sl()),
+      () => AuthLocalDataSource(
+        sl(),
+        environment: dev
+            ? AuthCacheEnvironment.dev
+            : AuthCacheEnvironment.local,
+      ),
     )
     ..registerLazySingleton<AuthRepository>(
-      () => AuthRepositoryImpl(remoteDataSource: sl(), localDataSource: sl()),
+      () =>
+          devAuth?.auth ??
+          AuthRepositoryImpl(remoteDataSource: sl(), localDataSource: sl()),
     )
-    ..registerLazySingleton<MockIdentityFixture>(MockIdentityFixture.new)
+    ..registerLazySingleton<MockIdentityFixture>(() {
+      if (dev) throw StateError('dev_mock_identity_forbidden');
+      return const MockIdentityFixture();
+    })
     ..registerLazySingleton<IdentityWorkspaceLocalDataSource>(
       () => IdentityWorkspaceLocalDataSource(sl()),
     )
+    ..registerLazySingleton<PublicProfessionalPageLocalDataSource>(
+      () => PublicProfessionalPageLocalDataSource(sl()),
+    )
     ..registerLazySingleton<IdentityWorkspaceRepository>(
-      () => IdentityWorkspaceRepositoryImpl(
-        localDataSource: sl(),
-        mockFixture: sl(),
-      ),
+      () =>
+          devAuth?.workspace ??
+          IdentityWorkspaceRepositoryImpl(
+            localDataSource: sl(),
+            mockFixture: sl(),
+            publicPageLocalDataSource: sl(),
+          ),
+    )
+    ..registerLazySingleton<PublicProfessionalPageRepository>(
+      () => dev
+          ? const DisabledDevPublicProfessionalPageRepository()
+          : PublicProfessionalPageRepositoryImpl(sl()),
+    )
+    ..registerLazySingleton<PublicPageContentProjectionRepository>(
+      EmptyPublicPageContentProjectionRepository.new,
     )
     ..registerLazySingleton<DiscoverRemoteDataSource>(
       MockDiscoverRemoteDataSource.new,
@@ -289,11 +582,26 @@ Future<void> setupDependencies() async {
       final repository = sl<CreateRepository>();
       if (repository is! CreateDraftCollectionRepository) {
         throw StateError(
-          'Create repository must support draft collection persistence.',
+          'Create repository must support draft collection persistence.', // l10n-ignore: developer error; the UI receives a code
         );
       }
       return repository as CreateDraftCollectionRepository;
     })
+    // RNT-PUB-01 §1.2: same repository instance, cast to the narrower
+    // RentalPromotionRepository interface — mirrors the
+    // CreateDraftCollectionRepository cast above.
+    ..registerLazySingleton<RentalPromotionRepository>(() {
+      final repository = sl<CreateRepository>();
+      if (repository is! RentalPromotionRepository) {
+        throw StateError(
+          'Create repository must support Rental direct-publish promotion.', // l10n-ignore: developer error; the UI receives a code
+        );
+      }
+      return repository as RentalPromotionRepository;
+    })
+    ..registerLazySingleton<PromoteRentalToPublishedUseCase>(
+      () => PromoteRentalToPublishedUseCase(sl()),
+    )
     ..registerLazySingleton<CreateTemplateRepository>(
       () => CreateTemplateRepositoryImpl(sl()),
     )
@@ -315,6 +623,157 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<PublishedRouteDiscoveryPort>(
       () => sl<RoutePublicationDiscoveryAdapter>(),
     )
+    // Rental — both sides active (DTL-OBJ-01 §3.6): unlike Collection
+    // below, Rental's Create-authoring half (RentalDirectPublishPolicy
+    // etc.) is already wired, so RentalPublicationIndexSink is registered
+    // too, mirroring Route above.
+    ..registerLazySingleton<PublishedRentalDiscoveryLocalDataSource>(
+      () => PublishedRentalDiscoveryLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<RentalPublicationDiscoveryAdapter>(
+      () => RentalPublicationDiscoveryAdapter(sl()),
+    )
+    ..registerLazySingleton<RentalPublicationIndexSink>(
+      () => sl<RentalPublicationDiscoveryAdapter>(),
+    )
+    // IDP-05A: publish-time Page access is re-read from Identity, never
+    // trusted from the active-workspace preference.
+    ..registerLazySingleton<PublisherAccessCheck>(
+      () => IdentityPublisherAccessCheck(sl<IdentityWorkspaceRepository>()),
+    )
+    ..registerLazySingleton<PublishedRentalDiscoveryPort>(
+      () => sl<RentalPublicationDiscoveryAdapter>(),
+    )
+    // Event (DTL-EVT-01) — read-only, mock-first: no write-side sink
+    // exists yet (§0.6), so unlike Rental/Collection above this is a
+    // single registration, not a shared adapter instance.
+    ..registerLazySingleton<PublishedEventDiscoveryPort>(
+      () => publishedEventDiscoveryFor(
+        manifest: discoverBindingManifest(sl()),
+        local: PublishedEventDiscoveryLocalDataSource.new,
+        port: sl(),
+        session: sl(),
+        currencyCode: sl<MarketConfig>().currencyCode,
+      ),
+    )
+    // Find People (DTL-FP-01) — public read-only mock projection. It is
+    // deliberately independent from Create drafts and participation flows.
+    // D3.7: over the server Catalog only under `testBackend` with its own define.
+    ..registerLazySingleton<PublishedFindPeopleDiscoveryPort>(
+      () => publishedFindPeopleDiscoveryFor(
+        manifest: discoverBindingManifest(sl()),
+        local: PublishedFindPeopleDiscoveryLocalDataSource.new,
+        port: sl(),
+        session: sl(),
+      ),
+    )
+    // Bookable Session (DTL-SES-01) — read-only public schedule snapshots.
+    // Provider calendar state and Create drafts never cross this boundary.
+    ..registerLazySingleton<PublishedBookableSessionDiscoveryPort>(
+      () => PublishedBookableSessionDiscoveryLocalDataSource(),
+    )
+    ..registerLazySingleton<PublishedClassWorkshopDiscoveryPort>(
+      () => PublishedClassWorkshopDiscoveryLocalDataSource(),
+    )
+    // Collection — both sides active (CLG-CRT-01): mirrors Rental above.
+    // `CollectionPublicationDiscoveryAdapter` is the one file that imports
+    // both `CollectionPublicationIndexSink` (Create) and
+    // `PublishedCollectionDiscoveryPort` (Discover); `sink`/`port` here are
+    // the same instance, same pattern as Route/Rental.
+    ..registerLazySingleton<PublishedCollectionDiscoveryLocalDataSource>(
+      () => PublishedCollectionDiscoveryLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<CollectionPublicationDiscoveryAdapter>(
+      () => CollectionPublicationDiscoveryAdapter(sl()),
+    )
+    ..registerLazySingleton<CollectionPublicationIndexSink>(
+      () => sl<CollectionPublicationDiscoveryAdapter>(),
+    )
+    ..registerLazySingleton<PublishedCollectionDiscoveryPort>(
+      () => sl<CollectionPublicationDiscoveryAdapter>(),
+    )
+    ..registerLazySingleton<CollectionItemResolutionRepository>(
+      CollectionItemResolutionRepositoryImpl.new,
+    )
+    // CLG-CRT-01 §15 "Миграция и rollback": one config instance for the
+    // whole composition, always the bare class default — never an override
+    // here, on purpose (see `collection_discover_default_composition_test.dart`,
+    // which exists specifically to catch this site silently diverging from
+    // the class's own default). CLG-CRT-01/CLG-PST-01/CLG-PST-02's gates are
+    // now all green, so `CollectionCreateRuntimeConfig`'s own default
+    // enables `collectionPublishingEnabled`/`collectionDiscoverEnabled`
+    // (`collectionCreateEnabled` was already `true`). For an emergency
+    // rollback, override at this exact call site — never edit the class
+    // default for a temporary rollback.
+    ..registerLazySingleton<CollectionCreateRuntimeConfig>(
+      () => const CollectionCreateRuntimeConfig(),
+    )
+    // CLG-PST-01: persisted, staged-write store — see
+    // `CollectionPublicationStore`'s own doc comment for why this has no
+    // AES-GCM layer of its own, unlike `RouteRecordingSecureStore`.
+    ..registerLazySingleton<CollectionPublicationStore>(
+      () => SecureCollectionPublicationStore(sl<FlutterSecureStorage>()),
+    )
+    ..registerLazySingleton<CollectionPublicationLocalDatasource>(
+      () =>
+          CollectionPublicationLocalDatasource(idGenerator: sl(), store: sl()),
+    )
+    ..registerLazySingleton<CollectionPublicationRepository>(
+      () => CollectionPublicationRepositoryImpl(
+        datasource: sl(),
+        sink: sl<CollectionPublicationIndexSink>(),
+      ),
+    )
+    ..registerLazySingleton<CollectionCatalogSearchMockDatasource>(
+      CollectionCatalogSearchMockDatasource.new,
+    )
+    // D3.4: the Create item picker reads the server Catalog only while the
+    // Collection test entry is allowed; otherwise the existing local catalog.
+    ..registerLazySingleton<CatalogCollectionCatalogSearchRepository>(
+      () => CatalogCollectionCatalogSearchRepository(
+        query: collectionCatalogQueryFor(
+          guard: sl(),
+          runtime: () => sl.getAsync<BookingTransportRuntime>(),
+        ),
+        marketId: sl<MarketConfig>().countryCode,
+      ),
+    )
+    ..registerLazySingleton<CollectionCatalogSearchRepository>(
+      () => TestEntryCollectionCatalogSearchRepository(
+        guard: sl(),
+        server: sl<CatalogCollectionCatalogSearchRepository>(),
+        local: CollectionCatalogSearchRepositoryImpl(datasource: sl()),
+      ),
+    )
+    // Place/Collection search rollback flag and debounce; the Create
+    // controller reads it (8f53854 dropped the registration).
+    ..registerLazySingleton<LocationSearchRuntimeConfig>(
+      () => const LocationSearchRuntimeConfig(),
+    )
+    // LOC-SRCH prerequisite: key comes from the gitignored
+    // google_maps.properties via --dart-define-from-file (documented in
+    // the tracked google_maps.properties.example), same mechanism the
+    // native Google Maps SDK config already uses. `GooglePlacesSearchDatasource`
+    // still fails closed (empty results) if the value is empty — a missing
+    // properties file degrades safely, it does not crash the build.
+    ..registerLazySingleton<GooglePlacesSearchDatasource>(
+      () => GooglePlacesSearchDatasource(
+        client: sl(),
+        apiKey: const String.fromEnvironment('GOOGLE_PLACES_API_KEY'),
+      ),
+    )
+    ..registerLazySingleton<LocationSearchRepository>(
+      () => LocationSearchRepositoryImpl(sl()),
+    )
+    ..registerFactory<CollectionCreateCoordinator>(
+      () => CollectionCreateCoordinator(
+        idGenerator: sl(),
+        catalogSearchRepository: sl(),
+        publicationRepository: sl(),
+        locationSearchRepository: sl(),
+        config: sl<CollectionCreateRuntimeConfig>(),
+      ),
+    )
     ..registerLazySingleton<RoutePublicationMemoryDataSource>(
       RoutePublicationMemoryDataSource.new,
     )
@@ -331,7 +790,21 @@ Future<void> setupDependencies() async {
       () => RouteGpxMemorySourceStore(idGenerator: sl(), config: sl()),
     )
     ..registerLazySingleton<RouteGpxFilePickerPort>(
-      () => RouteGpxFileSelectorAdapter(sl()),
+      () => RouteGpxFileSelectorAdapter(sl(), config: sl()),
+    )
+    // MEDIA-PICK-01: system photo picker, metadata-free copies, private store.
+    ..registerLazySingleton<CreateMediaPickerConfig>(
+      () => const CreateMediaPickerConfig(),
+    )
+    ..registerLazySingleton<CreateImagePickerPort>(CreateImagePickerAdapter.new)
+    ..registerLazySingleton<CreateImageNormalizer>(
+      () => const CreateImageNormalizerImpl(),
+    )
+    ..registerLazySingleton<CreateMediaStore>(
+      () => FileCreateMediaStore(
+        supportDirectory: supportDirectory,
+        idGenerator: sl(),
+      ),
     )
     ..registerLazySingleton<RouteGpxInspector>(
       () => RouteGpxInspector(config: sl()),
@@ -391,7 +864,7 @@ Future<void> setupDependencies() async {
         final repository = sl<CreateRepository>();
         if (repository is! RouteDraftPersistenceRepository) {
           throw StateError(
-            'Create repository must support Route draft persistence.',
+            'Create repository must support Route draft persistence.', // l10n-ignore: developer error; the UI receives a code
           );
         }
         final routeRepository = repository as RouteDraftPersistenceRepository;
@@ -425,6 +898,18 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<EventTimezoneRepository>(
       EventTimezoneRepositoryImpl.new,
     )
+    ..registerLazySingleton<SessionCreateCoordinator>(
+      () => SessionCreateCoordinator(
+        materializeSchedule: MaterializeSessionScheduleUseCase(
+          sl<EventTimezoneRepository>(),
+        ),
+      ),
+    )
+    ..registerLazySingleton<ClassWorkshopCreateCoordinator>(
+      () => ClassWorkshopCreateCoordinator(
+        mapper: ClassWorkshopContentBodyMapper(sl<EventTimezoneRepository>()),
+      ),
+    )
     ..registerLazySingleton<EventMockInventoryDataSource>(
       EventMockInventoryDataSource.new,
     )
@@ -438,6 +923,13 @@ Future<void> setupDependencies() async {
       () => EventCreateCoordinator(
         materializeSchedule: sl(),
         inventorySnapshotRepository: sl(),
+        validateDraft: ValidateEventDraftUseCase(
+          accessReadiness: () => EventAccessReadiness(
+            internalRegistration:
+                sl<EventPublicationTestEntryGuard>().allowed &&
+                sl<BookingTestEntryGuard>().allowed,
+          ),
+        ),
       ),
     )
     ..registerLazySingleton<CatalogObjectPickerPort>(
@@ -474,8 +966,7 @@ Future<void> setupDependencies() async {
       () => LatviaGtfsRemoteDataSource(client: sl()),
     )
     ..registerLazySingleton<GtfsCacheDataSource>(
-      () =>
-          GtfsCacheDataSource(supportDirectory: getApplicationSupportDirectory),
+      () => GtfsCacheDataSource(supportDirectory: supportDirectory),
     )
     ..registerLazySingleton<ScenarioTransitScheduleRepository>(
       () => ScenarioTransitScheduleRepositoryImpl(
@@ -493,11 +984,21 @@ Future<void> setupDependencies() async {
         defaultMarketCityId: sl<MarketConfig>().marketCityId,
         defaultCenterLat: sl<MarketConfig>().centerLat,
         defaultCenterLng: sl<MarketConfig>().centerLng,
+        defaultCurrencyCode: sl<MarketConfig>().currencyCode,
       ),
     )
     ..registerLazySingleton<DiscoverRepository>(
-      () =>
-          DiscoverRepositoryImpl(remoteDataSource: sl(), publishedRoutes: sl()),
+      () => discoverRepositoryFor(
+        manifest: discoverBindingManifest(sl()),
+        local: () => DiscoverRepositoryImpl(
+          remoteDataSource: sl(),
+          publishedRoutes: sl(),
+        ),
+        port: sl(),
+        session: sl(),
+        marketId: sl<MarketConfig>().countryCode,
+        currencyCode: sl<MarketConfig>().currencyCode,
+      ),
     )
     ..registerLazySingleton<TimezoneRepository>(TimezoneRepositoryImpl.new)
     ..registerLazySingleton<TravelTimeRepository>(
@@ -523,25 +1024,76 @@ Future<void> setupDependencies() async {
       () => ExploreRepositoryImpl(localDataSource: sl()),
     )
     ..registerLazySingleton<FavoritesLocalDataSource>(
-      () => FavoritesLocalDataSource(sl()),
+      () => FavoritesLocalDataSource(
+        sl(),
+        defaultCurrencyCode: sl<MarketConfig>().currencyCode,
+      ),
+    )
+    ..registerLazySingleton<ContentTranslationPort>(
+      () => ContentTranslationClient(
+        invoke: contentTranslationInvoke(
+          binding: sl(),
+          runtime: () => sl.getAsync<BookingTransportRuntime>(),
+        ),
+      ),
+    )
+    ..registerLazySingleton<LibrarySyncClient>(
+      () => LibrarySyncClient(
+        invoke: libraryInvoke(
+          binding: sl(),
+          runtime: () => sl.getAsync<BookingTransportRuntime>(),
+        ),
+        storage: sl(),
+      ),
     )
     ..registerLazySingleton<FavoritesRepository>(
-      () => FavoritesRepositoryImpl(localDataSource: sl()),
+      () => libraryRemoteAllowed(sl())
+          ? ServerFavoritesRepository(sl())
+          : FavoritesRepositoryImpl(
+              localDataSource: sl(),
+              currentOwnerId: () async =>
+                  (await sl<AuthRepository>().getCurrentUser())?.id,
+            ),
     )
     ..registerLazySingleton<NotificationsLocalDataSource>(
       () => NotificationsLocalDataSource(sl()),
     )
-    ..registerLazySingleton<NotificationsRepository>(
+    ..registerLazySingleton<NotificationsRepositoryImpl>(
       () => NotificationsRepositoryImpl(localDataSource: sl()),
     )
+    // F1: default-off server inbox; the local inbox otherwise.
+    ..registerLazySingleton<NotificationsInboxTestEntryGuard>(
+      () => NotificationsInboxTestEntryGuard.fromEnvironment(sl()),
+    )
+    ..registerLazySingleton<NotificationsRepository>(
+      () => devAuth?.notifications != null
+          // N3c: the dev-cloud server inbox (dev flavor, N3C_DEV_PUSH only).
+          ? ServerNotificationsRepository(
+              port: devAuth!.notifications!.port,
+              wireLocale: () => sl<LocaleController>().apiLocale,
+            )
+          : notificationsRepositoryFor(
+              manifest: notificationsBindingManifest(sl()),
+              local: () => sl<NotificationsRepositoryImpl>(),
+              port: BookingPortNotificationsAdapter(
+                runtime: () => sl.getAsync<BookingTransportRuntime>(),
+                guard: sl(),
+              ),
+              // L4: the reader's UI language at query time.
+              wireLocale: () => sl<LocaleController>().apiLocale,
+            ),
+    )
+    // Local identity events always land in the local inbox, whatever the binding.
     ..registerLazySingleton<AppNotificationSink>(
-      () => sl<NotificationsRepository>() as AppNotificationSink,
+      () => sl<NotificationsRepositoryImpl>(),
     )
     ..registerLazySingleton<VisitedPlacesLocalDataSource>(
       () => VisitedPlacesLocalDataSource(sl()),
     )
     ..registerLazySingleton<VisitedPlacesRepository>(
-      () => VisitedPlacesRepositoryImpl(localDataSource: sl()),
+      () => libraryRemoteAllowed(sl())
+          ? ServerVisitedPlacesRepository(sl())
+          : VisitedPlacesRepositoryImpl(localDataSource: sl()),
     )
     ..registerFactory<SignInUseCase>(() => SignInUseCase(sl()))
     ..registerFactory<RestoreSessionUseCase>(() => RestoreSessionUseCase(sl()))
@@ -559,6 +1111,19 @@ Future<void> setupDependencies() async {
     )
     ..registerFactory<SelectWorkspaceUseCase>(
       () => SelectWorkspaceUseCase(sl()),
+    )
+    ..registerLazySingleton<ManagedPageFieldModerationLocalDataSource>(
+      () => ManagedPageFieldModerationLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<ManagedPageFieldModerationRepository>(
+      () => ManagedPageFieldModerationRepositoryImpl(sl()),
+    )
+    ..registerFactory<ResolvePublicProfessionalPageUseCase>(
+      () => ResolvePublicProfessionalPageUseCase(
+        repository: sl(),
+        contentRepository: sl(),
+        moderationRepository: sl(),
+      ),
     )
     ..registerFactory<LoadCreateDraftUseCase>(
       () => LoadCreateDraftUseCase(sl()),
@@ -640,4 +1205,40 @@ Future<void> setupDependencies() async {
       () => RecordPlaceVisitUseCase(repository: sl(), idGenerator: sl()),
     )
     ..registerFactory<RemoveVisitUseCase>(() => RemoveVisitUseCase(sl()));
+  if (devAuth != null) {
+    final DevContentMediaPort? contentMedia = devAuth.contentMedia;
+    if (contentMedia != null) {
+      sl.registerSingleton<DevContentMediaPort>(contentMedia);
+    }
+    final DevNotificationsBundle? notifications = devAuth.notifications;
+    if (notifications != null) {
+      // The lock-screen push text follows the app language (A34 2026-11-13).
+      notifications.registrar.wireLocale = () =>
+          sl<LocaleController>().apiLocale;
+      sl
+        ..registerSingleton<DevPushRegistrar>(notifications.registrar)
+        ..registerSingleton<NotificationChannelSettingsRepository>(
+          notifications.settings,
+        );
+    }
+    sl.registerSingleton<AuthSessionEvents>(devAuth);
+    sl.registerFactory<SignInWithGoogleUseCase>(
+      () => SignInWithGoogleUseCase(devAuth.auth),
+    );
+  }
+}
+
+BookingBackendBindingController _bookingBackendBindingController() {
+  const emulatorBase = String.fromEnvironment(
+    'RECHARGE_BOOKING_EMULATOR_FUNCTIONS_BASE',
+  );
+  // The dart-define keeps selecting the Emulator; the manifest now owns the
+  // mode so it can be rolled back to localOnly without touching local data.
+  return BookingBackendBindingController(
+    emulatorBase: emulatorBase.isEmpty ? null : Uri.parse(emulatorBase),
+    releaseMode: kReleaseMode,
+    initial: emulatorBase.isEmpty
+        ? BackendBindingMode.localOnly
+        : BackendBindingMode.testBackend,
+  );
 }

@@ -52,7 +52,7 @@ class EncryptedFileRouteRecordingStore implements RouteRecordingSecureStore {
       }
     }
     throw StateError(
-      'Encrypted GPS journal authentication failed: $primaryError',
+      'Encrypted GPS journal authentication failed: $primaryError', // l10n-ignore: developer error; the UI receives a code
     );
   }
 
@@ -112,7 +112,7 @@ class EncryptedFileRouteRecordingStore implements RouteRecordingSecureStore {
     final envelope = decoded.cast<String, Object?>();
     if (envelope['version'] != _envelopeVersion) {
       throw const FormatException(
-        'Unsupported encrypted GPS journal envelope.',
+        'Unsupported encrypted GPS journal envelope.', // l10n-ignore: developer error; the UI receives a code
       );
     }
     final box = SecretBox(

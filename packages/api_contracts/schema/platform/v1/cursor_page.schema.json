@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/platform/v1/cursor_page.schema.json",
+  "title": "Recharge Platform v1 cursor page",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/contractVersion"
+    },
+    "requestId": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/entityReference"
+    },
+    "items": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/jsonObject"
+      }
+    },
+    "nextCursor": {
+      "anyOf": [
+        {
+          "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/opaqueCursor"
+        },
+        { "type": "null" }
+      ]
+    },
+    "sourceRevision": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/revision"
+    },
+    "projectionRevision": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/revision"
+    },
+    "queryRevision": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/entityReference"
+    },
+    "freshness": {
+      "type": "string",
+      "enum": ["fresh", "stale", "unknown"]
+    },
+    "fetchedAt": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/utcInstant"
+    },
+    "freshUntilUtc": {
+      "$ref": "https://recharge.app/schemas/platform/v1/request_context.schema.json#/$defs/utcInstant"
+    }
+  },
+  "required": [
+    "contractVersion",
+    "requestId",
+    "items",
+    "nextCursor",
+    "queryRevision",
+    "freshness",
+    "fetchedAt"
+  ]
+}

@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/core/product_analytics/product_analytics_queue.dart';
+import 'package:recharge/core/product_analytics/product_analytics_recorder.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
@@ -11,11 +13,14 @@ import 'package:recharge/features/create/domain/entities/create_availability.dar
 import 'package:recharge/features/create/domain/entities/place_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/place_validation_issue.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
+import 'package:recharge/features/create/domain/usecases/count_activity_informal_access_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
 
 import '../support/event_create_test_support.dart';
+import 'product_analytics/product_analytics_test_support.dart';
+import 'package:recharge/features/create/application/state/create_notice.dart';
 
 void main() {
   late _FakeCreateRepository repository;
@@ -94,7 +99,14 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
-    controller.setObjectType(CreateObjectType.activity);
+    // Class/workshop still routes through the generic
+    // _validateCreateAvailability path (unlike event/place/findPeople/
+    // scenario/activity/session, which all have dedicated _validate
+    // branches now — SES-CRT-01 gave Session its own typed validator).
+    // Recharge Activity has no Booking/attendance concept per ACT-CRT-01
+    // spec AC #2, so it no longer fits as the "generic availability
+    // validation" example here.
+    controller.setObjectType(CreateObjectType.classWorkshop);
     controller.updateTitle('My Event');
     controller.updateMainCategory('outdoor_nature_walking');
     controller.updateCoverImage('cover.jpg');
@@ -206,7 +218,14 @@ void main() {
       capabilities: const <String>['create.route'],
     );
 
-    controller.setObjectType(CreateObjectType.activity);
+    // Class/workshop still requires startDateTimeUtc via the generic
+    // validation path (unlike event/place/findPeople/scenario/session,
+    // which have their own dedicated _validate branches that never touch
+    // the generic startDateTimeUtc key — SES-CRT-01 gave Session its own
+    // typed schedule and requiresStartDateTime = false). Recharge Activity
+    // was deliberately made evergreen (no start time) by ACT-CRT-01 spec
+    // AC #2, so it no longer fits as the "missing time" example here.
+    controller.setObjectType(CreateObjectType.classWorkshop);
     controller.updateTitle('Recharge walk');
     controller.updateMainCategory('food_drinks');
     controller.updateCity('Rezekne');
@@ -226,7 +245,7 @@ void main() {
 
     expect(routeSuccess, isFalse);
     expect(controller.state.publishedDraft, isNull);
-    expect(controller.state.message, contains('Сервис публикации Route'));
+    expect(controller.state.message, CreateNotice.routePublicationUnavailable);
   });
 
   test('Route selection requires create.route capability', () async {
@@ -239,7 +258,7 @@ void main() {
     controller.setObjectType(CreateObjectType.route);
 
     expect(controller.state.draft.objectType, isNot(CreateObjectType.route));
-    expect(controller.state.message, contains('create.route'));
+    expect(controller.state.message, CreateNotice.routeCreateNotAllowed);
 
     await controller.ensureLoaded(
       userId: 'u1',
@@ -259,12 +278,20 @@ void main() {
       organizerEmail: 'user@example.com',
       organizerName: 'user',
     );
+    // Recharge Activity: Session has its own typed validator that also
+    // requires a resource, weekly rules and price (SES-CRT-01), so it no
+    // longer fits as the minimal generic publish-success example.
     controller.setObjectType(CreateObjectType.activity);
     controller.updateTitle('My Event');
-    controller.updateMainCategory('outdoor');
+    controller.updateShortDescription(
+      'A quiet, lesser-known viewpoint with a great sunset view.',
+    );
     controller.updateCity('Rezekne');
     controller.updateCoverImage('cover.jpg');
-    controller.updateStartDateTime('2026-05-01T10:00:00Z');
+    controller.updateActivityCoordinates(latitude: '56.51', longitude: '27.33');
+    controller.confirmActivityPin();
+    controller.updateActivityAccessNotes('Trail off the marked path.');
+    controller.updateCategoryCriterion('difficulty', 'easy');
 
     final success = await controller.publishDraft();
 
@@ -275,6 +302,68 @@ void main() {
       PublishStatus.pendingReview,
     );
   });
+
+  test(
+    'PA-T01 Create: a publish attempt queues create_publish_finished only',
+    () async {
+      final InMemoryProductAnalyticsQueueStore store =
+          InMemoryProductAnalyticsQueueStore();
+      final ProductAnalyticsRecorder recorder = ProductAnalyticsRecorder(
+        policy: SyntheticPolicySource(),
+        sink: CaptureSink(),
+        store: store,
+        newEventId: sequentialEventIds(),
+      )..bindAccount('u1');
+      final CreateController tracked = CreateController(
+        loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+        saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+        publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+        analyticsService: _NoopAnalyticsService(),
+        productAnalytics: recorder,
+        eventCreateCoordinator: createTestEventCoordinator(),
+        scenarioCreateCoordinator: ScenarioCreateCoordinator(
+          idGenerator: _SequentialIdGenerator(),
+        ),
+        runtimeDefaults: const CreateRuntimeDefaults(
+          marketCityId: 'riga',
+          timezone: 'Europe/Riga',
+          country: 'LV',
+          city: 'Riga',
+          currency: 'EUR',
+        ),
+      );
+      addTearDown(tracked.dispose);
+      await tracked.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      tracked.setObjectType(CreateObjectType.activity);
+      tracked.updateTitle('My Event');
+      tracked.updateShortDescription(
+        'A quiet, lesser-known viewpoint with a great sunset view.',
+      );
+      tracked.updateCity('Rezekne');
+      tracked.updateCoverImage('cover.jpg');
+      tracked.updateActivityCoordinates(latitude: '56.51', longitude: '27.33');
+      tracked.confirmActivityPin();
+      tracked.updateActivityAccessNotes('Trail off the marked path.');
+      tracked.updateCategoryCriterion('difficulty', 'easy');
+
+      expect(await tracked.publishDraft(), isTrue);
+
+      final List<ProductAnalyticsQueuedEvent> queued = allQueued(store);
+      expect(queued, hasLength(1));
+      expect(queued.single.envelope['eventName'], 'create_publish_finished');
+      // Pending moderation is "submitted", never a publication fact.
+      expect(queued.single.envelope['fields'], <String, String>{
+        'create_type': 'activity',
+        'outcome': 'submitted',
+      });
+      expect(queued.single.envelope.toString().contains('u1'), isFalse);
+      expect(queued.single.envelope.toString().contains('Rezekne'), isFalse);
+    },
+  );
 
   test(
     'Scenario personal save supports undo and blocks public publish',
@@ -349,14 +438,11 @@ void main() {
         identical(controller.state.draft.scenarioData, scenarioBeforeSave),
         isTrue,
       );
-      expect(controller.state.message, contains('Данные остались в форме'));
+      expect(controller.state.message, CreateNotice.draftSaveFailed);
 
       repository.saveError = null;
       expect(await controller.saveScenarioToMyScenarios(), isTrue);
-      expect(
-        repository._stored?.scenarioData?.items.first.id,
-        'scenario-id-1',
-      );
+      expect(repository._stored?.scenarioData?.items.first.id, 'scenario-id-1');
     },
   );
 
@@ -431,6 +517,222 @@ void main() {
       expect(controller.state.draft.media.gallery.last, 'local://image-12.jpg');
     },
   );
+
+  group('CreateController activity wiring', () {
+    test(
+      'setObjectType(activity) seeds activityData with market defaults',
+      () async {
+        await controller.ensureLoaded(
+          userId: 'u1',
+          organizerEmail: 'user@example.com',
+          organizerName: 'user',
+        );
+        controller.setObjectType(CreateObjectType.activity);
+        expect(controller.state.draft.objectType, CreateObjectType.activity);
+        expect(controller.state.draft.activityData, isNotNull);
+        expect(controller.state.draft.activityData!.location.accessNotes, '');
+      },
+    );
+
+    test(
+      'updateActivityAccessNotes updates the draft and bumps revision',
+      () async {
+        await controller.ensureLoaded(
+          userId: 'u1',
+          organizerEmail: 'user@example.com',
+          organizerName: 'user',
+        );
+        controller.setObjectType(CreateObjectType.activity);
+        final int before = controller.state.draft.activityData!.revision;
+        controller.updateActivityAccessNotes('Gravel path from parking.');
+        expect(
+          controller.state.draft.activityData!.location.accessNotes,
+          'Gravel path from parking.',
+        );
+        expect(
+          controller.state.draft.activityData!.revision,
+          greaterThan(before),
+        );
+      },
+    );
+
+    test('confirmActivityPin sets pinConfirmed', () async {
+      await controller.ensureLoaded(
+        userId: 'u1',
+        organizerEmail: 'user@example.com',
+        organizerName: 'user',
+      );
+      controller.setObjectType(CreateObjectType.activity);
+      controller.updateActivityCoordinates(
+        latitude: '56.95',
+        longitude: '24.11',
+      );
+      controller.confirmActivityPin();
+      expect(
+        controller.state.draft.activityData!.location.pinConfirmed,
+        isTrue,
+      );
+    });
+
+    test(
+      'goToActivityStep blocks forward navigation on a blocking error',
+      () async {
+        await controller.ensureLoaded(
+          userId: 'u1',
+          organizerEmail: 'user@example.com',
+          organizerName: 'user',
+        );
+        controller.setObjectType(CreateObjectType.activity);
+        // No cover image set yet -> cover_image_required is a 'basics'-section
+        // blocking error, and step 0 is 'basics'.
+        final bool advanced = await controller.goToActivityStep(2);
+        expect(advanced, isFalse);
+        expect(controller.state.activityStep, 0);
+        expect(controller.state.activityValidationIssues, isNotEmpty);
+      },
+    );
+
+    test(
+      'goToActivityStep allows forward navigation once the current step is valid',
+      () async {
+        await controller.ensureLoaded(
+          userId: 'u1',
+          organizerEmail: 'user@example.com',
+          organizerName: 'user',
+        );
+        controller.setObjectType(CreateObjectType.activity);
+        controller.updateTitle('Hidden viewpoint');
+        controller.updateShortDescription(
+          'A quiet, lesser-known viewpoint with a great sunset view.',
+        );
+        controller.updateCoverImage('cover.jpg');
+        controller.updateActivityCoordinates(
+          latitude: '56.95',
+          longitude: '24.11',
+        );
+        controller.confirmActivityPin();
+        controller.updateActivityAccessNotes('Gravel path from parking.');
+        final bool advanced = await controller.goToActivityStep(1);
+        expect(advanced, isTrue);
+        expect(controller.state.activityStep, 1);
+      },
+    );
+  });
+
+  group('CreateController activity publish moderation (§12)', () {
+    test('4th+ informal-access card publishes flagged, not blocked', () async {
+      final _FakeCreateRepository moderationRepository =
+          _FakeCreateRepository();
+      final CreateController moderationController = CreateController(
+        loadCreateDraftUseCase: LoadCreateDraftUseCase(moderationRepository),
+        saveCreateDraftUseCase: SaveCreateDraftUseCase(moderationRepository),
+        publishCreateDraftUseCase: PublishCreateDraftUseCase(
+          moderationRepository,
+        ),
+        analyticsService: _NoopAnalyticsService(),
+        eventCreateCoordinator: createTestEventCoordinator(),
+        runtimeDefaults: const CreateRuntimeDefaults(
+          marketCityId: 'riga',
+          timezone: 'Europe/Riga',
+          country: 'LV',
+          city: 'Riga',
+          currency: 'EUR',
+        ),
+        countActivityInformalAccess: const CountActivityInformalAccessUseCase(
+          publishedInformalActivityCounts: <String, int>{'user-3': 3},
+        ),
+      );
+      await moderationController.ensureLoaded(
+        userId: 'user-3',
+        organizerEmail: 'user3@example.com',
+        organizerName: 'user-3',
+      );
+      moderationController.setObjectType(CreateObjectType.activity);
+      moderationController.updateTitle('Hidden viewpoint');
+      moderationController.updateShortDescription(
+        'A quiet, lesser-known viewpoint with a great sunset view.',
+      );
+      moderationController.updateCity('Rezekne');
+      moderationController.updateCoverImage('cover.jpg');
+      moderationController.updateActivityCoordinates(
+        latitude: '56.51',
+        longitude: '27.33',
+      );
+      moderationController.confirmActivityPin();
+      moderationController.updateActivityAccessNotes(
+        'Trail off the marked path.',
+      );
+      moderationController.updateActivityAccessCaution(
+        isInformal: true,
+        note: 'Watch for dogs.',
+      );
+      moderationController.updateCategoryCriterion('difficulty', 'easy');
+
+      final bool published = await moderationController.publishDraft();
+
+      expect(published, isTrue);
+      expect(
+        moderationController.state.publishedDraft!.moderationStatus,
+        ModerationStatus.flaggedForReview,
+      );
+      moderationController.dispose();
+    });
+
+    test('1st-3rd informal-access card publishes as normal pending', () async {
+      final _FakeCreateRepository moderationRepository =
+          _FakeCreateRepository();
+      final CreateController moderationController = CreateController(
+        loadCreateDraftUseCase: LoadCreateDraftUseCase(moderationRepository),
+        saveCreateDraftUseCase: SaveCreateDraftUseCase(moderationRepository),
+        publishCreateDraftUseCase: PublishCreateDraftUseCase(
+          moderationRepository,
+        ),
+        analyticsService: _NoopAnalyticsService(),
+        eventCreateCoordinator: createTestEventCoordinator(),
+        runtimeDefaults: const CreateRuntimeDefaults(
+          marketCityId: 'riga',
+          timezone: 'Europe/Riga',
+          country: 'LV',
+          city: 'Riga',
+          currency: 'EUR',
+        ),
+      );
+      await moderationController.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: 'user1@example.com',
+        organizerName: 'user-1',
+      );
+      moderationController.setObjectType(CreateObjectType.activity);
+      moderationController.updateTitle('Hidden viewpoint');
+      moderationController.updateShortDescription(
+        'A quiet, lesser-known viewpoint with a great sunset view.',
+      );
+      moderationController.updateCity('Rezekne');
+      moderationController.updateCoverImage('cover.jpg');
+      moderationController.updateActivityCoordinates(
+        latitude: '56.51',
+        longitude: '27.33',
+      );
+      moderationController.confirmActivityPin();
+      moderationController.updateActivityAccessNotes(
+        'Trail off the marked path.',
+      );
+      moderationController.updateActivityAccessCaution(
+        isInformal: true,
+        note: 'Watch for dogs.',
+      );
+      moderationController.updateCategoryCriterion('difficulty', 'easy');
+
+      final bool published = await moderationController.publishDraft();
+
+      expect(published, isTrue);
+      expect(
+        moderationController.state.publishedDraft!.moderationStatus,
+        ModerationStatus.pending,
+      );
+      moderationController.dispose();
+    });
+  });
 }
 
 class _NoopAnalyticsService implements AnalyticsService {
@@ -458,9 +760,14 @@ class _FakeCreateRepository implements CreateRepository {
     CreateDraftEntity draft,
   ) async {
     final now = DateTime.now().toUtc();
+    // Preserve a caller-requested flaggedForReview (ACT-CRT-01 §12 soft
+    // moderation threshold); otherwise default to the normal pending state.
     _stored = draft.copyWith(
       draftStatus: DraftStatus.pendingReview,
-      moderationStatus: ModerationStatus.pending,
+      moderationStatus:
+          draft.moderationStatus == ModerationStatus.flaggedForReview
+          ? ModerationStatus.flaggedForReview
+          : ModerationStatus.pending,
       publishStatus: PublishStatus.pendingReview,
       publishedAtUtc: now,
       updatedAtUtc: now,

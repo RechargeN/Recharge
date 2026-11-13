@@ -1,13 +1,17 @@
+import 'activity_catalog_facts.dart';
+import '../../../../shared/models/catalog_object_ref.dart';
 import 'opening_hours_rule.dart';
 import 'published_route_discovery_entity.dart';
+import 'route_catalog_facts.dart';
 import 'time_fit_evaluation.dart';
 import 'time_slot.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 enum DurationConfidence { exact, estimated, unknown }
 
 enum AvailabilityKind { eventSlots, openingHours, none }
 
-enum DiscoverObjectKind { place, event, route, activity }
+enum DiscoverObjectKind { place, event, route, activity, findPeople }
 
 class DiscoverItemEntity {
   const DiscoverItemEntity({
@@ -47,6 +51,9 @@ class DiscoverItemEntity {
     this.ctaLabel = '',
     this.highlights = const <String>[],
     this.publishedRoute,
+    this.revisionRef = '',
+    this.activityCatalog,
+    this.routeCatalog,
   }) : assert(durationMinutes == null || durationMinutes > 0),
        assert(capacity == null || capacity > 0),
        assert(participantsCount == null || participantsCount >= 0),
@@ -62,10 +69,10 @@ class DiscoverItemEntity {
   final String city;
   final String category;
   final String subcategory;
-  final DateTime startsAtUtc;
+  final DateTime? startsAtUtc;
   final double latitude;
   final double longitude;
-  final double priceAmount;
+  final Money? priceAmount;
   final double distanceKm;
   final bool isFree;
   final DiscoverObjectKind objectKind;
@@ -93,7 +100,29 @@ class DiscoverItemEntity {
   final List<String> highlights;
   final PublishedRouteDiscoveryEntity? publishedRoute;
 
+  /// Opaque id of the exact published revision this card shows, when the
+  /// source is the server Catalog (E2); empty for local sources.
+  final String revisionRef;
+  final ActivityCatalogFacts? activityCatalog;
+
+  /// DTL-RTE-02: the public facts of a Route read from the server Catalog;
+  /// `null` for every other source (the local RTE-08 path uses
+  /// [publishedRoute]). Never both.
+  final RouteCatalogFacts? routeCatalog;
+
+  int compareStart(DiscoverItemEntity other) {
+    final DateTime? left = startsAtUtc, right = other.startsAtUtc;
+    if (left == null) return right == null ? id.compareTo(other.id) : 1;
+    return right == null ? -1 : left.compareTo(right);
+  }
+
   bool get isPublishedRoute => publishedRoute != null;
+
+  /// A Catalog Route (DTL-RTE-02).
+  bool get isCatalogRoute => routeCatalog != null;
+
+  /// Any Route, from the local projection or from the Catalog.
+  bool get isRoute => isPublishedRoute || isCatalogRoute;
 
   DiscoverItemEntity copyWith({
     DiscoverObjectKind? objectKind,
@@ -176,6 +205,32 @@ class DiscoverItemEntity {
       publishedRoute: clearPublishedRoute
           ? null
           : (publishedRoute ?? this.publishedRoute),
+      revisionRef: revisionRef,
+      activityCatalog: activityCatalog,
+      routeCatalog: routeCatalog,
     );
+  }
+}
+
+/// Not part of the original `DTL-LINK-01` file map — added because both
+/// `DiscoverItemDetailsLookup.classify`
+/// (`features/discover/data/repositories/discover_item_details_lookup.dart`)
+/// and several presentation call sites building a typed self-link
+/// (`discover_details_page.dart`, `discover_map_page.dart`,
+/// `discover_hub_page.dart`) need the exact same
+/// `isPublishedRoute`/`objectKind` classification. A single domain-layer
+/// extension avoids duplicating that logic across files and, just as
+/// importantly, avoids presentation code importing a `data/repositories`
+/// class directly (`ARCHITECTURE_BASELINE.md` rule 3).
+extension DiscoverItemCatalogType on DiscoverItemEntity {
+  CatalogObjectType get catalogObjectType {
+    if (isRoute) return CatalogObjectType.route;
+    return switch (objectKind) {
+      DiscoverObjectKind.event => CatalogObjectType.event,
+      DiscoverObjectKind.activity => CatalogObjectType.activity,
+      DiscoverObjectKind.place => CatalogObjectType.place,
+      DiscoverObjectKind.route => CatalogObjectType.route,
+      DiscoverObjectKind.findPeople => CatalogObjectType.findPeople,
+    };
   }
 }

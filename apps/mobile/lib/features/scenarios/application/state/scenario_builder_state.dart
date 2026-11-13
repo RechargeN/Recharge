@@ -1,4 +1,5 @@
 import '../../domain/entities/scenario_draft_entity.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 enum ScenarioBuilderStatus { ready }
 
@@ -19,6 +20,7 @@ class ScenarioBuilderState {
         freeOnly: false,
         walkingOnly: true,
         sourcePrompt: '',
+        currencyCode: 'EUR',
         steps:
             scenarioStepsFor(
                   mood: ScenarioMood.calm,
@@ -50,31 +52,70 @@ class ScenarioBuilderState {
   }
 }
 
+/// L4.6: how well a Quick Plan route fits; the builder turns it into text.
+enum ScenarioFitLevel { needsStops, ready, goodWithTweaks, needsTuning }
+
+enum ScenarioFitInsightKind {
+  noStops,
+  trimMinutes,
+  fitsMinutes,
+  roomForStop,
+  removePaidStops,
+  freeRoute,
+  totalPrice,
+  shortenTransfers,
+  totalDistance,
+}
+
+class ScenarioFitInsight {
+  const ScenarioFitInsight(
+    this.kind, {
+    this.minutes = 0,
+    this.price,
+    this.distanceKm = 0,
+  });
+
+  final ScenarioFitInsightKind kind;
+  final int minutes;
+  final Money? price;
+  final double distanceKm;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ScenarioFitInsight &&
+      other.kind == kind &&
+      other.minutes == minutes &&
+      other.price == price &&
+      other.distanceKm == distanceKm;
+
+  @override
+  int get hashCode => Object.hash(kind, minutes, price, distanceKm);
+}
+
 class ScenarioRouteFit {
   const ScenarioRouteFit({
     required this.score,
-    required this.label,
-    required this.summary,
+    required this.level,
     required this.insights,
   });
 
   final int score;
-  final String label;
-  final String summary;
-  final List<String> insights;
+  final ScenarioFitLevel level;
+  final List<ScenarioFitInsight> insights;
 }
 
 ScenarioRouteFit scenarioRouteFitFor(ScenarioDraftEntity draft) {
   if (draft.steps.isEmpty) {
     return const ScenarioRouteFit(
       score: 0,
-      label: 'Needs stops',
-      summary: 'Add at least one stop to make this route useful.',
-      insights: <String>['No stops selected'],
+      level: ScenarioFitLevel.needsStops,
+      insights: <ScenarioFitInsight>[
+        ScenarioFitInsight(ScenarioFitInsightKind.noStops),
+      ],
     );
   }
 
-  final List<String> insights = <String>[];
+  final List<ScenarioFitInsight> insights = <ScenarioFitInsight>[];
   var score = 100;
   final int durationOver =
       draft.totalDurationMinutes - draft.maxDurationMinutes;
@@ -89,47 +130,65 @@ ScenarioRouteFit scenarioRouteFitFor(ScenarioDraftEntity draft) {
 
   if (durationOver > 0) {
     score -= durationOver >= 45 ? 32 : 22;
-    insights.add('Trim about $durationOver min');
+    insights.add(
+      ScenarioFitInsight(
+        ScenarioFitInsightKind.trimMinutes,
+        minutes: durationOver,
+      ),
+    );
   } else {
-    insights.add('Fits ${draft.maxDurationMinutes} min');
+    insights.add(
+      ScenarioFitInsight(
+        ScenarioFitInsightKind.fitsMinutes,
+        minutes: draft.maxDurationMinutes,
+      ),
+    );
   }
 
   if (durationUnder > 0 && draft.steps.length < 3) {
     score -= 8;
-    insights.add('Room for one more stop');
+    insights.add(const ScenarioFitInsight(ScenarioFitInsightKind.roomForStop));
   }
 
   if (draft.freeOnly && hasPaidStep) {
     score -= 28;
-    insights.add('Remove paid stops for free-only mode');
-  } else if (draft.totalPriceAmount == 0) {
-    insights.add('Free route');
+    insights.add(
+      const ScenarioFitInsight(ScenarioFitInsightKind.removePaidStops),
+    );
+  } else if (draft.totalPriceAmount.minorUnits == 0) {
+    insights.add(const ScenarioFitInsight(ScenarioFitInsightKind.freeRoute));
   } else {
-    insights.add('${draft.totalPriceAmount.toStringAsFixed(0)} EUR total');
+    insights.add(
+      ScenarioFitInsight(
+        ScenarioFitInsightKind.totalPrice,
+        price: draft.totalPriceAmount,
+      ),
+    );
   }
 
   if (draft.walkingOnly && hasLongTransfer) {
     score -= 18;
-    insights.add('Shorten transfers for walking mode');
+    insights.add(
+      const ScenarioFitInsight(ScenarioFitInsightKind.shortenTransfers),
+    );
   } else {
-    insights.add('${draft.totalDistanceKm.toStringAsFixed(1)} km total');
+    insights.add(
+      ScenarioFitInsight(
+        ScenarioFitInsightKind.totalDistance,
+        distanceKm: draft.totalDistanceKm,
+      ),
+    );
   }
 
   final int boundedScore = score.clamp(0, 100).toInt();
-  final String label = boundedScore >= 85
-      ? 'Ready'
+  final ScenarioFitLevel level = boundedScore >= 85
+      ? ScenarioFitLevel.ready
       : boundedScore >= 65
-      ? 'Good with tweaks'
-      : 'Needs tuning';
-  final String summary = boundedScore >= 85
-      ? 'This route is ready for map or publishing.'
-      : boundedScore >= 65
-      ? 'A small optimization can make this route easier to follow.'
-      : 'Optimize the route before sending it to Map or Create.';
+      ? ScenarioFitLevel.goodWithTweaks
+      : ScenarioFitLevel.needsTuning;
   return ScenarioRouteFit(
     score: boundedScore,
-    label: label,
-    summary: summary,
+    level: level,
     insights: insights.take(4).toList(growable: false),
   );
 }
@@ -168,15 +227,11 @@ List<ScenarioStepEntity> scenarioStepsFor({
 }
 
 List<ScenarioStepEntity> scenarioSuggestionsFor(ScenarioDraftEntity draft) {
-  final Set<String> selectedCategories = draft.steps
-      .map((ScenarioStepEntity step) => step.category)
-      .toSet();
   final int remainingMinutes =
       draft.maxDurationMinutes - draft.totalDurationMinutes;
 
   return _allSteps
       .where((ScenarioStepEntity step) {
-        if (selectedCategories.contains(step.category)) return false;
         if (draft.freeOnly && !step.isFree) return false;
         if (draft.walkingOnly && step.distanceKm > 2.2) return false;
         if (remainingMinutes > 0 && step.durationMinutes > remainingMinutes) {
@@ -260,34 +315,40 @@ const List<ScenarioStepEntity> _allSteps = <ScenarioStepEntity>[
 
 const List<ScenarioStepEntity> _calmSteps = <ScenarioStepEntity>[
   ScenarioStepEntity(
-    title: 'Slow coffee start',
-    subtitle: 'A quiet cafe stop before the walk.',
+    title:
+        'Slow coffee start', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
+    subtitle:
+        'A quiet cafe stop before the walk.', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
     category: 'food_drinks.coffee',
     durationMinutes: 35,
     distanceKm: 0.4,
-    priceAmount: 4,
+    priceAmount: Money(minorUnits: 400, currencyCode: 'EUR'),
     isFree: false,
     latitude: 56.5097,
     longitude: 27.3352,
   ),
   ScenarioStepEntity(
-    title: 'Calm city walk',
-    subtitle: 'Low-pressure route through the old center.',
+    title:
+        'Calm city walk', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
+    subtitle:
+        'Low-pressure route through the old center.', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
     category: 'wellness_recharge.calm_walk',
     durationMinutes: 55,
     distanceKm: 1.6,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currencyCode: 'EUR'),
     isFree: true,
     latitude: 56.5112,
     longitude: 27.3304,
   ),
   ScenarioStepEntity(
-    title: 'Museum reset',
-    subtitle: 'Short culture stop with indoor recovery time.',
+    title:
+        'Museum reset', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
+    subtitle:
+        'Short culture stop with indoor recovery time.', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
     category: 'art_culture_museums.museum',
     durationMinutes: 50,
     distanceKm: 0.9,
-    priceAmount: 6,
+    priceAmount: Money(minorUnits: 600, currencyCode: 'EUR'),
     isFree: false,
     latitude: 56.5069,
     longitude: 27.3318,
@@ -296,34 +357,40 @@ const List<ScenarioStepEntity> _calmSteps = <ScenarioStepEntity>[
 
 const List<ScenarioStepEntity> _socialSteps = <ScenarioStepEntity>[
   ScenarioStepEntity(
-    title: 'Board game table',
-    subtitle: 'Meet people around a simple shared activity.',
+    title:
+        'Board game table', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
+    subtitle:
+        'Meet people around a simple shared activity.', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
     category: 'games_indoor.board_games',
     durationMinutes: 70,
     distanceKm: 1.2,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currencyCode: 'EUR'),
     isFree: true,
     latitude: 56.5108,
     longitude: 27.3385,
   ),
   ScenarioStepEntity(
-    title: 'Afterwork drinks',
-    subtitle: 'Easy social continuation nearby.',
+    title:
+        'Afterwork drinks', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
+    subtitle:
+        'Easy social continuation nearby.', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
     category: 'music_nightlife.afterwork_drinks',
     durationMinutes: 55,
     distanceKm: 0.7,
-    priceAmount: 12,
+    priceAmount: Money(minorUnits: 1200, currencyCode: 'EUR'),
     isFree: false,
     latitude: 56.5086,
     longitude: 27.3401,
   ),
   ScenarioStepEntity(
-    title: 'Live acoustic set',
-    subtitle: 'Small evening event with a relaxed crowd.',
+    title:
+        'Live acoustic set', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
+    subtitle:
+        'Small evening event with a relaxed crowd.', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
     category: 'music_nightlife.live_music',
     durationMinutes: 75,
     distanceKm: 1.8,
-    priceAmount: 10,
+    priceAmount: Money(minorUnits: 1000, currencyCode: 'EUR'),
     isFree: false,
     latitude: 56.5074,
     longitude: 27.3430,
@@ -332,34 +399,40 @@ const List<ScenarioStepEntity> _socialSteps = <ScenarioStepEntity>[
 
 const List<ScenarioStepEntity> _activeSteps = <ScenarioStepEntity>[
   ScenarioStepEntity(
-    title: 'Tennis warm-up',
-    subtitle: 'Beginner-friendly court time.',
+    title:
+        'Tennis warm-up', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
+    subtitle:
+        'Beginner-friendly court time.', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
     category: 'sport.tennis',
     durationMinutes: 60,
     distanceKm: 1.5,
-    priceAmount: 8,
+    priceAmount: Money(minorUnits: 800, currencyCode: 'EUR'),
     isFree: false,
     latitude: 56.5134,
     longitude: 27.3290,
   ),
   ScenarioStepEntity(
-    title: 'Park recovery walk',
-    subtitle: 'Cool down without leaving the route.',
+    title:
+        'Park recovery walk', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
+    subtitle:
+        'Cool down without leaving the route.', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
     category: 'outdoor_nature_walking.city_walk',
     durationMinutes: 35,
     distanceKm: 1.1,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currencyCode: 'EUR'),
     isFree: true,
     latitude: 56.5161,
     longitude: 27.3262,
   ),
   ScenarioStepEntity(
-    title: 'Healthy brunch',
-    subtitle: 'Food stop after movement.',
+    title:
+        'Healthy brunch', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
+    subtitle:
+        'Food stop after movement.', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
     category: 'food_drinks.brunch',
     durationMinutes: 55,
     distanceKm: 0.8,
-    priceAmount: 14,
+    priceAmount: Money(minorUnits: 1400, currencyCode: 'EUR'),
     isFree: false,
     latitude: 56.5118,
     longitude: 27.3360,

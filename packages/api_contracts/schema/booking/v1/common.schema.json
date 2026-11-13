@@ -4,8 +4,63 @@
   "title": "Recharge Booking v1 common definitions",
   "$defs": {
     "schemaVersion": { "type": "integer", "const": 1 },
-    "id": { "type": "string", "minLength": 1, "maxLength": 128 },
-    "revision": { "type": "integer", "minimum": 0 },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^(?!__name__$)[A-Za-z0-9_-]+$"
+    },
+    "requestId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^(?!__name__$)[A-Za-z0-9_-]+$"
+    },
+    "sessionContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sessionId": { "$ref": "#/$defs/id" },
+        "sessionHandle": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{43}$"
+        },
+        "installationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^(?!__name__$)[A-Za-z0-9._:-]+$"
+        }
+      },
+      "required": ["sessionId", "sessionHandle", "installationId"]
+    },
+    "safeInteger": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "materialRevision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^[\\u0020-\\u007E]+$"
+    },
+    "pageSize": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50,
+      "default": 20
+    },
     "positiveUnits": { "type": "integer", "minimum": 1, "maximum": 21 },
     "utcTimestamp": {
       "type": "string",
@@ -39,6 +94,7 @@
         "organizerCancelled",
         "applicationRejected",
         "occurrenceCancelled",
+        "privacyErasure",
         "eventCancelled",
         "missedReconfirmation",
         "waitlistOfferDeclined",

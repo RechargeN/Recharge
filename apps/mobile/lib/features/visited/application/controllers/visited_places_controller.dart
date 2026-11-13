@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../shared/primitives/errors/coded_refusal.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/visited_place_entity.dart';
 import '../../domain/usecases/get_visited_places_usecase.dart';
@@ -27,6 +28,13 @@ class VisitedPlacesController extends ChangeNotifier {
   VisitedPlacesState get state => _state;
 
   String? _loadedUserId;
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
 
   Future<void> ensureLoaded({required String userId}) async {
     if (_loadedUserId == userId && _state.status == VisitedPlacesStatus.ready) {
@@ -58,11 +66,14 @@ class VisitedPlacesController extends ChangeNotifier {
         'visited_places_loaded',
         params: <String, Object?>{'item_count': items.length},
       );
-    } on Exception {
+    } on Exception catch (error) {
       _setState(
         _state.copyWith(
           status: VisitedPlacesStatus.error,
-          message: 'Не удалось загрузить историю посещений',
+          items: const [],
+          visibleItems: const [],
+          message: 'visits_load_failed',
+          failure: error is CodedRefusal ? error : null,
         ),
       );
       _analyticsService.track(
@@ -199,6 +210,7 @@ class VisitedPlacesController extends ChangeNotifier {
   }
 
   void _setState(VisitedPlacesState nextState) {
+    if (_disposed) return;
     _state = nextState;
     notifyListeners();
   }

@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../state/scenario_intake_selection_state.dart';
 
-typedef ScenarioIntakeSupportIssue = String? Function(DiscoverItemEntity item);
+typedef ScenarioIntakeSupportIssue =
+    ScenarioIntakeIssue? Function(DiscoverItemEntity item);
 
 enum ScenarioIntakeToggleResult {
   selected,
@@ -61,9 +62,7 @@ class ScenarioIntakeSelectionController extends ChangeNotifier {
       return ScenarioIntakeToggleResult.unsupported;
     }
     if (_state.selectedItems.length >= maxSelection) {
-      _state = _state.copyWith(
-        message: 'A Scenario intake can contain up to $maxSelection items.',
-      );
+      _state = _state.copyWith(message: ScenarioIntakeIssue.limitReached);
       notifyListeners();
       return ScenarioIntakeToggleResult.limitReached;
     }

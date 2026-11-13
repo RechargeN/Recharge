@@ -1,0 +1,1649 @@
+import 'package:design_system/design_system.dart';
+import 'package:flutter/material.dart';
+
+import '../../../../core/config/recharge_taxonomy.dart';
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../create/application/create_taxonomy.dart';
+import '../../domain/entities/discover_item_entity.dart';
+import '../../domain/entities/time_fit_evaluation.dart';
+import '../../domain/repositories/route_safety_reporting_port.dart';
+import '../discover_formats.dart';
+import 'details_renderer.dart';
+
+/// [DetailsRenderer] that reproduces, unchanged, the Details layout that
+/// shipped before `DTL-FND-01`: the same hero, summary, action hub,
+/// organizer, info grid, highlights, location card and bottom bar — for
+/// Event, Activity and Place.
+///
+/// `docs/product/discover/DTL_FND_01_DETAILS_SHELL_SLICE_SPEC.md` §3: this class
+/// proves the shell/renderer abstraction works for a real consumer. It
+/// does **not** implement the target Object/Offer section matrix
+/// (`DISCOVER_DETAILS_SYSTEM_SPEC.md` §5) — that is `DTL-OBJ-01`'s job.
+///
+/// Since `DTL-RTE-01`, `route` no longer dispatches here — see
+/// `RouteDetailsRenderer` (`../renderers/route_details_renderer.dart`),
+/// which owns Route's map-hero/elevation/difficulty treatment but reuses
+/// several of this class's originally-private widgets (promoted to public
+/// for exactly that reason: [SummaryCard], [DetailsActionHub],
+/// [OrganizerCard], [InfoGrid], [HighlightsCard], [LocationCard],
+/// [DetailsBottomBar] and their shared helpers) rather than duplicating
+/// them. `_PublishedRouteCard`, this class's own hero and category badge
+/// stay private — Route no longer reaches this class at all, so nothing
+/// here still calls its now-dead Route branch, but it is left in place
+/// rather than stripped, since `compatibility_object_renderer.dart` isn't
+/// in `DTL-RTE-01`'s own file map and a deeper cleanup risks touching more
+/// than that slice authorized.
+class CompatibilityObjectRenderer implements DetailsRenderer {
+  const CompatibilityObjectRenderer({
+    required this.item,
+    required this.isFavorite,
+    required this.ctaSubmitted,
+    required this.onFavoriteTap,
+    required this.onShareTap,
+    required this.onMap,
+    required this.onRouteMap,
+    required this.onAddToScenario,
+    required this.onSearch,
+    required this.onCreateSimilar,
+    required this.onCreateRoute,
+    required this.onMarkVisited,
+    required this.onCtaTap,
+    required this.onReportRoute,
+  });
+
+  final DiscoverItemEntity item;
+  final bool isFavorite;
+  final bool ctaSubmitted;
+  final VoidCallback onFavoriteTap;
+  final VoidCallback onShareTap;
+  final VoidCallback onMap;
+  final VoidCallback onRouteMap;
+  final VoidCallback? onAddToScenario;
+  final VoidCallback onSearch;
+  final VoidCallback onCreateSimilar;
+  final VoidCallback onCreateRoute;
+  final VoidCallback onMarkVisited;
+  final VoidCallback onCtaTap;
+  final VoidCallback onReportRoute;
+
+  @override
+  List<Widget> buildAppBarActions(BuildContext context) {
+    return <Widget>[
+      IconButton(
+        tooltip: isFavorite
+            ? context.l10n.discoverUnsave
+            : context.l10n.discoverSave,
+        onPressed: onFavoriteTap,
+        icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+      ),
+      IconButton(
+        tooltip: context.l10n.discoverShare,
+        onPressed: onShareTap,
+        icon: const Icon(Icons.ios_share_rounded),
+      ),
+    ];
+  }
+
+  @override
+  Widget buildHero(BuildContext context) => _DetailsHero(item: item);
+
+  @override
+  Widget buildBody(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          SummaryCard(item: item),
+          if (item.activityCatalog != null) ...<Widget>[
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      context.l10n.discoverTypicalDuration(
+                        activityDurationLabel(
+                          context.l10n,
+                          item.activityCatalog!,
+                        ),
+                      ),
+                    ),
+                    if (item.activityCatalog!.suggestedGroupMin != null)
+                      Text(
+                        context.l10n.discoverSuggestedGroup(
+                          item.activityCatalog!.suggestedGroupMin!,
+                          item.activityCatalog!.suggestedGroupMax ??
+                              item.activityCatalog!.suggestedGroupMin!,
+                        ),
+                      ),
+                    if (item.activityCatalog!.linkedPlaceTitle != null)
+                      Text(
+                        '${context.l10n.discoverLinkedPlaceLabel} ${item.activityCatalog!.linkedPlaceTitle!}',
+                      ),
+                    if (item.activityCatalog!.fullDescription.isNotEmpty)
+                      Text(item.activityCatalog!.fullDescription),
+                    if (item.activityCatalog!.timeOfDay != null)
+                      Text(
+                        context.l10n.discoverBestTime(
+                          context.l10n.createOption(
+                            'ActivityTimeOfDay_${item.activityCatalog!.timeOfDay}',
+                          ),
+                        ),
+                      ),
+                    if (item.activityCatalog!.season != null)
+                      Text(
+                        context.l10n.discoverSeason(
+                          context.l10n.createOption(
+                            'ActivitySeason_${item.activityCatalog!.season}',
+                          ),
+                        ),
+                      ),
+                    if (item.activityCatalog!.addressLine.isNotEmpty)
+                      Text(item.activityCatalog!.addressLine),
+                    if (item.activityCatalog!.accessNotes.isNotEmpty)
+                      Text(item.activityCatalog!.accessNotes),
+                    if (item.activityCatalog!.isInformal)
+                      Text(
+                        '${context.l10n.discoverInformalAccessLabel} ${item.activityCatalog!.cautionNote}',
+                      ),
+                    if (item.activityCatalog!.contributionKind != null)
+                      Text(
+                        '${context.l10n.discoverOptionalContributionLabel(context.l10n.createOption('ActivityContributionKind_${item.activityCatalog!.contributionKind}'))} ${item.activityCatalog!.contributionNote ?? ''}', // l10n-ignore: Create seed prefill data
+                      ),
+                    // The hint needs its own currency; none is assumed.
+                    if (item.activityCatalog!.amountMinor != null &&
+                        item.activityCatalog!.currencyCode != null)
+                      Text(
+                        context.l10n.discoverAmountHint(
+                          RechargeFormats.money(
+                            Money(
+                              minorUnits: item.activityCatalog!.amountMinor!,
+                              currencyCode: item.activityCatalog!.currencyCode!,
+                            ),
+                            context.l10n.localeName,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          if (item.isPublishedRoute) ...<Widget>[
+            const SizedBox(height: 12),
+            _PublishedRouteCard(item: item, onReport: onReportRoute),
+          ],
+          const SizedBox(height: 12),
+          DetailsActionHub(
+            item: item,
+            isFavorite: isFavorite,
+            ctaSubmitted: ctaSubmitted,
+            onFavoriteTap: onFavoriteTap,
+            onMap: onMap,
+            onRouteMap: onRouteMap,
+            onAddToScenario: onAddToScenario,
+            onSearch: onSearch,
+            onCreateSimilar: onCreateSimilar,
+            onCreateRoute: onCreateRoute,
+            onMarkVisited: onMarkVisited,
+            onCtaTap: onCtaTap,
+          ),
+          const SizedBox(height: 12),
+          OrganizerCard(item: item),
+          const SizedBox(height: 12),
+          InfoGrid(item: item),
+          const SizedBox(height: 12),
+          HighlightsCard(item: item),
+          const SizedBox(height: 12),
+          LocationCard(item: item, onOpenMap: onMap),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget? buildStickyAction(BuildContext context) {
+    return DetailsBottomBar(
+      item: item,
+      isFavorite: isFavorite,
+      ctaSubmitted: ctaSubmitted,
+      onFavoriteTap: onFavoriteTap,
+      onCtaTap: onCtaTap,
+    );
+  }
+}
+
+class _DetailsHero extends StatelessWidget {
+  const _DetailsHero({required this.item});
+
+  final DiscoverItemEntity item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        AspectRatio(
+          aspectRatio: 1.35,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              if (item.coverImageUrl.isNotEmpty)
+                Image.network(
+                  item.coverImageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _CoverFallback(item: item),
+                )
+              else
+                _CoverFallback(item: item),
+              Positioned(
+                left: 12,
+                top: 12,
+                child: _CategoryBadge(
+                  label: taxonomyLabel(
+                    context.l10n,
+                    item.category,
+                  ).toUpperCase(),
+                ),
+              ),
+            ],
+          ),
+        ),
+        DecoratedBox(
+          decoration: const BoxDecoration(color: RechargeTheme.travelGreen),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  item.title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${dateTimeLabelForDetails(context.l10n, item.startsAtUtc)} · ${priceLabelForDetails(context.l10n, item)}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CoverFallback extends StatelessWidget {
+  const _CoverFallback({required this.item});
+
+  final DiscoverItemEntity item;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(color: RechargeTheme.travelGreenDark),
+      child: Center(
+        child: Icon(
+          _categoryIcon(item.category),
+          color: Colors.white,
+          size: 72,
+        ),
+      ),
+    );
+  }
+}
+
+class SummaryCard extends StatelessWidget {
+  const SummaryCard({super.key, required this.item});
+
+  final DiscoverItemEntity item;
+
+  @override
+  Widget build(BuildContext context) {
+    final route = item.publishedRoute;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              item.subtitle,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: MetricTile(
+                    icon: route == null
+                        ? Icons.payments_outlined
+                        : Icons.route_outlined,
+                    label: route == null
+                        ? context.l10n.discoverPrice
+                        : context.l10n.discoverLength,
+                    value: route == null
+                        ? priceLabelForDetails(context.l10n, item)
+                        : discoverKm(context.l10n, route.distanceMeters / 1000),
+                  ),
+                ),
+                Expanded(
+                  child: MetricTile(
+                    icon: route == null
+                        ? Icons.group_outlined
+                        : Icons.directions_walk_outlined,
+                    label: route == null
+                        ? context.l10n.discoverPeople
+                        : context.l10n.discoverProfile,
+                    value: route == null
+                        ? participantsLabelForDetails(context.l10n, item)
+                        : routeProfileLabelForDetails(
+                            context.l10n,
+                            route.routingProfileId,
+                          ),
+                  ),
+                ),
+                Expanded(
+                  child: MetricTile(
+                    icon: Icons.schedule_outlined,
+                    label: context.l10n.discoverDuration,
+                    value: durationLabelForDetails(context.l10n, item),
+                  ),
+                ),
+              ],
+            ),
+            if (item.timeFitEvaluation case final evaluation?) ...<Widget>[
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: <Widget>[
+                  DetailsPill(
+                    label: timeFitLabelForDetails(context.l10n, evaluation),
+                  ),
+                  DetailsPill(
+                    label: openingLabelForDetails(context.l10n, evaluation),
+                  ),
+                  if (evaluation.travelMinutes != null)
+                    DetailsPill(
+                      label:
+                          '${context.l10n.discoverTravelMinutes(evaluation.travelMinutes!)}'
+                          '${evaluation.quality == TravelEstimateQuality.fallback || evaluation.quality == TravelEstimateQuality.modeled ? ' · ${context.l10n.discoverEstimated}' : ''}',
+                    ),
+                  if (evaluation.selectedSlotId != null)
+                    DetailsPill(
+                      label:
+                          '${context.l10n.discoverSlotLabel} ${evaluation.selectedSlotId}',
+                    ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PublishedRouteCard extends StatelessWidget {
+  const _PublishedRouteCard({required this.item, required this.onReport});
+
+  final DiscoverItemEntity item;
+  final VoidCallback onReport;
+
+  @override
+  Widget build(BuildContext context) {
+    final route = item.publishedRoute!;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              context.l10n.discoverPublishedRoute,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: <Widget>[
+                DetailsPill(
+                  label: routeProfileLabelForDetails(
+                    context.l10n,
+                    route.routingProfileId,
+                  ),
+                ),
+                DetailsPill(
+                  label: routeDifficultyLabelForDetails(
+                    context.l10n,
+                    route.difficultyId,
+                  ),
+                ),
+                if (route.recommendedDifficultyId.isNotEmpty &&
+                    route.recommendedDifficultyId != route.difficultyId)
+                  DetailsPill(
+                    label: context.l10n.discoverRecommendedDifficulty(
+                      routeDifficultyLabelForDetails(
+                        context.l10n,
+                        route.recommendedDifficultyId,
+                      ),
+                    ),
+                  ),
+                if (route.ascentMeters != null)
+                  DetailsPill(label: '+${route.ascentMeters!.round()} m'),
+                if (route.descentMeters != null)
+                  DetailsPill(label: '-${route.descentMeters!.round()} m'),
+                DetailsPill(label: '${route.waypointCount} POI'),
+                if (route.fieldVerifiedAtUtc != null)
+                  DetailsPill(label: context.l10n.discoverFieldVerified),
+                DetailsPill(
+                  label:
+                      '${context.l10n.discoverVersionLabel} ${route.versionId}',
+                ),
+                if (route.demoOnly)
+                  DetailsPill(label: context.l10n.discoverDemoData),
+              ],
+            ),
+            if (route.attributions.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 10),
+              Text(
+                route.attributions.join(' · '),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            if (route.elevationAvailability != 'complete') ...<Widget>[
+              const SizedBox(height: 10),
+              Text(
+                route.elevationAvailability == 'partial'
+                    ? context.l10n.discoverElevationPartial
+                    : context.l10n.discoverElevationUnavailable,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+            if (route.unknownSurfaceDistanceMeters > 0) ...<Widget>[
+              const SizedBox(height: 6),
+              Text(
+                context.l10n.discoverUnknownSurface(
+                  context.l10n.createFormMetersValue(
+                    '${route.unknownSurfaceDistanceMeters.round()}',
+                  ),
+                ),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: onReport,
+                icon: const Icon(Icons.report_outlined),
+                label: Text(context.l10n.discoverReportRouteIssue),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Input collected by [RouteSafetyReportDialog].
+class RouteSafetyReportInput {
+  const RouteSafetyReportInput({
+    required this.reasonCode,
+    required this.severity,
+    this.safeNote,
+  });
+
+  final String reasonCode;
+  final DiscoverRouteSafetySeverity severity;
+  final String? safeNote;
+}
+
+/// Dialog used by the page-level `_reportRoute` flow. Public (unlike the
+/// other widgets in this file) because it is shown via `showDialog` from
+/// `discover_details_page.dart`, outside the renderer's own widget tree.
+class RouteSafetyReportDialog extends StatefulWidget {
+  const RouteSafetyReportDialog({super.key});
+
+  @override
+  State<RouteSafetyReportDialog> createState() =>
+      _RouteSafetyReportDialogState();
+}
+
+class _RouteSafetyReportDialogState extends State<RouteSafetyReportDialog> {
+  final TextEditingController _noteController = TextEditingController();
+  String _reasonCode = 'trail_closed';
+  DiscoverRouteSafetySeverity _severity = DiscoverRouteSafetySeverity.warning;
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.l10n.discoverRouteIssue),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            DropdownButtonFormField<String>(
+              initialValue: _reasonCode,
+              decoration: InputDecoration(
+                labelText: context.l10n.discoverWhatHappened,
+              ),
+              items: <DropdownMenuItem<String>>[
+                DropdownMenuItem(
+                  value: 'trail_closed',
+                  child: Text(context.l10n.discoverIssueTrailClosed),
+                ),
+                DropdownMenuItem(
+                  value: 'dangerous_surface',
+                  child: Text(context.l10n.discoverIssueHazardousSurface),
+                ),
+                DropdownMenuItem(
+                  value: 'obstruction',
+                  child: Text(context.l10n.discoverIssueObstacle),
+                ),
+                DropdownMenuItem(
+                  value: 'incorrect_geometry',
+                  child: Text(context.l10n.discoverIssueWrongLine),
+                ),
+                DropdownMenuItem(
+                  value: 'other',
+                  child: Text(context.l10n.discoverIssueOther),
+                ),
+              ],
+              onChanged: (value) {
+                if (value != null) setState(() => _reasonCode = value);
+              },
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<DiscoverRouteSafetySeverity>(
+              initialValue: _severity,
+              decoration: InputDecoration(
+                labelText: context.l10n.discoverSeverity,
+              ),
+              items: <DropdownMenuItem<DiscoverRouteSafetySeverity>>[
+                DropdownMenuItem(
+                  value: DiscoverRouteSafetySeverity.information,
+                  child: Text(context.l10n.discoverSeverityInfo),
+                ),
+                DropdownMenuItem(
+                  value: DiscoverRouteSafetySeverity.warning,
+                  child: Text(context.l10n.discoverSeverityWarning),
+                ),
+                DropdownMenuItem(
+                  value: DiscoverRouteSafetySeverity.high,
+                  child: Text(context.l10n.discoverSeverityDanger),
+                ),
+                DropdownMenuItem(
+                  value: DiscoverRouteSafetySeverity.critical,
+                  child: Text(context.l10n.discoverSeverityCritical),
+                ),
+              ],
+              onChanged: (value) {
+                if (value != null) setState(() => _severity = value);
+              },
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _noteController,
+              maxLength: 500,
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: context.l10n.discoverCommentOptional,
+                hintText: context.l10n.discoverDescribeWithoutPersonalData,
+              ),
+            ),
+            if (_severity == DiscoverRouteSafetySeverity.critical)
+              Text(context.l10n.discoverCriticalOnlyImmediateRisk),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(context.l10n.discoverCancel),
+        ),
+        FilledButton(
+          onPressed: () {
+            final note = _noteController.text.trim();
+            Navigator.of(context).pop(
+              RouteSafetyReportInput(
+                reasonCode: _reasonCode,
+                severity: _severity,
+                safeNote: note.isEmpty ? null : note,
+              ),
+            );
+          },
+          child: Text(context.l10n.discoverSend),
+        ),
+      ],
+    );
+  }
+}
+
+class MetricTile extends StatelessWidget {
+  const MetricTile({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return Column(
+      children: <Widget>[
+        Icon(icon, color: colorScheme.primary),
+        const SizedBox(height: 6),
+        Text(
+          value,
+          textAlign: TextAlign.center,
+          style: Theme.of(
+            context,
+          ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class DetailsActionHub extends StatelessWidget {
+  const DetailsActionHub({
+    super.key,
+    required this.item,
+    required this.isFavorite,
+    required this.ctaSubmitted,
+    required this.onFavoriteTap,
+    required this.onMap,
+    required this.onRouteMap,
+    required this.onAddToScenario,
+    required this.onSearch,
+    required this.onCreateSimilar,
+    required this.onCreateRoute,
+    required this.onMarkVisited,
+    required this.onCtaTap,
+  });
+
+  final DiscoverItemEntity item;
+  final bool isFavorite;
+  final bool ctaSubmitted;
+  final VoidCallback onFavoriteTap;
+  final VoidCallback onMap;
+  final VoidCallback onRouteMap;
+  final VoidCallback? onAddToScenario;
+  final VoidCallback onSearch;
+  final VoidCallback onCreateSimilar;
+  final VoidCallback onCreateRoute;
+  final VoidCallback onMarkVisited;
+  final VoidCallback onCtaTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final DetailsRoutePlan routePlan = routePlanForDetails(item);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                const Icon(Icons.route, color: RechargeTheme.travelGreenDark),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.l10n.discoverPlanThisRecharge,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: RechargeTheme.travelGreenDark,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                DetailsPill(
+                  label: isFavorite
+                      ? context.l10n.discoverSaved
+                      : context.l10n.discoverNotSaved,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              context.l10n.discoverPlanHint,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: <Widget>[
+                DetailsPill(label: taxonomyLabel(context.l10n, item.category)),
+                DetailsPill(label: priceLabelForDetails(context.l10n, item)),
+                DetailsPill(
+                  label: participantsLabelForDetails(context.l10n, item),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            DetailsRoutePreview(
+              plan: routePlan,
+              onRouteMap: onRouteMap,
+              onCreateRoute: onCreateRoute,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: ctaSubmitted ? null : onCtaTap,
+                    icon: const Icon(Icons.check_circle_outline),
+                    label: Text(
+                      ctaSubmitted
+                          ? context.l10n.discoverRequestSent
+                          : _ctaLabel(context.l10n, item),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                IconButton.outlined(
+                  tooltip: isFavorite
+                      ? context.l10n.discoverUnsave
+                      : context.l10n.discoverSave,
+                  onPressed: onFavoriteTap,
+                  icon: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            GridView.count(
+              crossAxisCount: 2,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: 1.82,
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              children: <Widget>[
+                DetailsActionTile(
+                  icon: Icons.map_outlined,
+                  title: context.l10n.discoverMap,
+                  subtitle: context.l10n.discoverOpenNearbyContext,
+                  onTap: onMap,
+                ),
+                if (onAddToScenario != null)
+                  DetailsActionTile(
+                    icon: Icons.playlist_add,
+                    title: context.l10n.discoverAddToScenario,
+                    subtitle: context.l10n.discoverAddStopToPlan,
+                    onTap: onAddToScenario!,
+                  ),
+                DetailsActionTile(
+                  icon: Icons.search,
+                  title: context.l10n.discoverFindSimilar,
+                  subtitle: context.l10n.discoverSearchThisCategory,
+                  onTap: onSearch,
+                ),
+                DetailsActionTile(
+                  icon: Icons.add_circle_outline,
+                  title: context.l10n.discoverCreateSimilar,
+                  subtitle: context.l10n.discoverOpenCreateHub,
+                  onTap: onCreateSimilar,
+                ),
+                if (item.objectKind == DiscoverObjectKind.place)
+                  DetailsActionTile(
+                    icon: Icons.history_toggle_off,
+                    title: context.l10n.discoverMarkVisited,
+                    subtitle: context.l10n.discoverAddToPrivateHistory,
+                    onTap: onMarkVisited,
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DetailsActionTile extends StatelessWidget {
+  const DetailsActionTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(4),
+      child: Ink(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: RechargeTheme.travelPanel,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: RechargeTheme.travelLine),
+        ),
+        child: Row(
+          children: <Widget>[
+            Icon(icon, color: RechargeTheme.travelGreenDark),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DetailsRoutePreview extends StatelessWidget {
+  const DetailsRoutePreview({
+    super.key,
+    required this.plan,
+    required this.onRouteMap,
+    required this.onCreateRoute,
+  });
+
+  final DetailsRoutePlan plan;
+  final VoidCallback onRouteMap;
+  final VoidCallback onCreateRoute;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: RechargeTheme.travelPanel,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: RechargeTheme.travelLine),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                const Icon(
+                  Icons.alt_route,
+                  color: RechargeTheme.travelGreenDark,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.l10n.discoverRouteFromThis,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: RechargeTheme.travelGreenDark,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                DetailsPill(label: '${plan.stepCategories.length} stops'),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: <Widget>[
+                DetailsPill(label: plan.mood),
+                DetailsPill(
+                  label: context.l10n.discoverMinutes(plan.durationMinutes),
+                ),
+                if (plan.freeOnly)
+                  DetailsPill(label: context.l10n.discoverFree),
+                if (plan.walkingOnly)
+                  DetailsPill(label: context.l10n.discoverWalking),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              plan.stepCategories
+                  .map((String c) => taxonomyLabel(context.l10n, c))
+                  .join(' · '),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onRouteMap,
+                    icon: const Icon(Icons.map_outlined),
+                    label: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(context.l10n.discoverRouteMap),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onCreateRoute,
+                    icon: const Icon(Icons.add_location_alt_outlined),
+                    label: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(context.l10n.discoverCreateRoute),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DetailsPill extends StatelessWidget {
+  const DetailsPill({super.key, required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: RechargeTheme.travelPanel,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: RechargeTheme.travelLine),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        child: Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+      ),
+    );
+  }
+}
+
+class OrganizerCard extends StatelessWidget {
+  const OrganizerCard({super.key, required this.item});
+
+  final DiscoverItemEntity item;
+
+  @override
+  Widget build(BuildContext context) {
+    final String organizerName = item.organizerName.isEmpty
+        // No organizer: the category name stands in (G04, not translated).
+        ? 'Recharge ${taxonomyLabel(context.l10n, item.category)}' // l10n-ignore: brand + category name
+        : item.organizerName;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: <Widget>[
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: RechargeTheme.travelPanel,
+              child: Text(
+                organizerName[0].toUpperCase(),
+                style: TextStyle(
+                  color: RechargeTheme.travelGreenDark,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    context.l10n.discoverOrganizer,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    organizerName,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  if (item.organizerHandle.isNotEmpty)
+                    Text(
+                      item.organizerHandle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: RechargeTheme.travelGreenDark,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.verified_rounded,
+              color: RechargeTheme.travelGreen,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class InfoGrid extends StatelessWidget {
+  const InfoGrid({super.key, required this.item});
+
+  final DiscoverItemEntity item;
+
+  @override
+  Widget build(BuildContext context) {
+    final route = item.publishedRoute;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          children: <Widget>[
+            if (route == null)
+              InfoRow(
+                icon: Icons.calendar_month_outlined,
+                label: context.l10n.discoverDateAndTime,
+                value: dateTimeLabelForDetails(context.l10n, item.startsAtUtc),
+              )
+            else
+              InfoRow(
+                icon: Icons.route_outlined,
+                label: context.l10n.discoverRouteGeometry,
+                value:
+                    '${discoverKm(context.l10n, route.distanceMeters / 1000)} · '
+                    '${durationFromSecondsForDetails(context.l10n, route.durationSeconds)}',
+              ),
+            const Divider(height: 20),
+            InfoRow(
+              icon: Icons.place_outlined,
+              label: context.l10n.discoverLocation,
+              value: venueLabelForDetails(item),
+            ),
+            const Divider(height: 20),
+            InfoRow(
+              icon: Icons.near_me_outlined,
+              label: context.l10n.discoverDistance,
+              value: route == null
+                  ? context.l10n.discoverDistanceFromYou(
+                      discoverOneDecimal(context.l10n, item.distanceKm),
+                    )
+                  : context.l10n.discoverStartPointAway(
+                      discoverOneDecimal(context.l10n, item.distanceKm),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class InfoRow extends StatelessWidget {
+  const InfoRow({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Icon(icon, color: RechargeTheme.travelGreenDark),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Text(
+                value,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class HighlightsCard extends StatelessWidget {
+  const HighlightsCard({super.key, required this.item});
+
+  final DiscoverItemEntity item;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<String> highlights = item.highlights.isEmpty
+        ? <String>[
+            context.l10n.discoverPerkMeetingPoint,
+            context.l10n.discoverPerkOrganizerDetails,
+            context.l10n.discoverPerkSaveForLater,
+          ]
+        : item.highlights;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              context.l10n.discoverWhatAwaitsYou,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 10),
+            ...highlights.map(
+              (String highlight) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Icon(
+                      Icons.check_circle_rounded,
+                      color: RechargeTheme.travelGreen,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(highlight)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LocationCard extends StatelessWidget {
+  const LocationCard({super.key, required this.item, required this.onOpenMap});
+
+  final DiscoverItemEntity item;
+  final VoidCallback onOpenMap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onOpenMap,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 76,
+                height: 76,
+                decoration: BoxDecoration(
+                  color: RechargeTheme.travelPanel,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: RechargeTheme.travelLine),
+                ),
+                child: Icon(
+                  Icons.map_outlined,
+                  color: RechargeTheme.travelGreenDark,
+                  size: 34,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      item.venueName.isEmpty ? item.city : item.venueName,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.addressLine.isEmpty ? item.city : item.addressLine,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      context.l10n.discoverShowOnMap,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: RechargeTheme.travelGreenDark,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: RechargeTheme.travelGreenDark,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DetailsBottomBar extends StatelessWidget {
+  const DetailsBottomBar({
+    super.key,
+    required this.item,
+    required this.isFavorite,
+    required this.ctaSubmitted,
+    required this.onFavoriteTap,
+    required this.onCtaTap,
+  });
+
+  final DiscoverItemEntity item;
+  final bool isFavorite;
+  final bool ctaSubmitted;
+  final VoidCallback onFavoriteTap;
+  final VoidCallback onCtaTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: RechargeTheme.travelLine)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: FilledButton(
+                  onPressed: ctaSubmitted ? null : onCtaTap,
+                  child: Text(
+                    ctaSubmitted
+                        ? context.l10n.discoverRequestSent
+                        : _ctaLabel(context.l10n, item),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              IconButton(
+                tooltip: isFavorite
+                    ? context.l10n.discoverUnsave
+                    : context.l10n.discoverSave,
+                onPressed: onFavoriteTap,
+                icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryBadge extends StatelessWidget {
+  const _CategoryBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: RechargeTheme.travelLine),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: RechargeTheme.travelGreenDark,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// [timezoneId] is the object's zone; a legacy item without one keeps the
+/// device zone it always had.
+String dateTimeLabelForDetails(
+  AppLocalizations l10n,
+  DateTime? value, [
+  String timezoneId = '',
+]) {
+  if (value == null) return l10n.discoverAnyTime;
+  return timezoneId.isEmpty
+      ? RechargeFormats.deviceDateTime(value, l10n.localeName)
+      : RechargeFormats.dateTime(value, timezoneId, l10n.localeName);
+}
+
+String durationFromSecondsForDetails(AppLocalizations l10n, int seconds) =>
+    discoverDuration(l10n, (seconds / 60).round());
+
+String routeProfileLabelForDetails(AppLocalizations l10n, String profileId) {
+  return switch (profileId.trim().toLowerCase()) {
+    'walking' || 'foot' || 'hiking' => l10n.discoverWalking,
+    'cycling' || 'bike' => l10n.discoverCycling,
+    'car' || 'driving' => l10n.discoverDriving,
+    // An unknown routing profile id is never shown raw.
+    _ => l10n.discoverRouteLabel,
+  };
+}
+
+String routeDifficultyLabelForDetails(
+  AppLocalizations l10n,
+  String difficultyId,
+) {
+  final String normalized = difficultyId.trim().toLowerCase().split('.').first;
+  return switch (normalized) {
+    'easy' => l10n.discoverDifficultyEasy,
+    'moderate' || 'medium' => l10n.discoverDifficultyModerate,
+    'hard' || 'difficult' => l10n.discoverDifficultyHard,
+    // An unknown difficulty id is never shown raw.
+    _ => l10n.discoverDifficultyNotSet,
+  };
+}
+
+String priceLabelForDetails(AppLocalizations l10n, DiscoverItemEntity item) {
+  if (item.activityCatalog != null) {
+    return item.activityCatalog!.contributionKind == null
+        ? l10n.discoverNoContribution
+        : l10n.discoverOptionalContribution;
+  }
+  if (item.isFree) return l10n.discoverFree;
+  final Money? price = item.priceAmount;
+  return price == null ? '—' : RechargeFormats.money(price, l10n.localeName);
+}
+
+String timeFitLabelForDetails(
+  AppLocalizations l10n,
+  TimeFitEvaluation evaluation,
+) => switch (evaluation.timeFitStatus) {
+  TimeFitStatus.fits => l10n.discoverFitsYourTime,
+  TimeFitStatus.partial => l10n.discoverPartialAttendance,
+  TimeFitStatus.doesNotFit => l10n.discoverDoesNotFit,
+  TimeFitStatus.unknown => l10n.discoverTimeNotConfirmed,
+};
+
+String openingLabelForDetails(
+  AppLocalizations l10n,
+  TimeFitEvaluation evaluation,
+) => switch (evaluation.openingStatus) {
+  OpeningStatus.open => l10n.discoverOpen,
+  OpeningStatus.closed => l10n.discoverClosed,
+  OpeningStatus.unknown => l10n.discoverOpeningHoursUnknown,
+};
+
+String participantsLabelForDetails(
+  AppLocalizations l10n,
+  DiscoverItemEntity item,
+) {
+  if (item.capacity == null) return l10n.discoverCapacityUnknown;
+  if (item.participantsCount == null) return l10n.discoverParticipantsUnknown;
+  return '${item.participantsCount}/${item.capacity}';
+}
+
+String durationLabelForDetails(AppLocalizations l10n, DiscoverItemEntity item) {
+  if (item.activityCatalog != null) {
+    return activityDurationLabel(l10n, item.activityCatalog!);
+  }
+  return discoverDuration(l10n, item.durationMinutes);
+}
+
+String venueLabelForDetails(DiscoverItemEntity item) {
+  if (item.venueName.isNotEmpty && item.addressLine.isNotEmpty) {
+    return '${item.venueName}, ${item.addressLine}';
+  }
+  if (item.venueName.isNotEmpty) return item.venueName;
+  if (item.addressLine.isNotEmpty) return item.addressLine;
+  return item.city;
+}
+
+class DetailsRoutePlan {
+  const DetailsRoutePlan({
+    required this.mood,
+    required this.durationMinutes,
+    required this.freeOnly,
+    required this.walkingOnly,
+    required this.prompt,
+    required this.stepCategories,
+  });
+
+  final String mood;
+  final int durationMinutes;
+  final bool freeOnly;
+  final bool walkingOnly;
+  final String prompt;
+  final List<String> stepCategories;
+
+  List<String> get stepLabels {
+    return stepCategories
+        .map(createTaxonomyLabelForPath)
+        .toList(growable: false);
+  }
+}
+
+DetailsRoutePlan routePlanForDetails(DiscoverItemEntity item) {
+  return DetailsRoutePlan(
+    mood: scenarioMoodForDetails(item),
+    durationMinutes: (item.durationMinutes ?? 0) > 120
+        ? item.durationMinutes!
+        : 120,
+    freeOnly: item.isFree,
+    walkingOnly: true,
+    prompt: '${item.title} · ${item.category} · ${item.city}',
+    stepCategories: routeStepCategoriesForDetails(item),
+  );
+}
+
+/// Public: used by `discover_details_page.dart` to build the "Route from
+/// this"/"Create route" seed link, exactly as the pre-`DTL-FND-01` page did
+/// with its own private helper of the same shape.
+List<String> routeStepCategoriesForDetails(DiscoverItemEntity item) {
+  final String normalizedTitle = item.title.toLowerCase();
+  if (normalizedTitle.contains('tennis')) {
+    return const <String>['sport.tennis', 'outdoor_nature_walking.city_walk'];
+  }
+
+  switch (normalizeRechargeContentGroupId(item.category)) {
+    case 'outdoor_nature_walking':
+      return const <String>[
+        'outdoor_nature_walking.city_walk',
+        'food_drinks.coffee',
+      ];
+    case 'art_culture_museums':
+      return const <String>['art_culture_museums.museum', 'food_drinks.coffee'];
+    case 'music_nightlife':
+      return const <String>[
+        'music_nightlife.live_music',
+        'music_nightlife.afterwork_drinks',
+      ];
+    case 'family_kids':
+      return const <String>['games_indoor.board_games', 'food_drinks.brunch'];
+    case 'wellness_recharge':
+      return const <String>[
+        'wellness_recharge.calm_walk',
+        'food_drinks.coffee',
+      ];
+    default:
+      return const <String>[
+        'food_drinks.coffee',
+        'wellness_recharge.calm_walk',
+      ];
+  }
+}
+
+/// Public: seed query parameters for the Route-from-this Map/Create
+/// handoff, mirroring the pre-`DTL-FND-01` private helper of the same
+/// shape.
+Map<String, String> routeSeedForDetails(
+  DiscoverItemEntity item, {
+  required bool includeMode,
+}) {
+  final DetailsRoutePlan plan = routePlanForDetails(item);
+  return <String, String>{
+    if (includeMode) 'mode': 'route',
+    'mood': plan.mood,
+    'duration': plan.durationMinutes.toString(),
+    'free': plan.freeOnly ? '1' : '0',
+    'walking': plan.walkingOnly ? '1' : '0',
+    'prompt': plan.prompt,
+    'steps': plan.stepCategories.join(','),
+  };
+}
+
+/// Public: title/subtitle seed for the Route-from-this Create handoff.
+String routeSeedTitle(DiscoverItemEntity item) => '${item.title} route';
+
+String routeSeedSubtitle(DiscoverItemEntity item) {
+  final DetailsRoutePlan plan = routePlanForDetails(item);
+  return '${plan.stepCategories.length} stops · ' // l10n-ignore: Create seed prefill data
+      '${plan.durationMinutes} min · from details'; // l10n-ignore: Create seed prefill data
+}
+
+String routeSeedPrompt(DiscoverItemEntity item) =>
+    routePlanForDetails(item).prompt;
+
+String scenarioMoodForDetails(DiscoverItemEntity item) {
+  final String category = normalizeRechargeContentGroupId(item.category);
+  if (category == 'outdoor_nature_walking' || category == 'sport') {
+    return 'active';
+  }
+  if (category == 'music_nightlife' ||
+      category == 'art_culture_museums' ||
+      category == 'family_kids') {
+    return 'social';
+  }
+  return 'calm';
+}
+
+String _ctaLabel(AppLocalizations l10n, DiscoverItemEntity item) {
+  if (item.ctaLabel.isNotEmpty) return item.ctaLabel;
+  if (item.isRoute) return l10n.discoverOpenRoute;
+  if (item.isFree) return l10n.discoverJoinActivity;
+  return l10n.discoverBookFor(priceLabelForDetails(l10n, item));
+}
+
+/// Public: shared by `DetailsBottomBar`/`DetailsActionHub` in this file
+/// and by `discover_details_page.dart`'s CTA-submitted SnackBar copy.
+String ctaLabelForDetails(AppLocalizations l10n, DiscoverItemEntity item) =>
+    _ctaLabel(l10n, item);
+
+IconData _categoryIcon(String category) {
+  switch (normalizeRechargeContentGroupId(category)) {
+    case 'wellness_recharge':
+      return Icons.self_improvement_rounded;
+    case 'outdoor_nature_walking':
+      return Icons.park_outlined;
+    case 'art_culture_museums':
+      return Icons.palette_outlined;
+    case 'music_nightlife':
+      return Icons.music_note_rounded;
+    case 'family_kids':
+      return Icons.family_restroom_rounded;
+    default:
+      return Icons.local_activity_outlined;
+  }
+}

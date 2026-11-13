@@ -1,0 +1,52 @@
+{
+  "cases": [
+    {
+      "target": "requestContext",
+      "reason": "the minimal v1 request remains valid",
+      "value": {
+        "contractVersion": 1,
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "client": {
+          "appId": "recharge-mobile",
+          "platform": "android",
+          "appVersion": "1.0.0",
+          "buildNumber": 1
+        },
+        "locale": "en",
+        "payload": {}
+      }
+    },
+    {
+      "target": "resultEnvelope",
+      "reason": "the minimal v1 success result remains valid",
+      "value": {
+        "contractVersion": 1,
+        "outcome": "success",
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "correlationId": "550e8400-e29b-41d4-a716-446655440000",
+        "serverTime": "2026-09-21T10:00:00.000Z",
+        "result": {}
+      }
+    },
+    {
+      "target": "queryEnvelope",
+      "reason": "the original v1 cursor request remains valid",
+      "value": {
+        "contractVersion": 1,
+        "queryType": "discover.search",
+        "queryVersion": 1,
+        "requestId": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "client": {
+          "appId": "recharge-mobile",
+          "platform": "ios",
+          "appVersion": "1.0.0",
+          "buildNumber": 1
+        },
+        "locale": "en",
+        "filters": {},
+        "sort": "default",
+        "page": { "limit": 20, "cursor": null }
+      }
+    }
+  ]
+}

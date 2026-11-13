@@ -1,26 +1,20 @@
 import '../../../core/config/recharge_taxonomy.dart';
 import '../domain/entities/create_draft_entity.dart';
 
+/// L4: a type's name, description and field labels come from
+/// `createObjectType*` messages keyed by [objectType]; no copy is kept here.
 class CreateBlockConfig {
   const CreateBlockConfig({
     required this.objectType,
-    required this.title,
-    required this.description,
     required this.defaultCategoryId,
     required this.defaultSubcategoryId,
     required this.requiresStartDateTime,
-    required this.locationLabel,
-    required this.priceLabel,
   });
 
   final CreateObjectType objectType;
-  final String title;
-  final String description;
   final String defaultCategoryId;
   final String defaultSubcategoryId;
   final bool requiresStartDateTime;
-  final String locationLabel;
-  final String priceLabel;
 }
 
 class CreateTaxonomySubcategory {
@@ -74,103 +68,66 @@ class CreateTaxonomyCategory {
 const List<CreateBlockConfig> rechargeCreateBlockConfigs = <CreateBlockConfig>[
   CreateBlockConfig(
     objectType: CreateObjectType.event,
-    title: 'Event',
-    description: 'Public activity with time, place, and attendees',
     defaultCategoryId: 'wellness_recharge',
     defaultSubcategoryId: 'calm_walk',
     requiresStartDateTime: true,
-    locationLabel: 'Venue',
-    priceLabel: 'Ticket or entry price',
   ),
   CreateBlockConfig(
     objectType: CreateObjectType.activity,
-    title: 'Recharge activity',
-    description: 'Lightweight activity such as a walk or reset',
     defaultCategoryId: 'wellness_recharge',
     defaultSubcategoryId: 'recharge_walk',
-    requiresStartDateTime: true,
-    locationLabel: 'Meeting place',
-    priceLabel: 'Expected spend',
+    requiresStartDateTime: false,
   ),
   CreateBlockConfig(
     objectType: CreateObjectType.route,
-    title: 'Route',
-    description: 'Continuous track with anchors, segments and route details',
     defaultCategoryId: 'travel_tours',
     defaultSubcategoryId: 'walking_tour',
     requiresStartDateTime: false,
-    locationLabel: 'Start point',
-    priceLabel: 'Route budget',
   ),
   CreateBlockConfig(
     objectType: CreateObjectType.place,
-    title: 'Place',
-    description: 'A permanent physical place, venue, public space or landmark',
     defaultCategoryId: '',
     defaultSubcategoryId: '',
     requiresStartDateTime: false,
-    locationLabel: 'Place name',
-    priceLabel: 'Typical spend',
   ),
   CreateBlockConfig(
     objectType: CreateObjectType.session,
-    title: 'Bookable session',
-    description: 'Time-based service, class, table, court, or session',
     defaultCategoryId: 'sport',
     defaultSubcategoryId: 'tennis',
-    requiresStartDateTime: true,
-    locationLabel: 'Bookable venue',
-    priceLabel: 'Booking price',
+    // Typed SessionSchedule is the single time authority
+    // (BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md §6.1) — the generic
+    // startDateTimeUtc gate does not apply once the typed writer is active.
+    requiresStartDateTime: false,
   ),
   CreateBlockConfig(
     objectType: CreateObjectType.scenario,
-    title: 'Scenario',
-    description: 'City, day, weekend or trip plan made of independent stops',
     defaultCategoryId: 'food_drinks',
     defaultSubcategoryId: 'coffee',
     requiresStartDateTime: false,
-    locationLabel: 'Area or city',
-    priceLabel: 'Scenario budget',
   ),
   CreateBlockConfig(
     objectType: CreateObjectType.findPeople,
-    title: 'Find people',
-    description: 'Find company for a specific activity',
     defaultCategoryId: 'sport',
     defaultSubcategoryId: 'tennis',
     requiresStartDateTime: true,
-    locationLabel: 'Meeting place',
-    priceLabel: 'Expected spend',
   ),
   CreateBlockConfig(
     objectType: CreateObjectType.classWorkshop,
-    title: 'Class / workshop',
-    description: 'A guided class, workshop, or hands-on experience',
     defaultCategoryId: 'workshops_masterclasses',
     defaultSubcategoryId: 'workshop',
     requiresStartDateTime: true,
-    locationLabel: 'Class venue',
-    priceLabel: 'Participation price',
   ),
   CreateBlockConfig(
     objectType: CreateObjectType.rental,
-    title: 'Rental / equipment',
-    description: 'Equipment or transport available for rent',
     defaultCategoryId: 'sport',
     defaultSubcategoryId: 'cycling',
     requiresStartDateTime: false,
-    locationLabel: 'Pickup place',
-    priceLabel: 'Rental price',
   ),
   CreateBlockConfig(
     objectType: CreateObjectType.collection,
-    title: 'Collection / guide',
-    description: 'A curated collection of places and ideas',
     defaultCategoryId: 'travel_tours',
     defaultSubcategoryId: 'hidden_gems_tour',
     requiresStartDateTime: false,
-    locationLabel: 'Area',
-    priceLabel: 'Collection budget',
   ),
 ];
 
@@ -178,13 +135,9 @@ CreateBlockConfig createBlockConfigFor(CreateObjectType objectType) {
   if (objectType == CreateObjectType.quickPlan) {
     return const CreateBlockConfig(
       objectType: CreateObjectType.quickPlan,
-      title: 'Legacy Quick Plan',
-      description: 'Personal lightweight plan kept for read compatibility',
       defaultCategoryId: 'food_drinks',
       defaultSubcategoryId: 'coffee',
       requiresStartDateTime: false,
-      locationLabel: 'Meeting place',
-      priceLabel: 'Expected spend',
     );
   }
   return rechargeCreateBlockConfigs.firstWhere(
@@ -232,6 +185,23 @@ List<CreateTaxonomyCategory> createTaxonomyForObjectType(
         ),
       )
       .toList(growable: false);
+}
+
+/// The server answer to "does this pair apply to [type]" from the canonical
+/// taxonomy (M1 stage 3): the pair must exist; for Activity it must also apply
+/// to Activity. Collection accepts any existing pair.
+bool canonicalSubcategoryApplies(
+  RechargeContentType type,
+  String categoryId,
+  String subcategoryId,
+) {
+  final RechargeActivityCategory? pair = rechargeActivityCategoryByPath(
+    contentGroupId: categoryId,
+    categorySlug: subcategoryId,
+  );
+  if (pair == null) return false;
+  return type == RechargeContentType.collection ||
+      pair.applicableTypes.contains(type);
 }
 
 CreateTaxonomyCategory? createTaxonomyCategoryById(String id) {

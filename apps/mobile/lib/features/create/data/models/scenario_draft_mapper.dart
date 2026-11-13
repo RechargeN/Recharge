@@ -1,3 +1,4 @@
+import 'dart:convert';
 import '../../domain/entities/scenario_budget_draft.dart';
 import '../../domain/entities/scenario_draft_data.dart';
 import '../../domain/entities/scenario_item_draft.dart';
@@ -5,6 +6,23 @@ import '../../domain/entities/scenario_logistics_draft.dart';
 
 class ScenarioDraftMapper {
   const ScenarioDraftMapper._();
+
+  /// Stable wire encoding shared by save fingerprints and expansion intents.
+  static String canonicalJson(Object? value) {
+    Object? sort(Object? v) {
+      if (v is Map) {
+        final keys = v.keys.cast<String>().toList()..sort();
+        return {for (final key in keys) key: sort(v[key])};
+      }
+      if (v is List) return v.map(sort).toList();
+      if (v is double && v.isFinite && v == v.truncateToDouble()) {
+        return v.toInt();
+      }
+      return v;
+    }
+
+    return jsonEncode(sort(value));
+  }
 
   static const Set<String> _knownScheduleSnapshotKeys = <String>{
     'freshness',
@@ -35,6 +53,7 @@ class ScenarioDraftMapper {
 
   static const Set<String> _knownRootKeys = <String>{
     'schemaVersion',
+    'updatesEnabled',
     'revision',
     'format',
     'dateMode',
@@ -242,6 +261,7 @@ class ScenarioDraftMapper {
       origin: _origin(json['origin']),
       capabilities: _capabilities(json['capabilities']),
       unknownFields: unknown,
+      updatesEnabled: _bool(json['updatesEnabled']) ?? fallback.updatesEnabled,
     );
   }
 
@@ -249,6 +269,7 @@ class ScenarioDraftMapper {
     return <String, Object?>{
       ...value.unknownFields,
       'schemaVersion': ScenarioDraftData.currentSchemaVersion,
+      'updatesEnabled': value.updatesEnabled,
       'revision': value.revision,
       'format': _id(_formats, value.format),
       'dateMode': _id(_dateModes, value.dateMode),

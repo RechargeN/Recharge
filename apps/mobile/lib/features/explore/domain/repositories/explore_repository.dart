@@ -9,8 +9,5 @@ abstract class ExploreRepository {
   );
 
   Future<SettingsEntity?> loadSettings(String userId);
-  Future<void> saveSettings(
-    String userId,
-    SettingsEntity settings,
-  );
+  Future<void> saveSettings(String userId, SettingsEntity settings);
 }

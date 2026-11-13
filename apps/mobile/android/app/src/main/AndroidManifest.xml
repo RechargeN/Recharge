@@ -5,7 +5,13 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <!-- Background Route recording runs geolocator's location foreground
+         service: startForeground needs FOREGROUND_SERVICE as well as the
+         typed FOREGROUND_SERVICE_LOCATION, and the service holds a wake lock
+         (enableWakeLock in RouteGeolocatorAdapter). Found on the A34. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:label="recharge"
@@ -41,6 +47,10 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${googleMapsApiKey}" />
+        <!-- N3c: FCM notifications without an explicit channel use this one. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="recharge_default" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

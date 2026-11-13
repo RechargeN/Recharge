@@ -1,0 +1,34 @@
+{
+  "cases": [
+    {
+      "id": "fractional",
+      "reason": "fractional_number",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"createBooking\",\"requestId\":\"bad-fraction\",\"idempotencyKey\":\"bad-fraction\",\"payload\":{\"occurrenceId\":\"occurrence-1\",\"participantUnits\":1,\"applicationFields\":{\"score\":1.5}}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" }
+    },
+    {
+      "id": "out-of-range",
+      "reason": "unsafe_integer",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"createBooking\",\"requestId\":\"bad-range\",\"idempotencyKey\":\"bad-range\",\"occurredAgainstEventRevision\":9007199254740992,\"payload\":{\"occurrenceId\":\"occurrence-1\",\"participantUnits\":1}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" }
+    },
+    {
+      "id": "duplicate-key",
+      "reason": "duplicate_key",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"createBooking\",\"requestId\":\"duplicate\",\"idempotencyKey\":\"duplicate\",\"payload\":{\"occurrenceId\":\"occurrence-1\",\"participantUnits\":1,\"participantUnits\":2}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" }
+    },
+    {
+      "id": "unpaired-surrogate",
+      "reason": "unpaired_surrogate",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"createBooking\",\"requestId\":\"\\ud800\",\"idempotencyKey\":\"surrogate\",\"payload\":{\"occurrenceId\":\"occurrence-1\",\"participantUnits\":1}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" }
+    },
+    {
+      "id": "null-revision",
+      "reason": "invalid_revision",
+      "rawCommandJson": "{\"schemaVersion\":1,\"commandType\":\"createBooking\",\"requestId\":\"null-revision\",\"idempotencyKey\":\"null-revision\",\"occurredAgainstEventRevision\":null,\"payload\":{\"occurrenceId\":\"occurrence-1\",\"participantUnits\":1}}",
+      "resolvedActorScope": { "kind": "user", "id": "user-1" }
+    }
+  ]
+}

@@ -43,7 +43,7 @@ class GeneratePlaceEnrichmentProposalUseCase {
     if (invalid) {
       throw const PlaceEnrichmentFailure(
         PlaceEnrichmentFailureCode.invalidProposal,
-        'The local Place helper returned an invalid proposal.',
+        'The local Place helper returned an invalid proposal.', // l10n-ignore: developer error, never displayed
       );
     }
     return proposal;

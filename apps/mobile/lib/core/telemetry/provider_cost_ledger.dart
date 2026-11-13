@@ -36,7 +36,7 @@ class InMemoryProviderCostLedger implements ProviderCostLedger {
       throw ArgumentError.value(
         entry.recordedAtUtc,
         'entry.recordedAtUtc',
-        'Ledger timestamps must be UTC.',
+        'Ledger timestamps must be UTC.', // l10n-ignore: developer error; the UI receives a code
       );
     }
     _entries.add(entry);

@@ -16,7 +16,7 @@ if (googleMapsPropertiesFile.exists()) {
 android {
     namespace = "com.recharge.app.recharge"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -38,6 +38,16 @@ android {
         versionName = flutter.versionName
 
         manifestPlaceholders["googleMapsApiKey"] = googleMapsProperties.getProperty("GOOGLE_MAPS_API_KEY") ?: ""
+    }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        create("local") { dimension = "environment" }
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+        }
     }
 
     buildTypes {

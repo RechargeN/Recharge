@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/config/r1/release-manifest.schema.json",
+  "title": "Recharge R1 immutable release manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "manifestId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "environmentId": { "enum": ["local", "dev", "stage", "prod"] },
+    "marketId": { "enum": ["LV", "EE", "LT"] },
+    "capabilityId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 96,
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "status": { "const": "disabled" },
+    "artifactDigest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "apiSchemaRevision": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "marketConfigRevision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "securityPrivacyEvidenceRevision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "retentionDsrRevision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "residencyTransferRevision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "observabilityPolicyRevision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "rollbackTargetManifestId": {
+      "anyOf": [
+        { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+        { "type": "null" }
+      ]
+    },
+    "createdAtUtc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "effectiveAtUtc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "approvedBy": {
+      "type": "array",
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 128 }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "manifestId",
+    "revision",
+    "environmentId",
+    "marketId",
+    "capabilityId",
+    "status",
+    "artifactDigest",
+    "apiSchemaRevision",
+    "marketConfigRevision",
+    "securityPrivacyEvidenceRevision",
+    "retentionDsrRevision",
+    "residencyTransferRevision",
+    "observabilityPolicyRevision",
+    "rollbackTargetManifestId",
+    "createdAtUtc",
+    "effectiveAtUtc",
+    "approvedBy"
+  ]
+}

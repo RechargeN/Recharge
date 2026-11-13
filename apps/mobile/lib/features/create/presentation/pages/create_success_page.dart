@@ -3,11 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/localization/taxonomy_labels.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../application/create_providers.dart';
 import '../../application/create_taxonomy.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/route_publication_data.dart';
+import '../widgets/create_form_texts.dart';
+import '../widgets/create_texts.dart';
+import '../../../../core/localization/l10n_context.dart';
+import '../../../../core/localization/recharge_formats.dart';
+import '../../../../shared/primitives/money/money.dart';
 
 class CreateSuccessPage extends ConsumerWidget {
   const CreateSuccessPage({super.key});
@@ -23,7 +29,7 @@ class CreateSuccessPage extends ConsumerWidget {
         : _PublishedScenarioRouteContext.fromDraft(draft);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Publish status')),
+      appBar: AppBar(title: Text(context.l10n.createFormPublishStatus)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: <Widget>[
@@ -50,7 +56,16 @@ class CreateSuccessPage extends ConsumerWidget {
                 await controller.archiveRoute(routeReceipt.routeId);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(controller.state.message ?? 'Done')),
+                    SnackBar(
+                      content: Text(
+                        controller.state.message == null
+                            ? context.l10n.createNotice('published')
+                            : CreateTexts.notice(
+                                context.l10n,
+                                controller.state.message!,
+                              ),
+                      ),
+                    ),
                   );
                 }
               },
@@ -61,7 +76,7 @@ class CreateSuccessPage extends ConsumerWidget {
             OutlinedButton.icon(
               onPressed: () => context.go(RouteNames.routeModeration),
               icon: const Icon(Icons.fact_check_outlined),
-              label: const Text('Open Route moderation queue'),
+              label: Text(context.l10n.createFormOpenRouteModerationQueue),
             ),
             const SizedBox(height: 14),
           ],
@@ -90,10 +105,10 @@ class CreateSuccessPage extends ConsumerWidget {
             createAnotherLabel:
                 draft?.objectType == CreateObjectType.event &&
                     controller.lastEventTemplate != null
-                ? 'Create another from ${controller.lastEventTemplate!.name}'
+                ? context.l10n.createFormCreateAnotherFrom
                 : draft?.objectType == CreateObjectType.event
-                ? 'Create another Event'
-                : 'Create another',
+                ? context.l10n.createFormCreateAnotherEvent
+                : context.l10n.createFormCreateAnother,
             onCreateAnother: user == null
                 ? null
                 : () async {
@@ -149,10 +164,10 @@ class _PublishStatusHero extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               routeReceipt?.isPublished == true
-                  ? 'Route published'
+                  ? context.l10n.createFormRoutePublished
                   : draft == null
-                  ? 'Publish processed'
-                  : 'Sent to moderation',
+                  ? context.l10n.createFormPublishProcessed
+                  : context.l10n.createFormSentModeration,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: colorScheme.onPrimary,
                 fontWeight: FontWeight.w800,
@@ -161,8 +176,13 @@ class _PublishStatusHero extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               publishedDraft == null
-                  ? 'Your publish action was handled. Create another listing or return to Home.'
-                  : '${publishedDraft.title} is now ${publishedDraft.publishStatus.name}.',
+                  ? context.l10n.createFormYourPublishActionWasHandledCreate
+                  : context.l10n.createFormNowStatus(
+                      createOptionText(
+                        context.l10n,
+                        publishedDraft.publishStatus,
+                      ),
+                    ),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onPrimary.withValues(alpha: 0.88),
                 fontWeight: FontWeight.w600,
@@ -206,22 +226,28 @@ class _RoutePublicationCard extends StatelessWidget {
           children: <Widget>[
             Text(
               receipt.isPublished
-                  ? 'Active immutable Route version'
-                  : 'Immutable version awaiting approval',
+                  ? context.l10n.createFormActiveImmutableRouteVersion
+                  : context.l10n.createFormImmutableVersionAwaitingApproval,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 10),
-            _TechnicalValue(label: 'Route ID', value: receipt.routeId),
-            _TechnicalValue(label: 'Version ID', value: receipt.versionId),
             _TechnicalValue(
-              label: 'Geometry hash',
+              label: context.l10n.createFormRouteId,
+              value: receipt.routeId,
+            ),
+            _TechnicalValue(
+              label: context.l10n.createFormVersionId,
+              value: receipt.versionId,
+            ),
+            _TechnicalValue(
+              label: context.l10n.createFormGeometryHash,
               value: receipt.geometryHash,
             ),
             if (receipt.requestId != null)
               _TechnicalValue(
-                label: 'Review request',
+                label: context.l10n.createFormReviewRequest,
                 value: receipt.requestId!,
               ),
             if (receipt.isPublished && (canManage || canArchive)) ...<Widget>[
@@ -234,13 +260,13 @@ class _RoutePublicationCard extends StatelessWidget {
                     FilledButton.tonalIcon(
                       onPressed: onCreateRevision,
                       icon: const Icon(Icons.edit_outlined),
-                      label: const Text('Create new version'),
+                      label: Text(context.l10n.createFormCreateNewVersion),
                     ),
                   if (canArchive)
                     OutlinedButton.icon(
                       onPressed: onArchive,
                       icon: const Icon(Icons.archive_outlined),
-                      label: const Text('Archive'),
+                      label: Text(context.l10n.createFormArchive),
                     ),
                 ],
               ),
@@ -313,27 +339,39 @@ class _PublishedDraftCard extends StatelessWidget {
               children: <Widget>[
                 _StatusChip(
                   icon: Icons.layers,
-                  label: createBlockConfigFor(draft.objectType).title,
+                  label: context.l10n.createObjectTypeName(
+                    draft.objectType.name,
+                  ),
                 ),
                 _StatusChip(
                   icon: Icons.verified_outlined,
-                  label: draft.publishStatus.name,
+                  label: createOptionText(context.l10n, draft.publishStatus),
                 ),
                 if (category != null)
-                  _StatusChip(icon: Icons.category, label: category.title),
+                  _StatusChip(
+                    icon: Icons.category,
+                    label: taxonomyLabel(context.l10n, category.id),
+                  ),
                 if (draft.subcategory.isNotEmpty)
                   _StatusChip(
                     icon: Icons.sell_outlined,
-                    label: createTaxonomyLabelForPath(
+                    label: taxonomyLabel(
+                      context.l10n,
                       '${draft.mainCategory}.${draft.subcategory}',
                     ),
                   ),
                 _StatusChip(
                   icon: Icons.payments_outlined,
                   label: draft.isFree
-                      ? 'Free'
-                      : '${draft.basePrice?.toStringAsFixed(0) ?? '0'} '
-                            '${draft.currency}',
+                      ? context.l10n.createFormFree
+                      : RechargeFormats.money(
+                          draft.basePrice ??
+                              Money(
+                                minorUnits: 0,
+                                currencyCode: draft.currency,
+                              ),
+                          Localizations.localeOf(context).languageCode,
+                        ),
                 ),
                 _StatusChip(icon: Icons.place_outlined, label: draft.city),
               ],
@@ -376,7 +414,7 @@ class _PublishedScenarioRouteCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Published route',
+                    context.l10n.createFormPublishedRoute,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w900,
@@ -384,7 +422,9 @@ class _PublishedScenarioRouteCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${routeContext.stepCategories.length} stops',
+                  context.l10n.createFormStops(
+                    routeContext.stepCategories.length,
+                  ),
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: colorScheme.primary,
                     fontWeight: FontWeight.w800,
@@ -394,7 +434,7 @@ class _PublishedScenarioRouteCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              routeContext.prompt,
+              routeContext.prompt ?? context.l10n.createFormPublishedRoute,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(
@@ -412,10 +452,13 @@ class _PublishedScenarioRouteCard extends StatelessWidget {
                   label: '${routeContext.durationMinutes} min',
                 ),
                 if (routeContext.isFree)
-                  const _StatusChip(icon: Icons.payments, label: 'Free'),
-                const _StatusChip(
+                  _StatusChip(
+                    icon: Icons.payments,
+                    label: context.l10n.createFormFree,
+                  ),
+                _StatusChip(
                   icon: Icons.directions_walk,
-                  label: 'Walking',
+                  label: context.l10n.createFormWalking,
                 ),
               ],
             ),
@@ -427,7 +470,7 @@ class _PublishedScenarioRouteCard extends StatelessWidget {
                   .map(
                     (String step) => _StatusChip(
                       icon: Icons.place_outlined,
-                      label: createTaxonomyLabelForPath(step),
+                      label: taxonomyLabel(context.l10n, step),
                     ),
                   )
                   .toList(growable: false),
@@ -439,7 +482,7 @@ class _PublishedScenarioRouteCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onEditRoute,
                     icon: const Icon(Icons.edit_location_alt),
-                    label: const Text('Edit route'),
+                    label: Text(context.l10n.createFormEditRoute),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -447,7 +490,7 @@ class _PublishedScenarioRouteCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onMapRoute,
                     icon: const Icon(Icons.map_outlined),
-                    label: const Text('Route map'),
+                    label: Text(context.l10n.createFormRouteMap),
                   ),
                 ),
               ],
@@ -492,7 +535,7 @@ class _NextActionsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              'Next steps',
+              context.l10n.createFormNextSteps,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
@@ -504,7 +547,7 @@ class _NextActionsCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: onHome,
                     icon: const Icon(Icons.home_outlined),
-                    label: const Text('Home'),
+                    label: Text(context.l10n.createFormHome),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -512,7 +555,7 @@ class _NextActionsCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onProfile,
                     icon: const Icon(Icons.person_outline),
-                    label: const Text('Profile'),
+                    label: Text(context.l10n.createFormProfile),
                   ),
                 ),
               ],
@@ -524,7 +567,7 @@ class _NextActionsCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onSearch,
                     icon: const Icon(Icons.search),
-                    label: const Text('Search similar'),
+                    label: Text(context.l10n.createFormSearchSimilar),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -532,7 +575,7 @@ class _NextActionsCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onMap,
                     icon: const Icon(Icons.map_outlined),
-                    label: const Text('Map area'),
+                    label: Text(context.l10n.createFormMapArea),
                   ),
                 ),
               ],
@@ -546,7 +589,7 @@ class _NextActionsCard extends StatelessWidget {
             if (draft == null) ...<Widget>[
               const SizedBox(height: 8),
               Text(
-                'Draft summary is unavailable in this session.',
+                context.l10n.createFormDraftSummaryUnavailableSession,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -613,7 +656,7 @@ class _PublishedScenarioRouteContext {
     final List<String> steps = _routeStepsFromDraft(draft);
     if (steps.isEmpty) return null;
     return _PublishedScenarioRouteContext(
-      prompt: draft.title.trim().isEmpty ? 'Published route' : draft.title,
+      prompt: draft.title.trim().isEmpty ? null : draft.title,
       mood: _scenarioMoodForDraft(draft),
       durationMinutes: _scenarioDurationForDraft(draft),
       isFree: draft.isFree,
@@ -621,7 +664,8 @@ class _PublishedScenarioRouteContext {
     );
   }
 
-  final String prompt;
+  /// The draft title; null shows the localized fallback.
+  final String? prompt;
   final String mood;
   final int durationMinutes;
   final bool isFree;
@@ -629,8 +673,13 @@ class _PublishedScenarioRouteContext {
 
   String get builderLocation {
     return Uri(
-      path: RouteNames.scenarioBuilder,
-      queryParameters: _routeParameters(includeMode: false),
+      path: RouteNames.create,
+      queryParameters: <String, String>{
+        ..._routeParameters(includeMode: false),
+        'source': 'published_route_seed',
+        'type': 'route',
+        'category': 'route',
+      },
     ).toString();
   }
 
@@ -643,12 +692,12 @@ class _PublishedScenarioRouteContext {
 
   Map<String, String> _routeParameters({required bool includeMode}) {
     return <String, String>{
-      if (includeMode) 'mode': 'scenario',
+      if (includeMode) 'mode': 'route',
       'mood': mood,
       'duration': durationMinutes.toString(),
       'free': isFree ? '1' : '0',
       'walking': '1',
-      'prompt': prompt,
+      'prompt': prompt ?? '',
       'steps': stepCategories.join(','),
     };
   }
@@ -682,11 +731,14 @@ String _discoverCategoryForDraft(String category) {
 }
 
 List<String> _routeStepsFromDraft(CreateDraftEntity draft) {
-  final String marker = 'Route steps: ';
+  final String marker = 'Route steps: '; // l10n-ignore: parses seed data
   final int markerIndex = draft.fullDescription.indexOf(marker);
   if (markerIndex >= 0) {
     final int start = markerIndex + marker.length;
-    final int end = draft.fullDescription.indexOf('. Review', start);
+    final int end = draft.fullDescription.indexOf(
+      '. Review', // l10n-ignore: seed marker
+      start,
+    );
     final String rawSteps = end > start
         ? draft.fullDescription.substring(start, end)
         : draft.fullDescription.substring(start);

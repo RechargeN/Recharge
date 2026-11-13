@@ -1,0 +1,141 @@
+import type {
+  ReferenceDataPort,
+  ReferenceResolution,
+} from '../application/ports/reference_data_port.js';
+import {
+  readLocalTaxonomy,
+  taxonomyPair,
+  taxonomyRevisionId,
+  type TaxonomyDataset,
+  type TaxonomyRead,
+} from '../../reference_data/infrastructure/local_taxonomy_reader.js';
+import { emulatorRentalPolicy } from './emulator_rental_policy.js';
+import {
+  emulatorPlaceTaxonomyRevisionId,
+  placeRequiredCriteria,
+  placeSubcategoryApplies,
+} from './emulator_place_taxonomy.js';
+import { findPeoplePolicy } from '../../../shared/find_people_policy.js';
+
+/**
+ * L4.9.1: `lv-LV`, `en`, `ru` are canonical; `lv` stays accepted for older clients
+ * and saved revisions, which are never rewritten.
+ */
+export const contentLocaleIds: readonly string[] = ['lv-LV', 'en', 'ru', 'lv'];
+
+/** Local demo-recharge composition: synthetic LV market/localization and Place fixture;
+ * Activity and Collection use the deterministic immutable BCK-20 artifact derived
+ * from the accepted Category System v1.4.3 semantic source. Rental (D3.3) checks
+ * its pairs against the same BCK-20 revision and answers a TEST-ONLY policy
+ * (`emulator_rental_policy.ts`, not an accepted policy). No production MarketConfig.
+ */
+export const emulatorReferenceEvidence =
+  'synthetic LV market/localization and Place fixture; Activity and Collection taxonomy derived from accepted Category System v1.4.3';
+
+/**
+ * D3.4 §2.4: a Collection may be filed under any existing pair of the pinned
+ * taxonomy, as the mobile taxonomy makes Collection applicable everywhere
+ * (`effectiveApplicableTypes`). The artifact does not encode that implicit
+ * rule, so here only the existence of the pair decides; an unknown pair does
+ * not apply, and a missing artifact cannot be answered (fail closed).
+ */
+export function collectionSubcategoryApplies(
+  dataset: TaxonomyDataset | undefined,
+  categoryId: string,
+  subcategoryId: string,
+): boolean | undefined {
+  return dataset === undefined
+    ? undefined
+    : taxonomyPair(dataset, categoryId, subcategoryId) !== undefined;
+}
+
+export class EmulatorSyntheticReferenceData implements ReferenceDataPort {
+  readTaxonomyRevision(input: { readonly taxonomyRevisionId: string }): Promise<TaxonomyRead> {
+    return Promise.resolve(readLocalTaxonomy(input.taxonomyRevisionId));
+  }
+  resolve(input: {
+    readonly marketId: string;
+    readonly typeId?: string;
+  }): Promise<ReferenceResolution> {
+    if (input.marketId !== 'LV') return Promise.resolve({ ok: false, code: 'market_disabled' });
+    const place = input.typeId === 'place';
+    const activity = input.typeId === 'activity';
+    const rental = input.typeId === 'rental';
+    const collection = input.typeId === 'collection';
+    const session = input.typeId === 'session';
+    const classWorkshop = input.typeId === 'class_workshop';
+    const findPeople = input.typeId === 'find_people';
+    const route = input.typeId === 'route';
+    const taxonomy = readLocalTaxonomy(taxonomyRevisionId);
+    if (
+      (activity || rental || collection || session || classWorkshop || findPeople || route) &&
+      !taxonomy.ok
+    )
+      return Promise.resolve({ ok: false, code: 'policy_unavailable' });
+    const dataset = taxonomy.ok ? taxonomy.dataset : undefined;
+    return Promise.resolve({
+      ok: true,
+      revisions: {
+        marketConfigRevisionId: 'test-only-mc-lv-1',
+        taxonomyRevisionId: place
+          ? emulatorPlaceTaxonomyRevisionId
+          : activity || rental || collection || session || classWorkshop || findPeople || route
+            ? taxonomyRevisionId
+            : 'test-only-tx-1',
+        localizationRevisionId: 'test-only-loc-1',
+      },
+      market: { currencyCode: 'EUR', timezoneId: 'Europe/Riga' },
+      lookups: {
+        ...(session ? { sessionProjectionWindowDays: () => 30 } : {}),
+        // D3.7 FP-OD-02: the owner-decided ~1 km public cell, only for Find People.
+        ...(findPeople
+          ? {
+              findPeoplePublicGeo: () => ({
+                precisionMeters: findPeoplePolicy.publicGeoPrecisionMeters,
+                policyRevision: findPeoplePolicy.publicGeoPolicyRevision,
+              }),
+            }
+          : {}),
+        supportsLocale: (locale: string) => contentLocaleIds.includes(locale),
+        subcategoryApplies: (typeId: string, categoryId: string, subcategoryId: string) =>
+          typeId === 'place'
+            ? placeSubcategoryApplies(categoryId, subcategoryId)
+            : typeId === 'activity'
+              ? dataset === undefined
+                ? undefined
+                : (taxonomyPair(dataset, categoryId, subcategoryId)?.applicableTypes.includes(
+                    'activity',
+                  ) ?? false)
+              : typeId === 'session' || typeId === 'class_workshop' || typeId === 'route'
+                ? dataset === undefined
+                  ? undefined
+                  : (taxonomyPair(dataset, categoryId, subcategoryId)?.applicableTypes.includes(
+                      typeId,
+                    ) ?? false)
+                : typeId === 'collection' || typeId === 'find_people'
+                  ? // Find People accepts any existing pair (spec v3.1 §3.3), like Collection.
+                    collectionSubcategoryApplies(dataset, categoryId, subcategoryId)
+                  : true,
+        requiredCriteria: (typeId: string, categoryId: string, subcategoryId: string) => {
+          if (typeId === 'place') return placeRequiredCriteria(categoryId, subcategoryId);
+          // D3.6 CLS-OD-06: Class required criteria block like Activity's.
+          if (typeId !== 'activity' && typeId !== 'class_workshop') return [];
+          if (dataset === undefined) return undefined;
+          const pair = taxonomyPair(dataset, categoryId, subcategoryId);
+          if (!pair?.applicableTypes.includes(typeId)) return [];
+          return dataset.profiles.find((profile) => profile.id === pair.profileId)
+            ?.requiredFieldIds;
+        },
+        // D3.3: only for Rental; every other type keeps having no Rental policy.
+        ...(rental && dataset !== undefined
+          ? {
+              rentalPolicy: (categoryId: string, subcategoryId: string) =>
+                emulatorRentalPolicy(dataset, categoryId, subcategoryId),
+            }
+          : {}),
+        pointInServiceArea: (latitude: number, longitude: number) =>
+          latitude > 55.6 && latitude < 58.1 && longitude > 20.9 && longitude < 28.3,
+      },
+    } as ReferenceResolution);
+  }
+}

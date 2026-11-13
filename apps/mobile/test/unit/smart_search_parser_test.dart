@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/application/smart_search_parser.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   test('parses free yoga tonight near radius', () {
@@ -19,11 +20,15 @@ void main() {
   test('parses museum today budget', () {
     final SmartSearchParseResult result = parseSmartSearch(
       'museum today under 10',
+      currencyCode: 'EUR',
     );
 
     expect(result.queryText, 'museum');
     expect(result.selectedCategoryIds, contains('art_culture_museums'));
-    expect(result.budgetMax, 10);
+    expect(
+      result.budgetMax,
+      const Money(minorUnits: 1000, currencyCode: 'EUR'),
+    );
     expect(result.datePreset, SmartSearchDatePreset.today);
   });
 

@@ -3,6 +3,7 @@ import '../../../../shared/primitives/geo/geo_distance.dart';
 import '../../../../shared/primitives/geo/geo_point.dart';
 import '../../../../shared/primitives/geo/geometry_encoding.dart';
 import '../../../../shared/primitives/geo/geometry_hash.dart';
+import 'publisher_ref.dart';
 import 'route_quality_data.dart';
 
 enum RouteCreationMethod {
@@ -180,7 +181,7 @@ class RouteGeometryDraft {
       throw ArgumentError.value(
         encodingPolicy,
         'encodingPolicy',
-        'Encoding policy is invalid.',
+        'Encoding policy is invalid.', // l10n-ignore: developer error, never displayed
       );
     }
 
@@ -493,9 +494,7 @@ class RouteWaypointDraft {
     List<String> photoIds = const <String>[],
     this.verifiedAtUtc,
     this.access,
-  }) : technicalAttributeIds = List<String>.unmodifiable(
-         technicalAttributeIds,
-       ),
+  }) : technicalAttributeIds = List<String>.unmodifiable(technicalAttributeIds),
        photoIds = List<String>.unmodifiable(photoIds);
 
   final String id;
@@ -719,6 +718,7 @@ class RouteDraftData {
         const <RouteAsyncOperationDraft>[],
     Map<String, Object?> unknownFields = const <String, Object?>{},
     this.turningAnchorId,
+    this.publisherRef,
   }) : anchors = List<RouteAnchorDraft>.unmodifiable(anchors),
        segments = List<RouteSegmentDraft>.unmodifiable(segments),
        waypoints = List<RouteWaypointDraft>.unmodifiable(waypoints),
@@ -745,6 +745,11 @@ class RouteDraftData {
   final RouteQualityDraft? quality;
   final List<RouteAsyncOperationDraft> operations;
   final Map<String, Object?> unknownFields;
+
+  /// IDP-04A / RTE-PUB-01 RP-04: the publisher captured once from the active
+  /// workspace when the Route block is created. Older drafts have none and
+  /// publish under the personal profile chosen at publication time.
+  final PublisherRef? publisherRef;
 
   List<RouteSegmentDraft> get orderedSegments {
     final ordered = List<RouteSegmentDraft>.of(segments)
@@ -822,6 +827,7 @@ class RouteDraftData {
     bool clearQuality = false,
     Iterable<RouteAsyncOperationDraft>? operations,
     Map<String, Object?>? unknownFields,
+    PublisherRef? publisherRef,
   }) => RouteDraftData(
     schemaVersion: schemaVersion ?? this.schemaVersion,
     revision: revision ?? this.revision,
@@ -843,6 +849,7 @@ class RouteDraftData {
     quality: clearQuality ? null : (quality ?? this.quality),
     operations: operations ?? this.operations,
     unknownFields: unknownFields ?? this.unknownFields,
+    publisherRef: publisherRef ?? this.publisherRef,
   );
 
   RouteDraftData replaceLocalIds(String Function() generateId) {

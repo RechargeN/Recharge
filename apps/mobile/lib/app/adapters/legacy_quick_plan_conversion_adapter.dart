@@ -1,4 +1,5 @@
 import '../../features/create/domain/entities/quick_plan_conversion.dart';
+import '../../features/create/domain/entities/scenario_item_draft.dart';
 import '../../features/scenarios/domain/entities/scenario_draft_entity.dart';
 
 class LegacyQuickPlanConversionAdapter {
@@ -15,7 +16,11 @@ class LegacyQuickPlanConversionAdapter {
       id: draft.id,
       revision: draft.revision,
       ownerId: ownerId,
-      title: title.trim().isEmpty ? 'Quick Plan' : title.trim(),
+      title: title.trim().isEmpty
+          // The product term is the default title of the author's new
+          // Scenario, which the author edits.
+          ? 'Quick Plan' // l10n-ignore: product term as a default title
+          : title.trim(),
       timezoneId: timezoneId,
       currencyCode: currencyCode,
       stops: draft.steps
@@ -29,14 +34,25 @@ class LegacyQuickPlanConversionAdapter {
               latitude: step.latitude,
               longitude: step.longitude,
               isFree: step.isFree,
-              priceMinorUnits: step.isFree
-                  ? 0
-                  : (step.priceAmount * 100).round(),
+              priceMinorUnits: step.isFree ? 0 : step.priceAmount.minorUnits,
               available: true,
+              distanceKm: step.distanceKm,
+              sourceObjectId: step.sourceObjectId,
+              sourceObjectType: _catalogObjectType(step.sourceObjectType),
             ),
           )
           .toList(growable: false),
       readableByUserIds: <String>{ownerId},
     );
+  }
+
+  static ScenarioCatalogObjectType? _catalogObjectType(String? value) {
+    final String normalized = value?.trim() ?? '';
+    if (normalized.isEmpty) return null;
+    for (final ScenarioCatalogObjectType type
+        in ScenarioCatalogObjectType.values) {
+      if (type.name == normalized) return type;
+    }
+    return null;
   }
 }

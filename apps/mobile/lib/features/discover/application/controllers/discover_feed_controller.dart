@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/telemetry/analytics_service.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/geo_point.dart';
@@ -29,6 +30,7 @@ class DiscoverFeedController extends ChangeNotifier {
       timezoneId: 'UTC',
       originLat: 0,
       originLng: 0,
+      currencyCode: 'XXX',
     ),
   }) : _getDiscoverFeedUseCase = getDiscoverFeedUseCase,
        _discoverPreferencesRepository = discoverPreferencesRepository,
@@ -48,6 +50,7 @@ class DiscoverFeedController extends ChangeNotifier {
   final DiscoverRuntimeDefaults _runtimeDefaults;
 
   String get marketTimezoneId => _runtimeDefaults.timezoneId;
+  String get marketCurrencyCode => _runtimeDefaults.currencyCode;
 
   DiscoverFeedState _state;
   DiscoverFeedState get state => _state;
@@ -64,7 +67,7 @@ class DiscoverFeedController extends ChangeNotifier {
     String? queryText,
     int? peopleCount,
     bool clearPeopleCount = false,
-    double? budgetMax,
+    Money? budgetMax,
     bool clearBudgetMax = false,
     DateTime? dateFrom,
     bool clearDateFrom = false,
@@ -112,7 +115,7 @@ class DiscoverFeedController extends ChangeNotifier {
     );
   }
 
-  String? stageTimeWindowSelection({
+  TimeWindowIssue? stageTimeWindowSelection({
     required TimeWindowMode mode,
     DateTime? startLocal,
     DateTime? endLocal,
@@ -124,7 +127,7 @@ class DiscoverFeedController extends ChangeNotifier {
     required bool includeReturnTrip,
   }) {
     final BuildTimeWindowUseCase? builder = _buildTimeWindow;
-    if (builder == null) return 'Time-window service is unavailable';
+    if (builder == null) return TimeWindowIssue.serviceUnavailable;
     try {
       final TimeWindow timeWindow = builder(
         mode: mode,
@@ -159,9 +162,9 @@ class DiscoverFeedController extends ChangeNotifier {
       );
       return null;
     } on TimeWindowValidationException catch (error) {
-      return error.message;
-    } on ArgumentError catch (error) {
-      return error.message?.toString() ?? 'Invalid travel context';
+      return error.issue;
+    } on ArgumentError {
+      return TimeWindowIssue.invalidTravelContext;
     }
   }
 
@@ -291,8 +294,7 @@ class DiscoverFeedController extends ChangeNotifier {
           _state.copyWith(
             status: DiscoverFeedStatus.empty,
             items: const <DiscoverItemEntity>[],
-            message:
-                'Ничего не найдено в этой зоне. Попробуйте увеличить радиус или снять ограничения.',
+            message: DiscoverFeedNotice.emptyArea,
             resultCount: 0,
             clearSelectedItem: true,
           ),
@@ -347,7 +349,7 @@ class DiscoverFeedController extends ChangeNotifier {
         _state.copyWith(
           status: DiscoverFeedStatus.error,
           items: const <DiscoverItemEntity>[],
-          message: 'Не удалось загрузить данные. Попробуйте снова.',
+          message: DiscoverFeedNotice.loadFailed,
           resultCount: 0,
           clearSelectedItem: true,
         ),
@@ -414,8 +416,8 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> setBudgetRange({
-    required double? min,
-    required double? max,
+    required Money? min,
+    required Money? max,
   }) async {
     await _applyGlobalQueryUpdate(
       _state.appliedQuery.copyWith(
@@ -550,9 +552,9 @@ class DiscoverFeedController extends ChangeNotifier {
     List<String>? selectedCategoryIds,
     List<String>? selectedSubcategoryIds,
     bool? freeOnly,
-    double? budgetMin,
+    Money? budgetMin,
     bool clearBudgetMin = false,
-    double? budgetMax,
+    Money? budgetMax,
     bool clearBudgetMax = false,
     DateTime? dateFrom,
     bool clearDateFrom = false,
@@ -725,16 +727,11 @@ class DiscoverFeedController extends ChangeNotifier {
     );
   }
 
-  String _messageForErrorCode(String code) {
-    switch (code) {
-      case 'DISCOVER_NOT_FOUND':
-        return 'Данные недоступны';
-      case 'NETWORK_UNAVAILABLE':
-        return 'Нет подключения к интернету';
-      default:
-        return 'Не удалось загрузить ленту. Попробуйте снова.';
-    }
-  }
+  DiscoverFeedNotice _messageForErrorCode(String code) => switch (code) {
+    'DISCOVER_NOT_FOUND' => DiscoverFeedNotice.dataUnavailable,
+    'NETWORK_UNAVAILABLE' => DiscoverFeedNotice.offline,
+    _ => DiscoverFeedNotice.loadFailed,
+  };
 
   String _errorGroup(String code) {
     if (code.contains('NETWORK')) return 'network';
@@ -848,24 +845,33 @@ String _savedSearchTitleFor(DiscoverQuery query) {
   final String text = query.queryText.trim();
   if (text.isNotEmpty) return _sentenceCase(text);
   if (query.selectedCategoryIds.isNotEmpty) {
-    return '${_categoryLabel(query.selectedCategoryIds.first)} nearby';
+    return '${_categoryLabel(query.selectedCategoryIds.first)} nearby'; // l10n-ignore: persisted saved-search field; the UI builds text from the query
   }
-  if (query.freeOnly) return 'Free nearby';
-  return 'Nearby recharge';
+  if (query.freeOnly) {
+    return 'Free nearby'; // l10n-ignore: persisted saved-search field; the UI builds text from the query
+  }
+  return 'Nearby recharge'; // l10n-ignore: persisted saved-search field; the UI builds text from the query
 }
 
 String _savedSearchSubtitleFor(DiscoverQuery query) {
   final List<String> parts = <String>[
     if (query.selectedCategoryIds.isNotEmpty)
       _categoryLabel(query.selectedCategoryIds.first),
-    if (query.freeOnly) 'free',
-    if (query.budgetMax != null) 'up to ${query.budgetMax!.toStringAsFixed(0)}',
-    if (query.dateFrom != null || query.dateTo != null) 'date set',
+    if (query.freeOnly)
+      'free', // l10n-ignore: persisted saved-search field; the UI builds text from the query
+    if (query.budgetMax != null)
+      'up to ${query.budgetMax!.toStringAsFixed(0)}', // l10n-ignore: persisted saved-search field; the UI builds text from the query
+    if (query.dateFrom != null || query.dateTo != null)
+      'date set', // l10n-ignore: persisted saved-search field; the UI builds text from the query
     query.unlimitedRadius
-        ? 'any area'
-        : '${(query.radiusMeters / 1000).round()} km',
+        ? 'any area' // l10n-ignore: persisted saved-search field; the UI builds text from the query
+        : '${(query.radiusMeters / 1000).round()} km', // l10n-ignore: persisted saved-search field; the UI builds text from the query
   ];
-  return parts.isEmpty ? 'Nearby activities' : parts.join(' · ');
+  return parts.isEmpty
+      ? 'Nearby activities' // l10n-ignore: persisted saved-search field; the UI builds text from the query
+      : parts.join(
+          ' · ',
+        ); // l10n-ignore: persisted saved-search field; the UI builds text from the query
 }
 
 String _sentenceCase(String value) {

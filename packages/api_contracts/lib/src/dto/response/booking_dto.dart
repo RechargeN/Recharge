@@ -6,6 +6,7 @@ class BookingDto {
     required this.schemaVersion,
     required this.revision,
     required this.userId,
+    required this.marketId,
     required this.eventId,
     required this.occurrenceId,
     required this.admissionMode,
@@ -21,13 +22,16 @@ class BookingDto {
     List<Map<String, Object?>> namedGuests = const [],
     this.eligibilitySnapshotRef,
     this.activeHoldId,
+    this.cancellationDeadlineSnapshot,
+    this.reconfirmationRequiredForRevision,
+    this.reconfirmationDeadlineUtc,
     this.terminalReason,
     this.confirmedAt,
     this.cancelledAt,
     this.expiredAt,
   }) : namedGuests = List<Map<String, Object?>>.unmodifiable(
-          namedGuests.map((guest) => freezeJsonMap(guest, 'namedGuests')),
-        ) {
+         namedGuests.map((guest) => freezeJsonMap(guest, 'namedGuests')),
+       ) {
     if (schemaVersion != bookingContractSchemaVersion) {
       throw BookingContractFormatException(
         'Unsupported Booking schemaVersion: $schemaVersion',
@@ -43,6 +47,17 @@ class BookingDto {
         'Only waitlisted Booking may reference an active hold',
       );
     }
+    final requiresReconfirmationAuthority =
+        reconfirmationState == BookingReconfirmationState.required ||
+        reconfirmationState == BookingReconfirmationState.confirmed;
+    if (requiresReconfirmationAuthority !=
+            (reconfirmationRequiredForRevision != null) ||
+        requiresReconfirmationAuthority !=
+            (reconfirmationDeadlineUtc != null)) {
+      throw const BookingContractFormatException(
+        'Required or confirmed reconfirmation must carry revision and deadline',
+      );
+    }
   }
 
   factory BookingDto.fromJson(Map<String, Object?> json) {
@@ -51,6 +66,7 @@ class BookingDto {
       'schemaVersion',
       'revision',
       'userId',
+      'marketId',
       'eventId',
       'occurrenceId',
       'admissionMode',
@@ -69,6 +85,9 @@ class BookingDto {
       'namedGuests',
       'eligibilitySnapshotRef',
       'activeHoldId',
+      'cancellationDeadlineSnapshot',
+      'reconfirmationRequiredForRevision',
+      'reconfirmationDeadlineUtc',
       'terminalReason',
       'confirmedAt',
       'cancelledAt',
@@ -100,11 +119,9 @@ class BookingDto {
       ),
       revision: requireNonNegativeInt(json['revision'], 'revision'),
       userId: requireNonBlankString(json['userId'], 'userId'),
+      marketId: _requireMarketId(json['marketId']),
       eventId: requireNonBlankString(json['eventId'], 'eventId'),
-      occurrenceId: requireNonBlankString(
-        json['occurrenceId'],
-        'occurrenceId',
-      ),
+      occurrenceId: requireNonBlankString(json['occurrenceId'], 'occurrenceId'),
       inventoryPoolId: optionalNonBlankString(
         json['inventoryPoolId'],
         'inventoryPoolId',
@@ -130,11 +147,7 @@ class BookingDto {
         BookingConfirmationMode.values,
         field: 'confirmationMode',
       ),
-      state: parseWireEnum(
-        json['state'],
-        BookingState.values,
-        field: 'state',
-      ),
+      state: parseWireEnum(json['state'], BookingState.values, field: 'state'),
       participantUnits: requirePositiveInt(
         json['participantUnits'],
         'participantUnits',
@@ -148,10 +161,25 @@ class BookingDto {
         json['activeHoldId'],
         'activeHoldId',
       ),
+      cancellationDeadlineSnapshot: optionalUtcTimestamp(
+        json['cancellationDeadlineSnapshot'],
+        'cancellationDeadlineSnapshot',
+      ),
       reconfirmationState: parseWireEnum(
         json['reconfirmationState'],
         BookingReconfirmationState.values,
         field: 'reconfirmationState',
+      ),
+      reconfirmationRequiredForRevision:
+          json['reconfirmationRequiredForRevision'] == null
+          ? null
+          : requirePositiveInt(
+              json['reconfirmationRequiredForRevision'],
+              'reconfirmationRequiredForRevision',
+            ),
+      reconfirmationDeadlineUtc: optionalUtcTimestamp(
+        json['reconfirmationDeadlineUtc'],
+        'reconfirmationDeadlineUtc',
       ),
       terminalReason: json['terminalReason'] == null
           ? null
@@ -172,6 +200,7 @@ class BookingDto {
   final int schemaVersion;
   final int revision;
   final String userId;
+  final String marketId;
   final String eventId;
   final String occurrenceId;
   final String? inventoryPoolId;
@@ -184,7 +213,10 @@ class BookingDto {
   final List<Map<String, Object?>> namedGuests;
   final String? eligibilitySnapshotRef;
   final String? activeHoldId;
+  final DateTime? cancellationDeadlineSnapshot;
   final BookingReconfirmationState reconfirmationState;
+  final int? reconfirmationRequiredForRevision;
+  final DateTime? reconfirmationDeadlineUtc;
   final BookingTerminalReason? terminalReason;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -193,30 +225,47 @@ class BookingDto {
   final DateTime? expiredAt;
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'id': id,
-        'schemaVersion': schemaVersion,
-        'revision': revision,
-        'userId': userId,
-        'eventId': eventId,
-        'occurrenceId': occurrenceId,
-        if (inventoryPoolId != null) 'inventoryPoolId': inventoryPoolId,
-        if (channel != null) 'channel': channel!.name,
-        if (auxiliaryTrackId != null) 'auxiliaryTrackId': auxiliaryTrackId,
-        'admissionMode': admissionMode.name,
-        'confirmationMode': confirmationMode.name,
-        'state': state.name,
-        'participantUnits': participantUnits,
-        if (namedGuests.isNotEmpty)
-          'namedGuests': namedGuests.map(thawJsonMap).toList(),
-        if (eligibilitySnapshotRef != null)
-          'eligibilitySnapshotRef': eligibilitySnapshotRef,
-        if (activeHoldId != null) 'activeHoldId': activeHoldId,
-        'reconfirmationState': reconfirmationState.name,
-        if (terminalReason != null) 'terminalReason': terminalReason!.name,
-        'createdAt': utcTimestamp(createdAt),
-        'updatedAt': utcTimestamp(updatedAt),
-        if (confirmedAt != null) 'confirmedAt': utcTimestamp(confirmedAt!),
-        if (cancelledAt != null) 'cancelledAt': utcTimestamp(cancelledAt!),
-        if (expiredAt != null) 'expiredAt': utcTimestamp(expiredAt!),
-      };
+    'id': id,
+    'schemaVersion': schemaVersion,
+    'revision': revision,
+    'userId': userId,
+    'marketId': marketId,
+    'eventId': eventId,
+    'occurrenceId': occurrenceId,
+    if (inventoryPoolId != null) 'inventoryPoolId': inventoryPoolId,
+    if (channel != null) 'channel': channel!.name,
+    if (auxiliaryTrackId != null) 'auxiliaryTrackId': auxiliaryTrackId,
+    'admissionMode': admissionMode.name,
+    'confirmationMode': confirmationMode.name,
+    'state': state.name,
+    'participantUnits': participantUnits,
+    if (namedGuests.isNotEmpty)
+      'namedGuests': namedGuests.map(thawJsonMap).toList(),
+    if (eligibilitySnapshotRef != null)
+      'eligibilitySnapshotRef': eligibilitySnapshotRef,
+    if (activeHoldId != null) 'activeHoldId': activeHoldId,
+    if (cancellationDeadlineSnapshot != null)
+      'cancellationDeadlineSnapshot': utcTimestamp(
+        cancellationDeadlineSnapshot!,
+      ),
+    'reconfirmationState': reconfirmationState.name,
+    if (reconfirmationRequiredForRevision != null)
+      'reconfirmationRequiredForRevision': reconfirmationRequiredForRevision,
+    if (reconfirmationDeadlineUtc != null)
+      'reconfirmationDeadlineUtc': utcTimestamp(reconfirmationDeadlineUtc!),
+    if (terminalReason != null) 'terminalReason': terminalReason!.name,
+    'createdAt': utcTimestamp(createdAt),
+    'updatedAt': utcTimestamp(updatedAt),
+    if (confirmedAt != null) 'confirmedAt': utcTimestamp(confirmedAt!),
+    if (cancelledAt != null) 'cancelledAt': utcTimestamp(cancelledAt!),
+    if (expiredAt != null) 'expiredAt': utcTimestamp(expiredAt!),
+  };
+}
+
+String _requireMarketId(Object? raw) {
+  final value = requireNonBlankString(raw, 'marketId');
+  if (value != 'LV' && value != 'EE' && value != 'LT') {
+    throw BookingContractFormatException('Unsupported marketId: $value');
+  }
+  return value;
 }

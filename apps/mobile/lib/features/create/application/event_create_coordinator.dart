@@ -6,6 +6,7 @@ import '../domain/entities/event_availability_projection.dart';
 import '../domain/entities/event_classification.dart';
 import '../domain/entities/event_inventory.dart';
 import '../domain/entities/event_validation_issue.dart';
+import '../../../shared/primitives/money/money.dart';
 import '../domain/repositories/event_inventory_snapshot_repository.dart';
 import '../domain/repositories/event_timezone_repository.dart';
 import '../domain/usecases/materialize_event_schedule_usecase.dart';
@@ -83,32 +84,39 @@ class EventCreateCoordinator {
             ).where((issue) => _admissionFieldIds.contains(issue.fieldId)),
           ]
         : const <EventValidationIssue>[];
-    final List<EventAccessCapabilityDisclosure>
-    disclosures = <EventAccessCapabilityDisclosure>[
-      const EventAccessCapabilityDisclosure(
-        code: EventAccessDisclosureCode.localConfiguration,
-        message:
-            'Local configuration only. No booking or inventory is reserved.',
-      ),
-      if (admission?.registrationMode == EventRegistrationMode.internal)
-        const EventAccessCapabilityDisclosure(
-          code: EventAccessDisclosureCode.internalLifecycleUnavailable,
-          message: 'Internal registration is not active until ECL-03.',
-          blocking: true,
-        ),
-      if (admission?.confirmationMode == ConfirmationMode.providerManaged)
-        const EventAccessCapabilityDisclosure(
-          code: EventAccessDisclosureCode.providerUnavailable,
-          message: 'Provider-managed confirmation is not connected.',
-          blocking: true,
-        ),
-      if (admission?.waitlistPolicy?.enabled == true)
-        const EventAccessCapabilityDisclosure(
-          code: EventAccessDisclosureCode.waitlistPreviewOnly,
-          message: 'Waitlist is configuration-only; no queue is running.',
-          blocking: true,
-        ),
-    ];
+    final List<EventAccessCapabilityDisclosure> disclosures =
+        <EventAccessCapabilityDisclosure>[
+          const EventAccessCapabilityDisclosure(
+            code: EventAccessDisclosureCode.localConfiguration,
+            topic: EventAccessDisclosureTopic.localConfiguration,
+          ),
+          if (admission?.registrationMode == EventRegistrationMode.internal &&
+              !_validateDraft.accessReadiness.internalRegistration)
+            const EventAccessCapabilityDisclosure(
+              code: EventAccessDisclosureCode.internalLifecycleUnavailable,
+              topic: EventAccessDisclosureTopic.internalNotActive,
+              blocking: true,
+            ),
+          if (admission?.registrationMode == EventRegistrationMode.internal &&
+              _validateDraft.accessReadiness.internalRegistration)
+            const EventAccessCapabilityDisclosure(
+              code: EventAccessDisclosureCode.localConfiguration,
+              topic: EventAccessDisclosureTopic.internalLocalStand,
+            ),
+          if (admission?.confirmationMode == ConfirmationMode.providerManaged)
+            const EventAccessCapabilityDisclosure(
+              code: EventAccessDisclosureCode.providerUnavailable,
+              topic:
+                  EventAccessDisclosureTopic.providerConfirmationNotConnected,
+              blocking: true,
+            ),
+          if (admission?.waitlistPolicy?.enabled == true)
+            const EventAccessCapabilityDisclosure(
+              code: EventAccessDisclosureCode.waitlistPreviewOnly,
+              topic: EventAccessDisclosureTopic.waitlistConfigurationOnly,
+              blocking: true,
+            ),
+        ];
     return EventAdmissionSectionState(
       enabled: enabled,
       admission: admission,
@@ -143,12 +151,12 @@ class EventCreateCoordinator {
         <EventAccessCapabilityDisclosure>[
           const EventAccessCapabilityDisclosure(
             code: EventAccessDisclosureCode.localConfiguration,
-            message: 'Capacity is configuration, not a live remaining balance.',
+            topic: EventAccessDisclosureTopic.capacityIsConfiguration,
           ),
           if (inventory?.authority == InventoryAuthority.externalProvider)
             const EventAccessCapabilityDisclosure(
               code: EventAccessDisclosureCode.providerUnavailable,
-              message: 'External inventory has no verified provider source.',
+              topic: EventAccessDisclosureTopic.externalInventoryUnverified,
               blocking: true,
             ),
           if (inventory?.primaryShape == InventoryShape.assignedSeating ||
@@ -158,7 +166,7 @@ class EventCreateCoordinator {
                   false))
             const EventAccessCapabilityDisclosure(
               code: EventAccessDisclosureCode.assignedSeatingUnavailable,
-              message: 'Assigned seating requires an authoritative hold API.',
+              topic: EventAccessDisclosureTopic.assignedSeatingUnavailable,
               blocking: true,
             ),
         ];
@@ -328,7 +336,10 @@ class EventCreateCoordinator {
       isFree: isFree,
       basePrice: normalized.price == null
           ? null
-          : normalized.price!.amountMinor / 100,
+          : Money(
+              minorUnits: normalized.price!.amountMinor,
+              currencyCode: normalized.price!.currencyCode,
+            ),
       clearBasePrice: normalized.price == null,
       currency: normalized.currencyCode,
       pricingModel: normalized.pricingMode.name,

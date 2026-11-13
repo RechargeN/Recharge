@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/media/v1/media_delivery.schema.json",
+  "title": "D2 Emulator-only delivery request (MEDIA_D2_LATE_RESTRICTION_AMENDMENT.md §4)",
+  "description": "Bytes of one public variant of an asset that the current public revision of a Content attaches. No URL, handle or cache contract exists in v1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "contentId",
+    "assetId",
+    "profile"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "contentId": {
+      "$ref": "media_common.schema.json#/$defs/entityId"
+    },
+    "assetId": {
+      "$ref": "media_common.schema.json#/$defs/entityId"
+    },
+    "profile": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,31}$"
+    }
+  }
+}

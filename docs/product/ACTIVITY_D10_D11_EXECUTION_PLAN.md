@@ -1,0 +1,23 @@
+# Activity D10/D11 — bounded file plan
+
+Date: 2026-10-12. Status: Owner-approved bounded file plan (2026-10-12). Owner conditions: baseline thematic local commits before D11; D10 only after shared state/ports/process stop verification; repeat C3/D3.1/D3.2 Emulator after helper extraction; no push/merge. Current target is C:/Users/User/.claude/worktrees/recharge-d3-2, detached HEAD b1e678a23a4db584e496a9d44593fbcf86c45dc0, 134 pre-existing modified/untracked paths. Preserve all prior work. D3.9 verified source fingerprint a10b8df9a266a68a4fd7b7759cfb47a4d3620fac0eeea0dee1357af1f2eb8b04.
+
+## D10: fill only missing real Activity photo evidence
+
+- apps/backend/functions/test/emulator/content_place_media_delivery.test.ts: reuse its existing four sequential D1/D2 delivery cases with an explicit Place/Activity test selector; Place remains the default. No new common Media suite or runtime change. Verify real WebP/hash/no EXIF, other photo still available, immediate refusal before Content catches up, refusal after lift before/after reconciliation, explicit publisher Activate restores bytes.
+- apps/backend/functions/test/support/content_activity_world.ts: additive test-only real Media/images injection matching the existing Place world; default fixture/composition unchanged.
+- apps/backend/scripts/stand-d3-1-gate.mjs: add bounded --activity-delivery-only --yes invocation of that same delivery flow, compile before tools/Emulators, retain verified tool stop, strict four-pass/no-skip/nonzero-error gate and logs; original Place invocation preserved. Do not fetch/reinstall tools silently if the existing installation is unavailable.
+- docs/evidence/backend/d3/D10_ACTIVITY_MEDIA_D2_2026-10-12.md: exact revision, real environment/tool mode, W1-W6 mapping to existing definitions/evidence, missing applicable cases only, explicit F2a/device/Linux/cloud limits. No runtime fix unless a demonstrated defect requires one.
+
+## D11: small stable extractions, in this order
+
+1. New apps/mobile/lib/features/create/data/publication_journal_file.dart: only JSON-list file IO, format-failure fallback, bounded atomic write-then-rename. Existing typed file_place_publication_journal.dart and file_activity_publication_journal.dart keep their public classes/interfaces, codecs, account/publisher matching, file paths and record layouts. No migration or unified entity.
+2. New apps/mobile/lib/features/create/application/publication_media_type.dart: exact shared declared media-type helper. Existing place_publication_controller.dart and activity_publication_controller.dart call it; keep their mappers, retry/journal commands, failure handling, submit/publish/Activate/edit lifecycle separate.
+3. apps/backend/functions/test/support/content_event_world.ts: reuse existing actor/upload support, extracting only the identical publishing-actor Session/Auth setup used by content_place_world.ts and content_activity_world.ts. Defaults, labels, enabled types and real-media injection remain explicit per world. No shared publication lifecycle.
+4. Gateway is already shared in functions_event_publication_gateway.dart with an explicit typeId, so no additional gateway abstraction. Panel comparison found material Activity feedback/edit/Activate differences; keep place_publication_panel.dart and activity_publication_panel.dart and their type-specific sections separate. Existing loopback guard is already shared; preserve type-specific flags/error messages.
+
+Tests: existing place_publication_controller_test.dart, activity_publication_controller_test.dart, content_publication_gateway_type_test.dart, both publication test-entry guard suites and existing publication widget suites. New test/unit/publication_journal_file_test.dart only for the extracted storage behavior (mixed typed records, malformed/non-list input, bounded atomic persistence, account isolation through wrappers); new test/unit/publication_media_type_test.dart only for the extracted claim contract. Existing Place/Activity Emulator regressions and D10 real-photo flow cover affected stand helpers; full Flutter analyze/test, boundary and diff checks required. No generic framework for future types.
+
+Docs: docs/evidence/backend/d3/D11_PLACE_ACTIVITY_EXTRACTION_2026-10-12.md, this plan, docs/product/ACTIVITY_D3_2_PUBLICATION_AMENDMENT.md and docs/architecture/LAUNCH_STATUS.md for factual status/evidence links. Record one final source manifest; do not mislabel older fingerprints as rerun on current source.
+
+Rollback: revert only these D10 test-selector/runner additions and D11 helper extractions; existing typed interfaces, journal files, immutable Content history and feature flags remain. No commit/push/merge/production authorization is inferred.

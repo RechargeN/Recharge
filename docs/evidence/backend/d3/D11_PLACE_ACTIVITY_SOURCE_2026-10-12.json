@@ -1,0 +1,51 @@
+{
+  "parent": "51778a79754bd61679b9dec6a1a53771c1e33219",
+  "fingerprint": "690643e2af655d0e3f73889351e44b01f4e0b589443dc5673c1ea64c663c19d4",
+  "files": [
+    {
+      "path": "apps/backend/functions/test/support/content_activity_world.ts",
+      "sha256": "428cb06253a75531a9f8af360b154247baad27add5829c9cf3e75e68ea7a0008"
+    },
+    {
+      "path": "apps/backend/functions/test/support/content_event_world.ts",
+      "sha256": "f931c5ee6301784b1eb8351b075d5ed6b25fd3e0ad61b9171904e1c21dd51216"
+    },
+    {
+      "path": "apps/backend/functions/test/support/content_place_world.ts",
+      "sha256": "2e7e2102755c6d0abfcbc540c316d3b1dc9c94350d8dd89cb91d68bd6f120834"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/application/activity_publication_controller.dart",
+      "sha256": "0a619b26d803728259588354dcd5a5c9c588f047f7275a6a3f86ace48e26ac10"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/application/place_publication_controller.dart",
+      "sha256": "5fe9f1f81c394ac804353ed061a41a6a62eb82a2268ffdb30d9e84011196701a"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/application/publication_media_type.dart",
+      "sha256": "be4eb3c5479d090e35101825d28be43d2f3363ef7c1f320a18daec43db027e4f"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/data/file_activity_publication_journal.dart",
+      "sha256": "c7a507ac27f4152b3254c9d163bdbd9be1b17fcc61f0c0b2065a8a0f5b9d9cd8"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/data/file_place_publication_journal.dart",
+      "sha256": "22fe430d43527ccd837b0fa68c5426d8da4d1e275a280f8ff2f421b7ac22a083"
+    },
+    {
+      "path": "apps/mobile/lib/features/create/data/publication_journal_file.dart",
+      "sha256": "a97bcddfa826e740c17a3706fe725918616a97b9bceb5c89bd073b291cb9d744"
+    },
+    {
+      "path": "apps/mobile/test/unit/publication_journal_file_test.dart",
+      "sha256": "cc1c856f20da117dfb8fd382fca20fe99b1a1fcdce9dbc32da87e434566f0f49"
+    },
+    {
+      "path": "apps/mobile/test/unit/publication_media_type_test.dart",
+      "sha256": "0cece8a00eb55bad95e21ed7a8fcc83d6fc4e212254bce7c41b942693a0e813e"
+    }
+  ],
+  "normalization": "CRLF to LF; SHA256 compact sorted-key JSON files list"
+}

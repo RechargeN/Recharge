@@ -3,7 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recharge/app/router/route_names.dart';
+import 'package:recharge/core/identity/account_experience.dart';
+import 'package:recharge/app/di/service_locator.dart';
+import 'package:recharge/features/create/domain/repositories/create_draft_collection_repository.dart';
+import 'package:recharge/features/create/domain/entities/publisher_ref.dart';
+import 'package:recharge/features/explore/presentation/widgets/scenario_library_panel.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -17,12 +23,14 @@ import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/create_providers.dart';
+import 'package:recharge/features/create/application/state/create_state.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
 import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -56,8 +64,138 @@ import 'package:recharge/features/visited/domain/usecases/get_visited_places_use
 
 import 'widget_test_viewport.dart';
 import '../support/event_create_test_support.dart';
+import '../support/l10n/l10n_screen_harness.dart';
 
 void main() {
+  // L4.6: the personal Profile in lv, en and ru at 360 dp.
+  l10nSmallScreenTestWidgets('Profile personal workspace', (
+    tester,
+    locale,
+    scale,
+  ) async {
+    final Widget app = await _unifiedUserApp(
+      textScaler: TextScaler.linear(scale),
+      locale: locale,
+    );
+    await tester.pumpWidget(app);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(l10nFor(locale).profileRoleTitle('creator')),
+      findsWidgets,
+    );
+    await l10nScrollThrough(tester);
+  });
+
+  for (final experience in <AccountExperience?>[
+    null,
+    AccountExperience.personal,
+    AccountExperience.professionalPage,
+  ]) {
+    fullPageTestWidgets(
+      'User personal content and handoffs with scope $experience',
+      (tester) async {
+        final library = _OwnedScenarioCollection();
+        sl.registerSingleton<CreateDraftCollectionRepository>(library);
+        addTearDown(() => sl.unregister<CreateDraftCollectionRepository>());
+        final controller = _createController(
+          initialDraft: _pagePublisherDraft(),
+        );
+        final app = await _unifiedUserApp(
+          experience: experience,
+          createController: controller,
+        );
+        await tester.pumpWidget(app);
+        await tester.pumpAndSettle();
+        expect(find.text('Creator'), findsOneWidget);
+        expect(find.text('CREATOR'), findsOneWidget);
+        expect(find.text('Created'), findsOneWidget);
+        expect(find.text('Visited'), findsOneWidget);
+        expect(find.text('Saved list'), findsOneWidget);
+        // ADR 0023: User = Creator — the personal profile offers the Create Hub.
+        expect(find.text('Create Hub'), findsOneWidget);
+        expect(find.text('Upgrade account'), findsNothing);
+        expect(find.text('PROFILE MODE'), findsNothing);
+        expect(find.byType(ScenarioLibraryPanel), findsOneWidget);
+        expect(find.text('My private Scenario'), findsOneWidget);
+        expect(library.requestedOwners, everyElement('creator_1'));
+        expect(
+          controller.state.draft.eventData?.publisherRef?.id,
+          'original-publisher',
+        );
+        await tester.tap(find.text('My private Scenario'));
+        await tester.pumpAndSettle();
+        expect(find.text('Scenario exact-owned-scenario'), findsOneWidget);
+        // Return through the actual router to the same personal entry.
+        GoRouter.of(
+          tester.element(find.text('Scenario exact-owned-scenario')),
+        ).go(RouteNames.profile);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Saved list'));
+        await tester.pumpAndSettle();
+        expect(find.text('Saved destination'), findsOneWidget);
+        GoRouter.of(
+          tester.element(find.text('Saved destination')),
+        ).go(RouteNames.profile);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Visited'));
+        await tester.pumpAndSettle();
+        expect(find.text('Visited destination'), findsOneWidget);
+        GoRouter.of(
+          tester.element(find.text('Visited destination')),
+        ).go(RouteNames.profile);
+        await tester.pumpAndSettle();
+        // ADR 0023: no "Creator tools" upsell — the User already creates.
+        expect(find.text('Creator tools'), findsNothing);
+        GoRouter.of(
+          tester.element(find.text('Created')),
+        ).go(RouteNames.profileWorkspace);
+        await tester.pumpAndSettle();
+        expect(find.text('PROFILE MODE'), findsNothing);
+        expect(find.text('User'), findsNothing);
+        expect(find.text('Pro'), findsNothing);
+        // ADR 0023: the User sees the creator workspace (route idea, Create Hub).
+        expect(find.text('Build route idea'), findsOneWidget);
+        await tester.tap(find.text('Build route idea'));
+        await tester.pumpAndSettle();
+        expect(find.text('Create scenario'), findsOneWidget);
+        expect(
+          controller.state.draft.eventData?.publisherRef?.id,
+          'original-publisher',
+        );
+      },
+    );
+  }
+
+  testWidgets('personal and direct workspace fit 360 dp at 150 percent text', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(360, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view
+        ..resetPhysicalSize()
+        ..resetDevicePixelRatio();
+    });
+    final app = await _unifiedUserApp(textScaler: const TextScaler.linear(1.5));
+    await tester.pumpWidget(app);
+    await tester.pumpAndSettle();
+    expect(find.text('Creator'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.scrollUntilVisible(
+      find.text('Create Scenario'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(tester.takeException(), isNull);
+    GoRouter.of(
+      tester.element(find.text('Create Scenario')),
+    ).go(RouteNames.profileWorkspace);
+    await tester.pumpAndSettle();
+    expect(find.text('PROFILE MODE'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   fullPageTestWidgets('renders creator role dashboard', (tester) async {
     final AuthController authController = AuthController(
       signInUseCase: SignInUseCase(_NoopAuthRepository()),
@@ -125,8 +263,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Community creator profile'), findsOneWidget);
-    expect(find.text('CREATOR LIGHT'), findsOneWidget);
+    expect(find.text('Creator'), findsOneWidget);
+    expect(find.text('CREATOR'), findsOneWidget);
     expect(find.text('Created'), findsOneWidget);
     expect(find.text('Visited'), findsOneWidget);
     expect(find.text('Photos'), findsOneWidget);
@@ -135,7 +273,7 @@ void main() {
     expect(find.text('QUICK ACTIONS'), findsOneWidget);
     expect(find.text('Create Hub'), findsOneWidget);
     expect(find.text('Create route'), findsOneWidget);
-    expect(find.text('Scenario Builder'), findsOneWidget);
+    expect(find.text('Create Scenario'), findsOneWidget);
     expect(find.text('One-time event'), findsOneWidget);
     expect(find.text('Find people'), findsOneWidget);
 
@@ -144,103 +282,110 @@ void main() {
     expect(find.text('Visited places page'), findsOneWidget);
   });
 
-  fullPageTestWidgets('renders viewer profile with visited places', (
-    tester,
-  ) async {
-    final AuthController authController = AuthController(
-      signInUseCase: SignInUseCase(
-        _NoopAuthRepository(
-          email: 'viewer@example.com',
-          role: 'user',
-          capabilities: const <String>['create.event', 'create.place'],
+  fullPageTestWidgets(
+    'ordinary User shares Creator layout and personal shortcuts without grants',
+    (tester) async {
+      final AuthController authController = AuthController(
+        signInUseCase: SignInUseCase(
+          _NoopAuthRepository(
+            email: 'viewer@example.com',
+            role: 'user',
+            capabilities: const <String>['create.event', 'create.place'],
+          ),
         ),
-      ),
-      restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
-      signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
-      getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
-      analyticsService: _NoopAnalyticsService(),
-    );
-    await authController.signIn(
-      email: 'viewer@example.com',
-      password: 'password123',
-      sourceScreen: 'test',
-      sourceAction: 'seed',
-    );
+        restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+        signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+        getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+        analyticsService: _NoopAnalyticsService(),
+      );
+      await authController.signIn(
+        email: 'viewer@example.com',
+        password: 'password123',
+        sourceScreen: 'test',
+        sourceAction: 'seed',
+      );
 
-    final _FakeExploreRepository exploreRepository = _FakeExploreRepository();
-    final ExploreController exploreController = ExploreController(
-      loadProfileEditableUseCase: LoadProfileEditableUseCase(exploreRepository),
-      saveProfileEditableUseCase: SaveProfileEditableUseCase(exploreRepository),
-      loadSettingsUseCase: LoadSettingsUseCase(exploreRepository),
-      saveSettingsUseCase: SaveSettingsUseCase(exploreRepository),
-      analyticsService: _NoopAnalyticsService(),
-    );
-    final _FakeFavoritesRepository favoritesRepository =
-        _FakeFavoritesRepository();
-    final FavoritesController favoritesController = FavoritesController(
-      getFavoritesUseCase: GetFavoritesUseCase(favoritesRepository),
-      addFavoriteUseCase: AddFavoriteUseCase(favoritesRepository),
-      removeFavoriteUseCase: RemoveFavoriteUseCase(favoritesRepository),
-      analyticsService: _NoopAnalyticsService(),
-    );
-    final VisitedPlacesController visitedController = VisitedPlacesController(
-      getVisitedPlacesUseCase: GetVisitedPlacesUseCase(
-        _FakeVisitedPlacesRepository(
-          items: <VisitedPlaceEntity>[
-            VisitedPlaceEntity(
-              id: '4a3d27ad-8185-4b94-a991-9b36b6f62c16',
-              userId: 'creator_1',
-              placeId: 'evt_rig_002',
-              title: 'Lake walk',
-              subtitle: 'Five calm kilometres',
-              city: 'Riga',
-              category: 'outdoor_nature_walking',
-              visitedOn: DateTime(2026, 7, 20),
-              timezoneId: 'Europe/Riga',
-              evidence: VisitEvidence.selfReported,
-              recordedAtUtc: DateTime.utc(2026, 7, 20, 12),
+      final _FakeExploreRepository exploreRepository = _FakeExploreRepository();
+      final ExploreController exploreController = ExploreController(
+        loadProfileEditableUseCase: LoadProfileEditableUseCase(
+          exploreRepository,
+        ),
+        saveProfileEditableUseCase: SaveProfileEditableUseCase(
+          exploreRepository,
+        ),
+        loadSettingsUseCase: LoadSettingsUseCase(exploreRepository),
+        saveSettingsUseCase: SaveSettingsUseCase(exploreRepository),
+        analyticsService: _NoopAnalyticsService(),
+      );
+      final _FakeFavoritesRepository favoritesRepository =
+          _FakeFavoritesRepository();
+      final FavoritesController favoritesController = FavoritesController(
+        getFavoritesUseCase: GetFavoritesUseCase(favoritesRepository),
+        addFavoriteUseCase: AddFavoriteUseCase(favoritesRepository),
+        removeFavoriteUseCase: RemoveFavoriteUseCase(favoritesRepository),
+        analyticsService: _NoopAnalyticsService(),
+      );
+      final VisitedPlacesController visitedController = VisitedPlacesController(
+        getVisitedPlacesUseCase: GetVisitedPlacesUseCase(
+          _FakeVisitedPlacesRepository(
+            items: <VisitedPlaceEntity>[
+              VisitedPlaceEntity(
+                id: '4a3d27ad-8185-4b94-a991-9b36b6f62c16',
+                userId: 'creator_1',
+                placeId: 'evt_rig_002',
+                title: 'Lake walk',
+                subtitle: 'Five calm kilometres',
+                city: 'Riga',
+                category: 'outdoor_nature_walking',
+                visitedOn: DateTime(2026, 7, 20),
+                timezoneId: 'Europe/Riga',
+                evidence: VisitEvidence.selfReported,
+                recordedAtUtc: DateTime.utc(2026, 7, 20, 12),
+              ),
+            ],
+          ),
+        ),
+        analyticsService: _NoopAnalyticsService(),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: <Override>[
+            authControllerProvider.overrideWith((ref) => authController),
+            exploreControllerProvider.overrideWith((ref) => exploreController),
+            favoritesControllerProvider.overrideWith(
+              (ref) => favoritesController,
+            ),
+            createControllerProvider.overrideWith((ref) => _createController()),
+            discoverFeedControllerProvider.overrideWith(
+              (ref) => _discoverController(),
+            ),
+            visitedPlacesControllerProvider.overrideWith(
+              (ref) => visitedController,
             ),
           ],
+          child: const MaterialApp(home: ProfilePage()),
         ),
-      ),
-      analyticsService: _NoopAnalyticsService(),
-    );
+      );
+      await tester.pumpAndSettle();
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: <Override>[
-          authControllerProvider.overrideWith((ref) => authController),
-          exploreControllerProvider.overrideWith((ref) => exploreController),
-          favoritesControllerProvider.overrideWith(
-            (ref) => favoritesController,
-          ),
-          createControllerProvider.overrideWith((ref) => _createController()),
-          discoverFeedControllerProvider.overrideWith(
-            (ref) => _discoverController(),
-          ),
-          visitedPlacesControllerProvider.overrideWith(
-            (ref) => visitedController,
-          ),
-        ],
-        child: const MaterialApp(home: ProfilePage()),
-      ),
-    );
-    await tester.pumpAndSettle();
+      expect(find.text('Creator'), findsOneWidget);
+      expect(find.text('VIEWER'), findsNothing);
+      expect(find.text('Visited'), findsOneWidget);
+      expect(find.text('Photos'), findsOneWidget);
+      expect(find.text('VISITED PLACES'), findsNothing);
+      expect(find.text('Lake walk'), findsNothing);
+      expect(find.text('QUICK ACTIONS'), findsOneWidget);
+      expect(find.text('Saved list'), findsOneWidget);
+      expect(find.text('Upgrade account'), findsNothing);
+      expect(find.text('Created'), findsOneWidget);
+      expect(find.text('PROFILE MODE'), findsNothing);
+    },
+  );
 
-    expect(find.text('Viewer profile'), findsOneWidget);
-    expect(find.text('VIEWER'), findsOneWidget);
-    expect(find.text('Visited'), findsOneWidget);
-    expect(find.text('Photos'), findsOneWidget);
-    expect(find.text('VISITED PLACES'), findsOneWidget);
-    expect(find.text('Lake walk'), findsOneWidget);
-    expect(find.text('ACTIONS'), findsOneWidget);
-    expect(find.text('Saved list'), findsOneWidget);
-    expect(find.text('Upgrade account'), findsOneWidget);
-    expect(find.text('Created'), findsNothing);
-    expect(find.text('PROFILE MODE'), findsNothing);
-  });
-
-  fullPageTestWidgets('renders pro generator profile layout', (tester) async {
+  fullPageTestWidgets('generator retains tools inside unified Creator layout', (
+    tester,
+  ) async {
     final AuthController authController = AuthController(
       signInUseCase: SignInUseCase(
         _NoopAuthRepository(
@@ -301,13 +446,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Pro generator profile'), findsOneWidget);
-    expect(find.text('PRO GENERATOR'), findsOneWidget);
-    expect(find.text('Page'), findsOneWidget);
+    expect(find.text('Creator'), findsOneWidget);
+    expect(find.text('PRO GENERATOR'), findsNothing);
+    expect(find.text('Visited'), findsOneWidget);
     expect(find.text('Created'), findsOneWidget);
-    expect(find.text('Insights'), findsOneWidget);
+    expect(find.text('Insights'), findsNothing);
     expect(find.text('Photos'), findsOneWidget);
-    expect(find.text('MANAGED PAGE'), findsOneWidget);
+    expect(find.text('MANAGED PAGE'), findsNothing);
     expect(find.text('CONTROL CENTER'), findsOneWidget);
     expect(find.text('Manage page'), findsOneWidget);
     expect(find.text('Created events'), findsOneWidget);
@@ -315,15 +460,12 @@ void main() {
     expect(find.text('Bookings & requests'), findsOneWidget);
     expect(find.text('PROFILE MODE'), findsNothing);
 
-    await tester.tap(find.text('Created'));
-    await tester.pumpAndSettle();
-
     expect(find.text('LATEST CREATED EVENTS'), findsOneWidget);
     expect(find.text('MANAGED PAGE'), findsNothing);
     expect(find.text('Create Hub'), findsOneWidget);
   });
 
-  fullPageTestWidgets('opens latest pro route from profile workspace', (
+  fullPageTestWidgets('ignores legacy favorite Scenario in profile workspace', (
     tester,
   ) async {
     final AuthController authController = AuthController(
@@ -395,7 +537,7 @@ void main() {
                 builder: (context, state) => const ProfileWorkspacePage(),
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => Scaffold(
                   body: Column(
                     children: <Widget>[
@@ -464,104 +606,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Pro'), findsOneWidget);
-    expect(find.text('Latest route'), findsOneWidget);
-    expect(find.text('Calm recharge route'), findsOneWidget);
-
-    await tester.scrollPageUntilVisible(find.text('Edit route').first, 200);
-    await tester.tap(find.text('Edit route').first);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('food_drinks.coffee'), findsOneWidget);
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: <Override>[
-          authControllerProvider.overrideWith((ref) => authController),
-          exploreControllerProvider.overrideWith((ref) => exploreController),
-          favoritesControllerProvider.overrideWith(
-            (ref) => favoritesController,
-          ),
-          createControllerProvider.overrideWith((ref) => createController),
-          discoverFeedControllerProvider.overrideWith(
-            (ref) => discoverController,
-          ),
-        ],
-        child: MaterialApp.router(
-          routerConfig: GoRouter(
-            initialLocation: RouteNames.profileWorkspace,
-            routes: <RouteBase>[
-              GoRoute(
-                path: RouteNames.profileWorkspace,
-                builder: (context, state) => const ProfileWorkspacePage(),
-              ),
-              GoRoute(
-                path: RouteNames.discoverMap,
-                builder: (context, state) => Scaffold(
-                  body: Column(
-                    children: <Widget>[
-                      const Text('Map page'),
-                      Text(state.uri.queryParameters['mode'] ?? ''),
-                      Text(state.uri.queryParameters['steps'] ?? ''),
-                      Text(state.uri.queryParameters['q'] ?? ''),
-                      Text(state.uri.queryParameters['category'] ?? ''),
-                      Text(state.uri.queryParameters['budgetMax'] ?? ''),
-                    ],
-                  ),
-                ),
-              ),
-              GoRoute(
-                path: RouteNames.scenarioBuilder,
-                builder: (context, state) =>
-                    const Scaffold(body: Text('Builder page')),
-              ),
-              GoRoute(
-                path: RouteNames.search,
-                builder: (context, state) => Scaffold(
-                  body: Text(state.uri.queryParameters['q'] ?? 'Search page'),
-                ),
-              ),
-              GoRoute(
-                path: RouteNames.create,
-                builder: (context, state) => Scaffold(
-                  body: Column(
-                    children: <Widget>[
-                      const Text('Create page'),
-                      Text(state.uri.queryParameters['source'] ?? ''),
-                      Text(state.uri.queryParameters['title'] ?? ''),
-                      Text(state.uri.queryParameters['q'] ?? ''),
-                      Text(state.uri.queryParameters['category'] ?? ''),
-                      Text(state.uri.queryParameters['budgetMax'] ?? ''),
-                      Text(state.uri.queryParameters['type'] ?? ''),
-                    ],
-                  ),
-                ),
-              ),
-              GoRoute(
-                path: RouteNames.favorites,
-                builder: (context, state) =>
-                    const Scaffold(body: Text('Favorites page')),
-              ),
-              GoRoute(
-                path: RouteNames.settings,
-                builder: (context, state) =>
-                    const Scaffold(body: Text('Settings page')),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await tester.scrollPageUntilVisible(find.text('Map route').first, 200);
-    await tester.tap(find.text('Map route').first);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
-    expect(find.text('food_drinks.coffee'), findsOneWidget);
+    expect(find.text('Pro'), findsNothing);
+    expect(find.text('Latest route'), findsNothing);
+    expect(find.text('Calm recharge route'), findsNothing);
   });
 
   fullPageTestWidgets('opens latest saved search from profile workspace', (
@@ -653,7 +700,7 @@ void main() {
                 ),
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => Scaffold(
                   body: Column(
                     children: <Widget>[
@@ -738,9 +785,9 @@ void main() {
     await tester.tap(find.byTooltip('Build route from latest search').first);
     await tester.pumpAndSettle();
 
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('social'), findsOneWidget);
-    expect(find.textContaining('museum'), findsOneWidget);
+    expect(find.text('Create page'), findsOneWidget);
+    expect(find.text('saved_search_route_seed'), findsOneWidget);
+    expect(find.text('route'), findsWidgets);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -858,7 +905,7 @@ void main() {
                 ),
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => Scaffold(
                   body: Column(
                     children: <Widget>[
@@ -935,9 +982,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('social'), findsOneWidget);
-    expect(find.text('museum today under 10'), findsOneWidget);
+    expect(find.text('Create page'), findsOneWidget);
+    expect(find.text('saved_search_route_seed'), findsOneWidget);
+    expect(find.text('route'), findsWidgets);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -1035,7 +1082,7 @@ void main() {
                   ),
                 ),
                 GoRoute(
-                  path: RouteNames.scenarioBuilder,
+                  path: RouteNames.legacyScenarioBuilder,
                   builder: (context, state) => Scaffold(
                     body: Column(
                       children: <Widget>[
@@ -1108,11 +1155,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Builder page'), findsOneWidget);
-      expect(find.text('calm'), findsOneWidget);
-      expect(find.text('120'), findsOneWidget);
-      expect(find.text('1'), findsWidgets);
-      expect(find.text(prompt), findsOneWidget);
+      expect(find.text('Create page'), findsOneWidget);
+      expect(find.text('smart_route_seed'), findsOneWidget);
+      expect(find.text('route'), findsWidgets);
       expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
 
       await tester.pumpWidget(app());
@@ -1122,7 +1167,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Map page'), findsOneWidget);
-      expect(find.text('scenario'), findsOneWidget);
+      expect(find.text('route'), findsOneWidget);
       expect(
         find.textContaining('wellness_recharge.calm_walk'),
         findsOneWidget,
@@ -1140,10 +1185,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Create page'), findsOneWidget);
-      expect(find.text('scenario'), findsWidgets);
+      expect(find.text('route'), findsWidgets);
       expect(find.text('Calm recharge route'), findsOneWidget);
       expect(find.text(prompt), findsOneWidget);
-      expect(find.text('event'), findsOneWidget);
+      expect(find.text('route'), findsWidgets);
       expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
     },
   );
@@ -1188,11 +1233,13 @@ void main() {
       organizerEmail: 'creator@example.com',
       organizerName: 'creator',
     );
-    createController.setObjectType(CreateObjectType.activity);
+    // Generic creator-listing-status fixture: Class / Workshop with an applicable
+    // Workshops & masterclasses category.
+    createController.setObjectType(CreateObjectType.classWorkshop);
     createController.updateTitle('Museum evening route');
     createController.applyTaxonomySelection(
-      mainCategory: 'art_culture_museums',
-      subcategory: 'museum',
+      mainCategory: 'workshops_masterclasses',
+      subcategory: 'workshop',
     );
     createController.updateCity('Rezekne');
     createController.updateVenueName('City museum');
@@ -1278,10 +1325,10 @@ void main() {
 
     expect(find.text('Creator listing'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
-    expect(find.text('pendingReview'), findsOneWidget);
-    expect(find.text('Art, culture & museums'), findsOneWidget);
-    expect(find.text('Museum'), findsOneWidget);
-    expect(find.text('12 EUR'), findsOneWidget);
+    expect(find.text('Pending review'), findsOneWidget);
+    expect(find.text('Workshops & masterclasses'), findsOneWidget);
+    expect(find.text('Workshop'), findsOneWidget);
+    expect(find.text('€12.00'), findsOneWidget);
 
     await tester.scrollPageUntilVisible(find.text('Open Create').first, 220);
     await tester.tap(find.text('Open Create').first);
@@ -1298,7 +1345,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Search page'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
-    expect(find.text('art_culture_museums'), findsOneWidget);
+    expect(find.text('workshops_masterclasses'), findsOneWidget);
     expect(find.text('12'), findsOneWidget);
 
     await tester.pumpWidget(app());
@@ -1311,7 +1358,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Map page'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
-    expect(find.text('art_culture_museums'), findsOneWidget);
+    expect(find.text('workshops_masterclasses'), findsOneWidget);
   });
 
   fullPageTestWidgets('opens legacy route-context activity from profile workspace', (
@@ -1348,31 +1395,24 @@ void main() {
       analyticsService: _NoopAnalyticsService(),
     );
     final DiscoverFeedController discoverController = _discoverController();
-    final CreateController createController = _createController();
+    // Historical fixture, not a publish: 'travel_tours'/'walking_tour' is not
+    // an applicable category for the activity type under today's validators.
+    final CreateController createController =
+        _HistoricalListingCreateController(
+          repository: _FakeCreateRepository(),
+          historicalListing: _legacyRouteContextListing(
+            title: 'Calm coffee walking route',
+            fullDescription:
+                'Route steps: food_drinks.coffee,wellness_recharge.calm_walk,'
+                'outdoor_nature_walking. Review the route before publishing.',
+            startsAtUtc: '2026-04-18T10:00:00Z',
+          ),
+        );
     await createController.ensureLoaded(
       userId: 'creator_1',
       organizerEmail: 'creator@example.com',
       organizerName: 'creator',
     );
-    createController.setObjectType(CreateObjectType.activity);
-    createController.updateTitle('Calm coffee walking route');
-    createController.applyTaxonomySelection(
-      mainCategory: 'travel_tours',
-      subcategory: 'walking_tour',
-    );
-    createController.updateCity('Rezekne');
-    createController.updateVenueName('Old town start');
-    createController.updateShortDescription('90 min calm creator route.');
-    createController.updateFullDescription(
-      'Route steps: food_drinks.coffee,wellness_recharge.calm_walk,'
-      'outdoor_nature_walking. Review the route before publishing.',
-    );
-    createController.updateCoverImage(
-      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
-    );
-    createController.updateStartDateTime('2026-04-18T10:00:00Z');
-    final bool published = await createController.publishDraft();
-    expect(published, isTrue);
 
     Widget app() {
       return ProviderScope(
@@ -1401,7 +1441,7 @@ void main() {
                     const Scaffold(body: Text('Create page')),
               ),
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => Scaffold(
                   body: Column(
                     children: <Widget>[
@@ -1468,19 +1508,7 @@ void main() {
     await tester.tap(find.text('Edit route').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('duration:90'), findsOneWidget);
-    expect(find.text('free:1'), findsOneWidget);
-    expect(find.text('walking:1'), findsOneWidget);
-    expect(find.text('Calm coffee walking route'), findsOneWidget);
-    expect(
-      find.text(
-        'food_drinks.coffee,wellness_recharge.calm_walk,'
-        'outdoor_nature_walking',
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('Create page'), findsOneWidget);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -1489,7 +1517,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('duration:90'), findsOneWidget);
     expect(find.text('Calm coffee walking route'), findsOneWidget);
@@ -1540,39 +1568,39 @@ void main() {
         analyticsService: _NoopAnalyticsService(),
       );
       final DiscoverFeedController discoverController = _discoverController();
-      final CreateController createController = _createController();
+      // The published listing is the explicit historical legacy
+      // route-context fixture; only the current draft is created live, with
+      // a valid Class / Workshop category.
+      final CreateController
+      createController = _HistoricalListingCreateController(
+        repository: _FakeCreateRepository(),
+        historicalListing: _legacyRouteContextListing(
+          title: 'Published calm route',
+          fullDescription:
+              'Route steps: food_drinks.coffee,wellness_recharge.calm_walk. '
+              'Review the route before publishing.',
+          startsAtUtc: '2026-04-18T10:00:00Z',
+        ),
+      );
       await createController.ensureLoaded(
         userId: 'creator_1',
         organizerEmail: 'creator@example.com',
         organizerName: 'creator',
       );
-      createController.setObjectType(CreateObjectType.activity);
-      createController.updateTitle('Published calm route');
-      createController.applyTaxonomySelection(
-        mainCategory: 'travel_tours',
-        subcategory: 'walking_tour',
-      );
-      createController.updateCity('Rezekne');
-      createController.updateVenueName('Old town start');
-      createController.updateShortDescription('90 min calm route.');
-      createController.updateFullDescription(
-        'Route steps: food_drinks.coffee,wellness_recharge.calm_walk. '
-        'Review the route before publishing.',
-      );
-      createController.updateCoverImage(
-        'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
-      );
-      createController.updateStartDateTime('2026-04-18T10:00:00Z');
-      expect(await createController.publishDraft(), isTrue);
-
+      createController.setObjectType(CreateObjectType.classWorkshop);
       createController.updateTitle('Draft pottery workshop');
       createController.applyTaxonomySelection(
-        mainCategory: 'art_culture_museums',
-        subcategory: 'museum',
+        mainCategory: 'workshops_masterclasses',
+        subcategory: 'pottery',
       );
       createController.updateShortDescription('Hands-on clay evening.');
       createController.updateFullDescription('Small creator workshop draft.');
       createController.updateVenueName('City studio');
+      createController.updateCity('Rezekne');
+      createController.updateCoverImage(
+        'https://images.unsplash.com/photo-1518998053901-5348d3961a04',
+      );
+      createController.updateStartDateTime('2026-04-18T18:00:00Z');
       createController.updateIsFree(false);
       createController.updateBasePrice('8');
 
@@ -1630,7 +1658,7 @@ void main() {
                   ),
                 ),
                 GoRoute(
-                  path: RouteNames.scenarioBuilder,
+                  path: RouteNames.legacyScenarioBuilder,
                   builder: (context, state) => Scaffold(
                     body: Column(
                       children: <Widget>[
@@ -1663,7 +1691,8 @@ void main() {
       expect(find.text('Creator publications'), findsOneWidget);
       expect(find.text('2 active'), findsOneWidget);
       expect(find.text('Creator listing'), findsNWidgets(2));
-      expect(find.text('Draft'), findsOneWidget);
+      // L4.6: the stage and the status are both localized labels now.
+      expect(find.text('Draft'), findsNWidgets(2));
       expect(find.text('Published'), findsOneWidget);
       expect(find.text('Draft pottery workshop'), findsOneWidget);
       expect(find.text('Published calm route'), findsWidgets);
@@ -1692,7 +1721,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Search page'), findsOneWidget);
       expect(find.text('Draft pottery workshop'), findsOneWidget);
-      expect(find.text('art_culture_museums'), findsOneWidget);
+      expect(find.text('workshops_masterclasses'), findsOneWidget);
       expect(find.text('8'), findsOneWidget);
 
       await tester.pumpWidget(app());
@@ -1704,7 +1733,7 @@ void main() {
       await tester.tap(find.text('Open route map').first);
       await tester.pumpAndSettle();
       expect(find.text('Map page'), findsOneWidget);
-      expect(find.text('scenario'), findsOneWidget);
+      expect(find.text('route'), findsOneWidget);
       expect(
         find.text('food_drinks.coffee,wellness_recharge.calm_walk'),
         findsOneWidget,
@@ -1805,10 +1834,13 @@ void main() {
 
     expect(find.text('Creator publications'), findsOneWidget);
     expect(find.text('Incomplete breathwork draft'), findsOneWidget);
-    expect(find.text('2 missing'), findsOneWidget);
+    // Recharge Activity no longer requires startDateTimeUtc (ACT-CRT-01
+    // spec AC #2: self-directed, evergreen, no start time) — only the
+    // cover image is missing from this draft now.
+    expect(find.text('1 missing'), findsOneWidget);
     expect(find.text('Creator next steps'), findsOneWidget);
     expect(find.text('Finish draft'), findsOneWidget);
-    expect(find.text('Missing: cover, start time'), findsWidgets);
+    expect(find.text('Missing: cover image'), findsWidgets);
 
     await tester.scrollPageUntilVisible(find.text('Finish draft').first, 220);
     await tester.tap(find.text('Finish draft').first);
@@ -1820,6 +1852,159 @@ void main() {
 class _NoopAnalyticsService implements AnalyticsService {
   @override
   void track(String eventName, {Map<String, Object?> params = const {}}) {}
+}
+
+CreateDraftEntity _pagePublisherDraft() {
+  final base = CreateDraftEntity.defaults(
+    organizerId: 'creator_1',
+    organizerEmail: 'personal@example.com',
+    organizerName: 'Personal',
+  );
+  return base.copyWith(
+    eventData: base.eventData!.copyWith(
+      publisherRef: const PublisherRef(
+        type: PublisherType.page,
+        id: 'original-publisher',
+      ),
+    ),
+  );
+}
+
+Future<Widget> _unifiedUserApp({
+  AccountExperience? experience,
+  CreateController? createController,
+  TextScaler? textScaler,
+  Locale? locale,
+}) async {
+  final repository = _NoopAuthRepository(role: 'user', capabilities: const []);
+  final auth = AuthController(
+    signInUseCase: SignInUseCase(repository),
+    restoreSessionUseCase: RestoreSessionUseCase(repository),
+    signOutUseCase: SignOutUseCase(repository),
+    getCurrentUserUseCase: GetCurrentUserUseCase(repository),
+    analyticsService: _NoopAnalyticsService(),
+  );
+  await auth.signIn(
+    email: 'personal@example.com',
+    password: 'password123',
+    sourceScreen: 'test',
+    sourceAction: 'seed',
+  );
+  final exploreRepository = _FakeExploreRepository();
+  final explore = ExploreController(
+    loadProfileEditableUseCase: LoadProfileEditableUseCase(exploreRepository),
+    saveProfileEditableUseCase: SaveProfileEditableUseCase(exploreRepository),
+    loadSettingsUseCase: LoadSettingsUseCase(exploreRepository),
+    saveSettingsUseCase: SaveSettingsUseCase(exploreRepository),
+    analyticsService: _NoopAnalyticsService(),
+  );
+  final favoritesRepository = _FakeFavoritesRepository();
+  final favorites = FavoritesController(
+    getFavoritesUseCase: GetFavoritesUseCase(favoritesRepository),
+    addFavoriteUseCase: AddFavoriteUseCase(favoritesRepository),
+    removeFavoriteUseCase: RemoveFavoriteUseCase(favoritesRepository),
+    analyticsService: _NoopAnalyticsService(),
+  );
+  Widget scope(Widget child) => experience == null
+      ? child
+      : AccountExperienceScope(experience: experience, child: child);
+  return ProviderScope(
+    overrides: [
+      authControllerProvider.overrideWith((ref) => auth),
+      exploreControllerProvider.overrideWith((ref) => explore),
+      favoritesControllerProvider.overrideWith((ref) => favorites),
+      createControllerProvider.overrideWith(
+        (ref) => createController ?? _createController(),
+      ),
+      discoverFeedControllerProvider.overrideWith(
+        (ref) => _discoverController(),
+      ),
+    ],
+    child: MaterialApp.router(
+      locale: locale,
+      supportedLocales: l10nTestLocales,
+      localizationsDelegates: locale == null ? null : l10nTestDelegates,
+      builder: (context, child) => textScaler == null
+          ? child!
+          : MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+              child: child!,
+            ),
+      routerConfig: GoRouter(
+        initialLocation: RouteNames.profile,
+        routes: [
+          GoRoute(
+            path: RouteNames.profile,
+            builder: (context, state) => scope(const ProfilePage()),
+          ),
+          GoRoute(
+            path: RouteNames.profileWorkspace,
+            builder: (context, state) => scope(const ProfileWorkspacePage()),
+          ),
+          GoRoute(
+            path: RouteNames.favorites,
+            builder: (context, state) =>
+                const Scaffold(body: Text('Saved destination')),
+          ),
+          GoRoute(
+            path: RouteNames.visitedPlaces,
+            builder: (context, state) =>
+                const Scaffold(body: Text('Visited destination')),
+          ),
+          GoRoute(
+            path: RouteNames.settings,
+            builder: (context, state) =>
+                const Scaffold(body: Text('Settings destination')),
+          ),
+          GoRoute(
+            path: RouteNames.create,
+            builder: (context, state) => Scaffold(
+              body: Text('Create ${state.uri.queryParameters['type']}'),
+            ),
+          ),
+          GoRoute(
+            path: RouteNames.createObjectFor('scenario'),
+            builder: (context, state) => Scaffold(
+              body: Text(
+                'Scenario ${state.uri.queryParameters['scenarioDraftId']}',
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _OwnedScenarioCollection implements CreateDraftCollectionRepository {
+  final List<String> requestedOwners = [];
+  @override
+  Future<List<CreateDraftSummary>> listDrafts({
+    required String ownerId,
+    required CreateObjectType type,
+  }) async {
+    requestedOwners.add(ownerId);
+    return [
+      CreateDraftSummary(
+        id: 'exact-owned-scenario',
+        objectType: type,
+        title: 'My private Scenario',
+        updatedAtUtc: DateTime.utc(2026, 10, 10),
+      ),
+    ];
+  }
+
+  @override
+  Future<CreateDraftEntity?> loadDraftById({
+    required String ownerId,
+    required String draftId,
+  }) async {
+    requestedOwners.add(ownerId);
+    return null;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _NoopAuthRepository implements AuthRepository {
@@ -1908,6 +2093,12 @@ DiscoverFeedController _discoverController({
       initialSmartSearchHistory: smartSearchHistory,
     ),
     analyticsService: _NoopAnalyticsService(),
+    runtimeDefaults: const DiscoverRuntimeDefaults(
+      timezoneId: 'Europe/Riga',
+      originLat: 56.9496,
+      originLng: 24.1052,
+      currencyCode: 'EUR',
+    ),
   );
 }
 
@@ -1929,6 +2120,77 @@ CreateController _createController({CreateDraftEntity? initialDraft}) {
       currency: 'EUR',
     ),
   );
+}
+
+/// Explicit HISTORICAL fixture for the legacy route-context rendering
+/// (`travel_tours`/`walking_tour` activity listing whose steps live in the
+/// full description). That category/type pairing is not creatable through
+/// today's validators, so it must not be produced by a successful publish in
+/// a test; the profile reads it as an already-published listing instead.
+CreateDraftEntity _legacyRouteContextListing({
+  required String title,
+  required String fullDescription,
+  required String startsAtUtc,
+}) {
+  final CreateDraftEntity base = CreateDraftEntity.defaults(
+    organizerId: 'creator_1',
+    organizerEmail: 'creator@example.com',
+    organizerName: 'creator',
+    marketCityId: 'riga',
+    timezone: 'Europe/Riga',
+    country: 'Latvia',
+    city: 'Riga',
+    currency: 'EUR',
+  );
+  return base.copyWith(
+    objectType: CreateObjectType.activity,
+    title: title,
+    mainCategory: 'travel_tours',
+    subcategory: 'walking_tour',
+    city: 'Rezekne',
+    venueName: 'Old town start',
+    shortDescription: '90 min calm creator route.',
+    fullDescription: fullDescription,
+    media: const MediaEntity(
+      coverImage:
+          'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
+      gallery: <String>[],
+    ),
+    startDateTimeUtc: DateTime.parse(startsAtUtc),
+    draftStatus: DraftStatus.pendingReview,
+    moderationStatus: ModerationStatus.pending,
+    publishStatus: PublishStatus.pendingReview,
+    publishedAtUtc: DateTime.utc(2026, 4, 18, 9),
+  );
+}
+
+/// Create controller whose `publishedDraft` is a preloaded historical
+/// listing; the current editable draft still behaves normally.
+class _HistoricalListingCreateController extends CreateController {
+  _HistoricalListingCreateController({
+    required CreateRepository repository,
+    required CreateDraftEntity historicalListing,
+  }) : _historicalListing = historicalListing,
+       super(
+         loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+         saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+         publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+         analyticsService: _NoopAnalyticsService(),
+         eventCreateCoordinator: createTestEventCoordinator(),
+         runtimeDefaults: const CreateRuntimeDefaults(
+           marketCityId: 'riga',
+           timezone: 'Europe/Riga',
+           country: 'Latvia',
+           city: 'Riga',
+           currency: 'EUR',
+         ),
+       );
+
+  final CreateDraftEntity _historicalListing;
+
+  @override
+  CreateState get state =>
+      super.state.copyWith(publishedDraft: _historicalListing);
 }
 
 class _FakeCreateRepository implements CreateRepository {
@@ -1974,7 +2236,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,
@@ -1993,7 +2255,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
         startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
         latitude: query.centerLat,
         longitude: query.centerLng,
-        priceAmount: 0,
+        priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
         distanceKm: 1.2,
         isFree: true,
         relevanceScore: 0.8,
@@ -2122,11 +2384,11 @@ FavoriteItemEntity _scenarioFavorite() {
     category: 'scenario',
     startsAtUtc: DateTime.parse('2026-04-20T12:00:00Z'),
     distanceKm: 2.4,
-    priceAmount: 0,
+    priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
     isFree: true,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
     targetRoute:
-        '${RouteNames.scenarioBuilder}?mood=calm&steps=food_drinks.coffee',
+        '${RouteNames.legacyScenarioBuilder}?mood=calm&steps=food_drinks.coffee',
   );
 }
 
@@ -2138,7 +2400,7 @@ SavedSearchEntity _savedSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -2153,7 +2415,7 @@ SmartSearchHistoryEntity _smartSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),

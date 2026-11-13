@@ -7,7 +7,10 @@ import 'package:recharge/app/application/scenario_object_intake_config.dart';
 import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/core/product_analytics/product_analytics_queue.dart';
+import 'package:recharge/core/product_analytics/product_analytics_recorder.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -21,6 +24,8 @@ import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/domain/repositories/discover_repository.dart';
+import 'package:recharge/features/discover/domain/repositories/timezone_repository.dart';
+import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/domain/usecases/get_discover_details_usecase.dart';
 import 'package:recharge/features/discover/presentation/pages/discover_details_page.dart';
 import 'package:recharge/features/favorites/application/controllers/favorites_controller.dart';
@@ -38,13 +43,45 @@ import 'package:recharge/features/visited/domain/usecases/get_visited_places_use
 import 'package:recharge/features/visited/domain/usecases/record_place_visit_usecase.dart';
 import 'package:recharge/features/visited/domain/usecases/remove_visit_usecase.dart';
 
+import '../unit/product_analytics/product_analytics_test_support.dart';
+import 'package:recharge/core/localization/l10n_context.dart';
 import 'widget_test_viewport.dart';
+import '../support/l10n/l10n_screenshot.dart';
 
 void main() {
+  // L4.5: Discover in lv, en and ru on a 360 dp phone at text scale 1 and 2.
+  group('L4.5: Details in lv, en and ru at 360 dp', () {
+    for (final String language in const <String>['en', 'lv', 'ru']) {
+      for (final double scale in const <double>[1, 2]) {
+        testWidgets('$language at ${scale}x', (WidgetTester tester) async {
+          tester.view
+            ..physicalSize = const Size(360, 800)
+            ..devicePixelRatio = 1;
+          tester.platformDispatcher.textScaleFactorTestValue = scale;
+          addTearDown(() {
+            tester.view
+              ..resetPhysicalSize()
+              ..resetDevicePixelRatio();
+            tester.platformDispatcher.clearTextScaleFactorTestValue();
+          });
+          await tester.pumpWidget(await _detailsApp(locale: Locale(language)));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          await l10nCaptureScreen(tester);
+          final AppLocalizations l10n = lookupAppLocalizations(
+            Locale(language),
+          );
+          // A known interface string is in the reader's language.
+          expect(find.byTooltip(l10n.discoverShareAndMore), findsWidgets);
+        });
+      }
+    }
+  });
   setUp(() async {
     _detailsKindForTest = DiscoverObjectKind.activity;
     await sl.reset();
     sl.registerSingleton<AnalyticsService>(_NoopAnalyticsService());
+    sl.registerSingleton<TimezoneRepository>(TimezoneRepositoryImpl());
     sl.registerFactory<GetDiscoverDetailsUseCase>(
       () => GetDiscoverDetailsUseCase(_FakeDiscoverRepository()),
     );
@@ -67,38 +104,60 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.scrollPageUntilVisible(
-      find.text('Plan this recharge'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await _openUtilityMenu(tester);
 
     expect(find.text('Add to Scenario'), findsNothing);
-    expect(find.text('Build route'), findsOneWidget);
     expect(find.text('Find similar'), findsOneWidget);
+    expect(find.text('Create route'), findsOneWidget);
   });
 
-  fullPageTestWidgets('renders action hub and opens contextual map', (
+  fullPageTestWidgets('PA-T01 Details: opening queues details_opened once', (
+    tester,
+  ) async {
+    final InMemoryProductAnalyticsQueueStore store =
+        InMemoryProductAnalyticsQueueStore();
+    sl.registerSingleton<ProductAnalyticsRecorder>(
+      ProductAnalyticsRecorder(
+        policy: SyntheticPolicySource(),
+        sink: CaptureSink(),
+        store: store,
+        newEventId: sequentialEventIds(),
+      )..bindAccount('user-a'),
+    );
+    await tester.pumpWidget(await _detailsApp());
+    await tester.pumpAndSettle();
+    await tester.pump();
+
+    final List<ProductAnalyticsQueuedEvent> queued = allQueued(store);
+    expect(queued, hasLength(1));
+    expect(queued.single.envelope['eventName'], 'details_opened');
+    expect(queued.single.envelope['fields'], <String, String>{
+      'object_kind': 'activity',
+    });
+    expect(queued.single.envelope.toString().contains('evt_1'), isFalse);
+  });
+
+  fullPageTestWidgets('renders utility actions and opens contextual map', (
     tester,
   ) async {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
+    await _openUtilityMenu(tester);
+    expect(find.text('Add to Scenario'), findsOneWidget);
+    expect(find.text('Find similar'), findsOneWidget);
+    expect(find.text('Create similar'), findsOneWidget);
+    expect(find.text('View route'), findsOneWidget);
+    expect(find.text('Create route'), findsOneWidget);
+    await tester.tapAt(const Offset(4, 4));
+    await tester.pumpAndSettle();
+
     await tester.scrollPageUntilVisible(
-      find.text('Plan this recharge'),
+      find.text('Show on map'),
       260,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('Plan this recharge'), findsOneWidget);
-    expect(find.text('Build route'), findsOneWidget);
-    expect(find.text('Add to Scenario'), findsOneWidget);
-    expect(find.text('Add this stop to a personal plan'), findsOneWidget);
-    expect(find.text('Find similar'), findsOneWidget);
-    expect(find.text('Create similar'), findsOneWidget);
-    expect(find.text('Route from this'), findsOneWidget);
-    expect(find.text('Calm walk · Coffee'), findsOneWidget);
-
-    await tester.tap(find.text('Map'));
+    await tester.tap(find.text('Show on map'));
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
@@ -109,43 +168,16 @@ void main() {
     expect(find.text('27.333200'), findsOneWidget);
   });
 
-  fullPageTestWidgets('opens scenario search and create actions', (
-    tester,
-  ) async {
+  fullPageTestWidgets('opens Route, search and create actions', (tester) async {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
-    await tester.scrollPageUntilVisible(
-      find.text('Build route'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text('Build route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Builder page'), findsOneWidget);
-    expect(find.text('calm'), findsOneWidget);
-    expect(find.text('120'), findsOneWidget);
-    expect(find.text('1'), findsWidgets);
-    expect(find.textContaining('Morning yoga'), findsOneWidget);
-    expect(
-      find.text('wellness_recharge.calm_walk,food_drinks.coffee'),
-      findsOneWidget,
-    );
-
-    await tester.pumpWidget(await _detailsApp());
-    await tester.pumpAndSettle();
-
-    await tester.scrollPageUntilVisible(
-      find.text('Route map'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text('Route map'));
+    await _openUtilityMenu(tester);
+    await tester.tap(find.text('View route'));
     await tester.pumpAndSettle();
 
     expect(find.text('Map page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('120'), findsOneWidget);
     expect(
@@ -156,11 +188,7 @@ void main() {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
-    await tester.scrollPageUntilVisible(
-      find.text('Find similar'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await _openUtilityMenu(tester);
     await tester.tap(find.text('Find similar'));
     await tester.pumpAndSettle();
 
@@ -171,11 +199,7 @@ void main() {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
-    await tester.scrollPageUntilVisible(
-      find.text('Create similar'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await _openUtilityMenu(tester);
     await tester.tap(find.text('Create similar'));
     await tester.pumpAndSettle();
 
@@ -189,16 +213,12 @@ void main() {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
 
-    await tester.scrollPageUntilVisible(
-      find.text('Create route'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await _openUtilityMenu(tester);
     await tester.tap(find.text('Create route'));
     await tester.pumpAndSettle();
 
     expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
+    expect(find.text('route'), findsWidgets);
     expect(find.text('Morning yoga route'), findsOneWidget);
     expect(find.textContaining('Morning yoga'), findsWidgets);
     expect(find.text('120'), findsOneWidget);
@@ -213,6 +233,7 @@ void main() {
   ) async {
     await tester.pumpWidget(await _detailsApp());
     await tester.pumpAndSettle();
+    await _openUtilityMenu(tester);
     expect(find.text('Mark as visited'), findsNothing);
   });
 
@@ -234,11 +255,7 @@ void main() {
       await _detailsApp(visitedController: visitedController),
     );
     await tester.pumpAndSettle();
-    await tester.scrollPageUntilVisible(
-      find.text('Mark as visited'),
-      260,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await _openUtilityMenu(tester);
 
     await tester.tap(find.text('Mark as visited'));
     await tester.pumpAndSettle();
@@ -253,10 +270,17 @@ void main() {
   });
 }
 
+/// Actions moved from the legacy in-body hub into the hero utility menu.
+Future<void> _openUtilityMenu(WidgetTester tester) async {
+  await tester.tap(find.byTooltip('Share and more actions'));
+  await tester.pumpAndSettle();
+}
+
 DiscoverObjectKind _detailsKindForTest = DiscoverObjectKind.activity;
 
 Future<Widget> _detailsApp({
   VisitedPlacesController? visitedController,
+  Locale? locale,
   List<Override> additionalOverrides = const <Override>[],
 }) async {
   final AuthController authController = AuthController(
@@ -301,6 +325,13 @@ Future<Widget> _detailsApp({
   return ProviderScope(
     overrides: overrides,
     child: MaterialApp.router(
+      locale: locale,
+      localizationsDelegates: locale == null
+          ? null
+          : AppLocalizations.localizationsDelegates,
+      supportedLocales: locale == null
+          ? const <Locale>[Locale('en', 'US')]
+          : AppLocalizations.supportedLocales,
       routerConfig: GoRouter(
         initialLocation: '${RouteNames.discoverDetails}/evt_1',
         routes: <RouteBase>[
@@ -331,7 +362,7 @@ Future<Widget> _detailsApp({
             ),
           ),
           GoRoute(
-            path: RouteNames.scenarioBuilder,
+            path: RouteNames.legacyScenarioBuilder,
             builder: (context, state) => Scaffold(
               body: Column(
                 children: <Widget>[
@@ -466,10 +497,11 @@ DiscoverItemEntity _detailsItem({
     startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
     latitude: 56.5099,
     longitude: 27.3332,
-    priceAmount: 0,
+    priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
     distanceKm: 1.2,
     isFree: true,
     objectKind: objectKind,
+    timezoneId: 'Europe/Riga',
     organizerName: 'Recharge Studio',
     organizerHandle: '@recharge',
     venueName: 'Green studio',

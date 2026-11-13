@@ -1,0 +1,124 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const backendRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
+const source = readFileSync(
+  path.join(backendRoot, "functions", "src", "index.ts"),
+  "utf8",
+);
+const exports = [
+  ...source.matchAll(/export\s+const\s+([A-Za-z0-9_]+)/gu),
+  ...source.matchAll(/export\s*\{\s*([A-Za-z0-9_]+)\s*\}/gu),
+]
+  .map((match) => match[1])
+  .sort();
+const expected = [
+  "cancelInternalBookingV1",
+  "createInternalBookingV1",
+  "reconfirmInternalBookingV1",
+  "getEventAvailabilityV1",
+  "getMyBookingV1",
+  "establishIdentitySessionV1",
+  "refreshIdentitySessionV1",
+  "recoverIdentitySessionsV1",
+  "releaseMissedReconfirmationsV1",
+  "consumeEventBookingOutboxV1",
+  "retryEventBookingProjectionDeliveriesV1",
+  "listMyBookingsV1",
+  "r0ToolchainProbe",
+  "mediaCommandV1",
+  "mediaQueryV1",
+  "uploadMediaBytesV1",
+  "contentCommandV1",
+  "contentQueryV1",
+  // E2: default-off, Emulator-only Discover read and Content effect trigger.
+  "discoverQueryV1",
+  "consumeContentEffectV1",
+  // F1: default-off, Emulator-only Notifications inbox and Booking-effect trigger.
+  "notificationsQueryV1",
+  "notificationsCommandV1",
+  "libraryCommandV1",
+  "libraryQueryV1",
+  // ADR 0022 stage 1: default-off, Emulator-only translation with the mock adapter.
+  "offerContentTranslationV1",
+  "translateContentV1",
+  "syncContentTranslationsV1",
+  "purgeContentTranslationsOnHoldV1",
+  "sweepContentTranslationsV1",
+  "quickPlanCommandV1",
+  "quickPlanQueryV1",
+  "routeCommandV1",
+  "routeQueryV1",
+  "scenarioCommandV1",
+  "scenarioQueryV1",
+  // D3.7: default-off, Emulator-only Find People consent and retention erasure.
+  "findPeopleConsentCommandV1",
+  "findPeopleConsentQueryV1",
+  "purgeFindPeoplePrivateLocationsV1",
+  "moderationCommandV1",
+  "moderationQueryV1",
+  "reportCommandV1",
+  "reportQueryV1",
+  "reviewCommandV1",
+  "reviewQueryV1",
+  "safetyCommandV1",
+  "safetyQueryV1",
+  "consumeNotificationEffectV1",
+  // D2: default-off, Emulator-only delivery gate, Media-fact trigger and sweeps.
+  "mediaDeliveryV1",
+  "consumeMediaEffectV1",
+  "reconcileMediaReferencesV1",
+  // ADR 0023 (2026-11-08): the author's DSA Art. 30 seller declaration (Emulator).
+  "sellerDeclarationV1",
+  // N3c (2026-11-13): the FCM token of the caller's Session installation (Emulator).
+  "pushDeviceCommandV1",
+].sort();
+if (JSON.stringify(exports) !== JSON.stringify(expected)) {
+  throw new Error(`Unexpected function export surface: ${exports.join(", ")}`);
+}
+const schedules = [
+  ...source.matchAll(/export\s+const\s+([A-Za-z0-9_]+)\s*=\s*onSchedule/gu),
+].map((match) => match[1]);
+if (
+  JSON.stringify(schedules.sort()) !==
+  JSON.stringify([
+    // D3.7 §5.3: Emulator-only Find People retention erasure (never flag-gated).
+    "purgeFindPeoplePrivateLocationsV1",
+    "reconcileMediaReferencesV1",
+    "releaseMissedReconfirmationsV1",
+    "retryEventBookingProjectionDeliveriesV1",
+    // ADR 0022 stage 1: Emulator-only removal of expired translations.
+    "sweepContentTranslationsV1",
+  ])
+) {
+  throw new Error(
+    `Only the approved disabled Event and Booking schedules are allowed: ${schedules.join(", ")}`,
+  );
+}
+const firestoreTriggers = [
+  ...source.matchAll(
+    /export\s+const\s+([A-Za-z0-9_]+)\s*=\s*onDocumentCreated\(\s*\{\s*document:\s*'([^']+)'/gu,
+  ),
+]
+  .map((match) => `${match[1]}@${match[2]}`)
+  .sort();
+if (
+  JSON.stringify(firestoreTriggers) !==
+  JSON.stringify([
+    "consumeContentEffectV1@contentEffects/{effectId}",
+    "consumeEventBookingOutboxV1@eventBookingOutbox/{outboxId}",
+    "consumeMediaEffectV1@mediaEffects/{effectId}",
+    "consumeNotificationEffectV1@bookingOutbox/{outboxId}",
+  ])
+) {
+  throw new Error(
+    `Only the approved Emulator-only Firestore triggers are allowed: ${firestoreTriggers.join(", ")}`,
+  );
+}
+process.stdout.write(
+  "R1 export gate passed: bounded Booking, Session lifecycle, Event delivery, reconfirmation-deadline, Media, Content, Discover, Content-effect, Notifications and D2 Media-delivery surface.\n",
+);

@@ -1,0 +1,59 @@
+{
+  "complete": true,
+  "code": 0,
+  "groups": [
+    {
+      "name": "place-activity",
+      "ms": 169624,
+      "timeoutMs": 300000,
+      "log": "C:\\Users\\User\\AppData\\Local\\Temp\\recharge-emulator-tests-SFVQzB\\place-activity.log",
+      "code": 0,
+      "tests": 29,
+      "passed": 29,
+      "failed": 0,
+      "skipped": 0,
+      "tasks": [
+        {
+          "args": [
+            "lib/test/emulator/media_delivery_callable.test.js"
+          ],
+          "ms": 4788,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/content_place_callable.test.js"
+          ],
+          "ms": 31589,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/content_place_emulator_flow.test.js"
+          ],
+          "ms": 43152,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/content_activity_callable.test.js"
+          ],
+          "ms": 40795,
+          "code": 0,
+          "timedOut": false
+        },
+        {
+          "args": [
+            "lib/test/emulator/content_activity_emulator_flow.test.js"
+          ],
+          "ms": 49277,
+          "code": 0,
+          "timedOut": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../app/config/market_config.dart';
+import '../../../../core/localization/app_locale_policy.dart';
 import '../../../../core/notifications/app_notification_sink.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/admin_experience_preview.dart';
@@ -50,11 +51,14 @@ class IdentityWorkspaceController extends ChangeNotifier {
 
     final int operationRevision = ++_operationRevision;
     _setState(
-      _state.copyWith(
-        status: IdentityWorkspaceStatus.loading,
-        userId: userId,
-        clearMessage: true,
-      ),
+      // A different account must never inherit the previous account's access,
+      // workspace or presentation while its own snapshot is pending or fails.
+      (_state.userId == userId ? _state : IdentityWorkspaceState.initial())
+          .copyWith(
+            status: IdentityWorkspaceStatus.loading,
+            userId: userId,
+            clearMessage: true,
+          ),
     );
 
     try {
@@ -72,7 +76,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
           pendingLimitRequest: result.pendingLimitRequest,
           message: result.recoveryReasonCode == null
               ? null
-              : 'Недоступная страница сброшена на личный профиль',
+              : 'workspace_recovered',
         ),
       );
       _analyticsService.track(
@@ -88,9 +92,42 @@ class IdentityWorkspaceController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: IdentityWorkspaceStatus.error,
-          message: 'Не удалось загрузить рабочие профили',
+          message: 'workspace_load_failed',
         ),
       );
+    }
+  }
+
+  /// IDP-05A: re-reads access and repairs a stale active workspace. A page
+  /// whose membership was revoked or whose lifecycle left `active` drops the
+  /// user back to the personal profile (fail-closed, preference repaired by
+  /// the load use case). Returns `true` when the active workspace changed.
+  Future<bool> revalidateAccess() async {
+    if (!_state.isLoaded || _state.userId.isEmpty || _state.isBusy) {
+      return false;
+    }
+    final int operationRevision = ++_operationRevision;
+    try {
+      final IdentityWorkspaceLoadResult result =
+          await _loadIdentityWorkspaceUseCase(_state.userId);
+      if (operationRevision != _operationRevision) return false;
+      final bool changed = result.activeWorkspace != _state.activeWorkspace;
+      _setState(
+        _state.copyWith(
+          accessSnapshot: result.accessSnapshot,
+          activeWorkspace: result.activeWorkspace,
+          pendingLimitRequest: result.pendingLimitRequest,
+          clearPendingLimitRequest: result.pendingLimitRequest == null,
+          clearAdminPreview: changed,
+          message: result.recoveryReasonCode == null
+              ? null
+              : 'workspace_recovered',
+          clearMessage: result.recoveryReasonCode == null,
+        ),
+      );
+      return changed;
+    } on Exception {
+      return false;
     }
   }
 
@@ -120,7 +157,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
           status: IdentityWorkspaceStatus.ready,
           activeWorkspace: selected,
           clearAdminPreview: true,
-          message: 'Рабочий профиль переключён',
+          message: 'workspace_switched',
         ),
       );
       _analyticsService.track(
@@ -137,7 +174,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: IdentityWorkspaceStatus.ready,
-          message: 'Доступ к выбранной странице недоступен',
+          message: 'workspace_access_unavailable',
         ),
       );
       return false;
@@ -146,7 +183,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: IdentityWorkspaceStatus.ready,
-          message: 'Не удалось переключить рабочий профиль',
+          message: 'workspace_switch_failed',
         ),
       );
       return false;
@@ -161,10 +198,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
       return false;
     }
     _setState(
-      _state.copyWith(
-        adminPreview: preview,
-        message: 'Admin preview: ${preview.name}',
-      ),
+      _state.copyWith(adminPreview: preview, message: 'admin_preview_selected'),
     );
     _analyticsService.track(
       'identity_admin_experience_preview_selected',
@@ -197,10 +231,14 @@ class IdentityWorkspaceController extends ChangeNotifier {
           displayName: displayName,
           marketId: _marketConfig.marketCityId,
           countryCode: _marketConfig.countryCode,
-          defaultLocale: _marketConfig.defaultLocaleCode,
+          defaultLocale: AppLocalePolicy.canonicalTag(
+            _marketConfig.defaultLocaleCode,
+          ),
           timezone: _marketConfig.timezoneId,
           defaultCurrency: _marketConfig.currencyCode,
-          supportedLocales: _marketConfig.supportedLocaleCodes,
+          supportedLocales: _marketConfig.supportedLocaleCodes
+              .map(AppLocalePolicy.canonicalTag)
+              .toList(growable: false),
         ),
       );
       await _selectWorkspaceUseCase(
@@ -220,7 +258,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
           activeWorkspace: result.activeWorkspace,
           adminPreview: null,
           pendingLimitRequest: result.pendingLimitRequest,
-          message: 'Professional Page создана и отправлена на проверку',
+          message: 'page_created',
         ),
       );
       _analyticsService.track(
@@ -234,8 +272,8 @@ class IdentityWorkspaceController extends ChangeNotifier {
     } on CreateProfessionalPageException catch (error) {
       if (operationRevision != _operationRevision) return false;
       final String message = error.code == 'self_service_page_limit_reached'
-          ? 'Достигнут лимит 3 страниц. Отправьте заявку модераторам.'
-          : 'Не удалось создать Professional Page';
+          ? 'self_service_page_limit_reached'
+          : 'page_create_failed';
       _setState(
         _state.copyWith(
           status: IdentityWorkspaceStatus.ready,
@@ -248,7 +286,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: IdentityWorkspaceStatus.ready,
-          message: 'Не удалось создать Professional Page',
+          message: 'page_create_failed',
         ),
       );
       return false;
@@ -277,7 +315,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
         _state.copyWith(
           status: IdentityWorkspaceStatus.ready,
           pendingLimitRequest: request,
-          message: 'Заявка на дополнительную страницу отправлена',
+          message: 'page_limit_request_sent',
         ),
       );
       _analyticsService.track(
@@ -290,7 +328,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: IdentityWorkspaceStatus.ready,
-          message: 'Заявка доступна после создания трёх страниц',
+          message: 'page_limit_request_unavailable',
         ),
       );
       return false;
@@ -299,7 +337,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: IdentityWorkspaceStatus.ready,
-          message: 'Не удалось отправить заявку модераторам',
+          message: 'page_limit_request_failed',
         ),
       );
       return false;
@@ -313,8 +351,10 @@ class IdentityWorkspaceController extends ChangeNotifier {
         id: 'professional-page-created-${page.id}-user',
         audience: AppNotificationAudience.user,
         recipientUserId: _state.userId,
-        title: 'Professional Page создана',
-        body: '${page.displayName}: статус проверки — Pending review.',
+        templateCode: 'identity_page_created_user',
+        title:
+            'Professional Page created', // l10n-ignore: fallback for old app versions; the inbox renders templateCode
+        body: page.displayName,
         createdAtUtc: page.createdAtUtc,
         targetRoute: route,
       ),
@@ -323,8 +363,10 @@ class IdentityWorkspaceController extends ChangeNotifier {
       AppNotificationEvent(
         id: 'professional-page-created-${page.id}-moderators',
         audience: AppNotificationAudience.moderators,
-        title: 'Новая Professional Page',
-        body: 'Создана новая страница. Требуется проверка.',
+        templateCode: 'identity_page_created_moderators',
+        title:
+            'New Professional Page', // l10n-ignore: fallback for old app versions; the inbox renders templateCode
+        body: page.displayName,
         createdAtUtc: page.createdAtUtc,
         targetRoute: route,
       ),
@@ -340,8 +382,10 @@ class IdentityWorkspaceController extends ChangeNotifier {
         id: 'page-limit-request-${request.id}-user',
         audience: AppNotificationAudience.user,
         recipientUserId: request.userId,
-        title: 'Заявка отправлена',
-        body: 'Модераторы рассмотрят дополнительную Professional Page.',
+        templateCode: 'identity_page_limit_request_user',
+        title:
+            'Request sent', // l10n-ignore: fallback for old app versions; the inbox renders templateCode
+        body: '',
         createdAtUtc: request.createdAtUtc,
         targetRoute: route,
       ),
@@ -350,8 +394,11 @@ class IdentityWorkspaceController extends ChangeNotifier {
       AppNotificationEvent(
         id: 'page-limit-request-${request.id}-moderators',
         audience: AppNotificationAudience.moderators,
-        title: 'Запрос дополнительной страницы',
-        body: 'Пользователь запросил лимит ${request.requestedOwnedPageLimit}.',
+        templateCode: 'identity_page_limit_request_moderators',
+        templateCount: request.requestedOwnedPageLimit,
+        title:
+            'Additional page request', // l10n-ignore: fallback for old app versions; the inbox renders templateCode
+        body: '',
         createdAtUtc: request.createdAtUtc,
         targetRoute: route,
       ),

@@ -152,7 +152,7 @@ class ApplyTimeWindowUseCase {
       if (aConfirmed != bConfirmed) return aConfirmed ? -1 : 1;
       final int score = b.relevanceScore.compareTo(a.relevanceScore);
       if (score != 0) return score;
-      return a.startsAtUtc.compareTo(b.startsAtUtc);
+      return a.compareStart(b);
     });
     return evaluated;
   }

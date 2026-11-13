@@ -4,38 +4,37 @@ import '../domain/entities/place_draft_data.dart';
 class PlaceCreateStepConfig {
   const PlaceCreateStepConfig({
     required this.id,
-    required this.title,
-    required this.description,
+    required this.titleId,
+    required this.descriptionId,
   });
 
   final String id;
-  final String title;
-  final String description;
+
+  /// ARB message ids; the UI resolves them with `createFormText` (L4).
+  final String titleId;
+  final String descriptionId;
 }
 
 const List<PlaceCreateStepConfig> placeCreateSteps = <PlaceCreateStepConfig>[
   PlaceCreateStepConfig(
     id: 'identity',
-    title: 'About',
-    description: 'Name, category and only the details this place needs',
+    titleId: 'createStepPlaceIdentityTitle',
+    descriptionId: 'createStepPlaceIdentityDescription',
   ),
   PlaceCreateStepConfig(
     id: 'visit',
-    title: 'Visit',
-    description: 'Confirmed map point and relevant visit information',
+    titleId: 'createStepPlaceVisitTitle',
+    descriptionId: 'createStepPlaceVisitDescription',
   ),
   PlaceCreateStepConfig(
     id: 'publish',
-    title: 'Publish',
-    description: 'Readiness, optional improvements and final checks',
+    titleId: 'createStepPlacePublishTitle',
+    descriptionId: 'createStepPlacePublishDescription',
   ),
 ];
 
 const PlaceCreationPolicy simplePoiPlacePolicy = PlaceCreationPolicy(
   id: PlaceCreationProfileId.simplePoi,
-  label: 'Simple point of interest',
-  description:
-      'A landmark people can identify and visit without managed access.',
   suggestedKind: PlaceKind.pointOfInterest,
   shortDescription: PlaceFieldRequirement.recommended,
   cover: PlaceFieldRequirement.recommended,
@@ -51,8 +50,6 @@ const PlaceCreationPolicy simplePoiPlacePolicy = PlaceCreationPolicy(
 
 const PlaceCreationPolicy publicSpacePlacePolicy = PlaceCreationPolicy(
   id: PlaceCreationProfileId.publicSpace,
-  label: 'Public space',
-  description: 'An open public area with optional access restrictions.',
   suggestedKind: PlaceKind.publicSpace,
   shortDescription: PlaceFieldRequirement.recommended,
   cover: PlaceFieldRequirement.recommended,
@@ -68,8 +65,6 @@ const PlaceCreationPolicy publicSpacePlacePolicy = PlaceCreationPolicy(
 
 const PlaceCreationPolicy naturalDestinationPlacePolicy = PlaceCreationPolicy(
   id: PlaceCreationProfileId.naturalDestination,
-  label: 'Natural destination',
-  description: 'A natural point or area where access facts may be unknown.',
   suggestedKind: PlaceKind.publicSpace,
   shortDescription: PlaceFieldRequirement.recommended,
   cover: PlaceFieldRequirement.recommended,
@@ -85,8 +80,6 @@ const PlaceCreationPolicy naturalDestinationPlacePolicy = PlaceCreationPolicy(
 
 const PlaceCreationPolicy culturalVenuePlacePolicy = PlaceCreationPolicy(
   id: PlaceCreationProfileId.culturalVenue,
-  label: 'Cultural venue',
-  description: 'A managed museum, gallery, cinema or cultural venue.',
   suggestedKind: PlaceKind.managedVenue,
   shortDescription: PlaceFieldRequirement.required,
   cover: PlaceFieldRequirement.required,
@@ -102,8 +95,6 @@ const PlaceCreationPolicy culturalVenuePlacePolicy = PlaceCreationPolicy(
 
 const PlaceCreationPolicy hospitalityPlacePolicy = PlaceCreationPolicy(
   id: PlaceCreationProfileId.hospitality,
-  label: 'Food or hospitality venue',
-  description: 'A managed venue where spend matters but admission does not.',
   suggestedKind: PlaceKind.managedVenue,
   shortDescription: PlaceFieldRequirement.required,
   cover: PlaceFieldRequirement.required,
@@ -119,8 +110,6 @@ const PlaceCreationPolicy hospitalityPlacePolicy = PlaceCreationPolicy(
 
 const PlaceCreationPolicy activityVenuePlacePolicy = PlaceCreationPolicy(
   id: PlaceCreationProfileId.activityVenue,
-  label: 'Activity or service venue',
-  description: 'A managed venue with optional booking, spend and facilities.',
   suggestedKind: PlaceKind.managedVenue,
   shortDescription: PlaceFieldRequirement.required,
   cover: PlaceFieldRequirement.required,
@@ -136,8 +125,6 @@ const PlaceCreationPolicy activityVenuePlacePolicy = PlaceCreationPolicy(
 
 const PlaceCreationPolicy paidAttractionPlacePolicy = PlaceCreationPolicy(
   id: PlaceCreationProfileId.paidAttraction,
-  label: 'Managed attraction',
-  description: 'A managed attraction that may have admission and facilities.',
   suggestedKind: PlaceKind.managedVenue,
   shortDescription: PlaceFieldRequirement.required,
   cover: PlaceFieldRequirement.required,
@@ -153,8 +140,6 @@ const PlaceCreationPolicy paidAttractionPlacePolicy = PlaceCreationPolicy(
 
 const PlaceCreationPolicy balancedPlacePolicy = PlaceCreationPolicy(
   id: PlaceCreationProfileId.balanced,
-  label: 'General place',
-  description: 'A safe fallback with no invented opening or pricing facts.',
   suggestedKind: PlaceKind.pointOfInterest,
   shortDescription: PlaceFieldRequirement.recommended,
   cover: PlaceFieldRequirement.recommended,
@@ -270,76 +255,32 @@ PlaceCreationPolicy placeCreationPolicyFor(String subcategoryId) {
 }
 
 class PlaceAmenityDefinition {
-  const PlaceAmenityDefinition({
-    required this.id,
-    required this.label,
-    required this.group,
-  });
+  const PlaceAmenityDefinition({required this.id, required this.group});
 
   final String id;
-  final String label;
+
+  /// Stable group id; the UI shows `createAmenityGroup` (L4).
   final String group;
 }
 
-const List<PlaceAmenityDefinition>
-placeAmenityTaxonomy = <PlaceAmenityDefinition>[
-  PlaceAmenityDefinition(
-    id: 'wheelchair_accessible',
-    label: 'Wheelchair accessible',
-    group: 'Accessibility',
-  ),
-  PlaceAmenityDefinition(
-    id: 'accessible_toilet',
-    label: 'Accessible toilet',
-    group: 'Accessibility',
-  ),
-  PlaceAmenityDefinition(id: 'parking', label: 'Parking', group: 'Transport'),
-  PlaceAmenityDefinition(
-    id: 'bike_parking',
-    label: 'Bike parking',
-    group: 'Transport',
-  ),
-  PlaceAmenityDefinition(
-    id: 'public_transport_nearby',
-    label: 'Public transport nearby',
-    group: 'Transport',
-  ),
-  PlaceAmenityDefinition(
-    id: 'family_friendly',
-    label: 'Family friendly',
-    group: 'Family',
-  ),
-  PlaceAmenityDefinition(
-    id: 'baby_changing',
-    label: 'Baby changing',
-    group: 'Family',
-  ),
-  PlaceAmenityDefinition(
-    id: 'pets_allowed',
-    label: 'Pets allowed',
-    group: 'Pets',
-  ),
-  PlaceAmenityDefinition(id: 'toilet', label: 'Toilet', group: 'Facilities'),
-  PlaceAmenityDefinition(id: 'wifi', label: 'Wi-Fi', group: 'Facilities'),
-  PlaceAmenityDefinition(
-    id: 'drinking_water',
-    label: 'Drinking water',
-    group: 'Facilities',
-  ),
-  PlaceAmenityDefinition(
-    id: 'food_available',
-    label: 'Food available',
-    group: 'Food',
-  ),
-  PlaceAmenityDefinition(
-    id: 'outdoor_seating',
-    label: 'Outdoor seating',
-    group: 'Outdoor',
-  ),
-  PlaceAmenityDefinition(
-    id: 'shelter',
-    label: 'Weather shelter',
-    group: 'Outdoor',
-  ),
-  PlaceAmenityDefinition(id: 'first_aid', label: 'First aid', group: 'Safety'),
-];
+const List<PlaceAmenityDefinition> placeAmenityTaxonomy =
+    <PlaceAmenityDefinition>[
+      PlaceAmenityDefinition(
+        id: 'wheelchair_accessible',
+        group: 'accessibility',
+      ),
+      PlaceAmenityDefinition(id: 'accessible_toilet', group: 'accessibility'),
+      PlaceAmenityDefinition(id: 'parking', group: 'transport'),
+      PlaceAmenityDefinition(id: 'bike_parking', group: 'transport'),
+      PlaceAmenityDefinition(id: 'public_transport_nearby', group: 'transport'),
+      PlaceAmenityDefinition(id: 'family_friendly', group: 'family'),
+      PlaceAmenityDefinition(id: 'baby_changing', group: 'family'),
+      PlaceAmenityDefinition(id: 'pets_allowed', group: 'pets'),
+      PlaceAmenityDefinition(id: 'toilet', group: 'facilities'),
+      PlaceAmenityDefinition(id: 'wifi', group: 'facilities'),
+      PlaceAmenityDefinition(id: 'drinking_water', group: 'facilities'),
+      PlaceAmenityDefinition(id: 'food_available', group: 'food'),
+      PlaceAmenityDefinition(id: 'outdoor_seating', group: 'outdoor'),
+      PlaceAmenityDefinition(id: 'shelter', group: 'outdoor'),
+      PlaceAmenityDefinition(id: 'first_aid', group: 'safety'),
+    ];

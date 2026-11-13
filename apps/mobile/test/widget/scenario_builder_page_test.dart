@@ -7,6 +7,7 @@ import 'package:recharge/app/application/planning_conversion_providers.dart';
 import 'package:recharge/app/adapters/legacy_quick_plan_conversion_adapter.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -18,6 +19,7 @@ import 'package:recharge/features/auth/domain/usecases/restore_session_usecase.d
 import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -40,9 +42,114 @@ import 'package:recharge/features/create/data/datasources/quick_plan_conversion_
 import 'package:recharge/features/create/domain/usecases/expand_quick_plan_to_scenario_usecase.dart';
 import 'package:recharge/features/scenarios/presentation/pages/scenario_builder_page.dart';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:recharge/features/scenarios/application/controllers/scenario_builder_controller.dart';
+import 'package:recharge/features/scenarios/application/scenario_builder_providers.dart';
+import 'package:recharge/features/scenarios/data/quick_plan_sync_client.dart';
+import 'package:recharge/features/scenarios/data/quick_plan_codec.dart';
+
+import '../support/l10n/l10n_screen_harness.dart';
 import 'widget_test_viewport.dart';
 
 void main() {
+  // L4.6: the Scenario builder in lv, en and ru at 360 dp.
+  l10nSmallScreenTestWidgets('Scenario builder', (tester, locale, scale) async {
+    await tester.pumpWidget(
+      _scenarioProviderScope(
+        child: l10nTestApp(
+          locale: locale,
+          scale: scale,
+          home: const ScenarioBuilderPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text(l10nFor(locale).quickPlanBuildRechargeRoute),
+      findsOneWidget,
+    );
+    await l10nScrollThrough(tester);
+  });
+
+  fullPageTestWidgets(
+    'invitation controls open online read-only content and hide it after revoke',
+    (tester) async {
+      FlutterSecureStorage.setMockInitialValues({});
+      final seed = ScenarioBuilderController();
+      final shared = seed.state.draft.copyWith(
+        sourcePrompt: 'Private invited stops',
+      );
+      seed.dispose();
+      var status = 'pending';
+      final g = <String, Object?>{
+        'planId': shared.id,
+        'ownerId': 'owner',
+        'inviteeId': 'viewer',
+        'invitationId': 'invitation',
+        'generation': 1,
+        'status': status,
+      };
+      final client = QuickPlanSyncClient(
+        storage: const FlutterSecureStorage(),
+        installationId: 'widget',
+        currentOwner: () => 'viewer',
+        invoke: (surface, request) async {
+          if (surface == 'quickPlanCommandV1') {
+            status = 'accepted';
+            return {'kind': 'succeeded'};
+          }
+          if (request['queryType'] == 'invitations') {
+            return {
+              'kind': 'succeeded',
+              'ownerId': 'viewer',
+              'invitations': [
+                {...g, 'status': status},
+              ],
+            };
+          }
+          if (request['planOwnerId'] != null) {
+            return status == 'accepted'
+                ? {
+                    'kind': 'succeeded',
+                    'ownerId': 'viewer',
+                    'entry': {
+                      'status': 'active',
+                      'plan': encodeQuickPlan(shared),
+                    },
+                  }
+                : {'kind': 'rejected', 'code': 'access_revoked'};
+          }
+          return {'kind': 'succeeded', 'ownerId': 'viewer', 'entry': null};
+        },
+      );
+      await tester.pumpWidget(
+        _scenarioProviderScope(
+          overrides: [quickPlanRepositoryProvider.overrideWithValue(client)],
+          child: const MaterialApp(home: QuickPlanPage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Invitations and access'));
+      await tester.pumpAndSettle();
+      expect(find.text('Open read-only'), findsNothing);
+      await tester.tap(find.text('Accept'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Open read-only'));
+      await tester.pumpAndSettle();
+      expect(find.text('Private invited stops'), findsOneWidget);
+      expect(find.text('Leave plan'), findsOneWidget);
+      expect(find.text('Edit'), findsNothing);
+      expect(find.text('Expand to Scenario'), findsNothing);
+      expect(find.byTooltip('Reset'), findsNothing);
+      status = 'revoked';
+      await tester.tap(find.byTooltip('Refresh access'));
+      await tester.pumpAndSettle();
+      expect(find.text('Private invited stops'), findsNothing);
+      expect(find.textContaining('Content hidden'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
   fullPageTestWidgets('previews one-way Expand to Scenario losses', (
     tester,
   ) async {
@@ -144,10 +251,10 @@ void main() {
         ],
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: '${RouteNames.scenarioBuilder}?preview=1',
+            initialLocation: '${RouteNames.legacyScenarioBuilder}?preview=1',
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => ScenarioBuilderPage(
                   seedParameters: state.uri.queryParameters,
                 ),
@@ -207,7 +314,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('My plan'), findsOneWidget);
+    expect(find.text('My quick plan'), findsOneWidget);
     expect(find.text('After work'), findsOneWidget);
     expect(find.text('Your route'), findsOneWidget);
     expect(find.byKey(const Key('scenario-preview-edit')), findsOneWidget);
@@ -215,7 +322,7 @@ void main() {
 
     await tester.tap(find.byKey(const Key('scenario-preview-edit')));
     await tester.pumpAndSettle();
-    expect(find.text('Scenario Builder'), findsOneWidget);
+    expect(find.text('Quick Plan'), findsOneWidget);
     expect(find.text('Ready route ideas'), findsOneWidget);
   });
 
@@ -229,7 +336,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Scenario Builder'), findsOneWidget);
+    expect(find.text('Quick Plan'), findsOneWidget);
     expect(find.text('Build a recharge route'), findsOneWidget);
     expect(find.text('Slow coffee start'), findsOneWidget);
 
@@ -259,7 +366,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Active plan with 1 stops'), findsOneWidget);
+    expect(find.text('Active plan · 1 stop'), findsOneWidget);
     expect(find.text('Intent: tennis near me'), findsOneWidget);
     expect(find.text('Tennis warm-up'), findsOneWidget);
   });
@@ -281,7 +388,7 @@ void main() {
     await tester.tap(find.byTooltip('Apply Social evening template'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Social plan with 2 stops'), findsOneWidget);
+    expect(find.text('Social plan · 2 stops'), findsOneWidget);
     expect(find.text('Intent: social evening near me'), findsOneWidget);
     expect(find.text('Board game table'), findsOneWidget);
     expect(find.text('Afterwork drinks'), findsWidgets);
@@ -306,9 +413,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Calm city walk'), findsOneWidget);
+    expect(find.text('Calm city walk'), findsNWidgets(2));
     expect(find.text('Slow coffee start'), findsOneWidget);
-    expect(find.text('Calm plan with 1 stops'), findsOneWidget);
+    expect(find.text('Calm plan · 1 stop'), findsOneWidget);
   });
 
   fullPageTestWidgets('opens map with scenario route parameters', (
@@ -318,10 +425,10 @@ void main() {
       _scenarioProviderScope(
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.scenarioBuilder,
+            initialLocation: RouteNames.legacyScenarioBuilder,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => const ScenarioBuilderPage(),
               ),
               GoRoute(
@@ -347,7 +454,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map route page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
     expect(find.textContaining('wellness_recharge.calm_walk'), findsOneWidget);
   });
@@ -359,10 +466,10 @@ void main() {
       _scenarioProviderScope(
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.scenarioBuilder,
+            initialLocation: RouteNames.legacyScenarioBuilder,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => const ScenarioBuilderPage(),
               ),
               GoRoute(
@@ -392,7 +499,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map route page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.text('social'), findsOneWidget);
     expect(find.text('social evening near me'), findsOneWidget);
     expect(find.textContaining('games_indoor.board_games'), findsOneWidget);
@@ -408,13 +515,13 @@ void main() {
         child: MaterialApp.router(
           routerConfig: GoRouter(
             initialLocation:
-                '${RouteNames.scenarioBuilder}?mood=social&duration=90'
+                '${RouteNames.legacyScenarioBuilder}?mood=social&duration=90'
                 '&free=1&walking=1'
                 '&steps=games_indoor.board_games,'
                 'music_nightlife.afterwork_drinks',
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => ScenarioBuilderPage(
                   seedParameters: state.uri.queryParameters,
                 ),
@@ -463,7 +570,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Map route page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.textContaining('games_indoor.board_games'), findsOneWidget);
     expect(
       find.textContaining('music_nightlife.afterwork_drinks'),
@@ -476,10 +583,10 @@ void main() {
       _scenarioProviderScope(
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.scenarioBuilder,
+            initialLocation: RouteNames.legacyScenarioBuilder,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => const ScenarioBuilderPage(),
               ),
               GoRoute(
@@ -512,7 +619,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
+    expect(find.text('route'), findsWidgets);
     expect(find.text('calm'), findsOneWidget);
     expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
   });
@@ -524,10 +631,10 @@ void main() {
       _scenarioProviderScope(
         child: MaterialApp.router(
           routerConfig: GoRouter(
-            initialLocation: RouteNames.scenarioBuilder,
+            initialLocation: RouteNames.legacyScenarioBuilder,
             routes: <RouteBase>[
               GoRoute(
-                path: RouteNames.scenarioBuilder,
+                path: RouteNames.legacyScenarioBuilder,
                 builder: (context, state) => const ScenarioBuilderPage(),
               ),
               GoRoute(
@@ -557,7 +664,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
+    expect(find.text('route'), findsWidgets);
     expect(find.text('Calm recharge route'), findsOneWidget);
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('150'), findsOneWidget);
@@ -579,7 +686,7 @@ void main() {
 
       await _tapScrollableTooltip(tester, 'Apply saved conditions to builder');
 
-      expect(find.textContaining('Social plan with'), findsOneWidget);
+      expect(find.textContaining('Social plan · '), findsOneWidget);
       expect(find.textContaining('Intent: museum'), findsOneWidget);
 
       await _pumpScenarioIntentHarness(
@@ -628,7 +735,7 @@ void main() {
 
     await _tapScrollableTooltip(tester, 'Apply smart search to builder');
 
-    expect(find.textContaining('Social plan with'), findsOneWidget);
+    expect(find.textContaining('Social plan · '), findsOneWidget);
     expect(find.text('Intent: museum today under 10'), findsOneWidget);
 
     await _pumpScenarioIntentHarness(
@@ -680,7 +787,7 @@ void main() {
 
     await _tapScrollableTooltip(tester, 'Apply smart search to builder');
 
-    expect(find.textContaining('Calm plan with'), findsOneWidget);
+    expect(find.textContaining('Calm plan · '), findsOneWidget);
     expect(find.textContaining('Intent: build a free calm'), findsOneWidget);
     expect(find.textContaining('Coffee'), findsWidgets);
 
@@ -692,7 +799,7 @@ void main() {
     await _tapScrollableTooltip(tester, 'Open smart search on map');
 
     expect(find.text('Map route page'), findsOneWidget);
-    expect(find.text('scenario'), findsOneWidget);
+    expect(find.text('route'), findsOneWidget);
     expect(find.text('calm'), findsOneWidget);
     expect(find.text('120'), findsOneWidget);
     expect(find.textContaining('wellness_recharge.calm_walk'), findsOneWidget);
@@ -705,10 +812,10 @@ void main() {
     await _tapScrollableTooltip(tester, 'Create listing from smart search');
 
     expect(find.text('Create page'), findsOneWidget);
-    expect(find.text('scenario'), findsWidgets);
+    expect(find.text('route'), findsWidgets);
     expect(find.text('Calm recharge route'), findsOneWidget);
     expect(find.text(prompt), findsOneWidget);
-    expect(find.text('event'), findsOneWidget);
+    expect(find.text('route'), findsWidgets);
     expect(find.textContaining('food_drinks.coffee'), findsOneWidget);
   });
 
@@ -738,7 +845,9 @@ void main() {
     expect(find.text('Slow coffee start'), findsOneWidget);
   });
 
-  fullPageTestWidgets('saves scenario into favorites', (tester) async {
+  fullPageTestWidgets('saves Quick Plan with an explicit target kind', (
+    tester,
+  ) async {
     final AuthController authController = AuthController(
       signInUseCase: SignInUseCase(_NoopAuthRepository()),
       restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
@@ -779,9 +888,9 @@ void main() {
 
     final List<FavoriteItemEntity> saved = await repository.getFavorites();
     expect(saved, hasLength(1));
-    expect(saved.single.category, 'scenario');
-    expect(saved.single.title, contains('recharge scenario'));
-    expect(saved.single.targetRoute, contains('/scenario-builder'));
+    expect(saved.single.category, 'quick_plan');
+    expect(saved.single.title, contains('quick plan'));
+    expect(saved.single.targetRoute, contains('/quick-plan/'));
     expect(saved.single.targetRoute, contains('steps='));
   });
 }
@@ -815,12 +924,21 @@ Future<void> _pumpScenarioIntentHarness(
       ),
       child: MaterialApp.router(
         routerConfig: GoRouter(
-          initialLocation: RouteNames.scenarioBuilder,
+          initialLocation: RouteNames.legacyScenarioBuilder,
           routes: <RouteBase>[
             GoRoute(
-              path: RouteNames.scenarioBuilder,
+              path: RouteNames.legacyScenarioBuilder,
               builder: (context, state) => ScenarioBuilderPage(
                 seedParameters: state.uri.queryParameters,
+              ),
+            ),
+            GoRoute(
+              path: '${RouteNames.quickPlan}/:quickPlanId',
+              builder: (context, state) => ScenarioBuilderPage(
+                seedParameters: <String, String>{
+                  ...state.uri.queryParameters,
+                  'quickPlanId': state.pathParameters['quickPlanId'] ?? '',
+                },
               ),
             ),
             GoRoute(
@@ -892,6 +1010,12 @@ DiscoverFeedController _discoverController({
       initialSmartSearchHistory: smartSearchHistory,
     ),
     analyticsService: _NoopAnalyticsService(),
+    runtimeDefaults: const DiscoverRuntimeDefaults(
+      timezoneId: 'Europe/Riga',
+      originLat: 56.9496,
+      originLng: 24.1052,
+      currencyCode: 'EUR',
+    ),
   );
 }
 
@@ -903,7 +1027,7 @@ SavedSearchEntity _savedSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -918,7 +1042,7 @@ SmartSearchHistoryEntity _smartSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: 10,
+      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -959,7 +1083,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: 0,
+      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,

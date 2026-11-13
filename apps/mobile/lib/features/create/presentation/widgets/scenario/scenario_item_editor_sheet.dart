@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/localization/l10n_context.dart';
+import '../../../../../core/parsing/input_parsers.dart';
+
 class ScenarioTimeBlockDraft {
   const ScenarioTimeBlockDraft({
     required this.title,
@@ -45,16 +48,16 @@ Future<ScenarioTimeBlockDraft?> showScenarioTimeBlockEditor(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text(
-                'Add time block',
+                context.l10n.createScenarioAddTimeBlock,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: title,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                  hintText: 'Coffee, rest, free time…',
+                decoration: InputDecoration(
+                  labelText: context.l10n.createScenarioTitle,
+                  hintText: context.l10n.createScenarioTimeBlockHint,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -62,9 +65,9 @@ Future<ScenarioTimeBlockDraft?> showScenarioTimeBlockEditor(
               TextField(
                 controller: duration,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Duration, minutes',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: context.l10n.createScenarioDurationMinutesField,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 12),
@@ -84,7 +87,7 @@ Future<ScenarioTimeBlockDraft?> showScenarioTimeBlockEditor(
                     ),
                   );
                 },
-                child: const Text('Add to Scenario'),
+                child: Text(context.l10n.createScenarioAddScenario),
               ),
             ],
           ),
@@ -118,20 +121,18 @@ Future<ScenarioCustomStopDraft?> showScenarioCustomStopEditor(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            'Add custom stop',
+            context.l10n.createScenarioAddCustomStop,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Use coordinates for any location in Latvia. The stop stays private by default.',
-          ),
+          Text(context.l10n.createScenarioUseCoordinatesAnyLocationLatviaStop),
           const SizedBox(height: 12),
           TextField(
             controller: title,
             autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'Title',
-              hintText: 'Park, viewpoint, private address…',
+            decoration: InputDecoration(
+              labelText: context.l10n.createScenarioTitle,
+              hintText: context.l10n.createScenarioStopHint,
               border: OutlineInputBorder(),
             ),
           ),
@@ -139,9 +140,9 @@ Future<ScenarioCustomStopDraft?> showScenarioCustomStopEditor(
           TextField(
             controller: duration,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Duration, minutes',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: context.l10n.createScenarioDurationMinutesField,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 10),
@@ -155,8 +156,8 @@ Future<ScenarioCustomStopDraft?> showScenarioCustomStopEditor(
                     decimal: true,
                     signed: true,
                   ),
-                  decoration: const InputDecoration(
-                    labelText: 'Latitude *',
+                  decoration: InputDecoration(
+                    labelText: context.l10n.createFormLatitudeRequired,
                     hintText: '56.946',
                     border: OutlineInputBorder(),
                   ),
@@ -171,8 +172,8 @@ Future<ScenarioCustomStopDraft?> showScenarioCustomStopEditor(
                     decimal: true,
                     signed: true,
                   ),
-                  decoration: const InputDecoration(
-                    labelText: 'Longitude *',
+                  decoration: InputDecoration(
+                    labelText: context.l10n.createFormLongitudeRequired,
                     hintText: '24.105',
                     border: OutlineInputBorder(),
                   ),
@@ -207,7 +208,7 @@ Future<ScenarioCustomStopDraft?> showScenarioCustomStopEditor(
                 ),
               );
             },
-            child: const Text('Add custom stop'),
+            child: Text(context.l10n.createScenarioAddCustomStop),
           ),
         ],
       ),
@@ -221,6 +222,5 @@ Future<ScenarioCustomStopDraft?> showScenarioCustomStopEditor(
 }
 
 double? _coordinate(String value) {
-  final String normalized = value.trim().replaceAll(',', '.');
-  return double.tryParse(normalized);
+  return parseLocaleDecimalInput(value);
 }

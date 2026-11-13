@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/reference-data/v1/mandatory_copy_reference.schema.json",
+  "title": "Mandatory copy reference v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "referenceId": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "marketId": { "enum": ["LV", "EE", "LT"] },
+    "capabilityId": { "type": "string", "pattern": "^[a-z][a-z0-9._-]{0,95}$" },
+    "purposeId": { "type": "string", "pattern": "^[a-z][a-z0-9._-]{0,95}$" },
+    "locale": { "type": "string", "minLength": 2, "maxLength": 35 },
+    "copyId": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "copyRevision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "contentSha256": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "approvalState": { "enum": ["pending", "accepted", "rejected"] },
+    "approvalEvidenceRevision": {
+      "anyOf": [
+        { "type": "string", "minLength": 1, "maxLength": 128 },
+        { "type": "null" }
+      ]
+    },
+    "effectiveAtUtc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "expiresAtUtc": {
+      "anyOf": [
+        { "type": "string", "format": "date-time", "pattern": "Z$" },
+        { "type": "null" }
+      ]
+    },
+    "fallbackPolicy": { "const": "forbidden" }
+  },
+  "required": [
+    "schemaVersion",
+    "referenceId",
+    "marketId",
+    "capabilityId",
+    "purposeId",
+    "locale",
+    "copyId",
+    "copyRevision",
+    "contentSha256",
+    "approvalState",
+    "approvalEvidenceRevision",
+    "effectiveAtUtc",
+    "expiresAtUtc",
+    "fallbackPolicy"
+  ]
+}

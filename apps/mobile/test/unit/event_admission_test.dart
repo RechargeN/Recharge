@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/features/create/data/models/event_draft_mapper.dart';
 import 'package:recharge/features/create/domain/entities/event_admission.dart';
 import 'package:recharge/features/create/domain/entities/event_draft_data.dart';
 import 'package:recharge/features/create/domain/usecases/normalize_event_admission_preset_usecase.dart';
@@ -147,6 +148,84 @@ void main() {
       contains('access_window_must_be_relative'),
     );
   });
+
+  test('E2.0: internal registration needs an explicit cancellation deadline '
+      'and guest policy', () {
+    List<String> codes(EventAdmissionDraft admission) => validate(
+      admission: admission,
+      inventory: null,
+      capacityMode: EventCapacityMode.known,
+      capacity: 20,
+      format: EventFormat.offline,
+      scheduleMode: EventScheduleMode.oneTime,
+      occurrences: _occurrences(),
+      externalRegistrationUrl: null,
+      readiness: const EventAccessReadiness(internalRegistration: true),
+    ).map((issue) => issue.code).toList();
+    const EventAdmissionDraft internal = EventAdmissionDraft(
+      admissionMode: AdmissionMode.booking,
+      registrationMode: EventRegistrationMode.internal,
+      confirmationMode: ConfirmationMode.instant,
+      guestPolicy: GuestPolicy(mode: GuestPolicyMode.none),
+      cancellationClosesBeforeOccurrenceMinutes: 120,
+    );
+    expect(codes(internal), isNot(contains('cancellation_deadline_required')));
+    expect(
+      codes(
+        internal.copyWith(clearCancellationClosesBeforeOccurrenceMinutes: true),
+      ),
+      contains('cancellation_deadline_required'),
+    );
+    expect(
+      codes(
+        internal.copyWith(cancellationClosesBeforeOccurrenceMinutes: 10081),
+      ),
+      contains('cancellation_deadline_invalid'),
+    );
+    expect(
+      codes(internal.copyWith(clearGuestPolicy: true)),
+      contains('guest_policy_required'),
+    );
+  });
+
+  test(
+    'E2.0: the cancellation deadline survives the local draft round trip',
+    () {
+      final EventDraftData defaults = EventDraftData.defaults(
+        marketCityId: 'riga',
+        countryCode: 'LV',
+        city: 'Riga',
+        timezoneId: 'Europe/Riga',
+        currencyCode: 'EUR',
+      );
+      final EventDraftData value = defaults.copyWith(
+        schemaVersion: EventDraftData.accessSchemaVersion,
+        admission: const EventAdmissionDraft(
+          admissionMode: AdmissionMode.booking,
+          registrationMode: EventRegistrationMode.internal,
+          confirmationMode: ConfirmationMode.instant,
+          cancellationClosesBeforeOccurrenceMinutes: 90,
+        ),
+      );
+      final EventDraftData restored = EventDraftMapper.fromJson(
+        EventDraftMapper.toJson(value),
+        defaults: defaults,
+      );
+      expect(restored.admission?.cancellationClosesBeforeOccurrenceMinutes, 90);
+      final Map<String, Object?> broken = EventDraftMapper.toJson(value);
+      (broken['admission']!
+              as Map<
+                String,
+                Object?
+              >)['cancellationClosesBeforeOccurrenceMinutes'] =
+          'ninety';
+      expect(
+        EventDraftMapper.fromJson(broken, defaults: defaults).admission,
+        isNull,
+        reason: 'a malformed stored value is not guessed',
+      );
+    },
+  );
 
   test('internal, provider-managed and lottery capabilities stay gated', () {
     final providerIssues = validate(

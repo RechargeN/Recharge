@@ -1,0 +1,14 @@
+{
+  "name": "@recharge/n3c-notifications-runtime",
+  "version": "0.0.0-n3c",
+  "private": true,
+  "type": "module",
+  "main": "lib/src/dev_notifications_entry.js",
+  "engines": {
+    "node": "22"
+  },
+  "dependencies": {
+    "firebase-admin": "14.5.0",
+    "firebase-functions": "7.3.2"
+  }
+}

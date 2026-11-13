@@ -29,9 +29,9 @@ void main() {
       find.byKey(const ValueKey<String>('smart-search-input')),
       findsOneWidget,
     );
-    expect(find.byTooltip('Голосовой запрос'), findsOneWidget);
-    expect(find.text('Популярные запросы'), findsOneWidget);
-    expect(find.text('Начать поиск'), findsOneWidget);
+    expect(find.byTooltip('Voice query'), findsOneWidget);
+    expect(find.text('Popular queries'), findsOneWidget);
+    expect(find.text('Start search'), findsOneWidget);
     expect(find.text('Search Recharge'), findsNothing);
     expect(find.text('Conditions'), findsNothing);
   });
@@ -48,13 +48,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Понятые параметры'), findsOneWidget);
+    expect(find.text('Understood parameters'), findsOneWidget);
     expect(find.text('up to 10'), findsOneWidget);
     expect(find.text('today'), findsOneWidget);
     expect(find.text('5 km'), findsOneWidget);
 
-    await tester.ensureVisible(find.text('Начать поиск'));
-    await tester.tap(find.text('Начать поиск'));
+    await tester.ensureVisible(find.text('Start search'));
+    await tester.tap(find.text('Start search'));
     await tester.pumpAndSettle();
 
     expect(find.text('Results page'), findsOneWidget);
@@ -80,7 +80,7 @@ void main() {
       find.byKey(const ValueKey<String>('smart-search-input')),
     );
     expect(field.controller?.text, 'museum today under 10');
-    expect(find.text('Понятые параметры'), findsOneWidget);
+    expect(find.text('Understood parameters'), findsOneWidget);
   });
 }
 

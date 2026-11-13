@@ -1,58 +1,58 @@
 class FindPeopleCreateStepConfig {
   const FindPeopleCreateStepConfig({
     required this.id,
-    required this.title,
-    required this.description,
+    required this.titleId,
+    required this.descriptionId,
     required this.iconKey,
   });
 
   final String id;
-  final String title;
-  final String description;
+
+  /// ARB message ids; the UI resolves them with `createFormText` (L4).
+  final String titleId;
+  final String descriptionId;
   final String iconKey;
 }
 
-const List<FindPeopleCreateStepConfig>
-findPeopleCreateSteps = <FindPeopleCreateStepConfig>[
-  FindPeopleCreateStepConfig(
-    id: 'activity',
-    title: 'Activity',
-    description: 'Describe what you want to do and who it suits.',
-    iconKey: 'activity',
-  ),
-  FindPeopleCreateStepConfig(
-    id: 'schedule',
-    title: 'When',
-    description: 'Choose one time, a poll, or a finite recurring series.',
-    iconKey: 'schedule',
-  ),
-  FindPeopleCreateStepConfig(
-    id: 'meeting',
-    title: 'Where',
-    description: 'Keep the public area separate from private meeting details.',
-    iconKey: 'meeting',
-  ),
-  FindPeopleCreateStepConfig(
-    id: 'group',
-    title: 'Group',
-    description:
-        'Set capacity, applications, verification, waitlist, and costs.',
-    iconKey: 'group',
-  ),
-  FindPeopleCreateStepConfig(
-    id: 'hosts',
-    title: 'Hosts & access',
-    description: 'Configure publisher, visibility, communication, and sharing.',
-    iconKey: 'hosts',
-  ),
-  FindPeopleCreateStepConfig(
-    id: 'publish',
-    title: 'Preview & publish',
-    description:
-        'Review public/private data and complete safety confirmations.',
-    iconKey: 'publish',
-  ),
-];
+const List<FindPeopleCreateStepConfig> findPeopleCreateSteps =
+    <FindPeopleCreateStepConfig>[
+      FindPeopleCreateStepConfig(
+        id: 'activity',
+        titleId: 'createStepFindPeopleActivityTitle',
+        descriptionId: 'createStepFindPeopleActivityDescription',
+        iconKey: 'activity',
+      ),
+      FindPeopleCreateStepConfig(
+        id: 'schedule',
+        titleId: 'createStepFindPeopleScheduleTitle',
+        descriptionId: 'createStepFindPeopleScheduleDescription',
+        iconKey: 'schedule',
+      ),
+      FindPeopleCreateStepConfig(
+        id: 'meeting',
+        titleId: 'createStepFindPeopleMeetingTitle',
+        descriptionId: 'createStepFindPeopleMeetingDescription',
+        iconKey: 'meeting',
+      ),
+      FindPeopleCreateStepConfig(
+        id: 'group',
+        titleId: 'createStepFindPeopleGroupTitle',
+        descriptionId: 'createStepFindPeopleGroupDescription',
+        iconKey: 'group',
+      ),
+      FindPeopleCreateStepConfig(
+        id: 'hosts',
+        titleId: 'createStepFindPeopleHostsTitle',
+        descriptionId: 'createStepFindPeopleHostsDescription',
+        iconKey: 'hosts',
+      ),
+      FindPeopleCreateStepConfig(
+        id: 'publish',
+        titleId: 'createStepFindPeoplePublishTitle',
+        descriptionId: 'createStepFindPeoplePublishDescription',
+        iconKey: 'publish',
+      ),
+    ];
 
 const Set<String> findPeopleHouseRuleOptions = <String>{
   'be_on_time',

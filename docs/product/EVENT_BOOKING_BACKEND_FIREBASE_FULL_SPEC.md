@@ -1,17 +1,336 @@
 # Recharge Event Booking — полный Backend/Firebase contract
 
-- Версия: 1.0
-- Дата: 2026-08-09
-- Статус: **Review — documentation only; implementation and deployment absent**
+- ID: **BCK-09**
+- Версия: **1.25**
+- Дата: **2026-09-28**
+- Spec status: **Review — disabled ECL-03C source present; independent specialist approval pending**
+- Runtime status: **Cloud/deployed/UI cutover Absent; local Emulator authority and disabled mobile adapter Present**
+- Accountable owner: **Booking owner**
+- Coordination baseline: [BCK-02 v2.4.100](RECHARGE_BACKEND_DELIVERY_MAP.md)
+- Required reviewers: **API Platform, Security/Privacy, Operations, Identity,
+  Content, Notifications, Mobile Platform, Admin Operations and Legal/Privacy**
 - Область: authoritative internal free Event Booking, ECL-03C–H
 - Канон: [Event Classification v2.2.3](EVENT_CLASSIFICATION_SPEC.md)
-- Parent slice: [ECL-03 v1.1](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md)
+- Parent slice: [ECL-03 v1.3](EVENT_CLASSIFICATION_ECL_03_SLICE_SPEC.md)
 - Architecture: [ADR 0019](../adr/0019-authoritative-internal-booking-ledger.md)
 - Accepted decisions:
-  [ECL-03 D01–D10](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
+  [ECL-03 D01–D12](EVENT_CLASSIFICATION_ECL_03_DECISION_PACKAGE.md)
 - Transaction-core plan:
-  [ECL-03C v1.0](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
-- Runtime effect: **none**
+  [ECL-03C v1.11](EVENT_CLASSIFICATION_ECL_03C_TRANSACTION_CORE_SLICE_SPEC.md)
+- Coverage evidence:
+  [BCK-09-PRE v1.12](BACKEND_EVENT_BOOKING_COVERAGE_MATRIX.md)
+- Product decision:
+  [BCK09-DEC-01 v0.3 — Accepted with controls](BACKEND_EVENT_BOOKING_OWNER_DECISION.md)
+- Specialist review:
+  [BCK09-REV-01 v0.12 — independent evidence Hold; signatures Pending](BACKEND_EVENT_BOOKING_SPECIALIST_REVIEW_PACKAGE.md)
+- API Platform pre-review:
+  [BCK09-API-REV-01 v0.10 — RAW-C hosted pass; independent evidence/runtime Hold](BACKEND_EVENT_BOOKING_API_PLATFORM_REVIEW.md)
+- Product API decision:
+  [BCK09-API-DEC-01 v0.4 — reconciled](BACKEND_EVENT_BOOKING_API_OWNER_DECISION.md)
+- Named API decision:
+  [BCK09-API-NAMED-DEC-01 v0.2 — Accepted with controls](BACKEND_EVENT_BOOKING_NAMED_API_DECISION.md)
+- Contract correction evidence:
+  [BCK09-API-CORR-01 v0.3 — Done](BACKEND_EVENT_BOOKING_CONTRACT_CORRECTION_SLICE_SPEC.md)
+- Contract parity evidence:
+  [BCK09-API-PAR-01 v0.3 — Done](BACKEND_EVENT_BOOKING_API_PARITY_SLICE_SPEC.md)
+- Callable raw-body emulator evidence:
+  [BCK09-API-RAW-B-01 v0.1 — Done](BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md)
+- Disabled-adapter evidence:
+  [BCK09-API-RAW-C-01 v0.3 — hosted pass / independent verdicts Pending](BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md)
+- Runtime effect: **disabled local/Emulator source and mobile data adapter only; no UI cutover, cloud, deployment or activation**
+
+## 0. Changelog
+
+### v1.25 — 2026-09-28
+
+- completes bounded local/Emulator slice `2B`: expired `required`
+  reconfirmations are cancelled transactionally and release active key,
+  finite ledger or unlimited usage exactly once;
+- adds the default-off `releaseMissedReconfirmationsV1` schedule with bounded
+  discovery, stable pagination, fenced lease, durable checkpoint, retry/backoff,
+  five-attempt dead-letter state and audited idempotent manual replay;
+- rechecks active state, exact material revision and deadline inside the
+  cancellation transaction, so reconfirm, manual cancel, repeated workers and
+  later reschedules cannot double-release allocation or usage;
+- records the full exact-toolchain gate at commit `8946cbb`: 93 unit, 28
+  contract, 16 integration, 84 Emulator/Rules and 701 Flutter tests; Flutter
+  analyzer, boundary, layout/export/no-cloud/reproducibility and diff checks
+  are green;
+- declares the bounded verdict `Local Booking vertical complete`. BCK-13
+  delivery, persistent escrow, dev cloud, staging, production, market
+  activation, independent Security and qualified Legal/Privacy remain absent.
+
+### v1.24 — 2026-09-28
+
+- accepts the bounded local/Emulator `2A` reconfirmation policy before code:
+  a materially rescheduled Booking remains active, retains its allocation and
+  counts against the applicable finite or unlimited active-Booking cap;
+- binds a user reconfirmation to the exact Booking revision and Event
+  `materialRevision`, persists a deadline no later than the rescheduled
+  occurrence start, and invalidates the prior response on every later material
+  reschedule;
+- keeps owner cancellation available while reconfirmation is required, makes
+  retries idempotent and leaves every notification obligation suppressed until
+  BCK-13 activation;
+- authorizes only the manual local/Emulator command slice. Automatic deadline
+  release belongs to separately gated `2B`; cloud, deployment, market
+  activation, push and merge remain unauthorized.
+- implements the default-off `reconfirmInternalBookingV1` callable and one
+  transaction for Identity/Session/AccessSnapshot, Booking revision, exact
+  Event material revision, deadline and semantic idempotency checks. The
+  command changes only Booking reconfirmation metadata and suppressed
+  notification/audit facts; inventory and usage are untouched;
+- verifies the bounded slice with 28 TypeScript contract tests, 14 Dart
+  DTO/schema tests and 5 exact-toolchain Emulator tests. This is local evidence
+  only and does not claim BCK-13 delivery or automatic deadline processing.
+
+### v1.23 — 2026-09-27
+
+- requires the immutable Event outbox `createdAt` to be a Firestore
+  server-owned commit `Timestamp`; caller-supplied strings are quarantined and
+  cannot advance the delivery cursor;
+- closes the trigger-only delivery gap with a durable ordered discovery cursor,
+  fenced renewable leases, bounded retry, explicit dead-letter state and an
+  audited idempotent manual replay decision;
+- keeps source facts and unresolved dead letters outside TTL, applies a 90-day
+  TTL only to terminal delivered metadata and retains operator decisions for
+  180 days;
+- makes paged Booking erasure advance past held records, report
+  `completedWithRetention`, and require an idempotent linked follow-up after
+  legal-hold release before deletion eligibility is restored;
+- passes 93 unit, 28 contract, 16 integration and 73 Emulator/Rules tests on
+  the exact local toolchain. Cloud, deployment, activation and market readiness
+  remain unchanged and absent.
+
+### v1.22 — 2026-09-26
+
+- adds one credential-free full Emulator flow from Auth UID through opaque
+  Identity Session, AccessSnapshot, immutable Event outbox/projection, all five
+  Booking callable paths, notification obligations and Firestore Privacy/DSR;
+- proves idempotent mobile-wire replay, query/availability/cancel behavior,
+  terminal retention facts and legal-hold precedence in the same disposable
+  `demo-recharge` execution;
+- adds a real projection-delivery retry where a transient lifecycle
+  inconsistency becomes `retryPending`, is repaired and converges without a
+  duplicate Booking transition;
+- passes the complete R0/Rules/Identity/Event/Booking/Abuse suite on exact
+  Node 22.23.2, npm 10.9.8 and Temurin 21.0.12+8, plus 92 unit, 28 contract,
+  13 integration and 699 Flutter tests;
+- records `Ready for physical dev backend` only as permission readiness for a
+  separately authorized dev-infrastructure slice. No project, credential,
+  deployment, activation or production readiness is claimed.
+
+### v1.21 — 2026-09-26
+
+- implements `BCK09-ABUSE-DEC-01 v1.0` locally: transaction-atomic finite
+  `5` and separate unlimited `50` active-Booking caps per User+market;
+- adds request-deduped rolling actor+installation/account/installation
+  rate limits with typed `rate_limited` and `retryAfterSeconds`, while IP is
+  hashed, secondary and never the sole cancel/account authority;
+- limits active Sessions to three, rejects the fourth explicitly, rotates the
+  same Session atomically and keeps opaque Session handles out of custom claims;
+- makes App Check exact-local-bypass/fail-closed, adds scoped incident-disable
+  contracts and persists minimized abuse audit without payload, token or raw IP;
+- makes the mobile logical operation identity restart-stable, bounds automatic
+  retry to seven days and records terminal reconciliation outcomes;
+- keeps every market disabled and retains Java 21 Emulator evidence, cloud,
+  deployment, activation and independent Security/Legal gates as Pending.
+
+### v1.19 — 2026-09-25
+
+- implements the bounded Event→Booking projection consumer and verifies its
+  deterministic rebuild suite without starting the BCK-07 Content aggregate;
+- adds a disabled mobile Booking callable adapter, persistent local receipts/
+  checkpoints, seven-day automatic retry boundary and explicit reconciliation;
+- registers all nine Booking collections, domain-separated user-usage IDs,
+  atomic Privacy dispatch, five-attempt tasks, Booking DSR handling and the
+  accepted 90/7/30/365-day technical owner retention policies;
+- retains qualified Legal/Privacy, cloud, deployment, production binding and
+  every market activation as Pending/disabled.
+
+### v1.18 — 2026-09-24
+
+- fixes the remaining owner decisions for baseline self-service authority,
+  authenticated visibility-safe availability, unlimited RSVP caps, primary
+  Booking retention, suppressed outbox terminal retention and account erasure;
+- moves Booking activation checks to the common R1 feature-flag authority and
+  requires create/cancel Identity, Session, AccessSnapshot and flag reads in
+  the same Firestore transaction as the mutation;
+- records opaque Session transport and the Emulator-only Firestore Identity
+  authority without enabling cloud, deployment, callable Identity or markets.
+
+### v1.17 — 2026-09-24
+
+- fixes the owner-approved normal/popular/mass peak profiles and records one
+  bounded local Emulator load run for the current single-ledger implementation;
+- records zero oversell together with unacceptable popular/mass contention,
+  so the single ledger remains limited to small disabled development evidence;
+- selects a fixed-capacity escrow model with 16 popular or 64 mass shards and
+  adds a default-off pure migration/reconciliation model without changing
+  Firestore schema, exports, deployment or activation;
+- publishes separate local, Emulator, dev, staging, production and market
+  readiness verdicts without promoting any independent or qualified gate.
+
+### v1.16 — 2026-09-24
+
+- records `BCK09-RETENTION-DEC-01` as the technical owner baseline for
+  Booking idempotency, outbox and audit retention without claiming a
+  qualified Legal/Privacy verdict;
+- adds real local `expiresAt` timestamps, Firestore TTL field configuration,
+  hold-safe cleanup/restore planning, account-deletion pseudonymization and
+  deterministic unit/Emulator evidence;
+- keeps all markets and cloud deployment disabled; an LV, EE or LT override
+  requires its own accepted versioned decision.
+
+### v1.15 — 2026-09-20
+
+- completed the Stage 4 Booking effect, reconciliation and operational handoff
+  contract without changing the accepted ECL-03C transaction core;
+- fixed the Booking-to-Notifications receipt boundary and the
+  Admin-proposal-to-Booking-repair command boundary;
+- added cross-domain effect identity, replay, rollback, retention and privacy
+  requirements while preserving every independent/runtime gate.
+
+### v1.14 — 2026-09-20
+
+- added the Stage 2 normalized Booking entity inventory and reconciled the
+  single-writer boundary with Discover, Provider, Payments and Notifications;
+- preserved ECL-03 lifecycle authority and all runtime/independent-review gates.
+
+### v1.13 — 2026-09-03
+
+- recorded RAW-C success at head
+  `75818f78c67e9bcfa06edbc12820424235c39627` in push run `33689696133` and
+  pull-request run `33689700189`, each green on Ubuntu 24.04 and Windows 2025;
+- closed the exact hosted npm/JDK/toolchain and cross-platform RAW-C evidence
+  gap without creating cloud resources, deployment, activation or mobile
+  integration; all PR #7 checks pass and the PR remains Draft;
+- kept BCK-09 in Review and deployed runtime Absent because all nine
+  independent specialist signatures remain Pending.
+
+### v1.12 — 2026-09-03
+
+- recorded exact RAW-C v0.1 implementation authority and the disabled local
+  ECL-03C adapter with exactly five Booking v1 callables and nine operational
+  collections under `demo-recharge` Emulator-only guards;
+- recorded local Node 22.23.2 unit 13/13, contract 15/15, Emulator 23/23,
+  generated/reproducibility and Flutter analyze plus 664/664 test evidence;
+- kept BCK-09 in Review and deployed runtime Absent because hosted exact
+  Ubuntu/Windows toolchain evidence and all nine
+  independent specialist signatures remain Pending; no cloud or activation
+  authority was granted; the local boundary gate passes with 0 violations.
+
+### v1.11 — 2026-08-28
+
+- registered BCK09-API-RAW-B-01 v0.1 as Done after 19/19 disposable
+  Functions Emulator transport vectors passed on Ubuntu and Windows at
+  `e043218`, with byte-identical raw-body visibility and cleanup evidence;
+- closed only the callable raw-body transport-feasibility gap and introduced
+  BCK09-API-RAW-C-01 v0.1 as a Proposed, separately authorized disabled-adapter
+  plan;
+- kept 85 existing AC stable and appended AC-86..89; all nine signatures,
+  product runtime, Firestore/Admin access, callable exports, Firebase changes,
+  deployment and activation remain blocked/Absent.
+
+### v1.10 — 2026-08-28
+
+- promoted BCK09-API-PAR-01 to Done after exact Node 22.23.2 hosted evidence
+  passed on `ubuntu-24.04` and `windows-2025` in runs `33127684319` and
+  `33127686757`;
+- closed the canonical Node 22 confirmation blocker while retaining raw
+  callable-body feasibility and every independent API/Security/Operations
+  review/runtime gate;
+- kept 85 AC, all nine signatures, Firebase, callable exports, deployment and
+  product runtime blocked/Absent.
+
+### v1.9 — 2026-08-28
+
+- registered BCK09-API-PAR-01 v0.2 / `api_contracts` v0.3.0 as implemented
+  contracts/test-only evidence: closed query/read/page/availability roots,
+  independent Dart/TypeScript validation and JCS/SHA-256 goldens;
+- closed only TR-06 contract parity and the pre-runtime portion of TR-04;
+  canonical Node 22 confirmation, raw callable-body feasibility and independent
+  API/Security/Operations evidence remain required;
+- kept 85 AC, all nine signatures, Firebase, callable exports, deployment and
+  product runtime blocked/Absent.
+
+### v1.8 — 2026-08-27
+
+- registered Booking-v1 API-DEC-01/03 as Accepted through
+  BCK09-API-NAMED-DEC-01 v0.2 without recording a specialist signature;
+- amended `booking_semantic_hash_v1` to include applicable Booking and Event
+  revision preconditions and froze the exact numeric safety subset by reference;
+- kept 85 AC, all nine signatures, TypeScript/query/hash parity, independent
+  stage/Security evidence, Firebase and runtime blocked/Absent.
+
+### v1.7 — 2026-08-27
+
+- registered BCK09-API-CORR-01 v0.3 as a Done pre-runtime command
+  Schema/Dart/D12 correction with green repository gates;
+- narrowed the API Hold to named API-DEC-01/03 and absent
+  TypeScript/query/availability/runtime evidence;
+- kept 85 AC, all specialist signatures Pending and runtime Absent.
+
+### v1.6 — 2026-08-27
+
+- inherited Accepted ECL03-D12 and parent ECL-03 v1.3, replacing the Booking-v1
+  request-ID ULID conflict with exact opaque bounded semantics;
+- kept Schema/Dart/TypeScript conformance inside unapproved
+  BCK09-API-CORR-01 v0.2 and retained the API specialist Hold;
+- changed no target AC count, schema, DTO, backend, Firebase, mobile or runtime.
+
+### v1.5 — 2026-08-27
+
+- recorded one Product-selected API baseline for atomic request binding,
+  `booking_semantic_hash_v1` and callable 10/15/30-second deadlines without
+  claiming named API/Security/Operations acceptance;
+- preserved nine ECL-03C collections while defining logical and request-attempt
+  record kinds inside `bookingIdempotency`;
+- made the ECL-03 ULID versus Booking-v1 opaque request-ID conflict an explicit
+  `ECL03-D12` blocker;
+- linked a bounded, separately approvable command schema/DTO correction plan;
+- appended AC-80..85 and changed no schema, DTO, backend, Firebase, mobile or
+  deployment file.
+
+### v1.4 — 2026-08-26
+
+- resolved BCK09-TR-09 with a deterministic `bookingActiveKeys` transaction
+  record and synchronized ECL-03C v1.2 without changing callable scope;
+- resolved BCK09-TR-10 by attributing proposal/approval to BCK-19 and retaining
+  only `ExecuteApprovedBookingRepair` as the BCK-09 mutation;
+- resolved BCK09-TR-11 with immutable suppressed/required handoff disposition,
+  preventing disabled pre-activation obligations from becoming late effects;
+- reconciled one server-issued, callback-retry-stable Booking ID with ADR 0013,
+  BCK-03 and the committed v1 command/fixture surface without a wire change;
+- appended AC-76..79, kept Product baseline/Review status unchanged and added
+  no backend, Firebase, contract, adapter, mobile or deployment runtime.
+
+### v1.3 — 2026-08-26
+
+- recorded Product acceptance of `BCK09-A1-STAGED-FREE-BOOKING-v1` with the
+  mandatory controls in BCK09-DEC-01 v0.2;
+- accepted BCK09-OD-04/05/06/08/09/10 only at their documented design
+  boundaries and kept BCK09-OD-01/02/03/07 Deferred/Open;
+- kept BCK-09 in Review pending independent specialist verdicts and preserved
+  every ECL-03C, Firebase, production-data, deployment and activation gate;
+- created no backend, Firebase, contract, adapter, mobile or deployment runtime.
+
+### v1.2 — 2026-08-26
+
+- reconciled all 22 mandatory BCK-02 categories and added named owner decisions;
+- separated the first ECL-03C executable core from target ECL-03D–H behavior;
+- preserved committed Booking v1 wire names and split request/idempotency identity;
+- reconciled Booking outbox ownership with BCK-13 inbox/delivery single writers;
+- aligned ECL-03C operational collection names and made later collections
+  conditional on their own Approved slices;
+- added explicit BCK-07 projection, BCK-08 availability, BCK-19 repair and
+  OD-09/OD-11 fail-closed boundaries;
+- did not add backend, Firebase, contracts, adapters, deployment or mobile runtime.
+
+### v1.1 — 2026-08-20
+
+- recorded ECL03-D11 split-key semantics and the full target Booking contract;
+- remained documentation-only with runtime absent.
 
 ## 1. Назначение документа
 
@@ -30,6 +349,37 @@ retention, reconciliation, поддержки и безопасного producti
 Он не создаёт параллельную Event/Booking-модель. При конфликте побеждают
 Accepted ADR, затем parent ECL-03 spec. Изменение их инвариантов требует новой
 ревизии или superseding ADR.
+
+### 1.1. Status semantics
+
+- **Review** означает, что полный target-контракт и его blockers готовы к
+  проверке, но не приняты как executable authorization;
+- **Approved** потребует owner/reviewer verdicts и закрытия применимых решений;
+- **Runtime Absent** означает отсутствие deployed authoritative Booking
+  Functions, cloud Firestore records, workers, production data и mobile
+  integration; disabled local Emulator source alone does not change this;
+- ECL-03B schemas/fixtures/Dart domain являются contract evidence, но не runtime;
+- ни этот документ, ни его Approval не разрешают автоматически создать
+  Firebase resources, включить flags, обработать production data или слить
+  изменения в `main`.
+
+### 1.2. Backend parent contracts
+
+BCK-09 расширяет, но не повышает статус следующих repository contracts:
+
+- [BCK-01](RECHARGE_BACKEND_MASTER_SPEC.md) — modular backend и single writer;
+- [BCK-02](RECHARGE_BACKEND_DELIVERY_MAP.md) — sequence, gates, OD-09/OD-11;
+- [BCK-03](BACKEND_API_CONTRACT_STANDARD.md) — wire/version/error/idempotency;
+- [BCK-04](BACKEND_SECURITY_PRIVACY_SPEC.md) — security, privacy, DSR, Legal;
+- [BCK-05](BACKEND_DEPLOYMENT_OPERATIONS_SPEC.md) — environment, flags, SLO/DR;
+- [BCK-06](IDENTITY_PUBLISHER_BACKEND_SPEC.md) — actor/capability authority;
+- [BCK-07](CONTENT_PUBLICATION_BACKEND_SPEC.md) — published Event writer;
+- [BCK-08](DISCOVER_SEARCH_CATALOG_BACKEND_SPEC.md) — public availability;
+- [BCK-13](NOTIFICATIONS_BACKEND_SPEC.md) — inbox/channel delivery;
+- [BCK-19](ADMIN_SUPPORT_BACKEND_SPEC.md) — staff case/repair approval.
+
+Draft/Review parent rule остаётся proposal/blocker и не становится Accepted
+только потому, что BCK-09 на него ссылается.
 
 ## 2. Итоговый продуктовый результат
 
@@ -59,6 +409,13 @@ authoritative транзакцию. Flutter, локальный cache, mock data
 внешняя ссылка никогда не создают подтверждённый Booking.
 
 ## 3. Граница системы
+
+Полный scope ниже является staged target, а не одним executable slice.
+ECL-03C может реализовать только instant finite/explicit unlimited create,
+owner cancel и три read surfaces из своего exact Approved плана. Applications,
+waitlist/holds, delivery workers, reconfirmation, Creator management, mobile
+integration и production proof принадлежат отдельным ECL-03D–H slices. Ни один
+следующий этап не наследует runtime authority только из Review/Approval BCK-09.
 
 ### 3.1. Входит
 
@@ -200,11 +557,16 @@ authRevision
 
 Body не может задавать или повышать эти значения.
 
+Transport carries a server-issued opaque Session handle plus `sessionId` and
+`installationId`; Firebase Auth supplies the UID. The server stores only the
+handle hash and validates all four bindings. Firebase custom claims never
+carry per-Session IDs, handles, AccessSnapshot revisions or mutable grants.
+
 ### 7.2. Матрица полномочий
 
 | Операция | Authority |
 |---|---|
-| Public-safe availability | Authenticated active Viewer |
+| Public-safe availability | Authenticated active User + permission to view exact published Event; no `booking.self_service` requirement |
 | Create application/Booking | Actor создаёт только для себя |
 | Read/cancel/reconfirm own Booking | Exact `booking.userId == actorId` |
 | Read Creator queue | Publisher owner или exact-page `manage_bookings` |
@@ -217,6 +579,11 @@ Body не может задавать или повышать эти значе�
 Page A никогда не даёт доступ к Page B. Revoked/disabled/unknown identity
 fail closed. Deep link повторяет Auth и authorization.
 
+`booking.self_service` — базовая personal capability каждого active User и
+требуется только для create/cancel. Read-own Booking и availability требуют
+current AuthN, exact ownership/visibility and revision checks, but do not use
+this capability as a visibility grant.
+
 ## 8. Firestore data model
 
 Все operational collections закрыты от прямого mobile read/write. Mobile
@@ -226,24 +593,51 @@ fail closed. Deep link повторяет Auth и authorization.
 |---|---|---|
 | `bookingEventProjections` | `occurrenceId` | Published revisioned Event/admission/inventory input |
 | `bookings` | `bookingId` | Booking aggregate |
-| `bookingActiveKeys` | deterministic actor/occurrence/track hash | Unique active Booking lock |
-| `bookingHolds` | `holdId` | TTL offer/allocation |
-| `inventoryPoolLedgers` | occurrence/pool/channel hash | Capacity counters and revision |
-| `userBookingUsage` | `userId` | Uniform cap evidence and policy version |
-| `bookingIdempotency` | actor/command/key hash | Payload hash and stored result |
-| `bookingAuditEvents` | `auditId` | Append-only mutation facts |
-| `bookingNotificationOutbox` | deterministic delivery key | Post-commit obligation |
-| `bookingNotificationDeliveries` | outbox/channel/attempt | Delivery status and retry |
+| `bookingHolds` | `holdId` | Future ECL-03D TTL offer/allocation |
+| `bookingPoolLedgers` | occurrence/pool/channel hash | Capacity counters and revision |
+| `bookingUserUsage` | domain-separated hash of exact `userId` | Uniform cap evidence and policy version; raw UID is not the document key |
+| `bookingActiveKeys` | versioned actor/occurrence/admission-track hash | One non-terminal Booking lock per duplicate-active scope |
+| `bookingIdempotency` | domain-separated `m1_` logical or `r1_` attempt hash | Payload/result or atomic request-attempt binding |
+| `bookingAudit` | `auditId` | Append-only mutation facts |
+| `bookingOutbox` | deterministic obligation ID | Booking-owned post-commit notification need |
 | `bookingPlatformPolicies` | policy/version | Concurrency/reschedule/retention policy |
-| `bookingFeatureFlags` | environment/flag | Server-owned kill switches |
+| `platformFeatureFlagRevisions` + `platformActiveFeatureFlagPointers` | environment/market/capability/revision | Common R1 server flag authority consumed by Booking; not a Booking writer |
 | `bookingWorkerLeases` | worker/scope | Bounded overlapping-worker protection |
 | `bookingReconciliationRuns` | `runId` | Drift findings and resolution state |
-| `bookingRepairProposals` | `proposalId` | Dry-run, approvals and execution result |
 | `bookingRetentionJobs` | `jobId` | Deletion/pseudonymization checkpoint |
 
-No document contains an unbounded participant array. Participant queries use
-indexes and cursor pagination. Email, phone, access code and raw token are
-never document IDs.
+Все девять Booking-owned records (`bookingEventProjections`, `bookings`,
+`bookingHolds`, `bookingPoolLedgers`, `bookingUserUsage`, `bookingActiveKeys`,
+`bookingIdempotency`, `bookingAudit`, `bookingOutbox`) нормативны для первого
+executable plan. Common R1 feature-flag records are read atomically but remain
+Platform-owned and are not duplicated under a Booking collection.
+`bookingHolds` пока default-deny и не получает hold runtime до отдельного
+Approved ECL-03D slice; остальные operational records выше являются
+conditional target names.
+
+Repair proposal/case/approval records в эту таблицу намеренно не входят: ими
+владеет BCK-19. BCK-09 владеет только валидируемой repair command, Booking
+mutation и Booking audit result.
+
+BCK-09 владеет только атомарным `bookingOutbox` fact. BCK-13 после Accepted
+OD-09 handoff владеет inbox, preferences, push registration и channel delivery
+attempts. Booking не создаёт второй notification-delivery source of truth.
+
+Каждый immutable obligation фиксирует `effectDisposition` и policy revision:
+
+- `suppressedPreActivation` — OD-09/BCK-13 effect gate был выключен при commit;
+  запись является terminal suppressed evidence и никогда позднее не доставляется;
+- `handoffRequired` — Accepted handoff был включён при commit; BCK-13 обязан
+  создать собственный dedupe/terminal receipt либо quarantine/dead-letter.
+
+BCK-09 не меняет inbox/delivery state. Старые suppressed records нельзя
+`replay` после включения notifications, поэтому активация не создаёт запоздалые
+или неожиданные сообщения.
+
+`suppressedPreActivation` is a terminal delivery and reconciliation outcome.
+It records `suppressedAt`; its 30-day outbox TTL starts from that instant and
+does not wait for impossible delivery/reconciliation receipts. Legal/security
+hold still removes TTL and wins over deletion.
 
 ### 8.1. Booking
 
@@ -294,22 +688,76 @@ confirmedUnits >= 0
 activeHoldUnits >= 0
 finite: confirmedUnits + activeHoldUnits <= totalUnits
 remaining = totalUnits - confirmedUnits - activeHoldUnits
-unlimited: no finite counters or user concurrency usage
+unlimited: no finite counters; separate unlimited user usage applies
 unknown capacity != unlimited
 ```
 
+Unlimited Booking has a separate abuse/concurrency policy: at most **50**
+active future unlimited Bookings per User across the enabled market. It never
+consumes finite inventory usage. Independent request limits are **10 create
+attempts/minute**, **20 cancel attempts/minute** and **120 authenticated
+read/availability requests/minute** per actor+installation, with a bounded
+network-risk key as a secondary signal. Market overrides require a separately
+accepted revision; unknown policy fails closed. Cancel remains available when
+the active unlimited cap is reached.
+
 ### 8.4. UserBookingUsage
 
-Policy `booking_concurrency_lv_v1`:
+Policy `bck09_abuse_v1`, revision `1`:
 
 ```text
 maxConcurrentBookings: 5
+maxActiveUnlimitedBookings: 50
 count finite confirmed Booking: yes, once per Booking
 count active hold: yes, once per Booking
-count pending application/plain waitlist/unlimited RSVP: no
+count unlimited confirmed future Booking: yes, in the separate unlimited counter
+count pending application/plain waitlist without allocation: no
 completion grace: 120 minutes
 personal/publisher/category override: forbidden
 ```
+
+Cap read, usage increment, Booking create, active key, idempotency and outbox
+write are one transaction. Cancel and occurrence cancellation release the
+matching finite/unlimited usage in the same transaction as the terminal
+Booking transition. `active_booking_limit_reached` never prevents cancel.
+
+### 8.5. Duplicate-active key
+
+Для Accepted scope `(userId, occurrenceId, admission track)` BCK-09 вычисляет
+opaque key по каноническому tuple:
+
+```text
+scopeVersion = booking_active_scope_v1
+admissionTrackId = general для ECL-03C
+encode(value) = uint32be(length(UTF8(value))) || UTF8(value)
+activeKeyId = lowercaseHex(SHA-256(
+  encode(scopeVersion) || encode(actorId) ||
+  encode(occurrenceId) || encode(admissionTrackId)
+))
+```
+
+For a User, `actorId` is authoritative `userId`. Length-prefix encoding
+исключает ambiguous tuple; fixtures фиксируют exact UTF-8 bytes/hash.
+Exact key record читается до любой write и создаётся/удаляется в той же
+transaction, что Booking. Он содержит ссылку на один non-terminal Booking и
+нужен для finite и explicit-unlimited paths. Existing valid key возвращает
+`already_active`; dangling/mismatch/schema drift возвращает
+`temporarily_unavailable`, блокирует scope для reconciliation и никогда не
+разрешает второй Booking. Cancel terminal transition удаляет key атомарно;
+rejoin после commit получает новый Booking ULID.
+
+Booking v1 `createBooking` не принимает `bookingId` в payload. Поэтому
+trusted handler до входа в Firestore callback выдаёт ровно один request-scoped
+candidate Booking ULID и повторно использует его при каждом внутреннем retry.
+ID становится authoritative и возвращается в typed result только после commit;
+refusal/failure не сохраняет Booking или mapping. Это соответствует ADR 0013
+и разрешённой BCK-03 ветке server-returned mapping, не связывает `bookingId` с
+`requestId` или `idempotencyKey` и не требует несовместимого изменения Booking
+v1 wire.
+
+No document contains an unbounded participant array. Participant queries use
+indexes and cursor pagination. Email, phone, access code and raw token are
+never document IDs.
 
 ## 9. Event operational projection
 
@@ -333,7 +781,10 @@ bookingCapabilityVersion
 
 Writer projection:
 
-- работает только из trusted publication pipeline;
+- является BCK-07-owned handoff projection: BCK-07 пишет pinned published Event
+  revision/config, а BCK-09 валидирует и потребляет её для Booking;
+- работает только из trusted publication pipeline и не даёт Booking права
+  менять Content/Event lifecycle;
 - использует stable Event/occurrence/pool IDs;
 - не активирует Booking без explicit enable/reconciliation;
 - сохраняет previous material revision для change workflow;
@@ -343,7 +794,7 @@ Writer projection:
 
 ## 10. API v1
 
-### 10.1. Viewer queries
+### 10.1. User queries
 
 ```text
 GetEventBookingReadiness(eventId, occurrenceId)
@@ -352,7 +803,7 @@ GetMyBooking(bookingId)
 ListMyBookings(cursor, stateFilter?, pageSize?)
 ```
 
-### 10.2. Viewer commands
+### 10.2. User commands
 
 ```text
 CreateInternalBooking(requestId, idempotencyKey, occurrenceId, poolId?, guestPayload?)
@@ -377,36 +828,48 @@ PromoteWaitlist(requestId, idempotencyKey, bookingId, expectedRevision)
 CancelManagedBooking(requestId, idempotencyKey, bookingId, reasonCode, expectedRevision)
 ```
 
-### 10.4. Internal operations
+### 10.4. Cross-service and internal operations
+
+| Operation | Single owner | BCK-09 relationship / gate |
+|---|---|---|
+| `PublishBookingEventProjection` | BCK-07 | BCK-09 validates and consumes the pinned revision; it never publishes Event state |
+| `ProcessOccurrenceMaterialChange` | BCK-09 | Conditional ECL-03E/F command after revision-safe BCK-07 handoff |
+| `ProcessOccurrenceCancellation` | BCK-09 | Conditional bounded Booking mutation after BCK-07 fact |
+| `ConsumeBookingOutbox` | BCK-13 | Conditional after Accepted OD-09; BCK-09 owns only immutable obligation creation |
+| `ExpireBookingHolds` | BCK-09 | Conditional ECL-03D worker |
+| `OpenReconfirmationWindows` | BCK-09 | Conditional ECL-03E worker |
+| `SendReconfirmationReminders` | BCK-13 | Conditional BCK-13 effect from an Accepted handoff |
+| `ReleaseMissedReconfirmations` | BCK-09 | Disabled until delivery/fairness approval |
+| `ReconcileBookingLedgers` | BCK-09 | Detect/block only; cannot invent repair approval |
+| `ApplyBookingRetention` | BCK-09 | Conditional on qualified policy and deletion workflow |
+| `CreateBookingRepairProposal` | BCK-19 | BCK-09 exposes no proposal write surface |
+| `ApproveBookingRepairProposal` | BCK-19 | Requires separate authorized approver; no Booking mutation yet |
+| `ExecuteApprovedBookingRepair` | BCK-09 | Only owning-domain invariant-safe repair mutation after exact BCK-19 receipt |
+| `EmergencyDisableBookingMutations` | BCK-05 | BCK-05 writes the flag; BCK-09 consumes it fail closed |
+
+### 10.5. Booking v1 result and BCK-03 compatibility
 
 ```text
-PublishBookingEventProjection
-ProcessOccurrenceMaterialChange
-ProcessOccurrenceCancellation
-DispatchBookingOutbox
-ExpireBookingHolds
-OpenReconfirmationWindows
-SendReconfirmationReminders
-ReleaseMissedReconfirmations
-ReconcileBookingLedgers
-ApplyBookingRetention
-ProposeBookingRepair
-ApproveAndExecuteBookingRepair
-EmergencyDisableBookingMutations
-```
-
-### 10.5. Response envelope
-
-```text
-ApiResult<T>
-  apiVersion
+BookingCommandResultV1
+  schemaVersion: 1
+  kind: succeeded | rejected | retryableFailure | unsupportedContract
   requestId
   correlationId
   serverTime
-  outcome: success | rejected | retryableFailure | unsupportedContract
-  data?
-  error?: { code, field?, retryAfterSeconds? }
+  booking?
+  hold?
+  policy?
+  error?
+  unsupportedPayload?
 ```
+
+Это существующий fixture-verified wire source в
+`packages/api_contracts/schema/booking/v1`; BCK-09 не переименовывает его и не
+оборачивает вторым envelope. Предлагаемый BCK-03 common result
+`success | cancelled | failure` применяется только через явно проверенный
+adapter либо отдельно Approved compatible major. При этом transport/user
+abandonment `cancelled` остаётся terminal non-success outcome, а успешная
+команда `CancelBooking` остаётся domain success с Booking state `cancelled`.
 
 Responses никогда не содержат stack trace, другие participant identities,
 raw eligibility evidence или внутренний policy document.
@@ -428,15 +891,29 @@ pool_required
 pool_unavailable
 sold_out
 already_active
-concurrency_limit_reached
+concurrency_cap_reached
 revision_conflict
 hold_expired
 cancellation_deadline_passed
 idempotency_conflict
 contention
 temporarily_unavailable
-unsupported_contract
+forbidden
+unsupported_schema
+invalid_contract
 ```
+
+`unsupported_flow` является target domain decision до его добавления в
+machine-verified contract; ECL-03C до contract change использует существующий
+fail-closed v1 result/error mapping и не изобретает wire value в handler.
+
+Booking-v1 Accepted target: одна callable Functions v2 в `europe-west1` на каждую
+из пяти ECL-03C surfaces, без generic router; client deadline 10 секунд для
+query и 15 секунд для mutation, server timeout 30 секунд. Timeout/connection
+loss mutation означает unknown outcome; recovery использует тот же semantic
+payload/idempotency key и fresh request ID либо authorized query. Это не
+deployable endpoint registry: exact mapping остаётся заблокирован до
+independent API Platform + BCK-05 stage evidence.
 
 Availability projection различает `available`, `limited`, `soldOut`,
 `closed`, `stale`, `unknown` и `unsupported`. Только response, прочитанный из
@@ -452,8 +929,8 @@ authoritative projection/ledger, может быть помечен authoritativ
 3. verify App Check mode;
 4. load server-owned feature flag;
 5. bind actor/capability to resource;
-6. calculate canonical payload hash;
-7. resolve idempotency record;
+6. validate the closed command variant and calculate canonical payload hash;
+7. resolve logical-mutation and request-attempt idempotency records;
 8. run exact domain transaction;
 9. return stored authoritative result after commit.
 
@@ -464,18 +941,27 @@ window, eligibility, revision, cap и capacity checks.
 
 ### 12.1. Instant finite Booking
 
+До transaction callback trusted handler один раз генерирует
+`candidateBookingId`. Callback получает его как immutable input и не вызывает
+ID generator; каждый Firestore retry использует тот же candidate.
+
 В одной Firestore transaction:
 
-1. read idempotency;
+1. read logical-mutation and request-attempt idempotency records;
 2. read Event projection and exact ledger;
 3. validate lifecycle/window/free/internal/generalCapacity;
 4. validate guest units and eligibility;
-5. read active-key and user usage;
+5. derive/read the exact duplicate-active key and read user usage;
 6. enforce duplicate-active and uniform cap;
 7. enforce remaining capacity;
-8. create Booking and active-key;
+8. create Booking and its active key atomically;
 9. increment ledger and user usage;
-10. write audit, outbox and idempotency result.
+10. write audit, outbox, logical result and atomic attempt binding.
+
+Finite и unlimited create конфликтуют на одном deterministic active-key record
+для `(actorId, occurrenceId, admissionTrackId)`. Different idempotency keys не
+обходят uniqueness. Dangling/mismatched key fail closed и уходит в
+reconciliation; transaction не пытается чинить его автоматически.
 
 Create payload имеет explicit `onFull: reject | joinWaitlist`, default
 `reject`. При `reject` sold out не создаёт Booking. При заранее подтверждённом
@@ -484,9 +970,14 @@ Create payload имеет explicit `onFull: reject | joinWaitlist`, default
 `JoinWaitlist` поддерживает последующее явное действие после `sold_out`.
 Backend никогда не ставит пользователя в очередь без explicit consent.
 
+Это только ECL-03D target. В ECL-03C `onFull` всегда фактически `reject`:
+`sold_out` не создаёт waitlisted Booking, даже если Event configuration уже
+содержит waitlist policy.
+
 ### 12.2. Unlimited RSVP
 
-Explicit unlimited occurrence создаёт confirmed Booking и active-key, но не
+Explicit unlimited occurrence создаёт confirmed Booking и участвует в той же
+duplicate-active uniqueness policy, но не
 создаёт finite ledger allocation и не увеличивает concurrency usage. Unknown
 capacity или отсутствие ledger не интерпретируется как unlimited.
 
@@ -510,8 +1001,9 @@ Owner/Creator cancellation:
 
 - проверяет authority, revision и deadline;
 - terminal transition выполняется ровно один раз;
+- exact active key обязан ссылаться на этот Booking и удаляется в transaction;
 - finite confirmed units/active hold/user usage освобождаются атомарно;
-- active-key удаляется или переводится в terminal tombstone;
+- terminal Booking перестаёт участвовать в active uniqueness evidence;
 - audit/outbox/idempotency записываются в той же transaction;
 - после commit запускается безопасная waitlist promotion obligation.
 
@@ -557,16 +1049,46 @@ ledger/usage и outbox obligations. Частично обработанный ba
 
 ### 12.7. Reconfirmation
 
-Открытие окна записывает authoritative state и outbox. User command отмечает
-confirmed response. Missed deadline может auto-release только после отдельного
-delivery/fairness approval; иначе allocation остаётся confirmed и оператор
-получает alert. Notification acceptance by FCM не считается прочтением.
+Для bounded local/Emulator slice `2A` действует следующий owner baseline:
+
+- material reschedule оставляет Booking `confirmed`, сохраняет allocation и
+  active key и продолжает учитывать Booking в соответствующем finite или
+  unlimited active cap;
+- lifecycle записывает `reconfirmationState=required`, точную
+  `reconfirmationRequiredForRevision` и immutable для этой ревизии
+  `reconfirmationDeadlineUtc`;
+- в `2A` дедлайн равен новому `occurrenceStartsAt`; более ранний дедлайн
+  потребует отдельной принятой policy revision. Отсутствие валидного нового
+  начала является fail-closed lifecycle failure;
+- user может подтвердить только собственную активную Booking, предъявив
+  `expectedBookingRevision` и точную текущую `materialRevision`, либо отменить
+  её независимо от обычного cancellation deadline;
+- успешная команда переводит состояние в `confirmed` только для этой material
+  revision, увеличивает Booking revision, но не меняет active key, ledger или
+  user usage;
+- повторный material reschedule всегда записывает новую required revision и
+  новый дедлайн, поэтому старое подтверждение не переносится на новое изменение;
+- нематериальное изменение не открывает reconfirmation и не изменяет его
+  authoritative state;
+- same idempotency key и тот же semantic payload возвращают сохранённый
+  результат; тот же ключ с другим payload отклоняется;
+- notification outbox остаётся suppressed до отдельного включения BCK-13 и не
+  является доказательством доставки или прочтения.
+
+Истечение дедлайна в `2A` возвращает typed
+`reconfirmation_deadline_passed`, но само по себе ещё не освобождает место.
+Автоматическая отмена, lease/pagination worker и terminal deadline
+reconciliation входят только в отдельно разрешаемый slice `2B`.
 
 ## 13. Idempotency
 
-Effective key: `(actorId/serviceIdentity, commandType, requestId)`.
+Effective key: `(resolvedActorOrServiceIdentity, commandType,
+idempotencyKey)`.
 
-Для client v1: `idempotencyKey == requestId`. Mismatch — invalid command.
+Для client v1 `requestId` коррелирует одну попытку, а `idempotencyKey`
+идентифицирует одну логическую mutation между retry. Значения могут совпадать,
+но equality не обязательна. Retry может получить новый `requestId`, только
+если сохраняет исходный `idempotencyKey` и semantic payload.
 
 - same key + same canonical payload hash возвращает stored result;
 - same key + different hash возвращает `idempotency_conflict`;
@@ -575,7 +1097,53 @@ Effective key: `(actorId/serviceIdentity, commandType, requestId)`.
 - unauthenticated/malformed/contention/internal failure не записывается как
   successful completion;
 - retry не повторяет allocation, audit transition или notification obligation;
+- новый idempotency key не обходит duplicate-active, capacity, policy или
+  revision invariants;
+- replay сохраняет domain outcome/resource revision, но response echo использует
+  `requestId` текущей попытки; correlation metadata может быть новой;
+- новый attempt использует свежий request ID; обнаруженный reuse одного
+  request ID с другим logical key/semantic command invalid и не мутирует state;
 - retention превышает максимальное поддерживаемое retry window.
+
+Existing `bookingIdempotency` stores two closed record kinds and remains one
+collection:
+
+```text
+encode(value) = uint32be(length(UTF8(value))) || UTF8(value)
+logicalMutationId = "m1_" + SHA256hex(
+  encode("booking_logical_mutation_v1") || encode(actorId) ||
+  encode(commandType) || encode(idempotencyKey))
+requestAttemptId = "r1_" + SHA256hex(
+  encode("booking_request_attempt_v1") || encode(actorId) || encode(requestId))
+```
+
+The logical record owns the semantic hash/stored result; the attempt record
+binds the same actor/request ID to command, logical-key reference and semantic
+hash. Both are read before writes and created atomically with the mutation.
+Same attempt/same mutation may replay the stored result; same attempt with
+another command/key/hash returns `invalid_contract` without mutation.
+
+`booking_semantic_hash_v1` projects exactly `{algorithmVersion, commandType,
+commandSchemaVersion, resolvedActorScope, expectedBookingRevision?,
+occurredAgainstEventRevision?, payload}` after closed-variant validation,
+serializes RFC 8785 JCS UTF-8, then emits lowercase hexadecimal SHA-256.
+Request/idempotency IDs, transport metadata, raw Auth/App Check and server
+timestamps are excluded. Duplicate keys, fractional/non-finite numbers,
+integers outside `-9007199254740991..9007199254740991`, unpaired surrogates
+and invalid nulls fail before hashing. Unicode normalization, case folding and
+  trimming are forbidden after validation. Dart/TypeScript golden vectors pass
+  at contracts/test-only scope. BCK09-API-RAW-B-01 v0.1 proves the pinned
+  Functions Emulator preserves the committed synthetic raw-body corpus on
+  Ubuntu and Windows; this is not product-adapter, Security or production
+  evidence.
+
+Accepted ECL03-D12 treats `requestId` as an exact case-sensitive, non-blank
+string of 1–128 Unicode scalar values, opaque and not normalized/interpreted as
+ULID. BCK09-API-CORR-01 v0.3 proves command Schema/Dart/fixture enforcement,
+  and BCK09-API-PAR-01 v0.3 proves bounded query/hash contract parity. RAW-C
+  v0.1 received separate authority for a disabled local adapter only; no
+  endpoint may be deployed or activated until all independent evidence gates
+  are complete.
 
 ## 14. Workers and scheduling
 
@@ -587,7 +1155,7 @@ Effective key: `(actorId/serviceIdentity, commandType, requestId)`.
 | Reminder | every minute | Deterministic bounded reminders |
 | Auto-release | gated, every minute | Release only after delivery-policy approval |
 | Occurrence completion | every 5 minutes | Stop cap count after 120-minute grace |
-| Outbox dispatcher | event + minute sweep | In-app first, FCM attempt, retry/dead-letter |
+| Outbox handoff | event + minute sweep | BCK-13 consumes only `handoffRequired` obligations after OD-09 Acceptance; suppressed records are never replayed |
 | Reconciliation | frequent scoped + daily full | Detect ledger/usage/audit drift |
 | Retention | daily | Delete/pseudonymize expired data |
 
@@ -627,19 +1195,23 @@ occurrenceChanged
 occurrenceCancelled
 ```
 
-Порядок:
+Порядок после отдельного BCK-13/OD-09 executable approval:
 
 1. domain transaction создаёт outbox obligation;
-2. dispatcher создаёт authoritative in-app notification;
-3. при разрешении пользователя выполняется FCM attempt;
-4. delivery result записывается отдельно;
+2. BCK-13 consumer дедуплицирует Accepted handoff и создаёт authoritative
+   in-app notification;
+3. BCK-13 при разрешении пользователя выполняет FCM attempt;
+4. BCK-13 записывает delivery result отдельно;
 5. retry не создаёт вторую domain transition;
 6. exhausted retry становится dead-letter и alert.
 
 Push payload не содержит private Event location, access code, participant
 name или application text. Deep link содержит opaque ID и повторно проходит
 authorization. Device token имеет lifecycle регистрации, rotation, revoke и
-user logout cleanup.
+user logout cleanup под BCK-13 authority. Пока OD-09 Proposed или BCK-13 не
+Approved/runtime-ready, `bookingOutbox` записывается только с
+`effectDisposition=suppressedPreActivation`: никакой cross-domain
+dispatcher/FCM effect не включается и поздний replay запрещён.
 
 ## 16. Security
 
@@ -657,19 +1229,42 @@ user logout cleanup.
 |---|---|
 | Booking command runtime | Exact Booking collections transaction access |
 | Scheduler invoker | Invoke exact worker endpoints only |
-| Notification worker | Outbox/delivery + FCM only |
+| BCK-13 notification runtime | Consume accepted outbox handoff; own inbox/delivery + FCM |
 | Reconciliation worker | Read aggregates/ledger; write findings, not repair |
 | CI deploy | Environment-scoped deploy, no application-data read |
 | Support repair | Disabled default, short-lived elevation |
 
 ### 16.3. App Check and abuse protection
 
-- dev/staging сначала observe missing/invalid tokens;
-- production mutation enforcement включается после legitimate traffic proof;
-- high-risk replay protection включается только после latency test;
+- local bypass допустим только при одновременных `local`, `demo-recharge`,
+  Functions Emulator и loopback Firestore Emulator; эта ветка конструктивно
+  недоступна dev/stage/prod;
+- dev/stage/prod требуют valid App Check evidence и fail closed;
 - App Check дополняет, но не заменяет Auth/domain/idempotency;
 - per-actor/resource rate limits не создают hidden product discrimination;
 - security errors не позволяют probe существование чужого Booking.
+
+Exact rolling limits use server time and a deduplicated `attemptRequestId`:
+
+| Scope | create | cancel | query |
+|---|---:|---:|---:|
+| actor+installation burst | 5/10 s | 10/10 s | 30/10 s |
+| actor+installation | 10/min | 20/min | 120/min |
+| account ceiling | 20/min | 40/min | 240/min |
+| installation ceiling | 20/min | 40/min | 240/min |
+| hashed network-risk signal | 60/min, non-authoritative | never sole blocker | 600/min, non-authoritative |
+
+Session issue is `5/15 min` per account and `10/15 min` per installation;
+rotation is `6/hour` per Session and `20/hour` per account. Policy storage
+unavailability returns retryable `temporarily_unavailable` with 60 seconds.
+Scoped incident switches exist separately for create, cancel, query, Session
+issue and rotation; their activation requires environment, actor, reason,
+revision and timestamp audit. There is no global security-disable switch.
+
+Age-sensitive eligibility, age-restricted Booking и guardian/consent evidence
+server-disabled, пока OD-11 не Accepted для конкретного рынка и BCK-04/BCK-06
+не предоставили qualified Legal/Privacy и identity controls. Unknown age
+policy не заменяется guessed threshold или client checkbox.
 
 Firebase Functions v2 поддерживает `enforceAppCheck`; неверифицированные
 requests отклоняются после включения enforcement:
@@ -682,25 +1277,52 @@ anonymization, backup propagation и exceptional hold.
 
 | Data | Terminal retention target | Action |
 |---|---:|---|
-| Booking core IDs/state | 90 days | Remove user linkage/anonymize if justified |
+| Booking core IDs/state | 90 days after the later of occurrence end or terminal cancellation/expiry | Active/future Booking has no TTL; remove user linkage/anonymize when eligible |
 | Named guests | 30 days | Delete |
 | Application fields | 30 days | Delete content, retain decision code |
 | Eligibility evidence ref | 30 days | Delete/revoke protected ref |
 | Resolved hold payload | 30 days | Delete; retain bounded audit |
-| Idempotency result | 30 days | Delete after retry window |
-| Notification payload/outbox | 30 days | Delete private/rendered arguments |
+| Booking idempotency | 7 days from `createdAt` | Delete after retry/dedupe window |
+| Booking outbox | 30 days after both delivery and reconciliation complete | Do not set `expiresAt` while either completion is missing |
 | Delivery metadata | 90 days | Aggregate/anonymize |
-| Booking audit | 180 days | Pseudonymize/delete by approved policy |
+| Booking audit | 365 days from `occurredAt` | Retain minimum audit; pseudonymize direct account identifiers after account deletion |
 | Security/support repair audit | 180 days | Restricted archive/delete |
 | Operational logs | 30 days | Delete |
 | Dead-letter payload | <=30 days | Delete after resolution |
 
-Каждый документ получает versioned `retentionClass` и `expireAt`, но TTL —
-только cleanup mechanism. Firebase TTL не удаляет мгновенно, обычно удаление
-происходит в пределах 24 часов, не является транзакционным и тарифицируется как
-delete operation. Поэтому user-deletion workflow обязан немедленно закрывать
-доступ и отдельно отслеживать завершение:
+`BCK09-RETENTION-DEC-01` является техническим owner-решением, а не qualified
+Legal/Privacy verdict. Это общий baseline для LV/EE/LT, но каждый рынок
+включается независимо; иной срок допустим только через принятый versioned
+market override. Наличие baseline не включает рынок и не разрешает production
+personal data.
+
+The 90-day core Booking baseline is independently versioned per market and is
+overridden by legal/security hold. Account erasure immediately blocks access
+and new mutations, creates a cancellation/privacy workflow for active future
+Bookings, safely cancels/releases inventory, then completes erasure and
+pseudonymization. Erasure never abandons active allocations or delays access
+revocation while cancellation work is pending.
+
+Каждый применимый документ получает versioned `retentionClass` и Firestore
+Timestamp `expiresAt`, но TTL — только cleanup mechanism. Для outbox retention
+anchor равен более позднему из `deliveredAt` и `reconciledAt`; пока любой из
+этих фактов отсутствует, `expiresAt` отсутствует и автоматическое удаление
+запрещено. Legal/security hold удаляет TTL-field и приостанавливает любое
+удаление до явного снятия. После снятия срок пересчитывается от исходного
+policy anchor; уже истёкшая запись сразу становится deletion-eligible.
+
+Firebase TTL не удаляет мгновенно, не является транзакционным и тарифицируется
+как delete operation. Поэтому user-deletion workflow обязан немедленно
+закрывать доступ и отдельно отслеживать завершение. Operational target:
+физическое удаление завершается не позднее 72 часов после наступления TTL;
+нарушение target создаёт reconciliation/alert, но не продлевает retention.
 [Firestore TTL](https://firebase.google.com/docs/firestore/ttl).
+
+При account deletion прямые account/actor identifiers удаляются или заменяются
+scope-bound pseudonym; минимальный Booking audit сохраняется только до своего
+исходного `expiresAt`. Restore всегда выполняется изолированно: истёкшая запись
+не возвращается в active dataset, hold сохраняется, а re-deletion и
+reconciliation завершаются до cutover.
 
 ## 18. Observability, SLO and alerts
 
@@ -755,9 +1377,10 @@ Reconciliation проверяет:
 ledger.confirmedUnits == sum(active finite confirmed allocations)
 ledger.activeHoldUnits == sum(active holds)
 user usage == policy-counted Booking/hold evidence
-one active-key == at most one non-terminal Booking per scope
+one active-key record == exactly one referenced non-terminal Booking per active scope
 every state mutation has audit
-every notification obligation has delivery/dead-letter resolution
+suppressedPreActivation obligation has no delivery and is never replayed
+handoffRequired obligation has BCK-13 terminal receipt or quarantine/dead-letter
 ```
 
 При drift:
@@ -766,9 +1389,10 @@ every notification obligation has delivery/dead-letter resolution
 2. новые capacity mutations fail closed;
 3. alert содержит только opaque IDs/correlation;
 4. reconciliation создаёт finding, но не чинит автоматически;
-5. support создаёт repair proposal с ticket/reason/dry-run;
-6. второй человек утверждает allocation/state repair;
-7. backend выполняет idempotent repair и append-only audit;
+5. BCK-19 создаёт repair proposal с ticket/reason/dry-run, не меняя Booking;
+6. второй уполномоченный сотрудник утверждает exact proposal в BCK-19;
+7. BCK-19 вызывает versioned BCK-09 domain repair command, а BCK-09 повторяет
+   invariants, выполняет idempotent repair и append-only audit;
 8. повторная reconciliation закрывает incident.
 
 Firestore Console editing не является поддерживаемым repair-процессом.
@@ -811,6 +1435,9 @@ event_internal_booking_app_check_enforcement
 ```
 
 Все flags server-owned, environment-scoped, default-off и fail closed.
+BCK-05 владеет registry/configuration/change audit этих flags; BCK-09 только
+проверяет актуальный resolved value в каждой mutation. Mobile, Booking document
+и Event draft не могут включать flag.
 
 Rollout:
 
@@ -875,7 +1502,13 @@ deletion/modification; restore из backup создаёт новую Firestore d
 [Firestore disaster recovery](https://firebase.google.com/docs/firestore/disaster-recovery)
 и [backups](https://firebase.google.com/docs/firestore/backups).
 
-## 25. Полная файловая карта реализации
+## 25. Target file map (conditional)
+
+Эта карта показывает конечное распределение ответственности, но не разрешает
+создать все paths одним slice. Первый executable этап обязан использовать
+exact ECL-03C §10 map. Каждый ECL-03D–H этап перед кодом фиксирует собственный
+bounded add/modify/must-not-change plan; отсутствие такого Approved плана
+означает запрет на соответствующие files/runtime.
 
 ### 25.1. Backend root
 
@@ -909,11 +1542,11 @@ src/booking/management/{approve,reject,promote,managed_cancel}.ts
 src/inventory/{ledger,active_key}.ts
 src/policy/{concurrency,reschedule,retention}.ts
 src/audit/booking_audit.ts
-src/notifications/{outbox,in_app,fcm,delivery}.ts
+src/booking/outbox.ts
 src/workers/{leases,hold_expiry,promotion,reconfirmation}.ts
 src/workers/{occurrence_change,completion,retention}.ts
 src/reconciliation/{scan,findings}.ts
-src/support/{repair_proposal,repair_execution,emergency_disable}.ts
+src/booking/{repair_execution,emergency_disable}.ts
 ```
 
 ### 25.3. Test ownership
@@ -958,6 +1591,9 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
 - finite/unlimited/unknown capacity;
 - guest units и one-slot concurrency counting;
 - duplicate-active deterministic key;
+- forced transaction callback retry сохраняет один server candidate Booking ID;
+- 100 parallel distinct-idempotency creates для одного actor/scope: ровно один
+  Booking/key в finite и explicit-unlimited paths;
 - same idempotency key 100 раз;
 - 100 parallel requests за последнее место;
 - parallel allocations на границе cap=5;
@@ -967,7 +1603,7 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
 - cancel-vs-reconfirm;
 - duplicate scheduled worker and lease expiry;
 - function failure injection после каждого planned write;
-- no partial Booking/ledger/usage/audit/outbox state;
+- no partial Booking/active-key/ledger/usage/audit/outbox state;
 - cross-user and cross-page denial;
 - revoked account and forged claims;
 - App Check observe/enforce modes;
@@ -1046,15 +1682,78 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
 59. Production имеет утверждённые RPO/RTO, backup/PITR и least-privilege access.
 60. Restore проверяется в изолированной staging database до reopening mutations.
 61. Backup retention не обходит Privacy deletion/retention policy.
+62. ECL-03C sold out не создаёт waitlist; `onFull=joinWaitlist` начинается не
+    раньше отдельного Approved ECL-03D slice.
+63. Existing Booking v1 schema/fixtures остаются wire source без silent rename,
+    double envelope или несуществующего enum.
+64. BCK-03 common envelope применяется только через fixture-verified adapter
+    либо отдельно Approved compatible major.
+65. `requestId` коррелирует попытку, `idempotencyKey` идентифицирует mutation;
+    retry сохраняет key/payload и использует fresh request ID.
+66. ECL-03C использует exact нормативные имена девяти operational records.
+67. Later holds/workers/repair records conditional до exact ECL-03D–H plans.
+68. BCK-07 остаётся единственным writer published Event lifecycle/config;
+    BCK-09 только потребляет pinned operational input.
+69. BCK-08 владеет public composed availability; BCK-09 владеет только
+    ledger-derived internal source и authoritative mutation decision.
+70. BCK-09 владеет Booking outbox obligation; BCK-13 владеет inbox,
+    preferences, device registrations и delivery attempts.
+71. Пока OD-09 не Accepted, cross-domain Booking notification effects disabled.
+72. BCK-05 владеет server feature-flag registry/change authority; BCK-09
+    fail-closed потребляет resolved value.
+73. BCK-19 владеет staff case/proposal/approval flow, но repair выполняется
+    только BCK-09 owning-domain command с повторной проверкой invariants.
+74. OD-11-sensitive Booking paths disabled per market до Accepted policy и
+    qualified Legal/Privacy/Identity evidence.
+75. BCK-09 Review/Approval не создаёт Firebase/runtime/deployment/main authority.
+76. Duplicate-active scope имеет versioned canonical tuple и один deterministic
+    key record для finite и explicit-unlimited Booking.
+77. Create/cancel атомарно создаёт/удаляет active key; dangling/mismatch fail
+    closed и не чинится внутри пользовательской transaction.
+78. BCK-19 один владеет repair proposal/approval; BCK-09 предоставляет только
+    `ExecuteApprovedBookingRepair` owning-domain mutation.
+79. Suppressed pre-activation outbox никогда не replay; только
+    `handoffRequired` obligation требует BCK-13 terminal receipt/dead-letter.
+80. `bookingIdempotency` содержит закрытые logical-mutation и request-attempt
+    record kinds без создания десятой ECL-03C collection.
+81. Request-attempt reuse с другим command/key/hash атомарно отклоняется до
+    Booking, ledger, usage, audit или outbox mutation.
+82. `booking_semantic_hash_v1` использует exact JCS/SHA-256 projection и
+    cross-language golden vectors до runtime.
+83. Callable v2, `europe-west1`, 10/15/30-second deadlines and the amended
+    semantic hash are Accepted for Booking v1, but remain non-deployable until
+    independent API Platform/BCK-05/Security evidence passes.
+84. Accepted ECL03-D12 является единственным Booking-v1 request-ID semantic
+    authority; command artifact enforcement доказан BCK09-API-CORR-01 v0.3.
+85. Command schema/DTO divergence исправлен только через отдельно Approved
+    BCK09-API-CORR-01; backend-only validation остаётся запрещённой.
+86. BCK09-API-RAW-B-01 proves only disposable Emulator transport feasibility;
+    it creates no product callable, Firestore/Admin access or runtime authority.
+87. RAW-B evidence cannot grant any specialist signature or satisfy independent
+    Security, Operations, Identity, Content, Legal or production evidence.
+88. BCK09-API-RAW-C-01 v0.1 received exact bounded authority for disabled local
+    source and Emulator-only Firestore/Admin evidence; v0.3 has green local and
+    hosted evidence but remains Inconclusive pending independent verdicts.
+89. Cloud runtime, deployment, activation, mobile integration and any authority
+    beyond the exact five disabled exports remain prohibited until their own
+    recorded gates and approvals pass.
 
 ## 28. Definition of Ready для начала реализации
 
 - этот master-spec и exact ECL-03C plan явно Approved;
+- BCK09-API-CORR-01 implemented/verified against Accepted `ECL03-D12`;
+- BCK09-API-RAW-B-01 remains Done on the pinned cross-platform Emulator corpus;
+- BCK09-API-RAW-C-01 exact plan is separately accepted for implementation;
+- BCK-03 API-DEC-01/03 приняты их named owners с exact evidence;
 - отдельный post-stabilization backend stage разрешён;
 - production Identity/account/capability authority имеет Approved contract и
   verified dependency plan;
 - Platform подтвердил проекты, регионы, billing, IAM и deploy ownership;
 - Privacy/Legal зафиксировали путь утверждения retention до activation;
+- BCK-07 projection writer, BCK-13 effect handoff и BCK-19 repair seam имеют
+  Approved contracts для реально включаемого этапа;
+- OD-09 Accepted до cross-domain effects, OD-11 Accepted до применимых
+  age-sensitive Booking paths;
 - implementation разбит на ECL-03C–H без попытки сделать всё одним PR;
 - exact file plan каждого executable slice повторно подтверждён.
 
@@ -1063,7 +1762,7 @@ verification, rollback, audit evidence и escalation contact role. Secrets и
 ### Документ Done
 
 - все ссылки, headings, code fences, таблицы и AC проверены;
-- документ не противоречит ADR 0019, D01–D10 и parent ECL-03;
+- документ не противоречит ADR 0019, D01–D12 и parent ECL-03;
 - runtime/app/backend не изменён;
 - product owner явно принял документ.
 
@@ -1082,3 +1781,505 @@ Backend нельзя назвать Done, пока одновременно не
 До этого Recharge честно показывает external handoff, unavailable или
 internal-coming-later state и никогда не выдаёт local/mock результат за
 подтверждённый Booking.
+
+## 30. Current implementation inventory and stage ledger
+
+| Stage | Current evidence | Status | Runtime authority |
+|---|---|---|---|
+| ECL-03A | ADR 0019, parent v1.3, D01–D12 | Accepted/Approved docs | None |
+| ECL-03B | Booking v1 schemas, fixtures, immutable Dart DTO/domain | Done | None |
+| ECL-03C | Plan v1.11; RAW-C v0.3 plus local lifecycle, retention and single-ledger load hardening | Review / local evidence present | Disabled source plus pure default-off escrow model; no persistent escrow/deploy/activation |
+| ECL-03D | Applications, waitlist, holds, Creator actions | Target only | None |
+| ECL-03E | Notifications/reconfirmation | Review / local `2A` and `2B` evidence present | Default-off Emulator reconfirm callable and deadline worker with suppressed outbox; BCK-13 delivery absent |
+| ECL-03F | Auxiliary/concurrency extensions | Target only | None |
+| ECL-03G | Mobile remote integration/cutover | Target only | None |
+| ECL-03H | Production security/load/operations proof | Target only | None |
+| Firebase/product backend | Local `demo-recharge` Emulator-only source/evidence; no provisioned cloud runtime | Cloud runtime Absent | None |
+
+Current ECL-02 local/mock availability and external handoff are compatibility
+evidence only. They are never imported as confirmed Booking, ledger counters,
+usage, idempotency, audit or delivery history. Production cutover starts empty
+unless a later Approved migration proves exact stable IDs and authoritative
+source evidence; `currentParticipants` is never migrated into capacity.
+
+## 31. Owner decisions and blockers
+
+| ID | Status | Owner(s) | Decision required | Fail-closed default |
+|---|---|---|---|---|
+| BCK09-OD-01 | Deferred/Open | Booking + Architecture | RAW-C local implementation exists; decide only the remaining evidence and later deploy/activation authority | No deployed backend/product runtime |
+| BCK09-OD-02 | Named API decisions, contract parity, RAW-B and local RAW-C evidence present; independent runtime evidence open | API Platform + Booking + Security + BCK-05 | Preserve Booking v1/D11; independently review RAW-C controls and later stage/Security evidence | No deployed mutation endpoint |
+| BCK09-OD-03 | Deferred/Open | Identity + Security | Server-owned actor/capability boundary selected; prove production authority/revocation readiness | Deny all production commands |
+| BCK09-OD-04 | Accepted — design boundary | Content + Booking | BCK-07 alone writes the pinned published Event input | No production projection; mutations off until revision-safe handoff evidence |
+| BCK09-OD-05 | Accepted — ownership boundary; effects deferred | Notifications + API + Operations | BCK-09 owns the obligation; BCK-13 owns inbox/delivery | Outbox retained; no delivery effect until OD-09/BCK-13 executable approval |
+| BCK09-OD-06 | Accepted technical owner baseline via `BCK09-RETENTION-DEC-01`; Legal gate retained | Legal/Privacy + Security + Booking | 7-day idempotency, completed-and-reconciled outbox +30 days, 365-day audit, hold, pseudonymization and restore controls | No production personal data before qualified per-market Legal/Privacy validation; no implicit market enablement |
+| BCK09-OD-07 | Deferred/Open | Security/Privacy + Identity + Legal | Preserve OD-11 ownership and market versioning | Applicable paths server-disabled |
+| BCK09-OD-08 | Accepted — thresholds; local characterization present, cloud proof deferred | Operations + Booking | Single-ledger local evidence selects escrow; dev/staging SLO, cost and operations still require proof | No cohort/GA before persistent escrow, cost, DR, load and restore evidence |
+| BCK09-OD-09 | Accepted — repair seam; runtime deferred | Admin Operations + Booking + Security | BCK-19 owns case/proposal/approval; BCK-09 executes an invariant-safe command | Drifted pool blocked; no console/manual repair |
+| BCK09-OD-10 | Accepted — staged sequence | Booking + Product + Mobile | ECL-03C → D → E → F → G → H; every stage remains bounded | No stage inherits executable authority |
+
+Accepted ECL03-D01–D12 are not reopened by this table. BCK09-DEC-01 v0.3
+records the Product disposition: six decisions are Accepted only at their
+stated design boundaries and four remain Deferred/Open. It supplies neither
+independent specialist verdicts nor executable integration, ECL-03C runtime or
+activation authority; every remaining closure requires a versioned verdict and
+evidence link.
+
+## 32. Stage 2 normalized Booking entity contract
+
+All rows inherit BCK-01 §30 and the BCK-02 writer ledger; existing domain
+sections remain authoritative for commands, queries, events and typed outcomes.
+
+| Entity family | Accountable owner / single writer | Readers/projections | ID/reference contract |
+|---|---|---|---|
+| Booking | Booking / Booking command handler | owner/participant/Admin projection and Notifications events | bookingId; eventId/occurrenceId/publisherRef by immutable ID |
+| Hold | Booking / hold handler | availability projection and authorized actor | holdId + inventoryKey + expiresAt UTC; never client-clock authority |
+| InventoryLedger | Booking / inventory transaction | availability projection and reconciliation | inventoryKey + monotonic revision; source of capacity truth |
+| UsageRecord | Booking / check-in/use command handler | owner/Admin audit projection | usageId + bookingId + actor + UTC instant |
+| BookingPolicySnapshot | Booking / policy snapshot handler consuming accepted Event/market/reference revisions | eligibility and command handlers | policyId/revision plus exact source revisions |
+| BookingIdempotencyRecord | Booking / Booking command handler | command retry/reconciliation | actor + operation + semantic key/hash + retained result |
+| BookingOutboxRecord | Booking / Booking transaction handler | BCK-13/other accepted consumers | eventId + bookingId/revision; payload minimized and versioned |
+
+Booking lifecycle and forbidden transitions remain ECL-03 authoritative.
+Create/cancel/use/hold commands use same-key/same-hash replay and reject key
+reuse with different meaning; inventory mutation uses one Firestore transaction
+with expected revision and never trusts public/provider availability. Booking,
+hold, inventory, usage, idempotency and outbox data classes, capabilities,
+retention/deletion/holds and audit follow BCK-04. Telemetry contains IDs/codes/
+latency, not attendee payload. Migration is dry-run/reconcilable; rollback
+disables new mutations and reconciles ledger state rather than restoring a
+projection. Booking and effect flags are server-owned/default-off. Required
+evidence includes contract parity, Rules denial, contention/no-oversell,
+idempotency, expiry, replay/gap, privacy, repair and rollback. Provider result
+and Payment result remain separate BCK-16/17 records.
+
+## 33. Stage 4 Booking effects, receipts and reconciliation
+
+Stage 4 does not change the accepted Booking transaction invariant. It makes
+every result after that transaction explicit and recoverable. A successful
+authoritative transition atomically commits the Booking/hold/inventory/usage
+changes, audit fact, idempotency result and any required minimized outbox
+obligation. Notification delivery, analytics ingestion and public availability
+projection occur after commit and cannot confirm, reject or roll back Booking.
+
+### 33.1 Effect ledger
+
+| Effect | Writer | Consumer | Required identity and terminal evidence |
+|---|---|---|---|
+| Booking domain transition | BCK-09 | authorized Booking reads | bookingId, revision, command receipt and audit fact |
+| Notification obligation | BCK-09 outbox | BCK-13 | effectId, bookingId/revision, recipient purpose, template intent; acknowledged, terminally suppressed or dead-lettered receipt |
+| Internal availability change | BCK-09 outbox | BCK-08 compositor | effectId, inventoryKey/revision and source freshness; projection receipt |
+| Product analytics proposal | BCK-09 outbox | BCK-21 | catalogued event name/revision and minimized properties; accepted/rejected ingestion receipt |
+| Approved repair request | BCK-19 | BCK-09 repair command | repairId, caseId, two-person approval, expected ledger revision and execution receipt |
+
+Every consumer deduplicates `effectId` and validates producer, schema, market,
+source revision and purpose. Delivery is at-least-once with idempotent effects,
+not a claim of exactly-once transport. `suppressed` is terminal and never
+replayed automatically; `dead_lettered` requires an audited operator decision.
+
+### 33.2 Booking-to-Notifications contract
+
+BCK-09 owns whether a Booking fact requires communication. BCK-13 owns inbox
+materialization, preferences, templates, registrations and channel attempts.
+A BCK-13 receipt may be `inbox_created`, `policy_suppressed`,
+`permanently_failed` or `dead_lettered`; provider acceptance is only an attempt
+result. Missing acknowledgement raises reconciliation work but never changes a
+confirmed/cancelled Booking. A user opening or dismissing a notification is not
+Booking usage, attendance or cancellation evidence.
+
+### 33.3 Repair and rollback
+
+BCK-19 can create and approve a repair proposal but cannot mutate Booking
+storage. `ExecuteApprovedBookingRepair` revalidates current authority, proposal
+hash, approvers, expected revisions, invariant impact and feature flag inside
+BCK-09. It returns a typed no-op/conflict/applied receipt and emits compensating
+effects when a prior projection or inbox item must be corrected. Rollback first
+disables new mutations, preserves cancel/safe-release where proven, drains or
+quarantines effects, reconciles the ledger and then rebuilds projections. A
+database restore never substitutes for ledger reconciliation.
+
+### 33.4 Retention and privacy boundary
+
+Booking business records, restricted audit, idempotency results, outbox/effect
+receipts, delivery attempts and analytics events are different data classes.
+Each receives a policy revision, purpose, access scope, retention trigger,
+legal-hold behavior, deletion/pseudonymization action and backup-expiry proof.
+Outbox and notification payloads contain stable IDs and bounded reason/template
+codes, never attendee free text, raw contact data or staff notes. No production
+persistence begins before the applicable BCK-04 and qualified Legal/Privacy
+schedule is accepted.
+
+### 33.5 Additional acceptance criteria
+
+90. A committed Booking transition and its required outbox obligations share
+    one atomic authoritative boundary.
+91. Notification, analytics and Discover consumers never decide Booking state.
+92. Every post-commit effect has stable effectId, source revision, purpose,
+    schema revision and a terminal/reconcilable receipt.
+93. At-least-once delivery is handled by consumer deduplication and never
+    described as exactly-once transport.
+94. Missing or failed notification delivery never rolls back Booking.
+95. Push/provider acceptance never proves user receipt, attendance or usage.
+96. Suppressed effects are terminal and are not silently replayed after flag or
+    policy changes.
+97. Dead-letter replay requires an audited decision and preserves original
+    effect identity and history.
+98. BCK-19 proposes and approves repair; only BCK-09 executes Booking mutation.
+99. Repair revalidates current authority, proposal hash, approvers and expected
+    ledger revision.
+100. Repair returns typed no-op/conflict/applied evidence and emits bounded
+     compensating effects where required.
+101. Rollback disables mutations before effect draining and ledger
+     reconciliation; blind restore is forbidden.
+102. Booking, audit, idempotency, outbox, delivery and analytics data use
+     distinct retention/privacy classes.
+103. Outbox payloads exclude attendee free text, contacts, staff notes and
+     unrestricted personal data.
+104. BCK-09 v1.15 preserves RAW-C, independent-review, Firebase, deployment,
+     activation and mobile-integration gates.
+105. `BCK09-RETENTION-DEC-01` plus the accepted v1.18 core-Booking rule form
+     the technical owner baseline for the four implemented retention classes;
+     neither is a qualified Legal/Privacy verdict.
+106. Booking idempotency receives `expiresAt = createdAt + 7 days` as a
+     Firestore Timestamp and cannot infer its duration from market or client.
+107. Booking outbox receives no `expiresAt` until delivery and reconciliation
+     are both complete; its 30-day period starts at the later completion.
+108. Booking audit receives `expiresAt = occurredAt + 365 days` and retains
+     only the minimum approved audit shape.
+109. Legal/security hold removes or suppresses TTL eligibility until explicit
+     release, including during backup restore.
+110. Account deletion removes or pseudonymizes direct identifiers without
+     resetting or extending the existing audit retention deadline.
+111. LV, EE and LT inherit the same disabled baseline but activate
+     independently; any market override is versioned and separately accepted.
+112. Physical deletion has a 72-hour operational target after expiry and
+     overdue work remains visible to reconciliation/alerting.
+113. Restore into isolation blocks expired records and preserves active holds
+     before any destination cutover.
+114. BCK-09 v1.16 and its local TTL configuration claim neither qualified
+     Legal/Privacy approval nor cloud deployment, production activation, push
+     or merge authority.
+
+## 34. Stage 7 popular-pool scalability boundary
+
+### 34.1 Approved demand profiles and transition rule
+
+The accountable owner fixes the following planning profiles per exact
+`occurrenceId + poolId + channel`. They are capacity-planning inputs, not a
+promise of achieved cloud throughput:
+
+| Profile | Sustained target | Burst target |
+|---|---:|---:|
+| Normal | 5 requests/s | 20 requests |
+| Popular | 25 requests/s | 100 requests |
+| Mass | 100 requests/s | 500 requests |
+
+The current single-ledger implementation may be considered only for a bounded
+small dev rollout when evidence is below 25 sustained requests/s and 100 burst
+requests, p95 is at most 1500 ms, success ratio is at least 99.9% and oversell
+is zero. Reaching any threshold, exceeding latency, missing the success ratio
+or observing any oversell requires sharded escrow. Emulator evidence can make
+the single ledger eligible only for small dev; dev/staging cloud evidence is
+still required before any production decision.
+
+### 34.2 Local single-ledger evidence
+
+One disposable `demo-recharge` Emulator run used unique actors against one
+exact finite pool per scenario. Capacity exceeded requested units, therefore
+failure represents transaction contention rather than a sold-out pool.
+
+| Profile/mode | Requests | Successful | Retryable | p95 | Oversell |
+|---|---:|---:|---:|---:|---:|
+| Normal sustained | 5 | 5 | 0 | 101.25 ms | 0 |
+| Normal burst | 20 | 20 | 0 | 12142.70 ms | 0 |
+| Popular sustained | 25 | 25 | 0 | 55.55 ms | 0 |
+| Popular burst | 100 | 6 | 94 | 55164.60 ms | 0 |
+| Mass sustained | 100 | 2 | 98 | 55968.12 ms | 0 |
+| Mass burst | 500 | 2 | 498 | 93033.26 ms | 0 |
+
+The no-oversell invariant held in all six scenarios, but the single ledger did
+not meet the agreed burst latency or popular/mass success requirements. It is
+therefore not eligible for popular or mass production pools. These figures are
+local architectural evidence, not a Firebase cloud benchmark or SLO proof.
+
+### 34.3 Selected escrow model
+
+`booking_fixed_escrow_v1` divides one immutable pool capacity across fixed
+escrow shards. Popular pools use 16 shards; mass pools use 64; the maximum
+supported plan is 128. Every shard stores its own capacity, confirmed units
+and revision. The sum of shard capacities must equal the root pool capacity;
+allocation commits against exactly one shard and stores that exact shard ID in
+the Booking. A deterministic hash selects the first candidate and bounded
+probing may try another shard. Moving capacity between shards is an explicit,
+revisioned operation and may transfer only currently unallocated units.
+
+The root and shard model is currently `disabled`. The repository contains a
+pure planner, allocation/release/transfer logic and reconciliation tests only.
+It does not add a Firestore collection, dual writer, callable export, mobile
+path or runtime activation.
+
+### 34.4 Migration, reconciliation and rollback
+
+Migration from a single ledger is fail-closed and ordered:
+
+1. keep the single ledger authoritative and disable new mutations;
+2. create a shadow escrow root for the exact inventory identity and revision;
+3. place all existing confirmed units in a dedicated `legacy` shard and pin
+   existing Bookings to it; distribute only remaining capacity to new shards;
+4. verify capacity sum, confirmed-unit sum, unique shard IDs and every Booking
+   allocation; over-capacity state is `cancel_only`, not data loss;
+5. run a bounded shadow comparison and an isolated restore/reconciliation
+   drill;
+6. activate only through one atomic, compatible pointer swap after separate
+   dev/staging approval; never run two authoritative allocators;
+7. on rollback, stop new allocations, preserve cancellation/release, drain and
+   reconcile, then switch to a rebuilt compatible single-ledger revision or
+   the last compatible escrow revision. Blind document restore is forbidden.
+
+Any duplicate/missing shard, invalid unit value, capacity-sum mismatch,
+Booking-to-shard mismatch or unexplained confirmed-unit drift marks the pool
+`corrupt`, blocks new allocation and opens audited reconciliation. A legitimate
+capacity reduction below existing confirmed units is `over_capacity`: new
+allocations return sold out while cancellations continue to release units.
+
+### 34.5 Readiness verdict
+
+| Level | BCK-09 verdict after Booking Stage 8 |
+|---|---|
+| Local implementation | Approximately 85–90% of bounded R5 Booking; Ready with controls for further disabled local work |
+| Emulator evidence | Present on exact Node 22.23.2, npm 10.9.8 and Temurin 21.0.12+8. The full 66-test R0/Rules/Identity/Event/Booking/Abuse matrix passes, including the end-to-end Auth→Identity→Event→Booking→outbox→Privacy/retention flow, projection retry, 100-request contention, exact 49→50 unlimited-cap concurrency and default-deny Rules |
+| Physical dev backend | Ready to start only through a separately authorized project/IAM/budget/deploy slice; no physical dev resource exists yet |
+| Dev cloud | Not Ready; escrow persistence/transactions, real IAM, budgets and measured cloud evidence absent |
+| Staging | Not Ready; no migration/rollback/load/restore drill on provisioned infrastructure |
+| Production | Not Ready; independent Security and applicable qualified Legal/Privacy plus SLO/cost/DR evidence absent |
+| Enabled markets | None; LV, EE and LT remain independently disabled |
+
+115. Normal, popular and mass profiles are fixed at 5/20, 25/100 and 100/500
+     sustained-RPS/burst targets per exact inventory identity.
+116. The single-ledger transition boundary is 25 sustained requests/s, 100
+     burst requests, p95 1500 ms, success ratio 99.9% and zero oversell.
+117. Local Emulator evidence preserves zero oversell but proves the current
+     single ledger unsuitable for popular and mass pools.
+118. Local Emulator timing is architectural evidence only and cannot satisfy
+     dev, staging or production SLO/load proof.
+119. `booking_fixed_escrow_v1` is the selected target with 16 popular and 64
+     mass shards, a hard maximum of 128 and default-off activation.
+120. Escrow shard capacities sum exactly to pool capacity; allocation mutates
+     one revisioned shard and persists its exact ID in the Booking.
+121. Existing Booking allocations migrate to a dedicated legacy shard while
+     the single ledger remains authoritative until one atomic pointer swap.
+122. Over-capacity state blocks new allocations but preserves cancellation;
+     structural mismatch is corrupt and blocks all new allocation.
+123. Migration, capacity transfer, reconciliation and rollback are bounded,
+     revisioned, auditable and cannot use two authoritative writers.
+124. The present pure escrow model adds no Firestore schema, callable export,
+     runtime activation or market enablement.
+125. Production popular/mass activation requires provisioned dev/staging load,
+     migration, rollback, restore, Security and operational evidence.
+126. BCK-09 v1.17 preserves every cloud, independent-review, Legal/Privacy,
+     deployment, activation, push and merge gate.
+127. Authenticated Event availability requires current Event visibility but
+     never `booking.self_service`; create/cancel require the capability.
+128. `booking.self_service` is a baseline active-User personal capability and
+     cannot imply Creator, Page, Admin or content authority.
+129. Unlimited Booking has an independent cap of 50 active future records per
+     User/market and request limits of 10 create, 20 cancel and 120 read/
+     availability attempts per minute per actor+installation; unknown policy
+     fails closed and cancel remains available at the cap.
+130. Core Booking retention is 90 days after the later occurrence-end or
+     terminal cancellation/expiry anchor, with versioned market override and
+     legal/security hold precedence.
+131. Account erasure closes access immediately, safely cancels future active
+     Booking and releases allocation through a privacy workflow before final
+     erasure/pseudonymization.
+132. A suppressed outbox record is a terminal delivery/reconciliation outcome;
+     its TTL starts at `suppressedAt`, while legal/security hold still wins.
+133. Booking transport uses a server-issued opaque Session handle bound to UID,
+     installation and persisted Session; per-Session authority and mutable
+     snapshot revisions are forbidden in Firebase custom claims.
+134. Create/cancel read Account, Session, AccessSnapshot, common R1 flag,
+     idempotency and Booking/Event/inventory authority in the same Firestore
+     transaction as mutation. Unknown/stale authority fails closed and the kill
+     switch is not cached.
+135. BCK-07 immutable Event facts are the only input to the BCK-09 projection
+     consumer; its exact key is `occurrenceId` and stale revisions never win.
+136. Unpublish and occurrence cancellation create typed non-bookable
+     tombstones; material reschedule replaces only a newer compatible view.
+137. The mobile Booking adapter maps Booking `kind`, `error.code` and
+     `error.retryable`; a post-dispatch unavailable/deadline outcome is unknown
+     until an explicit read/reconciliation proves the result.
+138. Automatic command retry is bounded to seven days from first attempt;
+     receipts and import/checkpoint state survive process restart, while mock
+     capabilities never become server authority.
+139. All nine Booking collections have one writer, data class, readers and a
+     default-deny client boundary; `bookingUserUsage` uses a domain-separated
+     hash document key rather than raw UID.
+140. Privacy request dispatch and domain-task creation share one atomic
+     repository operation; task identity excludes `occurredAt` and a task has
+     at most five dispatch attempts.
+141. A terminal task rejects later outcomes and a Privacy request becomes
+     terminal only after every required domain task is terminal; any terminal
+     domain failure makes the request failed with retained success evidence.
+142. Core Booking, idempotency, terminally suppressed outbox and audit use the
+     accepted technical owner durations 90/7/30/365 days; legal/security hold
+     wins over TTL and isolated restore rejects expired records.
+143. `BCK09-RETENTION-DEC-01` and the 90-day core rule are technical owner
+     baselines only. Applicable qualified Legal/Privacy review remains Pending
+     before any staging, production or market activation.
+144. Firebase UID is never a Booking owner ID; opaque Session authority maps it
+     to the immutable domain User ID before command/query execution.
+145. Create/cancel repeat that mapping inside the mutation transaction and
+     reject any mismatch with the pre-resolved User ID.
+146. The disabled Emulator Identity callable is the only implemented issuer of
+     Booking Session context; its common server flag defaults off.
+147. Feature-flag repository failure is typed operational failure and cannot be
+     silently reclassified as an ordinary disabled capability.
+148. Event publication delivery uses immutable `eventBookingOutbox` records and
+     idempotent `bookingProjectionDeliveries` checkpoints with five-attempt
+     retry/dead-letter state.
+149. Occurrence cancellation atomically cancels each active Booking and releases
+     its active key, finite ledger allocation and user usage exactly once.
+150. Material reschedule marks active Booking `reconfirmationState=required`
+     and records only a suppressed pre-activation effect until Notifications is
+     separately enabled.
+151. Firestore Privacy orchestration atomically persists request dispatch and
+     Booking task creation; the Booking handler pseudonymizes terminal records
+     across core/idempotency/audit/outbox storage.
+152. The new callable, delivery and DSR services are local/Emulator-only and
+     authorize no worker, cloud, deployment, market activation, push or merge.
+153. One credential-free disposable Emulator flow proves Auth UID to distinct
+     User ULID, opaque Session/AccessSnapshot, Event outbox/projection, mobile
+     callable create/read/list/availability/cancel, notification obligations
+     and terminal Booking Privacy/DSR reconciliation without cloud context.
+154. Event projection delivery records a retryable lifecycle inconsistency,
+     preserves the immutable source fact and converges after repair without a
+     duplicate Booking transition.
+155. Exact Node 22.23.2, npm 10.9.8 and Temurin 21.0.12+8 local evidence makes
+     the bounded slice `Ready for physical dev backend` only as a separately
+     authorized next step; dev cloud, staging, production and all markets stay
+     Not Ready/disabled.
+156. Every `eventBookingOutbox.createdAt` is a Firestore server commit
+     `Timestamp` written by BCK-07; application strings and client-owned time
+     are invalid, quarantined input and never cursor authority.
+157. Event delivery combines the document-created trigger with an ordered
+     `createdAt + documentId` discovery cursor, so missed triggers and source
+     batches larger than one scheduler page converge idempotently.
+158. Processing uses fenced renewable leases and durable lifecycle checkpoints;
+     a stale worker cannot finish a newer lease, exact duplicate facts resume,
+     and older material revisions cannot affect newer state.
+159. Manual dead-letter replay requires an idempotent audited operator decision.
+     Immutable source facts and unresolved dead letters have no TTL; only
+     terminal delivered metadata receives the 90-day retention timestamp.
+160. Booking erasure skips legally held records without stalling pagination,
+     continues through all other records and terminates as
+     `completedWithRetention` with the retained count.
+161. Legal-hold release does not restore TTL or silently delete data. It creates
+     one linked, idempotent follow-up erasure request, and deletion eligibility
+     changes only after that request completes.
+162. A materially rescheduled active Booking remains confirmed, retains its
+     allocation and counts against the applicable finite or unlimited active
+     Booking cap until user cancellation or a separately authorized terminal
+     deadline action.
+163. Reconfirmation stores the exact required Event material revision and a
+     server-computed UTC deadline no later than the rescheduled occurrence
+     start; invalid or missing authority fails closed.
+164. A later material reschedule always replaces the required revision and
+     deadline, invalidating every response tied to an earlier material
+     revision, while a non-material change does not open reconfirmation.
+165. The owner may reconfirm only their own active Booking with the exact
+     expected Booking revision and current material revision; cancellation
+     remains available while reconfirmation is required.
+166. Successful reconfirmation changes only Booking reconfirmation metadata and
+     Booking revision. It never increments or releases active key, finite
+     ledger allocation or finite/unlimited user usage.
+167. Reconfirmation replay with the same idempotency key and semantic payload
+     is stable; a changed payload under the same key is rejected.
+168. Reconfirmation effects remain suppressed until BCK-13 activation and do
+     not claim notification delivery, reading or production evidence.
+169. Slice `2A` authorizes only the manual default-off local/Emulator command;
+     slice `2B` separately authorizes only the default-off deadline worker.
+170. An expired Booking is auto-cancelled only when it remains active,
+     `reconfirmationState=required`, its material revision is unchanged and its
+     stored deadline has passed in the transaction that performs cancellation.
+171. Automatic cancellation releases the active key and the applicable finite
+     ledger or unlimited usage exactly once and emits only Booking-owned audit
+     and suppressed outbox facts.
+172. Deadline discovery is bounded and stably paginated; processing uses a
+     fenced lease, durable checkpoint and bounded retry/backoff. Five failed
+     attempts produce an explicit dead letter.
+173. Manual replay requires an audited idempotent operator decision and cannot
+     reopen a terminal job or bypass current Booking invariants.
+174. Concurrent reconfirmation, owner cancellation, later material reschedule
+     and duplicate workers resolve through transaction preconditions; exactly
+     one terminal transition may release allocation and usage.
+175. The exact-toolchain gate at commit `8946cbb` passes 93 unit, 28 contract,
+     16 integration, 84 Emulator/Rules and 701 Flutter tests, plus analyzer,
+     boundary, layout/export/no-cloud/reproducibility and diff checks.
+176. `Local Booking vertical complete` is a local/Emulator verdict only. It
+     authorizes no BCK-13 delivery, persistent escrow, cloud project,
+     deployment, market activation, staging, production, push or merge.
+
+## 35. E2 local amendment — booking terms and hide consistency (Emulator only)
+
+Owner-accepted 2026-10-06 together with
+[EVENT_INTERNAL_REGISTRATION_E2_0_AMENDMENT.md](EVENT_INTERNAL_REGISTRATION_E2_0_AMENDMENT.md).
+
+177. An authoritative `getEventAvailability` answer (`notOpen`, finite
+     `available`/`limited`/`soldOut`, `unlimited` `available`, `closed`) may
+     carry `terms`: a copy of the projection's pool, channel, party mode and
+     limit, registration window and cancellation deadline. Non-authoritative
+     answers never carry it. The client books with these values only.
+178. Content projections from the Event handoff use the existing consumer,
+     delivery records, lease, retry and dead-letter unchanged; reschedule,
+     capacity change and occurrence cancellation use the existing lifecycle.
+179. Hide is eventually consistent locally: new Bookings are refused once
+     Booking applied `EventUnpublished`; a Booking confirmed before that stays
+     confirmed and cancellable. An immediate fence at Content commit is a
+     separate extension, not part of E2.
+
+## 36. F1 local amendment — notification obligations and outbox retention (Emulator only)
+
+Owner-accepted 2026-10-08 together with
+[NOTIFICATIONS_F1_INBOX_AMENDMENT.md](NOTIFICATIONS_F1_INBOX_AMENDMENT.md).
+
+180. With the default-off local flag `booking.notification.effects`, every
+     Booking transition that already wrote its outbox record (create, cancel,
+     reconfirm, occurrence cancellation, material reschedule, missed
+     reconfirmation, privacy-erasure cancellation) writes the v2 record in the
+     accepted OD-09 envelope instead of v1, in the same transaction and under
+     the same document id. With the flag off the v1 record is unchanged.
+181. v2 names the effect explicitly (`booking.confirmed`, `booking.cancelled`
+     with its cause, `booking.reconfirmationRequired`, `booking.reconfirmed`);
+     the v1 `booking_reconfirmation` ambiguity is not carried over.
+182. The recipient stays the Booking subject in `actorId`, which Booking
+     erasure already pseudonymizes; the payload holds no person identifier.
+183. Outbox retention no longer waits only for `delivered + reconciled`: the
+     anchor is any terminal Notifications outcome (created, suppressed,
+     expired, erased) with reconciliation, and a v2 record carries `expiresAt`
+     a full outbox period after its declared relevance deadline.
+184. Booking never reads or writes Notifications state; an inbox outage cannot
+     block a Booking command, the deadline worker or a privacy erasure.
+
+## 37. F2 local amendment — user Booking actions (Emulator only)
+
+Owner-accepted 2026-10-08 together with
+[BOOKING_ACTIONS_F2_AMENDMENT.md](BOOKING_ACTIONS_F2_AMENDMENT.md). Booking
+`src/` is unchanged; the amendment proves and connects existing behaviour.
+
+185. A reschedule keeps the occurrence and Booking ids (D07): a one-time Event
+     moved through Create keeps its occurrence id, so Booking keeps the
+     Booking id and allocation and marks it `reconfirmation required`.
+     Multi-date dates remain identities; removing a date cancels it.
+186. Hide/withdraw (`EventUnpublished`) and occurrence cancellation are
+     different: only the second cancels existing Bookings. One-time
+     occurrence cancellation and whole-Event cancellation have no mobile path.
+187. Local `2A`: at or after the deadline (= rescheduled start) reconfirmation
+     is refused and the seat is not released. Local `2B` (default-off worker)
+     releases after the deadline; it is mechanism evidence only and does not
+     satisfy D05 (auto-release after proven delivery) or D07 (deadline at
+     least 12 h after notice and 6 h before start, under-24 h rule, urgent and
+     non-material notices), which stay open.
+188. Deadline boundaries are tested with one controlled server clock shared by
+     commands, lifecycle, worker and Notifications consumer; races are judged
+     by stored invariants (allocation/usage released at most once, an old
+     material revision never confirms a newer one, one outbox record and at
+     most one inbox record per Booking revision).
