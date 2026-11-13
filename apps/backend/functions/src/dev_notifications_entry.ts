@@ -121,8 +121,10 @@ export const sendSelfTestNotificationV1 = onRequest(options, (req, res) =>
 );
 
 /** Push reconciliation: due retries and stale registrations, while the switch is on. */
+const { invoker, ...scheduleOptions } = options;
+void invoker; // Cloud Scheduler calls with the runtime identity; no public invoker.
 export const reconcilePushV1 = onSchedule(
-  { ...options, schedule: 'every 15 minutes', timeZone: 'Etc/UTC', retryCount: 0 },
+  { ...scheduleOptions, schedule: 'every 15 minutes', timeZone: 'Etc/UTC', retryCount: 0 },
   async () => {
     if (devNotificationsOpen(process.env) === null) return;
     const firebase = app();

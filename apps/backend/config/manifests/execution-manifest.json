@@ -79,6 +79,13 @@
           "authorized": false
         },
         {
+          "name": "runtime-notifications",
+          "kind": "runtime",
+          "purpose": "Notifications: dev inbox, preferences and FCM push (N3c)",
+          "deployed": true,
+          "authorized": false
+        },
+        {
           "name": "runtime-privacy",
           "kind": "runtime",
           "purpose": "Privacy orchestration: library only",
@@ -212,6 +219,13 @@
           "authorized": false
         },
         {
+          "name": "runtime-notifications",
+          "kind": "runtime",
+          "purpose": "Notifications: library only, no runtime",
+          "deployed": false,
+          "authorized": false
+        },
+        {
           "name": "runtime-privacy",
           "kind": "runtime",
           "purpose": "Privacy orchestration: library only",
@@ -341,6 +355,13 @@
           "name": "runtime-media",
           "kind": "runtime",
           "purpose": "Media service: library only, fake adapters, no runtime",
+          "deployed": false,
+          "authorized": false
+        },
+        {
+          "name": "runtime-notifications",
+          "kind": "runtime",
+          "purpose": "Notifications: library only, no runtime",
           "deployed": false,
           "authorized": false
         },

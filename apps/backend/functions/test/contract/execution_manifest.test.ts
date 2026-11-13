@@ -324,6 +324,8 @@ void test('dev inventory is generated from the manifest, never cloud observation
     'runtime-identity',
     // N3a.2 (owner-approved plan 2026-11-07): runtime-media is deployed in dev.
     'runtime-media',
+    // N3c (owner-approved plan 2026-11-13): runtime-notifications is deployed in dev.
+    'runtime-notifications',
   ]);
   assert.deepEqual(
     (inventory.firebaseCliOwned as Json).collections,

@@ -102,3 +102,21 @@ variable "n3a2_authorization_record_sha256" {
   type    = string
   default = ""
 }
+
+# ---- N3c (dev Notifications runtime grants). Absent by default; needs the N3c record.
+variable "n3c_enabled" {
+  description = "Desired presence of the N3c runtime grants. Not execution authority."
+  type        = bool
+  default     = false
+}
+
+variable "n3c_authorization_record_path" {
+  description = "Private owner-issued N3c plan record. Never stored in Git."
+  type        = string
+  default     = ""
+}
+
+variable "n3c_authorization_record_sha256" {
+  type    = string
+  default = ""
+}

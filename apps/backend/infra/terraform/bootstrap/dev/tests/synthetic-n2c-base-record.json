@@ -5,7 +5,7 @@
   "projectId": "recharge-dev-n2a01",
   "billingAccountId": "000000-000000-000000",
   "commitSha": "0000000000000000000000000000000000000000",
-  "manifestSha256": "8733c3bf3d8c87fc4d598bd8f8731666a9f98d17d0c82beee54e0be91bc4af19",
+  "manifestSha256": "d1c7e980d9110dc7efc76b03a1a7830bda2454d13774f48646f5e2f221a550dc",
   "operations": [
     "plan"
   ],
