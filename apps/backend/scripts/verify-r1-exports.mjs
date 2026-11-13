@@ -74,6 +74,8 @@ const expected = [
   "reconcileMediaReferencesV1",
   // ADR 0023 (2026-11-08): the author's DSA Art. 30 seller declaration (Emulator).
   "sellerDeclarationV1",
+  // N3c (2026-11-13): the FCM token of the caller's Session installation (Emulator).
+  "pushDeviceCommandV1",
 ].sort();
 if (JSON.stringify(exports) !== JSON.stringify(expected)) {
   throw new Error(`Unexpected function export surface: ${exports.join(", ")}`);

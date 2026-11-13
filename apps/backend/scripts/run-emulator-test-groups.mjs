@@ -116,6 +116,8 @@ export const emulatorTestGroups = Object.freeze([
       ["lib/test/emulator/booking_notification_effects.test.js"],
       ["lib/test/emulator/notifications_rules_default_deny.test.js"],
       ["lib/test/emulator/notifications_inbox_emulator_flow.test.js"],
+      // N3c (2026-11-13): device token, inbox item, then the push hint.
+      ["lib/test/emulator/notifications_push_emulator_flow.test.js"],
       ["lib/test/emulator/notifications_unavailability.test.js"],
       ["lib/test/emulator/notifications_privacy_emulator.test.js"],
       ["lib/test/emulator/booking_reconfirmation_deadline_clock.test.js"],

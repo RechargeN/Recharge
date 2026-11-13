@@ -199,7 +199,7 @@ void test('the trigger creates one inbox record and the callables serve only its
       'notificationsCommandV1',
       command('updatePreferences', 'f1-owner-prefs-01', {
         expectedRevision: 0,
-        categories: { 'booking.receipts': { push: true } },
+        categories: { 'booking.receipts': { email: true } },
       }),
       ownerToken,
     )

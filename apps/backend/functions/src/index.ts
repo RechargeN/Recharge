@@ -60,6 +60,7 @@ import {
 } from './modules/identity_publisher/application/emulator_identity_session_service.js';
 import { FirestoreFeatureFlagGate } from './platform/config/firestore_feature_flag_gate.js';
 import { IdentityFailure } from './modules/identity_publisher/domain/failures.js';
+import { handlePushDeviceCommand } from './modules/notifications/application/push_device_command_handler.js';
 import { handleSellerDeclarationCommand } from './seller_declaration_entry.js';
 import { SellerDeclarationService } from './modules/identity_publisher/application/seller_declaration_service.js';
 import { FirestoreIdentityAuthorityRepository } from './modules/identity_publisher/infrastructure/firestore_identity_authority_repository.js';
@@ -95,6 +96,7 @@ import { handleDiscoverQuery, type DiscoverCaller } from './catalog_entry.js';
 import { deliverContentEffects } from './content_effects_entry.js';
 import {
   consumeBookingNotificationEffect,
+  createEmulatorNotifications,
   handleNotificationsCommand,
   handleNotificationsQuery,
   notificationFeatures,
@@ -1187,6 +1189,25 @@ export const consumeContentEffectV1 = onDocumentCreated(
 export const notificationsQueryV1 = onCall<unknown>(callableOptions, async (request) => {
   const prepared = await prepareNotificationsCaller(request);
   return prepared.ok ? handleNotificationsQuery(prepared.caller, request.data) : prepared.result;
+});
+
+/** N3c (2026-11-13): the FCM token of the caller's own Session installation. */
+export const pushDeviceCommandV1 = onCall<unknown>(callableOptions, async (request) => {
+  const access = prepareTransport(request);
+  if (!access.ok) return { schemaVersion: 1, kind: 'rejected', code: 'unauthenticated' };
+  const decision = await access.composition.accessAuthority.authorize(
+    access.accessHint,
+    systemServerClock.now(),
+    bookingAccessCapability,
+  );
+  if (!decision.allowed) return { schemaVersion: 1, kind: 'rejected', code: 'unauthenticated' };
+  const notifications = createEmulatorNotifications(access.firestore);
+  return handlePushDeviceCommand({
+    push: notifications.push,
+    userId: decision.userId,
+    installationId: access.accessHint.installationId,
+    data: request.data,
+  });
 });
 
 export const notificationsCommandV1 = onCall<unknown>(callableOptions, async (request) => {
