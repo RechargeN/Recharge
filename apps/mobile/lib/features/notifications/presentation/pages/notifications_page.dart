@@ -15,6 +15,8 @@ import '../../application/controllers/notifications_controller.dart';
 import '../../application/notifications_providers.dart';
 import '../../application/state/notifications_state.dart';
 import '../../domain/entities/notification_item_entity.dart';
+import '../../domain/repositories/notification_channel_settings_repository.dart';
+import '../widgets/notification_channel_settings_sheet.dart';
 
 enum _NotificationFeedFilter { all, newItems, reminders, updates, scenarios }
 
@@ -50,6 +52,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     );
     final NotificationsState state = controller.state;
     final user = authState.user;
+    final NotificationChannelSettingsRepository? channelSettings = ref.watch(
+      notificationChannelSettingsProvider,
+    );
 
     if (user == null) {
       return Scaffold(
@@ -86,6 +91,27 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
               onPressed: controller.markAllAsRead,
               icon: const Icon(Icons.done_all),
             ),
+          if (channelSettings != null) ...<Widget>[
+            IconButton(
+              key: const Key('notifications-push-test'),
+              tooltip: context.l10n.notificationsPushTest,
+              onPressed: () =>
+                  _sendTestNotification(channelSettings, controller, user.id),
+              icon: const Icon(Icons.campaign_outlined),
+            ),
+            IconButton(
+              key: const Key('notifications-channel-settings'),
+              tooltip: context.l10n.notificationsChannelSettings,
+              onPressed: () => showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                builder: (_) => NotificationChannelSettingsSheet(
+                  repository: channelSettings,
+                ),
+              ),
+              icon: const Icon(Icons.tune),
+            ),
+          ],
         ],
       ),
       body: switch (state.status) {
@@ -104,6 +130,30 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         ),
       },
     );
+  }
+
+  /// N3c dev: time to put the app in the background, then one synthetic
+  /// notification (inbox record first, then the push hint).
+  Future<void> _sendTestNotification(
+    NotificationChannelSettingsRepository settings,
+    NotificationsController controller,
+    String userId,
+  ) async {
+    final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(
+      context,
+    );
+    final String failed = context.l10n.notificationsPushTestFailed;
+    messenger?.showSnackBar(
+      SnackBar(content: Text(context.l10n.notificationsPushTestScheduled)),
+    );
+    await Future<void>.delayed(const Duration(seconds: 5));
+    try {
+      await settings.sendTestNotification();
+    } on Object {
+      messenger?.showSnackBar(SnackBar(content: Text(failed)));
+      return;
+    }
+    if (mounted) await controller.loadNotifications(userId: userId);
   }
 
   Widget _buildReadyState({

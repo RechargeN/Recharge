@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show appFlavor;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -14,6 +15,8 @@ import '../../features/identity/data/repositories/dev_identity_workspace_reposit
 import 'native_dev_auth_session_gateway.dart';
 import 'dev_auth_workspace_composition.dart';
 import 'dev_content_media_port.dart';
+import 'dev_notifications_bundle.dart';
+import 'dev_push_registrar.dart';
 
 final class DevAuthBundle implements AuthSessionEvents {
   DevAuthBundle({
@@ -23,6 +26,7 @@ final class DevAuthBundle implements AuthSessionEvents {
     required this.sessions,
     required this.invalidated,
     this.contentMedia,
+    this.notifications,
   });
   @override
   final Stream<void> invalidated;
@@ -33,6 +37,9 @@ final class DevAuthBundle implements AuthSessionEvents {
 
   /// N3a.2: present only with `N3A2_DEV_PLACE_DRAFT=true`.
   final DevContentMediaPort? contentMedia;
+
+  /// N3c: present only with `N3C_DEV_PUSH=true`.
+  final DevNotificationsBundle? notifications;
 }
 
 /// All values are public app configuration. No provider keys or SA credentials.
@@ -60,14 +67,15 @@ Future<DevAuthBundle> createDevAuthBundleFromEnvironment() async {
       resetOnError: false,
     ),
   );
+  const options = FirebaseOptions(
+    apiKey: apiKey,
+    appId: appId,
+    messagingSenderId: '420479958348',
+    projectId: 'recharge-dev-n2a01',
+  );
   final app = await Firebase.initializeApp(
     name: 'recharge-dev-android',
-    options: const FirebaseOptions(
-      apiKey: apiKey,
-      appId: appId,
-      messagingSenderId: '420479958348',
-      projectId: 'recharge-dev-n2a01',
-    ),
+    options: options,
   );
   final sessions = SecureBookingIdentitySessionStore(
     storage,
@@ -105,29 +113,44 @@ Future<DevAuthBundle> createDevAuthBundleFromEnvironment() async {
     identity: identity,
     sessions: client,
   );
-  final auth = DevServerAuthRepository(
-    gateway: NativeDevAuthSessionGateway(
-      coordinator: coordinator,
-      installations: installations,
-      store: sessions,
-    ),
+  final callables = FunctionsBookingCallablePort(
+    endpoint: endpoint,
+    client: httpClient,
+    tokens: identity,
+    sessions: sessions,
+    identitySessions: client,
   );
+  DevNotificationsBundle? notifications;
+  DevAuthSessionGateway gateway = NativeDevAuthSessionGateway(
+    coordinator: coordinator,
+    installations: installations,
+    store: sessions,
+  );
+  if (n3cDevPushDefined) {
+    // FCM on Android serves the default Firebase app only (same dev project).
+    await Firebase.initializeApp(options: options);
+    notifications = DevNotificationsBundle(
+      port: DevNotificationsPort(callables),
+      registrar: DevPushRegistrar(
+        port: callables,
+        messages: FirebaseDevPushMessages(FirebaseMessaging.instance),
+      ),
+    );
+    gateway = PushAwareDevAuthSessionGateway(
+      inner: gateway,
+      registrar: notifications.registrar,
+    );
+  }
+  final auth = DevServerAuthRepository(gateway: gateway);
   return DevAuthBundle(
     storage: storage,
     auth: auth,
     workspace: createDevIdentityWorkspaceRepository(auth),
     sessions: sessions,
     contentMedia: n3a2DevPlaceDraftDefined
-        ? DevContentMediaPort(
-            FunctionsBookingCallablePort(
-              endpoint: endpoint,
-              client: httpClient,
-              tokens: identity,
-              sessions: sessions,
-              identitySessions: client,
-            ),
-          )
+        ? DevContentMediaPort(callables)
         : null,
+    notifications: notifications,
     invalidated: FirebaseAuth.instanceFor(app: app)
         .authStateChanges()
         .where((_) => identity.hasMismatchedSdkUser)

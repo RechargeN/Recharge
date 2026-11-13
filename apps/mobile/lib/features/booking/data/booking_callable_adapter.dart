@@ -578,6 +578,11 @@ final class BookingBackendEndpoint {
           'mediaCommandV1',
           'mediaQueryV1',
           'uploadMediaBytesV1',
+          // N3c: dev-cloud Notifications (inbox, preferences, push, self-test).
+          'notificationsQueryV1',
+          'notificationsCommandV1',
+          'pushDeviceCommandV1',
+          'sendSelfTestNotificationV1',
         }.contains(callableName)) {
       throw ArgumentError('dev_identity_callable_forbidden');
     }
@@ -616,6 +621,9 @@ const Set<String> _bookingCallableAllowlist = <String>{
   // F1: default-off Emulator-only Notifications inbox.
   'notificationsQueryV1',
   'notificationsCommandV1',
+  // N3c: push device registration and the owner's dev self-test.
+  'pushDeviceCommandV1',
+  'sendSelfTestNotificationV1',
   'libraryCommandV1',
   'libraryQueryV1',
   // ADR 0022 stage 1: default-off Emulator-only content translation.

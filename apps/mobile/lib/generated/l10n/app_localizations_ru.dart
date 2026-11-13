@@ -13691,4 +13691,46 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get contentErrorSellerDeclarationRequired =>
       'Чтобы публиковать платный или бронируемый контент, заполните данные продавца в профиле.';
+
+  @override
+  String get notificationsChannelSettings => 'Настройки уведомлений';
+
+  @override
+  String get notificationsChannelPush => 'Push-уведомления';
+
+  @override
+  String get notificationsChannelInApp => 'Во входящих';
+
+  @override
+  String get notificationsChannelLocked => 'Всегда остаётся во входящих';
+
+  @override
+  String get notificationsCategoryBookingReceipts =>
+      'Подтверждения бронирований';
+
+  @override
+  String get notificationsCategoryBookingChanges => 'Изменения бронирований';
+
+  @override
+  String get notificationsChannelSaveFailed => 'Не удалось сохранить настройки';
+
+  @override
+  String get notificationsChannelLoadFailed => 'Не удалось загрузить настройки';
+
+  @override
+  String get notificationsPushTest => 'Отправить тестовое уведомление';
+
+  @override
+  String get notificationsPushTestScheduled =>
+      'Сверните приложение: тестовое уведомление придёт через 5 секунд';
+
+  @override
+  String get notificationsPushTestFailed =>
+      'Не удалось отправить тестовое уведомление';
+
+  @override
+  String get notificationsPushArrived => 'Новое уведомление';
+
+  @override
+  String get notificationsPushOpen => 'Открыть';
 }

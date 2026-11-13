@@ -20055,6 +20055,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fill in your seller details in the profile to publish paid or bookable content.'**
   String get contentErrorSellerDeclarationRequired;
+
+  /// N3c: title and tooltip of the per-category channel settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification settings'**
+  String get notificationsChannelSettings;
+
+  /// N3c: push channel switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Push notifications'**
+  String get notificationsChannelPush;
+
+  /// N3c: inbox channel switch.
+  ///
+  /// In en, this message translates to:
+  /// **'In the inbox'**
+  String get notificationsChannelInApp;
+
+  /// N3c: a locked category keeps its inbox record.
+  ///
+  /// In en, this message translates to:
+  /// **'Always kept in the inbox'**
+  String get notificationsChannelLocked;
+
+  /// N3c: category booking.receipts.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking confirmations'**
+  String get notificationsCategoryBookingReceipts;
+
+  /// N3c: category booking.changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking changes'**
+  String get notificationsCategoryBookingChanges;
+
+  /// N3c: channel settings update failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings could not be saved'**
+  String get notificationsChannelSaveFailed;
+
+  /// N3c: channel settings load failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings could not be loaded'**
+  String get notificationsChannelLoadFailed;
+
+  /// N3c dev: tooltip of the self-test button.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a test notification'**
+  String get notificationsPushTest;
+
+  /// N3c dev: self-test scheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimise the app: the test notification arrives in 5 seconds'**
+  String get notificationsPushTestScheduled;
+
+  /// N3c dev: self-test failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The test notification could not be sent'**
+  String get notificationsPushTestFailed;
+
+  /// N3c: a push arrived while the app is open.
+  ///
+  /// In en, this message translates to:
+  /// **'New notification'**
+  String get notificationsPushArrived;
+
+  /// N3c: open the inbox from the in-app notice.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get notificationsPushOpen;
 }
 
 class _AppLocalizationsDelegate

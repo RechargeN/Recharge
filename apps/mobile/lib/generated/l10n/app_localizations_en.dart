@@ -13440,4 +13440,45 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get contentErrorSellerDeclarationRequired =>
       'Fill in your seller details in the profile to publish paid or bookable content.';
+
+  @override
+  String get notificationsChannelSettings => 'Notification settings';
+
+  @override
+  String get notificationsChannelPush => 'Push notifications';
+
+  @override
+  String get notificationsChannelInApp => 'In the inbox';
+
+  @override
+  String get notificationsChannelLocked => 'Always kept in the inbox';
+
+  @override
+  String get notificationsCategoryBookingReceipts => 'Booking confirmations';
+
+  @override
+  String get notificationsCategoryBookingChanges => 'Booking changes';
+
+  @override
+  String get notificationsChannelSaveFailed => 'Settings could not be saved';
+
+  @override
+  String get notificationsChannelLoadFailed => 'Settings could not be loaded';
+
+  @override
+  String get notificationsPushTest => 'Send a test notification';
+
+  @override
+  String get notificationsPushTestScheduled =>
+      'Minimise the app: the test notification arrives in 5 seconds';
+
+  @override
+  String get notificationsPushTestFailed =>
+      'The test notification could not be sent';
+
+  @override
+  String get notificationsPushArrived => 'New notification';
+
+  @override
+  String get notificationsPushOpen => 'Open';
 }

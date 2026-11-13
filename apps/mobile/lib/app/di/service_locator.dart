@@ -30,6 +30,8 @@ import 'discover_catalog_composition.dart';
 import '../../features/create/domain/repositories/activity_place_link_repository.dart';
 import '../../features/create/data/repositories/catalog_activity_place_link_repository.dart';
 import 'notifications_inbox_composition.dart';
+import 'dev_notifications_bundle.dart';
+import 'dev_push_registrar.dart';
 import 'event_publication_composition.dart';
 import 'place_publication_composition.dart';
 import 'activity_publication_composition.dart';
@@ -252,6 +254,8 @@ import '../../features/favorites/domain/usecases/remove_favorite_usecase.dart';
 import '../../features/notifications/data/datasources/notifications_local_datasource.dart';
 import '../../features/notifications/data/repositories/notifications_repository_impl.dart';
 import '../../features/notifications/domain/repositories/notifications_repository.dart';
+import '../../features/notifications/domain/repositories/notification_channel_settings_repository.dart';
+import '../../features/notifications/data/remote/server_notifications_repository.dart';
 import '../../features/notifications/domain/usecases/get_notifications_usecase.dart';
 import '../../features/notifications/domain/usecases/mark_notification_read_usecase.dart';
 import '../../features/visited/data/datasources/visited_places_local_datasource.dart';
@@ -1062,16 +1066,22 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
       () => NotificationsInboxTestEntryGuard.fromEnvironment(sl()),
     )
     ..registerLazySingleton<NotificationsRepository>(
-      () => notificationsRepositoryFor(
-        manifest: notificationsBindingManifest(sl()),
-        local: () => sl<NotificationsRepositoryImpl>(),
-        port: BookingPortNotificationsAdapter(
-          runtime: () => sl.getAsync<BookingTransportRuntime>(),
-          guard: sl(),
-        ),
-        // L4: the reader's UI language at query time.
-        wireLocale: () => sl<LocaleController>().apiLocale,
-      ),
+      () => devAuth?.notifications != null
+          // N3c: the dev-cloud server inbox (dev flavor, N3C_DEV_PUSH only).
+          ? ServerNotificationsRepository(
+              port: devAuth!.notifications!.port,
+              wireLocale: () => sl<LocaleController>().apiLocale,
+            )
+          : notificationsRepositoryFor(
+              manifest: notificationsBindingManifest(sl()),
+              local: () => sl<NotificationsRepositoryImpl>(),
+              port: BookingPortNotificationsAdapter(
+                runtime: () => sl.getAsync<BookingTransportRuntime>(),
+                guard: sl(),
+              ),
+              // L4: the reader's UI language at query time.
+              wireLocale: () => sl<LocaleController>().apiLocale,
+            ),
     )
     // Local identity events always land in the local inbox, whatever the binding.
     ..registerLazySingleton<AppNotificationSink>(
@@ -1199,6 +1209,14 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     final DevContentMediaPort? contentMedia = devAuth.contentMedia;
     if (contentMedia != null) {
       sl.registerSingleton<DevContentMediaPort>(contentMedia);
+    }
+    final DevNotificationsBundle? notifications = devAuth.notifications;
+    if (notifications != null) {
+      sl
+        ..registerSingleton<DevPushRegistrar>(notifications.registrar)
+        ..registerSingleton<NotificationChannelSettingsRepository>(
+          notifications.settings,
+        );
     }
     sl.registerSingleton<AuthSessionEvents>(devAuth);
     sl.registerFactory<SignInWithGoogleUseCase>(

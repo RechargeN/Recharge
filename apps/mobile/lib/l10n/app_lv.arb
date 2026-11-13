@@ -3323,5 +3323,18 @@
   "sellerUnavailable": "Pārdevēja dati pašlaik nav pieejami.",
   "sellerInvalid": "Pārbaudiet laukus.",
   "sellerConflict": "Dati mainīti citur. Atjaunojiet un mēģiniet vēlreiz.",
-  "contentErrorSellerDeclarationRequired": "Lai publicētu maksas vai rezervējamu saturu, aizpildiet pārdevēja datus profilā."
+  "contentErrorSellerDeclarationRequired": "Lai publicētu maksas vai rezervējamu saturu, aizpildiet pārdevēja datus profilā.",
+  "notificationsChannelSettings": "Paziņojumu iestatījumi",
+  "notificationsChannelPush": "Push paziņojumi",
+  "notificationsChannelInApp": "Paziņojumu sarakstā",
+  "notificationsChannelLocked": "Vienmēr saglabājas paziņojumu sarakstā",
+  "notificationsCategoryBookingReceipts": "Rezervāciju apstiprinājumi",
+  "notificationsCategoryBookingChanges": "Rezervāciju izmaiņas",
+  "notificationsChannelSaveFailed": "Iestatījumus neizdevās saglabāt",
+  "notificationsChannelLoadFailed": "Iestatījumus neizdevās ielādēt",
+  "notificationsPushTest": "Nosūtīt testa paziņojumu",
+  "notificationsPushTestScheduled": "Samaziniet lietotni: testa paziņojums pienāks pēc 5 sekundēm",
+  "notificationsPushTestFailed": "Testa paziņojumu neizdevās nosūtīt",
+  "notificationsPushArrived": "Jauns paziņojums",
+  "notificationsPushOpen": "Atvērt"
 }

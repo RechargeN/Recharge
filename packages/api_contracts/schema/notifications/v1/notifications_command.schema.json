@@ -82,7 +82,8 @@
               "minProperties": 1,
               "additionalProperties": false,
               "properties": {
-                "booking.receipts": { "$ref": "#/$defs/channels" }
+                "booking.receipts": { "$ref": "#/$defs/channels" },
+                "booking.changes": { "$ref": "#/$defs/lockedChannels" }
               }
             }
           },
@@ -104,6 +105,12 @@
       "type": "object",
       "additionalProperties": false,
       "properties": { "inApp": { "type": "boolean" }, "push": { "type": "boolean" } },
+      "minProperties": 1
+    },
+    "lockedChannels": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "push": { "type": "boolean" } },
       "minProperties": 1
     }
   }

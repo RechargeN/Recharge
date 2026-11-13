@@ -13612,4 +13612,48 @@ class AppLocalizationsLv extends AppLocalizations {
   @override
   String get contentErrorSellerDeclarationRequired =>
       'Lai publicētu maksas vai rezervējamu saturu, aizpildiet pārdevēja datus profilā.';
+
+  @override
+  String get notificationsChannelSettings => 'Paziņojumu iestatījumi';
+
+  @override
+  String get notificationsChannelPush => 'Push paziņojumi';
+
+  @override
+  String get notificationsChannelInApp => 'Paziņojumu sarakstā';
+
+  @override
+  String get notificationsChannelLocked =>
+      'Vienmēr saglabājas paziņojumu sarakstā';
+
+  @override
+  String get notificationsCategoryBookingReceipts =>
+      'Rezervāciju apstiprinājumi';
+
+  @override
+  String get notificationsCategoryBookingChanges => 'Rezervāciju izmaiņas';
+
+  @override
+  String get notificationsChannelSaveFailed =>
+      'Iestatījumus neizdevās saglabāt';
+
+  @override
+  String get notificationsChannelLoadFailed => 'Iestatījumus neizdevās ielādēt';
+
+  @override
+  String get notificationsPushTest => 'Nosūtīt testa paziņojumu';
+
+  @override
+  String get notificationsPushTestScheduled =>
+      'Samaziniet lietotni: testa paziņojums pienāks pēc 5 sekundēm';
+
+  @override
+  String get notificationsPushTestFailed =>
+      'Testa paziņojumu neizdevās nosūtīt';
+
+  @override
+  String get notificationsPushArrived => 'Jauns paziņojums';
+
+  @override
+  String get notificationsPushOpen => 'Atvērt';
 }

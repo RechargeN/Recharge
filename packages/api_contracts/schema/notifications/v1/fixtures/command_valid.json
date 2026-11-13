@@ -38,6 +38,9 @@
       "categories": {
         "booking.receipts": {
           "inApp": false
+        },
+        "booking.changes": {
+          "push": false
         }
       }
     }

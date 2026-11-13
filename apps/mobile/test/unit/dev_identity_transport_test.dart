@@ -43,6 +43,16 @@ void main() {
       () => endpoint.callableUri('createInternalBookingV1'),
       throwsArgumentError,
     );
+    // N3c opens the four Notifications calls; Booking and Discover stay closed.
+    for (final name in [
+      'notificationsQueryV1',
+      'notificationsCommandV1',
+      'pushDeviceCommandV1',
+      'sendSelfTestNotificationV1',
+    ]) {
+      expect(endpoint.callableUri(name).path, '/$name');
+    }
+    expect(() => endpoint.callableUri('discoverQueryV1'), throwsArgumentError);
   });
   test(
     'requires App Check before dispatch and accepts only correlated server Session',

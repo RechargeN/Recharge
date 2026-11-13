@@ -3323,5 +3323,18 @@
   "sellerUnavailable": "Данные продавца сейчас недоступны.",
   "sellerInvalid": "Проверьте поля.",
   "sellerConflict": "Данные изменились в другом месте. Обновите и попробуйте снова.",
-  "contentErrorSellerDeclarationRequired": "Чтобы публиковать платный или бронируемый контент, заполните данные продавца в профиле."
+  "contentErrorSellerDeclarationRequired": "Чтобы публиковать платный или бронируемый контент, заполните данные продавца в профиле.",
+  "notificationsChannelSettings": "Настройки уведомлений",
+  "notificationsChannelPush": "Push-уведомления",
+  "notificationsChannelInApp": "Во входящих",
+  "notificationsChannelLocked": "Всегда остаётся во входящих",
+  "notificationsCategoryBookingReceipts": "Подтверждения бронирований",
+  "notificationsCategoryBookingChanges": "Изменения бронирований",
+  "notificationsChannelSaveFailed": "Не удалось сохранить настройки",
+  "notificationsChannelLoadFailed": "Не удалось загрузить настройки",
+  "notificationsPushTest": "Отправить тестовое уведомление",
+  "notificationsPushTestScheduled": "Сверните приложение: тестовое уведомление придёт через 5 секунд",
+  "notificationsPushTestFailed": "Не удалось отправить тестовое уведомление",
+  "notificationsPushArrived": "Новое уведомление",
+  "notificationsPushOpen": "Открыть"
 }
