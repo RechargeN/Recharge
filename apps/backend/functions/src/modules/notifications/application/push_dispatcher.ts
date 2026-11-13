@@ -4,10 +4,11 @@ import type {
   NotificationCategory,
   NotificationPreferences,
 } from '../domain/notification_policy.js';
+import type { NotificationLocale } from '../domain/notification_templates.js';
 import {
   afterSend,
   dayKeyOf,
-  genericPushText,
+  genericPushTextFor,
   newPushAttempt,
   pushConfig,
   pushEnabled,
@@ -85,6 +86,7 @@ export class PushDispatcher {
     readonly installationId: string;
     readonly platform: PushPlatform;
     readonly token: string;
+    readonly locale?: NotificationLocale;
   }): Promise<PushRegistration> {
     const now = this.now();
     const next = registerPush(await this.deps.store.registration(input.installationId), {
@@ -201,13 +203,14 @@ export class PushDispatcher {
 
   private async send(attempt: PushAttempt, registration: PushRegistration): Promise<PushAttempt> {
     let result: PushSendResult;
+    const text = genericPushTextFor(registration.locale);
     try {
       result = await this.deps.provider.send({
         token: registration.token,
         notificationId: attempt.notificationId,
         category: attempt.category,
-        title: genericPushText.title,
-        body: genericPushText.body,
+        title: text.title,
+        body: text.body,
         ttlSeconds: pushConfig.ttlSeconds,
       });
     } catch {

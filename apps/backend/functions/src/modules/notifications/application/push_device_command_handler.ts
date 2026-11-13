@@ -1,4 +1,5 @@
 import { isPushToken } from '../domain/push.js';
+import { isNotificationLocale } from '../domain/notification_templates.js';
 import type { PushDispatcher } from './push_dispatcher.js';
 
 /**
@@ -33,9 +34,10 @@ export async function handlePushDeviceCommand(input: {
   try {
     if (body.commandType === 'registerPushDevice') {
       if (
-        Object.keys(fields).some((key) => key !== 'platform' && key !== 'token') ||
+        Object.keys(fields).some((key) => !['platform', 'token', 'locale'].includes(key)) ||
         fields.platform !== 'android' ||
-        !isPushToken(fields.token)
+        !isPushToken(fields.token) ||
+        (fields.locale !== undefined && !isNotificationLocale(fields.locale))
       )
         return refuse('request_invalid');
       await input.push.register({
@@ -43,6 +45,7 @@ export async function handlePushDeviceCommand(input: {
         installationId: input.installationId,
         platform: 'android',
         token: fields.token,
+        ...(fields.locale !== undefined ? { locale: fields.locale } : {}),
       });
       return { schemaVersion: 1, requestId, kind: 'succeeded', registered: true };
     }

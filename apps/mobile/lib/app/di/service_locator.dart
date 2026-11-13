@@ -1212,6 +1212,9 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     }
     final DevNotificationsBundle? notifications = devAuth.notifications;
     if (notifications != null) {
+      // The lock-screen push text follows the app language (A34 2026-11-13).
+      notifications.registrar.wireLocale = () =>
+          sl<LocaleController>().apiLocale;
       sl
         ..registerSingleton<DevPushRegistrar>(notifications.registrar)
         ..registerSingleton<NotificationChannelSettingsRepository>(

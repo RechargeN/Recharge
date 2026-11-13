@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import type { NotificationCategory, NotificationPreferences } from './notification_policy.js';
+import type { NotificationLocale } from './notification_templates.js';
 
 /**
  * N3c (owner-approved plan 2026-11-13, BCK13-OD-04/06/07/08): FCM push is a
@@ -20,10 +21,21 @@ export const pushConfig = Object.freeze({
 });
 
 /** Shown on a locked screen; details only inside the app after sign-in. */
-export const genericPushText = Object.freeze({
-  title: 'Recharge',
-  body: 'You have a new notification.',
+export const genericPushTexts: Readonly<
+  Record<NotificationLocale, Readonly<{ title: string; body: string }>>
+> = Object.freeze({
+  en: Object.freeze({ title: 'Recharge', body: 'You have a new notification.' }),
+  'lv-LV': Object.freeze({ title: 'Recharge', body: 'Jums ir jauns paziņojums.' }),
+  ru: Object.freeze({ title: 'Recharge', body: 'У вас новое уведомление.' }),
 });
+export const genericPushText = genericPushTexts.en;
+
+/** The device's app language from its registration; English when unknown. */
+export function genericPushTextFor(
+  locale: NotificationLocale | undefined,
+): Readonly<{ title: string; body: string }> {
+  return (locale !== undefined ? genericPushTexts[locale] : undefined) ?? genericPushTexts.en;
+}
 
 // ----------------------------------------------------------- registrations
 
@@ -45,6 +57,8 @@ export interface PushRegistration {
   readonly createdAtUtc: string;
   readonly updatedAtUtc: string;
   readonly lastSeenAtUtc: string;
+  /** The app language at registration (A34 2026-11-13); absent on older records. */
+  readonly locale?: NotificationLocale;
 }
 
 const installationPattern = /^(?!__name__$)[A-Za-z0-9._:-]{1,128}$/u;
@@ -75,13 +89,15 @@ export function registerPush(
     readonly platform: PushPlatform;
     readonly token: string;
     readonly nowUtc: string;
+    readonly locale?: NotificationLocale;
   },
 ): PushRegistration {
   if (
     current !== undefined &&
     current.state === 'active' &&
     current.userId === input.userId &&
-    current.token === input.token
+    current.token === input.token &&
+    current.locale === input.locale
   )
     return { ...current, lastSeenAtUtc: input.nowUtc };
   return {
@@ -97,6 +113,8 @@ export function registerPush(
     createdAtUtc: current?.createdAtUtc ?? input.nowUtc,
     updatedAtUtc: input.nowUtc,
     lastSeenAtUtc: input.nowUtc,
+    // Never an undefined field: Firestore refuses it.
+    ...(input.locale !== undefined ? { locale: input.locale } : {}),
   };
 }
 

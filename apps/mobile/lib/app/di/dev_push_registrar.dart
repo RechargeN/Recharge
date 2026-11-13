@@ -76,6 +76,10 @@ final class DevPushRegistrar {
   final BookingCallablePort _port;
   final DevPushMessages _messages;
   final String Function() _newRequestId;
+
+  /// The app language as a notifications wire locale (`lv-LV`, `en`, `ru`);
+  /// the server picks the lock-screen text by it. Set once DI is ready.
+  String Function()? wireLocale;
   StreamSubscription<String>? _rotation;
   bool _signedIn = false;
 
@@ -127,12 +131,27 @@ final class DevPushRegistrar {
           'schemaVersion': 1,
           'requestId': _newRequestId(),
           'commandType': 'registerPushDevice',
-          'payload': <String, Object?>{'platform': 'android', 'token': token},
+          'payload': <String, Object?>{
+            'platform': 'android',
+            'token': token,
+            if (_locale() case final String locale) 'locale': locale,
+          },
         },
       );
       return answer['kind'] == 'succeeded' && answer['registered'] == true;
     } on Object {
       return false;
+    }
+  }
+
+  String? _locale() {
+    try {
+      final String? locale = wireLocale?.call();
+      return const <String>{'lv-LV', 'en', 'ru'}.contains(locale)
+          ? locale
+          : null;
+    } on Object {
+      return null;
     }
   }
 

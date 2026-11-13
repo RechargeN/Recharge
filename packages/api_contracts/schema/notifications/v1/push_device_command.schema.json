@@ -30,6 +30,10 @@
             "token": {
               "type": "string",
               "pattern": "^[A-Za-z0-9_:\\-.]{20,4096}$"
+            },
+            "locale": {
+              "description": "App language for the generic lock-screen text (A34 2026-11-13).",
+              "enum": ["lv-LV", "en", "ru"]
             }
           }
         },

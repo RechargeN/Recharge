@@ -113,6 +113,25 @@ void main() {
     },
   );
 
+  test('the app language rides along; an unknown one is left out', () async {
+    final port = _Port();
+    final registrar = DevPushRegistrar(port: port, messages: _Messages())
+      ..wireLocale = () => 'lv-LV';
+    await registrar.register();
+    expect(
+      (port.calls.last.$2['payload']! as Map<String, Object?>)['locale'],
+      'lv-LV',
+    );
+    registrar.wireLocale = () => 'de';
+    await registrar.register();
+    expect(
+      (port.calls.last.$2['payload']! as Map<String, Object?>).containsKey(
+        'locale',
+      ),
+      isFalse,
+    );
+  });
+
   test('no consent means no token on the server', () async {
     final port = _Port();
     final registrar = DevPushRegistrar(

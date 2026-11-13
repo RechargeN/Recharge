@@ -274,3 +274,38 @@ void test('preferences: push is a channel of revision 2; a locked category switc
     }),
   );
 });
+
+void test('the lock-screen text follows the app language of the registration', async () => {
+  const w = world();
+  await w.dispatcher.register({
+    userId: user,
+    installationId: 'inst-1',
+    platform: 'android',
+    token,
+    locale: 'ru',
+  });
+  await w.dispatcher.dispatch(item(1));
+  assert.equal(w.provider.sent[0]?.body, 'У вас новое уведомление.');
+  // A new language on the same token updates the registration.
+  const latvian = await w.dispatcher.register({
+    userId: user,
+    installationId: 'inst-1',
+    platform: 'android',
+    token,
+    locale: 'lv-LV',
+  });
+  assert.equal(latvian.locale, 'lv-LV');
+  assert.equal(latvian.revision, 2);
+  await w.dispatcher.dispatch(item(2));
+  assert.equal(w.provider.sent[1]?.body, 'Jums ir jauns paziņojums.');
+  // Older registrations without a language keep the English text.
+  const legacy = await w.dispatcher.register({
+    userId: user,
+    installationId: 'inst-3',
+    platform: 'android',
+    token: `fcm-token-${'b'.repeat(40)}`,
+  });
+  assert.equal('locale' in legacy, false);
+  await w.dispatcher.dispatch(item(3));
+  assert.ok(w.provider.sent.some((m) => m.body === 'You have a new notification.'));
+});
