@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- N3c: the Android notification channel `recharge_default` (MainActivity). -->
+<resources>
+    <string name="notification_channel_name">Paziņojumi</string>
+    <string name="notification_channel_description">Rezervāciju apstiprinājumi un izmaiņas</string>
+</resources>
