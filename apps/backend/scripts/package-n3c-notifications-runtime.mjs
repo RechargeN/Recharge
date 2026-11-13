@@ -27,9 +27,10 @@ const backend = path.resolve(
   "..",
 );
 const entry = "lib/src/dev_notifications_entry.js";
-// Never in this bundle: the default runtime index, Booking commands, stand or tests.
+// Never in this bundle: the default runtime index, Booking commands, stand,
+// tests or contract registries (their schemas would be missing from the stage).
 const forbidden =
-  /(^|\/)(index\.js$|booking_(create|cancel|reconfirm)|stand\/|test\/)/u;
+  /(^|\/)(index\.js$|booking_(create|cancel|reconfirm)|stand\/|test\/|contracts\/)/u;
 const uidPattern = /^[A-Za-z0-9]{20,128}$/u;
 
 export function renderEnv({ runtimeEnabled, allowedUids }) {
