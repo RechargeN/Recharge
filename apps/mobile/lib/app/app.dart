@@ -9,6 +9,8 @@ import '../core/localization/l10n_context.dart';
 import '../core/localization/locale_controller.dart';
 import '../core/localization/locale_providers.dart';
 import '../core/telemetry/analytics_service.dart';
+import '../features/auth/application/auth_providers.dart';
+import '../features/notifications/application/notifications_providers.dart';
 import 'di/dev_push_registrar.dart';
 import 'di/service_locator.dart';
 import 'observers/app_lifecycle_observer.dart';
@@ -47,14 +49,33 @@ class _RechargeAppState extends ConsumerState<RechargeApp>
     }
   }
 
-  void _openInbox() => ref.read(appRouterProvider).go(RouteNames.notifications);
+  void _openInbox() {
+    ref.read(appRouterProvider).go(RouteNames.notifications);
+    _reloadInbox();
+  }
+
+  /// The push is only a hint: the inbox is read again from the server.
+  /// A34 2026-11-13: a reload started while the app was in the background
+  /// never reached the server, so the inbox opened from a push was stale.
+  void _reloadInbox() {
+    final String? userId = ref.read(authControllerProvider).state.user?.id;
+    if (userId == null) return;
+    unawaited(
+      ref
+          .read(notificationsControllerProvider)
+          .loadNotifications(userId: userId),
+    );
+  }
 
   /// Android does not show a push while the app is open; the inbox has it.
   void _announcePush() {
+    _reloadInbox();
     final ScaffoldMessengerState? messenger = _messenger.currentState;
     if (messenger == null) return;
     messenger.showSnackBar(
       SnackBar(
+        // With an action a SnackBar would stay until dismissed (A34 2026-11-13).
+        persist: false,
         content: Text(messenger.context.l10n.notificationsPushArrived),
         action: SnackBarAction(
           label: messenger.context.l10n.notificationsPushOpen,
