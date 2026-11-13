@@ -52,13 +52,17 @@ export function closureSchemaGroups(files) {
   return [...groups].sort();
 }
 
-export function importClosure(functionsRoot, start = entry) {
+export function importClosure(
+  functionsRoot,
+  start = entry,
+  forbiddenModules = forbidden,
+) {
   const seen = new Set();
   const stack = [start];
   while (stack.length > 0) {
     const rel = stack.pop();
     if (seen.has(rel)) continue;
-    if (forbidden.test(rel.slice("lib/".length)))
+    if (forbiddenModules.test(rel.slice("lib/".length)))
       throw new Error(`forbidden module in runtime closure: ${rel}`);
     const file = path.join(functionsRoot, rel);
     if (!existsSync(file))

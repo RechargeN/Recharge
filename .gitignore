@@ -98,3 +98,4 @@ apps/backend/n3a2-content-media-runtime/stage/
 # N3b media-tools build output and Cloud Build context (apps/backend/scripts/package-media-tools-runtime.mjs)
 apps/backend/media-tools-runtime/build/
 apps/backend/media-tools-runtime/stage/
+apps/backend/n3c-notifications-runtime/stage/
