@@ -1,3 +1,4 @@
+import type { NotificationsStore } from '../domain/repositories.js';
 import type { ServerClock } from '../../../shared/server_clock.js';
 import type {
   NotificationCategory,
@@ -257,4 +258,19 @@ export async function erasePushSubject(
   await store.deleteRegistrations(registrations);
   await store.deleteAttempts(attempts);
   return registrations.length + attempts.length;
+}
+
+/** Reads the committed inbox item and sends its push hint. */
+export async function dispatchPushFor(
+  store: NotificationsStore,
+  push: PushDispatcher,
+  notificationId: string,
+): Promise<void> {
+  const item = await store.transact((tx) => tx.inboxItem(notificationId));
+  if (item === undefined || item === 'foreign') return;
+  await push.dispatch({
+    notificationId: item.notificationId,
+    recipientId: item.recipientId,
+    category: item.category,
+  });
 }

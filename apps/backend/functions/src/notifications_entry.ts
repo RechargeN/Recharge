@@ -26,6 +26,7 @@ import {
 import { FirestoreNotificationsStore } from './modules/notifications/infrastructure/firestore_notifications_repository.js';
 import { info } from 'firebase-functions/logger';
 import {
+  dispatchPushFor,
   PushDispatcher,
   type PushProviderPort,
 } from './modules/notifications/application/push_dispatcher.js';
@@ -113,21 +114,6 @@ export function createPushDispatcher(
     preferences: (userId) => store.transact((tx) => tx.preferences(userId)),
     clock,
     log: (event, fields) => info(event, fields),
-  });
-}
-
-/** Reads the committed inbox item and sends its push hint. */
-export async function dispatchPushFor(
-  store: NotificationsStore,
-  push: PushDispatcher,
-  notificationId: string,
-): Promise<void> {
-  const item = await store.transact((tx) => tx.inboxItem(notificationId));
-  if (item === undefined || item === 'foreign') return;
-  await push.dispatch({
-    notificationId: item.notificationId,
-    recipientId: item.recipientId,
-    category: item.category,
   });
 }
 
@@ -308,3 +294,5 @@ export function handleNotificationsCommand(
     stripTransport(data),
   );
 }
+
+export { dispatchPushFor };
