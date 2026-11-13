@@ -26,6 +26,9 @@ on:
       - "apps/backend/scripts/check-n3c-plan*.mjs"
       - "apps/backend/scripts/package-n3c-notifications-runtime*.mjs"
       - "apps/backend/n3c-notifications-runtime/**"
+      - "apps/backend/scripts/build-release-candidate*.mjs"
+      - "apps/backend/scripts/runtime-projects*.mjs"
+      - "apps/backend/scripts/check-n4a-plan*.mjs"
       - "apps/backend/scripts/package-media-tools-runtime*.mjs"
       - "apps/backend/media-tools-runtime/**"
       - "apps/backend/scripts/package-n2c-identity-runtime*.mjs"
@@ -86,7 +89,7 @@ jobs:
         run: npm run verify:execution-manifest
 
       - name: Reject plan-only or mismatched apply records (local fixtures)
-        run: node --test apps/backend/scripts/verify-dev-apply-approval.test.mjs apps/backend/scripts/wait-dev-budget-delivery.test.mjs apps/backend/scripts/check-dev-bootstrap-plan.test.mjs apps/backend/scripts/check-n2c-plan.test.mjs apps/backend/scripts/check-n3b-plan.test.mjs apps/backend/scripts/package-media-tools-runtime.test.mjs apps/backend/scripts/check-n3a2-plan.test.mjs apps/backend/scripts/check-n3c-plan.test.mjs
+        run: node --test apps/backend/scripts/verify-dev-apply-approval.test.mjs apps/backend/scripts/wait-dev-budget-delivery.test.mjs apps/backend/scripts/check-dev-bootstrap-plan.test.mjs apps/backend/scripts/check-n2c-plan.test.mjs apps/backend/scripts/check-n3b-plan.test.mjs apps/backend/scripts/package-media-tools-runtime.test.mjs apps/backend/scripts/check-n3a2-plan.test.mjs apps/backend/scripts/check-n3c-plan.test.mjs apps/backend/scripts/build-release-candidate.test.mjs apps/backend/scripts/check-n4a-plan.test.mjs
 
       - name: N3b media-tools runtime (typecheck, host and mirror tests, local stage)
         working-directory: apps/backend/media-tools-runtime
@@ -104,6 +107,17 @@ jobs:
 
       - name: Bootstrap schema and offline mocked gates
         working-directory: apps/backend/infra/terraform/bootstrap/dev
+        run: |
+          terraform validate -no-color
+          terraform test -no-color
+
+      # N4a (owner-approved 2026-11-13): the staging ownership root, same gates.
+      - name: Staging bootstrap providers (local backend, no credentials)
+        working-directory: apps/backend/infra/terraform/bootstrap/stage
+        run: terraform init -backend=false -input=false -lockfile=readonly
+
+      - name: Staging bootstrap schema and offline mocked gates
+        working-directory: apps/backend/infra/terraform/bootstrap/stage
         run: |
           terraform validate -no-color
           terraform test -no-color

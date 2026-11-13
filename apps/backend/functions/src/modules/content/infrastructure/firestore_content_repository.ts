@@ -35,6 +35,7 @@ import {
   resolveStorageLimits,
   type ContentStorageLimits,
 } from '../domain/storage_limits.js';
+import { isReviewedCloudProject } from '../../../shared/cloud_runtime_projects.js';
 
 /** Server-owned collections (BCK-07 v0.12 §38.2). Clients get no access. */
 export const contentCollections = Object.freeze({
@@ -184,12 +185,12 @@ export function assertMediaChainPersistenceContext(
   for (const name of emulatorVariables)
     if ((environment[name] ?? '') !== '')
       throw new ContentPersistenceEnvironmentError('dev_cloud_with_emulator');
-  for (const name of ['GCLOUD_PROJECT', 'GOOGLE_CLOUD_PROJECT'] as const) {
-    const value = environment[name];
-    if (value !== undefined && value !== devCloudPersistenceProjectId)
-      throw new ContentPersistenceEnvironmentError('dev_cloud_project_mismatch');
-  }
-  if (environment.GCLOUD_PROJECT !== devCloudPersistenceProjectId)
+  // N4a: one reviewed non-production project (dev or staging), the same everywhere.
+  const cloudProject = environment.GCLOUD_PROJECT;
+  if (!isReviewedCloudProject(cloudProject))
+    throw new ContentPersistenceEnvironmentError('dev_cloud_project_mismatch');
+  const alias = environment.GOOGLE_CLOUD_PROJECT;
+  if (alias !== undefined && alias !== cloudProject)
     throw new ContentPersistenceEnvironmentError('dev_cloud_project_mismatch');
   if (
     (environment.GOOGLE_APPLICATION_CREDENTIALS ?? '') !== '' ||
@@ -203,7 +204,7 @@ export function assertMediaChainPersistenceContext(
   } catch {
     projectId = undefined;
   }
-  if (projectId !== devCloudPersistenceProjectId)
+  if (projectId !== cloudProject)
     throw new ContentPersistenceEnvironmentError('dev_cloud_project_mismatch');
   const settings = (
     firestore as unknown as {

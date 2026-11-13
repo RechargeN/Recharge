@@ -8,8 +8,14 @@ import type { Response } from 'express';
 import { createDevIdentitySessionBinding } from './modules/identity_publisher/infrastructure/dev_identity_session_binding.js';
 import { handleDevIdentityRequest } from './modules/identity_publisher/infrastructure/dev_identity_session_handler.js';
 import { FirestoreAbuseRateLimiter } from './platform/security/firestore_abuse_rate_limiter.js';
+import {
+  cloudProjectNumber,
+  loadTimeCloudProject,
+  runtimeServiceAccount,
+} from './shared/cloud_runtime_projects.js';
 
-const projectId = 'recharge-dev-n2a01';
+// N4a: dev or staging from the deploy environment (reviewed list, never production).
+const projectId = loadTimeCloudProject(process.env);
 const options = {
   region: 'europe-west1',
   memory: '256MiB' as const,
@@ -18,7 +24,7 @@ const options = {
   minInstances: 0,
   maxInstances: 1,
   concurrency: 1,
-  serviceAccount: 'runtime-identity@recharge-dev-n2a01.iam.gserviceaccount.com',
+  serviceAccount: runtimeServiceAccount('runtime-identity', projectId),
   invoker: 'public' as const,
   secrets: ['DEV_AUTH_INGRESS_HMAC'],
 };
@@ -46,7 +52,13 @@ async function dispatch(callableName: string, request: Request, response: Respon
     !/^Bearer [^\s]{1,8192}$/.test(authorization) ||
     (provider !== 'google' && provider !== 'apple') ||
     allowed.length === 0 ||
-    allowed.some((id) => !/^1:420479958348:(android|ios):[a-f0-9]+$/.test(id))
+    allowed.some(
+      (id) =>
+        !new RegExp(
+          `^1:${cloudProjectNumber(projectId, process.env) ?? 'none'}:(android|ios):[a-f0-9]+$`,
+          'u',
+        ).test(id),
+    )
   ) {
     response.status(503).json({ error: { status: 'UNAVAILABLE' } });
     return;

@@ -11,10 +11,20 @@ import {
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import {
+  cliTarget,
+  codeTreeDigest,
+  envFileFor,
+  isReviewedProject,
+  projectNumberEnvLines,
+  resolveProjectNumber,
+} from "./runtime-projects.mjs";
+
 // Stages the Firebase CLI source directory of the five isolated N2c Session
 // functions. Local only: no npm install, network, Firebase CLI or cloud call.
 // The stage holds the compiled import closure of dev_identity_entry.js, the
 // pinned runtime package.json/package-lock.json and the per-project .env.
+// dev defaults; N4a stages the same code for staging (projectId + projectNumber).
 export const projectId = "recharge-dev-n2a01";
 export const envFile = `.env.${projectId}`;
 const backend = path.resolve(
@@ -24,7 +34,6 @@ const backend = path.resolve(
 const entry = "lib/src/dev_identity_entry.js";
 const forbidden =
   /(^|\/)(index\.js$|media|scanner|processor|push|notifications|booking)/u;
-const appIdPattern = /^1:420479958348:android:[a-f0-9]+$/u;
 
 export function importClosure(functionsRoot, start = entry) {
   const seen = new Set();
@@ -83,21 +92,35 @@ export function treeDigest(stageDir) {
   return { sha256, files };
 }
 
-export function renderEnv({ appId, runtimeEnabled }) {
-  if (!appIdPattern.test(appId ?? ""))
-    throw new Error("exact dev Android Firebase app ID required");
+export function renderEnv({
+  appId,
+  runtimeEnabled,
+  projectId: target = projectId,
+  projectNumber,
+}) {
+  const number = resolveProjectNumber(target, projectNumber);
+  if (!new RegExp(`^1:${number}:android:[a-f0-9]+$`, "u").test(appId ?? ""))
+    throw new Error("exact Android Firebase app ID of the project required");
   if (typeof runtimeEnabled !== "boolean")
     throw new Error("runtimeEnabled must be boolean");
-  return `N2C_DEV_AUTH_ENABLED=${runtimeEnabled}\nN2C_ALLOWED_APP_IDS=${appId}\n`;
+  return [
+    `N2C_DEV_AUTH_ENABLED=${runtimeEnabled}`,
+    `N2C_ALLOWED_APP_IDS=${appId}`,
+    ...projectNumberEnvLines(target, number),
+    "",
+  ].join("\n");
 }
 
 export function stageRuntime({
   outDir,
   appId,
   runtimeEnabled,
+  projectId: target = projectId,
+  projectNumber,
   functionsRoot = path.join(backend, "functions"),
   runtimeRoot = path.join(backend, "n2c-identity-runtime"),
 }) {
+  const number = resolveProjectNumber(target, projectNumber);
   const pkg = JSON.parse(
     readFileSync(path.join(runtimeRoot, "package.json"), "utf8"),
   );
@@ -113,7 +136,12 @@ export function stageRuntime({
     throw new Error("lockfile root dependencies differ from package.json");
   if (Object.values(pkg.dependencies).some((v) => !/^\d+\.\d+\.\d+$/u.test(v)))
     throw new Error("runtime dependencies must be exact versions");
-  const env = renderEnv({ appId, runtimeEnabled });
+  const env = renderEnv({
+    appId,
+    runtimeEnabled,
+    projectId: target,
+    projectNumber: number,
+  });
   const files = importClosure(functionsRoot);
   // Recreate everything except an already installed node_modules.
   if (existsSync(outDir))
@@ -132,14 +160,16 @@ export function stageRuntime({
   );
   for (const rel of files)
     write(rel, readFileSync(path.join(functionsRoot, rel)));
-  write(envFile, env);
+  write(envFileFor(target), env);
   const digest = treeDigest(outDir);
   const manifest = {
     schemaVersion: 1,
-    projectId,
+    projectId: target,
+    projectNumber: number,
     entry,
     runtimeEnabled,
     appId,
+    codeTreeSha256: codeTreeDigest(outDir),
     treeSha256: digest.sha256,
     files: digest.files,
   };
@@ -159,6 +189,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
       outDir,
       appId,
       runtimeEnabled: enabled === "true",
+      ...cliTarget(process.env),
     });
     process.stdout.write(
       `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled})\n`,

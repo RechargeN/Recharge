@@ -8,6 +8,10 @@ import {
   type AbuseOperation,
   type AbuseSubjectKind,
 } from '../../security/abuse_policy.js';
+import {
+  isReviewedCloudProject,
+  type ReviewedCloudProject,
+} from '../../shared/cloud_runtime_projects.js';
 
 export const abuseCollections = Object.freeze({
   counters: 'securityRateLimitCounters',
@@ -39,7 +43,7 @@ export interface AbuseRateRequest {
   readonly installationId: string;
   readonly sessionId?: string;
   readonly networkRiskHash?: string;
-  readonly environmentId: 'local' | 'recharge-dev-n2a01';
+  readonly environmentId: 'local' | ReviewedCloudProject;
   readonly marketId: 'LV' | 'EE' | 'LT';
   readonly now: Date;
   readonly correlationId: string;
@@ -255,7 +259,7 @@ function assertCounterCompatible(
 
 function assertRequest(input: AbuseRateRequest): void {
   if (
-    (input.environmentId !== 'local' && input.environmentId !== 'recharge-dev-n2a01') ||
+    (input.environmentId !== 'local' && !isReviewedCloudProject(input.environmentId)) ||
     !['LV', 'EE', 'LT'].includes(input.marketId) ||
     !/^(?!__name__$)[A-Za-z0-9_-]{1,128}$/u.test(input.attemptRequestId) ||
     !Number.isFinite(input.now.getTime()) ||

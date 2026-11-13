@@ -55,3 +55,20 @@ Go only if all are true:
 2. If severe regression appears:
    - execute `rollback.md`,
    - open incident using `incident.md`.
+
+## Release candidate (N4a, 2026-11-13)
+
+A release candidate is one clean commit and the digests of everything deployed from it:
+
+```powershell
+node apps/backend/scripts/build-release-candidate.mjs --media-tools-digest sha256:<image> --out <private>/rc.json
+node apps/backend/scripts/build-release-candidate.mjs --verify <private>/rc.json
+```
+
+Source digests (contracts, rules, indexes, reference data, lockfiles, NOTICE) come from Git objects at the
+commit, so Windows and Linux checkouts agree; codebase digests (`codeTreeSha256`) come from the staged
+Functions sources without the per-project `.env`, so the dev and staging stages of one candidate are equal.
+Each predeploy gate checks the staged code against the candidate; the image moves between registries by
+digest (`copy-image-by-digest.mjs`), never rebuilt. The candidate file is committed under
+`docs/release/rc/` with the deployment report.
+

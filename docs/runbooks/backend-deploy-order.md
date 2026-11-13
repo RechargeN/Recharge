@@ -17,6 +17,16 @@ may be run until a provisioning slice is separately approved (BCK-05 §36).
 4. Environment-specific credentials come only from that environment workload
    identity; no long-lived key is used.
 
+## N4a (2026-11-13): staging is no longer only a draft
+
+The owner approved N4a: one immutable release candidate (`apps/backend/scripts/build-release-candidate.mjs`,
+schema `apps/backend/config/release-candidate.schema.json`) is deployed first to dev, then to
+`recharge-staging-y9y2y`. The staging ownership root is `infra/terraform/bootstrap/stage` (a reviewed copy of
+the dev bootstrap); `check-n4a-plan.mjs` refuses any plan with update/delete, a foreign project, a delete
+permission, automatic deletion, a basic role, a public member, a budget other than €5 or Cloud Run beyond 0..1.
+Functions entries bind to the reviewed project list in `functions/src/shared/cloud_runtime_projects.ts`
+(dev and staging; production is never listed). Production stays closed; Emulator data is never copied.
+
 ## Order
 
 1. `verify-single-final-sha` — the SHA under deployment equals the verified one.

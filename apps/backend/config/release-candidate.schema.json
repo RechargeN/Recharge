@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recharge.app/schemas/config/n4a/release-candidate.schema.json",
+  "title": "Recharge immutable release candidate (N4a)",
+  "description": "One source commit and the digests of everything deployed from it. The same candidate goes to dev, then to staging; production is never a target. No secret, key, project number or user identifier.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "releaseCandidateId",
+    "sourceSha",
+    "createdAtUtc",
+    "targets",
+    "production",
+    "contracts",
+    "config",
+    "reference",
+    "toolchain",
+    "lockfiles",
+    "artifacts",
+    "notices"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "releaseCandidateId": {
+      "type": "string",
+      "pattern": "^RC-[0-9]{8}-[0-9a-f]{7}$"
+    },
+    "sourceSha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "createdAtUtc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "targets": {
+      "type": "array",
+      "items": { "enum": ["recharge-dev-n2a01", "recharge-staging-y9y2y"] },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "production": { "const": false },
+    "contracts": { "$ref": "#/$defs/tree" },
+    "config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionManifestSha256",
+        "firestoreRulesSha256",
+        "firestoreIndexesSha256",
+        "deployedIndexGroups",
+        "ttlFieldOverrides"
+      ],
+      "properties": {
+        "executionManifestSha256": { "$ref": "#/$defs/sha256" },
+        "firestoreRulesSha256": { "$ref": "#/$defs/sha256" },
+        "firestoreIndexesSha256": { "$ref": "#/$defs/sha256" },
+        "deployedIndexGroups": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Za-z]+$" },
+          "uniqueItems": true
+        },
+        "ttlFieldOverrides": { "const": "not-deployed" }
+      }
+    },
+    "reference": { "$ref": "#/$defs/tree" },
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "node",
+        "terraform",
+        "googleProvider",
+        "firebaseTools",
+        "flutter"
+      ],
+      "properties": {
+        "node": { "$ref": "#/$defs/version" },
+        "terraform": { "$ref": "#/$defs/version" },
+        "googleProvider": { "$ref": "#/$defs/version" },
+        "firebaseTools": { "$ref": "#/$defs/version" },
+        "flutter": { "$ref": "#/$defs/version" }
+      }
+    },
+    "lockfiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string", "pattern": "^[A-Za-z0-9_./-]+$" },
+          "sha256": { "$ref": "#/$defs/sha256" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "n2c-identity",
+        "n3a2-content-media",
+        "n3c-notifications",
+        "media-tools"
+      ],
+      "properties": {
+        "n2c-identity": { "$ref": "#/$defs/codebase" },
+        "n3a2-content-media": { "$ref": "#/$defs/codebase" },
+        "n3c-notifications": { "$ref": "#/$defs/codebase" },
+        "media-tools": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["imageDigest"],
+          "properties": {
+            "imageDigest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "notices": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["noticeSha256"],
+      "properties": { "noticeSha256": { "$ref": "#/$defs/sha256" } }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "tree": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root", "treeSha256", "files"],
+      "properties": {
+        "root": { "type": "string", "pattern": "^[A-Za-z0-9_./-]+$" },
+        "treeSha256": { "$ref": "#/$defs/sha256" },
+        "files": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "codebase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entry", "codeTreeSha256", "files"],
+      "properties": {
+        "entry": { "type": "string", "pattern": "^lib/src/[a-z_]+\\.js$" },
+        "codeTreeSha256": { "$ref": "#/$defs/sha256" },
+        "files": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

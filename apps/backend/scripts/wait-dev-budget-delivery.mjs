@@ -5,9 +5,16 @@ import { pathToFileURL } from "node:url";
 // (was 24 hours), so repeated cloud runs do not each wait for a new e-mail.
 export const receiptValidityMs = 7 * 24 * 60 * 60 * 1000;
 
+/** N4a: dev and the reviewed staging project; the names carry their prefix. */
+function environmentPrefix(projectId) {
+  if (/^recharge-dev-[a-z0-9]{4,20}$/u.test(projectId ?? "")) return "dev";
+  if (projectId === "recharge-staging-y9y2y") return "stage";
+  return null;
+}
+
 export function inspectReceipt(query, receipt, now = new Date()) {
-  if (!/^recharge-dev-[a-z0-9]{4,20}$/u.test(query.projectId ?? ""))
-    return false;
+  const prefix = environmentPrefix(query.projectId);
+  if (prefix === null) return false;
   if (
     !query.channelName?.startsWith(
       `projects/${query.projectId}/notificationChannels/`,
@@ -34,7 +41,7 @@ export function inspectReceipt(query, receipt, now = new Date()) {
     message?.publishTime !== receipt?.budgetMessagePublishedAtUtc ||
     payload?.currencyCode !== "EUR" ||
     payload?.budgetAmount !== 5 ||
-    payload?.budgetDisplayName !== "budget-guardrail-dev"
+    payload?.budgetDisplayName !== `budget-guardrail-${prefix}`
   )
     return false;
   const time = Date.parse(receipt?.deliveredAtUtc);
@@ -44,9 +51,9 @@ export function inspectReceipt(query, receipt, now = new Date()) {
     receipt.budgetName === query.budgetName &&
     receipt.channelName === query.channelName &&
     query.topicName ===
-      `projects/${query.projectId}/topics/dev-budget-events` &&
+      `projects/${query.projectId}/topics/${prefix}-budget-events` &&
     query.subscriptionName ===
-      `projects/${query.projectId}/subscriptions/dev-budget-evidence` &&
+      `projects/${query.projectId}/subscriptions/${prefix}-budget-evidence` &&
     receipt.topicName === query.topicName &&
     receipt.subscriptionName === query.subscriptionName &&
     receipt.budgetPubsubMessageVerified === true &&

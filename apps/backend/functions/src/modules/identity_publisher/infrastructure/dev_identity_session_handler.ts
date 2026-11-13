@@ -2,6 +2,7 @@ import { inspectIdentitySessionCommand } from '../../../contracts/identity_sessi
 import type { ProviderIdentityProof } from '../application/ports/provider_identity_verifier.js';
 import { IdentityFailure } from '../domain/failures.js';
 import type { DevIdentitySessionBinding } from './dev_identity_session_binding.js';
+import { isReviewedCloudProject } from '../../../shared/cloud_runtime_projects.js';
 
 interface Request {
   readonly method: string;
@@ -32,7 +33,7 @@ const commands: Readonly<Record<string, string>> = {
 export async function handleDevIdentityRequest(request: Request, deps: Dependencies) {
   const fail = (status: number, code: string) => ({ status, body: { error: { status: code } } });
   if (
-    deps.projectId !== 'recharge-dev-n2a01' ||
+    !isReviewedCloudProject(deps.projectId) ||
     !deps.enabled ||
     process.env.FIREBASE_AUTH_EMULATOR_HOST !== undefined ||
     process.env.FIRESTORE_EMULATOR_HOST !== undefined
@@ -80,7 +81,7 @@ export async function handleDevIdentityRequest(request: Request, deps: Dependenc
     const credentials = {
       proof: {
         provider,
-        providerTenant: 'recharge-dev-n2a01',
+        providerTenant: deps.projectId,
         proof: authorization.slice(7),
       } satisfies ProviderIdentityProof,
       ...(appCheck === undefined ? {} : { appCheckToken: appCheck }),

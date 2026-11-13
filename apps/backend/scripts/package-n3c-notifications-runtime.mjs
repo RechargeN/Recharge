@@ -15,6 +15,14 @@ import {
   importClosure,
   treeDigest,
 } from "./package-n3a2-content-media-runtime.mjs";
+import {
+  cliTarget,
+  codeTreeDigest,
+  envFileFor,
+  isReviewedProject,
+  projectNumberEnvLines,
+  resolveProjectNumber,
+} from "./runtime-projects.mjs";
 
 // N3c (owner-approved 2026-11-13): stages the Firebase CLI source of the dev
 // Notifications codebase (n3c-notifications) and, as its predeploy gate,
@@ -33,7 +41,13 @@ const forbidden =
   /(^|\/)(index\.js$|booking_(create|cancel|reconfirm)|stand\/|test\/|contracts\/)/u;
 const uidPattern = /^[A-Za-z0-9]{20,128}$/u;
 
-export function renderEnv({ runtimeEnabled, allowedUids }) {
+export function renderEnv({
+  runtimeEnabled,
+  allowedUids,
+  projectId: target = projectId,
+  projectNumber,
+}) {
+  const number = resolveProjectNumber(target, projectNumber);
   if (typeof runtimeEnabled !== "boolean")
     throw new Error("runtimeEnabled must be boolean");
   if (
@@ -45,6 +59,7 @@ export function renderEnv({ runtimeEnabled, allowedUids }) {
   return [
     `N3C_DEV_ENABLED=${runtimeEnabled}`,
     `N3C_ALLOWED_FIREBASE_UIDS=${allowedUids.join(",")}`,
+    ...projectNumberEnvLines(target, number),
     "",
   ].join("\n");
 }
@@ -53,9 +68,12 @@ export function stageRuntime({
   outDir,
   runtimeEnabled,
   allowedUids,
+  projectId: target = projectId,
+  projectNumber,
   functionsRoot = path.join(backend, "functions"),
   runtimeRoot = path.join(backend, "n3c-notifications-runtime"),
 }) {
+  const number = resolveProjectNumber(target, projectNumber);
   const pkg = JSON.parse(
     readFileSync(path.join(runtimeRoot, "package.json"), "utf8"),
   );
@@ -71,7 +89,12 @@ export function stageRuntime({
     throw new Error("lockfile root dependencies differ from package.json");
   if (Object.values(pkg.dependencies).some((v) => !/^\d+\.\d+\.\d+$/u.test(v)))
     throw new Error("runtime dependencies must be exact versions");
-  const env = renderEnv({ runtimeEnabled, allowedUids });
+  const env = renderEnv({
+    runtimeEnabled,
+    allowedUids,
+    projectId: target,
+    projectNumber: number,
+  });
   const files = importClosure(functionsRoot, entry, forbidden);
   const missing = closurePackages(functionsRoot, files).filter(
     (name) => !(name in pkg.dependencies),
@@ -94,14 +117,16 @@ export function stageRuntime({
   );
   for (const rel of files)
     write(rel, readFileSync(path.join(functionsRoot, rel)));
-  write(envFile, env);
+  write(envFileFor(target), env);
   const digest = treeDigest(outDir);
   const manifest = {
     schemaVersion: 1,
-    projectId,
+    projectId: target,
+    projectNumber: number,
     entry,
     runtimeEnabled,
     allowedUids,
+    codeTreeSha256: codeTreeDigest(outDir),
     treeSha256: digest.sha256,
     files: digest.files,
   };
@@ -112,8 +137,6 @@ export function stageRuntime({
 /** Firebase CLI predeploy gate: the staged tree, its .env and the owner record match exactly. */
 export function verifyStage({ stageDir, env, now = new Date() }) {
   const errors = [];
-  if (env.GCLOUD_PROJECT !== projectId)
-    errors.push("deploy target is not recharge-dev-n2a01");
   let manifest;
   try {
     manifest = JSON.parse(
@@ -122,9 +145,17 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
   } catch {
     return ["stage manifest missing"];
   }
+  // N4a: the reviewed project the stage was packaged for (dev or staging).
+  if (
+    !isReviewedProject(manifest.projectId) ||
+    env.GCLOUD_PROJECT !== manifest.projectId
+  )
+    errors.push("deploy target is not the reviewed project of this stage");
   const digest = treeDigest(stageDir);
   if (digest.sha256 !== manifest.treeSha256)
     errors.push("staged files changed after packaging");
+  if (codeTreeDigest(stageDir) !== manifest.codeTreeSha256)
+    errors.push("staged code differs from the release candidate digest");
   if (digest.files.some((f) => forbidden.test(f.name.replace(/^lib\//u, ""))))
     errors.push("stage contains modules outside the reviewed closure");
   let expectedEnv;
@@ -132,11 +163,22 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
     expectedEnv = renderEnv({
       runtimeEnabled: manifest.runtimeEnabled,
       allowedUids: manifest.allowedUids,
+      projectId: manifest.projectId,
+      projectNumber: manifest.projectNumber,
     });
   } catch {
     errors.push("stage manifest env inputs invalid");
   }
-  if (readFileSync(path.join(stageDir, envFile), "utf8") !== expectedEnv)
+  let dotenv;
+  try {
+    dotenv = readFileSync(
+      path.join(stageDir, envFileFor(manifest.projectId)),
+      "utf8",
+    );
+  } catch {
+    errors.push("stage .env missing");
+  }
+  if (dotenv !== expectedEnv)
     errors.push("stage .env differs from the manifest");
   let raw;
   let record;
@@ -155,7 +197,7 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
     schemaVersion: 1,
     status: "approved",
     stage: "n3c-deploy",
-    projectId,
+    projectId: manifest.projectId,
     stageTreeSha256: manifest.treeSha256,
     runtimeEnabled: manifest.runtimeEnabled,
     automaticDeletion: false,
@@ -198,6 +240,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
         outDir,
         runtimeEnabled: enabled === "true",
         allowedUids: uids.split(","),
+        ...cliTarget(process.env),
       });
       process.stdout.write(
         `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled})\n`,

@@ -5,17 +5,21 @@ import type {
   ProviderIdentityVerifier,
 } from '../application/ports/provider_identity_verifier.js';
 import type { TrustedProviderAssertion } from '../domain/auth_identity.js';
+import { isReviewedCloudProject } from '../../../shared/cloud_runtime_projects.js';
 
-const projectId = 'recharge-dev-n2a01';
 type VerifyToken = (token: string, checkRevoked: true) => Promise<DecodedIdToken>;
 
 /** Firebase proof adapter for the existing account authority. No email linking or grants. */
 export class DevFirebaseProviderIdentityVerifier implements ProviderIdentityVerifier {
+  private readonly projectId: string;
+
   constructor(
     firebaseProjectId: string,
     private readonly verifyToken: VerifyToken,
   ) {
-    if (firebaseProjectId !== projectId) throw new TypeError('dev_auth_binding_invalid');
+    // N4a: the reviewed dev or staging project only, never production.
+    if (!isReviewedCloudProject(firebaseProjectId)) throw new TypeError('dev_auth_binding_invalid');
+    this.projectId = firebaseProjectId;
   }
 
   async verify(
@@ -34,7 +38,7 @@ export class DevFirebaseProviderIdentityVerifier implements ProviderIdentityVeri
     readonly assertion: TrustedProviderAssertion;
   } | null> {
     if (
-      proof.providerTenant !== projectId ||
+      proof.providerTenant !== this.projectId ||
       (proof.provider !== 'google' && proof.provider !== 'apple') ||
       proof.proof.trim().length === 0
     )
@@ -46,8 +50,8 @@ export class DevFirebaseProviderIdentityVerifier implements ProviderIdentityVeri
       const subjects: unknown = token.firebase.identities[providerId];
       if (
         !Number.isFinite(now) ||
-        token.aud !== projectId ||
-        token.iss !== `https://securetoken.google.com/${projectId}` ||
+        token.aud !== this.projectId ||
+        token.iss !== `https://securetoken.google.com/${this.projectId}` ||
         token.uid !== token.sub ||
         token.uid.length < 1 ||
         token.uid.length > 128 ||
@@ -72,7 +76,7 @@ export class DevFirebaseProviderIdentityVerifier implements ProviderIdentityVeri
         authTimeSeconds: token.auth_time,
         assertion: Object.freeze({
           provider: proof.provider,
-          providerTenant: projectId,
+          providerTenant: this.projectId,
           providerSubject: subjects[0],
           verifiedAtUtc: nowUtc,
         }),
@@ -87,10 +91,8 @@ export class DevFirebaseProviderIdentityVerifier implements ProviderIdentityVeri
 export function createDevFirebaseProviderIdentityVerifier(
   app: App,
 ): DevFirebaseProviderIdentityVerifier {
-  if (
-    app.options.projectId !== projectId ||
-    process.env.FIREBASE_AUTH_EMULATOR_HOST !== undefined
-  ) {
+  const projectId = app.options.projectId;
+  if (!isReviewedCloudProject(projectId) || process.env.FIREBASE_AUTH_EMULATOR_HOST !== undefined) {
     throw new TypeError('dev_auth_binding_invalid');
   }
   return new DevFirebaseProviderIdentityVerifier(projectId, (token, checkRevoked) => {

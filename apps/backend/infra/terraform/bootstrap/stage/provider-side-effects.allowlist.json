@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "scope": "dev-bootstrap-observed-provider-side-effects-only",
+  "provider": "hashicorp/google",
+  "version": "7.43.0",
+  "trigger": "google_project.auto_create_network=false",
+  "acceptedApiSideEffects": [
+    "analyticshub.googleapis.com",
+    "appengine.googleapis.com",
+    "apptopology.googleapis.com",
+    "backupdr.googleapis.com",
+    "bigquery.googleapis.com",
+    "bigqueryconnection.googleapis.com",
+    "bigquerydatapolicy.googleapis.com",
+    "bigquerydatatransfer.googleapis.com",
+    "bigquerymigration.googleapis.com",
+    "bigqueryreservation.googleapis.com",
+    "bigquerystorage.googleapis.com",
+    "cloudapis.googleapis.com",
+    "cloudtrace.googleapis.com",
+    "compute.googleapis.com",
+    "dataform.googleapis.com",
+    "dataplex.googleapis.com",
+    "datastore.googleapis.com",
+    "fcm.googleapis.com",
+    "firebasehosting.googleapis.com",
+    "firebaseinstallations.googleapis.com",
+    "firebaseremoteconfig.googleapis.com",
+    "firebaseremoteconfigrealtime.googleapis.com",
+    "firebaserules.googleapis.com",
+    "iamcredentials.googleapis.com",
+    "identitytoolkit.googleapis.com",
+    "oslogin.googleapis.com",
+    "runtimeconfig.googleapis.com",
+    "securetoken.googleapis.com",
+    "servicemanagement.googleapis.com",
+    "servicenetworking.googleapis.com",
+    "sql-component.googleapis.com",
+    "storage-api.googleapis.com",
+    "storage-component.googleapis.com",
+    "telemetry.googleapis.com",
+    "testing.googleapis.com"
+  ],
+  "evidence": "ServiceUsage CrossLoggingResponse: Compute->compute/backupdr/oslogin/servicenetworking; Logging and Monitoring->telemetry, verified in dev audit 2026-11-05",
+  "doesNotAuthorize": [
+    "paid resources outside reviewed addresses",
+    "basic IAM roles except owner",
+    "IAM grants to non-Google principals",
+    "manual unrelated API activation",
+    "destroy/replace",
+    "data deletion"
+  ],
+  "status": "N2b bootstrap completed; final GCS plan no changes; observed automatic effects retained",
+  "standingN2bPolicy": {
+    "automaticGoogleApiDependencies": "record observed evidence and continue; no manual out-of-package service activation",
+    "automaticGoogleSystemServiceAgentRoles": "record and continue",
+    "hardStops": [
+      "paid resources beyond plan",
+      "basic roles for principals other than owner",
+      "roles on non-Google principals",
+      "billing drift",
+      "destroy or replace plan",
+      "state migration error"
+    ]
+  },
+  "explicitManagedApis": [
+    "billingbudgets.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "firebase.googleapis.com",
+    "firestore.googleapis.com",
+    "iam.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com",
+    "pubsub.googleapis.com",
+    "serviceusage.googleapis.com",
+    "storage.googleapis.com"
+  ],
+  "observedGoogleSystemRoleNames": [
+    "roles/compute.instanceGroupManagerServiceAgent",
+    "roles/compute.serviceAgent",
+    "roles/firebase.managementServiceAgent",
+    "roles/firebase.sdkAdminServiceAgent",
+    "roles/firebaserules.system",
+    "roles/firestore.serviceAgent",
+    "roles/iam.serviceAccountTokenCreator",
+    "roles/pubsub.serviceAgent"
+  ],
+  "googleSystemIdentityEvidence": {
+    "firebaseAdminSdk": "Exact SDK account created and granted SDK service-agent and TokenCreator roles by project Firebase management service agent; audit verified",
+    "firebaseRules": "Documented Google Firebase Rules service agent",
+    "basicRoles": "Owner only on owner principal; Editor/Viewer absent",
+    "runtimeAccounts": "Three Terraform-created runtime/deploy service accounts have no explicit project roles or user-managed keys"
+  },
+  "n2c": {
+    "observedAtUtc": "2026-11-06",
+    "scope": "N2c dev Identity apply (Terraform) and Firebase CLI deploy of codebase n2c-identity; observed, not requested",
+    "explicitManagedApis": [
+      "apikeys.googleapis.com",
+      "artifactregistry.googleapis.com",
+      "cloudbuild.googleapis.com",
+      "cloudfunctions.googleapis.com",
+      "firebaseappcheck.googleapis.com",
+      "run.googleapis.com",
+      "secretmanager.googleapis.com"
+    ],
+    "acceptedApiSideEffects": [
+      "containerregistry.googleapis.com",
+      "eventarc.googleapis.com",
+      "fcmregistrations.googleapis.com",
+      "firebaseappdistribution.googleapis.com",
+      "firebaseextensions.googleapis.com",
+      "source.googleapis.com"
+    ],
+    "apiSideEffectEvidence": "ServiceUsage readback after Terraform apply (4) and Firebase CLI deploy log \"Enabling now\" (eventarc, firebaseextensions)",
+    "observedGoogleSystemRoles": [
+      {
+        "role": "roles/cloudbuild.serviceAgent",
+        "member": "service-420479958348@gcp-sa-cloudbuild"
+      },
+      {
+        "role": "roles/cloudfunctions.standardServiceAgent",
+        "member": "service-420479958348@gcf-admin-robot"
+      },
+      {
+        "role": "roles/run.serviceAgent",
+        "member": "service-420479958348@serverless-robot-prod"
+      },
+      {
+        "role": "roles/containerregistry.ServiceAgent",
+        "member": "service-420479958348@containerregistry"
+      },
+      {
+        "role": "roles/cloudbuild.builds.builder",
+        "member": "420479958348@cloudbuild (legacy Cloud Build SA)"
+      },
+      {
+        "role": "roles/firebaseappcheck.admin",
+        "member": "firebase-adminsdk-fbsvc@recharge-dev-n2a01"
+      }
+    ],
+    "ownerAcceptedBasicRoleException": {
+      "role": "roles/editor",
+      "member": "serviceAccount:420479958348@cloudservices.gserviceaccount.com",
+      "grantedBy": "service-agent-manager@system.gserviceaccount.com (audit SetIamPolicy 2026-11-06T08:43:57Z, during eventarc/pubsub service identity generation)",
+      "decision": "Owner 2026-11-06: keep as recorded exception for the Google APIs Service Agent (Google advises not to remove it). Any other basic role remains a hard stop."
+    },
+    "correctedAutomaticGrants": [
+      {
+        "role": "roles/editor",
+        "member": "serviceAccount:recharge-dev-n2a01@appspot.gserviceaccount.com",
+        "action": "removed 2026-11-06T08:24Z with owner approval (App Engine default SA, unused by gen2 functions)"
+      }
+    ]
+  },
+  "n3b": {
+    "status": "expected before the N3b apply; replace with observed facts after each phase",
+    "scope": "N3b dev Media tools: Terraform phases 1-2, Cloud Build of the media-tools image, mirror job runs",
+    "explicitManagedApis": [
+      "cloudscheduler.googleapis.com"
+    ],
+    "expectedGoogleSystemRoles": [
+      {
+        "role": "roles/cloudscheduler.serviceAgent",
+        "member": "service-420479958348@gcp-sa-cloudscheduler"
+      }
+    ],
+    "expectedAutomaticEffects": [
+      "Cloud Run service agent pulls the image from the media-tools repository (same project, existing roles/run.serviceAgent)",
+      "Cloud Build runs regionally in europe-west1 as media-tools-build; source staged only in recharge-dev-n2a01-media-tools-build"
+    ],
+    "hardStops": [
+      "roles/editor or roles/viewer granted to any new account (remove only with owner approval, as in N2c)",
+      "a recharge-dev-n2a01_cloudbuild bucket or cloud-run-source-deploy repository appearing",
+      "allUsers or allAuthenticatedUsers on a service, job, bucket or repository",
+      "min instances above 0 or a cleanup/lifecycle rule"
+    ]
+  }
+}

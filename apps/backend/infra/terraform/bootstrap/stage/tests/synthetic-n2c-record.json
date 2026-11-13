@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "status": "approved",
+  "stage": "n2c",
+  "environment": "stage",
+  "projectId": "recharge-staging-y9y2y",
+  "commitSha": "0000000000000000000000000000000000000000",
+  "manifestSha256": "9ff3f547118d045a571addbc494d1beed0fe34ca2ff6efadafb54a258e9bac39",
+  "operations": [
+    "plan"
+  ],
+  "ownerApprovalEvidenceRef": "SYNTHETIC-TERRAFORM-MOCK-TEST-ONLY",
+  "dataScope": "synthetic",
+  "appCheckEnforcement": false,
+  "push": false,
+  "merge": false,
+  "marketActivation": false,
+  "issuedAtUtc": "2020-01-01T00:00:00Z",
+  "expiresAtUtc": "2099-01-01T00:00:00Z"
+}
