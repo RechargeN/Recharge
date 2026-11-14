@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import 'booking_functions_transport.dart';
 import 'booking_identity_failure.dart';
+import '../../../core/config/cloud_environment.dart';
 
 /// Provider credentials only; never supplies Recharge roles or Session authority.
 abstract interface class DevGoogleAuthenticationDriver {
@@ -65,12 +66,14 @@ final class NativeDevGoogleAuthenticationDriver
 }
 
 void _assertDevAndroidApp(FirebaseApp app) {
-  if (app.name != 'recharge-dev-android' ||
-      app.options.projectId != 'recharge-dev-n2a01' ||
-      app.options.messagingSenderId != '420479958348' ||
-      !RegExp(
-        r'^1:420479958348:android:[a-f0-9]+$',
-      ).hasMatch(app.options.appId)) {
+  // N4b: exactly one reviewed cloud project per named app (dev or staging).
+  final CloudEnvironment? cloud = CloudEnvironment.values
+      .where((CloudEnvironment e) => e.firebaseAppName == app.name)
+      .firstOrNull;
+  if (cloud == null ||
+      app.options.projectId != cloud.projectId ||
+      app.options.messagingSenderId != cloud.projectNumber ||
+      !cloud.isAndroidAppId(app.options.appId)) {
     throw StateError('dev_android_firebase_binding_invalid');
   }
 }
@@ -217,7 +220,8 @@ final class DevAndroidIdentitySessionCoordinator {
     final store = identity._sessions;
     if (!sessions.isDevGoogleFor(store, identity) ||
         (store is SecureBookingIdentitySessionStore &&
-            store.environment != BookingIdentityCacheEnvironment.dev)) {
+            store.environment != BookingIdentityCacheEnvironment.dev &&
+            store.environment != BookingIdentityCacheEnvironment.staging)) {
       throw StateError('dev_identity_session_composition_invalid');
     }
   }

@@ -48,6 +48,12 @@ android {
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
         }
+        // N4b (2026-11-13): debug builds against recharge-staging-y9y2y.
+        create("stage") {
+            dimension = "environment"
+            applicationIdSuffix = ".stage"
+            versionNameSuffix = "-stage"
+        }
     }
 
     buildTypes {

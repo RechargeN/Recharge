@@ -264,11 +264,14 @@ import '../../features/visited/domain/repositories/visited_places_repository.dar
 import '../../features/visited/domain/usecases/get_visited_places_usecase.dart';
 import '../../features/visited/domain/usecases/record_place_visit_usecase.dart';
 import '../../features/visited/domain/usecases/remove_visit_usecase.dart';
+import '../../core/config/cloud_environment.dart';
 
 final GetIt sl = GetIt.instance;
 
 Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
-  final dev = appFlavor == 'dev';
+  // N4b: a reviewed cloud flavor (dev or stage) needs the server auth bundle.
+  final CloudEnvironment? cloud = CloudEnvironment.forFlavor(appFlavor);
+  final dev = cloud != null;
   if (dev != (devAuth != null)) {
     throw StateError('dev_auth_composition_required');
   }
@@ -282,7 +285,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     final root = await getApplicationSupportDirectory();
     if (!dev) return root;
     return Directory(
-      '${root.path}${Platform.pathSeparator}dev-recharge-dev-n2a01',
+      '${root.path}${Platform.pathSeparator}dev-${cloud.projectId}',
     ).create(recursive: true);
   }
 
@@ -514,9 +517,11 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     ..registerLazySingleton<AuthLocalDataSource>(
       () => AuthLocalDataSource(
         sl(),
-        environment: dev
-            ? AuthCacheEnvironment.dev
-            : AuthCacheEnvironment.local,
+        environment: switch (cloud) {
+          CloudEnvironment.dev => AuthCacheEnvironment.dev,
+          CloudEnvironment.staging => AuthCacheEnvironment.staging,
+          null => AuthCacheEnvironment.local,
+        },
       ),
     )
     ..registerLazySingleton<AuthRepository>(

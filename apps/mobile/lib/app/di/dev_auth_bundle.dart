@@ -17,6 +17,7 @@ import 'dev_auth_workspace_composition.dart';
 import 'dev_content_media_port.dart';
 import 'dev_notifications_bundle.dart';
 import 'dev_push_registrar.dart';
+import '../../core/config/cloud_environment.dart';
 
 final class DevAuthBundle implements AuthSessionEvents {
   DevAuthBundle({
@@ -43,47 +44,52 @@ final class DevAuthBundle implements AuthSessionEvents {
 }
 
 /// All values are public app configuration. No provider keys or SA credentials.
+/// N4b: the `dev` flavor binds to the dev project, `stage` to staging; the
+/// defines must belong to that project (number in the app and client ids).
 Future<DevAuthBundle> createDevAuthBundleFromEnvironment() async {
   const enabled = bool.fromEnvironment('N2C_DEV_AUTH_CONFIGURED');
   const appId = String.fromEnvironment('N2C_FIREBASE_ANDROID_APP_ID');
   const apiKey = String.fromEnvironment('N2C_FIREBASE_ANDROID_API_KEY');
   const clientId = String.fromEnvironment('N2C_GOOGLE_SERVER_CLIENT_ID');
+  final CloudEnvironment? cloud = CloudEnvironment.forFlavor(appFlavor);
   if (!enabled ||
       kReleaseMode ||
-      appFlavor != 'dev' ||
+      cloud == null ||
       kIsWeb ||
       defaultTargetPlatform != TargetPlatform.android ||
-      !RegExp(r'^1:420479958348:android:[a-f0-9]+$').hasMatch(appId) ||
+      !cloud.isAndroidAppId(appId) ||
       apiKey.isEmpty ||
-      !RegExp(
-        r'^420479958348-[a-z0-9]+\.apps\.googleusercontent\.com$',
-      ).hasMatch(clientId)) {
+      !cloud.isGoogleServerClientId(clientId)) {
     throw StateError('dev_auth_public_configuration_required');
   }
-  const storage = FlutterSecureStorage(
+  final storage = FlutterSecureStorage(
     aOptions: AndroidOptions(
-      sharedPreferencesName: 'recharge_dev_n2a01_secure',
-      preferencesKeyPrefix: 'recharge_dev_n2a01_',
+      sharedPreferencesName: '${cloud.storageScope}_secure',
+      preferencesKeyPrefix: '${cloud.storageScope}_',
       resetOnError: false,
     ),
   );
-  const options = FirebaseOptions(
+  final options = FirebaseOptions(
     apiKey: apiKey,
     appId: appId,
-    messagingSenderId: '420479958348',
-    projectId: 'recharge-dev-n2a01',
+    messagingSenderId: cloud.projectNumber,
+    projectId: cloud.projectId,
   );
   final app = await Firebase.initializeApp(
-    name: 'recharge-dev-android',
+    name: cloud.firebaseAppName,
     options: options,
   );
+  final BookingIdentityCacheEnvironment cacheEnvironment =
+      cloud == CloudEnvironment.dev
+      ? BookingIdentityCacheEnvironment.dev
+      : BookingIdentityCacheEnvironment.staging;
   final sessions = SecureBookingIdentitySessionStore(
     storage,
-    environment: BookingIdentityCacheEnvironment.dev,
+    environment: cacheEnvironment,
   );
   final installations = SecureBookingInstallationIdProvider(
     storage,
-    environment: BookingIdentityCacheEnvironment.dev,
+    environment: cacheEnvironment,
   );
   final identity = DevAndroidGoogleIdentity(
     auth: FirebaseAuth.instanceFor(app: app),
@@ -91,7 +97,7 @@ Future<DevAuthBundle> createDevAuthBundleFromEnvironment() async {
     sessions: sessions,
   );
   final endpoint = BookingBackendEndpoint.devIdentity(
-    Uri.parse('https://europe-west1-recharge-dev-n2a01.cloudfunctions.net'),
+    Uri.parse(cloud.functionsBase),
   );
   final httpClient = http.Client();
   final client = FunctionsIdentitySessionClient(

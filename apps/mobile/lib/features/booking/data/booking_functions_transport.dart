@@ -715,7 +715,9 @@ const int _maximumCallableResponseBytes = 256 * 1024;
 enum BookingIdentityCacheEnvironment {
   local('booking'),
   emulator('booking.emulator.demo-recharge'),
-  dev('booking.dev.recharge-dev-n2a01');
+  dev('booking.dev.recharge-dev-n2a01'),
+  // N4b (2026-11-13): staging keys and handles never mix with dev.
+  staging('booking.staging.recharge-staging-y9y2y');
 
   const BookingIdentityCacheEnvironment(this.namespace);
   final String namespace;

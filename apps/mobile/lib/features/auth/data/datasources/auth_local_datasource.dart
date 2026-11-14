@@ -60,7 +60,9 @@ class AuthLocalDataSource {
 enum AuthCacheEnvironment {
   local('auth'),
   emulator('auth.emulator.demo-recharge'),
-  dev('auth.dev.recharge-dev-n2a01');
+  dev('auth.dev.recharge-dev-n2a01'),
+  // N4b (2026-11-13): staging never shares persisted authority with dev.
+  staging('auth.staging.recharge-staging-y9y2y');
 
   const AuthCacheEnvironment(this.namespace);
   final String namespace;

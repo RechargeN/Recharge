@@ -4,6 +4,7 @@ import '../../../core/network/backend_clients.dart';
 import '../../../core/network/backend_contract.dart';
 import '../../../core/network/backend_payload.dart';
 import '../../../core/network/backend_transport.dart';
+import '../../../core/config/cloud_environment.dart';
 
 typedef BookingClock = DateTime Function();
 
@@ -541,11 +542,11 @@ final class BookingBackendEndpoint {
   }
 
   /// Session endpoints only; does not activate Booking or other cloud features.
+  /// N4b: the dev or the staging project (reviewed list), never production.
   BookingBackendEndpoint.devIdentity(Uri devUri)
     : binding = BookingBackendBinding.devIdentity,
       uri = devUri {
-    if (devUri.toString() !=
-        'https://europe-west1-recharge-dev-n2a01.cloudfunctions.net') {
+    if (CloudEnvironment.forFunctionsBase(devUri.toString()) == null) {
       throw ArgumentError('dev_identity_endpoint_invalid');
     }
   }
