@@ -5,9 +5,23 @@
 //   sets/<UTC stamp>.json     one manifest per job run, naming main/daily/bytecode
 // Google Cloud Storage JSON API with the instance's metadata-server token; no
 // SDK and no key file.
+//
+// N4b: one image runs in dev and staging (N4a release candidate). Each project
+// keeps its own bucket `<project>-clamav-mirror`; the project is read from the
+// metadata server and must be a reviewed one (production is never listed), so
+// the image never reads or writes another project's mirror.
 import { createHash } from 'node:crypto';
 
-export const mirrorBucket = 'recharge-dev-n2a01-clamav-mirror';
+/** Mirror of `functions/src/shared/cloud_runtime_projects.ts` (a test keeps them equal). */
+export const reviewedMirrorProjects: readonly string[] = Object.freeze([
+  'recharge-dev-n2a01',
+  'recharge-staging-y9y2y',
+]);
+
+export function mirrorBucketFor(projectId: string): string {
+  if (!reviewedMirrorProjects.includes(projectId)) throw new Error('mirror: project not reviewed');
+  return `${projectId}-clamav-mirror`;
+}
 export const databaseNames = Object.freeze(['main.cvd', 'daily.cvd', 'bytecode.cvd'] as const);
 export type DatabaseName = (typeof databaseNames)[number];
 /** Sum of the three official files is ~0.3 GB; anything far above is refused. */
@@ -114,13 +128,29 @@ export function newestSet(names: readonly string[]): string | null {
 
 export class MirrorStore {
   #token: { value: string; expiresAt: number } | null = null;
+  #bucketName: string | null = null;
 
   constructor(
     private readonly fetchImpl: Fetch = fetch,
-    private readonly bucket: string = mirrorBucket,
     private readonly api: string = 'https://storage.googleapis.com',
     private readonly metadata: string = 'http://metadata.google.internal',
   ) {}
+
+  /** The running project's own mirror bucket; an unreviewed project stops here. */
+  async #bucket(): Promise<string> {
+    if (this.#bucketName === null) {
+      const response = await this.fetchImpl(
+        `${this.metadata}/computeMetadata/v1/project/project-id`,
+        {
+          headers: { 'metadata-flavor': 'Google' },
+          signal: AbortSignal.timeout(5_000),
+        },
+      );
+      if (response.status !== 200) throw new Error(`metadata project ${response.status}`);
+      this.#bucketName = mirrorBucketFor((await response.text()).trim());
+    }
+    return this.#bucketName;
+  }
 
   async #authorization(): Promise<string> {
     if (this.#token === null || Date.now() > this.#token.expiresAt) {
@@ -155,11 +185,12 @@ export class MirrorStore {
     return response.json();
   }
 
-  #object(name: string): string {
-    return `${this.api}/storage/v1/b/${this.bucket}/o/${encodeURIComponent(name)}`;
+  async #object(name: string): Promise<string> {
+    return `${this.api}/storage/v1/b/${await this.#bucket()}/o/${encodeURIComponent(name)}`;
   }
 
   async list(prefix: string): Promise<string[]> {
+    const bucket = await this.#bucket();
     const names: string[] = [];
     let pageToken: string | undefined;
     do {
@@ -168,7 +199,7 @@ export class MirrorStore {
         fields: 'items(name),nextPageToken',
       });
       if (pageToken !== undefined) query.set('pageToken', pageToken);
-      const page = (await this.#json(`${this.api}/storage/v1/b/${this.bucket}/o?${query}`)) as {
+      const page = (await this.#json(`${this.api}/storage/v1/b/${bucket}/o?${query}`)) as {
         items?: { name?: unknown }[];
         nextPageToken?: unknown;
       };
@@ -181,7 +212,7 @@ export class MirrorStore {
 
   /** Bounded download; the caller checks the content. */
   async download(name: string, maxBytes: number): Promise<Buffer> {
-    const response = await this.fetchImpl(`${this.#object(name)}?alt=media`, {
+    const response = await this.fetchImpl(`${await this.#object(name)}?alt=media`, {
       headers: { authorization: await this.#authorization() },
       signal: AbortSignal.timeout(120_000),
     });
@@ -214,7 +245,7 @@ export class MirrorStore {
       ifGenerationMatch: '0',
     });
     const response = await this.fetchImpl(
-      `${this.api}/upload/storage/v1/b/${this.bucket}/o?${query}`,
+      `${this.api}/upload/storage/v1/b/${await this.#bucket()}/o?${query}`,
       {
         method: 'POST',
         headers: {
@@ -227,7 +258,7 @@ export class MirrorStore {
     );
     if (response.status === 200) return 'created';
     if (response.status !== 412) throw new Error(`upload ${response.status}`);
-    const existing = (await this.#json(`${this.#object(name)}?fields=size,md5Hash`)) as {
+    const existing = (await this.#json(`${await this.#object(name)}?fields=size,md5Hash`)) as {
       size?: unknown;
       md5Hash?: unknown;
     };
