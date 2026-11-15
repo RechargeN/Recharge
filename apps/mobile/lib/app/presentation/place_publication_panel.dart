@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show appFlavor;
 
+import '../../core/config/cloud_environment.dart';
 import '../../core/localization/l10n_context.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -100,9 +102,11 @@ class _PlacePublicationPanelState extends ConsumerState<PlacePublicationPanel> {
             if (controller == null) return const SizedBox.shrink();
             return PlacePublicationSection(
               controller: controller,
-              devCloud:
+              cloud:
                   sl.isRegistered<PlacePublicationTestEntryGuard>() &&
-                  sl<PlacePublicationTestEntryGuard>().devCloudAllowed,
+                      sl<PlacePublicationTestEntryGuard>().devCloudAllowed
+                  ? CloudEnvironment.forFlavor(appFlavor)
+                  : null,
             );
           },
     );

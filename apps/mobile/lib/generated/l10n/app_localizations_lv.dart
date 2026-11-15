@@ -674,8 +674,14 @@ class AppLocalizationsLv extends AppLocalizations {
       'Testa publicēšanas ceļš (lokālais emulators)';
 
   @override
-  String get publicationTestPathDevCloud =>
-      'Testa publicēšanas ceļš (izstrādes mākonis)';
+  String publicationTestPathCloud(String kind) {
+    String _temp0 = intl.Intl.selectLogic(kind, {
+      'dev': 'Testa publicēšanas ceļš (izstrādes mākonis)',
+      'staging': 'Testa publicēšanas ceļš (testēšanas mākonis)',
+      'other': 'Testa publicēšanas ceļš (mākonis)',
+    });
+    return '$_temp0';
+  }
 
   @override
   String publicationNoDraft(String type) {
@@ -3531,7 +3537,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get createFormCouldRental => 'Vai tā varētu būt noma?';
 
   @override
-  String get createFormRechargeCreate => 'Recharge Create';
+  String get createFormRechargeCreate => 'Recharge: veidošana';
 
   @override
   String get createFormSaveDraft => 'Saglabāt melnrakstu';
@@ -3848,7 +3854,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get createFormEventDraftUnavailableReopenCreateHub =>
-      'Pasākuma melnraksts nav pieejams. Atveriet Create Hub vēlreiz.';
+      'Pasākuma melnraksts nav pieejams. Atveriet veidošanas centru vēlreiz.';
 
   @override
   String get createFormClosesAtUtcIso8601 => 'Aizveras UTC (ISO 8601)';
@@ -4450,7 +4456,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get createFormWhatDoYouWantCreate => 'Ko vēlaties izveidot?';
 
   @override
-  String get createFormCreateHub => 'Create Hub';
+  String get createFormCreateHub => 'Veidošanas centrs';
 
   @override
   String get createFormRefreshPreview => 'Atjaunināt priekšskatījumu';
@@ -8774,37 +8780,38 @@ class AppLocalizationsLv extends AppLocalizations {
       'Ierakstiet vaicājumu vai izmantojiet balss ievadi. Recharge saprot laiku, vietu, budžetu un noskaņojumu un parāda piemērotas iespējas.';
 
   @override
-  String get discoverSmartPromptCalmEveningNearby => 'Calm evening nearby';
+  String get discoverSmartPromptCalmEveningNearby =>
+      'Gribu mierīgu vakaru tuvumā';
 
   @override
   String get discoverSmartPromptSomethingForTwoHours =>
-      'Find something interesting for 2 hours';
+      'Atrodi kaut ko interesantu uz 2 stundām';
 
   @override
-  String get discoverSmartPromptForTwoNearby => 'Where to go for two nearby';
+  String get discoverSmartPromptForTwoNearby => 'Kur aiziet divatā netālu';
 
   @override
   String get discoverSmartPromptExample =>
-      'Something calm nearby tonight, up to 20 EUR';
+      'Gribu šovakar kaut ko mierīgu tuvumā, līdz 20 EUR';
 
   @override
   String get discoverSmartPromptExampleHint =>
-      'Piemēram: “Something calm nearby tonight, up to €20”';
+      'Piemēram: “Gribu šovakar kaut ko mierīgu tuvumā, līdz 20 €”';
 
   @override
-  String get discoverSmartPromptNearNow => 'Something interesting nearby now';
+  String get discoverSmartPromptNearNow => 'Kaut kas interesants tuvumā tagad';
 
   @override
-  String get discoverSmartPromptForTwo => 'Where to go for two';
+  String get discoverSmartPromptForTwo => 'Kur aiziet divatā';
 
   @override
-  String get discoverSmartPromptCalmEvening => 'Calm evening';
+  String get discoverSmartPromptCalmEvening => 'Gribu mierīgu vakaru';
 
   @override
-  String get discoverSmartPromptTwoHours => 'Find a plan for 2 hours';
+  String get discoverSmartPromptTwoHours => 'Atrodi plānu uz 2 stundām';
 
   @override
-  String get discoverSmartPromptUpTo20 => 'Find something up to 20 EUR';
+  String get discoverSmartPromptUpTo20 => 'Atrodi kaut ko līdz 20 EUR';
 
   @override
   String discoverRentalBaseRate(String type, String price) {
@@ -10236,7 +10243,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get quickPlanInvitationsAccess => 'Ielūgumi un piekļuve';
 
   @override
-  String get quickPlanQuickPlan => 'Quick Plan';
+  String get quickPlanQuickPlan => 'Ātrais plāns';
 
   @override
   String get quickPlanMyQuickPlan => 'Mans Quick Plan';

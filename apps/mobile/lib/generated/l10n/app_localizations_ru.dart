@@ -676,8 +676,14 @@ class AppLocalizationsRu extends AppLocalizations {
       'Тестовый путь публикации (локальный эмулятор)';
 
   @override
-  String get publicationTestPathDevCloud =>
-      'Тестовый путь публикации (dev-облако)';
+  String publicationTestPathCloud(String kind) {
+    String _temp0 = intl.Intl.selectLogic(kind, {
+      'dev': 'Тестовый путь публикации (dev-облако)',
+      'staging': 'Тестовый путь публикации (staging-облако)',
+      'other': 'Тестовый путь публикации (облако)',
+    });
+    return '$_temp0';
+  }
 
   @override
   String publicationNoDraft(String type) {
@@ -3571,7 +3577,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get createFormCouldRental => 'Это предложение аренды?';
 
   @override
-  String get createFormRechargeCreate => 'Recharge Create';
+  String get createFormRechargeCreate => 'Recharge: создание';
 
   @override
   String get createFormSaveDraft => 'Сохранить черновик';
@@ -3889,7 +3895,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createFormEventDraftUnavailableReopenCreateHub =>
-      'Черновик события недоступен. Откройте Create Hub заново.';
+      'Черновик события недоступен. Откройте центр создания заново.';
 
   @override
   String get createFormClosesAtUtcIso8601 => 'Закрывается в UTC (ISO 8601)';
@@ -4488,7 +4494,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get createFormWhatDoYouWantCreate => 'Что хотите создать?';
 
   @override
-  String get createFormCreateHub => 'Create Hub';
+  String get createFormCreateHub => 'Центр создания';
 
   @override
   String get createFormRefreshPreview => 'Обновить предпросмотр';
@@ -10281,7 +10287,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get quickPlanInvitationsAccess => 'Приглашения и доступ';
 
   @override
-  String get quickPlanQuickPlan => 'Quick Plan';
+  String get quickPlanQuickPlan => 'Быстрый план';
 
   @override
   String get quickPlanMyQuickPlan => 'Мой Quick Plan';

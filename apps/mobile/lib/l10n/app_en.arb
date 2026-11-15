@@ -778,9 +778,14 @@
   "@publicationTestPath": {
     "description": "Header of a default-off publication test page."
   },
-  "publicationTestPathDevCloud": "Test publication path (dev cloud)",
-  "@publicationTestPathDevCloud": {
-    "description": "Header of the publication test page when it talks to the dev cloud (N3a.2), not the local Emulator."
+  "publicationTestPathCloud": "{kind, select, dev{Test publication path (dev cloud)} staging{Test publication path (staging cloud)} other{Test publication path (cloud)}}",
+  "@publicationTestPathCloud": {
+    "description": "Header of the publication test page when it talks to a reviewed cloud project (N3a.2 dev, N4b staging), not the local Emulator.",
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
   },
   "publicationNoDraft": "{type, select, event{No Event draft in Create} place{No Place draft in Create} rental{No Rental draft in Create} session{No Session draft in Create} activity{No Activity draft in Create} collection{No Collection draft in Create} findPeople{No Find People draft in Create} route{No Route draft in Create} scenario{No Scenario draft in Create} classWorkshop{No Class / Workshop draft in Create} other{No draft in Create}}",
   "@publicationNoDraft": {

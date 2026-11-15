@@ -665,7 +665,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publicationTestPath => 'Test publication path (local Emulator)';
 
   @override
-  String get publicationTestPathDevCloud => 'Test publication path (dev cloud)';
+  String publicationTestPathCloud(String kind) {
+    String _temp0 = intl.Intl.selectLogic(kind, {
+      'dev': 'Test publication path (dev cloud)',
+      'staging': 'Test publication path (staging cloud)',
+      'other': 'Test publication path (cloud)',
+    });
+    return '$_temp0';
+  }
 
   @override
   String publicationNoDraft(String type) {
