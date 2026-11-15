@@ -88,6 +88,10 @@ class AuthController extends ChangeNotifier {
   Timer? _serverExpiry;
   Timer? _silentRefresh;
   Timer? _offlineRetry;
+
+  /// The server's rate-limit wait; unlike [_offlineRetry] it survives the
+  /// background, since resuming inside it must send nothing.
+  Timer? _rateLimitRetry;
   int _offlineAttempt = 0;
   StreamSubscription<void>? _sessionSubscription;
   int _generation = 0;
@@ -261,6 +265,10 @@ class AuthController extends ChangeNotifier {
   /// a sign-in is still completing (its own result is fresh server authority).
   Future<void> restoreAfterBackground() {
     if (_federatedSignInInProgress) return Future<void>.value();
+    // Inside the server's rate-limit wait nothing is sent: denied attempts
+    // count in its window (N4b A34 staging 2026-11-15). The wait's own timer
+    // tries again when it ends.
+    if (_rateLimitRetry?.isActive ?? false) return Future<void>.value();
     // A34 2026-11-08: after a long offline sleep the backoff sat at 60 s, and
     // the resume attempt usually runs before Wi-Fi is back, so the sign-in
     // screen stayed for a minute. Coming back starts the short delays again.
@@ -370,6 +378,8 @@ class AuthController extends ChangeNotifier {
       final result = await _restoreSessionUseCase();
       if (supportsGoogleSignIn && generation != _generation) return;
       _cancelOfflineRetry(resetBackoff: true);
+      _rateLimitRetry?.cancel();
+      _rateLimitRetry = null;
       if (result == null) {
         _setState(const AuthState.guest());
         return;
@@ -407,16 +417,20 @@ class AuthController extends ChangeNotifier {
         if (e.code == rateLimitedMessage) {
           // Denied attempts count in the server's window too: never retry
           // before the server's own retryAfter, nor faster than the longest
-          // backoff step (N4b A34 staging 2026-11-15).
-          final last = offlineRetryDelays.length - 1;
-          if (_offlineAttempt < last) _offlineAttempt = last;
+          // backoff step. The wait survives the background (N4b A34 staging
+          // 2026-11-15).
+          _cancelOfflineRetry(resetBackoff: true);
+          final longest = offlineRetryDelays.last;
           final retryAfter = e.retryAfter;
-          _scheduleOfflineRetry(
-            notBefore:
-                retryAfter != null && retryAfter > offlineRetryDelays[last]
-                ? retryAfter
-                : null,
-          );
+          final wait = retryAfter != null && retryAfter > longest
+              ? retryAfter
+              : longest;
+          _rateLimitRetry?.cancel();
+          _rateLimitRetry = Timer(wait, () {
+            _rateLimitRetry = null;
+            if (_federatedSignInInProgress) return;
+            unawaited(restoreSession().catchError((Object _) {}));
+          });
           return;
         }
         _scheduleOfflineRetry();
@@ -519,11 +533,10 @@ class AuthController extends ChangeNotifier {
     _setState(AuthState(status: AuthStatus.authenticated, user: result.user));
   }
 
-  void _scheduleOfflineRetry({Duration? notBefore}) {
+  void _scheduleOfflineRetry() {
     _offlineRetry?.cancel();
     final delays = offlineRetryDelays;
     final delay =
-        notBefore ??
         delays[_offlineAttempt < delays.length
             ? _offlineAttempt
             : delays.length - 1];
@@ -543,6 +556,8 @@ class AuthController extends ChangeNotifier {
   void _cancelBackgroundRevalidation() {
     _silentRefresh?.cancel();
     _silentRefresh = null;
+    _rateLimitRetry?.cancel();
+    _rateLimitRetry = null;
     _cancelOfflineRetry(resetBackoff: true);
   }
 

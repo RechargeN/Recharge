@@ -397,4 +397,33 @@ void main() {
       controller.dispose();
     });
   });
+
+  // Going to the background cancelled the wait, and every return to the app
+  // tried again at once: each denied attempt refilled the server's window.
+  test(
+    'the rate-limit wait survives the background; resume inside it sends nothing',
+    () {
+      fakeAsync((async) {
+        final repo = _ScriptedRepository(DateTime.now);
+        repo.restoreScript.addAll(<Object>[
+          'rate-limited-10m',
+          const Duration(hours: 1),
+        ]);
+        final controller = _controller(repo);
+        unawaited(controller.restoreSession());
+        async.flushMicrotasks();
+        expect(repo.restoreCalls, 1);
+        async.elapse(const Duration(minutes: 1));
+        controller.suspendForBackground();
+        async.elapse(const Duration(minutes: 2));
+        unawaited(controller.restoreAfterBackground());
+        async.flushMicrotasks();
+        expect(repo.restoreCalls, 1, reason: 'no attempt inside retryAfter');
+        async.elapse(const Duration(minutes: 7));
+        expect(repo.restoreCalls, 2);
+        expect(controller.state.isAuthenticated, isTrue);
+        controller.dispose();
+      });
+    },
+  );
 }
