@@ -46,6 +46,9 @@ void test('only Place and the owner draft/media operations exist; publication pa
     ['contentCommandV1', { commandType: 'applyModerationDisposition' }],
     ['contentQueryV1', { queryType: 'getPublishedRevision' }],
     ['mediaCommandV1', { commandType: 'deleteAsset' }],
+    ['mediaCommandV1', { commandType: 'detachAsset' }],
+    ['mediaCommandV1', { commandType: 'applyRestriction' }],
+    ['mediaCommandV1', { commandType: 'reconcileOrphan' }],
     ['mediaQueryV1', { queryType: 'deliver' }],
     ['contentCommandV1', {}],
     ['contentCommandV1', 'not an object'],
@@ -60,6 +63,14 @@ void test('only Place and the owner draft/media operations exist; publication pa
     assert.deepEqual(result, { schemaVersion: 1, kind: 'rejected', code: 'capability_denied' });
   }
   assert.deepEqual(devOperations.contentCommandV1, ['createDraft', 'updateDraft']);
+  // N4b: an owner may ask the server to process a quarantined asset again
+  // (bounded attempts, no deletion); nothing else was added.
+  assert.deepEqual(devOperations.mediaCommandV1, [
+    'createUploadSession',
+    'confirmUpload',
+    'finalizeAsset',
+    'retryProcessing',
+  ]);
 });
 
 void test('no Recharge Session in the payload: unauthenticated before any read', async () => {

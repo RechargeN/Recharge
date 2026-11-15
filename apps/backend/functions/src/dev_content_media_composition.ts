@@ -34,7 +34,15 @@ export const devContentTypes: ReadonlySet<ContentTypeId> = new Set<ContentTypeId
 export const devOperations = Object.freeze({
   contentCommandV1: Object.freeze(['createDraft', 'updateDraft']),
   contentQueryV1: Object.freeze(['getDraft', 'getPublicationStatus']),
-  mediaCommandV1: Object.freeze(['createUploadSession', 'confirmUpload', 'finalizeAsset']),
+  // N4b (A34 staging 2026-11-15): retryProcessing lets the owner have a
+  // quarantined asset (scanner unavailable) processed again; the server bounds
+  // the attempts and nothing is deleted.
+  mediaCommandV1: Object.freeze([
+    'createUploadSession',
+    'confirmUpload',
+    'finalizeAsset',
+    'retryProcessing',
+  ]),
   mediaQueryV1: Object.freeze(['getAssetStatus', 'getProcessingReceipt']),
   uploadMediaBytesV1: Object.freeze([] as string[]),
 });
