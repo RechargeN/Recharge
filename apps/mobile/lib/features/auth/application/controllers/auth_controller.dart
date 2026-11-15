@@ -405,9 +405,19 @@ class AuthController extends ChangeNotifier {
           );
         }
         if (e.code == rateLimitedMessage) {
-          // Never retry quickly into the server's limit.
+          // Denied attempts count in the server's window too: never retry
+          // before the server's own retryAfter, nor faster than the longest
+          // backoff step (N4b A34 staging 2026-11-15).
           final last = offlineRetryDelays.length - 1;
           if (_offlineAttempt < last) _offlineAttempt = last;
+          final retryAfter = e.retryAfter;
+          _scheduleOfflineRetry(
+            notBefore:
+                retryAfter != null && retryAfter > offlineRetryDelays[last]
+                ? retryAfter
+                : null,
+          );
+          return;
         }
         _scheduleOfflineRetry();
         return;
@@ -509,10 +519,11 @@ class AuthController extends ChangeNotifier {
     _setState(AuthState(status: AuthStatus.authenticated, user: result.user));
   }
 
-  void _scheduleOfflineRetry() {
+  void _scheduleOfflineRetry({Duration? notBefore}) {
     _offlineRetry?.cancel();
     final delays = offlineRetryDelays;
     final delay =
+        notBefore ??
         delays[_offlineAttempt < delays.length
             ? _offlineAttempt
             : delays.length - 1];

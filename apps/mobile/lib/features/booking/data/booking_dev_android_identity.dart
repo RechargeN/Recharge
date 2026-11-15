@@ -229,10 +229,34 @@ final class DevAndroidIdentitySessionCoordinator {
   final FunctionsIdentitySessionClient sessions;
   bool _busy = false;
 
+  /// Revalidates the stored Session with a read (no rotation). Like
+  /// [restoreSession], it first waits for the same Firebase user and re-arms
+  /// token access (cold start); the server still checks every credential.
+  Future<BookingIdentitySessionContext?> readSession({
+    required String requestId,
+    required Future<void> Function(Map<String, Object?> data) onAuthContext,
+  }) => _armed(
+    () => sessions.readCurrent(
+      requestId: requestId,
+      onAuthContext: onAuthContext,
+    ),
+  );
+
   Future<BookingIdentitySessionContext?> restoreSession({
     required String requestId,
     Future<void> Function(Map<String, Object?> data)? onAuthContext,
-  }) async {
+  }) => _armed(
+    () => sessions.refresh(
+      requestId: requestId,
+      requireExistingSession: true,
+      forceRefreshToken: true,
+      onAuthContext: onAuthContext,
+    ),
+  );
+
+  Future<BookingIdentitySessionContext?> _armed(
+    Future<BookingIdentitySessionContext> Function() operation,
+  ) async {
     if (_busy) throw StateError('dev_identity_operation_in_progress');
     _busy = true;
     try {
@@ -250,12 +274,7 @@ final class DevAndroidIdentitySessionCoordinator {
       // Only transport credentials are enabled here; server verifies the old handle/uid.
       identity._authenticatedUid = user.uid;
       identity._tokenAccessEnabled = true;
-      return await sessions.refresh(
-        requestId: requestId,
-        requireExistingSession: true,
-        forceRefreshToken: true,
-        onAuthContext: onAuthContext,
-      );
+      return await operation();
     } catch (error, stack) {
       if (!isTransientIdentityFailure(error)) {
         try {

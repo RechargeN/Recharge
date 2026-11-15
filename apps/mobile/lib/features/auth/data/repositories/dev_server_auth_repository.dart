@@ -20,6 +20,10 @@ const String offlineAuthErrorCode = 'NETWORK_UNAVAILABLE';
 /// Auth code for a server rate limit: transient as well, credentials stay.
 const String rateLimitedAuthErrorCode = 'AUTH_TOO_MANY_ATTEMPTS';
 
+/// A read found the server snapshot run out (no rotation within its hour).
+/// Not a decision about the Session: credentials stay and restore rotates.
+const String staleSnapshotAuthErrorCode = 'SNAPSHOT_STALE';
+
 final class DevServerAuthRepository implements FederatedAuthRepository {
   DevServerAuthRepository({required this.gateway, DateTime Function()? now})
     : _now = now ?? (() => DateTime.now().toUtc());
@@ -69,7 +73,12 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
       (await _run(_currentOrRotate))?.result;
 
   Future<ServerAuthContext?> _currentOrRotate() async {
-    final current = await gateway.current();
+    ServerAuthContext? current;
+    try {
+      current = await gateway.current();
+    } on AuthException catch (error) {
+      if (error.code != staleSnapshotAuthErrorCode) rethrow;
+    }
     if (current != null &&
         current.result.session.expiresAtUtc.difference(_now().toUtc()) >
             rotateWhenLessThan) {
@@ -117,7 +126,8 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
       final offline =
           error is AuthException &&
           (error.code == offlineAuthErrorCode ||
-              error.code == rateLimitedAuthErrorCode);
+              error.code == rateLimitedAuthErrorCode ||
+              error.code == staleSnapshotAuthErrorCode);
       if (!offline) {
         try {
           await gateway.clearLocal();

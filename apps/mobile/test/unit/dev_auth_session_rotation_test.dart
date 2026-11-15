@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/auth/data/models/server_auth_context.dart';
 import 'package:recharge/features/auth/data/repositories/dev_server_auth_repository.dart';
+import 'package:recharge/features/auth/domain/repositories/auth_repository.dart';
 
 import '../fixtures/auth/server_auth_packet.dart';
 
@@ -12,7 +13,9 @@ import '../fixtures/auth/server_auth_packet.dart';
 class _Gateway implements DevAuthSessionGateway {
   int currents = 0;
   int refreshes = 0;
+  int clears = 0;
   bool noCurrent = false;
+  bool staleCurrent = false;
 
   ServerAuthContext _context() => ServerAuthContext.fromResponse(
     packet(), // snapshot expires 2026-11-05T11:00Z
@@ -23,6 +26,12 @@ class _Gateway implements DevAuthSessionGateway {
   @override
   Future<ServerAuthContext?> current() async {
     currents++;
+    if (staleCurrent) {
+      throw const AuthException(
+        code: staleSnapshotAuthErrorCode,
+        message: staleSnapshotAuthErrorCode,
+      );
+    }
     return noCurrent ? null : _context();
   }
 
@@ -36,7 +45,7 @@ class _Gateway implements DevAuthSessionGateway {
   Future<ServerAuthContext> signInWithGoogle() async => _context();
 
   @override
-  Future<void> clearLocal() async {}
+  Future<void> clearLocal() async => clears++;
 
   @override
   Future<void> revokeAndSignOut() async {}
@@ -84,4 +93,32 @@ void main() {
     expect(await repository.restoreSession(), isNotNull);
     expect(gateway.refreshes, 1);
   });
+
+  // The server snapshot ran out (no rotation within its hour): the read says
+  // snapshot-stale, which is not a decision about the Session; rotate.
+  test(
+    'a stale snapshot on read falls back to rotation, keeping credentials',
+    () async {
+      final gateway = _Gateway()..staleCurrent = true;
+      final repository = DevServerAuthRepository(
+        gateway: gateway,
+        now: () => now,
+      );
+      expect(await repository.restoreSession(), isNotNull);
+      expect(gateway.refreshes, 1);
+      expect(gateway.clears, 0);
+      // A plain revalidation keeps credentials too (no rotation there).
+      await expectLater(
+        repository.revalidateContext(),
+        throwsA(
+          isA<AuthException>().having(
+            (e) => e.code,
+            'code',
+            staleSnapshotAuthErrorCode,
+          ),
+        ),
+      );
+      expect(gateway.clears, 0);
+    },
+  );
 }

@@ -60,6 +60,13 @@ class _ScriptedRepository implements FederatedAuthRepository {
     if (step == 'rate-limited') {
       throw const AuthException(code: 'AUTH_TOO_MANY_ATTEMPTS', message: '');
     }
+    if (step == 'rate-limited-10m') {
+      throw const AuthException(
+        code: 'AUTH_TOO_MANY_ATTEMPTS',
+        message: '',
+        retryAfter: Duration(minutes: 10),
+      );
+    }
     return _result(clock(), step as Duration);
   }
 
@@ -366,6 +373,27 @@ void main() {
       async.flushMicrotasks();
       expect(controller.state.isAuthenticated, isTrue);
       expect(repo.signOuts, 0);
+      controller.dispose();
+    });
+  });
+
+  // Denied attempts count in the server's window: retrying before the
+  // server's retryAfter would keep the window full forever.
+  test('rate-limited restore waits for the server retryAfter', () {
+    fakeAsync((async) {
+      final repo = _ScriptedRepository(DateTime.now);
+      repo.restoreScript.addAll(<Object>[
+        'rate-limited-10m',
+        const Duration(hours: 1),
+      ]);
+      final controller = _controller(repo);
+      unawaited(controller.restoreSession());
+      async.flushMicrotasks();
+      async.elapse(const Duration(minutes: 9, seconds: 59));
+      expect(repo.restoreCalls, 1);
+      async.elapse(const Duration(seconds: 1));
+      expect(repo.restoreCalls, 2);
+      expect(controller.state.isAuthenticated, isTrue);
       controller.dispose();
     });
   });
