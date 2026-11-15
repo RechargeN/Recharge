@@ -1,3 +1,4 @@
+import { ownerMediaCommands } from '../../src/media_entry.js';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -64,7 +65,11 @@ void test('only Place and the owner draft/media operations exist; publication pa
   }
   assert.deepEqual(devOperations.contentCommandV1, ['createDraft', 'updateDraft']);
   // N4b: an owner may ask the server to process a quarantined asset again
-  // (bounded attempts, no deletion); nothing else was added.
+  // (bounded attempts, no deletion); nothing else was added. Every operation
+  // the cloud runtime lets through must also be one the owner handler serves
+  // (the first retry came back capability_denied from media_entry).
+  for (const operation of devOperations.mediaCommandV1)
+    assert.ok(ownerMediaCommands.includes(operation), operation);
   assert.deepEqual(devOperations.mediaCommandV1, [
     'createUploadSession',
     'confirmUpload',
