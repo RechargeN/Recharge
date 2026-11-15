@@ -170,8 +170,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               data: workspaceData,
               canCreate: presentation.canShowCreatorTools,
               onViewAll: () => context.push(RouteNames.profileWorkspace),
-              onOpenListing: (listing) =>
-                  context.push(_searchRouteForCreateListing(listing)),
+              // A34 2026-11-13: a draft opens its editor, as in the workspace;
+              // only a published card leads to search.
+              onOpenListing: (listing) => context.push(
+                profileCreatedListingRoute(
+                  isPublished: listing.isPublished,
+                  searchRoute: () => _searchRouteForCreateListing(listing),
+                ),
+              ),
               onCreate: () => context.push(RouteNames.create),
               onCreateRoute: () => context.push(
                 Uri(
@@ -761,6 +767,9 @@ class _LatestCreatedEvents extends StatelessWidget {
                 else
                   for (final _CreatorListingData listing in listings.take(3))
                     _CreatedEventRow(
+                      key: ValueKey<String>(
+                        'profile-latest-created-${listing.title}',
+                      ),
                       listing: listing,
                       onTap: () => onOpenListing(listing),
                     ),
@@ -839,7 +848,11 @@ class _LatestCreatedEvents extends StatelessWidget {
 }
 
 class _CreatedEventRow extends StatelessWidget {
-  const _CreatedEventRow({required this.listing, required this.onTap});
+  const _CreatedEventRow({
+    super.key,
+    required this.listing,
+    required this.onTap,
+  });
 
   final _CreatorListingData listing;
   final VoidCallback onTap;
@@ -2772,6 +2785,14 @@ String _mapRouteForSmartSearch(SmartSearchHistoryEntity item) {
   }
   return _discoverRouteForSavedSearch(RouteNames.discoverMap, item.query);
 }
+
+/// A34 2026-11-13: a draft card in "latest created" opens its editor (as in
+/// the workspace); only a published card leads to search.
+@visibleForTesting
+String profileCreatedListingRoute({
+  required bool isPublished,
+  required String Function() searchRoute,
+}) => isPublished ? searchRoute() : RouteNames.create;
 
 String _searchRouteForCreateListing(_CreatorListingData listing) {
   return _discoverRouteForCreateListing(RouteNames.search, listing.draft);

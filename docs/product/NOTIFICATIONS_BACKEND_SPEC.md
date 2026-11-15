@@ -4,7 +4,7 @@
 - Version: **0.3**
 - Date: **2026-09-20**
 - Spec status: **Review — documentation only; approval pending**
-- Runtime status: **Absent**
+- Runtime status (refreshed 2026-11-15, text of the spec unchanged): **F1 — local/Emulator server inbox; N3c (Done 2026-11-13) — dev cloud inbox, preferences with a `push` channel (policy revision 2) and FCM push after the inbox; staging since N4a (2026-11-13). Email, APNs/iOS and production: absent.** Evidence: `docs/verification/N3C_DEV_PUSH_2026_11_13.md`, `docs/verification/N4A_STAGING_RC_2026_11_13.md`
 - Accountable owner: **Notifications owner**
 - Review owners: **API Platform, Security/Privacy, Platform Operations,
   Identity, Mobile, Product domain owners, Legal/Privacy and Support**
