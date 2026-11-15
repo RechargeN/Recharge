@@ -37,7 +37,7 @@ class _ScriptedRepository implements FederatedAuthRepository {
   _ScriptedRepository(this.clock);
   final DateTime Function() clock;
   final List<Object> restoreScript =
-      <Object>[]; // 'offline' | 'refused' | Duration
+      <Object>[]; // 'offline' | 'refused' | 'busy' | 'rate-limited' | Duration
   int restoreCalls = 0;
   int signOuts = 0;
 
@@ -50,6 +50,15 @@ class _ScriptedRepository implements FederatedAuthRepository {
     }
     if (step == 'refused') {
       throw const AuthException(code: 'unauthenticated', message: '');
+    }
+    if (step == 'busy') {
+      throw const AuthException(
+        code: 'auth_operation_in_progress',
+        message: '',
+      );
+    }
+    if (step == 'rate-limited') {
+      throw const AuthException(code: 'AUTH_TOO_MANY_ATTEMPTS', message: '');
     }
     return _result(clock(), step as Duration);
   }
@@ -288,6 +297,75 @@ void main() {
       expect(result, isTrue);
       expect(repo.freshSignIns, 1);
       expect(controller.state.isAuthenticated, isTrue);
+      controller.dispose();
+    });
+  });
+
+  // N4b A34 2026-11-15 (staging): a restore that met another auth operation
+  // (`auth_operation_in_progress`) or the server's rotation limit
+  // (`rate-limited`) showed "Session expired" although the Session lived.
+  test(
+    'a busy repository during restore is retried, never shown as expiry',
+    () {
+      fakeAsync((async) {
+        final repo = _ScriptedRepository(DateTime.now);
+        repo.restoreScript.addAll(<Object>['busy', const Duration(hours: 1)]);
+        final controller = _controller(repo);
+        unawaited(controller.restoreSession());
+        async.flushMicrotasks();
+        expect(
+          controller.state.message,
+          isNot(AuthController.sessionExpiredMessage),
+        );
+        expect(repo.signOuts, 0);
+        async.elapse(const Duration(seconds: 2));
+        expect(controller.state.isAuthenticated, isTrue);
+        expect(repo.restoreCalls, 2);
+        controller.dispose();
+      });
+    },
+  );
+
+  test(
+    'rate-limited restore keeps the sign-in, says so, and retries slowly',
+    () {
+      fakeAsync((async) {
+        final repo = _ScriptedRepository(DateTime.now);
+        repo.restoreScript.addAll(<Object>[
+          'rate-limited',
+          const Duration(hours: 1),
+        ]);
+        final controller = _controller(repo);
+        unawaited(controller.restoreSession());
+        async.flushMicrotasks();
+        expect(controller.state.isAuthenticated, isFalse);
+        expect(controller.state.message, AuthController.rateLimitedMessage);
+        expect(repo.signOuts, 0);
+        async.elapse(const Duration(seconds: 30));
+        expect(repo.restoreCalls, 1, reason: 'no fast retry into the limit');
+        async.elapse(const Duration(seconds: 30));
+        expect(repo.restoreCalls, 2);
+        expect(controller.state.isAuthenticated, isTrue);
+        controller.dispose();
+      });
+    },
+  );
+
+  test('rate-limited while signed in keeps the signed-in UI', () {
+    fakeAsync((async) {
+      final repo = _ScriptedRepository(DateTime.now);
+      repo.restoreScript.addAll(<Object>[
+        const Duration(hours: 1),
+        'rate-limited',
+      ]);
+      final controller = _controller(repo);
+      unawaited(controller.restoreSession());
+      async.flushMicrotasks();
+      expect(controller.state.isAuthenticated, isTrue);
+      unawaited(controller.restoreSession());
+      async.flushMicrotasks();
+      expect(controller.state.isAuthenticated, isTrue);
+      expect(repo.signOuts, 0);
       controller.dispose();
     });
   });

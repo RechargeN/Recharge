@@ -33,6 +33,18 @@ class AuthController extends ChangeNotifier {
   /// kept, no authority is granted, and the controller retries by itself.
   static const String offlineMessage = 'NETWORK_UNAVAILABLE';
 
+  /// The server refused for now (rate limit): credentials are kept and the
+  /// controller retries by itself, but only after the longest backoff step.
+  static const String rateLimitedMessage = 'AUTH_TOO_MANY_ATTEMPTS';
+
+  /// Another auth operation holds the repository; not a decision about the
+  /// Session, so restore simply tries again.
+  static const String busyCode = 'auth_operation_in_progress';
+
+  /// Outcomes that keep the stored Session and the SDK user.
+  static bool _keepsCredentials(String code) =>
+      code == offlineMessage || code == rateLimitedMessage;
+
   /// The user closed the provider picker; shown as no error at all.
   static const String cancelledCode = 'auth_cancelled';
 
@@ -272,14 +284,14 @@ class AuthController extends ChangeNotifier {
     // Credentials kept while offline: the button resumes them instead of a
     // fresh Google sign-in (which would refuse with an SDK user present and
     // wipe everything). Only a server refusal falls through to a new sign-in.
-    if (_state.errorCode == offlineMessage) {
+    if (_keepsCredentials(_state.errorCode ?? '')) {
       try {
         await restoreSession();
       } catch (_) {
         /* Reflected in state. */
       }
       if (_state.isAuthenticated) return true;
-      if (_state.errorCode == offlineMessage) return false;
+      if (_keepsCredentials(_state.errorCode ?? '')) return false;
     }
     final generation = ++_generation;
     _federatedSignInInProgress = true;
@@ -375,16 +387,27 @@ class AuthController extends ChangeNotifier {
         debugPrint('recharge-auth: restore failed code=${e.code}');
       }
       if (supportsGoogleSignIn && generation != _generation) return;
-      if (supportsGoogleSignIn && e.code == offlineMessage) {
+      if (supportsGoogleSignIn && e.code == busyCode) {
+        // N4b A34 2026-11-15: another auth operation was running; the Session
+        // was not judged, so nothing is shown and restore tries again.
+        _scheduleOfflineRetry();
+        return;
+      }
+      if (supportsGoogleSignIn && _keepsCredentials(e.code)) {
         // Keep the current UI authority while its snapshot is still valid;
-        // otherwise show "no connection" (not "session expired") and retry.
+        // otherwise say what happened (not "session expired") and retry.
         if (!wasAuthenticated) {
           _setState(
             const AuthState.guest().copyWith(
-              errorCode: offlineMessage,
-              message: offlineMessage,
+              errorCode: e.code,
+              message: e.code,
             ),
           );
+        }
+        if (e.code == rateLimitedMessage) {
+          // Never retry quickly into the server's limit.
+          final last = offlineRetryDelays.length - 1;
+          if (_offlineAttempt < last) _offlineAttempt = last;
         }
         _scheduleOfflineRetry();
         return;

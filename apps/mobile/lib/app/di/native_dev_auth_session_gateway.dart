@@ -76,6 +76,12 @@ final class NativeDevAuthSessionGateway implements DevAuthSessionGateway {
           'transient=${isTransientIdentityFailure(error)}',
         );
       }
+      if (identityFailureCode(error) == 'rate-limited') {
+        throw const AuthException(
+          code: rateLimitedAuthErrorCode,
+          message: rateLimitedAuthErrorCode,
+        );
+      }
       if (isTransientIdentityFailure(error)) {
         throw const AuthException(code: offlineCode, message: offlineCode);
       }
