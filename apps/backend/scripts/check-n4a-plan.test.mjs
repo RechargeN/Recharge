@@ -183,3 +183,130 @@ test("only the staging project", () => {
     /recharge-staging-y9y2y only/u,
   );
 });
+
+// N4b: roll the media tools to a new reviewed digest (fix: own mirror bucket).
+const digest = `sha256:${"b".repeat(64)}`;
+const image = `europe-west1-docker.pkg.dev/${project}/media-tools/media-tools@${digest}`;
+const oldImage = `europe-west1-docker.pkg.dev/${project}/media-tools/media-tools@sha256:${"a".repeat(64)}`;
+const scanner = 'google_cloud_run_v2_service.n3b["media-scanner"]';
+const processor = 'google_cloud_run_v2_service.n3b["media-processor"]';
+const mirrorJob = "google_cloud_run_v2_job.n3b_mirror[0]";
+const service = (img, extra = {}) => ({
+  project,
+  template: [
+    {
+      containers: [{ image: img }],
+      scaling: [{ min_instance_count: 0, max_instance_count: 1 }],
+      ...extra,
+    },
+  ],
+});
+const job = (img) => ({
+  project,
+  template: [{ template: [{ containers: [{ image: img }] }] }],
+});
+const roll = (address, type, before, after) => ({
+  address,
+  type,
+  change: { actions: ["update"], before, after, after_unknown: {} },
+});
+function rollPlan(mutate = (c) => c) {
+  const c = mutate([
+    roll(
+      scanner,
+      "google_cloud_run_v2_service",
+      service(oldImage),
+      service(image),
+    ),
+    roll(
+      processor,
+      "google_cloud_run_v2_service",
+      service(oldImage),
+      service(image),
+    ),
+    roll(mirrorJob, "google_cloud_run_v2_job", job(oldImage), job(image)),
+  ]);
+  const p = plan(c);
+  p.variables.n3b_image_digest = { value: digest };
+  return p;
+}
+const rollExpected = (p, extra = {}) => ({
+  projectId: project,
+  commitSha: "a".repeat(40),
+  inventorySha256: inventoryDigest(p),
+  imageDigest: digest,
+  image,
+  ...extra,
+});
+
+test("N4b: an image-only roll of the three media tools to the recorded digest passes", () => {
+  const p = rollPlan();
+  assert.deepEqual(checkN4aPlan(p, rollExpected(p)), []);
+});
+
+test("N4b: any other update, field, image or registry is refused", () => {
+  const cases = [
+    // No reviewed digest: updates stay forbidden as before.
+    [
+      (c) => c,
+      { imageDigest: undefined, image: undefined },
+      /forbidden action update/u,
+    ],
+    // Another field changes with the image.
+    [
+      (c) => {
+        c[0].change.after = service(image, { timeout: "600s" });
+        return c;
+      },
+      {},
+      /forbidden action update/u,
+    ],
+    // The image is not the recorded one.
+    [
+      (c) => {
+        c[2].change.after = job(
+          oldImage.replace("a".repeat(64), "c".repeat(64)),
+        );
+        return c;
+      },
+      {},
+      /forbidden action update/u,
+    ],
+    // An update of anything else.
+    [
+      (c) => [
+        ...c,
+        roll(
+          "google_storage_bucket.media",
+          "google_storage_bucket",
+          { project, labels: {} },
+          { project, labels: { x: "y" } },
+        ),
+      ],
+      {},
+      /forbidden action update: google_storage_bucket.media/u,
+    ],
+  ];
+  for (const [mutate, extra, pattern] of cases) {
+    const p = rollPlan(mutate);
+    assert.match(checkN4aPlan(p, rollExpected(p, extra)).join(), pattern);
+  }
+  // A digest from another project's registry is never a staging image.
+  const p = rollPlan();
+  assert.match(
+    checkN4aPlan(
+      p,
+      rollExpected(p, {
+        image: `europe-west1-docker.pkg.dev/recharge-dev-n2a01/media-tools/media-tools@${digest}`,
+      }),
+    ).join(),
+    /staging repository image/u,
+  );
+  // The plan's digest variable must be the recorded one.
+  const q = rollPlan();
+  q.variables.n3b_image_digest = { value: `sha256:${"d".repeat(64)}` };
+  assert.match(
+    checkN4aPlan(q, rollExpected(q)).join(),
+    /image digest mismatch/u,
+  );
+});

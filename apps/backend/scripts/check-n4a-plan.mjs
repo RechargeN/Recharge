@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
-import { inventoryDigest } from "./check-n3b-plan.mjs";
+import { inventoryDigest, reviewedUpdate } from "./check-n3b-plan.mjs";
 
 // N4a (owner-approved 2026-11-13): independent policy check of a serialized
 // staging bootstrap plan (terraform show -json). No Terraform or cloud call.
@@ -9,6 +9,8 @@ import { inventoryDigest } from "./check-n3b-plan.mjs";
 // every change instead of a second address list: create/read/no-op only, the
 // staging project only, no delete permission or automatic deletion, no basic
 // role or public member, budget €5 as an alert, Cloud Run 0..1 instance.
+// N4b: the one update allowed is an image-only roll of the three media tools
+// to the recorded digest in the staging repository (same rule as dev N3b).
 export { inventoryDigest };
 export const stagingProject = "recharge-staging-y9y2y";
 const basicRoles = new Set(["roles/owner", "roles/editor", "roles/viewer"]);
@@ -29,9 +31,29 @@ function memberOk(member, role) {
   return false;
 }
 
+const imageRoll = [
+  'google_cloud_run_v2_service.n3b["media-scanner"]',
+  'google_cloud_run_v2_service.n3b["media-processor"]',
+  "google_cloud_run_v2_job.n3b_mirror[0]",
+];
+
 export function checkN4aPlan(plan, expected) {
   const errors = [];
   const vars = plan?.variables ?? {};
+  const rolling = typeof expected.imageDigest === "string";
+  if (rolling) {
+    if (!/^sha256:[0-9a-f]{64}$/u.test(expected.imageDigest))
+      errors.push("image digest invalid");
+    if (
+      expected.image !==
+      `europe-west1-docker.pkg.dev/${stagingProject}/media-tools/media-tools@${expected.imageDigest}`
+    )
+      errors.push(
+        "expected image must be the staging repository image at the digest",
+      );
+    if (vars.n3b_image_digest?.value !== expected.imageDigest)
+      errors.push("image digest mismatch");
+  }
   if (expected.projectId !== stagingProject)
     errors.push("N4a targets recharge-staging-y9y2y only");
   if (vars.project_id?.value !== stagingProject)
@@ -43,9 +65,15 @@ export function checkN4aPlan(plan, expected) {
   for (const c of plan.resource_changes ?? []) {
     const actions = c.change?.actions ?? [];
     const after = c.change?.after ?? {};
+    const allowedUpdate =
+      rolling &&
+      actions.length === 1 &&
+      actions[0] === "update" &&
+      reviewedUpdate(c, { image: expected.image, allowedUpdates: imageRoll });
     if (
-      actions.length !== 1 ||
-      !["create", "read", "no-op"].includes(actions[0])
+      !allowedUpdate &&
+      (actions.length !== 1 ||
+        !["create", "read", "no-op"].includes(actions[0]))
     )
       errors.push(`forbidden action ${actions.join("+")}: ${c.address}`);
     if (actions[0] !== "create") continue;
