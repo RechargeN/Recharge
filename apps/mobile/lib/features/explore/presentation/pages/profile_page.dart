@@ -1,3 +1,4 @@
+import '../../../../core/layout/page_list_padding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -128,7 +129,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           },
         ),
         ExploreStatus.ready || ExploreStatus.saving => ListView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          padding: pageListPadding(
+            context,
+            const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          ),
           children: <Widget>[
             _ProfileHero(
               displayName: state.profile.displayName,
@@ -323,7 +327,10 @@ class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
         surfaceTintColor: Colors.transparent,
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        padding: pageListPadding(
+          context,
+          const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        ),
         children: <Widget>[
           _RoleWorkspace(
             roleSummary: roleSummary,

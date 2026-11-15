@@ -1,3 +1,4 @@
+import '../../../../core/layout/page_list_padding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -86,7 +87,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           },
         ),
         ExploreStatus.ready || ExploreStatus.saving => ListView(
-          padding: const EdgeInsets.all(16),
+          padding: pageListPadding(context, const EdgeInsets.all(16)),
           children: <Widget>[
             _SettingsSectionTitle(l10n.settingsSectionAccount),
             const SizedBox(height: 8),

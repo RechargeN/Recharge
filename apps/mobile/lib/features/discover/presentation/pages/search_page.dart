@@ -1,3 +1,4 @@
+import '../../../../core/layout/page_list_padding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -88,7 +89,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       ),
       body: ListView(
         key: const Key('search-landing-body'),
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        padding: pageListPadding(
+          context,
+          const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        ),
         children: <Widget>[
           SizedBox(
             height: 42,

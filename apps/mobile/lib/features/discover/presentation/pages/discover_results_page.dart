@@ -1,3 +1,4 @@
+import '../../../../core/layout/page_list_padding.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
@@ -164,7 +165,10 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
             )
           : null,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: pageListPadding(
+          context,
+          const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        ),
         children: <Widget>[
           _SearchField(
             controller: _searchController,

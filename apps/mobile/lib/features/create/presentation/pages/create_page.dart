@@ -1,3 +1,4 @@
+import '../../../../core/layout/page_list_padding.dart';
 import '../../../../core/localization/taxonomy_labels.dart';
 import '../../application/activity_validation_feedback_provider.dart';
 import 'package:design_system/design_system.dart';
@@ -197,7 +198,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
         CreateStatus.saving ||
         CreateStatus.publishing ||
         CreateStatus.publishSuccess => ListView(
-          padding: const EdgeInsets.all(16),
+          padding: pageListPadding(context, const EdgeInsets.all(16)),
           children: <Widget>[
             _CreateHubHeader(draft: state.draft),
             if (_needsRentalReview(state.draft)) ...<Widget>[

@@ -1,3 +1,4 @@
+import '../../../../core/layout/page_list_padding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -95,7 +96,10 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        padding: pageListPadding(
+          context,
+          const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        ),
         children: <Widget>[
           TextField(
             key: const ValueKey<String>('smart-search-input'),
