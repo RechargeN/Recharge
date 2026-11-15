@@ -379,6 +379,10 @@ class AppLocalizationsLv extends AppLocalizations {
       'Šo augšupielādi nevar atkārtot. Sāciet jaunu augšupielādi.';
 
   @override
+  String get mediaErrorQuarantined =>
+      'Fails vēl nav izgājis drošības pārbaudi. Mēģiniet to augšupielādēt vēlāk.';
+
+  @override
   String get bookingErrorSoldOut => 'Šim pasākumam vairs nav brīvu vietu.';
 
   @override

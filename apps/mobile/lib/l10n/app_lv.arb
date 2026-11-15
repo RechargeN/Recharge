@@ -109,6 +109,7 @@
   "mediaErrorLimitExceeded": "Fails ir pārāk liels vai ir sasniegts limits.",
   "mediaErrorAssetReferenced": "Šis fails joprojām tiek izmantots, un to nevar izdzēst.",
   "mediaErrorRetryNotAllowed": "Šo augšupielādi nevar atkārtot. Sāciet jaunu augšupielādi.",
+  "mediaErrorQuarantined": "Fails vēl nav izgājis drošības pārbaudi. Mēģiniet to augšupielādēt vēlāk.",
   "bookingErrorSoldOut": "Šim pasākumam vairs nav brīvu vietu.",
   "bookingErrorBookingLimit": "Sasniegts aktīvo rezervāciju limits.",
   "bookingErrorRegistrationNotOpen": "Reģistrācija vēl nav sākusies.",

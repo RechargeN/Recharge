@@ -109,6 +109,7 @@
   "mediaErrorLimitExceeded": "Файл слишком большой или достигнут лимит.",
   "mediaErrorAssetReferenced": "Этот файл ещё используется, его нельзя удалить.",
   "mediaErrorRetryNotAllowed": "Эту загрузку нельзя повторить. Начните новую.",
+  "mediaErrorQuarantined": "Файл ещё не прошёл проверку безопасности. Попробуйте загрузить его позже.",
   "bookingErrorSoldOut": "На это событие мест больше нет.",
   "bookingErrorBookingLimit": "Достигнут лимит активных бронирований.",
   "bookingErrorRegistrationNotOpen": "Регистрация ещё не открыта.",

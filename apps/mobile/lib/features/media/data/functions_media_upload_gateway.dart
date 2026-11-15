@@ -92,6 +92,9 @@ final class FunctionsMediaUploadGateway implements MediaUploadGateway {
             assetRevision: accepted.revision,
           );
         }
+        if (accepted.lifecycle == 'quarantined') {
+          return _retryQuarantined(request, assetId, accepted);
+        }
       }
 
       final confirmed = await _command(<String, Object?>{
@@ -120,6 +123,9 @@ final class FunctionsMediaUploadGateway implements MediaUploadGateway {
         },
       });
       if (finalized.failure != null) return _rejected(finalized.failure!);
+      if (finalized.data!['lifecycle'] == 'quarantined') {
+        return _rejected(quarantinedCode);
+      }
       if (finalized.data!['lifecycle'] != 'ready') {
         return _rejected('invalid_state');
       }
@@ -149,9 +155,44 @@ final class FunctionsMediaUploadGateway implements MediaUploadGateway {
     );
   }
 
+  /// The safety scan could not decide (scanner unavailable) or processing
+  /// failed: the asset waits in quarantine and may be processed again.
+  static const String quarantinedCode = 'media_quarantined';
+
+  /// N4b A34 staging 2026-11-15: the same bytes replay the same intent, so a
+  /// quarantined asset was reported as "upload incomplete" forever. The server
+  /// processes it again (`retryProcessing`, bounded attempts) without a
+  /// second transfer.
+  Future<MediaUploadResult> _retryQuarantined(
+    MediaUploadRequest request,
+    String assetId,
+    ({String lifecycle, int revision, String generation}) asset,
+  ) async {
+    final retried = await _command(<String, Object?>{
+      'schemaVersion': 1,
+      'commandType': 'retryProcessing',
+      'idempotencyKey': '${request.intentId}:retry:${asset.revision}',
+      'payload': <String, Object?>{
+        'assetId': assetId,
+        'expectedAssetRevision': asset.revision,
+        'sourceProviderGeneration': asset.generation,
+      },
+    });
+    if (retried.failure != null) return _rejected(retried.failure!);
+    final lifecycle = retried.data!['lifecycle'];
+    if (lifecycle == 'quarantined') return _rejected(quarantinedCode);
+    if (lifecycle != 'ready') return _rejected('invalid_state');
+    return MediaUploadResult(
+      MediaUploadOutcome.ready,
+      assetId: assetId,
+      assetRevision: retried.data!['revision']! as int,
+    );
+  }
+
   /// The asset this intent's earlier attempt already filled with exactly these
   /// bytes for the same entity, or null when the server holds nothing usable.
-  Future<({String lifecycle, int revision})?> _acceptedEarlier(
+  Future<({String lifecycle, int revision, String generation})?>
+  _acceptedEarlier(
     String assetId,
     MediaUploadRequest request,
     String sha256Hex,
@@ -172,12 +213,14 @@ final class FunctionsMediaUploadGateway implements MediaUploadGateway {
       return null;
     }
     if (revision is! int || source is! Map) return null;
+    final generation = source['providerGeneration'];
+    if (generation is! String) return null;
     if (source['sha256'] != sha256Hex ||
         source['byteLength'] != request.bytes.length) {
       return null;
     }
     if (binding is Map && binding['entityId'] != request.contentId) return null;
-    return (lifecycle: lifecycle, revision: revision);
+    return (lifecycle: lifecycle, revision: revision, generation: generation);
   }
 
   /// States reached only after the server confirmed the uploaded bytes.
@@ -186,6 +229,7 @@ final class FunctionsMediaUploadGateway implements MediaUploadGateway {
     'validating',
     'processing',
     'ready',
+    'quarantined',
   };
 
   MediaUploadResult _rejected(String code) =>

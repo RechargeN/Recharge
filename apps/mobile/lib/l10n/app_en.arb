@@ -442,6 +442,10 @@
   "@mediaErrorRetryNotAllowed": {
     "description": "Media retry not allowed."
   },
+  "mediaErrorQuarantined": "The file has not passed the safety check yet. Try uploading it again later.",
+  "@mediaErrorQuarantined": {
+    "description": "Media upload kept in quarantine: the safety scan could not decide yet or processing failed (N4b)."
+  },
   "bookingErrorSoldOut": "This event is sold out.",
   "@bookingErrorSoldOut": {
     "description": "Booking: sold out."

@@ -374,6 +374,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This upload cannot be retried. Start a new upload.';
 
   @override
+  String get mediaErrorQuarantined =>
+      'The file has not passed the safety check yet. Try uploading it again later.';
+
+  @override
   String get bookingErrorSoldOut => 'This event is sold out.';
 
   @override

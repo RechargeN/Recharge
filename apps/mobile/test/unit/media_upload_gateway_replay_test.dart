@@ -127,6 +127,77 @@ void main() {
     expect(refused.failureCode, 'limit_exceeded');
     expect(limited.steps, <String>['createUploadSession', 'bytes']);
   });
+
+  // N4b A34 staging 2026-11-15: the scanner was unavailable, the asset went to
+  // quarantine, the app said "it changed while you worked" and a second tap
+  // replayed the quarantined asset as "upload incomplete" forever.
+  test(
+    'a quarantined finalize is reported as quarantine, not a conflict',
+    () async {
+      final _ScriptedPort port = _ScriptedPort(
+        finalizeLifecycle: 'quarantined',
+      );
+      final MediaUploadResult result = await _gateway(port).upload(request());
+      expect(result.outcome, MediaUploadOutcome.rejected);
+      expect(result.failureCode, 'media_quarantined');
+    },
+  );
+
+  test('a replayed intent whose asset is quarantined asks the server to retry '
+      'processing once, without a second transfer', () async {
+    final _ScriptedPort port = _ScriptedPort(
+      transferCode: 'session_expired',
+      status: asset(lifecycle: 'quarantined'),
+      retryAnswer: 'ready',
+    );
+    final MediaUploadResult result = await _gateway(port).upload(request());
+    expect(result.outcome, MediaUploadOutcome.ready);
+    expect(result.assetId, 'asset-1');
+    expect(result.assetRevision, 6);
+    expect(port.steps, <String>[
+      'createUploadSession',
+      'bytes',
+      'getAssetStatus',
+      'retryProcessing',
+    ]);
+    expect(port.keys.last, 'intent-1:retry:4');
+    expect(port.retryPayload, <String, Object?>{
+      'assetId': 'asset-1',
+      'expectedAssetRevision': 4,
+      'sourceProviderGeneration': 'g-1',
+    });
+  });
+
+  test('a retry that ends in quarantine again or is refused says so', () async {
+    for (final (String answer, String code) in <(String, String)>[
+      ('quarantined', 'media_quarantined'),
+      ('no:retry_not_allowed', 'retry_not_allowed'),
+      ('no:stale_revision', 'stale_revision'),
+    ]) {
+      final _ScriptedPort port = _ScriptedPort(
+        transferCode: 'session_expired',
+        status: asset(lifecycle: 'quarantined'),
+        retryAnswer: answer,
+      );
+      final MediaUploadResult result = await _gateway(port).upload(request());
+      expect(result.outcome, MediaUploadOutcome.rejected, reason: answer);
+      expect(result.failureCode, code, reason: answer);
+    }
+    // Quarantine of other bytes or another entity is never retried.
+    for (final Map<String, Object?> status in <Map<String, Object?>>[
+      asset(lifecycle: 'quarantined', sha: 'other'),
+      asset(lifecycle: 'quarantined', entityId: 'content-2'),
+    ]) {
+      final _ScriptedPort port = _ScriptedPort(
+        transferCode: 'session_expired',
+        status: status,
+        retryAnswer: 'ready',
+      );
+      final MediaUploadResult result = await _gateway(port).upload(request());
+      expect(result.failureCode, 'session_expired');
+      expect(port.steps.last, 'getAssetStatus');
+    }
+  });
 }
 
 FunctionsMediaUploadGateway _gateway(_ScriptedPort port) =>
@@ -141,7 +212,21 @@ final class _Open implements MediaCommandGate {
 
 /// Answers the Media callables like the server would for one intent.
 final class _ScriptedPort implements MediaCallablePort {
-  _ScriptedPort({this.transferCode, this.status});
+  _ScriptedPort({
+    this.transferCode,
+    this.status,
+    this.finalizeLifecycle = 'ready',
+    this.retryAnswer,
+  });
+
+  /// Lifecycle `finalizeAsset` reports (the scan and processing ran inline).
+  final String finalizeLifecycle;
+
+  /// `retryProcessing`: a lifecycle, or a refusal code prefixed with `no:`.
+  final String? retryAnswer;
+
+  /// Payload of the last `retryProcessing`.
+  Map<String, Object?>? retryPayload;
 
   /// Refusal of the byte transfer; null accepts it.
   final String? transferCode;
@@ -188,9 +273,16 @@ final class _ScriptedPort implements MediaCallablePort {
             'sourceGenerationRef': <String, Object?>{'providerGeneration': 'g'},
           }),
           'finalizeAsset' => ok(<String, Object?>{
-            'lifecycle': 'ready',
+            'lifecycle': finalizeLifecycle,
             'revision': 3,
           }),
+          'retryProcessing' => () {
+            retryPayload = Map<String, Object?>.from(data['payload']! as Map);
+            final String answer = retryAnswer ?? 'no:invalid_contract';
+            return answer.startsWith('no:')
+                ? no(answer.substring(3))
+                : ok(<String, Object?>{'lifecycle': answer, 'revision': 6});
+          }(),
           _ => no('invalid_contract'),
         };
     }

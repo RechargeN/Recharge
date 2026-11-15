@@ -380,6 +380,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Эту загрузку нельзя повторить. Начните новую.';
 
   @override
+  String get mediaErrorQuarantined =>
+      'Файл ещё не прошёл проверку безопасности. Попробуйте загрузить его позже.';
+
+  @override
   String get bookingErrorSoldOut => 'На это событие мест больше нет.';
 
   @override

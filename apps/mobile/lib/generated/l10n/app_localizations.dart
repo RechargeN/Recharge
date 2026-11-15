@@ -754,6 +754,12 @@ abstract class AppLocalizations {
   /// **'This upload cannot be retried. Start a new upload.'**
   String get mediaErrorRetryNotAllowed;
 
+  /// Media upload kept in quarantine: the safety scan could not decide yet or processing failed (N4b).
+  ///
+  /// In en, this message translates to:
+  /// **'The file has not passed the safety check yet. Try uploading it again later.'**
+  String get mediaErrorQuarantined;
+
   /// Booking: sold out.
   ///
   /// In en, this message translates to:

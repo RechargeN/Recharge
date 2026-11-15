@@ -134,6 +134,7 @@ abstract final class UserMessageCatalog {
     'invalid_state': _conflict,
     'idempotency_conflict': _generic,
     'retry_not_allowed': (l) => l.mediaErrorRetryNotAllowed,
+    'media_quarantined': (l) => l.mediaErrorQuarantined,
     'revision_conflict': _conflict,
     'unknown_outcome': _unknown,
     'asset_referenced': (l) => l.mediaErrorAssetReferenced,
