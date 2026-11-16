@@ -7,8 +7,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 // N4c operator tool (owner choice 2026-11-16: synthetic participants and
 // synthetic events). Staging only. Writes, with the operator's own credentials:
 //   - synthetic Booking actors (account, Session, access snapshot) n4cloadNNNN;
-//   - synthetic Event projections occ_n4cload_* through the ordinary Event
-//     outbox delivery, the same path the Emulator tests use.
+//   - synthetic Event projections occ_n4cload_* through the ordinary Booking
+//     projection consumer (the outbox delivery is contained in the cloud).
 // Nothing is deleted. The Session handles go to a private file, never to Git.
 export const stagingProject = "recharge-staging-y9y2y";
 export const actorId = (index) => `n4cload${String(index).padStart(4, "0")}`;
@@ -129,11 +129,10 @@ async function main() {
   );
   const { initializeApp, applicationDefault } = require("firebase-admin/app");
   const { getFirestore } = require("firebase-admin/firestore");
-  const { seedEventBookingOutbox } = await lib(
-    "test/support/event_outbox_seed.js",
-  );
-  const { deliverEventBookingProjection } = await lib(
-    "src/booking/event_projection_delivery.js",
+  // The outbox delivery is contained outside the Emulator (Operations switches
+  // do not run in the cloud), so the operator feeds the same consumer directly.
+  const { consumeEventForBookingProjection } = await lib(
+    "src/booking/event_projection_consumer.js",
   );
   const firestore = getFirestore(
     initializeApp(
@@ -178,32 +177,19 @@ async function main() {
     ),
   ];
   for (const event of events) {
-    const outboxId = createHash("sha256")
-      .update(
-        `n4c-load-seed-v1|${event.eventId}|${event.occurrenceId}|${event.materialRevision}`,
-      )
-      .digest("hex");
-    const enqueued = await seedEventBookingOutbox(firestore, {
-      outboxId,
-      event: {
-        kind: "EventRevisionPublished",
-        eventId: event.eventId,
-        occurrenceId: event.occurrenceId,
-        publicationRevision: event.materialRevision,
-        materialRevision: event.materialRevision,
-        occurredAt: now.toISOString(),
-        projection: event,
-      },
+    const result = await consumeEventForBookingProjection(firestore, {
+      kind: "EventRevisionPublished",
+      eventId: event.eventId,
+      occurrenceId: event.occurrenceId,
+      publicationRevision: event.materialRevision,
+      materialRevision: event.materialRevision,
+      occurredAt: now.toISOString(),
+      projection: event,
     });
-    if (enqueued === "conflict")
-      throw new Error(`event ${event.occurrenceId} exists with other content`);
-    const delivered = await deliverEventBookingProjection(
-      firestore,
-      outboxId,
-      new Date().toISOString(),
-    );
-    if (delivered !== "delivered" && delivered !== "replayed")
-      throw new Error(`event ${event.occurrenceId} delivery: ${delivered}`);
+    if (result.kind !== "applied" && result.kind !== "ignoredDuplicate")
+      throw new Error(
+        `event ${event.occurrenceId} projection: ${result.kind} ${result.code ?? ""}`,
+      );
   }
   writeFileSync(
     outFile,
