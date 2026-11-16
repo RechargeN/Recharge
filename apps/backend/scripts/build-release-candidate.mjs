@@ -28,6 +28,8 @@ export const deployedIndexGroups = Object.freeze([
   "contentPublishedRevisions",
   "contentSubmissions",
   "notificationInboxItems",
+  // N4c: Booking own-list and occurrence queries (no TTL override, D-07).
+  "bookings",
 ]);
 export const lockfilePaths = Object.freeze([
   "apps/backend/functions/package-lock.json",
