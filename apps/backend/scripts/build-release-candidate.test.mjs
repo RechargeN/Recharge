@@ -37,6 +37,11 @@ const codebases = {
     codeTreeSha256: "3".repeat(64),
     files: 30,
   },
+  "n4c-booking": {
+    entry: "lib/src/dev_booking_entry.js",
+    codeTreeSha256: "4".repeat(64),
+    files: 76,
+  },
 };
 const digest = `sha256:${"a".repeat(64)}`;
 const now = new Date("2026-11-13T12:00:00.000Z");

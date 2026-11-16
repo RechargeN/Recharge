@@ -1,0 +1,14 @@
+{
+  "name": "@recharge/n4c-booking-runtime",
+  "version": "0.0.0-n4c",
+  "private": true,
+  "type": "module",
+  "main": "lib/src/dev_booking_entry.js",
+  "engines": {
+    "node": "22"
+  },
+  "dependencies": {
+    "firebase-admin": "14.5.0",
+    "firebase-functions": "7.3.2"
+  }
+}

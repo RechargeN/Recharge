@@ -8,6 +8,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { stageRuntime as stageIdentity } from "./package-n2c-identity-runtime.mjs";
 import { stageRuntime as stageContentMedia } from "./package-n3a2-content-media-runtime.mjs";
 import { stageRuntime as stageNotifications } from "./package-n3c-notifications-runtime.mjs";
+import { stageRuntime as stageBooking } from "./package-n4c-booking-runtime.mjs";
 import { reviewedProjects } from "./runtime-projects.mjs";
 
 // N4a (owner-approved 2026-11-13): the immutable release candidate. Source
@@ -33,6 +34,7 @@ export const lockfilePaths = Object.freeze([
   "apps/backend/n2c-identity-runtime/package-lock.json",
   "apps/backend/n3a2-content-media-runtime/package-lock.json",
   "apps/backend/n3c-notifications-runtime/package-lock.json",
+  "apps/backend/n4c-booking-runtime/package-lock.json",
   "apps/backend/infra/terraform/bootstrap/dev/.terraform.lock.hcl",
   "pubspec.lock",
 ]);
@@ -126,7 +128,7 @@ export function toolchainAt(root, sha) {
   };
 }
 
-/** Stages the three Functions codebases with inert placeholders; .env is not in the digest. */
+/** Stages the four Functions codebases with inert placeholders; .env is not in the digest. */
 export function codebaseDigests(functionsRoot) {
   const dir = mkdtempSync(path.join(tmpdir(), "recharge-rc-"));
   const uid = "rcplaceholderuid0000000000";
@@ -136,6 +138,7 @@ export function codebaseDigests(functionsRoot) {
       ["n2c-identity", stageIdentity, { appId: "1:420479958348:android:0" }],
       ["n3a2-content-media", stageContentMedia, { allowedUids: [uid] }],
       ["n3c-notifications", stageNotifications, { allowedUids: [uid] }],
+      ["n4c-booking", stageBooking, { allowedUids: [uid] }],
     ]) {
       const manifest = stage({
         outDir: path.join(dir, name),

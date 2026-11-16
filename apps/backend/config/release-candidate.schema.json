@@ -100,12 +100,14 @@
         "n2c-identity",
         "n3a2-content-media",
         "n3c-notifications",
+        "n4c-booking",
         "media-tools"
       ],
       "properties": {
         "n2c-identity": { "$ref": "#/$defs/codebase" },
         "n3a2-content-media": { "$ref": "#/$defs/codebase" },
         "n3c-notifications": { "$ref": "#/$defs/codebase" },
+        "n4c-booking": { "$ref": "#/$defs/codebase" },
         "media-tools": {
           "type": "object",
           "additionalProperties": false,
