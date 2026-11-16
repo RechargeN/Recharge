@@ -24,8 +24,13 @@ import '../discover_runtime_defaults.dart';
 import '../state/discover_feed_state.dart';
 import '../../domain/repositories/timezone_repository.dart';
 import '../../../../shared/primitives/time/utc_instant.dart';
+import '../../../../shared/primitives/time/local_date.dart';
 
 enum TimeFitRelaxation { widenWindow, skipReturnTrip, removeTimeFilter }
+
+enum DiscoverDatePreset { today, tonight, tomorrow, weekend }
+
+enum DiscoverDateSurface { search, results }
 
 class DiscoverFeedController extends ChangeNotifier {
   DiscoverFeedController({
@@ -57,6 +62,116 @@ class DiscoverFeedController extends ChangeNotifier {
 
   String get marketTimezoneId => _runtimeDefaults.timezoneId;
   CurrencyCode get marketCurrency => _runtimeDefaults.currency;
+
+  LocalDate calendarDate(DateTime instantUtc, {String? timezoneId}) {
+    final zone = timezoneId ?? marketTimezoneId;
+    final repository = _calendarRepository(zone);
+    try {
+      return repository.toLocal(UtcInstant(instantUtc).value, zone).date;
+    } on ArgumentError {
+      throw const TimeWindowValidationException('Invalid calendar instant');
+    } on FormatException {
+      throw const TimeWindowValidationException('Unsupported calendar date');
+    }
+  }
+
+  TimezoneRepository _calendarRepository(String zone) {
+    final repository = _timezoneRepository;
+    if (repository == null || !repository.isValidTimezone(zone)) {
+      throw const TimeWindowValidationException(
+        'Search timezone is unavailable',
+      );
+    }
+    return repository;
+  }
+
+  DateTime _calendarBoundary(LocalDate date, int minute, {required bool end}) {
+    final resolution = _calendarRepository(marketTimezoneId).resolveLocal(
+      date: date,
+      minutesSinceMidnight: minute,
+      timezoneId: marketTimezoneId,
+      policy: end ? LocalBoundaryPolicy.userEnd : LocalBoundaryPolicy.userStart,
+    );
+    if (!resolution.isValid || resolution.instantUtc == null) {
+      throw const TimeWindowValidationException(
+        'Selected local time does not exist',
+      );
+    }
+    return UtcInstant(resolution.instantUtc!).value;
+  }
+
+  ({DateTime from, DateTime to}) _calendarInterval(DateTime from, DateTime to) {
+    if (!from.isBefore(to)) {
+      throw const TimeWindowValidationException('End must be after start');
+    }
+    return (from: from, to: to);
+  }
+
+  /// Calendar picks use the configured market zone, never the device zone.
+  ({DateTime from, DateTime to}) calendarRange(
+    LocalDate first,
+    LocalDate last,
+  ) {
+    if (first.compareTo(last) > 0) {
+      throw const TimeWindowValidationException(
+        'End date must not precede start',
+      );
+    }
+    return _calendarInterval(
+      _calendarBoundary(first, 0, end: false),
+      _calendarBoundary(last, 1439, end: true).add(const Duration(seconds: 59)),
+    );
+  }
+
+  /// Search and Results retain their distinct existing endpoint policies.
+  ({DateTime from, DateTime to}) datePreset(
+    DiscoverDatePreset preset, {
+    DiscoverDateSurface surface = DiscoverDateSurface.search,
+    DateTime? nowUtc,
+  }) {
+    final now = nowUtc ?? DateTime.now().toUtc();
+    final today = calendarDate(now);
+    try {
+      switch (preset) {
+        case DiscoverDatePreset.tomorrow:
+          final date = today.addDays(1);
+          return calendarRange(date, date);
+        case DiscoverDatePreset.weekend:
+          final saturday = today.addDays(
+            (DateTime.saturday - today.weekday) % 7,
+          );
+          return calendarRange(saturday, saturday.addDays(1));
+        case DiscoverDatePreset.today:
+          if (surface == DiscoverDateSurface.results) {
+            return _calendarInterval(
+              _calendarBoundary(today, 0, end: false),
+              _calendarBoundary(today.addDays(1), 0, end: true),
+            );
+          }
+          return _calendarInterval(
+            now,
+            _calendarBoundary(
+              today,
+              1439,
+              end: true,
+            ).add(const Duration(seconds: 59)),
+          );
+        case DiscoverDatePreset.tonight:
+          final start = _calendarBoundary(today, 1080, end: false);
+          final end = _calendarBoundary(today, 1439, end: true).add(
+            Duration(seconds: surface == DiscoverDateSurface.search ? 59 : 0),
+          );
+          if (surface == DiscoverDateSurface.results && now.isAfter(end)) {
+            return _calendarInterval(now, now.add(const Duration(hours: 6)));
+          }
+          return _calendarInterval(now.isAfter(start) ? now : start, end);
+      }
+    } on ArgumentError {
+      throw const TimeWindowValidationException('Unsupported calendar date');
+    } on FormatException {
+      throw const TimeWindowValidationException('Unsupported calendar date');
+    }
+  }
 
   ({String timezoneId, LocalDateTimeValue start, LocalDateTimeValue end})
   timeEditorValues({TimeWindow? window, DateTime? nowUtc}) {

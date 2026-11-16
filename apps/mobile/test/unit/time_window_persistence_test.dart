@@ -4,6 +4,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/data/datasources/discover_preferences_local_datasource.dart';
 import 'package:recharge/features/discover/data/models/discover_query_model.dart';
+import 'package:recharge/features/discover/data/models/saved_search_model.dart';
+import 'package:recharge/features/discover/data/models/smart_search_history_model.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/saved_search_entity.dart';
@@ -65,6 +67,183 @@ void main() {
     createdAtUtc: DateTime.utc(2026),
   );
   setUp(() => FlutterSecureStorage.setMockInitialValues({}));
+
+  final invalidInstants = <Object>[
+    '',
+    '2026-01-01T10:00:00',
+    '2026-01-01T10:00:00+00:00',
+    '2026-02-30T10:00:00Z',
+    '2026-01-01T24:00:00Z',
+    '2026-01-01T00:00:00.1234567Z',
+    123,
+    [],
+    {},
+  ];
+  test(
+    'all query instant fields reject ambiguous legacy reads and local writes',
+    () {
+      for (final field in ['date_from', 'date_to', 'applied_at_utc']) {
+        for (final invalid in invalidInstants) {
+          expect(
+            () => read({field: invalid}),
+            throwsFormatException,
+            reason: '$field: $invalid',
+          );
+        }
+        expect(read({field: null}), isA<DiscoverQuery>());
+      }
+      for (final value in [
+        query().copyWith(dateFrom: DateTime(2026)),
+        query().copyWith(dateTo: DateTime(2026)),
+        query().copyWith(appliedAtUtc: DateTime(2026)),
+      ]) {
+        expect(() => DiscoverQueryModel.toMap(value), throwsArgumentError);
+      }
+      expect(
+        () => SavedSearchModel.toMap(
+          SavedSearchEntity(
+            id: 's',
+            title: 's',
+            subtitle: 's',
+            query: query(),
+            createdAtUtc: DateTime(2026),
+          ),
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => SmartSearchHistoryModel.toMap(
+          SmartSearchHistoryEntity(
+            id: 's',
+            prompt: 's',
+            query: query(),
+            createdAtUtc: DateTime(2026),
+          ),
+        ),
+        throwsArgumentError,
+      );
+    },
+  );
+
+  test(
+    'corrupt query and history timestamps block mutations without rewriting',
+    () async {
+      for (final invalid in invalidInstants) {
+        for (final field in ['date_from', 'date_to', 'applied_at_utc']) {
+          final raw = jsonEncode({field: invalid});
+          final nested = jsonEncode([
+            {
+              'id': 'bad',
+              'query': {field: invalid},
+            },
+          ]);
+          FlutterSecureStorage.setMockInitialValues({
+            'discover.last_query': raw,
+            'discover.saved_searches': nested,
+            'discover.smart_search_history': nested,
+          });
+          await expectLater(source().loadLastQuery(), throwsFormatException);
+          await expectLater(
+            source().saveLastQuery(query()),
+            throwsFormatException,
+          );
+          await expectLater(
+            source().deleteSavedSearch('bad'),
+            throwsFormatException,
+          );
+          await expectLater(
+            source().saveSavedSearch(saved()),
+            throwsFormatException,
+          );
+          await expectLater(
+            source().deleteSmartSearchPrompt('bad'),
+            throwsFormatException,
+          );
+          await expectLater(
+            source().saveSmartSearchPrompt(recent()),
+            throwsFormatException,
+          );
+          expect(await storage.read(key: 'discover.last_query'), raw);
+          expect(await storage.read(key: 'discover.saved_searches'), nested);
+          expect(
+            await storage.read(key: 'discover.smart_search_history'),
+            nested,
+          );
+        }
+        final nested = jsonEncode([
+          {'id': 'bad', 'created_at_utc': invalid},
+        ]);
+        FlutterSecureStorage.setMockInitialValues({
+          'discover.saved_searches': nested,
+          'discover.smart_search_history': nested,
+        });
+        await expectLater(source().loadSavedSearches(), throwsFormatException);
+        await expectLater(
+          source().loadSmartSearchHistory(),
+          throwsFormatException,
+        );
+        await expectLater(
+          source().deleteSavedSearch('bad'),
+          throwsFormatException,
+        );
+        await expectLater(
+          source().saveSavedSearch(saved()),
+          throwsFormatException,
+        );
+        await expectLater(
+          source().deleteSmartSearchPrompt('bad'),
+          throwsFormatException,
+        );
+        await expectLater(
+          source().saveSmartSearchPrompt(recent()),
+          throwsFormatException,
+        );
+        expect(await storage.read(key: 'discover.saved_searches'), nested);
+        expect(
+          await storage.read(key: 'discover.smart_search_history'),
+          nested,
+        );
+      }
+    },
+  );
+
+  test(
+    'legacy UTC query and creation metadata retain precision and original bytes',
+    () async {
+      const instant = '2026-01-01T00:00:00.123456Z';
+      final map = {
+        'date_from': instant,
+        'date_to': instant,
+        'applied_at_utc': instant,
+      };
+      final raw = jsonEncode(map);
+      final nested = jsonEncode([
+        {'id': 'old', 'prompt': 'old', 'query': map, 'created_at_utc': instant},
+      ]);
+      FlutterSecureStorage.setMockInitialValues({
+        'discover.last_query': raw,
+        'discover.saved_searches': nested,
+        'discover.smart_search_history': nested,
+      });
+      final restored = await source().loadLastQuery();
+      final savedValue = (await source().loadSavedSearches()).single;
+      final recentValue = (await source().loadSmartSearchHistory()).single;
+      for (final value in [restored!, savedValue.query, recentValue.query]) {
+        final encoded = DiscoverQueryModel.toMap(value);
+        for (final field in map.keys) {
+          expect(encoded[field], instant);
+        }
+      }
+      expect(SavedSearchModel.toMap(savedValue)['created_at_utc'], instant);
+      expect(
+        SmartSearchHistoryModel.toMap(recentValue)['created_at_utc'],
+        instant,
+      );
+      expect(await storage.read(key: 'discover.last_query'), raw);
+      expect(await storage.read(key: 'discover.saved_searches'), nested);
+      expect(await storage.read(key: 'discover.smart_search_history'), nested);
+    },
+  );
 
   test(
     'domain rejects local instants and malformed zones in release paths',

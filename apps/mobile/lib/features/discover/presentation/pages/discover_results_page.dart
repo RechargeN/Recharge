@@ -21,6 +21,7 @@ import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../application/state/scenario_intake_selection_state.dart';
 import '../../domain/entities/discover_query.dart';
+import '../../domain/usecases/build_time_window_usecase.dart';
 import '../../application/state/discover_feed_state.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/saved_search_entity.dart';
@@ -198,7 +199,11 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
           const SizedBox(height: 10),
           _ScenarioRow(
             onFreeToday: () {
-              final _DateWindow today = _todayWindow();
+              final today = _selectDatePreset(
+                controller,
+                DiscoverDatePreset.today,
+              );
+              if (today == null) return;
               _searchController.clear();
               controller.applySearchConditions(
                 queryText: '',
@@ -208,10 +213,16 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
                 clearBudgetMax: true,
                 dateFrom: today.from,
                 dateTo: today.to,
+                clearTimeWindow: true,
+                clearTravelContext: true,
               );
             },
             onTonight: () {
-              final _DateWindow tonight = _tonightWindow();
+              final tonight = _selectDatePreset(
+                controller,
+                DiscoverDatePreset.tonight,
+              );
+              if (tonight == null) return;
               _searchController.text = 'music';
               controller.applySearchConditions(
                 queryText: 'music',
@@ -221,6 +232,8 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
                 clearBudgetMax: true,
                 dateFrom: tonight.from,
                 dateTo: tonight.to,
+                clearTimeWindow: true,
+                clearTravelContext: true,
               );
             },
             onUnderTen: () {
@@ -236,6 +249,8 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
                     .value!,
                 clearDateFrom: true,
                 clearDateTo: true,
+                clearTimeWindow: true,
+                clearTravelContext: true,
               );
             },
             onOutdoor: () {
@@ -318,13 +333,23 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
                 clearBudgetMax: value == null,
               );
             },
+            dateController: controller,
             onDateSelected: (_DateFilter filter) {
               final _DateWindow? window = switch (filter) {
                 _DateFilter.any => null,
-                _DateFilter.today => _todayWindow(),
-                _DateFilter.tonight => _tonightWindow(),
+                _DateFilter.today => _selectDatePreset(
+                  controller,
+                  DiscoverDatePreset.today,
+                ),
+                _DateFilter.tonight => _selectDatePreset(
+                  controller,
+                  DiscoverDatePreset.tonight,
+                ),
               };
+              if (filter != _DateFilter.any && window == null) return;
               controller.applySearchConditions(
+                clearTimeWindow: true,
+                clearTravelContext: true,
                 dateFrom: window?.from,
                 clearDateFrom: window == null,
                 dateTo: window?.to,
@@ -407,6 +432,24 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
       sourceAction: 'add_to_scenario',
       originRoute: RouteNames.search,
     );
+  }
+
+  _DateWindow? _selectDatePreset(
+    DiscoverFeedController controller,
+    DiscoverDatePreset preset,
+  ) {
+    try {
+      final window = controller.datePreset(
+        preset,
+        surface: DiscoverDateSurface.results,
+      );
+      return _DateWindow(from: window.from, to: window.to);
+    } on TimeWindowValidationException catch (error) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+      return null;
+    }
   }
 
   Future<void> _openScenarioIntake(List<DiscoverItemEntity> items) async {
@@ -1091,6 +1134,7 @@ class _ConditionPanel extends StatelessWidget {
     required this.onBudgetSelected,
     required this.currency,
     required this.onDateSelected,
+    required this.dateController,
     required this.onRadiusSelected,
   });
 
@@ -1099,6 +1143,7 @@ class _ConditionPanel extends StatelessWidget {
   final ValueChanged<Money?> onBudgetSelected;
   final CurrencyCode currency;
   final ValueChanged<_DateFilter> onDateSelected;
+  final DiscoverFeedController dateController;
   final ValueChanged<_RadiusFilter> onRadiusSelected;
 
   @override
@@ -1148,12 +1193,20 @@ class _ConditionPanel extends StatelessWidget {
                 ),
                 ChoiceChip(
                   label: Text(context.l10n.discoverToday),
-                  selected: _matchesWindow(query, _todayWindow()),
+                  selected: _matchesPreset(
+                    query,
+                    dateController,
+                    DiscoverDatePreset.today,
+                  ),
                   onSelected: (_) => onDateSelected(_DateFilter.today),
                 ),
                 ChoiceChip(
                   label: Text(context.l10n.discoverTonight),
-                  selected: _matchesWindow(query, _tonightWindow()),
+                  selected: _matchesPreset(
+                    query,
+                    dateController,
+                    DiscoverDatePreset.tonight,
+                  ),
                   onSelected: (_) => onDateSelected(_DateFilter.tonight),
                 ),
               ],
@@ -1560,24 +1613,18 @@ enum _RadiusFilter {
   final bool unlimited;
 }
 
-_DateWindow _todayWindow() {
-  final DateTime now = DateTime.now();
-  final DateTime start = DateTime(now.year, now.month, now.day);
-  return _DateWindow(from: start, to: start.add(const Duration(days: 1)));
-}
-
-_DateWindow _tonightWindow() {
-  final DateTime now = DateTime.now();
-  final DateTime start = DateTime(now.year, now.month, now.day, 18);
-  final DateTime end = DateTime(now.year, now.month, now.day, 23, 59);
-  if (now.isAfter(end)) {
-    return _DateWindow(from: now, to: now.add(const Duration(hours: 6)));
+bool _matchesPreset(
+  DiscoverQuery query,
+  DiscoverFeedController controller,
+  DiscoverDatePreset preset,
+) {
+  try {
+    final window = controller.datePreset(
+      preset,
+      surface: DiscoverDateSurface.results,
+    );
+    return query.dateFrom == window.from && query.dateTo == window.to;
+  } on TimeWindowValidationException {
+    return false;
   }
-  final DateTime from = now.isAfter(start) ? now : start;
-  return _DateWindow(from: from, to: end);
-}
-
-bool _matchesWindow(DiscoverQuery query, _DateWindow window) {
-  return query.dateFrom?.toLocal().isAtSameMomentAs(window.from) == true &&
-      query.dateTo?.toLocal().isAtSameMomentAs(window.to) == true;
 }

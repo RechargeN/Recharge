@@ -23,8 +23,12 @@ class DiscoverQueryModel {
       'query_text': value.queryText,
       'selected_category_ids': value.selectedCategoryIds,
       'selected_subcategory_ids': value.selectedSubcategoryIds,
-      'date_from': value.dateFrom?.toIso8601String(),
-      'date_to': value.dateTo?.toIso8601String(),
+      'date_from': value.dateFrom == null
+          ? null
+          : UtcInstant(value.dateFrom!).toString(),
+      'date_to': value.dateTo == null
+          ? null
+          : UtcInstant(value.dateTo!).toString(),
       'people_count': value.peopleCount,
       'available_duration_minutes': value.availableDurationMinutes,
       'mood': value.mood,
@@ -44,7 +48,7 @@ class DiscoverQueryModel {
       'search_area_dirty': value.searchAreaDirty,
       'source_screen': value.sourceScreen,
       'query_version': 2,
-      'applied_at_utc': value.appliedAtUtc.toIso8601String(),
+      'applied_at_utc': UtcInstant(value.appliedAtUtc).toString(),
       'time_window': value.timeWindow == null
           ? null
           : _timeWindowToMap(value.timeWindow!, timezoneRepository),
@@ -210,8 +214,11 @@ class DiscoverQueryModel {
   }
 }
 
-DateTime? _dateOrNull(Object? value) =>
-    value is String && value.isNotEmpty ? DateTime.parse(value).toUtc() : null;
+DateTime? _dateOrNull(Object? value) {
+  if (value == null) return null;
+  if (value is! String) throw const FormatException('Invalid UTC timestamp');
+  return UtcInstant.parse(value).value;
+}
 
 Map<String, Object?>? _mapOrNull(Object? value) =>
     value is Map<dynamic, dynamic>

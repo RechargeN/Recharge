@@ -20,6 +20,7 @@ import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/time_window.dart';
 import '../../domain/usecases/build_time_window_usecase.dart';
 import '../discover_formats.dart';
+import '../../../../shared/primitives/time/local_date.dart';
 
 abstract final class _SearchLandingStyle {
   static const Color ink = Color(0xFF10231F);
@@ -161,6 +162,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           const SizedBox(height: 8),
           _SearchConditionChips(
             query: query,
+            controller: controller,
             onDate: () => _openDatePicker(controller, query),
             onPeople: () => _openPeoplePicker(controller, query),
             onBudget: () => _openBudgetPicker(controller, query),
@@ -169,10 +171,13 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           const SizedBox(height: 12),
           _QuickSearchActions(
             onNearNow: () {
-              final _DateWindow today = _todayWindow();
+              final today = _preset(controller, DiscoverDatePreset.today);
+              if (today == null) return;
               controller.stageSearchConditions(
                 dateFrom: today.from,
                 dateTo: today.to,
+                clearTimeWindow: true,
+                clearTravelContext: true,
                 radiusMeters: 2000,
                 unlimitedRadius: false,
               );
@@ -190,11 +195,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             onOneHour: () =>
                 controller.stageSearchConditions(availableDurationMinutes: 60),
             onCalmEvening: () {
-              final _DateWindow tonight = _tonightWindow();
+              final tonight = _preset(controller, DiscoverDatePreset.tonight);
+              if (tonight == null) return;
               controller.stageSearchConditions(
                 mood: 'calm',
                 dateFrom: tonight.from,
                 dateTo: tonight.to,
+                clearTimeWindow: true,
+                clearTravelContext: true,
               );
             },
           ),
@@ -227,6 +235,21 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     );
   }
 
+  _DateWindow? _preset(
+    DiscoverFeedController controller,
+    DiscoverDatePreset preset,
+  ) {
+    try {
+      final bounds = controller.datePreset(preset);
+      return _DateWindow(bounds.from, bounds.to);
+    } on TimeWindowValidationException catch (error) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+      return null;
+    }
+  }
+
   void _openResults(DiscoverFeedController controller) {
     FocusScope.of(context).unfocus();
     controller.stageSearchConditions(queryText: _searchController.text);
@@ -243,7 +266,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           useSafeArea: true,
           useRootNavigator: true,
           backgroundColor: Colors.transparent,
-          builder: (BuildContext context) => _QuickDateSheet(query: query),
+          builder: (BuildContext context) =>
+              _QuickDateSheet(query: query, controller: controller),
         );
     if (selection == null) return;
     controller.stageSearchConditions(
@@ -355,6 +379,29 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           ),
         );
     if (selection == null) return;
+    DateTime? dateFrom = query.dateFrom;
+    DateTime? dateTo = query.dateTo;
+    try {
+      if (selection.dateChoice == 'any') {
+        dateFrom = null;
+        dateTo = null;
+      } else if (selection.dateChoice != 'preserve') {
+        final dates = controller.datePreset(
+          selection.dateChoice == 'today'
+              ? DiscoverDatePreset.today
+              : DiscoverDatePreset.tonight,
+        );
+        dateFrom = dates.from;
+        dateTo = dates.to;
+      }
+    } on TimeWindowValidationException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
+      }
+      return;
+    }
     if (selection.timeWindowMode == null) {
       controller.clearTimeWindowSelection(clearLegacyDates: false);
     } else {
@@ -400,10 +447,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               currencyCode: controller.marketCurrencyCode,
             ),
       clearBudgetMax: selection.budgetMax == null,
-      dateFrom: activeWindow?.startAtUtc ?? selection.dateWindow?.from,
-      clearDateFrom: activeWindow == null && selection.dateWindow == null,
-      dateTo: activeWindow?.endAtUtc ?? selection.dateWindow?.to,
-      clearDateTo: activeWindow == null && selection.dateWindow == null,
+      dateFrom: activeWindow?.startAtUtc ?? dateFrom,
+      clearDateFrom: activeWindow == null && dateFrom == null,
+      dateTo: activeWindow?.endAtUtc ?? dateTo,
+      clearDateTo: activeWindow == null && dateTo == null,
       radiusMeters: selection.radiusMeters,
       unlimitedRadius: selection.unlimitedRadius,
       openNow: selection.openNow,
@@ -453,6 +500,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 class _SearchConditionChips extends StatelessWidget {
   const _SearchConditionChips({
     required this.query,
+    required this.controller,
     required this.onDate,
     required this.onPeople,
     required this.onBudget,
@@ -460,6 +508,7 @@ class _SearchConditionChips extends StatelessWidget {
   });
 
   final DiscoverQuery query;
+  final DiscoverFeedController controller;
   final VoidCallback onDate;
   final VoidCallback onPeople;
   final VoidCallback onBudget;
@@ -482,7 +531,7 @@ class _SearchConditionChips extends StatelessWidget {
       _SearchConditionChip(
         key: const Key('search-date-chip'),
         icon: Icons.calendar_today_outlined,
-        label: _dateLabel(context.l10n, query),
+        label: _dateLabel(context.l10n, query, controller),
         onTap: onDate,
       ),
       _SearchConditionChip(
@@ -606,84 +655,94 @@ class _QuickRadiusSelection {
 }
 
 class _QuickDateSheet extends StatelessWidget {
-  const _QuickDateSheet({required this.query});
-
+  const _QuickDateSheet({required this.query, required this.controller});
   final DiscoverQuery query;
+  final DiscoverFeedController controller;
 
-  @override
-  Widget build(BuildContext context) {
-    final _DateWindow today = _todayWindow();
-    final _DateWindow tomorrow = _tomorrowWindow();
-    final _DateWindow weekend = _weekendWindow();
-    return _QuickPickerSurface(
-      key: const Key('search-date-sheet'),
-      title: context.l10n.discoverChooseDate,
-      onReset: () => Navigator.of(context).pop(const _QuickDateSelection(null)),
-      child: _FilterPillWrap(
-        children: <Widget>[
-          _FilterPill(
-            label: context.l10n.discoverAnyDate,
-            selected: query.dateFrom == null && query.dateTo == null,
-            onTap: () =>
-                Navigator.of(context).pop(const _QuickDateSelection(null)),
-          ),
-          _FilterPill(
-            key: const Key('quick-date-today'),
-            label: context.l10n.discoverToday,
-            selected: _sameLocalDay(query.dateFrom, today.from),
-            onTap: () => Navigator.of(context).pop(_QuickDateSelection(today)),
-          ),
-          _FilterPill(
-            key: const Key('quick-date-tomorrow'),
-            label: context.l10n.discoverTomorrow,
-            selected: _sameLocalDay(query.dateFrom, tomorrow.from),
-            onTap: () =>
-                Navigator.of(context).pop(_QuickDateSelection(tomorrow)),
-          ),
-          _FilterPill(
-            key: const Key('quick-date-weekend'),
-            label: context.l10n.discoverThisWeekend,
-            selected:
-                _sameLocalDay(query.dateFrom, weekend.from) &&
-                _sameLocalDay(query.dateTo, weekend.to),
-            onTap: () =>
-                Navigator.of(context).pop(_QuickDateSelection(weekend)),
-          ),
-          _FilterPill(
-            key: const Key('quick-date-custom'),
-            label: context.l10n.discoverChooseDates,
-            selected: false,
-            onTap: () => _pickCustomRange(context),
-          ),
-        ],
-      ),
-    );
+  bool _selected(DiscoverDatePreset preset) {
+    try {
+      final window = controller.datePreset(preset);
+      return _sameCalendarDay(query.dateFrom, window.from, controller) &&
+          _sameCalendarDay(query.dateTo, window.to, controller);
+    } on TimeWindowValidationException {
+      return false;
+    }
   }
 
+  void _select(BuildContext context, DiscoverDatePreset preset) {
+    try {
+      final window = controller.datePreset(preset);
+      Navigator.of(
+        context,
+      ).pop(_QuickDateSelection(_DateWindow(window.from, window.to)));
+    } on TimeWindowValidationException catch (error) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => _QuickPickerSurface(
+    key: const Key('search-date-sheet'),
+    title: 'Choose date',
+    onReset: () => Navigator.of(context).pop(const _QuickDateSelection(null)),
+    child: _FilterPillWrap(
+      children: <Widget>[
+        _FilterPill(
+          label: 'Any date',
+          selected: query.dateFrom == null && query.dateTo == null,
+          onTap: () =>
+              Navigator.of(context).pop(const _QuickDateSelection(null)),
+        ),
+        for (final option in [
+          (DiscoverDatePreset.today, 'Today', 'today'),
+          (DiscoverDatePreset.tomorrow, 'Tomorrow', 'tomorrow'),
+          (DiscoverDatePreset.weekend, 'This weekend', 'weekend'),
+        ])
+          _FilterPill(
+            key: Key('quick-date-${option.$3}'),
+            label: option.$2,
+            selected: _selected(option.$1),
+            onTap: () => _select(context, option.$1),
+          ),
+        _FilterPill(
+          key: const Key('quick-date-custom'),
+          label: 'Choose dates',
+          selected: false,
+          onTap: () => _pickCustomRange(context),
+        ),
+      ],
+    ),
+  );
+
   Future<void> _pickCustomRange(BuildContext context) async {
-    final DateTime now = DateTime.now();
-    final DateTime firstDate = DateTime(now.year, now.month, now.day);
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: firstDate,
-      lastDate: firstDate.add(const Duration(days: 730)),
-      helpText: context.l10n.discoverChooseSearchDates,
-    );
-    if (picked == null || !context.mounted) return;
-    final DateTime from = DateTime(
-      picked.start.year,
-      picked.start.month,
-      picked.start.day,
-    );
-    final DateTime to = DateTime(
-      picked.end.year,
-      picked.end.month,
-      picked.end.day,
-      23,
-      59,
-      59,
-    );
-    Navigator.of(context).pop(_QuickDateSelection(_DateWindow(from, to)));
+    try {
+      final first = controller.calendarDate(DateTime.now().toUtc());
+      final last = first.addDays(730);
+      // Flutter receives calendar-component carriers, never persisted instants.
+      final DateTimeRange? picked = await showDateRangePicker(
+        context: context,
+        currentDate: DateTime.utc(first.year, first.month, first.day),
+        firstDate: DateTime.utc(first.year, first.month, first.day),
+        lastDate: DateTime.utc(last.year, last.month, last.day),
+        helpText: context.l10n.discoverChooseSearchDates,
+      );
+      if (picked == null || !context.mounted) return;
+      final window = controller.calendarRange(
+        LocalDate(picked.start.year, picked.start.month, picked.start.day),
+        LocalDate(picked.end.year, picked.end.month, picked.end.day),
+      );
+      Navigator.of(
+        context,
+      ).pop(_QuickDateSelection(_DateWindow(window.from, window.to)));
+    } on TimeWindowValidationException catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.discoverTimeWindowIssue(error.issue.name))));
+      }
+    }
   }
 }
 
@@ -1538,7 +1597,10 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
   late bool _onlyAvailable = widget.query.onlyAvailable;
   late int? _duration = widget.query.availableDurationMinutes;
   late String? _mood = widget.query.mood;
-  late String _date = _dateChoice(widget.query);
+  late String _date =
+      widget.query.dateFrom == null && widget.query.dateTo == null
+      ? 'any'
+      : 'preserve';
   late TimeWindowMode? _timeWindowMode = widget.query.timeWindow?.mode;
   late String _timezoneId = widget.initialTime.timezoneId;
   late LocalDateTimeValue _startLocal = widget.initialTime.start;
@@ -1596,7 +1658,10 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                           _FilterPill(
                             label: option.$2,
                             selected: _date == option.$1,
-                            onTap: () => setState(() => _date = option.$1),
+                            onTap: () => setState(() {
+                              _date = option.$1;
+                              _timeWindowMode = null;
+                            }),
                           ),
                       ],
                     ),
@@ -1803,6 +1868,7 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
     final String date = switch (_date) {
       'today' => context.l10n.discoverToday,
       'tonight' => context.l10n.discoverTonight,
+      'preserve' => context.l10n.discoverChooseDates,
       _ => context.l10n.discoverAnyDate,
     };
     final String duration = _duration == null
@@ -1924,15 +1990,10 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
   );
 
   _SearchFilterSelection get _selection {
-    final _DateWindow? window = switch (_date) {
-      'today' => _todayWindow(),
-      'tonight' => _tonightWindow(),
-      _ => null,
-    };
     return _SearchFilterSelection(
       peopleCount: _peopleCount,
       budgetMax: _budgetMax,
-      dateWindow: window,
+      dateChoice: _date,
       radiusMeters: _radiusMeters,
       unlimitedRadius: _unlimited,
       openNow: _openNow,
@@ -3081,7 +3142,7 @@ class _SearchFilterSelection {
   const _SearchFilterSelection({
     required this.peopleCount,
     required this.budgetMax,
-    required this.dateWindow,
+    required this.dateChoice,
     required this.radiusMeters,
     required this.unlimitedRadius,
     required this.openNow,
@@ -3099,7 +3160,7 @@ class _SearchFilterSelection {
   });
   final int? peopleCount;
   final Money? budgetMax;
-  final _DateWindow? dateWindow;
+  final String dateChoice;
   final double radiusMeters;
   final bool unlimitedRadius;
   final bool openNow;
@@ -3141,82 +3202,44 @@ String _formatLocalDate(AppLocalizations l10n, DateTime value) {
   return today ? l10n.discoverTodayDate(date) : date;
 }
 
-_DateWindow _todayWindow() {
-  final DateTime now = DateTime.now();
-  return _DateWindow(now, DateTime(now.year, now.month, now.day, 23, 59, 59));
-}
-
-_DateWindow _tomorrowWindow() {
-  final DateTime now = DateTime.now();
-  final DateTime tomorrow = DateTime(
-    now.year,
-    now.month,
-    now.day,
-  ).add(const Duration(days: 1));
-  return _DateWindow(
-    tomorrow,
-    DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 23, 59, 59),
-  );
-}
-
-_DateWindow _weekendWindow() {
-  final DateTime now = DateTime.now();
-  final DateTime today = DateTime(now.year, now.month, now.day);
-  final int daysUntilSaturday = (DateTime.saturday - today.weekday) % 7;
-  final DateTime saturday = today.add(Duration(days: daysUntilSaturday));
-  final DateTime sunday = saturday.add(const Duration(days: 1));
-  return _DateWindow(
-    saturday,
-    DateTime(sunday.year, sunday.month, sunday.day, 23, 59, 59),
-  );
-}
-
-_DateWindow _tonightWindow() {
-  final DateTime now = DateTime.now();
-  final DateTime from = DateTime(now.year, now.month, now.day, 18);
-  return _DateWindow(
-    now.isAfter(from) ? now : from,
-    DateTime(now.year, now.month, now.day, 23, 59, 59),
-  );
-}
-
-String _dateLabel(AppLocalizations l10n, DiscoverQuery query) {
-  if (query.dateFrom == null && query.dateTo == null) {
-    return l10n.discoverAnyDate;
+String _dateLabel(AppLocalizations l10n, DiscoverQuery query, DiscoverFeedController controller) {
+  if (query.dateFrom == null && query.dateTo == null) return l10n.discoverAnyDate;
+  try {
+    final zone = query.timeWindow?.timezoneId;
+    final today = controller.calendarDate(
+      DateTime.now().toUtc(),
+      timezoneId: zone,
+    );
+    final from = query.dateFrom == null
+        ? null
+        : controller.calendarDate(query.dateFrom!, timezoneId: zone);
+    final to = query.dateTo == null
+        ? null
+        : controller.calendarDate(query.dateTo!, timezoneId: zone);
+    if (from == null) return 'Until ${_numericDate(to!)}';
+    if (to == null) return 'From ${_numericDate(from)}';
+    if (from == to && from == today) return l10n.discoverToday;
+    if (from == to && from == today.addDays(1)) return l10n.discoverTomorrow;
+    return from == to
+        ? _numericDate(from)
+        : '${_numericDate(from)}–${_numericDate(to)}';
+  } on TimeWindowValidationException {
+    return 'Date unavailable';
   }
-  final DateTime now = DateTime.now();
-  final DateTime? from = query.dateFrom?.toLocal();
-  final DateTime? to = query.dateTo?.toLocal();
-  if (_sameLocalDay(from, now)) {
-    return l10n.discoverToday;
-  }
-  if (_sameLocalDay(from, now.add(const Duration(days: 1)))) {
-    return l10n.discoverTomorrow;
-  }
-  if (from == null) return l10n.discoverDateSet;
-  final String fromLabel = _numericDate(from);
-  if (to == null || _sameLocalDay(from, to)) return fromLabel;
-  return '$fromLabel–${_numericDate(to)}';
 }
 
-bool _sameLocalDay(DateTime? first, DateTime? second) {
+bool _sameCalendarDay(
+  DateTime? first,
+  DateTime? second,
+  DiscoverFeedController controller,
+) {
   if (first == null || second == null) return false;
-  final DateTime firstLocal = first.toLocal();
-  final DateTime secondLocal = second.toLocal();
-  return firstLocal.year == secondLocal.year &&
-      firstLocal.month == secondLocal.month &&
-      firstLocal.day == secondLocal.day;
+  return controller.calendarDate(first) == controller.calendarDate(second);
 }
 
-String _numericDate(DateTime value) =>
+String _numericDate(LocalDate value) =>
     '${value.day.toString().padLeft(2, '0')}.'
     '${value.month.toString().padLeft(2, '0')}';
-
-String _dateChoice(DiscoverQuery query) {
-  if (query.dateFrom == null && query.dateTo == null) return 'any';
-  final int hour = query.dateFrom?.toLocal().hour ?? 0;
-  return hour >= 17 ? 'tonight' : 'today';
-}
 
 IconData _recentIcon(SavedSearchEntity search) {
   final String value = '${search.title} ${search.subtitle}'.toLowerCase();

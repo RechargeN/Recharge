@@ -740,3 +740,36 @@ time-editor widget are not claimed migrated here: C2a4 owns active date flows;
 M2-D owns unused compatibility removal after reference proof. C2b and C3–C5
 remain open. Checkpoint gate logs are separate evidence, not R1/device/Emulator/
 cloud or production acceptance.
+
+## 21. M2-C2a4 active calendar filters and UTC metadata — 2026-11-17
+
+C2a3 on `92c2fa7` passed complete Windows/Linux suites with 1433 tests and
+analyzer/boundary/diff gates. C2a4 moves the active Search/Results calendar
+shortcuts to the existing DiscoverFeedController and TimezoneRepository.
+LocalDate carries picker calendar components; each boundary resolves independently
+in the configured market zone with existing user-start/user-end DST policies.
+An existing TimeWindow retains its own zone for display and editing.
+
+Search Today starts now and ends at 23:59:59; Results Today spans local midnight
+to next local midnight, including 23/25-hour days. Tonight keeps each surface's
+existing endpoint and Results' six-hour late fallback. Tomorrow/weekend/custom
+ranges end at the final local 23:59:59. Invalid/unknown-zone/empty intervals fail
+visibly before query mutation; no device-zone or implicit market fallback exists.
+
+Explicit date presets clear the old coupled window/travel fields. Unrelated
+filter apply retains custom and one-sided UTC bounds exactly. Active labels use
+the explicit zone; Flutter picker dates are component carriers, never converted
+from host-local time into stored instants. The unused legacy time-editor widget
+remains for M2-D reference-proven removal.
+
+Existing DiscoverQuery/SavedSearch/SmartSearchHistory mappers now validate
+date bounds, appliedAtUtc and createdAtUtc through shared UtcInstant. Valid
+legacy Z records retain precision and are not rewritten on read; malformed,
+zone-less, offset or non-string timestamps block existing storage mutations
+without discarding raw records. Optional null/missing compatibility is retained.
+No new parser, mapper, storage key, schema, controller or sync path is added.
+
+Behavioral and complete host/CI gates are recorded in checkpoint evidence;
+incomplete runs do not close this checkpoint. C2b Event/Session, C3–C5 and M2-D/E
+remain open, separately reviewable work. No device, Emulator, cloud runtime,
+production grants, R1 acceptance or Accepted promotion is implied.
