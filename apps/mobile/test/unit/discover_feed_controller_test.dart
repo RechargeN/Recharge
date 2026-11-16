@@ -58,6 +58,149 @@ void main() {
     );
   });
 
+  test(
+    'calendar presets resolve both boundaries across 23 and 25 hour days',
+    () {
+      for (final (now, hours) in [
+        (DateTime.utc(2026, 3, 29, 10), 23),
+        (DateTime.utc(2026, 10, 25, 10), 25),
+      ]) {
+        final results = controller.datePreset(
+          DiscoverDatePreset.today,
+          surface: DiscoverDateSurface.results,
+          nowUtc: now,
+        );
+        expect(results.to.difference(results.from), Duration(hours: hours));
+        expect(results.from.isUtc && results.to.isUtc, isTrue);
+        final date = controller.calendarDate(now);
+        final custom = controller.calendarRange(date, date);
+        expect(custom.from, results.from);
+        expect(custom.to, results.to.subtract(const Duration(seconds: 1)));
+        final search = controller.datePreset(
+          DiscoverDatePreset.today,
+          nowUtc: now,
+        );
+        expect(search.from, now);
+        expect(search.to, custom.to);
+      }
+    },
+  );
+
+  test('calendar shortcuts preserve local rollover and surface policies', () {
+    final now = DateTime.utc(2026, 12, 31, 21, 30); // Riga 23:30.
+    final tomorrow = controller.datePreset(
+      DiscoverDatePreset.tomorrow,
+      nowUtc: now,
+    );
+    expect(tomorrow.from, DateTime.utc(2026, 12, 31, 22));
+    expect(tomorrow.to, DateTime.utc(2027, 1, 1, 21, 59, 59));
+    final weekend = controller.datePreset(
+      DiscoverDatePreset.weekend,
+      nowUtc: now,
+    );
+    expect(weekend.from, DateTime.utc(2027, 1, 1, 22));
+    expect(weekend.to, DateTime.utc(2027, 1, 3, 21, 59, 59));
+    final search = controller.datePreset(
+      DiscoverDatePreset.tonight,
+      nowUtc: now,
+    );
+    final results = controller.datePreset(
+      DiscoverDatePreset.tonight,
+      surface: DiscoverDateSurface.results,
+      nowUtc: now,
+    );
+    expect(search.from, now);
+    expect(results.from, now);
+    expect(search.to, results.to.add(const Duration(seconds: 59)));
+    final early = controller.datePreset(
+      DiscoverDatePreset.tonight,
+      nowUtc: DateTime.utc(2026, 12, 31, 10),
+    );
+    expect(early.from, DateTime.utc(2026, 12, 31, 16));
+    final late = DateTime.utc(2026, 12, 31, 21, 59, 30);
+    final fallback = controller.datePreset(
+      DiscoverDatePreset.tonight,
+      surface: DiscoverDateSurface.results,
+      nowUtc: late,
+    );
+    expect(fallback.from, late);
+    expect(fallback.to, late.add(const Duration(hours: 6)));
+  });
+
+  test('invalid calendar operations do not change query or window', () {
+    final before = controller.state.draftQuery;
+    final invalid = throwsA(isA<TimeWindowValidationException>());
+    expect(
+      () => controller.datePreset(
+        DiscoverDatePreset.today,
+        nowUtc: DateTime(2026),
+      ),
+      invalid,
+    );
+    expect(
+      () => controller.datePreset(
+        DiscoverDatePreset.today,
+        nowUtc: DateTime.utc(2026, 12, 31, 21, 59, 59),
+      ),
+      invalid,
+    );
+    expect(
+      () => controller.calendarRange(
+        LocalDate(2026, 2, 2),
+        LocalDate(2026, 2, 1),
+      ),
+      invalid,
+    );
+    expect(
+      () => controller.calendarDate(
+        DateTime.utc(2026),
+        timezoneId: 'Unknown/Nowhere',
+      ),
+      invalid,
+    );
+    expect(controller.state.draftQuery, same(before));
+  });
+
+  test(
+    'calendar uses explicit zone across date line and rejects skipped day',
+    () {
+      DiscoverFeedController withZone(String zone) => DiscoverFeedController(
+        getDiscoverFeedUseCase: GetDiscoverFeedUseCase(repository),
+        discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
+        analyticsService: _NoopAnalyticsService(),
+        timezoneRepository: TimezoneRepositoryImpl(),
+        runtimeDefaults: DiscoverRuntimeDefaults(
+          timezoneId: zone,
+          originLat: 1,
+          originLng: 2,
+          currency: CurrencyCode.eur,
+        ),
+      );
+      final honolulu = withZone('Pacific/Honolulu');
+      final now = DateTime.utc(2026, 1, 1, 5);
+      expect(honolulu.calendarDate(now), LocalDate(2025, 12, 31));
+      final tomorrow = honolulu.datePreset(
+        DiscoverDatePreset.tomorrow,
+        nowUtc: now,
+      );
+      expect(tomorrow.from, DateTime.utc(2026, 1, 1, 10));
+      expect(tomorrow.to, DateTime.utc(2026, 1, 2, 9, 59, 59));
+      final apia = withZone('Pacific/Apia');
+      expect(
+        () => apia.calendarRange(
+          LocalDate(2011, 12, 30),
+          LocalDate(2011, 12, 30),
+        ),
+        throwsA(isA<TimeWindowValidationException>()),
+      );
+      final unknown = withZone('Unknown/Nowhere');
+      expect(
+        () => unknown.datePreset(DiscoverDatePreset.today, nowUtc: now),
+        throwsA(isA<TimeWindowValidationException>()),
+      );
+    },
+  );
+
   test('loadFeed success -> ready state with items', () async {
     await controller.loadFeed();
 

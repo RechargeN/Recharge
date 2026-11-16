@@ -38,6 +38,163 @@ import 'package:recharge/features/discover/domain/entities/time_window.dart';
 import 'package:recharge/shared/primitives/geo/geo_point.dart';
 
 void main() {
+  DiscoverFeedController calendarController(
+    DiscoverQuery initial, {
+    String zone = 'Europe/Riga',
+  }) {
+    final zones = TimezoneRepositoryImpl();
+    return DiscoverFeedController(
+      getDiscoverFeedUseCase: GetDiscoverFeedUseCase(_FakeDiscoverRepository()),
+      discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
+      analyticsService: _NoopAnalyticsService(),
+      timezoneRepository: zones,
+      buildTimeWindow: BuildTimeWindowUseCase(zones),
+      initialQuery: initial,
+      runtimeDefaults: DiscoverRuntimeDefaults(
+        timezoneId: zone,
+        originLat: 1,
+        originLng: 2,
+        currency: CurrencyCode.eur,
+      ),
+    );
+  }
+
+  fullPageTestWidgets(
+    'unrelated filter apply preserves custom and one-sided UTC dates',
+    (tester) async {
+      for (final (from, to) in [
+        (
+          DateTime.utc(2027, 1, 3, 5, 7, 1, 123, 456),
+          DateTime.utc(2027, 1, 5, 9),
+        ),
+        (DateTime.utc(2027, 1, 3, 18), null),
+        (null, DateTime.utc(2027, 1, 5, 9)),
+      ]) {
+        final controller = calendarController(
+          DiscoverQuery.defaults().copyWith(dateFrom: from, dateTo: to),
+        );
+        await tester.pumpWidget(_SearchLandingTestApp(controller: controller));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('regular-search-filters')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('filter-apply-button')));
+        await tester.pumpAndSettle();
+        expect(controller.state.draftQuery.dateFrom, from);
+        expect(controller.state.draftQuery.dateTo, to);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpAndSettle();
+      }
+    },
+  );
+
+  fullPageTestWidgets(
+    'calendar preset clears coupled time filter and uses market zone',
+    (tester) async {
+      final window = TimeWindow(
+        startAtUtc: DateTime.utc(2027, 1, 1, 5),
+        endAtUtc: DateTime.utc(2027, 1, 1, 6),
+        resolvedAtUtc: DateTime.utc(2026),
+        timezoneId: 'Pacific/Honolulu',
+        mode: TimeWindowMode.exact,
+        flexibilityMinutes: 0,
+      );
+      final controller = calendarController(
+        DiscoverQuery.defaults().copyWith(
+          timeWindow: window,
+          dateFrom: window.startAtUtc,
+          dateTo: window.endAtUtc,
+          travelContext: TravelContext(
+            originType: TravelOriginType.currentLocation,
+            origin: const GeoPoint(latitude: 1, longitude: 2),
+            transportMode: TransportMode.walking,
+            includeReturnTrip: false,
+          ),
+        ),
+      );
+      await tester.pumpWidget(_SearchLandingTestApp(controller: controller));
+      await tester.pumpAndSettle();
+      // Both instants fall on Dec 31 in the stored window's zone, not Jan 1.
+      expect(find.text('31.12'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('search-date-chip')));
+      await tester.pumpAndSettle();
+      final expected = controller.datePreset(DiscoverDatePreset.tomorrow);
+      await tester.tap(find.byKey(const Key('quick-date-tomorrow')));
+      await tester.pumpAndSettle();
+      final query = controller.state.draftQuery;
+      expect(query.dateFrom, expected.from);
+      expect(query.dateTo, expected.to);
+      expect(query.timeWindow, isNull);
+      expect(query.travelContext, isNull);
+      expect(find.text('Tomorrow'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  fullPageTestWidgets(
+    'unavailable calendar zone reports error and retains dates',
+    (tester) async {
+      final initial = DiscoverQuery.defaults().copyWith(
+        dateFrom: DateTime.utc(2027),
+      );
+      final controller = calendarController(initial, zone: 'Unknown/Nowhere');
+      await tester.pumpWidget(_SearchLandingTestApp(controller: controller));
+      await tester.pumpAndSettle();
+      expect(find.text('Date unavailable'), findsOneWidget);
+      final before = controller.state.draftQuery;
+      await tester.tap(find.byKey(const Key('search-date-chip')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('quick-date-tomorrow')));
+      await tester.pumpAndSettle();
+      expect(find.text('Search timezone is unavailable'), findsOneWidget);
+      expect(controller.state.draftQuery, same(before));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  fullPageTestWidgets(
+    'results calendar action replaces the coupled window in explicit zone',
+    (tester) async {
+      final window = TimeWindow(
+        startAtUtc: DateTime.utc(2027),
+        endAtUtc: DateTime.utc(2027, 1, 2),
+        resolvedAtUtc: DateTime.utc(2026),
+        timezoneId: 'Europe/Riga',
+        mode: TimeWindowMode.exact,
+        flexibilityMinutes: 0,
+      );
+      final controller = calendarController(
+        DiscoverQuery.defaults().copyWith(
+          timeWindow: window,
+          dateFrom: window.startAtUtc,
+          dateTo: window.endAtUtc,
+          travelContext: TravelContext(
+            originType: TravelOriginType.currentLocation,
+            origin: const GeoPoint(latitude: 1, longitude: 2),
+            transportMode: TransportMode.walking,
+            includeReturnTrip: false,
+          ),
+        ),
+        zone: 'Pacific/Honolulu',
+      );
+      await tester.pumpWidget(_SearchTestApp(controller: controller));
+      await tester.pumpAndSettle();
+      final expected = controller.datePreset(
+        DiscoverDatePreset.today,
+        surface: DiscoverDateSurface.results,
+      );
+      await tester.tap(find.widgetWithText(ActionChip, 'Free today'));
+      await tester.pumpAndSettle();
+      final query = controller.state.appliedQuery;
+      expect(query.dateFrom, expected.from);
+      expect(query.dateTo, expected.to);
+      expect(query.freeOnly, isTrue);
+      expect(query.timeWindow, isNull);
+      expect(query.travelContext, isNull);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   fullPageTestWidgets(
     'filter editor preserves selected zone and precise unchanged window',
     (tester) async {

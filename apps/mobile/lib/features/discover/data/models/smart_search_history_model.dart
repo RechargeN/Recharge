@@ -1,5 +1,6 @@
 import '../../domain/entities/smart_search_history_entity.dart';
 import 'discover_query_model.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 import '../../domain/repositories/timezone_repository.dart';
 
 /// The single local record mapper; domain values do not own storage shapes.
@@ -15,7 +16,7 @@ class SmartSearchHistoryModel {
         value.query,
         timezoneRepository: timezoneRepository,
       ),
-      'created_at_utc': value.createdAtUtc.toIso8601String(),
+      'created_at_utc': UtcInstant(value.createdAtUtc).toString(),
     };
   }
 
@@ -39,6 +40,10 @@ class SmartSearchHistoryModel {
       queryMap = const <String, Object?>{};
     }
 
+    final created = map['created_at_utc'];
+    if (created != null && created is! String) {
+      throw const FormatException('Invalid created_at_utc');
+    }
     return SmartSearchHistoryEntity(
       id: (map['id'] as String?) ?? 'smart_legacy',
       prompt: (map['prompt'] as String?) ?? '',
@@ -50,9 +55,9 @@ class SmartSearchHistoryModel {
         legacyCurrencyCode: legacyCurrencyCode,
         timezoneRepository: timezoneRepository,
       ),
-      createdAtUtc: map['created_at_utc'] == null
+      createdAtUtc: created == null
           ? DateTime.now().toUtc()
-          : DateTime.parse(map['created_at_utc']! as String).toUtc(),
+          : UtcInstant.parse(created as String).value,
     );
   }
 }
