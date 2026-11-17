@@ -773,3 +773,29 @@ Behavioral and complete host/CI gates are recorded in checkpoint evidence;
 incomplete runs do not close this checkpoint. C2b Event/Session, C3–C5 and M2-D/E
 remain open, separately reviewable work. No device, Emulator, cloud runtime,
 production grants, R1 acceptance or Accepted promotion is implied.
+
+## 22. M2-C2b1 Event calendar boundary — 2026-11-17
+
+C2a4 `b01f169` passed complete Windows/Linux suites with 1444 tests,
+analyzer/boundary/diff gates. C2b1 makes shared LocalDate the owner of strict
+calendar parsing, nullable parsing, day arithmetic and day differences in Event.
+The former private type name remains a forwarding typedef until M2-D; no
+duplicate parser/arithmetic or new materializer is introduced.
+
+Event recurrence retains the existing UTC 548-day projection cutoff, ordering,
+deduplication, occurrence IDs, interval/count/until rules and monthly policies.
+Invalid exception/until/multi-date values fail instead of normalizing or silently
+dropping a bound. Projection-clock input must be UTC. Calendar overflow is
+contained by the existing coordinator, which keeps the entered draft date and
+does not manufacture a normalized occurrence.
+
+The existing EventTimezoneRepositoryImpl validates shared LocalDate and
+IanaTimeZone plus minute bounds before TZDB resolution. Event gap shift/reject
+and overlap earlier/later policies remain feature-owned; Session still uses
+its own reject/skip policy through the same port. Focused checks cover both
+consumers. No storage schema, read-time rewrite, Booking/lifecycle or production
+authority change is included.
+
+Complete gate results are recorded in checkpoint evidence. Session local-day
+projection, remaining Event/Session persisted UTC fields, Scenario/transit,
+Visit, MarketConfig and final M2-D/E cleanup/gates remain separate work.

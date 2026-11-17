@@ -34,6 +34,14 @@ class LocalDate implements Comparable<LocalDate> {
     );
   }
 
+  static LocalDate? tryParse(String value) {
+    try {
+      return LocalDate.parse(value);
+    } on FormatException {
+      return null;
+    }
+  }
+
   // DateTime is only an internal Gregorian calculator. This is not an instant
   // representing midnight in the calendar date's (unspecified) timezone.
   DateTime get _calendar => DateTime.utc(year, month, day);
@@ -41,6 +49,10 @@ class LocalDate implements Comparable<LocalDate> {
   static final _lastDay = DateTime.utc(9999, 12, 31).difference(_epoch).inDays;
 
   int get weekday => _calendar.weekday;
+
+  /// Difference between calendar dates, independent of timezone/DST.
+  int daysSince(LocalDate other) =>
+      _calendar.difference(other._calendar).inDays;
 
   LocalDate addDays(int days) {
     final dayNumber = _calendar.difference(_epoch).inDays;

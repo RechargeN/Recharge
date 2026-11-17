@@ -7,6 +7,48 @@ import 'package:recharge/features/create/domain/usecases/validate_event_draft_us
 void main() {
   const ValidateEventDraftUseCase validate = ValidateEventDraftUseCase();
 
+  test('all Event date fields share strict Gregorian validation', () {
+    final base = CreateDraftEntity.defaults(
+      organizerId: 'user-1',
+      organizerEmail: 'user@example.com',
+      organizerName: 'Host',
+    );
+    for (final invalid in [
+      '2026-02-29',
+      '1900-02-29',
+      '0000-01-01',
+      '2026-1-01',
+      '2026-01-01\n',
+    ]) {
+      final event = base.eventData!.copyWith(
+        localStartDate: invalid,
+        scheduleMode: EventScheduleMode.recurring,
+        recurrence: EventRecurrenceRuleDraft(
+          frequency: EventRecurrenceFrequency.daily,
+          endMode: EventRecurrenceEndMode.untilDate,
+          untilLocalDate: invalid,
+          exceptionLocalDates: {invalid},
+        ),
+      );
+      final codes = validate(
+        base.copyWith(eventData: event),
+      ).map((issue) => issue.code).toSet();
+      expect(
+        codes,
+        containsAll([
+          'local_start_date_invalid',
+          'recurrence_until_invalid',
+          'recurrence_exception_invalid',
+        ]),
+      );
+    }
+    final valid = base.eventData!.copyWith(localStartDate: '2000-02-29');
+    expect(
+      validate(base.copyWith(eventData: valid)).map((issue) => issue.code),
+      isNot(contains('local_start_date_invalid')),
+    );
+  });
+
   test(
     'physical Event requires confirmed coordinates and accessible media',
     () {

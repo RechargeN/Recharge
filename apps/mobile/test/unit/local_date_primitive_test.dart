@@ -2,6 +2,39 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/shared/primitives/time/local_date.dart';
 
 void main() {
+  test('nullable parse delegates to strict Gregorian parsing', () {
+    expect(LocalDate.tryParse('2024-02-29'), LocalDate(2024, 2, 29));
+    for (final value in [
+      '2026-02-29',
+      '0000-01-01',
+      '2026-1-01',
+      '2026-01-01Z',
+      '',
+    ]) {
+      expect(LocalDate.tryParse(value), isNull);
+    }
+  });
+
+  test(
+    'calendar difference and day addition are inverses across DST and leap years',
+    () {
+      for (final start in [
+        LocalDate(1, 1, 1),
+        LocalDate(1900, 2, 28),
+        LocalDate(2000, 2, 28),
+        LocalDate(2026, 3, 28),
+        LocalDate(2026, 10, 24),
+      ]) {
+        for (final days in [0, 1, 2, 7, 366]) {
+          final end = start.addDays(days);
+          expect(end.daysSince(start), days);
+          expect(start.daysSince(end), -days);
+        }
+      }
+      expect(LocalDate(9999, 12, 31).daysSince(LocalDate(1, 1, 1)), 3652058);
+    },
+  );
+
   test('rejects invalid dates instead of normalizing overflow', () {
     for (final parts in [
       [0, 1, 1],

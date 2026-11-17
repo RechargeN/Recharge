@@ -3,6 +3,8 @@ import 'package:timezone/timezone.dart' as timezone;
 
 import '../../domain/entities/event_draft_data.dart';
 import '../../domain/repositories/event_timezone_repository.dart';
+import '../../../../shared/primitives/time/local_date.dart';
+import '../../../../shared/primitives/time/iana_time_zone.dart';
 
 class EventTimezoneRepositoryImpl implements EventTimezoneRepository {
   EventTimezoneRepositoryImpl() {
@@ -24,9 +26,19 @@ class EventTimezoneRepositoryImpl implements EventTimezoneRepository {
     required EventDstGapPolicy gapPolicy,
     required EventDstOverlapPolicy overlapPolicy,
   }) {
+    try {
+      LocalDate(year, month, day);
+    } on FormatException {
+      throw const EventLocalTimeException('invalid_local_date');
+    }
+    if (minuteOfDay < 0 || minuteOfDay > 1439) {
+      throw const EventLocalTimeException('invalid_local_minute');
+    }
     timezone.Location location;
     try {
-      location = timezone.getLocation(timezoneId);
+      location = timezone.getLocation(IanaTimeZone.parse(timezoneId).value);
+    } on FormatException {
+      throw const EventLocalTimeException('timezone_not_found');
     } on timezone.LocationNotFoundException {
       throw const EventLocalTimeException('timezone_not_found');
     }
