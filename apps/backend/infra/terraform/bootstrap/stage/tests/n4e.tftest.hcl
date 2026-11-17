@@ -9,6 +9,11 @@ mock_provider "google" { alias = "budget" }
 mock_provider "google-beta" {}
 mock_provider "external" {}
 
+# The backup schedule is imported in the real plan; mocks cannot import.
+override_resource {
+  target = google_firestore_backup_schedule.n4e
+}
+
 override_data {
   target = data.external.budget_delivery
   values = { result = { status = "delivered-and-owner-acknowledged" } }
@@ -84,6 +89,30 @@ run "n4e_shape" {
     condition = alltrue([for p in [google_monitoring_alert_policy.n4e_fast_burn[0], google_monitoring_alert_policy.n4e_slow_burn[0], google_monitoring_alert_policy.n4e_server_errors[0]] :
     length(p.notification_channels) == 1])
     error_message = "Every N4e policy notifies the one staging e-mail channel."
+  }
+}
+
+run "n4e_round1_shape" {
+  command = plan
+  variables {
+    n4e_enabled = true
+  }
+  assert {
+    condition = (length(google_monitoring_alert_policy.n4e_budget_spent) == 2
+      && google_monitoring_alert_policy.n4e_budget_spent["50"].conditions[0].condition_threshold[0].threshold_value == 0.5
+      && google_monitoring_alert_policy.n4e_budget_spent["75"].conditions[0].condition_threshold[0].threshold_value == 0.25
+    && length(google_monitoring_alert_policy.n4e_budget_spent["50"].conditions) == 5)
+    error_message = "Two budget-spent policies (50 % and 75 % spent), one condition per SLO."
+  }
+  assert {
+    condition = (length(google_monitoring_alert_policy.n4e_telemetry_absent[0].conditions) == 2
+      && google_monitoring_alert_policy.n4e_telemetry_absent[0].conditions[0].condition_absent[0].duration == "1800s"
+    && length(google_monitoring_alert_policy.n4e_media_tools) == 1)
+    error_message = "Missing telemetry for both probed services (30 min) and the media tools failure alert."
+  }
+  assert {
+    condition     = google_firestore_backup_schedule.n4e["daily"].retention == "604800s"
+    error_message = "The daily backup schedule keeps backups for 7 days."
   }
 }
 

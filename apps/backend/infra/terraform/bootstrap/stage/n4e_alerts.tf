@@ -279,3 +279,109 @@ resource "google_monitoring_alert_policy" "n4e_server_errors" {
     mime_type = "text/markdown"
   }
 }
+
+# ---- N4e round 1 (owner-approved debt plan 2026-11-17) ----
+
+# Error budget consumed: remaining fraction below 50 % and below 25 % (75 % spent).
+resource "google_monitoring_alert_policy" "n4e_budget_spent" {
+  for_each              = local.n4e_on ? { "50" = 0.5, "75" = 0.25 } : {}
+  project               = google_project.stage.project_id
+  display_name          = "stage-slo-budget-${each.key}-percent-spent"
+  combiner              = "OR"
+  enabled               = true
+  severity              = each.key == "75" ? "ERROR" : "WARNING"
+  notification_channels = [google_monitoring_notification_channel.budget_email.name]
+  dynamic "conditions" {
+    for_each = local.n4e_slos
+    content {
+      display_name = "${conditions.key} error budget ${each.key} % spent"
+      condition_threshold {
+        filter          = "select_slo_budget_fraction(\"${google_monitoring_slo.n4e[conditions.key].name}\")"
+        comparison      = "COMPARISON_LT"
+        threshold_value = each.value
+        duration        = "0s"
+      }
+    }
+  }
+  alert_strategy {
+    auto_close = "86400s"
+  }
+  documentation {
+    content   = "Error budget ${each.key} % spent: ${each.key == "75" ? "reliability work only, except approved safety and security fixes" : "no expansion and no risky flags for that journey"}. ${local.n4e_runbook}"
+    mime_type = "text/markdown"
+  }
+}
+
+# Missing telemetry: the probes call these two services every 5 minutes, so no
+# request metric for 30 minutes means the probes or the metric pipeline stopped.
+resource "google_monitoring_alert_policy" "n4e_telemetry_absent" {
+  count                 = local.n4e_on ? 1 : 0
+  project               = google_project.stage.project_id
+  display_name          = "stage-telemetry-absent"
+  combiner              = "OR"
+  enabled               = true
+  severity              = "ERROR"
+  notification_channels = [google_monitoring_notification_channel.budget_email.name]
+  dynamic "conditions" {
+    for_each = toset(["createinternalbookingv1", "readidentitysessionv1"])
+    content {
+      display_name = "no request metric from ${conditions.value} for 30 min"
+      condition_absent {
+        filter   = "metric.type=\"run.googleapis.com/request_count\" AND resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${conditions.value}\""
+        duration = "1800s"
+        aggregations {
+          alignment_period   = "300s"
+          per_series_aligner = "ALIGN_SUM"
+        }
+      }
+    }
+  }
+  alert_strategy {
+    auto_close = "3600s"
+  }
+  documentation {
+    content   = "No telemetry: a monitoring incident, never a green status. ${local.n4e_runbook}"
+    mime_type = "text/markdown"
+  }
+}
+
+# Media scanner/processor failures (database absent, crash): covers quarantined uploads.
+resource "google_monitoring_alert_policy" "n4e_media_tools" {
+  count                 = local.n4e_on ? 1 : 0
+  project               = google_project.stage.project_id
+  display_name          = "stage-media-tools-failure"
+  combiner              = "OR"
+  enabled               = true
+  severity              = "ERROR"
+  notification_channels = [google_monitoring_notification_channel.budget_email.name]
+  conditions {
+    display_name = "media tools request with a failure class"
+    condition_matched_log {
+      filter = "resource.type=\"cloud_run_revision\" AND jsonPayload.kind=\"media-tools-request\" AND jsonPayload.failureClass:*"
+    }
+  }
+  alert_strategy {
+    notification_rate_limit { period = "3600s" }
+    auto_close = "3600s"
+  }
+  documentation {
+    content   = "Scanner or processor failure (no signature database or crash): uploads go to quarantine. Run the mirror job, then retryProcessing. ${local.n4e_runbook}"
+    mime_type = "text/markdown"
+  }
+}
+
+# The daily backup schedule created by the N4d drill (2026-11-16) through the API,
+# now owned by Terraform. Import only: nothing is recreated.
+resource "google_firestore_backup_schedule" "n4e" {
+  for_each  = local.n4e_on ? toset(["daily"]) : toset([])
+  project   = google_project.stage.project_id
+  database  = "(default)"
+  retention = "604800s"
+  daily_recurrence {}
+}
+
+import {
+  for_each = local.n4e_on ? toset(["daily"]) : toset([])
+  to       = google_firestore_backup_schedule.n4e[each.key]
+  id       = "projects/recharge-staging-y9y2y/databases/(default)/backupSchedules/31f345b5-d213-4f8b-9b78-b8a9bd5a6af8"
+}

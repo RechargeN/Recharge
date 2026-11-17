@@ -6,6 +6,7 @@ import {
   inventoryDigest,
   project,
   reviewedCreates,
+  roundOneCreates,
 } from "./check-n4e-plan.mjs";
 
 const channel = `projects/${project}/notificationChannels/123`;
@@ -154,5 +155,53 @@ test("nothing else is created, changed or removed; staging only", () => {
   assert.match(
     checkN4ePlan(p, { ...expected(p), projectId: "recharge-dev-n2a01" }).join(),
     /staging only/u,
+  );
+});
+
+test("round 1: only the four new policies, and the backup schedule imported unchanged", () => {
+  const channelChange = changes()[0];
+  const round = [
+    channelChange,
+    ...roundOneCreates.map((address) =>
+      change(address, "google_monitoring_alert_policy", {
+        project,
+        notification_channels: [channel],
+        enabled: true,
+      }),
+    ),
+    {
+      address: 'google_firestore_backup_schedule.n4e["daily"]',
+      type: "google_firestore_backup_schedule",
+      change: {
+        actions: ["no-op"],
+        importing: { id: "x" },
+        after: { project },
+      },
+    },
+  ];
+  const p = plan(round);
+  assert.deepEqual(checkN4ePlan(p, { ...expected(p), round: 1 }), []);
+  const notImported = plan(
+    round.map((c) =>
+      c.type === "google_firestore_backup_schedule"
+        ? { ...c, change: { ...c.change, importing: undefined } }
+        : c,
+    ),
+  );
+  assert.match(
+    checkN4ePlan(notImported, { ...expected(notImported), round: 1 }).join(),
+    /imported unchanged/u,
+  );
+  const recreated = plan([
+    ...round,
+    change(
+      "google_monitoring_alert_policy.n4e_fast_burn[0]",
+      "google_monitoring_alert_policy",
+      { project, notification_channels: [channel], enabled: true },
+    ),
+  ]);
+  assert.match(
+    checkN4ePlan(recreated, { ...expected(recreated), round: 1 }).join(),
+    /unreviewed create/u,
   );
 });

@@ -27,6 +27,14 @@ export const reviewedCreates = Object.freeze([
   "google_monitoring_alert_policy.n4e_probe[0]",
   "google_monitoring_alert_policy.n4e_server_errors[0]",
 ]);
+/** Round 1 of the debt plan (2026-11-17): applied on top of the first 13. */
+export const roundOneCreates = Object.freeze([
+  'google_monitoring_alert_policy.n4e_budget_spent["50"]',
+  'google_monitoring_alert_policy.n4e_budget_spent["75"]',
+  "google_monitoring_alert_policy.n4e_telemetry_absent[0]",
+  "google_monitoring_alert_policy.n4e_media_tools[0]",
+]);
+const backupSchedule = 'google_firestore_backup_schedule.n4e["daily"]';
 const channelAddress = "google_monitoring_notification_channel.budget_email";
 const host = `europe-west1-${project}.cloudfunctions.net`;
 
@@ -47,6 +55,16 @@ export function checkN4ePlan(plan, expected) {
     channel?.change?.after?.name ?? channel?.change?.before?.name;
   if (!channelName)
     errors.push("existing staging e-mail channel not in the plan");
+  const expectedCreates =
+    expected.round === 1 ? roundOneCreates : reviewedCreates;
+  if (expected.round === 1) {
+    const schedule = changes.find((c) => c.address === backupSchedule);
+    if (
+      !schedule?.change?.importing ||
+      JSON.stringify(schedule.change.actions) !== '["no-op"]'
+    )
+      errors.push("the backup schedule must be imported unchanged");
+  }
   const seen = new Set();
   for (const c of changes) {
     const actions = c.change?.actions ?? [];
@@ -57,7 +75,7 @@ export function checkN4ePlan(plan, expected) {
     )
       errors.push(`forbidden action ${actions.join("+")}: ${c.address}`);
     if (actions[0] !== "create") continue;
-    if (!reviewedCreates.includes(c.address)) {
+    if (!expectedCreates.includes(c.address)) {
       errors.push(`unreviewed create: ${c.address}`);
       continue;
     }
@@ -98,7 +116,7 @@ export function checkN4ePlan(plan, expected) {
     )
       errors.push("server-error alert must watch Cloud Run logs only");
   }
-  for (const address of reviewedCreates)
+  for (const address of expectedCreates)
     if (!seen.has(address)) errors.push(`reviewed create missing: ${address}`);
   return errors;
 }
