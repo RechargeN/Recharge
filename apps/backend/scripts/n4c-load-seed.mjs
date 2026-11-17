@@ -96,7 +96,92 @@ export function syntheticEvent(runId, name, totalCapacity, now) {
   };
 }
 
+/**
+ * The app's Booking test fixture (`seeded_event_fixture.dart`) as a Booking
+ * projection, so the default-off test entry of a dev/stage debug build books
+ * against the cloud. Same ids, revision, pool and channel as the app.
+ */
+export function appFixtureEvent(now) {
+  const start = "2035-06-01T16:00:00.000Z";
+  return {
+    schemaVersion: 1,
+    eventId: "evt_01JSTANDEVENTRIGAOPEN001",
+    occurrenceId: "occ_01JSTANDOCCURRENCE000001",
+    marketId: "LV",
+    publisherRef: { type: "page", id: "page_stand_studio_fixture" },
+    materialRevision: 1,
+    occurrenceStartsAt: start,
+    occurrenceEndsAt: "2035-06-01T19:00:00.000Z",
+    lifecycle: "published",
+    bookingEnabled: true,
+    registrationMode: "internal",
+    pricingMode: "free",
+    paymentCollectionMode: "none",
+    confirmationMode: "instant",
+    inventoryAuthority: "internal",
+    inventoryShape: "general",
+    capacityMode: "finite",
+    totalCapacity: 20,
+    poolId: "pool_general",
+    channel: "onsite",
+    registrationWindow: {
+      opensAt: new Date(now.getTime() - 86_400_000).toISOString(),
+      closesAt: "2035-05-31T00:00:00.000Z",
+    },
+    cancellationDeadline: "2035-05-31T00:00:00.000Z",
+    guestPolicy: { mode: "partyWithoutNames", maximumParticipantUnits: 21 },
+    eligibilityMode: "open",
+  };
+}
+
+async function fixture(project) {
+  if (
+    !["recharge-dev-n2a01", stagingProject].includes(project) ||
+    process.env.GCLOUD_PROJECT !== project ||
+    process.env.FIRESTORE_EMULATOR_HOST !== undefined
+  )
+    throw new Error(
+      "dev or staging only: GCLOUD_PROJECT must name the project",
+    );
+  const backend = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "..",
+  );
+  const lib = (rel) =>
+    import(pathToFileURL(path.join(backend, "functions", "lib", rel)).href);
+  const require = createRequire(
+    path.join(backend, "functions", "package.json"),
+  );
+  const { initializeApp, applicationDefault } = require("firebase-admin/app");
+  const { getFirestore } = require("firebase-admin/firestore");
+  const { consumeEventForBookingProjection } = await lib(
+    "src/booking/event_projection_consumer.js",
+  );
+  const firestore = getFirestore(
+    initializeApp(
+      { projectId: project, credential: applicationDefault() },
+      "n4c-fixture",
+    ),
+  );
+  const now = new Date();
+  const event = appFixtureEvent(now);
+  const result = await consumeEventForBookingProjection(firestore, {
+    kind: "EventRevisionPublished",
+    eventId: event.eventId,
+    occurrenceId: event.occurrenceId,
+    publicationRevision: 1,
+    materialRevision: 1,
+    occurredAt: now.toISOString(),
+    projection: event,
+  });
+  process.stdout.write(`fixture ${project}: ${result.kind}
+`);
+  if (result.kind !== "applied" && result.kind !== "ignoredDuplicate")
+    throw new Error(`fixture projection: ${result.kind}`);
+}
+
 async function main() {
+  if (process.argv[2] === "--fixture") return fixture(process.argv[3]);
   const [runId, actorsArg, poolRoundsArg, outFile] = process.argv.slice(2);
   const actors = Number(actorsArg);
   const poolRounds = Number(poolRoundsArg);
