@@ -72,6 +72,7 @@ export function renderEnv({
   runtimeEnabled,
   allowedUids,
   load,
+  createDisabled = false,
   projectId: target = projectId,
   projectNumber,
 }) {
@@ -85,8 +86,11 @@ export function renderEnv({
   )
     throw new Error("exact owner Firebase uid allowlist required");
   const settings = checkedLoad(target, load);
+  if (typeof createDisabled !== "boolean")
+    throw new Error("createDisabled must be boolean");
   return [
     `N4C_BOOKING_ENABLED=${runtimeEnabled}`,
+    `N4C_BOOKING_CREATE_DISABLE=${createDisabled}`,
     `N4C_ALLOWED_FIREBASE_UIDS=${allowedUids.join(",")}`,
     `N4C_LOAD_ENABLED=${settings.enabled}`,
     `N4C_LOAD_MAX_INSTANCES=${settings.maxInstances}`,
@@ -101,6 +105,7 @@ export function stageRuntime({
   runtimeEnabled,
   allowedUids,
   load,
+  createDisabled = false,
   projectId: target = projectId,
   projectNumber,
   functionsRoot = path.join(backend, "functions"),
@@ -127,6 +132,7 @@ export function stageRuntime({
     runtimeEnabled,
     allowedUids,
     load: settings,
+    createDisabled,
     projectId: target,
     projectNumber: number,
   });
@@ -162,6 +168,7 @@ export function stageRuntime({
     runtimeEnabled,
     allowedUids,
     load: settings,
+    createDisabled,
     codeTreeSha256: codeTreeDigest(outDir),
     treeSha256: digest.sha256,
     files: digest.files,
@@ -200,6 +207,7 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
       runtimeEnabled: manifest.runtimeEnabled,
       allowedUids: manifest.allowedUids,
       load: manifest.load,
+      createDisabled: manifest.createDisabled,
       projectId: manifest.projectId,
       projectNumber: manifest.projectNumber,
     });
@@ -240,6 +248,7 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
     loadEnabled: manifest.load?.enabled,
     loadMaxInstances: manifest.load?.maxInstances,
     loadConcurrency: manifest.load?.concurrency,
+    createDisabled: manifest.createDisabled,
     automaticDeletion: false,
   };
   for (const [key, value] of Object.entries(expected))
@@ -269,16 +278,24 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
       process.exitCode = 1;
     } else process.stdout.write("N4c stage verified\n");
   } else {
-    const [outDir, enabled, uids, loadEnabled, maxInstances, concurrency] =
-      args;
+    const [
+      outDir,
+      enabled,
+      uids,
+      loadEnabled,
+      maxInstances,
+      concurrency,
+      createDisabled,
+    ] = args;
     if (
       !outDir ||
       !["true", "false"].includes(enabled) ||
       !uids ||
-      ![undefined, "true", "false"].includes(loadEnabled)
+      ![undefined, "true", "false"].includes(loadEnabled) ||
+      ![undefined, "true", "false"].includes(createDisabled)
     ) {
       process.stderr.write(
-        "usage: node package-n4c-booking-runtime.mjs <stageDir> <true|false> <uid[,uid]> [<loadEnabled> <maxInstances> <concurrency>] | --verify <stageDir>\n",
+        "usage: node package-n4c-booking-runtime.mjs <stageDir> <true|false> <uid[,uid]> [<loadEnabled> <maxInstances> <concurrency> [<createDisabled>]] | --verify <stageDir>\n",
       );
       process.exitCode = 1;
     } else {
@@ -295,10 +312,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
                 concurrency: Number(concurrency),
               },
             }),
+        createDisabled: createDisabled === "true",
         ...cliTarget(process.env),
       });
       process.stdout.write(
-        `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled}, load=${manifest.load.enabled})\n`,
+        `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled}, load=${manifest.load.enabled}, createDisabled=${manifest.createDisabled})\n`,
       );
     }
   }

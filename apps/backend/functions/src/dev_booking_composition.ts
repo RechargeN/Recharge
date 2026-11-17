@@ -76,17 +76,19 @@ const interactiveFlags: ReadonlySet<string> = new Set([
 
 /**
  * Deploy-switch flags: the four interactive Booking capabilities are on while
- * the runtime is open; an incident switch closes every command and query at
- * once. Workers and anything unknown stay off.
+ * the runtime is open. The one containment switch is the cost kill switch of
+ * `backend-cost-response.md`: it stops NEW Booking creation only. Cancel,
+ * reconfirm and reads are never contained, so a user can always release a
+ * place. Workers and anything unknown stay off.
  */
 export class DeploySwitchBookingFlags {
-  constructor(private readonly incidentDisabled: boolean) {}
+  constructor(private readonly createDisabled: boolean) {}
 
   isEnabled(capabilityId: string, transaction?: Transaction): Promise<boolean> {
     void transaction;
-    if ((Object.values(abuseEmergencySwitchIds) as string[]).includes(capabilityId))
-      return Promise.resolve(this.incidentDisabled);
-    return Promise.resolve(!this.incidentDisabled && interactiveFlags.has(capabilityId));
+    if (capabilityId === abuseEmergencySwitchIds.bookingCreate)
+      return Promise.resolve(this.createDisabled);
+    return Promise.resolve(interactiveFlags.has(capabilityId));
   }
 }
 
@@ -98,12 +100,12 @@ export interface DevBookingComposition {
 
 export function createDevBookingComposition(
   firestore: Firestore,
-  incidentDisabled = false,
+  createDisabled = false,
 ): DevBookingComposition {
   return Object.freeze({
     accessAuthority: new FirestoreBookingAccessAuthority(firestore),
     abuseRateLimiter: new FirestoreAbuseRateLimiter(firestore),
-    featureFlags: new DeploySwitchBookingFlags(incidentDisabled),
+    featureFlags: new DeploySwitchBookingFlags(createDisabled),
   });
 }
 

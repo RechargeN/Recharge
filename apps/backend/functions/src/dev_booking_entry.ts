@@ -120,8 +120,9 @@ export function loadRequestAllowed(callable: DevBookingCallable, actor: unknown,
   return typeof occurrenceId === 'string' && occurrenceId.startsWith(loadOccurrencePrefix);
 }
 
-function incidentDisabled(environment: NodeJS.ProcessEnv): boolean {
-  return environment.N4C_BOOKING_INCIDENT_DISABLE === 'true';
+/** The cost kill switch: stops new Booking creation; cancel and reads stay open. */
+export function bookingCreateDisabled(environment: NodeJS.ProcessEnv): boolean {
+  return environment.N4C_BOOKING_CREATE_DISABLE === 'true';
 }
 
 async function dispatch(callable: DevBookingCallable, request: Request, response: Response) {
@@ -163,7 +164,7 @@ async function dispatch(callable: DevBookingCallable, request: Request, response
       data: body.data,
       firestore,
       projectId,
-      composition: createDevBookingComposition(firestore, incidentDisabled(process.env)),
+      composition: createDevBookingComposition(firestore, bookingCreateDisabled(process.env)),
       ...(request.ip === undefined ? {} : { ip: request.ip }),
     });
     info('dev_booking_result', { callable, kind: result.kind });
@@ -236,7 +237,7 @@ export const bookingLoadV1 = onRequest(
         data: body.data,
         firestore,
         projectId,
-        composition: createDevBookingComposition(firestore, incidentDisabled(process.env)),
+        composition: createDevBookingComposition(firestore, bookingCreateDisabled(process.env)),
       });
       response.status(200).json({ result });
     } catch (error) {

@@ -7,6 +7,7 @@ import {
   isDevBookingCallable,
 } from '../../src/dev_booking_composition.js';
 import {
+  bookingCreateDisabled,
   devBookingLoadOpen,
   devBookingOpen,
   loadRequestAllowed,
@@ -120,7 +121,7 @@ void test('a load request is a synthetic actor on a synthetic occurrence', () =>
     );
 });
 
-void test('deploy-switch flags: interactive Booking on, workers off, one incident switch', async () => {
+void test('deploy-switch flags: interactive Booking on, workers off, kill switch stops creation only', async () => {
   const open = new DeploySwitchBookingFlags(false);
   for (const id of [
     bookingFlagIds.create,
@@ -137,6 +138,17 @@ void test('deploy-switch flags: interactive Booking on, workers off, one inciden
   ])
     assert.equal(await open.isEnabled(id), false, id);
   const contained = new DeploySwitchBookingFlags(true);
-  assert.equal(await contained.isEnabled(bookingFlagIds.create), false);
   assert.equal(await contained.isEnabled(abuseEmergencySwitchIds.bookingCreate), true);
+  // Cancel, reconfirm and reads are never contained (backend-cost-response.md).
+  for (const id of [
+    abuseEmergencySwitchIds.bookingCancel,
+    abuseEmergencySwitchIds.bookingReconfirm,
+    abuseEmergencySwitchIds.bookingQuery,
+  ])
+    assert.equal(await contained.isEnabled(id), false, id);
+  for (const id of [bookingFlagIds.cancel, bookingFlagIds.reconfirm, bookingFlagIds.read])
+    assert.equal(await contained.isEnabled(id), true, id);
+  assert.equal(bookingCreateDisabled({ N4C_BOOKING_CREATE_DISABLE: 'true' }), true);
+  assert.equal(bookingCreateDisabled({ N4C_BOOKING_CREATE_DISABLE: 'TRUE' }), false);
+  assert.equal(bookingCreateDisabled({}), false);
 });

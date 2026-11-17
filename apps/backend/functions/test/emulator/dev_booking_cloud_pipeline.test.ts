@@ -48,7 +48,7 @@ function call(
   callable: DevBookingCallable,
   uid: string,
   data: Record<string, unknown>,
-  incidentDisabled = false,
+  createDisabled = false,
 ) {
   const full = { ...data, sessionContext: bookingSessionContextFor(uid) };
   return handleDevBooking({
@@ -58,7 +58,7 @@ function call(
     data: full,
     firestore,
     projectId: project,
-    composition: createDevBookingComposition(firestore, incidentDisabled),
+    composition: createDevBookingComposition(firestore, createDisabled),
   });
 }
 
@@ -77,6 +77,25 @@ function create(uid: string, suffix: string) {
       namedGuests: [],
     },
   });
+}
+
+function killSwitchCreate(uid: string) {
+  const data = {
+    schemaVersion: 1,
+    commandType: 'createBooking',
+    requestId: 'req_create_contained',
+    idempotencyKey: 'idem_create_contained',
+    occurredAgainstEventRevision: event.materialRevision,
+    payload: {
+      occurrenceId: event.occurrenceId,
+      inventoryPoolId: event.poolId,
+      channel: 'onsite',
+      participantUnits: 1,
+      namedGuests: [],
+    },
+    sessionContext: bookingSessionContextFor(uid),
+  };
+  return { data, rawBody: Buffer.from(JSON.stringify({ data }), 'utf8') };
 }
 
 void test('create, replay, read, cancel and sold-out through the cloud composition', async () => {
@@ -130,7 +149,7 @@ void test('create, replay, read, cancel and sold-out through the cloud compositi
   assert.equal((await create('n4cload0003', 'd')).kind, 'succeeded');
 });
 
-void test('a foreign Session, the incident switch and a wrong flow are refused', async () => {
+void test('a foreign Session and a wrong flow are refused; the kill switch stops creation only', async () => {
   const data = {
     schemaVersion: 1,
     queryType: 'listMyBookings',
@@ -153,9 +172,37 @@ void test('a foreign Session, the incident switch and a wrong flow are refused',
   });
   assert.equal(refused.kind, 'rejected', JSON.stringify(refused));
 
-  const contained = await call('listMyBookingsV1', 'n4cload0001', data, true);
-  assert.equal(contained.kind, 'rejected', JSON.stringify(contained));
-  assert.equal((contained.error as { code: string }).code, 'feature_disabled');
+  // Kill switch on: reads still answer, a new Booking is refused, an existing one can be cancelled.
+  const stillListed = await call('listMyBookingsV1', 'n4cload0001', data, true);
+  assert.equal(stillListed.kind, 'succeeded', JSON.stringify(stillListed));
+  const refusedCreate = await handleDevBooking({
+    callable: 'createInternalBookingV1',
+    firebaseUid: 'n4cload0002',
+    ...killSwitchCreate('n4cload0002'),
+    firestore,
+    projectId: project,
+    composition: createDevBookingComposition(firestore, true),
+  });
+  assert.equal(refusedCreate.kind, 'rejected', JSON.stringify(refusedCreate));
+  assert.equal((refusedCreate.error as { code: string }).code, 'feature_disabled');
+  const page = (listed.page as { items: { id: string; revision: number; state: string }[] }).items;
+  const active = page.find((item) => item.state !== 'cancelled');
+  if (active !== undefined) {
+    const cancelled = await call(
+      'cancelInternalBookingV1',
+      'n4cload0001',
+      {
+        schemaVersion: 1,
+        commandType: 'cancelBooking',
+        requestId: 'req_cancel_contained',
+        idempotencyKey: 'idem_cancel_contained',
+        expectedBookingRevision: active.revision,
+        payload: { bookingId: active.id, reasonCode: 'user_request' },
+      },
+      true,
+    );
+    assert.equal(cancelled.kind, 'succeeded', JSON.stringify(cancelled));
+  }
 
   const wrongFlow = await call('getMyBookingV1', 'n4cload0001', data);
   assert.equal(wrongFlow.kind, 'unsupportedContract', JSON.stringify(wrongFlow));

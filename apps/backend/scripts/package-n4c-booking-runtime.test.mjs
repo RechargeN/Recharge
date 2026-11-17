@@ -18,7 +18,7 @@ const number = "30205452447";
 test("env: switch, exact owner allowlist, load run closed by default", () => {
   assert.equal(
     renderEnv({ runtimeEnabled: false, allowedUids: [uid] }),
-    `N4C_BOOKING_ENABLED=false\nN4C_ALLOWED_FIREBASE_UIDS=${uid}\nN4C_LOAD_ENABLED=false\nN4C_LOAD_MAX_INSTANCES=1\nN4C_LOAD_CONCURRENCY=1\n`,
+    `N4C_BOOKING_ENABLED=false\nN4C_BOOKING_CREATE_DISABLE=false\nN4C_ALLOWED_FIREBASE_UIDS=${uid}\nN4C_LOAD_ENABLED=false\nN4C_LOAD_MAX_INSTANCES=1\nN4C_LOAD_CONCURRENCY=1\n`,
   );
   assert.throws(() => renderEnv({ runtimeEnabled: true, allowedUids: [] }));
   assert.throws(() => renderEnv({ runtimeEnabled: "yes", allowedUids: [uid] }));
@@ -71,6 +71,7 @@ function record(dir, manifest, overrides = {}) {
     loadEnabled: manifest.load.enabled,
     loadMaxInstances: manifest.load.maxInstances,
     loadConcurrency: manifest.load.concurrency,
+    createDisabled: manifest.createDisabled,
     automaticDeletion: false,
     ownerApprovalEvidenceRef: "SYNTHETIC-TEST",
     issuedAtUtc: "2020-01-01T00:00:00Z",
@@ -165,6 +166,27 @@ test("stage: staging carries the load settings into the manifest and the record"
         env: record(dir, manifest, { loadMaxInstances: 1 }),
       }).join(),
       /loadMaxInstances mismatch/u,
+    );
+    // The kill switch is part of what the owner record approves.
+    const contained = stageRuntime({
+      outDir: stage,
+      runtimeEnabled: true,
+      allowedUids: [uid],
+      createDisabled: true,
+      projectId: staging,
+      projectNumber: number,
+    });
+    assert.equal(contained.createDisabled, true);
+    assert.deepEqual(
+      verifyStage({ stageDir: stage, env: record(dir, contained) }),
+      [],
+    );
+    assert.match(
+      verifyStage({
+        stageDir: stage,
+        env: record(dir, contained, { createDisabled: false }),
+      }).join(),
+      /createDisabled mismatch/u,
     );
   } finally {
     rmSync(dir, { recursive: true, force: true });
