@@ -949,6 +949,10 @@
   "@publicationUploadMedia": {
     "description": "Publication button."
   },
+  "publicationCheckingPhoto": "Checking the photo… The first check can take up to 20 seconds.",
+  "@publicationCheckingPhoto": {
+    "description": "Publication: shown while uploaded photos are scanned on the server."
+  },
   "publicationUploadCover": "Upload cover",
   "@publicationUploadCover": {
     "description": "Publication button."

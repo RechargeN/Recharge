@@ -818,6 +818,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get publicationUploadMedia => 'Загрузить медиа';
 
   @override
+  String get publicationCheckingPhoto =>
+      'Проверяем фото… Первая проверка может занять до 20 секунд.';
+
+  @override
   String get publicationUploadCover => 'Загрузить обложку';
 
   @override

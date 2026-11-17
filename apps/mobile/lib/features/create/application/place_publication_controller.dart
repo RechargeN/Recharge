@@ -175,8 +175,24 @@ final class PlacePublicationController extends ChangeNotifier {
     await _refreshAll();
   });
 
+  /// True while photos are uploaded and checked. The server scans each photo
+  /// before it is accepted; a cold scanner takes 12-15 s (N3b D-04), so the UI
+  /// says what is happening instead of a silent spinner.
+  bool get checkingMedia => _checkingMedia;
+  bool _checkingMedia = false;
+
   /// Uploads the cover and every gallery photo that changed, then binds them.
-  Future<void> uploadMedia() => _run(() async {
+  Future<void> uploadMedia() async {
+    _checkingMedia = true;
+    try {
+      await _uploadMedia();
+    } finally {
+      _checkingMedia = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _uploadMedia() => _run(() async {
     final CreateDraftEntity draft = _requireDraft();
     final PlacePublicationScope scope = _scope(draft);
     PlacePublicationRecord record = await _requireRecord(scope);

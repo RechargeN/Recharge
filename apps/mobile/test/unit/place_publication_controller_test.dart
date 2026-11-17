@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -119,6 +120,24 @@ void main() {
       expect(c.state.violations.single.fieldPath, '/body/location/point');
       await c.refresh();
       expect(c.state.violations, isEmpty, reason: 'a new action clears it');
+    },
+  );
+
+  test(
+    'while photos are uploaded and scanned the controller says so',
+    () async {
+      final PlacePublicationController c = controller(draft());
+      await c.load();
+      await c.save();
+      uploader.hold = Completer<void>();
+      expect(c.checkingMedia, isFalse);
+      final Future<void> running = c.uploadMedia();
+      await Future<void>.delayed(Duration.zero);
+      expect(c.checkingMedia, isTrue);
+      expect(c.state.phase, PlacePublicationPhase.working);
+      uploader.hold!.complete();
+      await running;
+      expect(c.checkingMedia, isFalse);
     },
   );
 
@@ -493,6 +512,7 @@ final class _Media implements EventCoverSource {
 
 final class _Uploader implements EventCoverUploader {
   final List<String> intents = <String>[];
+  Completer<void>? hold;
   final Map<String, String> _assets = <String, String>{};
 
   String? assetFor(String intent) => _assets[intent];
@@ -506,6 +526,8 @@ final class _Uploader implements EventCoverUploader {
     required String contentId,
   }) async {
     intents.add(intentId);
+    final Completer<void>? pending = hold;
+    if (pending != null) await pending.future;
     return _assets.putIfAbsent(intentId, () => 'asset-${_assets.length + 1}');
   }
 }

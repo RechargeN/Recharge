@@ -77,6 +77,24 @@ class PlacePublicationSection extends StatelessWidget {
                 ),
                 key: const Key('place-publication-conflict'),
               ),
+            if (state.phase == PlacePublicationPhase.working &&
+                controller.checkingMedia)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Row(
+                  key: const Key('place-publication-checking-media'),
+                  children: <Widget>[
+                    const SizedBox.square(
+                      dimension: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(context.l10n.publicationCheckingPhoto),
+                    ),
+                  ],
+                ),
+              ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,

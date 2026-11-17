@@ -203,6 +203,7 @@
   "publicationSave": "Сохранить",
   "publicationSaveToServer": "Сохранить на сервере",
   "publicationUploadMedia": "Загрузить медиа",
+  "publicationCheckingPhoto": "Проверяем фото… Первая проверка может занять до 20 секунд.",
   "publicationUploadCover": "Загрузить обложку",
   "publicationSubmit": "Отправить",
   "publicationPublish": "Опубликовать",

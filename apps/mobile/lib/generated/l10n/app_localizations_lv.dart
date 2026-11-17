@@ -815,6 +815,10 @@ class AppLocalizationsLv extends AppLocalizations {
   String get publicationUploadMedia => 'Augšupielādēt multividi';
 
   @override
+  String get publicationCheckingPhoto =>
+      'Pārbaudām fotoattēlu… Pirmā pārbaude var ilgt līdz 20 sekundēm.';
+
+  @override
   String get publicationUploadCover => 'Augšupielādēt vāku';
 
   @override

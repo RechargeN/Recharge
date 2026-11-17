@@ -1318,6 +1318,12 @@ abstract class AppLocalizations {
   /// **'Upload media'**
   String get publicationUploadMedia;
 
+  /// Publication: shown while uploaded photos are scanned on the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking the photo… The first check can take up to 20 seconds.'**
+  String get publicationCheckingPhoto;
+
   /// Publication button.
   ///
   /// In en, this message translates to:

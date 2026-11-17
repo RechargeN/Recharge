@@ -806,6 +806,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publicationUploadMedia => 'Upload media';
 
   @override
+  String get publicationCheckingPhoto =>
+      'Checking the photo… The first check can take up to 20 seconds.';
+
+  @override
   String get publicationUploadCover => 'Upload cover';
 
   @override

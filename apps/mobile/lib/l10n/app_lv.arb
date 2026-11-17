@@ -203,6 +203,7 @@
   "publicationSave": "Saglabāt",
   "publicationSaveToServer": "Saglabāt serverī",
   "publicationUploadMedia": "Augšupielādēt multividi",
+  "publicationCheckingPhoto": "Pārbaudām fotoattēlu… Pirmā pārbaude var ilgt līdz 20 sekundēm.",
   "publicationUploadCover": "Augšupielādēt vāku",
   "publicationSubmit": "Iesniegt",
   "publicationPublish": "Publicēt",
