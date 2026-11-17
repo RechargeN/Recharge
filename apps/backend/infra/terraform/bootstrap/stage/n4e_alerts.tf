@@ -217,6 +217,13 @@ resource "google_monitoring_uptime_check_config" "n4e" {
       host       = local.n4e_probe_host
     }
   }
+
+  # mask_headers makes the API return "******" for every header, so Terraform
+  # would rewrite the headers on every plan. They hold no secret (an invalid
+  # token by design); changes to them go through a new resource version.
+  lifecycle {
+    ignore_changes = [http_check[0].headers]
+  }
 }
 
 resource "google_monitoring_alert_policy" "n4e_probe" {
