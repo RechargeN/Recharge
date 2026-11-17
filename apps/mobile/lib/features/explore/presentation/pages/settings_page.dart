@@ -146,9 +146,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ListTile(
                 key: const Key('settings-booking-test-entry'),
                 leading: const Icon(Icons.event_available_outlined),
-                title: const Text(
-                  'Booking test (debug)',
-                ), // l10n-ignore: debug-only test entry
+                title: Text(l10n.settingsBookingTestEntry),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => context.push(
                   '${RouteNames.testEventBooking}/$seededBookingEventId',

@@ -116,6 +116,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsSearchHint => 'Сохранённые поиски и фильтры каталога';
 
   @override
+  String get settingsBookingTestEntry => 'Тест бронирования (отладка)';
+
+  @override
   String get settingsNotificationsHint => 'Входящие и обновления маршрутов';
 
   @override

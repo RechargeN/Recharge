@@ -116,6 +116,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSearchHint => 'Saved searches and discovery filters';
 
   @override
+  String get settingsBookingTestEntry => 'Booking test (debug)';
+
+  @override
   String get settingsNotificationsHint => 'Inbox and route updates';
 
   @override

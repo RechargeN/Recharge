@@ -140,6 +140,10 @@
   "@settingsSearchHint": {
     "description": "Settings item subtitle."
   },
+  "settingsBookingTestEntry": "Booking test (debug)",
+  "@settingsBookingTestEntry": {
+    "description": "Settings: debug-only entry to the Booking test Event."
+  },
   "settingsNotificationsHint": "Inbox and route updates",
   "@settingsNotificationsHint": {
     "description": "Settings item subtitle."

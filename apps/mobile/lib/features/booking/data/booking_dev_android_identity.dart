@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -180,8 +181,11 @@ final class DevAndroidGoogleIdentity implements BookingFirebaseIdTokenProvider {
             )
             .toList();
         journal(
-          'sdkUser=${_auth.currentUser != null} '
-          'armed=$_tokenAccessEnabled frames=${frames.join(' <- ')}',
+          jsonEncode(<String, Object>{
+            'sdkUser': _auth.currentUser != null,
+            'armed': _tokenAccessEnabled,
+            'frames': frames,
+          }),
         );
       } catch (_) {
         /* Diagnostics never block the sign-out. */

@@ -301,10 +301,10 @@ void main() {
       await journaled.signInWithGoogle();
       await journaled.signOutLocal();
       expect(entries, hasLength(1));
-      expect(entries.single, contains('sdkUser=true'));
-      expect(entries.single, contains('armed=true'));
+      expect(entries.single, contains('"sdkUser":true'));
+      expect(entries.single, contains('"armed":true'));
       // In the app the callers are lib frames (package:recharge/...); a test has none.
-      expect(entries.single, contains('frames='));
+      expect(entries.single, contains('"frames":'));
       expect(entries.single, isNot(contains('synthetic-google-id-token')));
     },
   );

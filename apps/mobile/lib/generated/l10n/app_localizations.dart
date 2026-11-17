@@ -310,6 +310,12 @@ abstract class AppLocalizations {
   /// **'Saved searches and discovery filters'**
   String get settingsSearchHint;
 
+  /// Settings: debug-only entry to the Booking test Event.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking test (debug)'**
+  String get settingsBookingTestEntry;
+
   /// Settings item subtitle.
   ///
   /// In en, this message translates to:

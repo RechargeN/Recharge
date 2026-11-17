@@ -116,6 +116,9 @@ class AppLocalizationsLv extends AppLocalizations {
   String get settingsSearchHint => 'Saglabātie meklējumi un kataloga filtri';
 
   @override
+  String get settingsBookingTestEntry => 'Rezervācijas tests (atkļūdošana)';
+
+  @override
   String get settingsNotificationsHint => 'Iesūtne un maršrutu jaunumi';
 
   @override
