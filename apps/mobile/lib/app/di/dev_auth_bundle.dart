@@ -14,6 +14,7 @@ import '../../features/booking/data/booking_functions_transport.dart';
 import '../../features/identity/data/repositories/dev_identity_workspace_repository.dart';
 import 'native_dev_auth_session_gateway.dart';
 import 'dev_auth_workspace_composition.dart';
+import 'dev_booking_cloud.dart';
 import 'dev_content_media_port.dart';
 import 'dev_notifications_bundle.dart';
 import 'dev_push_registrar.dart';
@@ -28,6 +29,7 @@ final class DevAuthBundle implements AuthSessionEvents {
     required this.invalidated,
     this.contentMedia,
     this.notifications,
+    this.booking,
   });
   @override
   final Stream<void> invalidated;
@@ -41,6 +43,10 @@ final class DevAuthBundle implements AuthSessionEvents {
 
   /// N3c: present only with `N3C_DEV_PUSH=true`.
   final DevNotificationsBundle? notifications;
+
+  /// Debt plan round 1: the cloud Booking transport, present only with
+  /// `N4C_DEV_BOOKING=true`.
+  final BookingCallablePort? booking;
 }
 
 /// All values are public app configuration. No provider keys or SA credentials.
@@ -157,6 +163,7 @@ Future<DevAuthBundle> createDevAuthBundleFromEnvironment() async {
         ? DevContentMediaPort(callables)
         : null,
     notifications: notifications,
+    booking: n4cDevBookingDefined ? callables : null,
     invalidated: FirebaseAuth.instanceFor(app: app)
         .authStateChanges()
         .where((_) => identity.hasMismatchedSdkUser)

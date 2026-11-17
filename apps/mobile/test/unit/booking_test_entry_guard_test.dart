@@ -33,6 +33,26 @@ void main() {
     expect(guard(mode: BackendBindingMode.disabled).allowed, isFalse);
   });
 
+  test(
+    'the cloud Booking transport opens the entry only with the define in a debug build',
+    () {
+      BookingTestEntryGuard cloud({bool flag = true, bool release = false}) =>
+          BookingTestEntryGuard(
+            flag: flag,
+            releaseMode: release,
+            binding: BookingBackendBindingController(
+              emulatorBase: null,
+              releaseMode: release,
+              initial: BackendBindingMode.localOnly,
+            ),
+            cloudBooking: true,
+          );
+      expect(cloud().allowed, isTrue);
+      expect(cloud(flag: false).allowed, isFalse);
+      expect(cloud(release: true).allowed, isFalse);
+    },
+  );
+
   test('a testBackend binding without an Emulator base is refused', () {
     final withoutBase = BookingTestEntryGuard(
       flag: true,

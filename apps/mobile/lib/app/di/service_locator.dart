@@ -1,6 +1,7 @@
 import '../../features/auth/domain/repositories/auth_session_events.dart';
 import 'dart:io';
 import 'dev_auth_bundle.dart';
+import 'dev_booking_cloud.dart';
 import 'dev_content_media_port.dart';
 import '../../features/identity/data/repositories/dev_identity_workspace_repository.dart';
 import '../../features/auth/domain/usecases/sign_in_with_google_usecase.dart';
@@ -375,7 +376,10 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
           : sl<BookingBackendBindingController>().endpoint,
     )
     ..registerLazySingleton<BookingTestEntryGuard>(
-      () => BookingTestEntryGuard.fromEnvironment(sl()),
+      () => BookingTestEntryGuard.fromEnvironment(
+        sl(),
+        cloudBooking: devAuth?.booking != null,
+      ),
     )
     ..registerLazySingleton<EventPublicationTestEntryGuard>(
       () => EventPublicationTestEntryGuard.fromEnvironment(sl()),
@@ -487,7 +491,14 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
       ),
     )
     ..registerLazySingletonAsync<BookingTransportRuntime>(
-      () => sl<BookingTransportRuntimeFactory>().create(),
+      // Debt plan round 1: a dev/stage debug build with N4C_DEV_BOOKING talks
+      // to the cloud Booking runtime of its project; everything else as before.
+      () => devAuth?.booking != null
+          ? createDevCloudBookingRuntime(
+              port: devAuth!.booking!,
+              supportDirectory: supportDirectory,
+            )
+          : sl<BookingTransportRuntimeFactory>().create(),
     )
     ..registerLazySingleton<RouteRecordingSecureStore>(
       () => EncryptedFileRouteRecordingStore(
