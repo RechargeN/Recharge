@@ -85,11 +85,20 @@ final class DevAndroidGoogleIdentity implements BookingFirebaseIdTokenProvider {
     required FirebaseAuth auth,
     required DevGoogleAuthenticationDriver google,
     required BookingIdentitySessionStore sessions,
+    void Function(String entry)? onLocalSignOut,
   }) : _auth = auth,
        _google = google,
-       _sessions = sessions {
+       _sessions = sessions,
+       _onLocalSignOut = onLocalSignOut {
     _assertDevAndroidApp(auth.app);
   }
+
+  /// Debug diagnostics (A34 staging 2026-11-16: the sign-in was wiped on a
+  /// resume while the server Session stayed active, and it did not reproduce).
+  /// Records which code path wiped the local sign-in, with the calling frames
+  /// (file and line only) and whether the SDK user was present. No tokens, ids
+  /// or e-mails.
+  final void Function(String entry)? _onLocalSignOut;
 
   final FirebaseAuth _auth;
   final DevGoogleAuthenticationDriver _google;
@@ -154,6 +163,30 @@ final class DevAndroidGoogleIdentity implements BookingFirebaseIdTokenProvider {
 
   /// Local logout only; global Firebase/Recharge revocation is a server operation.
   Future<void> signOutLocal() async {
+    final void Function(String entry)? journal = _onLocalSignOut;
+    if (journal != null) {
+      try {
+        final List<String> frames = StackTrace.current
+            .toString()
+            .split('\n')
+            .skip(1)
+            .where((String line) => line.contains('package:recharge/'))
+            .take(6)
+            .map(
+              (String line) => line
+                  .replaceAll(RegExp(r'^#\d+\s+'), '')
+                  .replaceAll(RegExp(r'\s+'), ' ')
+                  .trim(),
+            )
+            .toList();
+        journal(
+          'sdkUser=${_auth.currentUser != null} '
+          'armed=$_tokenAccessEnabled frames=${frames.join(' <- ')}',
+        );
+      } catch (_) {
+        /* Diagnostics never block the sign-out. */
+      }
+    }
     _assertDevAndroidApp(_auth.app);
     if (_busy) throw StateError('dev_identity_operation_in_progress');
     _busy = true;

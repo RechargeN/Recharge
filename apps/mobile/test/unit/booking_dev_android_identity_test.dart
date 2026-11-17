@@ -288,6 +288,29 @@ void main() {
     );
   }
 
+  test(
+    'every local sign-out is journaled with its code path, never a token',
+    () async {
+      final List<String> entries = <String>[];
+      final journaled = DevAndroidGoogleIdentity(
+        auth: auth,
+        google: google,
+        sessions: sessions,
+        onLocalSignOut: entries.add,
+      );
+      await journaled.signInWithGoogle();
+      await journaled.signOutLocal();
+      expect(entries, hasLength(1));
+      expect(entries.single, contains('sdkUser=true'));
+      expect(entries.single, contains('armed=true'));
+      expect(
+        entries.single,
+        contains('booking_dev_android_identity_test.dart'),
+      );
+      expect(entries.single, isNot(contains('synthetic-google-id-token')));
+    },
+  );
+
   test('offline cold restore keeps the SDK user and stored Session', () async {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
     auth.currentUser = _User();

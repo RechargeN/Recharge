@@ -14,6 +14,7 @@ import '../../features/booking/data/booking_functions_transport.dart';
 import '../../features/identity/data/repositories/dev_identity_workspace_repository.dart';
 import 'native_dev_auth_session_gateway.dart';
 import 'dev_auth_workspace_composition.dart';
+import 'dev_auth_clear_journal.dart';
 import 'dev_booking_cloud.dart';
 import 'dev_content_media_port.dart';
 import 'dev_notifications_bundle.dart';
@@ -97,10 +98,12 @@ Future<DevAuthBundle> createDevAuthBundleFromEnvironment() async {
     storage,
     environment: cacheEnvironment,
   );
+  final DevAuthClearJournal journal = await DevAuthClearJournal.open();
   final identity = DevAndroidGoogleIdentity(
     auth: FirebaseAuth.instanceFor(app: app),
     google: NativeDevGoogleAuthenticationDriver(clientId),
     sessions: sessions,
+    onLocalSignOut: journal.record,
   );
   final endpoint = BookingBackendEndpoint.devIdentity(
     Uri.parse(cloud.functionsBase),
@@ -166,7 +169,13 @@ Future<DevAuthBundle> createDevAuthBundleFromEnvironment() async {
     booking: n4cDevBookingDefined ? callables : null,
     invalidated: FirebaseAuth.instanceFor(app: app)
         .authStateChanges()
-        .where((_) => identity.hasMismatchedSdkUser)
+        .where((User? user) {
+          final bool mismatch = identity.hasMismatchedSdkUser;
+          if (mismatch) {
+            journal.record('invalidated sdkUserPresent=${user != null}');
+          }
+          return mismatch;
+        })
         .map<void>((_) {}),
   );
 }
