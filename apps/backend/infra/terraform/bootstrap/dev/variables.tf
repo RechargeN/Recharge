@@ -138,3 +138,21 @@ variable "n4c_authorization_record_sha256" {
   type    = string
   default = ""
 }
+
+# ---- N4e (staging service monitoring). Absent by default; needs the N4e record.
+variable "n4e_enabled" {
+  description = "Desired presence of the N4e monitoring resources. Not execution authority."
+  type        = bool
+  default     = false
+}
+
+variable "n4e_authorization_record_path" {
+  description = "Private owner-issued N4e plan record. Never stored in Git."
+  type        = string
+  default     = ""
+}
+
+variable "n4e_authorization_record_sha256" {
+  type    = string
+  default = ""
+}

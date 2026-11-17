@@ -9,6 +9,7 @@ import { inventoryDigest } from "./check-n3b-plan.mjs";
 // alert policy notifies the one existing staging e-mail channel.
 export { inventoryDigest };
 export const project = "recharge-staging-y9y2y";
+export const devProject = "recharge-dev-n2a01";
 const slos = [
   "auth-availability",
   "commands-availability",
@@ -36,13 +37,16 @@ export const roundOneCreates = Object.freeze([
 ]);
 const backupSchedule = 'google_firestore_backup_schedule.n4e["daily"]';
 const channelAddress = "google_monitoring_notification_channel.budget_email";
-const host = `europe-west1-${project}.cloudfunctions.net`;
 
 export function checkN4ePlan(plan, expected) {
   const errors = [];
   const vars = plan?.variables ?? {};
-  if (expected.projectId !== project) return ["N4e targets staging only"];
-  if (vars.project_id?.value !== project) errors.push("project mismatch");
+  // dev gets the same set in one plan (debt plan 2026-11-17); staging in two rounds.
+  const target = expected.projectId;
+  if (target !== project && target !== devProject)
+    return ["N4e targets the reviewed dev or staging project only"];
+  const host = `europe-west1-${target}.cloudfunctions.net`;
+  if (vars.project_id?.value !== target) errors.push("project mismatch");
   if (vars.n4e_enabled?.value !== true)
     errors.push("N4e plan must set n4e_enabled");
   if (vars.release_commit_sha?.value !== expected.commitSha)
@@ -56,7 +60,11 @@ export function checkN4ePlan(plan, expected) {
   if (!channelName)
     errors.push("existing staging e-mail channel not in the plan");
   const expectedCreates =
-    expected.round === 1 ? roundOneCreates : reviewedCreates;
+    target === devProject
+      ? [...reviewedCreates, ...roundOneCreates]
+      : expected.round === 1
+        ? roundOneCreates
+        : reviewedCreates;
   if (expected.round === 1) {
     const schedule = changes.find((c) => c.address === backupSchedule);
     if (
@@ -80,7 +88,7 @@ export function checkN4ePlan(plan, expected) {
       continue;
     }
     seen.add(c.address);
-    if (after.project && after.project !== project)
+    if (after.project && after.project !== target)
       errors.push(`foreign target: ${c.address}`);
     if (c.type === "google_monitoring_alert_policy") {
       const channels = after.notification_channels ?? [];

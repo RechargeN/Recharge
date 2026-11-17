@@ -153,8 +153,8 @@ test("nothing else is created, changed or removed; staging only", () => {
   assert.match(check((c) => c.splice(3, 1)).join(), /reviewed create missing/u);
   const p = plan(changes());
   assert.match(
-    checkN4ePlan(p, { ...expected(p), projectId: "recharge-dev-n2a01" }).join(),
-    /staging only/u,
+    checkN4ePlan(p, { ...expected(p), projectId: "recharge-prod" }).join(),
+    /dev or staging project only/u,
   );
 });
 
@@ -204,4 +204,66 @@ test("round 1: only the four new policies, and the backup schedule imported unch
     checkN4ePlan(recreated, { ...expected(recreated), round: 1 }).join(),
     /unreviewed create/u,
   );
+});
+
+test("dev: the full set (first apply plus round 1) in one plan, on the dev host", () => {
+  const dev = "recharge-dev-n2a01";
+  const devChannel = `projects/${dev}/notificationChannels/7`;
+  const all = [...reviewedCreates, ...roundOneCreates];
+  const list = [
+    change(
+      "google_monitoring_notification_channel.budget_email",
+      "google_monitoring_notification_channel",
+      { project: dev, name: devChannel },
+      ["no-op"],
+      { project: dev, name: devChannel },
+    ),
+    ...all.map((address) => {
+      const type = address.split(".")[0];
+      const after = { project: dev };
+      if (type === "google_monitoring_alert_policy")
+        Object.assign(after, {
+          notification_channels: [devChannel],
+          enabled: true,
+          conditions: [
+            {
+              condition_matched_log: [
+                { filter: 'resource.type="cloud_run_revision" AND x' },
+              ],
+            },
+          ],
+        });
+      if (type === "google_monitoring_uptime_check_config")
+        Object.assign(after, {
+          http_check: [
+            {
+              use_ssl: true,
+              request_method: "POST",
+              accepted_response_status_codes: [{ status_value: 401 }],
+            },
+          ],
+          monitored_resource: [
+            { labels: { host: `europe-west1-${dev}.cloudfunctions.net` } },
+          ],
+        });
+      return change(address, type, after);
+    }),
+  ];
+  const p = {
+    variables: {
+      project_id: { value: dev },
+      n4e_enabled: { value: true },
+      release_commit_sha: { value: "a".repeat(40) },
+    },
+    resource_changes: list,
+  };
+  const exp = {
+    projectId: dev,
+    commitSha: "a".repeat(40),
+    inventorySha256: inventoryDigest(p),
+  };
+  assert.deepEqual(checkN4ePlan(p, exp), []);
+  list[2].change.after.monitored_resource = [
+    { labels: { host: `europe-west1-${project}.cloudfunctions.net` } },
+  ];
 });
