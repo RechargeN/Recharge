@@ -118,7 +118,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         NotificationsStatus.initial || NotificationsStatus.loading =>
           const Center(child: CircularProgressIndicator()),
         NotificationsStatus.error => _StateMessage(
-          message: context.l10n.notificationsLoadFailed,
+          message: state.message == NotificationsController.accessDeniedMessage
+              ? context.l10n.notificationsAccessDenied
+              : context.l10n.notificationsLoadFailed,
           actionLabel: context.l10n.commonRetry,
           onAction: () => controller.loadNotifications(userId: user.id),
         ),

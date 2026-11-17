@@ -276,6 +276,7 @@
   "importRollbackConfirm": "Atsaukt",
   "notificationsReadAll": "Atzīmēt visus kā izlasītus",
   "notificationsLoadFailed": "Paziņojumus neizdevās ielādēt",
+  "notificationsAccessDenied": "Šim kontam nav piekļuves paziņojumiem",
   "notificationsEmpty": "Paziņojumu vēl nav",
   "notificationsSearchHint": "Meklēt paziņojumos",
   "notificationsClearSearch": "Notīrīt meklēšanu",

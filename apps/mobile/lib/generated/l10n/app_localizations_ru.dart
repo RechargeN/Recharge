@@ -1201,6 +1201,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get notificationsLoadFailed => 'Не удалось загрузить уведомления';
 
   @override
+  String get notificationsAccessDenied =>
+      'У этого аккаунта нет доступа к уведомлениям';
+
+  @override
   String get notificationsEmpty => 'Пока нет уведомлений';
 
   @override

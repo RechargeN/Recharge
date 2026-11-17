@@ -3,6 +3,7 @@ import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/notifications/application/controllers/notifications_controller.dart';
 import 'package:recharge/features/notifications/application/state/notifications_state.dart';
 import 'package:recharge/features/notifications/domain/entities/notification_item_entity.dart';
+import 'package:recharge/features/notifications/domain/failures/notifications_access_denied.dart';
 import 'package:recharge/features/notifications/domain/repositories/notifications_repository.dart';
 import 'package:recharge/features/notifications/domain/usecases/get_notifications_usecase.dart';
 import 'package:recharge/features/notifications/domain/usecases/mark_notification_read_usecase.dart';
@@ -65,6 +66,26 @@ void main() {
     );
   });
 
+  test(
+    'a refused account is told it has no access, not that loading failed',
+    () async {
+      repository.failure = const NotificationsAccessDenied();
+      await controller.loadNotifications(userId: 'u1');
+      expect(controller.state.status, NotificationsStatus.error);
+      expect(
+        controller.state.message,
+        NotificationsController.accessDeniedMessage,
+      );
+
+      repository.failure = Exception('offline');
+      await controller.loadNotifications(userId: 'u1');
+      expect(
+        controller.state.message,
+        NotificationsController.loadFailedMessage,
+      );
+    },
+  );
+
   test('markAllAsRead clears all unread notifications', () async {
     await controller.ensureLoaded(userId: 'u1');
 
@@ -86,6 +107,8 @@ class _NoopAnalyticsService implements AnalyticsService {
 }
 
 class _FakeNotificationsRepository implements NotificationsRepository {
+  Exception? failure;
+
   final List<NotificationItemEntity> _storage = <NotificationItemEntity>[
     NotificationItemEntity(
       id: 'n1',
@@ -120,6 +143,8 @@ class _FakeNotificationsRepository implements NotificationsRepository {
   Future<List<NotificationItemEntity>> getNotifications({
     required String userId,
   }) async {
+    final Exception? pending = failure;
+    if (pending != null) throw pending;
     return List<NotificationItemEntity>.from(_storage);
   }
 

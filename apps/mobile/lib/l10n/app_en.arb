@@ -1413,6 +1413,10 @@
   "@notificationsLoadFailed": {
     "description": "Notifications: load error."
   },
+  "notificationsAccessDenied": "This account has no access to notifications",
+  "@notificationsAccessDenied": {
+    "description": "Notifications: the server refused this account access to the inbox."
+  },
   "notificationsEmpty": "No notifications yet",
   "@notificationsEmpty": {
     "description": "Notifications: empty inbox."

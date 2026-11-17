@@ -1196,6 +1196,10 @@ class AppLocalizationsLv extends AppLocalizations {
   String get notificationsLoadFailed => 'Paziņojumus neizdevās ielādēt';
 
   @override
+  String get notificationsAccessDenied =>
+      'Šim kontam nav piekļuves paziņojumiem';
+
+  @override
   String get notificationsEmpty => 'Paziņojumu vēl nav';
 
   @override

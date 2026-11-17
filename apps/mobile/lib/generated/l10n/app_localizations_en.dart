@@ -1184,6 +1184,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsLoadFailed => 'Notifications could not be loaded';
 
   @override
+  String get notificationsAccessDenied =>
+      'This account has no access to notifications';
+
+  @override
   String get notificationsEmpty => 'No notifications yet';
 
   @override

@@ -276,6 +276,7 @@
   "importRollbackConfirm": "Откатить",
   "notificationsReadAll": "Отметить все как прочитанные",
   "notificationsLoadFailed": "Не удалось загрузить уведомления",
+  "notificationsAccessDenied": "У этого аккаунта нет доступа к уведомлениям",
   "notificationsEmpty": "Пока нет уведомлений",
   "notificationsSearchHint": "Поиск по уведомлениям",
   "notificationsClearSearch": "Очистить поиск",

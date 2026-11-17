@@ -2,11 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/notifications/data/remote/notifications_inbox_port.dart';
 import 'package:recharge/features/notifications/data/remote/server_notifications_repository.dart';
 import 'package:recharge/features/notifications/domain/entities/notification_item_entity.dart';
+import 'package:recharge/features/notifications/domain/failures/notifications_access_denied.dart';
 
 final class _FakePort implements NotificationsInboxPort {
   final List<Map<String, Object?>> queries = <Map<String, Object?>>[];
   final List<Map<String, Object?>> commands = <Map<String, Object?>>[];
   Map<String, Object?> queryAnswer = <String, Object?>{};
+  NotificationsInboxFailure? queryFailure;
   Map<String, Object?> commandAnswer = <String, Object?>{
     'schemaVersion': 1,
     'commandType': 'markRead',
@@ -17,6 +19,8 @@ final class _FakePort implements NotificationsInboxPort {
   @override
   Future<Map<String, Object?>> query(Map<String, Object?> request) async {
     queries.add(request);
+    final NotificationsInboxFailure? pending = queryFailure;
+    if (pending != null) throw pending;
     return queryAnswer;
   }
 
@@ -65,6 +69,41 @@ Map<String, Object?> _page(List<Map<String, Object?>> items) =>
     };
 
 void main() {
+  test(
+    'a refusal of the account becomes NotificationsAccessDenied; other failures stay',
+    () async {
+      final _FakePort port = _FakePort();
+      final ServerNotificationsRepository repository =
+          ServerNotificationsRepository(port: port);
+      for (final String code in <String>[
+        'unauthenticated',
+        'permission-denied',
+      ]) {
+        port.queryFailure = NotificationsInboxFailure(code);
+        await expectLater(
+          repository.getNotifications(userId: 'u'),
+          throwsA(isA<NotificationsAccessDenied>()),
+        );
+      }
+      port.queryFailure = null;
+      port.queryAnswer = <String, Object?>{
+        'kind': 'rejected',
+        'code': 'unauthenticated',
+      };
+      await expectLater(
+        repository.getNotifications(userId: 'u'),
+        throwsA(isA<NotificationsAccessDenied>()),
+      );
+      port.queryFailure = const NotificationsInboxFailure(
+        'transport_unavailable',
+      );
+      await expectLater(
+        repository.getNotifications(userId: 'u'),
+        throwsA(isA<NotificationsInboxFailure>()),
+      );
+    },
+  );
+
   test('lists the server inbox without sending a user id', () async {
     final _FakePort port = _FakePort()
       ..queryAnswer = _page(<Map<String, Object?>>[

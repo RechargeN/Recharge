@@ -2,6 +2,7 @@ import 'package:api_contracts/api_contracts.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/entities/notification_item_entity.dart';
+import '../../domain/failures/notifications_access_denied.dart';
 import '../../domain/repositories/notifications_repository.dart';
 import 'notifications_inbox_port.dart';
 
@@ -29,20 +30,36 @@ final class ServerNotificationsRepository implements NotificationsRepository {
 
   static const int _pageSize = 50;
 
+  /// Refusals of the account itself (HTTP 401/403 envelope or a typed
+  /// rejection), as opposed to transport or availability failures.
+  static const Set<String> accessDeniedCodes = <String>{
+    'unauthenticated',
+    'permission-denied',
+    'permission_denied',
+  };
+
   @override
   Future<List<NotificationItemEntity>> getNotifications({
     required String userId,
   }) async {
-    final Map<String, Object?> answer = await _port.query(<String, Object?>{
-      'schemaVersion': 1,
-      'requestId': _newRequestId(),
-      'queryType': 'listInbox',
-      'payload': <String, Object?>{
-        'locale': _wireLocale(),
-        'pageSize': _pageSize,
-      },
-    });
-    _refuseUnlessSucceeded(answer);
+    final Map<String, Object?> answer;
+    try {
+      answer = await _port.query(<String, Object?>{
+        'schemaVersion': 1,
+        'requestId': _newRequestId(),
+        'queryType': 'listInbox',
+        'payload': <String, Object?>{
+          'locale': _wireLocale(),
+          'pageSize': _pageSize,
+        },
+      });
+      _refuseUnlessSucceeded(answer);
+    } on NotificationsInboxFailure catch (failure) {
+      if (accessDeniedCodes.contains(failure.code)) {
+        throw const NotificationsAccessDenied();
+      }
+      rethrow;
+    }
     final NotificationInboxPageDto page;
     try {
       page = NotificationInboxPageDto.fromJson(answer);

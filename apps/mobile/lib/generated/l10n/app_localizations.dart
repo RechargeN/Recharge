@@ -1760,6 +1760,12 @@ abstract class AppLocalizations {
   /// **'Notifications could not be loaded'**
   String get notificationsLoadFailed;
 
+  /// Notifications: the server refused this account access to the inbox.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has no access to notifications'**
+  String get notificationsAccessDenied;
+
   /// Notifications: empty inbox.
   ///
   /// In en, this message translates to:
