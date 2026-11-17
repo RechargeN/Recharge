@@ -280,6 +280,9 @@ class EventCreateCoordinator {
       occurrences = const <EventOccurrenceDraft>[];
     } on EventLocalTimeException {
       occurrences = const <EventOccurrenceDraft>[];
+    } on RangeError {
+      // Shared LocalDate rejects calendar overflow instead of normalizing it.
+      occurrences = const <EventOccurrenceDraft>[];
     }
     final EventDraftData normalized = event.copyWith(
       revision: incrementRevision ? event.revision + 1 : event.revision,
