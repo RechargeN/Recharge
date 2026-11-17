@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import '../../../../app/router/route_names.dart';
+import '../../../../app/testing/seeded_event_fixture.dart'
+    show seededBookingEventId;
 import '../../../../app/config/legal_links.dart';
 import '../../../../core/localization/app_locale_policy.dart';
 import '../../../../core/localization/l10n_context.dart';
@@ -136,6 +139,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push(RouteNames.notifications),
             ),
+            // Debug test entry (define RECHARGE_TEST_BOOKING_ENTRY): opens the
+            // Booking test Event in the running app, so the signed-in Session is
+            // used. The route guard still decides; release builds never show it.
+            if (_bookingTestEntryDefined && !kReleaseMode)
+              ListTile(
+                key: const Key('settings-booking-test-entry'),
+                leading: const Icon(Icons.event_available_outlined),
+                title: const Text(
+                  'Booking test (debug)',
+                ), // l10n-ignore: debug-only test entry
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(
+                  '${RouteNames.testEventBooking}/$seededBookingEventId',
+                ),
+              ),
             const Divider(height: 28),
             _SettingsSectionTitle(l10n.settingsSectionPreferences),
             // L4: the device-scoped UI language. It changes text only, never
@@ -439,3 +457,7 @@ class _LabeledField extends StatelessWidget {
     );
   }
 }
+
+const bool _bookingTestEntryDefined = bool.fromEnvironment(
+  'RECHARGE_TEST_BOOKING_ENTRY',
+);

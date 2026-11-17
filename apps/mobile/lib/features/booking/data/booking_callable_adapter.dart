@@ -584,6 +584,14 @@ final class BookingBackendEndpoint {
           'notificationsCommandV1',
           'pushDeviceCommandV1',
           'sendSelfTestNotificationV1',
+          // Debt plan round 1 (2026-11-17): the cloud Booking runtime
+          // (codebase n4c-booking). The load ingress is never called by the app.
+          'createInternalBookingV1',
+          'cancelInternalBookingV1',
+          'reconfirmInternalBookingV1',
+          'getMyBookingV1',
+          'listMyBookingsV1',
+          'getEventAvailabilityV1',
         }.contains(callableName)) {
       throw ArgumentError('dev_identity_callable_forbidden');
     }
