@@ -101,13 +101,13 @@ test("stage: the Booking closure with its switch-guarded workers, verified again
     assert.ok(names.includes("lib/src/contracts/booking_v1.js"));
     assert.ok(!names.includes("lib/src/index.js"));
     assert.ok(names.includes("lib/src/booking/event_projection_runtime.js"));
-    assert.ok(names.includes("lib/src/booking/reconfirmation_deadline_worker.js"));
+    assert.ok(
+      names.includes("lib/src/booking/reconfirmation_deadline_worker.js"),
+    );
     assert.ok(names.includes("lib/src/modules/operations/emergency_switch.js"));
     assert.ok(
       !names.some((n) =>
-        /stand\/|\/test\/|dev_notifications|dev_content_media/u.test(
-          n,
-        ),
+        /stand\/|\/test\/|dev_notifications|dev_content_media/u.test(n),
       ),
     );
     assert.deepEqual(
