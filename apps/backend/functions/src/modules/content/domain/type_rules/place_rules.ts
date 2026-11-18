@@ -150,7 +150,7 @@ function validateCategory(
   if (!categoryOk || !subcategoryOk) return;
   const categoryId = body.categoryId as string;
   const subcategoryId = body.subcategoryId as string;
-  // Category is chosen by the Creator; it is never inferred from the title.
+  // Category is chosen by the User; it is never inferred from the title.
   const applies = context.lookups.subcategoryApplies('place', categoryId, subcategoryId);
   if (applies === undefined) issues.add('place.taxonomy_unavailable');
   else issues.require(applies, 'place.subcategory.not_applicable');

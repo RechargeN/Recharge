@@ -110,13 +110,13 @@ async function declare(local: Local, body: unknown, expectedRevision = 0) {
 
 /** Verified, with a fresh Session (session2) after the security revision moved. */
 async function verify(local: Local) {
-  await local.authority.creatorVerification.submit({
+  await local.authority.identityVerification.submit({
     userId: ids.user1,
     verificationId: ids.verification1,
     evidenceRefIds: [ids.evidence1],
     nowUtc: '2026-09-22T00:00:03.000Z',
   });
-  await local.authority.creatorVerification.decide({
+  await local.authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: ids.user1,
     status: 'verified',

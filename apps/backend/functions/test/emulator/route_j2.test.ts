@@ -596,13 +596,13 @@ void test(
       nowUtc,
       accountCreationEnabled: true,
     });
-    await authority.creatorVerification.submit({
+    await authority.identityVerification.submit({
       userId: account.userId,
       verificationId: randomUUID(),
       evidenceRefIds: [randomUUID()],
       nowUtc,
     });
-    await authority.creatorVerification.decide({
+    await authority.identityVerification.decide({
       reviewerId: reviewer,
       userId: account.userId,
       status: 'verified',

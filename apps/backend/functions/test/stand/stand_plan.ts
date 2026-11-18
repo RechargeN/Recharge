@@ -41,7 +41,7 @@ export const standPages = Object.freeze([
   }),
 ] as const);
 
-export const standCreatorVerification = Object.freeze({
+export const standIdentityVerification = Object.freeze({
   verificationId: '5d1e0000-0000-4000-8000-00000000c001',
   evidenceRefIds: Object.freeze(['5d1e0000-0000-4000-8000-00000000d001']),
 });

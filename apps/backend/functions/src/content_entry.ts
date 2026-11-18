@@ -105,7 +105,7 @@ export function assertEmulatorAuthoringTypes(types: ReadonlySet<string>): void {
 
 /**
  * C3/D3.1/D3.2/D3.4 Emulator-only authoring. Content is composed with the real ports it
- * already has: Identity publisher eligibility (Session, verified Creator, exact
+ * already has: Identity publisher eligibility (Session, identity verification where required, exact
  * Page), Media readiness of the exact revision, and the C2 moderation verifier,
  * which makes review mandatory before publication. Only the given authoring
  * types are enabled (default `event`), and only here; the default composition

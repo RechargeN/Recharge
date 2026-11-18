@@ -4,7 +4,7 @@ import type {
 } from '../domain/repositories.js';
 import { normalizeLegacyAccount, type Account } from '../domain/account.js';
 import type { AuthIdentity } from '../domain/auth_identity.js';
-import type { CreatorVerification } from '../domain/creator_verification.js';
+import type { IdentityVerification } from '../domain/identity_verification.js';
 import type { ManagedPage } from '../domain/managed_page.js';
 import type { PageMembership } from '../domain/page_membership.js';
 import type { SellerDeclaration } from '../domain/seller_declaration.js';
@@ -16,7 +16,7 @@ interface Store {
   readonly identities: Map<string, AuthIdentity>;
   readonly sessions: Map<string, IdentitySession>;
   readonly accessSnapshots: Map<string, AccessSnapshot>;
-  readonly verifications: Map<string, CreatorVerification>;
+  readonly verifications: Map<string, IdentityVerification>;
   readonly pages: Map<string, ManagedPage>;
   readonly memberships: Map<string, PageMembership>;
   readonly sellerDeclarations: Map<string, SellerDeclaration>;

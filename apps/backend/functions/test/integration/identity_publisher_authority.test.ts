@@ -294,13 +294,13 @@ void test('verified Creator obtains exact personal and page Publisher authority 
   });
   // ADR 0023: an unverified User is a personal publisher (money is checked by Content).
   assert.equal(unverified.reason, 'eligible');
-  await authority.creatorVerification.submit({
+  await authority.identityVerification.submit({
     userId: ids.user1,
     verificationId: ids.verification1,
     evidenceRefIds: [ids.evidence1],
     nowUtc: '2026-09-22T00:00:03.000Z',
   });
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: ids.user1,
     status: 'verified',
@@ -401,13 +401,13 @@ void test('membership and account revocation invalidate cached authority', async
     installationId: 'install-1',
     snapshotExpiresAtUtc: '2026-09-22T00:05:01.000Z',
   });
-  await authority.creatorVerification.submit({
+  await authority.identityVerification.submit({
     userId: ids.user1,
     verificationId: ids.verification1,
     evidenceRefIds: [ids.evidence1],
     nowUtc: '2026-09-22T00:00:02.000Z',
   });
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: ids.user1,
     status: 'verified',
@@ -557,13 +557,13 @@ void test('page grants are role-bounded and suspended pages become restricted', 
     nowUtc: '2026-09-22T00:00:00.000Z',
     accountCreationEnabled: true,
   });
-  await authority.creatorVerification.submit({
+  await authority.identityVerification.submit({
     userId: ids.user1,
     verificationId: ids.verification1,
     evidenceRefIds: [ids.evidence1],
     nowUtc: '2026-09-22T00:00:01.000Z',
   });
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: ids.user1,
     status: 'verified',
@@ -663,13 +663,13 @@ void test('restricted pages do not consume active page creation quota', async ()
     nowUtc: '2026-09-22T00:00:00.000Z',
     accountCreationEnabled: true,
   });
-  await authority.creatorVerification.submit({
+  await authority.identityVerification.submit({
     userId: ids.user1,
     verificationId: ids.verification1,
     evidenceRefIds: [ids.evidence1],
     nowUtc: '2026-09-22T00:00:01.000Z',
   });
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: ids.user1,
     status: 'verified',

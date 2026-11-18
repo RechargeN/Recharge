@@ -5,7 +5,7 @@ import type { PageCreationPolicyPort } from './ports/page_creation_policy_port.j
 import { AccountLinkingService } from './account_linking_service.js';
 import { AccountSecurityService } from './account_security_service.js';
 import { AccessSnapshotService } from './access_snapshot_service.js';
-import { CreatorVerificationService } from './creator_verification_service.js';
+import { IdentityVerificationService } from './identity_verification_service.js';
 import { ManagedPageService } from './managed_page_service.js';
 import { PublisherEligibilityService } from './publisher_eligibility_service.js';
 import { SellerDeclarationService } from './seller_declaration_service.js';
@@ -21,7 +21,7 @@ export class IdentityPublisherAuthority {
   readonly accounts: AccountLinkingService;
   readonly sessions: SessionAuthorityService;
   readonly accountSecurity: AccountSecurityService;
-  readonly creatorVerification: CreatorVerificationService;
+  readonly identityVerification: IdentityVerificationService;
   readonly pages: ManagedPageService;
   readonly access: AccessSnapshotService;
   readonly publishers: PublisherEligibilityService;
@@ -37,7 +37,7 @@ export class IdentityPublisherAuthority {
     this.accounts = new AccountLinkingService(input.repository, input.providerVerifier);
     this.sessions = new SessionAuthorityService(input.repository);
     this.accountSecurity = new AccountSecurityService(input.repository);
-    this.creatorVerification = new CreatorVerificationService(
+    this.identityVerification = new IdentityVerificationService(
       input.repository,
       input.verificationDecisions,
     );

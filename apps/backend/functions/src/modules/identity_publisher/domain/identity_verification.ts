@@ -1,20 +1,20 @@
 import type {
-  CreatorVerificationStatus,
-  CreatorVerificationV1,
+  IdentityVerificationStatus,
+  IdentityVerificationV1,
 } from '../../../contracts/identity_v1.js';
 import { parseEntityId } from '../../../shared/ids.js';
 import { deepFreeze } from '../../../shared/immutable.js';
 import { parseUtcInstant } from '../../../shared/utc_instant.js';
 import { IdentityFailure } from './failures.js';
 
-export type CreatorVerification = CreatorVerificationV1;
+export type IdentityVerification = IdentityVerificationV1;
 
-export function submitCreatorVerification(input: {
+export function submitIdentityVerification(input: {
   readonly verificationId: string;
   readonly userId: string;
   readonly evidenceRefIds: readonly string[];
   readonly submittedAtUtc: string;
-}): CreatorVerification {
+}): IdentityVerification {
   if (input.evidenceRefIds.length < 1 || input.evidenceRefIds.length > 16)
     throw new IdentityFailure('invalid_transition');
   return deepFreeze({
@@ -28,19 +28,19 @@ export function submitCreatorVerification(input: {
   });
 }
 
-export function decideCreatorVerification(
-  verification: CreatorVerification,
-  status: Exclude<CreatorVerificationStatus, 'pendingReview'>,
+export function decideIdentityVerification(
+  verification: IdentityVerification,
+  status: Exclude<IdentityVerificationStatus, 'pendingReview'>,
   decidedAtUtc: string,
-): CreatorVerification {
+): IdentityVerification {
   const allowed =
     verification.status === 'pendingReview'
-      ? new Set<CreatorVerificationStatus>(['verified', 'rejected', 'revoked'])
+      ? new Set<IdentityVerificationStatus>(['verified', 'rejected', 'revoked'])
       : verification.status === 'verified'
-        ? new Set<CreatorVerificationStatus>(['suspended', 'revoked'])
+        ? new Set<IdentityVerificationStatus>(['suspended', 'revoked'])
         : verification.status === 'suspended'
-          ? new Set<CreatorVerificationStatus>(['verified', 'revoked'])
-          : new Set<CreatorVerificationStatus>();
+          ? new Set<IdentityVerificationStatus>(['verified', 'revoked'])
+          : new Set<IdentityVerificationStatus>();
   if (!allowed.has(status)) throw new IdentityFailure('invalid_transition');
   return deepFreeze({
     ...verification,

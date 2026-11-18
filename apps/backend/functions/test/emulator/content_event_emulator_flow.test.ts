@@ -122,13 +122,13 @@ async function bootstrap() {
     ['staff', staff],
   ] as const)
     await account(label, id);
-  await authority.creatorVerification.submit({
+  await authority.identityVerification.submit({
     userId: creator,
     verificationId: randomUUID(),
     evidenceRefIds: [randomUUID()],
     nowUtc,
   });
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: reviewer,
     userId: creator,
     status: 'verified',

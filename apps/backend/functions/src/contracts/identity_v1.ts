@@ -6,7 +6,7 @@ export type IdentityProvider = 'google' | 'apple';
 export type AccountStatus = 'active' | 'restricted' | 'blocked' | 'deleted';
 export type IdentitySessionStatus =
   'active' | 'stepUpRequired' | 'revoked' | 'expired' | 'compromised';
-export type CreatorVerificationStatus =
+export type IdentityVerificationStatus =
   'pendingReview' | 'verified' | 'rejected' | 'suspended' | 'revoked';
 
 export interface AccountV1 {
@@ -100,11 +100,11 @@ export interface AccessSnapshotV1 {
   readonly expiresAtUtc: UtcInstant;
 }
 
-export interface CreatorVerificationV1 {
+export interface IdentityVerificationV1 {
   readonly schemaVersion: 1;
   readonly verificationId: EntityId;
   readonly userId: EntityId;
-  readonly status: CreatorVerificationStatus;
+  readonly status: IdentityVerificationStatus;
   readonly revision: number;
   readonly submittedAtUtc: UtcInstant;
   readonly decidedAtUtc?: UtcInstant;
