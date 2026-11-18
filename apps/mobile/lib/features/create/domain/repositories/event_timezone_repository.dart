@@ -27,6 +27,16 @@ class EventLocalTimeException implements Exception {
 }
 
 abstract class EventTimezoneRepository {
+  /// Whether a local interval or either endpoint touches a missing/repeated
+  /// wall-clock range. End minutes may extend into the next calendar day.
+  /// Consumers retain their own skip/shift policy.
+  bool intersectsTransition({
+    required LocalDate date,
+    required int startMinuteLocal,
+    required int endMinuteLocal,
+    required String timezoneId,
+  });
+
   LocalDate localDateAt({
     required DateTime instantUtc,
     required String timezoneId,

@@ -24,8 +24,10 @@ class BuildSessionPublicProjectionUseCase {
             .map(
               (SessionSlotProjection p) => PublicSessionOffer(
                 slotKey: p.slotKey,
-                startAtUtc: p.startAtUtc,
-                endAtUtc: p.endAtUtc,
+                // The internal entity requires both UTC bounds for any
+                // resolved status; DST-skipped entries never reach here.
+                startAtUtc: p.startAtUtc!,
+                endAtUtc: p.endAtUtc!,
                 timezoneId: p.timezoneId,
               ),
             )

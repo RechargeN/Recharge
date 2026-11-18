@@ -827,3 +827,35 @@ C2b2b separately owns the full protected-interval check, honest internal skipped
 projection values and removal of host-local preview formatting. C2b3 owns
 persisted Event/Session UTC fields and legacy reads. Full host/CI gate results
 are checkpoint evidence; no device, Emulator, cloud or R1 acceptance is implied.
+
+## 24. M2-C2b2b Session protected intervals and zoned preview — 2026-11-18
+
+C2b2a `c70ff91` passed complete Windows/Linux suites with 1462 tests and
+analyzer/boundary/diff gates. C2b2b enforces the existing Session §11.4 policy
+through EventTimezoneRepository's TZDB adapter: the complete slot and protected
+buffer are checked against missing/repeated wall-clock ranges. Binary search
+limits inspection to relevant offset transitions; there is no minute scan or
+new resolver/library. Event shift/reject and earlier/later policies are unchanged.
+
+Gap/overlap ranges are half-open; a candidate endpoint inside one is unsafe.
+Thus a slot ending at the first ambiguous/missing minute is skipped, while a
+slot starting at the first unambiguous minute after the range remains valid.
+The buffer can cross midnight. Tests cover both Riga transitions, half-hour
+Lord Howe changes, Apia's skipped date, exact boundaries and calendar overflow.
+Unsupported ranges fail closed without retaining partial offers.
+
+Internal SessionSlotProjection retains shared LocalDate/IanaTimeZone and local
+minute bounds. A DST-skipped candidate has no fabricated UTC timestamps;
+resolved statuses require a positive pair of UtcInstant values. The existing
+public projector still allowlists offered candidates only, preserving public
+shape, freshness and providerAvailabilityUnknown semantics. Stable keys,
+revision, duration, notice and candidate cap remain feature-owned.
+
+Creator preview renders local date/time and the listing zone, including bounded
+skipped-date diagnostics with a human-readable clock-change reason. It does not
+convert labels through the device zone or expose diagnostics to public offers.
+No stored schema, writer, Booking lifecycle or authority is added.
+
+Checkpoint evidence records complete gates and any failed attempts separately.
+C2b3 persisted Create UTC/legacy reads, C3–C5 and M2-D/E remain open. This is
+local/mock work, not R1, device, Emulator, cloud runtime or Accepted promotion.

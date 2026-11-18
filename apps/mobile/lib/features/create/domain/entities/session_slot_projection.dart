@@ -1,3 +1,7 @@
+import '../../../../shared/primitives/time/local_date.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
+import '../../../../shared/primitives/time/iana_time_zone.dart';
+
 /// Internal-only status of a materialized candidate slot
 /// (BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md §11.6). Never exposed as-is to
 /// Viewers — the public projector allowlists only [offeredBySchedule].
@@ -14,23 +18,51 @@ enum SessionProjectionStatus {
 /// stored source of truth — always derived from `SessionSchedule` +
 /// `SessionAvailabilityException` (§11.2, §16.1 invariant).
 class SessionSlotProjection {
-  const SessionSlotProjection({
+  SessionSlotProjection({
     required this.slotKey,
     required this.scheduleRevision,
-    required this.localDate,
-    required this.startAtUtc,
-    required this.endAtUtc,
-    required this.timezoneId,
+    required String localDate,
+    required this.startMinuteLocal,
+    required this.endMinuteLocal,
+    required DateTime? startAtUtc,
+    required DateTime? endAtUtc,
+    required String timezoneId,
     required this.internalStatus,
     this.internalReasonCode,
-  });
+  }) : date = LocalDate.parse(localDate),
+       zone = IanaTimeZone.parse(timezoneId),
+       _start = startAtUtc == null ? null : UtcInstant(startAtUtc),
+       _end = endAtUtc == null ? null : UtcInstant(endAtUtc) {
+    if (startMinuteLocal < 0 ||
+        startMinuteLocal >= 1440 ||
+        endMinuteLocal <= startMinuteLocal ||
+        endMinuteLocal > 1440) {
+      throw ArgumentError('Invalid local slot bounds');
+    }
+    date.addDays(endMinuteLocal ~/ 1440);
+    if (internalStatus == SessionProjectionStatus.dstTransitionSkipped) {
+      if (_start != null || _end != null) {
+        throw ArgumentError('A skipped local slot has no resolved UTC bounds');
+      }
+    } else if (_start == null ||
+        _end == null ||
+        !_end.value.isAfter(_start.value)) {
+      throw ArgumentError('A resolved slot requires positive UTC bounds');
+    }
+  }
 
   final String slotKey;
   final int scheduleRevision;
-  final String localDate;
-  final DateTime startAtUtc;
-  final DateTime endAtUtc;
-  final String timezoneId;
+  final LocalDate date;
+  final IanaTimeZone zone;
+  final int startMinuteLocal;
+  final int endMinuteLocal;
+  final UtcInstant? _start;
+  final UtcInstant? _end;
+  String get localDate => date.toString();
+  String get timezoneId => zone.value;
+  DateTime? get startAtUtc => _start?.value;
+  DateTime? get endAtUtc => _end?.value;
   final SessionProjectionStatus internalStatus;
   final String? internalReasonCode;
 }

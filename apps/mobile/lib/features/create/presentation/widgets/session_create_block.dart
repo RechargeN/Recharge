@@ -251,12 +251,19 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
   // --- Блок 2. Когда ---
 
   Widget _whenBlock(SessionDraftData session) {
-    final List<SessionSlotProjection> preview = widget
-        .controller
-        .sessionSchedulePreview
+    final projections = widget.controller.sessionSchedulePreview;
+    final List<SessionSlotProjection> preview = projections
         .where(
           (SessionSlotProjection p) =>
               p.internalStatus == SessionProjectionStatus.offeredBySchedule,
+        )
+        .take(7)
+        .toList(growable: false);
+    final skipped = projections
+        .where(
+          (slot) =>
+              slot.internalStatus ==
+              SessionProjectionStatus.dstTransitionSkipped,
         )
         .take(7)
         .toList(growable: false);
@@ -328,6 +335,14 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
                 Chip(label: Text(_slotLabel(slot))),
             ],
           ),
+        ],
+        if (skipped.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 12),
+          Text(
+            'Skipped because clocks change',
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+          for (final slot in skipped) Text(_slotLabel(slot)),
         ],
         ..._fieldIssues(<String>{'weeklyRules', 'slotDurationMinutes'}),
       ],
@@ -697,10 +712,9 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
   }
 
   static String _slotLabel(SessionSlotProjection slot) {
-    final DateTime local = slot.startAtUtc.toLocal();
     return '${slot.localDate} '
-        '${local.hour.toString().padLeft(2, '0')}:'
-        '${local.minute.toString().padLeft(2, '0')}';
+        '${_minutesLabel(slot.startMinuteLocal)}–'
+        '${_minutesLabel(slot.endMinuteLocal)} · ${slot.timezoneId}';
   }
 }
 

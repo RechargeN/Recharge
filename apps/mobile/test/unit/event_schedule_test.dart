@@ -12,6 +12,113 @@ void main() {
   final MaterializeEventScheduleUseCase materialize =
       MaterializeEventScheduleUseCase(timezone);
 
+  test(
+    'protected intervals include ambiguous endpoints but preserve safe neighbors',
+    () {
+      for (final date in [LocalDate(2026, 3, 29), LocalDate(2026, 10, 25)]) {
+        for (final value in [
+          (120, 179, false),
+          (120, 180, true),
+          (150, 270, true),
+          (180, 210, true),
+          (239, 240, true),
+          (240, 300, false),
+        ]) {
+          expect(
+            timezone.intersectsTransition(
+              date: date,
+              startMinuteLocal: value.$1,
+              endMinuteLocal: value.$2,
+              timezoneId: 'Europe/Riga',
+            ),
+            value.$3,
+            reason: '$date: ${value.$1}..${value.$2}',
+          );
+        }
+      }
+    },
+  );
+
+  test(
+    'protected intervals detect half-hour transitions without hour assumptions',
+    () {
+      for (final value in [
+        (LocalDate(2026, 4, 5), 89, 90, true),
+        (LocalDate(2026, 4, 5), 120, 150, false),
+        (LocalDate(2026, 10, 4), 119, 120, true),
+        (LocalDate(2026, 10, 4), 150, 180, false),
+      ]) {
+        expect(
+          timezone.intersectsTransition(
+            date: value.$1,
+            startMinuteLocal: value.$2,
+            endMinuteLocal: value.$3,
+            timezoneId: 'Australia/Lord_Howe',
+          ),
+          value.$4,
+        );
+      }
+    },
+  );
+
+  test('protected buffer can cross midnight and a skipped calendar date', () {
+    for (final value in [(1619, false), (1620, true), (1650, true)]) {
+      expect(
+        timezone.intersectsTransition(
+          date: LocalDate(2026, 3, 28),
+          startMinuteLocal: 1410,
+          endMinuteLocal: value.$1,
+          timezoneId: 'Europe/Riga',
+        ),
+        value.$2,
+      );
+    }
+    expect(
+      timezone.intersectsTransition(
+        date: LocalDate(2011, 12, 29),
+        startMinuteLocal: 1410,
+        endMinuteLocal: 1470,
+        timezoneId: 'Pacific/Apia',
+      ),
+      isTrue,
+    );
+  });
+
+  test(
+    'protected interval validates zone minutes and supported calendar bounds',
+    () {
+      for (final value in [(-1, 60), (1440, 1500), (60, 60)]) {
+        expect(
+          () => timezone.intersectsTransition(
+            date: LocalDate(2026, 1, 1),
+            startMinuteLocal: value.$1,
+            endMinuteLocal: value.$2,
+            timezoneId: 'Europe/Riga',
+          ),
+          throwsA(isA<EventLocalTimeException>()),
+        );
+      }
+      expect(
+        () => timezone.intersectsTransition(
+          date: LocalDate(2026, 1, 1),
+          startMinuteLocal: 60,
+          endMinuteLocal: 120,
+          timezoneId: 'Unknown/Nowhere',
+        ),
+        throwsA(isA<EventLocalTimeException>()),
+      );
+      expect(
+        () => timezone.intersectsTransition(
+          date: LocalDate(9999, 12, 31),
+          startMinuteLocal: 1380,
+          endMinuteLocal: 1440,
+        timezoneId: 'UTC',
+        ),
+        throwsRangeError,
+      );
+    },
+  );
+
   EventDraftData defaults() => EventDraftData.defaults(
     marketCityId: 'riga',
     countryCode: 'LV',
