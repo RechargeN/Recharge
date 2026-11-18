@@ -51,17 +51,19 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
 ## Разрешённые конфликты (решения приняты, не пересматривать молча)
 
 1. **Роли и identity** — по ADR 0013, ADR 0015 и Accepted ADR 0023
-   (2026-11-06, суперсидит ADR 0015 §2–§4 и перечень ролей): три вида
-   аккаунта — **User (он же Creator)**, **Professional Page**, **Admin**.
+   (2026-11-06, суперсидит ADR 0015 §2–§4 и перечень ролей; решение владельца
+   2026-11-18): у всех пользователей одна роль **User**, исключение —
+   внутренние **Admin**; слова и роли Creator в продукте нет. **Professional
+   Page** — отдельный тип страницы, а не роль аккаунта.
    Глобальные роли только `User` и `Admin` + capability-based permissions;
    старое значение `Creator` читается как `User`. Viewer — обязательно
    авторизованный User. Любой User публикует бесплатный личный контент без
    проверки личности (модерация, лимиты); платное, бронирование, аренда и сбор
    денег — только от проверенной Professional Page или при серверном факте
    проверки личности. Google/Apple auth прав сам по себе не даёт; роли, права,
-   членство и проверки выдаёт только сервер. По ADR 0021 единый личный
-   интерфейс называется Creator; пользователь не переключается между Viewer и
-   Creator. Professional Page (`ManagedPage`) — членство (owner/manager) в
+   членство и проверки выдаёт только сервер. По ADR 0021 и ADR 0023 у каждого
+   аккаунта один личный профиль (Profile / Профиль); режимов Viewer/Creator
+   нет. Professional Page (`ManagedPage`) — членство (owner/manager) в
    конкретной странице с page-scoped capabilities (`manage_page`,
    `view_insights`, `manage_bookings`), а не глобальная роль; права одной
    страницы не открывают другую; владелец места (Place) — проверенная
@@ -69,7 +71,8 @@ docs/architecture/         # ARCHITECTURE_BASELINE, LAUNCH_STATUS
    переключает только `Personal profile ↔ Professional Page`; Admin tools —
    отдельная capability-gated поверхность, не профиль, workspace или
    publisher. Термин `Pro generator` — legacy UI и не целевая модель.
-   Реализация ADR 0023 (контракт → сервер → правила → клиент) — отдельный срез.
+   Реализация ADR 0023 (контракт → сервер → правила → клиент) — срез
+   ADR-0023-IMPL, начат 2026-11-18 по решению владельца.
    Guest mode более не является целевой продуктовой политикой.
 2. **ID** — по ADR 0013: server IDs — immutable ULID/UUID-style IDs.
    Permanent client-generated ID допустим только там, где это явно принимает
@@ -183,8 +186,8 @@ acceptance criteria, `flutter analyze`, `flutter test`, boundary и diff checks;
 | Find People publication (D3.7/T3) | Review: local/LV Emulator, default-off private source/public cell, consent и синтетическая 18+ аттестация; локальные gates завершены. Production authority, Legal/Privacy, device и staging остаются открыты; см. D3_7_FIND_PEOPLE_PUBLICATION_AMENDMENT.md. |
 | Category System v1.4.3 | реализовано: 28 категорий / 530 подкатегорий, legacy migration; `route` означает только Route; 14 place-only типов поддерживают адаптивный Place Create |
 | Auth | mock; целевое по ADR 0015: обязательная авторизация Viewer через Firebase Google/Apple, без guest mode |
-| Personal Profile / Viewer retirement | PVR-01 In progress: единый личный Creator UI и архив Viewer реализованы локально по ADR 0021; роли, verification и page guards сохранены. До Done открыты Saved isolation и регрессионные сценарии auth/workspace/publisher; подробности — LAUNCH_STATUS и PVR verification |
-| Creator verification / roles / capabilities | IDP-03A local/mock в Review: access snapshot явно содержит Admin и verified Creator; Admin-only preview Creator/Professional Page без смены authority; production shell скрывает legacy-переключатель режимов; production verification НЕ реализована |
+| Personal Profile / Viewer retirement | PVR-01 In progress: единый личный профиль (UI) и архив Viewer реализованы локально по ADR 0021; роли, verification и page guards сохранены. До Done открыты Saved isolation и регрессионные сценарии auth/workspace/publisher; подробности — LAUNCH_STATUS и PVR verification |
+| Identity verification / roles / capabilities | IDP-03A local/mock в Review: access snapshot явно содержит Admin и verified Creator; Admin-only preview Creator/Professional Page без смены authority; production shell скрывает legacy-переключатель режимов; production verification НЕ реализована |
 | Professional Page / Active workspace / PublisherRef | IDP-03A в Review, IDP-04A в Doing: пользователь сам создаёт страницы (с нуля, лимит 3, дальше pending-заявка модераторам), exact-ID доступ, локальные уведомления, switcher и навигация страниц. Локально в Review: публичная страница (PPP-01A), редактор профиля (PP-01A), приглашения в команду (PP-03A). PublisherRef с active-workspace default есть у Event (ECL-01) и Route (J2), остальные 8 типов не переведены; production authority gated |
 | Отзывы (Review) | запланировано (в MVP) |
 | Visit History | VIS-HIST-01 Done: только явная self-reported отметка Place (сегодня или раньше), idempotency place/day, несколько дат, удаление; v2 начинается пустым; просмотр, избранное, бронь и GPS посещением не считаются |
@@ -234,8 +237,8 @@ Recharge — приложение подбора и создания досуг�
 маршруты, активности. Ядро: единый filter flow
 search → filters → map → feed → details с одним общим состоянием
 фильтров (обычный Search, Smart Search, карта, категории, лента). В личном
-workspace единый профиль Creator использует bottom nav:
-Home / Favorites / Smart Search / Notifications / Profile. Creator tools
+workspace единый личный профиль использует bottom nav:
+Home / Favorites / Smart Search / Notifications / Profile. Create tools
 открываются внутри Profile/Create Hub, а не заменяют Smart Search. В
 Professional Page workspace навигация:
 Page / Content / Create / Notifications / Account; активная страница
@@ -253,10 +256,10 @@ Find People — полноценный MapObject в общей выдаче.
 
 ## PVR-01 — единый личный профиль, фактический статус 2026-10-10
 
-По Accepted [ADR 0021](docs/adr/0021-unified-personal-profile.md) личный экран называется Creator для
-любого авторизованного User. Отдельная Viewer-композиция снимается; Admin
+По Accepted [ADR 0021](docs/adr/0021-unified-personal-profile.md) личный экран — единый профиль
+любого авторизованного User (по ADR 0023 слова Creator в продукте нет). Отдельная Viewer-композиция снимается; Admin
 presentation preview предлагает creator | professionalPage. UI-название и
-preview не меняют User / Creator / Admin, verification, capabilities,
+preview не меняют User / Admin, verification, capabilities,
 WorkspaceRef, PublisherRef или exact page membership. Personal libraries,
 Saved/Favorites, Visit History, Scenario/Quick Plan, настройки и edit/save
 не требуют publishing verification. Конкретные операции сохраняют свои
