@@ -122,8 +122,17 @@ export function checkN4ePlan(plan, expected) {
       expected.round === 4 &&
       actions.length === 1 &&
       actions[0] === "update" &&
-      (c.address === channelAddress || roundThreeUpdatable.test(c.address));
-    if (roundFourUpdate && c.address === channelAddress) {
+      (c.address === channelAddress ||
+        roundThreeUpdatable.test(c.address) ||
+        // Local Terraform record only: its input re-reads the delivery receipt after the channel
+        // change; its precondition (delivered and owner-acknowledged) is still enforced at apply.
+        c.address === "terraform_data.budget_delivery_gate");
+    if (
+      roundFourUpdate &&
+      c.address === "terraform_data.budget_delivery_gate"
+    ) {
+      // nothing in the cloud changes
+    } else if (roundFourUpdate && c.address === channelAddress) {
       if (
         after.type !== "email" ||
         !expected.alertEmail ||

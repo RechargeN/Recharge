@@ -387,6 +387,19 @@ test("round 3: the alert mailbox on the two Critical policies only, with its own
     }).join();
   };
   assert.equal(run(list()), "");
+  const gate = {
+    address: "terraform_data.budget_delivery_gate",
+    type: "terraform_data",
+    change: { actions: ["update"], before: {}, after: {} },
+  };
+  assert.equal(run([...list(), gate]), "");
+  assert.match(
+    run([
+      ...list(),
+      { ...gate, change: { ...gate.change, actions: ["delete", "create"] } },
+    ]),
+    /forbidden action delete\+create/u,
+  );
   assert.match(
     run(list({ email: "someone@else.invalid" })),
     /reviewed e-mail address/u,
