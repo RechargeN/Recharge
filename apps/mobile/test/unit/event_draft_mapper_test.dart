@@ -4,8 +4,187 @@ import 'package:recharge/features/create/data/models/create_draft_model.dart';
 import 'package:recharge/features/create/data/models/event_draft_mapper.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/entities/event_draft_data.dart';
+import 'package:recharge/features/create/domain/entities/event_admission.dart';
 
 void main() {
+  EventDraftData timedEvent() {
+    final start = DateTime.utc(2026, 8, 3, 12, 0, 0, 123, 456);
+    final end = start.add(const Duration(hours: 1));
+    return EventDraftData.defaults(
+      marketCityId: 'riga',
+      countryCode: 'LV',
+      city: 'Riga',
+      timezoneId: 'Pacific/Honolulu',
+      currencyCode: 'EUR',
+    ).copyWith(
+      schemaVersion: EventDraftData.currentSchemaVersion,
+      occurrences: [
+        EventOccurrenceDraft(
+          id: 'o1',
+          localDate: '2026-08-03',
+          startAtUtc: start,
+          endAtUtc: end,
+        ),
+      ],
+      occurrenceOverrides: {
+        'o1': EventOccurrenceOverrideDraft(
+          occurrenceId: 'o1',
+          startAtUtc: start,
+          endAtUtc: end,
+        ),
+      },
+      admission: EventAdmissionDraft(
+        admissionMode: null,
+        registrationMode: null,
+        confirmationMode: null,
+        registrationWindow: EventAccessWindow(
+          kind: EventAccessWindowKind.absolute,
+          opensAtUtc: start,
+          closesAtUtc: end,
+        ),
+      ),
+    );
+  }
+
+  test(
+    'Event UTC fields roundtrip exact microseconds with their explicit zone',
+    () {
+      final source = timedEvent();
+      final wire = EventDraftMapper.toJson(source);
+      final restored = EventDraftMapper.fromJson(wire, defaults: source);
+      expect(
+        restored.occurrences.single.startAtUtc,
+        source.occurrences.single.startAtUtc,
+      );
+      expect(
+        restored.occurrenceOverrides['o1']!.endAtUtc,
+        source.occurrenceOverrides['o1']!.endAtUtc,
+      );
+      expect(
+        restored.admission!.registrationWindow!.opensAtUtc,
+        source.admission!.registrationWindow!.opensAtUtc,
+      );
+      expect(restored.timezoneId, 'Pacific/Honolulu');
+      expect(EventDraftMapper.toJson(restored), wire);
+    },
+  );
+
+  test(
+    'Event corrupt explicit UTC values fail instead of normalizing or dropping',
+    () {
+      final source = timedEvent();
+      for (final location in ['occurrence', 'override', 'window']) {
+        for (final edge in ['start', 'end']) {
+          for (final invalid in <Object>[
+            '2026-08-03T12:00:00',
+            '2026-08-03T12:00:00+03:00',
+            '2026-02-30T12:00:00Z',
+            '2026-08-03T25:00:00Z',
+            '2026-08-03T12:00:00.1234567Z',
+            '',
+            123,
+          ]) {
+            final wire = EventDraftMapper.toJson(source);
+            final Map target = switch (location) {
+              'occurrence' => (wire['occurrences'] as List).single as Map,
+              'override' => (wire['occurrenceOverrides'] as Map)['o1'] as Map,
+              _ => (wire['admission'] as Map)['registrationWindow'] as Map,
+            };
+            final key = location == 'window'
+                ? (edge == 'start' ? 'opensAtUtc' : 'closesAtUtc')
+                : (edge == 'start' ? 'startAtUtc' : 'endAtUtc');
+            target[key] = invalid;
+            expect(
+              () => EventDraftMapper.fromJson(wire, defaults: source),
+              throwsFormatException,
+              reason: '$location/$key: $invalid',
+            );
+          }
+        }
+      }
+    },
+  );
+
+  test(
+    'Event required occurrence bounds fail while optional timestamps stay absent',
+    () {
+      final source = timedEvent();
+      for (final field in ['startAtUtc', 'endAtUtc']) {
+        final wire = EventDraftMapper.toJson(source);
+        ((wire['occurrences'] as List).single as Map).remove(field);
+        expect(
+          () => EventDraftMapper.fromJson(wire, defaults: source),
+          throwsFormatException,
+        );
+      }
+      for (final malformed in <Object>[
+        {},
+        [null],
+        [{}],
+      ]) {
+        final wire = EventDraftMapper.toJson(source)
+          ..['occurrences'] = malformed;
+        expect(
+          () => EventDraftMapper.fromJson(wire, defaults: source),
+          throwsFormatException,
+        );
+      }
+      final wire = EventDraftMapper.toJson(source);
+      ((wire['occurrenceOverrides'] as Map)['o1'] as Map)
+        ..remove('startAtUtc')
+        ..['endAtUtc'] = null;
+      ((wire['admission'] as Map)['registrationWindow'] as Map)
+        ..remove('opensAtUtc')
+        ..['closesAtUtc'] = null;
+      final restored = EventDraftMapper.fromJson(wire, defaults: source);
+      expect(restored.occurrenceOverrides['o1']!.startAtUtc, isNull);
+      expect(restored.occurrenceOverrides['o1']!.endAtUtc, isNull);
+      expect(restored.admission!.registrationWindow!.opensAtUtc, isNull);
+      expect(restored.admission!.registrationWindow!.closesAtUtc, isNull);
+    },
+  );
+
+  test(
+    'Event writers reject host-local instants and preserve opaque future schemas',
+    () {
+      final source = timedEvent();
+      final local = DateTime(2026, 8, 3, 12);
+      for (final invalid in [
+        source.copyWith(
+          occurrences: [source.occurrences.single.copyWith(startAtUtc: local)],
+        ),
+        source.copyWith(
+          occurrenceOverrides: {
+            'o1': EventOccurrenceOverrideDraft(
+              occurrenceId: 'o1',
+              endAtUtc: local,
+            ),
+          },
+        ),
+        source.copyWith(
+          admission: source.admission!.copyWith(
+            registrationWindow: source.admission!.registrationWindow!.copyWith(
+              opensAtUtc: local,
+            ),
+          ),
+        ),
+      ]) {
+        expect(() => EventDraftMapper.toJson(invalid), throwsArgumentError);
+      }
+      final future = <String, Object?>{
+        'schemaVersion': 99,
+        'occurrences': [
+          {'startAtUtc': 'future-format'},
+        ],
+      };
+      expect(
+        EventDraftMapper.toJson(
+          EventDraftMapper.fromJson(future, defaults: source),
+        ),
+        future,
+      );
+    },
+  );
   test('Money canonical Event writer and legacy minor-unit reader agree', () {
     final defaults = EventDraftData.defaults(
       marketCityId: 'riga',

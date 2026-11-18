@@ -1,6 +1,7 @@
 import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../shared/primitives/money/money.dart';
 import '../../../../shared/primitives/money/money_parse_result.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 import '../../domain/entities/event_admission.dart';
 import '../../domain/entities/event_inventory.dart';
 import '../../domain/entities/event_draft_data.dart';
@@ -156,12 +157,13 @@ class EventDraftMapper {
       }
     }
     final Map<String, Object?> media = _map(json['mediaMetadata']);
-    final List<EventOccurrenceDraft> occurrences = _list(json['occurrences'])
-        .map(_map)
-        .where((Map<String, Object?> value) => value.isNotEmpty)
-        .map(_occurrence)
-        .whereType<EventOccurrenceDraft>()
-        .toList(growable: false);
+    final rawOccurrences = json['occurrences'];
+    if (rawOccurrences != null && rawOccurrences is! List) {
+      throw const FormatException('Stored Event occurrences must be a list');
+    }
+    final List<EventOccurrenceDraft> occurrences = _list(
+      rawOccurrences,
+    ).map((raw) => _occurrence(_map(raw))).toList(growable: false);
     final Map<String, EventOccurrenceOverrideDraft> overrides =
         <String, EventOccurrenceOverrideDraft>{};
     for (final MapEntry<String, Object?> entry in _map(
@@ -317,8 +319,8 @@ class EventDraftMapper {
             (EventOccurrenceDraft occurrence) => <String, Object?>{
               'id': occurrence.id,
               'localDate': occurrence.localDate,
-              'startAtUtc': occurrence.startAtUtc.toIso8601String(),
-              'endAtUtc': occurrence.endAtUtc.toIso8601String(),
+              'startAtUtc': _dateTimeJson(occurrence.startAtUtc),
+              'endAtUtc': _dateTimeJson(occurrence.endAtUtc),
               'shiftedForDst': occurrence.shiftedForDst,
             },
           )
@@ -327,8 +329,8 @@ class EventDraftMapper {
         for (final MapEntry<String, EventOccurrenceOverrideDraft> entry
             in value.occurrenceOverrides.entries)
           entry.key: <String, Object?>{
-            'startAtUtc': entry.value.startAtUtc?.toIso8601String(),
-            'endAtUtc': entry.value.endAtUtc?.toIso8601String(),
+            'startAtUtc': _dateTimeJson(entry.value.startAtUtc),
+            'endAtUtc': _dateTimeJson(entry.value.endAtUtc),
             'capacity': entry.value.capacity,
             'cancelled': entry.value.cancelled,
           },
@@ -756,8 +758,8 @@ class EventDraftMapper {
       ? null
       : <String, Object?>{
           'kind': value.kind.name,
-          'opensAtUtc': value.opensAtUtc?.toIso8601String(),
-          'closesAtUtc': value.closesAtUtc?.toIso8601String(),
+          'opensAtUtc': _dateTimeJson(value.opensAtUtc),
+          'closesAtUtc': _dateTimeJson(value.closesAtUtc),
           'opensBeforeOccurrenceMinutes': value.opensBeforeOccurrenceMinutes,
           'closesBeforeOccurrenceMinutes': value.closesBeforeOccurrenceMinutes,
         };
@@ -892,13 +894,13 @@ class EventDraftMapper {
           'dstOverlapPolicy': value.dstOverlapPolicy.name,
         };
 
-  static EventOccurrenceDraft? _occurrence(Map<String, Object?> json) {
+  static EventOccurrenceDraft _occurrence(Map<String, Object?> json) {
     final String id = _string(json['id'], '');
     final String localDate = _string(json['localDate'], '');
     final DateTime? start = _dateTime(json['startAtUtc']);
     final DateTime? end = _dateTime(json['endAtUtc']);
     if (id.isEmpty || localDate.isEmpty || start == null || end == null) {
-      return null;
+      throw const FormatException('Incomplete stored Event occurrence');
     }
     return EventOccurrenceDraft(
       id: id,
@@ -982,6 +984,14 @@ class EventDraftMapper {
           _ => null,
         };
 
-  static DateTime? _dateTime(Object? raw) =>
-      DateTime.tryParse(raw?.toString() ?? '')?.toUtc();
+  static DateTime? _dateTime(Object? raw) {
+    if (raw == null) return null;
+    if (raw is! String) {
+      throw const FormatException('Event UTC timestamp must be text');
+    }
+    return UtcInstant.parse(raw).value;
+  }
+
+  static String? _dateTimeJson(DateTime? value) =>
+      value == null ? null : UtcInstant(value).toString();
 }

@@ -18,6 +18,57 @@ import 'package:recharge/features/create/domain/usecases/manage_create_template_
 
 void main() {
   late ManageCreateTemplateUseCase useCase;
+  test('corrupt template UTC cannot be erased by upsert or deletion', () async {
+    const storage = FlutterSecureStorage();
+    final template = useCase.create(
+      userId: 'user-1',
+      name: 'corrupt',
+      draft: _eventDraft(),
+      nowUtc: DateTime.utc(2026),
+    );
+    final sibling = useCase.create(
+      userId: 'user-1',
+      name: 'valid',
+      draft: _eventDraft(),
+      nowUtc: DateTime.utc(2026),
+    );
+    final wire = CreateTemplateModel.fromEntity(template).toJson();
+    final details =
+        ((wire['snapshot'] as Map)['sectionData'] as Map)['event_details']
+            as Map;
+    details['occurrenceOverrides'] = {
+      'o1': {'startAtUtc': '2026-02-30T10:00:00Z'},
+    };
+    final raw = jsonEncode({
+      'schemaVersion': 1,
+      'templates': [wire, CreateTemplateModel.fromEntity(sibling).toJson()],
+    });
+    await storage.write(key: 'create_templates_v1_user-1', value: raw);
+    final repository = CreateTemplateRepositoryImpl(
+      CreateTemplateLocalDataSource(
+        storage,
+        activeMarketCityId: 'riga',
+        activeTimezone: 'Europe/Riga',
+        activeCountry: 'LV',
+        activeCity: 'Riga',
+        activeCurrency: 'EUR',
+      ),
+    );
+    final listed = await repository.listTemplates(
+      userId: 'user-1',
+      objectType: CreateObjectType.event,
+    );
+    expect(listed.map((t) => t.id), [sibling.id]);
+    await expectLater(
+      repository.upsertTemplate(userId: 'user-1', template: sibling),
+      throwsFormatException,
+    );
+    await expectLater(
+      repository.deleteTemplate(userId: 'user-1', templateId: template.id),
+      throwsFormatException,
+    );
+    expect(await storage.read(key: 'create_templates_v1_user-1'), raw);
+  });
   for (final location in ['base', 'currency', 'nested']) {
     test(
       'unreadable $location template money blocks mutation without deleting raw record',
