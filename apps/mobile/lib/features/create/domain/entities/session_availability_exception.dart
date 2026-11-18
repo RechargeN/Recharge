@@ -31,7 +31,7 @@ class SessionAvailabilityException {
   bool get isStructurallyValid {
     final SessionLocalDate? start = SessionLocalDate.tryParse(startDateLocal);
     final SessionLocalDate? end = SessionLocalDate.tryParse(endDateLocal);
-    if (start == null || end == null || end < start) return false;
+    if (start == null || end == null || end.compareTo(start) < 0) return false;
     if (id.trim().isEmpty || createdByUserId.trim().isEmpty) return false;
     if ((privateNote?.length ?? 0) > maxPrivateNoteLength) return false;
     if (allDay) return true;
@@ -51,7 +51,7 @@ class SessionAvailabilityException {
     final SessionLocalDate? start = SessionLocalDate.tryParse(startDateLocal);
     final SessionLocalDate? end = SessionLocalDate.tryParse(endDateLocal);
     if (start == null || end == null) return false;
-    if (date < start || end < date) return false;
+    if (date.compareTo(start) < 0 || end.compareTo(date) < 0) return false;
     if (allDay) return true;
     final int s = startMinuteLocal ?? 0;
     final int e = endMinuteLocalExclusive ?? 1440;

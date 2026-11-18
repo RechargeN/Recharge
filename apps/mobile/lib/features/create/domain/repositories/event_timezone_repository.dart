@@ -1,4 +1,5 @@
 import '../entities/event_draft_data.dart';
+import '../../../../shared/primitives/time/local_date.dart';
 
 class ResolvedEventLocalTime {
   const ResolvedEventLocalTime({
@@ -26,6 +27,11 @@ class EventLocalTimeException implements Exception {
 }
 
 abstract class EventTimezoneRepository {
+  LocalDate localDateAt({
+    required DateTime instantUtc,
+    required String timezoneId,
+  });
+
   ResolvedEventLocalTime resolve({
     required String timezoneId,
     required int year,

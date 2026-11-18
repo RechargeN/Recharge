@@ -5,6 +5,7 @@ import '../../domain/entities/event_draft_data.dart';
 import '../../domain/repositories/event_timezone_repository.dart';
 import '../../../../shared/primitives/time/local_date.dart';
 import '../../../../shared/primitives/time/iana_time_zone.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 
 class EventTimezoneRepositoryImpl implements EventTimezoneRepository {
   EventTimezoneRepositoryImpl() {
@@ -15,6 +16,28 @@ class EventTimezoneRepositoryImpl implements EventTimezoneRepository {
   }
 
   static bool _initialized = false;
+
+  @override
+  LocalDate localDateAt({
+    required DateTime instantUtc,
+    required String timezoneId,
+  }) {
+    final instant = UtcInstant(instantUtc).value;
+    timezone.Location location;
+    try {
+      location = timezone.getLocation(IanaTimeZone.parse(timezoneId).value);
+    } on FormatException {
+      throw const EventLocalTimeException('timezone_not_found');
+    } on timezone.LocationNotFoundException {
+      throw const EventLocalTimeException('timezone_not_found');
+    }
+    final local = timezone.TZDateTime.from(instant, location);
+    try {
+      return LocalDate(local.year, local.month, local.day);
+    } on FormatException {
+      throw const EventLocalTimeException('invalid_local_date');
+    }
+  }
 
   @override
   ResolvedEventLocalTime resolve({

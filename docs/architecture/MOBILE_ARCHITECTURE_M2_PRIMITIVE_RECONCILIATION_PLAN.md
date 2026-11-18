@@ -799,3 +799,31 @@ authority change is included.
 Complete gate results are recorded in checkpoint evidence. Session local-day
 projection, remaining Event/Session persisted UTC fields, Scenario/transit,
 Visit, MarketConfig and final M2-D/E cleanup/gates remain separate work.
+
+## 23. M2-C2b2a Session calendar projection and clock — 2026-11-17
+
+C2b1 `2a97568` passed complete Windows/Linux suites with 1454 tests and
+analyzer/boundary/diff gates. C2b2a makes SessionLocalDate a forwarding alias
+to shared LocalDate, retained until M2-D. Exception dates now share strict
+Gregorian validation and calendar comparison without silent normalization.
+
+The existing EventTimezoneRepository supplies instant-to-local-date conversion
+through its TZDB adapter. Session projection starts on the date of generatedAtUtc
+in the listing's IANA zone and validates the complete calendar range before
+emitting candidates. Unknown zones and unsupported calendar ranges return a
+typed failure on the existing materialization result; existing validation
+codes block readiness and no partial public offers are produced.
+
+Materializer and public projector require explicit UTC clock parameters.
+SessionCreateCoordinator samples the application clock once and passes the
+same instant to both. Stable slot keys, schedule revision, duration/buffer,
+notice, candidate cap, five-minute freshness and public allowlist are retained.
+No new clock service, repository, parser, aggregate or storage path is added.
+
+This checkpoint does not claim complete Session DST reconciliation. Read-only
+probes on C2b1 reproduce three violations of Session spec §11.4: transition
+inside slot or protected buffer is not caught by the current start-only check.
+C2b2b separately owns the full protected-interval check, honest internal skipped
+projection values and removal of host-local preview formatting. C2b3 owns
+persisted Event/Session UTC fields and legacy reads. Full host/CI gate results
+are checkpoint evidence; no device, Emulator, cloud or R1 acceptance is implied.

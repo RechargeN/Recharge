@@ -4,16 +4,17 @@ import 'package:recharge/features/create/domain/entities/session_price_disclosur
 import 'package:recharge/features/create/domain/entities/session_schedule.dart';
 import 'package:recharge/features/create/domain/entities/session_validation_issue.dart';
 import 'package:recharge/features/create/domain/usecases/validate_session_draft_usecase.dart';
+import 'package:recharge/features/create/domain/usecases/materialize_session_schedule_usecase.dart';
 
 void main() {
   const ValidateSessionDraftUseCase validate = ValidateSessionDraftUseCase();
 
   const SessionExternalValidationContext validContext =
       SessionExternalValidationContext(
-    categoryAllowedForSession: true,
-    hasCover: true,
-    publisherEligible: true,
-  );
+        categoryAllowedForSession: true,
+        hasCover: true,
+        publisherEligible: true,
+      );
 
   SessionDraftData validDraft() => SessionDraftData(
     resourceName: 'Sauna 1',
@@ -45,6 +46,34 @@ void main() {
     expect(issues.where((i) => i.isBlocking), isEmpty);
   });
 
+  test(
+    'typed calendar materialization errors block existing readiness codes',
+    () {
+      for (final failure in SessionCalendarFailure.values) {
+        final issues = validate(
+          validDraft(),
+          context: validContext,
+          materialization: SessionScheduleMaterializationResult(
+            projections: [],
+            candidateCapExceeded: false,
+            calendarFailure: failure,
+          ),
+        );
+        final code = failure == SessionCalendarFailure.unknownTimezone
+            ? SessionBlockingCode.timezoneInvalid
+            : SessionBlockingCode.rangeInvalid;
+        expect(issues.where((i) => i.code == code).single.isBlocking, isTrue);
+        expect(
+          issues
+              .where((i) => i.code == SessionWarningCode.noOffersInWindow)
+              .single
+              .isBlocking,
+          isFalse,
+        );
+      }
+    },
+  );
+
   test('empty weekly schedule blocks publish', () {
     final draft = validDraft().copyWith(
       schedule: const SessionSchedule(
@@ -57,28 +86,31 @@ void main() {
     expect(hasCode(issues, SessionBlockingCode.scheduleEmpty), isTrue);
   });
 
-  test('overlapping ranges on the same weekday block publish (§10.1 rule 4)', () {
-    final draft = validDraft().copyWith(
-      schedule: validDraft().schedule.copyWith(
-        weeklyRules: const [
-          SessionWeeklyRule(
-            id: 'r1',
-            isoWeekday: 1,
-            startMinuteLocal: 540,
-            endMinuteLocalExclusive: 660,
-          ),
-          SessionWeeklyRule(
-            id: 'r2',
-            isoWeekday: 1,
-            startMinuteLocal: 600,
-            endMinuteLocalExclusive: 720,
-          ),
-        ],
-      ),
-    );
-    final issues = validate(draft, context: validContext);
-    expect(hasCode(issues, SessionBlockingCode.rangeOverlap), isTrue);
-  });
+  test(
+    'overlapping ranges on the same weekday block publish (§10.1 rule 4)',
+    () {
+      final draft = validDraft().copyWith(
+        schedule: validDraft().schedule.copyWith(
+          weeklyRules: const [
+            SessionWeeklyRule(
+              id: 'r1',
+              isoWeekday: 1,
+              startMinuteLocal: 540,
+              endMinuteLocalExclusive: 660,
+            ),
+            SessionWeeklyRule(
+              id: 'r2',
+              isoWeekday: 1,
+              startMinuteLocal: 600,
+              endMinuteLocalExclusive: 720,
+            ),
+          ],
+        ),
+      );
+      final issues = validate(draft, context: validContext);
+      expect(hasCode(issues, SessionBlockingCode.rangeOverlap), isTrue);
+    },
+  );
 
   test('duration out of range blocks publish', () {
     final draft = validDraft().copyWith(

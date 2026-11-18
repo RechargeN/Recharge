@@ -5,6 +5,7 @@ import 'package:recharge/features/create/domain/repositories/event_timezone_repo
 import 'package:recharge/features/create/domain/usecases/materialize_event_schedule_usecase.dart';
 import 'package:recharge/features/create/application/event_create_coordinator.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
+import 'package:recharge/shared/primitives/time/local_date.dart';
 
 void main() {
   final EventTimezoneRepository timezone = EventTimezoneRepositoryImpl();
@@ -17,6 +18,42 @@ void main() {
     city: 'Riga',
     timezoneId: 'Europe/Riga',
     currencyCode: 'EUR',
+  );
+
+  test(
+    'existing timezone port converts UTC instants into explicit local dates',
+    () {
+      final now = DateTime.utc(2026, 1, 1, 5);
+      expect(
+        timezone.localDateAt(instantUtc: now, timezoneId: 'Pacific/Honolulu'),
+        LocalDate(2025, 12, 31),
+      );
+      expect(
+        timezone.localDateAt(instantUtc: now, timezoneId: 'Europe/Riga'),
+        LocalDate(2026, 1, 1),
+      );
+      expect(
+        timezone.localDateAt(
+          instantUtc: DateTime.utc(2026, 12, 31, 12),
+          timezoneId: 'Pacific/Kiritimati',
+        ),
+        LocalDate(2027, 1, 1),
+      );
+      expect(
+        () => timezone.localDateAt(
+          instantUtc: DateTime(2026),
+          timezoneId: 'Europe/Riga',
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => timezone.localDateAt(
+          instantUtc: now,
+          timezoneId: 'Unknown/Nowhere',
+        ),
+        throwsA(isA<EventLocalTimeException>()),
+      );
+    },
   );
 
   test(

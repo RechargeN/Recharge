@@ -1,68 +1,7 @@
-/// Local calendar date, independent of any timezone offset.
-///
-/// Weekly rules and exceptions are expressed in the listing's local time;
-/// this type keeps that arithmetic free of `DateTime`'s implicit local/UTC
-/// ambiguity.
-class SessionLocalDate implements Comparable<SessionLocalDate> {
-  const SessionLocalDate(this.year, this.month, this.day);
+import '../../../../shared/primitives/time/local_date.dart';
 
-  final int year;
-  final int month;
-  final int day;
-
-  factory SessionLocalDate.parse(String value) {
-    final SessionLocalDate? parsed = tryParse(value);
-    if (parsed == null) {
-      throw const FormatException('Invalid local date');
-    }
-    return parsed;
-  }
-
-  static SessionLocalDate? tryParse(String value) {
-    if (value.length != 10) return null;
-    final DateTime? parsed = DateTime.tryParse('${value}T00:00:00Z');
-    if (parsed == null) return null;
-    return SessionLocalDate(parsed.year, parsed.month, parsed.day);
-  }
-
-  factory SessionLocalDate.fromDateTime(DateTime value) =>
-      SessionLocalDate(value.year, value.month, value.day);
-
-  String get iso =>
-      '${year.toString().padLeft(4, '0')}-'
-      '${month.toString().padLeft(2, '0')}-'
-      '${day.toString().padLeft(2, '0')}';
-
-  /// ISO weekday: 1 = Monday .. 7 = Sunday.
-  int get isoWeekday => DateTime.utc(year, month, day).weekday;
-
-  SessionLocalDate addDays(int count) =>
-      SessionLocalDate.fromDateTime(DateTime.utc(year, month, day + count));
-
-  @override
-  int compareTo(SessionLocalDate other) => DateTime.utc(
-    year,
-    month,
-    day,
-  ).compareTo(DateTime.utc(other.year, other.month, other.day));
-
-  bool operator <=(SessionLocalDate other) => compareTo(other) <= 0;
-
-  bool operator <(SessionLocalDate other) => compareTo(other) < 0;
-
-  @override
-  bool operator ==(Object other) =>
-      other is SessionLocalDate &&
-      year == other.year &&
-      month == other.month &&
-      day == other.day;
-
-  @override
-  int get hashCode => Object.hash(year, month, day);
-
-  @override
-  String toString() => iso;
-}
+// Temporary name compatibility; migrate final references in M2-D.
+typedef SessionLocalDate = LocalDate;
 
 /// One non-overlapping local time range on a specific ISO weekday.
 class SessionWeeklyRule {
