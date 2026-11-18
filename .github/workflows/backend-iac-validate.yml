@@ -92,6 +92,11 @@ jobs:
         working-directory: apps/backend/functions
         run: npm run verify:execution-manifest
 
+      # The Booking packaging test stages the compiled closure (lib/).
+      - name: Compile Functions for packaging tests
+        working-directory: apps/backend/functions
+        run: npm run build
+
       - name: Reject plan-only or mismatched apply records (local fixtures)
         run: node --test apps/backend/scripts/verify-dev-apply-approval.test.mjs apps/backend/scripts/wait-dev-budget-delivery.test.mjs apps/backend/scripts/check-dev-bootstrap-plan.test.mjs apps/backend/scripts/check-n2c-plan.test.mjs apps/backend/scripts/check-n3b-plan.test.mjs apps/backend/scripts/package-media-tools-runtime.test.mjs apps/backend/scripts/check-n3a2-plan.test.mjs apps/backend/scripts/check-n3c-plan.test.mjs apps/backend/scripts/check-n4c-plan.test.mjs apps/backend/scripts/package-n4c-booking-runtime.test.mjs apps/backend/scripts/n4c-load.test.mjs apps/backend/scripts/check-n4e-plan.test.mjs apps/backend/scripts/build-release-candidate.test.mjs apps/backend/scripts/check-n4a-plan.test.mjs
 
