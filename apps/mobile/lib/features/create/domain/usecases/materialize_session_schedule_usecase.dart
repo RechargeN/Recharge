@@ -7,6 +7,7 @@ import '../entities/session_draft_data.dart';
 import '../entities/session_schedule.dart';
 import '../entities/session_slot_projection.dart';
 import '../repositories/event_timezone_repository.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 
 /// Stable technical key for a projected slot — not a Booking id, not a
 /// secret (BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md §11.5).
@@ -24,25 +25,31 @@ String computeSessionSlotKey({
   return base64UrlEncode(digest.bytes).replaceAll('=', '');
 }
 
+enum SessionCalendarFailure { unknownTimezone, unsupportedDateRange }
+
 class SessionScheduleMaterializationResult {
   const SessionScheduleMaterializationResult({
     required this.projections,
     required this.candidateCapExceeded,
+    this.calendarFailure,
   });
 
   final List<SessionSlotProjection> projections;
+  final SessionCalendarFailure? calendarFailure;
 
   /// True if generation stopped early after hitting
   /// [SessionSchedule.maxCandidatesPerMaterialization] — publish must fail
   /// closed on this, not silently truncate (§11.2, `session_projection_overflow`).
   final bool candidateCapExceeded;
 
-  List<SessionSlotProjection> get offeredCandidates => projections
-      .where(
-        (SessionSlotProjection p) =>
-            p.internalStatus == SessionProjectionStatus.offeredBySchedule,
-      )
-      .toList(growable: false);
+  List<SessionSlotProjection> get offeredCandidates => calendarFailure != null
+      ? const <SessionSlotProjection>[]
+      : projections
+            .where(
+              (SessionSlotProjection p) =>
+                  p.internalStatus == SessionProjectionStatus.offeredBySchedule,
+            )
+            .toList(growable: false);
 }
 
 /// Deterministic bounded materializer: `weeklyRules + slotDuration + buffer
@@ -57,14 +64,36 @@ class MaterializeSessionScheduleUseCase {
   SessionScheduleMaterializationResult call({
     required String listingId,
     required SessionDraftData draft,
-    DateTime? nowUtc,
+    required DateTime nowUtc,
   }) {
-    final DateTime now = nowUtc ?? DateTime.now().toUtc();
+    final DateTime now = UtcInstant(nowUtc).value;
     final SessionSchedule schedule = draft.schedule;
     final int windowDays = schedule.projectionWindowDays > 0
         ? schedule.projectionWindowDays
         : 1;
-    final SessionLocalDate startDate = SessionLocalDate.fromDateTime(now);
+    final SessionLocalDate startDate;
+    try {
+      startDate = _timezoneRepository.localDateAt(
+        instantUtc: now,
+        timezoneId: draft.timezoneId,
+      );
+      // Check the complete calendar range before producing any candidates.
+      startDate.addDays(windowDays - 1);
+    } on EventLocalTimeException catch (error) {
+      return SessionScheduleMaterializationResult(
+        projections: const [],
+        candidateCapExceeded: false,
+        calendarFailure: error.code == 'timezone_not_found'
+            ? SessionCalendarFailure.unknownTimezone
+            : SessionCalendarFailure.unsupportedDateRange,
+      );
+    } on RangeError {
+      return const SessionScheduleMaterializationResult(
+        projections: [],
+        candidateCapExceeded: false,
+        calendarFailure: SessionCalendarFailure.unsupportedDateRange,
+      );
+    }
     final DateTime noticeThreshold = now.add(
       Duration(minutes: schedule.minNoticeMinutes),
     );
@@ -75,7 +104,7 @@ class MaterializeSessionScheduleUseCase {
     dayLoop:
     for (int offset = 0; offset < windowDays; offset++) {
       final SessionLocalDate date = startDate.addDays(offset);
-      final int weekday = date.isoWeekday;
+      final int weekday = date.weekday;
       final List<SessionWeeklyRule> rulesForDay =
           schedule.weeklyRules
               .where((SessionWeeklyRule r) => r.isoWeekday == weekday)
@@ -114,7 +143,7 @@ class MaterializeSessionScheduleUseCase {
           final String slotKey = computeSessionSlotKey(
             listingId: listingId,
             scheduleRevision: schedule.scheduleRevision,
-            localDate: date.iso,
+            localDate: date.toString(),
             startMinuteLocal: candidateStart,
             timezoneId: draft.timezoneId,
           );
@@ -131,7 +160,7 @@ class MaterializeSessionScheduleUseCase {
               SessionSlotProjection(
                 slotKey: slotKey,
                 scheduleRevision: schedule.scheduleRevision,
-                localDate: date.iso,
+                localDate: date.toString(),
                 startAtUtc: DateTime.utc(
                   date.year,
                   date.month,
@@ -181,7 +210,7 @@ class MaterializeSessionScheduleUseCase {
             SessionSlotProjection(
               slotKey: slotKey,
               scheduleRevision: schedule.scheduleRevision,
-              localDate: date.iso,
+              localDate: date.toString(),
               startAtUtc: startAtUtc,
               endAtUtc: endAtUtc,
               timezoneId: draft.timezoneId,

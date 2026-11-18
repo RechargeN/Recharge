@@ -73,6 +73,184 @@ void main() {
     );
   });
 
+  test(
+    'projection starts on listing local date on both sides of UTC midnight',
+    () {
+      final cases = [
+        (
+          'Pacific/Honolulu',
+          DateTime.utc(2026, 8, 24, 5),
+          7,
+          1200,
+          '2026-08-23',
+          DateTime.utc(2026, 8, 24, 6),
+        ),
+        (
+          'Pacific/Kiritimati',
+          DateTime.utc(2026, 12, 31, 12),
+          5,
+          540,
+          '2027-01-01',
+          DateTime.utc(2026, 12, 31, 19),
+        ),
+      ];
+      for (final c in cases) {
+        final value = draft(
+          timezoneId: c.$1,
+          projectionWindowDays: 1,
+          weeklyRules: [
+            SessionWeeklyRule(
+              id: 'r',
+              isoWeekday: c.$3,
+              startMinuteLocal: c.$4,
+              endMinuteLocalExclusive: c.$4 + 60,
+            ),
+          ],
+        );
+        final result = materialize(
+          listingId: 'listing',
+          draft: value,
+          nowUtc: c.$2,
+        );
+        expect(result.calendarFailure, isNull);
+        expect(result.offeredCandidates, hasLength(1));
+        final slot = result.offeredCandidates.single;
+        expect(slot.localDate, c.$5);
+        expect(slot.startAtUtc, c.$6);
+        expect(
+          slot.slotKey,
+          computeSessionSlotKey(
+            listingId: 'listing',
+            scheduleRevision: 1,
+            localDate: c.$5,
+            startMinuteLocal: c.$4,
+            timezoneId: c.$1,
+          ),
+        );
+      }
+    },
+  );
+
+  test(
+    'projection spans exactly local calendar days across DST and year rollover',
+    () {
+      final rules = [
+        for (var day = 1; day <= 7; day++)
+          SessionWeeklyRule(
+            id: 'r$day',
+            isoWeekday: day,
+            startMinuteLocal: 540,
+            endMinuteLocalExclusive: 600,
+          ),
+      ];
+      for (final c in [
+        (
+          DateTime.utc(2026, 3, 28, 22),
+          ['2026-03-29', '2026-03-30', '2026-03-31'],
+        ),
+        (
+          DateTime.utc(2026, 10, 24, 21),
+          ['2026-10-25', '2026-10-26', '2026-10-27'],
+        ),
+        (
+          DateTime.utc(2026, 12, 31, 22),
+          ['2027-01-01', '2027-01-02', '2027-01-03'],
+        ),
+      ]) {
+        final result = materialize(
+          listingId: 'listing',
+          nowUtc: c.$1,
+          draft: draft(weeklyRules: rules, projectionWindowDays: 3),
+        );
+        expect(result.projections.map((p) => p.localDate), c.$2);
+        expect(result.offeredCandidates, hasLength(3));
+      }
+    },
+  );
+
+  test('calendar failures are typed and never yield partial public offers', () {
+    final rules = [
+      const SessionWeeklyRule(
+        id: 'r',
+        isoWeekday: 1,
+        startMinuteLocal: 540,
+        endMinuteLocalExclusive: 600,
+      ),
+    ];
+    final invalidZone = materialize(
+      listingId: 'listing',
+      nowUtc: DateTime.utc(2026),
+      draft: draft(weeklyRules: rules, timezoneId: 'Unknown/Nowhere'),
+    );
+    expect(invalidZone.calendarFailure, SessionCalendarFailure.unknownTimezone);
+    expect(invalidZone.projections, isEmpty);
+    expect(invalidZone.offeredCandidates, isEmpty);
+    final invalidRange = materialize(
+      listingId: 'listing',
+      nowUtc: DateTime.utc(9999, 12, 31, 12),
+      draft: draft(weeklyRules: rules),
+    );
+    expect(
+      invalidRange.calendarFailure,
+      SessionCalendarFailure.unsupportedDateRange,
+    );
+    expect(invalidRange.projections, isEmpty);
+    expect(
+      () => materialize(
+        listingId: 'listing',
+        nowUtc: DateTime(2026),
+        draft: draft(weeklyRules: rules),
+      ),
+      throwsArgumentError,
+    );
+  });
+
+  test(
+    'closing exceptions use strict shared date semantics without changing boundaries',
+    () {
+      SessionAvailabilityException exception(String first, String last) =>
+          SessionAvailabilityException(
+            id: 'x',
+            startDateLocal: first,
+            endDateLocal: last,
+            allDay: false,
+            startMinuteLocal: 540,
+            endMinuteLocalExclusive: 600,
+            createdByUserId: 'u',
+            createdAtUtc: DateTime.utc(2026),
+          );
+      for (final invalid in ['2026-02-30', '2026-1-01', '0000-01-01']) {
+        expect(exception(invalid, invalid).isStructurallyValid, isFalse);
+      }
+      final value = exception('2026-02-28', '2026-03-01');
+      expect(value.isStructurallyValid, isTrue);
+      expect(
+        value.closes(
+          date: SessionLocalDate(2026, 3, 1),
+          candidateStartMinute: 590,
+          candidateEndMinute: 650,
+        ),
+        isTrue,
+      );
+      expect(
+        value.closes(
+          date: SessionLocalDate(2026, 3, 1),
+          candidateStartMinute: 600,
+          candidateEndMinute: 660,
+        ),
+        isFalse,
+      );
+      expect(
+        value.closes(
+          date: SessionLocalDate(2026, 3, 2),
+          candidateStartMinute: 540,
+          candidateEndMinute: 600,
+        ),
+        isFalse,
+      );
+    },
+  );
+
   test('DST gap on 2026-03-29 is skipped, not shifted', () {
     // Riga clocks jump 03:00 -> 04:00; a slot starting exactly at 03:00
     // local does not exist and must be fail-closed skipped (§11.4). Window
@@ -193,40 +371,43 @@ void main() {
     expect(result.offeredCandidates, isEmpty);
   });
 
-  test('same revision and input produce the same slotKey (§11.5, SES-AC-13)', () {
-    final a = materialize(
-      listingId: 'listing_1',
-      draft: draft(
-        weeklyRules: const [
-          SessionWeeklyRule(
-            id: 'r1',
-            isoWeekday: 1,
-            startMinuteLocal: 540,
-            endMinuteLocalExclusive: 600,
-          ),
-        ],
-        projectionWindowDays: 7,
-      ),
-      nowUtc: DateTime.utc(2026, 8, 24, 0),
-    );
-    final b = materialize(
-      listingId: 'listing_1',
-      draft: draft(
-        weeklyRules: const [
-          SessionWeeklyRule(
-            id: 'different_local_id',
-            isoWeekday: 1,
-            startMinuteLocal: 540,
-            endMinuteLocalExclusive: 600,
-          ),
-        ],
-        projectionWindowDays: 7,
-      ),
-      nowUtc: DateTime.utc(2026, 8, 24, 0),
-    );
+  test(
+    'same revision and input produce the same slotKey (§11.5, SES-AC-13)',
+    () {
+      final a = materialize(
+        listingId: 'listing_1',
+        draft: draft(
+          weeklyRules: const [
+            SessionWeeklyRule(
+              id: 'r1',
+              isoWeekday: 1,
+              startMinuteLocal: 540,
+              endMinuteLocalExclusive: 600,
+            ),
+          ],
+          projectionWindowDays: 7,
+        ),
+        nowUtc: DateTime.utc(2026, 8, 24, 0),
+      );
+      final b = materialize(
+        listingId: 'listing_1',
+        draft: draft(
+          weeklyRules: const [
+            SessionWeeklyRule(
+              id: 'different_local_id',
+              isoWeekday: 1,
+              startMinuteLocal: 540,
+              endMinuteLocalExclusive: 600,
+            ),
+          ],
+          projectionWindowDays: 7,
+        ),
+        nowUtc: DateTime.utc(2026, 8, 24, 0),
+      );
 
-    expect(a.projections.single.slotKey, b.projections.single.slotKey);
-  });
+      expect(a.projections.single.slotKey, b.projections.single.slotKey);
+    },
+  );
 
   test('candidate cap is fail-closed, not silently truncated', () {
     final result = materialize(

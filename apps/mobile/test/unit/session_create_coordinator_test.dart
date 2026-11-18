@@ -8,6 +8,8 @@ import 'package:recharge/features/create/domain/entities/session_price_disclosur
 import 'package:recharge/features/create/domain/entities/session_schedule.dart';
 import 'package:recharge/features/create/domain/usecases/materialize_session_schedule_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/validate_session_draft_usecase.dart';
+import 'package:recharge/features/create/domain/usecases/build_session_public_projection_usecase.dart';
+import 'package:recharge/features/create/domain/entities/session_validation_issue.dart';
 
 void main() {
   final SessionCreateCoordinator coordinator = SessionCreateCoordinator(
@@ -33,6 +35,84 @@ void main() {
     expect(data.timezoneId, 'Europe/Riga');
     expect(data.maxPartySizeInRange, isTrue);
   });
+
+  test('one explicit UTC clock governs offers and public freshness', () {
+    final now = DateTime.utc(2026, 8, 24, 5);
+    final session =
+        SessionDraftData.defaults(
+          resourceName: 'Sauna',
+          timezoneId: 'Pacific/Honolulu',
+        ).copyWith(
+          schedule: const SessionSchedule(
+            scheduleRevision: 1,
+            slotDurationMinutes: 60,
+            projectionWindowDays: 1,
+            weeklyRules: [
+              SessionWeeklyRule(
+                id: 'r',
+                isoWeekday: 7,
+                startMinuteLocal: 1200,
+                endMinuteLocalExclusive: 1260,
+              ),
+            ],
+          ),
+        );
+    final value = baseDraft().copyWith(sessionData: session);
+    final first = coordinator.buildPublicProjection(value, nowUtc: now);
+    final second = coordinator.buildPublicProjection(value, nowUtc: now);
+    expect(first.generatedAtUtc, now);
+    expect(first.validUntilUtc, now.add(const Duration(minutes: 5)));
+    expect(first.offers.single.startAtUtc, DateTime.utc(2026, 8, 24, 6));
+    expect(second.offers.single.slotKey, first.offers.single.slotKey);
+    expect(first.providerAvailabilityUnknown, isTrue);
+    expect(
+      () => coordinator.buildPublicProjection(value, nowUtc: DateTime(2026)),
+      throwsArgumentError,
+    );
+    expect(
+      () => const BuildSessionPublicProjectionUseCase()(
+        internalProjections: [],
+        scheduleRevision: 1,
+        generatedAtUtc: DateTime(2026),
+      ),
+      throwsArgumentError,
+    );
+  });
+
+  test(
+    'confirmed but unknown timezone stays on draft and blocks readiness',
+    () {
+      final session = SessionDraftData.defaults(
+        resourceName: 'Sauna',
+        timezoneId: 'Unknown/Nowhere',
+      ).copyWith(timezoneConfirmed: true);
+      final value = baseDraft().copyWith(sessionData: session);
+      final now = DateTime.utc(2026);
+      final result = coordinator.materialize(value, nowUtc: now);
+      expect(result.calendarFailure, SessionCalendarFailure.unknownTimezone);
+      expect(
+        coordinator.buildPublicProjection(value, nowUtc: now).offers,
+        isEmpty,
+      );
+      final issues = coordinator.validate(
+        value,
+        nowUtc: now,
+        context: const SessionExternalValidationContext(
+          categoryAllowedForSession: true,
+          hasCover: true,
+          publisherEligible: true,
+        ),
+      );
+      expect(
+        issues
+            .where((i) => i.code == SessionBlockingCode.timezoneInvalid)
+            .single
+            .isBlocking,
+        isTrue,
+      );
+      expect(value.sessionData!.timezoneId, 'Unknown/Nowhere');
+    },
+  );
 
   test('applyWeeklyPreset replaces weekly rules atomically', () {
     final SessionDraftData data = coordinator.ensureData(

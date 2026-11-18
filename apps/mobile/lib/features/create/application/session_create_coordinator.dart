@@ -1,5 +1,6 @@
 import '../../../shared/primitives/money/currency_code.dart';
 import '../../../shared/primitives/money/money.dart';
+import '../../../shared/primitives/time/utc_instant.dart';
 import '../domain/entities/create_availability.dart';
 import '../domain/entities/create_draft_entity.dart';
 import '../domain/entities/session_availability_exception.dart';
@@ -57,7 +58,7 @@ class SessionCreateCoordinator {
     return _materializeSchedule(
       listingId: draft.id,
       draft: session,
-      nowUtc: nowUtc,
+      nowUtc: UtcInstant(nowUtc ?? DateTime.now().toUtc()).value,
     );
   }
 
@@ -65,14 +66,15 @@ class SessionCreateCoordinator {
     CreateDraftEntity draft, {
     DateTime? nowUtc,
   }) {
+    final now = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
     final SessionScheduleMaterializationResult result = materialize(
       draft,
-      nowUtc: nowUtc,
+      nowUtc: now,
     );
     return _buildPublicProjection(
       internalProjections: result.projections,
       scheduleRevision: draft.sessionData?.schedule.scheduleRevision ?? 0,
-      generatedAtUtc: nowUtc,
+      generatedAtUtc: now,
     );
   }
 
