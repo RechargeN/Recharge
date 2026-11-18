@@ -76,16 +76,23 @@ export function checkN4ePlan(plan, expected) {
     channel?.change?.after?.name ?? channel?.change?.before?.name;
   if (!channelName)
     errors.push("existing staging e-mail channel not in the plan");
+  if (
+    expected.round === 4 &&
+    JSON.stringify(channel?.change?.actions) !== '["update"]'
+  )
+    errors.push("round 4 must repoint the main e-mail channel");
   const expectedCreates =
-    expected.round === 3
-      ? roundThreeCreates
-      : expected.round === 2
-        ? roundTwoCreates
-        : target === devProject
-          ? [...reviewedCreates, ...roundOneCreates]
-          : expected.round === 1
-            ? roundOneCreates
-            : reviewedCreates;
+    expected.round === 4
+      ? []
+      : expected.round === 3
+        ? roundThreeCreates
+        : expected.round === 2
+          ? roundTwoCreates
+          : target === devProject
+            ? [...reviewedCreates, ...roundOneCreates]
+            : expected.round === 1
+              ? roundOneCreates
+              : reviewedCreates;
   if (expected.round === 1) {
     const schedule = changes.find((c) => c.address === backupSchedule);
     if (
@@ -108,6 +115,33 @@ export function checkN4ePlan(plan, expected) {
       actions.length === 1 &&
       actions[0] === "update" &&
       roundThreeUpdatable.test(c.address);
+    // Round 4 (owner 2026-11-18: "all information goes to the mailbox"): the main e-mail channel is
+    // repointed in place to the reviewed mailbox, and the two Critical policies drop the now
+    // duplicate second channel. No creates, no deletes, the channel keeps its name.
+    const roundFourUpdate =
+      expected.round === 4 &&
+      actions.length === 1 &&
+      actions[0] === "update" &&
+      (c.address === channelAddress || roundThreeUpdatable.test(c.address));
+    if (roundFourUpdate && c.address === channelAddress) {
+      if (
+        after.type !== "email" ||
+        !expected.alertEmail ||
+        after.labels?.email_address !== expected.alertEmail ||
+        c.change?.before?.name !== after.name
+      )
+        errors.push(
+          "the main channel may only be repointed to the reviewed mailbox",
+        );
+    } else if (roundFourUpdate) {
+      if (
+        JSON.stringify(after.notification_channels ?? []) !==
+        JSON.stringify([channelName])
+      )
+        errors.push(
+          `Critical policy must notify the main channel exactly once: ${c.address}`,
+        );
+    }
     if (roundThreeUpdate) {
       // The owner's channel stays; the mailbox name may be unknown until apply.
       const known = (after.notification_channels ?? []).filter(Boolean);
@@ -124,6 +158,7 @@ export function checkN4ePlan(plan, expected) {
     if (
       !roundTwoUpdate &&
       !roundThreeUpdate &&
+      !roundFourUpdate &&
       (actions.length !== 1 ||
         !["create", "read", "no-op"].includes(actions[0]))
     )

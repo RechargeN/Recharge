@@ -142,6 +142,21 @@ run "n4e_alert_mailbox" {
   }
 }
 
+run "n4e_all_to_mailbox" {
+  command = plan
+  variables {
+    n4e_enabled        = true
+    notification_email = "alerts@example.invalid"
+    alert_email        = "alerts@example.invalid"
+  }
+  assert {
+    condition = (length(google_monitoring_alert_policy.n4e_fast_burn[0].notification_channels) == 1
+      && length(google_monitoring_alert_policy.n4e_probe[0].notification_channels) == 1
+    && length(google_monitoring_alert_policy.n4e_alert_channel_test) == 1)
+    error_message = "With one address for everything, each Critical alert is sent once."
+  }
+}
+
 run "n4e_needs_booking" {
   command = plan
   variables {

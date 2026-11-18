@@ -414,3 +414,67 @@ test("round 3: the alert mailbox on the two Critical policies only, with its own
     /forbidden action update/u,
   );
 });
+
+test("round 4: the main channel repointed in place to the mailbox, Critical policies notify it once", () => {
+  const mailbox = "alerts@example.invalid";
+  const main = (email, name = channel) => ({
+    address: "google_monitoring_notification_channel.budget_email",
+    type: "google_monitoring_notification_channel",
+    change: {
+      actions: ["update"],
+      before: {
+        project,
+        name: channel,
+        type: "email",
+        labels: { email_address: "owner@example.invalid" },
+      },
+      after: { project, name, type: "email", labels: { email_address: email } },
+    },
+  });
+  const policy = (address, channels) => ({
+    address,
+    type: "google_monitoring_alert_policy",
+    change: {
+      actions: ["update"],
+      before: { project, notification_channels: [channel, "x"] },
+      after: { project, enabled: true, notification_channels: channels },
+    },
+  });
+  const list = (email = mailbox, channels = [channel]) => [
+    main(email),
+    policy("google_monitoring_alert_policy.n4e_fast_burn[0]", channels),
+    policy("google_monitoring_alert_policy.n4e_probe[0]", channels),
+  ];
+  const run = (l) => {
+    const p = plan(l);
+    return checkN4ePlan(p, {
+      ...expected(p),
+      round: 4,
+      alertEmail: mailbox,
+    }).join();
+  };
+  assert.equal(run(list()), "");
+  assert.match(
+    run(list("someone@else.invalid")),
+    /repointed to the reviewed mailbox/u,
+  );
+  assert.match(run(list(mailbox, [channel, "x"])), /exactly once/u);
+  assert.match(
+    run([
+      main(mailbox, "projects/p/notificationChannels/999"),
+      ...list().slice(1),
+    ]),
+    /repointed/u,
+  );
+  assert.match(
+    run(list().slice(1).concat([changes()[0]])),
+    /must repoint the main e-mail channel/u,
+  );
+  assert.match(
+    run([
+      ...list(),
+      policy("google_monitoring_alert_policy.n4e_slow_burn[0]", []),
+    ]),
+    /forbidden action update/u,
+  );
+});

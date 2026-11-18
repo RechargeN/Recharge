@@ -70,13 +70,16 @@ locals {
     # Owner request 2026-11-18: the Booking read path is critical too.
     booking_read = { path = "/getMyBookingV1", headers = { Authorization = "Bearer n4e-uptime-invalid-token" } }
   }
-  # Owner decision 2026-11-18: Critical alerts also go to the dedicated Recharge
-  # alert mailbox (var.alert_email, private tfvars) so delivery can be checked
-  # without the owner's personal inbox.
-  n4e_critical_channels = concat(
-    [google_monitoring_notification_channel.budget_email.name],
-    google_monitoring_notification_channel.n4e_alerts[*].name,
-  )
+  # Owner decisions 2026-11-18: Critical alerts also go to the dedicated Recharge
+  # alert mailbox (var.alert_email, private tfvars); then "all information goes to
+  # the mailbox": when the main notification address is that mailbox too, the
+  # second channel is left off the Critical policies so no alert arrives twice.
+  n4e_critical_channels = (var.alert_email == "" || var.alert_email == var.notification_email
+    ? [google_monitoring_notification_channel.budget_email.name]
+    : concat(
+      [google_monitoring_notification_channel.budget_email.name],
+      google_monitoring_notification_channel.n4e_alerts[*].name,
+  ))
   n4e_runbook = "Runbook: docs/runbooks/staging-monitoring-alerts-cost.md (staging only; budget alerts do not cap spend)."
 }
 
