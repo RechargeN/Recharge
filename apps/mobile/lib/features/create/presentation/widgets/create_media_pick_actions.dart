@@ -7,6 +7,7 @@ import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/user_message_catalog.dart';
 import '../../application/controllers/create_controller.dart';
 import '../../domain/repositories/create_image_picker_port.dart';
+import '../../application/create_media_asset_ref.dart';
 
 /// Which existing media field a picked photo goes into.
 enum CreateMediaTarget { cover, gallery }
@@ -69,6 +70,10 @@ class _CreateMediaPickActionsState extends State<CreateMediaPickActions> {
     final bool pickedCover =
         widget.target == CreateMediaTarget.cover &&
         controller.isPickedMediaCopy(cover);
+    // MEDIA-PICK-02: the cover is a ready server asset; no local copy is left.
+    final bool uploadedCover =
+        widget.target == CreateMediaTarget.cover &&
+        promotedMediaAssetId(cover) != null;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
@@ -95,6 +100,23 @@ class _CreateMediaPickActionsState extends State<CreateMediaPickActions> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(child: Text(context.l10n.createMediaCoverSelected)),
+                ],
+              ),
+            ),
+          if (uploadedCover)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                key: const Key('create-media-cover-uploaded'),
+                children: <Widget>[
+                  const SizedBox.square(
+                    dimension: 56,
+                    child: Icon(Icons.cloud_done_outlined),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(context.l10n.createMediaUploadedToServer),
+                  ),
                 ],
               ),
             ),

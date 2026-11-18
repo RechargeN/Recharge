@@ -487,6 +487,9 @@ class AppLocalizationsLv extends AppLocalizations {
   String get createMediaCoverSelected => 'Vāka attēls izvēlēts';
 
   @override
+  String get createMediaUploadedToServer => 'Foto ir augšupielādēts serverī';
+
+  @override
   String get localErrorMediaUnsupported =>
       'Šo attēlu nevar izmantot. Izvēlieties foto.';
 

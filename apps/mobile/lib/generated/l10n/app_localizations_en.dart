@@ -482,6 +482,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createMediaCoverSelected => 'Cover photo selected';
 
   @override
+  String get createMediaUploadedToServer => 'Photo uploaded to the server';
+
+  @override
   String get localErrorMediaUnsupported =>
       'This image can\'t be used. Choose a photo.';
 

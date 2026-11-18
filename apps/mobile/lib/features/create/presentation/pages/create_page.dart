@@ -40,6 +40,7 @@ import '../widgets/scenario/scenario_create_block.dart';
 import '../widgets/create_texts.dart';
 import '../../../../core/localization/recharge_formats.dart';
 import '../../domain/personal_creation_hints.dart';
+import '../../application/create_media_asset_ref.dart';
 
 class CreatePage extends ConsumerStatefulWidget {
   const CreatePage({
@@ -576,7 +577,14 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                   children: List<Widget>.generate(
                     state.draft.media.gallery.length,
                     (int index) => InputChip(
-                      label: Text(state.draft.media.gallery[index]),
+                      label: Text(
+                        promotedMediaAssetId(
+                                  state.draft.media.gallery[index],
+                                ) !=
+                                null
+                            ? context.l10n.createMediaUploadedToServer
+                            : state.draft.media.gallery[index],
+                      ),
                       onDeleted: () => controller.removeGalleryImageAt(index),
                     ),
                   ),

@@ -139,6 +139,7 @@
   "createMediaTakePhoto": "Сделать фото",
   "createMediaPreparing": "Подготавливаем фото…",
   "createMediaCoverSelected": "Обложка выбрана",
+  "createMediaUploadedToServer": "Фото загружено на сервер",
   "localErrorMediaUnsupported": "Это изображение нельзя использовать. Выберите фото.",
   "localErrorMediaDecodeFailed": "Не удалось открыть изображение. Попробуйте другое.",
   "localErrorMediaTooLarge": "Изображение слишком большое даже после сжатия.",

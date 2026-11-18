@@ -139,6 +139,7 @@
   "createMediaTakePhoto": "Uzņemt foto",
   "createMediaPreparing": "Sagatavo foto…",
   "createMediaCoverSelected": "Vāka attēls izvēlēts",
+  "createMediaUploadedToServer": "Foto ir augšupielādēts serverī",
   "localErrorMediaUnsupported": "Šo attēlu nevar izmantot. Izvēlieties foto.",
   "localErrorMediaDecodeFailed": "Attēlu neizdevās atvērt. Mēģiniet citu.",
   "localErrorMediaTooLarge": "Attēls ir pārāk liels pat pēc saspiešanas.",

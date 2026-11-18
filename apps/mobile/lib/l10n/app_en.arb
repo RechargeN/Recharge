@@ -562,6 +562,10 @@
   "@createMediaCoverSelected": {
     "description": "Create media: the cover is a photo picked on this device."
   },
+  "createMediaUploadedToServer": "Photo uploaded to the server",
+  "@createMediaUploadedToServer": {
+    "description": "MEDIA-PICK-02: the photo is a ready server asset; the local copy was removed."
+  },
   "localErrorMediaUnsupported": "This image can't be used. Choose a photo.",
   "@localErrorMediaUnsupported": {
     "description": "Client refusal media_unsupported."

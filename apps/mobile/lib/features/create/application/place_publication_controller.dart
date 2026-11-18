@@ -1,5 +1,6 @@
 import 'content_server_requirements.dart';
 import 'publication_media_type.dart';
+import 'create_media_asset_ref.dart';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
@@ -181,6 +182,16 @@ final class PlacePublicationController extends ChangeNotifier {
   bool get checkingMedia => _checkingMedia;
   bool _checkingMedia = false;
 
+  Map<String, String> _readyMediaRefs = const <String, String>{};
+
+  /// MEDIA-PICK-02: local photo copies that became ready server assets in the
+  /// last successful upload (local path -> asset id). Read once, then empty.
+  Map<String, String> takeReadyMediaRefs() {
+    final Map<String, String> refs = _readyMediaRefs;
+    _readyMediaRefs = const <String, String>{};
+    return refs;
+  }
+
   /// Uploads the cover and every gallery photo that changed, then binds them.
   Future<void> uploadMedia() async {
     _checkingMedia = true;
@@ -198,6 +209,18 @@ final class PlacePublicationController extends ChangeNotifier {
     PlacePublicationRecord record = await _requireRecord(scope);
     final List<PlaceAttachmentRecord> uploaded = <PlaceAttachmentRecord>[];
     for (final PlaceMediaAttachment item in _attachments(draft, scope)) {
+      // MEDIA-PICK-02: a promoted field already is a ready server asset.
+      final String? promoted = promotedMediaAssetId(item.localRef);
+      if (promoted != null) {
+        uploaded.add(
+          PlaceAttachmentRecord(
+            attachmentId: item.attachmentId,
+            assetId: promoted,
+            sha256: promotedMediaDigest(item.localRef),
+          ),
+        );
+        continue;
+      }
       final Uint8List? bytes = await _mediaSource.read(item.localRef);
       if (bytes == null) throw const _LocalRefusal('media_missing');
       final String digest = sha256.convert(bytes).toString();
@@ -236,6 +259,14 @@ final class PlacePublicationController extends ChangeNotifier {
     record = record.copyWith(attachments: uploaded);
     await _journal.save(record);
     await _saveBody(draft, scope, record);
+    // MEDIA-PICK-02: every photo is a ready asset bound to the saved body;
+    // the Create form may now point its fields at the assets.
+    _readyMediaRefs = <String, String>{
+      for (final item in _attachments(draft, scope))
+        if (promotedMediaAssetId(item.localRef) == null &&
+            record.attachment(item.attachmentId) != null)
+          item.localRef: record.attachment(item.attachmentId)!.assetId,
+    };
     await _refreshAll();
   });
 
@@ -491,6 +522,11 @@ final class PlacePublicationController extends ChangeNotifier {
   ) async {
     final Map<String, String> assets = <String, String>{};
     for (final PlaceMediaAttachment item in _attachments(draft, scope)) {
+      final String? promoted = promotedMediaAssetId(item.localRef);
+      if (promoted != null) {
+        assets[item.attachmentId] = promoted;
+        continue;
+      }
       final PlaceAttachmentRecord? known = record.attachment(item.attachmentId);
       if (known == null) continue;
       final Uint8List? bytes = await _mediaSource.read(item.localRef);

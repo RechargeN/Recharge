@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/features/create/application/create_media_asset_ref.dart';
 import 'package:recharge/features/create/application/place_publication_controller.dart';
 import 'package:recharge/features/create/data/file_place_publication_journal.dart';
 import 'package:recharge/features/create/domain/entities/content_validation_violation.dart';
@@ -306,6 +307,46 @@ void main() {
       await reordered.uploadMedia();
       expect(uploader.intents, hasLength(4));
       expect(uploader.intents.last, intent(gallery[0], 9));
+    },
+  );
+
+  test(
+    'MEDIA-PICK-02: ready uploads are offered to the form; promoted fields are bound without bytes or uploads',
+    () async {
+      final CreateDraftEntity current = draft();
+      final PlacePublicationController c = controller(current);
+      await c.load();
+      await c.save();
+      await c.uploadMedia();
+      final Map<String, String> ready = c.takeReadyMediaRefs();
+      expect(ready.keys, unorderedEquals(<String>[cover, ...gallery]));
+      expect(c.takeReadyMediaRefs(), isEmpty, reason: 'read once');
+      // The form now points at the assets and the local copies are gone.
+      final CreateDraftEntity promoted = current.copyWith(
+        media: current.media.copyWith(
+          coverImage: promotedMediaRef(ready[cover]!),
+          gallery: gallery.map((g) => promotedMediaRef(ready[g]!)).toList(),
+        ),
+      );
+      media.files.clear();
+      final PlacePublicationController after = controller(promoted);
+      await after.load();
+      await after.uploadMedia();
+      expect(after.state.message, isNull, reason: 'no media_missing');
+      expect(uploader.intents, hasLength(3), reason: 'nothing uploaded again');
+      final Map<String, Object?> bodyMedia =
+          server.drafts.values.single.body['media']! as Map<String, Object?>;
+      expect(
+        (bodyMedia['coverImage']! as Map<String, Object?>)['mediaId'],
+        ready[cover],
+      );
+      expect(
+        (bodyMedia['gallery']! as List<Object?>)
+            .map((item) => (item! as Map<String, Object?>)['mediaId'])
+            .toList(),
+        gallery.map((g) => ready[g]).toList(),
+      );
+      expect(after.takeReadyMediaRefs(), isEmpty);
     },
   );
 

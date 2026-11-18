@@ -934,6 +934,12 @@ abstract class AppLocalizations {
   /// **'Cover photo selected'**
   String get createMediaCoverSelected;
 
+  /// MEDIA-PICK-02: the photo is a ready server asset; the local copy was removed.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo uploaded to the server'**
+  String get createMediaUploadedToServer;
+
   /// Client refusal media_unsupported.
   ///
   /// In en, this message translates to:

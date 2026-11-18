@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -5,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/features/create/data/media/file_create_media_store.dart';
 import 'package:recharge/features/create/domain/repositories/create_image_picker_port.dart';
+import 'package:recharge/features/create/domain/repositories/create_media_store.dart';
 
 /// MEDIA-PICK-01 §6 / MP-AC-05: private copies, atomic writes, cleanup.
 void main() {
@@ -92,4 +94,113 @@ void main() {
     expect(partial.existsSync(), isFalse);
     expect(File(kept).existsSync(), isTrue);
   });
+
+  group('MEDIA-PICK-02', () {
+    test(
+      'copies of different accounts live in separate folders, no ids in paths',
+      () async {
+        final a = await store.save(
+          createMediaDraftKey('uid-a', 'loc_1'),
+          bytes(5),
+        );
+        final b = await store.save(
+          createMediaDraftKey('uid-b', 'loc_1'),
+          bytes(5),
+        );
+        expect(File(a).parent.parent.path, isNot(File(b).parent.parent.path));
+        expect(a, isNot(contains('uid-a')));
+        expect(b, isNot(contains('uid-b')));
+        expect(store.owns(a) && store.owns(b), isTrue);
+      },
+    );
+
+    test(
+      'release deletes only a copy of this store and leaves no journal entry',
+      () async {
+        final path = await store.save(
+          createMediaDraftKey('uid-a', 'loc_1'),
+          bytes(5),
+        );
+        final outside = File('${support.path}${Platform.pathSeparator}keep.jpg')
+          ..writeAsBytesSync(bytes(1));
+        await store.release(ownerId: 'uid-a', path: path);
+        await store.release(ownerId: 'uid-a', path: outside.path);
+        expect(File(path).existsSync(), isFalse);
+        expect(outside.existsSync(), isTrue);
+        expect(
+          await store.sweepReleased(ownerId: 'uid-a', referenced: (_) => false),
+          0,
+        );
+      },
+    );
+
+    test(
+      'an interrupted release is finished for its own account only, and a copy the draft uses again is kept',
+      () async {
+        final mine = await store.save(
+          createMediaDraftKey('uid-a', 'loc_1'),
+          bytes(5),
+        );
+        final reused = await store.save(
+          createMediaDraftKey('uid-a', 'loc_1'),
+          bytes(5),
+        );
+        final theirs = await store.save(
+          createMediaDraftKey('uid-b', 'loc_2'),
+          bytes(5),
+        );
+        // A journal written before the app was ended between journal and delete.
+        final journal = File(
+          '${support.path}${Platform.pathSeparator}create_media${Platform.pathSeparator}released.jsonl',
+        );
+        journal.writeAsStringSync(
+          [
+            '{"account":"${FileCreateMediaStore.accountFolder('uid-a')}","path":${_json(mine)}}',
+            '{"account":"${FileCreateMediaStore.accountFolder('uid-a')}","path":${_json(reused)}}',
+            '{"account":"${FileCreateMediaStore.accountFolder('uid-b')}","path":${_json(theirs)}}',
+            '{"account":', // a line cut short: ignored, nothing deleted for it
+          ].join('\n'),
+        );
+        final removed = await store.sweepReleased(
+          ownerId: 'uid-a',
+          referenced: (String path) => path == reused,
+        );
+        expect(removed, 1);
+        expect(File(mine).existsSync(), isFalse);
+        expect(
+          File(reused).existsSync(),
+          isTrue,
+          reason: 'the draft uses it again',
+        );
+        expect(
+          File(theirs).existsSync(),
+          isTrue,
+          reason: 'another account is never swept',
+        );
+        // The other account finishes its own release later.
+        expect(
+          await store.sweepReleased(ownerId: 'uid-b', referenced: (_) => false),
+          1,
+        );
+        expect(File(theirs).existsSync(), isFalse);
+      },
+    );
+
+    test(
+      'nothing that was never released is deleted by a sweep (mock mode keeps every copy)',
+      () async {
+        final path = await store.save(
+          createMediaDraftKey('uid-a', 'loc_1'),
+          bytes(5),
+        );
+        expect(
+          await store.sweepReleased(ownerId: 'uid-a', referenced: (_) => false),
+          0,
+        );
+        expect(File(path).existsSync(), isTrue);
+      },
+    );
+  });
 }
+
+String _json(String value) => jsonEncode(value);

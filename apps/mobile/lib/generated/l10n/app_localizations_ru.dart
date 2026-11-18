@@ -486,6 +486,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get createMediaCoverSelected => 'Обложка выбрана';
 
   @override
+  String get createMediaUploadedToServer => 'Фото загружено на сервер';
+
+  @override
   String get localErrorMediaUnsupported =>
       'Это изображение нельзя использовать. Выберите фото.';
 
