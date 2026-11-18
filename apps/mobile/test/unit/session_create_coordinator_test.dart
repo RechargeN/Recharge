@@ -10,6 +10,7 @@ import 'package:recharge/features/create/domain/usecases/materialize_session_sch
 import 'package:recharge/features/create/domain/usecases/validate_session_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/build_session_public_projection_usecase.dart';
 import 'package:recharge/features/create/domain/entities/session_validation_issue.dart';
+import 'package:recharge/features/create/domain/entities/session_slot_projection.dart';
 
 void main() {
   final SessionCreateCoordinator coordinator = SessionCreateCoordinator(
@@ -35,6 +36,58 @@ void main() {
     expect(data.timezoneId, 'Europe/Riga');
     expect(data.maxPartySizeInRange, isTrue);
   });
+
+  test(
+    'public projection omits DST diagnostics and keeps only resolved offers',
+    () {
+      final session =
+          SessionDraftData.defaults(
+            resourceName: 'Sauna',
+            timezoneId: 'Europe/Riga',
+          ).copyWith(
+            schedule: const SessionSchedule(
+              scheduleRevision: 3,
+              slotDurationMinutes: 30,
+              projectionWindowDays: 1,
+              weeklyRules: [
+                SessionWeeklyRule(
+                  id: 'r',
+                  isoWeekday: 7,
+                  startMinuteLocal: 120,
+                  endMinuteLocalExclusive: 300,
+                ),
+              ],
+            ),
+          );
+      final value = baseDraft().copyWith(sessionData: session);
+      final now = DateTime.utc(2026, 3, 28, 22);
+      final internal = coordinator.materialize(value, nowUtc: now);
+      final skippedKeys = internal.projections
+          .where(
+            (p) =>
+                p.internalStatus ==
+                SessionProjectionStatus.dstTransitionSkipped,
+          )
+          .map((p) => p.slotKey)
+          .toSet();
+      expect(skippedKeys, hasLength(3));
+      final public = coordinator.buildPublicProjection(value, nowUtc: now);
+      expect(public.offers, hasLength(3));
+      expect(
+        public.offers.any((p) => skippedKeys.contains(p.slotKey)),
+        isFalse,
+      );
+      expect(public.offers.map((p) => p.startAtUtc), [
+        DateTime.utc(2026, 3, 29),
+        DateTime.utc(2026, 3, 29, 1),
+        DateTime.utc(2026, 3, 29, 1, 30),
+      ]);
+      expect(public.offers.every((p) => p.timezoneId == 'Europe/Riga'), isTrue);
+      expect(public.scheduleRevision, 3);
+      expect(public.generatedAtUtc, now);
+      expect(public.providerAvailabilityUnknown, isTrue);
+    },
+  );
 
   test('one explicit UTC clock governs offers and public freshness', () {
     final now = DateTime.utc(2026, 8, 24, 5);

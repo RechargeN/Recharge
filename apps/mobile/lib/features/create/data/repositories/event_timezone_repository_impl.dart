@@ -18,19 +18,79 @@ class EventTimezoneRepositoryImpl implements EventTimezoneRepository {
   static bool _initialized = false;
 
   @override
-  LocalDate localDateAt({
-    required DateTime instantUtc,
+  bool intersectsTransition({
+    required LocalDate date,
+    required int startMinuteLocal,
+    required int endMinuteLocal,
     required String timezoneId,
   }) {
-    final instant = UtcInstant(instantUtc).value;
-    timezone.Location location;
+    if (startMinuteLocal < 0 ||
+        startMinuteLocal >= 1440 ||
+        endMinuteLocal <= startMinuteLocal) {
+      throw const EventLocalTimeException('invalid_local_minute');
+    }
+    // Validate calendar range before multiplying caller-supplied minutes.
+    date.addDays(endMinuteLocal ~/ 1440);
+    final location = _location(timezoneId);
+    // A naive calendar scalar for comparison only, never a stored UTC instant.
+    final midnight = DateTime.utc(
+      date.year,
+      date.month,
+      date.day,
+    ).millisecondsSinceEpoch;
+    final start = midnight + startMinuteLocal * Duration.millisecondsPerMinute;
+    final end = midnight + endMinuteLocal * Duration.millisecondsPerMinute;
+    if (location.transitionAt.isEmpty) return false;
+    var minOffset = 0;
+    var maxOffset = 0;
+    for (final zone in location.zones) {
+      if (zone.offset < minOffset) minOffset = zone.offset;
+      if (zone.offset > maxOffset) maxOffset = zone.offset;
+    }
+    // Only inspect transitions whose local ranges can touch this interval.
+    // Work is bounded by relevant TZDB transitions, not by slot minutes.
+    var low = 0;
+    var high = location.transitionAt.length;
+    while (low < high) {
+      final middle = (low + high) ~/ 2;
+      if (location.transitionAt[middle] < start - maxOffset) {
+        low = middle + 1;
+      } else {
+        high = middle;
+      }
+    }
+    for (var index = low; index < location.transitionAt.length; index++) {
+      final instant = location.transitionAt[index];
+      if (instant > end - minOffset) break;
+      final before = instant + location.timeZone(instant - 1).offset;
+      final after = instant + location.timeZone(instant).offset;
+      if (before == after) continue;
+      final first = before < after ? before : after;
+      final last = before > after ? before : after;
+      // Gap/overlap is [first, last). Endpoints inside it also reject a
+      // candidate; a candidate starting exactly at last is unambiguous.
+      if (start < last && end >= first) return true;
+    }
+    return false;
+  }
+
+  timezone.Location _location(String timezoneId) {
     try {
-      location = timezone.getLocation(IanaTimeZone.parse(timezoneId).value);
+      return timezone.getLocation(IanaTimeZone.parse(timezoneId).value);
     } on FormatException {
       throw const EventLocalTimeException('timezone_not_found');
     } on timezone.LocationNotFoundException {
       throw const EventLocalTimeException('timezone_not_found');
     }
+  }
+
+  @override
+  LocalDate localDateAt({
+    required DateTime instantUtc,
+    required String timezoneId,
+  }) {
+    final instant = UtcInstant(instantUtc).value;
+    final location = _location(timezoneId);
     final local = timezone.TZDateTime.from(instant, location);
     try {
       return LocalDate(local.year, local.month, local.day);
@@ -57,14 +117,7 @@ class EventTimezoneRepositoryImpl implements EventTimezoneRepository {
     if (minuteOfDay < 0 || minuteOfDay > 1439) {
       throw const EventLocalTimeException('invalid_local_minute');
     }
-    timezone.Location location;
-    try {
-      location = timezone.getLocation(IanaTimeZone.parse(timezoneId).value);
-    } on FormatException {
-      throw const EventLocalTimeException('timezone_not_found');
-    } on timezone.LocationNotFoundException {
-      throw const EventLocalTimeException('timezone_not_found');
-    }
+    final location = _location(timezoneId);
     final int hour = minuteOfDay ~/ 60;
     final int minute = minuteOfDay % 60;
     final timezone.TZDateTime normalized = timezone.TZDateTime(

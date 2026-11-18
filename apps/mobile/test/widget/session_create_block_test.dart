@@ -7,6 +7,8 @@ import 'package:recharge/features/create/application/create_runtime_defaults.dar
 import 'package:recharge/features/create/application/session_create_coordinator.dart';
 import 'package:recharge/features/create/data/repositories/event_timezone_repository_impl.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
+import 'package:recharge/features/create/domain/entities/session_draft_data.dart';
+import 'package:recharge/features/create/domain/entities/session_schedule.dart';
 import 'package:recharge/features/create/domain/repositories/create_repository.dart';
 import 'package:recharge/features/create/domain/usecases/load_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/materialize_session_schedule_usecase.dart';
@@ -16,18 +18,23 @@ import 'package:recharge/features/create/presentation/widgets/session_create_blo
 
 import '../support/event_create_test_support.dart';
 
-CreateController _buildController(CreateRepository repository) {
+CreateController _buildController(
+  CreateRepository repository, {
+  SessionCreateCoordinator? sessionCoordinator,
+}) {
   final CreateController controller = CreateController(
     loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
     saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
     publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
     analyticsService: _NoopAnalyticsService(),
     eventCreateCoordinator: createTestEventCoordinator(),
-    sessionCreateCoordinator: SessionCreateCoordinator(
-      materializeSchedule: MaterializeSessionScheduleUseCase(
-        EventTimezoneRepositoryImpl(),
-      ),
-    ),
+    sessionCreateCoordinator:
+        sessionCoordinator ??
+        SessionCreateCoordinator(
+          materializeSchedule: MaterializeSessionScheduleUseCase(
+            EventTimezoneRepositoryImpl(),
+          ),
+        ),
     runtimeDefaults: const CreateRuntimeDefaults(
       marketCityId: 'riga',
       timezone: 'Europe/Riga',
@@ -68,6 +75,115 @@ Future<void> _pumpSessionBlock(
 }
 
 void main() {
+  testWidgets(
+    'preview renders listing-zone wall time and skipped-clock reason',
+    (tester) async {
+      final repository = _MemoryRepository();
+      repository.stored =
+          CreateDraftEntity.defaults(
+            organizerId: 'u',
+            organizerEmail: '',
+            organizerName: '',
+            timezone: 'Europe/Riga',
+            currency: 'EUR',
+          ).copyWith(
+            objectType: CreateObjectType.session,
+            sessionData:
+                SessionDraftData.defaults(
+                  resourceName: 'Sauna',
+                  timezoneId: 'Europe/Riga',
+                ).copyWith(
+                  timezoneConfirmed: true,
+                  schedule: const SessionSchedule(
+                    scheduleRevision: 1,
+                    slotDurationMinutes: 30,
+                    projectionWindowDays: 1,
+                    weeklyRules: [
+                      SessionWeeklyRule(
+                        id: 'r',
+                        isoWeekday: 7,
+                        startMinuteLocal: 120,
+                        endMinuteLocalExclusive: 300,
+                      ),
+                    ],
+                  ),
+                ),
+          );
+      final controller = _buildController(
+        repository,
+        sessionCoordinator: _FixedClockCoordinator(
+          DateTime.utc(2026, 3, 28, 22),
+        ),
+      );
+      addTearDown(controller.dispose);
+      await controller.ensureLoaded(
+        userId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      await _pumpSessionBlock(tester, controller);
+      expect(find.text('Next offers'), findsOneWidget);
+      expect(find.text('2026-03-29 02:00–02:30 · Europe/Riga'), findsOneWidget);
+      expect(find.text('2026-03-29 04:00–04:30 · Europe/Riga'), findsOneWidget);
+      expect(find.text('Skipped because clocks change'), findsOneWidget);
+      expect(find.text('2026-03-29 02:30–03:00 · Europe/Riga'), findsOneWidget);
+      expect(find.text('dst_transition_skipped'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('preview retains nonmarket zone and previous UTC calendar day', (
+    tester,
+  ) async {
+    final repository = _MemoryRepository();
+    repository.stored =
+        CreateDraftEntity.defaults(
+          organizerId: 'u',
+          organizerEmail: '',
+          organizerName: '',
+          timezone: 'Pacific/Honolulu',
+          currency: 'EUR',
+        ).copyWith(
+          objectType: CreateObjectType.session,
+          sessionData:
+              SessionDraftData.defaults(
+                resourceName: 'Sauna',
+                timezoneId: 'Pacific/Honolulu',
+              ).copyWith(
+                timezoneConfirmed: true,
+                schedule: const SessionSchedule(
+                  scheduleRevision: 1,
+                  slotDurationMinutes: 60,
+                  projectionWindowDays: 1,
+                  weeklyRules: [
+                    SessionWeeklyRule(
+                      id: 'r',
+                      isoWeekday: 7,
+                      startMinuteLocal: 1200,
+                      endMinuteLocalExclusive: 1260,
+                    ),
+                  ],
+                ),
+              ),
+        );
+    final controller = _buildController(
+      repository,
+      sessionCoordinator: _FixedClockCoordinator(DateTime.utc(2026, 8, 24, 5)),
+    );
+    addTearDown(controller.dispose);
+    await controller.ensureLoaded(
+      userId: 'u',
+      organizerEmail: '',
+      organizerName: '',
+    );
+    await _pumpSessionBlock(tester, controller);
+    expect(
+      find.text('2026-08-23 20:00–21:00 · Pacific/Honolulu'),
+      findsOneWidget,
+    );
+    expect(find.text('Skipped because clocks change'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
   testWidgets(
     'Session price input rejects excess scale and preserves the exact value',
     (tester) async {
@@ -200,6 +316,21 @@ void main() {
 class _NoopAnalyticsService implements AnalyticsService {
   @override
   void track(String eventName, {Map<String, Object?> params = const {}}) {}
+}
+
+class _FixedClockCoordinator extends SessionCreateCoordinator {
+  _FixedClockCoordinator(this.now)
+    : super(
+        materializeSchedule: MaterializeSessionScheduleUseCase(
+          EventTimezoneRepositoryImpl(),
+        ),
+      );
+  final DateTime now;
+  @override
+  SessionScheduleMaterializationResult materialize(
+    CreateDraftEntity draft, {
+    DateTime? nowUtc,
+  }) => super.materialize(draft, nowUtc: nowUtc ?? now);
 }
 
 class _MemoryRepository implements CreateRepository {

@@ -148,11 +148,32 @@ class MaterializeSessionScheduleUseCase {
             timezoneId: draft.timezoneId,
           );
 
-          final ResolvedEventLocalTime? resolved = _resolve(
-            date,
-            candidateStart,
-            draft.timezoneId,
-          );
+          final bool intersectsTransition;
+          try {
+            intersectsTransition = _timezoneRepository.intersectsTransition(
+              date: date,
+              startMinuteLocal: candidateStart,
+              endMinuteLocal: protectedEnd,
+              timezoneId: draft.timezoneId,
+            );
+          } on EventLocalTimeException catch (error) {
+            return SessionScheduleMaterializationResult(
+              projections: const [],
+              candidateCapExceeded: false,
+              calendarFailure: error.code == 'timezone_not_found'
+                  ? SessionCalendarFailure.unknownTimezone
+                  : SessionCalendarFailure.unsupportedDateRange,
+            );
+          } on RangeError {
+            return const SessionScheduleMaterializationResult(
+              projections: [],
+              candidateCapExceeded: false,
+              calendarFailure: SessionCalendarFailure.unsupportedDateRange,
+            );
+          }
+          final ResolvedEventLocalTime? resolved = intersectsTransition
+              ? null
+              : _resolve(date, candidateStart, draft.timezoneId);
           if (resolved == null ||
               resolved.shifted ||
               resolved.ambiguousLocalTime) {
@@ -161,16 +182,10 @@ class MaterializeSessionScheduleUseCase {
                 slotKey: slotKey,
                 scheduleRevision: schedule.scheduleRevision,
                 localDate: date.toString(),
-                startAtUtc: DateTime.utc(
-                  date.year,
-                  date.month,
-                  date.day,
-                ).add(Duration(minutes: candidateStart)),
-                endAtUtc: DateTime.utc(
-                  date.year,
-                  date.month,
-                  date.day,
-                ).add(Duration(minutes: candidateEnd)),
+                startMinuteLocal: candidateStart,
+                endMinuteLocal: candidateEnd,
+                startAtUtc: null,
+                endAtUtc: null,
                 timezoneId: draft.timezoneId,
                 internalStatus: SessionProjectionStatus.dstTransitionSkipped,
                 internalReasonCode: 'dst_transition_skipped',
@@ -211,6 +226,8 @@ class MaterializeSessionScheduleUseCase {
               slotKey: slotKey,
               scheduleRevision: schedule.scheduleRevision,
               localDate: date.toString(),
+              startMinuteLocal: candidateStart,
+              endMinuteLocal: candidateEnd,
               startAtUtc: startAtUtc,
               endAtUtc: endAtUtc,
               timezoneId: draft.timezoneId,

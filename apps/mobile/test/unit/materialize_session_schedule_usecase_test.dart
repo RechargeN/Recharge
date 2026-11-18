@@ -74,6 +74,203 @@ void main() {
   });
 
   test(
+    'whole slot and protected buffer skip all three reproduced DST failures',
+    () {
+      for (final value in [
+        (DateTime.utc(2026, 3, 29), 120, 0),
+        (DateTime.utc(2026, 3, 29), 30, 60),
+        (DateTime.utc(2026, 10, 25), 120, 0),
+      ]) {
+        final result = materialize(
+          listingId: 'listing_1',
+          draft: draft(
+            projectionWindowDays: 2,
+            slotDurationMinutes: value.$2,
+            bufferAfterSlotMinutes: value.$3,
+            weeklyRules: [
+              SessionWeeklyRule(
+                id: 'r',
+                isoWeekday: 7,
+                startMinuteLocal: 150,
+                endMinuteLocalExclusive: 150 + value.$2,
+              ),
+            ],
+          ),
+          nowUtc: value.$1.subtract(const Duration(hours: 3)),
+        );
+        expect(result.offeredCandidates, isEmpty);
+        final slot = result.projections.single;
+        expect(
+          slot.internalStatus,
+          SessionProjectionStatus.dstTransitionSkipped,
+        );
+        expect(slot.internalReasonCode, 'dst_transition_skipped');
+        expect(slot.startAtUtc, isNull);
+        expect(slot.endAtUtc, isNull);
+        expect(slot.startMinuteLocal, 150);
+        expect(slot.endMinuteLocal, 150 + value.$2);
+        expect(slot.localDate, value.$1.toIso8601String().substring(0, 10));
+        expect(
+          slot.slotKey,
+          computeSessionSlotKey(
+            listingId: 'listing_1',
+            scheduleRevision: 1,
+            localDate: slot.localDate,
+            startMinuteLocal: 150,
+            timezoneId: 'Europe/Riga',
+          ),
+        );
+      }
+    },
+  );
+
+  test(
+    'unambiguous neighbors keep exact duration while transition endpoints skip',
+    () {
+      final result = materialize(
+        listingId: 'listing_1',
+        draft: draft(
+          projectionWindowDays: 1,
+          slotDurationMinutes: 30,
+          weeklyRules: const [
+            SessionWeeklyRule(
+              id: 'r',
+              isoWeekday: 7,
+              startMinuteLocal: 120,
+              endMinuteLocalExclusive: 300,
+            ),
+          ],
+        ),
+        nowUtc: DateTime.utc(2026, 3, 28, 22),
+      );
+      expect(result.offeredCandidates.map((p) => p.startMinuteLocal), [
+        120,
+        240,
+        270,
+      ]);
+      expect(
+        result.projections
+            .where(
+              (p) =>
+                  p.internalStatus ==
+                  SessionProjectionStatus.dstTransitionSkipped,
+            )
+            .map((p) => p.startMinuteLocal),
+        [150, 180, 210],
+      );
+      for (final slot in result.offeredCandidates) {
+        expect(
+          slot.endAtUtc!.difference(slot.startAtUtc!),
+          const Duration(minutes: 30),
+        );
+      }
+    },
+  );
+
+  test('buffer rollover and calendar overflow fail without partial offers', () {
+    final result = materialize(
+      listingId: 'listing_1',
+      draft: draft(
+        projectionWindowDays: 1,
+        slotDurationMinutes: 30,
+        bufferAfterSlotMinutes: 180,
+        weeklyRules: const [
+          SessionWeeklyRule(
+            id: 'r',
+            isoWeekday: 6,
+            startMinuteLocal: 1410,
+            endMinuteLocalExclusive: 1440,
+          ),
+        ],
+      ),
+      nowUtc: DateTime.utc(2026, 3, 28, 0),
+    );
+    expect(
+      result.projections.single.internalStatus,
+      SessionProjectionStatus.dstTransitionSkipped,
+    );
+    final overflow = materialize(
+      listingId: 'listing_1',
+      draft: draft(
+        timezoneId: 'UTC',
+        projectionWindowDays: 1,
+        bufferAfterSlotMinutes: 180,
+        weeklyRules: const [
+          SessionWeeklyRule(
+            id: 'early',
+            isoWeekday: 5,
+            startMinuteLocal: 600,
+            endMinuteLocalExclusive: 660,
+          ),
+          SessionWeeklyRule(
+            id: 'late',
+            isoWeekday: 5,
+            startMinuteLocal: 1380,
+            endMinuteLocalExclusive: 1440,
+          ),
+        ],
+      ),
+      nowUtc: DateTime.utc(9999, 12, 31),
+    );
+    expect(
+      overflow.calendarFailure,
+      SessionCalendarFailure.unsupportedDateRange,
+    );
+    expect(overflow.projections, isEmpty);
+  });
+
+  test('internal projection forbids fabricated or incomplete UTC bounds', () {
+    SessionSlotProjection slot(
+      SessionProjectionStatus status,
+      DateTime? start,
+      DateTime? end, {
+      String date = '2026-03-29',
+    }) => SessionSlotProjection(
+      slotKey: 'key',
+      scheduleRevision: 1,
+      localDate: date,
+      startMinuteLocal: 150,
+      endMinuteLocal: 270,
+      startAtUtc: start,
+      endAtUtc: end,
+      timezoneId: 'Europe/Riga',
+      internalStatus: status,
+    );
+    final start = DateTime.utc(2026, 3, 29);
+    final end = start.add(const Duration(hours: 2));
+    expect(
+      () => slot(SessionProjectionStatus.dstTransitionSkipped, start, end),
+      throwsArgumentError,
+    );
+    expect(
+      () => slot(SessionProjectionStatus.offeredBySchedule, null, null),
+      throwsArgumentError,
+    );
+    expect(
+      () => slot(SessionProjectionStatus.offeredBySchedule, start, null),
+      throwsArgumentError,
+    );
+    expect(
+      () => slot(SessionProjectionStatus.offeredBySchedule, start, start),
+      throwsArgumentError,
+    );
+    expect(
+      () =>
+          slot(SessionProjectionStatus.offeredBySchedule, DateTime(2026), end),
+      throwsArgumentError,
+    );
+    expect(
+      () => slot(
+        SessionProjectionStatus.dstTransitionSkipped,
+        null,
+        null,
+        date: '2026-02-30',
+      ),
+      throwsFormatException,
+    );
+  });
+
+  test(
     'projection starts on listing local date on both sides of UTC midnight',
     () {
       final cases = [
