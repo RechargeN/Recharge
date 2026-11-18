@@ -183,6 +183,11 @@ const approvedOutsideUsers = {
       "contentCollections",
     ],
   },
+  // Round 2.2 (owner approval 2026-11-19): the cloud handoff entry reads only
+  // the reviewed dev-cloud switch name.
+  "dev_content_effects_entry.ts": {
+    firestore_content_repository: ["devCloudPersistenceSwitch"],
+  },
   "modules/library/firestore_library_service.ts": {
     firestore_content_repository: [
       "assertContentEmulatorContext",

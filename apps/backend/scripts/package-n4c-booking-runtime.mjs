@@ -11,6 +11,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
+  closureSchemaGroups,
   closurePackages,
   importClosure,
   treeDigest,
@@ -95,6 +96,10 @@ export function renderEnv({
     `N4C_LOAD_ENABLED=${settings.enabled}`,
     `N4C_LOAD_MAX_INSTANCES=${settings.maxInstances}`,
     `N4C_LOAD_CONCURRENCY=${settings.concurrency}`,
+    // Round 2.2: the Event → Booking handoff follows the runtime switch; its
+    // Operations switch (contained until an operator opens it) still decides.
+    `N4F_CONTENT_EFFECTS_ENABLED=${runtimeEnabled}`,
+    "RECHARGE_DEV_RUNTIME=content-media",
     ...projectNumberEnvLines(target, number),
     "",
   ].join("\n");
@@ -158,6 +163,22 @@ export function stageRuntime({
   );
   for (const rel of files)
     write(rel, readFileSync(path.join(functionsRoot, rel)));
+  // Round 2.2: the Content handoff validates against the contract schemas.
+  const schemaRoot = path.resolve(
+    backend,
+    "..",
+    "..",
+    "packages",
+    "api_contracts",
+    "schema",
+  );
+  for (const group of closureSchemaGroups(files))
+    for (const name of readdirSync(path.join(schemaRoot, group, "v1")).sort())
+      if (name.endsWith(".schema.json"))
+        write(
+          `contracts/${group}/v1/${name}`,
+          readFileSync(path.join(schemaRoot, group, "v1", name)),
+        );
   write(envFileFor(target), env);
   const digest = treeDigest(outDir);
   const manifest = {

@@ -311,3 +311,7 @@ export const releaseMissedReconfirmationsV1 = onSchedule(
     );
   },
 );
+
+// Round 2.2: the cloud Event → Booking handoff ships with this codebase (same
+// runtime account, same release), behind its own runtime and Operations switches.
+export { consumeContentEffectV1 } from './dev_content_effects_entry.js';

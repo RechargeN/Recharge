@@ -61,7 +61,9 @@ export const consumeContentEffectV1 = onDocumentCreated(
     timeoutSeconds: 120,
     minInstances: 0,
     maxInstances: 1,
-    serviceAccount: runtimeServiceAccount('runtime-effects', projectId),
+    // Round 2.2: Firestore IAM is database-wide, so a separate account adds no
+    // isolation; the Booking runtime account (already on this database) runs it.
+    serviceAccount: runtimeServiceAccount('runtime-booking', projectId),
   },
   async () => {
     if (!devContentEffectsOpen(process.env)) return;
