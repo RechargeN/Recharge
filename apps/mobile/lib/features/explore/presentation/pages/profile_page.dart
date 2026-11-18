@@ -81,7 +81,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       capabilities: user.capabilities,
     );
     final ProfilePersonalPresentation presentation =
-        ProfilePersonalPresentation(accessSummary: accessRoleSummary);
+        ProfilePersonalPresentation(
+          accessSummary: accessRoleSummary,
+          isAdmin: user.role.trim().toLowerCase() == 'admin',
+        );
     final _ProfileWorkspaceData workspaceData = _profileWorkspaceDataFor(
       context.l10n,
       favoritesState.items,
@@ -94,7 +97,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Scaffold(
       backgroundColor: RechargeTheme.profileBackground,
       appBar: AppBar(
-        title: Text(context.l10n.profileRoleTitle(presentation.titleId)),
+        title: Text(context.l10n.navProfile),
         backgroundColor: RechargeTheme.profileBackground,
         foregroundColor: RechargeTheme.ink,
         centerTitle: true,
@@ -540,12 +543,15 @@ class _ProfileHero extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  _HeroPill(
-                    label: context.l10n
-                        .profileRoleTitle(presentation.titleId)
-                        .toUpperCase(),
-                  ),
+                  // ADR 0023: no role badge for an ordinary account.
+                  if (presentation.roleBadgeId != null) ...<Widget>[
+                    const SizedBox(height: 8),
+                    _HeroPill(
+                      label: context.l10n
+                          .profileRoleTitle(presentation.roleBadgeId!)
+                          .toUpperCase(),
+                    ),
+                  ],
                 ],
               ),
             ),

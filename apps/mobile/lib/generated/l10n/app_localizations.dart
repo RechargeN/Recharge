@@ -1859,7 +1859,7 @@ abstract class AppLocalizations {
   /// Where a notification leads; kind is a stable id.
   ///
   /// In en, this message translates to:
-  /// **'{kind, select, legacy{Legacy notification} routeMap{Route map} map{Map} details{Details} saved{Saved plan} search{Search} publishStatus{Publish status} create{Create} creatorProfile{Creator profile} discover{Discover} other{Update}}'**
+  /// **'{kind, select, legacy{Legacy notification} routeMap{Route map} map{Map} details{Details} saved{Saved plan} search{Search} publishStatus{Publish status} create{Create} creatorProfile{Profile} discover{Discover} other{Update}}'**
   String notificationDestination(String kind);
 
   /// Action that opens a notification's destination; kind is a stable id.
@@ -12255,7 +12255,7 @@ abstract class AppLocalizations {
   /// Discover: Rental quantities are declared, not live.
   ///
   /// In en, this message translates to:
-  /// **'Listed quantities are Creator-declared, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.'**
+  /// **'Listed quantities are declared by the publisher, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.'**
   String get discoverRentalQuantitiesDisclaimer;
 
   /// Discover: Rental delivery radius.
@@ -12879,7 +12879,7 @@ abstract class AppLocalizations {
   /// Discover: home: what the For you block holds.
   ///
   /// In en, this message translates to:
-  /// **'Personal picks, saved ideas and creator tools stay one tap away.'**
+  /// **'Personal picks, saved ideas and create tools stay one tap away.'**
   String get discoverForYouHint;
 
   /// Discover: idea title from Smart Search without a query.
@@ -13299,7 +13299,7 @@ abstract class AppLocalizations {
   /// L4.6: Profile, workspace switcher — title.
   ///
   /// In en, this message translates to:
-  /// **'Creator'**
+  /// **'User'**
   String get identityCreator;
 
   /// L4.6: Profile, workspace switcher — button label.
@@ -13641,7 +13641,7 @@ abstract class AppLocalizations {
   /// L4.6: Profile page — text.
   ///
   /// In en, this message translates to:
-  /// **'Creator next steps'**
+  /// **'Next steps'**
   String get profileCreatorNextSteps;
 
   /// L4.6: Profile page — button tooltip.
@@ -13671,7 +13671,7 @@ abstract class AppLocalizations {
   /// L4.6: Profile page — text.
   ///
   /// In en, this message translates to:
-  /// **'Creator listing'**
+  /// **'My listing'**
   String get profileCreatorListing;
 
   /// L4.6: Profile page — button label.
@@ -13695,7 +13695,7 @@ abstract class AppLocalizations {
   /// L4.6: Profile page — text.
   ///
   /// In en, this message translates to:
-  /// **'Creator publications'**
+  /// **'My publications'**
   String get profileCreatorPublications;
 
   /// L4.6: Profile page — button tooltip.
@@ -13953,7 +13953,7 @@ abstract class AppLocalizations {
   /// L4.6: Profile page — secondary line.
   ///
   /// In en, this message translates to:
-  /// **'Open taxonomy-based creator flow'**
+  /// **'Open creation by category'**
   String get profileOpenTaxonomyFlow;
 
   /// L4.6: Profile page — title.
@@ -14037,7 +14037,7 @@ abstract class AppLocalizations {
   /// L4.6: Profile page — title.
   ///
   /// In en, this message translates to:
-  /// **'Creator tools'**
+  /// **'Create tools'**
   String get profileCreatorTools;
 
   /// L4.6: Profile page — title.
@@ -15003,7 +15003,7 @@ abstract class AppLocalizations {
   /// L4.6: profile role title for a stable role id (Creator stays untranslated until the glossary).
   ///
   /// In en, this message translates to:
-  /// **'{value, select, pro_generator{Pro generator}creator{Creator}user{User} other{Creator}}'**
+  /// **'{value, select, admin{Administrator}pro_generator{Pro generator}creator{User}user{User} other{User}}'**
   String profileRoleTitle(String value);
 
   /// L4.6: Quick Plan route fit level (stable value).

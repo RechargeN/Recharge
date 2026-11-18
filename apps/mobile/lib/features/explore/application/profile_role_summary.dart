@@ -33,25 +33,15 @@ ProfileRoleSummary profileRoleSummaryFor({
     return profileRoleSummaryForTier(ProfileRoleTier.user);
   }
   final String normalizedRole = role.trim().toLowerCase();
-  final Set<String> capabilitySet = capabilities
-      .map((String capability) => capability.trim().toLowerCase())
-      .where((String capability) => capability.isNotEmpty)
-      .toSet();
-  final bool isCreatorRole =
-      normalizedRole == 'creator' ||
-      normalizedRole == 'pro_generator' ||
-      normalizedRole == 'pro';
-  // ADR 0023: User = Creator — every active User may author personal content.
-  // Generation (Pro) still needs a creator/pro role, never capabilities alone.
-  final bool canCreate = isCreatorRole || normalizedRole == 'user';
-  final bool canGenerate =
-      isCreatorRole &&
-      (normalizedRole == 'pro_generator' ||
-          normalizedRole == 'pro' ||
-          capabilitySet.contains('pro.generator') ||
-          capabilitySet.contains('scenario.generate') ||
-          capabilitySet.contains('route.generate') ||
-          capabilitySet.contains('ai.generate.scenarios'));
+  // ADR 0023 (owner 2026-11-18): one role User for everyone except internal
+  // Admin; a legacy `creator` value reads as `user` and grants nothing more.
+  // Generation stays with the legacy Pro roles only, never capabilities alone
+  // and never the retired Creator role.
+  final bool isProRole =
+      normalizedRole == 'pro_generator' || normalizedRole == 'pro';
+  final bool canCreate =
+      isProRole || normalizedRole == 'user' || normalizedRole == 'creator';
+  final bool canGenerate = isProRole;
 
   if (canGenerate) {
     return profileRoleSummaryForTier(ProfileRoleTier.proGenerator);
@@ -119,11 +109,18 @@ bool profileRoleTierUnlocked({
 enum ProfilePersonalLayout { personal }
 
 class ProfilePersonalPresentation {
-  const ProfilePersonalPresentation({this.accessSummary});
+  const ProfilePersonalPresentation({this.accessSummary, this.isAdmin = false});
 
   final ProfileRoleSummary? accessSummary;
 
-  /// The one personal profile title id (glossary term Creator).
+  /// ADR 0023: Admin is the only role shown as a badge; an ordinary account
+  /// shows none.
+  final bool isAdmin;
+
+  /// The role badge id, or null for an ordinary account.
+  String? get roleBadgeId => isAdmin ? 'admin' : null;
+
+  /// Legacy title id of the personal profile (ADR 0023: shown as "User").
   String get titleId => 'creator';
   ProfilePersonalLayout get layout => ProfilePersonalLayout.personal;
   bool get canShowCreatorTools => accessSummary?.canCreate ?? false;

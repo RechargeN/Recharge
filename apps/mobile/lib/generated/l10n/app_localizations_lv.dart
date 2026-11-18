@@ -1256,7 +1256,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'search': 'Meklēšana',
       'publishStatus': 'Publicēšanas statuss',
       'create': 'Izveidot',
-      'creatorProfile': 'Autora profils',
+      'creatorProfile': 'Profils',
       'discover': 'Atklāt',
       'other': 'Jaunums',
     });
@@ -8643,7 +8643,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get discoverRentalQuantitiesDisclaimer =>
-      'Norādītos daudzumus deklarē autors; tā nav reāllaika rezervācijas garantija vai apstiprināts aktuāls skaits. Pirms paļauties uz tiem, pārbaudiet pakalpojuma sniedzēja vietnē.';
+      'Norādītos daudzumus deklarē publicētājs; tā nav reāllaika rezervācijas garantija vai apstiprināts aktuāls skaits. Pirms paļauties uz tiem, pārbaudiet pakalpojuma sniedzēja vietnē.';
 
   @override
   String discoverDeliveryWithin(String value) {
@@ -9274,7 +9274,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get discoverForYouHint =>
-      'Personīgas izvēles, saglabātas idejas un veidotāja rīki — viena pieskāriena attālumā.';
+      'Personīgas izvēles, saglabātas idejas un izveides rīki — viena pieskāriena attālumā.';
 
   @override
   String get discoverSmartSearchIdea => 'Viedās meklēšanas ideja';
@@ -9553,7 +9553,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'Papildu lapas pieprasījums gaida izskatīšanu';
 
   @override
-  String get identityCreator => 'Autors';
+  String get identityCreator => 'Lietotājs';
 
   @override
   String get identityOk => 'Labi';
@@ -9737,7 +9737,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get profileFinishDraft => 'Pabeigt melnrakstu';
 
   @override
-  String get profileCreatorNextSteps => 'Autora nākamie soļi';
+  String get profileCreatorNextSteps => 'Nākamie soļi';
 
   @override
   String get profileMapListingArea => 'Sludinājuma zona kartē';
@@ -9752,7 +9752,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get profileOpenCreate => 'Atvērt veidošanu';
 
   @override
-  String get profileCreatorListing => 'Autora sludinājums';
+  String get profileCreatorListing => 'Mans sludinājums';
 
   @override
   String get profileBuildRoute => 'Veidot maršrutu';
@@ -9765,7 +9765,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'Pārvaldiet melnrakstus un publicētos sludinājumus vienā darbvietā.';
 
   @override
-  String get profileCreatorPublications => 'Autora publikācijas';
+  String get profileCreatorPublications => 'Manas publikācijas';
 
   @override
   String get profileListingFromLatestSmart =>
@@ -9902,7 +9902,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get profileCreateRoute => 'Izveidot maršrutu';
 
   @override
-  String get profileOpenTaxonomyFlow => 'Atvērt veidošanu pēc kategorijām';
+  String get profileOpenTaxonomyFlow => 'Atvērt izveidi pa kategorijām';
 
   @override
   String get profileViewAllEvents => 'Skatīt visus pasākumus';
@@ -9945,7 +9945,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'Pārbaudi un pieejamos rīkus skatiet iestatījumos';
 
   @override
-  String get profileCreatorTools => 'Autora rīki';
+  String get profileCreatorTools => 'Izveides rīki';
 
   @override
   String get profileSavedList => 'Saglabātais saraksts';
@@ -10551,10 +10551,11 @@ class AppLocalizationsLv extends AppLocalizations {
   @override
   String profileRoleTitle(String value) {
     String _temp0 = intl.Intl.selectLogic(value, {
+      'admin': 'Administrators',
       'pro_generator': 'Pro ģenerators',
-      'creator': 'Autors',
+      'creator': 'Lietotājs',
       'user': 'Lietotājs',
-      'other': 'Autors',
+      'other': 'Lietotājs',
     });
     return '$_temp0';
   }

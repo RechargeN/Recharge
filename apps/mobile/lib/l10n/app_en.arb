@@ -1477,7 +1477,7 @@
   "@notificationsShowAll": {
     "description": "Notifications: reset the filter."
   },
-  "notificationDestination": "{kind, select, legacy{Legacy notification} routeMap{Route map} map{Map} details{Details} saved{Saved plan} search{Search} publishStatus{Publish status} create{Create} creatorProfile{Creator profile} discover{Discover} other{Update}}",
+  "notificationDestination": "{kind, select, legacy{Legacy notification} routeMap{Route map} map{Map} details{Details} saved{Saved plan} search{Search} publishStatus{Publish status} create{Create} creatorProfile{Profile} discover{Discover} other{Update}}",
   "@notificationDestination": {
     "description": "Where a notification leads; kind is a stable id.",
     "placeholders": {
@@ -9133,7 +9133,7 @@
       }
     }
   },
-  "discoverRentalQuantitiesDisclaimer": "Listed quantities are Creator-declared, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.",
+  "discoverRentalQuantitiesDisclaimer": "Listed quantities are declared by the publisher, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.",
   "@discoverRentalQuantitiesDisclaimer": {
     "description": "Discover: Rental quantities are declared, not live."
   },
@@ -9927,7 +9927,7 @@
       }
     }
   },
-  "discoverForYouHint": "Personal picks, saved ideas and creator tools stay one tap away.",
+  "discoverForYouHint": "Personal picks, saved ideas and create tools stay one tap away.",
   "@discoverForYouHint": {
     "description": "Discover: home: what the For you block holds."
   },
@@ -10279,7 +10279,7 @@
   "@identityLimitRequestPending": {
     "description": "L4.6: Profile, workspace switcher — title."
   },
-  "identityCreator": "Creator",
+  "identityCreator": "User",
   "@identityCreator": {
     "description": "L4.6: Profile, workspace switcher — title."
   },
@@ -10507,7 +10507,7 @@
   "@profileFinishDraft": {
     "description": "L4.6: Profile page — title."
   },
-  "profileCreatorNextSteps": "Creator next steps",
+  "profileCreatorNextSteps": "Next steps",
   "@profileCreatorNextSteps": {
     "description": "L4.6: Profile page — text."
   },
@@ -10527,7 +10527,7 @@
   "@profileOpenCreate": {
     "description": "L4.6: Profile page — text."
   },
-  "profileCreatorListing": "Creator listing",
+  "profileCreatorListing": "My listing",
   "@profileCreatorListing": {
     "description": "L4.6: Profile page — text."
   },
@@ -10543,7 +10543,7 @@
   "@profileManageDrafts": {
     "description": "L4.6: Profile page — text."
   },
-  "profileCreatorPublications": "Creator publications",
+  "profileCreatorPublications": "My publications",
   "@profileCreatorPublications": {
     "description": "L4.6: Profile page — text."
   },
@@ -10715,7 +10715,7 @@
   "@profileCreateRoute": {
     "description": "L4.6: Profile page — title."
   },
-  "profileOpenTaxonomyFlow": "Open taxonomy-based creator flow",
+  "profileOpenTaxonomyFlow": "Open creation by category",
   "@profileOpenTaxonomyFlow": {
     "description": "L4.6: Profile page — secondary line."
   },
@@ -10771,7 +10771,7 @@
   "@profileCheckVerification": {
     "description": "L4.6: Profile page — secondary line."
   },
-  "profileCreatorTools": "Creator tools",
+  "profileCreatorTools": "Create tools",
   "@profileCreatorTools": {
     "description": "L4.6: Profile page — title."
   },
@@ -11457,7 +11457,7 @@
       }
     }
   },
-  "profileRoleTitle": "{value, select, pro_generator{Pro generator}creator{Creator}user{User} other{Creator}}",
+  "profileRoleTitle": "{value, select, admin{Administrator}pro_generator{Pro generator}creator{User}user{User} other{User}}",
   "@profileRoleTitle": {
     "description": "L4.6: profile role title for a stable role id (Creator stays untranslated until the glossary).",
     "placeholders": {

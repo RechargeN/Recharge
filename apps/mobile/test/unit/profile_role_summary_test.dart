@@ -34,17 +34,32 @@ void main() {
     expect(summary.canGenerate, isFalse);
   });
 
-  test('maps generator capabilities to Pro generator tier', () {
-    final ProfileRoleSummary summary = profileRoleSummaryFor(
-      role: 'creator',
-      capabilities: const <String>['create.event', 'scenario.generate'],
-    );
+  test(
+    'ADR 0023: a legacy Creator role reads as User and grants nothing more',
+    () {
+      final ProfileRoleSummary legacy = profileRoleSummaryFor(
+        role: 'creator',
+        capabilities: const <String>['create.event', 'scenario.generate'],
+      );
+      final ProfileRoleSummary user = profileRoleSummaryFor(
+        role: 'user',
+        capabilities: const <String>['create.event', 'scenario.generate'],
+      );
 
-    expect(summary.tier, ProfileRoleTier.proGenerator);
-    expect(summary.canCreate, isTrue);
-    expect(summary.canGenerate, isTrue);
-    expect(summary.primaryActionId, 'open_builder');
-  });
+      expect(legacy.tier, user.tier);
+      expect(legacy.canCreate, user.canCreate);
+      expect(legacy.canGenerate, isFalse);
+      expect(user.canGenerate, isFalse);
+      // A legacy Pro role keeps generation.
+      expect(
+        profileRoleSummaryFor(
+          role: 'pro_generator',
+          capabilities: const <String>[],
+        ).canGenerate,
+        isTrue,
+      );
+    },
+  );
 
   test('one personal title/layout with distinct actual tool hints', () {
     final summaries = <ProfileRoleSummary?>[

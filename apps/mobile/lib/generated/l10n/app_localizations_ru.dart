@@ -1262,7 +1262,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'search': 'Поиск',
       'publishStatus': 'Статус публикации',
       'create': 'Создать',
-      'creatorProfile': 'Профиль автора',
+      'creatorProfile': 'Профиль',
       'discover': 'Лента',
       'other': 'Обновление',
     });
@@ -8671,7 +8671,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get discoverRentalQuantitiesDisclaimer =>
-      'Указанное количество заявлено автором — это не гарантия бронирования и не проверенный актуальный остаток. Прежде чем полагаться на него, проверьте на сайте поставщика.';
+      'Указанное количество заявил публикующий — это не гарантия бронирования и не проверенный актуальный остаток. Прежде чем полагаться на него, проверьте на сайте поставщика.';
 
   @override
   String discoverDeliveryWithin(String value) {
@@ -9317,7 +9317,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get discoverForYouHint =>
-      'Личные подборки, сохранённые идеи и инструменты автора — в одно касание.';
+      'Личные подборки, сохранённые идеи и инструменты создания — в одно касание.';
 
   @override
   String get discoverSmartSearchIdea => 'Идея из умного поиска';
@@ -9596,7 +9596,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Заявка на дополнительную страницу ожидает рассмотрения';
 
   @override
-  String get identityCreator => 'Автор';
+  String get identityCreator => 'Пользователь';
 
   @override
   String get identityOk => 'ОК';
@@ -9781,7 +9781,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profileFinishDraft => 'Завершить черновик';
 
   @override
-  String get profileCreatorNextSteps => 'Следующие шаги автора';
+  String get profileCreatorNextSteps => 'Что сделать дальше';
 
   @override
   String get profileMapListingArea => 'Область объявления на карте';
@@ -9796,7 +9796,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profileOpenCreate => 'Открыть создание';
 
   @override
-  String get profileCreatorListing => 'Объявление автора';
+  String get profileCreatorListing => 'Моё объявление';
 
   @override
   String get profileBuildRoute => 'Построить маршрут';
@@ -9809,7 +9809,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Управляйте черновиками и опубликованными объявлениями в одном месте.';
 
   @override
-  String get profileCreatorPublications => 'Публикации автора';
+  String get profileCreatorPublications => 'Мои публикации';
 
   @override
   String get profileListingFromLatestSmart =>
@@ -9989,7 +9989,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Проверку и доступные инструменты смотрите в настройках';
 
   @override
-  String get profileCreatorTools => 'Инструменты автора';
+  String get profileCreatorTools => 'Инструменты создания';
 
   @override
   String get profileSavedList => 'Сохранённое';
@@ -10595,10 +10595,11 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String profileRoleTitle(String value) {
     String _temp0 = intl.Intl.selectLogic(value, {
+      'admin': 'Администратор',
       'pro_generator': 'Pro-генератор',
-      'creator': 'Автор',
+      'creator': 'Пользователь',
       'user': 'Пользователь',
-      'other': 'Автор',
+      'other': 'Пользователь',
     });
     return '$_temp0';
   }

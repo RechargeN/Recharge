@@ -1244,7 +1244,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'search': 'Search',
       'publishStatus': 'Publish status',
       'create': 'Create',
-      'creatorProfile': 'Creator profile',
+      'creatorProfile': 'Profile',
       'discover': 'Discover',
       'other': 'Update',
     });
@@ -8540,7 +8540,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discoverRentalQuantitiesDisclaimer =>
-      'Listed quantities are Creator-declared, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.';
+      'Listed quantities are declared by the publisher, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.';
 
   @override
   String discoverDeliveryWithin(String value) {
@@ -9153,7 +9153,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discoverForYouHint =>
-      'Personal picks, saved ideas and creator tools stay one tap away.';
+      'Personal picks, saved ideas and create tools stay one tap away.';
 
   @override
   String get discoverSmartSearchIdea => 'Smart search idea';
@@ -9430,7 +9430,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get identityLimitRequestPending => 'Additional page request pending';
 
   @override
-  String get identityCreator => 'Creator';
+  String get identityCreator => 'User';
 
   @override
   String get identityOk => 'OK';
@@ -9614,7 +9614,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileFinishDraft => 'Finish draft';
 
   @override
-  String get profileCreatorNextSteps => 'Creator next steps';
+  String get profileCreatorNextSteps => 'Next steps';
 
   @override
   String get profileMapListingArea => 'Map listing area';
@@ -9629,7 +9629,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileOpenCreate => 'Open Create';
 
   @override
-  String get profileCreatorListing => 'Creator listing';
+  String get profileCreatorListing => 'My listing';
 
   @override
   String get profileBuildRoute => 'Build route';
@@ -9642,7 +9642,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Manage drafts and published listings from the same workspace.';
 
   @override
-  String get profileCreatorPublications => 'Creator publications';
+  String get profileCreatorPublications => 'My publications';
 
   @override
   String get profileListingFromLatestSmart =>
@@ -9776,7 +9776,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileCreateRoute => 'Create route';
 
   @override
-  String get profileOpenTaxonomyFlow => 'Open taxonomy-based creator flow';
+  String get profileOpenTaxonomyFlow => 'Open creation by category';
 
   @override
   String get profileViewAllEvents => 'View all events';
@@ -9819,7 +9819,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Check verification and available tools in Settings';
 
   @override
-  String get profileCreatorTools => 'Creator tools';
+  String get profileCreatorTools => 'Create tools';
 
   @override
   String get profileSavedList => 'Saved list';
@@ -10419,10 +10419,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String profileRoleTitle(String value) {
     String _temp0 = intl.Intl.selectLogic(value, {
+      'admin': 'Administrator',
       'pro_generator': 'Pro generator',
-      'creator': 'Creator',
+      'creator': 'User',
       'user': 'User',
-      'other': 'Creator',
+      'other': 'User',
     });
     return '$_temp0';
   }
