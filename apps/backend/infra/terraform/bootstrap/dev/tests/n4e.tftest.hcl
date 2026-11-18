@@ -64,23 +64,30 @@ run "n4e_shape" {
     error_message = "Goals and bounds follow the SLO model (99.9 %, p95 1.5 s / 750 ms, 28 days)."
   }
   assert {
-    condition = (length(google_monitoring_alert_policy.n4e_fast_burn[0].conditions) == 5
+    condition = (length(google_monitoring_alert_policy.n4e_fast_burn[0].conditions) == 3
+      && length(google_monitoring_alert_policy.n4e_latency_fast_burn[0].conditions) == 2
       && google_monitoring_alert_policy.n4e_fast_burn[0].conditions[0].condition_threshold[0].threshold_value == 10
       && google_monitoring_alert_policy.n4e_fast_burn[0].conditions[0].condition_threshold[0].duration == "300s"
       && google_monitoring_alert_policy.n4e_slow_burn[0].conditions[0].condition_threshold[0].threshold_value == 2
     && google_monitoring_alert_policy.n4e_slow_burn[0].conditions[0].condition_threshold[0].duration == "7200s")
-    error_message = "Fast burn 10x over 1 h held 5 min; slow burn 2x over 24 h held 2 h; one condition per SLO."
+    error_message = "Fast burn 10x over 1 h held 5 min (availability Critical, latency Warning); slow burn 2x over 24 h held 2 h."
   }
   assert {
-    condition = (length(google_monitoring_uptime_check_config.n4e) == 2
+    condition = (length(google_monitoring_uptime_check_config.n4e) == 3
+      && google_monitoring_uptime_check_config.n4e["booking"].content_matchers[0].content == "\"UNAUTHENTICATED\""
       && google_monitoring_uptime_check_config.n4e["booking"].http_check[0].accepted_response_status_codes[0].status_value == 401
     && google_monitoring_uptime_check_config.n4e["booking"].monitored_resource[0].labels.host == "europe-west1-recharge-dev-n2a01.cloudfunctions.net")
-    error_message = "Two probes on the staging Functions host that expect 401 for an invalid token."
+    error_message = "Three probes that expect the app's own 401 body for an invalid token."
   }
   assert {
-    condition = alltrue([for p in [google_monitoring_alert_policy.n4e_fast_burn[0], google_monitoring_alert_policy.n4e_slow_burn[0], google_monitoring_alert_policy.n4e_server_errors[0]] :
-    length(p.notification_channels) == 1])
-    error_message = "Every N4e policy notifies the one staging e-mail channel."
+    condition = (length(google_monitoring_alert_policy.n4e_fast_burn[0].notification_channels) == 1
+      && length(google_monitoring_alert_policy.n4e_probe[0].notification_channels) == 1
+      && google_monitoring_alert_policy.n4e_fast_burn[0].severity == "CRITICAL"
+      && google_monitoring_alert_policy.n4e_probe[0].severity == "CRITICAL"
+      && length(google_monitoring_alert_policy.n4e_latency_fast_burn[0].notification_channels) == 0
+      && length(google_monitoring_alert_policy.n4e_slow_burn[0].notification_channels) == 0
+    && length(google_monitoring_alert_policy.n4e_server_errors[0].notification_channels) == 0)
+    error_message = "Owner e-mail only for Critical: probes and availability fast burn; the rest stays in Monitoring."
   }
 }
 
@@ -97,8 +104,11 @@ run "n4e_round1_shape" {
     error_message = "Two budget-spent policies (50 % and 75 % spent), one condition per SLO."
   }
   assert {
-    condition = (length(google_monitoring_alert_policy.n4e_telemetry_absent[0].conditions) == 2
+    condition = (length(google_monitoring_alert_policy.n4e_telemetry_absent[0].conditions) == 3
       && google_monitoring_alert_policy.n4e_telemetry_absent[0].conditions[0].condition_absent[0].duration == "1800s"
+      && google_monitoring_alert_policy.n4e_telemetry_absent[0].conditions[0].condition_absent[0].aggregations[0].cross_series_reducer == "REDUCE_SUM"
+      && length(google_monitoring_alert_policy.n4e_telemetry_absent[0].notification_channels) == 0
+      && length(google_monitoring_alert_policy.n4e_budget_spent["75"].notification_channels) == 0
     && length(google_monitoring_alert_policy.n4e_media_tools) == 1)
     error_message = "Missing telemetry for both probed services (30 min) and the media tools failure alert."
   }

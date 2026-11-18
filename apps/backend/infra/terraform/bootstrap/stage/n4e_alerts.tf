@@ -67,6 +67,8 @@ locals {
   n4e_probes = {
     booking = { path = "/createInternalBookingV1", headers = { Authorization = "Bearer n4e-uptime-invalid-token" } }
     session = { path = "/readIdentitySessionV1", headers = { Authorization = "Bearer n4e-uptime-invalid-token", "X-Recharge-Identity-Provider" = "google" } }
+    # Owner request 2026-11-18: the Booking read path is critical too.
+    booking_read = { path = "/getMyBookingV1", headers = { Authorization = "Bearer n4e-uptime-invalid-token" } }
   }
   n4e_runbook = "Runbook: docs/runbooks/staging-monitoring-alerts-cost.md (staging only; budget alerts do not cap spend)."
 }
@@ -133,7 +135,7 @@ resource "google_monitoring_alert_policy" "n4e_fast_burn" {
   severity              = "CRITICAL"
   notification_channels = [google_monitoring_notification_channel.budget_email.name]
   dynamic "conditions" {
-    for_each = local.n4e_slos
+    for_each = { for k, v in local.n4e_slos : k => v if v.kind == "availability" }
     content {
       display_name = "${conditions.key} burn >= 10x over 1 h"
       condition_threshold {
@@ -145,23 +147,56 @@ resource "google_monitoring_alert_policy" "n4e_fast_burn" {
     }
   }
   alert_strategy {
-    auto_close = "3600s"
+    auto_close           = "3600s"
+    notification_prompts = ["OPENED", "CLOSED"]
   }
   documentation {
-    content   = "Fast error-budget burn. Stop releases and assess as an incident. ${local.n4e_runbook}"
+    content   = "Critical: a sign-in, Booking command or read journey is failing (5xx/429) at 10x the sustainable rate. Stop releases and assess as an incident. ${local.n4e_runbook}"
+    mime_type = "text/markdown"
+  }
+}
+
+resource "google_monitoring_alert_policy" "n4e_latency_fast_burn" {
+  count        = local.n4e_on ? 1 : 0
+  project      = google_project.stage.project_id
+  display_name = "stage-slo-latency-fast-burn"
+  combiner     = "OR"
+  enabled      = true
+  severity     = "WARNING"
+  # Owner rule 2026-11-18: no e-mail; the incident stays visible in Cloud Monitoring.
+  notification_channels = []
+  dynamic "conditions" {
+    for_each = { for k, v in local.n4e_slos : k => v if v.kind == "latency" }
+    content {
+      display_name = "${conditions.key} burn >= 10x over 1 h"
+      condition_threshold {
+        filter          = "select_slo_burn_rate(\"${google_monitoring_slo.n4e[conditions.key].name}\", \"3600s\")"
+        comparison      = "COMPARISON_GT"
+        threshold_value = 10
+        duration        = "300s"
+      }
+    }
+  }
+  alert_strategy {
+    auto_close           = "3600s"
+    notification_prompts = ["OPENED"]
+  }
+  documentation {
+    content   = "Warning: latency budget burning fast. With almost no traffic a single cold start does it; look at p95 with real traffic before acting. ${local.n4e_runbook}"
     mime_type = "text/markdown"
   }
 }
 
 # Slow burn: 2x the sustainable rate over 24 hours, held for 2 hours.
 resource "google_monitoring_alert_policy" "n4e_slow_burn" {
-  count                 = local.n4e_on ? 1 : 0
-  project               = google_project.stage.project_id
-  display_name          = "stage-slo-slow-burn"
-  combiner              = "OR"
-  enabled               = true
-  severity              = "WARNING"
-  notification_channels = [google_monitoring_notification_channel.budget_email.name]
+  count        = local.n4e_on ? 1 : 0
+  project      = google_project.stage.project_id
+  display_name = "stage-slo-slow-burn"
+  combiner     = "OR"
+  enabled      = true
+  severity     = "WARNING"
+  # Owner rule 2026-11-18: no e-mail; the incident stays visible in Cloud Monitoring.
+  notification_channels = []
   dynamic "conditions" {
     for_each = local.n4e_slos
     content {
@@ -210,6 +245,13 @@ resource "google_monitoring_uptime_check_config" "n4e" {
     }
   }
 
+  # The app's own refusal, not a Google front-end 401: a probe that only saw a
+  # status would stay green if the function itself were unreachable.
+  content_matchers {
+    content = "\"UNAUTHENTICATED\""
+    matcher = "CONTAINS_STRING"
+  }
+
   monitored_resource {
     type = "uptime_url"
     labels = {
@@ -232,7 +274,7 @@ resource "google_monitoring_alert_policy" "n4e_probe" {
   display_name          = "stage-probe-failed"
   combiner              = "OR"
   enabled               = true
-  severity              = "ERROR"
+  severity              = "CRITICAL"
   notification_channels = [google_monitoring_notification_channel.budget_email.name]
   dynamic "conditions" {
     for_each = google_monitoring_uptime_check_config.n4e
@@ -253,7 +295,8 @@ resource "google_monitoring_alert_policy" "n4e_probe" {
     }
   }
   alert_strategy {
-    auto_close = "1800s"
+    auto_close           = "1800s"
+    notification_prompts = ["OPENED", "CLOSED"]
   }
   documentation {
     content   = "A staging Function stopped answering 401 to an invalid token (503 means the runtime is off or failing). ${local.n4e_runbook}"
@@ -264,13 +307,14 @@ resource "google_monitoring_alert_policy" "n4e_probe" {
 # Server-side failures: error logs and the closed-fail markers of the cloud
 # entries (`dev_*_failure`, logged when a request ends in 503).
 resource "google_monitoring_alert_policy" "n4e_server_errors" {
-  count                 = local.n4e_on ? 1 : 0
-  project               = google_project.stage.project_id
-  display_name          = "stage-server-errors"
-  combiner              = "OR"
-  enabled               = true
-  severity              = "ERROR"
-  notification_channels = [google_monitoring_notification_channel.budget_email.name]
+  count        = local.n4e_on ? 1 : 0
+  project      = google_project.stage.project_id
+  display_name = "stage-server-errors"
+  combiner     = "OR"
+  enabled      = true
+  severity     = "WARNING"
+  # Owner rule 2026-11-18: no e-mail; the incident stays visible in Cloud Monitoring.
+  notification_channels = []
   conditions {
     display_name = "error log or closed-fail marker in a Cloud Run service"
     condition_matched_log {
@@ -291,13 +335,14 @@ resource "google_monitoring_alert_policy" "n4e_server_errors" {
 
 # Error budget consumed: remaining fraction below 50 % and below 25 % (75 % spent).
 resource "google_monitoring_alert_policy" "n4e_budget_spent" {
-  for_each              = local.n4e_on ? { "50" = 0.5, "75" = 0.25 } : {}
-  project               = google_project.stage.project_id
-  display_name          = "stage-slo-budget-${each.key}-percent-spent"
-  combiner              = "OR"
-  enabled               = true
-  severity              = each.key == "75" ? "ERROR" : "WARNING"
-  notification_channels = [google_monitoring_notification_channel.budget_email.name]
+  for_each     = local.n4e_on ? { "50" = 0.5, "75" = 0.25 } : {}
+  project      = google_project.stage.project_id
+  display_name = "stage-slo-budget-${each.key}-percent-spent"
+  combiner     = "OR"
+  enabled      = true
+  severity     = "WARNING"
+  # Owner rule 2026-11-18: no e-mail; the incident stays visible in Cloud Monitoring.
+  notification_channels = []
   dynamic "conditions" {
     for_each = local.n4e_slos
     content {
@@ -322,23 +367,26 @@ resource "google_monitoring_alert_policy" "n4e_budget_spent" {
 # Missing telemetry: the probes call these two services every 5 minutes, so no
 # request metric for 30 minutes means the probes or the metric pipeline stopped.
 resource "google_monitoring_alert_policy" "n4e_telemetry_absent" {
-  count                 = local.n4e_on ? 1 : 0
-  project               = google_project.stage.project_id
-  display_name          = "stage-telemetry-absent"
-  combiner              = "OR"
-  enabled               = true
-  severity              = "ERROR"
-  notification_channels = [google_monitoring_notification_channel.budget_email.name]
+  count        = local.n4e_on ? 1 : 0
+  project      = google_project.stage.project_id
+  display_name = "stage-telemetry-absent"
+  combiner     = "OR"
+  enabled      = true
+  severity     = "WARNING"
+  # Owner rule 2026-11-18: no e-mail; the incident stays visible in Cloud Monitoring.
+  notification_channels = []
   dynamic "conditions" {
-    for_each = toset(["createinternalbookingv1", "readidentitysessionv1"])
+    for_each = toset(["createinternalbookingv1", "readidentitysessionv1", "getmybookingv1"])
     content {
       display_name = "no request metric from ${conditions.value} for 30 min"
       condition_absent {
         filter   = "metric.type=\"run.googleapis.com/request_count\" AND resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${conditions.value}\""
         duration = "1800s"
         aggregations {
-          alignment_period   = "300s"
-          per_series_aligner = "ALIGN_SUM"
+          alignment_period     = "300s"
+          per_series_aligner   = "ALIGN_SUM"
+          cross_series_reducer = "REDUCE_SUM"
+          group_by_fields      = ["resource.label.service_name"]
         }
       }
     }
@@ -354,13 +402,14 @@ resource "google_monitoring_alert_policy" "n4e_telemetry_absent" {
 
 # Media scanner/processor failures (database absent, crash): covers quarantined uploads.
 resource "google_monitoring_alert_policy" "n4e_media_tools" {
-  count                 = local.n4e_on ? 1 : 0
-  project               = google_project.stage.project_id
-  display_name          = "stage-media-tools-failure"
-  combiner              = "OR"
-  enabled               = true
-  severity              = "ERROR"
-  notification_channels = [google_monitoring_notification_channel.budget_email.name]
+  count        = local.n4e_on ? 1 : 0
+  project      = google_project.stage.project_id
+  display_name = "stage-media-tools-failure"
+  combiner     = "OR"
+  enabled      = true
+  severity     = "WARNING"
+  # Owner rule 2026-11-18: no e-mail; the incident stays visible in Cloud Monitoring.
+  notification_channels = []
   conditions {
     display_name = "media tools request with a failure class"
     condition_matched_log {

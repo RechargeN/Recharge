@@ -36,6 +36,14 @@ export const roundOneCreates = Object.freeze([
   "google_monitoring_alert_policy.n4e_media_tools[0]",
 ]);
 const backupSchedule = 'google_firestore_backup_schedule.n4e["daily"]';
+/** Round 2 (owner request 2026-11-18, alert noise): two creates, in-place updates of the existing
+ * N4e policies and probes only; nothing is removed. */
+export const roundTwoCreates = Object.freeze([
+  "google_monitoring_alert_policy.n4e_latency_fast_burn[0]",
+  'google_monitoring_uptime_check_config.n4e["booking_read"]',
+]);
+const roundTwoUpdatable =
+  /^google_monitoring_(alert_policy\.n4e_[a-z_]+(\[0\]|\["(50|75)"\])|uptime_check_config\.n4e\["(booking|session)"\])$/u;
 const channelAddress = "google_monitoring_notification_channel.budget_email";
 
 export function checkN4ePlan(plan, expected) {
@@ -60,11 +68,13 @@ export function checkN4ePlan(plan, expected) {
   if (!channelName)
     errors.push("existing staging e-mail channel not in the plan");
   const expectedCreates =
-    target === devProject
-      ? [...reviewedCreates, ...roundOneCreates]
-      : expected.round === 1
-        ? roundOneCreates
-        : reviewedCreates;
+    expected.round === 2
+      ? roundTwoCreates
+      : target === devProject
+        ? [...reviewedCreates, ...roundOneCreates]
+        : expected.round === 1
+          ? roundOneCreates
+          : reviewedCreates;
   if (expected.round === 1) {
     const schedule = changes.find((c) => c.address === backupSchedule);
     if (
@@ -77,11 +87,25 @@ export function checkN4ePlan(plan, expected) {
   for (const c of changes) {
     const actions = c.change?.actions ?? [];
     const after = c.change?.after ?? {};
+    const roundTwoUpdate =
+      expected.round === 2 &&
+      actions.length === 1 &&
+      actions[0] === "update" &&
+      roundTwoUpdatable.test(c.address);
     if (
-      actions.length !== 1 ||
-      !["create", "read", "no-op"].includes(actions[0])
+      !roundTwoUpdate &&
+      (actions.length !== 1 ||
+        !["create", "read", "no-op"].includes(actions[0]))
     )
       errors.push(`forbidden action ${actions.join("+")}: ${c.address}`);
+    if (roundTwoUpdate && c.type === "google_monitoring_alert_policy") {
+      const channels = after.notification_channels ?? [];
+      if (
+        channels.length > 1 ||
+        (channels.length === 1 && channelName && channels[0] !== channelName)
+      )
+        errors.push(`policy may notify only the e-mail channel: ${c.address}`);
+    }
     if (actions[0] !== "create") continue;
     if (!expectedCreates.includes(c.address)) {
       errors.push(`unreviewed create: ${c.address}`);
@@ -93,7 +117,12 @@ export function checkN4ePlan(plan, expected) {
     if (c.type === "google_monitoring_alert_policy") {
       const channels = after.notification_channels ?? [];
       // The channel name is known before apply: it already exists.
-      if (channels.length !== 1 || (channelName && channels[0] !== channelName))
+      if (
+        // Owner rule 2026-11-18: a Warning policy has no channel; a Critical one
+        // has exactly the staging e-mail channel.
+        channels.length > 1 ||
+        (channels.length === 1 && channelName && channels[0] !== channelName)
+      )
         errors.push(
           `policy must notify only the staging e-mail channel: ${c.address}`,
         );

@@ -7,6 +7,7 @@ import {
   project,
   reviewedCreates,
   roundOneCreates,
+  roundTwoCreates,
 } from "./check-n4e-plan.mjs";
 
 const channel = `projects/${project}/notificationChannels/123`;
@@ -266,4 +267,80 @@ test("dev: the full set (first apply plus round 1) in one plan, on the dev host"
   list[2].change.after.monitored_resource = [
     { labels: { host: `europe-west1-${project}.cloudfunctions.net` } },
   ];
+});
+
+test("round 2: in-place policy and probe updates, two creates, nothing removed", () => {
+  const list = [
+    changes()[0],
+    change(
+      "google_monitoring_alert_policy.n4e_slow_burn[0]",
+      "google_monitoring_alert_policy",
+      { project, notification_channels: [], enabled: true },
+      ["update"],
+    ),
+    change(
+      'google_monitoring_uptime_check_config.n4e["booking"]',
+      "google_monitoring_uptime_check_config",
+      { project },
+      ["update"],
+    ),
+    ...roundTwoCreates.map((address) => {
+      const type = address.split(".")[0];
+      const after = { project };
+      if (type === "google_monitoring_alert_policy")
+        Object.assign(after, { notification_channels: [], enabled: true });
+      if (type === "google_monitoring_uptime_check_config")
+        Object.assign(after, {
+          http_check: [
+            {
+              use_ssl: true,
+              request_method: "POST",
+              accepted_response_status_codes: [{ status_value: 401 }],
+            },
+          ],
+          monitored_resource: [
+            { labels: { host: `europe-west1-${project}.cloudfunctions.net` } },
+          ],
+        });
+      return change(address, type, after);
+    }),
+  ];
+  const p = plan(list);
+  assert.deepEqual(checkN4ePlan(p, { ...expected(p), round: 2 }), []);
+  const removed = plan([
+    ...list,
+    change(
+      "google_monitoring_alert_policy.n4e_probe[0]",
+      "google_monitoring_alert_policy",
+      {},
+      ["delete"],
+    ),
+  ]);
+  assert.match(
+    checkN4ePlan(removed, { ...expected(removed), round: 2 }).join(),
+    /forbidden action delete/u,
+  );
+  const replaced = plan([
+    ...list,
+    change(
+      'google_monitoring_uptime_check_config.n4e["session"]',
+      "google_monitoring_uptime_check_config",
+      {},
+      ["delete", "create"],
+    ),
+  ]);
+  assert.match(
+    checkN4ePlan(replaced, { ...expected(replaced), round: 2 }).join(),
+    /forbidden action delete\+create/u,
+  );
+  const foreign = plan([
+    ...list,
+    change("google_project_iam_member.x[0]", "google_project_iam_member", {}, [
+      "update",
+    ]),
+  ]);
+  assert.match(
+    checkN4ePlan(foreign, { ...expected(foreign), round: 2 }).join(),
+    /forbidden action update/u,
+  );
 });
