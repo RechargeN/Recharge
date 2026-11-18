@@ -1,4 +1,5 @@
 import type { Firestore, Transaction } from 'firebase-admin/firestore';
+import { emergencySwitchState } from './modules/operations/emergency_switch.js';
 import { error as logError } from 'firebase-functions/logger';
 
 import { getEventAvailability } from './booking/availability_query.js';
@@ -82,13 +83,26 @@ const interactiveFlags: ReadonlySet<string> = new Set([
  * place. Workers and anything unknown stay off.
  */
 export class DeploySwitchBookingFlags {
-  constructor(private readonly createDisabled: boolean) {}
+  constructor(
+    private readonly createDisabled: boolean,
+    private readonly firestore?: Firestore,
+  ) {}
 
-  isEnabled(capabilityId: string, transaction?: Transaction): Promise<boolean> {
-    void transaction;
-    if (capabilityId === abuseEmergencySwitchIds.bookingCreate)
-      return Promise.resolve(this.createDisabled);
-    return Promise.resolve(interactiveFlags.has(capabilityId));
+  /**
+   * Round 2.1 (owner approval 2026-11-18): the kill switch is also an
+   * Operations emergency switch of this environment, so containment takes
+   * seconds instead of a redeploy. Either one contains; the switch fails
+   * closed (no pointer in the cloud, a read error) like every L2 switch.
+   */
+  async isEnabled(capabilityId: string, transaction?: Transaction): Promise<boolean> {
+    if (capabilityId === abuseEmergencySwitchIds.bookingCreate) {
+      if (this.createDisabled) return true;
+      if (this.firestore === undefined) return false;
+      return (
+        (await emergencySwitchState(this.firestore, capabilityId, transaction)) === 'contained'
+      );
+    }
+    return interactiveFlags.has(capabilityId);
   }
 }
 
@@ -105,7 +119,7 @@ export function createDevBookingComposition(
   return Object.freeze({
     accessAuthority: new FirestoreBookingAccessAuthority(firestore),
     abuseRateLimiter: new FirestoreAbuseRateLimiter(firestore),
-    featureFlags: new DeploySwitchBookingFlags(createDisabled),
+    featureFlags: new DeploySwitchBookingFlags(createDisabled, firestore),
   });
 }
 

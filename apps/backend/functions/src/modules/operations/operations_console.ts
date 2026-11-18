@@ -11,7 +11,7 @@ import type { ServerClock } from '../../shared/server_clock.js';
 import { assertContentEmulatorContext } from '../content/infrastructure/firestore_content_repository.js';
 import { assertCurrentSession } from '../identity_publisher/domain/session.js';
 import { identityAuthorityCollections as identity } from '../identity_publisher/infrastructure/firestore_identity_authority_repository.js';
-import { emergencySwitchState } from './emergency_switch.js';
+import { emergencySwitchEnvironment, emergencySwitchState } from './emergency_switch.js';
 import { admitRestoredCopy, type RestoreAdmission } from './restore_admission.js';
 import { operationalFamily, type OperationalFamilyId } from './operational_task_registry.js';
 import type {
@@ -161,6 +161,10 @@ export class OperationsConsole {
   ): Promise<OperationsConsoleResult<{ readonly result: 'contained' | 'reopened' | 'unchanged' }>> {
     const switchId = operationalFamily(familyId)?.emergencySwitchId ?? null;
     if (switchId === null) return rejected('not_supported');
+    // Round 2.1: the switch of this runtime's environment; none (production,
+    // unknown or mixed setup) means nothing can be switched here.
+    const environmentId = emergencySwitchEnvironment();
+    if (environmentId === null) return rejected('not_supported');
     if (!validOperatorDecision({ ...decision, actorId: operator.userId }))
       return rejected('invalid_contract');
     const action = contained ? operationsActions.disable : operationsActions.enable;
@@ -172,7 +176,7 @@ export class OperationsConsole {
           .collection(operationsCollections.audit)
           .doc(`d_${decision.decisionId}`);
         const prior = allowed ? (await tx.get(decisionRef)).data() : undefined;
-        const key = featureFlagKey('local', 'LV', switchId);
+        const key = featureFlagKey(environmentId, 'LV', switchId);
         const pointerRef = this.db.collection(featureFlagPointerCollection).doc(key);
         const pointer = allowed ? (await tx.get(pointerRef)).data() : undefined;
         const state = allowed ? await emergencySwitchState(this.db, switchId, tx) : 'contained';
@@ -203,7 +207,7 @@ export class OperationsConsole {
           tx.create(this.#revisionRef(key, revision), {
             schemaVersion: 1,
             revision,
-            environmentId: 'local',
+            environmentId,
             marketId: 'LV',
             capabilityId: switchId,
             enabled: contained,
@@ -406,7 +410,7 @@ export class OperationsConsole {
       phase,
       result,
       atUtc: nowUtc,
-      environment: 'local',
+      environment: emergencySwitchEnvironment() ?? 'local',
       policy: operationsPolicy,
     };
   }
