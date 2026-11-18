@@ -73,6 +73,13 @@ export interface IdentitySessionV1 {
   readonly firebaseUid: string;
   readonly installationId: string;
   readonly handleHash: string;
+  /**
+   * The handle a rotation replaced, while the client has not yet shown it
+   * received the new one (owner 2026-11-19: a lost rotation answer must not
+   * end the sign-in). Cleared by the first use of the current handle.
+   */
+  readonly previousHandleHash?: string;
+  readonly previousHandleValidUntilUtc?: UtcInstant;
   readonly issuedAtUtc: UtcInstant;
   readonly lastActiveAtUtc: UtcInstant;
   readonly idleExpiresAtUtc: UtcInstant;

@@ -11,7 +11,9 @@ import {
   isLiveSession,
   type IdentitySession,
   hashSessionHandle,
+  isPreviousSessionHandle,
   rotateSessionHandle,
+  withoutPreviousSessionHandle,
 } from '../domain/session.js';
 import { maximumActiveSessions } from '../../../security/abuse_policy.js';
 
@@ -134,10 +136,17 @@ export class SessionAuthorityService {
         throw new IdentityFailure('unauthenticated');
       }
       assertCurrentSession(current, account, input.nowUtc);
+      const presented = hashSessionHandle(input.sessionHandle);
+      // Owner 2026-11-19: a rotation whose answer never reached the device
+      // (screen off, network cut) is repaired by rotating again with the
+      // previous handle, until the new one is used.
+      const viaPreviousHandle =
+        current.handleHash !== presented &&
+        isPreviousSessionHandle(current, presented, input.nowUtc);
       if (
         current.installationId !== input.installationId ||
         current.firebaseUid !== input.firebaseUid ||
-        current.handleHash !== hashSessionHandle(input.sessionHandle)
+        (current.handleHash !== presented && !viaPreviousHandle)
       ) {
         throw new IdentityFailure('not_found_or_not_accessible');
       }
@@ -150,7 +159,7 @@ export class SessionAuthorityService {
         }
       }
       if (sessionHandle.length === 0) throw new IdentityFailure('temporarily_unavailable');
-      const session = rotateSessionHandle(current, sessionHandle, input.nowUtc);
+      const session = rotateSessionHandle(current, sessionHandle, input.nowUtc, viaPreviousHandle);
       const accessSnapshot = Object.freeze({
         ...snapshot,
         accountRevision: account.revision,
@@ -184,12 +193,22 @@ export class SessionAuthorityService {
       if (session === null || account === null || snapshot === null)
         throw new IdentityFailure('unauthenticated');
       assertCurrentSession(session, account, input.nowUtc);
+      const presented = hashSessionHandle(input.sessionHandle);
       if (
         session.firebaseUid !== input.firebaseUid ||
-        session.installationId !== input.installationId ||
-        session.handleHash !== hashSessionHandle(input.sessionHandle)
+        session.installationId !== input.installationId
       )
         throw new IdentityFailure('unauthenticated');
+      if (session.handleHash !== presented) {
+        // The previous handle of a rotation the device never received: ask the
+        // client to rotate (it keeps its sign-in) instead of ending it.
+        if (isPreviousSessionHandle(session, presented, input.nowUtc))
+          throw new IdentityFailure('snapshot_stale');
+        throw new IdentityFailure('unauthenticated');
+      }
+      // The current handle is in use: the previous one stops working now.
+      if (session.previousHandleHash !== undefined)
+        transaction.putSession(withoutPreviousSessionHandle(session));
       if (
         snapshot.userId !== account.userId ||
         snapshot.sessionId !== session.sessionId ||
