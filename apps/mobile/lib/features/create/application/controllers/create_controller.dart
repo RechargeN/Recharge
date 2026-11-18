@@ -455,7 +455,7 @@ class CreateController extends ChangeNotifier {
   Set<String> _capabilities = const <String>{};
   PublisherRef? _activePublisherRef;
   Timer? _autosaveTimer;
-  bool _moneyReadBlocked = false;
+  bool _draftReadBlocked = false;
   final Map<String, MoneyParseError> _moneyInputErrors = {};
   Map<String, MoneyParseError> get moneyInputErrors =>
       Map.unmodifiable(_moneyInputErrors);
@@ -490,14 +490,14 @@ class CreateController extends ChangeNotifier {
     final PublisherRef resolvedPublisher = activePublisherRef?.isValid == true
         ? activePublisherRef!
         : PublisherRef(type: PublisherType.user, id: userId);
-    if (_loadedUserId == userId && _state.isLoaded && !_moneyReadBlocked) {
+    if (_loadedUserId == userId && _state.isLoaded && !_draftReadBlocked) {
       _capabilities = capabilities.toSet();
       _activePublisherRef = resolvedPublisher;
       _isVerifiedCreator = isVerifiedCreator;
       return;
     }
     _loadedUserId = userId;
-    _moneyReadBlocked = false;
+    _draftReadBlocked = false;
     _moneyInputErrors.clear();
     _autosaveTimer?.cancel();
     _capabilities = capabilities.toSet();
@@ -517,13 +517,26 @@ class CreateController extends ChangeNotifier {
       saved = await _loadCreateDraftUseCase(userId);
     } on MoneyReadException {
       if (_loadedUserId != userId) return;
-      _moneyReadBlocked = true;
+      _draftReadBlocked = true;
       _setState(
         _state.copyWith(
           status: CreateStatus.error,
           userId: userId,
           message:
               'Не удалось прочитать сохранённую цену. Черновик сохранён без изменений.',
+          saveStatus: CreateSaveStatus.failed,
+        ),
+      );
+      return;
+    } on FormatException {
+      if (_loadedUserId != userId) return;
+      _draftReadBlocked = true;
+      _setState(
+        _state.copyWith(
+          status: CreateStatus.error,
+          userId: userId,
+          message:
+              'Не удалось прочитать сохранённые данные черновика. Исходная запись сохранена без изменений.',
           saveStatus: CreateSaveStatus.failed,
         ),
       );
@@ -3870,7 +3883,7 @@ class CreateController extends ChangeNotifier {
 
   Future<void> saveDraft() async {
     if (_state.userId.isEmpty ||
-        _moneyReadBlocked ||
+        _draftReadBlocked ||
         _moneyInputErrors.isNotEmpty) {
       return;
     }
@@ -4017,7 +4030,7 @@ class CreateController extends ChangeNotifier {
   /// A second call while one is already running (double tap, retry during a
   /// slow save) is ignored instead of racing the first publish.
   Future<bool> publishDraft() async {
-    if (_publishInFlight || _moneyReadBlocked || _moneyInputErrors.isNotEmpty) {
+    if (_publishInFlight || _draftReadBlocked || _moneyInputErrors.isNotEmpty) {
       return false;
     }
     _publishInFlight = true;

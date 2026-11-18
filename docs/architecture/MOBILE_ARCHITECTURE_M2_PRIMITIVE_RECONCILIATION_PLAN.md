@@ -859,3 +859,33 @@ No stored schema, writer, Booking lifecycle or authority is added.
 Checkpoint evidence records complete gates and any failed attempts separately.
 C2b3 persisted Create UTC/legacy reads, C3–C5 and M2-D/E remain open. This is
 local/mock work, not R1, device, Emulator, cloud runtime or Accepted promotion.
+
+## 25. M2-C2b3a Event/Session persisted UTC and safe reads — 2026-11-18
+
+C2b2b `1f04b57` passed complete Windows/Linux suites with 1473 tests and
+analyzer/boundary/diff gates. C2b3a reuses UtcInstant in the existing Event and
+Session mappers. Explicit UTC text retains microseconds; corrupt, offset,
+zone-less and non-string values fail instead of normalizing or disappearing.
+Event occurrence bounds and Session exception audit timestamps are required;
+optional Event override/admission timestamps still support null/missing values.
+Non-UTC DateTime input is rejected by current typed writers.
+
+Future Event schemas remain opaque under the existing contract. Valid legacy
+UTC reads do not write records; Session legacy_schedule payload is retained.
+Date-only editable draft fields keep feature validation policy. This checkpoint
+does not silently change old timezone-default or market-inference policies.
+
+The existing CreateController restore-failure block now covers FormatException
+as well as MoneyReadException. Save/autosave/publish remain blocked until a
+successful retry or a different actor is loaded. The existing queued draft
+writer validates both stored and incoming models through CreateDraftModel
+before slot/collection mutation, protecting raw records against direct or stale
+callers. Template upsert/delete reuse their existing requireLosslessRead path.
+No parallel parser, repository, writer, queue, migration or sync path is added.
+
+Behavioral evidence covers precise roundtrip, required/optional timestamps,
+corrupt restore, direct replacement, queue recovery, actor isolation and raw
+template preservation. Full gates and failed attempts are recorded separately.
+C2b3b still owns shared Create envelope UTC, legacy generic Session slots and
+legacy Event date defaults; C3–C5 and M2-D/E remain open. No production grants,
+data migration writes, R1, device, Emulator, cloud runtime or Accepted claim.

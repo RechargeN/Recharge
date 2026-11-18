@@ -178,6 +178,70 @@ void main() {
   });
 
   test(
+    'temporal restore failure blocks autosave and publish until successful retry',
+    () async {
+      final stored = CreateDraftEntity.defaults(
+        organizerId: 'user-1',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      repository._stored = stored;
+      repository.loadError = const FormatException('Invalid stored UTC');
+      await controller.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      expect(controller.state.status, CreateStatus.error);
+      controller.updateTitle('Must not replace unreadable data');
+      await Future<void>.delayed(const Duration(milliseconds: 850));
+      await controller.saveDraft();
+      expect(await controller.publishDraft(), isFalse);
+      expect(repository._stored, same(stored));
+      expect(repository.publishCalls, 0);
+      repository.loadError = null;
+      await controller.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      expect(controller.state.isLoaded, isTrue);
+      expect(controller.state.draft.id, stored.id);
+      controller.updateTitle('Recovered');
+      await controller.saveDraft();
+      expect(repository._stored!.title, 'Recovered');
+    },
+  );
+
+  test('temporal restore block does not leak to the next actor', () async {
+    repository.loadError = const FormatException('Invalid stored UTC');
+    await controller.ensureLoaded(
+      userId: 'user-1',
+      organizerEmail: '',
+      organizerName: '',
+    );
+    expect(controller.state.status, CreateStatus.error);
+    repository.loadError = null;
+    repository._stored = CreateDraftEntity.defaults(
+      organizerId: 'user-2',
+      organizerEmail: '',
+      organizerName: '',
+    );
+    final otherId = repository._stored!.id;
+    await controller.ensureLoaded(
+      userId: 'user-2',
+      organizerEmail: '',
+      organizerName: '',
+    );
+    expect(controller.state.isLoaded, isTrue);
+    expect(controller.state.draft.id, otherId);
+    controller.updateTitle('Other actor');
+    await controller.saveDraft();
+    expect(repository._stored!.organizerId, 'user-2');
+    expect(repository._stored!.title, 'Other actor');
+  });
+
+  test(
     'typed Money restore failure blocks fresh overwrite and publish until retry',
     () async {
       final stored = CreateDraftEntity.defaults(

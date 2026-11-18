@@ -80,6 +80,8 @@ class CreateLocalDataSource {
       return await _loadDraftStrict(userId);
     } on MoneyReadException {
       rethrow;
+    } on FormatException {
+      rethrow;
     } on Object {
       return null;
     }
@@ -117,6 +119,11 @@ class CreateLocalDataSource {
     String userId,
     CreateDraftModel model,
   ) async {
+    // Validate through the canonical mapper while holding the existing queue.
+    // A stale/direct caller must not replace unreadable saved data or persist
+    // invalid typed values. Do this before either slot or collection mutation.
+    (await _loadDraftStrict(userId))?.toEntity();
+    model.toEntity();
     if (model.objectType == 'scenario' && model.organizerId == userId) {
       await _saveCollectionUnconditional(ownerId: userId, model: model);
     }
