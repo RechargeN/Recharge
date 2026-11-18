@@ -199,7 +199,9 @@ export const operationalTaskRegistry: readonly OperationalTaskFamily[] = deepFre
     ],
     triggers: ['consumeContentEffectV1'],
     recovery: ['checkpoint_resume', 'owner_receipt', 'reconciliation'],
-    emergencySwitchId: null,
+    // Round 2.2 (owner approval 2026-11-19): the cloud handoff runs only while
+    // this switch is open; locally the activation flag still decides.
+    emergencySwitchId: operationsEmergencySwitchIds.contentEventBookingHandoff,
     activationFlagId: contentFlagIds.eventBookingHandoff,
     console: noConsole,
     blockers: ['OB-07'],

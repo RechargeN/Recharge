@@ -19,7 +19,7 @@ import type {
 } from '../domain/event_internal_registration.js';
 import { ContentPublicationFeed } from './content_publication_feed.js';
 import {
-  assertContentEmulatorContext,
+  assertMediaChainPersistenceContext,
   FirestoreContentRepository,
 } from './firestore_content_repository.js';
 
@@ -52,7 +52,7 @@ class HandoffRepositoryConflict extends Error {
 }
 
 /**
- * Emulator-only Firestore adapter of the handoff. Reads come first and writes
+ * Firestore adapter of the handoff (Emulator, or dev/staging behind the Media-chain switch). Reads come first and writes
  * are buffered to commit time, so a refused or failed effect leaves nothing:
  * receipt, state, outbox records and checkpoint commit together or not at all.
  */
@@ -61,7 +61,9 @@ export class FirestoreEventBookingHandoffRepository implements HandoffRepository
     private readonly firestore: Firestore,
     environment: NodeJS.ProcessEnv = process.env,
   ) {
-    assertContentEmulatorContext(firestore, environment);
+    // Round 2.2 (owner approval 2026-11-19): the Event → Booking handoff also
+    // runs in dev/staging, behind the same reviewed switch as the Media chain.
+    assertMediaChainPersistenceContext(firestore, environment);
   }
 
   transact<T>(operation: (transaction: HandoffTransaction) => Promise<T>): Promise<T> {

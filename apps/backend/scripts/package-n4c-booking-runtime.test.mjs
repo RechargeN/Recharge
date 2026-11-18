@@ -86,7 +86,7 @@ function record(dir, manifest, overrides = {}) {
   };
 }
 
-test("stage: the Booking closure without workers, verified against the owner record", () => {
+test("stage: the Booking closure with its switch-guarded workers, verified against the owner record", () => {
   const dir = mkdtempSync(path.join(tmpdir(), "n4c-stage-"));
   try {
     const stage = path.join(dir, "stage");
@@ -100,9 +100,12 @@ test("stage: the Booking closure without workers, verified against the owner rec
     assert.ok(names.includes("lib/src/booking/create_internal_booking.js"));
     assert.ok(names.includes("lib/src/contracts/booking_v1.js"));
     assert.ok(!names.includes("lib/src/index.js"));
+    assert.ok(names.includes("lib/src/booking/event_projection_runtime.js"));
+    assert.ok(names.includes("lib/src/booking/reconfirmation_deadline_worker.js"));
+    assert.ok(names.includes("lib/src/modules/operations/emergency_switch.js"));
     assert.ok(
       !names.some((n) =>
-        /stand\/|\/test\/|reconfirmation_deadline_worker|event_projection_runtime|dev_notifications|dev_content_media/u.test(
+        /stand\/|\/test\/|dev_notifications|dev_content_media/u.test(
           n,
         ),
       ),

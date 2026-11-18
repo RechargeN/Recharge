@@ -2,6 +2,8 @@ import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { info } from 'firebase-functions/logger';
 import { onRequest, type Request } from 'firebase-functions/v2/https';
+import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import type { Response } from 'express';
 
 import {
@@ -17,6 +19,12 @@ import {
   stagingCloudProject,
 } from './shared/cloud_runtime_projects.js';
 import { failureShape } from './shared/failure_shape.js';
+import { systemServerClock } from './shared/server_clock.js';
+import {
+  processEventBookingOutboxDocument,
+  runPendingEventBookingDeliveries,
+} from './booking/event_projection_runtime.js';
+import { runReconfirmationDeadlineWorker } from './booking/reconfirmation_deadline_worker.js';
 
 // N4c isolated entry (codebase n4c-booking), owner-approved 2026-11-16. Not
 // re-exported by index.ts. Callable wire protocol over onRequest, as in
@@ -247,5 +255,59 @@ export const bookingLoadV1 = onRequest(
       });
       response.status(503).json({ error: { status: 'UNAVAILABLE' } });
     }
+  },
+);
+
+/**
+ * Round 2.2 (owner approval 2026-11-19): Event → Booking delivery in the cloud.
+ * The same workers as the Emulator (`index.ts`), bound to this runtime's
+ * project and runtime account. Each one is also behind its Operations
+ * emergency switch (round 2.1): in the cloud a missing switch is contained, so
+ * a deploy delivers nothing until an operator opens it. A closed runtime does
+ * nothing.
+ */
+const workerOptions = {
+  region: 'europe-west1',
+  memory: '256MiB' as const,
+  cpu: 1,
+  timeoutSeconds: 120,
+  minInstances: 0,
+  maxInstances: 1,
+  serviceAccount: runtimeServiceAccount('runtime-booking', projectId),
+};
+
+export const consumeEventBookingOutboxV1 = onDocumentCreated(
+  { ...workerOptions, document: 'eventBookingOutbox/{outboxId}', retry: false },
+  async (event) => {
+    if (!runtimeOpen(process.env)) return;
+    await processEventBookingOutboxDocument(
+      getFirestore(app()),
+      event.params.outboxId,
+      systemServerClock.now().toISOString(),
+    );
+  },
+);
+
+export const retryEventBookingProjectionDeliveriesV1 = onSchedule(
+  { ...workerOptions, schedule: 'every 5 minutes', retryCount: 0 },
+  async () => {
+    if (!runtimeOpen(process.env)) return;
+    await runPendingEventBookingDeliveries(
+      getFirestore(app()),
+      systemServerClock.now().toISOString(),
+      20,
+    );
+  },
+);
+
+export const releaseMissedReconfirmationsV1 = onSchedule(
+  { ...workerOptions, schedule: 'every 5 minutes', retryCount: 0 },
+  async () => {
+    if (!runtimeOpen(process.env)) return;
+    await runReconfirmationDeadlineWorker(
+      getFirestore(app()),
+      systemServerClock.now().toISOString(),
+      20,
+    );
   },
 );

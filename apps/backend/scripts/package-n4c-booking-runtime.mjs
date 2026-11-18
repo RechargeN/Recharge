@@ -36,10 +36,10 @@ const backend = path.resolve(
   "..",
 );
 const entry = "lib/src/dev_booking_entry.js";
-// Never in this bundle: the default runtime index, the Booking workers (they need
-// Event publication and the Operations switches), stand or tests.
-const forbidden =
-  /(^|\/)(index\.js$|event_projection_(runtime|consumer)|reconfirmation_deadline_worker|stand\/|test\/)/u;
+// Never in this bundle: the default runtime index, stand or tests. Round 2.2
+// (owner approval 2026-11-19): the Booking workers ship, behind the Operations
+// emergency switches of round 2.1 (contained until an operator opens them).
+const forbidden = /(^|\/)(index\.js$|stand\/|test\/)/u;
 const uidPattern = /^[A-Za-z0-9]{20,128}$/u;
 
 const noLoad = Object.freeze({

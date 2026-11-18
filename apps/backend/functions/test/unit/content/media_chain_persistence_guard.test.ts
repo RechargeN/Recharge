@@ -81,7 +81,7 @@ void test('without the switch the Emulator rules apply unchanged (a cloud client
   );
 });
 
-void test('only the Content, Media and Moderation repositories may use the dev-cloud guard', () => {
+void test('only the Content, Media, Moderation and Event-handoff repositories may use the dev-cloud guard', () => {
   const src = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../src');
   const files: string[] = [];
   const walk = (dir: string) => {
@@ -98,6 +98,8 @@ void test('only the Content, Media and Moderation repositories may use the dev-c
     .sort();
   assert.deepEqual(users, [
     'modules/content/infrastructure/firestore_content_repository.ts',
+    // Round 2.2 (owner approval 2026-11-19): Event → Booking handoff in the cloud.
+    'modules/content/infrastructure/firestore_event_booking_handoff_repository.ts',
     'modules/media/infrastructure/firestore_media_repository.ts',
     'modules/moderation/infrastructure/firestore_moderation_repository.ts',
   ]);
