@@ -81,3 +81,13 @@ resource "google_project_iam_member" "n4c_auth" {
   role       = "projects/${local.n2c_project}/roles/devIdentityFirebaseVerifier"
   member     = local.n4c_member
 }
+
+# Round 2.2 (owner approval 2026-11-19): the Booking runtime account receives the
+# Firestore events of its two triggers (outbox delivery, Content effects handoff).
+resource "google_project_iam_member" "n4c_eventarc" {
+  count      = local.n4c_on ? 1 : 0
+  depends_on = [terraform_data.n4c_guard, module.runtime_identities]
+  project    = google_project.stage.project_id
+  role       = "roles/eventarc.eventReceiver"
+  member     = local.n4c_member
+}

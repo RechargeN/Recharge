@@ -34,8 +34,9 @@ export function devContentEffectsOpen(environment: NodeJS.ProcessEnv): boolean {
 }
 
 /**
- * In the cloud the handoff runs only while its Operations emergency switch is
- * open (round 2.1: a missing switch is contained). Every other consumer is off.
+ * In the cloud the handoff runs only while the Event → Booking delivery switch
+ * is open (round 2.1: a missing switch is contained): one switch stops the whole
+ * pipeline. Every other consumer is off.
  */
 export function cloudEffectFlags(firestore: Firestore) {
   return {
@@ -44,7 +45,7 @@ export function cloudEffectFlags(firestore: Firestore) {
       return (
         (await emergencySwitchState(
           firestore,
-          operationsEmergencySwitchIds.contentEventBookingHandoff,
+          operationsEmergencySwitchIds.eventProjectionDelivery,
         )) === 'open'
       );
     },

@@ -132,8 +132,7 @@ void test('flags equal the code registry, default off and have the right kind', 
 void test('each omitted local flag has one explicit dev exclusion; activation is not implied', () => {
   const manifest = load();
   const flags = manifest.flags as { flags: Json[]; excludedFromDev: Json[] };
-  // 29: round 2.2 adds the cloud Event→Booking handoff switch (owner 2026-11-19).
-  assert.equal(flags.excludedFromDev.length, 29);
+  assert.equal(flags.excludedFromDev.length, 28);
   assert.ok(
     flags.excludedFromDev.some((item) => item.id === 'contentTranslation.onDemand.incidentDisable'),
   );

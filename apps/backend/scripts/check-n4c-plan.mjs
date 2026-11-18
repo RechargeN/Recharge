@@ -37,6 +37,16 @@ function reviewedCreates(project) {
   ]);
 }
 
+/** Round 2 (owner approval 2026-11-19): only the Eventarc receiver grant. */
+function roundTwoCreates() {
+  return new Map([
+    [
+      "google_project_iam_member.n4c_eventarc[0]",
+      { role: "roles/eventarc.eventReceiver" },
+    ],
+  ]);
+}
+
 export function checkN4cPlan(plan, expected) {
   const errors = [];
   const vars = plan?.variables ?? {};
@@ -44,7 +54,8 @@ export function checkN4cPlan(plan, expected) {
   if (!isReviewedProject(project))
     return ["N4c targets the reviewed dev or staging project only"];
   const member = `serviceAccount:runtime-booking@${project}.iam.gserviceaccount.com`;
-  const creates = reviewedCreates(project);
+  const creates =
+    expected.round === 2 ? roundTwoCreates() : reviewedCreates(project);
   if (vars.project_id?.value !== project) errors.push("project mismatch");
   if (vars.n4c_enabled?.value !== true || vars.n2c_enabled?.value !== true)
     errors.push("N4c plan must set n4c_enabled and keep n2c_enabled");

@@ -52,14 +52,14 @@ void test('only the handoff can run, and only while its Operations switch is ope
     delete process.env[name];
   process.env.GCLOUD_PROJECT = dev;
   try {
-    const key = 'dev:LV:content.eventBookingHandoff.incidentDisable';
+    const key = 'dev:LV:booking.eventProjection.delivery.incidentDisable';
     const opened = firestoreWith({
       [`platformActiveFeatureFlagPointers/${key}`]: { key, activeRevision: 1 },
       [`platformFeatureFlagRevisions/${key}:1`]: {
         schemaVersion: 1,
         environmentId: 'dev',
         marketId: 'LV',
-        capabilityId: 'content.eventBookingHandoff.incidentDisable',
+        capabilityId: 'booking.eventProjection.delivery.incidentDisable',
         revision: 1,
         enabled: false,
       },

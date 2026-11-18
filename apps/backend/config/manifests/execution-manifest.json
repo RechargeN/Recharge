@@ -1343,11 +1343,6 @@
         "reason": "no-approved-cloud-runtime-in-minimal-dev"
       },
       {
-        "id": "content.eventBookingHandoff.incidentDisable",
-        "disposition": "excluded",
-        "reason": "no-approved-cloud-runtime-in-minimal-dev"
-      },
-      {
         "id": "identity.findPeople.consent",
         "disposition": "excluded",
         "reason": "no-approved-cloud-runtime-in-minimal-dev"

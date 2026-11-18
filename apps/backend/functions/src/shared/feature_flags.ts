@@ -90,8 +90,6 @@ export const operationsEmergencySwitchIds = Object.freeze({
   reconfirmationDeadlineWorker: 'booking.reconfirmation.deadlineWorker.incidentDisable',
   notificationsConsumeBooking: 'notifications.consume.booking.incidentDisable',
   contentTranslation: 'contentTranslation.onDemand.incidentDisable',
-  // Round 2.2 (owner approval 2026-11-19): the cloud Event → Booking handoff.
-  contentEventBookingHandoff: 'content.eventBookingHandoff.incidentDisable',
 });
 
 /**

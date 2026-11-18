@@ -160,3 +160,43 @@ test("only a reviewed project, with N4c enabled", () => {
   const s = plan("recharge-staging-y9y2y", changes("recharge-staging-y9y2y"));
   assert.match(checkN4cPlan(s, expected(dev, s)).join(), /project mismatch/u);
 });
+
+test("round 2: exactly the Eventarc receiver grant of runtime-booking", () => {
+  const project = "recharge-dev-n2a01";
+  const member = `serviceAccount:runtime-booking@${project}.iam.gserviceaccount.com`;
+  const grant = (role, who = member) => ({
+    address: "google_project_iam_member.n4c_eventarc[0]",
+    type: "google_project_iam_member",
+    change: { actions: ["create"], after: { project, role, member: who } },
+  });
+  const planWith = (changes) => ({
+    variables: {
+      project_id: { value: project },
+      n4c_enabled: { value: true },
+      n2c_enabled: { value: true },
+      release_commit_sha: { value: "a".repeat(40) },
+    },
+    resource_changes: changes,
+  });
+  const run = (p) =>
+    checkN4cPlan(p, {
+      projectId: project,
+      commitSha: "a".repeat(40),
+      inventorySha256: inventoryDigest(p),
+      round: 2,
+    }).join();
+  assert.equal(run(planWith([grant("roles/eventarc.eventReceiver")])), "");
+  assert.match(run(planWith([grant("roles/owner")])), /IAM mismatch/u);
+  assert.match(
+    run(
+      planWith([
+        grant(
+          "roles/eventarc.eventReceiver",
+          "serviceAccount:x@y.iam.gserviceaccount.com",
+        ),
+      ]),
+    ),
+    /IAM mismatch/u,
+  );
+  assert.match(run(planWith([])), /reviewed create missing/u);
+});
