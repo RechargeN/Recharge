@@ -118,7 +118,14 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
     } catch (error, stack) {
       if (kDebugMode) {
         // Type and our own constant code only; never messages, tokens or ids.
-        final code = error is AuthException ? error.code : '';
+        // A FormatException message is printed only when it is one of our own
+        // short constant codes (A34/emulator sign-in loss, 2026-11-18).
+        final formatCode =
+            error is FormatException &&
+                RegExp(r'^[A-Za-z_ -]{1,64}$').hasMatch(error.message)
+            ? error.message
+            : '';
+        final code = error is AuthException ? error.code : formatCode;
         debugPrint(
           'recharge-auth: dev operation failed type=${error.runtimeType} $code',
         );

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
@@ -423,6 +424,15 @@ final class FunctionsIdentitySessionClient {
       final retryAfterSeconds = details is Map
           ? (details['retryAfter'] ?? details['retryAfterSeconds'])
           : null;
+      if (kDebugMode) {
+        // Debug diagnostics (sign-in loss 2026-11-18): whether the server sent
+        // a code, or the client fell back to `unauthenticated`. Server codes
+        // are constants; nothing else from the response is printed.
+        debugPrint(
+          'recharge-auth: server refusal command=$commandType '
+          'serverCode=${code is String && RegExp(r'^[a-z_-]{1,64}$').hasMatch(code) ? code : '<none>'}',
+        );
+      }
       throw BookingCallableFailure(
         code: code is String ? code.replaceAll('_', '-') : 'unauthenticated',
         dispatched: true,
