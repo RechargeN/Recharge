@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:api_contracts/api_contracts.dart';
 import 'package:uuid/uuid.dart';
 
@@ -39,6 +40,14 @@ final class BookingTransportEventBookingGateway implements EventBookingGateway {
       });
     } on BookingCallableFailure catch (error) {
       return EventBookingResult(_outcomeForFailure(error));
+    } on Object catch (error) {
+      // An unexpected transport error must not leave the screen loading: a
+      // read is safe to retry, so it reads as offline.
+      _reportUnexpected(error);
+      return const EventBookingResult(
+        EventBookingOutcome.offline,
+        refusalCode: 'client_error',
+      );
     }
     if (raw['kind'] != 'succeeded') {
       final error = raw['error'];
@@ -85,6 +94,14 @@ final class BookingTransportEventBookingGateway implements EventBookingGateway {
       });
     } on BookingCallableFailure catch (error) {
       return EventBookingResult(_outcomeForFailure(error));
+    } on Object catch (error) {
+      // An unexpected transport error must not leave the screen loading: a
+      // read is safe to retry, so it reads as offline.
+      _reportUnexpected(error);
+      return const EventBookingResult(
+        EventBookingOutcome.offline,
+        refusalCode: 'client_error',
+      );
     }
     if (raw['kind'] == 'notFound') {
       return const EventBookingResult(EventBookingOutcome.succeeded);
@@ -145,6 +162,12 @@ final class BookingTransportEventBookingGateway implements EventBookingGateway {
           EventBookingTermsOutcome.unknownOutcome,
         _ => EventBookingTermsOutcome.offline,
       });
+    } on Object catch (error) {
+      _reportUnexpected(error);
+      return const EventBookingTermsResult(
+        EventBookingTermsOutcome.offline,
+        code: 'client_error',
+      );
     }
     if (raw['kind'] != 'succeeded') {
       final error = raw['error'];
@@ -258,6 +281,11 @@ final class BookingTransportEventBookingGateway implements EventBookingGateway {
       );
     } on BookingCallableFailure catch (error) {
       return EventBookingResult(_outcomeForFailure(error));
+    } on Object catch (error) {
+      // A command may have reached the server: unknown outcome, so the
+      // controller reconciles instead of creating anything twice.
+      _reportUnexpected(error);
+      return const EventBookingResult(EventBookingOutcome.unknownOutcome);
     }
     return switch (result) {
       BackendSuccess<BookingResultDto>(:final value) => EventBookingResult(
@@ -300,6 +328,15 @@ final class BookingTransportEventBookingGateway implements EventBookingGateway {
       BackendFailureCode.unauthenticated => EventBookingOutcome.unauthenticated,
       _ => EventBookingOutcome.rejected,
     }, refusalCode: failure.reason);
+  }
+
+  /// Debug builds name the error type only (never messages, ids or tokens).
+  void _reportUnexpected(Object error) {
+    if (kDebugMode) {
+      debugPrint(
+        'recharge-booking: unexpected transport error ${error.runtimeType}',
+      );
+    }
   }
 
   EventBookingOutcome _outcomeForFailure(BookingCallableFailure error) {
