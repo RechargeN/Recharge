@@ -114,6 +114,22 @@ run "n4e_round1_shape" {
   }
 }
 
+run "n4e_alert_mailbox" {
+  command = plan
+  variables {
+    n4e_enabled = true
+    alert_email = "alerts@example.invalid"
+  }
+  assert {
+    condition = (length(google_monitoring_notification_channel.n4e_alerts) == 1
+      && length(google_monitoring_alert_policy.n4e_fast_burn[0].notification_channels) == 2
+      && length(google_monitoring_alert_policy.n4e_probe[0].notification_channels) == 2
+      && length(google_monitoring_alert_policy.n4e_slow_burn[0].notification_channels) == 0
+    && length(google_monitoring_alert_policy.n4e_alert_channel_test) == 1)
+    error_message = "The alert mailbox is added to the Critical policies only, with its own delivery test."
+  }
+}
+
 run "n4e_needs_booking" {
   command = plan
   variables {

@@ -156,3 +156,9 @@ variable "n4e_authorization_record_sha256" {
   type    = string
   default = ""
 }
+
+variable "alert_email" {
+  description = "Dedicated Recharge alert mailbox for Critical alerts. Private tfvars only; empty means none."
+  type        = string
+  default     = ""
+}

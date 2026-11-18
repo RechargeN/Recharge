@@ -8,6 +8,7 @@ import {
   reviewedCreates,
   roundOneCreates,
   roundTwoCreates,
+  roundThreeCreates,
 } from "./check-n4e-plan.mjs";
 
 const channel = `projects/${project}/notificationChannels/123`;
@@ -341,6 +342,75 @@ test("round 2: in-place policy and probe updates, two creates, nothing removed",
   ]);
   assert.match(
     checkN4ePlan(foreign, { ...expected(foreign), round: 2 }).join(),
+    /forbidden action update/u,
+  );
+});
+
+test("round 3: the alert mailbox on the two Critical policies only, with its own delivery test", () => {
+  const mailbox = "alerts@example.invalid";
+  const update = (address, channels, unknown) => ({
+    address,
+    type: "google_monitoring_alert_policy",
+    change: {
+      actions: ["update"],
+      after: { project, enabled: true, notification_channels: channels },
+      after_unknown: unknown ? { notification_channels: unknown } : {},
+      before: { project, notification_channels: [channel] },
+    },
+  });
+  const list = (overrides = {}) => [
+    changes()[0],
+    update(
+      "google_monitoring_alert_policy.n4e_fast_burn[0]",
+      [channel, null],
+      [false, true],
+    ),
+    update("google_monitoring_alert_policy.n4e_probe[0]", undefined, true),
+    change(roundThreeCreates[0], "google_monitoring_notification_channel", {
+      project,
+      type: "email",
+      labels: { email_address: overrides.email ?? mailbox },
+    }),
+    change(roundThreeCreates[1], "google_monitoring_alert_policy", {
+      project,
+      enabled: true,
+      notification_channels: overrides.testChannels,
+    }),
+  ];
+  const run = (l, extra = {}) => {
+    const p = plan(l);
+    return checkN4ePlan(p, {
+      ...expected(p),
+      round: 3,
+      alertEmail: mailbox,
+      ...extra,
+    }).join();
+  };
+  assert.equal(run(list()), "");
+  assert.match(
+    run(list({ email: "someone@else.invalid" })),
+    /reviewed e-mail address/u,
+  );
+  assert.match(
+    run(list(), { alertEmail: undefined }),
+    /reviewed e-mail address/u,
+  );
+  assert.match(
+    run(list({ testChannels: [channel] })),
+    /must not notify the owner's channel/u,
+  );
+  const dropped = list();
+  dropped[1] = update(
+    "google_monitoring_alert_policy.n4e_fast_burn[0]",
+    [],
+    undefined,
+  );
+  assert.match(run(dropped), /keeps the owner's channel/u);
+  assert.match(
+    run([
+      ...list(),
+      update("google_monitoring_alert_policy.n4e_slow_burn[0]", [channel]),
+    ]),
     /forbidden action update/u,
   );
 });

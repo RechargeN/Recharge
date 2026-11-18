@@ -70,6 +70,13 @@ locals {
     # Owner request 2026-11-18: the Booking read path is critical too.
     booking_read = { path = "/getMyBookingV1", headers = { Authorization = "Bearer n4e-uptime-invalid-token" } }
   }
+  # Owner decision 2026-11-18: Critical alerts also go to the dedicated Recharge
+  # alert mailbox (var.alert_email, private tfvars) so delivery can be checked
+  # without the owner's personal inbox.
+  n4e_critical_channels = concat(
+    [google_monitoring_notification_channel.budget_email.name],
+    google_monitoring_notification_channel.n4e_alerts[*].name,
+  )
   n4e_runbook = "Runbook: docs/runbooks/staging-monitoring-alerts-cost.md (staging only; budget alerts do not cap spend)."
 }
 
@@ -133,7 +140,7 @@ resource "google_monitoring_alert_policy" "n4e_fast_burn" {
   combiner              = "OR"
   enabled               = true
   severity              = "CRITICAL"
-  notification_channels = [google_monitoring_notification_channel.budget_email.name]
+  notification_channels = local.n4e_critical_channels
   dynamic "conditions" {
     for_each = { for k, v in local.n4e_slos : k => v if v.kind == "availability" }
     content {
@@ -275,7 +282,7 @@ resource "google_monitoring_alert_policy" "n4e_probe" {
   combiner              = "OR"
   enabled               = true
   severity              = "CRITICAL"
-  notification_channels = [google_monitoring_notification_channel.budget_email.name]
+  notification_channels = local.n4e_critical_channels
   dynamic "conditions" {
     for_each = google_monitoring_uptime_check_config.n4e
     content {
@@ -440,4 +447,33 @@ import {
   for_each = local.n4e_on ? toset(["daily"]) : toset([])
   to       = google_firestore_backup_schedule.n4e[each.key]
   id       = "projects/recharge-staging-y9y2y/databases/(default)/backupSchedules/31f345b5-d213-4f8b-9b78-b8a9bd5a6af8"
+}
+
+resource "google_monitoring_notification_channel" "n4e_alerts" {
+  count        = local.n4e_on && var.alert_email != "" ? 1 : 0
+  depends_on   = [terraform_data.n4e_guard]
+  project      = google_project.stage.project_id
+  display_name = "stage-recharge-alerts-email"
+  type         = "email"
+  labels       = { email_address = var.alert_email }
+}
+
+# Delivery check of the alert mailbox: fires only on an explicit synthetic log line.
+resource "google_monitoring_alert_policy" "n4e_alert_channel_test" {
+  count                 = length(google_monitoring_notification_channel.n4e_alerts)
+  project               = google_project.stage.project_id
+  display_name          = "stage-alert-mailbox-delivery-test"
+  combiner              = "OR"
+  enabled               = true
+  notification_channels = google_monitoring_notification_channel.n4e_alerts[*].name
+  conditions {
+    display_name = "explicit synthetic delivery probe only"
+    condition_matched_log {
+      filter = "logName=\"projects/${google_project.stage.project_id}/logs/stage-alert-mailbox-test\" AND jsonPayload.kind=\"n4e-alert-delivery-probe\""
+    }
+  }
+  alert_strategy {
+    notification_rate_limit { period = "300s" }
+    auto_close = "1800s"
+  }
 }

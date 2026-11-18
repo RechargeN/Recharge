@@ -45,6 +45,15 @@ export const roundTwoCreates = Object.freeze([
 const roundTwoUpdatable =
   /^google_monitoring_(alert_policy\.n4e_[a-z_]+(\[0\]|\["(50|75)"\])|uptime_check_config\.n4e\["(booking|session)"\])$/u;
 const channelAddress = "google_monitoring_notification_channel.budget_email";
+/** Round 3 (owner decision 2026-11-18): the dedicated alert mailbox as a second channel on the
+ * two Critical policies, plus its own delivery-test policy. Nothing else changes. */
+export const roundThreeCreates = Object.freeze([
+  "google_monitoring_notification_channel.n4e_alerts[0]",
+  "google_monitoring_alert_policy.n4e_alert_channel_test[0]",
+]);
+const roundThreeUpdatable =
+  /^google_monitoring_alert_policy\.n4e_(fast_burn|probe)\[0\]$/u;
+const mailboxAddress = "google_monitoring_notification_channel.n4e_alerts[0]";
 
 export function checkN4ePlan(plan, expected) {
   const errors = [];
@@ -68,13 +77,15 @@ export function checkN4ePlan(plan, expected) {
   if (!channelName)
     errors.push("existing staging e-mail channel not in the plan");
   const expectedCreates =
-    expected.round === 2
-      ? roundTwoCreates
-      : target === devProject
-        ? [...reviewedCreates, ...roundOneCreates]
-        : expected.round === 1
-          ? roundOneCreates
-          : reviewedCreates;
+    expected.round === 3
+      ? roundThreeCreates
+      : expected.round === 2
+        ? roundTwoCreates
+        : target === devProject
+          ? [...reviewedCreates, ...roundOneCreates]
+          : expected.round === 1
+            ? roundOneCreates
+            : reviewedCreates;
   if (expected.round === 1) {
     const schedule = changes.find((c) => c.address === backupSchedule);
     if (
@@ -92,8 +103,27 @@ export function checkN4ePlan(plan, expected) {
       actions.length === 1 &&
       actions[0] === "update" &&
       roundTwoUpdatable.test(c.address);
+    const roundThreeUpdate =
+      expected.round === 3 &&
+      actions.length === 1 &&
+      actions[0] === "update" &&
+      roundThreeUpdatable.test(c.address);
+    if (roundThreeUpdate) {
+      // The owner's channel stays; the mailbox name may be unknown until apply.
+      const known = (after.notification_channels ?? []).filter(Boolean);
+      const unknown = c.change?.after_unknown?.notification_channels;
+      if (
+        (unknown !== true && !known.includes(channelName)) ||
+        known.some((n) => n !== channelName) ||
+        (after.notification_channels ?? []).length > 2
+      )
+        errors.push(
+          `Critical policy keeps the owner's channel plus the mailbox only: ${c.address}`,
+        );
+    }
     if (
       !roundTwoUpdate &&
+      !roundThreeUpdate &&
       (actions.length !== 1 ||
         !["create", "read", "no-op"].includes(actions[0]))
     )
@@ -114,6 +144,23 @@ export function checkN4ePlan(plan, expected) {
     seen.add(c.address);
     if (after.project && after.project !== target)
       errors.push(`foreign target: ${c.address}`);
+    if (c.address === mailboxAddress) {
+      if (
+        after.type !== "email" ||
+        !expected.alertEmail ||
+        after.labels?.email_address !== expected.alertEmail
+      )
+        errors.push("the mailbox channel must be the reviewed e-mail address");
+      continue;
+    }
+    if (
+      c.address ===
+        "google_monitoring_alert_policy.n4e_alert_channel_test[0]" &&
+      (after.notification_channels ?? []).includes(channelName)
+    ) {
+      errors.push("the delivery test must not notify the owner's channel");
+      continue;
+    }
     if (c.type === "google_monitoring_alert_policy") {
       const channels = after.notification_channels ?? [];
       // The channel name is known before apply: it already exists.
