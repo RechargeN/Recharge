@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/booking/data/booking_callable_adapter.dart';
 import 'package:recharge/features/booking/data/booking_command_gate.dart';
-import 'package:recharge/features/booking/data/booking_persistence_store.dart';
 import 'package:recharge/features/booking/data/booking_transport_event_booking_gateway.dart';
 import 'package:recharge/features/booking/domain/repositories/event_booking_gateway.dart';
 
