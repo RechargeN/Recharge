@@ -325,3 +325,6 @@ export const releaseMissedReconfirmationsV1 = onSchedule(
 // Round 2.2: the cloud Event → Booking handoff ships with this codebase (same
 // runtime account, same release), behind its own runtime and Operations switches.
 export { consumeContentEffectV1 } from './dev_content_effects_entry.js';
+// Step 2 (owner decision 2026-11-20): the DSR intake, operator path and worker
+// ship in this codebase under runtime-booking, behind the privacy switch.
+export { privacyOperatorV1, privacyRequestV1, runPrivacyRequestsV1 } from './dev_privacy_entry.js';

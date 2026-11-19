@@ -74,6 +74,7 @@ export function renderEnv({
   allowedUids,
   load,
   createDisabled = false,
+  privacyEnabled = false,
   projectId: target = projectId,
   projectNumber,
 }) {
@@ -89,6 +90,8 @@ export function renderEnv({
   const settings = checkedLoad(target, load);
   if (typeof createDisabled !== "boolean")
     throw new Error("createDisabled must be boolean");
+  if (typeof privacyEnabled !== "boolean")
+    throw new Error("privacyEnabled must be boolean");
   return [
     `N4C_BOOKING_ENABLED=${runtimeEnabled}`,
     `N4C_BOOKING_CREATE_DISABLE=${createDisabled}`,
@@ -100,6 +103,9 @@ export function renderEnv({
     // Operations switch (contained until an operator opens it) still decides.
     `N4F_CONTENT_EFFECTS_ENABLED=${runtimeEnabled}`,
     "RECHARGE_DEV_RUNTIME=content-media",
+    // Step 2 (owner decision 2026-11-20): the DSR intake and worker open only
+    // with the runtime and an explicit privacy deploy switch.
+    `N5D_PRIVACY_ENABLED=${runtimeEnabled && privacyEnabled}`,
     ...projectNumberEnvLines(target, number),
     "",
   ].join("\n");
@@ -111,6 +117,7 @@ export function stageRuntime({
   allowedUids,
   load,
   createDisabled = false,
+  privacyEnabled = false,
   projectId: target = projectId,
   projectNumber,
   functionsRoot = path.join(backend, "functions"),
@@ -138,6 +145,7 @@ export function stageRuntime({
     allowedUids,
     load: settings,
     createDisabled,
+    privacyEnabled,
     projectId: target,
     projectNumber: number,
   });
@@ -190,6 +198,7 @@ export function stageRuntime({
     allowedUids,
     load: settings,
     createDisabled,
+    privacyEnabled,
     codeTreeSha256: codeTreeDigest(outDir),
     treeSha256: digest.sha256,
     files: digest.files,
@@ -229,6 +238,7 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
       allowedUids: manifest.allowedUids,
       load: manifest.load,
       createDisabled: manifest.createDisabled,
+      privacyEnabled: manifest.privacyEnabled ?? false,
       projectId: manifest.projectId,
       projectNumber: manifest.projectNumber,
     });
@@ -270,6 +280,7 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
     loadMaxInstances: manifest.load?.maxInstances,
     loadConcurrency: manifest.load?.concurrency,
     createDisabled: manifest.createDisabled,
+    privacyEnabled: manifest.privacyEnabled ?? false,
     automaticDeletion: false,
   };
   for (const [key, value] of Object.entries(expected))
@@ -307,16 +318,18 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
       maxInstances,
       concurrency,
       createDisabled,
+      privacyEnabled,
     ] = args;
     if (
       !outDir ||
       !["true", "false"].includes(enabled) ||
       !uids ||
       ![undefined, "true", "false"].includes(loadEnabled) ||
-      ![undefined, "true", "false"].includes(createDisabled)
+      ![undefined, "true", "false"].includes(createDisabled) ||
+      ![undefined, "true", "false"].includes(privacyEnabled)
     ) {
       process.stderr.write(
-        "usage: node package-n4c-booking-runtime.mjs <stageDir> <true|false> <uid[,uid]> [<loadEnabled> <maxInstances> <concurrency> [<createDisabled>]] | --verify <stageDir>\n",
+        "usage: node package-n4c-booking-runtime.mjs <stageDir> <true|false> <uid[,uid]> [<loadEnabled> <maxInstances> <concurrency> [<createDisabled> [<privacyEnabled>]]] | --verify <stageDir>\n",
       );
       process.exitCode = 1;
     } else {
@@ -334,10 +347,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
               },
             }),
         createDisabled: createDisabled === "true",
+        privacyEnabled: privacyEnabled === "true",
         ...cliTarget(process.env),
       });
       process.stdout.write(
-        `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled}, load=${manifest.load.enabled}, createDisabled=${manifest.createDisabled})\n`,
+        `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled}, load=${manifest.load.enabled}, createDisabled=${manifest.createDisabled}, privacyEnabled=${manifest.privacyEnabled})\n`,
       );
     }
   }

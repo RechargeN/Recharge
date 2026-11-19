@@ -977,8 +977,10 @@ void test('delegated import never reaches Content storage except through the Con
       'assertContentEmulatorContext',
       'contentCollections',
     ],
+    // Step 2 (owner decision 2026-11-20): the hold authority also runs in the
+    // reviewed dev/stage cloud behind the persistence switch.
     'modules/privacy_orchestration/infrastructure/firestore_privacy_legal_hold_service.ts': [
-      'assertContentEmulatorContext',
+      'assertMediaChainPersistenceContext',
     ],
     'modules/operations/operations_console.ts': ['assertContentEmulatorContext'],
     'modules/product_analytics/firestore_product_analytics_service.ts': [

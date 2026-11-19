@@ -1,7 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { appendFileSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  appendFileSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -18,7 +24,7 @@ const number = "30205452447";
 test("env: switch, exact owner allowlist, load run closed by default", () => {
   assert.equal(
     renderEnv({ runtimeEnabled: false, allowedUids: [uid] }),
-    `N4C_BOOKING_ENABLED=false\nN4C_BOOKING_CREATE_DISABLE=false\nN4C_ALLOWED_FIREBASE_UIDS=${uid}\nN4C_LOAD_ENABLED=false\nN4C_LOAD_MAX_INSTANCES=1\nN4C_LOAD_CONCURRENCY=1\nN4F_CONTENT_EFFECTS_ENABLED=false\nRECHARGE_DEV_RUNTIME=content-media\n`,
+    `N4C_BOOKING_ENABLED=false\nN4C_BOOKING_CREATE_DISABLE=false\nN4C_ALLOWED_FIREBASE_UIDS=${uid}\nN4C_LOAD_ENABLED=false\nN4C_LOAD_MAX_INSTANCES=1\nN4C_LOAD_CONCURRENCY=1\nN4F_CONTENT_EFFECTS_ENABLED=false\nRECHARGE_DEV_RUNTIME=content-media\nN5D_PRIVACY_ENABLED=false\n`,
   );
   assert.throws(() => renderEnv({ runtimeEnabled: true, allowedUids: [] }));
   assert.throws(() => renderEnv({ runtimeEnabled: "yes", allowedUids: [uid] }));
@@ -72,6 +78,7 @@ function record(dir, manifest, overrides = {}) {
     loadMaxInstances: manifest.load.maxInstances,
     loadConcurrency: manifest.load.concurrency,
     createDisabled: manifest.createDisabled,
+    privacyEnabled: manifest.privacyEnabled,
     automaticDeletion: false,
     ownerApprovalEvidenceRef: "SYNTHETIC-TEST",
     issuedAtUtc: "2020-01-01T00:00:00Z",
@@ -190,6 +197,45 @@ test("stage: staging carries the load settings into the manifest and the record"
         env: record(dir, contained, { createDisabled: false }),
       }).join(),
       /createDisabled mismatch/u,
+    );
+    // Step 2: the privacy deploy switch is closed by default and approved by
+    // the owner record like the kill switch; it never opens without the runtime.
+    assert.match(
+      readFileSync(path.join(stage, `.env.${staging}`), "utf8"),
+      /^N5D_PRIVACY_ENABLED=false$/mu,
+    );
+    const privacy = stageRuntime({
+      outDir: stage,
+      runtimeEnabled: true,
+      allowedUids: [uid],
+      privacyEnabled: true,
+      projectId: staging,
+      projectNumber: number,
+    });
+    assert.match(
+      readFileSync(path.join(stage, `.env.${staging}`), "utf8"),
+      /^N5D_PRIVACY_ENABLED=true$/mu,
+    );
+    assert.deepEqual(
+      verifyStage({ stageDir: stage, env: record(dir, privacy) }),
+      [],
+    );
+    assert.match(
+      verifyStage({
+        stageDir: stage,
+        env: record(dir, privacy, { privacyEnabled: false }),
+      }).join(),
+      /privacyEnabled mismatch/u,
+    );
+    assert.match(
+      renderEnv({
+        runtimeEnabled: false,
+        allowedUids: [uid],
+        privacyEnabled: true,
+        projectId: staging,
+        projectNumber: number,
+      }),
+      /^N5D_PRIVACY_ENABLED=false$/mu,
     );
   } finally {
     rmSync(dir, { recursive: true, force: true });
