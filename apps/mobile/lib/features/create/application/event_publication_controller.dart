@@ -27,6 +27,24 @@ final class EventPublicationObjectView {
   final String? failureCode;
 }
 
+/// Debug-only: the published Event and its first occurrence, so the default-off
+/// Booking test entry can open exactly this Event (no Discover in the cloud).
+final class EventBookingTestTarget {
+  const EventBookingTestTarget({
+    required this.eventId,
+    required this.occurrenceId,
+    required this.startAtUtc,
+    required this.endAtUtc,
+    required this.title,
+  });
+
+  final String eventId;
+  final String occurrenceId;
+  final DateTime startAtUtc;
+  final DateTime endAtUtc;
+  final String title;
+}
+
 final class EventPublicationViewState {
   const EventPublicationViewState({
     required this.phase,
@@ -35,6 +53,7 @@ final class EventPublicationViewState {
     this.status,
     this.message,
     this.myObjects = const <EventPublicationObjectView>[],
+    this.bookingTarget,
   });
 
   final EventPublicationPhase phase;
@@ -49,6 +68,9 @@ final class EventPublicationViewState {
   /// Last refusal or failure code (server code, or a local `*_required`).
   final String? message;
   final List<EventPublicationObjectView> myObjects;
+
+  /// Set only while the server reports this Event visible.
+  final EventBookingTestTarget? bookingTarget;
 
   bool get _idle => phase == EventPublicationPhase.ready;
   bool get canSave => _idle && draftTitle != null;
@@ -311,6 +333,7 @@ final class EventPublicationController extends ChangeNotifier {
       status: status,
       message: _state.message,
       myObjects: List<EventPublicationObjectView>.unmodifiable(objects),
+      bookingTarget: _bookingTarget(draft, record, status),
     );
   }
 
@@ -355,8 +378,35 @@ final class EventPublicationController extends ChangeNotifier {
       status: _state.status,
       message: message,
       myObjects: _state.myObjects,
+      bookingTarget: _state.bookingTarget,
     );
     notifyListeners();
+  }
+
+  static EventBookingTestTarget? _bookingTarget(
+    CreateDraftEntity? draft,
+    EventPublicationRecord? record,
+    EventPublicationStatus? status,
+  ) {
+    final occurrences = draft?.eventData?.occurrences;
+    if (draft == null ||
+        record == null ||
+        status?.visibility != 'visible' ||
+        occurrences == null ||
+        occurrences.isEmpty) {
+      return null;
+    }
+    final occurrence = occurrences.first;
+    return EventBookingTestTarget(
+      eventId: record.contentId,
+      occurrenceId: EventContentBodyMapper.serverOccurrenceId(
+        draft.id,
+        occurrence.id,
+      ),
+      startAtUtc: occurrence.startAtUtc.toUtc(),
+      endAtUtc: occurrence.endAtUtc.toUtc(),
+      title: draft.title,
+    );
   }
 
   CreateDraftEntity _requireDraft() {

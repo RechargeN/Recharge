@@ -131,6 +131,7 @@ void main() {
       await c.submit();
       expect(c.state.status?.latestSubmissionState, 'under_review');
       expect(c.state.canPublish, isFalse);
+      expect(c.state.bookingTarget, isNull);
       gateway.submissionState = 'approved_for_publication';
       await c.refresh();
       expect(c.state.canPublish, isTrue);
@@ -141,8 +142,14 @@ void main() {
       expect(publish.$2['submissionId'], 'submission-1');
       expect(publish.$2['expectedPointerRevision'], 0);
       expect(c.state.status?.visibility, 'visible');
+      // Debug Booking test target: the published Event and its occurrence.
+      final target = c.state.bookingTarget;
+      expect(target?.eventId, 'content-1');
+      expect(target?.occurrenceId, isNotEmpty);
+      expect(target?.title, draft.title);
       await c.hide();
       expect(c.state.status?.visibility, 'withdrawn');
+      expect(c.state.bookingTarget, isNull);
       expect(c.state.myObjects.single.status?.visibility, 'withdrawn');
     },
   );

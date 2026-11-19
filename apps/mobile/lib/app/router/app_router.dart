@@ -328,12 +328,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               fallback: RouteNames.discover,
             ),
         builder: (BuildContext context, GoRouterState state) {
-          if (state.pathParameters['eventId'] != seededBookingEventId) {
-            return const DetailsShell(
-              state: DetailsScreenUnavailable(
-                reason: DetailsUnavailableReason.notFound,
-              ),
+          final String eventId = state.pathParameters['eventId'] ?? '';
+          if (eventId != seededBookingEventId) {
+            final published = publishedTestBookingEventProjection(
+              eventId: eventId,
+              query: state.uri.queryParameters,
             );
+            if (published == null) {
+              return const DetailsShell(
+                state: DetailsScreenUnavailable(
+                  reason: DetailsUnavailableReason.notFound,
+                ),
+              );
+            }
+            return EventDetailsPage(projection: published);
           }
           return EventDetailsPage(projection: seededBookingEventProjection());
         },
