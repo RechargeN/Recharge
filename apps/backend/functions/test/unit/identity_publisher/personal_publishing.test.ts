@@ -160,9 +160,11 @@ void test('commerce per type: what is sold or booked, and where', () => {
     'external',
   );
   assert.equal(commerce('find_people', { findPeople: { cost: { costType: 'free' } } }), 'none');
+  // Owner decision 2026-11-19 (variant 1): an estimated shared cost paid at the
+  // venue or split at cost is no sale.
   assert.equal(
     commerce('find_people', { findPeople: { cost: { costType: 'estimated' } } }),
-    'external',
+    'none',
   );
   assert.equal(commerce('unknown_type', {}), 'inApp');
 });

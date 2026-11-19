@@ -12,8 +12,11 @@ import { isRecord } from './type_rules/validation_context.js';
  *   booking). A trader also needs the identity verification before sales start.
  *
  * Rental and Session book through an external link today; an Event with a
- * fixed price, a Class/Workshop with a fixed price and Find People with an
- * estimated shared cost are paid. Free internal Event registration takes no
+ * fixed price and a Class/Workshop with a fixed price are paid. Find People:
+ * owner decision 2026-11-19 (variant 1) — an estimated shared cost (an entry
+ * paid at the venue, costs split at cost) is no sale: the author sells
+ * nothing and Recharge collects nothing, so it is `none`; asking for money with
+ * a markup is a report-based violation. Free internal Event registration takes no
  * money and concludes no sale (owner, 2026-11-08): `none`. In-app payment
  * collection would be `inApp`. An unknown type is the strictest.
  */
@@ -43,10 +46,8 @@ export function contentCommerce(typeId: ContentTypeId, body: ContentBody): Conte
       const price = section('class_workshop')?.price;
       return isRecord(price) && price.mode === 'free' ? 'none' : 'external';
     }
-    case 'find_people': {
-      const cost = section('findPeople')?.cost;
-      return isRecord(cost) && cost.costType !== 'estimated' ? 'none' : 'external';
-    }
+    case 'find_people':
+      return 'none';
     default:
       return 'inApp';
   }
