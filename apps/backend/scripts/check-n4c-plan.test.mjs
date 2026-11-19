@@ -200,3 +200,88 @@ test("round 2: exactly the Eventarc receiver grant of runtime-booking", () => {
   );
   assert.match(run(planWith([])), /reviewed create missing/u);
 });
+
+test("round 3: exactly run.invoker of runtime-booking on the two trigger services", () => {
+  const project = "recharge-staging-y9y2y";
+  const member = `serviceAccount:runtime-booking@${project}.iam.gserviceaccount.com`;
+  const invoker = (
+    which,
+    name,
+    {
+      role = "roles/run.invoker",
+      who = member,
+      location = "europe-west1",
+    } = {},
+  ) => ({
+    address: `google_cloud_run_v2_service_iam_member.n4c_invoker_${which}[0]`,
+    type: "google_cloud_run_v2_service_iam_member",
+    change: {
+      actions: ["create"],
+      after: { project, location, name, role, member: who },
+    },
+  });
+  const planWith = (changes) => ({
+    variables: {
+      project_id: { value: project },
+      n4c_enabled: { value: true },
+      n2c_enabled: { value: true },
+      release_commit_sha: { value: "b".repeat(40) },
+    },
+    resource_changes: changes,
+  });
+  const run = (p) =>
+    checkN4cPlan(p, {
+      projectId: project,
+      commitSha: "b".repeat(40),
+      inventorySha256: inventoryDigest(p),
+      round: 3,
+    }).join();
+  const effects = invoker("effects", "consumecontenteffectv1");
+  const outbox = invoker("outbox", "consumeeventbookingoutboxv1");
+  assert.equal(run(planWith([effects, outbox])), "");
+  assert.match(run(planWith([effects])), /reviewed create missing/u);
+  assert.match(
+    run(planWith([effects, invoker("outbox", "createinternalbookingv1")])),
+    /invoker target mismatch/u,
+  );
+  assert.match(
+    run(
+      planWith([
+        effects,
+        invoker("outbox", "consumeeventbookingoutboxv1", {
+          role: "roles/run.admin",
+        }),
+      ]),
+    ),
+    /IAM mismatch/u,
+  );
+  assert.match(
+    run(
+      planWith([
+        effects,
+        invoker("outbox", "consumeeventbookingoutboxv1", {
+          who: "allUsers",
+        }),
+      ]),
+    ),
+    /IAM mismatch/u,
+  );
+  // The Eventarc receiver of round 2 is not part of round 3.
+  assert.match(
+    run(
+      planWith([
+        effects,
+        outbox,
+        {
+          address: "google_project_iam_member.n4c_eventarc[0]",
+          type: "google_project_iam_member",
+          change: {
+            actions: ["create"],
+            after: { project, role: "roles/eventarc.eventReceiver", member },
+          },
+        },
+      ]),
+    ),
+    /unreviewed create/u,
+  );
+});

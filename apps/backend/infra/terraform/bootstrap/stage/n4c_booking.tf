@@ -91,3 +91,26 @@ resource "google_project_iam_member" "n4c_eventarc" {
   role       = "roles/eventarc.eventReceiver"
   member     = local.n4c_member
 }
+
+# Round 3 (owner approval 2026-11-19): Eventarc invokes the two Firestore
+# trigger services as runtime-booking, which therefore may invoke exactly these
+# two Cloud Run services (Firebase deploy creates them; no project-level grant).
+resource "google_cloud_run_v2_service_iam_member" "n4c_invoker_effects" {
+  count      = local.n4c_on ? 1 : 0
+  depends_on = [terraform_data.n4c_guard, module.runtime_identities]
+  project    = google_project.stage.project_id
+  location   = "europe-west1"
+  name       = "consumecontenteffectv1"
+  role       = "roles/run.invoker"
+  member     = local.n4c_member
+}
+
+resource "google_cloud_run_v2_service_iam_member" "n4c_invoker_outbox" {
+  count      = local.n4c_on ? 1 : 0
+  depends_on = [terraform_data.n4c_guard, module.runtime_identities]
+  project    = google_project.stage.project_id
+  location   = "europe-west1"
+  name       = "consumeeventbookingoutboxv1"
+  role       = "roles/run.invoker"
+  member     = local.n4c_member
+}

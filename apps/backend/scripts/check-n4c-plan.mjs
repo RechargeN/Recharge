@@ -47,6 +47,30 @@ function roundTwoCreates() {
   ]);
 }
 
+/**
+ * Round 3 (owner approval 2026-11-19): Eventarc invokes the two trigger
+ * services as runtime-booking, so it may invoke exactly those two Cloud Run
+ * services; no project-level grant.
+ */
+const invokerServices = new Map([
+  [
+    "google_cloud_run_v2_service_iam_member.n4c_invoker_effects[0]",
+    "consumecontenteffectv1",
+  ],
+  [
+    "google_cloud_run_v2_service_iam_member.n4c_invoker_outbox[0]",
+    "consumeeventbookingoutboxv1",
+  ],
+]);
+function roundThreeCreates() {
+  return new Map(
+    [...invokerServices].map(([address, name]) => [
+      address,
+      { role: "roles/run.invoker", serviceName: name },
+    ]),
+  );
+}
+
 export function checkN4cPlan(plan, expected) {
   const errors = [];
   const vars = plan?.variables ?? {};
@@ -55,7 +79,11 @@ export function checkN4cPlan(plan, expected) {
     return ["N4c targets the reviewed dev or staging project only"];
   const member = `serviceAccount:runtime-booking@${project}.iam.gserviceaccount.com`;
   const creates =
-    expected.round === 2 ? roundTwoCreates() : reviewedCreates(project);
+    expected.round === 3
+      ? roundThreeCreates()
+      : expected.round === 2
+        ? roundTwoCreates()
+        : reviewedCreates(project);
   if (vars.project_id?.value !== project) errors.push("project mismatch");
   if (vars.n4c_enabled?.value !== true || vars.n2c_enabled?.value !== true)
     errors.push("N4c plan must set n4c_enabled and keep n2c_enabled");
@@ -96,6 +124,11 @@ export function checkN4cPlan(plan, expected) {
       )
         errors.push(`IAM condition mismatch: ${c.address}`);
     }
+    if (
+      rule.serviceName !== undefined &&
+      (after.name !== rule.serviceName || after.location !== "europe-west1")
+    )
+      errors.push(`invoker target mismatch: ${c.address}`);
   }
   for (const address of creates.keys())
     if (!seen.has(address)) errors.push(`reviewed create missing: ${address}`);
