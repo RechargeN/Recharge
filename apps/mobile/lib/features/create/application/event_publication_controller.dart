@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import 'create_media_asset_ref.dart';
 import '../domain/entities/create_draft_entity.dart';
+import '../domain/entities/event_draft_data.dart';
 import '../domain/entities/event_publication.dart';
 import '../domain/entities/publisher_ref.dart';
 import '../domain/repositories/event_publication_gateway.dart';
@@ -36,6 +37,7 @@ final class EventBookingTestTarget {
     required this.startAtUtc,
     required this.endAtUtc,
     required this.title,
+    this.channel,
   });
 
   final String eventId;
@@ -43,6 +45,9 @@ final class EventBookingTestTarget {
   final DateTime startAtUtc;
   final DateTime endAtUtc;
   final String title;
+
+  /// Booking's inventory channel of this occurrence (`onsite` / `online`).
+  final String? channel;
 }
 
 final class EventPublicationViewState {
@@ -406,6 +411,11 @@ final class EventPublicationController extends ChangeNotifier {
       startAtUtc: occurrence.startAtUtc.toUtc(),
       endAtUtc: occurrence.endAtUtc.toUtc(),
       title: draft.title,
+      channel: switch (draft.eventData!.format) {
+        EventFormat.offline => 'onsite',
+        EventFormat.online => 'online',
+        EventFormat.hybrid => null,
+      },
     );
   }
 

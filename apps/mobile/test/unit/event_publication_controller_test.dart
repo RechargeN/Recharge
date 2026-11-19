@@ -147,6 +147,7 @@ void main() {
       expect(target?.eventId, 'content-1');
       expect(target?.occurrenceId, isNotEmpty);
       expect(target?.title, draft.title);
+      expect(target?.channel, 'onsite');
       await c.hide();
       expect(c.state.status?.visibility, 'withdrawn');
       expect(c.state.bookingTarget, isNull);

@@ -70,6 +70,10 @@ PublishedEventDiscoveryEntity? publishedTestBookingEventProjection({
       !end.isAfter(start)) {
     return null;
   }
+  final String? channel = query['channel'];
+  if (channel != null && channel != 'onsite' && channel != 'online') {
+    return null;
+  }
   final String title = (query['title'] ?? '').trim();
   return PublishedEventDiscoveryEntity(
     eventId: eventId,
@@ -95,6 +99,12 @@ PublishedEventDiscoveryEntity? publishedTestBookingEventProjection({
         startAtUtc: start.toUtc(),
         endAtUtc: end.toUtc(),
         status: EventOccurrenceStatus.scheduled,
+        // E2b: Details shows the Booking panel; its terms come from Booking.
+        bookingRef: EventBookingRef(
+          eventId: eventId,
+          occurrenceId: occurrenceId,
+          channel: channel,
+        ),
       ),
     ],
     displayOccurrenceId: occurrenceId,

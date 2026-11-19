@@ -8,6 +8,8 @@ import 'booking_test_entry_guard.dart';
 import 'service_locator.dart';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+
 /// Builds the Event Booking controller from the real `testBackend` runtime.
 /// Returns null unless the whole test entry is allowed and the runtime really
 /// is the Emulator transport, so nothing is wired in any other mode.
@@ -73,6 +75,13 @@ Future<EventBookingController?> createEventBookingControllerFor({
   );
   final EventBookingTerms? terms = result.terms;
   if (result.outcome != EventBookingTermsOutcome.succeeded || terms == null) {
+    // Debug builds only: the outcome and server code, never ids or values.
+    if (kDebugMode) {
+      debugPrint(
+        'booking terms unavailable outcome=${result.outcome.name} '
+        'code=${result.code}',
+      );
+    }
     return null;
   }
   final Directory support = await sl<BookingSupportDirectoryProvider>()();

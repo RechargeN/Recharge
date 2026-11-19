@@ -87,6 +87,7 @@ class _EventPublicationPanelState extends ConsumerState<EventPublicationPanel> {
                     'start': target.startAtUtc.toIso8601String(),
                     'end': target.endAtUtc.toIso8601String(),
                     'title': target.title,
+                    if (target.channel != null) 'channel': target.channel!,
                   },
                 ).toString(),
               ),
