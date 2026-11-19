@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../entities/create_draft_entity.dart';
 import '../entities/event_admission.dart';
 import '../entities/event_draft_data.dart';
+import '../entities/event_inventory.dart';
 
 /// The Content Event body built from the user's own Create draft, plus the
 /// parts of that draft the Content Event subset (C0 + schedule-C1) cannot
@@ -59,7 +60,8 @@ final class EventContentBodyMapper {
         ..._internalUnsupported(event)
       else if (event.admission != null)
         'admission',
-      if (event.inventory != null) 'inventory',
+      if (event.inventory != null && !(internal && _v1Inventory(event)))
+        'inventory',
       if (event.occurrenceOverrides.isNotEmpty) 'occurrenceOverrides',
     ];
     final classification = event.classification;
@@ -240,6 +242,35 @@ final class EventContentBodyMapper {
 
   /// The reasons a draft with internal registration cannot be sent (§8 of the
   /// E2.0 amendment); empty when it can.
+  /// Internal registration v1 carries seats only as the event capacity. The
+  /// wizard always asks who manages the seats, so v1 accepts the two answers
+  /// it can carry without loss: nobody (no shapes, no groups), or Recharge
+  /// with one general on-site group of the event's known capacity.
+  static bool _v1Inventory(EventDraftData event) {
+    final EventInventoryConfiguration inventory = event.inventory!;
+    if (inventory.authority == InventoryAuthority.none) {
+      return inventory.primaryShape == null &&
+          inventory.additionalShapes.isEmpty &&
+          inventory.pools.isEmpty;
+    }
+    if (inventory.authority != InventoryAuthority.recharge ||
+        inventory.primaryShape != InventoryShape.generalCapacity ||
+        inventory.additionalShapes.isNotEmpty ||
+        inventory.pools.length != 1 ||
+        event.capacityMode != EventCapacityMode.known) {
+      return false;
+    }
+    final EventInventoryPoolDraft pool = inventory.pools.single;
+    return pool.shape == InventoryShape.generalCapacity &&
+        pool.channel == InventoryChannel.onsite &&
+        pool.capacityMode == EventCapacityMode.known &&
+        pool.capacity != null &&
+        pool.capacity == event.capacity &&
+        pool.roleIds.isEmpty &&
+        pool.zoneRef == null &&
+        pool.providerPoolRef == null;
+  }
+
   static List<String> _internalUnsupported(EventDraftData event) {
     final EventAdmissionDraft? admission = event.admission;
     if (admission == null) return const <String>['admission.unset'];

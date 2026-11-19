@@ -4,6 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
+import 'create_media_asset_ref.dart';
 import '../domain/entities/create_draft_entity.dart';
 import '../domain/entities/event_publication.dart';
 import '../domain/entities/publisher_ref.dart';
@@ -130,6 +131,13 @@ final class EventPublicationController extends ChangeNotifier {
   Future<void> uploadCover() => _run(() async {
     final CreateDraftEntity draft = _requireDraft();
     EventPublicationRecord record = await _requireRecord(draft);
+    // MEDIA-PICK-02: a cover that already became a ready server asset has
+    // no local bytes; it is bound by its id and nothing is uploaded again.
+    if (promotedMediaAssetId(draft.media.coverImage) != null) {
+      await _saveDraft(draft, record);
+      await _refreshAll();
+      return;
+    }
     final Uint8List? bytes = await _coverSource.read(draft.media.coverImage);
     if (bytes == null) throw const _LocalRefusal('cover_required');
     final String digest = sha256.convert(bytes).toString();
@@ -260,6 +268,8 @@ final class EventPublicationController extends ChangeNotifier {
     CreateDraftEntity draft,
     EventPublicationRecord? record,
   ) async {
+    final String? promoted = promotedMediaAssetId(draft.media.coverImage);
+    if (promoted != null) return promoted;
     if (record?.coverAssetId == null) return null;
     final Uint8List? bytes = await _coverSource.read(draft.media.coverImage);
     if (bytes == null) return null;
@@ -319,6 +329,13 @@ final class EventPublicationController extends ChangeNotifier {
       await action();
       _emit(phase: done, message: null);
     } on EventPublicationRejected catch (refusal) {
+      // Debug builds only: the server's codes and field paths (no values).
+      if (kDebugMode) {
+        debugPrint(
+          'event publication refusal code=${refusal.code} violations='
+          '${refusal.violations.map((v) => '${v.code}@${v.fieldPath}').join(',')}',
+        );
+      }
       _emit(phase: done, message: refusal.code);
     } on _LocalRefusal catch (refusal) {
       _emit(phase: done, message: refusal.code);

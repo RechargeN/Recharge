@@ -152,6 +152,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   '${RouteNames.testEventBooking}/$seededBookingEventId',
                 ),
               ),
+            // Debug test entry (define RECHARGE_TEST_EVENT_PUBLICATION): the
+            // only way to the Event publication test page in the running app.
+            // The route guard still decides; release builds never show it.
+            if (_eventPublicationTestEntryDefined && !kReleaseMode)
+              ListTile(
+                key: const Key('settings-event-publication-test-entry'),
+                leading: const Icon(Icons.publish_outlined),
+                title: Text(l10n.publicationPageTitle('event')),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(RouteNames.testEventPublication),
+              ),
             const Divider(height: 28),
             _SettingsSectionTitle(l10n.settingsSectionPreferences),
             // L4: the device-scoped UI language. It changes text only, never
@@ -458,4 +469,8 @@ class _LabeledField extends StatelessWidget {
 
 const bool _bookingTestEntryDefined = bool.fromEnvironment(
   'RECHARGE_TEST_BOOKING_ENTRY',
+);
+
+const bool _eventPublicationTestEntryDefined = bool.fromEnvironment(
+  'RECHARGE_TEST_EVENT_PUBLICATION',
 );

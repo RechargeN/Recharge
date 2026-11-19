@@ -96,6 +96,33 @@ void main() {
   );
 
   test(
+    'a cover already promoted to a server asset is bound without upload',
+    () async {
+      // MEDIA-PICK-02 (A34 2026-11-19): the cover field holds `asset:<id>`
+      // once the photo became a ready server asset; there are no local bytes.
+      draft = userEventDraft(
+        pageId: 'page-1',
+        coverPath: 'asset:srv-7',
+        localId: 'loc_42',
+      );
+      covers = _Covers(null);
+      final c = controller();
+      await c.load();
+      await c.save();
+      await c.uploadCover();
+      expect(uploader.calls, 0);
+      expect(c.state.message, isNot('cover_required'));
+      final updates = gateway.calls.where(
+        (call) => call.$1 == 'createDraft' || call.$1 == 'updateDraft',
+      );
+      for (final call in updates) {
+        final media = (call.$2['body']! as Map)['media']! as Map;
+        expect((media['coverImage']! as Map)['mediaId'], 'srv-7');
+      }
+    },
+  );
+
+  test(
     'publish is offered only after the server reports an approval',
     () async {
       final c = controller();
@@ -201,7 +228,7 @@ final class _Drafts implements EventDraftSource {
 final class _Covers implements EventCoverSource {
   _Covers(this.bytes);
 
-  final Uint8List bytes;
+  final Uint8List? bytes;
 
   @override
   Future<Uint8List?> read(String reference) async => bytes;
