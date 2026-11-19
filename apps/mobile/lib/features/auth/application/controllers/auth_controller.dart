@@ -507,7 +507,10 @@ class AuthController extends ChangeNotifier {
         return;
       }
       _serverExpiry = Timer(remaining, () {
-        _generation++;
+        // Not a user action: a refresh that is still running (A34 2026-11-19:
+        // after sleep both timers fire together) must still be able to sign
+        // the user back in, so the generation is left as it is. Sign-out and
+        // suspension still invalidate it.
         clearPendingTarget();
         _silentRefresh?.cancel();
         _setState(

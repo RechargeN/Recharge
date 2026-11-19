@@ -33,6 +33,13 @@ AuthResultEntity _result(DateTime now, Duration lifetime) => AuthResultEntity(
   ),
 );
 
+/// A restore that answers only after [delay] (a slow refresh round trip).
+class _Slow {
+  const _Slow(this.delay, this.lifetime);
+  final Duration delay;
+  final Duration lifetime;
+}
+
 class _ScriptedRepository implements FederatedAuthRepository {
   _ScriptedRepository(this.clock);
   final DateTime Function() clock;
@@ -59,6 +66,10 @@ class _ScriptedRepository implements FederatedAuthRepository {
     }
     if (step == 'rate-limited') {
       throw const AuthException(code: 'AUTH_TOO_MANY_ATTEMPTS', message: '');
+    }
+    if (step is _Slow) {
+      await Future<void>.delayed(step.delay);
+      return _result(clock(), step.lifetime);
     }
     if (step == 'rate-limited-10m') {
       throw const AuthException(
@@ -422,6 +433,33 @@ void main() {
         async.elapse(const Duration(minutes: 7));
         expect(repo.restoreCalls, 2);
         expect(controller.state.isAuthenticated, isTrue);
+        controller.dispose();
+      });
+    },
+  );
+  test(
+    'a refresh still running when the snapshot runs out is not thrown away',
+    () {
+      // A34 staging 2026-11-19 21:01: the phone slept past the snapshot, so on
+      // wake the silent refresh and the expiry fired together. The refresh
+      // (snapshot_stale -> rotate) took seconds; expiry showed "no connection"
+      // and its retry joined the running refresh, whose success was then
+      // dropped as stale: the app stayed signed out with a live Session.
+      fakeAsync((async) {
+        final repo = _ScriptedRepository(DateTime.now);
+        final controller = _controller(repo);
+        unawaited(controller.signInWithGoogle());
+        async.flushMicrotasks();
+        repo.restoreScript.add(
+          const _Slow(Duration(minutes: 6), Duration(hours: 1)),
+        );
+        async.elapse(const Duration(minutes: 55)); // silent refresh starts
+        expect(repo.restoreCalls, 1);
+        async.elapse(const Duration(minutes: 5)); // snapshot over mid-refresh
+        async.elapse(const Duration(minutes: 2)); // the refresh succeeds
+        expect(controller.state.isAuthenticated, isTrue);
+        expect(controller.state.message, isNull);
+        expect(repo.signOuts, 0);
         controller.dispose();
       });
     },

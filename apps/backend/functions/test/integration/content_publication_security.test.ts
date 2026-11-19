@@ -883,6 +883,10 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/content_translation/firestore_content_translation_service.ts',
     'content_effects_entry.ts',
     'content_entry.ts',
+    // Round 2.2 (owner 2026-11-18): the dev/stage cloud entry of the Content
+    // effects handoff; it only composes content_effects_entry behind the
+    // reviewed dev-cloud persistence switch, never Content storage itself.
+    'dev_content_effects_entry.ts',
     // N3a.2: dev-cloud Content + Media composition (Place only, no publication).
     'dev_content_media_composition.ts',
     // D2: the composition root of Content's reaction to late Media restriction.
@@ -995,6 +999,7 @@ void test('delegated import never reaches Content storage except through the Con
       'applyContentSafety',
     ],
     'content_effects_entry.ts': ['createEmulatorEventBookingHandoff'],
+    'dev_content_effects_entry.ts': ['devCloudPersistenceSwitch'],
     'content_entry.ts': [
       'ContentPublicationService',
       'ContentActor',
