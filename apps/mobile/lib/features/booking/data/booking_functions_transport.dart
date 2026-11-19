@@ -613,13 +613,30 @@ Future<Map<String, Object?>> _invokeCallable({
       dispatched: true,
     );
   }
+  final bool httpOk = response.statusCode >= 200 && response.statusCode < 300;
   Object? decoded;
   try {
     decoded = jsonDecode(utf8.decode(bytes, allowMalformed: false));
   } on Object {
+    // A non-2xx page that is not the Functions envelope comes from the
+    // infrastructure in front of it (Cloud Run "no available instance", a
+    // proxy): a typed failure like any other 5xx, never an uncaught crash.
+    // A malformed 2xx body stays a protocol error.
+    if (!httpOk) {
+      throw BookingCallableFailure(
+        code: response.statusCode >= 500 ? 'internal' : 'unknown',
+        dispatched: true,
+      );
+    }
     throw const FormatException('Malformed Functions callable response');
   }
   if (decoded is! Map) {
+    if (!httpOk) {
+      throw BookingCallableFailure(
+        code: response.statusCode >= 500 ? 'internal' : 'unknown',
+        dispatched: true,
+      );
+    }
     throw const FormatException('Functions callable response is not an object');
   }
   final envelope = Map<String, Object?>.from(decoded);
