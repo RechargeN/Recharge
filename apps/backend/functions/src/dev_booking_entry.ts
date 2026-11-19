@@ -21,6 +21,7 @@ import {
 import { failureShape } from './shared/failure_shape.js';
 import { systemServerClock } from './shared/server_clock.js';
 import {
+  cloudEventDeliveryGate,
   processEventBookingOutboxDocument,
   runPendingEventBookingDeliveries,
 } from './booking/event_projection_runtime.js';
@@ -280,10 +281,12 @@ export const consumeEventBookingOutboxV1 = onDocumentCreated(
   { ...workerOptions, document: 'eventBookingOutbox/{outboxId}', retry: false },
   async (event) => {
     if (!runtimeOpen(process.env)) return;
+    const firestore = getFirestore(app());
     await processEventBookingOutboxDocument(
-      getFirestore(app()),
+      firestore,
       event.params.outboxId,
       systemServerClock.now().toISOString(),
+      cloudEventDeliveryGate(firestore),
     );
   },
 );
@@ -292,10 +295,12 @@ export const retryEventBookingProjectionDeliveriesV1 = onSchedule(
   { ...workerOptions, schedule: 'every 5 minutes', retryCount: 0 },
   async () => {
     if (!runtimeOpen(process.env)) return;
+    const firestore = getFirestore(app());
     await runPendingEventBookingDeliveries(
-      getFirestore(app()),
+      firestore,
       systemServerClock.now().toISOString(),
       20,
+      cloudEventDeliveryGate(firestore),
     );
   },
 );
