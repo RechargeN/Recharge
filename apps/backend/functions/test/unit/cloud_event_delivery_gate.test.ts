@@ -7,6 +7,10 @@ import {
   cloudEventDeliveryGate,
   processEventBookingOutboxDocument,
 } from '../../src/booking/event_projection_runtime.js';
+import {
+  cloudReconfirmationGate,
+  runReconfirmationDeadlineWorker,
+} from '../../src/booking/reconfirmation_deadline_worker.js';
 import { operationsEmergencySwitchIds } from '../../src/shared/feature_flags.js';
 
 /**
@@ -82,5 +86,43 @@ void test('a closed gate delivers nothing and touches no outbox record', async (
       Promise.resolve(false),
     ),
     'disabled',
+  );
+});
+
+void test('the cloud reconfirmation gate follows its own Operations switch', async () => {
+  const workerSwitch = operationsEmergencySwitchIds.reconfirmationDeadlineWorker;
+  const workerKey = `stage:LV:${workerSwitch}`;
+  const docs = (enabled: boolean) =>
+    firestoreWith({
+      [`platformActiveFeatureFlagPointers/${workerKey}`]: { key: workerKey, activeRevision: 1 },
+      [`platformFeatureFlagRevisions/${workerKey}:1`]: {
+        schemaVersion: 1,
+        environmentId: 'stage',
+        marketId: 'LV',
+        capabilityId: workerSwitch,
+        revision: 1,
+        enabled,
+      },
+    });
+  await inStagingCloud(async () => {
+    assert.equal(await cloudReconfirmationGate(docs(false))(), true);
+    assert.equal(await cloudReconfirmationGate(docs(true))(), false);
+    assert.equal(await cloudReconfirmationGate(firestoreWith({}))(), false);
+    // The delivery switch does not open the reconfirmation worker.
+    assert.equal(await cloudReconfirmationGate(firestoreWith(switchDocs(false)))(), false);
+  });
+});
+
+void test('a closed reconfirmation gate runs nothing', async () => {
+  const untouched = {
+    collection: () => {
+      throw new Error('must not read');
+    },
+  } as unknown as Firestore;
+  assert.deepEqual(
+    await runReconfirmationDeadlineWorker(untouched, '2026-11-19T20:00:00.000Z', 20, () =>
+      Promise.resolve(false),
+    ),
+    { discovered: 0, examined: 0, attempted: 0 },
   );
 });

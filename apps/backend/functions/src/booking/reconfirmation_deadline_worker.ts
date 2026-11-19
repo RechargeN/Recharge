@@ -93,6 +93,29 @@ const maximumAttempts = 5;
 const containedRetryMs = 60_000;
 const switchId = operationsEmergencySwitchIds.reconfirmationDeadlineWorker;
 
+/**
+ * Whether the deadline worker is active, read again inside the effect
+ * transaction. The Emulator reads the local product flag; the cloud runtime
+ * passes the Operations switch gate, because product flags are Emulator-only
+ * and always off in the cloud (A34 staging 2026-11-19: the cloud worker ran
+ * every 5 minutes and did nothing).
+ */
+export type ReconfirmationWorkerGate = (transaction?: Transaction) => Promise<boolean>;
+
+export function emulatorReconfirmationGate(firestore: Firestore): ReconfirmationWorkerGate {
+  return (transaction) =>
+    new FirestoreFeatureFlagGate(firestore, 'local', 'LV').isEnabled(
+      bookingFlagIds.reconfirmationDeadlineWorker,
+      transaction,
+    );
+}
+
+/** Cloud: active exactly while the worker's Operations switch is open; none is contained. */
+export function cloudReconfirmationGate(firestore: Firestore): ReconfirmationWorkerGate {
+  return async (transaction) =>
+    (await emergencySwitchState(firestore, switchId, transaction)) === 'open';
+}
+
 export async function discoverReconfirmationDeadlineJobs(
   firestore: Firestore,
   nowUtc: string,
@@ -193,6 +216,7 @@ export async function processReconfirmationDeadlineJob(
   leaseOwner: string = randomUUID(),
   /** Test-only fault injection between dispatch and effect, never a client parameter. */
   testHooks: Readonly<{ afterLease?: () => Promise<void> }> = {},
+  gate: ReconfirmationWorkerGate = emulatorReconfirmationGate(firestore),
 ): Promise<ReconfirmationDeadlineResult> {
   assertInstant(nowUtc);
   const acquired = await acquireLease(firestore, jobId, nowUtc, leaseOwner);
@@ -204,7 +228,7 @@ export async function processReconfirmationDeadlineJob(
   if (acquired === 'contained') return 'contained';
   try {
     await testHooks.afterLease?.();
-    const result = await autoCancelMissedReconfirmation(firestore, acquired, nowUtc);
+    const result = await autoCancelMissedReconfirmation(firestore, acquired, nowUtc, gate);
     return result === 'contained' ? await releaseContained(firestore, acquired, nowUtc) : result;
   } catch (error) {
     const failureClass = classify(error);
@@ -243,12 +267,11 @@ export async function runReconfirmationDeadlineWorker(
   firestore: Firestore,
   nowUtc: string,
   executionLimit = 20,
+  gate: ReconfirmationWorkerGate = emulatorReconfirmationGate(firestore),
 ): Promise<Readonly<{ discovered: number; examined: number; attempted: number }>> {
   assertInstant(nowUtc);
   assertLimit(executionLimit, 100);
-  const enabled = await new FirestoreFeatureFlagGate(firestore, 'local', 'LV').isEnabled(
-    bookingFlagIds.reconfirmationDeadlineWorker,
-  );
+  const enabled = await gate();
   if (!enabled) return { discovered: 0, examined: 0, attempted: 0 };
   const discovery = await discoverReconfirmationDeadlineJobs(firestore, nowUtc, 100);
   const due = await firestore
@@ -266,6 +289,8 @@ export async function runReconfirmationDeadlineWorker(
       document.id,
       nowUtc,
       `scheduler:${document.id}`,
+      {},
+      gate,
     );
     if (result !== 'lease_held') attempted += 1;
   }
@@ -437,13 +462,11 @@ async function autoCancelMissedReconfirmation(
   firestore: Firestore,
   acquired: AcquiredDeadlineJob,
   nowUtc: string,
+  gate: ReconfirmationWorkerGate,
 ): Promise<ReconfirmationDeadlineResult> {
   const notificationEffects = await bookingNotificationEffectsEnabled(firestore);
   return runBookingTransaction(firestore, async (transaction) => {
-    const enabled = await new FirestoreFeatureFlagGate(firestore, 'local', 'LV').isEnabled(
-      bookingFlagIds.reconfirmationDeadlineWorker,
-      transaction,
-    );
+    const enabled = await gate(transaction);
     // Activation and the emergency switch are read in the effect transaction:
     // a worker contained after taking its lease cancels nothing.
     if (!enabled || (await emergencySwitchState(firestore, switchId, transaction)) === 'contained')

@@ -25,7 +25,10 @@ import {
   processEventBookingOutboxDocument,
   runPendingEventBookingDeliveries,
 } from './booking/event_projection_runtime.js';
-import { runReconfirmationDeadlineWorker } from './booking/reconfirmation_deadline_worker.js';
+import {
+  cloudReconfirmationGate,
+  runReconfirmationDeadlineWorker,
+} from './booking/reconfirmation_deadline_worker.js';
 
 // N4c isolated entry (codebase n4c-booking), owner-approved 2026-11-16. Not
 // re-exported by index.ts. Callable wire protocol over onRequest, as in
@@ -309,10 +312,12 @@ export const releaseMissedReconfirmationsV1 = onSchedule(
   { ...workerOptions, schedule: 'every 5 minutes', retryCount: 0 },
   async () => {
     if (!runtimeOpen(process.env)) return;
+    const firestore = getFirestore(app());
     await runReconfirmationDeadlineWorker(
-      getFirestore(app()),
+      firestore,
       systemServerClock.now().toISOString(),
       20,
+      cloudReconfirmationGate(firestore),
     );
   },
 );
