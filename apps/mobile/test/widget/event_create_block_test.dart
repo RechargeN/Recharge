@@ -82,6 +82,11 @@ void main() {
       find.byKey(const Key('event-short-description')),
       'A welcoming evening for the local community.',
     );
+    // The Content Event contract needs a full description of 50+ characters.
+    await tester.enterText(
+      find.byKey(const Key('event-full-description')),
+      'Tea, short introductions and a calm walk around the neighbourhood together.',
+    );
     await tester.enterText(find.byKey(const Key('event-cover')), 'cover.jpg');
     await tester.enterText(
       find.byKey(const Key('event-cover-alt')),

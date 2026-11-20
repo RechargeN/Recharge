@@ -65,14 +65,22 @@ class ValidateEventDraftUseCase {
       }
     }
 
-    if (draft.title.trim().length < 3) {
+    // The Content Event contract (server `event_rules.ts`): lengths count the
+    // trimmed text with inner whitespace collapsed, in Unicode code points.
+    final int titleLength = _contentLength(draft.title);
+    if (titleLength < 3 || titleLength > 100) {
       blocking(0, 'title_required', 'title');
     }
     if (draft.mainCategory.trim().isEmpty || draft.subcategory.trim().isEmpty) {
       blocking(0, 'taxonomy_required', 'subcategory');
     }
-    if (draft.shortDescription.trim().length < 10) {
+    final int shortLength = _contentLength(draft.shortDescription);
+    if (shortLength < 20 || shortLength > 240) {
       blocking(0, 'short_description_required', 'shortDescription');
+    }
+    final int fullLength = _contentLength(draft.fullDescription);
+    if (fullLength < 50 || fullLength > 20000) {
+      blocking(0, 'full_description_required', 'fullDescription');
     }
     if (draft.media.coverImage.trim().isEmpty) {
       blocking(0, 'cover_required', 'coverImage');
@@ -288,3 +296,7 @@ class ValidateEventDraftUseCase {
   bool _validLongitude(double? value) =>
       value != null && value.isFinite && value >= -180 && value <= 180;
 }
+
+/// The length Content counts: trimmed, inner whitespace collapsed, code points.
+int _contentLength(String value) =>
+    value.trim().replaceAll(RegExp(r'\s+'), ' ').runes.length;

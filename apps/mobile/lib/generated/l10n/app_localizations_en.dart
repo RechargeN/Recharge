@@ -2403,10 +2403,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'event_publisher_required': 'Choose who publishes this Event.',
       'event_classification_unsupported':
           'This Event uses a classification from a newer app version.',
-      'title_required': 'Add a title of at least 3 characters.',
+      'title_required': 'Add a title of 3 to 100 characters.',
       'taxonomy_required': 'Choose a category and subcategory.',
       'short_description_required':
-          'Add a short description of at least 10 characters.',
+          'Add a short description of 20 to 240 characters.',
+      'full_description_required':
+          'Add a full description of at least 50 characters.',
       'cover_required': 'Add a cover image.',
       'cover_alt_required': 'Describe the cover image for accessibility.',
       'media_rights_required': 'Confirm that you may publish this media.',
