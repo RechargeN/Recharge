@@ -3,7 +3,7 @@
 **ID:** MOB-ARCH-M2-P
 **Версия:** 1.0
 **Дата:** 2026-08-11
-**Статус:** Approved — M2-A/B Done (local/mock); M2-C/D/E Doing (local work; integration/removal gates open)
+**Статус:** Approved — historical M2-A/B local evidence retained; M2-C/D/E local integration and gates verified through CP5; exact-HEAD Linux CI and owner acceptance pending
 **Parent:** [Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
 **Depends on:** MOB-ARCH-M1 — Done, merged as `f893a931a58cff9ef9f779e17517af0d28c2f454`
 **Нормативные AC:** MOB-ARCH-AC-05–06, AC-52–53, AC-56–60, AC-74
@@ -974,3 +974,43 @@ The AC01–40 matrix, exact scope of local evidence, 71-exception reconciliation
 residual UTC/fallback review, rollback and integration/publication blockers are
 in [M2-D/E verification](../verification/M2_DE_2026_11_19.md). M2-C/D/E remain
 Doing; no Done/Accepted, production, device or cloud promotion is made.
+
+## 32. Combined-tree reconciliation — 2026-11-20
+
+The full PR10/11 source stack and safety WIP were transferred individually onto
+main `78d6a386` after PR12/13 merged; safety tags and conflict journal preserve
+rollback. CP1 `aa20ed60` passed full analyze/tests after semantic integration.
+ADR0023 spec reconciliation is a separate commit `00af72fa`; CP2 `8ccc9097`
+verifies ten-type publisher capture/non-rewrite and Personal/Page/Admin guards.
+
+CP3 `45eda2d6` closes the remaining UTC/configuration boundaries, with explicit
+DST/Place-zone/GTFS contracts and no restore-time active-config guesses.
+The owner-approved protected transport/debug diff is only parser imports and
+strict UTC readers, covered by establish/restore/debug-route regressions.
+The concrete .000Z syntax is accepted; +00:00, zone-less and impossible UTC
+text intentionally refuse. Expired sessions remain refused.
+
+CP4 `c78101f5` removes nine unused public wrappers, private LocalDate alias,
+seven forwarding files, the ID forwarding export, obsolete MarketConfig
+members and unused active-context codec parameters after retained-tree proofs.
+The initial Market getter text check missed two for-in references; getters
+were restored and a complete resolved-AST zero proof preceded final removal.
+Twenty-two source files/preimages are hash-verified in the owner Desktop review
+archive; the per-item rollback matrix identifies the removal commit.
+UUID/ULID implementation and necessary persisted-data compatibility readers
+remain: legacy Money, schedules, Scenario snapshots/future fields, owner-scoped
+Visit v2 and Class legacy blocks. They do not infer identity or grant access.
+
+CP3 and CP4 each passed 2713 tests / 83 existing skips, analyze/boundary/diff 0.
+The shared inventory was regenerated once in CP5: 710 scanned Dart files,
+69 active exceptions under unchanged budget 71, no violations/stale/expired.
+The old 71-item snapshot differs because main already removed BND-LEGACY-0023
+and 0051; the registry is unchanged by this integration. See the full AC01–40,
+IDP coverage, debt, blockers and rollback package:
+[2026-11-20 reconciliation](../verification/IDP_M2_RECONCILIATION_2026_11_20.md).
+
+Final CP5 local gates passed: analyze0, full2713 pass/83 existing skips, boundary
+self-test/scan/drift0 and diff0. Exact-HEAD Linux CI remains to be recorded. Claude's
+A34 signin check is an owner-required gate before any main merge. No Done
+promotion, backend/infra/contracts/device/cloud changes, production grants or
+R1 M2 acceptance follow from this architecture reconciliation.
