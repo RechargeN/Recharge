@@ -2476,10 +2476,12 @@ class AppLocalizationsRu extends AppLocalizations {
           'Выберите, от чьего имени публикуется событие.',
       'event_classification_unsupported':
           'У этого события классификация из более новой версии приложения.',
-      'title_required': 'Добавьте название не короче 3 символов.',
+      'title_required': 'Добавьте название от 3 до 100 символов.',
       'taxonomy_required': 'Выберите категорию и подкатегорию.',
       'short_description_required':
-          'Добавьте краткое описание не короче 10 символов.',
+          'Добавьте краткое описание от 20 до 240 символов.',
+      'full_description_required':
+          'Добавьте полное описание не короче 50 символов.',
       'cover_required': 'Добавьте обложку.',
       'cover_alt_required': 'Опишите обложку для доступности.',
       'media_rights_required':

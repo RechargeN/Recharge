@@ -89,4 +89,59 @@ void main() {
     expect(codes, contains('local_start_date_invalid'));
     expect(codes, contains('external_booking_url_invalid'));
   });
+  test(
+    'text lengths follow the Content Event contract (A34 staging 2026-11-19)',
+    () {
+      // The server refused a draft the wizard accepted (empty full description).
+      final CreateDraftEntity base =
+          CreateDraftEntity.defaults(
+            organizerId: 'user-1',
+            organizerEmail: 'user@example.com',
+            organizerName: 'Host',
+            marketCityId: 'riga',
+            timezone: 'Europe/Riga',
+            country: 'LV',
+            city: 'Riga',
+            currency: 'EUR',
+          ).copyWith(
+            title: 'Riga design meetup',
+            shortDescription: 'A friendly meetup for local designers.',
+            fullDescription:
+                'Bring a sketchbook and one project you are working on; we swap feedback in small groups.',
+          );
+      Set<String> codes(CreateDraftEntity draft) => validate(
+        draft,
+        throughStep: 0,
+      ).map((EventValidationIssue issue) => issue.code).toSet();
+      final ok = codes(base);
+      expect(ok, isNot(contains('title_required')));
+      expect(ok, isNot(contains('short_description_required')));
+      expect(ok, isNot(contains('full_description_required')));
+      // Whitespace is collapsed before counting, as on the server.
+      expect(
+        codes(base.copyWith(shortDescription: 'short   and          padded')),
+        contains('short_description_required'),
+      );
+      expect(
+        codes(base.copyWith(shortDescription: 'A' * 241)),
+        contains('short_description_required'),
+      );
+      expect(
+        codes(base.copyWith(fullDescription: '')),
+        contains('full_description_required'),
+      );
+      expect(
+        codes(base.copyWith(fullDescription: 'x' * 49)),
+        contains('full_description_required'),
+      );
+      expect(
+        codes(base.copyWith(title: 'T' * 101)),
+        contains('title_required'),
+      );
+      expect(
+        codes(base.copyWith(title: 'T' * 100)),
+        isNot(contains('title_required')),
+      );
+    },
+  );
 }

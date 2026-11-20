@@ -2451,10 +2451,12 @@ class AppLocalizationsLv extends AppLocalizations {
       'event_publisher_required': 'Izvēlieties, kas publicē šo pasākumu.',
       'event_classification_unsupported':
           'Šim pasākumam ir klasifikācija no jaunākas lietotnes versijas.',
-      'title_required': 'Pievienojiet nosaukumu, vismaz 3 rakstzīmes.',
+      'title_required': 'Pievienojiet nosaukumu, 3–100 rakstzīmes.',
       'taxonomy_required': 'Izvēlieties kategoriju un apakškategoriju.',
       'short_description_required':
-          'Pievienojiet īsu aprakstu, vismaz 10 rakstzīmes.',
+          'Pievienojiet īsu aprakstu, 20–240 rakstzīmes.',
+      'full_description_required':
+          'Pievienojiet pilnu aprakstu, vismaz 50 rakstzīmes.',
       'cover_required': 'Pievienojiet vāka attēlu.',
       'cover_alt_required': 'Aprakstiet vāka attēlu pieejamībai.',
       'media_rights_required':
