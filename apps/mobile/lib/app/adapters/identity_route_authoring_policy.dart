@@ -21,7 +21,7 @@ class IdentityRouteAuthoringPolicy implements RouteAuthoringPolicy {
         RouteAuthoringOperation.moderateSafety,
         RouteAuthoringOperation.restoreRoute,
       }.contains(request.operation);
-      if (admin ? !access.canUseAdminTools : !access.isVerifiedCreator) {
+      if (admin && !access.canUseAdminTools) {
         return const RouteAuthorizationDecision.denied(
           'identity_access_denied',
         );

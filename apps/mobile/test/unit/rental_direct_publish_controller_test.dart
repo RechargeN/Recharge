@@ -375,6 +375,7 @@ class _AllowAllPublisherAccess implements PublisherAccessCheck {
     required PublisherRef publisher,
     Set<String> requiredCapabilities = const {},
     bool requireAdmin = false,
+    bool requireIdentityVerification = true,
   }) async => true;
 }
 

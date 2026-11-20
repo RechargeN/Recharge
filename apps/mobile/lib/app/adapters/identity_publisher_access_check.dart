@@ -21,15 +21,17 @@ class IdentityPublisherAccessCheck implements PublisherAccessCheck {
     required PublisherRef publisher,
     Set<String> requiredCapabilities = const {},
     bool requireAdmin = false,
+    bool requireIdentityVerification = true,
   }) async {
     if (!publisher.isValid || actorUserId.trim().isEmpty) return false;
+    if (requireAdmin && publisher.type != PublisherType.user) return false;
     try {
       final IdentityAccessSnapshot snapshot = await _repository
           .loadAccessSnapshot(actorUserId);
       if (!snapshot.belongsTo(actorUserId) ||
           (requireAdmin
               ? !snapshot.canUseAdminTools
-              : !snapshot.isVerifiedCreator) ||
+              : requireIdentityVerification && !snapshot.isVerifiedCreator) ||
           !requiredCapabilities.every(snapshot.hasGlobalCapability)) {
         return false;
       }

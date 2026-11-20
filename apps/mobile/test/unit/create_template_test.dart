@@ -19,6 +19,76 @@ import 'package:recharge/features/create/domain/usecases/manage_create_template_
 void main() {
   late ManageCreateTemplateUseCase useCase;
   test(
+    'ten-type copy matrix rejects surfaces not enabled by existing contracts',
+    () {
+      for (final type in CreateObjectType.values.where(
+        (t) => t != CreateObjectType.quickPlan,
+      )) {
+        final draft = _eventDraft().copyWith(objectType: type);
+        if (type != CreateObjectType.event) {
+          expect(
+            () => useCase.create(userId: 'user-1', name: 'Test', draft: draft),
+            throwsArgumentError,
+            reason: '${type.name}: Event-only template surface',
+          );
+        }
+        if (type != CreateObjectType.rental) {
+          expect(
+            () => useCase.duplicateRental(
+              draft: draft,
+              userId: 'user-1',
+              currencyCode: 'EUR',
+              timeZoneId: 'Europe/Riga',
+            ),
+            throwsArgumentError,
+            reason: '${type.name}: Rental-only duplicate surface',
+          );
+        }
+      }
+    },
+  );
+  test(
+    'copies created at the same instant have different local ids and leave source identity unchanged',
+    () {
+      final now = DateTime.utc(2026, 11, 20);
+      final source = _eventDraft();
+      final template = useCase.create(
+        userId: 'user-1',
+        name: 'Source',
+        draft: source,
+        nowUtc: now,
+      );
+      CreateDraftEntity copy() => useCase.materializeEvent(
+        template: template,
+        userId: 'user-1',
+        organizerEmail: '',
+        organizerName: '',
+        marketCityId: 'riga',
+        timezone: 'Europe/Riga',
+        country: 'LV',
+        city: 'Riga',
+        currency: 'EUR',
+        publisherRef: const PublisherRef(
+          type: PublisherType.user,
+          id: 'user-1',
+        ),
+        nowUtc: now,
+      );
+      final a = copy(), b = copy();
+      expect(a.id, isNot(b.id));
+      expect(a.id, startsWith('loc_'));
+      expect(
+        b.effectivePublisher,
+        const PublisherRef(type: PublisherType.user, id: 'user-1'),
+      );
+      expect(template.snapshot.publisherSelectionRequired, isTrue);
+      expect(
+        source.eventData!.publisherRef,
+        _eventDraft().eventData!.publisherRef,
+      );
+    },
+  );
+  test(
     'template metadata preserves UTC precision and rejects malformed clocks',
     () {
       final instant = DateTime.utc(2026, 11, 19, 10, 20, 30, 123, 456);

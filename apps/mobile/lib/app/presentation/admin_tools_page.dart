@@ -1,3 +1,4 @@
+import '../../core/layout/page_list_padding.dart';
 import '../../core/localization/l10n_context.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -44,7 +45,7 @@ class _AdminToolsPageState extends ConsumerState<AdminToolsPage>
       body: access?.canUseAdminTools != true
           ? Center(child: Text(context.l10n.adminToolsUnavailable))
           : ListView(
-              padding: const EdgeInsets.all(20),
+              padding: pageListPadding(context, const EdgeInsets.all(20)),
               children: [
                 Text(context.l10n.adminToolsLocalMock),
                 Text(context.l10n.adminToolsNoDecisions),

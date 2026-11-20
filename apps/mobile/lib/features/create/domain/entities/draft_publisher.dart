@@ -12,6 +12,7 @@ extension CreateDraftPublisher on CreateDraftEntity {
       CreateObjectType.place => placeData?.publisherRef,
       CreateObjectType.activity => activityData?.publisherRef,
       CreateObjectType.rental => rentalData?.publisherRef,
+      CreateObjectType.route => routeData?.publisherRef,
       CreateObjectType.collection => collectionData?.publisherRef,
       CreateObjectType.findPeople when findPeopleData != null => PublisherRef(
         type: findPeopleData!.publisherType == FindPeoplePublisherType.page

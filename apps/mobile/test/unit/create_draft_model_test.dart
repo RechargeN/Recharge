@@ -1,3 +1,4 @@
+import '../support/route_domain_fixtures.dart';
 import 'package:recharge/features/create/domain/entities/rental_draft_data.dart';
 import 'package:recharge/shared/primitives/money/money_parse_result.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -92,6 +93,47 @@ void main() {
   CreateDraftEntity read(Map<String, dynamic> json) =>
       CreateDraftModel.fromJson(json).toEntity();
 
+  test(
+    'legacy Route keeps its explicit stored publisher and envelope conflicts fail closed',
+    () {
+      const stored = PublisherRef(
+        type: PublisherType.page,
+        id: 'stored-route-page',
+      );
+      final route = base.copyWith(
+        objectType: CreateObjectType.route,
+        clearEventData: true,
+        clearPublisher: true,
+        routeData: routeFixture().copyWith(publisherRef: stored),
+      );
+      final wire = CreateDraftModel.fromEntity(route).toJson()
+        ..remove('publisherEnvelope');
+      final restored = read(wire);
+      expect(restored.effectivePublisher, stored);
+      expect(
+        read(CreateDraftModel.fromEntity(restored).toJson()).effectivePublisher,
+        stored,
+      );
+      wire['publisherEnvelope'] = {
+        'schemaVersion': 1,
+        'publisherRef': {'type': 'page', 'id': 'forged-other-page'},
+      };
+      final conflict = read(wire);
+      expect(conflict.routeData!.publisherRef, stored);
+      expect(conflict.publisherSelectionRequired, isTrue);
+    },
+  );
+  test('all ten legacy types without a stored publisher require selection', () {
+    for (final type in CreateObjectType.values.where(
+      (t) => t != CreateObjectType.quickPlan,
+    )) {
+      final value = wire()
+        ..['objectType'] = type.taxonomyId
+        ..remove('publisherEnvelope')
+        ..['sectionData'] = <String, Object?>{};
+      expect(read(value).publisherSelectionRequired, isTrue, reason: type.name);
+    }
+  });
   test(
     'all ten envelopes keep UTC microseconds zone and publisher on roundtrip',
     () {

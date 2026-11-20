@@ -148,7 +148,7 @@ class ManageCreateTemplateUseCase {
     final DateTime now = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
     return fresh.copyWith(
       publisherRef: event.publisherRef,
-      id: 'loc_${now.microsecondsSinceEpoch}',
+      id: _newLocalId(),
       objectType: CreateObjectType.event,
       title: source.title,
       eventType: source.eventType,
@@ -361,7 +361,7 @@ class ManageCreateTemplateUseCase {
     );
     return fresh.copyWith(
       publisherRef: resolvedPublisher,
-      id: 'loc_${now.microsecondsSinceEpoch}',
+      id: _newLocalId(),
       objectType: CreateObjectType.rental,
       title: source.title,
       mainCategory: source.mainCategory,

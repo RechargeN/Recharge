@@ -882,6 +882,7 @@ final class _Access implements PublisherAccessCheck {
     required PublisherRef publisher,
     Set<String> requiredCapabilities = const {},
     bool requireAdmin = false,
+    bool requireIdentityVerification = true,
   }) async => allowed.contains('${publisher.type.wireName}:${publisher.id}');
 }
 

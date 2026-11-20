@@ -498,5 +498,6 @@ final class _PageAccess implements PublisherAccessCheck {
     required PublisherRef publisher,
     Set<String> requiredCapabilities = const {},
     bool requireAdmin = false,
+    bool requireIdentityVerification = true,
   }) async => publisher.type == PublisherType.page && publisher.id == pageId;
 }

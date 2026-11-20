@@ -4609,6 +4609,21 @@ class CreateController extends ChangeNotifier {
   /// is still usable by the current actor. A Page publisher is denied when no
   /// access check is composed (fail-closed). The draft is never rewritten, so
   /// the author keeps the form and can retry after access is restored.
+  // ADR 0023: classify the operation from feature policy, not a price of zero
+  // or the possibly stale generic envelope's isFree bit.
+  bool _requiresIdentityVerification(CreateDraftEntity draft) =>
+      switch (draft.objectType) {
+        CreateObjectType.rental || CreateObjectType.session => true,
+        CreateObjectType.event =>
+          draft.eventData == null ||
+              draft.eventData!.pricingMode != EventPricingMode.free ||
+              draft.eventData!.registrationMode ==
+                  EventRegistrationMode.internal,
+        CreateObjectType.classWorkshop =>
+          draft.classWorkshopData?.price.mode != ClassWorkshopPriceMode.free,
+        _ => !draft.isFree,
+      };
+
   Future<bool> _publisherAccessAllowed(CreateDraftEntity draft) async {
     final actor = _state.userId;
     final PublisherRef publisher = draft.effectivePublisher;
@@ -4638,6 +4653,9 @@ class CreateController extends ChangeNotifier {
           actorUserId: actor,
           publisher: publisher,
           requiredCapabilities: {capability},
+          requireIdentityVerification:
+              publisher.type == PublisherType.page ||
+              _requiresIdentityVerification(draft),
         );
       } on Object {
         allowed = false;

@@ -11,6 +11,7 @@ class TestPersonalPublisherAccess implements PublisherAccessCheck {
     required PublisherRef publisher,
     Set<String> requiredCapabilities = const {},
     bool requireAdmin = false,
+    bool requireIdentityVerification = true,
   }) async =>
       !requireAdmin &&
       publisher.type == PublisherType.user &&

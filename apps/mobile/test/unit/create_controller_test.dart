@@ -1164,5 +1164,6 @@ class _PageAccess implements PublisherAccessCheck {
     required PublisherRef publisher,
     Set<String> requiredCapabilities = const {},
     bool requireAdmin = false,
+    bool requireIdentityVerification = true,
   }) async => active && actorUserId == 'u1' && publisher.id == 'page-A';
 }

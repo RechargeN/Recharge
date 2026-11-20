@@ -862,6 +862,7 @@ class CreateDraftModel {
       CreateObjectType.activity => 'activity_details',
       CreateObjectType.findPeople => 'find_people_details',
       CreateObjectType.rental => 'rental_details',
+      CreateObjectType.route => 'route_details',
       CreateObjectType.collection => 'collection_details',
       _ => null,
     };

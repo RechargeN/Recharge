@@ -26,6 +26,99 @@ import 'package:recharge/features/identity/data/repositories/identity_workspace_
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  test(
+    'ADR0023 free personal User needs capability, not identity verification or Creator role',
+    () async {
+      final repo = GuardRepository(
+        guardSnapshot(
+          role: 'user',
+          verified: false,
+          capabilities: {'submit.event', 'create.route'},
+        ),
+      );
+      final check = IdentityPublisherAccessCheck(repo);
+      const own = PublisherRef(type: PublisherType.user, id: 'alice');
+      expect(
+        await check.canPublishAs(
+          actorUserId: 'alice',
+          publisher: own,
+          requiredCapabilities: {'submit.event'},
+          requireIdentityVerification: false,
+        ),
+        isTrue,
+      );
+      expect(
+        await check.canPublishAs(
+          actorUserId: 'alice',
+          publisher: own,
+          requiredCapabilities: {'submit.event'},
+        ),
+        isFalse,
+        reason: 'risky default stays closed',
+      );
+      expect(
+        await check.canPublishAs(
+          actorUserId: 'bob',
+          publisher: own,
+          requireIdentityVerification: false,
+        ),
+        isFalse,
+      );
+      final route = await IdentityRouteAuthoringPolicy(repo).authorize(
+        const RouteAuthorizationRequest(
+          actorId: 'alice',
+          draftId: 'loc_route',
+          operation: RouteAuthoringOperation.editGeometry,
+          publisherId: 'alice',
+          capabilities: {},
+        ),
+      );
+      expect(route.allowed, isTrue);
+      repo.snapshot = guardSnapshot(
+        role: 'user',
+        verified: false,
+        capabilities: {},
+      );
+      expect(
+        await check.canPublishAs(
+          actorUserId: 'alice',
+          publisher: own,
+          requiredCapabilities: {'submit.event'},
+          requireIdentityVerification: false,
+        ),
+        isFalse,
+      );
+      expect(
+        (await IdentityRouteAuthoringPolicy(repo).authorize(
+          const RouteAuthorizationRequest(
+            actorId: 'alice',
+            draftId: 'loc_route',
+            operation: RouteAuthoringOperation.editGeometry,
+            publisherId: 'alice',
+            capabilities: {'create.route'},
+          ),
+        )).allowed,
+        isFalse,
+        reason: 'caller supplied hints cannot grant access',
+      );
+    },
+  );
+  test(
+    'Admin action cannot use a Page publisher even with exact membership',
+    () async {
+      final check = IdentityPublisherAccessCheck(
+        GuardRepository(guardSnapshot()),
+      );
+      expect(
+        await check.canPublishAs(
+          actorUserId: 'alice',
+          publisher: const PublisherRef(type: PublisherType.page, id: 'page-a'),
+          requireAdmin: true,
+        ),
+        isFalse,
+      );
+    },
+  );
   test('revocation during workspace switch is not lost while busy', () async {
     final repo = _DelayedGuardRepository(guardSnapshot());
     final controller = guardController(repo);

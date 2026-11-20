@@ -1,3 +1,6 @@
+import 'package:recharge/features/create/domain/entities/event_draft_data.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -27,6 +30,49 @@ import '../support/event_create_test_support.dart';
 const PublisherRef _page = PublisherRef(type: PublisherType.page, id: 'page-1');
 
 void main() {
+  test(
+    'free personal exception cannot be forged with generic isFree or zero paid price',
+    () async {
+      for (final variant in <(EventPricingMode, EventRegistrationMode, bool)>[
+        (EventPricingMode.free, EventRegistrationMode.none, false),
+        (EventPricingMode.fixed, EventRegistrationMode.none, true),
+        (EventPricingMode.free, EventRegistrationMode.internal, true),
+      ]) {
+        final base = CreateDraftEntity.defaults(
+          organizerId: 'user-1',
+          organizerEmail: '',
+          organizerName: '',
+          marketCityId: 'riga',
+          timezone: 'Europe/Riga',
+          currency: 'EUR',
+        );
+        final stored = base.copyWith(
+          isFree: true,
+          eventData: base.eventData!.copyWith(
+            pricingMode: variant.$1,
+            registrationMode: variant.$2,
+            price: Money(minorUnits: 0, currency: CurrencyCode.eur),
+          ),
+        );
+        final repo = _Repo()..stored = stored;
+        final access = _FakeAccess(allowed: false);
+        final controller = _controller(repo, access: access);
+        await controller.ensureLoaded(
+          userId: 'user-1',
+          organizerEmail: '',
+          organizerName: '',
+        );
+        expect(await controller.publishDraft(), isFalse);
+        expect(access.verificationRequirements, [variant.$3]);
+        expect(
+          controller.state.draft.effectivePublisher,
+          stored.effectivePublisher,
+        );
+        expect(repo.publishCalls, 0);
+        controller.dispose();
+      }
+    },
+  );
   group('publish-time publisher guard (IDP-05A)', () {
     test('revoked Page access denies publish and keeps the draft', () async {
       final _Repo repo = _Repo();
@@ -329,6 +375,7 @@ class _FakeAccess implements PublisherAccessCheck {
   _FakeAccess({required this.allowed});
 
   final bool allowed;
+  final verificationRequirements = <bool>[];
 
   @override
   Future<bool> canPublishAs({
@@ -336,7 +383,11 @@ class _FakeAccess implements PublisherAccessCheck {
     required PublisherRef publisher,
     Set<String> requiredCapabilities = const {},
     bool requireAdmin = false,
-  }) async => allowed;
+    bool requireIdentityVerification = true,
+  }) async {
+    verificationRequirements.add(requireIdentityVerification);
+    return allowed;
+  }
 }
 
 class _NoopAnalytics implements AnalyticsService {
