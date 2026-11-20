@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../entities/scenario_budget_draft.dart';
 import '../entities/scenario_draft_data.dart';
 import '../entities/scenario_item_draft.dart';
@@ -28,6 +30,39 @@ class EvaluateScenarioReadinessUseCase {
     ScenarioDraftData draft, {
     ScenarioValidationTarget target = ScenarioValidationTarget.myScenarios,
   }) {
+    try {
+      return _evaluate(draft, target: target);
+    } on MoneyArithmeticException catch (error) {
+      return _moneyFailure(draft, target, 'money_${error.code.name}');
+    } on FormatException {
+      return _moneyFailure(draft, target, 'money_invalid_currency');
+    }
+  }
+
+  ScenarioReadinessResult _moneyFailure(
+    ScenarioDraftData draft,
+    ScenarioValidationTarget target,
+    String code,
+  ) => ScenarioReadinessResult(
+    totals: const ScenarioTotalsDraft.empty(),
+    validation: ScenarioValidationResult(
+      target: target,
+      issues: [
+        ...validator(draft, target: target).issues,
+        ScenarioValidationIssue(
+          code: code,
+          severity: ScenarioValidationSeverity.error,
+          path: 'budget',
+        ),
+      ],
+    ),
+  );
+
+  ScenarioReadinessResult _evaluate(
+    ScenarioDraftData draft, {
+    required ScenarioValidationTarget target,
+  }) {
+    final displayCurrency = CurrencyCode.parse(draft.displayCurrencyCode);
     final ScenarioValidationResult validation = validator(
       draft,
       target: target,
@@ -54,10 +89,16 @@ class EvaluateScenarioReadinessUseCase {
 
     final Map<String, _MoneyAccumulator> currencyTotals =
         <String, _MoneyAccumulator>{};
-    final _MoneyAccumulator experienceDisplay = _MoneyAccumulator();
-    final _MoneyAccumulator stayDisplay = _MoneyAccumulator();
-    final _MoneyAccumulator localTravelDisplay = _MoneyAccumulator();
-    final _MoneyAccumulator transportDisplay = _MoneyAccumulator();
+    final _MoneyAccumulator experienceDisplay = _MoneyAccumulator(
+      displayCurrency,
+    );
+    final _MoneyAccumulator stayDisplay = _MoneyAccumulator(displayCurrency);
+    final _MoneyAccumulator localTravelDisplay = _MoneyAccumulator(
+      displayCurrency,
+    );
+    final _MoneyAccumulator transportDisplay = _MoneyAccumulator(
+      displayCurrency,
+    );
 
     for (final ScenarioItemDraft item in draft.items) {
       if (!activeIds.contains(item.id)) {
@@ -199,7 +240,7 @@ class EvaluateScenarioReadinessUseCase {
         })
         .toList(growable: false);
 
-    final _MoneyAccumulator displayTotal = _MoneyAccumulator()
+    final _MoneyAccumulator displayTotal = _MoneyAccumulator(displayCurrency)
       ..known =
           experienceDisplay.known +
           stayDisplay.known +
@@ -300,7 +341,7 @@ class EvaluateScenarioReadinessUseCase {
       if (component.knowledge == ScenarioPriceKnowledge.estimated) {
         estimated += 1;
       }
-      final ScenarioMoneyDraft? money = component.amount;
+      final Money? money = component.amount;
       if (money == null || money.minorUnits < 0) {
         continue;
       }
@@ -316,10 +357,11 @@ class EvaluateScenarioReadinessUseCase {
         ScenarioPriceBasis.perBooking ||
         null => 1,
       };
-      final int total = money.minorUnits * multiplier;
+      final value = money.scaledBy(multiplier);
+      final int total = value.minorUnits;
       final _MoneyAccumulator currency = currencyTotals.putIfAbsent(
-        money.currencyCode,
-        _MoneyAccumulator.new,
+        value.currency.value,
+        () => _MoneyAccumulator(value.currency),
       );
       final bool isEstimate =
           component.knowledge == ScenarioPriceKnowledge.estimated;
@@ -328,7 +370,7 @@ class EvaluateScenarioReadinessUseCase {
       } else {
         currency.known += total;
       }
-      if (money.currencyCode == displayCurrency) {
+      if (value.currency == CurrencyCode.parse(displayCurrency)) {
         displayTarget.includedCount += 1;
         if (isEstimate) {
           displayTarget.estimated += total;
@@ -347,14 +389,10 @@ class EvaluateScenarioReadinessUseCase {
     );
   }
 
-  static ScenarioMoneyDraft? _moneyOrNull(
-    _MoneyAccumulator value,
-    String currencyCode,
-  ) {
-    final int total = value.known + value.estimated;
-    return value.includedCount == 0 || value.incomplete
-        ? null
-        : ScenarioMoneyDraft(minorUnits: total, currencyCode: currencyCode);
+  static Money? _moneyOrNull(_MoneyAccumulator value, String currencyCode) {
+    final Money total = value.knownMoney + value.estimatedMoney;
+    total.minorUnitsIn(CurrencyCode.parse(currencyCode));
+    return value.includedCount == 0 || value.incomplete ? null : (total);
   }
 
   static bool _legIsRelevant(
@@ -416,8 +454,18 @@ class EvaluateScenarioReadinessUseCase {
 }
 
 class _MoneyAccumulator {
-  int known = 0;
-  int estimated = 0;
+  _MoneyAccumulator(this.currency)
+    : knownMoney = Money(minorUnits: 0, currency: currency),
+      estimatedMoney = Money(minorUnits: 0, currency: currency);
+  final CurrencyCode currency;
+  Money knownMoney;
+  Money estimatedMoney;
+  int get known => knownMoney.minorUnits;
+  set known(int value) =>
+      knownMoney = Money(minorUnits: value, currency: currency);
+  int get estimated => estimatedMoney.minorUnits;
+  set estimated(int value) =>
+      estimatedMoney = Money(minorUnits: value, currency: currency);
   int includedCount = 0;
   bool incomplete = false;
 }

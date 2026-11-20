@@ -1,5 +1,6 @@
-import '../../domain/entities/scenario_draft_entity.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../shared/primitives/money/money.dart';
+import '../../domain/entities/scenario_draft_entity.dart';
 
 enum ScenarioBuilderStatus { ready }
 
@@ -15,12 +16,13 @@ class ScenarioBuilderState {
       draft: ScenarioDraftEntity(
         id: draftId,
         revision: 0,
+        currency:
+            CurrencyCode.eur, // Currency of the explicit local mock dataset.
         mood: ScenarioMood.calm,
         maxDurationMinutes: 150,
         freeOnly: false,
         walkingOnly: true,
         sourcePrompt: '',
-        currencyCode: 'EUR',
         steps:
             scenarioStepsFor(
                   mood: ScenarioMood.calm,
@@ -307,13 +309,13 @@ List<ScenarioStepEntity> scenarioStepsByCategories(List<String> categories) {
   return steps;
 }
 
-const List<ScenarioStepEntity> _allSteps = <ScenarioStepEntity>[
+final List<ScenarioStepEntity> _allSteps = <ScenarioStepEntity>[
   ..._calmSteps,
   ..._socialSteps,
   ..._activeSteps,
 ];
 
-const List<ScenarioStepEntity> _calmSteps = <ScenarioStepEntity>[
+final List<ScenarioStepEntity> _calmSteps = <ScenarioStepEntity>[
   ScenarioStepEntity(
     title:
         'Slow coffee start', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
@@ -322,7 +324,7 @@ const List<ScenarioStepEntity> _calmSteps = <ScenarioStepEntity>[
     category: 'food_drinks.coffee',
     durationMinutes: 35,
     distanceKm: 0.4,
-    priceAmount: Money(minorUnits: 400, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 400, currency: CurrencyCode.eur),
     isFree: false,
     latitude: 56.5097,
     longitude: 27.3352,
@@ -335,7 +337,7 @@ const List<ScenarioStepEntity> _calmSteps = <ScenarioStepEntity>[
     category: 'wellness_recharge.calm_walk',
     durationMinutes: 55,
     distanceKm: 1.6,
-    priceAmount: Money(minorUnits: 0, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     isFree: true,
     latitude: 56.5112,
     longitude: 27.3304,
@@ -348,14 +350,14 @@ const List<ScenarioStepEntity> _calmSteps = <ScenarioStepEntity>[
     category: 'art_culture_museums.museum',
     durationMinutes: 50,
     distanceKm: 0.9,
-    priceAmount: Money(minorUnits: 600, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 600, currency: CurrencyCode.eur),
     isFree: false,
     latitude: 56.5069,
     longitude: 27.3318,
   ),
 ];
 
-const List<ScenarioStepEntity> _socialSteps = <ScenarioStepEntity>[
+final List<ScenarioStepEntity> _socialSteps = <ScenarioStepEntity>[
   ScenarioStepEntity(
     title:
         'Board game table', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
@@ -364,7 +366,7 @@ const List<ScenarioStepEntity> _socialSteps = <ScenarioStepEntity>[
     category: 'games_indoor.board_games',
     durationMinutes: 70,
     distanceKm: 1.2,
-    priceAmount: Money(minorUnits: 0, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     isFree: true,
     latitude: 56.5108,
     longitude: 27.3385,
@@ -377,7 +379,7 @@ const List<ScenarioStepEntity> _socialSteps = <ScenarioStepEntity>[
     category: 'music_nightlife.afterwork_drinks',
     durationMinutes: 55,
     distanceKm: 0.7,
-    priceAmount: Money(minorUnits: 1200, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 1200, currency: CurrencyCode.eur),
     isFree: false,
     latitude: 56.5086,
     longitude: 27.3401,
@@ -390,14 +392,14 @@ const List<ScenarioStepEntity> _socialSteps = <ScenarioStepEntity>[
     category: 'music_nightlife.live_music',
     durationMinutes: 75,
     distanceKm: 1.8,
-    priceAmount: Money(minorUnits: 1000, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 1000, currency: CurrencyCode.eur),
     isFree: false,
     latitude: 56.5074,
     longitude: 27.3430,
   ),
 ];
 
-const List<ScenarioStepEntity> _activeSteps = <ScenarioStepEntity>[
+final List<ScenarioStepEntity> _activeSteps = <ScenarioStepEntity>[
   ScenarioStepEntity(
     title:
         'Tennis warm-up', // l10n-ignore: demo stop library of the legacy Quick Plan (mock content)
@@ -406,7 +408,7 @@ const List<ScenarioStepEntity> _activeSteps = <ScenarioStepEntity>[
     category: 'sport.tennis',
     durationMinutes: 60,
     distanceKm: 1.5,
-    priceAmount: Money(minorUnits: 800, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 800, currency: CurrencyCode.eur),
     isFree: false,
     latitude: 56.5134,
     longitude: 27.3290,
@@ -419,7 +421,7 @@ const List<ScenarioStepEntity> _activeSteps = <ScenarioStepEntity>[
     category: 'outdoor_nature_walking.city_walk',
     durationMinutes: 35,
     distanceKm: 1.1,
-    priceAmount: Money(minorUnits: 0, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     isFree: true,
     latitude: 56.5161,
     longitude: 27.3262,
@@ -432,7 +434,7 @@ const List<ScenarioStepEntity> _activeSteps = <ScenarioStepEntity>[
     category: 'food_drinks.brunch',
     durationMinutes: 55,
     distanceKm: 0.8,
-    priceAmount: Money(minorUnits: 1400, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 1400, currency: CurrencyCode.eur),
     isFree: false,
     latitude: 56.5118,
     longitude: 27.3360,

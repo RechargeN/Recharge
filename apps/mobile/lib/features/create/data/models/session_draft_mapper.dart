@@ -1,9 +1,11 @@
+import '../../../../core/parsing/money_legacy_adapter.dart';
 import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/legacy_session_schedule.dart';
 import '../../domain/entities/session_availability_exception.dart';
 import '../../domain/entities/session_draft_data.dart';
 import '../../domain/entities/session_price_disclosure.dart';
 import '../../domain/entities/session_schedule.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 
 class UnsupportedSessionSchemaException implements Exception {
   const UnsupportedSessionSchemaException(this.version);
@@ -163,31 +165,35 @@ abstract final class SessionDraftMapper {
     'end_minute_local_exclusive': e.endMinuteLocalExclusive,
     'private_note': e.privateNote,
     'created_by_user_id': e.createdByUserId,
-    'created_at_utc': e.createdAtUtc.toUtc().toIso8601String(),
+    'created_at_utc': UtcInstant(e.createdAtUtc).toString(),
   };
 
   static SessionAvailabilityException _exceptionFromJson(
     Map<String, Object?> map,
-  ) => SessionAvailabilityException(
-    id: (map['id'] as String?) ?? '',
-    startDateLocal: (map['start_date_local'] as String?) ?? '',
-    endDateLocal: (map['end_date_local'] as String?) ?? '',
-    allDay: (map['all_day'] as bool?) ?? true,
-    startMinuteLocal: (map['start_minute_local'] as num?)?.toInt(),
-    endMinuteLocalExclusive: (map['end_minute_local_exclusive'] as num?)
-        ?.toInt(),
-    privateNote: map['private_note'] as String?,
-    createdByUserId: (map['created_by_user_id'] as String?) ?? '',
-    createdAtUtc:
-        DateTime.tryParse((map['created_at_utc'] as String?) ?? '')?.toUtc() ??
-        DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
-  );
+  ) {
+    final createdAt = map['created_at_utc'];
+    if (createdAt is! String) {
+      throw const FormatException('Session exception requires a UTC timestamp');
+    }
+    return SessionAvailabilityException(
+      id: (map['id'] as String?) ?? '',
+      startDateLocal: (map['start_date_local'] as String?) ?? '',
+      endDateLocal: (map['end_date_local'] as String?) ?? '',
+      allDay: (map['all_day'] as bool?) ?? true,
+      startMinuteLocal: (map['start_minute_local'] as num?)?.toInt(),
+      endMinuteLocalExclusive: (map['end_minute_local_exclusive'] as num?)
+          ?.toInt(),
+      privateNote: map['private_note'] as String?,
+      createdByUserId: (map['created_by_user_id'] as String?) ?? '',
+      createdAtUtc: UtcInstant.parse(createdAt).value,
+    );
+  }
 
   static Map<String, Object?> _priceToJson(SessionPriceDisclosure p) =>
       <String, Object?>{
         'mode': p.mode.name,
-        'amount_minor': p.amount?.amountMinor,
-        'currency_code': p.amount?.currencyCode,
+        'amount_minor': p.amount?.minorUnits,
+        'currency_code': p.amount?.currency.value,
       };
 
   static SessionPriceDisclosure _priceFromJson(Object? raw) {
@@ -196,17 +202,12 @@ abstract final class SessionDraftMapper {
       (SessionPricingMode value) => value.name == raw['mode'],
       orElse: () => SessionPricingMode.free,
     );
-    final int? amountMinor = (raw['amount_minor'] as num?)?.toInt();
-    final String? currencyCode = raw['currency_code'] as String?;
-    return SessionPriceDisclosure(
-      mode: mode,
-      amount: amountMinor == null || currencyCode == null
-          ? null
-          : SessionMoneyDraft(
-              amountMinor: amountMinor,
-              currencyCode: currencyCode,
-            ),
+    final amount = MoneyLegacyAdapter().readOptional(
+      hasCanonicalMinorUnits: true,
+      canonicalMinorUnits: raw['amount_minor'],
+      currencyCode: raw['currency_code'],
     );
+    return SessionPriceDisclosure(mode: mode, amount: amount);
   }
 
   static int _intOr(Object? value, int fallback) {

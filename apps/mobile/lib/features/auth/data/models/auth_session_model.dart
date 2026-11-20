@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../domain/entities/auth_session_entity.dart';
 
 class AuthSessionModel {
@@ -44,7 +45,7 @@ class AuthSessionModel {
   AuthSessionEntity toEntity() {
     final expiresAt = expiresAtUtcIso == null
         ? DateTime.now().toUtc().add(Duration(seconds: expiresInSeconds))
-        : DateTime.parse(expiresAtUtcIso!).toUtc();
+        : UtcInstant.parse(expiresAtUtcIso!).value;
     return AuthSessionEntity(
       accessToken: accessToken,
       refreshToken: refreshToken,

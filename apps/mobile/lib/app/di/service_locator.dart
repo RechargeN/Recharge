@@ -1,3 +1,4 @@
+import '../config/catalog_market_binding.dart';
 import '../../features/auth/domain/repositories/auth_session_events.dart';
 import 'dart:io';
 import 'dev_auth_bundle.dart';
@@ -18,6 +19,13 @@ import '../../features/library/data/library_sync_client.dart';
 import 'dart:ui' show Locale, PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
+import '../../features/identity/domain/usecases/submit_managed_page_field_edit_usecase.dart';
+import '../../features/identity/domain/usecases/send_team_invitation_usecase.dart';
+import '../../features/identity/domain/usecases/revoke_team_invitation_usecase.dart';
+import '../../features/identity/domain/repositories/team_invitation_repository.dart';
+import '../../features/identity/data/datasources/team_invitation_local_datasource.dart';
+import '../../features/identity/data/repositories/team_invitation_repository_impl.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -55,7 +63,7 @@ import '../../features/create/domain/repositories/create_media_store.dart';
 import '../adapters/route_geolocator_adapter.dart';
 import '../../core/telemetry/analytics_service.dart';
 import '../../core/product_analytics/product_analytics_recorder.dart';
-import '../../core/id/id_generator.dart';
+import '../../core/id/id_generator.dart' show UuidV4IdGenerator;
 import '../../core/notifications/app_notification_sink.dart';
 import '../../core/localization/app_locale_policy.dart';
 import '../../core/localization/locale_controller.dart';
@@ -110,7 +118,6 @@ import '../../features/create/data/datasources/route_recording_secure_store.dart
 import '../../features/create/data/gpx/route_gpx_inspector.dart';
 import '../../features/create/data/gpx/route_gpx_importer.dart';
 import '../../features/create/data/gpx/route_gpx_exporter.dart';
-import '../../features/create/data/policies/demo_route_authoring_policy.dart';
 import '../../features/create/data/repositories/event_timezone_repository_impl.dart';
 import '../../features/create/data/repositories/event_inventory_snapshot_repository_impl.dart';
 import '../../features/create/data/repositories/create_repository_impl.dart';
@@ -226,6 +233,7 @@ import '../../features/explore/domain/usecases/load_settings_usecase.dart';
 import '../../features/explore/domain/usecases/save_profile_editable_usecase.dart';
 import '../../features/explore/domain/usecases/save_settings_usecase.dart';
 import '../adapters/identity_publisher_access_check.dart';
+import '../adapters/identity_route_authoring_policy.dart';
 import '../../features/create/domain/repositories/publisher_access_check.dart';
 import '../../features/identity/data/datasources/identity_workspace_local_datasource.dart';
 import '../../features/identity/data/datasources/mock_identity_fixture.dart';
@@ -318,28 +326,28 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     )
     ..registerLazySingleton<DiscoverQuery>(
       () => DiscoverQuery.defaults(
-        marketCityId: sl<MarketConfig>().marketCityId,
+        marketCityId: sl<MarketConfig>().market.value,
         centerLat: sl<MarketConfig>().centerLat,
         centerLng: sl<MarketConfig>().centerLng,
       ),
     )
     ..registerLazySingleton<CreateRuntimeDefaults>(
       () => CreateRuntimeDefaults(
-        marketCityId: sl<MarketConfig>().marketCityId,
-        timezone: sl<MarketConfig>().timezoneId,
+        marketCityId: sl<MarketConfig>().market.value,
+        timezone: sl<MarketConfig>().timezone.value,
         country: sl<MarketConfig>().countryCode,
         city: sl<MarketConfig>().cityName,
-        currency: sl<MarketConfig>().currencyCode,
+        currency: sl<MarketConfig>().currency.value,
         marketCenterLat: sl<MarketConfig>().centerLat,
         marketCenterLng: sl<MarketConfig>().centerLng,
       ),
     )
     ..registerLazySingleton<DiscoverRuntimeDefaults>(
       () => DiscoverRuntimeDefaults(
-        timezoneId: sl<MarketConfig>().timezoneId,
+        currency: sl<MarketConfig>().currency,
+        timezoneId: sl<MarketConfig>().timezone.value,
         originLat: sl<MarketConfig>().centerLat,
         originLng: sl<MarketConfig>().centerLng,
-        currencyCode: sl<MarketConfig>().currencyCode,
       ),
     )
     ..registerLazySingleton<AnalyticsService>(ConsoleAnalyticsService.new)
@@ -358,7 +366,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
       () => LocaleController(
         policy: AppLocalePolicy(
           supportedLanguageCodes: AppLocalePolicy.r1LanguageCodes,
-          fallbackLanguageCode: sl<MarketConfig>().defaultLocaleCode,
+          fallbackLanguageCode: sl<MarketConfig>().defaultLocale.value,
         ),
         store: sl<LocalePreferenceStore>(),
         deviceLanguageTags: PlatformDispatcher.instance.locales
@@ -436,7 +444,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     ..registerLazySingleton<ActivityPlaceLinkRepository>(
       () => CatalogActivityPlaceLinkRepository(
         query: sl<CatalogQueryPort>().query,
-        marketId: sl<MarketConfig>().countryCode,
+        marketId: catalogMarketIdFor(sl<MarketConfig>().market),
         enabled: activityLinkedPlaceTestEntryDefined && !kReleaseMode,
       ),
     )
@@ -554,6 +562,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
       () =>
           devAuth?.workspace ??
           IdentityWorkspaceRepositoryImpl(
+            currentActor: () async => (await sl<GetCurrentUserUseCase>()())?.id,
             localDataSource: sl(),
             mockFixture: sl(),
             publicPageLocalDataSource: sl(),
@@ -571,22 +580,10 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
       MockDiscoverRemoteDataSource.new,
     )
     ..registerLazySingleton<CreateLocalDataSource>(
-      () => CreateLocalDataSource(
-        sl(),
-        activeMarketCityId: sl<CreateRuntimeDefaults>().marketCityId,
-        activeTimezone: sl<CreateRuntimeDefaults>().timezone,
-        activeCountry: sl<CreateRuntimeDefaults>().country,
-        activeCity: sl<CreateRuntimeDefaults>().city,
-      ),
+      () => CreateLocalDataSource(sl()),
     )
     ..registerLazySingleton<CreateTemplateLocalDataSource>(
-      () => CreateTemplateLocalDataSource(
-        sl(),
-        activeMarketCityId: sl<CreateRuntimeDefaults>().marketCityId,
-        activeTimezone: sl<CreateRuntimeDefaults>().timezone,
-        activeCountry: sl<CreateRuntimeDefaults>().country,
-        activeCity: sl<CreateRuntimeDefaults>().city,
-      ),
+      () => CreateTemplateLocalDataSource(sl()),
     )
     ..registerLazySingleton<ScenarioObjectIntakeLocalDataSource>(
       () => ScenarioObjectIntakeLocalDataSource(sl()),
@@ -669,7 +666,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
         local: PublishedEventDiscoveryLocalDataSource.new,
         port: sl(),
         session: sl(),
-        currencyCode: sl<MarketConfig>().currencyCode,
+        currencyCode: sl<MarketConfig>().currency.value,
       ),
     )
     // Find People (DTL-FP-01) — public read-only mock projection. It is
@@ -751,7 +748,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
           guard: sl(),
           runtime: () => sl.getAsync<BookingTransportRuntime>(),
         ),
-        marketId: sl<MarketConfig>().countryCode,
+        marketId: catalogMarketIdFor(sl<MarketConfig>().market),
       ),
     )
     ..registerLazySingleton<CollectionCatalogSearchRepository>(
@@ -844,7 +841,9 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     ..registerLazySingleton<RouteQualityWorkflowRepository>(
       () => RouteQualityWorkflowRepositoryImpl(sl()),
     )
-    ..registerLazySingleton<RouteAuthoringPolicy>(DemoRouteAuthoringPolicy.new)
+    ..registerLazySingleton<RouteAuthoringPolicy>(
+      () => IdentityRouteAuthoringPolicy(sl()),
+    )
     ..registerFactory<RouteQualityWorkflowCoordinator>(
       () => RouteQualityWorkflowCoordinator(
         idGenerator: sl(),
@@ -997,10 +996,12 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     ..registerLazySingleton<DiscoverPreferencesLocalDataSource>(
       () => DiscoverPreferencesLocalDataSource(
         sl(),
-        defaultMarketCityId: sl<MarketConfig>().marketCityId,
+        timezoneRepository: sl(),
+        // v1 LV records predate currency storage; their recorded contract was EUR.
+        legacyCurrencyCode: 'EUR',
+        defaultMarketCityId: sl<MarketConfig>().market.value,
         defaultCenterLat: sl<MarketConfig>().centerLat,
         defaultCenterLng: sl<MarketConfig>().centerLng,
-        defaultCurrencyCode: sl<MarketConfig>().currencyCode,
       ),
     )
     ..registerLazySingleton<DiscoverRepository>(
@@ -1009,11 +1010,12 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
         local: () => DiscoverRepositoryImpl(
           remoteDataSource: sl(),
           publishedRoutes: sl(),
+          currency: sl<MarketConfig>().currency,
         ),
         port: sl(),
         session: sl(),
-        marketId: sl<MarketConfig>().countryCode,
-        currencyCode: sl<MarketConfig>().currencyCode,
+        marketId: catalogMarketIdFor(sl<MarketConfig>().market),
+        currencyCode: sl<MarketConfig>().currency.value,
       ),
     )
     ..registerLazySingleton<TimezoneRepository>(TimezoneRepositoryImpl.new)
@@ -1042,7 +1044,8 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     ..registerLazySingleton<FavoritesLocalDataSource>(
       () => FavoritesLocalDataSource(
         sl(),
-        defaultCurrencyCode: sl<MarketConfig>().currencyCode,
+        // v1 LV records predate currency storage; their recorded contract was EUR.
+        legacyCurrencyCode: 'EUR',
       ),
     )
     ..registerLazySingleton<ContentTranslationPort>(
@@ -1134,6 +1137,31 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     ..registerLazySingleton<ManagedPageFieldModerationRepository>(
       () => ManagedPageFieldModerationRepositoryImpl(sl()),
     )
+    ..registerFactory<SubmitManagedPageFieldEditUseCase>(
+      () => SubmitManagedPageFieldEditUseCase(
+        workspaceRepository: sl(),
+        moderationRepository: sl(),
+      ),
+    )
+    ..registerLazySingleton<TeamInvitationLocalDataSource>(
+      () => TeamInvitationLocalDataSource(sl()),
+    )
+    ..registerLazySingleton<TeamInvitationRepository>(
+      () => TeamInvitationRepositoryImpl(sl()),
+    )
+    ..registerFactory<SendTeamInvitationUseCase>(
+      () => SendTeamInvitationUseCase(
+        workspaceRepository: sl(),
+        invitationRepository: sl(),
+        idGenerator: sl(),
+      ),
+    )
+    ..registerFactory<RevokeTeamInvitationUseCase>(
+      () => RevokeTeamInvitationUseCase(
+        workspaceRepository: sl(),
+        invitationRepository: sl(),
+      ),
+    )
     ..registerFactory<ResolvePublicProfessionalPageUseCase>(
       () => ResolvePublicProfessionalPageUseCase(
         repository: sl(),
@@ -1218,7 +1246,12 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
       () => GetVisitedPlacesUseCase(sl()),
     )
     ..registerFactory<RecordPlaceVisitUseCase>(
-      () => RecordPlaceVisitUseCase(repository: sl(), idGenerator: sl()),
+      () => RecordPlaceVisitUseCase(
+        repository: sl(),
+        idGenerator: sl(),
+        localDateAt: (instant, zone) =>
+            sl<TimezoneRepository>().toLocal(instant, zone).date,
+      ),
     )
     ..registerFactory<RemoveVisitUseCase>(() => RemoveVisitUseCase(sl()));
   if (devAuth != null) {

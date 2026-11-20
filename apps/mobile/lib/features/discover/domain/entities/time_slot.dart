@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
+
 class TimeSlot {
   TimeSlot({
     required this.slotId,
@@ -22,7 +24,7 @@ class TimeSlot {
 
   factory TimeSlot.fromMap(Map<String, Object?> map) => TimeSlot(
     slotId: map['slot_id']! as String,
-    startAtUtc: DateTime.parse(map['start_at_utc']! as String).toUtc(),
-    endAtUtc: DateTime.parse(map['end_at_utc']! as String).toUtc(),
+    startAtUtc: UtcInstant.parse(map['start_at_utc']! as String).value,
+    endAtUtc: UtcInstant.parse(map['end_at_utc']! as String).value,
   );
 }

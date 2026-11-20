@@ -1,6 +1,6 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import '../entities/create_draft_entity.dart';
 import '../entities/scenario_draft_data.dart';
-import '../entities/scenario_item_draft.dart';
 
 class CreateDraftSummary {
   const CreateDraftSummary({
@@ -26,8 +26,8 @@ class CreateDraftSummary {
   final ScenarioDateMode? scenarioDateMode;
   final int? scenarioDayCount;
   final int? scenarioActiveItemCount;
-  final ScenarioLocalDateDraft? scenarioFirstDate;
-  final ScenarioLocalDateDraft? scenarioLastDate;
+  final LocalDate? scenarioFirstDate;
+  final LocalDate? scenarioLastDate;
 }
 
 enum CreateDraftCollectionSaveStatus {

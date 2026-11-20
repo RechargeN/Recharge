@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money.dart';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
@@ -243,11 +244,10 @@ final class RentalContentBodyMapper {
 
   static String _instant(DateTime value) => value.toUtc().toIso8601String();
 
-  static Map<String, Object?> _money(RentalMoneyDraft money) =>
-      <String, Object?>{
-        'minorUnits': money.amountMinor,
-        'currencyCode': money.currencyCode,
-      };
+  static Map<String, Object?> _money(Money money) => <String, Object?>{
+    'minorUnits': money.minorUnits,
+    'currencyCode': money.currency.value,
+  };
 
   static String _condition(RentalCondition value) => switch (value) {
     RentalCondition.rentalNew => 'new',
@@ -314,7 +314,7 @@ final class RentalContentBodyMapper {
       if (handover.deliveryAvailable) ...<String, Object?>{
         if (handover.deliveryRadiusKm != null)
           'deliveryRadiusKm': handover.deliveryRadiusKm,
-        if (handover.deliveryFee case final RentalMoneyDraft fee)
+        if (handover.deliveryFee case final Money fee)
           'deliveryFee': _money(fee),
         if (_text(handover.deliveryTerms) case final String value)
           'deliveryTerms': value,

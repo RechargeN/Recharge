@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/time/utc_instant.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -5,9 +6,9 @@ import 'package:crypto/crypto.dart';
 import 'package:xml/xml.dart' show XmlParserException, XmlTagException;
 import 'package:xml/xml_events.dart';
 
-import '../../../../core/geo/geo_bounds.dart';
-import '../../../../core/geo/geo_distance.dart';
-import '../../../../core/geo/geo_point.dart';
+import '../../../../shared/primitives/geo/geo_bounds.dart';
+import '../../../../shared/primitives/geo/geo_distance.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
 import '../../domain/repositories/route_gpx_repository.dart';
 
 class RouteGpxInspector {
@@ -467,7 +468,7 @@ class _InspectionParser {
           if (value.isNotEmpty) {
             _containsPrivateMetadata = true;
             _point!.hasTimestamp = true;
-            _point!.timestamp = DateTime.tryParse(value)?.toUtc();
+            _point!.timestamp = _gpxInstant(value);
             if (_point!.timestamp == null) {
               _issues.add('gpx_timestamp_invalid');
             }
@@ -749,4 +750,20 @@ class _CandidateBuilder {
       northeast: GeoPoint(latitude: _maximumLatitude!, longitude: east),
     ).validated();
   }
+}
+
+// GPX permits explicit numeric offsets. Validate the calendar through the
+// shared UTC primitive before applying that known offset; never use device TZ.
+DateTime? _gpxInstant(String text) {
+  final match = RegExp(r'^(.*)(Z|[+-][0-9]{2}:[0-9]{2})$').firstMatch(text);
+  if (match == null) return null;
+  final clock = UtcInstant.tryParse('${match[1]}Z')?.value;
+  if (clock == null) return null;
+  final offset = match[2]!;
+  if (offset == 'Z') return clock;
+  final hours = int.parse(offset.substring(1, 3));
+  final minutes = int.parse(offset.substring(4, 6));
+  if (hours > 14 || minutes > 59 || (hours == 14 && minutes != 0)) return null;
+  final total = (hours * 60 + minutes) * (offset.startsWith('-') ? -1 : 1);
+  return clock.subtract(Duration(minutes: total));
 }

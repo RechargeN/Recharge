@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/time/local_date.dart';
+import '../../../../shared/primitives/money/money.dart';
 import 'activity_draft_data.dart';
 import 'class_workshop_draft_data.dart';
 import 'collection_draft_data.dart';
@@ -9,7 +11,6 @@ import 'rental_draft_data.dart';
 import 'session_draft_data.dart';
 import 'route_draft_data.dart';
 import 'scenario_draft_data.dart';
-import '../../../../shared/primitives/money/money.dart';
 
 enum CreateObjectType {
   event,
@@ -100,6 +101,8 @@ class CreateDraftEntity {
   const CreateDraftEntity({
     required this.id,
     this.basedOnPublishedVersionId,
+    this.publisherRef,
+    this.publisherEnvelope,
     required this.objectType,
     required this.title,
     required this.eventType,
@@ -175,6 +178,13 @@ class CreateDraftEntity {
 
   final String id;
   final String? basedOnPublishedVersionId;
+
+  /// Local Create identity, independent of Scenario ownership and backend grants.
+  final PublisherRef? publisherRef;
+
+  /// Original wire envelope retained for lossless unknown/future-schema reads.
+  /// A present envelope with no valid ref requires explicit publisher selection.
+  final Object? publisherEnvelope;
   final CreateObjectType objectType;
 
   /// The author's declared text language, `null` until they choose one; Create
@@ -274,6 +284,7 @@ class CreateDraftEntity {
     String country = '',
     String city = '',
     String currency = '',
+    LocalDate? eventLocalToday,
   }) {
     final DateTime now = DateTime.now().toUtc();
     return CreateDraftEntity(
@@ -294,6 +305,7 @@ class CreateDraftEntity {
         city: city,
         timezoneId: timezone,
         currencyCode: currency,
+        localToday: eventLocalToday,
         publisherRef: PublisherRef(type: PublisherType.user, id: organizerId),
       ),
       placeData: null,
@@ -360,6 +372,9 @@ class CreateDraftEntity {
     String? id,
     String? basedOnPublishedVersionId,
     bool clearBasedOnPublishedVersionId = false,
+    PublisherRef? publisherRef,
+    Object? publisherEnvelope,
+    bool clearPublisher = false,
     CreateObjectType? objectType,
     String? title,
     String? eventType,
@@ -457,6 +472,10 @@ class CreateDraftEntity {
   }) {
     return CreateDraftEntity(
       id: id ?? this.id,
+      publisherRef: clearPublisher ? null : (publisherRef ?? this.publisherRef),
+      publisherEnvelope: clearPublisher
+          ? null
+          : (publisherEnvelope ?? this.publisherEnvelope),
       basedOnPublishedVersionId: clearBasedOnPublishedVersionId
           ? null
           : (basedOnPublishedVersionId ?? this.basedOnPublishedVersionId),

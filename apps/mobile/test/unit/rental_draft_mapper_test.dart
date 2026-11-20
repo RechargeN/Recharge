@@ -1,8 +1,30 @@
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/models/rental_draft_mapper.dart';
 import 'package:recharge/features/create/domain/entities/rental_draft_data.dart';
 
 void main() {
+  test(
+    'Rental retains legacy minor-unit schema and rejects fractional stored amounts',
+    () {
+      final wire = RentalDraftMapper.toJson(_defaults());
+      final pricing = wire['pricing'] as Map;
+      final deposit = pricing['deposit'] as Map;
+      final amount = deposit['amount'] as Map;
+      expect(amount, {'amountMinor': 0, 'currencyCode': 'EUR'});
+      expect(
+        RentalDraftMapper.toJson(
+          RentalDraftMapper.fromJson(wire, defaults: _defaults()),
+        ),
+        wire,
+      );
+      amount['amountMinor'] = 12.5;
+      expect(
+        () => RentalDraftMapper.fromJson(wire, defaults: _defaults()),
+        throwsA(isA<MoneyReadException>()),
+      );
+    },
+  );
   test(
     'round-trips typed Rental data and preserves unknown top-level fields',
     () {
@@ -83,8 +105,8 @@ void main() {
       expect(decoded.inventoryGroups, hasLength(1));
       expect(decoded.inventoryGroups.first.quantity, 5);
       expect(decoded.availability.coverage, isNotNull);
-      expect(decoded.pricing.rateSteps.first.unitPrice.amountMinor, 2800);
-      expect(decoded.pricing.deposit.amount.amountMinor, 15000);
+      expect(decoded.pricing.rateSteps.first.unitPrice.minorUnits, 2800);
+      expect(decoded.pricing.deposit.amount.minorUnits, 15000);
       expect(
         decoded.fulfillment.externalBookingUrl,
         'https://example.com/book',

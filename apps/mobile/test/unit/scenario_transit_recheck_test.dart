@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/domain/entities/scenario_item_draft.dart';
 import 'package:recharge/features/create/domain/entities/scenario_transit_mutation.dart';
@@ -81,7 +82,7 @@ ScenarioTransitServiceOption _option({
   String? sha,
 }) => ScenarioTransitServiceOption(
   providerCode: 'provider-a',
-  serviceDate: const ScenarioTransitLocalDate(2026, 8, 3),
+  serviceDate: LocalDate(2026, 8, 3),
   tripId: 'trip-1',
   routeId: 'route-1',
   serviceId: 'weekday',

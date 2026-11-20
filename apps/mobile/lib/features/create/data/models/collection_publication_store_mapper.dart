@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
@@ -430,6 +431,6 @@ class CollectionPublicationStoreMapper {
 
   static DateTime? _dateTime(Object? value) {
     if (value is! String) return null;
-    return DateTime.tryParse(value);
+    return UtcInstant.tryParse(value)?.value;
   }
 }

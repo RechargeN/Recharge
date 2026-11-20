@@ -1,6 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/data/datasources/create_local_datasource.dart';
 import 'package:recharge/features/create/data/models/create_draft_model.dart';
 import 'package:recharge/features/create/data/repositories/create_repository_impl.dart';
@@ -52,10 +52,7 @@ void main() {
     // Seeded through the datasource directly, not `repository.saveDraft` —
     // the latter deliberately resets status to `draft` (autosave
     // semantics), which would defeat this fixture's `pending_review` setup.
-    await dataSource.saveDraft(
-      'user-1',
-      CreateDraftModel.fromEntity(entity),
-    );
+    await dataSource.saveDraft('user-1', CreateDraftModel.fromEntity(entity));
 
     final CreateDraftEntity promoted = await repository
         .promoteRentalToPublished(
@@ -77,10 +74,7 @@ void main() {
       // — the latter deliberately resets status to `draft` (autosave
       // semantics), which would defeat this fixture's `pending_review`
       // setup.
-      await dataSource.saveDraft(
-        'user-1',
-        CreateDraftModel.fromEntity(entity),
-      );
+      await dataSource.saveDraft('user-1', CreateDraftModel.fromEntity(entity));
 
       expect(
         () => repository.promoteRentalToPublished(
@@ -93,17 +87,14 @@ void main() {
     },
   );
 
-  test(
-    'maps a missing draft to RentalPromotionException',
-    () async {
-      expect(
-        () => repository.promoteRentalToPublished(
-          userId: 'nobody',
-          rentalId: 'rental-1',
-          expectedRentalRevision: 0,
-        ),
-        throwsA(isA<RentalPromotionException>()),
-      );
-    },
-  );
+  test('maps a missing draft to RentalPromotionException', () async {
+    expect(
+      () => repository.promoteRentalToPublished(
+        userId: 'nobody',
+        rentalId: 'rental-1',
+        expectedRentalRevision: 0,
+      ),
+      throwsA(isA<RentalPromotionException>()),
+    );
+  });
 }

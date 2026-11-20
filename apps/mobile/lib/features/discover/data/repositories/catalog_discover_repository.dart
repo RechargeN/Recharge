@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'dart:math' as math;
 
 import '../../../../core/config/recharge_taxonomy.dart';
@@ -222,8 +223,11 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
       latitude: item.point.latitude,
       longitude: item.point.longitude,
       priceAmount: spend != null && item.currencyCode != null
-          ? Money(minorUnits: spend, currencyCode: item.currencyCode!)
-          : Money.zero(_currencyCode),
+          ? Money(
+              minorUnits: spend,
+              currency: CurrencyCode.parse(item.currencyCode!),
+            )
+          : Money(minorUnits: 0, currency: CurrencyCode.parse(_currencyCode)),
       distanceKm: (distance ?? 0) / 1000,
       isFree: item.costType == 'free',
       objectKind: DiscoverObjectKind.findPeople,
@@ -329,9 +333,9 @@ final class CatalogDiscoverRepository implements DiscoverRepository {
       priceAmount: price != null && !price.free
           ? Money(
               minorUnits: price.amountMinor,
-              currencyCode: price.currencyCode!,
+              currency: CurrencyCode.parse(price.currencyCode!),
             )
-          : Money.zero(_currencyCode),
+          : Money(minorUnits: 0, currency: CurrencyCode.parse(_currencyCode)),
       // Unknown distance (no point) is shown as no distance, like Routes.
       distanceKm: distanceMeters == null ? 0 : distanceMeters / 1000,
       isFree: price?.free ?? false,
@@ -418,7 +422,7 @@ Map<String, Object?> catalogWireQuery(
     if (budgetMax != null)
       'price': <String, Object?>{
         'maxAmountMinor': budgetMax.minorUnits,
-        'currencyCode': budgetMax.currencyCode,
+        'currencyCode': budgetMax.currency.value,
       },
     if (text.isNotEmpty) 'literalText': text,
     // Booking availability is not part of the Catalog: the server refuses it

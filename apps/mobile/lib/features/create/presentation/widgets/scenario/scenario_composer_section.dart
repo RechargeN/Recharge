@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/localization/l10n_context.dart';
@@ -416,11 +417,7 @@ class _PlannedTransportEntry extends StatelessWidget {
       controller: picker,
       initialServiceDate: localDate == null
           ? null
-          : ScenarioTransitLocalDate(
-              localDate.year,
-              localDate.month,
-              localDate.day,
-            ),
+          : LocalDate(localDate.year, localDate.month, localDate.day),
       initialDepartAfter: preferredStart == null
           ? null
           : ScenarioTransitTime(preferredStart.minuteOfDay * 60),

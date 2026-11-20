@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/domain/entities/activity_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/activity_validation_issue.dart';
@@ -145,7 +147,7 @@ void main() {
                 pinConfirmed: true,
                 accessNotes: 'Gravel path, well signed.',
               ),
-              optionalContribution: const ActivityOptionalContributionDraft(
+              optionalContribution: ActivityOptionalContributionDraft(
                 kind: ActivityContributionKind.donation,
               ),
             ),
@@ -168,10 +170,10 @@ void main() {
                 pinConfirmed: true,
                 accessNotes: 'Gravel path, well signed.',
               ),
-              optionalContribution: const ActivityOptionalContributionDraft(
-                amountHint: ActivityContributionAmountDraft(
-                  amountMinor: 300,
-                  currencyCode: 'EUR',
+              optionalContribution: ActivityOptionalContributionDraft(
+                amountHint: Money(
+                  minorUnits: 300,
+                  currency: CurrencyCode.parse('EUR'),
                 ),
               ),
             ),
@@ -405,7 +407,7 @@ void main() {
                   pinConfirmed: true,
                   accessNotes: 'Gravel path, well signed.',
                 ),
-                optionalContribution: const ActivityOptionalContributionDraft(
+                optionalContribution: ActivityOptionalContributionDraft(
                   kind: ActivityContributionKind.donation,
                   note: 'short',
                 ),
@@ -452,12 +454,12 @@ void main() {
                 pinConfirmed: true,
                 accessNotes: 'Gravel path, well signed.',
               ),
-              optionalContribution: const ActivityOptionalContributionDraft(
+              optionalContribution: ActivityOptionalContributionDraft(
                 kind: ActivityContributionKind.purchase,
                 note: 'Coffee at the kiosk, not required.',
-                amountHint: ActivityContributionAmountDraft(
-                  amountMinor: 0,
-                  currencyCode: 'EUR',
+                amountHint: Money(
+                  minorUnits: 0,
+                  currency: CurrencyCode.parse('EUR'),
                 ),
               ),
             ),
@@ -483,12 +485,12 @@ void main() {
                 pinConfirmed: true,
                 accessNotes: 'Gravel path, well signed.',
               ),
-              optionalContribution: const ActivityOptionalContributionDraft(
+              optionalContribution: ActivityOptionalContributionDraft(
                 kind: ActivityContributionKind.purchase,
                 note: 'Coffee at the kiosk, not required.',
-                amountHint: ActivityContributionAmountDraft(
-                  amountMinor: 300,
-                  currencyCode: 'USD',
+                amountHint: Money(
+                  minorUnits: 300,
+                  currency: CurrencyCode.parse('USD'),
                 ),
               ),
             ),

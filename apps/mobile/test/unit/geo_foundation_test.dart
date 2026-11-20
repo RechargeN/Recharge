@@ -1,11 +1,10 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart' as discover;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/geo/geo_bounds.dart';
-import 'package:recharge/core/geo/geo_distance.dart';
-import 'package:recharge/core/geo/geo_point.dart' as core;
-import 'package:recharge/core/geo/geometry_encoding.dart';
-import 'package:recharge/core/geo/geometry_hash.dart';
-import 'package:recharge/features/discover/domain/entities/geo_point.dart'
-    as discover;
+import 'package:recharge/shared/primitives/geo/geo_bounds.dart';
+import 'package:recharge/shared/primitives/geo/geo_distance.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart' as core;
+import 'package:recharge/shared/primitives/geo/geometry_encoding.dart';
+import 'package:recharge/shared/primitives/geo/geometry_hash.dart';
 
 void main() {
   group('GeoPoint', () {

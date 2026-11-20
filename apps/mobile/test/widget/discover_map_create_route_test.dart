@@ -1,19 +1,59 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/saved_search_entity.dart';
 import 'package:recharge/features/discover/domain/entities/smart_search_history_entity.dart';
 import 'package:recharge/features/discover/presentation/pages/discover_map_page.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/core/localization/l10n_context.dart';
 import 'package:flutter/widgets.dart';
+import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
+import 'package:recharge/features/discover/domain/entities/time_window.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 
 void main() {
+  test('saved Map query uses the canonical time route writer', () {
+    final query = DiscoverQuery.defaults().copyWith(
+      timeWindow: TimeWindow(
+        startAtUtc: DateTime.utc(2026, 10, 25, 0, 30, 0, 123, 456),
+        endAtUtc: DateTime.utc(2026, 10, 25, 1, 30, 0, 123, 456),
+        resolvedAtUtc: DateTime.utc(2026, 10, 24),
+        timezoneId: 'Europe/London',
+        mode: TimeWindowMode.flexible,
+        flexibilityMinutes: 30,
+      ),
+      travelContext: TravelContext(
+        originType: TravelOriginType.manualPin,
+        origin: const GeoPoint(latitude: 51.5, longitude: -0.1),
+        transportMode: TransportMode.walking,
+        includeReturnTrip: false,
+      ),
+    );
+    final uri = Uri.parse(
+      mapCreateLocationForSavedSearch(
+        SavedSearchEntity(
+          id: 'time',
+          title: 'Time',
+          subtitle: 'Test',
+          query: query,
+          createdAtUtc: DateTime.utc(2026),
+        ),
+      ),
+    );
+    final expected = DiscoverFeedController.timeRouteParameters(query);
+    for (final key in expected.keys) {
+      expect(uri.queryParameters[key], expected[key], reason: key);
+    }
+    expect(uri.queryParameters['timezone'], 'Europe/London');
+    expect(uri.queryParameters['timeStart'], '2026-10-25T00:30:00.123456Z');
+  });
+
   test('map create route carries current map conditions into create seed', () {
     final DiscoverQuery query = DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
+      budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
       radiusMeters: 7500,
       centerLat: 56.501234,
       centerLng: 27.345678,
@@ -54,7 +94,7 @@ void main() {
       query: DiscoverQuery.defaults().copyWith(
         queryText: 'museum',
         selectedCategoryIds: const <String>['art'],
-        budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
+        budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
         radiusMeters: 5000,
       ),
       createdAtUtc: DateTime.parse('2026-04-21T08:00:00Z'),
@@ -86,7 +126,7 @@ void main() {
       query: DiscoverQuery.defaults().copyWith(
         queryText: 'museum',
         selectedCategoryIds: const <String>['art'],
-        budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
+        budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
         radiusMeters: 5000,
       ),
       createdAtUtc: DateTime.parse('2026-04-22T08:00:00Z'),

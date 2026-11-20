@@ -1,5 +1,5 @@
-import 'publisher_ref.dart';
 import '../../../../shared/primitives/money/money.dart';
+import 'publisher_ref.dart';
 
 export 'publisher_ref.dart';
 

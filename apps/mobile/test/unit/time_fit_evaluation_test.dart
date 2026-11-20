@@ -1,9 +1,11 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/data/repositories/travel_time_repository_impl.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
-import 'package:recharge/features/discover/domain/entities/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:recharge/features/discover/domain/entities/opening_hours_rule.dart';
 import 'package:recharge/features/discover/domain/entities/time_fit_evaluation.dart';
 import 'package:recharge/features/discover/domain/entities/time_slot.dart';
@@ -12,7 +14,6 @@ import 'package:recharge/features/discover/domain/repositories/travel_time_repos
 import 'package:recharge/features/discover/domain/usecases/apply_time_window_usecase.dart';
 import 'package:recharge/features/discover/domain/usecases/calculate_time_fit_score_usecase.dart';
 import 'package:recharge/features/discover/domain/usecases/calculate_travel_times_usecase.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   test('event exactly inside travel and buffer boundaries fits', () async {
@@ -249,7 +250,7 @@ DiscoverItemEntity _item({
   startsAtUtc: DateTime.utc(2026, 7, 20, 10),
   latitude: 56.9496,
   longitude: 24.1052,
-  priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+  priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
   distanceKm: 0,
   isFree: true,
   marketCityId: 'riga',

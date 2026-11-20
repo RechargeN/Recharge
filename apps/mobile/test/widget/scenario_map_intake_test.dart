@@ -1,10 +1,12 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/application/scenario_object_intake_config.dart';
 import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -108,6 +110,12 @@ Future<Widget> _mapApp({ScenarioObjectIntakeConfig? config}) async {
     getDiscoverFeedUseCase: GetDiscoverFeedUseCase(_DiscoverRepository()),
     discoverPreferencesRepository: _PreferencesRepository(),
     analyticsService: _Analytics(),
+    runtimeDefaults: const DiscoverRuntimeDefaults(
+      timezoneId: 'Europe/Riga',
+      originLat: 56.9496,
+      originLng: 24.1052,
+      currency: CurrencyCode.eur,
+    ),
   );
   final favoriteRepository = _FavoritesRepository();
   final favoritesController = FavoritesController(
@@ -190,7 +198,7 @@ DiscoverItemEntity _item(int index) => DiscoverItemEntity(
   startsAtUtc: DateTime.utc(2026, 8, 3, 12),
   latitude: 56.94 + index / 100,
   longitude: 24.10 + index / 100,
-  priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+  priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
   distanceKm: index.toDouble(),
   isFree: true,
 );

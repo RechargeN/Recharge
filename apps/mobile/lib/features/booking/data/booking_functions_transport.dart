@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -451,7 +452,9 @@ final class FunctionsIdentitySessionClient {
     );
     if (_endpoint.binding == BookingBackendBinding.devIdentity) {
       final expires = rawSession['expiresAtUtc'];
-      final expiry = expires is String ? DateTime.tryParse(expires) : null;
+      final expiry = expires is String
+          ? UtcInstant.tryParse(expires)?.value
+          : null;
       final installation = await _installations.current();
       if (expiry == null ||
           !expiry.isUtc ||

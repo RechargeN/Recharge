@@ -1,6 +1,11 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../../../core/layout/page_list_padding.dart';
 import '../../../../core/localization/taxonomy_labels.dart';
 import '../../application/activity_validation_feedback_provider.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +44,6 @@ import '../widgets/route/route_create_block.dart';
 import '../widgets/scenario/scenario_create_block.dart';
 import '../widgets/create_texts.dart';
 import '../../../../core/localization/recharge_formats.dart';
-import '../../domain/personal_creation_hints.dart';
 import '../../application/create_media_asset_ref.dart';
 
 class CreatePage extends ConsumerStatefulWidget {
@@ -125,11 +129,14 @@ class _CreatePageState extends ConsumerState<CreatePage> {
       userId: user.id,
       organizerEmail: user.email,
       organizerName: user.email.split('@').first,
-      // ADR 0023: personal creation hints; the server decides every command.
-      capabilities: withPersonalCreationHints(user.capabilities),
+      capabilities: ref.watch(activeCreateCapabilitiesProvider),
       publisherRef: activePublisher,
       isVerifiedCreator: isVerifiedCreator,
     );
+    if ((!state.isLoaded && state.status != CreateStatus.error) ||
+        state.userId != user.id) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     _syncControllers(state);
     _scheduleExactScenarioDraft(controller, state, user.id);
     _scheduleScenarioHandoff(controller, state);
@@ -606,7 +613,10 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                     blockConfig.objectType.name,
                   ),
                   controller: _priceController,
-                  onChanged: controller.updateBasePrice,
+                  onChanged: (value) => controller.updateBasePrice(
+                    value,
+                    locale: Localizations.localeOf(context).toLanguageTag(),
+                  ),
                 ),
               const SizedBox(height: 12),
               Row(
@@ -713,7 +723,13 @@ class _CreatePageState extends ConsumerState<CreatePage> {
       _startController,
       state.draft.startDateTimeUtc?.toIso8601String() ?? '',
     );
-    _syncController(_priceController, state.draft.basePrice?.toString() ?? '');
+    _syncController(
+      _priceController,
+      MoneyFormatter().optionalDecimal(
+        state.draft.basePrice,
+        locale: Localizations.localeOf(context).toLanguageTag(),
+      ),
+    );
   }
 
   void _syncController(TextEditingController controller, String value) {
@@ -732,7 +748,10 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     }
     final String seedKey = _seedKeyFor(widget.seedParameters);
     if (_appliedSeedKey == seedKey) return;
-    final _CreateSeed seed = _CreateSeed.fromParameters(widget.seedParameters);
+    final _CreateSeed seed = _CreateSeed.fromParameters(
+      widget.seedParameters,
+      currency: state.draft.currency,
+    );
     if (!seed.hasValues) return;
     _appliedSeedKey = seedKey;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -807,7 +826,9 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     controller.updateCoverImage(seed.coverImage);
     controller.updateIsFree(seed.isFree);
     if (!seed.isFree && seed.basePrice != null) {
-      controller.updateBasePrice(seed.basePrice!);
+      controller.updateBasePrice(
+        MoneyFormatter().decimal(seed.basePrice!, locale: 'en'),
+      );
     }
     if (createBlockConfigFor(seed.objectType).requiresStartDateTime) {
       controller.updateStartDateTime(seed.startDateTimeUtc.toIso8601String());
@@ -2145,7 +2166,10 @@ class _CreateSeed {
     this.basePrice,
   });
 
-  factory _CreateSeed.fromParameters(Map<String, String> params) {
+  factory _CreateSeed.fromParameters(
+    Map<String, String> params, {
+    required String currency,
+  }) {
     final String prompt = _seedParam(params, <String>['q', 'prompt', 'query']);
     final String rawCategory = _firstSeedValue(
       _seedParam(params, <String>['category', 'mainCategory']),
@@ -2163,7 +2187,7 @@ class _CreateSeed {
     );
     final String title = _seedTitle(rawTitle, prompt, taxonomy.categoryId);
     final CreateObjectType objectType = _seedObjectType(params);
-    final String? basePrice = _seedPrice(params);
+    final Money? basePrice = _seedPrice(params, currency);
     final bool isFree = _seedIsFree(params, basePrice);
 
     return _CreateSeed(
@@ -2203,7 +2227,7 @@ class _CreateSeed {
   final String addressLine1;
   final String coverImage;
   final bool isFree;
-  final String? basePrice;
+  final Money? basePrice;
   final DateTime startDateTimeUtc;
 }
 
@@ -2476,20 +2500,23 @@ String _seedCoverImage(Map<String, String> params, String categoryId) {
   }
 }
 
-String? _seedPrice(Map<String, String> params) {
+Money? _seedPrice(Map<String, String> params, String currency) {
   final String value = _seedParam(params, <String>[
     'price',
     'budgetMax',
     'basePrice',
   ]);
   if (value.isEmpty) return null;
-  final String normalized = value.replaceAll(',', '.');
-  return RegExp(r'^\d+(?:\.\d{1,2})?$').hasMatch(normalized)
-      ? normalized
-      : null;
+  try {
+    return MoneyParser()
+        .parse(value, currency: CurrencyCode.parse(currency), locale: 'en')
+        .value;
+  } on FormatException {
+    return null;
+  }
 }
 
-bool _seedIsFree(Map<String, String> params, String? basePrice) {
+bool _seedIsFree(Map<String, String> params, Money? basePrice) {
   final String value = _seedParam(params, <String>[
     'free',
     'isFree',
@@ -2497,19 +2524,13 @@ bool _seedIsFree(Map<String, String> params, String? basePrice) {
   ]).toLowerCase();
   if (value == '1' || value == 'true' || value == 'yes') return true;
   if (value == '0' || value == 'false' || value == 'no') return false;
-  if (basePrice == null) return true;
-  final List<String> parts = basePrice.split('.');
-  final int whole = int.parse(parts.first);
-  final int fraction = parts.length == 1
-      ? 0
-      : int.parse(parts.last.padRight(2, '0'));
-  return whole == 0 && fraction == 0;
+  return basePrice == null || basePrice.minorUnits <= 0;
 }
 
 DateTime _seedStartDateTime(Map<String, String> params) {
   for (final String key in <String>['start', 'startsAt', 'dateFrom']) {
     final String raw = _seedParam(params, <String>[key]);
-    final DateTime? parsed = DateTime.tryParse(raw)?.toUtc();
+    final DateTime? parsed = UtcInstant.tryParse(raw)?.value;
     if (parsed != null) return parsed;
   }
   return DateTime.now().toUtc().add(const Duration(days: 3));

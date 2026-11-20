@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'route_issue_texts.dart';
 import '../../../../../core/localization/l10n_context.dart';
-import '../../../../../core/geo/geo_bounds.dart';
-import '../../../../../core/geo/geo_point.dart';
+import '../../../../../shared/primitives/geo/geo_bounds.dart';
+import '../../../../../shared/primitives/geo/geo_point.dart';
 import '../../../../../core/map/map_scene.dart';
 import '../../../application/state/route_create_state.dart';
 import '../../../domain/entities/route_quality_data.dart';

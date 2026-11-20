@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../domain/entities/notification_item_entity.dart';
 
 class NotificationItemModel {
@@ -91,7 +92,7 @@ class NotificationItemModel {
       title: title,
       body: body,
       type: _parseType(type),
-      createdAtUtc: DateTime.parse(createdAtUtcIso).toUtc(),
+      createdAtUtc: UtcInstant.parse(createdAtUtcIso).value,
       isRead: isRead,
       targetRoute: targetRoute,
       subjectRef: _subjectRef(),

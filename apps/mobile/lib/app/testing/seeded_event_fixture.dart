@@ -1,3 +1,6 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
+import '../../shared/primitives/money/money.dart';
+import '../../shared/primitives/money/currency_code.dart';
 import '../../features/discover/domain/entities/discover_item_entity.dart'
     show DurationConfidence;
 import '../../features/discover/domain/entities/event_occurrence.dart';
@@ -32,7 +35,7 @@ PublishedEventDiscoveryEntity seededBookingEventProjection() {
     latitude: 56.9496,
     longitude: 24.1052,
     distanceKm: 0,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     isFree: true,
     currencyCode: 'EUR',
     durationConfidence: DurationConfidence.unknown,
@@ -60,8 +63,8 @@ PublishedEventDiscoveryEntity? publishedTestBookingEventProjection({
 }) {
   final RegExp id = RegExp(r'^[A-Za-z0-9_-]{1,128}$');
   final String? occurrenceId = query['occurrence'];
-  final DateTime? start = DateTime.tryParse(query['start'] ?? '');
-  final DateTime? end = DateTime.tryParse(query['end'] ?? '');
+  final DateTime? start = UtcInstant.tryParse(query['start'] ?? '')?.value;
+  final DateTime? end = UtcInstant.tryParse(query['end'] ?? '')?.value;
   if (!id.hasMatch(eventId) ||
       occurrenceId == null ||
       !id.hasMatch(occurrenceId) ||
@@ -88,7 +91,7 @@ PublishedEventDiscoveryEntity? publishedTestBookingEventProjection({
     latitude: 0,
     longitude: 0,
     distanceKm: 0,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     isFree: true,
     currencyCode: 'EUR',
     durationConfidence: DurationConfidence.unknown,

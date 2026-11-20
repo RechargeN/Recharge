@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/time/local_date.dart';
+import '../../../../shared/primitives/time/iana_time_zone.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 import '../../domain/entities/visited_place_entity.dart';
 
 class VisitedPlaceModel {
@@ -62,14 +65,15 @@ class VisitedPlaceModel {
       city: entity.city,
       category: entity.category,
       visitedOn: entity.localDayKey,
-      timezoneId: entity.timezoneId,
+      timezoneId: IanaTimeZone.parse(entity.timezoneId).value,
       evidence: entity.evidence.name,
-      recordedAtUtcIso: entity.recordedAtUtc.toUtc().toIso8601String(),
+      recordedAtUtcIso: UtcInstant(entity.recordedAtUtc).toString(),
       coverImageUrl: entity.coverImageUrl,
     );
   }
 
   Map<String, dynamic> toJson() {
+    toEntity();
     return <String, dynamic>{
       'schemaVersion': schemaVersion,
       'id': id,
@@ -91,10 +95,7 @@ class VisitedPlaceModel {
     if (schemaVersion != currentSchemaVersion) {
       throw const FormatException('Unsupported visit schema');
     }
-    final DateTime parsedDay = DateTime.parse(visitedOn);
-    if (_formatLocalDay(parsedDay) != visitedOn) {
-      throw const FormatException('Invalid visit calendar day');
-    }
+    final parsedDay = LocalDate.parse(visitedOn);
     return VisitedPlaceEntity(
       id: id,
       userId: userId,
@@ -104,17 +105,10 @@ class VisitedPlaceModel {
       city: city,
       category: category,
       visitedOn: DateTime(parsedDay.year, parsedDay.month, parsedDay.day),
-      timezoneId: timezoneId,
+      timezoneId: IanaTimeZone.parse(timezoneId).value,
       evidence: VisitEvidence.values.byName(evidence),
-      recordedAtUtc: DateTime.parse(recordedAtUtcIso).toUtc(),
+      recordedAtUtc: UtcInstant.parse(recordedAtUtcIso).value,
       coverImageUrl: coverImageUrl,
     );
   }
-}
-
-String _formatLocalDay(DateTime value) {
-  final String year = value.year.toString().padLeft(4, '0');
-  final String month = value.month.toString().padLeft(2, '0');
-  final String day = value.day.toString().padLeft(2, '0');
-  return '$year-$month-$day';
 }

@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import '../../domain/entities/scenario_transit_schedule.dart';
 
 class GtfsScheduleIndex {
@@ -154,9 +155,7 @@ class GtfsScheduleIndex {
     return <String>{stopId, ...?_stationChildren[stopId]};
   }
 
-  ScenarioTransitFeedManifest _manifestForDate(
-    ScenarioTransitLocalDate serviceDate,
-  ) {
+  ScenarioTransitFeedManifest _manifestForDate(LocalDate serviceDate) {
     if (manifest.freshness == ScenarioTransitFreshness.stale) return manifest;
     final start = manifest.feedStartDate;
     final end = manifest.feedEndDate;
@@ -223,18 +222,16 @@ class GtfsServiceCalendar {
     required this.weekdays,
     this.startDate,
     this.endDate,
-    Map<ScenarioTransitLocalDate, bool> exceptions = const {},
-  }) : exceptions = Map<ScenarioTransitLocalDate, bool>.unmodifiable(
-         exceptions,
-       );
+    Map<LocalDate, bool> exceptions = const {},
+  }) : exceptions = Map<LocalDate, bool>.unmodifiable(exceptions);
 
   final String serviceId;
   final Set<int> weekdays;
-  final ScenarioTransitLocalDate? startDate;
-  final ScenarioTransitLocalDate? endDate;
-  final Map<ScenarioTransitLocalDate, bool> exceptions;
+  final LocalDate? startDate;
+  final LocalDate? endDate;
+  final Map<LocalDate, bool> exceptions;
 
-  bool runsOn(ScenarioTransitLocalDate date) {
+  bool runsOn(LocalDate date) {
     final exception = exceptions[date];
     if (exception != null) return exception;
     if (startDate == null || endDate == null) return false;

@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'event_publication.dart';
 import 'publisher_ref.dart';
 
@@ -154,9 +155,9 @@ final class SessionPublicationRecord {
     final Object? serverOwnerUserId = value['serverOwnerUserId'];
     final Object? authorApplied = value['authorApplied'];
     final Object? title = value['title'];
-    final DateTime? createdAt = DateTime.tryParse(
+    final DateTime? createdAt = UtcInstant.tryParse(
       '${value['createdAtUtc'] ?? ''}',
-    );
+    )?.value;
     final Object? attachments = value['attachments'];
     final Object? submissionId = value['submissionId'];
     if (accountId is! String ||
@@ -176,9 +177,8 @@ final class SessionPublicationRecord {
     }
     final List<SessionAttachmentRecord> parsed = <SessionAttachmentRecord>[];
     for (final Object? item in attachments) {
-      final SessionAttachmentRecord? attachment = SessionAttachmentRecord.fromJson(
-        item,
-      );
+      final SessionAttachmentRecord? attachment =
+          SessionAttachmentRecord.fromJson(item);
       if (attachment == null) return null;
       parsed.add(attachment);
     }

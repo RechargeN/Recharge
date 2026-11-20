@@ -1,5 +1,11 @@
+import '../../../../shared/primitives/time/local_date.dart';
 import '../../../../shared/primitives/errors/coded_refusal.dart';
 import '../../domain/usecases/build_session_content_body.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import 'dart:async';
 
 import '../class_workshop_create_coordinator.dart';
@@ -18,7 +24,6 @@ import '../../../../core/parsing/input_parsers.dart';
 import '../../../../core/product_analytics/product_analytics_contract.dart';
 import '../../../../core/product_analytics/product_analytics_recorder.dart';
 import '../../../../core/telemetry/analytics_service.dart';
-import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/activity_draft_data.dart';
 import '../../domain/entities/activity_validation_issue.dart';
 import '../../domain/entities/collection_draft_data.dart';
@@ -427,9 +432,9 @@ class CreateController extends ChangeNotifier {
           currencyCode: _runtimeDefaults.currency,
           billingUnit: RentalBillingUnit.day,
           deposit: RentalDepositPolicy(
-            amount: RentalMoneyDraft(
-              amountMinor: 0,
-              currencyCode: _runtimeDefaults.currency,
+            amount: Money(
+              minorUnits: 0,
+              currency: CurrencyCode.parse(_runtimeDefaults.currency),
             ),
             collectionMethod: RentalDepositCollectionMethod.none,
           ),
@@ -485,6 +490,11 @@ class CreateController extends ChangeNotifier {
   Set<String> _capabilities = const <String>{};
   PublisherRef? _activePublisherRef;
   Timer? _autosaveTimer;
+  bool _draftReadBlocked = false;
+  final Map<String, MoneyParseError> _moneyInputErrors = {};
+  final Set<String> _utcInputErrors = {};
+  Map<String, MoneyParseError> get moneyInputErrors =>
+      Map.unmodifiable(_moneyInputErrors);
   int _localIdCounter = 0;
   RouteCreateCoordinator? _routeCoordinator;
   CollectionCreateCoordinator? _collectionCoordinator;
@@ -516,13 +526,17 @@ class CreateController extends ChangeNotifier {
     final PublisherRef resolvedPublisher = activePublisherRef?.isValid == true
         ? activePublisherRef!
         : PublisherRef(type: PublisherType.user, id: userId);
-    if (_loadedUserId == userId && _state.isLoaded) {
+    if (_loadedUserId == userId && _state.isLoaded && !_draftReadBlocked) {
       _capabilities = capabilities.toSet();
       _activePublisherRef = resolvedPublisher;
       _isVerifiedCreator = isVerifiedCreator;
       return;
     }
     _loadedUserId = userId;
+    _draftReadBlocked = false;
+    _moneyInputErrors.clear();
+    _utcInputErrors.clear();
+    _autosaveTimer?.cancel();
     _capabilities = capabilities.toSet();
     _activePublisherRef = resolvedPublisher;
     _isVerifiedCreator = isVerifiedCreator;
@@ -535,7 +549,35 @@ class CreateController extends ChangeNotifier {
       ),
     );
 
-    final CreateDraftEntity? saved = await _loadCreateDraftUseCase(userId);
+    final CreateDraftEntity? saved;
+    try {
+      saved = await _loadCreateDraftUseCase(userId);
+    } on MoneyReadException {
+      if (_loadedUserId != userId) return;
+      _draftReadBlocked = true;
+      _setState(
+        _state.copyWith(
+          status: CreateStatus.error,
+          userId: userId,
+          message: CreateNotice.storedMoneyInvalid,
+          saveStatus: CreateSaveStatus.failed,
+        ),
+      );
+      return;
+    } on FormatException {
+      if (_loadedUserId != userId) return;
+      _draftReadBlocked = true;
+      _setState(
+        _state.copyWith(
+          status: CreateStatus.error,
+          userId: userId,
+          message: CreateNotice.storedDraftInvalid,
+          saveStatus: CreateSaveStatus.failed,
+        ),
+      );
+      return;
+    }
+    if (_loadedUserId != userId) return;
     final bool createsFreshDraft = saved == null;
     CreateDraftEntity draft =
         saved ??
@@ -548,16 +590,31 @@ class CreateController extends ChangeNotifier {
           country: _runtimeDefaults.country,
           city: _runtimeDefaults.city,
           currency: _runtimeDefaults.currency,
+          eventLocalToday: _eventCreateCoordinator.localDateAt(
+            instantUtc: DateTime.now().toUtc(),
+            timezoneId: _runtimeDefaults.timezone,
+          ),
         );
     if (createsFreshDraft && draft.eventData != null) {
       draft = draft.copyWith(
+        publisherRef: resolvedPublisher,
         eventData: draft.eventData!.copyWith(publisherRef: resolvedPublisher),
       );
     }
+    if (!createsFreshDraft &&
+        draft.publisherEnvelope == null &&
+        draft.publisherRef == null) {
+      draft = draft.copyWith(
+        publisherRef: draft.effectivePublisher,
+        publisherEnvelope: const <String, Object?>{'schemaVersion': 1},
+      );
+    }
+    _setState(_state.copyWith(draft: draft));
     if (draft.objectType == CreateObjectType.place && draft.placeData == null) {
       draft = draft.copyWith(placeData: _placeDefaults(userId));
     }
-    if (draft.objectType == CreateObjectType.event) {
+    if (draft.objectType == CreateObjectType.event &&
+        (createsFreshDraft || draft.eventData == null)) {
       draft = _eventCreateCoordinator.apply(
         draft,
         draft.eventData ?? _eventDefaults(),
@@ -716,6 +773,10 @@ class CreateController extends ChangeNotifier {
         city: _runtimeDefaults.city,
         currency: _runtimeDefaults.currency,
         publisherRef: _activePublisherRef,
+        localToday: _eventCreateCoordinator.localDateAt(
+          instantUtc: DateTime.now().toUtc(),
+          timezoneId: _runtimeDefaults.timezone,
+        ),
       );
       draft = _eventCreateCoordinator.apply(
         draft,
@@ -1152,6 +1213,10 @@ class CreateController extends ChangeNotifier {
     _applyScenario(
       coordinator.updateContext(
         current,
+        localToday: _eventCreateCoordinator.localDateAt(
+          instantUtc: DateTime.now().toUtc(),
+          timezoneId: current.defaultTimezoneId,
+        ),
         format: format,
         dateMode: dateMode,
         peopleCount: peopleCount,
@@ -2298,11 +2363,29 @@ class CreateController extends ChangeNotifier {
     );
   }
 
+  void updateEventPriceText(String text, {String locale = 'en'}) {
+    final event = _state.draft.eventData;
+    if (event == null) return;
+    final amount = _parseMoneyInput(
+      text,
+      currency: event.currencyCode,
+      locale: locale,
+      field: 'event.price',
+    );
+    if (_moneyInputErrors.containsKey('event.price')) return;
+    updateEventPricing(
+      mode: EventPricingMode.fixed,
+      collectionMode: event.paymentCollectionMode,
+      amountMinor: amount?.minorUnits ?? 0,
+    );
+  }
+
   void updateEventPricing({
     required EventPricingMode mode,
     EventPaymentCollectionMode? collectionMode,
     int? amountMinor,
   }) {
+    if (mode == EventPricingMode.free) _moneyInputErrors.remove('event.price');
     _updateEvent((EventDraftData event) {
       final bool free = mode == EventPricingMode.free;
       return event.copyWith(
@@ -2312,9 +2395,9 @@ class CreateController extends ChangeNotifier {
             : (collectionMode ?? event.paymentCollectionMode),
         price: free
             ? null
-            : EventMoneyDraft(
-                amountMinor: amountMinor ?? event.price?.amountMinor ?? 0,
-                currencyCode: event.currencyCode,
+            : Money(
+                minorUnits: amountMinor ?? event.price?.minorUnits ?? 0,
+                currency: CurrencyCode.parse(event.currencyCode),
               ),
         clearPrice: free,
       );
@@ -2710,6 +2793,27 @@ class CreateController extends ChangeNotifier {
     );
   }
 
+  void updateActivityContributionAmountText(
+    String text, {
+    String locale = 'en',
+  }) {
+    final contribution = _state.draft.activityData?.optionalContribution;
+    if (contribution == null) return;
+    final amount = _parseMoneyInput(
+      text,
+      currency:
+          contribution.amountHint?.currency.value ?? _state.draft.currency,
+      locale: locale,
+      field: 'activity.contribution',
+    );
+    if (_moneyInputErrors.containsKey('activity.contribution')) return;
+    updateActivityOptionalContribution(
+      kind: contribution.kind,
+      note: contribution.note,
+      amountMinor: amount?.minorUnits,
+    );
+  }
+
   void updateActivityOptionalContribution({
     ActivityContributionKind? kind,
     String? note,
@@ -2723,9 +2827,12 @@ class CreateController extends ChangeNotifier {
           note: trimmedNote.isEmpty ? null : trimmedNote,
           amountHint: amountMinor == null
               ? null
-              : ActivityContributionAmountDraft(
-                  amountMinor: amountMinor,
-                  currencyCode: _runtimeDefaults.currency,
+              : Money(
+                  minorUnits: amountMinor,
+                  currency: CurrencyCode.parse(
+                    activity.optionalContribution?.amountHint?.currency.value ??
+                        _state.draft.currency,
+                  ),
                 ),
         ),
       );
@@ -2733,6 +2840,7 @@ class CreateController extends ChangeNotifier {
   }
 
   void clearActivityOptionalContribution() {
+    _moneyInputErrors.remove('activity.contribution');
     _updateActivity(
       (ActivityDraftData activity) =>
           activity.copyWith(clearOptionalContribution: true),
@@ -2843,7 +2951,7 @@ class CreateController extends ChangeNotifier {
             ? <LocalOpeningPeriod>[
                 LocalOpeningPeriod(
                   id: _localId(),
-                  dayOfWeek: DateTime.tryParse(localDate)?.weekday ?? 1,
+                  dayOfWeek: LocalDate.tryParse(localDate)?.weekday ?? 1,
                   openMinute: 9 * 60,
                   closeMinute: 18 * 60,
                   closesNextDay: false,
@@ -2944,6 +3052,7 @@ class CreateController extends ChangeNotifier {
   }
 
   void updatePlacePricing({
+    String locale = 'en',
     String? entryFrom,
     String? entryTo,
     String? spendFrom,
@@ -2951,23 +3060,40 @@ class CreateController extends ChangeNotifier {
     String? note,
     String? pricingUrl,
   }) {
+    final currency =
+        _state.draft.placeData?.pricing.currencyCode ?? _state.draft.currency;
+    final parsed = <String, Money?>{};
+    final inputs = {
+      'entryFrom': entryFrom,
+      'entryTo': entryTo,
+      'spendFrom': spendFrom,
+      'spendTo': spendTo,
+    };
+    for (final input in inputs.entries) {
+      if (input.value != null) {
+        parsed[input.key] = _parseMoneyInput(
+          input.value!,
+          currency: currency,
+          locale: locale,
+          field: 'place.${input.key}',
+        );
+      }
+    }
+    if (inputs.keys.any((key) => _moneyInputErrors.containsKey('place.$key'))) {
+      return;
+    }
     _updatePlace((PlaceDraftData place) {
-      final String currencyCode = place.pricing.currencyCode;
-      Money? parseMoney(String? value) => value == null
-          ? null
-          : Money.tryParseMajor(value, currencyCode: currencyCode);
       return place.copyWith(
         pricing: place.pricing.copyWith(
-          entryPriceFrom: parseMoney(entryFrom),
-          clearEntryPriceFrom:
-              entryFrom != null && parseMoney(entryFrom) == null,
-          entryPriceTo: parseMoney(entryTo),
-          clearEntryPriceTo: entryTo != null && parseMoney(entryTo) == null,
-          typicalSpendFrom: parseMoney(spendFrom),
+          entryPriceFrom: entryFrom == null ? null : parsed['entryFrom'],
+          clearEntryPriceFrom: entryFrom != null && parsed['entryFrom'] == null,
+          entryPriceTo: entryTo == null ? null : parsed['entryTo'],
+          clearEntryPriceTo: entryTo != null && parsed['entryTo'] == null,
+          typicalSpendFrom: spendFrom == null ? null : parsed['spendFrom'],
           clearTypicalSpendFrom:
-              spendFrom != null && parseMoney(spendFrom) == null,
-          typicalSpendTo: parseMoney(spendTo),
-          clearTypicalSpendTo: spendTo != null && parseMoney(spendTo) == null,
+              spendFrom != null && parsed['spendFrom'] == null,
+          typicalSpendTo: spendTo == null ? null : parsed['spendTo'],
+          clearTypicalSpendTo: spendTo != null && parsed['spendTo'] == null,
           pricingNote: note == null ? null : _nullableText(note),
           clearPricingNote: note != null && _nullableText(note) == null,
           officialPricingUrl: pricingUrl == null
@@ -3432,6 +3558,7 @@ class CreateController extends ChangeNotifier {
   }
 
   void updateIsFree(bool isFree) {
+    if (isFree) _moneyInputErrors.remove('basePrice');
     _updateDraft(
       _state.draft.copyWith(
         isFree: isFree,
@@ -3441,11 +3568,97 @@ class CreateController extends ChangeNotifier {
     );
   }
 
-  void updateBasePrice(String value) {
-    final Money? parsed = Money.tryParseMajor(
+  Money? _parseMoneyInput(
+    String text, {
+    required String currency,
+    required String locale,
+    required String field,
+  }) {
+    if (text.trim().isEmpty) {
+      _moneyInputErrors.remove(field);
+      return null;
+    }
+    MoneyParseResult result;
+    try {
+      result = MoneyParser().parse(
+        text,
+        currency: CurrencyCode.parse(currency),
+        locale: locale,
+      );
+    } on FormatException {
+      result = const MoneyParseResult.failure(MoneyParseError.missingCurrency);
+    }
+    if (result.value != null && result.value!.minorUnits < 0) {
+      result = const MoneyParseResult.failure(
+        MoneyParseError.invalidCanonicalValue,
+      );
+    }
+    if (!result.isSuccess) {
+      _moneyInputErrors[field] = result.error!;
+      _autosaveTimer?.cancel();
+      _setState(_state.copyWith(message: CreateNotice.moneyInputInvalid));
+      return null;
+    }
+    _moneyInputErrors.remove(field);
+    return result.value;
+  }
+
+  void updateFindPeopleExpectedSpend(String value, {String locale = 'en'}) {
+    final data = _state.draft.findPeopleData;
+    if (data == null) return;
+    final amount = _parseMoneyInput(
       value,
-      currencyCode: _state.draft.currency,
+      currency: data.currencyCode,
+      locale: locale,
+      field: 'findPeople.expectedSpend',
     );
+    if (_moneyInputErrors.containsKey('findPeople.expectedSpend')) return;
+    updateFindPeopleData(
+      data.copyWith(
+        expectedSpendAmount: amount,
+        clearExpectedSpendAmount: amount == null,
+      ),
+    );
+  }
+
+  bool addFindPeopleExpense({
+    required String category,
+    required String text,
+    String locale = 'en',
+  }) {
+    final data = _state.draft.findPeopleData;
+    if (data == null || category.trim().isEmpty) return false;
+    final amount = _parseMoneyInput(
+      text,
+      currency: data.currencyCode,
+      locale: locale,
+      field: 'findPeople.expense',
+    );
+    if (amount == null || amount.minorUnits <= 0) return false;
+    updateFindPeopleData(
+      data.copyWith(
+        plannedExpenseItems: [
+          ...data.plannedExpenseItems,
+          FindPeopleExpenseItemDraft(
+            id: 'loc_${DateTime.now().toUtc().microsecondsSinceEpoch}',
+            category: category.trim(),
+            amount: amount,
+            payerNote: 'shared',
+          ),
+        ],
+      ),
+    );
+    return true;
+  }
+
+  void updateBasePrice(String value, {String locale = 'en'}) {
+    final Money? parsed = _parseMoneyInput(
+      value,
+      currency: _state.draft.currency,
+      locale: locale,
+      field: 'basePrice',
+    );
+    if (_moneyInputErrors.containsKey('basePrice')) return;
     _updateDraft(
       _state.draft.copyWith(
         basePrice: parsed,
@@ -3456,7 +3669,24 @@ class CreateController extends ChangeNotifier {
   }
 
   void updateStartDateTime(String value) {
-    final DateTime? parsed = DateTime.tryParse(value.trim())?.toUtc();
+    final DateTime? parsed;
+    try {
+      parsed = value.trim().isEmpty
+          ? null
+          : UtcInstant.parse(value.trim()).value;
+      _utcInputErrors.remove('startDateTimeUtc');
+    } on FormatException {
+      _utcInputErrors.add('startDateTimeUtc');
+      _setState(
+        _state.copyWith(
+          validationErrors: {
+            ..._state.validationErrors,
+            'startDateTimeUtc': 'create.validation.utc_input_invalid',
+          },
+        ),
+      );
+      return;
+    }
     final List<CreateTimeSlotDraft> slots =
         parsed != null &&
             _state.draft.availabilityKind ==
@@ -3670,7 +3900,24 @@ class CreateController extends ChangeNotifier {
   }
 
   void updateRegistrationDeadline(String value) {
-    final DateTime? parsed = DateTime.tryParse(value.trim())?.toUtc();
+    final DateTime? parsed;
+    try {
+      parsed = value.trim().isEmpty
+          ? null
+          : UtcInstant.parse(value.trim()).value;
+      _utcInputErrors.remove('registrationDeadlineUtc');
+    } on FormatException {
+      _utcInputErrors.add('registrationDeadlineUtc');
+      _setState(
+        _state.copyWith(
+          validationErrors: {
+            ..._state.validationErrors,
+            'registrationDeadlineUtc': 'create.validation.utc_input_invalid',
+          },
+        ),
+      );
+      return;
+    }
     _updateDraft(
       _state.draft.copyWith(
         registrationDeadlineUtc: parsed,
@@ -4106,9 +4353,31 @@ class CreateController extends ChangeNotifier {
   void setSessionSlotDuration(int value) => _updateSession(
     (s) => _sessionCreateCoordinator!.setSlotDuration(s, value),
   );
-  void setSessionPriceFree() => _updateSession(
-    (s) => _sessionCreateCoordinator!.setPrice(s, SessionPriceDisclosure.free),
-  );
+  void setSessionPriceFree() {
+    _moneyInputErrors.remove('session.price');
+    _updateSession(
+      (s) =>
+          _sessionCreateCoordinator!.setPrice(s, SessionPriceDisclosure.free),
+    );
+  }
+
+  void updateSessionPriceText(String text, {String locale = 'en'}) {
+    final currency =
+        _state.draft.sessionData?.price.amount?.currency.value ??
+        _state.draft.currency;
+    final amount = _parseMoneyInput(
+      text,
+      currency: currency,
+      locale: locale,
+      field: 'session.price',
+    );
+    if (_moneyInputErrors.containsKey('session.price')) return;
+    setSessionPriceFixed(
+      amountMinor: amount?.minorUnits ?? 0,
+      currencyCode: currency,
+    );
+  }
+
   void setSessionPriceFixed({
     required int amountMinor,
     required String currencyCode,
@@ -4117,9 +4386,9 @@ class CreateController extends ChangeNotifier {
       s,
       SessionPriceDisclosure(
         mode: SessionPricingMode.fixed,
-        amount: SessionMoneyDraft(
-          amountMinor: amountMinor,
-          currencyCode: currencyCode,
+        amount: Money(
+          minorUnits: amountMinor,
+          currency: CurrencyCode.parse(currencyCode),
         ),
       ),
     ),
@@ -4187,6 +4456,9 @@ class CreateController extends ChangeNotifier {
   }
 
   void updateFindPeopleData(FindPeopleDraftData value) {
+    if (value.costType != FindPeopleCostType.estimated) {
+      _moneyInputErrors.remove('findPeople.expectedSpend');
+    }
     if (_state.draft.objectType != CreateObjectType.findPeople) return;
     _updateDraft(
       _state.draft.copyWith(
@@ -4255,7 +4527,11 @@ class CreateController extends ChangeNotifier {
   }
 
   Future<void> saveDraft() async {
-    if (_state.userId.isEmpty) return;
+    if (_state.userId.isEmpty ||
+        _draftReadBlocked ||
+        (_moneyInputErrors.isNotEmpty || _utcInputErrors.isNotEmpty)) {
+      return;
+    }
     _autosaveTimer?.cancel();
     if (_state.draft.objectType == CreateObjectType.route) {
       final coordinator = _routeCoordinator;
@@ -4334,19 +4610,62 @@ class CreateController extends ChangeNotifier {
   /// is still usable by the current actor. A Page publisher is denied when no
   /// access check is composed (fail-closed). The draft is never rewritten, so
   /// the author keeps the form and can retry after access is restored.
+  // ADR 0023: classify the operation from feature policy, not a price of zero
+  // or the possibly stale generic envelope's isFree bit.
+  bool _requiresIdentityVerification(CreateDraftEntity draft) =>
+      switch (draft.objectType) {
+        CreateObjectType.rental || CreateObjectType.session => true,
+        CreateObjectType.event =>
+          draft.eventData == null ||
+              draft.eventData!.pricingMode != EventPricingMode.free ||
+              draft.eventData!.registrationMode ==
+                  EventRegistrationMode.internal,
+        CreateObjectType.classWorkshop =>
+          draft.classWorkshopData?.price.mode != ClassWorkshopPriceMode.free,
+        _ => !draft.isFree,
+      };
+
   Future<bool> _publisherAccessAllowed(CreateDraftEntity draft) async {
+    final actor = _state.userId;
     final PublisherRef publisher = draft.effectivePublisher;
     final PublisherAccessCheck? check = _publisherAccessCheck;
     bool allowed;
-    if (publisher.type == PublisherType.user) {
-      allowed = publisher.id == _state.userId;
+    if (!publisher.isValid) {
+      allowed = false;
+    } else if (publisher.type == PublisherType.page &&
+        const <CreateObjectType>{
+          CreateObjectType.session,
+          CreateObjectType.scenario,
+          CreateObjectType.route,
+          CreateObjectType.classWorkshop,
+        }.contains(draft.objectType)) {
+      // Local envelope capture does not enable Page publication for these types.
+      allowed = false;
     } else if (check == null) {
       allowed = false;
     } else {
-      allowed = await check.canPublishAs(
-        actorUserId: _state.userId,
-        publisher: publisher,
-      );
+      final type = draft.objectType.taxonomyId;
+      final direct = 'publish.$type.direct';
+      final capability = _capabilities.contains(direct)
+          ? direct
+          : 'submit.$type';
+      try {
+        allowed = await check.canPublishAs(
+          actorUserId: actor,
+          publisher: publisher,
+          requiredCapabilities: {capability},
+          requireIdentityVerification:
+              publisher.type == PublisherType.page ||
+              _requiresIdentityVerification(draft),
+        );
+      } on Object {
+        allowed = false;
+      }
+    }
+    if (_state.userId != actor ||
+        _loadedUserId != actor ||
+        _state.draft.id != draft.id) {
+      return false;
     }
     if (!allowed) {
       _setState(
@@ -4376,7 +4695,12 @@ class CreateController extends ChangeNotifier {
   /// A second call while one is already running (double tap, retry during a
   /// slow save) is ignored instead of racing the first publish.
   Future<bool> publishDraft() async {
-    if (_publishInFlight) return false;
+    if (_publishInFlight ||
+        _draftReadBlocked ||
+        _moneyInputErrors.isNotEmpty ||
+        _utcInputErrors.isNotEmpty) {
+      return false;
+    }
     _publishInFlight = true;
     try {
       return await _publishDraftOnce();
@@ -4403,8 +4727,16 @@ class CreateController extends ChangeNotifier {
       );
       return false;
     }
+    final actor = _state.userId;
+    final publishingDraftId = _state.draft.id;
     await saveDraft();
-    if (_state.saveStatus == CreateSaveStatus.failed) return false;
+    if (_state.userId != actor ||
+        _loadedUserId != actor ||
+        _state.draft.id != publishingDraftId ||
+        _state.saveStatus == CreateSaveStatus.failed ||
+        !await _publisherAccessAllowed(_state.draft)) {
+      return false;
+    }
     final Map<String, String> errors = _validate(_state.draft);
     if (errors.isNotEmpty) {
       if (_state.draft.objectType == CreateObjectType.event) {
@@ -4552,6 +4884,13 @@ class CreateController extends ChangeNotifier {
       return false;
     }
 
+    if (_state.userId != actor ||
+        _loadedUserId != actor ||
+        _state.draft.id != publishingDraftId ||
+        !await _publisherAccessAllowed(draftToPublish)) {
+      return false;
+    }
+
     // RNT-PUB-01 §1.4: a single, bounded, Rental-only trusted direct-publish
     // attempt immediately after the generic publish above. `rentalData` is
     // checked explicitly here rather than assumed from `objectType ==
@@ -4574,7 +4913,7 @@ class CreateController extends ChangeNotifier {
           isPolicyTrusted: _rentalDirectPublishPolicy.isTrusted,
         ),
       );
-      if (decision.authorized) {
+      if (decision.authorized && await _publisherAccessAllowed(_state.draft)) {
         try {
           finalPublished = await promoteRentalToPublished(
             userId: _state.userId,
@@ -4863,6 +5202,8 @@ class CreateController extends ChangeNotifier {
     required String organizerEmail,
     required String organizerName,
   }) {
+    _moneyInputErrors.clear();
+    _utcInputErrors.clear();
     CreateDraftEntity draft = CreateDraftEntity.defaults(
       organizerId: organizerId,
       organizerEmail: organizerEmail,
@@ -4872,11 +5213,20 @@ class CreateController extends ChangeNotifier {
       country: _runtimeDefaults.country,
       city: _runtimeDefaults.city,
       currency: _runtimeDefaults.currency,
-    );
+      eventLocalToday: _eventCreateCoordinator.localDateAt(
+        instantUtc: DateTime.now().toUtc(),
+        timezoneId: _runtimeDefaults.timezone,
+      ),
+    ).copyWith(id: _localId());
     if (draft.eventData != null) {
       draft = draft.copyWith(
+        publisherRef:
+            _activePublisherRef ??
+            PublisherRef(type: PublisherType.user, id: organizerId),
         eventData: draft.eventData!.copyWith(
-          publisherRef: _defaultPublisher(organizerId),
+          publisherRef:
+              _activePublisherRef ??
+              PublisherRef(type: PublisherType.user, id: organizerId),
         ),
       );
     }
@@ -5065,14 +5415,9 @@ class CreateController extends ChangeNotifier {
     );
   }
 
-  /// IDP-04A: publisher captured once from the active workspace when a new
-  /// typed block is created; existing drafts keep their stored publisher.
-  PublisherRef _defaultPublisher(String userId) {
-    final PublisherRef? active = _activePublisherRef;
-    return active != null && active.isValid
-        ? active
-        : PublisherRef(type: PublisherType.user, id: userId);
-  }
+  /// Typed block creation reuses the draft identity, including missing state.
+  PublisherRef _defaultPublisher(String userId) =>
+      _state.draft.effectivePublisher;
 
   PlaceDraftData _placeDefaults(String userId) {
     return PlaceDraftData.defaults(
@@ -5108,20 +5453,14 @@ class CreateController extends ChangeNotifier {
       timeZoneId: _runtimeDefaults.timezone,
       categoryId: config.defaultCategoryId,
       subcategoryId: config.defaultSubcategoryId,
-    ).copyWith(
-      publisherRef:
-          _activePublisherRef ??
-          PublisherRef(type: PublisherType.user, id: userId),
-    );
+    ).copyWith(publisherRef: _defaultPublisher(userId));
   }
 
   /// COLLECTION_GUIDE_CREATE_BLOCK_SPEC.md §9: `publisherRef` is captured
   /// once from the active workspace at draft creation and never rewritten
   /// by a later workspace switch — same invariant as Rental/Event above.
   CollectionDraftData _collectionDefaults() => CollectionDraftData.defaults(
-    publisherRef:
-        _activePublisherRef ??
-        PublisherRef(type: PublisherType.user, id: _state.userId),
+    publisherRef: _defaultPublisher(_state.userId),
   );
 
   EventDraftData _eventDefaults() => EventDraftData.defaults(
@@ -5130,9 +5469,11 @@ class CreateController extends ChangeNotifier {
     city: _runtimeDefaults.city,
     timezoneId: _runtimeDefaults.timezone,
     currencyCode: _runtimeDefaults.currency,
-    publisherRef:
-        _activePublisherRef ??
-        PublisherRef(type: PublisherType.user, id: _state.draft.organizerId),
+    publisherRef: _defaultPublisher(_state.draft.organizerId),
+    localToday: _eventCreateCoordinator.localDateAt(
+      instantUtc: DateTime.now().toUtc(),
+      timezoneId: _runtimeDefaults.timezone,
+    ),
   );
 
   List<EventValidationIssue> _eventIssues({
@@ -6407,10 +6748,29 @@ class CreateController extends ChangeNotifier {
   /// the presentation layer calls this yet — no dedicated moderation page
   /// ships in this slice, so the flow is not reachable end to end through
   /// the running app.
+  Future<bool> _adminAccessAllowed(String capability) async {
+    final actor = _state.userId;
+    final check = _publisherAccessCheck;
+    if (check == null || actor.isEmpty) return false;
+    try {
+      final allowed = await check.canPublishAs(
+        actorUserId: actor,
+        publisher: PublisherRef(type: PublisherType.user, id: actor),
+        requiredCapabilities: {capability},
+        requireAdmin: true,
+      );
+      return allowed && _state.userId == actor && _loadedUserId == actor;
+    } on Object {
+      return false;
+    }
+  }
+
   Future<List<CollectionModerationRequest>>
   loadPendingCollectionModerationRequests() async {
     final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null || !canModerateCollection) {
+    if (coordinator == null ||
+        !canModerateCollection ||
+        !await _adminAccessAllowed('moderate.collection')) {
       return const <CollectionModerationRequest>[];
     }
     return coordinator.pendingModerationRequests();
@@ -6426,7 +6786,11 @@ class CreateController extends ChangeNotifier {
     CollectionModerationRejectionReason? rejectionReason,
   }) async {
     final CollectionCreateCoordinator? coordinator = _collectionCoordinator;
-    if (coordinator == null || !canModerateCollection) return false;
+    if (coordinator == null ||
+        !canModerateCollection ||
+        !await _adminAccessAllowed('moderate.collection')) {
+      return false;
+    }
     if (!accept && rejectionReason == null) {
       _setState(
         _state.copyWith(

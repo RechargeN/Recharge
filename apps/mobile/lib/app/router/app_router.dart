@@ -1,3 +1,4 @@
+import '../../features/auth/application/controllers/auth_controller.dart';
 import '../di/session_publication_composition.dart';
 import '../di/class_workshop_publication_composition.dart';
 import '../../features/identity/presentation/pages/seller_declaration_page.dart';
@@ -35,6 +36,13 @@ import '../application/resolve_details_usecase.dart';
 import '../observers/app_route_observer.dart';
 import '../presentation/recharge_app_shell.dart';
 import '../presentation/workspace_section_host.dart';
+import '../presentation/admin_tools_page.dart';
+import '../application/active_creator_verification_provider.dart';
+import '../../features/identity/application/identity_workspace_providers.dart';
+import '../../features/identity/domain/repositories/identity_workspace_repository.dart';
+import '../../features/identity/domain/entities/identity_access_snapshot.dart';
+import '../../features/identity/domain/entities/workspace_ref.dart';
+import '../../features/identity/domain/entities/admin_experience_preview.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/auth/presentation/pages/discover_hub_page.dart';
 import '../../features/auth/presentation/pages/sign_in_page.dart';
@@ -82,7 +90,6 @@ import '../../features/scenarios/presentation/pages/scenario_builder_page.dart';
 import '../../features/visited/presentation/pages/visited_places_page.dart';
 import 'details_route_parser.dart';
 import 'route_names.dart';
-import '../../features/create/domain/personal_creation_hints.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authController = ref.read(authControllerProvider);
@@ -96,9 +103,35 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
   final AnalyticsService analyticsService = sl<AnalyticsService>();
 
+  final identity = ref.read(identityWorkspaceControllerProvider);
+  var lastAuthenticatedActor = authController.state.user?.id ?? '';
+  bool recoveringSession() {
+    final state = authController.state;
+    return lastAuthenticatedActor.isNotEmpty &&
+        !state.isAuthenticated &&
+        (state.isLoading ||
+            const {
+              AuthController.offlineMessage,
+              AuthController.rateLimitedMessage,
+              AuthController.busyCode,
+            }.contains(state.errorCode));
+  }
+
+  void synchronizeActor() {
+    if (recoveringSession()) return;
+    final actor = authController.state.user?.id ?? '';
+    lastAuthenticatedActor = actor;
+    if (identity.state.userId != actor) {
+      identity.clearSession();
+      if (actor.isNotEmpty) identity.ensureLoaded(actor);
+    }
+  }
+
+  authController.addListener(synchronizeActor);
+  ref.onDispose(() => authController.removeListener(synchronizeActor));
   return GoRouter(
     initialLocation: RouteNames.splash,
-    refreshListenable: authController,
+    refreshListenable: Listenable.merge([authController, identity]),
     observers: <NavigatorObserver>[
       AppRouteObserver(analyticsService: analyticsService),
     ],
@@ -110,6 +143,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       ShellRoute(
         builder: (context, state, child) => RechargeAppShell(
+          routerGuardsWorkspace: true,
           currentLocation: state.uri.path,
           userId: authController.state.user?.id ?? '',
           child: child,
@@ -247,10 +281,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: 'professional_page_create',
             path: RouteNames.professionalPageCreate,
             builder: (context, state) {
-              final user = authController.state.user;
-              return CreateHubPage(
-                isAuthenticated: user != null,
-                capabilities: user?.capabilities ?? const <String>[],
+              return Consumer(
+                builder: (context, ref, _) {
+                  final user = authController.state.user;
+                  return CreateHubPage(
+                    isAuthenticated: user != null,
+                    capabilities: ref.watch(activeCreateCapabilitiesProvider),
+                  );
+                },
               );
             },
           ),
@@ -540,19 +578,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'create',
         path: RouteNames.create,
         builder: (context, state) {
-          if (state.uri.queryParameters.isNotEmpty) {
-            return CreatePage(
-              seedParameters: state.uri.queryParameters,
-              onOpenPlaceServerTest: _placeServerTestEntry(context),
-            );
-          }
-          final user = authController.state.user;
-          return CreateHubPage(
-            isAuthenticated: user != null,
-            // ADR 0023: a User may author free personal content (UI hint only).
-            capabilities: user == null
-                ? const <String>[]
-                : withPersonalCreationHints(user.capabilities),
+          return Consumer(
+            builder: (context, ref, _) {
+              if (state.uri.queryParameters.isNotEmpty) {
+                return CreatePage(
+                  seedParameters: state.uri.queryParameters,
+                  onOpenPlaceServerTest: _placeServerTestEntry(context),
+                );
+              }
+              final user = authController.state.user;
+              return CreateHubPage(
+                isAuthenticated: user != null,
+                capabilities: ref.watch(activeCreateCapabilitiesProvider),
+              );
+            },
           );
         },
       ),
@@ -570,19 +609,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const CreateSuccessPage(),
       ),
       GoRoute(
+        path: RouteNames.adminTools,
+        builder: (context, state) => const AdminToolsPage(),
+      ),
+      GoRoute(
         name: 'route_moderation',
         path: RouteNames.routeModeration,
         builder: (context, state) {
-          final user = authController.state.user;
-          return RouteModerationPage(
-            userId: user?.id ?? '',
-            userEmail: user?.email ?? '',
-            capabilities: user?.capabilities ?? const <String>[],
+          return Consumer(
+            builder: (context, ref, _) {
+              final user = authController.state.user;
+              return RouteModerationPage(
+                userId: user?.id ?? '',
+                userEmail: user?.email ?? '',
+                capabilities: ref.watch(activeCreateCapabilitiesProvider),
+              );
+            },
           );
         },
       ),
     ],
-    redirect: (context, state) {
+    redirect: (context, state) async {
       final isProtected =
           state.matchedLocation == RouteNames.profile ||
           state.matchedLocation == RouteNames.profileWorkspace ||
@@ -604,11 +651,47 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             '${RouteNames.publicProfessionalPages}/',
           ) ||
           state.matchedLocation == RouteNames.createSuccess ||
-          state.matchedLocation == RouteNames.routeModeration;
+          state.matchedLocation == RouteNames.routeModeration ||
+          state.matchedLocation == RouteNames.adminTools;
 
+      // AUTH-ROT-02: retain navigation/preference while credentials recover.
+      // Access providers stay empty and every protected action revalidates.
+      if (isProtected && recoveringSession()) return null;
       if (isProtected && !authController.state.isAuthenticated) {
-        final encodedOrigin = Uri.encodeComponent(state.matchedLocation);
+        final encodedOrigin = Uri.encodeComponent(state.uri.toString());
         return '${RouteNames.signIn}?originRoute=$encodedOrigin';
+      }
+
+      if (isProtected && authController.state.user != null) {
+        final actor = authController.state.user!.id;
+        try {
+          // GoRouter may invoke redirect during Router restoration/build.
+          // Yield before notifying the shared ChangeNotifier provider.
+          await Future<void>.value();
+          if (authController.state.user?.id != actor) return RouteNames.signIn;
+          if (identity.state.userId != actor) {
+            await identity.ensureLoaded(actor);
+          }
+          final access = await sl<IdentityWorkspaceRepository>()
+              .loadAccessSnapshot(actor);
+          if (authController.state.user?.id != actor) return RouteNames.signIn;
+          final denied = identityRouteDenial(
+            path: state.uri.path,
+            actor: actor,
+            access: access,
+            workspace: identity.state.activeWorkspace,
+            preview: identity.state.adminPreview,
+          );
+          if (denied != null) return denied;
+        } on Object {
+          final path = state.uri.path;
+          if (path == RouteNames.adminTools ||
+              path == RouteNames.routeModeration ||
+              path == RouteNames.professionalPage ||
+              path.startsWith('/page/')) {
+            return RouteNames.settings;
+          }
+        }
       }
 
       if (state.matchedLocation == RouteNames.splash &&
@@ -783,3 +866,54 @@ VoidCallback? _placeServerTestEntry(BuildContext context) =>
         sl<PlacePublicationTestEntryGuard>().allowed
     ? () => context.push(RouteNames.testPlacePublication)
     : null;
+
+/// Local route policy over the same fresh snapshot used by application guards.
+/// A destination never grants a workspace, membership or publisher.
+String? identityRouteDenial({
+  required String path,
+  required String actor,
+  required IdentityAccessSnapshot access,
+  WorkspaceRef? workspace,
+  AdminExperiencePreview? preview,
+}) {
+  if (!access.belongsTo(actor)) {
+    return path == RouteNames.settings ? null : RouteNames.settings;
+  }
+  if (path == RouteNames.adminTools || path == RouteNames.routeModeration) {
+    if (!access.canUseAdminTools) return RouteNames.settings;
+    if (path == RouteNames.routeModeration &&
+        !access.hasGlobalCapability('moderate.route') &&
+        !access.hasGlobalCapability('manage.route')) {
+      return RouteNames.adminTools;
+    }
+  }
+  if (path.startsWith('${RouteNames.professionalPagePreview}/')) {
+    final pageId = Uri.decodeComponent(
+      path.substring(RouteNames.professionalPagePreview.length + 1),
+    );
+    return access.canActivatePage(pageId) ? null : RouteNames.settings;
+  }
+  if (path == RouteNames.professionalPage ||
+      path == RouteNames.professionalPageContent ||
+      path == RouteNames.professionalPageCreate ||
+      path == RouteNames.professionalPageAccount) {
+    if (workspace?.isPage != true || !access.canActivatePage(workspace!.id)) {
+      final emptyPreview =
+          path != RouteNames.professionalPageCreate &&
+          access.canPreviewExperience &&
+          preview == AdminExperiencePreview.professionalPage;
+      return emptyPreview ? null : RouteNames.settings;
+    }
+    final capability = path == RouteNames.professionalPageAccount
+        ? 'page.team.manage'
+        : (path == RouteNames.professionalPageContent ||
+              path == RouteNames.professionalPageCreate)
+        ? 'page.content.create'
+        : null;
+    if (capability != null &&
+        !access.canUsePage(actor, workspace.id, capability)) {
+      return RouteNames.settings;
+    }
+  }
+  return null;
+}

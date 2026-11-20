@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import '../../../../core/geo/geo_point.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
 import '../../domain/entities/route_draft_data.dart';
 import '../../domain/repositories/route_gpx_repository.dart';
 import 'route_gpx_inspector.dart';

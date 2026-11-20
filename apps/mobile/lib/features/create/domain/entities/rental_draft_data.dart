@@ -1,49 +1,14 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'create_availability.dart';
 import 'publisher_ref.dart';
 
 export 'publisher_ref.dart';
 
 /// Temporary ad-hoc money representation for Rental, mirroring
-/// `EventMoneyDraft`. Migrates to the shared `Money` primitive
+/// `Money`. Migrates to the shared `Money` primitive
 /// (`shared/primitives/money/`) without semantic change once M2-B lands —
 /// see docs/architecture/MOBILE_ARCHITECTURE_M2_PRIMITIVE_RECONCILIATION_PLAN.md.
-class RentalMoneyDraft {
-  const RentalMoneyDraft({
-    required this.amountMinor,
-    required this.currencyCode,
-  });
-
-  final int amountMinor;
-  final String currencyCode;
-
-  RentalMoneyDraft copyWith({int? amountMinor, String? currencyCode}) {
-    return RentalMoneyDraft(
-      amountMinor: amountMinor ?? this.amountMinor,
-      currencyCode: currencyCode ?? this.currencyCode,
-    );
-  }
-
-  Map<String, Object?> toMap() => <String, Object?>{
-    'amountMinor': amountMinor,
-    'currencyCode': currencyCode,
-  };
-
-  factory RentalMoneyDraft.fromMap(Map<String, Object?> map) =>
-      RentalMoneyDraft(
-        amountMinor: (map['amountMinor'] as num).toInt(),
-        currencyCode: map['currencyCode']! as String,
-      );
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is RentalMoneyDraft &&
-          amountMinor == other.amountMinor &&
-          currencyCode == other.currencyCode;
-
-  @override
-  int get hashCode => Object.hash(amountMinor, currencyCode);
-}
 
 enum RentalCondition { rentalNew, likeNew, good, worn }
 
@@ -256,7 +221,7 @@ class RentalHandoverDraft {
   final List<CreateOpeningHoursDraftRule> openingHours;
   final bool deliveryAvailable;
   final double? deliveryRadiusKm;
-  final RentalMoneyDraft? deliveryFee;
+  final Money? deliveryFee;
   final String? deliveryTerms;
 
   bool get hasPublicGeo => publicLatitude != null && publicLongitude != null;
@@ -277,7 +242,7 @@ class RentalHandoverDraft {
     bool? deliveryAvailable,
     double? deliveryRadiusKm,
     bool clearDeliveryRadiusKm = false,
-    RentalMoneyDraft? deliveryFee,
+    Money? deliveryFee,
     bool clearDeliveryFee = false,
     String? deliveryTerms,
     bool clearDeliveryTerms = false,
@@ -385,9 +350,9 @@ class RentalRateStep {
   const RentalRateStep({required this.minUnits, required this.unitPrice});
 
   final int minUnits;
-  final RentalMoneyDraft unitPrice;
+  final Money unitPrice;
 
-  RentalRateStep copyWith({int? minUnits, RentalMoneyDraft? unitPrice}) {
+  RentalRateStep copyWith({int? minUnits, Money? unitPrice}) {
     return RentalRateStep(
       minUnits: minUnits ?? this.minUnits,
       unitPrice: unitPrice ?? this.unitPrice,
@@ -404,14 +369,14 @@ class RentalDepositPolicy {
     this.terms,
   });
 
-  final RentalMoneyDraft amount;
+  final Money amount;
   final RentalDepositCollectionMethod collectionMethod;
   final String? terms;
 
-  bool get isZero => amount.amountMinor == 0;
+  bool get isZero => amount.minorUnits == 0;
 
   RentalDepositPolicy copyWith({
-    RentalMoneyDraft? amount,
+    Money? amount,
     RentalDepositCollectionMethod? collectionMethod,
     String? terms,
     bool clearTerms = false,
@@ -634,7 +599,10 @@ class RentalDraftData {
         currencyCode: currencyCode,
         billingUnit: RentalBillingUnit.day,
         deposit: RentalDepositPolicy(
-          amount: RentalMoneyDraft(amountMinor: 0, currencyCode: currencyCode),
+          amount: Money(
+            minorUnits: 0,
+            currency: CurrencyCode.parse(currencyCode),
+          ),
           collectionMethod: RentalDepositCollectionMethod.none,
         ),
         damagePolicy: '',

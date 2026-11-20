@@ -1,3 +1,6 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../../../shared/primitives/id/id_generator.dart';
 import '../entities/quick_plan_conversion.dart';
 import '../entities/scenario_budget_draft.dart';
@@ -79,6 +82,34 @@ class ExpandQuickPlanToScenarioUseCase {
       );
     }
 
+    CurrencyCode? currency;
+    try {
+      currency = CurrencyCode.parse(source.currencyCode);
+    } on FormatException {
+      // Invalid source currency is a conversion issue, not an inferred default.
+    }
+    if (currency == null ||
+        source.stops
+            .where((stop) => request.selectedStopIds.contains(stop.id))
+            .any(
+              (stop) =>
+                  stop.price != null &&
+                  (stop.price!.currency != currency ||
+                      stop.price!.minorUnits < 0),
+            )) {
+      return ExpandQuickPlanToScenarioResult(
+        scenario: null,
+        issues: const [
+          QuickPlanConversionIssue(
+            code: QuickPlanConversionIssueCode.invalidPrice,
+            severity: QuickPlanConversionIssueSeverity.error,
+          ),
+        ],
+        quickPlanStopIdToScenarioItemId: const {},
+        privateNotesByScenarioItemId: const {},
+        sourceRevision: source.revision,
+      );
+    }
     final String dayId = _idGenerator.generate();
     final List<ScenarioLocationDraft> locations = <ScenarioLocationDraft>[];
     final List<ScenarioItemDraft> items = <ScenarioItemDraft>[];
@@ -108,10 +139,7 @@ class ExpandQuickPlanToScenarioUseCase {
       locations.add(
         ScenarioLocationDraft(
           id: locationId,
-          point: ScenarioGeoPointDraft(
-            latitude: stop.latitude,
-            longitude: stop.longitude,
-          ),
+          point: GeoPoint(latitude: stop.latitude, longitude: stop.longitude),
           title: stop.title,
           timezoneId: source.timezoneId,
           disclosure: ScenarioLocationDisclosure.private,
@@ -241,16 +269,16 @@ class ExpandQuickPlanToScenarioUseCase {
             componentCode: 'experience',
             knowledge: ScenarioPriceKnowledge.free,
             source: ScenarioPriceSource.manual,
-            amount: ScenarioMoneyDraft(
+            amount: Money(
               minorUnits: 0,
-              currencyCode: currencyCode,
+              currency: CurrencyCode.parse(currencyCode),
             ),
             basis: ScenarioPriceBasis.perPerson,
           ),
         ],
       );
     }
-    final int? amount = stop.priceMinorUnits;
+    final Money? amount = stop.price;
     if (amount == null) {
       return const ScenarioCostDraft(
         components: <ScenarioMoneyEstimateDraft>[
@@ -268,10 +296,7 @@ class ExpandQuickPlanToScenarioUseCase {
           componentCode: 'experience',
           knowledge: ScenarioPriceKnowledge.estimated,
           source: ScenarioPriceSource.manual,
-          amount: ScenarioMoneyDraft(
-            minorUnits: amount,
-            currencyCode: currencyCode,
-          ),
+          amount: (amount),
           basis: ScenarioPriceBasis.perPerson,
           confidence: 0.5,
         ),

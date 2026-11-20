@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -203,18 +205,18 @@ void main() {
       ).body;
       expect(
         body(
-          const ActivityOptionalContributionDraft(note: '  '),
+          ActivityOptionalContributionDraft(note: '  '),
         ).containsKey('optionalContribution'),
         isFalse,
       );
       expect(
         body(
-          const ActivityOptionalContributionDraft(
+          ActivityOptionalContributionDraft(
             kind: ActivityContributionKind.donation,
             note: ' Leave a coin in the box ',
-            amountHint: ActivityContributionAmountDraft(
-              amountMinor: 200,
-              currencyCode: 'EUR',
+            amountHint: Money(
+              minorUnits: 200,
+              currency: CurrencyCode.parse('EUR'),
             ),
           ),
         )['optionalContribution'],

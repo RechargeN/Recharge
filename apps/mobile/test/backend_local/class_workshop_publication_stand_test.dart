@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/di/backend_binding_manifest.dart';
 import 'package:recharge/app/di/booking_backend_selection.dart';
 import 'package:recharge/app/di/class_workshop_publication_composition.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/core/id/id_generator.dart' show UuidV4IdGenerator;
 import 'package:recharge/features/booking/data/booking_transport_runtime.dart';
 import 'package:recharge/features/create/data/datasources/create_local_datasource.dart';
 import 'package:recharge/features/create/data/repositories/create_repository_impl.dart';

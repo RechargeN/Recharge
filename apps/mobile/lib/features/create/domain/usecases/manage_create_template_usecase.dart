@@ -1,4 +1,6 @@
+import '../../../../shared/primitives/time/local_date.dart';
 import '../../../../shared/primitives/id/id_generator.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 import '../entities/create_draft_entity.dart';
 import '../entities/create_template_entity.dart';
 import '../entities/event_draft_data.dart';
@@ -21,7 +23,7 @@ class ManageCreateTemplateUseCase {
       throw ArgumentError('CRT-TPL-01 supports Event templates only.');
     }
     final String normalizedName = _normalizedName(name);
-    final DateTime now = (nowUtc ?? DateTime.now()).toUtc();
+    final DateTime now = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
     return CreateTemplateEntity(
       schemaVersion: CreateTemplateEntity.currentSchemaVersion,
       id: _idGenerator.generate(),
@@ -47,7 +49,7 @@ class ManageCreateTemplateUseCase {
     }
     return template.copyWith(
       snapshot: _sanitizeSnapshot(draft),
-      updatedAtUtc: (nowUtc ?? DateTime.now()).toUtc(),
+      updatedAtUtc: UtcInstant(nowUtc ?? DateTime.now().toUtc()).value,
     );
   }
 
@@ -60,7 +62,7 @@ class ManageCreateTemplateUseCase {
     _verifyOwnership(template, userId);
     return template.copyWith(
       name: _normalizedName(name),
-      updatedAtUtc: (nowUtc ?? DateTime.now()).toUtc(),
+      updatedAtUtc: UtcInstant(nowUtc ?? DateTime.now().toUtc()).value,
     );
   }
 
@@ -70,7 +72,7 @@ class ManageCreateTemplateUseCase {
     DateTime? nowUtc,
   }) {
     _verifyOwnership(template, userId);
-    final DateTime now = (nowUtc ?? DateTime.now()).toUtc();
+    final DateTime now = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
     return template.copyWith(updatedAtUtc: now, lastUsedAtUtc: now);
   }
 
@@ -86,6 +88,7 @@ class ManageCreateTemplateUseCase {
     required String currency,
     PublisherRef? publisherRef,
     DateTime? nowUtc,
+    LocalDate? localToday,
   }) {
     _verifyOwnership(template, userId);
     if (template.objectType != CreateObjectType.event) {
@@ -100,6 +103,7 @@ class ManageCreateTemplateUseCase {
       country: country,
       city: city,
       currency: currency,
+      eventLocalToday: localToday,
     );
     final CreateDraftEntity source = template.snapshot;
     final EventDraftData freshEvent = fresh.eventData!;
@@ -141,9 +145,10 @@ class ManageCreateTemplateUseCase {
       unknownFields: const {},
       unsupportedFieldIds: const {},
     );
-    final DateTime now = (nowUtc ?? DateTime.now()).toUtc();
+    final DateTime now = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
     return fresh.copyWith(
-      id: 'loc_${now.microsecondsSinceEpoch}',
+      publisherRef: event.publisherRef,
+      id: _newLocalId(),
       objectType: CreateObjectType.event,
       title: source.title,
       eventType: source.eventType,
@@ -244,6 +249,7 @@ class ManageCreateTemplateUseCase {
       unsupportedFieldIds: const {},
     );
     return draft.copyWith(
+      clearPublisher: true,
       eventData: event,
       clearStartDateTimeUtc: true,
       clearEndDateTimeUtc: true,
@@ -281,7 +287,7 @@ class ManageCreateTemplateUseCase {
       throw ArgumentError('Rental templates require a rental draft.');
     }
     final String normalizedName = _normalizedName(name);
-    final DateTime now = (nowUtc ?? DateTime.now()).toUtc();
+    final DateTime now = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
     return CreateTemplateEntity(
       schemaVersion: CreateTemplateEntity.currentSchemaVersion,
       id: _idGenerator.generate(),
@@ -307,7 +313,7 @@ class ManageCreateTemplateUseCase {
     }
     return template.copyWith(
       snapshot: _sanitizeRentalSnapshot(draft),
-      updatedAtUtc: (nowUtc ?? DateTime.now()).toUtc(),
+      updatedAtUtc: UtcInstant(nowUtc ?? DateTime.now().toUtc()).value,
     );
   }
 
@@ -338,7 +344,7 @@ class ManageCreateTemplateUseCase {
     );
     final CreateDraftEntity source = template.snapshot;
     final RentalDraftData sourceRental = source.rentalData!;
-    final DateTime now = (nowUtc ?? DateTime.now()).toUtc();
+    final DateTime now = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
     final PublisherRef resolvedPublisher =
         publisherRef ?? PublisherRef(type: PublisherType.user, id: userId);
     final RentalDraftData rental = sourceRental.copyWith(
@@ -354,7 +360,8 @@ class ManageCreateTemplateUseCase {
       ),
     );
     return fresh.copyWith(
-      id: 'loc_${now.microsecondsSinceEpoch}',
+      publisherRef: resolvedPublisher,
+      id: _newLocalId(),
       objectType: CreateObjectType.rental,
       title: source.title,
       mainCategory: source.mainCategory,
@@ -400,7 +407,7 @@ class ManageCreateTemplateUseCase {
         draft.rentalData == null) {
       throw ArgumentError('Duplicate requires a rental draft.');
     }
-    final DateTime now = (nowUtc ?? DateTime.now()).toUtc();
+    final DateTime now = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
     final CreateTemplateEntity ephemeral = CreateTemplateEntity(
       schemaVersion: CreateTemplateEntity.currentSchemaVersion,
       id: _idGenerator.generate(),
@@ -439,6 +446,7 @@ class ManageCreateTemplateUseCase {
       ),
     );
     return draft.copyWith(
+      clearPublisher: true,
       rentalData: sanitized,
       media: const MediaEntity(coverImage: '', gallery: []),
       draftStatus: DraftStatus.draft,

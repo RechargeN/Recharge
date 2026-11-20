@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -100,7 +101,7 @@ class PublicProfessionalPageLocalDataSource {
       supportedLocales: (json['supportedLocales'] as List<dynamic>)
           .cast<String>()
           .toList(growable: false),
-      createdAtUtc: DateTime.parse(json['createdAtUtc'] as String).toUtc(),
+      createdAtUtc: UtcInstant.parse(json['createdAtUtc'] as String).value,
       revision: json['revision'] as int,
     );
   }

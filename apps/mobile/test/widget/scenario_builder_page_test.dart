@@ -1,3 +1,7 @@
+import 'package:recharge/core/id/id_generator.dart' show UuidV4IdGenerator;
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,9 +9,8 @@ import 'package:go_router/go_router.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/app/application/planning_conversion_providers.dart';
 import 'package:recharge/app/adapters/legacy_quick_plan_conversion_adapter.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -19,7 +22,6 @@ import 'package:recharge/features/auth/domain/usecases/restore_session_usecase.d
 import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
-import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -75,7 +77,7 @@ void main() {
     'invitation controls open online read-only content and hide it after revoke',
     (tester) async {
       FlutterSecureStorage.setMockInitialValues({});
-      final seed = ScenarioBuilderController();
+      final seed = ScenarioBuilderController(idGenerator: UuidV4IdGenerator());
       final shared = seed.state.draft.copyWith(
         sourcePrompt: 'Private invited stops',
       );
@@ -1014,7 +1016,7 @@ DiscoverFeedController _discoverController({
       timezoneId: 'Europe/Riga',
       originLat: 56.9496,
       originLng: 24.1052,
-      currencyCode: 'EUR',
+      currency: CurrencyCode.eur,
     ),
   );
 }
@@ -1027,7 +1029,7 @@ SavedSearchEntity _savedSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
+      budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -1042,7 +1044,7 @@ SmartSearchHistoryEntity _smartSearch() {
     query: DiscoverQuery.defaults().copyWith(
       queryText: 'museum',
       selectedCategoryIds: const <String>['art'],
-      budgetMax: const Money(minorUnits: 1000, currencyCode: 'EUR'),
+      budgetMax: Money(minorUnits: 1000, currency: CurrencyCode.eur),
       radiusMeters: 5000,
       unlimitedRadius: false,
     ),
@@ -1083,7 +1085,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.7,
@@ -1092,7 +1094,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
 
   @override
   Future<List<DiscoverItemEntity>> getFeed(DiscoverQuery query) async {
-    return const <DiscoverItemEntity>[];
+    return <DiscoverItemEntity>[];
   }
 }
 

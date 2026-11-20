@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/geo/geo_bounds.dart';
-import 'package:recharge/core/geo/geo_point.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/geo/geo_bounds.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/core/map/map_scene.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
@@ -328,13 +328,13 @@ Future<void> _loadGoldenFonts() async {
   }
   final String fontRoot = '$flutterRoot/bin/cache/artifacts/material_fonts';
   await (FontLoader('Roboto')
-        ..addFont(_goldenFontData('$fontRoot/roboto-regular.ttf'))
-        ..addFont(_goldenFontData('$fontRoot/roboto-medium.ttf'))
-        ..addFont(_goldenFontData('$fontRoot/roboto-bold.ttf')))
+        ..addFont(_goldenFontData('$fontRoot/Roboto-Regular.ttf'))
+        ..addFont(_goldenFontData('$fontRoot/Roboto-Medium.ttf'))
+        ..addFont(_goldenFontData('$fontRoot/Roboto-Bold.ttf')))
       .load();
   await (FontLoader(
     'MaterialIcons',
-  )..addFont(_goldenFontData('$fontRoot/materialicons-regular.otf'))).load();
+  )..addFont(_goldenFontData('$fontRoot/MaterialIcons-Regular.otf'))).load();
 }
 
 Future<ByteData> _goldenFontData(String path) async {

@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'event_publication.dart';
 import 'publisher_ref.dart';
 
@@ -189,9 +190,9 @@ final class ActivityPublicationRecord {
     final Object? serverOwnerUserId = value['serverOwnerUserId'];
     final Object? bodySaved = value['bodySaved'];
     final Object? title = value['title'];
-    final DateTime? createdAt = DateTime.tryParse(
+    final DateTime? createdAt = UtcInstant.tryParse(
       '${value['createdAtUtc'] ?? ''}',
-    );
+    )?.value;
     final Object? attachments = value['attachments'];
     final Object? submissionId = value['submissionId'];
     if (accountId is! String ||

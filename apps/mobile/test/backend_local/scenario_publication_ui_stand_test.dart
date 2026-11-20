@@ -13,7 +13,7 @@ import 'package:recharge/app/di/event_publication_composition.dart';
 import 'package:recharge/app/di/scenario_publication_composition.dart';
 import 'package:recharge/app/di/service_locator.dart';
 import 'package:recharge/app/presentation/scenario_publication_panel.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/core/id/id_generator.dart' show UuidV4IdGenerator;
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/booking/data/booking_callable_adapter.dart';
 import 'package:recharge/features/booking/data/booking_transport_runtime.dart';

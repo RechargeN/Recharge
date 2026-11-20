@@ -65,8 +65,18 @@ class ValidateSessionDraftUseCase {
     if (draft.resourceName.trim().isEmpty || draft.timezoneId.trim().isEmpty) {
       blocking(SessionBlockingCode.resourceMissing, fieldId: 'resourceName');
     }
-    if (draft.timezoneId.trim().isEmpty || !draft.timezoneConfirmed) {
+    if (draft.timezoneId.trim().isEmpty ||
+        !draft.timezoneConfirmed ||
+        materialization?.calendarFailure ==
+            SessionCalendarFailure.unknownTimezone) {
       blocking(SessionBlockingCode.timezoneInvalid, fieldId: 'timezoneId');
+    }
+    if (materialization?.calendarFailure ==
+        SessionCalendarFailure.unsupportedDateRange) {
+      blocking(
+        SessionBlockingCode.rangeInvalid,
+        fieldId: 'projectionWindowDays',
+      );
     }
     if (!draft.schedule.hasActiveWeekday) {
       blocking(SessionBlockingCode.scheduleEmpty, fieldId: 'weeklyRules');

@@ -2019,6 +2019,8 @@ class AppLocalizationsRu extends AppLocalizations {
       'title_length': 'В названии используйте 3–120 символов.',
       'visit_buffer_invalid': 'Проверьте запас времени на посещение.',
       'visit_duration_invalid': 'Проверьте обычную длительность посещения.',
+      'price_currency_mismatch':
+          'Валюта цены должна совпадать с указанной валютой.',
       'other': 'Проверьте эту часть места.',
     });
     return '$_temp0';
@@ -2789,6 +2791,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'legacySourceIdentityMissing':
           'Остановка скопирована как личное место: в старом плане нет объекта каталога',
       'stopNotFound': 'Выбранной остановки больше нет',
+      'invalidPrice': 'Сохранённая цена некорректна. Проверьте сумму и валюту.',
       'other': 'Проверьте эту остановку.',
     });
     return '$_temp0';
@@ -3009,6 +3012,12 @@ class AppLocalizationsRu extends AppLocalizations {
       'event_access_contract_unsupported':
           'У этого события более новый формат доступа, изменить его здесь нельзя.',
       'place_gallery_limit': 'Галерея места заполнена.',
+      'stored_money_invalid':
+          'Не удалось прочитать сохранённую цену. Исходный черновик не изменён.',
+      'stored_draft_invalid':
+          'Не удалось прочитать черновик. Исходные данные не изменены.',
+      'money_input_invalid':
+          'Проверьте сумму и валюту. Лишние десятичные знаки не округляются.',
       'other': 'Что-то пошло не так. Попробуйте ещё раз.',
     });
     return '$_temp0';
@@ -3035,6 +3044,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'city_required': 'Введите город',
       'cover_required': 'Добавьте обложку',
       'start_required': 'Выберите дату и время начала',
+      'utc_input_invalid': 'Введите явное время UTC (YYYY-MM-DDTHH:mm:ssZ).',
       'other': 'Проверьте это поле',
     });
     return '$_temp0';
@@ -9171,6 +9181,8 @@ class AppLocalizationsRu extends AppLocalizations {
       'loadFailed': 'Не удалось загрузить данные. Попробуйте снова.',
       'dataUnavailable': 'Данные недоступны.',
       'offline': 'Нет подключения к интернету.',
+      'invalidTimeFilter':
+          'Некорректный фильтр времени. Измените условия поиска.',
       'other': 'Не удалось загрузить ленту. Попробуйте снова.',
     });
     return '$_temp0';
@@ -10493,6 +10505,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'page_limit_request_unavailable':
           'Заявка доступна после создания трёх страниц.',
       'page_limit_request_failed': 'Не удалось отправить заявку модераторам.',
+      'access_unavailable': 'Доступ недоступен. Повторите проверку.',
       'other': 'Не удалось загрузить рабочие пространства.',
     });
     return '$_temp0';
@@ -13760,4 +13773,35 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get notificationsPushOpen => 'Открыть';
+
+  @override
+  String get adminToolsUnavailable => 'Доступ администратора недоступен';
+
+  @override
+  String get adminToolsLocalMock => 'Локальное тестовое администрирование';
+
+  @override
+  String get adminToolsNoDecisions =>
+      'Решения о проверке и лимитах недоступны.';
+
+  @override
+  String get createSessionClockChangeSkipped =>
+      'Пропущено из-за перевода часов';
+
+  @override
+  String get discoverTimeFilterInvalid =>
+      'Некорректный фильтр времени. Измените условия поиска.';
+
+  @override
+  String get discoverDateUnavailable => 'Дата недоступна';
+
+  @override
+  String discoverDateFrom(String date) {
+    return 'С $date';
+  }
+
+  @override
+  String discoverDateUntil(String date) {
+    return 'До $date';
+  }
 }

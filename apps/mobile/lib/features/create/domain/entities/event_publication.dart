@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'content_validation_violation.dart';
 
 /// Server-side state of an Event the user is publishing through Content (C3).
@@ -209,9 +210,9 @@ final class EventPublicationRecord {
     final Object? draftId = value['draftId'];
     final Object? draftRevision = value['draftRevision'];
     final Object? title = value['title'];
-    final DateTime? createdAt = DateTime.tryParse(
+    final DateTime? createdAt = UtcInstant.tryParse(
       value['createdAtUtc']?.toString() ?? '',
-    );
+    )?.value;
     if (localDraftId is! String ||
         contentId is! String ||
         draftId is! String ||

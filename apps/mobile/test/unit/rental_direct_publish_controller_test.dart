@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
@@ -24,7 +26,8 @@ void main() {
       isTrusted: true,
     ),
     bool wirePromotion = true,
-    PublisherAccessCheck? publisherAccessCheck,
+    PublisherAccessCheck? publisherAccessCheck =
+        const _AllowAllPublisherAccess(),
   }) {
     return CreateController(
       loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
@@ -100,17 +103,17 @@ void main() {
           pricing: RentalPricingPolicy(
             currencyCode: 'EUR',
             billingUnit: RentalBillingUnit.day,
-            rateSteps: const <RentalRateStep>[
+            rateSteps: <RentalRateStep>[
               RentalRateStep(
                 minUnits: 1,
-                unitPrice: RentalMoneyDraft(
-                  amountMinor: 2800,
-                  currencyCode: 'EUR',
+                unitPrice: Money(
+                  minorUnits: 2800,
+                  currency: CurrencyCode.parse('EUR'),
                 ),
               ),
             ],
-            deposit: const RentalDepositPolicy(
-              amount: RentalMoneyDraft(amountMinor: 0, currencyCode: 'EUR'),
+            deposit: RentalDepositPolicy(
+              amount: Money(minorUnits: 0, currency: CurrencyCode.parse('EUR')),
               collectionMethod: RentalDepositCollectionMethod.none,
             ),
             damagePolicy: 'Repair cost billed to renter.',
@@ -221,7 +224,7 @@ void main() {
         publisherRef: const PublisherRef(type: PublisherType.page, id: 'p1'),
       ),
     );
-    final controller = buildController();
+    final controller = buildController(publisherAccessCheck: null);
     await controller.ensureLoaded(
       userId: 'user-1',
       organizerEmail: 'user@example.test',
@@ -370,6 +373,9 @@ class _AllowAllPublisherAccess implements PublisherAccessCheck {
   Future<bool> canPublishAs({
     required String actorUserId,
     required PublisherRef publisher,
+    Set<String> requiredCapabilities = const {},
+    bool requireAdmin = false,
+    bool requireIdentityVerification = true,
   }) async => true;
 }
 

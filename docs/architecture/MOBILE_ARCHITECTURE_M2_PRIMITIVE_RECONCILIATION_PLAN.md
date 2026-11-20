@@ -3,7 +3,7 @@
 **ID:** MOB-ARCH-M2-P
 **Версия:** 1.0
 **Дата:** 2026-08-11
-**Статус:** Approved — M2-A Done; M2-B–M2-E not started
+**Статус:** Approved — historical M2-A/B local evidence retained; M2-C/D/E local integration and gates verified through CP5; exact-HEAD Linux CI and owner acceptance pending
 **Parent:** [Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
 **Depends on:** MOB-ARCH-M1 — Done, merged as `f893a931a58cff9ef9f779e17517af0d28c2f454`
 **Нормативные AC:** MOB-ARCH-AC-05–06, AC-52–53, AC-56–60, AC-74
@@ -532,3 +532,485 @@ time/locale/market, backend, Firebase или продуктовых UI-изме�
 
 Это закрывает только M2-A. Compatibility exports остаются осознанным долгом
 M2-D; M2-B–M2-E и весь M2 остаются незавершёнными.
+
+## 15. M2-B local progress — 2026-11-02
+
+Scope остаётся Approved local/mock. Выполнение начато на detached HEAD
+`be17822ed1ee7b750274430b39ba38e07c0c4a0a` с сохранением исходного IDP WIP.
+Отдельные checkpoint diffs отделяют Money foundation от миграции Create.
+
+Реализованы shared CurrencyCode/Money, exact decimal parser/formatter и единый
+legacy adapter. Общий Create draft, Place и Find People используют Money;
+current local writers пишут integer minor units. Event/Scenario wrappers
+сохраняются как lossless adapters до M2-D. Typed read failure блокирует
+перезапись draft; mutation коллекции templates не удаляет нечитаемый Money
+record. Невалидный price input не округляется и не заменяет прежнюю сумму.
+
+Event/Session и Scenario transport используют тот же exact input parser;
+Scenario totals проверяют overflow и currency compatibility через Money.
+Повторное открытие transport editor сохраняет введённую сумму. Strict mutation
+read templates сохраняет повреждённые и неизвестные records без перезаписи.
+
+Find People public projection использует Money; Details formatting для него
+и integer Rental/Session amounts не проходит через double.
+Query/saved-search/history persistence перенесён из domain в единственные
+data mappers; прежние domain readers/writers удалены после переноса всех
+вызовов. Legacy read без записи сохраняет raw record и использует явный
+geographic config context. Discover/Favorites/query budgets, Smart Search и
+legacy Scenario/Quick Plan consumers используют Money; exact input/formatting
+не округляет cents. Corrupt/future saved records блокируют mutation без
+перезаписи, direct conversion проверяет currency до создания новых IDs.
+
+Activity contribution input/restore использует общий parser/formatter и
+strict Money adapter без double rounding или удаления повреждённой суммы.
+Collection budget median сравнивается точно через integer arithmetic.
+Reference scan не выявил normalized monetary double declarations; coverage
+ratios, geo/duration/confidence и pixels не являются денежными суммами.
+
+Проверенный checkpoint: `flutter analyze --no-pub` — exit 0, 0 issues;
+полный `flutter test --no-pub --reporter expanded` — 1395 passed, exit 0,
+02:50. Boundary self-test/rules/inventory/diff — exit 0; 545 scanned,
+71 findings/suppressions, 0 violations/stale/expired, budget 71/71.
+
+Local implementation готова к review. Обязательный Linux GitHub Actions для
+данного diff отсутствует; M2-B остаётся Doing, M2-C/D/E не начаты.
+Это не M2-B Done, не приёмка R1 и не Emulator/device/cloud evidence.
+Compatibility paths не удалялись; production authority не добавлялась.
+
+## 16. M2-B completed local/mock checkpoint — 2026-11-10
+
+M2-B technical acceptance is complete on
+`2ad3e474acf61e591fb6c3113e0e56cc3a7b7ec1`, in draft PR #10 against
+the frozen task baseline `be17822`. This establishes this checkout's bounded
+Money/consumer scope, not compatibility with the newer integration branch,
+formal IDP acceptance, R1, Emulator/device or production readiness.
+
+AC-16–26 and AC-35–38 are covered by the canonical Money primitive/parser/
+formatter/legacy-adapter tests and affected consumer, mapper, controller and
+widget tests in the complete suite. Money uses exact integer minor units,
+checked BigInt intermediates, explicit currency, no silent rounding or FX;
+canonical presence wins and invalid/future records are not destructively
+rewritten. Event/Scenario wrappers remain until M2-D zero-reference cleanup.
+M8 remote writes remain outside this scope.
+
+Windows: full `flutter test --no-pub --reporter expanded` 1395 passed,
+exit 0, 02:32; `flutter analyze --no-pub` no issues, exit 0, 13.9 seconds.
+Linux: full mobile-tests run
+[42799083937](https://github.com/RechargeN/Recharge/actions/runs/42799083937)
+1395 passed, success; mobile-ci run
+[42799083935](https://github.com/RechargeN/Recharge/actions/runs/42799083935)
+analyzer no issues (19.9 seconds), boundary self/scan/inventory success.
+Both boundary scans: 545 files, 71 findings/suppressions, zero violations/
+stale/expired; budget 71/71. Diff and exported binary-patch checks passed.
+Codegen reports build_runner not configured; no generation evidence claimed.
+
+The user authorized the separate seventeen-file platform golden scope.
+Windows PNGs remain byte-identical; Linux references were visually reviewed,
+with the default exact comparator and no skips/tolerances. The initial
+Activity image differed in displayed time, not only rasterization; it was
+rejected and the visual fixture made explicit about host-local 10:00 supplied
+as a UTC instant. Its corrected Linux image was reviewed before acceptance.
+This fixture change does not establish product timezone behavior.
+Provenance and host policy: `apps/mobile/test/support/PLATFORM_GOLDENS.md`.
+The intermediate full Linux run had 1394 passed / 1 failed; only the final
+complete green run above closes the gate.
+
+## 17. M2-C1 primitive checkpoint — 2026-11-10
+
+C1 starts from the completed B tree, documentation checkpoint `b2d3e96`,
+on separate branch `codex/m2c-primitives-local-review-20261110`.
+The user authorized sequential B/C/D/E implementation. The C1 file map adds
+only the LAUNCH_STATUS progress row to the nineteen-file plan; canonical
+inventory is regenerated/checked without increasing exceptions.
+
+Shared LocalDate validates Gregorian years 1–9999, strict calendar text,
+weekday, ordering and bounded day arithmetic. Discover's old import path
+forwards to it until D; all current direct consumers use the shared type.
+There is no public date-as-UTC-midnight API. The existing TZDB adapter owns
+wall-clock candidate calculation and keeps its gap/overlap feature policy.
+
+UtcInstant rejects non-UTC DateTime, including local values on UTC hosts.
+IanaTimeZone validates structural identity only; existence and alias resolution
+remain adapter responsibilities. LocaleTag supports language/script/region
+with explicit rejection of unsupported extensions/variants. MarketRef stores
+a stable ID without city-name resolution or inferred market configuration.
+Primitive validation is explicit and does not rely on debug assertions.
+
+Focused primitive/property + existing timezone/time-fit tests: 23 passed.
+The date property cases span a 400-year Gregorian cycle. Boundary self/scan/
+inventory checks passed at unchanged budget 71/71, zero violations. Complete
+Windows/Linux gates remain required; their results are recorded separately
+in the checkpoint review evidence, not inferred from focused tests.
+
+C remains Doing: C1 is not complete schedule integration. C2 must reconcile
+UTC/zone persistence and existing Event/Session policies; C3 retains Scenario/
+transit service-day rules; C4 must use the Place zone for Visit History; C5
+must integrate market/locale values through explicit adapters. No compatibility
+deletion, backend/Firebase runtime, l10n readiness or R1 acceptance is claimed.
+
+## 18. M2-C2a1 persisted Discover window checkpoint — 2026-11-10
+
+This bounded checkpoint follows C1 on `92ffe51`, whose complete Windows/Linux
+suites passed with 1407 tests and clean analyzer/boundary gates. It uses the
+existing TimeWindow aggregate, DiscoverQueryModel, preferences datasource
+and injected TimezoneRepository; there is no new schedule, writer or resolver.
+
+TimeWindow holds shared UtcInstant/IanaTimeZone values internally. Its existing
+DateTime/String consumer accessors remain transitional until the M2-D audit.
+The sole persisted window shape now belongs to DiscoverQueryModel, including
+saved-search and history nesting. Current keys and query version are unchanged.
+Window reads/writes require a known zone through the existing TZDB repository.
+Missing validation, malformed non-null windows, unknown modes, noninteger or
+invalid flexibility and unsupported version/window combinations fail closed.
+
+UtcInstant parses explicit UTC Z text with component validation, microsecond
+precision and range checks; it rejects silent calendar normalization, offsets
+and zone-less text. Application now and timezone conversion reject local
+DateTime even on UTC hosts. Feature DST gap/overlap and interval policies stay
+in Discover. Valid old Z records read without writes; corrupt last/saved/history
+records block replacement/insertion/deletion and retain their original bytes.
+
+Focused tests cover all three persisted query paths, primitive parsing,
+non-UTC rejection, existing DST rules and Money regressions. Complete gate
+results are recorded in checkpoint evidence. Initial focused fixture failures
+omitted the aggregate's required TravelContext; fixtures were corrected without
+weakening the invariant.
+
+C2a2 still owns Map/Results route parsing and Search wall-clock UI conversion.
+C2b Event/Session, C3 Scenario/transit, C4 Visit and C5 MarketConfig remain open.
+This checkpoint does not claim those paths are canonical, remove compatibility
+APIs, migrate records on startup or establish device/Emulator/cloud evidence.
+
+## 19. M2-C2a2 Discover route boundary checkpoint — 2026-11-11
+
+C2a1 on `20de14e` passed complete Windows/Linux suites with 1419 tests,
+analyzer, boundary and diff checks. C2a2 replaces the two presentation time/
+travel parsers and three route writers with one implementation in the existing
+DiscoverFeedController. The existing TimezoneRepository is injected through
+the existing provider composition; persisted shapes remain in DiscoverQueryModel.
+
+Route decoding validates the complete coupled window/travel group before any
+query mutation. UTC text uses UtcInstant; known zones use TZDB. Partial fields,
+unknown modes/zones, invalid flexibility/origin/return flag, absent zone service
+and conflicting legacy date bounds fail closed. Without a window, valid UTC
+date bounds remain supported. Route names and parameter keys are unchanged.
+
+Map/Results preserve applied/draft query and storage on invalid input. The
+initial page transitions to an error state instead of remaining on a loading
+indicator; existing loaded results are retained. Search/Results/Map delegate
+to the single route writer. Superseded helper names have no production or test
+references. The primitive/parser and existing aggregate invariants remain the
+owners of structural semantics; no additional controller or storage path exists.
+
+Behavioral tests cover every time mode, exact UTC precision, explicit zone,
+travel fields, rejected routes and actual Results deep-link application with
+storage/recent-query checks. A first test run exposed the initial spinner defect,
+which was fixed; another test incorrectly expected regular history in Smart
+Search storage and was corrected to the canonical SavedSearch path.
+
+C2a3 must still replace Search's host-local editor initialization and preserve
+the selected zone during editing. Event/Session and C3–C5 remain separate.
+Complete host/CI gate results are in checkpoint evidence; native Google Maps,
+device, Emulator, production authority and R1 acceptance are not claimed.
+
+## 20. M2-C2a3 live time editor checkpoint — 2026-11-11
+
+C2a2 `99c7542` passed complete Windows/Linux suites with 1426 tests and all
+analyzer/boundary/diff gates. C2a3 migrates the live Search filter editor and
+BuildTimeWindowUseCase input to the existing LocalDateTimeValue, containing
+shared LocalDate and a validated local minute. Wall-clock day rollover uses
+bounded calendar arithmetic without host-zone normalization. Feature-specific
+gap/overlap resolution stays in the existing TimezoneRepository.
+
+The existing controller prepares editor values in the stored window zone, or
+the explicit configured market zone for a new window. The UI displays that zone;
+there is no device fallback. Unavailable zones/services fail visibly. Unchanged
+displayed bounds preserve original UTC seconds/microseconds and overlap offsets;
+an entirely unchanged window also retains resolvedAtUtc. Mode/flexibility-only
+edits retain bounds. Changed local times use the existing builder and DST rules.
+
+Time validation precedes other staged filter changes, so rejected edits do not
+partially replace date bounds. Existing manual origin remains unchanged when
+its type was not changed. Tests cover midnight/leap-day rollover, invalid local
+minute/weekday/range, explicit nonmarket zones, DST gap rejection, late overlap
+non-rewrite and actual filter-sheet open/apply behavior.
+
+Legacy quick-date shortcuts, their host-local labels and the unused legacy
+time-editor widget are not claimed migrated here: C2a4 owns active date flows;
+M2-D owns unused compatibility removal after reference proof. C2b and C3–C5
+remain open. Checkpoint gate logs are separate evidence, not R1/device/Emulator/
+cloud or production acceptance.
+
+## 21. M2-C2a4 active calendar filters and UTC metadata — 2026-11-17
+
+C2a3 on `92c2fa7` passed complete Windows/Linux suites with 1433 tests and
+analyzer/boundary/diff gates. C2a4 moves the active Search/Results calendar
+shortcuts to the existing DiscoverFeedController and TimezoneRepository.
+LocalDate carries picker calendar components; each boundary resolves independently
+in the configured market zone with existing user-start/user-end DST policies.
+An existing TimeWindow retains its own zone for display and editing.
+
+Search Today starts now and ends at 23:59:59; Results Today spans local midnight
+to next local midnight, including 23/25-hour days. Tonight keeps each surface's
+existing endpoint and Results' six-hour late fallback. Tomorrow/weekend/custom
+ranges end at the final local 23:59:59. Invalid/unknown-zone/empty intervals fail
+visibly before query mutation; no device-zone or implicit market fallback exists.
+
+Explicit date presets clear the old coupled window/travel fields. Unrelated
+filter apply retains custom and one-sided UTC bounds exactly. Active labels use
+the explicit zone; Flutter picker dates are component carriers, never converted
+from host-local time into stored instants. The unused legacy time-editor widget
+remains for M2-D reference-proven removal.
+
+Existing DiscoverQuery/SavedSearch/SmartSearchHistory mappers now validate
+date bounds, appliedAtUtc and createdAtUtc through shared UtcInstant. Valid
+legacy Z records retain precision and are not rewritten on read; malformed,
+zone-less, offset or non-string timestamps block existing storage mutations
+without discarding raw records. Optional null/missing compatibility is retained.
+No new parser, mapper, storage key, schema, controller or sync path is added.
+
+Behavioral and complete host/CI gates are recorded in checkpoint evidence;
+incomplete runs do not close this checkpoint. C2b Event/Session, C3–C5 and M2-D/E
+remain open, separately reviewable work. No device, Emulator, cloud runtime,
+production grants, R1 acceptance or Accepted promotion is implied.
+
+## 22. M2-C2b1 Event calendar boundary — 2026-11-17
+
+C2a4 `b01f169` passed complete Windows/Linux suites with 1444 tests,
+analyzer/boundary/diff gates. C2b1 makes shared LocalDate the owner of strict
+calendar parsing, nullable parsing, day arithmetic and day differences in Event.
+The former private type name remains a forwarding typedef until M2-D; no
+duplicate parser/arithmetic or new materializer is introduced.
+
+Event recurrence retains the existing UTC 548-day projection cutoff, ordering,
+deduplication, occurrence IDs, interval/count/until rules and monthly policies.
+Invalid exception/until/multi-date values fail instead of normalizing or silently
+dropping a bound. Projection-clock input must be UTC. Calendar overflow is
+contained by the existing coordinator, which keeps the entered draft date and
+does not manufacture a normalized occurrence.
+
+The existing EventTimezoneRepositoryImpl validates shared LocalDate and
+IanaTimeZone plus minute bounds before TZDB resolution. Event gap shift/reject
+and overlap earlier/later policies remain feature-owned; Session still uses
+its own reject/skip policy through the same port. Focused checks cover both
+consumers. No storage schema, read-time rewrite, Booking/lifecycle or production
+authority change is included.
+
+Complete gate results are recorded in checkpoint evidence. Session local-day
+projection, remaining Event/Session persisted UTC fields, Scenario/transit,
+Visit, MarketConfig and final M2-D/E cleanup/gates remain separate work.
+
+## 23. M2-C2b2a Session calendar projection and clock — 2026-11-17
+
+C2b1 `2a97568` passed complete Windows/Linux suites with 1454 tests and
+analyzer/boundary/diff gates. C2b2a makes SessionLocalDate a forwarding alias
+to shared LocalDate, retained until M2-D. Exception dates now share strict
+Gregorian validation and calendar comparison without silent normalization.
+
+The existing EventTimezoneRepository supplies instant-to-local-date conversion
+through its TZDB adapter. Session projection starts on the date of generatedAtUtc
+in the listing's IANA zone and validates the complete calendar range before
+emitting candidates. Unknown zones and unsupported calendar ranges return a
+typed failure on the existing materialization result; existing validation
+codes block readiness and no partial public offers are produced.
+
+Materializer and public projector require explicit UTC clock parameters.
+SessionCreateCoordinator samples the application clock once and passes the
+same instant to both. Stable slot keys, schedule revision, duration/buffer,
+notice, candidate cap, five-minute freshness and public allowlist are retained.
+No new clock service, repository, parser, aggregate or storage path is added.
+
+This checkpoint does not claim complete Session DST reconciliation. Read-only
+probes on C2b1 reproduce three violations of Session spec §11.4: transition
+inside slot or protected buffer is not caught by the current start-only check.
+C2b2b separately owns the full protected-interval check, honest internal skipped
+projection values and removal of host-local preview formatting. C2b3 owns
+persisted Event/Session UTC fields and legacy reads. Full host/CI gate results
+are checkpoint evidence; no device, Emulator, cloud or R1 acceptance is implied.
+
+## 24. M2-C2b2b Session protected intervals and zoned preview — 2026-11-18
+
+C2b2a `c70ff91` passed complete Windows/Linux suites with 1462 tests and
+analyzer/boundary/diff gates. C2b2b enforces the existing Session §11.4 policy
+through EventTimezoneRepository's TZDB adapter: the complete slot and protected
+buffer are checked against missing/repeated wall-clock ranges. Binary search
+limits inspection to relevant offset transitions; there is no minute scan or
+new resolver/library. Event shift/reject and earlier/later policies are unchanged.
+
+Gap/overlap ranges are half-open; a candidate endpoint inside one is unsafe.
+Thus a slot ending at the first ambiguous/missing minute is skipped, while a
+slot starting at the first unambiguous minute after the range remains valid.
+The buffer can cross midnight. Tests cover both Riga transitions, half-hour
+Lord Howe changes, Apia's skipped date, exact boundaries and calendar overflow.
+Unsupported ranges fail closed without retaining partial offers.
+
+Internal SessionSlotProjection retains shared LocalDate/IanaTimeZone and local
+minute bounds. A DST-skipped candidate has no fabricated UTC timestamps;
+resolved statuses require a positive pair of UtcInstant values. The existing
+public projector still allowlists offered candidates only, preserving public
+shape, freshness and providerAvailabilityUnknown semantics. Stable keys,
+revision, duration, notice and candidate cap remain feature-owned.
+
+Creator preview renders local date/time and the listing zone, including bounded
+skipped-date diagnostics with a human-readable clock-change reason. It does not
+convert labels through the device zone or expose diagnostics to public offers.
+No stored schema, writer, Booking lifecycle or authority is added.
+
+Checkpoint evidence records complete gates and any failed attempts separately.
+C2b3 persisted Create UTC/legacy reads, C3–C5 and M2-D/E remain open. This is
+local/mock work, not R1, device, Emulator, cloud runtime or Accepted promotion.
+
+## 25. M2-C2b3a Event/Session persisted UTC and safe reads — 2026-11-18
+
+C2b2b `1f04b57` passed complete Windows/Linux suites with 1473 tests and
+analyzer/boundary/diff gates. C2b3a reuses UtcInstant in the existing Event and
+Session mappers. Explicit UTC text retains microseconds; corrupt, offset,
+zone-less and non-string values fail instead of normalizing or disappearing.
+Event occurrence bounds and Session exception audit timestamps are required;
+optional Event override/admission timestamps still support null/missing values.
+Non-UTC DateTime input is rejected by current typed writers.
+
+Future Event schemas remain opaque under the existing contract. Valid legacy
+UTC reads do not write records; Session legacy_schedule payload is retained.
+Date-only editable draft fields keep feature validation policy. This checkpoint
+does not silently change old timezone-default or market-inference policies.
+
+The existing CreateController restore-failure block now covers FormatException
+as well as MoneyReadException. Save/autosave/publish remain blocked until a
+successful retry or a different actor is loaded. The existing queued draft
+writer validates both stored and incoming models through CreateDraftModel
+before slot/collection mutation, protecting raw records against direct or stale
+callers. Template upsert/delete reuse their existing requireLosslessRead path.
+No parallel parser, repository, writer, queue, migration or sync path is added.
+
+Behavioral evidence covers precise roundtrip, required/optional timestamps,
+corrupt restore, direct replacement, queue recovery, actor isolation and raw
+template preservation. Full gates and failed attempts are recorded separately.
+C2b3b still owns shared Create envelope UTC, legacy generic Session slots and
+legacy Event date defaults; C3–C5 and M2-D/E remain open. No production grants,
+data migration writes, R1, device, Emulator, cloud runtime or Accepted claim.
+
+
+## 26. M2-C2b3b — shared Create UTC boundaries — 2026-11-19
+
+Create envelopes, template metadata and generic legacy slots now use UtcInstant
+at existing reader/writer boundaries. Required audit instants fail explicitly;
+optional null fields, microseconds, IDs and map keys remain compatible. Explicit
+template clocks must already be UTC. Corrupt raw drafts/templates cannot be
+silently replaced; valid reads perform no migration writes.
+
+## 27. M2-C Event defaults and Create input — 2026-11-19
+
+Fresh Event defaults receive LocalDate from the existing TZDB adapter in the
+explicit Event zone. Calendar tomorrow uses addDays, without elapsed 24-hour
+arithmetic. Compatibility factory callers without a zoned date get an empty,
+editable date instead of a fabricated current date. Template materialization
+receives the same application calendar contract.
+
+Saved Event fields and occurrences are not rematerialized during controller
+restore. For old envelopes without a typed local date, an explicit persisted
+instant is converted through the existing Event TZDB adapter; the instant and
+stored bytes remain untouched. Missing instants do not become read-time now.
+Existing Event DST gap/overlap policies and duration semantics remain unchanged.
+Generic Create inputs labelled UTC reject zone-less, offset and invalid calendar
+text, retain the previous draft values and block save/publish until correction.
+
+## 28. M2-C Scenario/transit — 2026-11-19
+
+Scenario compatibility date wrappers delegate validation/arithmetic to shared
+LocalDate. Transit service dates compare through that calendar. GTFS times
+remain feature-owned seconds from the service day, including values after
+24:00; day offsets and seconds are not converted into elapsed UTC durations.
+Dated Scenario creation receives an explicit zoned calendar from application.
+
+Scenario mapper and GTFS cache/parser/snapshot boundaries use UtcInstant,
+retaining precision and rejecting malformed or implicit instants. Calculated
+UTC intervals require both bounds in increasing order. Optional fields remain
+optional; IANA identity validation does not imply an enabled zone or market.
+Restore does not recheck providers or recalculate saved snapshots. Unknown
+snapshot fields and existing schema keys remain; corrupt drafts retain their
+raw bytes and block replacement through the existing Create storage path.
+
+## 29. M2-C Visit History — 2026-11-19
+
+The existing RecordPlaceVisitUseCase receives a calendar callback bound in app
+DI to the owning TZDB adapter. Both the picker and the domain future-date guard
+use today's LocalDate in the explicit Place zone. The retained compatibility
+`today` argument does not override that clock. Unknown or missing Place zones
+fail explicitly; the app facade no longer substitutes Europe/Riga.
+
+Visit dates and audit UTC fields validate through shared primitives without
+changing owner/place/day identity. Read-only lists may display valid siblings;
+mutations require a lossless read and preserve unreadable/future records.
+Existing foreign-owner records are retained rather than filtered out on write.
+There is no new storage writer, queue, migration or attendance inference.
+
+## 30. M2-C typed MarketConfig and verification boundary — 2026-11-19
+
+MarketConfig requires separate MarketRef, LocaleTag, CurrencyCode and
+IanaTimeZone identities. Locale lists are immutable; changing market/display
+name does not infer locale, currency or zone. Existing string getters and the
+explicit legacy constructor/registry adapter remain for M2-D consumer cleanup.
+No locale availability, enabled-market or production grant is implied.
+
+Five reversible local checkpoints have separate patches and behavioral checks.
+Complete final Windows analyzer/test, boundary self/scan/inventory, formatting
+and diff evidence are recorded in the 2026-11-19 work report. Required Linux
+GitHub Actions evidence for the new uncommitted diff is still absent; M2-C
+remains Doing until that gate passes. No commit, push, merge, deployment,
+Accepted promotion, Emulator/device/cloud or R1 acceptance is included.
+
+
+## 31. M2-D/E pre-rebase migration — 2026-11-19
+
+Consumer migration uses shared Geo, ID interface, Money and LocalDate while
+retaining compatibility declarations and exports under the owner's PR12 →
+main → PR11 rebase order. Legacy data schema keys/readers remain. Current
+local verification does not establish zero references on the combined tree.
+The private Event alias remains until its final-use migration and removal can
+be atomic. No new suppression or registry edit is used to hide this debt.
+
+The AC01–40 matrix, exact scope of local evidence, 71-exception reconciliation,
+residual UTC/fallback review, rollback and integration/publication blockers are
+in [M2-D/E verification](../verification/M2_DE_2026_11_19.md). M2-C/D/E remain
+Doing; no Done/Accepted, production, device or cloud promotion is made.
+
+## 32. Combined-tree reconciliation — 2026-11-20
+
+The full PR10/11 source stack and safety WIP were transferred individually onto
+main `78d6a386` after PR12/13 merged; safety tags and conflict journal preserve
+rollback. CP1 `aa20ed60` passed full analyze/tests after semantic integration.
+ADR0023 spec reconciliation is a separate commit `00af72fa`; CP2 `8ccc9097`
+verifies ten-type publisher capture/non-rewrite and Personal/Page/Admin guards.
+
+CP3 `45eda2d6` closes the remaining UTC/configuration boundaries, with explicit
+DST/Place-zone/GTFS contracts and no restore-time active-config guesses.
+The owner-approved protected transport/debug diff is only parser imports and
+strict UTC readers, covered by establish/restore/debug-route regressions.
+The concrete .000Z syntax is accepted; +00:00, zone-less and impossible UTC
+text intentionally refuse. Expired sessions remain refused.
+
+CP4 `c78101f5` removes nine unused public wrappers, private LocalDate alias,
+seven forwarding files, the ID forwarding export, obsolete MarketConfig
+members and unused active-context codec parameters after retained-tree proofs.
+The initial Market getter text check missed two for-in references; getters
+were restored and a complete resolved-AST zero proof preceded final removal.
+Twenty-two source files/preimages are hash-verified in the owner Desktop review
+archive; the per-item rollback matrix identifies the removal commit.
+UUID/ULID implementation and necessary persisted-data compatibility readers
+remain: legacy Money, schedules, Scenario snapshots/future fields, owner-scoped
+Visit v2 and Class legacy blocks. They do not infer identity or grant access.
+
+CP3 and CP4 each passed 2713 tests / 83 existing skips, analyze/boundary/diff 0.
+The shared inventory was regenerated once in CP5: 710 scanned Dart files,
+69 active exceptions under unchanged budget 71, no violations/stale/expired.
+The old 71-item snapshot differs because main already removed BND-LEGACY-0023
+and 0051; the registry is unchanged by this integration. See the full AC01–40,
+IDP coverage, debt, blockers and rollback package:
+[2026-11-20 reconciliation](../verification/IDP_M2_RECONCILIATION_2026_11_20.md).
+
+Final CP5 local gates passed: analyze0, full2713 pass/83 existing skips, boundary
+self-test/scan/drift0 and diff0. Exact-HEAD Linux CI remains to be recorded. Claude's
+A34 signin check is an owner-required gate before any main merge. No Done
+promotion, backend/infra/contracts/device/cloud changes, production grants or
+R1 M2 acceptance follow from this architecture reconciliation.

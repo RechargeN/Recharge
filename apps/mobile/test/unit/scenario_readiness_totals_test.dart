@@ -1,3 +1,6 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/domain/entities/scenario_budget_draft.dart';
 import 'package:recharge/features/create/domain/entities/scenario_draft_data.dart';
@@ -6,6 +9,42 @@ import 'package:recharge/features/create/domain/entities/scenario_logistics_draf
 import 'package:recharge/features/create/domain/usecases/evaluate_scenario_readiness_usecase.dart';
 
 void main() {
+  for (final basis in [
+    ScenarioPriceBasis.perPerson,
+    ScenarioPriceBasis.perBooking,
+  ]) {
+    test('Money totals reject ${basis.name} overflow without wrapping', () {
+      const evaluate = EvaluateScenarioReadinessUseCase();
+      ScenarioCostDraft cost(int minor) => ScenarioCostDraft(
+        components: [
+          ScenarioMoneyEstimateDraft(
+            componentCode: 'ticket',
+            knowledge: ScenarioPriceKnowledge.known,
+            amount: Money(
+              minorUnits: minor,
+              currency: CurrencyCode.parse('EUR'),
+            ),
+            basis: basis,
+            source: ScenarioPriceSource.manual,
+          ),
+        ],
+      );
+      final result = evaluate(
+        _fixture(
+          routeCost: cost(Money.maxSafeMinorUnits),
+          breakCost: cost(1),
+          legCost: const ScenarioCostDraft(),
+        ),
+      );
+      expect(result.canSaveToMyScenarios, isFalse);
+      expect(
+        result.validation.issues.map((i) => i.code),
+        contains('money_outOfRange'),
+      );
+      expect(result.totals.displayFromTotalCost, isNull);
+    });
+  }
+
   const EvaluateScenarioReadinessUseCase evaluate =
       EvaluateScenarioReadinessUseCase();
 
@@ -61,12 +100,12 @@ void main() {
         planned: ScenarioTemplatePlannedTimeDraft(startDayIndex: 0),
       ),
       durationMinutes: 45,
-      cost: const ScenarioCostDraft(
+      cost: ScenarioCostDraft(
         components: <ScenarioMoneyEstimateDraft>[
           ScenarioMoneyEstimateDraft(
             componentCode: 'dessert',
             knowledge: ScenarioPriceKnowledge.known,
-            amount: ScenarioMoneyDraft(minorUnits: 900, currencyCode: 'EUR'),
+            amount: Money(minorUnits: 900, currency: CurrencyCode.parse('EUR')),
             basis: ScenarioPriceBasis.perBooking,
             source: ScenarioPriceSource.manual,
           ),
@@ -98,12 +137,12 @@ void main() {
   });
 
   test('confirmed free totals remain zero instead of becoming unknown', () {
-    const ScenarioCostDraft free = ScenarioCostDraft(
+    final ScenarioCostDraft free = ScenarioCostDraft(
       components: <ScenarioMoneyEstimateDraft>[
         ScenarioMoneyEstimateDraft(
           componentCode: 'admission',
           knowledge: ScenarioPriceKnowledge.free,
-          amount: ScenarioMoneyDraft(minorUnits: 0, currencyCode: 'EUR'),
+          amount: Money(minorUnits: 0, currency: CurrencyCode.parse('EUR')),
           basis: ScenarioPriceBasis.perBooking,
           source: ScenarioPriceSource.catalog,
         ),
@@ -125,12 +164,12 @@ void main() {
   });
 
   test('does not expose a partial display total without exchange rates', () {
-    const ScenarioCostDraft dollars = ScenarioCostDraft(
+    final ScenarioCostDraft dollars = ScenarioCostDraft(
       components: <ScenarioMoneyEstimateDraft>[
         ScenarioMoneyEstimateDraft(
           componentCode: 'ticket',
           knowledge: ScenarioPriceKnowledge.known,
-          amount: ScenarioMoneyDraft(minorUnits: 3000, currencyCode: 'USD'),
+          amount: Money(minorUnits: 3000, currency: CurrencyCode.parse('USD')),
           basis: ScenarioPriceBasis.perBooking,
           source: ScenarioPriceSource.catalog,
         ),
@@ -160,7 +199,7 @@ ScenarioDraftData _fixture({
 }) {
   const ScenarioLocationDraft location = ScenarioLocationDraft(
     id: 'location-1',
-    point: ScenarioGeoPointDraft(latitude: 56.9496, longitude: 24.1052),
+    point: GeoPoint(latitude: 56.9496, longitude: 24.1052),
     title: 'Riga centre',
     disclosure: ScenarioLocationDisclosure.public,
     timezoneId: 'Europe/Riga',
@@ -187,12 +226,15 @@ ScenarioDraftData _fixture({
     durationMinutes: 60,
     cost:
         routeCost ??
-        const ScenarioCostDraft(
+        ScenarioCostDraft(
           components: <ScenarioMoneyEstimateDraft>[
             ScenarioMoneyEstimateDraft(
               componentCode: 'ticket',
               knowledge: ScenarioPriceKnowledge.known,
-              amount: ScenarioMoneyDraft(minorUnits: 1000, currencyCode: 'EUR'),
+              amount: Money(
+                minorUnits: 1000,
+                currency: CurrencyCode.parse('EUR'),
+              ),
               basis: ScenarioPriceBasis.perPerson,
               source: ScenarioPriceSource.catalog,
             ),
@@ -286,14 +328,14 @@ ScenarioDraftData _fixture({
         durationMinutes: unresolvedLeg ? null : 15,
         cost:
             legCost ??
-            const ScenarioCostDraft(
+            ScenarioCostDraft(
               components: <ScenarioMoneyEstimateDraft>[
                 ScenarioMoneyEstimateDraft(
                   componentCode: 'transit',
                   knowledge: ScenarioPriceKnowledge.estimated,
-                  amount: ScenarioMoneyDraft(
+                  amount: Money(
                     minorUnits: 500,
-                    currencyCode: 'EUR',
+                    currency: CurrencyCode.parse('EUR'),
                   ),
                   basis: ScenarioPriceBasis.perBooking,
                   source: ScenarioPriceSource.provider,

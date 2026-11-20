@@ -9,7 +9,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:recharge/app/adapters/route_geolocator_adapter.dart';
 import 'package:recharge/app/adapters/route_gpx_file_selector_adapter.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/core/id/id_generator.dart' show UuidV4IdGenerator;
 import 'package:recharge/features/create/application/controllers/route_recording_controller.dart';
 import 'package:recharge/features/create/application/state/route_recording_state.dart';
 import 'package:recharge/features/create/data/datasources/route_gpx_memory_source_store.dart';

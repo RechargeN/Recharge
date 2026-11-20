@@ -27,15 +27,12 @@ String discoverMetersText(AppLocalizations l10n, num meters) =>
       NumberFormat.decimalPattern(l10n.localeName).format(meters.round()),
     );
 
-/// [amount] in major units with its own [currencyCode].
+/// Exact Money with its own currency; language affects display only.
 String discoverMoney(
   AppLocalizations l10n,
-  double amount,
+  Money amount,
   String currencyCode,
-) => RechargeFormats.money(
-  Money(minorUnits: (amount * 100).round(), currencyCode: currencyCode),
-  l10n.localeName,
-);
+) => RechargeFormats.money(amount, l10n.localeName);
 
 /// `45 min`, `2 h`, `2 h 30 min`; no duration is "flexible".
 String discoverDuration(AppLocalizations l10n, int? minutes) {

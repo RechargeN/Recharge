@@ -3,6 +3,8 @@ import '../../../../core/localization/recharge_formats.dart';
 import '../../../../core/localization/taxonomy_labels.dart';
 import '../../../../core/localization/user_message_catalog.dart';
 import '../discover_formats.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -16,7 +18,6 @@ import '../../../../app/application/scenario_object_intake_providers.dart';
 import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
-import '../../../../shared/primitives/money/money.dart';
 import '../../../../shared/models/catalog_object_ref.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/application/controllers/auth_controller.dart';
@@ -34,7 +35,6 @@ import '../../application/smart_search_parser.dart';
 import '../../application/state/discover_feed_state.dart';
 import '../../application/state/scenario_intake_selection_state.dart';
 import '../../domain/entities/discover_item_entity.dart';
-import '../../domain/entities/geo_point.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/smart_search_history_entity.dart';
 import '../../domain/entities/time_window.dart';
@@ -611,21 +611,40 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
     DiscoverFeedController controller,
     Map<String, String> seedParameters,
   ) async {
-    final String? rawBudgetMax = seedParameters['budgetMax'];
-    final Money? budgetMax = rawBudgetMax == null
+    final budgetText = seedParameters['budgetMax'];
+    final budgetResult = budgetText == null
         ? null
-        : Money.tryParseMajor(
-            rawBudgetMax,
-            currencyCode: controller.marketCurrencyCode,
-          );
-    final DateTime? dateFrom = _dateFromSeed(seedParameters['dateFrom']);
-    final DateTime? dateTo = _dateFromSeed(seedParameters['dateTo']);
+        : controller.parseBudgetInput(budgetText, locale: 'en');
+    if (budgetResult != null && !budgetResult.isSuccess) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.validationCheckTheAmount)),
+        );
+      }
+      return;
+    }
+    final Money? budgetMax = budgetResult?.value;
+    final ({
+      TimeWindow? window,
+      TravelContext? travel,
+      DateTime? from,
+      DateTime? to,
+    })
+    time;
+    try {
+      time = controller.decodeTimeRouteParameters(seedParameters);
+    } on FormatException {
+      controller.reportInvalidTimeRoute();
+      if (mounted) {
+        _searchController.text = controller.state.appliedQuery.queryText;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.discoverTimeFilterInvalid)),
+        );
+      }
+      return;
+    }
     final double? itemLat = _doubleFromSeed(seedParameters['itemLat']);
     final double? itemLng = _doubleFromSeed(seedParameters['itemLng']);
-    final TimeWindow? timeWindow = _mapTimeWindowFromSeed(seedParameters);
-    final TravelContext? travelContext = _mapTravelContextFromSeed(
-      seedParameters,
-    );
     await controller.applySearchConditions(
       queryText: _queryTextFromSeed(seedParameters),
       selectedCategoryIds: _categoriesFromSeed(seedParameters),
@@ -633,10 +652,10 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       budgetMax: budgetMax,
       clearBudgetMin: true,
       clearBudgetMax: budgetMax == null,
-      dateFrom: dateFrom,
-      clearDateFrom: dateFrom == null,
-      dateTo: dateTo,
-      clearDateTo: dateTo == null,
+      dateFrom: time.from,
+      clearDateFrom: time.from == null,
+      dateTo: time.to,
+      clearDateTo: time.to == null,
       radiusMeters: _doubleFromSeed(seedParameters['radius']),
       unlimitedRadius: seedParameters['unlimited'] == '1',
       openNow: seedParameters['openNow'] == '1',
@@ -645,10 +664,10 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       centerLng: itemLng,
       manualAreaSelected: itemLat != null && itemLng != null,
       selectedItemId: _itemIdFromSeed(seedParameters),
-      timeWindow: timeWindow,
-      clearTimeWindow: timeWindow == null,
-      travelContext: travelContext,
-      clearTravelContext: travelContext == null,
+      timeWindow: time.window,
+      clearTimeWindow: time.window == null,
+      travelContext: time.travel,
+      clearTravelContext: time.travel == null,
       sourceScreen: 'map_search',
     );
   }
@@ -997,7 +1016,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       startsAtUtc: now,
       distanceKm: route.totalDistanceKm,
       priceAmount: route.totalPriceAmount,
-      isFree: route.totalPriceAmount.minorUnits == 0,
+      isFree: route.isFree,
       savedAtUtc: now,
       targetRoute: route.builderLocation,
     );
@@ -1034,7 +1053,8 @@ bool _hasSearchSeed(Map<String, String> seedParameters) {
     'openNow',
     'onlyAvailable',
   ];
-  return supportedKeys.any(seedParameters.containsKey);
+  return supportedKeys.any(seedParameters.containsKey) ||
+      DiscoverFeedController.hasTimeRouteParameters(seedParameters);
 }
 
 String? _queryTextFromSeed(Map<String, String> seedParameters) {
@@ -1064,11 +1084,6 @@ double? _doubleFromSeed(String? value) {
   return double.tryParse(value.trim());
 }
 
-DateTime? _dateFromSeed(String? value) {
-  if (value == null || value.trim().isEmpty) return null;
-  return DateTime.tryParse(value.trim())?.toUtc();
-}
-
 String mapCreateLocationForQuery(AppLocalizations l10n, DiscoverQuery query) {
   final Map<String, String> params = <String, String>{
     'source': 'map',
@@ -1079,7 +1094,11 @@ String mapCreateLocationForQuery(AppLocalizations l10n, DiscoverQuery query) {
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter().decimal(
+        query.budgetMax!,
+        locale: 'en',
+        omitZeroFraction: true,
+      ),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -1195,7 +1214,11 @@ String mapScenarioBuilderLocationForQuery(
 SmartSearchParseResult? _mapSmartRouteParseForSmartSearch(
   SmartSearchHistoryEntity item,
 ) {
-  final SmartSearchParseResult parseResult = parseSmartSearch(item.prompt);
+  final SmartSearchParseResult parseResult = parseSmartSearch(
+    item.prompt,
+    currency: (item.query.budgetMax ?? item.query.budgetMin)?.currency,
+    locale: 'en',
+  );
   if (parseResult.routeIntent == null) return null;
   return parseResult;
 }
@@ -1236,83 +1259,16 @@ Map<String, String> _mapQueryParameters(DiscoverQuery query) {
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter().decimal(
+        query.budgetMax!,
+        locale: 'en',
+        omitZeroFraction: true,
+      ),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
     'unlimited': query.unlimitedRadius ? '1' : '0',
-    ..._mapTimeRouteParameters(query),
-  };
-}
-
-TimeWindow? _mapTimeWindowFromSeed(Map<String, String> values) {
-  final String? mode = values['timeMode'];
-  final String? start = values['timeStart'];
-  final String? end = values['timeEnd'];
-  final String? timezone = values['timezone'];
-  final String? resolvedAt = values['resolvedAt'];
-  if (mode == null ||
-      start == null ||
-      end == null ||
-      timezone == null ||
-      resolvedAt == null) {
-    return null;
-  }
-  try {
-    return TimeWindow(
-      startAtUtc: DateTime.parse(start).toUtc(),
-      endAtUtc: DateTime.parse(end).toUtc(),
-      timezoneId: timezone,
-      mode: TimeWindowMode.values.firstWhere(
-        (TimeWindowMode value) => value.name == mode,
-      ),
-      flexibilityMinutes: int.tryParse(values['flexibility'] ?? '') ?? 0,
-      resolvedAtUtc: DateTime.parse(resolvedAt).toUtc(),
-    );
-  } on Exception {
-    return null;
-  }
-}
-
-TravelContext? _mapTravelContextFromSeed(Map<String, String> values) {
-  if (!values.containsKey('originLat') || !values.containsKey('originLng')) {
-    return null;
-  }
-  try {
-    return TravelContext(
-      originType: TravelOriginType.values.firstWhere(
-        (TravelOriginType value) => value.name == values['originType'],
-      ),
-      origin: GeoPoint(
-        latitude: double.parse(values['originLat']!),
-        longitude: double.parse(values['originLng']!),
-      ),
-      transportMode: TransportMode.values.firstWhere(
-        (TransportMode value) => value.name == values['transport'],
-      ),
-      includeReturnTrip: values['returnTrip'] == '1',
-    );
-  } on Exception {
-    return null;
-  }
-}
-
-Map<String, String> _mapTimeRouteParameters(DiscoverQuery query) {
-  final TimeWindow? window = query.timeWindow;
-  final TravelContext? travel = query.travelContext;
-  if (window == null || travel == null) return const <String, String>{};
-  return <String, String>{
-    'timeMode': window.mode.name,
-    'timeStart': window.startAtUtc.toIso8601String(),
-    'timeEnd': window.endAtUtc.toIso8601String(),
-    'timezone': window.timezoneId,
-    'flexibility': '${window.flexibilityMinutes}',
-    'resolvedAt': window.resolvedAtUtc.toIso8601String(),
-    'originType': travel.originType.name,
-    'originLat': '${travel.origin.latitude}',
-    'originLng': '${travel.origin.longitude}',
-    'transport': travel.transportMode.name,
-    'returnTrip': travel.includeReturnTrip ? '1' : '0',
+    ...DiscoverFeedController.timeRouteParameters(query),
   };
 }
 
@@ -1353,9 +1309,9 @@ String _mapCreateSubtitleForQuery(AppLocalizations l10n, DiscoverQuery query) {
   final List<String> parts = <String>[
     'Map area', // l10n-ignore: Create seed prefill data
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
-    if (query.freeOnly) 'free', // l10n-ignore: Create seed prefill data
+    if (query.freeOnly) 'free',
     if (query.budgetMax != null)
-      'under ${query.budgetMax!.toStringAsFixed(0)}', // l10n-ignore: Create seed prefill data
+      'under ${MoneyFormatter().decimal(query.budgetMax!, locale: 'en', omitZeroFraction: true)}',
     query.unlimitedRadius
         ? 'any area' // l10n-ignore: Create seed prefill data
         : '${(query.radiusMeters / 1000).round()} km',
@@ -1367,9 +1323,9 @@ String _mapPromptForQuery(DiscoverQuery query) {
   final List<String> parts = <String>[
     if (query.queryText.trim().isNotEmpty) query.queryText.trim(),
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
-    if (query.freeOnly) 'free', // l10n-ignore: Scenario builder prompt
+    if (query.freeOnly) 'free',
     if (query.budgetMax != null)
-      'under ${query.budgetMax!.toStringAsFixed(0)}', // l10n-ignore: Scenario builder prompt
+      'under ${MoneyFormatter().decimal(query.budgetMax!, locale: 'en', omitZeroFraction: true)}',
     query.unlimitedRadius
         ? 'any area' // l10n-ignore: Scenario builder prompt
         : 'near ${(query.radiusMeters / 1000).round()} km', // l10n-ignore: Scenario builder prompt
@@ -3060,13 +3016,11 @@ class _ScenarioMapRoute {
     );
   }
 
-  Money get totalPriceAmount {
-    final String currencyCode = stops.first.priceAmount.currencyCode;
-    return stops.fold<Money>(
-      Money.zero(currencyCode),
-      (Money total, ScenarioStepEntity step) => total + step.priceAmount,
-    );
-  }
+  Money get totalPriceAmount => ScenarioDraftEntity.totalPriceOf(
+    stops,
+    currency: stops.first.priceAmount.currency,
+  );
+  bool get isFree => stops.every((stop) => stop.isFree);
 
   double get centerLatitude {
     return stops.fold<double>(
@@ -3082,14 +3036,6 @@ class _ScenarioMapRoute {
           (double total, ScenarioStepEntity step) => total + step.longitude,
         ) /
         stops.length;
-  }
-
-  String get priceLabel {
-    if (totalPriceAmount.minorUnits == 0) {
-      return 'Free'; // l10n-ignore: Create seed prefill data
-    }
-    return '${totalPriceAmount.toStringAsFixed(0)} '
-        '${totalPriceAmount.currencyCode}';
   }
 
   String get moodLabel {
@@ -3160,7 +3106,7 @@ class _ScenarioMapRoute {
     final Map<String, String> params = <String, String>{
       'q': promptLabel,
       if (category != null) 'category': category,
-      'free': totalPriceAmount.minorUnits == 0 ? '1' : '0',
+      'free': isFree ? '1' : '0',
       'radius': '5000',
       'unlimited': '0',
     };

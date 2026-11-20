@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'dart:convert';
 
 /// L3 product analytics contract (ANALYTICS_L3_PRODUCT_ANALYTICS_AMENDMENT.md
@@ -308,7 +309,7 @@ bool isValidProductAnalyticsEnvelope(Object? raw) {
   if (definition == null) return false;
   final Object? occurred = raw['occurredAtUtc'];
   if (occurred is! String || !_hourInstant.hasMatch(occurred)) return false;
-  final DateTime? parsed = DateTime.tryParse(occurred);
+  final DateTime? parsed = UtcInstant.tryParse(occurred)?.value;
   if (parsed == null || parsed.toUtc().toIso8601String() != occurred) {
     return false;
   }

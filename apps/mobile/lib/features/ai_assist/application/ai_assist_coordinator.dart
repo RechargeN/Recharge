@@ -1,4 +1,4 @@
-import '../../../core/id/id_generator.dart';
+import '../../../shared/primitives/id/id_generator.dart';
 import '../domain/entities/ai_assist_contract.dart';
 import '../domain/repositories/ai_prompt_registry.dart';
 import '../domain/usecases/execute_ai_assist_usecase.dart';

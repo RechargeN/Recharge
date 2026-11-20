@@ -29,6 +29,23 @@ class IdentityAccessSnapshot {
   final List<ManagedPageMembershipEntity> memberships;
   final int revision;
 
+  static const int selfServiceOwnedPageLimit = 3;
+
+  bool belongsTo(String actor) => actor.isNotEmpty && userId == actor;
+
+  bool get isAdmin => globalRole.toLowerCase() == 'admin';
+  bool get canUseAdminTools =>
+      isAdmin && hasGlobalCapability('admin.tools.view');
+  bool get canPreviewExperience =>
+      isAdmin && hasGlobalCapability('admin.experience.preview');
+  bool get canCreatePage =>
+      isVerifiedCreator && hasGlobalCapability('page.create');
+
+  bool canUsePage(String actor, String pageId, String capability) =>
+      belongsTo(actor) &&
+      canActivatePage(pageId) &&
+      (membershipFor(pageId)?.hasCapability(capability) ?? false);
+
   bool get isVerifiedCreator =>
       creatorVerificationStatus == CreatorVerificationStatus.verified;
 
@@ -59,7 +76,14 @@ class IdentityAccessSnapshot {
         page != null &&
         page.isActive &&
         membership != null &&
-        membership.isActive;
+        membership.isActive &&
+        const {
+          'page.manage',
+          'page.content.create',
+          'page.content.submit',
+          'page.insights.view',
+          'page.team.manage',
+        }.any(membership.hasCapability);
   }
 
   List<ManagedPageEntity> get availablePages {
@@ -69,7 +93,7 @@ class IdentityAccessSnapshot {
   }
 
   List<ManagedPageEntity> get ownedPages {
-    return availablePages
+    return pages
         .where((ManagedPageEntity page) {
           final ManagedPageMembershipEntity? membership = membershipFor(
             page.id,

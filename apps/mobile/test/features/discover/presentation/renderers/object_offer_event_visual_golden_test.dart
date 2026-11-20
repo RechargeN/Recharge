@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'dart:io';
 
 import 'package:design_system/design_system.dart';
@@ -91,13 +93,13 @@ Future<void> _loadGoldenFonts() async {
   }
   final String fontRoot = '$flutterRoot/bin/cache/artifacts/material_fonts';
   await (FontLoader('Roboto')
-        ..addFont(_fontData('$fontRoot/roboto-regular.ttf'))
-        ..addFont(_fontData('$fontRoot/roboto-medium.ttf'))
-        ..addFont(_fontData('$fontRoot/roboto-bold.ttf')))
+        ..addFont(_fontData('$fontRoot/Roboto-Regular.ttf'))
+        ..addFont(_fontData('$fontRoot/Roboto-Medium.ttf'))
+        ..addFont(_fontData('$fontRoot/Roboto-Bold.ttf')))
       .load();
   await (FontLoader(
     'MaterialIcons',
-  )..addFont(_fontData('$fontRoot/materialicons-regular.otf'))).load();
+  )..addFont(_fontData('$fontRoot/MaterialIcons-Regular.otf'))).load();
 }
 
 Future<ByteData> _fontData(String path) async {
@@ -138,7 +140,7 @@ PublishedEventDiscoveryEntity _eventFixture() {
     latitude: 25.0805,
     longitude: 55.1403,
     distanceKm: 3.2,
-    priceAmount: 12,
+    priceAmount: Money(minorUnits: 1200, currency: CurrencyCode.eur),
     isFree: false,
     currencyCode: 'EUR',
     externalBookingUrl: 'https://example.com/book',

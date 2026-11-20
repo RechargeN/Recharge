@@ -25,16 +25,17 @@ class RequestPageLimitIncreaseUseCase {
   final IdGenerator _idGenerator;
   final DateTime Function() _utcNow;
 
-  Future<PageLimitIncreaseRequestEntity> call(String userId) async {
+  Future<PageLimitIncreaseRequestEntity> call(String userId) =>
+      IdentityWorkspaceRepository.runCommand(
+        _repository,
+        () => _request(userId),
+      );
+
+  Future<PageLimitIncreaseRequestEntity> _request(String userId) async {
     final String normalizedUserId = userId.trim();
     if (normalizedUserId.isEmpty) {
       throw const RequestPageLimitIncreaseException('user_id_required');
     }
-
-    final existing = await _repository.loadPendingPageLimitRequest(
-      normalizedUserId,
-    );
-    if (existing != null) return existing;
 
     final access = await _repository.loadAccessSnapshot(normalizedUserId);
     if (access.userId != normalizedUserId) {
@@ -42,6 +43,16 @@ class RequestPageLimitIncreaseUseCase {
         'access_snapshot_user_mismatch',
       );
     }
+    if (!access.canCreatePage) {
+      throw const RequestPageLimitIncreaseException(
+        'page_request_not_authorized',
+      );
+    }
+    final existing = await _repository.loadPendingPageLimitRequest(
+      normalizedUserId,
+    );
+    if (existing != null) return existing;
+
     final int ownedPageCount = access.ownedPages.length;
     if (ownedPageCount <
         CreateProfessionalPageUseCase.selfServiceOwnedPageLimit) {
@@ -60,7 +71,8 @@ class RequestPageLimitIncreaseUseCase {
       revision: 1,
     );
     await _repository.savePageLimitRequest(request);
-    return request;
+    return await _repository.loadPendingPageLimitRequest(normalizedUserId) ??
+        request;
   }
 
   static DateTime _systemUtcNow() => DateTime.now().toUtc();

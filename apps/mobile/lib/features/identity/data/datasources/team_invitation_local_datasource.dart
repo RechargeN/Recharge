@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -96,8 +97,8 @@ class TeamInvitationLocalDataSource {
           .cast<String>()
           .toSet(),
       invitedByUserId: json['invitedByUserId'] as String,
-      sentAtUtc: DateTime.parse(json['sentAtUtc'] as String).toUtc(),
-      expiresAtUtc: DateTime.parse(json['expiresAtUtc'] as String).toUtc(),
+      sentAtUtc: UtcInstant.parse(json['sentAtUtc'] as String).value,
+      expiresAtUtc: UtcInstant.parse(json['expiresAtUtc'] as String).value,
       status: _enumByName(
         TeamInvitationStatus.values,
         json['status'] as String,
@@ -105,7 +106,7 @@ class TeamInvitationLocalDataSource {
       resendCount: json['resendCount'] as int? ?? 0,
       lastResentAtUtc: lastResent == null
           ? null
-          : DateTime.parse(lastResent).toUtc(),
+          : UtcInstant.parse(lastResent).value,
       revision: json['revision'] as int,
     );
   }

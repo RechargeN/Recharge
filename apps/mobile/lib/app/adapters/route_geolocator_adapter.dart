@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 
-import '../../core/geo/geo_point.dart';
 import '../../core/localization/l10n_context.dart';
+import '../../shared/primitives/geo/geo_point.dart';
 import '../../features/create/domain/entities/route_recording_data.dart';
 import '../../features/create/domain/repositories/route_location_recording_port.dart';
 

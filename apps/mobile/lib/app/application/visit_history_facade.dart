@@ -67,6 +67,13 @@ class VisitHistoryFacade {
     return _controller.ensureLoaded(userId: userId);
   }
 
+  DateTime todayForPlace(DiscoverItemEntity item) {
+    if (item.objectKind != DiscoverObjectKind.place) {
+      throw ArgumentError('A Place is required');
+    }
+    return _controller.todayInZone(item.timezoneId);
+  }
+
   Future<VisitedPlaceEntity> recordSelfReported({
     required String userId,
     required DiscoverItemEntity item,

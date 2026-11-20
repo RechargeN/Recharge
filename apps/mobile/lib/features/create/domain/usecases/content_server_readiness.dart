@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../entities/content_validation_violation.dart';
 
 /// Server publication readiness (M1 stage 3, owner decisions Р-09 and 3-Б).
@@ -144,7 +145,7 @@ List<ContentValidationViolation> rentalServerReadiness(
     final Object? confirmed =
         (availability['coverage'] as Map)['confirmedAtUtc'];
     final DateTime? confirmedAt = confirmed is String
-        ? DateTime.tryParse(confirmed)
+        ? UtcInstant.tryParse(confirmed)?.value
         : null;
     if (confirmedAt != null && !confirmedAt.isAfter(nowUtc)) {
       issues.require(

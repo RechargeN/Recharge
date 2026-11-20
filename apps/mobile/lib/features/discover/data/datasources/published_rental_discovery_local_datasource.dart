@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -225,9 +226,7 @@ class PublishedRentalDiscoveryLocalDataSource {
       cancellationPolicyId: map['cancellationPolicyId'] as String? ?? '',
       cancellationPolicyNote: map['cancellationPolicyNote'] as String?,
       externalBookingUrl: map['externalBookingUrl'] as String?,
-      publishedAtUtc: DateTime.parse(
-        map['publishedAtUtc']! as String,
-      ).toUtc(),
+      publishedAtUtc: UtcInstant.parse(map['publishedAtUtc']! as String).value,
     );
   }
 }

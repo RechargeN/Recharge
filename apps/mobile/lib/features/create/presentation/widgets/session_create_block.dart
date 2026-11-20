@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 
 import 'create_media_pick_actions.dart';
@@ -365,12 +368,19 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
   // --- Блок 2. Когда ---
 
   Widget _whenBlock(SessionDraftData session) {
-    final List<SessionSlotProjection> preview = widget
-        .controller
-        .sessionSchedulePreview
+    final projections = widget.controller.sessionSchedulePreview;
+    final List<SessionSlotProjection> preview = projections
         .where(
           (SessionSlotProjection p) =>
               p.internalStatus == SessionProjectionStatus.offeredBySchedule,
+        )
+        .take(7)
+        .toList(growable: false);
+    final skipped = projections
+        .where(
+          (slot) =>
+              slot.internalStatus ==
+              SessionProjectionStatus.dstTransitionSkipped,
         )
         .take(7)
         .toList(growable: false);
@@ -449,6 +459,14 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
             ],
           ),
         ],
+        if (skipped.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 12),
+          Text(
+            context.l10n.createSessionClockChangeSkipped,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+          for (final slot in skipped) Text(_slotLabel(slot)),
+        ],
         ..._fieldIssues(<String>{'weeklyRules', 'slotDurationMinutes'}),
       ],
     );
@@ -474,8 +492,10 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
               label: Text(context.l10n.createSessionPriceFixed),
               selected: !isFree,
               onSelected: (_) => widget.controller.setSessionPriceFixed(
-                amountMinor: session.price.amount?.amountMinor ?? 0,
-                currencyCode: session.price.amount?.currencyCode ?? 'EUR',
+                amountMinor: session.price.amount?.minorUnits ?? 0,
+                currencyCode:
+                    session.price.amount?.currency.value ??
+                    widget.state.draft.currency,
               ),
             ),
           ],
@@ -487,24 +507,29 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
               'priceAmount',
               session.price.amount == null
                   ? ''
-                  : (session.price.amount!.amountMinor / 100).toStringAsFixed(
-                      2,
+                  : MoneyFormatter().decimal(
+                      Money(
+                        minorUnits: session.price.amount!.minorUnits,
+                        currency: CurrencyCode.parse(
+                          session.price.amount!.currency.value,
+                        ),
+                      ),
+                      locale: Localizations.localeOf(context).toLanguageTag(),
                     ),
             ),
             decoration: InputDecoration(
-              labelText: context.l10n.createSessionPricePerSlotEur,
+              labelText: context.l10n.createSessionPricePerSlotEur.replaceAll(
+                'EUR',
+                session.price.amount?.currency.value ??
+                    widget.state.draft.currency,
+              ),
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (String value) {
-              final double? parsed = double.tryParse(
-                value.replaceAll(',', '.'),
+              widget.controller.updateSessionPriceText(
+                value,
+                locale: Localizations.localeOf(context).toLanguageTag(),
               );
-              if (parsed != null) {
-                widget.controller.setSessionPriceFixed(
-                  amountMinor: (parsed * 100).round(),
-                  currencyCode: session.price.amount?.currencyCode ?? 'EUR',
-                );
-              }
             },
           ),
         ],
@@ -814,10 +839,9 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
   }
 
   static String _slotLabel(SessionSlotProjection slot) {
-    final DateTime local = slot.startAtUtc.toLocal();
     return '${slot.localDate} '
-        '${local.hour.toString().padLeft(2, '0')}:'
-        '${local.minute.toString().padLeft(2, '0')}';
+        '${_minutesLabel(slot.startMinuteLocal)}–'
+        '${_minutesLabel(slot.endMinuteLocal)} · ${slot.timezoneId}';
   }
 }
 

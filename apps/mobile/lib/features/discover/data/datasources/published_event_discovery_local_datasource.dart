@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/event_occurrence.dart';
 import '../../domain/entities/published_event_discovery_entity.dart';
 import '../../domain/entities/published_event_program_item.dart';
@@ -75,7 +77,7 @@ class PublishedEventDiscoveryLocalDataSource
       latitude: 25.0805,
       longitude: 55.1403,
       distanceKm: 3.2,
-      priceAmount: 12,
+      priceAmount: Money(minorUnits: 1200, currency: CurrencyCode.eur),
       isFree: false,
       currencyCode: 'EUR',
       externalBookingUrl:

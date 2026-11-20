@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import '../../domain/entities/scenario_item_draft.dart';
 import '../../domain/entities/scenario_object_intake.dart';
 import '../../domain/entities/scenario_object_intake_session.dart';
@@ -31,8 +33,8 @@ class ScenarioObjectIntakeSessionModel {
     final session = ScenarioObjectIntakeSession(
       schemaVersion: schemaVersion!,
       intent: _intentFromJson(_map(json['intent'])),
-      createdAtUtc: DateTime.parse(json['createdAtUtc'] as String).toUtc(),
-      expiresAtUtc: DateTime.parse(json['expiresAtUtc'] as String).toUtc(),
+      createdAtUtc: UtcInstant.parse(json['createdAtUtc'] as String).value,
+      expiresAtUtc: UtcInstant.parse(json['expiresAtUtc'] as String).value,
       status: status.single,
       consumedTargetDraftId: _nullableString(json['consumedTargetDraftId']),
       consumedTargetRevision: (json['consumedTargetRevision'] as num?)?.toInt(),
@@ -148,7 +150,7 @@ class ScenarioObjectIntakeSessionModel {
           ? null
           : ScenarioIntakeLocationSnapshot(
               title: location['title'] as String,
-              point: ScenarioGeoPointDraft(
+              point: GeoPoint(
                 latitude: (location['latitude'] as num).toDouble(),
                 longitude: (location['longitude'] as num).toDouble(),
               ),
@@ -262,5 +264,5 @@ class ScenarioObjectIntakeSessionModel {
   }
 
   static DateTime? _nullableDateTime(Object? value) =>
-      value == null ? null : DateTime.parse(value as String).toUtc();
+      value == null ? null : UtcInstant.parse(value as String).value;
 }

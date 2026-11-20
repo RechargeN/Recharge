@@ -3,8 +3,8 @@ import 'dart:typed_data';
 
 import 'package:xml/xml.dart';
 
-import '../../../../core/geo/geo_point.dart';
 import '../../domain/entities/route_sync_data.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
 import '../../domain/repositories/route_gpx_repository.dart';
 
 /// Builds GPX from a canonical model only (never from stored source XML).

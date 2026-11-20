@@ -1,8 +1,9 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/presentation/widgets/scenario_intake_selection_tray.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/discover/application/state/scenario_intake_selection_state.dart';
 
 void main() {
@@ -66,7 +67,7 @@ DiscoverItemEntity _item(int index) => DiscoverItemEntity(
   startsAtUtc: DateTime.utc(2026, 8, 3),
   latitude: 56.9496,
   longitude: 24.1052,
-  priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+  priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
   distanceKm: 1,
   isFree: true,
   objectKind: DiscoverObjectKind.place,

@@ -1,11 +1,16 @@
+import '../../../../shared/primitives/money/currency_metadata.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/telemetry/analytics_service.dart';
-import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/discover_query.dart';
-import '../../domain/entities/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import '../../domain/entities/time_window.dart';
 import '../../domain/entities/time_fit_evaluation.dart';
 import '../../domain/entities/saved_search_entity.dart';
@@ -16,8 +21,15 @@ import '../../domain/usecases/get_discover_feed_usecase.dart';
 import '../../domain/usecases/build_time_window_usecase.dart';
 import '../discover_runtime_defaults.dart';
 import '../state/discover_feed_state.dart';
+import '../../domain/repositories/timezone_repository.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
+import '../../../../shared/primitives/time/local_date.dart';
 
 enum TimeFitRelaxation { widenWindow, skipReturnTrip, removeTimeFilter }
+
+enum DiscoverDatePreset { today, tonight, tomorrow, weekend }
+
+enum DiscoverDateSurface { search, results }
 
 class DiscoverFeedController extends ChangeNotifier {
   DiscoverFeedController({
@@ -26,17 +38,14 @@ class DiscoverFeedController extends ChangeNotifier {
     required AnalyticsService analyticsService,
     DiscoverQuery? initialQuery,
     BuildTimeWindowUseCase? buildTimeWindow,
-    DiscoverRuntimeDefaults runtimeDefaults = const DiscoverRuntimeDefaults(
-      timezoneId: 'UTC',
-      originLat: 0,
-      originLng: 0,
-      currencyCode: 'XXX',
-    ),
+    TimezoneRepository? timezoneRepository,
+    required DiscoverRuntimeDefaults runtimeDefaults,
   }) : _getDiscoverFeedUseCase = getDiscoverFeedUseCase,
        _discoverPreferencesRepository = discoverPreferencesRepository,
        _analyticsService = analyticsService,
        _initialQuery = initialQuery ?? DiscoverQuery.defaults(),
        _buildTimeWindow = buildTimeWindow,
+       _timezoneRepository = timezoneRepository,
        _runtimeDefaults = runtimeDefaults,
        _state = DiscoverFeedState.initial(
          initialQuery ?? DiscoverQuery.defaults(),
@@ -47,15 +56,291 @@ class DiscoverFeedController extends ChangeNotifier {
   final AnalyticsService _analyticsService;
   final DiscoverQuery _initialQuery;
   final BuildTimeWindowUseCase? _buildTimeWindow;
+  final TimezoneRepository? _timezoneRepository;
   final DiscoverRuntimeDefaults _runtimeDefaults;
 
   String get marketTimezoneId => _runtimeDefaults.timezoneId;
-  String get marketCurrencyCode => _runtimeDefaults.currencyCode;
+  CurrencyCode get marketCurrency => _runtimeDefaults.currency;
+
+  LocalDate calendarDate(DateTime instantUtc, {String? timezoneId}) {
+    final zone = timezoneId ?? marketTimezoneId;
+    final repository = _calendarRepository(zone);
+    try {
+      return repository.toLocal(UtcInstant(instantUtc).value, zone).date;
+    } on ArgumentError {
+      throw const TimeWindowValidationException(
+        TimeWindowIssue.invalidTravelContext,
+      );
+    } on FormatException {
+      throw const TimeWindowValidationException(TimeWindowIssue.boundsRequired);
+    }
+  }
+
+  TimezoneRepository _calendarRepository(String zone) {
+    final repository = _timezoneRepository;
+    if (repository == null || !repository.isValidTimezone(zone)) {
+      throw const TimeWindowValidationException(
+        TimeWindowIssue.unknownTimezone,
+      );
+    }
+    return repository;
+  }
+
+  DateTime _calendarBoundary(LocalDate date, int minute, {required bool end}) {
+    final resolution = _calendarRepository(marketTimezoneId).resolveLocal(
+      date: date,
+      minutesSinceMidnight: minute,
+      timezoneId: marketTimezoneId,
+      policy: end ? LocalBoundaryPolicy.userEnd : LocalBoundaryPolicy.userStart,
+    );
+    if (!resolution.isValid || resolution.instantUtc == null) {
+      throw const TimeWindowValidationException(
+        TimeWindowIssue.nonexistentLocalTime,
+      );
+    }
+    return UtcInstant(resolution.instantUtc!).value;
+  }
+
+  ({DateTime from, DateTime to}) _calendarInterval(DateTime from, DateTime to) {
+    if (!from.isBefore(to)) {
+      throw const TimeWindowValidationException(TimeWindowIssue.endBeforeStart);
+    }
+    return (from: from, to: to);
+  }
+
+  /// Calendar picks use the configured market zone, never the device zone.
+  ({DateTime from, DateTime to}) calendarRange(
+    LocalDate first,
+    LocalDate last,
+  ) {
+    if (first.compareTo(last) > 0) {
+      throw const TimeWindowValidationException(TimeWindowIssue.endBeforeStart);
+    }
+    return _calendarInterval(
+      _calendarBoundary(first, 0, end: false),
+      _calendarBoundary(last, 1439, end: true).add(const Duration(seconds: 59)),
+    );
+  }
+
+  /// Search and Results retain their distinct existing endpoint policies.
+  ({DateTime from, DateTime to}) datePreset(
+    DiscoverDatePreset preset, {
+    DiscoverDateSurface surface = DiscoverDateSurface.search,
+    DateTime? nowUtc,
+  }) {
+    final now = nowUtc ?? DateTime.now().toUtc();
+    final today = calendarDate(now);
+    try {
+      switch (preset) {
+        case DiscoverDatePreset.tomorrow:
+          final date = today.addDays(1);
+          return calendarRange(date, date);
+        case DiscoverDatePreset.weekend:
+          final saturday = today.addDays(
+            (DateTime.saturday - today.weekday) % 7,
+          );
+          return calendarRange(saturday, saturday.addDays(1));
+        case DiscoverDatePreset.today:
+          if (surface == DiscoverDateSurface.results) {
+            return _calendarInterval(
+              _calendarBoundary(today, 0, end: false),
+              _calendarBoundary(today.addDays(1), 0, end: true),
+            );
+          }
+          return _calendarInterval(
+            now,
+            _calendarBoundary(
+              today,
+              1439,
+              end: true,
+            ).add(const Duration(seconds: 59)),
+          );
+        case DiscoverDatePreset.tonight:
+          final start = _calendarBoundary(today, 1080, end: false);
+          final end = _calendarBoundary(today, 1439, end: true).add(
+            Duration(seconds: surface == DiscoverDateSurface.search ? 59 : 0),
+          );
+          if (surface == DiscoverDateSurface.results && now.isAfter(end)) {
+            return _calendarInterval(now, now.add(const Duration(hours: 6)));
+          }
+          return _calendarInterval(now.isAfter(start) ? now : start, end);
+      }
+    } on ArgumentError {
+      throw const TimeWindowValidationException(TimeWindowIssue.boundsRequired);
+    } on FormatException {
+      throw const TimeWindowValidationException(TimeWindowIssue.boundsRequired);
+    }
+  }
+
+  ({String timezoneId, LocalDateTimeValue start, LocalDateTimeValue end})
+  timeEditorValues({TimeWindow? window, DateTime? nowUtc}) {
+    final repository = _timezoneRepository;
+    final zone = window?.timezoneId ?? marketTimezoneId;
+    if (repository == null || !repository.isValidTimezone(zone)) {
+      throw const TimeWindowValidationException(
+        TimeWindowIssue.unknownTimezone,
+      );
+    }
+    final now = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
+    try {
+      return (
+        timezoneId: zone,
+        start: repository.toLocal(
+          window?.startAtUtc ?? now.add(const Duration(minutes: 30)),
+          zone,
+        ),
+        end: repository.toLocal(
+          window?.endAtUtc ?? now.add(const Duration(hours: 2)),
+          zone,
+        ),
+      );
+    } on FormatException {
+      throw const TimeWindowValidationException(TimeWindowIssue.boundsRequired);
+    } on ArgumentError {
+      throw const TimeWindowValidationException(TimeWindowIssue.boundsRequired);
+    }
+  }
+
+  static const _timeRouteKeys = <String>{
+    'timeMode',
+    'timeStart',
+    'timeEnd',
+    'timezone',
+    'flexibility',
+    'resolvedAt',
+    'originType',
+    'originLat',
+    'originLng',
+    'transport',
+    'returnTrip',
+  };
+
+  static bool hasTimeRouteParameters(Map<String, String> values) =>
+      _timeRouteKeys.any(values.containsKey);
+
+  void reportInvalidTimeRoute() {
+    _setState(
+      _state.copyWith(
+        status: _state.status == DiscoverFeedStatus.initial
+            ? DiscoverFeedStatus.error
+            : _state.status,
+        message: DiscoverFeedNotice.invalidTimeFilter,
+      ),
+    );
+  }
+
+  /// Decode the coupled route fields before any draft, feed or storage mutation.
+  ({TimeWindow? window, TravelContext? travel, DateTime? from, DateTime? to})
+  decodeTimeRouteParameters(Map<String, String> values) {
+    DateTime? date(String key) {
+      final value = values[key];
+      return value == null ? null : UtcInstant.parse(value).value;
+    }
+
+    final from = date('dateFrom');
+    final to = date('dateTo');
+    if (!hasTimeRouteParameters(values)) {
+      if (from != null && to != null && !from.isBefore(to)) {
+        throw const FormatException('Invalid search date bounds');
+      }
+      return (window: null, travel: null, from: from, to: to);
+    }
+    if (!_timeRouteKeys.every(values.containsKey)) {
+      throw const FormatException('Incomplete time filter');
+    }
+    final timezone = values['timezone']!;
+    if (_timezoneRepository?.isValidTimezone(timezone) != true) {
+      throw const FormatException('Time filter requires a known timezone');
+    }
+    final flexibilityText = values['flexibility']!;
+    if (RegExp(r'^[0-9]+$').stringMatch(flexibilityText) != flexibilityText) {
+      throw const FormatException('Invalid time flexibility');
+    }
+    final flexibility = int.tryParse(flexibilityText);
+    if (flexibility == null || !{'0', '1'}.contains(values['returnTrip'])) {
+      throw const FormatException('Invalid time or travel filter');
+    }
+    try {
+      final window = TimeWindow(
+        startAtUtc: date('timeStart')!,
+        endAtUtc: date('timeEnd')!,
+        resolvedAtUtc: date('resolvedAt')!,
+        timezoneId: timezone,
+        mode: TimeWindowMode.values.firstWhere(
+          (v) => v.name == values['timeMode'],
+        ),
+        flexibilityMinutes: flexibility,
+      );
+      final travel = TravelContext(
+        originType: TravelOriginType.values.firstWhere(
+          (v) => v.name == values['originType'],
+        ),
+        origin: GeoPoint(
+          latitude: double.parse(values['originLat']!),
+          longitude: double.parse(values['originLng']!),
+        ),
+        transportMode: TransportMode.values.firstWhere(
+          (v) => v.name == values['transport'],
+        ),
+        includeReturnTrip: values['returnTrip'] == '1',
+      );
+      if ((from != null && from != window.startAtUtc) ||
+          (to != null && to != window.endAtUtc)) {
+        throw const FormatException('Conflicting time filter bounds');
+      }
+      return (
+        window: window,
+        travel: travel,
+        from: window.startAtUtc,
+        to: window.endAtUtc,
+      );
+    } on StateError {
+      throw const FormatException('Unknown time or travel mode');
+    } on ArgumentError {
+      throw const FormatException('Invalid time or travel filter');
+    }
+  }
+
+  /// The one route shape used by Search, Results and Map.
+  static Map<String, String> timeRouteParameters(DiscoverQuery query) {
+    final window = query.timeWindow;
+    final travel = query.travelContext;
+    if (window == null) return const {};
+    if (travel == null) throw const FormatException('Missing travel context');
+    return {
+      'timeMode': window.mode.name,
+      'timeStart': window.startAtUtc.toIso8601String(),
+      'timeEnd': window.endAtUtc.toIso8601String(),
+      'timezone': window.timezoneId,
+      'flexibility': '${window.flexibilityMinutes}',
+      'resolvedAt': window.resolvedAtUtc.toIso8601String(),
+      'originType': travel.originType.name,
+      'originLat': '${travel.origin.latitude}',
+      'originLng': '${travel.origin.longitude}',
+      'transport': travel.transportMode.name,
+      'returnTrip': travel.includeReturnTrip ? '1' : '0',
+    };
+  }
+
+  MoneyParseResult parseBudgetInput(String text, {required String locale}) {
+    final result = MoneyParser().parse(
+      text,
+      currency: marketCurrency,
+      locale: locale,
+    );
+    if (result.value != null && result.value!.minorUnits < 0) {
+      return const MoneyParseResult.failure(MoneyParseError.outOfRange);
+    }
+    return result;
+  }
+
+  String get marketCurrencyCode => marketCurrency.value;
 
   DiscoverFeedState _state;
   DiscoverFeedState get state => _state;
 
   bool _requestedOnce = false;
+  bool _queryReadBlocked = false;
   bool _savedSearchesRequested = false;
   bool _smartSearchHistoryRequested = false;
 
@@ -117,8 +402,10 @@ class DiscoverFeedController extends ChangeNotifier {
 
   TimeWindowIssue? stageTimeWindowSelection({
     required TimeWindowMode mode,
-    DateTime? startLocal,
-    DateTime? endLocal,
+    LocalDateTimeValue? startLocal,
+    LocalDateTimeValue? endLocal,
+    String? timezoneId,
+    DateTime? nowUtc,
     required int flexibilityMinutes,
     required TravelOriginType originType,
     double? originLat,
@@ -129,14 +416,48 @@ class DiscoverFeedController extends ChangeNotifier {
     final BuildTimeWindowUseCase? builder = _buildTimeWindow;
     if (builder == null) return TimeWindowIssue.serviceUnavailable;
     try {
-      final TimeWindow timeWindow = builder(
-        mode: mode,
-        timezoneId: _runtimeDefaults.timezoneId,
-        nowUtc: DateTime.now().toUtc(),
-        startLocal: startLocal,
-        endLocal: endLocal,
-        flexibilityMinutes: flexibilityMinutes,
-      );
+      final existing = _state.draftQuery.timeWindow;
+      final zone = timezoneId ?? existing?.timezoneId ?? marketTimezoneId;
+      final repository = _timezoneRepository;
+      if (repository == null || !repository.isValidTimezone(zone)) {
+        return TimeWindowIssue.unknownTimezone;
+      }
+      final now = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
+      final flex = mode == TimeWindowMode.flexible ? flexibilityMinutes : 0;
+      final sameBounds =
+          existing != null &&
+          mode != TimeWindowMode.anytimeToday &&
+          existing.timezoneId == zone &&
+          startLocal != null &&
+          endLocal != null &&
+          repository.toLocal(existing.startAtUtc, zone).compareTo(startLocal) ==
+              0 &&
+          repository.toLocal(existing.endAtUtc, zone).compareTo(endLocal) == 0;
+      final TimeWindow timeWindow;
+      if (sameBounds) {
+        // Minute-resolution UI must not discard precision or choose another
+        // offset in an overlapping hour when the displayed bounds did not change.
+        timeWindow =
+            existing.mode == mode && existing.flexibilityMinutes == flex
+            ? existing
+            : TimeWindow(
+                startAtUtc: existing.startAtUtc,
+                endAtUtc: existing.endAtUtc,
+                resolvedAtUtc: now,
+                timezoneId: zone,
+                mode: mode,
+                flexibilityMinutes: flex,
+              );
+      } else {
+        timeWindow = builder(
+          mode: mode,
+          timezoneId: zone,
+          nowUtc: now,
+          startLocal: startLocal,
+          endLocal: endLocal,
+          flexibilityMinutes: flexibilityMinutes,
+        );
+      }
       final TravelContext travelContext = TravelContext(
         originType: originType,
         origin: GeoPoint(
@@ -163,6 +484,8 @@ class DiscoverFeedController extends ChangeNotifier {
       return null;
     } on TimeWindowValidationException catch (error) {
       return error.issue;
+    } on FormatException {
+      return TimeWindowIssue.boundsRequired;
     } on ArgumentError {
       return TimeWindowIssue.invalidTravelContext;
     }
@@ -230,11 +553,12 @@ class DiscoverFeedController extends ChangeNotifier {
   Future<void> ensureLoaded() async {
     if (_requestedOnce) return;
     _requestedOnce = true;
-    await _restoreLastQuery();
+    if (!await _restoreLastQuery()) return;
     await loadFeed();
   }
 
   Future<void> loadFeed() async {
+    if (_queryReadBlocked && !await _restoreLastQuery()) return;
     if (_state.status == DiscoverFeedStatus.loading) return;
 
     _analyticsService.track(
@@ -448,43 +772,63 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> ensureSavedSearchesLoaded() async {
-    if (_savedSearchesRequested) return;
-    _savedSearchesRequested = true;
-    final List<SavedSearchEntity> searches =
-        await _discoverPreferencesRepository.loadSavedSearches();
-    _setState(_state.copyWith(savedSearches: searches));
+    try {
+      if (_savedSearchesRequested) return;
+      _savedSearchesRequested = true;
+      final List<SavedSearchEntity> searches =
+          await _discoverPreferencesRepository.loadSavedSearches();
+      _setState(_state.copyWith(savedSearches: searches));
+    } on Object {
+      _savedSearchesRequested = false;
+      _preferencesFailure();
+    }
   }
 
   Future<void> ensureSmartSearchHistoryLoaded() async {
-    if (_smartSearchHistoryRequested) return;
-    _smartSearchHistoryRequested = true;
-    final List<SmartSearchHistoryEntity> history =
-        await _discoverPreferencesRepository.loadSmartSearchHistory();
-    _setState(_state.copyWith(smartSearchHistory: history));
+    try {
+      if (_smartSearchHistoryRequested) return;
+      _smartSearchHistoryRequested = true;
+      final List<SmartSearchHistoryEntity> history =
+          await _discoverPreferencesRepository.loadSmartSearchHistory();
+      _setState(_state.copyWith(smartSearchHistory: history));
+    } on Object {
+      _smartSearchHistoryRequested = false;
+      _preferencesFailure();
+    }
   }
 
   Future<void> saveCurrentSearch() async {
-    final SavedSearchEntity search = _savedSearchForQuery(_state.appliedQuery);
-    await _discoverPreferencesRepository.saveSavedSearch(search);
-    final List<SavedSearchEntity> next = <SavedSearchEntity>[
-      search,
-      ..._state.savedSearches.where(
-        (SavedSearchEntity item) => item.id != search.id,
-      ),
-    ].take(8).toList(growable: false);
-    _setState(_state.copyWith(savedSearches: next));
+    try {
+      final SavedSearchEntity search = _savedSearchForQuery(
+        _state.appliedQuery,
+      );
+      await _discoverPreferencesRepository.saveSavedSearch(search);
+      final List<SavedSearchEntity> next = <SavedSearchEntity>[
+        search,
+        ..._state.savedSearches.where(
+          (SavedSearchEntity item) => item.id != search.id,
+        ),
+      ].take(8).toList(growable: false);
+      _setState(_state.copyWith(savedSearches: next));
+    } on Object {
+      _preferencesFailure();
+    }
   }
 
   Future<void> recordRecentSearch(DiscoverQuery query) async {
-    final SavedSearchEntity search = _savedSearchForQuery(query);
-    await _discoverPreferencesRepository.saveSavedSearch(search);
-    final List<SavedSearchEntity> next = <SavedSearchEntity>[
-      search,
-      ..._state.savedSearches.where(
-        (SavedSearchEntity item) => item.id != search.id,
-      ),
-    ].take(8).toList(growable: false);
-    _setState(_state.copyWith(savedSearches: next));
+    try {
+      final SavedSearchEntity search = _savedSearchForQuery(query);
+      await _discoverPreferencesRepository.saveSavedSearch(search);
+      final List<SavedSearchEntity> next = <SavedSearchEntity>[
+        search,
+        ..._state.savedSearches.where(
+          (SavedSearchEntity item) => item.id != search.id,
+        ),
+      ].take(8).toList(growable: false);
+      _setState(_state.copyWith(savedSearches: next));
+    } on Object {
+      _preferencesFailure();
+    }
   }
 
   Future<void> applySavedSearch(SavedSearchEntity search) async {
@@ -497,33 +841,41 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> deleteSavedSearch(String id) async {
-    await _discoverPreferencesRepository.deleteSavedSearch(id);
-    _setState(
-      _state.copyWith(
-        savedSearches: _state.savedSearches
-            .where((SavedSearchEntity item) => item.id != id)
-            .toList(growable: false),
-      ),
-    );
+    try {
+      await _discoverPreferencesRepository.deleteSavedSearch(id);
+      _setState(
+        _state.copyWith(
+          savedSearches: _state.savedSearches
+              .where((SavedSearchEntity item) => item.id != id)
+              .toList(growable: false),
+        ),
+      );
+    } on Object {
+      _preferencesFailure();
+    }
   }
 
   Future<void> saveSmartSearchPrompt({
     required String prompt,
     required DiscoverQuery query,
   }) async {
-    final SmartSearchHistoryEntity? item = _smartSearchHistoryForQuery(
-      prompt,
-      query,
-    );
-    if (item == null) return;
-    await _discoverPreferencesRepository.saveSmartSearchPrompt(item);
-    final List<SmartSearchHistoryEntity> next = <SmartSearchHistoryEntity>[
-      item,
-      ..._state.smartSearchHistory.where(
-        (SmartSearchHistoryEntity current) => current.id != item.id,
-      ),
-    ].take(6).toList(growable: false);
-    _setState(_state.copyWith(smartSearchHistory: next));
+    try {
+      final SmartSearchHistoryEntity? item = _smartSearchHistoryForQuery(
+        prompt,
+        query,
+      );
+      if (item == null) return;
+      await _discoverPreferencesRepository.saveSmartSearchPrompt(item);
+      final List<SmartSearchHistoryEntity> next = <SmartSearchHistoryEntity>[
+        item,
+        ..._state.smartSearchHistory.where(
+          (SmartSearchHistoryEntity current) => current.id != item.id,
+        ),
+      ].take(6).toList(growable: false);
+      _setState(_state.copyWith(smartSearchHistory: next));
+    } on Object {
+      _preferencesFailure();
+    }
   }
 
   Future<void> applySmartSearchHistory(SmartSearchHistoryEntity item) async {
@@ -537,14 +889,18 @@ class DiscoverFeedController extends ChangeNotifier {
   }
 
   Future<void> deleteSmartSearchPrompt(String id) async {
-    await _discoverPreferencesRepository.deleteSmartSearchPrompt(id);
-    _setState(
-      _state.copyWith(
-        smartSearchHistory: _state.smartSearchHistory
-            .where((SmartSearchHistoryEntity item) => item.id != id)
-            .toList(growable: false),
-      ),
-    );
+    try {
+      await _discoverPreferencesRepository.deleteSmartSearchPrompt(id);
+      _setState(
+        _state.copyWith(
+          smartSearchHistory: _state.smartSearchHistory
+              .where((SmartSearchHistoryEntity item) => item.id != id)
+              .toList(growable: false),
+        ),
+      );
+    } on Object {
+      _preferencesFailure();
+    }
   }
 
   Future<void> applySearchConditions({
@@ -664,15 +1020,7 @@ class DiscoverFeedController extends ChangeNotifier {
       queryVersion: 2,
       appliedAtUtc: DateTime.now().toUtc(),
     );
-    _setState(
-      _state.copyWith(
-        appliedQuery: applied,
-        draftQuery: applied,
-        searchAreaDirty: false,
-      ),
-    );
-    await _discoverPreferencesRepository.saveLastQuery(applied);
-    await loadFeed();
+    await _applyGlobalQueryUpdate(applied);
   }
 
   Future<void> useCurrentLocation() async {
@@ -701,28 +1049,64 @@ class DiscoverFeedController extends ChangeNotifier {
     String? selectedItemId,
     bool clearSelectedItem = false,
   }) async {
-    _setState(
-      _state.copyWith(
-        appliedQuery: appliedQuery,
-        draftQuery: appliedQuery,
-        searchAreaDirty: false,
-        selectedItemId: selectedItemId,
-        clearSelectedItem: clearSelectedItem,
-      ),
-    );
-    await _discoverPreferencesRepository.saveLastQuery(appliedQuery);
-    await loadFeed();
+    try {
+      _validateQueryMoney(appliedQuery);
+      await _discoverPreferencesRepository.saveLastQuery(appliedQuery);
+      _setState(
+        _state.copyWith(
+          appliedQuery: appliedQuery,
+          draftQuery: appliedQuery,
+          searchAreaDirty: false,
+          selectedItemId: selectedItemId,
+          clearSelectedItem: clearSelectedItem,
+        ),
+      );
+      await loadFeed();
+    } on Object {
+      _preferencesFailure();
+    }
   }
 
-  Future<void> _restoreLastQuery() async {
-    final DiscoverQuery? lastQuery = await _discoverPreferencesRepository
-        .loadLastQuery();
-    if (lastQuery == null) return;
+  Future<bool> _restoreLastQuery() async {
+    try {
+      final DiscoverQuery? lastQuery = await _discoverPreferencesRepository
+          .loadLastQuery();
+      if (lastQuery == null) {
+        _queryReadBlocked = false;
+        return true;
+      }
+      _validateQueryMoney(lastQuery);
+      _setState(
+        _state.copyWith(
+          appliedQuery: lastQuery,
+          draftQuery: lastQuery,
+          searchAreaDirty: false,
+        ),
+      );
+      _queryReadBlocked = false;
+      return true;
+    } on Object {
+      _queryReadBlocked = true;
+      _requestedOnce = false;
+      _preferencesFailure();
+      return false;
+    }
+  }
+
+  void _validateQueryMoney(DiscoverQuery query) {
+    for (final value in [query.budgetMin, query.budgetMax]) {
+      if (value != null &&
+          CurrencyMetadataRegistry.eurOnly.lookup(value.currency) == null) {
+        throw const MoneyReadException(MoneyParseError.unknownCurrency);
+      }
+    }
+  }
+
+  void _preferencesFailure() {
     _setState(
       _state.copyWith(
-        appliedQuery: lastQuery,
-        draftQuery: lastQuery,
-        searchAreaDirty: false,
+        status: DiscoverFeedStatus.error,
+        message: DiscoverFeedNotice.dataUnavailable,
       ),
     );
   }
@@ -782,7 +1166,9 @@ String _savedSearchIdFor(DiscoverQuery query) {
     query.queryText.trim().toLowerCase(),
     query.selectedCategoryIds.join('-'),
     query.freeOnly ? 'free' : 'paid',
-    query.budgetMax?.round().toString() ?? 'any_budget',
+    query.budgetMax == null
+        ? 'any_budget'
+        : '${query.budgetMax!.minorUnits}_${query.budgetMax!.currency.value}',
     query.dateFrom?.toIso8601String() ?? 'any_date',
     query.dateTo?.toIso8601String() ?? 'any_date_to',
     query.radiusMeters.round().toString(),
@@ -823,7 +1209,9 @@ String _smartSearchHistoryIdFor(String prompt, DiscoverQuery query) {
     query.queryText.trim().toLowerCase(),
     query.selectedCategoryIds.join('-'),
     query.freeOnly ? 'free' : 'paid',
-    query.budgetMax?.round().toString() ?? 'any_budget',
+    query.budgetMax == null
+        ? 'any_budget'
+        : '${query.budgetMax!.minorUnits}_${query.budgetMax!.currency.value}',
     query.radiusMeters.round().toString(),
     query.unlimitedRadius ? 'any_area' : 'radius',
   ].join('_');
@@ -857,12 +1245,10 @@ String _savedSearchSubtitleFor(DiscoverQuery query) {
   final List<String> parts = <String>[
     if (query.selectedCategoryIds.isNotEmpty)
       _categoryLabel(query.selectedCategoryIds.first),
-    if (query.freeOnly)
-      'free', // l10n-ignore: persisted saved-search field; the UI builds text from the query
+    if (query.freeOnly) 'free',
     if (query.budgetMax != null)
-      'up to ${query.budgetMax!.toStringAsFixed(0)}', // l10n-ignore: persisted saved-search field; the UI builds text from the query
-    if (query.dateFrom != null || query.dateTo != null)
-      'date set', // l10n-ignore: persisted saved-search field; the UI builds text from the query
+      'up to ${MoneyFormatter().decimal(query.budgetMax!, locale: 'en', omitZeroFraction: true)}',
+    if (query.dateFrom != null || query.dateTo != null) 'date set',
     query.unlimitedRadius
         ? 'any area' // l10n-ignore: persisted saved-search field; the UI builds text from the query
         : '${(query.radiusMeters / 1000).round()} km', // l10n-ignore: persisted saved-search field; the UI builds text from the query

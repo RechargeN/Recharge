@@ -20,7 +20,7 @@ import 'package:recharge/app/di/booking_backend_selection.dart';
 import 'package:recharge/app/di/class_workshop_publication_composition.dart';
 import 'package:recharge/app/di/service_locator.dart';
 import 'package:recharge/app/presentation/class_workshop_publication_panel.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/core/id/id_generator.dart' show UuidV4IdGenerator;
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/class_workshop_create_coordinator.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';

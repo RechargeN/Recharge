@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../domain/entities/collection_draft_data.dart';
 import '../../domain/entities/collection_item_draft.dart';
 import '../../domain/entities/collection_publication_data.dart';
@@ -282,6 +283,6 @@ class CollectionPublicationModel {
 
   static DateTime? _dateTime(Object? value) {
     if (value is! String) return null;
-    return DateTime.tryParse(value);
+    return UtcInstant.tryParse(value)?.value;
   }
 }

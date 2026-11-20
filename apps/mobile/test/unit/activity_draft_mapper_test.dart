@@ -1,3 +1,6 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/models/activity_draft_mapper.dart';
 import 'package:recharge/features/create/domain/entities/activity_draft_data.dart';
@@ -8,8 +11,47 @@ void main() {
     currencyCode: 'EUR',
   );
 
+  test(
+    'present contribution money must be exact and readable, never dropped',
+    () {
+      for (final rawAmount in <Object?>[
+        'broken',
+        {'amount_minor': 1.5, 'currency_code': 'EUR'},
+        {'amount_minor': '123', 'currency_code': 'EUR'},
+        {'amount_minor': null, 'currency_code': 'EUR'},
+        {'amount_minor': 123},
+        {'amount_minor': 123, 'currency_code': 'USD'},
+        {'amount_minor': Money.maxSafeMinorUnits + 1, 'currency_code': 'EUR'},
+      ]) {
+        expect(
+          () => ActivityDraftMapper.fromJson({
+            'optional_contribution': {
+              'kind': 'donation',
+              'amount_hint': rawAmount,
+            },
+          }, defaults: defaults),
+          throwsA(isA<MoneyReadException>()),
+        );
+      }
+      final restored = ActivityDraftMapper.fromJson({
+        'optional_contribution': {
+          'kind': 'donation',
+          'amount_hint': {'amount_minor': 29, 'currency_code': 'EUR'},
+        },
+      }, defaults: defaults);
+      final roundTrip = ActivityDraftMapper.fromJson(
+        ActivityDraftMapper.toJson(restored),
+        defaults: defaults,
+      );
+      expect(roundTrip.optionalContribution!.amountHint!.minorUnits, 29);
+    },
+  );
+
   test('fromJson(null) returns defaults', () {
-    expect(ActivityDraftMapper.fromJson(null, defaults: defaults), same(defaults));
+    expect(
+      ActivityDraftMapper.fromJson(null, defaults: defaults),
+      same(defaults),
+    );
   });
 
   test('round-trips a fully populated draft', () {
@@ -29,13 +71,10 @@ void main() {
       ),
       typicalDurationMinutes: const ActivityIntRangeDraft(min: 45, max: 90),
       suggestedGroupSize: const ActivityIntRangeDraft(min: 2, max: 4),
-      optionalContribution: const ActivityOptionalContributionDraft(
+      optionalContribution: ActivityOptionalContributionDraft(
         kind: ActivityContributionKind.donation,
         note: 'Donate to the park cleanup box.',
-        amountHint: ActivityContributionAmountDraft(
-          amountMinor: 300,
-          currencyCode: 'EUR',
-        ),
+        amountHint: Money(minorUnits: 300, currency: CurrencyCode.parse('EUR')),
       ),
       bestTime: const ActivityBestTimeDraft(
         timeOfDay: ActivityTimeOfDay.evening,
@@ -56,8 +95,11 @@ void main() {
     expect(roundTripped.location.linkedPlaceId, 'place-123');
     expect(roundTripped.typicalDurationMinutes.min, 45);
     expect(roundTripped.suggestedGroupSize?.max, 4);
-    expect(roundTripped.optionalContribution?.kind, ActivityContributionKind.donation);
-    expect(roundTripped.optionalContribution?.amountHint?.amountMinor, 300);
+    expect(
+      roundTripped.optionalContribution?.kind,
+      ActivityContributionKind.donation,
+    );
+    expect(roundTripped.optionalContribution?.amountHint?.minorUnits, 300);
     expect(roundTripped.bestTime?.timeOfDay, ActivityTimeOfDay.evening);
     expect(roundTripped.bestTime?.season, ActivitySeason.autumn);
   });
@@ -72,7 +114,9 @@ void main() {
       defaults: defaults,
     );
     expect(parsed.unknownFields['future_field_from_a_newer_client'], 'keep-me');
-    final Map<String, Object?> reserialized = ActivityDraftMapper.toJson(parsed);
+    final Map<String, Object?> reserialized = ActivityDraftMapper.toJson(
+      parsed,
+    );
     expect(reserialized['future_field_from_a_newer_client'], 'keep-me');
   });
 

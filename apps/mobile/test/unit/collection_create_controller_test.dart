@@ -1,6 +1,7 @@
+import '../support/publisher_access_test_support.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/collection_create_config.dart';
 import 'package:recharge/features/create/application/collection_create_coordinator.dart';
@@ -75,6 +76,7 @@ void main() {
         const CollectionCreateRuntimeConfig(),
   }) {
     return CreateController(
+      publisherAccessCheck: const TestPersonalPublisherAccess(),
       loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
       saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
@@ -204,6 +206,15 @@ void main() {
         CollectionCreateStatus.published,
       );
       expect(sink.activateCalls, hasLength(1));
+      expect(
+        controller
+            .collectionCreateState!
+            .collectionData
+            .compositionReview!
+            .reviewedAtUtc
+            .isUtc,
+        isTrue,
+      );
       controller.dispose();
     },
   );

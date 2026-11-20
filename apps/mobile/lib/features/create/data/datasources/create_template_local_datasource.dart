@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -5,23 +6,16 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/create_template_model.dart';
 
 class CreateTemplateLocalDataSource {
-  const CreateTemplateLocalDataSource(
-    this._storage, {
-    required this.activeMarketCityId,
-    required this.activeTimezone,
-    required this.activeCountry,
-    required this.activeCity,
-  });
+  const CreateTemplateLocalDataSource(this._storage);
 
   final FlutterSecureStorage _storage;
-  final String activeMarketCityId;
-  final String activeTimezone;
-  final String activeCountry;
-  final String activeCity;
 
   String _key(String userId) => 'create_templates_v1_$userId';
 
-  Future<List<CreateTemplateModel>> loadTemplates(String userId) async {
+  Future<List<CreateTemplateModel>> loadTemplates(
+    String userId, {
+    bool requireLosslessRead = false,
+  }) async {
     try {
       final String? raw = await _storage.read(key: _key(userId));
       if (raw == null || raw.isEmpty) return const <CreateTemplateModel>[];
@@ -29,27 +23,37 @@ class CreateTemplateLocalDataSource {
       if (decoded is! Map<String, dynamic> ||
           decoded['schemaVersion'] != 1 ||
           decoded['templates'] is! List<dynamic>) {
+        if (requireLosslessRead) {
+          throw const FormatException('Unsupported template collection');
+        }
         return const <CreateTemplateModel>[];
       }
       final List<CreateTemplateModel> result = <CreateTemplateModel>[];
       for (final Object? item in decoded['templates'] as List<dynamic>) {
-        if (item is! Map<dynamic, dynamic>) continue;
+        if (item is! Map<dynamic, dynamic>) {
+          if (requireLosslessRead) {
+            throw const FormatException('Invalid template record');
+          }
+          continue;
+        }
         try {
-          result.add(
-            CreateTemplateModel.fromJson(
-              Map<String, dynamic>.from(item),
-              activeMarketCityId: activeMarketCityId,
-              activeTimezone: activeTimezone,
-              activeCountry: activeCountry,
-              activeCity: activeCity,
-            ),
+          final model = CreateTemplateModel.fromJson(
+            Map<String, dynamic>.from(item),
           );
+          if (requireLosslessRead) model.toEntity();
+          result.add(model);
+        } on MoneyReadException {
+          if (requireLosslessRead) rethrow;
         } on Object {
+          if (requireLosslessRead) rethrow;
           // One corrupt or future record must not hide valid sibling templates.
         }
       }
       return result;
+    } on MoneyReadException {
+      rethrow;
     } on Object {
+      if (requireLosslessRead) rethrow;
       return const <CreateTemplateModel>[];
     }
   }
@@ -63,7 +67,10 @@ class CreateTemplateLocalDataSource {
       value: jsonEncode(<String, Object?>{
         'schemaVersion': 1,
         'templates': templates
-            .map((CreateTemplateModel item) => item.toJson())
+            .map(
+              (CreateTemplateModel item) =>
+                  CreateTemplateModel.fromEntity(item.toEntity()).toJson(),
+            )
             .toList(growable: false),
       }),
     );

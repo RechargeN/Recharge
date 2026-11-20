@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -7,8 +9,7 @@ import 'package:recharge/app/application/scenario_object_intake_facade.dart';
 import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/app/di/service_locator.dart';
 import 'package:recharge/app/presentation/scenario_object_intake_sheet.dart';
-import 'package:recharge/core/id/id_generator.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/scenario_create_coordinator.dart';
 import 'package:recharge/features/create/data/datasources/create_local_datasource.dart';
@@ -228,7 +229,7 @@ final DiscoverItemEntity _item = DiscoverItemEntity(
   startsAtUtc: DateTime.utc(2026, 8, 8, 17),
   latitude: 56.5099,
   longitude: 27.3332,
-  priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+  priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
   distanceKm: 1,
   isFree: true,
   objectKind: DiscoverObjectKind.place,

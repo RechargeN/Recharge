@@ -1,9 +1,12 @@
 import '../../../../core/layout/page_list_padding.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
 import '../../../../core/localization/taxonomy_labels.dart';
-import '../../../../shared/primitives/money/money.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,9 +20,9 @@ import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../application/state/scenario_intake_selection_state.dart';
 import '../../domain/entities/discover_query.dart';
+import '../../domain/usecases/build_time_window_usecase.dart';
 import '../../application/state/discover_feed_state.dart';
 import '../../domain/entities/discover_item_entity.dart';
-import '../../domain/entities/geo_point.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/time_window.dart';
 import '../discover_formats.dart';
@@ -195,7 +198,11 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
           const SizedBox(height: 10),
           _ScenarioRow(
             onFreeToday: () {
-              final _DateWindow today = _todayWindow();
+              final today = _selectDatePreset(
+                controller,
+                DiscoverDatePreset.today,
+              );
+              if (today == null) return;
               _searchController.clear();
               controller.applySearchConditions(
                 queryText: '',
@@ -205,10 +212,16 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
                 clearBudgetMax: true,
                 dateFrom: today.from,
                 dateTo: today.to,
+                clearTimeWindow: true,
+                clearTravelContext: true,
               );
             },
             onTonight: () {
-              final _DateWindow tonight = _tonightWindow();
+              final tonight = _selectDatePreset(
+                controller,
+                DiscoverDatePreset.tonight,
+              );
+              if (tonight == null) return;
               _searchController.text = 'music';
               controller.applySearchConditions(
                 queryText: 'music',
@@ -218,18 +231,25 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
                 clearBudgetMax: true,
                 dateFrom: tonight.from,
                 dateTo: tonight.to,
+                clearTimeWindow: true,
+                clearTravelContext: true,
               );
             },
             onUnderTen: () {
               controller.applySearchConditions(
                 freeOnly: false,
                 clearBudgetMin: true,
-                budgetMax: Money(
-                  minorUnits: 1000,
-                  currencyCode: controller.marketCurrencyCode,
-                ),
+                budgetMax: MoneyParser()
+                    .parse(
+                      '10',
+                      currency: controller.marketCurrency,
+                      locale: 'en',
+                    )
+                    .value!,
                 clearDateFrom: true,
                 clearDateTo: true,
+                clearTimeWindow: true,
+                clearTravelContext: true,
               );
             },
             onOutdoor: () {
@@ -298,26 +318,32 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
             onFreeOnlyChanged: (bool value) {
               controller.applySearchConditions(freeOnly: value);
             },
-            onBudgetSelected: (double? value) {
+            currency: controller.marketCurrency,
+            onBudgetSelected: (Money? value) {
               controller.applySearchConditions(
                 freeOnly: false,
-                budgetMax: value == null
-                    ? null
-                    : Money.fromLegacyMajor(
-                        value,
-                        currencyCode: controller.marketCurrencyCode,
-                      ),
+                budgetMax: value,
                 clearBudgetMin: true,
                 clearBudgetMax: value == null,
               );
             },
+            dateController: controller,
             onDateSelected: (_DateFilter filter) {
               final _DateWindow? window = switch (filter) {
                 _DateFilter.any => null,
-                _DateFilter.today => _todayWindow(),
-                _DateFilter.tonight => _tonightWindow(),
+                _DateFilter.today => _selectDatePreset(
+                  controller,
+                  DiscoverDatePreset.today,
+                ),
+                _DateFilter.tonight => _selectDatePreset(
+                  controller,
+                  DiscoverDatePreset.tonight,
+                ),
               };
+              if (filter != _DateFilter.any && window == null) return;
               controller.applySearchConditions(
+                clearTimeWindow: true,
+                clearTravelContext: true,
                 dateFrom: window?.from,
                 clearDateFrom: window == null,
                 dateTo: window?.to,
@@ -402,6 +428,26 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
     );
   }
 
+  _DateWindow? _selectDatePreset(
+    DiscoverFeedController controller,
+    DiscoverDatePreset preset,
+  ) {
+    try {
+      final window = controller.datePreset(
+        preset,
+        surface: DiscoverDateSurface.results,
+      );
+      return _DateWindow(from: window.from, to: window.to);
+    } on TimeWindowValidationException catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.discoverTimeWindowIssue(error.issue.name)),
+        ),
+      );
+      return null;
+    }
+  }
+
   Future<void> _openScenarioIntake(List<DiscoverItemEntity> items) async {
     final result = await launchScenarioObjectIntake(
       context: context,
@@ -436,17 +482,38 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
     DiscoverFeedController controller,
     Map<String, String> seedParameters,
   ) async {
-    final String? rawBudgetMax = seedParameters['budgetMax'];
-    final Money? budgetMax = rawBudgetMax == null
+    final budgetText = seedParameters['budgetMax'];
+    final budgetResult = budgetText == null
         ? null
-        : Money.tryParseMajor(
-            rawBudgetMax,
-            currencyCode: controller.marketCurrencyCode,
-          );
-    final DateTime? dateFrom = _dateFromSeed(seedParameters['dateFrom']);
-    final DateTime? dateTo = _dateFromSeed(seedParameters['dateTo']);
-    final TimeWindow? timeWindow = _timeWindowFromSeed(seedParameters);
-    final TravelContext? travelContext = _travelContextFromSeed(seedParameters);
+        : controller.parseBudgetInput(budgetText, locale: 'en');
+    if (budgetResult != null && !budgetResult.isSuccess) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.validationCheckTheAmount)),
+        );
+      }
+      return;
+    }
+    final Money? budgetMax = budgetResult?.value;
+    final ({
+      TimeWindow? window,
+      TravelContext? travel,
+      DateTime? from,
+      DateTime? to,
+    })
+    time;
+    try {
+      time = controller.decodeTimeRouteParameters(seedParameters);
+    } on FormatException {
+      controller.reportInvalidTimeRoute();
+      if (mounted) {
+        _searchController.text = controller.state.appliedQuery.queryText;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.discoverTimeFilterInvalid)),
+        );
+      }
+      return;
+    }
     await controller.applySearchConditions(
       queryText: _queryTextFromSeed(seedParameters),
       selectedCategoryIds: _categoriesFromSeed(seedParameters),
@@ -456,10 +523,10 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
       budgetMax: budgetMax,
       clearBudgetMin: true,
       clearBudgetMax: budgetMax == null,
-      dateFrom: dateFrom,
-      clearDateFrom: dateFrom == null,
-      dateTo: dateTo,
-      clearDateTo: dateTo == null,
+      dateFrom: time.from,
+      clearDateFrom: time.from == null,
+      dateTo: time.to,
+      clearDateTo: time.to == null,
       radiusMeters: _doubleFromSeed(seedParameters['radius']),
       unlimitedRadius: seedParameters['unlimited'] == '1',
       openNow: seedParameters['openNow'] == '1',
@@ -469,10 +536,10 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
       mood: seedParameters['mood'],
       clearMood: !seedParameters.containsKey('mood'),
       sourceScreen: seedParameters['source'] ?? 'search_results',
-      timeWindow: timeWindow,
-      clearTimeWindow: timeWindow == null,
-      travelContext: travelContext,
-      clearTravelContext: travelContext == null,
+      timeWindow: time.window,
+      clearTimeWindow: time.window == null,
+      travelContext: time.travel,
+      clearTravelContext: time.travel == null,
     );
     if (seedParameters['source'] == 'regular_search') {
       await controller.ensureSavedSearchesLoaded();
@@ -686,14 +753,18 @@ String _mapLocationForQuery(DiscoverQuery query) {
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter().decimal(
+        query.budgetMax!,
+        locale: 'en',
+        omitZeroFraction: true,
+      ),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
     'unlimited': query.unlimitedRadius ? '1' : '0',
     'openNow': query.openNow ? '1' : '0',
     'onlyAvailable': query.onlyAvailable ? '1' : '0',
-    ..._timeRouteParameters(query),
+    ...DiscoverFeedController.timeRouteParameters(query),
   };
   return Uri(path: RouteNames.discoverMap, queryParameters: params).toString();
 }
@@ -728,7 +799,11 @@ String _createLocationForQuery(
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter().decimal(
+        query.budgetMax!,
+        locale: 'en',
+        omitZeroFraction: true,
+      ),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -773,7 +848,8 @@ bool _hasSearchSeed(Map<String, String> seedParameters) {
     'openNow',
     'onlyAvailable',
   ];
-  return supportedKeys.any(seedParameters.containsKey);
+  return supportedKeys.any(seedParameters.containsKey) ||
+      DiscoverFeedController.hasTimeRouteParameters(seedParameters);
 }
 
 String? _queryTextFromSeed(Map<String, String> seedParameters) {
@@ -799,82 +875,6 @@ double? _doubleFromSeed(String? value) {
 int? _intFromSeed(String? value) {
   if (value == null || value.trim().isEmpty) return null;
   return int.tryParse(value.trim());
-}
-
-DateTime? _dateFromSeed(String? value) {
-  if (value == null || value.trim().isEmpty) return null;
-  return DateTime.tryParse(value.trim())?.toUtc();
-}
-
-TimeWindow? _timeWindowFromSeed(Map<String, String> values) {
-  final String? mode = values['timeMode'];
-  final String? start = values['timeStart'];
-  final String? end = values['timeEnd'];
-  final String? timezone = values['timezone'];
-  final String? resolvedAt = values['resolvedAt'];
-  if (mode == null ||
-      start == null ||
-      end == null ||
-      timezone == null ||
-      resolvedAt == null) {
-    return null;
-  }
-  try {
-    return TimeWindow(
-      startAtUtc: DateTime.parse(start).toUtc(),
-      endAtUtc: DateTime.parse(end).toUtc(),
-      timezoneId: timezone,
-      mode: TimeWindowMode.values.firstWhere(
-        (TimeWindowMode value) => value.name == mode,
-      ),
-      flexibilityMinutes: int.tryParse(values['flexibility'] ?? '') ?? 0,
-      resolvedAtUtc: DateTime.parse(resolvedAt).toUtc(),
-    );
-  } on Exception {
-    return null;
-  }
-}
-
-TravelContext? _travelContextFromSeed(Map<String, String> values) {
-  if (!values.containsKey('originLat') || !values.containsKey('originLng')) {
-    return null;
-  }
-  try {
-    return TravelContext(
-      originType: TravelOriginType.values.firstWhere(
-        (TravelOriginType value) => value.name == values['originType'],
-      ),
-      origin: GeoPoint(
-        latitude: double.parse(values['originLat']!),
-        longitude: double.parse(values['originLng']!),
-      ),
-      transportMode: TransportMode.values.firstWhere(
-        (TransportMode value) => value.name == values['transport'],
-      ),
-      includeReturnTrip: values['returnTrip'] == '1',
-    );
-  } on Exception {
-    return null;
-  }
-}
-
-Map<String, String> _timeRouteParameters(DiscoverQuery query) {
-  final TimeWindow? window = query.timeWindow;
-  final TravelContext? travel = query.travelContext;
-  if (window == null || travel == null) return const <String, String>{};
-  return <String, String>{
-    'timeMode': window.mode.name,
-    'timeStart': window.startAtUtc.toIso8601String(),
-    'timeEnd': window.endAtUtc.toIso8601String(),
-    'timezone': window.timezoneId,
-    'flexibility': '${window.flexibilityMinutes}',
-    'resolvedAt': window.resolvedAtUtc.toIso8601String(),
-    'originType': travel.originType.name,
-    'originLat': '${travel.origin.latitude}',
-    'originLng': '${travel.origin.longitude}',
-    'transport': travel.transportMode.name,
-    'returnTrip': travel.includeReturnTrip ? '1' : '0',
-  };
 }
 
 class _SearchField extends StatelessWidget {
@@ -1126,14 +1126,18 @@ class _ConditionPanel extends StatelessWidget {
     required this.query,
     required this.onFreeOnlyChanged,
     required this.onBudgetSelected,
+    required this.currency,
     required this.onDateSelected,
+    required this.dateController,
     required this.onRadiusSelected,
   });
 
   final DiscoverQuery query;
   final ValueChanged<bool> onFreeOnlyChanged;
-  final ValueChanged<double?> onBudgetSelected;
+  final ValueChanged<Money?> onBudgetSelected;
+  final CurrencyCode currency;
   final ValueChanged<_DateFilter> onDateSelected;
+  final DiscoverFeedController dateController;
   final ValueChanged<_RadiusFilter> onRadiusSelected;
 
   @override
@@ -1163,12 +1167,16 @@ class _ConditionPanel extends StatelessWidget {
                 ChoiceChip(
                   label: Text(context.l10n.discoverUnder('10')),
                   selected: query.budgetMax?.minorUnits == 1000,
-                  onSelected: (_) => onBudgetSelected(10),
+                  onSelected: (_) => onBudgetSelected(
+                    Money(minorUnits: 1000, currency: currency),
+                  ),
                 ),
                 ChoiceChip(
                   label: Text(context.l10n.discoverUnder('15')),
                   selected: query.budgetMax?.minorUnits == 1500,
-                  onSelected: (_) => onBudgetSelected(15),
+                  onSelected: (_) => onBudgetSelected(
+                    Money(minorUnits: 1500, currency: currency),
+                  ),
                 ),
               ],
             ),
@@ -1183,12 +1191,20 @@ class _ConditionPanel extends StatelessWidget {
                 ),
                 ChoiceChip(
                   label: Text(context.l10n.discoverToday),
-                  selected: _matchesWindow(query, _todayWindow()),
+                  selected: _matchesPreset(
+                    query,
+                    dateController,
+                    DiscoverDatePreset.today,
+                  ),
                   onSelected: (_) => onDateSelected(_DateFilter.today),
                 ),
                 ChoiceChip(
                   label: Text(context.l10n.discoverTonight),
-                  selected: _matchesWindow(query, _tonightWindow()),
+                  selected: _matchesPreset(
+                    query,
+                    dateController,
+                    DiscoverDatePreset.tonight,
+                  ),
                   onSelected: (_) => onDateSelected(_DateFilter.tonight),
                 ),
               ],
@@ -1595,24 +1611,18 @@ enum _RadiusFilter {
   final bool unlimited;
 }
 
-_DateWindow _todayWindow() {
-  final DateTime now = DateTime.now();
-  final DateTime start = DateTime(now.year, now.month, now.day);
-  return _DateWindow(from: start, to: start.add(const Duration(days: 1)));
-}
-
-_DateWindow _tonightWindow() {
-  final DateTime now = DateTime.now();
-  final DateTime start = DateTime(now.year, now.month, now.day, 18);
-  final DateTime end = DateTime(now.year, now.month, now.day, 23, 59);
-  if (now.isAfter(end)) {
-    return _DateWindow(from: now, to: now.add(const Duration(hours: 6)));
+bool _matchesPreset(
+  DiscoverQuery query,
+  DiscoverFeedController controller,
+  DiscoverDatePreset preset,
+) {
+  try {
+    final window = controller.datePreset(
+      preset,
+      surface: DiscoverDateSurface.results,
+    );
+    return query.dateFrom == window.from && query.dateTo == window.to;
+  } on TimeWindowValidationException {
+    return false;
   }
-  final DateTime from = now.isAfter(start) ? now : start;
-  return _DateWindow(from: from, to: end);
-}
-
-bool _matchesWindow(DiscoverQuery query, _DateWindow window) {
-  return query.dateFrom?.toLocal().isAtSameMomentAs(window.from) == true &&
-      query.dateTo?.toLocal().isAtSameMomentAs(window.to) == true;
 }

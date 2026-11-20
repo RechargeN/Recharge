@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -115,7 +116,7 @@ void main() {
             freeOnly: false,
             walkingOnly: true,
             sourcePrompt: prompt,
-            currencyCode: 'EUR',
+            currency: CurrencyCode.eur,
             steps: const [],
           );
       final failure = throwsA(isA<QuickPlanFailure>());

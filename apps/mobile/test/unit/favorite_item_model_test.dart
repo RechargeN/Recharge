@@ -1,7 +1,8 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/favorites/data/models/favorite_item_model.dart';
 import 'package:recharge/features/favorites/domain/entities/favorite_item_entity.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   test('evergreen favorite roundtrip preserves absent time and price', () {
@@ -23,7 +24,7 @@ void main() {
     );
     final restored = FavoriteItemModel.fromJson(
       model.toJson(),
-      defaultCurrencyCode: 'EUR',
+      legacyCurrencyCode: 'EUR',
     ).toEntity();
     expect(restored.startsAtUtc, isNull);
     expect(restored.priceAmount, isNull);
@@ -43,7 +44,7 @@ void main() {
           'priceAmount': 0,
           'isFree': true,
           'savedAtUtcIso': '2026-04-20T08:00:00.000Z',
-        }, defaultCurrencyCode: 'EUR');
+        }, legacyCurrencyCode: 'EUR');
 
     expect(model.toEntity().targetRoute, isNull);
     expect(model.toEntity().coverImageUrl, isEmpty);
@@ -58,7 +59,7 @@ void main() {
       category: 'scenario',
       startsAtUtc: DateTime.parse('2026-04-20T10:00:00Z'),
       distanceKm: 2.4,
-      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       isFree: true,
       savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
       targetRoute: '/scenario-builder?mood=calm&steps=a,b',
@@ -82,7 +83,7 @@ void main() {
       category: 'quick_plan',
       startsAtUtc: DateTime.utc(2026, 8, 10),
       distanceKm: 2,
-      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       isFree: true,
       savedAtUtc: DateTime.utc(2026, 8, 10),
       targetRoute: '/quick-plan/01J5QP00000000000000000000',

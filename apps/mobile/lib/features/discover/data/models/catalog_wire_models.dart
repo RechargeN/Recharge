@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../../../shared/primitives/geo/geo_point.dart';
 import '../../../../shared/primitives/geo/geometry_encoding.dart';
 import '../../domain/entities/activity_catalog_facts.dart';
@@ -37,7 +38,7 @@ double? _optionalDouble(Map<String, Object?> map, String field) {
 }
 
 DateTime _instant(Map<String, Object?> map, String field) {
-  final DateTime? parsed = DateTime.tryParse(_string(map, field));
+  final DateTime? parsed = UtcInstant.tryParse(_string(map, field))?.value;
   if (parsed == null || !parsed.isUtc) {
     throw FormatException('catalog.$field must be a UTC instant');
   }

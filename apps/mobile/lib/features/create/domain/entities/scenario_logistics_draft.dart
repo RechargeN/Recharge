@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'scenario_budget_draft.dart';
 import 'scenario_item_draft.dart';
 
@@ -38,7 +39,7 @@ class ScenarioLegDraft {
     this.toItemId,
     this.distanceM,
     this.durationMinutes,
-    this.displayPolyline = const <ScenarioGeoPointDraft>[],
+    this.displayPolyline = const <GeoPoint>[],
     this.providerCode,
     this.warningCode,
     this.updatedAtUtc,
@@ -58,7 +59,7 @@ class ScenarioLegDraft {
   final double? distanceM;
   final int? durationMinutes;
   final ScenarioCostDraft cost;
-  final List<ScenarioGeoPointDraft> displayPolyline;
+  final List<GeoPoint> displayPolyline;
   final String? providerCode;
   final String? warningCode;
   final DateTime? updatedAtUtc;

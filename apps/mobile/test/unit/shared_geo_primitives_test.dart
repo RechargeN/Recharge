@@ -1,8 +1,8 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/geo/geo_point.dart' as compatibility;
+import 'package:recharge/shared/primitives/geo/geo_point.dart' as compatibility;
 import 'package:recharge/shared/primitives/geo/geo_bounds.dart';
 import 'package:recharge/shared/primitives/geo/geo_distance.dart';
-import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:recharge/shared/primitives/geo/geometry_encoding.dart';
 import 'package:recharge/shared/primitives/geo/geometry_hash.dart';
 

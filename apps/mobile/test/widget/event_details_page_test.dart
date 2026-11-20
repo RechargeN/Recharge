@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -246,7 +248,7 @@ PublishedEventDiscoveryEntity _event({String revisionRef = ''}) =>
       latitude: 56.95,
       longitude: 24.1,
       distanceKm: 1.2,
-      priceAmount: 0,
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       isFree: true,
       currencyCode: 'EUR',
       participantsCount: 12,

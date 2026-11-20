@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 
 import 'create_media_pick_actions.dart';
@@ -13,7 +15,6 @@ import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/find_people_draft_data.dart';
 import '../../domain/entities/find_people_validation_issue.dart';
-import '../../../../shared/primitives/money/money.dart';
 import 'create_form_texts.dart';
 import 'create_texts.dart';
 
@@ -453,7 +454,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               value: data.pollResponseDeadlineUtc?.toIso8601String() ?? '',
               hint: '2026-08-18T18:00:00Z',
               onChanged: (String value) {
-                final DateTime? date = DateTime.tryParse(value)?.toUtc();
+                final DateTime? date = UtcInstant.tryParse(value)?.value;
                 _update(
                   data.copyWith(
                     pollResponseDeadlineUtc: date,
@@ -486,7 +487,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               label: context.l10n.createFindPeopleSeriesEndUtc,
               value: data.seriesEndAtUtc?.toIso8601String() ?? '',
               onChanged: (String value) {
-                final DateTime? date = DateTime.tryParse(value)?.toUtc();
+                final DateTime? date = UtcInstant.tryParse(value)?.value;
                 _update(
                   data.copyWith(
                     seriesEndAtUtc: date,
@@ -948,20 +949,17 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               label: context.l10n.createFindPeopleExpectedSpendPerPerson(
                 data.currencyCode,
               ),
-              value: data.expectedSpendAmount?.formatMajor() ?? '',
+              value: MoneyFormatter().optionalDecimal(
+                data.expectedSpendAmount,
+                locale: Localizations.localeOf(context).toLanguageTag(),
+              ),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
               onChanged: (String value) {
-                final Money? amount = Money.tryParseMajor(
+                widget.controller.updateFindPeopleExpectedSpend(
                   value,
-                  currencyCode: data.currencyCode,
-                );
-                _update(
-                  data.copyWith(
-                    expectedSpendAmount: amount,
-                    clearExpectedSpendAmount: amount == null,
-                  ),
+                  locale: Localizations.localeOf(context).toLanguageTag(),
                 );
               },
             ),
@@ -1035,7 +1033,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                 contentPadding: EdgeInsets.zero,
                 title: Text(item.category),
                 subtitle: Text(
-                  '${item.amount.formatMajor()} ${item.amount.currencyCode} • ${item.payerNote}',
+                  '${MoneyFormatter().decimal(item.amount, locale: Localizations.localeOf(context).toLanguageTag())} ${item.amount.currency.value} • ${item.payerNote}',
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
@@ -1365,7 +1363,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                     context.l10n.createFindPeopleSchedulePublicationUtcOptional,
                 value: data.publishAtUtc?.toIso8601String() ?? '',
                 onChanged: (String value) {
-                  final DateTime? date = DateTime.tryParse(value)?.toUtc();
+                  final DateTime? date = UtcInstant.tryParse(value)?.value;
                   _update(
                     data.copyWith(
                       publishAtUtc: date,
@@ -1523,8 +1521,8 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
   }
 
   void _addSlot(CreateDraftEntity draft, FindPeopleDraftData data) {
-    final DateTime? start = DateTime.tryParse(_slotStart.text)?.toUtc();
-    final DateTime? end = DateTime.tryParse(_slotEnd.text)?.toUtc();
+    final DateTime? start = UtcInstant.tryParse(_slotStart.text)?.value;
+    final DateTime? end = UtcInstant.tryParse(_slotEnd.text)?.value;
     if (start == null || end == null || !start.isBefore(end)) return;
     final CreateTimeSlotDraft slot = CreateTimeSlotDraft(
       localId: 'loc_${DateTime.now().toUtc().microsecondsSinceEpoch}',
@@ -1562,25 +1560,13 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
   }
 
   void _addExpense(FindPeopleDraftData data) {
-    final String? category = _text(_expenseCategory.text);
-    final Money? amount = Money.tryParseMajor(
-      _expenseAmount.text,
-      currencyCode: data.currencyCode,
-    );
-    if (category == null || amount == null || amount.minorUnits <= 0) return;
-    _update(
-      data.copyWith(
-        plannedExpenseItems: <FindPeopleExpenseItemDraft>[
-          ...data.plannedExpenseItems,
-          FindPeopleExpenseItemDraft(
-            id: 'loc_${DateTime.now().toUtc().microsecondsSinceEpoch}',
-            category: category,
-            amount: amount,
-            payerNote: 'shared',
-          ),
-        ],
-      ),
-    );
+    if (!widget.controller.addFindPeopleExpense(
+      category: _expenseCategory.text,
+      text: _expenseAmount.text,
+      locale: Localizations.localeOf(context).toLanguageTag(),
+    )) {
+      return;
+    }
     _expenseCategory.clear();
     _expenseAmount.clear();
   }

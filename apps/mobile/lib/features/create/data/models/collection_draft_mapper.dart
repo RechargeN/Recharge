@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../domain/entities/collection_draft_data.dart';
 import '../../domain/entities/collection_item_draft.dart';
 import '../../domain/entities/publisher_ref.dart';
@@ -264,7 +265,7 @@ class CollectionDraftMapper {
   }
 
   static DateTime? _dateTime(Object? value) {
-    if (value is! String) return null;
-    return DateTime.tryParse(value);
+    if (value == null) return null;
+    return UtcInstant.parse(value as String).value;
   }
 }

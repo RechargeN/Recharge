@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/data/datasources/route_gpx_memory_source_store.dart';
 import 'package:recharge/features/create/data/gpx/route_gpx_inspector.dart';
 import 'package:recharge/features/create/data/gpx/route_gpx_importer.dart';
@@ -97,10 +97,7 @@ void main() {
         () => _inspect('<gpx version="1.1"><trk>'),
         _throwsCode('gpx_xml_malformed'),
       );
-      expect(
-        () => _inspect('<root/>'),
-        _throwsCode('gpx_root_invalid'),
-      );
+      expect(() => _inspect('<root/>'), _throwsCode('gpx_root_invalid'));
       expect(
         () => _inspect('<gpx version="1.1"><trk/></gpx>'),
         _throwsCode('gpx_candidate_empty'),
@@ -181,6 +178,28 @@ void main() {
       expect(inspection.candidates.single.bounds.crossesAntimeridian, isTrue);
     });
 
+    test(
+      'AC-35 GPX permits explicit offsets and flags impossible or zoneless timestamps',
+      () {
+        for (final text in [
+          '2026-07-25T10:00:00+02:00',
+          '2026-07-25T08:00:00Z',
+          '2026-02-30T08:00:00Z',
+          '2026-07-25T08:00:00',
+          '2026-07-25T08:00:00+14:01',
+        ]) {
+          final inspection = _inspect(
+            '<gpx version="1.1"><trk><trkseg><trkpt lat="56.95" lon="24.10"><time>$text</time></trkpt><trkpt lat="56.96" lon="24.11"/></trkseg></trk></gpx>',
+          );
+          expect(
+            inspection.issueCodes.contains('gpx_timestamp_invalid'),
+            !(text.endsWith('+02:00') || text == '2026-07-25T08:00:00Z'),
+            reason: text,
+          );
+        }
+      },
+    );
+
     test('flags timestamp anomalies without rejecting safe geometry', () {
       final inspection = _inspect('''
 <gpx version="1.1"><trk><trkseg>
@@ -224,10 +243,7 @@ void main() {
     expect(file.displayName, 'route.gpx');
     expect(inspection.candidates.single.pointCount, 2);
     await store.remove(file.token);
-    expect(
-      () => repository.inspect(file),
-      _throwsCode('gpx_file_not_found'),
-    );
+    expect(() => repository.inspect(file), _throwsCode('gpx_file_not_found'));
   });
 }
 

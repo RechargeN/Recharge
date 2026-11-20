@@ -1,3 +1,6 @@
+import '../models/discover_query_model.dart';
+import '../models/saved_search_model.dart';
+import '../models/smart_search_history_model.dart';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -5,24 +8,26 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../domain/entities/discover_query.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/smart_search_history_entity.dart';
+import '../../domain/repositories/timezone_repository.dart';
 
 class DiscoverPreferencesLocalDataSource {
   DiscoverPreferencesLocalDataSource(
     this._secureStorage, {
+    required this.timezoneRepository,
     required String defaultMarketCityId,
     required double defaultCenterLat,
     required double defaultCenterLng,
-    required String defaultCurrencyCode,
+    this.legacyCurrencyCode,
   }) : _defaultMarketCityId = defaultMarketCityId,
        _defaultCenterLat = defaultCenterLat,
-       _defaultCenterLng = defaultCenterLng,
-       _defaultCurrencyCode = defaultCurrencyCode;
+       _defaultCenterLng = defaultCenterLng;
 
   final FlutterSecureStorage _secureStorage;
+  final TimezoneRepository timezoneRepository;
+  final String? legacyCurrencyCode;
   final String _defaultMarketCityId;
   final double _defaultCenterLat;
   final double _defaultCenterLng;
-  final String _defaultCurrencyCode;
   static const String _lastQueryKey = 'discover.last_query';
   static const String _savedSearchesKey = 'discover.saved_searches';
   static const String _smartSearchHistoryKey = 'discover.smart_search_history';
@@ -30,7 +35,10 @@ class DiscoverPreferencesLocalDataSource {
   static const int _maxSmartSearchHistory = 6;
 
   Future<void> saveLastQuery(DiscoverQuery query) async {
-    final String encoded = jsonEncode(query.toMap());
+    await loadLastQuery(); // Validate existing data before any explicit replacement.
+    final String encoded = jsonEncode(
+      DiscoverQueryModel.toMap(query, timezoneRepository: timezoneRepository),
+    );
     await _secureStorage.write(key: _lastQueryKey, value: encoded);
   }
 
@@ -45,15 +53,16 @@ class DiscoverPreferencesLocalDataSource {
             (dynamic key, dynamic value) =>
                 MapEntry<String, Object?>(key as String, value as Object?),
           );
-      return DiscoverQuery.fromMap(
+      return DiscoverQueryModel.fromMap(
         map,
         defaultMarketCityId: _defaultMarketCityId,
         defaultCenterLat: _defaultCenterLat,
         defaultCenterLng: _defaultCenterLng,
-        defaultCurrencyCode: _defaultCurrencyCode,
+        legacyCurrencyCode: legacyCurrencyCode,
+        timezoneRepository: timezoneRepository,
       );
     } on FormatException {
-      return null;
+      rethrow;
     }
   }
 
@@ -65,9 +74,9 @@ class DiscoverPreferencesLocalDataSource {
     try {
       final List<dynamic> decoded = jsonDecode(raw) as List<dynamic>;
       return decoded
-          .whereType<Map<dynamic, dynamic>>()
+          .cast<Map<dynamic, dynamic>>()
           .map(
-            (Map<dynamic, dynamic> item) => SavedSearchEntity.fromMap(
+            (Map<dynamic, dynamic> item) => SavedSearchModel.fromMap(
               item.map(
                 (dynamic key, dynamic value) =>
                     MapEntry<String, Object?>(key as String, value as Object?),
@@ -75,14 +84,15 @@ class DiscoverPreferencesLocalDataSource {
               defaultMarketCityId: _defaultMarketCityId,
               defaultCenterLat: _defaultCenterLat,
               defaultCenterLng: _defaultCenterLng,
-              defaultCurrencyCode: _defaultCurrencyCode,
+              legacyCurrencyCode: legacyCurrencyCode,
+              timezoneRepository: timezoneRepository,
             ),
           )
           .toList(growable: false);
     } on FormatException {
-      return const <SavedSearchEntity>[];
+      rethrow;
     } on TypeError {
-      return const <SavedSearchEntity>[];
+      rethrow;
     }
   }
 
@@ -111,9 +121,9 @@ class DiscoverPreferencesLocalDataSource {
     try {
       final List<dynamic> decoded = jsonDecode(raw) as List<dynamic>;
       return decoded
-          .whereType<Map<dynamic, dynamic>>()
+          .cast<Map<dynamic, dynamic>>()
           .map(
-            (Map<dynamic, dynamic> item) => SmartSearchHistoryEntity.fromMap(
+            (Map<dynamic, dynamic> item) => SmartSearchHistoryModel.fromMap(
               item.map(
                 (dynamic key, dynamic value) =>
                     MapEntry<String, Object?>(key as String, value as Object?),
@@ -121,7 +131,8 @@ class DiscoverPreferencesLocalDataSource {
               defaultMarketCityId: _defaultMarketCityId,
               defaultCenterLat: _defaultCenterLat,
               defaultCenterLng: _defaultCenterLng,
-              defaultCurrencyCode: _defaultCurrencyCode,
+              legacyCurrencyCode: legacyCurrencyCode,
+              timezoneRepository: timezoneRepository,
             ),
           )
           .where(
@@ -129,9 +140,9 @@ class DiscoverPreferencesLocalDataSource {
           )
           .toList(growable: false);
     } on FormatException {
-      return const <SmartSearchHistoryEntity>[];
+      rethrow;
     } on TypeError {
-      return const <SmartSearchHistoryEntity>[];
+      rethrow;
     }
   }
 
@@ -158,7 +169,14 @@ class DiscoverPreferencesLocalDataSource {
 
   Future<void> _writeSavedSearches(List<SavedSearchEntity> searches) async {
     final String encoded = jsonEncode(
-      searches.map((SavedSearchEntity item) => item.toMap()).toList(),
+      searches
+          .map(
+            (SavedSearchEntity item) => SavedSearchModel.toMap(
+              item,
+              timezoneRepository: timezoneRepository,
+            ),
+          )
+          .toList(),
     );
     await _secureStorage.write(key: _savedSearchesKey, value: encoded);
   }
@@ -167,7 +185,14 @@ class DiscoverPreferencesLocalDataSource {
     List<SmartSearchHistoryEntity> items,
   ) async {
     final String encoded = jsonEncode(
-      items.map((SmartSearchHistoryEntity item) => item.toMap()).toList(),
+      items
+          .map(
+            (SmartSearchHistoryEntity item) => SmartSearchHistoryModel.toMap(
+              item,
+              timezoneRepository: timezoneRepository,
+            ),
+          )
+          .toList(),
     );
     await _secureStorage.write(key: _smartSearchHistoryKey, value: encoded);
   }

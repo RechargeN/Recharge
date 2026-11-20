@@ -1,3 +1,6 @@
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/domain/entities/create_availability.dart';
 import 'package:recharge/features/create/domain/entities/legacy_session_schedule.dart';
@@ -40,15 +43,36 @@ void main() {
         createdAtUtc: DateTime.utc(2026, 8, 1),
       ),
     ],
-    price: const SessionPriceDisclosure(
+    price: SessionPriceDisclosure(
       mode: SessionPricingMode.fixed,
-      amount: SessionMoneyDraft(amountMinor: 2500, currencyCode: 'EUR'),
+      amount: Money(minorUnits: 2500, currency: CurrencyCode.parse('EUR')),
     ),
     externalBookingUrl: 'https://sauna-riga.lv/book',
     externalTermsUrl: 'https://sauna-riga.lv/terms',
     revision: 2,
   );
 
+  test(
+    'Session retains legacy minor-unit keys without rounding corrupt amounts',
+    () {
+      final wire = SessionDraftMapper.toJson(sample());
+      final price = wire['price'] as Map;
+      expect(price, {
+        'mode': 'fixed',
+        'amount_minor': 2500,
+        'currency_code': 'EUR',
+      });
+      expect(
+        SessionDraftMapper.toJson(SessionDraftMapper.fromJson(wire)),
+        wire,
+      );
+      price['amount_minor'] = 2500.5;
+      expect(
+        () => SessionDraftMapper.fromJson(wire),
+        throwsA(isA<MoneyReadException>()),
+      );
+    },
+  );
   test('round-trip preserves every field', () {
     final SessionDraftData original = sample();
     final SessionDraftData restored = SessionDraftMapper.fromJson(
@@ -60,7 +84,10 @@ void main() {
     expect(restored.timezoneConfirmed, original.timezoneConfirmed);
     expect(restored.amenityIds, original.amenityIds);
     expect(restored.maxPartySize, original.maxPartySize);
-    expect(restored.schedule.scheduleRevision, original.schedule.scheduleRevision);
+    expect(
+      restored.schedule.scheduleRevision,
+      original.schedule.scheduleRevision,
+    );
     expect(
       restored.schedule.weeklyRules.single.startMinuteLocal,
       original.schedule.weeklyRules.single.startMinuteLocal,
@@ -68,10 +95,55 @@ void main() {
     expect(restored.exceptions.single.id, original.exceptions.single.id);
     expect(restored.exceptions.single.privateNote, 'maintenance');
     expect(restored.price.mode, SessionPricingMode.fixed);
-    expect(restored.price.amount!.amountMinor, 2500);
+    expect(restored.price.amount!.minorUnits, 2500);
     expect(restored.externalBookingUrl, original.externalBookingUrl);
     expect(restored.externalTermsUrl, original.externalTermsUrl);
     expect(restored.revision, original.revision);
+  });
+
+  test('Session exception timestamps require precise explicit UTC text', () {
+    for (final invalid in <Object?>[
+      null,
+      123,
+      '',
+      '2026-08-01T12:00:00',
+      '2026-08-01T12:00:00+03:00',
+      '2026-02-30T12:00:00Z',
+      '2026-08-01T12:00:00.1234567Z',
+    ]) {
+      final wire = SessionDraftMapper.toJson(sample());
+      ((wire['exceptions'] as List).single as Map)['created_at_utc'] = invalid;
+      expect(() => SessionDraftMapper.fromJson(wire), throwsFormatException);
+    }
+    final missing = SessionDraftMapper.toJson(sample());
+    ((missing['exceptions'] as List).single as Map).remove('created_at_utc');
+    expect(() => SessionDraftMapper.fromJson(missing), throwsFormatException);
+    final precise = SessionDraftMapper.toJson(sample());
+    ((precise['exceptions'] as List).single as Map)['created_at_utc'] =
+        '2026-08-01T12:00:00.123456Z';
+    final restored = SessionDraftMapper.fromJson(precise);
+    expect(
+      restored.exceptions.single.createdAtUtc,
+      DateTime.utc(2026, 8, 1, 12, 0, 0, 123, 456),
+    );
+    expect(SessionDraftMapper.toJson(restored), precise);
+  });
+
+  test('Session writer rejects a non-UTC exception audit instant', () {
+    final source = sample();
+    final invalid = source.copyWith(
+      exceptions: [
+        SessionAvailabilityException(
+          id: 'x',
+          startDateLocal: '2026-09-01',
+          endDateLocal: '2026-09-01',
+          allDay: true,
+          createdByUserId: 'u',
+          createdAtUtc: DateTime(2026, 8, 1),
+        ),
+      ],
+    );
+    expect(() => SessionDraftMapper.toJson(invalid), throwsArgumentError);
   });
 
   test('round-trip preserves unknown fields (§14.1 invariant)', () {
@@ -83,7 +155,10 @@ void main() {
       restored,
     );
 
-    expect(restored.unknownFields['future_field_not_yet_understood'], 'keep-me');
+    expect(
+      restored.unknownFields['future_field_not_yet_understood'],
+      'keep-me',
+    );
     expect(roundTripped['future_field_not_yet_understood'], 'keep-me');
   });
 
@@ -116,11 +191,49 @@ void main() {
 
       // Round-tripping the legacy payload itself must not lose data either.
       final Map<String, Object?> map = legacy.toMap();
-      final LegacySessionSchedule restored = LegacySessionSchedule.fromMap(
-        map,
-      );
+      final LegacySessionSchedule restored = LegacySessionSchedule.fromMap(map);
       expect(restored.legacyOneTimeSlots.single.localId, 'loc_1');
       expect(restored.state, LegacySessionScheduleState.unreviewed);
+    },
+  );
+
+  test(
+    'legacy Session UTC remains exact and invalid records cannot become weekly rules',
+    () {
+      final wire = SessionDraftMapper.toJson(sample())
+        ..['legacy_schedule'] = {
+          'source_schema_version': 0,
+          'state': 'unreviewed',
+          'legacy_one_time_slots': [
+            {
+              'local_id': 'old',
+              'start_at_utc': '2026-08-03T12:00:00.123456Z',
+              'end_at_utc': '2026-08-03T13:00:00.123456Z',
+            },
+          ],
+        };
+      final restored = SessionDraftMapper.fromJson(wire);
+      expect(
+        restored.legacySchedule!.state,
+        LegacySessionScheduleState.unreviewed,
+      );
+      expect(
+        restored.legacySchedule!.legacyOneTimeSlots.single.startAtUtc,
+        DateTime.utc(2026, 8, 3, 12, 0, 0, 123, 456),
+      );
+      expect(restored.schedule.weeklyRules, sample().schedule.weeklyRules);
+      expect(SessionDraftMapper.toJson(restored), wire);
+      (((wire['legacy_schedule'] as Map)['legacy_one_time_slots'] as List)
+                  .single
+              as Map)['start_at_utc'] =
+          '2026-08-03T12:00:00+03:00';
+      expect(() => SessionDraftMapper.fromJson(wire), throwsFormatException);
+      expect(
+        (((wire['legacy_schedule'] as Map)['legacy_one_time_slots'] as List)
+                .single
+            as Map)['start_at_utc'],
+        '2026-08-03T12:00:00+03:00',
+      );
     },
   );
 }

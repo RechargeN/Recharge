@@ -2,6 +2,7 @@ import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
 import '../../../../shared/primitives/money/money.dart';
 import '../discover_formats.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
 import 'dart:async';
 
 import 'package:design_system/design_system.dart';
@@ -3235,7 +3236,7 @@ String _moneyLabel(
   int amountMinor,
   String currencyCode,
 ) => RechargeFormats.money(
-  Money(minorUnits: amountMinor, currencyCode: currencyCode),
+  Money(minorUnits: amountMinor, currency: CurrencyCode.parse(currencyCode)),
   l10n.localeName,
 );
 
@@ -4031,7 +4032,7 @@ String _bookableSessionPriceLabel(
     PublishedBookableSessionPriceType.fixed => RechargeFormats.money(
       Money(
         minorUnits: projection.priceAmountMinor!,
-        currencyCode: projection.currencyCode,
+        currency: CurrencyCode.parse(projection.currencyCode),
       ),
       l10n.localeName,
     ),

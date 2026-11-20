@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/geo/geo_bounds.dart';
-import 'package:recharge/core/geo/geo_point.dart';
-import 'package:recharge/core/geo/geometry_encoding.dart';
+import 'package:recharge/shared/primitives/geo/geo_bounds.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geometry_encoding.dart';
 import 'package:recharge/features/create/domain/entities/route_draft_data.dart';
 
 import '../support/route_domain_fixtures.dart';

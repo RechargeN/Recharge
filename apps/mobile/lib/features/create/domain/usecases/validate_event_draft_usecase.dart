@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/time/local_date.dart';
 import '../entities/create_draft_entity.dart';
 import '../entities/event_draft_data.dart';
 import '../entities/event_validation_issue.dart';
@@ -211,7 +212,7 @@ class ValidateEventDraftUseCase {
         blocking(3, 'free_price_conflict', 'pricingMode');
       }
     } else if (event.pricingMode == EventPricingMode.fixed) {
-      if ((event.price?.amountMinor ?? 0) <= 0) {
+      if ((event.price?.minorUnits ?? 0) <= 0) {
         blocking(3, 'fixed_price_required', 'price');
       }
       if (event.paymentCollectionMode == EventPaymentCollectionMode.none ||
@@ -280,15 +281,7 @@ class ValidateEventDraftUseCase {
         uri.userInfo.isEmpty;
   }
 
-  bool _isLocalDate(String value) {
-    if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value)) return false;
-    final DateTime? parsed = DateTime.tryParse('${value}T00:00:00Z');
-    return parsed != null &&
-        '${parsed.year.toString().padLeft(4, '0')}-'
-                '${parsed.month.toString().padLeft(2, '0')}-'
-                '${parsed.day.toString().padLeft(2, '0')}' ==
-            value;
-  }
+  bool _isLocalDate(String value) => LocalDate.tryParse(value) != null;
 
   bool _validLatitude(double? value) =>
       value != null && value.isFinite && value >= -90 && value <= 90;

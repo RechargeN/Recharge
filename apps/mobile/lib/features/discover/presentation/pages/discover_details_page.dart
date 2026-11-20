@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -420,7 +421,8 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
       params: <String, Object?>{
         'item_id': item.id,
         'category': item.category,
-        'price_amount': item.priceAmount,
+        'price_minor_units': item.priceAmount?.minorUnits,
+        'currency_code': item.priceAmount?.currency.value,
       },
     );
     ScaffoldMessenger.of(
@@ -462,7 +464,7 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
     final DateTime today;
     try {
       today = ref.read(visitHistoryFacadeProvider).todayAtPlace(item);
-    } on ArgumentError {
+    } on Object {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.detailsPlaceTimezoneUnavailable)),
       );
@@ -608,7 +610,11 @@ String _createLocationForDetails(DiscoverItemEntity item) {
       'address': item.addressLine,
       'free': item.isFree ? '1' : '0',
       if (!item.isFree && item.priceAmount != null)
-        'budgetMax': item.priceAmount?.toStringAsFixed(0) ?? '—',
+        'budgetMax': MoneyFormatter().decimal(
+          item.priceAmount!,
+          locale: 'en',
+          omitZeroFraction: true,
+        ),
       'cover': item.coverImageUrl,
       if (item.startsAtUtc != null)
         'start': item.startsAtUtc!.toIso8601String(),

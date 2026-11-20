@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,8 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recharge/app/di/service_locator.dart';
 import 'package:recharge/app/router/route_names.dart';
-import 'package:recharge/core/geo/geo_bounds.dart';
-import 'package:recharge/core/geo/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_bounds.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
@@ -416,7 +417,7 @@ DiscoverItemEntity _activityItem() {
     startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
     latitude: 56.5099,
     longitude: 27.3332,
-    priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     distanceKm: 1.2,
     isFree: true,
     objectKind: DiscoverObjectKind.activity,
@@ -442,7 +443,7 @@ DiscoverItemEntity _routeItem() {
     startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
     latitude: 56.9496,
     longitude: 24.1052,
-    priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     distanceKm: 0.4,
     isFree: true,
     objectKind: DiscoverObjectKind.route,

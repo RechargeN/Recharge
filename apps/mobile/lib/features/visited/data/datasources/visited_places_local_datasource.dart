@@ -10,7 +10,10 @@ class VisitedPlacesLocalDataSource {
   static const String keyPrefix = 'visit_history_v2_';
   final FlutterSecureStorage _storage;
 
-  Future<List<VisitedPlaceModel>> readVisitedPlaces(String userId) async {
+  Future<List<VisitedPlaceModel>> readVisitedPlaces(
+    String userId, {
+    bool requireLosslessRead = false,
+  }) async {
     final String? raw =
         await _storage.read(key: _storageKey(userId)) ??
         await _storage.read(
@@ -29,11 +32,17 @@ class VisitedPlacesLocalDataSource {
           model.toEntity();
           if (model.userId == userId) result.add(model);
         } on Object {
-          // A corrupt or future record is ignored without hiding valid records.
+          if (requireLosslessRead) {
+            throw const FormatException('visit_record_unreadable');
+          }
+          // Read-only lists may still display valid sibling records.
         }
       }
       return result;
     } on Object {
+      if (requireLosslessRead) {
+        throw const FormatException('visit_history_not_lossless');
+      }
       return const <VisitedPlaceModel>[];
     }
   }

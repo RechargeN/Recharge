@@ -1,6 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/data/datasources/create_local_datasource.dart';
 import 'package:recharge/features/create/data/models/create_draft_model.dart';
 import 'package:recharge/features/create/data/repositories/create_repository_impl.dart';
@@ -12,6 +12,79 @@ import 'package:recharge/features/create/domain/entities/event_inventory.dart';
 import 'package:recharge/features/create/domain/entities/place_draft_data.dart';
 
 void main() {
+  test(
+    'shared Create slot keeps exact UTC bounds and rejects non-UTC construction',
+    () {
+      final start = DateTime.utc(2026, 8, 3, 12, 0, 0, 123, 456);
+      final end = start.add(const Duration(minutes: 30));
+      final slot = CreateTimeSlotDraft(
+        localId: 'slot',
+        startAtUtc: start,
+        endAtUtc: end,
+      );
+      final restored = CreateTimeSlotDraft.fromMap(slot.toMap());
+      expect(restored.startAtUtc, start);
+      expect(restored.endAtUtc, end);
+      expect(restored.localId, 'slot');
+      expect(
+        () => CreateTimeSlotDraft(
+          localId: 'slot',
+          startAtUtc: DateTime(2026, 8, 3, 12),
+          endAtUtc: end,
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => CreateTimeSlotDraft(
+          localId: 'slot',
+          startAtUtc: start,
+          endAtUtc: DateTime(2026, 8, 3, 13),
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => CreateTimeSlotDraft(
+          localId: 'slot',
+          startAtUtc: start,
+          endAtUtc: start,
+        ),
+        throwsArgumentError,
+      );
+    },
+  );
+
+  test(
+    'stored generic slot UTC failures never normalize into different slots',
+    () {
+      final valid = <String, Object?>{
+        'local_id': 'slot',
+        'start_at_utc': '2026-08-03T12:00:00Z',
+        'end_at_utc': '2026-08-03T13:00:00Z',
+      };
+      for (final field in ['start_at_utc', 'end_at_utc']) {
+        for (final bad in <Object?>[
+          null,
+          123,
+          '',
+          '2026-02-30T12:00:00Z',
+          '2026-08-03T12:00:00',
+          '2026-08-03T12:00:00+03:00',
+        ]) {
+          expect(
+            () => CreateTimeSlotDraft.fromMap({...valid, field: bad}),
+            throwsFormatException,
+          );
+        }
+      }
+      expect(
+        () => CreateTimeSlotDraft.fromMap({
+          ...valid,
+          'end_at_utc': valid['start_at_utc'],
+        }),
+        throwsFormatException,
+      );
+    },
+  );
   test('publish replaces local slot ids with permanent ids', () async {
     final _MemoryCreateLocalDataSource dataSource =
         _MemoryCreateLocalDataSource();

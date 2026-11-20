@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/time/local_date.dart';
+
 enum VisitEvidence { selfReported, attendanceConfirmed }
 
 class VisitedPlaceEntity {
@@ -32,10 +34,7 @@ class VisitedPlaceEntity {
   final DateTime recordedAtUtc;
   final String coverImageUrl;
 
-  String get localDayKey {
-    final String year = visitedOn.year.toString().padLeft(4, '0');
-    final String month = visitedOn.month.toString().padLeft(2, '0');
-    final String day = visitedOn.day.toString().padLeft(2, '0');
-    return '$year-$month-$day';
-  }
+  LocalDate get localDate =>
+      LocalDate(visitedOn.year, visitedOn.month, visitedOn.day);
+  String get localDayKey => localDate.toString();
 }

@@ -1,3 +1,7 @@
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 import '../../domain/entities/event_admission.dart';
 import '../../domain/entities/event_inventory.dart';
 import '../../domain/entities/event_draft_data.dart';
@@ -153,12 +157,13 @@ class EventDraftMapper {
       }
     }
     final Map<String, Object?> media = _map(json['mediaMetadata']);
-    final List<EventOccurrenceDraft> occurrences = _list(json['occurrences'])
-        .map(_map)
-        .where((Map<String, Object?> value) => value.isNotEmpty)
-        .map(_occurrence)
-        .whereType<EventOccurrenceDraft>()
-        .toList(growable: false);
+    final rawOccurrences = json['occurrences'];
+    if (rawOccurrences != null && rawOccurrences is! List) {
+      throw const FormatException('Stored Event occurrences must be a list');
+    }
+    final List<EventOccurrenceDraft> occurrences = _list(
+      rawOccurrences,
+    ).map((raw) => _occurrence(_map(raw))).toList(growable: false);
     final Map<String, EventOccurrenceOverrideDraft> overrides =
         <String, EventOccurrenceOverrideDraft>{};
     for (final MapEntry<String, Object?> entry in _map(
@@ -234,7 +239,10 @@ class EventDraftMapper {
             json['paymentCollectionMode'],
           ) ??
           defaults.paymentCollectionMode,
-      price: _money(json['price'], defaults.currencyCode),
+      price: _money(
+        json['price'],
+        _string(json['currencyCode'], defaults.currencyCode),
+      ),
       capacityMode:
           _enumValue(EventCapacityMode.values, json['capacityMode']) ??
           defaults.capacityMode,
@@ -311,8 +319,8 @@ class EventDraftMapper {
             (EventOccurrenceDraft occurrence) => <String, Object?>{
               'id': occurrence.id,
               'localDate': occurrence.localDate,
-              'startAtUtc': occurrence.startAtUtc.toIso8601String(),
-              'endAtUtc': occurrence.endAtUtc.toIso8601String(),
+              'startAtUtc': _dateTimeJson(occurrence.startAtUtc),
+              'endAtUtc': _dateTimeJson(occurrence.endAtUtc),
               'shiftedForDst': occurrence.shiftedForDst,
             },
           )
@@ -321,8 +329,8 @@ class EventDraftMapper {
         for (final MapEntry<String, EventOccurrenceOverrideDraft> entry
             in value.occurrenceOverrides.entries)
           entry.key: <String, Object?>{
-            'startAtUtc': entry.value.startAtUtc?.toIso8601String(),
-            'endAtUtc': entry.value.endAtUtc?.toIso8601String(),
+            'startAtUtc': _dateTimeJson(entry.value.startAtUtc),
+            'endAtUtc': _dateTimeJson(entry.value.endAtUtc),
             'capacity': entry.value.capacity,
             'cancelled': entry.value.cancelled,
           },
@@ -352,8 +360,8 @@ class EventDraftMapper {
       'price': value.price == null
           ? null
           : <String, Object?>{
-              'amountMinor': value.price!.amountMinor,
-              'currencyCode': value.price!.currencyCode,
+              'minorUnits': value.price!.minorUnits,
+              'currencyCode': value.price!.currency.value,
             },
       'capacityMode': value.capacityMode.name,
       'capacity': value.capacity,
@@ -750,8 +758,8 @@ class EventDraftMapper {
       ? null
       : <String, Object?>{
           'kind': value.kind.name,
-          'opensAtUtc': value.opensAtUtc?.toIso8601String(),
-          'closesAtUtc': value.closesAtUtc?.toIso8601String(),
+          'opensAtUtc': _dateTimeJson(value.opensAtUtc),
+          'closesAtUtc': _dateTimeJson(value.closesAtUtc),
           'opensBeforeOccurrenceMinutes': value.opensBeforeOccurrenceMinutes,
           'closesBeforeOccurrenceMinutes': value.closesBeforeOccurrenceMinutes,
         };
@@ -886,13 +894,13 @@ class EventDraftMapper {
           'dstOverlapPolicy': value.dstOverlapPolicy.name,
         };
 
-  static EventOccurrenceDraft? _occurrence(Map<String, Object?> json) {
+  static EventOccurrenceDraft _occurrence(Map<String, Object?> json) {
     final String id = _string(json['id'], '');
     final String localDate = _string(json['localDate'], '');
     final DateTime? start = _dateTime(json['startAtUtc']);
     final DateTime? end = _dateTime(json['endAtUtc']);
     if (id.isEmpty || localDate.isEmpty || start == null || end == null) {
-      return null;
+      throw const FormatException('Incomplete stored Event occurrence');
     }
     return EventOccurrenceDraft(
       id: id,
@@ -903,14 +911,33 @@ class EventDraftMapper {
     );
   }
 
-  static EventMoneyDraft? _money(Object? raw, String fallbackCurrency) {
-    final Map<String, Object?> json = _map(raw);
-    final int? amount = _int(json['amountMinor']);
-    if (amount == null) return null;
-    return EventMoneyDraft(
-      amountMinor: amount,
-      currencyCode: _string(json['currencyCode'], fallbackCurrency),
-    );
+  static Money? _money(Object? raw, String fallbackCurrency) {
+    if (raw == null) return null;
+    final json = _map(raw);
+    final canonical = json.containsKey('minorUnits');
+    final rawAmount = canonical ? json['minorUnits'] : json['amountMinor'];
+    // Old Event minor-unit strings are read-compatible; canonical writes
+    // require an actual integer and never fall back on a malformed new field.
+    final amount = rawAmount is int
+        ? rawAmount
+        : !canonical && rawAmount is String
+        ? int.tryParse(rawAmount)
+        : null;
+    if (amount == null) {
+      throw const MoneyReadException(MoneyParseError.invalidCanonicalValue);
+    }
+    try {
+      return (Money(
+        minorUnits: amount,
+        currency: CurrencyCode.parse(
+          _string(json['currencyCode'], fallbackCurrency),
+        ),
+      ));
+    } on FormatException {
+      throw const MoneyReadException(MoneyParseError.missingCurrency);
+    } on MoneyArithmeticException {
+      throw const MoneyReadException(MoneyParseError.outOfRange);
+    }
   }
 
   static T? _enumValue<T extends Enum>(List<T> values, Object? raw) {
@@ -955,6 +982,14 @@ class EventDraftMapper {
           _ => null,
         };
 
-  static DateTime? _dateTime(Object? raw) =>
-      DateTime.tryParse(raw?.toString() ?? '')?.toUtc();
+  static DateTime? _dateTime(Object? raw) {
+    if (raw == null) return null;
+    if (raw is! String) {
+      throw const FormatException('Event UTC timestamp must be text');
+    }
+    return UtcInstant.parse(raw).value;
+  }
+
+  static String? _dateTimeJson(DateTime? value) =>
+      value == null ? null : UtcInstant(value).toString();
 }

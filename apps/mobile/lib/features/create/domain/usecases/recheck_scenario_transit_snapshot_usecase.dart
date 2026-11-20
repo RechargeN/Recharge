@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import '../entities/scenario_item_draft.dart';
 import '../entities/scenario_transit_mutation.dart';
 import '../entities/scenario_transit_schedule.dart';
@@ -39,8 +40,7 @@ class RecheckScenarioTransitSnapshotUseCase {
         originStopId.isEmpty ||
         destinationStopId == null ||
         destinationStopId.isEmpty ||
-        date == null ||
-        !date.isValid) {
+        date == null) {
       return const ScenarioTransitRecheckResult(
         status: ScenarioTransitRecheckStatus.invalidSnapshot,
       );
@@ -51,11 +51,7 @@ class RecheckScenarioTransitSnapshotUseCase {
         ScenarioTransitSearchQuery(
           originStopId: originStopId,
           destinationStopId: destinationStopId,
-          serviceDate: ScenarioTransitLocalDate(
-            date.year,
-            date.month,
-            date.day,
-          ),
+          serviceDate: LocalDate(date.year, date.month, date.day),
           providerCodes: <String>{providerCode},
           exactTripId: tripId,
           limit: 1,

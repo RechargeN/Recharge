@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import '../../features/create/domain/entities/scenario_item_draft.dart';
 import '../../features/create/domain/entities/scenario_object_intake.dart';
 import '../../features/discover/application/state/scenario_intake_selection_state.dart';
@@ -146,10 +147,7 @@ class DiscoverScenarioIntakeAdapter {
           : ScenarioSourceStatus.ready,
       location: ScenarioIntakeLocationSnapshot(
         title: event.venueName.trim().isEmpty ? event.title : event.venueName,
-        point: ScenarioGeoPointDraft(
-          latitude: event.latitude,
-          longitude: event.longitude,
-        ),
+        point: GeoPoint(latitude: event.latitude, longitude: event.longitude),
         address: _nullable(event.addressLine),
         marketId: _nullable(event.marketCityId),
         timezoneId: _nullable(event.timezoneId),
@@ -208,10 +206,7 @@ class DiscoverScenarioIntakeAdapter {
       sourceStatus: ScenarioSourceStatus.ready,
       location: ScenarioIntakeLocationSnapshot(
         title: item.venueName.trim().isEmpty ? item.title : item.venueName,
-        point: ScenarioGeoPointDraft(
-          latitude: item.latitude,
-          longitude: item.longitude,
-        ),
+        point: GeoPoint(latitude: item.latitude, longitude: item.longitude),
         address: _nullable(item.addressLine),
         marketId: _nullable(item.marketCityId),
         timezoneId: _nullable(item.timezoneId),

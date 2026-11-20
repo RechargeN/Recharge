@@ -139,7 +139,7 @@ class ValidateActivityDraftUseCase {
         );
       }
       if (hasAmount) {
-        final int amountMinor = contribution.amountHint!.amountMinor;
+        final int amountMinor = contribution.amountHint!.minorUnits;
         if (amountMinor <= 0) {
           error(
             'contribution_amount_not_positive',
@@ -147,7 +147,7 @@ class ValidateActivityDraftUseCase {
             'contributionAmountHint',
           );
         }
-        final String currency = contribution.amountHint!.currencyCode.trim();
+        final String currency = contribution.amountHint!.currency.value.trim();
         if (currency.isEmpty ||
             currency.toUpperCase() != activeMarketCurrencyCode.toUpperCase()) {
           error(

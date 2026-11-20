@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
 import '../entities/rental_draft_data.dart';
 
 class RentalRateEstimate {
@@ -22,11 +24,6 @@ class RentalRateEstimate {
 class EstimateRentalRateUseCase {
   const EstimateRentalRateUseCase();
 
-  /// A conservative bound well under the 64-bit signed int range and under
-  /// JS's safe-integer limit (2^53), so a result stays representable even
-  /// if this value round-trips through a web/JSON boundary.
-  static const int _maxSafeMinorUnits = 1 << 53;
-
   RentalRateEstimate? call({
     required RentalPricingPolicy pricing,
     required int requestedMinutes,
@@ -49,25 +46,21 @@ class EstimateRentalRateUseCase {
     }
     selected ??= pricing.rateSteps.first;
 
-    final int? totalMinor = _checkedMultiply(
-      billableUnits,
-      selected.unitPrice.amountMinor,
-    );
-    if (totalMinor == null) return null;
+    final Money total;
+    try {
+      selected.unitPrice.minorUnitsIn(CurrencyCode.parse(pricing.currencyCode));
+      total = selected.unitPrice.scaledBy(billableUnits);
+    } on MoneyArithmeticException {
+      return null;
+    } on FormatException {
+      return null;
+    }
 
     return RentalRateEstimate(
       billableUnits: billableUnits,
-      unitPriceMinor: selected.unitPrice.amountMinor,
-      totalMinor: totalMinor,
+      unitPriceMinor: selected.unitPrice.minorUnits,
+      totalMinor: total.minorUnits,
       currencyCode: pricing.currencyCode,
     );
-  }
-
-  int? _checkedMultiply(int a, int b) {
-    if (a == 0 || b == 0) return 0;
-    final int product = a * b;
-    if (product ~/ a != b) return null; // overflow
-    if (product.abs() > _maxSafeMinorUnits) return null;
-    return product;
   }
 }

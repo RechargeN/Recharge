@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import '../../domain/entities/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import '../../domain/entities/time_fit_evaluation.dart';
 import '../../domain/entities/time_window.dart';
 import '../../domain/repositories/travel_time_repository.dart';

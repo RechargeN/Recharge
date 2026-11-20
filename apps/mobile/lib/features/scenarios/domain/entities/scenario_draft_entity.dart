@@ -1,9 +1,10 @@
+import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../shared/primitives/money/money.dart';
 
 enum ScenarioMood { calm, social, active }
 
 class ScenarioStepEntity {
-  const ScenarioStepEntity({
+  ScenarioStepEntity({
     this.id = '',
     this.sourceObjectId,
     this.sourceObjectType,
@@ -16,7 +17,11 @@ class ScenarioStepEntity {
     required this.isFree,
     required this.latitude,
     required this.longitude,
-  });
+  }) {
+    if (priceAmount.minorUnits < 0) {
+      throw ArgumentError('Price must be nonnegative');
+    }
+  }
 
   final String id;
   final String? sourceObjectId;
@@ -57,23 +62,24 @@ class ScenarioDraftEntity {
   const ScenarioDraftEntity({
     required this.id,
     required this.revision,
+    required this.currency,
     required this.mood,
     required this.maxDurationMinutes,
     required this.freeOnly,
     required this.walkingOnly,
     required this.sourcePrompt,
-    required this.currencyCode,
     required this.steps,
   });
 
   final String id;
   final int revision;
+  final CurrencyCode currency;
   final ScenarioMood mood;
   final int maxDurationMinutes;
   final bool freeOnly;
   final bool walkingOnly;
   final String sourcePrompt;
-  final String currencyCode;
+  String get currencyCode => currency.value;
   final List<ScenarioStepEntity> steps;
 
   int get totalDurationMinutes {
@@ -90,10 +96,17 @@ class ScenarioDraftEntity {
     );
   }
 
-  Money get totalPriceAmount {
+  Money get totalPriceAmount => totalPriceOf(steps, currency: currency);
+
+  bool get isFree => steps.every((step) => step.isFree);
+
+  static Money totalPriceOf(
+    Iterable<ScenarioStepEntity> steps, {
+    required CurrencyCode currency,
+  }) {
     return steps.fold<Money>(
-      Money.zero(currencyCode),
-      (Money total, ScenarioStepEntity step) => total + step.priceAmount,
+      Money(minorUnits: 0, currency: currency),
+      (total, step) => total + step.priceAmount,
     );
   }
 
@@ -105,18 +118,17 @@ class ScenarioDraftEntity {
     bool? freeOnly,
     bool? walkingOnly,
     String? sourcePrompt,
-    String? currencyCode,
     List<ScenarioStepEntity>? steps,
   }) {
     return ScenarioDraftEntity(
       id: id ?? this.id,
       revision: revision ?? this.revision,
+      currency: currency,
       mood: mood ?? this.mood,
       maxDurationMinutes: maxDurationMinutes ?? this.maxDurationMinutes,
       freeOnly: freeOnly ?? this.freeOnly,
       walkingOnly: walkingOnly ?? this.walkingOnly,
       sourcePrompt: sourcePrompt ?? this.sourcePrompt,
-      currencyCode: currencyCode ?? this.currencyCode,
       steps: steps ?? this.steps,
     );
   }

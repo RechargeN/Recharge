@@ -1,5 +1,6 @@
 import '../../../../shared/primitives/id/id_generator.dart';
 import '../entities/managed_page_entity.dart';
+import '../entities/identity_access_snapshot.dart';
 import '../entities/managed_page_membership_entity.dart';
 import '../entities/professional_page_creation_input.dart';
 import '../repositories/identity_workspace_repository.dart';
@@ -22,15 +23,28 @@ class CreateProfessionalPageUseCase {
        _idGenerator = idGenerator,
        _utcNow = utcNow ?? _systemUtcNow;
 
-  static const int selfServiceOwnedPageLimit = 3;
+  static const int selfServiceOwnedPageLimit =
+      IdentityAccessSnapshot.selfServiceOwnedPageLimit;
 
   final IdentityWorkspaceRepository _repository;
   final IdGenerator _idGenerator;
   final DateTime Function() _utcNow;
 
+  String newRequestId() => _idGenerator.generate();
+
   Future<ManagedPageEntity> call({
     required String userId,
     required ProfessionalPageCreationInput input,
+    String? requestId,
+  }) => IdentityWorkspaceRepository.runCommand(
+    _repository,
+    () => _create(userId: userId, input: input, requestId: requestId),
+  );
+
+  Future<ManagedPageEntity> _create({
+    required String userId,
+    required ProfessionalPageCreationInput input,
+    String? requestId,
   }) async {
     final String normalizedUserId = userId.trim();
     final String displayName = input.displayName.trim();
@@ -58,13 +72,22 @@ class CreateProfessionalPageUseCase {
         'page_creation_not_authorized',
       );
     }
+    if (requestId != null) {
+      final existing = access.pageById(requestId);
+      if (existing != null) {
+        if (existing.ownerUserId != normalizedUserId) {
+          throw const CreateProfessionalPageException('request_owner_mismatch');
+        }
+        return existing;
+      }
+    }
     if (access.ownedPages.length >= selfServiceOwnedPageLimit) {
       throw const CreateProfessionalPageException(
         'self_service_page_limit_reached',
       );
     }
 
-    final String pageId = _idGenerator.generate();
+    final String pageId = requestId ?? newRequestId();
     final DateTime createdAtUtc = _utcNow().toUtc();
     final page = ManagedPageEntity(
       id: pageId,

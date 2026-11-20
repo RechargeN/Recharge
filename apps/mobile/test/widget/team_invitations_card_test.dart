@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/identity/application/controllers/team_invitation_controller.dart';
 import 'package:recharge/features/identity/application/identity_workspace_providers.dart';
 import 'package:recharge/features/identity/domain/entities/identity_access_snapshot.dart';
@@ -28,7 +28,25 @@ void main() {
       globalRole: 'user',
       creatorVerificationStatus: CreatorVerificationStatus.verified,
       globalCapabilities: const <String>{},
-      pages: const <ManagedPageEntity>[],
+      pages: [
+        ManagedPageEntity(
+          id: pageId,
+          ownerUserId: ownerId,
+          kind: ManagedPageKind.company,
+          displayName: 'Test page',
+          avatar: '',
+          verificationStatus: ManagedPageVerificationStatus.pending,
+          lifecycle: ManagedPageLifecycle.active,
+          marketId: 'riga',
+          countryCode: 'LV',
+          defaultLocale: 'en',
+          timezone: 'Europe/Riga',
+          defaultCurrency: 'EUR',
+          supportedLocales: const ['en'],
+          createdAtUtc: DateTime.utc(2026),
+          revision: 1,
+        ),
+      ],
       memberships: <ManagedPageMembershipEntity>[
         ManagedPageMembershipEntity(
           pageId: pageId,

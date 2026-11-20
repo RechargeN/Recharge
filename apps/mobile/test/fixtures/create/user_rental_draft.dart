@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/entities/rental_draft_data.dart';
 import 'package:recharge/features/create/domain/usecases/build_rental_content_body.dart';
@@ -92,20 +94,23 @@ CreateDraftEntity userRentalDraft({
               'area.',
           includedAccessoriesConfirmation: true,
         ),
-        pricing: const RentalPricingPolicy(
+        pricing: RentalPricingPolicy(
           currencyCode: 'EUR',
           billingUnit: RentalBillingUnit.hour,
           rateSteps: <RentalRateStep>[
             RentalRateStep(
               minUnits: 1,
-              unitPrice: RentalMoneyDraft(
-                amountMinor: 1500,
-                currencyCode: 'EUR',
+              unitPrice: Money(
+                minorUnits: 1500,
+                currency: CurrencyCode.parse('EUR'),
               ),
             ),
           ],
           deposit: RentalDepositPolicy(
-            amount: RentalMoneyDraft(amountMinor: 5000, currencyCode: 'EUR'),
+            amount: Money(
+              minorUnits: 5000,
+              currency: CurrencyCode.parse('EUR'),
+            ),
             collectionMethod: RentalDepositCollectionMethod.atHandover,
             terms: 'Returned after the kayak is inspected at return.',
           ),
@@ -208,9 +213,9 @@ final Map<String, CreateDraftEntity Function()> rentalCompatCases =
           handover: rental.handover.copyWith(
             deliveryAvailable: true,
             deliveryRadiusKm: 80,
-            deliveryFee: const RentalMoneyDraft(
-              amountMinor: 0,
-              currencyCode: 'EUR',
+            deliveryFee: Money(
+              minorUnits: 0,
+              currency: CurrencyCode.parse('EUR'),
             ),
             deliveryTerms: 'Delivered to the shore by arrangement.',
           ),

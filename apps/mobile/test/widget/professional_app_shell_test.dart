@@ -8,7 +8,7 @@ import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/identity/account_experience.dart';
 import 'package:recharge/features/identity/presentation/pages/professional_page_workspace_page.dart';
 import 'package:recharge/features/identity/presentation/widgets/workspace_section.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/core/notifications/app_notification_sink.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/identity/application/controllers/identity_workspace_controller.dart';
@@ -51,7 +51,9 @@ void main() {
         analyticsService: _NoopAnalyticsService(),
       );
       await controller.ensureLoaded(userId);
-      controller.selectAdminPreview(AdminExperiencePreview.professionalPage);
+      await controller.selectAdminPreview(
+        AdminExperiencePreview.professionalPage,
+      );
       final actualSnapshot = controller.state.accessSnapshot;
 
       await tester.pumpWidget(

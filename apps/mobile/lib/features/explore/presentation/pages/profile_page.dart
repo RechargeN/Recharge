@@ -1,4 +1,6 @@
+import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../core/layout/page_list_padding.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -1596,6 +1598,8 @@ class _LatestSmartSearchCard extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final SmartRouteIntent? routeIntent = parseSmartSearch(
       item.prompt,
+      currency: (item.query.budgetMax ?? item.query.budgetMin)?.currency,
+      locale: 'en',
     ).routeIntent;
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -2597,7 +2601,10 @@ _CreatorListingData? _creatorListingDataFor(
         ? l10n.discoverFree
         : RechargeFormats.money(
             draft.basePrice ??
-                Money(minorUnits: 0, currencyCode: draft.currency),
+                Money(
+                  minorUnits: 0,
+                  currency: CurrencyCode.parse(draft.currency),
+                ),
             l10n.localeName,
           ),
     readinessLabel: missingFields.isEmpty
@@ -2823,7 +2830,7 @@ String _discoverRouteForCreateListing(String path, CreateDraftEntity draft) {
       'category': _discoverCategoryForCreateListing(draft.mainCategory),
       'free': draft.isFree ? '1' : '0',
       if (!draft.isFree && draft.basePrice != null)
-        'budgetMax': draft.basePrice!.toStringAsFixed(0),
+        'budgetMax': MoneyFormatter().decimal(draft.basePrice!, locale: 'en'),
       'radius': '5000',
       'unlimited': '0',
     },
@@ -2893,7 +2900,11 @@ Map<String, String> _queryParametersForSavedSearch(DiscoverQuery query) {
     'category': query.selectedCategoryIds.join(','),
     'free': query.freeOnly ? '1' : '0',
     if (query.budgetMax != null)
-      'budgetMax': query.budgetMax!.toStringAsFixed(0),
+      'budgetMax': MoneyFormatter().decimal(
+        query.budgetMax!,
+        locale: 'en',
+        omitZeroFraction: true,
+      ),
     if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
     if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
     'radius': query.radiusMeters.round().toString(),
@@ -2931,7 +2942,11 @@ String _scenarioBuilderRouteForSmartSearch(SmartSearchHistoryEntity item) {
 SmartSearchParseResult? _smartRouteParseForSmartSearch(
   SmartSearchHistoryEntity item,
 ) {
-  final SmartSearchParseResult parseResult = parseSmartSearch(item.prompt);
+  final SmartSearchParseResult parseResult = parseSmartSearch(
+    item.prompt,
+    currency: (item.query.budgetMax ?? item.query.budgetMin)?.currency,
+    locale: 'en',
+  );
   if (parseResult.routeIntent == null) return null;
   return parseResult;
 }
@@ -3019,7 +3034,7 @@ String _promptForSavedSearch(DiscoverQuery query) {
     if (query.selectedCategoryIds.isNotEmpty) query.selectedCategoryIds.first,
     if (query.freeOnly) 'free',
     if (query.budgetMax != null)
-      'under ${query.budgetMax!.toStringAsFixed(0)}', // l10n-ignore: search prompt text built from the saved query, not UI copy
+      'under ${MoneyFormatter().decimal(query.budgetMax!, locale: 'en', omitZeroFraction: true)}',
     query.unlimitedRadius
         ? 'any area' // l10n-ignore: search prompt text built from the saved query, not UI copy
         : 'near ${(query.radiusMeters / 1000).round()} km', // l10n-ignore: search prompt text built from the saved query, not UI copy

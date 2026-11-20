@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -22,8 +23,7 @@ class PublishedCollectionDiscoveryLocalDataSource {
     }
     try {
       final Object? decoded = jsonDecode(raw);
-      if (decoded is! Map<String, dynamic> ||
-          decoded['schemaVersion'] != 1) {
+      if (decoded is! Map<String, dynamic> || decoded['schemaVersion'] != 1) {
         return const <PublishedCollectionDiscoveryEntity>[];
       }
       final Object? collections = decoded['collections'];
@@ -132,12 +132,11 @@ class PublishedCollectionDiscoveryLocalDataSource {
     'publishedAtUtc': value.publishedAtUtc.toIso8601String(),
   };
 
-  static PublishedCollectionDiscoveryEntity _fromMap(
-    Map<String, Object?> map,
-  ) {
+  static PublishedCollectionDiscoveryEntity _fromMap(Map<String, Object?> map) {
     final List<dynamic> rawSections =
         map['sections'] as List<dynamic>? ?? <dynamic>[];
-    final List<dynamic> rawItems = map['items'] as List<dynamic>? ?? <dynamic>[];
+    final List<dynamic> rawItems =
+        map['items'] as List<dynamic>? ?? <dynamic>[];
     return PublishedCollectionDiscoveryEntity(
       collectionId: map['collectionId']! as String,
       versionId: map['versionId']! as String,
@@ -172,9 +171,7 @@ class PublishedCollectionDiscoveryLocalDataSource {
             ),
           )
           .toList(growable: false),
-      publishedAtUtc: DateTime.parse(
-        map['publishedAtUtc']! as String,
-      ).toUtc(),
+      publishedAtUtc: UtcInstant.parse(map['publishedAtUtc']! as String).value,
     );
   }
 }

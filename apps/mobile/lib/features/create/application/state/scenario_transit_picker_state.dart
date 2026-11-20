@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import '../../domain/entities/scenario_transit_schedule.dart';
 import '../../domain/entities/scenario_transit_mutation.dart';
 
@@ -102,7 +103,7 @@ class ScenarioTransitPickerState {
   final List<ScenarioTransitStop> destinationResults;
   final ScenarioTransitStop? origin;
   final ScenarioTransitStop? destination;
-  final ScenarioTransitLocalDate? serviceDate;
+  final LocalDate? serviceDate;
   final ScenarioTransitTime departAfter;
   final List<ScenarioTransitServiceOption> serviceOptions;
   final ScenarioTransitServiceOption? selectedService;
@@ -123,7 +124,7 @@ class ScenarioTransitPickerState {
       origin!.providerCode == selectedProviderCode &&
       destination!.providerCode == selectedProviderCode &&
       origin!.id != destination!.id &&
-      serviceDate?.isValid == true;
+      serviceDate != null;
 
   ScenarioTransitPickerState copyWith({
     ScenarioTransitPickerMode? mode,
@@ -146,7 +147,7 @@ class ScenarioTransitPickerState {
     bool clearOrigin = false,
     ScenarioTransitStop? destination,
     bool clearDestination = false,
-    ScenarioTransitLocalDate? serviceDate,
+    LocalDate? serviceDate,
     bool clearServiceDate = false,
     ScenarioTransitTime? departAfter,
     List<ScenarioTransitServiceOption>? serviceOptions,

@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'publisher_ref.dart';
 
 enum ActivityContributionKind { purchase, donation, other }
@@ -79,24 +80,6 @@ class ActivityLocationDraft {
   );
 }
 
-class ActivityContributionAmountDraft {
-  const ActivityContributionAmountDraft({
-    required this.amountMinor,
-    required this.currencyCode,
-  });
-
-  final int amountMinor;
-  final String currencyCode;
-
-  ActivityContributionAmountDraft copyWith({
-    int? amountMinor,
-    String? currencyCode,
-  }) => ActivityContributionAmountDraft(
-    amountMinor: amountMinor ?? this.amountMinor,
-    currencyCode: currencyCode ?? this.currencyCode,
-  );
-}
-
 class ActivityOptionalContributionDraft {
   const ActivityOptionalContributionDraft({
     this.kind,
@@ -106,14 +89,14 @@ class ActivityOptionalContributionDraft {
 
   final ActivityContributionKind? kind;
   final String? note;
-  final ActivityContributionAmountDraft? amountHint;
+  final Money? amountHint;
 
   ActivityOptionalContributionDraft copyWith({
     ActivityContributionKind? kind,
     bool clearKind = false,
     String? note,
     bool clearNote = false,
-    ActivityContributionAmountDraft? amountHint,
+    Money? amountHint,
     bool clearAmountHint = false,
   }) => ActivityOptionalContributionDraft(
     kind: clearKind ? null : (kind ?? this.kind),

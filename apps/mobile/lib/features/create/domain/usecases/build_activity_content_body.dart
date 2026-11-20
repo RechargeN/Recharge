@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money.dart';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
@@ -209,7 +210,7 @@ final class ActivityContentBodyMapper {
   ) {
     if (contribution == null) return null;
     final String? note = _text(contribution.note);
-    final ActivityContributionAmountDraft? amount = contribution.amountHint;
+    final Money? amount = contribution.amountHint;
     if (contribution.kind == null && note == null && amount == null) {
       return null;
     }
@@ -218,8 +219,8 @@ final class ActivityContentBodyMapper {
       if (note != null) 'note': note,
       if (amount != null)
         'amountHint': <String, Object?>{
-          'amountMinor': amount.amountMinor,
-          'currencyCode': amount.currencyCode,
+          'amountMinor': amount.minorUnits,
+          'currencyCode': amount.currency.value,
         },
     };
   }

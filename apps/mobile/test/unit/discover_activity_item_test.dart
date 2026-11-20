@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/data/datasources/discover_remote_datasource.dart';
 import 'package:recharge/features/discover/data/repositories/discover_repository_impl.dart';
@@ -10,6 +12,7 @@ void main() {
     () async {
       final DiscoverRepositoryImpl repository = DiscoverRepositoryImpl(
         remoteDataSource: MockDiscoverRemoteDataSource(),
+        currency: CurrencyCode.eur,
       );
       final DiscoverQuery query = DiscoverQuery.defaults(
         marketCityId: 'riga',
@@ -25,8 +28,10 @@ void main() {
       );
 
       expect(activityItem.isFree, isTrue);
-      expect(activityItem.priceAmount!.minorUnits, 0);
-      expect(activityItem.priceAmount!.currencyCode, 'EUR');
+      expect(
+        activityItem.priceAmount,
+        Money(minorUnits: 0, currency: CurrencyCode.eur),
+      );
       expect(activityItem.availabilityKind, AvailabilityKind.none);
       expect(activityItem.durationMinutes, isNotNull);
     },
@@ -37,6 +42,7 @@ void main() {
     () async {
       final DiscoverRepositoryImpl repository = DiscoverRepositoryImpl(
         remoteDataSource: MockDiscoverRemoteDataSource(),
+        currency: CurrencyCode.eur,
       );
       final DiscoverQuery query = DiscoverQuery.defaults(
         marketCityId: 'riga',

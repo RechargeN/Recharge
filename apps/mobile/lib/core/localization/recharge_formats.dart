@@ -1,10 +1,10 @@
-import 'dart:math' as math;
-
 import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../shared/primitives/money/money.dart';
+import '../../shared/primitives/money/currency_metadata.dart';
+import '../../shared/primitives/money/currency_code.dart';
 
 /// L4 locale-aware formatting. The language only changes how a value looks:
 /// the currency always comes from the [Money] value (never from the language
@@ -13,6 +13,14 @@ import '../../shared/primitives/money/money.dart';
 /// device zone.
 abstract final class RechargeFormats {
   static bool _zonesLoaded = false;
+  // Display metadata is explicit and does not enable currency writers or FX.
+  static final _displayCurrencies = CurrencyMetadataRegistry([
+    CurrencyMetadata(code: CurrencyCode.eur, exponent: 2),
+    CurrencyMetadata(code: CurrencyCode.parse('USD'), exponent: 2),
+    CurrencyMetadata(code: CurrencyCode.parse('GBP'), exponent: 2),
+    CurrencyMetadata(code: CurrencyCode.parse('JPY'), exponent: 0),
+    CurrencyMetadata(code: CurrencyCode.parse('KWD'), exponent: 3),
+  ]);
 
   /// The owning object's zone, or null when the id is unknown here.
   static tz.Location? _zone(String ianaZone) {
@@ -29,29 +37,57 @@ abstract final class RechargeFormats {
 
   /// [value] with its own currency, e.g. `€12.50` (en), `12,50 €` (lv, ru).
   static String money(Money value, String languageCode) {
-    final NumberFormat format = NumberFormat.simpleCurrency(
-      locale: languageCode,
-      name: value.currencyCode,
-      decimalDigits: 2,
+    final metadata = _displayCurrencies.lookup(value.currency);
+    if (metadata == null) return '—';
+    return minorUnits(
+      value.minorUnits,
+      value.currency.value,
+      metadata.exponent,
+      languageCode,
     );
-    // Money keeps integer hundredths; the division happens only for display.
-    return format.format(value.minorUnits / 100);
   }
 
-  /// An amount kept in [amountMinor] units of [minorUnitDigits] decimals
-  /// (JPY 0, EUR 2, KWD 3) with its own currency.
+  /// Exact integer formatting; no conversion through binary floating point.
   static String minorUnits(
     int amountMinor,
     String currencyCode,
     int minorUnitDigits,
     String languageCode,
   ) {
-    final NumberFormat format = NumberFormat.simpleCurrency(
+    if (minorUnitDigits < 0 || minorUnitDigits > 6) {
+      throw ArgumentError.value(minorUnitDigits, 'minorUnitDigits');
+    }
+    final digits = BigInt.from(
+      amountMinor,
+    ).abs().toString().padLeft(minorUnitDigits + 1, '0');
+    final whole = minorUnitDigits == 0
+        ? digits
+        : digits.substring(0, digits.length - minorUnitDigits);
+    final fraction = minorUnitDigits == 0
+        ? ''
+        : digits.substring(digits.length - minorUnitDigits);
+    final number = NumberFormat.decimalPattern(languageCode)
+      ..minimumFractionDigits = minorUnitDigits
+      ..maximumFractionDigits = minorUnitDigits;
+    final symbols = number.symbols;
+    final groups = <String>[];
+    var remaining = whole;
+    while (remaining.length > 3) {
+      groups.insert(0, remaining.substring(remaining.length - 3));
+      remaining = remaining.substring(0, remaining.length - 3);
+    }
+    groups.insert(0, remaining);
+    final exact =
+        groups.join(symbols.GROUP_SEP) +
+        (minorUnitDigits == 0 ? '' : '${symbols.DECIMAL_SEP}$fraction');
+    final currency = NumberFormat.simpleCurrency(
       locale: languageCode,
       name: currencyCode,
       decimalDigits: minorUnitDigits,
     );
-    return format.format(amountMinor / math.pow(10, minorUnitDigits));
+    final sample = amountMinor < 0 ? -1 : 0;
+    final template = currency.format(sample);
+    return template.replaceFirst(number.format(sample.abs()), exact);
   }
 
   /// A plain number with up to [maxFractionDigits] decimals.

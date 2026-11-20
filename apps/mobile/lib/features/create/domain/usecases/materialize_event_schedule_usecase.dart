@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/time/local_date.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 import '../entities/event_draft_data.dart';
 import '../repositories/event_timezone_repository.dart';
 
@@ -6,22 +8,36 @@ class MaterializeEventScheduleUseCase {
 
   final EventTimezoneRepository _timezoneRepository;
 
+  LocalDate localDateAt({
+    required DateTime instantUtc,
+    required String timezoneId,
+  }) => _timezoneRepository.localDateAt(
+    instantUtc: instantUtc,
+    timezoneId: timezoneId,
+  );
+
   List<EventOccurrenceDraft> call(
     EventDraftData draft, {
     int maxProjectionCount = 180,
     DateTime? projectionNowUtc,
   }) {
-    final List<_LocalDate> dates = switch (draft.scheduleMode) {
-      EventScheduleMode.oneTime => <_LocalDate>[
-        _LocalDate.parse(draft.localStartDate),
+    final now = UtcInstant(projectionNowUtc ?? DateTime.now().toUtc()).value;
+    final rule = draft.recurrence;
+    if (rule != null) {
+      for (final exception in rule.exceptionLocalDates) {
+        LocalDate.parse(exception);
+      }
+    }
+    final List<LocalDate> dates = switch (draft.scheduleMode) {
+      EventScheduleMode.oneTime => <LocalDate>[
+        LocalDate.parse(draft.localStartDate),
       ],
       EventScheduleMode.multiDate =>
-        draft.multiDateLocalDates.map(_LocalDate.parse).toSet().toList()
-          ..sort(),
+        draft.multiDateLocalDates.map(LocalDate.parse).toSet().toList()..sort(),
       EventScheduleMode.recurring => _recurringDates(
         draft,
         maxProjectionCount: maxProjectionCount,
-        projectionNowUtc: projectionNowUtc ?? DateTime.now().toUtc(),
+        projectionNowUtc: now,
       ),
     };
     final Map<String, String> existingIds = <String, String>{
@@ -37,10 +53,11 @@ class MaterializeEventScheduleUseCase {
             draft.occurrences.length == 1
         ? draft.occurrences.single.id
         : null;
-    final EventRecurrenceRuleDraft? rule = draft.recurrence;
     final List<EventOccurrenceDraft> result = <EventOccurrenceDraft>[];
-    for (final _LocalDate date in dates) {
-      if (rule?.exceptionLocalDates.contains(date.iso) ?? false) continue;
+    for (final LocalDate date in dates) {
+      if (rule?.exceptionLocalDates.contains(date.toString()) ?? false) {
+        continue;
+      }
       final ResolvedEventLocalTime start = _timezoneRepository.resolve(
         timezoneId: draft.timezoneId,
         year: date.year,
@@ -53,7 +70,7 @@ class MaterializeEventScheduleUseCase {
       );
       final DateTime end;
       if (draft.allDay) {
-        final _LocalDate endDate = date.addDays(draft.durationMinutes ~/ 1440);
+        final LocalDate endDate = date.addDays(draft.durationMinutes ~/ 1440);
         end = _timezoneRepository
             .resolve(
               timezoneId: draft.timezoneId,
@@ -73,9 +90,9 @@ class MaterializeEventScheduleUseCase {
         EventOccurrenceDraft(
           id:
               oneTimeId ??
-              existingIds[date.iso] ??
-              'loc_occ_${date.iso.replaceAll('-', '')}_${draft.startMinute}',
-          localDate: date.iso,
+              existingIds[date.toString()] ??
+              'loc_occ_${date.toString().replaceAll('-', '')}_${draft.startMinute}',
+          localDate: date.toString(),
           startAtUtc: start.utc,
           endAtUtc: end,
           shiftedForDst: start.shifted,
@@ -89,35 +106,42 @@ class MaterializeEventScheduleUseCase {
     return List<EventOccurrenceDraft>.unmodifiable(result);
   }
 
-  List<_LocalDate> _recurringDates(
+  List<LocalDate> _recurringDates(
     EventDraftData draft, {
     required int maxProjectionCount,
     required DateTime projectionNowUtc,
   }) {
-    final EventRecurrenceRuleDraft? rule = draft.recurrence;
-    if (rule == null) return const <_LocalDate>[];
-    final _LocalDate anchor = _LocalDate.parse(draft.localStartDate);
-    final _LocalDate horizon = _LocalDate.fromDateTime(
-      projectionNowUtc.add(const Duration(days: 548)),
+    final rule = draft.recurrence;
+    if (rule == null) return const <LocalDate>[];
+    final LocalDate anchor = LocalDate.parse(draft.localStartDate);
+    // Preserve the existing 548 elapsed-day UTC projection cutoff policy.
+    final horizonUtc = projectionNowUtc.add(const Duration(days: 548));
+    final LocalDate horizon = LocalDate(
+      horizonUtc.year,
+      horizonUtc.month,
+      horizonUtc.day,
     );
-    final _LocalDate? until =
-        rule.endMode != EventRecurrenceEndMode.untilDate ||
-            rule.untilLocalDate == null
-        ? null
-        : _LocalDate.tryParse(rule.untilLocalDate!);
+    final LocalDate? until = rule.endMode == EventRecurrenceEndMode.untilDate
+        ? LocalDate.parse(rule.untilLocalDate ?? '')
+        : null;
     final int targetCount =
         rule.endMode == EventRecurrenceEndMode.occurrenceCount
         ? (rule.occurrenceCount ?? 0)
         : maxProjectionCount;
-    if (targetCount <= 0 || rule.interval <= 0) return const <_LocalDate>[];
+    if (targetCount <= 0 || rule.interval <= 0) return const <LocalDate>[];
 
-    final List<_LocalDate> result = <_LocalDate>[];
-    _LocalDate cursor = anchor;
+    final List<LocalDate> result = <LocalDate>[];
+    LocalDate cursor = anchor;
     while (result.length < targetCount && cursor.compareTo(horizon) <= 0) {
       if (until != null && cursor.compareTo(until) > 0) break;
       if (_matches(anchor, cursor, rule) &&
-          !rule.exceptionLocalDates.contains(cursor.iso)) {
+          !rule.exceptionLocalDates.contains(cursor.toString())) {
         result.add(cursor);
+      }
+      if (result.length >= targetCount ||
+          cursor == horizon ||
+          cursor == until) {
+        break;
       }
       cursor = cursor.addDays(1);
     }
@@ -125,8 +149,8 @@ class MaterializeEventScheduleUseCase {
   }
 
   bool _matches(
-    _LocalDate anchor,
-    _LocalDate candidate,
+    LocalDate anchor,
+    LocalDate candidate,
     EventRecurrenceRuleDraft rule,
   ) {
     final int days = candidate.daysSince(anchor);
@@ -151,8 +175,8 @@ class MaterializeEventScheduleUseCase {
   }
 
   bool _matchesMonthly(
-    _LocalDate anchor,
-    _LocalDate candidate,
+    LocalDate anchor,
+    LocalDate candidate,
     EventRecurrenceRuleDraft rule,
   ) {
     final int monthDelta =
@@ -163,62 +187,6 @@ class MaterializeEventScheduleUseCase {
         anchor.day > _daysInMonth(candidate.year, candidate.month) &&
         candidate.day == _daysInMonth(candidate.year, candidate.month);
   }
-}
-
-class _LocalDate implements Comparable<_LocalDate> {
-  const _LocalDate(this.year, this.month, this.day);
-
-  final int year;
-  final int month;
-  final int day;
-
-  factory _LocalDate.parse(String value) {
-    final _LocalDate? parsed = tryParse(value);
-    if (parsed == null) throw const FormatException('Invalid local date');
-    return parsed;
-  }
-
-  static _LocalDate? tryParse(String value) {
-    final DateTime? parsed = DateTime.tryParse('${value}T00:00:00Z');
-    if (parsed == null || value.length != 10) return null;
-    return _LocalDate(parsed.year, parsed.month, parsed.day);
-  }
-
-  factory _LocalDate.fromDateTime(DateTime value) =>
-      _LocalDate(value.year, value.month, value.day);
-
-  String get iso =>
-      '${year.toString().padLeft(4, '0')}-'
-      '${month.toString().padLeft(2, '0')}-'
-      '${day.toString().padLeft(2, '0')}';
-
-  int get weekday => DateTime.utc(year, month, day).weekday;
-
-  _LocalDate addDays(int count) =>
-      _LocalDate.fromDateTime(DateTime.utc(year, month, day + count));
-
-  int daysSince(_LocalDate other) => DateTime.utc(
-    year,
-    month,
-    day,
-  ).difference(DateTime.utc(other.year, other.month, other.day)).inDays;
-
-  @override
-  int compareTo(_LocalDate other) => DateTime.utc(
-    year,
-    month,
-    day,
-  ).compareTo(DateTime.utc(other.year, other.month, other.day));
-
-  @override
-  bool operator ==(Object other) =>
-      other is _LocalDate &&
-      year == other.year &&
-      month == other.month &&
-      day == other.day;
-
-  @override
-  int get hashCode => Object.hash(year, month, day);
 }
 
 int _daysInMonth(int year, int month) => DateTime.utc(year, month + 1, 0).day;

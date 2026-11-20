@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/localization/l10n_context.dart';
@@ -203,7 +204,7 @@ String _diffValue(ScenarioTransitSnapshotDiff difference, String? value) {
   if (difference.fieldCode == 'feed_hash' && value.length > 12) {
     return value.substring(0, 12);
   }
-  final date = DateTime.tryParse(value);
+  final date = UtcInstant.tryParse(value)?.value;
   if (difference.fieldCode == 'retrieved_at' && date != null) {
     return date.toUtc().toIso8601String();
   }

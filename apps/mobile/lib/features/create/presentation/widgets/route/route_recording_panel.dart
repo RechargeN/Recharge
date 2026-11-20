@@ -5,7 +5,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../../../core/localization/l10n_context.dart';
-import '../../../../../core/geo/geo_point.dart';
+import '../../../../../shared/primitives/geo/geo_point.dart';
 import '../../../application/controllers/route_recording_controller.dart';
 import '../../../application/state/route_recording_state.dart';
 import '../../../domain/entities/route_recording_data.dart';

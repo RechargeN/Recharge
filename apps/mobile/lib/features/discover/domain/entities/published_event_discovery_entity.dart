@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money.dart';
 import 'discover_item_entity.dart' show DurationConfidence;
 import 'event_occurrence.dart';
 import 'published_event_program_item.dart';
@@ -64,7 +65,7 @@ class PublishedEventDiscoveryEntity {
          'PublishedEventDiscoveryEntity.eventId must not be empty', // l10n-ignore: developer error
        ),
        assert(distanceKm >= 0, 'distanceKm must not be negative'),
-       assert(priceAmount >= 0),
+       assert(priceAmount.minorUnits >= 0),
        assert(participantsCount == null || participantsCount >= 0),
        assert(capacity == null || capacity > 0),
        assert(durationMinutes == null || durationMinutes > 0) {
@@ -73,6 +74,10 @@ class PublishedEventDiscoveryEntity {
     // cannot express, and because — like `TimeSlot`'s constructor — they
     // are real data-integrity checks worth keeping in release builds,
     // not just debug-mode sanity checks.
+    if (priceAmount.minorUnits < 0 ||
+        priceAmount.currency.value != currencyCode.trim().toUpperCase()) {
+      throw ArgumentError('event_price_currency_invalid');
+    }
     if (occurrences.isEmpty) {
       throw ArgumentError(
         'An Event without a confirmed occurrence is not published ' // l10n-ignore: developer error
@@ -140,7 +145,7 @@ class PublishedEventDiscoveryEntity {
   /// Save for Event fails at runtime, not just visually.
   final double distanceKm;
 
-  final double priceAmount;
+  final Money priceAmount;
   final bool isFree;
   final String currencyCode;
 

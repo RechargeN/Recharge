@@ -1,4 +1,4 @@
-import '../geo/geo_point.dart';
+import '../../shared/primitives/geo/geo_point.dart';
 import 'map_scene.dart';
 
 class AuthoringMapScene {

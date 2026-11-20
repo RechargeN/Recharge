@@ -1,8 +1,13 @@
+import 'package:recharge/features/create/domain/entities/activity_draft_data.dart';
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
+import '../support/publisher_access_test_support.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/product_analytics/product_analytics_queue.dart';
 import 'package:recharge/core/product_analytics/product_analytics_recorder.dart';
+import 'package:recharge/features/create/domain/entities/draft_publisher.dart';
+import 'package:recharge/features/create/domain/repositories/publisher_access_check.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/scenario_create_coordinator.dart';
@@ -25,10 +30,187 @@ import 'package:recharge/features/create/application/state/create_notice.dart';
 void main() {
   late _FakeCreateRepository repository;
   late CreateController controller;
+  test(
+    'restoring Event never materializes saved schedule or replaces local dates',
+    () async {
+      final saved = CreateDraftEntity.defaults(
+        organizerId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      ).copyWith(startDateTimeUtc: DateTime.utc(2026, 10, 25, 1, 30));
+      repository._stored = saved;
+      await controller.ensureLoaded(
+        userId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      expect(controller.state.draft.eventData, same(saved.eventData));
+      expect(controller.state.draft.startDateTimeUtc, saved.startDateTimeUtc);
+      expect(repository._stored, same(saved));
+    },
+  );
+  test(
+    'UTC input rejects wall times and offsets while preserving draft values',
+    () async {
+      await controller.ensureLoaded(
+        userId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      controller.updateStartDateTime('2026-03-29T01:30:00.123456Z');
+      controller.updateRegistrationDeadline('2026-03-28T12:00:00Z');
+      final start = controller.state.draft.startDateTimeUtc;
+      final deadline = controller.state.draft.registrationDeadlineUtc;
+      for (final bad in [
+        '2026-03-29T03:30:00',
+        '2026-03-29T03:30:00+02:00',
+        '2026-02-30T01:30:00Z',
+      ]) {
+        controller.updateStartDateTime(bad);
+        controller.updateRegistrationDeadline(bad);
+        expect(controller.state.draft.startDateTimeUtc, start);
+        expect(controller.state.draft.registrationDeadlineUtc, deadline);
+        expect(
+          controller.state.validationErrors,
+          contains('registrationDeadlineUtc'),
+        );
+        expect(await controller.publishDraft(), isFalse);
+      }
+      controller.updateStartDateTime('');
+      controller.updateRegistrationDeadline('');
+      expect(controller.state.draft.startDateTimeUtc, isNull);
+      expect(controller.state.draft.registrationDeadlineUtc, isNull);
+    },
+  );
+  test(
+    'Activity amount input preserves cents and blocks invalid edits',
+    () async {
+      await controller.ensureLoaded(
+        userId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      controller.setObjectType(CreateObjectType.activity);
+      controller.updateActivityOptionalContribution(
+        kind: ActivityContributionKind.donation,
+        note: 'Optional donation',
+      );
+      controller.updateActivityContributionAmountText('12,34', locale: 'ru');
+      expect(
+        controller
+            .state
+            .draft
+            .activityData!
+            .optionalContribution!
+            .amountHint!
+            .minorUnits,
+        1234,
+      );
+      await controller.saveDraft();
+      final stored = repository._stored;
+      controller.updateActivityContributionAmountText('12.345');
+      expect(
+        controller.moneyInputErrors['activity.contribution'],
+        MoneyParseError.excessiveFractionDigits,
+      );
+      expect(
+        controller
+            .state
+            .draft
+            .activityData!
+            .optionalContribution!
+            .amountHint!
+            .minorUnits,
+        1234,
+      );
+      await controller.saveDraft();
+      expect(repository._stored, same(stored));
+      expect(await controller.publishDraft(), isFalse);
+      controller.updateActivityContributionAmountText('0.29');
+      expect(controller.moneyInputErrors, isEmpty);
+      await controller.saveDraft();
+      expect(
+        repository
+            ._stored!
+            .activityData!
+            .optionalContribution!
+            .amountHint!
+            .minorUnits,
+        29,
+      );
+      controller.updateActivityContributionAmountText('1.001');
+      controller.clearActivityOptionalContribution();
+      expect(controller.moneyInputErrors, isEmpty);
+      expect(controller.state.draft.activityData!.optionalContribution, isNull);
+    },
+  );
+
+  test(
+    'Event text price is exact and invalid edits do not round the stored value',
+    () async {
+      await controller.ensureLoaded(
+        userId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      controller.updateEventPriceText('12,34', locale: 'ru');
+      expect(controller.state.draft.eventData?.price?.minorUnits, 1234);
+      expect(controller.state.draft.basePrice?.minorUnits, 1234);
+      controller.updateEventPriceText('1.005');
+      expect(
+        controller.moneyInputErrors['event.price'],
+        MoneyParseError.excessiveFractionDigits,
+      );
+      expect(controller.state.draft.eventData?.price?.minorUnits, 1234);
+      expect(await controller.publishDraft(), isFalse);
+      controller.updateEventPriceText('0.29');
+      expect(controller.moneyInputErrors, isEmpty);
+      expect(controller.state.draft.eventData?.price?.minorUnits, 29);
+    },
+  );
+
+  test(
+    'invalid monetary input preserves previous value and blocks writes until corrected',
+    () async {
+      await controller.ensureLoaded(
+        userId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      controller.updateBasePrice('12.34');
+      expect(controller.state.draft.basePrice?.minorUnits, 1234);
+      await controller.saveDraft();
+      final stored = repository._stored;
+      controller.updateBasePrice('1.234');
+      expect(
+        controller.moneyInputErrors['basePrice'],
+        MoneyParseError.excessiveFractionDigits,
+      );
+      expect(controller.state.draft.basePrice?.minorUnits, 1234);
+      controller.updateTitle('Still pending invalid input');
+      await controller.saveDraft();
+      expect(repository._stored, same(stored));
+      expect(await controller.publishDraft(), isFalse);
+      controller.updateBasePrice('12,35', locale: 'ru');
+      expect(controller.moneyInputErrors, isEmpty);
+      expect(controller.state.draft.basePrice?.minorUnits, 1235);
+      await controller.saveDraft();
+      expect(repository._stored?.basePrice?.minorUnits, 1235);
+      controller.updateBasePrice('-1');
+      expect(controller.moneyInputErrors, isNotEmpty);
+      controller.resetToFreshDraft(
+        organizerId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      expect(controller.moneyInputErrors, isEmpty);
+    },
+  );
 
   setUp(() {
     repository = _FakeCreateRepository();
     controller = CreateController(
+      publisherAccessCheck: const TestPersonalPublisherAccess(),
       loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
       saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
       publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
@@ -50,6 +232,187 @@ void main() {
   tearDown(() {
     controller.dispose();
   });
+
+  test(
+    'temporal restore failure blocks autosave and publish until successful retry',
+    () async {
+      final stored = CreateDraftEntity.defaults(
+        organizerId: 'user-1',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      repository._stored = stored;
+      repository.loadError = const FormatException('Invalid stored UTC');
+      await controller.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      expect(controller.state.status, CreateStatus.error);
+      controller.updateTitle('Must not replace unreadable data');
+      await Future<void>.delayed(const Duration(milliseconds: 850));
+      await controller.saveDraft();
+      expect(await controller.publishDraft(), isFalse);
+      expect(repository._stored, same(stored));
+      expect(repository.publishCalls, 0);
+      repository.loadError = null;
+      await controller.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      expect(controller.state.isLoaded, isTrue);
+      expect(controller.state.draft.id, stored.id);
+      controller.updateTitle('Recovered');
+      await controller.saveDraft();
+      expect(repository._stored!.title, 'Recovered');
+    },
+  );
+
+  test('temporal restore block does not leak to the next actor', () async {
+    repository.loadError = const FormatException('Invalid stored UTC');
+    await controller.ensureLoaded(
+      userId: 'user-1',
+      organizerEmail: '',
+      organizerName: '',
+    );
+    expect(controller.state.status, CreateStatus.error);
+    repository.loadError = null;
+    repository._stored = CreateDraftEntity.defaults(
+      organizerId: 'user-2',
+      organizerEmail: '',
+      organizerName: '',
+    );
+    final otherId = repository._stored!.id;
+    await controller.ensureLoaded(
+      userId: 'user-2',
+      organizerEmail: '',
+      organizerName: '',
+    );
+    expect(controller.state.isLoaded, isTrue);
+    expect(controller.state.draft.id, otherId);
+    controller.updateTitle('Other actor');
+    await controller.saveDraft();
+    expect(repository._stored!.organizerId, 'user-2');
+    expect(repository._stored!.title, 'Other actor');
+  });
+
+  test(
+    'typed Money restore failure blocks fresh overwrite and publish until retry',
+    () async {
+      final stored = CreateDraftEntity.defaults(
+        organizerId: 'user-1',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      repository._stored = stored;
+      repository.loadError = const MoneyReadException(
+        MoneyParseError.excessiveFractionDigits,
+      );
+      await controller.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      expect(controller.state.status, CreateStatus.error);
+      controller.updateTitle('Must not overwrite stored draft');
+      await controller.saveDraft();
+      expect(await controller.publishDraft(), isFalse);
+      expect(repository._stored, same(stored));
+      expect(repository.publishCalls, 0);
+      repository.loadError = null;
+      await controller.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      expect(controller.state.isLoaded, isTrue);
+      expect(controller.state.draft.id, stored.id);
+    },
+  );
+
+  for (final type in CreateObjectType.values.where(
+    (t) => t != CreateObjectType.quickPlan && t != CreateObjectType.scenario,
+  )) {
+    for (final reason in <String>['missing', 'revoked', 'foreign']) {
+      test(
+        '${type.name}: $reason Page denied without rewriting or mutation',
+        () async {
+          final access = _PageAccess();
+          final guarded = CreateController(
+            loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+            saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+            publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+            analyticsService: _NoopAnalyticsService(),
+            eventCreateCoordinator: createTestEventCoordinator(),
+            publisherAccessCheck: reason == 'missing' ? null : access,
+            runtimeDefaults: const CreateRuntimeDefaults(
+              marketCityId: 'riga',
+              timezone: 'Europe/Riga',
+              country: 'LV',
+              city: 'Riga',
+              currency: 'EUR',
+            ),
+          );
+          addTearDown(guarded.dispose);
+          final publisher = PublisherRef(
+            type: PublisherType.page,
+            id: reason == 'foreign' ? 'foreign-page' : 'page-A',
+          );
+          await guarded.ensureLoaded(
+            userId: 'u1',
+            organizerEmail: '',
+            organizerName: '',
+            activePublisherRef: publisher,
+            capabilities: const ['create.route', 'create.collection'],
+          );
+          guarded.setObjectType(type);
+          final before = guarded.state.draft;
+          // Membership valid at creation may be revoked before publish.
+          access.active = false;
+          expect(await guarded.publishDraft(), isFalse);
+          expect(guarded.state.draft, same(before));
+          expect(guarded.state.draft.effectivePublisher, publisher);
+          expect(repository.publishCalls, 0);
+          expect(repository._stored, isNull);
+        },
+      );
+    }
+  }
+  for (final type in <CreateObjectType>[
+    CreateObjectType.session,
+    CreateObjectType.route,
+    CreateObjectType.classWorkshop,
+  ]) {
+    test(
+      '${type.name}: envelope Page capture never enables Page publication',
+      () async {
+        final guarded = CreateController(
+          loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
+          saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
+          publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
+          analyticsService: _NoopAnalyticsService(),
+          eventCreateCoordinator: createTestEventCoordinator(),
+          publisherAccessCheck: _PageAccess(),
+        );
+        addTearDown(guarded.dispose);
+        await guarded.ensureLoaded(
+          userId: 'u1',
+          organizerEmail: '',
+          organizerName: '',
+          activePublisherRef: const PublisherRef(
+            type: PublisherType.page,
+            id: 'page-A',
+          ),
+          capabilities: const ['create.route'],
+        );
+        guarded.setObjectType(type);
+        expect(await guarded.publishDraft(), isFalse);
+        expect(repository.publishCalls, 0);
+        expect(guarded.state.draft.effectivePublisher.id, 'page-A');
+      },
+    );
+  }
 
   test('publish fails when coverImage is empty', () async {
     await controller.ensureLoaded(
@@ -315,6 +678,7 @@ void main() {
         newEventId: sequentialEventIds(),
       )..bindAccount('u1');
       final CreateController tracked = CreateController(
+        publisherAccessCheck: const TestPersonalPublisherAccess(),
         loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
         saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
         publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),
@@ -624,6 +988,7 @@ void main() {
       final _FakeCreateRepository moderationRepository =
           _FakeCreateRepository();
       final CreateController moderationController = CreateController(
+        publisherAccessCheck: const TestPersonalPublisherAccess(),
         loadCreateDraftUseCase: LoadCreateDraftUseCase(moderationRepository),
         saveCreateDraftUseCase: SaveCreateDraftUseCase(moderationRepository),
         publishCreateDraftUseCase: PublishCreateDraftUseCase(
@@ -682,6 +1047,7 @@ void main() {
       final _FakeCreateRepository moderationRepository =
           _FakeCreateRepository();
       final CreateController moderationController = CreateController(
+        publisherAccessCheck: const TestPersonalPublisherAccess(),
         loadCreateDraftUseCase: LoadCreateDraftUseCase(moderationRepository),
         saveCreateDraftUseCase: SaveCreateDraftUseCase(moderationRepository),
         publishCreateDraftUseCase: PublishCreateDraftUseCase(
@@ -750,15 +1116,22 @@ class _SequentialIdGenerator implements IdGenerator {
 class _FakeCreateRepository implements CreateRepository {
   CreateDraftEntity? _stored;
   Object? saveError;
+  Object? loadError;
+  int publishCalls = 0;
 
   @override
-  Future<CreateDraftEntity?> loadDraft(String userId) async => _stored;
+  Future<CreateDraftEntity?> loadDraft(String userId) async {
+    final failure = loadError;
+    if (failure != null) throw failure;
+    return _stored;
+  }
 
   @override
   Future<CreateDraftEntity> publishDraft(
     String userId,
     CreateDraftEntity draft,
   ) async {
+    publishCalls++;
     final now = DateTime.now().toUtc();
     // Preserve a caller-requested flaggedForReview (ACT-CRT-01 §12 soft
     // moderation threshold); otherwise default to the normal pending state.
@@ -781,4 +1154,16 @@ class _FakeCreateRepository implements CreateRepository {
     if (error != null) throw error;
     _stored = draft;
   }
+}
+
+class _PageAccess implements PublisherAccessCheck {
+  bool active = true;
+  @override
+  Future<bool> canPublishAs({
+    required String actorUserId,
+    required PublisherRef publisher,
+    Set<String> requiredCapabilities = const {},
+    bool requireAdmin = false,
+    bool requireIdentityVerification = true,
+  }) async => active && actorUserId == 'u1' && publisher.id == 'page-A';
 }

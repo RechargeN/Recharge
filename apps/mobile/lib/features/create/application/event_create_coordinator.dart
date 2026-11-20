@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/time/local_date.dart';
 import '../domain/entities/create_availability.dart';
 import '../domain/entities/create_draft_entity.dart';
 import '../domain/entities/event_draft_data.dart';
@@ -6,7 +7,6 @@ import '../domain/entities/event_availability_projection.dart';
 import '../domain/entities/event_classification.dart';
 import '../domain/entities/event_inventory.dart';
 import '../domain/entities/event_validation_issue.dart';
-import '../../../shared/primitives/money/money.dart';
 import '../domain/repositories/event_inventory_snapshot_repository.dart';
 import '../domain/repositories/event_timezone_repository.dart';
 import '../domain/usecases/materialize_event_schedule_usecase.dart';
@@ -38,6 +38,14 @@ class EventCreateCoordinator {
        _suggestLegacyAdmission = suggestLegacyAdmission,
        _projectAvailability = projectAvailability,
        _inventorySnapshotRepository = inventorySnapshotRepository;
+
+  LocalDate localDateAt({
+    required DateTime instantUtc,
+    required String timezoneId,
+  }) => _materializeSchedule.localDateAt(
+    instantUtc: instantUtc,
+    timezoneId: timezoneId,
+  );
 
   final MaterializeEventScheduleUseCase _materializeSchedule;
   final ValidateEventDraftUseCase _validateDraft;
@@ -280,6 +288,9 @@ class EventCreateCoordinator {
       occurrences = const <EventOccurrenceDraft>[];
     } on EventLocalTimeException {
       occurrences = const <EventOccurrenceDraft>[];
+    } on RangeError {
+      // Shared LocalDate rejects calendar overflow instead of normalizing it.
+      occurrences = const <EventOccurrenceDraft>[];
     }
     final EventDraftData normalized = event.copyWith(
       revision: incrementRevision ? event.revision + 1 : event.revision,
@@ -290,7 +301,7 @@ class EventCreateCoordinator {
         : occurrences.first;
     final bool isFree = switch (normalized.pricingMode) {
       EventPricingMode.free => true,
-      EventPricingMode.donation => (normalized.price?.amountMinor ?? 0) <= 0,
+      EventPricingMode.donation => (normalized.price?.minorUnits ?? 0) <= 0,
       EventPricingMode.fixed || EventPricingMode.ticketTypes => false,
     };
     return draft.copyWith(
@@ -334,12 +345,7 @@ class EventCreateCoordinator {
         'wheelchair_accessible',
       ),
       isFree: isFree,
-      basePrice: normalized.price == null
-          ? null
-          : Money(
-              minorUnits: normalized.price!.amountMinor,
-              currencyCode: normalized.price!.currencyCode,
-            ),
+      basePrice: normalized.price,
       clearBasePrice: normalized.price == null,
       currency: normalized.currencyCode,
       pricingModel: normalized.pricingMode.name,

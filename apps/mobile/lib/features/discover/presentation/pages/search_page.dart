@@ -1,4 +1,8 @@
 import '../../../../core/layout/page_list_padding.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,14 +10,15 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
-import '../../../../shared/primitives/money/money.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_query.dart';
+import '../../domain/repositories/timezone_repository.dart';
+import '../../domain/usecases/build_time_window_usecase.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/time_window.dart';
-import '../../domain/usecases/build_time_window_usecase.dart';
 import '../discover_formats.dart';
+import '../../../../shared/primitives/time/local_date.dart';
 
 abstract final class _SearchLandingStyle {
   static const Color ink = Color(0xFF10231F);
@@ -155,6 +160,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           const SizedBox(height: 8),
           _SearchConditionChips(
             query: query,
+            controller: controller,
             onDate: () => _openDatePicker(controller, query),
             onPeople: () => _openPeoplePicker(controller, query),
             onBudget: () => _openBudgetPicker(controller, query),
@@ -163,29 +169,38 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           const SizedBox(height: 12),
           _QuickSearchActions(
             onNearNow: () {
-              final _DateWindow today = _todayWindow();
+              final today = _preset(controller, DiscoverDatePreset.today);
+              if (today == null) return;
               controller.stageSearchConditions(
                 dateFrom: today.from,
                 dateTo: today.to,
+                clearTimeWindow: true,
+                clearTravelContext: true,
                 radiusMeters: 2000,
                 unlimitedRadius: false,
               );
             },
             onForTwo: () => controller.stageSearchConditions(peopleCount: 2),
             onLowBudget: () => controller.stageSearchConditions(
-              budgetMax: Money(
-                minorUnits: 1000,
-                currencyCode: controller.marketCurrencyCode,
-              ),
+              budgetMax: MoneyParser()
+                  .parse(
+                    '10',
+                    currency: controller.marketCurrency,
+                    locale: 'en',
+                  )
+                  .value!,
             ),
             onOneHour: () =>
                 controller.stageSearchConditions(availableDurationMinutes: 60),
             onCalmEvening: () {
-              final _DateWindow tonight = _tonightWindow();
+              final tonight = _preset(controller, DiscoverDatePreset.tonight);
+              if (tonight == null) return;
               controller.stageSearchConditions(
                 mood: 'calm',
                 dateFrom: tonight.from,
                 dateTo: tonight.to,
+                clearTimeWindow: true,
+                clearTravelContext: true,
               );
             },
           ),
@@ -218,6 +233,23 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     );
   }
 
+  _DateWindow? _preset(
+    DiscoverFeedController controller,
+    DiscoverDatePreset preset,
+  ) {
+    try {
+      final bounds = controller.datePreset(preset);
+      return _DateWindow(bounds.from, bounds.to);
+    } on TimeWindowValidationException catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.discoverTimeWindowIssue(error.issue.name)),
+        ),
+      );
+      return null;
+    }
+  }
+
   void _openResults(DiscoverFeedController controller) {
     FocusScope.of(context).unfocus();
     controller.stageSearchConditions(queryText: _searchController.text);
@@ -234,7 +266,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           useSafeArea: true,
           useRootNavigator: true,
           backgroundColor: Colors.transparent,
-          builder: (BuildContext context) => _QuickDateSheet(query: query),
+          builder: (BuildContext context) =>
+              _QuickDateSheet(query: query, controller: controller),
         );
     if (selection == null) return;
     controller.stageSearchConditions(
@@ -277,17 +310,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           useSafeArea: true,
           useRootNavigator: true,
           backgroundColor: Colors.transparent,
-          builder: (BuildContext context) =>
-              _QuickBudgetSheet(selected: query.budgetMax?.round()),
+          builder: (BuildContext context) => _QuickBudgetSheet(
+            selected: query.budgetMax,
+            currency: controller.marketCurrency,
+          ),
         );
     if (selection == null) return;
     controller.stageSearchConditions(
-      budgetMax: selection.budgetMax == null
-          ? null
-          : Money(
-              minorUnits: selection.budgetMax! * 100,
-              currencyCode: controller.marketCurrencyCode,
-            ),
+      budgetMax: selection.budgetMax,
       clearBudgetMax: selection.budgetMax == null,
     );
   }
@@ -315,6 +345,22 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     DiscoverFeedController controller,
     DiscoverQuery query,
   ) async {
+    final ({
+      String timezoneId,
+      LocalDateTimeValue start,
+      LocalDateTimeValue end,
+    })
+    editor;
+    try {
+      editor = controller.timeEditorValues(window: query.timeWindow);
+    } on TimeWindowValidationException catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.discoverTimeWindowIssue(error.issue.name)),
+        ),
+      );
+      return;
+    }
     final _SearchFilterSelection? selection =
         await showModalBottomSheet<_SearchFilterSelection>(
           context: context,
@@ -322,23 +368,87 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           useSafeArea: true,
           useRootNavigator: true,
           backgroundColor: Colors.transparent,
-          builder: (BuildContext context) => _SearchFiltersSheet(query: query),
+          builder: (BuildContext context) => _SearchFiltersSheet(
+            query: query,
+            currency: controller.marketCurrency,
+            initialTime: editor,
+            resetTimeValues: () => controller.timeEditorValues(),
+          ),
         );
     if (selection == null) return;
+    DateTime? dateFrom = query.dateFrom;
+    DateTime? dateTo = query.dateTo;
+    try {
+      if (selection.dateChoice == 'any') {
+        dateFrom = null;
+        dateTo = null;
+      } else if (selection.dateChoice != 'preserve') {
+        final dates = controller.datePreset(
+          selection.dateChoice == 'today'
+              ? DiscoverDatePreset.today
+              : DiscoverDatePreset.tonight,
+        );
+        dateFrom = dates.from;
+        dateTo = dates.to;
+      }
+    } on TimeWindowValidationException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.discoverTimeWindowIssue(error.issue.name),
+            ),
+          ),
+        );
+      }
+      return;
+    }
+    if (selection.timeWindowMode == null) {
+      controller.clearTimeWindowSelection(clearLegacyDates: false);
+    } else {
+      final existingManual =
+          query.travelContext?.originType == TravelOriginType.manualPin;
+      final TimeWindowIssue? error = controller.stageTimeWindowSelection(
+        mode: selection.timeWindowMode!,
+        startLocal: selection.startLocal,
+        endLocal: selection.endLocal,
+        timezoneId: selection.timezoneId,
+        flexibilityMinutes: selection.flexibilityMinutes,
+        originType: selection.originType,
+        originLat: selection.originType == TravelOriginType.manualPin
+            ? (existingManual
+                  ? query.travelContext!.origin.latitude
+                  : query.centerLat)
+            : null,
+        originLng: selection.originType == TravelOriginType.manualPin
+            ? (existingManual
+                  ? query.travelContext!.origin.longitude
+                  : query.centerLng)
+            : null,
+        transportMode: selection.transportMode,
+        includeReturnTrip: selection.includeReturnTrip,
+      );
+      if (error != null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.l10n.discoverTimeWindowIssue(error.name)),
+            ),
+          );
+        }
+        return;
+      }
+    }
+    final activeWindow = controller.state.draftQuery.timeWindow;
     controller.stageSearchConditions(
       peopleCount: selection.peopleCount,
       clearPeopleCount: selection.peopleCount == null,
-      budgetMax: selection.budgetMax == null
-          ? null
-          : Money(
-              minorUnits: selection.budgetMax! * 100,
-              currencyCode: controller.marketCurrencyCode,
-            ),
+      budgetMax: selection.budgetMax,
       clearBudgetMax: selection.budgetMax == null,
-      dateFrom: selection.dateWindow?.from,
-      clearDateFrom: selection.dateWindow == null,
-      dateTo: selection.dateWindow?.to,
-      clearDateTo: selection.dateWindow == null,
+      dateFrom: activeWindow?.startAtUtc ?? dateFrom,
+      clearDateFrom: activeWindow == null && dateFrom == null,
+      dateTo: activeWindow?.endAtUtc ?? dateTo,
+      clearDateTo: activeWindow == null && dateTo == null,
       radiusMeters: selection.radiusMeters,
       unlimitedRadius: selection.unlimitedRadius,
       openNow: selection.openNow,
@@ -348,32 +458,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       mood: selection.mood,
       clearMood: selection.mood == null,
     );
-    if (selection.timeWindowMode == null) {
-      controller.clearTimeWindowSelection(clearLegacyDates: false);
-    } else {
-      final TimeWindowIssue? error = controller.stageTimeWindowSelection(
-        mode: selection.timeWindowMode!,
-        startLocal: selection.startLocal,
-        endLocal: selection.endLocal,
-        flexibilityMinutes: selection.flexibilityMinutes,
-        originType: selection.originType,
-        originLat: selection.originType == TravelOriginType.manualPin
-            ? query.centerLat
-            : null,
-        originLng: selection.originType == TravelOriginType.manualPin
-            ? query.centerLng
-            : null,
-        transportMode: selection.transportMode,
-        includeReturnTrip: selection.includeReturnTrip,
-      );
-      if (error != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.discoverTimeWindowIssue(error.name)),
-          ),
-        );
-      }
-    }
   }
 
   void _showAllRecent(
@@ -414,6 +498,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 class _SearchConditionChips extends StatelessWidget {
   const _SearchConditionChips({
     required this.query,
+    required this.controller,
     required this.onDate,
     required this.onPeople,
     required this.onBudget,
@@ -421,6 +506,7 @@ class _SearchConditionChips extends StatelessWidget {
   });
 
   final DiscoverQuery query;
+  final DiscoverFeedController controller;
   final VoidCallback onDate;
   final VoidCallback onPeople;
   final VoidCallback onBudget;
@@ -443,7 +529,7 @@ class _SearchConditionChips extends StatelessWidget {
       _SearchConditionChip(
         key: const Key('search-date-chip'),
         icon: Icons.calendar_today_outlined,
-        label: _dateLabel(context.l10n, query),
+        label: _dateLabel(context.l10n, query, controller),
         onTap: onDate,
       ),
       _SearchConditionChip(
@@ -553,7 +639,7 @@ class _QuickPeopleSelection {
 class _QuickBudgetSelection {
   const _QuickBudgetSelection(this.budgetMax);
 
-  final int? budgetMax;
+  final Money? budgetMax;
 }
 
 class _QuickRadiusSelection {
@@ -567,84 +653,108 @@ class _QuickRadiusSelection {
 }
 
 class _QuickDateSheet extends StatelessWidget {
-  const _QuickDateSheet({required this.query});
-
+  const _QuickDateSheet({required this.query, required this.controller});
   final DiscoverQuery query;
+  final DiscoverFeedController controller;
 
-  @override
-  Widget build(BuildContext context) {
-    final _DateWindow today = _todayWindow();
-    final _DateWindow tomorrow = _tomorrowWindow();
-    final _DateWindow weekend = _weekendWindow();
-    return _QuickPickerSurface(
-      key: const Key('search-date-sheet'),
-      title: context.l10n.discoverChooseDate,
-      onReset: () => Navigator.of(context).pop(const _QuickDateSelection(null)),
-      child: _FilterPillWrap(
-        children: <Widget>[
-          _FilterPill(
-            label: context.l10n.discoverAnyDate,
-            selected: query.dateFrom == null && query.dateTo == null,
-            onTap: () =>
-                Navigator.of(context).pop(const _QuickDateSelection(null)),
-          ),
-          _FilterPill(
-            key: const Key('quick-date-today'),
-            label: context.l10n.discoverToday,
-            selected: _sameLocalDay(query.dateFrom, today.from),
-            onTap: () => Navigator.of(context).pop(_QuickDateSelection(today)),
-          ),
-          _FilterPill(
-            key: const Key('quick-date-tomorrow'),
-            label: context.l10n.discoverTomorrow,
-            selected: _sameLocalDay(query.dateFrom, tomorrow.from),
-            onTap: () =>
-                Navigator.of(context).pop(_QuickDateSelection(tomorrow)),
-          ),
-          _FilterPill(
-            key: const Key('quick-date-weekend'),
-            label: context.l10n.discoverThisWeekend,
-            selected:
-                _sameLocalDay(query.dateFrom, weekend.from) &&
-                _sameLocalDay(query.dateTo, weekend.to),
-            onTap: () =>
-                Navigator.of(context).pop(_QuickDateSelection(weekend)),
-          ),
-          _FilterPill(
-            key: const Key('quick-date-custom'),
-            label: context.l10n.discoverChooseDates,
-            selected: false,
-            onTap: () => _pickCustomRange(context),
-          ),
-        ],
-      ),
-    );
+  bool _selected(DiscoverDatePreset preset) {
+    try {
+      final window = controller.datePreset(preset);
+      return _sameCalendarDay(query.dateFrom, window.from, controller) &&
+          _sameCalendarDay(query.dateTo, window.to, controller);
+    } on TimeWindowValidationException {
+      return false;
+    }
   }
 
+  void _select(BuildContext context, DiscoverDatePreset preset) {
+    try {
+      final window = controller.datePreset(preset);
+      Navigator.of(
+        context,
+      ).pop(_QuickDateSelection(_DateWindow(window.from, window.to)));
+    } on TimeWindowValidationException catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.discoverTimeWindowIssue(error.issue.name)),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => _QuickPickerSurface(
+    key: const Key('search-date-sheet'),
+    title: context.l10n.discoverChooseDate,
+    onReset: () => Navigator.of(context).pop(const _QuickDateSelection(null)),
+    child: _FilterPillWrap(
+      children: <Widget>[
+        _FilterPill(
+          label: context.l10n.discoverAnyDate,
+          selected: query.dateFrom == null && query.dateTo == null,
+          onTap: () =>
+              Navigator.of(context).pop(const _QuickDateSelection(null)),
+        ),
+        for (final option in [
+          (DiscoverDatePreset.today, context.l10n.discoverToday, 'today'),
+          (
+            DiscoverDatePreset.tomorrow,
+            context.l10n.discoverTomorrow,
+            'tomorrow',
+          ),
+          (
+            DiscoverDatePreset.weekend,
+            context.l10n.discoverThisWeekend,
+            'weekend',
+          ),
+        ])
+          _FilterPill(
+            key: Key('quick-date-${option.$3}'),
+            label: option.$2,
+            selected: _selected(option.$1),
+            onTap: () => _select(context, option.$1),
+          ),
+        _FilterPill(
+          key: const Key('quick-date-custom'),
+          label: context.l10n.discoverChooseDates,
+          selected: false,
+          onTap: () => _pickCustomRange(context),
+        ),
+      ],
+    ),
+  );
+
   Future<void> _pickCustomRange(BuildContext context) async {
-    final DateTime now = DateTime.now();
-    final DateTime firstDate = DateTime(now.year, now.month, now.day);
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: firstDate,
-      lastDate: firstDate.add(const Duration(days: 730)),
-      helpText: context.l10n.discoverChooseSearchDates,
-    );
-    if (picked == null || !context.mounted) return;
-    final DateTime from = DateTime(
-      picked.start.year,
-      picked.start.month,
-      picked.start.day,
-    );
-    final DateTime to = DateTime(
-      picked.end.year,
-      picked.end.month,
-      picked.end.day,
-      23,
-      59,
-      59,
-    );
-    Navigator.of(context).pop(_QuickDateSelection(_DateWindow(from, to)));
+    try {
+      final first = controller.calendarDate(DateTime.now().toUtc());
+      final last = first.addDays(730);
+      // Flutter receives calendar-component carriers, never persisted instants.
+      final DateTimeRange? picked = await showDateRangePicker(
+        context: context,
+        currentDate: DateTime.utc(first.year, first.month, first.day),
+        firstDate: DateTime.utc(first.year, first.month, first.day),
+        lastDate: DateTime.utc(last.year, last.month, last.day),
+        helpText: context.l10n.discoverChooseSearchDates,
+      );
+      if (picked == null || !context.mounted) return;
+      final window = controller.calendarRange(
+        LocalDate(picked.start.year, picked.start.month, picked.start.day),
+        LocalDate(picked.end.year, picked.end.month, picked.end.day),
+      );
+      Navigator.of(
+        context,
+      ).pop(_QuickDateSelection(_DateWindow(window.from, window.to)));
+    } on TimeWindowValidationException catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.discoverTimeWindowIssue(error.issue.name),
+            ),
+          ),
+        );
+      }
+    }
   }
 }
 
@@ -704,9 +814,10 @@ class _QuickPeopleSheet extends StatelessWidget {
 }
 
 class _QuickBudgetSheet extends StatelessWidget {
-  const _QuickBudgetSheet({required this.selected});
+  const _QuickBudgetSheet({required this.selected, required this.currency});
 
-  final int? selected;
+  final Money? selected;
+  final CurrencyCode currency;
 
   @override
   Widget build(BuildContext context) => _QuickPickerSurface(
@@ -723,14 +834,37 @@ class _QuickBudgetSheet extends StatelessWidget {
                 : value == 0
                 ? context.l10n.discoverFree
                 : context.l10n.discoverUpToBudget(_euros(context, value)),
-            selected: selected == value,
-            onTap: () =>
-                Navigator.of(context).pop(_QuickBudgetSelection(value)),
+            selected:
+                selected ==
+                (value == null
+                    ? null
+                    : MoneyParser()
+                          .parse(
+                            value.toString(),
+                            currency: currency,
+                            locale: 'en',
+                          )
+                          .value!),
+            onTap: () => Navigator.of(context).pop(
+              _QuickBudgetSelection(
+                value == null
+                    ? null
+                    : MoneyParser()
+                          .parse(
+                            value.toString(),
+                            currency: currency,
+                            locale: 'en',
+                          )
+                          .value!,
+              ),
+            ),
           ),
         _FilterPill(
           key: const Key('quick-budget-custom'),
           label: _isCustom
-              ? context.l10n.discoverCustomValue(_euros(context, selected!))
+              ? context.l10n.discoverCustomValue(
+                  RechargeFormats.money(selected!, context.l10n.localeName),
+                )
               : context.l10n.discoverCustom,
           selected: _isCustom,
           onTap: () => _editCustom(context),
@@ -740,17 +874,43 @@ class _QuickBudgetSheet extends StatelessWidget {
   );
 
   bool get _isCustom =>
-      selected != null && !<int>[0, 10, 20, 50].contains(selected);
+      selected != null &&
+      !<int>[0, 10, 20, 50]
+          .map(
+            (v) => MoneyParser()
+                .parse(v.toString(), currency: currency, locale: 'en')
+                .value!,
+          )
+          .contains(selected);
 
   Future<void> _editCustom(BuildContext context) async {
-    final int? result = await showDialog<int>(
+    final Money? result = await showDialog<Money>(
       context: context,
-      builder: (BuildContext context) => _NumberInputDialog<int>(
+      builder: (BuildContext context) => _NumberInputDialog<Money>(
         title: context.l10n.discoverBudgetPerPerson,
-        hint: context.l10n.discoverAmountInEur,
-        initialValue: _isCustom ? '$selected' : '',
-        parser: (String value) => int.tryParse(value),
-        isValid: (int value) => value >= 0 && value <= 10000,
+        hint: '${context.l10n.createFormAmount} (${currency.value})',
+        initialValue: _isCustom
+            ? MoneyFormatter().decimal(
+                selected!,
+                locale: 'en',
+                omitZeroFraction: true,
+              )
+            : '',
+        parser: (text) => MoneyParser()
+            .parse(
+              text,
+              currency: currency,
+              locale: Localizations.localeOf(context).toLanguageTag(),
+            )
+            .value,
+        isValid: (Money value) =>
+            value.minorUnits >= 0 &&
+            value.compareTo(
+                  MoneyParser()
+                      .parse('10000', currency: currency, locale: 'en')
+                      .value!,
+                ) <=
+                0,
         errorMessage: context.l10n.discoverEnterBudget,
       ),
     );
@@ -1424,7 +1584,18 @@ Color _quickPlanColor(ColorScheme colors, int tone) => switch (tone) {
 };
 
 class _SearchFiltersSheet extends StatefulWidget {
-  const _SearchFiltersSheet({required this.query});
+  const _SearchFiltersSheet({
+    required this.query,
+    required this.currency,
+    required this.initialTime,
+    required this.resetTimeValues,
+  });
+  final ({String timezoneId, LocalDateTimeValue start, LocalDateTimeValue end})
+  initialTime;
+  final ({String timezoneId, LocalDateTimeValue start, LocalDateTimeValue end})
+  Function()
+  resetTimeValues;
+  final CurrencyCode currency;
   final DiscoverQuery query;
 
   @override
@@ -1433,21 +1604,21 @@ class _SearchFiltersSheet extends StatefulWidget {
 
 class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
   late int? _peopleCount = widget.query.peopleCount;
-  late int? _budgetMax = widget.query.budgetMax?.round();
+  late Money? _budgetMax = widget.query.budgetMax;
   late double _radiusMeters = widget.query.radiusMeters;
   late bool _unlimited = widget.query.unlimitedRadius;
   late bool _openNow = widget.query.openNow;
   late bool _onlyAvailable = widget.query.onlyAvailable;
   late int? _duration = widget.query.availableDurationMinutes;
   late String? _mood = widget.query.mood;
-  late String _date = _dateChoice(widget.query);
+  late String _date =
+      widget.query.dateFrom == null && widget.query.dateTo == null
+      ? 'any'
+      : 'preserve';
   late TimeWindowMode? _timeWindowMode = widget.query.timeWindow?.mode;
-  late DateTime _startLocal =
-      widget.query.timeWindow?.startAtUtc.toLocal() ??
-      DateTime.now().add(const Duration(minutes: 30));
-  late DateTime _endLocal =
-      widget.query.timeWindow?.endAtUtc.toLocal() ??
-      DateTime.now().add(const Duration(hours: 2));
+  late String _timezoneId = widget.initialTime.timezoneId;
+  late LocalDateTimeValue _startLocal = widget.initialTime.start;
+  late LocalDateTimeValue _endLocal = widget.initialTime.end;
   late int _flexibilityMinutes =
       widget.query.timeWindow?.flexibilityMinutes ?? 30;
   late TravelOriginType _originType =
@@ -1501,7 +1672,10 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                           _FilterPill(
                             label: option.$2,
                             selected: _date == option.$1,
-                            onTap: () => setState(() => _date = option.$1),
+                            onTap: () => setState(() {
+                              _date = option.$1;
+                              _timeWindowMode = null;
+                            }),
                           ),
                       ],
                     ),
@@ -1523,6 +1697,7 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                     const _FilterSectionDivider(),
                     _TimeFilterBlock(
                       mode: _timeWindowMode,
+                      timezoneId: _timezoneId,
                       start: _startLocal,
                       end: _endLocal,
                       flexibilityMinutes: _flexibilityMinutes,
@@ -1595,14 +1770,37 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                             label: value == null
                                 ? context.l10n.discoverAny
                                 : _euros(context, value),
-                            selected: _budgetMax == value,
-                            onTap: () => setState(() => _budgetMax = value),
+                            selected:
+                                _budgetMax ==
+                                (value == null
+                                    ? null
+                                    : MoneyParser()
+                                          .parse(
+                                            value.toString(),
+                                            currency: widget.currency,
+                                            locale: 'en',
+                                          )
+                                          .value!),
+                            onTap: () => setState(
+                              () => _budgetMax = value == null
+                                  ? null
+                                  : MoneyParser()
+                                        .parse(
+                                          value.toString(),
+                                          currency: widget.currency,
+                                          locale: 'en',
+                                        )
+                                        .value!,
+                            ),
                           ),
                         _FilterPill(
                           key: const Key('budget-custom'),
                           label: _isCustomBudget
                               ? context.l10n.discoverCustomValue(
-                                  _euros(context, _budgetMax!),
+                                  RechargeFormats.money(
+                                    _budgetMax!,
+                                    context.l10n.localeName,
+                                  ),
                                 )
                               : context.l10n.discoverCustom,
                           selected: _isCustomBudget,
@@ -1689,6 +1887,7 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
     final String date = switch (_date) {
       'today' => context.l10n.discoverToday,
       'tonight' => context.l10n.discoverTonight,
+      'preserve' => context.l10n.discoverChooseDates,
       _ => context.l10n.discoverAnyDate,
     };
     final String duration = _duration == null
@@ -1709,32 +1908,40 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
       _peopleCount != null && !<int>[1, 2, 4].contains(_peopleCount);
 
   bool get _isCustomBudget =>
-      _budgetMax != null && !<int>[0, 10, 20, 40].contains(_budgetMax);
+      _budgetMax != null &&
+      !<int>[0, 10, 20, 40]
+          .map(
+            (v) => MoneyParser()
+                .parse(v.toString(), currency: widget.currency, locale: 'en')
+                .value!,
+          )
+          .contains(_budgetMax);
 
   Future<void> _pickFilterTime({required bool isStart}) async {
-    final DateTime initial = isStart ? _startLocal : _endLocal;
+    final initial = isStart ? _startLocal : _endLocal;
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(initial),
+      initialTime: TimeOfDay(
+        hour: initial.minutesSinceMidnight ~/ 60,
+        minute: initial.minutesSinceMidnight % 60,
+      ),
     );
     if (picked == null || !mounted) return;
     setState(() {
-      final DateTime value = DateTime(
-        initial.year,
-        initial.month,
-        initial.day,
-        picked.hour,
-        picked.minute,
+      final value = LocalDateTimeValue(
+        date: initial.date,
+        minutesSinceMidnight: picked.hour * 60 + picked.minute,
+        weekday: initial.date.weekday,
       );
       if (isStart) {
         _startLocal = value;
-        if (!_endLocal.isAfter(_startLocal)) {
-          _endLocal = _startLocal.add(const Duration(hours: 1));
+        if (_endLocal.compareTo(_startLocal) <= 0) {
+          _endLocal = _startLocal.addMinutes(60);
         }
       } else {
-        _endLocal = value.isAfter(_startLocal)
+        _endLocal = value.compareTo(_startLocal) > 0
             ? value
-            : value.add(const Duration(days: 1));
+            : value.addMinutes(1440);
       }
     });
   }
@@ -1752,18 +1959,37 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
   }
 
   Future<void> _editBudget() async {
-    final int? result = await _showNumberDialog<int>(
+    final Money? result = await _showNumberDialog<Money>(
       title: context.l10n.discoverBudgetPerPerson,
-      hint: context.l10n.discoverAmountInEur,
-      initialValue: _isCustomBudget ? '$_budgetMax' : '',
-      parser: (String value) => int.tryParse(value),
-      isValid: (int value) => value >= 0 && value <= 10000,
+      hint: '${context.l10n.createFormAmount} (${widget.currency.value})',
+      initialValue: _isCustomBudget
+          ? MoneyFormatter().decimal(
+              _budgetMax!,
+              locale: 'en',
+              omitZeroFraction: true,
+            )
+          : '',
+      parser: (text) => MoneyParser()
+          .parse(
+            text,
+            currency: widget.currency,
+            locale: Localizations.localeOf(context).toLanguageTag(),
+          )
+          .value,
+      isValid: (Money value) =>
+          value.minorUnits >= 0 &&
+          value.compareTo(
+                MoneyParser()
+                    .parse('10000', currency: widget.currency, locale: 'en')
+                    .value!,
+              ) <=
+              0,
       errorMessage: context.l10n.discoverEnterBudget,
     );
     if (result != null && mounted) setState(() => _budgetMax = result);
   }
 
-  Future<T?> _showNumberDialog<T extends num>({
+  Future<T?> _showNumberDialog<T>({
     required String title,
     required String hint,
     required String initialValue,
@@ -1783,15 +2009,10 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
   );
 
   _SearchFilterSelection get _selection {
-    final _DateWindow? window = switch (_date) {
-      'today' => _todayWindow(),
-      'tonight' => _tonightWindow(),
-      _ => null,
-    };
     return _SearchFilterSelection(
       peopleCount: _peopleCount,
       budgetMax: _budgetMax,
-      dateWindow: window,
+      dateChoice: _date,
       radiusMeters: _radiusMeters,
       unlimitedRadius: _unlimited,
       openNow: _openNow,
@@ -1799,6 +2020,7 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
       durationMinutes: _duration,
       mood: _mood,
       timeWindowMode: _timeWindowMode,
+      timezoneId: _timezoneId,
       startLocal: _startLocal,
       endLocal: _endLocal,
       flexibilityMinutes: _flexibilityMinutes,
@@ -1808,27 +2030,46 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
     );
   }
 
-  void _reset() => setState(() {
-    _peopleCount = null;
-    _budgetMax = null;
-    _date = 'any';
-    _radiusMeters = 5000;
-    _unlimited = false;
-    _openNow = false;
-    _onlyAvailable = false;
-    _duration = null;
-    _mood = null;
-    _timeWindowMode = null;
-    _startLocal = DateTime.now().add(const Duration(minutes: 30));
-    _endLocal = DateTime.now().add(const Duration(hours: 2));
-    _flexibilityMinutes = 30;
-    _originType = TravelOriginType.currentLocation;
-    _transportMode = TransportMode.walking;
-    _includeReturnTrip = true;
-  });
+  void _reset() {
+    final ({
+      String timezoneId,
+      LocalDateTimeValue start,
+      LocalDateTimeValue end,
+    })
+    reset;
+    try {
+      reset = widget.resetTimeValues();
+    } on TimeWindowValidationException catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.discoverTimeWindowIssue(error.issue.name)),
+        ),
+      );
+      return;
+    }
+    setState(() {
+      _peopleCount = null;
+      _budgetMax = null;
+      _date = 'any';
+      _radiusMeters = 5000;
+      _unlimited = false;
+      _openNow = false;
+      _onlyAvailable = false;
+      _duration = null;
+      _mood = null;
+      _timeWindowMode = null;
+      _timezoneId = reset.timezoneId;
+      _startLocal = reset.start;
+      _endLocal = reset.end;
+      _flexibilityMinutes = 30;
+      _originType = TravelOriginType.currentLocation;
+      _transportMode = TransportMode.walking;
+      _includeReturnTrip = true;
+    });
+  }
 }
 
-class _NumberInputDialog<T extends num> extends StatefulWidget {
+class _NumberInputDialog<T> extends StatefulWidget {
   const _NumberInputDialog({
     required this.title,
     required this.hint,
@@ -1849,8 +2090,7 @@ class _NumberInputDialog<T extends num> extends StatefulWidget {
   State<_NumberInputDialog<T>> createState() => _NumberInputDialogState<T>();
 }
 
-class _NumberInputDialogState<T extends num>
-    extends State<_NumberInputDialog<T>> {
+class _NumberInputDialogState<T> extends State<_NumberInputDialog<T>> {
   late final TextEditingController _controller = TextEditingController(
     text: widget.initialValue,
   );
@@ -2083,6 +2323,7 @@ class _CompactSwitchRow extends StatelessWidget {
 class _TimeFilterBlock extends StatelessWidget {
   const _TimeFilterBlock({
     required this.mode,
+    required this.timezoneId,
     required this.start,
     required this.end,
     required this.flexibilityMinutes,
@@ -2093,8 +2334,9 @@ class _TimeFilterBlock extends StatelessWidget {
   });
 
   final TimeWindowMode? mode;
-  final DateTime start;
-  final DateTime end;
+  final String timezoneId;
+  final LocalDateTimeValue start;
+  final LocalDateTimeValue end;
   final int flexibilityMinutes;
   final ValueChanged<TimeWindowMode?> onModeChanged;
   final VoidCallback onStartTap;
@@ -2113,6 +2355,7 @@ class _TimeFilterBlock extends StatelessWidget {
           icon: Icons.schedule_outlined,
           label: context.l10n.discoverWhen,
         ),
+        Text(timezoneId, key: const Key('filter-timezone')),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
@@ -2152,7 +2395,7 @@ class _TimeFilterBlock extends StatelessWidget {
               Expanded(
                 child: _InlineTimeField(
                   key: const Key('filter-start-time'),
-                  value: _formatClock(start),
+                  value: _formatLocalClock(start),
                   onTap: onStartTap,
                 ),
               ),
@@ -2168,7 +2411,7 @@ class _TimeFilterBlock extends StatelessWidget {
               Expanded(
                 child: _InlineTimeField(
                   key: const Key('filter-end-time'),
-                  value: _formatClock(end),
+                  value: _formatLocalClock(end),
                   onTap: onEndTap,
                 ),
               ),
@@ -2920,7 +3163,7 @@ class _SearchFilterSelection {
   const _SearchFilterSelection({
     required this.peopleCount,
     required this.budgetMax,
-    required this.dateWindow,
+    required this.dateChoice,
     required this.radiusMeters,
     required this.unlimitedRadius,
     required this.openNow,
@@ -2928,6 +3171,7 @@ class _SearchFilterSelection {
     required this.durationMinutes,
     required this.mood,
     required this.timeWindowMode,
+    required this.timezoneId,
     required this.startLocal,
     required this.endLocal,
     required this.flexibilityMinutes,
@@ -2936,8 +3180,8 @@ class _SearchFilterSelection {
     required this.includeReturnTrip,
   });
   final int? peopleCount;
-  final int? budgetMax;
-  final _DateWindow? dateWindow;
+  final Money? budgetMax;
+  final String dateChoice;
   final double radiusMeters;
   final bool unlimitedRadius;
   final bool openNow;
@@ -2945,8 +3189,9 @@ class _SearchFilterSelection {
   final int? durationMinutes;
   final String? mood;
   final TimeWindowMode? timeWindowMode;
-  final DateTime startLocal;
-  final DateTime endLocal;
+  final String timezoneId;
+  final LocalDateTimeValue startLocal;
+  final LocalDateTimeValue endLocal;
   final int flexibilityMinutes;
   final TravelOriginType originType;
   final TransportMode transportMode;
@@ -2958,6 +3203,10 @@ class _DateWindow {
   final DateTime from;
   final DateTime to;
 }
+
+String _formatLocalClock(LocalDateTimeValue value) =>
+    '${(value.minutesSinceMidnight ~/ 60).toString().padLeft(2, '0')}:'
+    '${(value.minutesSinceMidnight % 60).toString().padLeft(2, '0')}';
 
 String _formatClock(DateTime value) =>
     '${value.hour.toString().padLeft(2, '0')}:'
@@ -2974,82 +3223,50 @@ String _formatLocalDate(AppLocalizations l10n, DateTime value) {
   return today ? l10n.discoverTodayDate(date) : date;
 }
 
-_DateWindow _todayWindow() {
-  final DateTime now = DateTime.now();
-  return _DateWindow(now, DateTime(now.year, now.month, now.day, 23, 59, 59));
-}
-
-_DateWindow _tomorrowWindow() {
-  final DateTime now = DateTime.now();
-  final DateTime tomorrow = DateTime(
-    now.year,
-    now.month,
-    now.day,
-  ).add(const Duration(days: 1));
-  return _DateWindow(
-    tomorrow,
-    DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 23, 59, 59),
-  );
-}
-
-_DateWindow _weekendWindow() {
-  final DateTime now = DateTime.now();
-  final DateTime today = DateTime(now.year, now.month, now.day);
-  final int daysUntilSaturday = (DateTime.saturday - today.weekday) % 7;
-  final DateTime saturday = today.add(Duration(days: daysUntilSaturday));
-  final DateTime sunday = saturday.add(const Duration(days: 1));
-  return _DateWindow(
-    saturday,
-    DateTime(sunday.year, sunday.month, sunday.day, 23, 59, 59),
-  );
-}
-
-_DateWindow _tonightWindow() {
-  final DateTime now = DateTime.now();
-  final DateTime from = DateTime(now.year, now.month, now.day, 18);
-  return _DateWindow(
-    now.isAfter(from) ? now : from,
-    DateTime(now.year, now.month, now.day, 23, 59, 59),
-  );
-}
-
-String _dateLabel(AppLocalizations l10n, DiscoverQuery query) {
+String _dateLabel(
+  AppLocalizations l10n,
+  DiscoverQuery query,
+  DiscoverFeedController controller,
+) {
   if (query.dateFrom == null && query.dateTo == null) {
     return l10n.discoverAnyDate;
   }
-  final DateTime now = DateTime.now();
-  final DateTime? from = query.dateFrom?.toLocal();
-  final DateTime? to = query.dateTo?.toLocal();
-  if (_sameLocalDay(from, now)) {
-    return l10n.discoverToday;
+  try {
+    final zone = query.timeWindow?.timezoneId;
+    final today = controller.calendarDate(
+      DateTime.now().toUtc(),
+      timezoneId: zone,
+    );
+    final from = query.dateFrom == null
+        ? null
+        : controller.calendarDate(query.dateFrom!, timezoneId: zone);
+    final to = query.dateTo == null
+        ? null
+        : controller.calendarDate(query.dateTo!, timezoneId: zone);
+    if (from == null) return l10n.discoverDateUntil(_numericDate(to!));
+    if (to == null) return l10n.discoverDateFrom(_numericDate(from));
+    if (from == to && from == today) return l10n.discoverToday;
+    if (from == to && from == today.addDays(1)) return l10n.discoverTomorrow;
+    return from == to
+        ? _numericDate(from)
+        : '${_numericDate(from)}–${_numericDate(to)}';
+  } on TimeWindowValidationException {
+    return l10n.discoverDateUnavailable;
   }
-  if (_sameLocalDay(from, now.add(const Duration(days: 1)))) {
-    return l10n.discoverTomorrow;
-  }
-  if (from == null) return l10n.discoverDateSet;
-  final String fromLabel = _numericDate(from);
-  if (to == null || _sameLocalDay(from, to)) return fromLabel;
-  return '$fromLabel–${_numericDate(to)}';
 }
 
-bool _sameLocalDay(DateTime? first, DateTime? second) {
+bool _sameCalendarDay(
+  DateTime? first,
+  DateTime? second,
+  DiscoverFeedController controller,
+) {
   if (first == null || second == null) return false;
-  final DateTime firstLocal = first.toLocal();
-  final DateTime secondLocal = second.toLocal();
-  return firstLocal.year == secondLocal.year &&
-      firstLocal.month == secondLocal.month &&
-      firstLocal.day == secondLocal.day;
+  return controller.calendarDate(first) == controller.calendarDate(second);
 }
 
-String _numericDate(DateTime value) =>
+String _numericDate(LocalDate value) =>
     '${value.day.toString().padLeft(2, '0')}.'
     '${value.month.toString().padLeft(2, '0')}';
-
-String _dateChoice(DiscoverQuery query) {
-  if (query.dateFrom == null && query.dateTo == null) return 'any';
-  final int hour = query.dateFrom?.toLocal().hour ?? 0;
-  return hour >= 17 ? 'tonight' : 'today';
-}
 
 IconData _recentIcon(SavedSearchEntity search) {
   final String value = '${search.title} ${search.subtitle}'.toLowerCase();
@@ -3074,7 +3291,11 @@ String _resultsLocation(
       'free': query.freeOnly ? '1' : '0',
       if (query.peopleCount != null) 'people': '${query.peopleCount}',
       if (query.budgetMax != null)
-        'budgetMax': query.budgetMax!.toStringAsFixed(0),
+        'budgetMax': MoneyFormatter().decimal(
+          query.budgetMax!,
+          locale: 'en',
+          omitZeroFraction: true,
+        ),
       if (query.dateFrom != null) 'dateFrom': query.dateFrom!.toIso8601String(),
       if (query.dateTo != null) 'dateTo': query.dateTo!.toIso8601String(),
       'radius': query.radiusMeters.round().toString(),
@@ -3084,27 +3305,13 @@ String _resultsLocation(
       if (query.availableDurationMinutes != null)
         'duration': '${query.availableDurationMinutes}',
       if (query.mood != null) 'mood': query.mood!,
-      if (query.timeWindow != null) ...<String, String>{
-        'timeMode': query.timeWindow!.mode.name,
-        'timeStart': query.timeWindow!.startAtUtc.toIso8601String(),
-        'timeEnd': query.timeWindow!.endAtUtc.toIso8601String(),
-        'timezone': query.timeWindow!.timezoneId,
-        'flexibility': '${query.timeWindow!.flexibilityMinutes}',
-        'resolvedAt': query.timeWindow!.resolvedAtUtc.toIso8601String(),
-      },
-      if (query.travelContext != null) ...<String, String>{
-        'originType': query.travelContext!.originType.name,
-        'originLat': '${query.travelContext!.origin.latitude}',
-        'originLng': '${query.travelContext!.origin.longitude}',
-        'transport': query.travelContext!.transportMode.name,
-        'returnTrip': query.travelContext!.includeReturnTrip ? '1' : '0',
-      },
+      ...DiscoverFeedController.timeRouteParameters(query),
     },
   ).toString();
 }
 
 /// Whole euros of the EUR-only budget pickers (their stored value is EUR).
 String _euros(BuildContext context, int value) => RechargeFormats.money(
-  Money(minorUnits: value * 100, currencyCode: 'EUR'),
+  Money(minorUnits: value * 100, currency: CurrencyCode.parse('EUR')),
   context.l10n.localeName,
 );

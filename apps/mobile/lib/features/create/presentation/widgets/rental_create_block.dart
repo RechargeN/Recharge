@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter/material.dart';
 
 import '../../application/controllers/create_controller.dart';
@@ -13,7 +15,6 @@ import 'create_texts.dart';
 import '../../../../core/localization/l10n_context.dart';
 import 'create_form_texts.dart';
 import '../../../../core/localization/recharge_formats.dart';
-import '../../../../shared/primitives/money/money.dart';
 
 /// Rental / Equipment create block — RNT-CRT-01. A shell + step navigation
 /// (mirrors `PlaceCreateBlock`), with all 8 spec §13 steps rendered as
@@ -661,7 +662,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
           TextField(
             controller: _field(
               'deliveryFee',
-              h.deliveryFee?.amountMinor.toString() ?? '',
+              h.deliveryFee?.minorUnits.toString() ?? '',
             ),
             decoration: InputDecoration(
               labelText: context.l10n.createFormDeliveryFeeMinorUnits,
@@ -672,9 +673,9 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
               if (minor == null) return;
               widget.controller.updateRentalHandover(
                 (handover) => handover.copyWith(
-                  deliveryFee: RentalMoneyDraft(
-                    amountMinor: minor,
-                    currencyCode: rental.pricing.currencyCode,
+                  deliveryFee: Money(
+                    minorUnits: minor,
+                    currency: CurrencyCode.parse(rental.pricing.currencyCode),
                   ),
                 ),
               );
@@ -866,7 +867,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                 child: Text(
                   context.l10n.createRentalRateStep(
                     p.rateSteps[i].minUnits,
-                    '${p.rateSteps[i].unitPrice.amountMinor} ${p.currencyCode}',
+                    '${p.rateSteps[i].unitPrice.minorUnits} ${p.currencyCode}',
                   ),
                 ),
               ),
@@ -880,9 +881,9 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
           onPressed: () => widget.controller.addRentalRateStep(
             RentalRateStep(
               minUnits: p.rateSteps.isEmpty ? 1 : p.rateSteps.last.minUnits + 1,
-              unitPrice: RentalMoneyDraft(
-                amountMinor: 0,
-                currencyCode: p.currencyCode,
+              unitPrice: Money(
+                minorUnits: 0,
+                currency: CurrencyCode.parse(p.currencyCode),
               ),
             ),
           ),
@@ -896,7 +897,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
               child: TextField(
                 controller: _field(
                   'depositAmount',
-                  p.deposit.amount.amountMinor.toString(),
+                  p.deposit.amount.minorUnits.toString(),
                 ),
                 decoration: InputDecoration(
                   labelText: context.l10n.createRentalDepositField,
@@ -908,9 +909,9 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                   widget.controller.updateRentalPricing(
                     (pricing) => pricing.copyWith(
                       deposit: pricing.deposit.copyWith(
-                        amount: RentalMoneyDraft(
-                          amountMinor: minor,
-                          currencyCode: pricing.currencyCode,
+                        amount: Money(
+                          minorUnits: minor,
+                          currency: CurrencyCode.parse(pricing.currencyCode),
                         ),
                         collectionMethod: minor == 0
                             ? RentalDepositCollectionMethod.none
@@ -1060,7 +1061,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                 RechargeFormats.money(
                   Money(
                     minorUnits: preview.depositAmountMinor ?? 0,
-                    currencyCode: preview.currencyCode,
+                    currency: CurrencyCode.parse(preview.currencyCode),
                   ),
                   Localizations.localeOf(context).languageCode,
                 ),

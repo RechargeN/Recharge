@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 
@@ -164,7 +165,9 @@ class CompatibilityObjectRenderer implements DetailsRenderer {
                           RechargeFormats.money(
                             Money(
                               minorUnits: item.activityCatalog!.amountMinor!,
-                              currencyCode: item.activityCatalog!.currencyCode!,
+                              currency: CurrencyCode.parse(
+                                item.activityCatalog!.currencyCode!,
+                              ),
                             ),
                             context.l10n.localeName,
                           ),

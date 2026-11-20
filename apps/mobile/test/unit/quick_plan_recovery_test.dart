@@ -1,3 +1,4 @@
+import 'package:recharge/core/id/id_generator.dart' show UuidV4IdGenerator;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/scenarios/data/quick_plan_sync_client.dart';
@@ -11,7 +12,9 @@ void main() {
     () async {
       bool offline = true;
       final sent = <String>[];
-      final controller = ScenarioBuilderController();
+      final controller = ScenarioBuilderController(
+        idGenerator: UuidV4IdGenerator(),
+      );
       addTearDown(controller.dispose);
       final p = controller.state.draft;
       controller.reset();
@@ -78,7 +81,10 @@ void main() {
           return receipts[key]!;
         },
       );
-      final controller = ScenarioBuilderController(repository: client);
+      final controller = ScenarioBuilderController(
+        idGenerator: UuidV4IdGenerator(),
+        repository: client,
+      );
       addTearDown(controller.dispose);
       await controller.sync(save: true);
       expect(controller.syncError, isNotNull);

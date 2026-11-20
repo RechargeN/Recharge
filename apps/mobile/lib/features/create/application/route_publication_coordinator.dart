@@ -1,4 +1,4 @@
-import '../../../core/id/id_generator.dart';
+import '../../../shared/primitives/id/id_generator.dart';
 import '../domain/entities/create_draft_entity.dart';
 import '../domain/entities/route_publication_data.dart';
 import '../domain/repositories/route_authoring_policy.dart';
@@ -57,6 +57,15 @@ class RoutePublicationCoordinator {
     );
 
     final current = await _currentFor(draft);
+    await _requireAllowed(
+      actorId: actorId,
+      draftId: draft.id,
+      capabilities: capabilities,
+      operation: direct
+          ? RouteAuthoringOperation.publishDirect
+          : RouteAuthoringOperation.submitForReview,
+      publisher: publisher,
+    );
     final routeId = current?.routeId ?? _idGenerator.generate();
     final effectiveAttemptId = attemptId ?? _idGenerator.generate();
     final bundle = _buildBundle(
@@ -92,7 +101,14 @@ class RoutePublicationCoordinator {
       capabilities: capabilities,
       operation: RouteAuthoringOperation.moderate,
     );
-    return _repository.pendingRequests();
+    final result = await _repository.pendingRequests();
+    await _requireAllowed(
+      actorId: actorId,
+      draftId: 'route-moderation-queue',
+      capabilities: capabilities,
+      operation: RouteAuthoringOperation.moderate,
+    );
+    return result;
   }
 
   Future<RoutePublishReceipt> moderate({

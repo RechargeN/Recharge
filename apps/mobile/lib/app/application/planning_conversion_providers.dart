@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../adapters/legacy_quick_plan_conversion_adapter.dart';
 import '../di/service_locator.dart';
-import '../../core/id/id_generator.dart';
+import '../../shared/primitives/id/id_generator.dart';
 import '../../features/create/application/create_runtime_defaults.dart';
 import '../../features/create/application/quick_plan_conversion_coordinator.dart';
 import '../../features/create/application/scenario_conversion_handoff_store.dart';

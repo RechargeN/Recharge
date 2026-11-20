@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/config/market_config.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/core/notifications/app_notification_sink.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/identity/application/controllers/identity_workspace_controller.dart';

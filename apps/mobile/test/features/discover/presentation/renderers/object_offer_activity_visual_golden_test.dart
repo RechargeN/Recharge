@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'dart:io';
 
@@ -89,13 +90,13 @@ Future<void> _loadGoldenFonts() async {
   }
   final String fontRoot = '$flutterRoot/bin/cache/artifacts/material_fonts';
   await (FontLoader('Roboto')
-        ..addFont(_fontData('$fontRoot/roboto-regular.ttf'))
-        ..addFont(_fontData('$fontRoot/roboto-medium.ttf'))
-        ..addFont(_fontData('$fontRoot/roboto-bold.ttf')))
+        ..addFont(_fontData('$fontRoot/Roboto-Regular.ttf'))
+        ..addFont(_fontData('$fontRoot/Roboto-Medium.ttf'))
+        ..addFont(_fontData('$fontRoot/Roboto-Bold.ttf')))
       .load();
   await (FontLoader(
     'MaterialIcons',
-  )..addFont(_fontData('$fontRoot/materialicons-regular.otf'))).load();
+  )..addFont(_fontData('$fontRoot/MaterialIcons-Regular.otf'))).load();
 }
 
 Future<ByteData> _fontData(String path) async {
@@ -126,7 +127,7 @@ DiscoverItemEntity _activityFixture() {
     startsAtUtc: DateTime.utc(2026, 9, 12, 7),
     latitude: 56.956,
     longitude: 24.112,
-    priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     distanceKm: 1.2,
     isFree: true,
     objectKind: DiscoverObjectKind.activity,

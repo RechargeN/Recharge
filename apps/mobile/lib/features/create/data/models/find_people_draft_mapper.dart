@@ -1,5 +1,8 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../core/parsing/money_legacy_adapter.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
 import '../../domain/entities/find_people_draft_data.dart';
-import '../../../../shared/primitives/money/money.dart';
 
 class FindPeopleDraftMapper {
   const FindPeopleDraftMapper._();
@@ -56,7 +59,9 @@ class FindPeopleDraftMapper {
       'attendanceConfirmationRequired': value.attendanceConfirmationRequired,
       'guestPolicy': value.guestPolicy,
       'costType': value.costType.name,
-      'expectedSpendAmount': value.expectedSpendAmount?.toJson(),
+      'expectedSpendAmountMinorUnits': value.expectedSpendAmount?.minorUnitsIn(
+        CurrencyCode.parse(value.currencyCode),
+      ),
       'currencyCode': value.currencyCode,
       'costNote': value.costNote,
       'expenseSplitMode': value.expenseSplitMode.name,
@@ -65,7 +70,8 @@ class FindPeopleDraftMapper {
             (FindPeopleExpenseItemDraft item) => <String, Object?>{
               'id': item.id,
               'category': item.category,
-              'amount': item.amount.toJson(),
+              'amountMinorUnits': item.amount.minorUnits,
+              'currencyCode': item.amount.currency.value,
               'payerNote': item.payerNote,
             },
           )
@@ -236,20 +242,34 @@ class FindPeopleDraftMapper {
       costType:
           _enumValue(FindPeopleCostType.values, json['costType']) ??
           defaults.costType,
-      expectedSpendAmount: Money.fromJsonOrNull(
-        json['expectedSpendAmount'],
-        legacyCurrencyCode:
-            _text(json['currencyCode']) ?? defaults.currencyCode,
+      expectedSpendAmount: MoneyLegacyAdapter().readOptional(
+        hasCanonicalMinorUnits: json.containsKey(
+          'expectedSpendAmountMinorUnits',
+        ),
+        canonicalMinorUnits: json['expectedSpendAmountMinorUnits'],
+        legacyMajorAmount: json['expectedSpendAmount'],
+        currencyCode: MoneyLegacyAdapter.recordedCurrency(
+          json,
+          recordedContext: defaults.currencyCode,
+        ),
       ),
       clearExpectedSpendAmount:
-          json.containsKey('expectedSpendAmount') &&
-          Money.fromJsonOrNull(
-                json['expectedSpendAmount'],
-                legacyCurrencyCode:
-                    _text(json['currencyCode']) ?? defaults.currencyCode,
-              ) ==
-              null,
-      currencyCode: _text(json['currencyCode']) ?? defaults.currencyCode,
+          MoneyLegacyAdapter().readOptional(
+            hasCanonicalMinorUnits: json.containsKey(
+              'expectedSpendAmountMinorUnits',
+            ),
+            canonicalMinorUnits: json['expectedSpendAmountMinorUnits'],
+            legacyMajorAmount: json['expectedSpendAmount'],
+            currencyCode: MoneyLegacyAdapter.recordedCurrency(
+              json,
+              recordedContext: defaults.currencyCode,
+            ),
+          ) ==
+          null,
+      currencyCode: MoneyLegacyAdapter.recordedCurrency(
+        json,
+        recordedContext: defaults.currencyCode,
+      ),
       costNote: _text(json['costNote']),
       clearCostNote:
           json.containsKey('costNote') && _text(json['costNote']) == null,
@@ -261,7 +281,10 @@ class FindPeopleDraftMapper {
           defaults.expenseSplitMode,
       plannedExpenseItems: _expenses(
         json['plannedExpenseItems'],
-        _text(json['currencyCode']) ?? defaults.currencyCode,
+        MoneyLegacyAdapter.recordedCurrency(
+          json,
+          recordedContext: defaults.currencyCode,
+        ),
       ),
       cancellationPolicyId:
           _text(json['cancellationPolicyId']) ?? defaults.cancellationPolicyId,
@@ -348,7 +371,7 @@ class FindPeopleDraftMapper {
       : double.tryParse(source?.toString() ?? '');
   static bool? _bool(Object? source) => source is bool ? source : null;
   static DateTime? _date(Object? source) =>
-      DateTime.tryParse(source?.toString() ?? '')?.toUtc();
+      source == null ? null : UtcInstant.parse(source as String).value;
   static List<String> _strings(Object? source) => source is List<dynamic>
       ? source
             .map((dynamic item) => item.toString().trim())
@@ -388,11 +411,18 @@ class FindPeopleDraftMapper {
             id: _text(json['id']) ?? '',
             category: _text(json['category']) ?? '',
             amount:
-                Money.fromJsonOrNull(
-                  json['amount'],
-                  legacyCurrencyCode: currencyCode,
+                MoneyLegacyAdapter().readOptional(
+                  hasCanonicalMinorUnits: json.containsKey('amountMinorUnits'),
+                  canonicalMinorUnits: json['amountMinorUnits'],
+                  legacyMajorAmount: json['amount'],
+                  currencyCode: MoneyLegacyAdapter.recordedCurrency(
+                    json,
+                    recordedContext: currencyCode,
+                  ),
                 ) ??
-                Money.zero(currencyCode),
+                (throw const MoneyReadException(
+                  MoneyParseError.invalidCanonicalValue,
+                )),
             payerNote: _text(json['payerNote']) ?? '',
           );
         })

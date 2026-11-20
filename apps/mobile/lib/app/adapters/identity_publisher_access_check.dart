@@ -19,14 +19,25 @@ class IdentityPublisherAccessCheck implements PublisherAccessCheck {
   Future<bool> canPublishAs({
     required String actorUserId,
     required PublisherRef publisher,
+    Set<String> requiredCapabilities = const {},
+    bool requireAdmin = false,
+    bool requireIdentityVerification = true,
   }) async {
     if (!publisher.isValid || actorUserId.trim().isEmpty) return false;
-    if (publisher.type == PublisherType.user) {
-      return publisher.id == actorUserId;
-    }
+    if (requireAdmin && publisher.type != PublisherType.user) return false;
     try {
       final IdentityAccessSnapshot snapshot = await _repository
           .loadAccessSnapshot(actorUserId);
+      if (!snapshot.belongsTo(actorUserId) ||
+          (requireAdmin
+              ? !snapshot.canUseAdminTools
+              : requireIdentityVerification && !snapshot.isVerifiedCreator) ||
+          !requiredCapabilities.every(snapshot.hasGlobalCapability)) {
+        return false;
+      }
+      if (publisher.type == PublisherType.user) {
+        return publisher.id == actorUserId;
+      }
       if (!snapshot.canActivatePage(publisher.id)) return false;
       final ManagedPageMembershipEntity? membership = snapshot.membershipFor(
         publisher.id,

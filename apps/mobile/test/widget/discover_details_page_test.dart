@@ -1,3 +1,6 @@
+import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,11 +9,10 @@ import 'package:recharge/app/di/service_locator.dart';
 import 'package:recharge/app/application/scenario_object_intake_config.dart';
 import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/app/router/route_names.dart';
-import 'package:recharge/core/id/id_generator.dart';
 import 'package:recharge/core/product_analytics/product_analytics_queue.dart';
 import 'package:recharge/core/product_analytics/product_analytics_recorder.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -25,7 +27,6 @@ import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/domain/repositories/discover_repository.dart';
 import 'package:recharge/features/discover/domain/repositories/timezone_repository.dart';
-import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/domain/usecases/get_discover_details_usecase.dart';
 import 'package:recharge/features/discover/presentation/pages/discover_details_page.dart';
 import 'package:recharge/features/favorites/application/controllers/favorites_controller.dart';
@@ -245,6 +246,8 @@ void main() {
     final visitedController = VisitedPlacesController(
       getVisitedPlacesUseCase: GetVisitedPlacesUseCase(repository),
       recordPlaceVisitUseCase: RecordPlaceVisitUseCase(
+        localDateAt: (instant, zone) =>
+            TimezoneRepositoryImpl().toLocal(instant, zone).date,
         repository: repository,
         idGenerator: _FixedIdGenerator(),
       ),
@@ -493,15 +496,15 @@ DiscoverItemEntity _detailsItem({
     title: 'Morning yoga',
     subtitle: 'Gentle recharge session',
     city: 'Rezekne',
+    timezoneId: 'Europe/Riga',
     category: 'wellness',
     startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
     latitude: 56.5099,
     longitude: 27.3332,
-    priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     distanceKm: 1.2,
     isFree: true,
     objectKind: objectKind,
-    timezoneId: 'Europe/Riga',
     organizerName: 'Recharge Studio',
     organizerHandle: '@recharge',
     venueName: 'Green studio',

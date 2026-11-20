@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -102,14 +103,14 @@ class ManagedPageFieldModerationLocalDataSource {
           : _valueFromJson(lastApproved),
       lastApprovedAtUtc: lastApprovedAtUtc == null
           ? null
-          : DateTime.parse(lastApprovedAtUtc).toUtc(),
+          : UtcInstant.parse(lastApprovedAtUtc).value,
       approvedForVerificationRevision:
           json['approvedForVerificationRevision'] as int?,
       pendingSubmission: pending == null ? null : _pendingFromJson(pending),
       latestRejection: rejection == null ? null : _rejectionFromJson(rejection),
       clearedAtUtc: clearedAtUtc == null
           ? null
-          : DateTime.parse(clearedAtUtc).toUtc(),
+          : UtcInstant.parse(clearedAtUtc).value,
       revision: json['revision'] as int,
       schemaVersion: json['schemaVersion'] as int,
     );
@@ -135,7 +136,7 @@ class ManagedPageFieldModerationLocalDataSource {
       submissionId: json['submissionId'] as String,
       value: value == null ? null : _valueFromJson(value),
       clearRequested: json['clearRequested'] as bool,
-      submittedAtUtc: DateTime.parse(json['submittedAtUtc'] as String).toUtc(),
+      submittedAtUtc: UtcInstant.parse(json['submittedAtUtc'] as String).value,
       basedOnOverlayRevision: json['basedOnOverlayRevision'] as int,
     );
   }
@@ -163,7 +164,7 @@ class ManagedPageFieldModerationLocalDataSource {
       rejectedValue: rejectedValue == null
           ? null
           : _valueFromJson(rejectedValue),
-      rejectedAtUtc: DateTime.parse(json['rejectedAtUtc'] as String).toUtc(),
+      rejectedAtUtc: UtcInstant.parse(json['rejectedAtUtc'] as String).value,
       rejectionReasonCode: json['rejectionReasonCode'] as String,
     );
   }

@@ -1,10 +1,11 @@
+import '../../../../shared/primitives/time/local_date.dart';
+import '../../../../shared/primitives/money/money.dart';
 import 'dart:math' as math;
 
 import '../entities/create_draft_entity.dart';
 import '../entities/place_creation_policy.dart';
 import '../entities/place_draft_data.dart';
 import '../entities/place_validation_issue.dart';
-import '../../../../shared/primitives/money/money.dart';
 
 class ValidatePlaceDraftUseCase {
   const ValidatePlaceDraftUseCase();
@@ -268,6 +269,10 @@ class ValidatePlaceDraftUseCase {
       ],
     ];
     for (final Money? amount in activeAmounts) {
+      if (amount != null &&
+          amount.currency.value != pricing.currencyCode.trim().toUpperCase()) {
+        error('price_currency_mismatch', 'pricing', 'currencyCode');
+      }
       if (amount != null && amount.minorUnits < 0) {
         error('price_negative', 'pricing', 'entryPriceFrom');
       }
@@ -388,17 +393,8 @@ class ValidatePlaceDraftUseCase {
         longitude <= 180;
   }
 
-  static bool _validLocalDate(String? value) {
-    if (value == null || !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value)) {
-      return false;
-    }
-    final DateTime? parsed = DateTime.tryParse(value);
-    return parsed != null &&
-        '${parsed.year.toString().padLeft(4, '0')}-'
-                '${parsed.month.toString().padLeft(2, '0')}-'
-                '${parsed.day.toString().padLeft(2, '0')}' ==
-            value;
-  }
+  static bool _validLocalDate(String? value) =>
+      value != null && LocalDate.tryParse(value) != null;
 
   static bool _validHttpsUrl(String value) {
     final Uri? uri = Uri.tryParse(value.trim());
@@ -426,7 +422,7 @@ class ValidatePlaceDraftUseCase {
   static bool _rangeInvalid(Money? from, Money? to) {
     return from != null &&
         to != null &&
-        (from.currencyCode != to.currencyCode || from.compareTo(to) > 0);
+        (from.currency != to.currency || from.compareTo(to) > 0);
   }
 
   static double _distanceKm(

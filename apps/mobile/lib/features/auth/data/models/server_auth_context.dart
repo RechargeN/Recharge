@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../domain/entities/auth_result_entity.dart';
 import '../../domain/entities/auth_session_entity.dart';
 import '../../domain/entities/auth_user_entity.dart';
@@ -33,7 +34,7 @@ final class ServerAuthContext {
       if (value is! String || !value.endsWith('Z')) {
         invalid();
       }
-      final parsed = DateTime.tryParse(value);
+      final parsed = UtcInstant.tryParse(value)?.value;
       if (parsed == null || !parsed.isUtc) {
         invalid();
       }

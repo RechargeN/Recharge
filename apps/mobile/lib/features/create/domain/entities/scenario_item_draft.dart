@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
+import '../../../../shared/primitives/time/local_date.dart';
 import 'scenario_budget_draft.dart';
 
 enum ScenarioItemKind {
@@ -39,33 +41,6 @@ enum ScenarioPlannedTransportKind {
 
 enum ScenarioScheduleFreshness { current, stale, unknown, notApplicable }
 
-class ScenarioLocalDateDraft {
-  const ScenarioLocalDateDraft({
-    required this.year,
-    required this.month,
-    required this.day,
-  });
-
-  final int year;
-  final int month;
-  final int day;
-
-  String get iso8601 =>
-      '${year.toString().padLeft(4, '0')}-'
-      '${month.toString().padLeft(2, '0')}-'
-      '${day.toString().padLeft(2, '0')}';
-
-  bool get isValid {
-    if (year < 1 || month < 1 || month > 12 || day < 1 || day > 31) {
-      return false;
-    }
-    final DateTime candidate = DateTime.utc(year, month, day);
-    return candidate.year == year &&
-        candidate.month == month &&
-        candidate.day == day;
-  }
-}
-
 class ScenarioLocalTimeDraft {
   const ScenarioLocalTimeDraft({required this.hour, required this.minute});
 
@@ -79,24 +54,6 @@ class ScenarioLocalTimeDraft {
       '${minute.toString().padLeft(2, '0')}';
 
   bool get isValid => hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
-}
-
-class ScenarioGeoPointDraft {
-  const ScenarioGeoPointDraft({
-    required this.latitude,
-    required this.longitude,
-  });
-
-  final double latitude;
-  final double longitude;
-
-  bool get isValid =>
-      latitude.isFinite &&
-      longitude.isFinite &&
-      latitude >= -90 &&
-      latitude <= 90 &&
-      longitude >= -180 &&
-      longitude <= 180;
 }
 
 class ScenarioObjectSnapshotDraft {
@@ -180,7 +137,7 @@ class ScenarioScheduleSnapshotDraft {
   final String? originStopId;
   final String? destinationStopId;
   final String? feedSha256;
-  final ScenarioLocalDateDraft? serviceDate;
+  final LocalDate? serviceDate;
   final DateTime? feedUpdatedAtUtc;
   final DateTime? retrievedAtUtc;
   final String? carrierName;
@@ -321,7 +278,7 @@ class ScenarioLocationDraft {
   });
 
   final String id;
-  final ScenarioGeoPointDraft point;
+  final GeoPoint point;
   final String title;
   final String? address;
   final String? marketId;

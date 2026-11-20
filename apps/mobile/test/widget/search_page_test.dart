@@ -1,3 +1,6 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,7 +9,6 @@ import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/app/application/scenario_object_intake_config.dart';
 import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -18,7 +20,6 @@ import 'package:recharge/features/auth/domain/usecases/restore_session_usecase.d
 import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
-import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -32,6 +33,11 @@ import 'package:recharge/features/discover/presentation/pages/search_page.dart';
 
 import 'package:recharge/core/localization/l10n_context.dart';
 import 'widget_test_viewport.dart';
+import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
+import 'package:recharge/features/discover/domain/usecases/build_time_window_usecase.dart';
+import 'package:recharge/features/discover/domain/entities/time_window.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
+
 import '../support/l10n/l10n_screenshot.dart';
 
 void main() {
@@ -63,6 +69,374 @@ void main() {
       }
     }
   });
+  DiscoverFeedController calendarController(
+    DiscoverQuery initial, {
+    String zone = 'Europe/Riga',
+  }) {
+    final zones = TimezoneRepositoryImpl();
+    return DiscoverFeedController(
+      getDiscoverFeedUseCase: GetDiscoverFeedUseCase(_FakeDiscoverRepository()),
+      discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
+      analyticsService: _NoopAnalyticsService(),
+      timezoneRepository: zones,
+      buildTimeWindow: BuildTimeWindowUseCase(zones),
+      initialQuery: initial,
+      runtimeDefaults: DiscoverRuntimeDefaults(
+        timezoneId: zone,
+        originLat: 1,
+        originLng: 2,
+        currency: CurrencyCode.eur,
+      ),
+    );
+  }
+
+  fullPageTestWidgets(
+    'unrelated filter apply preserves custom and one-sided UTC dates',
+    (tester) async {
+      for (final (from, to) in [
+        (
+          DateTime.utc(2027, 1, 3, 5, 7, 1, 123, 456),
+          DateTime.utc(2027, 1, 5, 9),
+        ),
+        (DateTime.utc(2027, 1, 3, 18), null),
+        (null, DateTime.utc(2027, 1, 5, 9)),
+      ]) {
+        final controller = calendarController(
+          DiscoverQuery.defaults().copyWith(dateFrom: from, dateTo: to),
+        );
+        await tester.pumpWidget(_SearchLandingTestApp(controller: controller));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('regular-search-filters')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('filter-apply-button')));
+        await tester.pumpAndSettle();
+        expect(controller.state.draftQuery.dateFrom, from);
+        expect(controller.state.draftQuery.dateTo, to);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpAndSettle();
+      }
+    },
+  );
+
+  fullPageTestWidgets(
+    'calendar preset clears coupled time filter and uses market zone',
+    (tester) async {
+      final window = TimeWindow(
+        startAtUtc: DateTime.utc(2027, 1, 1, 5),
+        endAtUtc: DateTime.utc(2027, 1, 1, 6),
+        resolvedAtUtc: DateTime.utc(2026),
+        timezoneId: 'Pacific/Honolulu',
+        mode: TimeWindowMode.exact,
+        flexibilityMinutes: 0,
+      );
+      final controller = calendarController(
+        DiscoverQuery.defaults().copyWith(
+          timeWindow: window,
+          dateFrom: window.startAtUtc,
+          dateTo: window.endAtUtc,
+          travelContext: TravelContext(
+            originType: TravelOriginType.currentLocation,
+            origin: const GeoPoint(latitude: 1, longitude: 2),
+            transportMode: TransportMode.walking,
+            includeReturnTrip: false,
+          ),
+        ),
+      );
+      await tester.pumpWidget(_SearchLandingTestApp(controller: controller));
+      await tester.pumpAndSettle();
+      // Both instants fall on Dec 31 in the stored window's zone, not Jan 1.
+      expect(find.text('31.12'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('search-date-chip')));
+      await tester.pumpAndSettle();
+      final expected = controller.datePreset(DiscoverDatePreset.tomorrow);
+      await tester.tap(find.byKey(const Key('quick-date-tomorrow')));
+      await tester.pumpAndSettle();
+      final query = controller.state.draftQuery;
+      expect(query.dateFrom, expected.from);
+      expect(query.dateTo, expected.to);
+      expect(query.timeWindow, isNull);
+      expect(query.travelContext, isNull);
+      expect(find.text('Tomorrow'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  fullPageTestWidgets(
+    'unavailable calendar zone reports error and retains dates',
+    (tester) async {
+      final initial = DiscoverQuery.defaults().copyWith(
+        dateFrom: DateTime.utc(2027),
+      );
+      final controller = calendarController(initial, zone: 'Unknown/Nowhere');
+      await tester.pumpWidget(_SearchLandingTestApp(controller: controller));
+      await tester.pumpAndSettle();
+      expect(find.text('Date unavailable'), findsOneWidget);
+      final before = controller.state.draftQuery;
+      await tester.tap(find.byKey(const Key('search-date-chip')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('quick-date-tomorrow')));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(
+          lookupAppLocalizations(
+            const Locale('en'),
+          ).discoverTimeWindowIssue('unknownTimezone'),
+        ),
+        findsOneWidget,
+      );
+      expect(controller.state.draftQuery, same(before));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  fullPageTestWidgets(
+    'results calendar action replaces the coupled window in explicit zone',
+    (tester) async {
+      final window = TimeWindow(
+        startAtUtc: DateTime.utc(2027),
+        endAtUtc: DateTime.utc(2027, 1, 2),
+        resolvedAtUtc: DateTime.utc(2026),
+        timezoneId: 'Europe/Riga',
+        mode: TimeWindowMode.exact,
+        flexibilityMinutes: 0,
+      );
+      final controller = calendarController(
+        DiscoverQuery.defaults().copyWith(
+          timeWindow: window,
+          dateFrom: window.startAtUtc,
+          dateTo: window.endAtUtc,
+          travelContext: TravelContext(
+            originType: TravelOriginType.currentLocation,
+            origin: const GeoPoint(latitude: 1, longitude: 2),
+            transportMode: TransportMode.walking,
+            includeReturnTrip: false,
+          ),
+        ),
+        zone: 'Pacific/Honolulu',
+      );
+      await tester.pumpWidget(_SearchTestApp(controller: controller));
+      await tester.pumpAndSettle();
+      final expected = controller.datePreset(
+        DiscoverDatePreset.today,
+        surface: DiscoverDateSurface.results,
+      );
+      await tester.tap(find.widgetWithText(ActionChip, 'Free today'));
+      await tester.pumpAndSettle();
+      final query = controller.state.appliedQuery;
+      expect(query.dateFrom, expected.from);
+      expect(query.dateTo, expected.to);
+      expect(query.freeOnly, isTrue);
+      expect(query.timeWindow, isNull);
+      expect(query.travelContext, isNull);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  fullPageTestWidgets(
+    'filter editor preserves selected zone and precise unchanged window',
+    (tester) async {
+      final window = TimeWindow(
+        startAtUtc: DateTime.utc(2026, 7, 20, 20, 30, 22, 123, 456),
+        endAtUtc: DateTime.utc(2026, 7, 20, 21, 30, 33, 456, 789),
+        resolvedAtUtc: DateTime.utc(2026, 7, 19),
+        timezoneId: 'Pacific/Honolulu',
+        mode: TimeWindowMode.exact,
+        flexibilityMinutes: 0,
+      );
+      final travel = TravelContext(
+        originType: TravelOriginType.manualPin,
+        origin: const GeoPoint(latitude: 21.3, longitude: -157.8),
+        transportMode: TransportMode.walking,
+        includeReturnTrip: false,
+      );
+      final initial = DiscoverQuery.defaults().copyWith(
+        timeWindow: window,
+        travelContext: travel,
+        dateFrom: window.startAtUtc,
+        dateTo: window.endAtUtc,
+      );
+      final zones = TimezoneRepositoryImpl();
+      final controller = DiscoverFeedController(
+        getDiscoverFeedUseCase: GetDiscoverFeedUseCase(
+          _FakeDiscoverRepository(),
+        ),
+        discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
+        analyticsService: _NoopAnalyticsService(),
+        timezoneRepository: zones,
+        buildTimeWindow: BuildTimeWindowUseCase(zones),
+        initialQuery: initial,
+        runtimeDefaults: const DiscoverRuntimeDefaults(
+          timezoneId: 'Europe/Riga',
+          originLat: 1,
+          originLng: 2,
+          currency: CurrencyCode.eur,
+        ),
+      );
+      await tester.pumpWidget(_SearchLandingTestApp(controller: controller));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('regular-search-filters')));
+      await tester.pumpAndSettle();
+      expect(find.text('Pacific/Honolulu'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('filter-start-time')),
+          matching: find.text('10:30'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('filter-end-time')),
+          matching: find.text('11:30'),
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const Key('filter-apply-button')));
+      await tester.pumpAndSettle();
+      expect(controller.state.draftQuery.timeWindow, same(window));
+      expect(controller.state.draftQuery.dateFrom, window.startAtUtc);
+      expect(controller.state.draftQuery.dateTo, window.endAtUtc);
+      expect(controller.state.draftQuery.travelContext!.origin, travel.origin);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  fullPageTestWidgets('invalid time deep link preserves query and storage', (
+    tester,
+  ) async {
+    final preferences = _FakeDiscoverPreferencesRepository();
+    final initial = DiscoverQuery.defaults().copyWith(queryText: 'original');
+    final controller = DiscoverFeedController(
+      getDiscoverFeedUseCase: GetDiscoverFeedUseCase(_FakeDiscoverRepository()),
+      discoverPreferencesRepository: preferences,
+      analyticsService: _NoopAnalyticsService(),
+      timezoneRepository: TimezoneRepositoryImpl(),
+      initialQuery: initial,
+      runtimeDefaults: const DiscoverRuntimeDefaults(
+        timezoneId: 'Europe/Riga',
+        originLat: 1,
+        originLng: 2,
+        currency: CurrencyCode.eur,
+      ),
+    );
+    await tester.pumpWidget(
+      _SearchTestApp(
+        controller: controller,
+        initialLocation: Uri(
+          path: RouteNames.search,
+          queryParameters: {
+            'timeStart': '2026-01-01T00:00:00Z',
+            'source': 'regular_search',
+          },
+        ).toString(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Invalid time filter. Edit the search filters.'),
+      findsWidgets,
+    );
+    expect(controller.state.appliedQuery, same(initial));
+    expect(controller.state.draftQuery, same(initial));
+    expect(preferences._savedQuery, isNull);
+    expect(preferences._savedSearches, isEmpty);
+    expect(preferences._smartSearchHistory, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
+  fullPageTestWidgets('complete UTC time deep link preserves zone and bounds', (
+    tester,
+  ) async {
+    final preferences = _FakeDiscoverPreferencesRepository();
+    final controller = DiscoverFeedController(
+      getDiscoverFeedUseCase: GetDiscoverFeedUseCase(_FakeDiscoverRepository()),
+      discoverPreferencesRepository: preferences,
+      analyticsService: _NoopAnalyticsService(),
+      timezoneRepository: TimezoneRepositoryImpl(),
+      runtimeDefaults: const DiscoverRuntimeDefaults(
+        timezoneId: 'Europe/Riga',
+        originLat: 1,
+        originLng: 2,
+        currency: CurrencyCode.eur,
+      ),
+    );
+    final seed = <String, String>{
+      'q': 'museum',
+      'source': 'regular_search',
+      'timeMode': 'exact',
+      'timeStart': '2026-10-25T00:30:00.123456Z',
+      'timeEnd': '2026-10-25T01:30:00.123456Z',
+      'resolvedAt': '2026-10-24T00:00:00.000Z',
+      'timezone': 'Europe/London',
+      'flexibility': '0',
+      'originType': 'manualPin',
+      'originLat': '51.5',
+      'originLng': '-0.1',
+      'transport': 'walking',
+      'returnTrip': '0',
+    };
+    await tester.pumpWidget(
+      _SearchTestApp(
+        controller: controller,
+        initialLocation: Uri(
+          path: RouteNames.search,
+          queryParameters: seed,
+        ).toString(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final query = controller.state.appliedQuery;
+    expect(query.timeWindow!.timezoneId, 'Europe/London');
+    expect(
+      query.timeWindow!.startAtUtc,
+      DateTime.utc(2026, 10, 25, 0, 30, 0, 123, 456),
+    );
+    expect(query.dateFrom, query.timeWindow!.startAtUtc);
+    expect(query.dateTo, query.timeWindow!.endAtUtc);
+    expect(preferences._savedQuery!.timeWindow!.timezoneId, 'Europe/London');
+    expect(
+      preferences._savedSearches.single.query.timeWindow!.timezoneId,
+      'Europe/London',
+    );
+    expect(
+      find.text('Invalid time filter. Edit the search filters.'),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  fullPageTestWidgets(
+    'custom budget rejects rounding and preserves cents through navigation',
+    (tester) async {
+      await tester.pumpWidget(_SearchLandingTestApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('search-budget-chip')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('quick-budget-custom')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('custom-number-input')),
+        '12.345',
+      );
+      await tester.tap(find.byKey(const Key('custom-number-save')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('custom-number-input')), findsOneWidget);
+      expect(find.text('Enter an amount from €0 to €10,000'), findsOneWidget);
+      await tester.enterText(
+        find.byKey(const Key('custom-number-input')),
+        '12.34',
+      );
+      await tester.tap(find.byKey(const Key('custom-number-save')));
+      await tester.pumpAndSettle();
+      expect(find.text('€12.34'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('regular-search-field')));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+      expect(find.text('budget:12.34'), findsOneWidget);
+    },
+  );
+
   fullPageTestWidgets('search intake flag hides single and multi actions', (
     tester,
   ) async {
@@ -594,20 +968,24 @@ void main() {
 }
 
 class _SearchLandingTestApp extends StatelessWidget {
-  _SearchLandingTestApp()
-    : _controller = DiscoverFeedController(
-        getDiscoverFeedUseCase: GetDiscoverFeedUseCase(
-          _FakeDiscoverRepository(),
-        ),
-        discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
-        analyticsService: _NoopAnalyticsService(),
-        runtimeDefaults: const DiscoverRuntimeDefaults(
-          timezoneId: 'Europe/Riga',
-          originLat: 56.9496,
-          originLng: 24.1052,
-          currencyCode: 'EUR',
-        ),
-      );
+  _SearchLandingTestApp({DiscoverFeedController? controller})
+    : _controller =
+          controller ??
+          DiscoverFeedController(
+            getDiscoverFeedUseCase: GetDiscoverFeedUseCase(
+              _FakeDiscoverRepository(),
+            ),
+            discoverPreferencesRepository: _FakeDiscoverPreferencesRepository(),
+            analyticsService: _NoopAnalyticsService(),
+            timezoneRepository: TimezoneRepositoryImpl(),
+            buildTimeWindow: BuildTimeWindowUseCase(TimezoneRepositoryImpl()),
+            runtimeDefaults: const DiscoverRuntimeDefaults(
+              timezoneId: 'Europe/Riga',
+              originLat: 56.9496,
+              originLng: 24.1052,
+              currency: CurrencyCode.eur,
+            ),
+          );
 
   final DiscoverFeedController _controller;
 
@@ -682,7 +1060,7 @@ class _SearchTestApp extends StatelessWidget {
                timezoneId: 'Europe/Riga',
                originLat: 56.9496,
                originLng: 24.1052,
-               currencyCode: 'EUR',
+               currency: CurrencyCode.eur,
              ),
            );
 
@@ -851,7 +1229,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T07:00:00Z'),
       latitude: 56.5099,
       longitude: 27.3332,
-      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       distanceKm: 1.2,
       isFree: true,
       relevanceScore: 0.8,
@@ -865,7 +1243,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T10:00:00Z'),
       latitude: 56.51,
       longitude: 27.34,
-      priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+      priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
       distanceKm: 1.8,
       isFree: true,
       relevanceScore: 0.7,
@@ -879,7 +1257,7 @@ class _FakeDiscoverRepository implements DiscoverRepository {
       startsAtUtc: DateTime.parse('2026-04-18T12:00:00Z'),
       latitude: 56.51,
       longitude: 27.34,
-      priceAmount: const Money(minorUnits: 800, currencyCode: 'EUR'),
+      priceAmount: Money(minorUnits: 800, currency: CurrencyCode.eur),
       distanceKm: 1.4,
       isFree: false,
       relevanceScore: 0.75,

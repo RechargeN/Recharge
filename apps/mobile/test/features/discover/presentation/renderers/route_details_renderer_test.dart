@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -192,7 +193,7 @@ DiscoverItemEntity _item(PublishedRouteDiscoveryEntity route) {
     startsAtUtc: DateTime.utc(2026, 8, 1),
     latitude: 56.9496,
     longitude: 24.1052,
-    priceAmount: const Money(minorUnits: 0, currencyCode: 'EUR'),
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     distanceKm: 0.4,
     isFree: true,
     objectKind: DiscoverObjectKind.route,

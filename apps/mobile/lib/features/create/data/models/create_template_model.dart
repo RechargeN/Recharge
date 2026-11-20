@@ -1,6 +1,7 @@
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/create_template_entity.dart';
 import '../models/create_draft_model.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 
 class CreateTemplateModel {
   const CreateTemplateModel({
@@ -33,19 +34,15 @@ class CreateTemplateModel {
       objectType: entity.objectType.taxonomyId,
       name: entity.name,
       snapshot: CreateDraftModel.fromEntity(entity.snapshot),
-      createdAtUtcIso: entity.createdAtUtc.toIso8601String(),
-      updatedAtUtcIso: entity.updatedAtUtc.toIso8601String(),
-      lastUsedAtUtcIso: entity.lastUsedAtUtc?.toIso8601String(),
+      createdAtUtcIso: UtcInstant(entity.createdAtUtc).toString(),
+      updatedAtUtcIso: UtcInstant(entity.updatedAtUtc).toString(),
+      lastUsedAtUtcIso: entity.lastUsedAtUtc == null
+          ? null
+          : UtcInstant(entity.lastUsedAtUtc!).toString(),
     );
   }
 
-  factory CreateTemplateModel.fromJson(
-    Map<String, dynamic> json, {
-    required String activeMarketCityId,
-    required String activeTimezone,
-    required String activeCountry,
-    required String activeCity,
-  }) {
+  factory CreateTemplateModel.fromJson(Map<String, dynamic> json) {
     final int schemaVersion = (json['schemaVersion'] as num?)?.toInt() ?? 0;
     if (schemaVersion != CreateTemplateEntity.currentSchemaVersion) {
       throw const FormatException('Unsupported create template schema.');
@@ -62,14 +59,10 @@ class CreateTemplateModel {
       name: json['name'] as String,
       snapshot: CreateDraftModel.fromJson(
         Map<String, dynamic>.from(rawSnapshot),
-        activeMarketCityId: activeMarketCityId,
-        activeTimezone: activeTimezone,
-        activeCountry: activeCountry,
-        activeCity: activeCity,
       ),
-      createdAtUtcIso: json['createdAtUtcIso'] as String,
-      updatedAtUtcIso: json['updatedAtUtcIso'] as String,
-      lastUsedAtUtcIso: json['lastUsedAtUtcIso'] as String?,
+      createdAtUtcIso: _readUtcText(json['createdAtUtcIso'])!,
+      updatedAtUtcIso: _readUtcText(json['updatedAtUtcIso'])!,
+      lastUsedAtUtcIso: _readUtcText(json['lastUsedAtUtcIso'], optional: true),
     );
   }
 
@@ -86,15 +79,18 @@ class CreateTemplateModel {
       objectType: parsedType,
       name: name,
       snapshot: entity,
-      createdAtUtc: DateTime.parse(createdAtUtcIso).toUtc(),
-      updatedAtUtc: DateTime.parse(updatedAtUtcIso).toUtc(),
+      createdAtUtc: UtcInstant.parse(createdAtUtcIso).value,
+      updatedAtUtc: UtcInstant.parse(updatedAtUtcIso).value,
       lastUsedAtUtc: lastUsedAtUtcIso == null
           ? null
-          : DateTime.parse(lastUsedAtUtcIso!).toUtc(),
+          : UtcInstant.parse(lastUsedAtUtcIso!).value,
     );
   }
 
   Map<String, dynamic> toJson() {
+    _readUtcText(createdAtUtcIso);
+    _readUtcText(updatedAtUtcIso);
+    _readUtcText(lastUsedAtUtcIso, optional: true);
     return <String, dynamic>{
       'schemaVersion': schemaVersion,
       'id': id,
@@ -106,5 +102,14 @@ class CreateTemplateModel {
       'updatedAtUtcIso': updatedAtUtcIso,
       'lastUsedAtUtcIso': lastUsedAtUtcIso,
     };
+  }
+
+  static String? _readUtcText(Object? raw, {bool optional = false}) {
+    if (raw == null && optional) return null;
+    if (raw is! String) {
+      throw const FormatException('template_utc_text_required');
+    }
+    UtcInstant.parse(raw);
+    return raw;
   }
 }

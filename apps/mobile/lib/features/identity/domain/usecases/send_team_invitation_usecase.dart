@@ -68,6 +68,11 @@ class SendTeamInvitationUseCase {
     if (access.userId != normalizedActor) {
       throw const SendTeamInvitationException('access_snapshot_mismatch');
     }
+    if (!access.belongsTo(normalizedActor) ||
+        (!access.isVerifiedCreator ||
+            access.pageById(normalizedPageId)?.isActive != true)) {
+      throw const SendTeamInvitationException('page_access_unavailable');
+    }
     final ManagedPageMembershipEntity? membership = access.membershipFor(
       normalizedPageId,
     );
@@ -96,6 +101,19 @@ class SendTeamInvitationUseCase {
       nowUtc,
     );
 
+    final fresh = await _workspaceRepository.loadAccessSnapshot(
+      normalizedActor,
+    );
+    if (!fresh.canUsePage(
+          normalizedActor,
+          normalizedPageId,
+          teamManageCapability,
+        ) ||
+        !proposedCapabilities.every(
+          (c) => fresh.membershipFor(normalizedPageId)!.hasCapability(c),
+        )) {
+      throw const SendTeamInvitationException('page_access_unavailable');
+    }
     if (activeForTarget != null) {
       return _resendIdempotently(activeForTarget, nowUtc);
     }

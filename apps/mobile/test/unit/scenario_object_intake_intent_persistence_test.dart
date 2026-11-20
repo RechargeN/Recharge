@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -107,7 +108,7 @@ ScenarioObjectIntakeSession _session() => ScenarioObjectIntakeSession(
         sourceStatus: ScenarioSourceStatus.ready,
         location: const ScenarioIntakeLocationSnapshot(
           title: 'GORS',
-          point: ScenarioGeoPointDraft(latitude: 56.5099, longitude: 27.3332),
+          point: GeoPoint(latitude: 56.5099, longitude: 27.3332),
           address: 'GORS',
           timezoneId: 'Europe/Riga',
           disclosure: ScenarioLocationDisclosure.public,

@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/gtfs/gtfs_archive_parser.dart';
 import 'package:recharge/features/create/data/gtfs/gtfs_parser_executor.dart';
@@ -36,10 +37,10 @@ void main() {
     );
 
     final result = index.searchServices(
-      const ScenarioTransitSearchQuery(
+      ScenarioTransitSearchQuery(
         originStopId: 'station_a',
         destinationStopId: 'stop_c',
-        serviceDate: ScenarioTransitLocalDate(2026, 7, 30),
+        serviceDate: LocalDate(2026, 7, 30),
         departAfter: ScenarioTransitTime(23 * 3600),
       ),
     );
@@ -49,7 +50,7 @@ void main() {
     expect(result.single.departure.hhmm, '23:55');
     expect(result.single.arrival.hhmm, '24:50');
     expect(result.single.arrival.dayOffset, 1);
-    expect(result.single.serviceDate.iso8601, '2026-07-30');
+    expect(result.single.serviceDate.toString(), '2026-07-30');
     expect(result.single.durationMinutes, 55);
     expect(result.single.agencyName, 'Latvia, Test Transit');
     expect(result.single.manifest.freshness, ScenarioTransitFreshness.current);
@@ -58,10 +59,10 @@ void main() {
   test('calendar removal overrides weekly service', () async {
     final index = await parseFixture();
     final result = index.searchServices(
-      const ScenarioTransitSearchQuery(
+      ScenarioTransitSearchQuery(
         originStopId: 'platform_a',
         destinationStopId: 'stop_c',
-        serviceDate: ScenarioTransitLocalDate(2026, 7, 31),
+        serviceDate: LocalDate(2026, 7, 31),
       ),
     );
     expect(result, isEmpty);
@@ -72,10 +73,10 @@ void main() {
     () async {
       final index = await parseFixture();
       final result = index.searchServices(
-        const ScenarioTransitSearchQuery(
+        ScenarioTransitSearchQuery(
           originStopId: 'station_a',
           destinationStopId: 'stop_b',
-          serviceDate: ScenarioTransitLocalDate(2026, 8, 1),
+          serviceDate: LocalDate(2026, 8, 1),
         ),
       );
       expect(result, hasLength(1));
@@ -86,10 +87,10 @@ void main() {
   test('does not return a trip when destination precedes origin', () async {
     final index = await parseFixture();
     final result = index.searchServices(
-      const ScenarioTransitSearchQuery(
+      ScenarioTransitSearchQuery(
         originStopId: 'stop_c',
         destinationStopId: 'station_a',
-        serviceDate: ScenarioTransitLocalDate(2026, 7, 30),
+        serviceDate: LocalDate(2026, 7, 30),
       ),
     );
     expect(result, isEmpty);
@@ -98,18 +99,18 @@ void main() {
   test('exact trip filter never substitutes another direct service', () async {
     final index = await parseFixture();
     final exact = index.searchServices(
-      const ScenarioTransitSearchQuery(
+      ScenarioTransitSearchQuery(
         originStopId: 'station_a',
         destinationStopId: 'stop_c',
-        serviceDate: ScenarioTransitLocalDate(2026, 7, 30),
+        serviceDate: LocalDate(2026, 7, 30),
         exactTripId: 'trip_late',
       ),
     );
     final missing = index.searchServices(
-      const ScenarioTransitSearchQuery(
+      ScenarioTransitSearchQuery(
         originStopId: 'station_a',
         destinationStopId: 'stop_c',
-        serviceDate: ScenarioTransitLocalDate(2026, 7, 30),
+        serviceDate: LocalDate(2026, 7, 30),
         exactTripId: 'trip_missing',
       ),
     );

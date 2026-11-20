@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/application/scenario_object_intake_telemetry.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
@@ -71,7 +72,7 @@ final _intent = ScenarioObjectIntakeIntent(
       sourceStatus: ScenarioSourceStatus.ready,
       location: const ScenarioIntakeLocationSnapshot(
         title: 'Secret address',
-        point: ScenarioGeoPointDraft(latitude: 56.9, longitude: 24.1),
+        point: GeoPoint(latitude: 56.9, longitude: 24.1),
         disclosure: ScenarioLocationDisclosure.public,
       ),
     ),

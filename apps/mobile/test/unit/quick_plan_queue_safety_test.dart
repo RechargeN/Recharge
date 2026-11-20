@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'dart:async';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,7 +17,7 @@ void main() {
     freeOnly: true,
     walkingOnly: true,
     sourcePrompt: 'owner A private draft',
-    currencyCode: 'EUR',
+    currency: CurrencyCode.eur,
     steps: const [],
   );
   test(
