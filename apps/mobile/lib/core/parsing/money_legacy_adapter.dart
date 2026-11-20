@@ -22,6 +22,22 @@ class MoneyLegacyAdapter {
         : legacyMajorAmount == null) {
       return null;
     }
+    // Main's earlier integer-money object is a supported legacy read shape.
+    // Its own explicit currency is checked against the surrounding envelope.
+    if (!hasCanonicalMinorUnits && legacyMajorAmount is Map) {
+      final raw = legacyMajorAmount;
+      if (raw.keys.any((key) => key != 'minorUnits' && key != 'currencyCode') ||
+          raw['minorUnits'] is! int ||
+          raw['currencyCode'] is! String ||
+          (currencyCode != null && currencyCode != raw['currencyCode'])) {
+        throw const MoneyReadException(MoneyParseError.invalidCanonicalValue);
+      }
+      return readOptional(
+        hasCanonicalMinorUnits: true,
+        canonicalMinorUnits: raw['minorUnits'],
+        currencyCode: raw['currencyCode'],
+      );
+    }
     CurrencyCode? currency;
     if (currencyCode != null) {
       if (currencyCode is! String) {

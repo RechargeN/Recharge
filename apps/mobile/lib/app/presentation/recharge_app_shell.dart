@@ -176,7 +176,9 @@ class _RechargeAppShellState extends ConsumerState<RechargeAppShell> {
         widget.currentLocation == RouteNames.professionalPageAccount;
     // In the app composition, permission fallback belongs to GoRouter.
     // Standalone shell previews still support presentation-only switching.
-    if (widget.routerGuardsWorkspace && !isProfessional && onProfessionalRoute) {
+    if (widget.routerGuardsWorkspace &&
+        !isProfessional &&
+        onProfessionalRoute) {
       return;
     }
     final String? target = isProfessional && !onProfessionalRoute

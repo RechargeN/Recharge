@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/adapters/discover_scenario_intake_adapter.dart';
 import 'package:recharge/features/discover/application/controllers/scenario_intake_selection_controller.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/discover/application/state/scenario_intake_selection_state.dart';
 
 void main() {

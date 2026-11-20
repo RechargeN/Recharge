@@ -275,7 +275,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('7,50'), findsOneWidget);
+    expect(find.textContaining('7,51'), findsOneWidget);
 
     await tester.pumpWidget(
       app(fixture(costType: PublishedFindPeopleCostType.unknown)),

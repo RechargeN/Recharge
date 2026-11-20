@@ -18,7 +18,6 @@ import '../../../../app/application/scenario_object_intake_providers.dart';
 import '../../../../app/presentation/scenario_object_intake_sheet.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
-import '../../../../shared/primitives/money/money.dart';
 import '../../../../shared/models/catalog_object_ref.dart';
 import '../../../auth/application/auth_providers.dart';
 import '../../../auth/application/controllers/auth_controller.dart';
@@ -618,9 +617,9 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
         : controller.parseBudgetInput(budgetText, locale: 'en');
     if (budgetResult != null && !budgetResult.isSuccess) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Invalid budget')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.validationCheckTheAmount)),
+        );
       }
       return;
     }
@@ -639,9 +638,7 @@ class _DiscoverMapPageState extends ConsumerState<DiscoverMapPage> {
       if (mounted) {
         _searchController.text = controller.state.appliedQuery.queryText;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid time filter. Edit the search filters.'),
-          ),
+          SnackBar(content: Text(context.l10n.discoverTimeFilterInvalid)),
         );
       }
       return;
@@ -3039,11 +3036,6 @@ class _ScenarioMapRoute {
           (double total, ScenarioStepEntity step) => total + step.longitude,
         ) /
         stops.length;
-  }
-
-  String get priceLabel {
-    if (isFree) return 'Free';
-    return '${MoneyFormatter().decimal(totalPriceAmount, locale: 'en', omitZeroFraction: true)} €';
   }
 
   String get moodLabel {

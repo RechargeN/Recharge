@@ -20,7 +20,7 @@ class FavoriteItemEntity {
     this.planningTargetId,
     this.coverImageUrl = '',
   }) {
-    if (priceAmount.minorUnits < 0) {
+    if ((priceAmount?.minorUnits ?? 0) < 0) {
       throw ArgumentError('Price must be nonnegative');
     }
   }

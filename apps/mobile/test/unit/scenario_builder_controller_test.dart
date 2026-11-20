@@ -2,7 +2,6 @@ import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/scenarios/application/controllers/scenario_builder_controller.dart';
 import 'package:recharge/features/scenarios/domain/entities/scenario_draft_entity.dart';
 import 'package:recharge/features/scenarios/application/state/scenario_builder_state.dart';

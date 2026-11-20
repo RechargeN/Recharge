@@ -14,7 +14,6 @@ import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/find_people_draft_data.dart';
 import '../../domain/entities/find_people_validation_issue.dart';
-import '../../../../shared/primitives/money/money.dart';
 import 'create_form_texts.dart';
 import 'create_texts.dart';
 

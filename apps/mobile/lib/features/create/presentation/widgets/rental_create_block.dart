@@ -15,7 +15,6 @@ import 'create_texts.dart';
 import '../../../../core/localization/l10n_context.dart';
 import 'create_form_texts.dart';
 import '../../../../core/localization/recharge_formats.dart';
-import '../../../../shared/primitives/money/money.dart';
 
 /// Rental / Equipment create block — RNT-CRT-01. A shell + step navigation
 /// (mirrors `PlaceCreateBlock`), with all 8 spec §13 steps rendered as
@@ -1062,7 +1061,7 @@ class _RentalCreateBlockState extends State<RentalCreateBlock> {
                 RechargeFormats.money(
                   Money(
                     minorUnits: preview.depositAmountMinor ?? 0,
-                    currencyCode: preview.currencyCode,
+                    currency: CurrencyCode.parse(preview.currencyCode),
                   ),
                   Localizations.localeOf(context).languageCode,
                 ),

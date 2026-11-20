@@ -114,10 +114,7 @@ void main() {
       await tester.tap(find.text('Save travel'));
       await tester.pumpAndSettle();
       expect(result, isNull);
-      expect(
-        find.textContaining('extra decimals are not rounded'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Check the amount'), findsOneWidget);
       await tester.enterText(amount, '0.29');
       await tester.ensureVisible(find.text('Save travel'));
       await tester.tap(find.text('Save travel'));

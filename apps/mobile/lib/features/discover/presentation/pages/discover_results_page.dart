@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
 import '../../../../core/localization/taxonomy_labels.dart';
-import '../../../../shared/primitives/money/money.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -323,12 +322,7 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
             onBudgetSelected: (Money? value) {
               controller.applySearchConditions(
                 freeOnly: false,
-                budgetMax: value == null
-                    ? null
-                    : Money.fromLegacyMajor(
-                        value,
-                        currencyCode: controller.marketCurrencyCode,
-                      ),
+                budgetMax: value,
                 clearBudgetMin: true,
                 clearBudgetMax: value == null,
               );
@@ -445,9 +439,11 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
       );
       return _DateWindow(from: window.from, to: window.to);
     } on TimeWindowValidationException catch (error) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.discoverTimeWindowIssue(error.issue.name)),
+        ),
+      );
       return null;
     }
   }
@@ -492,9 +488,9 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
         : controller.parseBudgetInput(budgetText, locale: 'en');
     if (budgetResult != null && !budgetResult.isSuccess) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Invalid budget')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.validationCheckTheAmount)),
+        );
       }
       return;
     }
@@ -513,9 +509,7 @@ class _DiscoverResultsPageState extends ConsumerState<DiscoverResultsPage> {
       if (mounted) {
         _searchController.text = controller.state.appliedQuery.queryText;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid time filter. Edit the search filters.'),
-          ),
+          SnackBar(content: Text(context.l10n.discoverTimeFilterInvalid)),
         );
       }
       return;
@@ -1173,12 +1167,16 @@ class _ConditionPanel extends StatelessWidget {
                 ChoiceChip(
                   label: Text(context.l10n.discoverUnder('10')),
                   selected: query.budgetMax?.minorUnits == 1000,
-                  onSelected: (_) => onBudgetSelected(10),
+                  onSelected: (_) => onBudgetSelected(
+                    Money(minorUnits: 1000, currency: currency),
+                  ),
                 ),
                 ChoiceChip(
                   label: Text(context.l10n.discoverUnder('15')),
                   selected: query.budgetMax?.minorUnits == 1500,
-                  onSelected: (_) => onBudgetSelected(15),
+                  onSelected: (_) => onBudgetSelected(
+                    Money(minorUnits: 1500, currency: currency),
+                  ),
                 ),
               ],
             ),

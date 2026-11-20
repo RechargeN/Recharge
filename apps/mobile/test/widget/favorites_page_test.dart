@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
-import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -20,7 +19,6 @@ import 'package:recharge/features/discover/domain/usecases/get_discover_feed_use
 import 'package:recharge/features/favorites/application/controllers/favorites_controller.dart';
 import 'package:recharge/features/favorites/application/favorites_providers.dart';
 import 'package:recharge/features/favorites/domain/entities/favorite_item_entity.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/favorites/domain/repositories/favorites_repository.dart';
 import 'package:recharge/features/favorites/domain/usecases/add_favorite_usecase.dart';
 import 'package:recharge/features/favorites/domain/usecases/get_favorites_usecase.dart';
@@ -677,7 +675,8 @@ FavoriteItemEntity _favorite(
     category: category,
     startsAtUtc: DateTime.parse('2026-04-20T10:00:00Z'),
     distanceKm: distanceKm,
-    priceAmount: priceAmount ?? Money(minorUnits: 0, currency: CurrencyCode.eur),
+    priceAmount:
+        priceAmount ?? Money(minorUnits: 0, currency: CurrencyCode.eur),
     isFree: isFree,
     savedAtUtc: DateTime.parse('2026-04-20T08:00:00Z'),
     targetRoute: targetRoute,

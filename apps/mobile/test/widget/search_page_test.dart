@@ -9,7 +9,6 @@ import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/app/application/scenario_object_intake_config.dart';
 import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -21,7 +20,6 @@ import 'package:recharge/features/auth/domain/usecases/restore_session_usecase.d
 import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
-import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -179,7 +177,14 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('quick-date-tomorrow')));
       await tester.pumpAndSettle();
-      expect(find.text('Search timezone is unavailable'), findsOneWidget);
+      expect(
+        find.text(
+          lookupAppLocalizations(
+            const Locale('en'),
+          ).discoverTimeWindowIssue('unknownTimezone'),
+        ),
+        findsOneWidget,
+      );
       expect(controller.state.draftQuery, same(before));
       expect(tester.takeException(), isNull);
     },

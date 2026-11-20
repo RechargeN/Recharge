@@ -551,7 +551,8 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                     'activity.contribution',
                   )
                   ? context.l10n.validationCheckTheAmount
-                  : widget.serverErrors['/body/optionalContribution/amountHint/amountMinor'],
+                  : widget
+                        .serverErrors['/body/optionalContribution/amountHint/amountMinor'],
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (String value) {

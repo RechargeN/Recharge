@@ -119,9 +119,7 @@ class CreateTemplateModel {
   static String? _readUtcText(Object? raw, {bool optional = false}) {
     if (raw == null && optional) return null;
     if (raw is! String) {
-      throw const FormatException(
-        'Template UTC timestamp must be present as text',
-      );
+      throw const FormatException('template_utc_text_required');
     }
     UtcInstant.parse(raw);
     return raw;

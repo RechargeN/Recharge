@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/data/datasources/catalog_query_port.dart';
 import 'package:recharge/features/discover/data/repositories/catalog_discover_repository.dart';
@@ -256,7 +257,10 @@ void main() {
       expect(items.first.objectKind, DiscoverObjectKind.event);
       expect(items.first.distanceKm, 1.5);
       expect(items.first.isFree, isTrue);
-      expect(items.first.priceAmount, Money.zero('EUR'));
+      expect(
+        items.first.priceAmount,
+        Money(minorUnits: 0, currency: CurrencyCode.parse('EUR')),
+      );
       expect(items.last.latitude.isNaN, isTrue, reason: 'no fake coordinate');
       final Map<String, Object?> second = port.requests[1];
       expect(second['queryType'], 'feed');
@@ -299,7 +303,10 @@ void main() {
       () => catalogWireQuery(
         _query().copyWith(
           peopleCount: 2,
-          budgetMin: const Money(minorUnits: 100, currencyCode: 'EUR'),
+          budgetMin: Money(
+            minorUnits: 100,
+            currency: CurrencyCode.parse('EUR'),
+          ),
         ),
         marketId: 'LV',
       ),
@@ -373,7 +380,10 @@ void main() {
       expect(event!.revisionRef, 'ra');
       expect(event.changedSinceListing, isFalse);
       expect(event.fullDescription, 'Full description of a');
-      expect(event.priceAmount, 12.5);
+      expect(
+        event.priceAmount,
+        Money(minorUnits: 1250, currency: CurrencyCode.eur),
+      );
       expect(event.isFree, isFalse);
       expect(event.scheduleMode, EventScheduleMode.oneTime);
       expect(event.displayOccurrenceId, 'occ-a');

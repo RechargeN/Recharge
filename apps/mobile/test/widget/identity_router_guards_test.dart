@@ -1,3 +1,8 @@
+import 'package:recharge/app/application/active_creator_verification_provider.dart';
+import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
+import 'package:recharge/features/auth/domain/entities/auth_session_entity.dart';
+import 'package:recharge/features/identity/domain/entities/identity_access_snapshot.dart';
+import 'package:recharge/features/create/presentation/pages/create_hub_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -59,6 +64,123 @@ void main() {
   String location() =>
       container.read(appRouterProvider).routeInformationProvider.value.uri.path;
 
+  testWidgets('ADR0023 User with zero pages retains personal Create hints', (
+    tester,
+  ) async {
+    repository.snapshot = const IdentityAccessSnapshot(
+      userId: 'alice',
+      globalRole: 'user',
+      creatorVerificationStatus: CreatorVerificationStatus.notStarted,
+      globalCapabilities: {},
+      pages: [],
+      memberships: [],
+      revision: 1,
+    );
+    await open(tester, RouteNames.create);
+    final capabilities = container.read(activeCreateCapabilitiesProvider);
+    expect(
+      capabilities,
+      containsAll(['create.place', 'create.route', 'create.collection']),
+    );
+    expect(location(), RouteNames.create);
+    final hub = tester.widget<CreateHubPage>(find.byType(CreateHubPage));
+    expect(
+      hub.capabilities,
+      containsAll(['create.place', 'create.route', 'create.collection']),
+    );
+  });
+  testWidgets(
+    'Create destination watches capability changes without recreating router',
+    (tester) async {
+      await open(tester, RouteNames.create);
+      final router = container.read(appRouterProvider);
+      repository.change(guardSnapshot(capabilities: {'create.rental'}));
+      await tester.pumpAndSettle();
+      expect(container.read(appRouterProvider), same(router));
+      expect(
+        tester.widget<CreateHubPage>(find.byType(CreateHubPage)).capabilities,
+        contains('create.rental'),
+      );
+      repository.change(guardSnapshot(capabilities: {}));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<CreateHubPage>(find.byType(CreateHubPage)).capabilities,
+        isNot(contains('create.rental')),
+      );
+      expect(location(), RouteNames.create);
+    },
+  );
+  testWidgets(
+    'AUTH-ROT-02 temporary guest preserves Page workspace and route without authority',
+    (tester) async {
+      repository.workspace = WorkspaceRef.page('page-a');
+      final auth = container.read(authControllerProvider);
+      authRepository.restored = AuthResultEntity(
+        user: authRepository.user!,
+        session: AuthSessionEntity.serverIssued(
+          sessionId: 'test',
+          expiresAtUtc: DateTime.now().toUtc().add(const Duration(minutes: 1)),
+          serverSessionHandle: 'local-test',
+          installationId: 'local-test',
+        ),
+      );
+      await auth.restoreSession();
+      await open(tester, RouteNames.professionalPage);
+      final before = container
+          .read(identityWorkspaceControllerProvider)
+          .state
+          .activeWorkspace;
+      await tester.pump(const Duration(minutes: 2));
+      await tester.pumpAndSettle();
+      expect(auth.state.isGuest, isTrue);
+      expect(auth.state.errorCode, AuthController.offlineMessage);
+      expect(location(), RouteNames.professionalPage);
+      expect(
+        container
+            .read(identityWorkspaceControllerProvider)
+            .state
+            .activeWorkspace,
+        before,
+      );
+      expect(container.read(activeIdentityAccessProvider), isNull);
+      authRepository.restored = AuthResultEntity(
+        user: authRepository.user!,
+        session: AuthSessionEntity.serverIssued(
+          sessionId: 'refreshed',
+          expiresAtUtc: DateTime.now().toUtc().add(const Duration(minutes: 5)),
+          serverSessionHandle: 'local-test',
+          installationId: 'local-test',
+        ),
+      );
+      await auth.restoreSession();
+      await tester.pumpAndSettle();
+      expect(auth.state.isAuthenticated, isTrue);
+      expect(location(), RouteNames.professionalPage);
+      expect(
+        container
+            .read(identityWorkspaceControllerProvider)
+            .state
+            .activeWorkspace,
+        before,
+      );
+      // Dispose the local test Session timer before Flutter checks invariants.
+      authRepository.restored = null;
+      await auth.signOut();
+      await tester.pumpAndSettle();
+    },
+  );
+  testWidgets('protected redirect settles on safe destination without a loop', (
+    tester,
+  ) async {
+    repository.snapshot = guardSnapshot(actor: 'foreign');
+    await open(tester, RouteNames.adminTools);
+    for (var i = 0; i < 3; i++) {
+      container.read(appRouterProvider).refresh();
+      await tester.pumpAndSettle();
+    }
+    expect(location(), RouteNames.settings);
+    expect(tester.takeException(), isNull);
+  });
   testWidgets(
     'real app router restores cold Admin deep link with explicit capability',
     (tester) async {
@@ -196,6 +318,7 @@ void main() {
 }
 
 class RouterAuthRepository implements AuthRepository {
+  AuthResultEntity? restored;
   AuthUserEntity? user = userFor('alice');
   static AuthUserEntity userFor(String id) => AuthUserEntity(
     id: id,
@@ -212,7 +335,7 @@ class RouterAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AuthResultEntity?> restoreSession() async => null;
+  Future<AuthResultEntity?> restoreSession() async => restored;
   @override
   Future<AuthResultEntity> signIn({
     required String email,

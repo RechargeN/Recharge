@@ -1,3 +1,4 @@
+import 'package:recharge/core/id/id_generator.dart' show UuidV4IdGenerator;
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -30,7 +31,9 @@ void main() {
     if (phase == 1) {
       await storage.delete(key: marker);
       await storage.delete(key: journalKey);
-      final controller = ScenarioBuilderController();
+      final controller = ScenarioBuilderController(
+        idGenerator: UuidV4IdGenerator(),
+      );
       addTearDown(controller.dispose);
       final plan = controller.state.draft.copyWith(
         sourcePrompt: 'native pending survives force-stop',

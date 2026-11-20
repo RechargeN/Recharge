@@ -54,7 +54,6 @@ class MaterializeEventScheduleUseCase {
             draft.occurrences.length == 1
         ? draft.occurrences.single.id
         : null;
-    final EventRecurrenceRuleDraft? rule = draft.recurrence;
     final List<EventOccurrenceDraft> result = <EventOccurrenceDraft>[];
     for (final _LocalDate date in dates) {
       if (rule?.exceptionLocalDates.contains(date.toString()) ?? false) {
@@ -113,7 +112,7 @@ class MaterializeEventScheduleUseCase {
     required int maxProjectionCount,
     required DateTime projectionNowUtc,
   }) {
-    final EventRecurrenceRuleDraft? rule = draft.recurrence;
+    final rule = draft.recurrence;
     if (rule == null) return const <_LocalDate>[];
     final _LocalDate anchor = _LocalDate.parse(draft.localStartDate);
     // Preserve the existing 548 elapsed-day UTC projection cutoff policy.

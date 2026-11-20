@@ -4,7 +4,6 @@ import 'package:recharge/features/discover/application/discover_runtime_defaults
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
-import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/application/state/discover_feed_state.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -13,7 +12,6 @@ import 'package:recharge/features/discover/domain/entities/smart_search_history_
 import 'package:recharge/features/discover/domain/repositories/discover_preferences_repository.dart';
 import 'package:recharge/features/discover/domain/repositories/discover_repository.dart';
 import 'package:recharge/features/discover/domain/usecases/get_discover_feed_usecase.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/domain/entities/time_window.dart';
 import 'package:recharge/shared/primitives/geo/geo_point.dart';

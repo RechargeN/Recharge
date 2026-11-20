@@ -113,7 +113,7 @@ void main() {
           date: LocalDate(9999, 12, 31),
           startMinuteLocal: 1380,
           endMinuteLocal: 1440,
-        timezoneId: 'UTC',
+          timezoneId: 'UTC',
         ),
         throwsRangeError,
       );

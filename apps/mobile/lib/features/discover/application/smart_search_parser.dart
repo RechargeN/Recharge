@@ -4,7 +4,6 @@ import '../../../shared/primitives/money/money_parser.dart';
 import '../../../shared/primitives/money/money_parse_result.dart';
 import '../../../shared/primitives/money/money_formatter.dart';
 import '../../../core/config/recharge_taxonomy.dart';
-import '../../../shared/primitives/money/money.dart';
 
 class SmartSearchParseResult {
   const SmartSearchParseResult({

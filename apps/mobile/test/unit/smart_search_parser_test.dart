@@ -2,7 +2,6 @@ import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/application/smart_search_parser.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   test('parses free yoga tonight near radius', () {

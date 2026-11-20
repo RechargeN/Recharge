@@ -421,8 +421,8 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
       params: <String, Object?>{
         'item_id': item.id,
         'category': item.category,
-        'price_minor_units': item.priceAmount.minorUnits,
-        'currency_code': item.priceAmount.currency.value,
+        'price_minor_units': item.priceAmount?.minorUnits,
+        'currency_code': item.priceAmount?.currency.value,
       },
     );
     ScaffoldMessenger.of(
@@ -609,9 +609,9 @@ String _createLocationForDetails(DiscoverItemEntity item) {
       'venue': item.venueName,
       'address': item.addressLine,
       'free': item.isFree ? '1' : '0',
-      if (!item.isFree)
+      if (!item.isFree && item.priceAmount != null)
         'budgetMax': MoneyFormatter().decimal(
-          item.priceAmount,
+          item.priceAmount!,
           locale: 'en',
           omitZeroFraction: true,
         ),

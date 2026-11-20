@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:recharge/features/create/domain/entities/activity_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/entities/publisher_ref.dart';
@@ -138,20 +140,17 @@ activityCompatCases = <String, CreateDraftEntity Function()>{
   ),
   'contribution_note_missing': () => _withActivity(
     (activity) => activity.copyWith(
-      optionalContribution: const ActivityOptionalContributionDraft(
+      optionalContribution: ActivityOptionalContributionDraft(
         kind: ActivityContributionKind.donation,
       ),
     ),
   ),
   'contribution_currency_mismatch': () => _withActivity(
     (activity) => activity.copyWith(
-      optionalContribution: const ActivityOptionalContributionDraft(
+      optionalContribution: ActivityOptionalContributionDraft(
         kind: ActivityContributionKind.purchase,
         note: 'Parking at the trail head is paid',
-        amountHint: ActivityContributionAmountDraft(
-          amountMinor: 300,
-          currencyCode: 'USD',
-        ),
+        amountHint: Money(minorUnits: 300, currency: CurrencyCode.parse('USD')),
       ),
     ),
   ),
@@ -230,11 +229,8 @@ activityCompatCases = <String, CreateDraftEntity Function()>{
   ),
   'amount_without_kind': () => _withActivity(
     (a) => a.copyWith(
-      optionalContribution: const ActivityOptionalContributionDraft(
-        amountHint: ActivityContributionAmountDraft(
-          amountMinor: 100,
-          currencyCode: 'EUR',
-        ),
+      optionalContribution: ActivityOptionalContributionDraft(
+        amountHint: Money(minorUnits: 100, currency: CurrencyCode.parse('EUR')),
       ),
     ),
   ),

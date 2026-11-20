@@ -13,7 +13,6 @@ import 'package:recharge/core/product_analytics/product_analytics_queue.dart';
 import 'package:recharge/core/product_analytics/product_analytics_recorder.dart';
 import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -28,7 +27,6 @@ import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/domain/repositories/discover_repository.dart';
 import 'package:recharge/features/discover/domain/repositories/timezone_repository.dart';
-import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'package:recharge/features/discover/domain/usecases/get_discover_details_usecase.dart';
 import 'package:recharge/features/discover/presentation/pages/discover_details_page.dart';
 import 'package:recharge/features/favorites/application/controllers/favorites_controller.dart';
@@ -507,7 +505,6 @@ DiscoverItemEntity _detailsItem({
     distanceKm: 1.2,
     isFree: true,
     objectKind: objectKind,
-    timezoneId: 'Europe/Riga',
     organizerName: 'Recharge Studio',
     organizerHandle: '@recharge',
     venueName: 'Green studio',

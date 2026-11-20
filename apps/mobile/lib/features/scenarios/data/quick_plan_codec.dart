@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import '../../../../shared/primitives/money/money.dart';
@@ -24,7 +25,10 @@ Map<String, Object?> encodeQuickPlan(ScenarioDraftEntity p) => {
           'category': s.category,
           'durationMinutes': s.durationMinutes,
           'distanceKm': s.distanceKm,
-          'priceAmount': s.priceAmount.toJson(),
+          'priceAmount': <String, Object>{
+            'minorUnits': s.priceAmount.minorUnits,
+            'currencyCode': s.priceAmount.currency.value,
+          },
           'isFree': s.isFree,
           'latitude': s.latitude,
           'longitude': s.longitude,
@@ -122,7 +126,7 @@ ScenarioDraftEntity decodeQuickPlan(Object? raw) {
         distanceKm: (s['distanceKm'] as num).toDouble(),
         priceAmount: Money(
           minorUnits: money['minorUnits'] as int,
-          currencyCode: money['currencyCode'] as String,
+          currency: CurrencyCode.parse(money['currencyCode'] as String),
         ),
         isFree: s['isFree'] as bool,
         latitude: (s['latitude'] as num).toDouble(),
@@ -138,7 +142,7 @@ ScenarioDraftEntity decodeQuickPlan(Object? raw) {
     freeOnly: raw['freeOnly'] as bool,
     walkingOnly: raw['walkingOnly'] as bool,
     sourcePrompt: raw['sourcePrompt'] as String,
-    currencyCode: raw['currencyCode'] as String,
+    currency: CurrencyCode.parse(raw['currencyCode'] as String),
     steps: List.unmodifiable(steps),
   );
 }

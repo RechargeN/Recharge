@@ -1987,6 +1987,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'title_length': 'Use 3–120 characters in the title.',
       'visit_buffer_invalid': 'Check the visit buffer.',
       'visit_duration_invalid': 'Check the typical visit duration.',
+      'price_currency_mismatch':
+          'The price currency must match the declared currency.',
       'other': 'Check this part of the place.',
     });
     return '$_temp0';
@@ -2702,6 +2704,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'legacySourceIdentityMissing':
           'A stop was copied as a private custom location because the old plan has no catalog object',
       'stopNotFound': 'Selected stop no longer exists',
+      'invalidPrice':
+          'The saved price is invalid. Review the amount and currency.',
       'other': 'Check this stop.',
     });
     return '$_temp0';
@@ -2915,6 +2919,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'event_access_contract_unsupported':
           'This Event uses a newer access contract and cannot be changed here.',
       'place_gallery_limit': 'The Place gallery is full.',
+      'stored_money_invalid':
+          'The saved price cannot be read. The original draft is unchanged.',
+      'stored_draft_invalid':
+          'The saved draft cannot be read. Its original data is unchanged.',
+      'money_input_invalid':
+          'Check the amount and currency. Extra decimal places are not rounded.',
       'other': 'Something went wrong. Please try again.',
     });
     return '$_temp0';
@@ -2939,6 +2949,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'city_required': 'Enter a city',
       'cover_required': 'Add a cover image',
       'start_required': 'Choose the start date and time',
+      'utc_input_invalid':
+          'Enter an explicit UTC timestamp (YYYY-MM-DDTHH:mm:ssZ).',
       'other': 'Check this field',
     });
     return '$_temp0';
@@ -9013,6 +9025,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'loadFailed': 'Could not load the data. Try again.',
       'dataUnavailable': 'The data is unavailable.',
       'offline': 'No internet connection.',
+      'invalidTimeFilter': 'Invalid time filter. Edit the search filters.',
       'other': 'Could not load the feed. Try again.',
     });
     return '$_temp0';
@@ -10320,6 +10333,7 @@ class AppLocalizationsEn extends AppLocalizations {
           'The request is available after you create three pages.',
       'page_limit_request_failed':
           'Unable to send the request to the moderators.',
+      'access_unavailable': 'Access is unavailable. Try checking again.',
       'other': 'Unable to load workspaces.',
     });
     return '$_temp0';
@@ -13509,4 +13523,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsPushOpen => 'Open';
+
+  @override
+  String get adminToolsUnavailable => 'Admin access unavailable';
+
+  @override
+  String get adminToolsLocalMock => 'Local/mock administration';
+
+  @override
+  String get adminToolsNoDecisions =>
+      'Verification and quota decisions are not available.';
+
+  @override
+  String get createSessionClockChangeSkipped => 'Skipped because clocks change';
+
+  @override
+  String get discoverTimeFilterInvalid =>
+      'Invalid time filter. Edit the search filters.';
+
+  @override
+  String get discoverDateUnavailable => 'Date unavailable';
+
+  @override
+  String discoverDateFrom(String date) {
+    return 'From $date';
+  }
+
+  @override
+  String discoverDateUntil(String date) {
+    return 'Until $date';
+  }
 }

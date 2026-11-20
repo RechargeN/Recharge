@@ -103,7 +103,6 @@ class ExpandQuickPlanToScenarioUseCase {
           QuickPlanConversionIssue(
             code: QuickPlanConversionIssueCode.invalidPrice,
             severity: QuickPlanConversionIssueSeverity.error,
-            message: 'Selected stop price is invalid or has another currency',
           ),
         ],
         quickPlanStopIdToScenarioItemId: const {},

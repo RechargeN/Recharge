@@ -3,7 +3,6 @@ import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/favorites/data/models/favorite_item_model.dart';
 import 'package:recharge/features/favorites/domain/entities/favorite_item_entity.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   test('evergreen favorite roundtrip preserves absent time and price', () {
@@ -25,7 +24,7 @@ void main() {
     );
     final restored = FavoriteItemModel.fromJson(
       model.toJson(),
-      defaultCurrencyCode: 'EUR',
+      legacyCurrencyCode: 'EUR',
     ).toEntity();
     expect(restored.startsAtUtc, isNull);
     expect(restored.priceAmount, isNull);

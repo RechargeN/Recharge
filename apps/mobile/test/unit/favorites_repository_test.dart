@@ -16,7 +16,7 @@ void main() {
     repository = FavoritesRepositoryImpl(
       localDataSource: FavoritesLocalDataSource(
         const FlutterSecureStorage(),
-        defaultCurrencyCode: 'EUR',
+        legacyCurrencyCode: 'EUR',
       ),
       currentOwnerId: () async => owner,
     );

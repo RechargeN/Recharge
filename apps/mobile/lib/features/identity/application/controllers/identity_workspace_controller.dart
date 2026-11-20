@@ -202,7 +202,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
             userId: actor,
             status: IdentityWorkspaceStatus.error,
             activeWorkspace: WorkspaceRef.personal(actor),
-            message: 'Доступ недоступен. Повторите проверку.',
+            message: 'access_unavailable',
           ),
         );
       }
@@ -270,7 +270,7 @@ class IdentityWorkspaceController extends ChangeNotifier {
 
   Future<bool> selectAdminPreview(AdminExperiencePreview preview) async {
     final actor = _state.userId;
-    if (actor.isEmpty || _state.isBusy) return false;
+    if (actor.isEmpty || !_state.isLoaded || _state.isBusy) return false;
     await revalidateAccess();
     if (_state.userId != actor) return false;
     final access = _state.accessSnapshot;

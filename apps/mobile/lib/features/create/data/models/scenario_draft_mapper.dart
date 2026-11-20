@@ -759,9 +759,7 @@ class ScenarioDraftMapper {
       final DateTime? start = _dateTime(json['startAtUtc']);
       final DateTime? end = _dateTime(json['endAtUtc']);
       if (start == null || end == null || !start.isBefore(end)) {
-        throw const FormatException(
-          'Calculated Scenario UTC interval is incomplete or invalid',
-        );
+        throw const FormatException('scenario_utc_interval_invalid');
       }
       return ScenarioDatedCalculatedTimeDraft(startAtUtc: start, endAtUtc: end);
     }

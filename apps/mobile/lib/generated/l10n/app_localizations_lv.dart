@@ -2013,6 +2013,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'title_length': 'Nosaukumā izmantojiet 3–120 rakstzīmes.',
       'visit_buffer_invalid': 'Pārbaudiet apmeklējuma rezervi.',
       'visit_duration_invalid': 'Pārbaudiet parasto apmeklējuma ilgumu.',
+      'price_currency_mismatch': 'Cenas valūtai jāsakrīt ar norādīto valūtu.',
       'other': 'Pārbaudiet šo vietas daļu.',
     });
     return '$_temp0';
@@ -2757,6 +2758,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'legacySourceIdentityMissing':
           'Pietura nokopēta kā privāta vieta, jo vecajā plānā nav kataloga objekta',
       'stopNotFound': 'Izvēlētā pietura vairs nepastāv',
+      'invalidPrice': 'Saglabātā cena nav derīga. Pārbaudiet summu un valūtu.',
       'other': 'Pārbaudiet šo pieturu.',
     });
     return '$_temp0';
@@ -2974,6 +2976,12 @@ class AppLocalizationsLv extends AppLocalizations {
       'event_access_contract_unsupported':
           'Šim pasākumam ir jaunāks piekļuves formāts, un to šeit nevar mainīt.',
       'place_gallery_limit': 'Vietas galerija ir pilna.',
+      'stored_money_invalid':
+          'Saglabāto cenu nevar nolasīt. Sākotnējais melnraksts nav mainīts.',
+      'stored_draft_invalid':
+          'Saglabāto melnrakstu nevar nolasīt. Sākotnējie dati nav mainīti.',
+      'money_input_invalid':
+          'Pārbaudiet summu un valūtu. Lieki cipari aiz komata netiek noapaļoti.',
       'other': 'Kaut kas nogāja greizi. Lūdzu, mēģiniet vēlreiz.',
     });
     return '$_temp0';
@@ -2999,6 +3007,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'city_required': 'Ievadiet pilsētu',
       'cover_required': 'Pievienojiet vāka attēlu',
       'start_required': 'Izvēlieties sākuma datumu un laiku',
+      'utc_input_invalid': 'Ievadiet laiku UTC formātā (YYYY-MM-DDTHH:mm:ssZ).',
       'other': 'Pārbaudiet šo lauku',
     });
     return '$_temp0';
@@ -9131,6 +9140,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'loadFailed': 'Neizdevās ielādēt datus. Mēģiniet vēlreiz.',
       'dataUnavailable': 'Dati nav pieejami.',
       'offline': 'Nav interneta savienojuma.',
+      'invalidTimeFilter': 'Nederīgs laika filtrs. Mainiet meklēšanas filtrus.',
       'other': 'Neizdevās ielādēt plūsmu. Mēģiniet vēlreiz.',
     });
     return '$_temp0';
@@ -10451,6 +10461,8 @@ class AppLocalizationsLv extends AppLocalizations {
           'Pieprasījums pieejams pēc trīs lapu izveides.',
       'page_limit_request_failed':
           'Neizdevās nosūtīt pieprasījumu moderatoriem.',
+      'access_unavailable':
+          'Piekļuve nav pieejama. Mēģiniet pārbaudīt vēlreiz.',
       'other': 'Neizdevās ielādēt darbvietas.',
     });
     return '$_temp0';
@@ -13684,4 +13696,35 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get notificationsPushOpen => 'Atvērt';
+
+  @override
+  String get adminToolsUnavailable => 'Administratora piekļuve nav pieejama';
+
+  @override
+  String get adminToolsLocalMock => 'Lokāla testa administrēšana';
+
+  @override
+  String get adminToolsNoDecisions =>
+      'Lēmumi par pārbaudēm un limitiem nav pieejami.';
+
+  @override
+  String get createSessionClockChangeSkipped =>
+      'Izlaists pulksteņa pārregulēšanas dēļ';
+
+  @override
+  String get discoverTimeFilterInvalid =>
+      'Nederīgs laika filtrs. Mainiet meklēšanas filtrus.';
+
+  @override
+  String get discoverDateUnavailable => 'Datums nav pieejams';
+
+  @override
+  String discoverDateFrom(String date) {
+    return 'No $date';
+  }
+
+  @override
+  String discoverDateUntil(String date) {
+    return 'Līdz $date';
+  }
 }

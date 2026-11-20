@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/presentation/widgets/scenario_intake_selection_tray.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/discover/application/state/scenario_intake_selection_state.dart';
 
 void main() {

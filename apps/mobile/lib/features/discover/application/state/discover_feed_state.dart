@@ -15,7 +15,13 @@ enum DiscoverFeedStatus {
 }
 
 /// L4.5: what the feed tells the reader; the UI turns the code into text.
-enum DiscoverFeedNotice { emptyArea, loadFailed, dataUnavailable, offline }
+enum DiscoverFeedNotice {
+  invalidTimeFilter,
+  emptyArea,
+  loadFailed,
+  dataUnavailable,
+  offline,
+}
 
 class DiscoverFeedState {
   const DiscoverFeedState({

@@ -76,9 +76,7 @@ class PublishedEventDiscoveryEntity {
     // not just debug-mode sanity checks.
     if (priceAmount.minorUnits < 0 ||
         priceAmount.currency.value != currencyCode.trim().toUpperCase()) {
-      throw ArgumentError(
-        'Event price must be nonnegative and match currencyCode',
-      );
+      throw ArgumentError('event_price_currency_invalid');
     }
     if (occurrences.isEmpty) {
       throw ArgumentError(

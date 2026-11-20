@@ -147,7 +147,7 @@ void main() {
                 pinConfirmed: true,
                 accessNotes: 'Gravel path, well signed.',
               ),
-              optionalContribution: const ActivityOptionalContributionDraft(
+              optionalContribution: ActivityOptionalContributionDraft(
                 kind: ActivityContributionKind.donation,
               ),
             ),
@@ -407,7 +407,7 @@ void main() {
                   pinConfirmed: true,
                   accessNotes: 'Gravel path, well signed.',
                 ),
-                optionalContribution: const ActivityOptionalContributionDraft(
+                optionalContribution: ActivityOptionalContributionDraft(
                   kind: ActivityContributionKind.donation,
                   note: 'short',
                 ),

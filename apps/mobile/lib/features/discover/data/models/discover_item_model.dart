@@ -3,7 +3,6 @@ import '../../../../shared/primitives/money/money_parse_result.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/opening_hours_rule.dart';
 import '../../domain/entities/time_slot.dart';
-import '../../../../shared/primitives/money/money.dart';
 
 class DiscoverItemModel extends DiscoverItemEntity {
   DiscoverItemModel({
@@ -51,7 +50,9 @@ class DiscoverItemModel extends DiscoverItemEntity {
         MoneyLegacyAdapter().readOptional(
           hasCanonicalMinorUnits: map.containsKey('price_minor_units'),
           canonicalMinorUnits: map['price_minor_units'],
-          legacyMajorAmount: map['price_amount'],
+          legacyMajorAmount: map.containsKey('price')
+              ? map['price']
+              : map['price_amount'],
           currencyCode: map.containsKey('currency_code')
               ? map['currency_code']
               : legacyCurrencyCode,

@@ -6,12 +6,11 @@ class DiscoverRuntimeDefaults {
     required this.currency,
     required this.originLat,
     required this.originLng,
-    required this.currencyCode,
   });
 
   final String timezoneId;
   final CurrencyCode currency;
   final double originLat;
   final double originLng;
-  final String currencyCode;
+  String get currencyCode => currency.value;
 }

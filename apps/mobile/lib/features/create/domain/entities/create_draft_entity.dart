@@ -11,7 +11,6 @@ import 'rental_draft_data.dart';
 import 'session_draft_data.dart';
 import 'route_draft_data.dart';
 import 'scenario_draft_data.dart';
-import '../../../../shared/primitives/money/money.dart';
 
 enum CreateObjectType {
   event,

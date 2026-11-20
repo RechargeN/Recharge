@@ -25,7 +25,6 @@ import 'package:recharge/features/identity/domain/usecases/request_page_limit_in
 import 'package:recharge/features/identity/domain/usecases/select_workspace_usecase.dart';
 
 void main() {
-  regressionCases();
   const String userId = 'demo_full_access';
 
   test(
@@ -122,7 +121,9 @@ void main() {
       expect(controller.state.activeWorkspace, isNull);
       expect(controller.state.adminPreview, isNull);
       expect(
-        await controller.selectAdminPreview(AdminExperiencePreview.professionalPage),
+        await controller.selectAdminPreview(
+          AdminExperiencePreview.professionalPage,
+        ),
         isFalse,
       );
       pending.completeError(Exception('controlled load failure'));
@@ -364,7 +365,9 @@ void main() {
       expect(controller.state.activeWorkspace, WorkspaceRef.personal(userId));
       final actualSnapshot = controller.state.accessSnapshot;
       expect(
-        await controller.selectAdminPreview(AdminExperiencePreview.professionalPage),
+        await controller.selectAdminPreview(
+          AdminExperiencePreview.professionalPage,
+        ),
         isTrue,
       );
       expect(controller.state.accessSnapshot, same(actualSnapshot));
@@ -703,7 +706,7 @@ void main() {
       addTearDown(controller.dispose);
       await controller.ensureLoaded('alice');
       expect(
-        await controller.selectAdminPreview(AdminExperiencePreview.viewer),
+        await controller.selectAdminPreview(AdminExperiencePreview.creator),
         isFalse,
       );
     },
@@ -715,7 +718,7 @@ void main() {
     final controller = _controller(repo);
     addTearDown(controller.dispose);
     await controller.ensureLoaded('alice');
-    await controller.selectAdminPreview(AdminExperiencePreview.viewer);
+    await controller.selectAdminPreview(AdminExperiencePreview.creator);
     repo.accessSnapshot = _replaceAccess(repo.accessSnapshot, capabilities: {});
     await controller.revalidateAccess();
     expect(controller.state.adminPreview, isNull);
@@ -841,4 +844,168 @@ class _FailingOnceNotificationSink extends _MemoryNotificationSink {
     }
     await super.appendNotification(event);
   }
+}
+
+ProfessionalPageCreationInput _creationInput(String displayName) {
+  return ProfessionalPageCreationInput(
+    kind: ManagedPageKind.company,
+    displayName: displayName,
+    marketId: 'riga',
+    countryCode: 'LV',
+    defaultLocale: 'en',
+    timezone: 'Europe/Riga',
+    defaultCurrency: 'EUR',
+    supportedLocales: const <String>['en', 'lv', 'ru'],
+  );
+}
+
+IdentityAccessSnapshot _accessWithPageCount(
+  int count, {
+  String userId = 'page_count_user',
+  ManagedPageMembershipStatus membershipStatus =
+      ManagedPageMembershipStatus.active,
+}) {
+  final pages = List<ManagedPageEntity>.generate(
+    count,
+    (int index) => ManagedPageEntity(
+      id: 'page-$index',
+      ownerUserId: userId,
+      kind: ManagedPageKind.company,
+      displayName: 'Page $index',
+      avatar: '',
+      verificationStatus: ManagedPageVerificationStatus.pending,
+      lifecycle: ManagedPageLifecycle.active,
+      marketId: 'riga',
+      countryCode: 'LV',
+      defaultLocale: 'en',
+      timezone: 'Europe/Riga',
+      defaultCurrency: 'EUR',
+      supportedLocales: const <String>['en'],
+      createdAtUtc: DateTime.utc(2026, 7, 31),
+      revision: 1,
+    ),
+  );
+  final memberships = pages
+      .map(
+        (ManagedPageEntity page) => ManagedPageMembershipEntity(
+          pageId: page.id,
+          userId: userId,
+          relationship: ManagedPageRelationship.owner,
+          status: membershipStatus,
+          capabilities: const <String>{'page.content.create'},
+          revision: 1,
+        ),
+      )
+      .toList(growable: false);
+  return IdentityAccessSnapshot(
+    userId: userId,
+    globalRole: 'admin',
+    creatorVerificationStatus: CreatorVerificationStatus.verified,
+    globalCapabilities: const <String>{
+      'page.create',
+      'admin.tools.view',
+      'admin.experience.preview',
+    },
+    pages: pages,
+    memberships: memberships,
+    revision: 1,
+  );
+}
+
+class _MemoryIdentityWorkspaceRepository
+    implements IdentityWorkspaceRepository {
+  _MemoryIdentityWorkspaceRepository(
+    this.accessSnapshot, {
+    this.savedWorkspace,
+  });
+
+  Future<IdentityAccessSnapshot>? nextAccess;
+  IdentityAccessSnapshot accessSnapshot;
+  WorkspaceRef? savedWorkspace;
+  final List<PageLimitIncreaseRequestEntity> limitRequests =
+      <PageLimitIncreaseRequestEntity>[];
+
+  @override
+  Future<IdentityAccessSnapshot> loadAccessSnapshot(String userId) async {
+    return nextAccess ?? Future.value(accessSnapshot);
+  }
+
+  @override
+  Future<WorkspaceRef?> loadActiveWorkspace(String userId) async {
+    return savedWorkspace;
+  }
+
+  @override
+  Future<void> saveActiveWorkspace(
+    String userId,
+    WorkspaceRef workspace,
+  ) async {
+    savedWorkspace = workspace;
+  }
+
+  @override
+  Future<void> saveCreatedPage({
+    required String userId,
+    required ManagedPageEntity page,
+    required ManagedPageMembershipEntity membership,
+  }) async {
+    accessSnapshot = IdentityAccessSnapshot(
+      userId: accessSnapshot.userId,
+      globalRole: accessSnapshot.globalRole,
+      creatorVerificationStatus: accessSnapshot.creatorVerificationStatus,
+      globalCapabilities: accessSnapshot.globalCapabilities,
+      pages: <ManagedPageEntity>[...accessSnapshot.pages, page],
+      memberships: <ManagedPageMembershipEntity>[
+        ...accessSnapshot.memberships,
+        membership,
+      ],
+      revision: accessSnapshot.revision + 1,
+    );
+  }
+
+  @override
+  Future<PageLimitIncreaseRequestEntity?> loadPendingPageLimitRequest(
+    String userId,
+  ) async {
+    for (final PageLimitIncreaseRequestEntity request
+        in limitRequests.reversed) {
+      if (request.userId == userId && request.isPending) return request;
+    }
+    return null;
+  }
+
+  @override
+  Future<void> savePageLimitRequest(
+    PageLimitIncreaseRequestEntity request,
+  ) async {
+    if (limitRequests.any(
+      (PageLimitIncreaseRequestEntity item) => item.id == request.id,
+    )) {
+      return;
+    }
+    limitRequests.add(request);
+  }
+}
+
+class _SequenceIdGenerator implements IdGenerator {
+  int _next = 0;
+
+  @override
+  String generate() =>
+      '00000000-0000-4000-8000-${(++_next).toString().padLeft(12, '0')}';
+}
+
+class _MemoryNotificationSink implements AppNotificationSink {
+  final List<AppNotificationEvent> events = <AppNotificationEvent>[];
+
+  @override
+  Future<void> appendNotification(AppNotificationEvent event) async {
+    if (events.any((AppNotificationEvent item) => item.id == event.id)) return;
+    events.add(event);
+  }
+}
+
+class _NoopAnalyticsService implements AnalyticsService {
+  @override
+  void track(String eventName, {Map<String, Object?> params = const {}}) {}
 }

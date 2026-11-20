@@ -1,7 +1,6 @@
 import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../core/parsing/money_legacy_adapter.dart';
 import '../../domain/entities/place_draft_data.dart';
-import '../../../../shared/primitives/money/money.dart';
 
 class PlaceDraftMapper {
   const PlaceDraftMapper._();
@@ -296,8 +295,6 @@ class PlaceDraftMapper {
 
   static PlacePricingDraft _pricing(Object? raw, String defaultCurrency) {
     final Map<String, Object?> json = _map(raw) ?? const <String, Object?>{};
-    final String currencyCode =
-        _string(json['currencyCode']) ?? defaultCurrency;
     return PlacePricingDraft(
       entryType: _enumValue(PlaceEntryType.values, json['entryType']),
       entryPriceFrom: MoneyLegacyAdapter().readOptional(

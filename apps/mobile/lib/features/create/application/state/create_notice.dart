@@ -5,6 +5,9 @@ import '../../domain/usecases/generate_scenario_proposal_usecase.dart';
 /// and in the Scenario/Place helper error fields. The UI turns a code into
 /// text (`createNoticeText`); no sentence lives in the controller.
 abstract final class CreateNotice {
+  static const String storedMoneyInvalid = 'stored_money_invalid';
+  static const String storedDraftInvalid = 'stored_draft_invalid';
+  static const String moneyInputInvalid = 'money_input_invalid';
   static const String admissionLegacyReview = 'admission_legacy_review';
   static const String admissionPreviewStale = 'admission_preview_stale';
   static const String classificationChanged = 'classification_changed';
@@ -121,6 +124,9 @@ abstract final class CreateNotice {
 
   /// Every code (contract tests).
   static const Set<String> all = <String>{
+    storedMoneyInvalid,
+    storedDraftInvalid,
+    moneyInputInvalid,
     admissionLegacyReview,
     admissionPreviewStale,
     classificationChanged,

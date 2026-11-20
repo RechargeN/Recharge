@@ -8,7 +8,6 @@ import '../../../../../core/localization/l10n_context.dart';
 import '../../../../../core/parsing/input_parsers.dart';
 import '../../../domain/entities/scenario_item_draft.dart';
 import '../../../domain/entities/scenario_logistics_draft.dart';
-import '../../../../../shared/primitives/money/money.dart';
 import '../create_form_texts.dart';
 
 class ScenarioPlannedTransportInput {

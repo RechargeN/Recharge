@@ -5,7 +5,6 @@ import 'package:recharge/app/adapters/discover_scenario_intake_adapter.dart';
 import 'package:recharge/features/create/domain/entities/scenario_item_draft.dart';
 import 'package:recharge/features/create/domain/entities/scenario_object_intake.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/discover/domain/entities/event_occurrence.dart';
 import 'package:recharge/features/discover/domain/entities/published_event_discovery_entity.dart';
 import 'package:recharge/features/discover/application/state/scenario_intake_selection_state.dart';

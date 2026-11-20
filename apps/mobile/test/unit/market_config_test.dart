@@ -84,14 +84,14 @@ void main() {
         defaultMarketCityId: 'riga',
         defaultCenterLat: 56.9496,
         defaultCenterLng: 24.1052,
-        defaultCurrencyCode: 'EUR',
+        legacyCurrencyCode: 'EUR',
       );
       final DiscoverQuery manual = DiscoverQueryModel.fromMap(
         <String, Object?>{...legacy, 'manual_area_selected': true},
         defaultMarketCityId: 'riga',
         defaultCenterLat: 56.9496,
         defaultCenterLng: 24.1052,
-        defaultCurrencyCode: 'EUR',
+        legacyCurrencyCode: 'EUR',
       );
 
       expect(migrated.marketCityId, 'riga');
@@ -148,7 +148,7 @@ void main() {
       defaultMarketCityId: 'riga',
       defaultCenterLat: 56.9496,
       defaultCenterLng: 24.1052,
-      defaultCurrencyCode: 'EUR',
+      legacyCurrencyCode: 'EUR',
     );
 
     expect(restored.queryVersion, 3);

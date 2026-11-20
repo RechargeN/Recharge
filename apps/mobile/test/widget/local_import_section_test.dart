@@ -480,6 +480,8 @@ final class _Access implements PublisherAccessCheck {
   Future<bool> canPublishAs({
     required String actorUserId,
     required PublisherRef publisher,
+    Set<String> requiredCapabilities = const {},
+    bool requireAdmin = false,
   }) async => true;
 }
 

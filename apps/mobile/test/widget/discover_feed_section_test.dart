@@ -15,7 +15,6 @@ import 'package:recharge/features/discover/domain/repositories/discover_preferen
 import 'package:recharge/features/discover/domain/repositories/discover_repository.dart';
 import 'package:recharge/features/discover/domain/usecases/get_discover_feed_usecase.dart';
 import 'package:recharge/features/discover/presentation/widgets/discover_feed_section.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   testWidgets('renders feed cards in success state', (tester) async {

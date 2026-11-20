@@ -1,8 +1,6 @@
-import '../../../../shared/primitives/money/money_formatter.dart';
 import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/scenario_draft_entity.dart';
-import '../../../../shared/primitives/money/money.dart';
 
 enum ScenarioBuilderStatus { ready }
 
@@ -25,7 +23,6 @@ class ScenarioBuilderState {
         freeOnly: false,
         walkingOnly: true,
         sourcePrompt: '',
-        currencyCode: 'EUR',
         steps:
             scenarioStepsFor(
                   mood: ScenarioMood.calm,

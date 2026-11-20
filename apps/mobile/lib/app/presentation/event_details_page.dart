@@ -22,7 +22,6 @@ import '../../features/favorites/application/controllers/favorites_controller.da
 import '../../features/favorites/application/favorites_providers.dart';
 import '../../features/favorites/domain/entities/favorite_item_entity.dart';
 import '../../shared/models/catalog_object_ref.dart';
-import '../../shared/primitives/money/money.dart';
 import '../di/booking_test_entry_guard.dart';
 import '../di/service_locator.dart';
 import '../testing/seeded_event_fixture.dart';
@@ -403,10 +402,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
       category: projection.category,
       startsAtUtc: startsAtUtc,
       distanceKm: projection.distanceKm,
-      priceAmount: Money.fromLegacyMajor(
-        projection.priceAmount,
-        currencyCode: projection.currencyCode,
-      ),
+      priceAmount: projection.priceAmount,
       isFree: projection.isFree,
       savedAtUtc: DateTime.now().toUtc(),
       targetRoute: null,

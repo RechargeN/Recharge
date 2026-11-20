@@ -10,7 +10,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
-import '../../../../shared/primitives/money/money.dart';
 import '../../application/controllers/discover_feed_controller.dart';
 import '../../application/discover_providers.dart';
 import '../../domain/entities/discover_query.dart';
@@ -18,7 +17,6 @@ import '../../domain/repositories/timezone_repository.dart';
 import '../../domain/usecases/build_time_window_usecase.dart';
 import '../../domain/entities/saved_search_entity.dart';
 import '../../domain/entities/time_window.dart';
-import '../../domain/usecases/build_time_window_usecase.dart';
 import '../discover_formats.dart';
 import '../../../../shared/primitives/time/local_date.dart';
 
@@ -243,9 +241,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       final bounds = controller.datePreset(preset);
       return _DateWindow(bounds.from, bounds.to);
     } on TimeWindowValidationException catch (error) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.discoverTimeWindowIssue(error.issue.name)),
+        ),
+      );
       return null;
     }
   }
@@ -317,12 +317,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         );
     if (selection == null) return;
     controller.stageSearchConditions(
-      budgetMax: selection.budgetMax == null
-          ? null
-          : Money(
-              minorUnits: selection.budgetMax! * 100,
-              currencyCode: controller.marketCurrencyCode,
-            ),
+      budgetMax: selection.budgetMax,
       clearBudgetMax: selection.budgetMax == null,
     );
   }
@@ -359,9 +354,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     try {
       editor = controller.timeEditorValues(window: query.timeWindow);
     } on TimeWindowValidationException catch (error) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.discoverTimeWindowIssue(error.issue.name)),
+        ),
+      );
       return;
     }
     final _SearchFilterSelection? selection =
@@ -396,9 +393,13 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       }
     } on TimeWindowValidationException catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.discoverTimeWindowIssue(error.issue.name),
+            ),
+          ),
+        );
       }
       return;
     }
@@ -407,7 +408,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     } else {
       final existingManual =
           query.travelContext?.originType == TravelOriginType.manualPin;
-      final String? error = controller.stageTimeWindowSelection(
+      final TimeWindowIssue? error = controller.stageTimeWindowSelection(
         mode: selection.timeWindowMode!,
         startLocal: selection.startLocal,
         endLocal: selection.endLocal,
@@ -429,9 +430,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       );
       if (error != null) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(context.l10n.discoverTimeWindowIssue(error.name))));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.l10n.discoverTimeWindowIssue(error.name)),
+            ),
+          );
         }
         return;
       }
@@ -440,12 +443,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     controller.stageSearchConditions(
       peopleCount: selection.peopleCount,
       clearPeopleCount: selection.peopleCount == null,
-      budgetMax: selection.budgetMax == null
-          ? null
-          : Money(
-              minorUnits: selection.budgetMax! * 100,
-              currencyCode: controller.marketCurrencyCode,
-            ),
+      budgetMax: selection.budgetMax,
       clearBudgetMax: selection.budgetMax == null,
       dateFrom: activeWindow?.startAtUtc ?? dateFrom,
       clearDateFrom: activeWindow == null && dateFrom == null,
@@ -676,29 +674,39 @@ class _QuickDateSheet extends StatelessWidget {
         context,
       ).pop(_QuickDateSelection(_DateWindow(window.from, window.to)));
     } on TimeWindowValidationException catch (error) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.discoverTimeWindowIssue(error.issue.name)),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) => _QuickPickerSurface(
     key: const Key('search-date-sheet'),
-    title: 'Choose date',
+    title: context.l10n.discoverChooseDate,
     onReset: () => Navigator.of(context).pop(const _QuickDateSelection(null)),
     child: _FilterPillWrap(
       children: <Widget>[
         _FilterPill(
-          label: 'Any date',
+          label: context.l10n.discoverAnyDate,
           selected: query.dateFrom == null && query.dateTo == null,
           onTap: () =>
               Navigator.of(context).pop(const _QuickDateSelection(null)),
         ),
         for (final option in [
-          (DiscoverDatePreset.today, 'Today', 'today'),
-          (DiscoverDatePreset.tomorrow, 'Tomorrow', 'tomorrow'),
-          (DiscoverDatePreset.weekend, 'This weekend', 'weekend'),
+          (DiscoverDatePreset.today, context.l10n.discoverToday, 'today'),
+          (
+            DiscoverDatePreset.tomorrow,
+            context.l10n.discoverTomorrow,
+            'tomorrow',
+          ),
+          (
+            DiscoverDatePreset.weekend,
+            context.l10n.discoverThisWeekend,
+            'weekend',
+          ),
         ])
           _FilterPill(
             key: Key('quick-date-${option.$3}'),
@@ -708,7 +716,7 @@ class _QuickDateSheet extends StatelessWidget {
           ),
         _FilterPill(
           key: const Key('quick-date-custom'),
-          label: 'Choose dates',
+          label: context.l10n.discoverChooseDates,
           selected: false,
           onTap: () => _pickCustomRange(context),
         ),
@@ -738,9 +746,13 @@ class _QuickDateSheet extends StatelessWidget {
       ).pop(_QuickDateSelection(_DateWindow(window.from, window.to)));
     } on TimeWindowValidationException catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(context.l10n.discoverTimeWindowIssue(error.issue.name))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.discoverTimeWindowIssue(error.issue.name),
+            ),
+          ),
+        );
       }
     }
   }
@@ -850,7 +862,9 @@ class _QuickBudgetSheet extends StatelessWidget {
         _FilterPill(
           key: const Key('quick-budget-custom'),
           label: _isCustom
-              ? context.l10n.discoverCustomValue(RechargeFormats.money(selected!, context.l10n.localeName))
+              ? context.l10n.discoverCustomValue(
+                  RechargeFormats.money(selected!, context.l10n.localeName),
+                )
               : context.l10n.discoverCustom,
           selected: _isCustom,
           onTap: () => _editCustom(context),
@@ -1753,7 +1767,9 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                       children: <Widget>[
                         for (final int? value in <int?>[null, 0, 10, 20, 40])
                           _FilterPill(
-                            label: value == null ? context.l10n.discoverAny : _euros(context, value),
+                            label: value == null
+                                ? context.l10n.discoverAny
+                                : _euros(context, value),
                             selected:
                                 _budgetMax ==
                                 (value == null
@@ -1781,7 +1797,10 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
                           key: const Key('budget-custom'),
                           label: _isCustomBudget
                               ? context.l10n.discoverCustomValue(
-                                  RechargeFormats.money(_budgetMax!, context.l10n.localeName),
+                                  RechargeFormats.money(
+                                    _budgetMax!,
+                                    context.l10n.localeName,
+                                  ),
                                 )
                               : context.l10n.discoverCustom,
                           selected: _isCustomBudget,
@@ -2021,9 +2040,11 @@ class _SearchFiltersSheetState extends State<_SearchFiltersSheet> {
     try {
       reset = widget.resetTimeValues();
     } on TimeWindowValidationException catch (error) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.discoverTimeWindowIssue(error.issue.name)),
+        ),
+      );
       return;
     }
     setState(() {
@@ -3202,8 +3223,14 @@ String _formatLocalDate(AppLocalizations l10n, DateTime value) {
   return today ? l10n.discoverTodayDate(date) : date;
 }
 
-String _dateLabel(AppLocalizations l10n, DiscoverQuery query, DiscoverFeedController controller) {
-  if (query.dateFrom == null && query.dateTo == null) return l10n.discoverAnyDate;
+String _dateLabel(
+  AppLocalizations l10n,
+  DiscoverQuery query,
+  DiscoverFeedController controller,
+) {
+  if (query.dateFrom == null && query.dateTo == null) {
+    return l10n.discoverAnyDate;
+  }
   try {
     final zone = query.timeWindow?.timezoneId;
     final today = controller.calendarDate(
@@ -3216,15 +3243,15 @@ String _dateLabel(AppLocalizations l10n, DiscoverQuery query, DiscoverFeedContro
     final to = query.dateTo == null
         ? null
         : controller.calendarDate(query.dateTo!, timezoneId: zone);
-    if (from == null) return 'Until ${_numericDate(to!)}';
-    if (to == null) return 'From ${_numericDate(from)}';
+    if (from == null) return l10n.discoverDateUntil(_numericDate(to!));
+    if (to == null) return l10n.discoverDateFrom(_numericDate(from));
     if (from == to && from == today) return l10n.discoverToday;
     if (from == to && from == today.addDays(1)) return l10n.discoverTomorrow;
     return from == to
         ? _numericDate(from)
         : '${_numericDate(from)}–${_numericDate(to)}';
   } on TimeWindowValidationException {
-    return 'Date unavailable';
+    return l10n.discoverDateUnavailable;
   }
 }
 
@@ -3285,6 +3312,6 @@ String _resultsLocation(
 
 /// Whole euros of the EUR-only budget pickers (their stored value is EUR).
 String _euros(BuildContext context, int value) => RechargeFormats.money(
-  Money(minorUnits: value * 100, currencyCode: 'EUR'),
+  Money(minorUnits: value * 100, currency: CurrencyCode.parse('EUR')),
   context.l10n.localeName,
 );

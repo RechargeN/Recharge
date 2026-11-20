@@ -1,6 +1,5 @@
 import '../../../../shared/primitives/money/money.dart';
 import 'time_window.dart';
-import '../../../../shared/primitives/money/money.dart';
 
 enum DiscoverSortMode { geoFreshness }
 

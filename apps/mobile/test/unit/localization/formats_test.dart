@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -14,7 +15,10 @@ void main() {
   String plain(String value) => value.replaceAll(' ', ' ').replaceAll(' ', ' ');
 
   group('money keeps its own currency in every language', () {
-    const Money price = Money(minorUnits: 125050, currencyCode: 'EUR');
+    final Money price = Money(
+      minorUnits: 125050,
+      currency: CurrencyCode.parse('EUR'),
+    );
 
     test('EUR', () {
       expect(plain(RechargeFormats.money(price, 'en')), '€1,250.50');
@@ -23,7 +27,7 @@ void main() {
       expect(
         plain(
           RechargeFormats.money(
-            const Money(minorUnits: 5, currencyCode: 'EUR'),
+            Money(minorUnits: 5, currency: CurrencyCode.parse('EUR')),
             'lv',
           ),
         ),
@@ -32,7 +36,10 @@ void main() {
     });
 
     test('the language never changes the currency', () {
-      const Money usd = Money(minorUnits: 999, currencyCode: 'USD');
+      final Money usd = Money(
+        minorUnits: 999,
+        currency: CurrencyCode.parse('USD'),
+      );
       for (final String code in <String>['en', 'lv', 'ru']) {
         expect(RechargeFormats.money(usd, code), contains(r'$'));
         expect(RechargeFormats.money(usd, code), isNot(contains('€')));

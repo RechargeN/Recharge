@@ -1,3 +1,5 @@
+import '../../shared/primitives/money/money.dart';
+import '../../shared/primitives/money/currency_code.dart';
 import '../../features/discover/domain/entities/discover_item_entity.dart'
     show DurationConfidence;
 import '../../features/discover/domain/entities/event_occurrence.dart';
@@ -32,7 +34,7 @@ PublishedEventDiscoveryEntity seededBookingEventProjection() {
     latitude: 56.9496,
     longitude: 24.1052,
     distanceKm: 0,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     isFree: true,
     currencyCode: 'EUR',
     durationConfidence: DurationConfidence.unknown,
@@ -88,7 +90,7 @@ PublishedEventDiscoveryEntity? publishedTestBookingEventProjection({
     latitude: 0,
     longitude: 0,
     distanceKm: 0,
-    priceAmount: 0,
+    priceAmount: Money(minorUnits: 0, currency: CurrencyCode.eur),
     isFree: true,
     currencyCode: 'EUR',
     durationConfidence: DurationConfidence.unknown,

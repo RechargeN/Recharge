@@ -1,7 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:xml/xml.dart';
-
 import '../../../../shared/primitives/geo/geo_point.dart';
 import '../../domain/entities/route_draft_data.dart';
 import '../../domain/repositories/route_gpx_repository.dart';

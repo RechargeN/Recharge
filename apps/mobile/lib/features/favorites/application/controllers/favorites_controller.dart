@@ -95,8 +95,20 @@ class FavoritesController extends ChangeNotifier {
         'item_id': item.id,
       },
     );
-    await _addFavoriteUseCase(item);
-    await loadFavorites();
+    try {
+      await _addFavoriteUseCase(item);
+      await loadFavorites();
+    } on Exception catch (error) {
+      if (error is CodedRefusal) rethrow;
+      _setState(
+        _state.copyWith(
+          status: FavoritesStatus.error,
+          message: 'favorites_load_failed',
+        ),
+      );
+      return false;
+    }
+    if (_state.status == FavoritesStatus.error) return false;
     _analyticsService.track(
       'favorites_add_succeeded',
       params: <String, Object?>{
@@ -113,6 +125,7 @@ class FavoritesController extends ChangeNotifier {
         FavoriteAdded(kind, _entrySurface(sourceScreen)),
       );
     }
+    return true;
   }
 
   static ProductAnalyticsEntrySurface _entrySurface(String sourceScreen) {
@@ -151,7 +164,7 @@ class FavoritesController extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: FavoritesStatus.error,
-          message: 'Не удалось завершить сохранение избранного.',
+          message: 'favorites_load_failed',
         ),
       );
       return false;

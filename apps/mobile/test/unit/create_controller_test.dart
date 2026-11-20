@@ -678,6 +678,7 @@ void main() {
         newEventId: sequentialEventIds(),
       )..bindAccount('u1');
       final CreateController tracked = CreateController(
+        publisherAccessCheck: const TestPersonalPublisherAccess(),
         loadCreateDraftUseCase: LoadCreateDraftUseCase(repository),
         saveCreateDraftUseCase: SaveCreateDraftUseCase(repository),
         publishCreateDraftUseCase: PublishCreateDraftUseCase(repository),

@@ -38,9 +38,7 @@ class RecordPlaceVisitUseCase {
     try {
       return _localDateAt(instant, IanaTimeZone.parse(timezoneId).value);
     } on Object {
-      throw const VisitHistoryValidationException(
-        'A known explicit Place timezone is required',
-      );
+      throw const VisitHistoryValidationException('place_timezone_required');
     }
   }
 

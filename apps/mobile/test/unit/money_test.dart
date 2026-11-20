@@ -1,54 +1,89 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/shared/primitives/money/money_parser.dart';
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
+import 'package:recharge/core/parsing/money_legacy_adapter.dart';
 
 void main() {
-  test('Money parses decimal input without binary floating-point storage', () {
+  test('Money parses exact decimals and refuses implicit rounding', () {
+    final parser = MoneyParser();
     expect(
-      Money.tryParseMajor('12.34', currencyCode: 'eur'),
-      Money(minorUnits: 1234, currencyCode: 'EUR'),
+      parser.parse('12.34', currency: CurrencyCode.eur, locale: 'en').value,
+      Money(minorUnits: 1234, currency: CurrencyCode.eur),
     );
-    expect(Money.tryParseMajor('12.345', currencyCode: 'EUR'), isNull);
-  });
-
-  test('Money persists integer minor units and explicit currency', () {
-    final Money value = Money(minorUnits: 999, currencyCode: 'EUR');
-    expect(value.toJson(), <String, Object>{
-      'minorUnits': 999,
-      'currencyCode': 'EUR',
-    });
-    expect(Money.fromJsonOrNull(value.toJson()), value);
-  });
-
-  test('legacy major-unit reader is isolated and fails closed', () {
     expect(
-      Money.fromJsonOrNull(12.34, legacyCurrencyCode: 'EUR'),
-      Money(minorUnits: 1234, currencyCode: 'EUR'),
-    );
-    expect(Money.fromJsonOrNull(double.nan, legacyCurrencyCode: 'EUR'), isNull);
-    expect(
-      () => Money(minorUnits: -1, currencyCode: 'EUR'),
-      throwsAssertionError,
+      parser.parse('12.345', currency: CurrencyCode.eur, locale: 'en').error,
+      MoneyParseError.excessiveFractionDigits,
     );
   });
-
-  test(
-    'invalid persisted minor units fail closed and zero normalizes currency',
-    () {
-      expect(
-        Money.fromJsonOrNull(<String, Object>{
-          'minorUnits': -1,
-          'currencyCode': 'EUR',
-        }),
-        isNull,
-      );
-      expect(Money.zero('eur').currencyCode, 'EUR');
-    },
-  );
-
-  test('different currencies cannot be combined or compared', () {
-    final Money eur = Money(minorUnits: 100, currencyCode: 'EUR');
-    final Money usd = Money(minorUnits: 100, currencyCode: 'USD');
-    expect(() => eur + usd, throwsStateError);
-    expect(() => eur.compareTo(usd), throwsStateError);
+  test('main integer map and pre-Money major units remain readable', () {
+    final reader = MoneyLegacyAdapter();
+    final expected = Money(minorUnits: 1234, currency: CurrencyCode.eur);
+    expect(
+      reader.readOptional(
+        hasCanonicalMinorUnits: false,
+        legacyMajorAmount: {'minorUnits': 1234, 'currencyCode': 'EUR'},
+        currencyCode: null,
+      ),
+      expected,
+    );
+    expect(
+      reader.readOptional(
+        hasCanonicalMinorUnits: false,
+        legacyMajorAmount: 12.34,
+        currencyCode: 'EUR',
+      ),
+      expected,
+    );
+    expect(
+      () => reader.readOptional(
+        hasCanonicalMinorUnits: false,
+        legacyMajorAmount: double.nan,
+        currencyCode: 'EUR',
+      ),
+      throwsA(isA<MoneyReadException>()),
+    );
+  });
+  test('canonical null wins and inconsistent map currencies fail closed', () {
+    final reader = MoneyLegacyAdapter();
+    expect(
+      reader.readOptional(
+        hasCanonicalMinorUnits: true,
+        canonicalMinorUnits: null,
+        legacyMajorAmount: 99,
+        currencyCode: 'EUR',
+      ),
+      isNull,
+    );
+    expect(
+      () => reader.readOptional(
+        hasCanonicalMinorUnits: false,
+        legacyMajorAmount: {'minorUnits': 1234, 'currencyCode': 'USD'},
+        currencyCode: 'EUR',
+      ),
+      throwsA(isA<MoneyReadException>()),
+    );
+    expect(
+      () => reader.readOptional(
+        hasCanonicalMinorUnits: false,
+        legacyMajorAmount: {'minorUnits': 1.5, 'currencyCode': 'EUR'},
+        currencyCode: 'EUR',
+      ),
+      throwsA(isA<MoneyReadException>()),
+    );
+  });
+  test('signed arithmetic is exact and rejects currency mismatch', () {
+    final negative = Money(minorUnits: -1, currency: CurrencyCode.eur);
+    expect(
+      (negative + Money(minorUnits: 2, currency: CurrencyCode.eur)).minorUnits,
+      1,
+    );
+    final usd = Money(minorUnits: 1, currency: CurrencyCode.parse('USD'));
+    expect(() => negative + usd, throwsA(isA<MoneyArithmeticException>()));
+    expect(
+      () => negative.compareTo(usd),
+      throwsA(isA<MoneyArithmeticException>()),
+    );
   });
 }

@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -143,7 +144,10 @@ void main() {
           pricing: PlacePricingDraft(
             currencyCode: 'EUR',
             entryType: PlaceEntryType.paid,
-            entryPriceFrom: Money(minorUnits: 500, currencyCode: 'EUR'),
+            entryPriceFrom: Money(
+              minorUnits: 500,
+              currency: CurrencyCode.parse('EUR'),
+            ),
           ),
         ),
       );
@@ -224,8 +228,14 @@ void main() {
             pricing: PlacePricingDraft(
               currencyCode: 'EUR',
               entryType: PlaceEntryType.free,
-              entryPriceFrom: Money(minorUnits: 500, currencyCode: 'EUR'),
-              entryPriceTo: Money(minorUnits: 900, currencyCode: 'EUR'),
+              entryPriceFrom: Money(
+                minorUnits: 500,
+                currency: CurrencyCode.parse('EUR'),
+              ),
+              entryPriceTo: Money(
+                minorUnits: 900,
+                currency: CurrencyCode.parse('EUR'),
+              ),
             ),
           ),
         );
@@ -284,8 +294,14 @@ void main() {
           pricing: PlacePricingDraft(
             currencyCode: 'EUR',
             entryType: PlaceEntryType.free,
-            typicalSpendFrom: Money(minorUnits: 300, currencyCode: 'EUR'),
-            typicalSpendTo: Money(minorUnits: 800, currencyCode: 'EUR'),
+            typicalSpendFrom: Money(
+              minorUnits: 300,
+              currency: CurrencyCode.parse('EUR'),
+            ),
+            typicalSpendTo: Money(
+              minorUnits: 800,
+              currency: CurrencyCode.parse('EUR'),
+            ),
           ),
         ),
       );

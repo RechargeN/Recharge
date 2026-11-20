@@ -1,3 +1,4 @@
+import 'package:recharge/core/id/id_generator.dart' show UuidV4IdGenerator;
 import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
@@ -10,7 +11,6 @@ import 'package:recharge/app/application/planning_conversion_providers.dart';
 import 'package:recharge/app/adapters/legacy_quick_plan_conversion_adapter.dart';
 import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -22,7 +22,6 @@ import 'package:recharge/features/auth/domain/usecases/restore_session_usecase.d
 import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
-import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -78,7 +77,7 @@ void main() {
     'invitation controls open online read-only content and hide it after revoke',
     (tester) async {
       FlutterSecureStorage.setMockInitialValues({});
-      final seed = ScenarioBuilderController();
+      final seed = ScenarioBuilderController(idGenerator: UuidV4IdGenerator());
       final shared = seed.state.draft.copyWith(
         sourcePrompt: 'Private invited stops',
       );

@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../../../core/telemetry/analytics_service.dart';
-import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/discover_query.dart';
 import 'package:recharge/shared/primitives/geo/geo_point.dart';
@@ -69,9 +68,11 @@ class DiscoverFeedController extends ChangeNotifier {
     try {
       return repository.toLocal(UtcInstant(instantUtc).value, zone).date;
     } on ArgumentError {
-      throw const TimeWindowValidationException('Invalid calendar instant');
+      throw const TimeWindowValidationException(
+        TimeWindowIssue.invalidTravelContext,
+      );
     } on FormatException {
-      throw const TimeWindowValidationException('Unsupported calendar date');
+      throw const TimeWindowValidationException(TimeWindowIssue.boundsRequired);
     }
   }
 
@@ -79,7 +80,7 @@ class DiscoverFeedController extends ChangeNotifier {
     final repository = _timezoneRepository;
     if (repository == null || !repository.isValidTimezone(zone)) {
       throw const TimeWindowValidationException(
-        'Search timezone is unavailable',
+        TimeWindowIssue.unknownTimezone,
       );
     }
     return repository;
@@ -94,7 +95,7 @@ class DiscoverFeedController extends ChangeNotifier {
     );
     if (!resolution.isValid || resolution.instantUtc == null) {
       throw const TimeWindowValidationException(
-        'Selected local time does not exist',
+        TimeWindowIssue.nonexistentLocalTime,
       );
     }
     return UtcInstant(resolution.instantUtc!).value;
@@ -102,7 +103,7 @@ class DiscoverFeedController extends ChangeNotifier {
 
   ({DateTime from, DateTime to}) _calendarInterval(DateTime from, DateTime to) {
     if (!from.isBefore(to)) {
-      throw const TimeWindowValidationException('End must be after start');
+      throw const TimeWindowValidationException(TimeWindowIssue.endBeforeStart);
     }
     return (from: from, to: to);
   }
@@ -113,9 +114,7 @@ class DiscoverFeedController extends ChangeNotifier {
     LocalDate last,
   ) {
     if (first.compareTo(last) > 0) {
-      throw const TimeWindowValidationException(
-        'End date must not precede start',
-      );
+      throw const TimeWindowValidationException(TimeWindowIssue.endBeforeStart);
     }
     return _calendarInterval(
       _calendarBoundary(first, 0, end: false),
@@ -167,9 +166,9 @@ class DiscoverFeedController extends ChangeNotifier {
           return _calendarInterval(now.isAfter(start) ? now : start, end);
       }
     } on ArgumentError {
-      throw const TimeWindowValidationException('Unsupported calendar date');
+      throw const TimeWindowValidationException(TimeWindowIssue.boundsRequired);
     } on FormatException {
-      throw const TimeWindowValidationException('Unsupported calendar date');
+      throw const TimeWindowValidationException(TimeWindowIssue.boundsRequired);
     }
   }
 
@@ -179,7 +178,7 @@ class DiscoverFeedController extends ChangeNotifier {
     final zone = window?.timezoneId ?? marketTimezoneId;
     if (repository == null || !repository.isValidTimezone(zone)) {
       throw const TimeWindowValidationException(
-        'Time-window timezone is unavailable',
+        TimeWindowIssue.unknownTimezone,
       );
     }
     final now = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
@@ -196,13 +195,9 @@ class DiscoverFeedController extends ChangeNotifier {
         ),
       );
     } on FormatException {
-      throw const TimeWindowValidationException(
-        'Local date is outside the supported range',
-      );
+      throw const TimeWindowValidationException(TimeWindowIssue.boundsRequired);
     } on ArgumentError {
-      throw const TimeWindowValidationException(
-        'Local date is outside the supported range',
-      );
+      throw const TimeWindowValidationException(TimeWindowIssue.boundsRequired);
     }
   }
 
@@ -229,7 +224,7 @@ class DiscoverFeedController extends ChangeNotifier {
         status: _state.status == DiscoverFeedStatus.initial
             ? DiscoverFeedStatus.error
             : _state.status,
-        message: 'Invalid time filter. Edit the search filters.',
+        message: DiscoverFeedNotice.invalidTimeFilter,
       ),
     );
   }
@@ -338,6 +333,7 @@ class DiscoverFeedController extends ChangeNotifier {
     }
     return result;
   }
+
   String get marketCurrencyCode => marketCurrency.value;
 
   DiscoverFeedState _state;
@@ -424,7 +420,7 @@ class DiscoverFeedController extends ChangeNotifier {
       final zone = timezoneId ?? existing?.timezoneId ?? marketTimezoneId;
       final repository = _timezoneRepository;
       if (repository == null || !repository.isValidTimezone(zone)) {
-        return 'Time-window timezone is unavailable';
+        return TimeWindowIssue.unknownTimezone;
       }
       final now = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
       final flex = mode == TimeWindowMode.flexible ? flexibilityMinutes : 0;
@@ -1110,8 +1106,7 @@ class DiscoverFeedController extends ChangeNotifier {
     _setState(
       _state.copyWith(
         status: DiscoverFeedStatus.error,
-        message:
-            'Не удалось восстановить или сохранить условия поиска. Данные сохранены без изменений.',
+        message: DiscoverFeedNotice.dataUnavailable,
       ),
     );
   }

@@ -26,6 +26,33 @@ const PublisherRef _page = PublisherRef(type: PublisherType.page, id: 'page-1');
 const PublisherRef _user = PublisherRef(type: PublisherType.user, id: 'user-1');
 
 void main() {
+  test(
+    'rapid fresh resets never reuse a saved draft id or rewrite its publisher',
+    () async {
+      final controller = await _loaded(_page);
+      addTearDown(controller.dispose);
+      controller.setObjectType(CreateObjectType.activity);
+      final original = controller.state.draft;
+      final ids = <String>{original.id};
+      await controller.ensureLoaded(
+        userId: 'user-1',
+        organizerEmail: '',
+        organizerName: '',
+        activePublisherRef: _user,
+      );
+      for (var i = 0; i < 100; i++) {
+        controller.resetToFreshDraft(
+          organizerId: 'user-1',
+          organizerEmail: '',
+          organizerName: '',
+        );
+        expect(ids.add(controller.state.draft.id), isTrue);
+        expect(controller.state.draft.effectivePublisher, _user);
+        expect(original.effectivePublisher, _page);
+      }
+    },
+  );
+
   const types = <CreateObjectType>[
     CreateObjectType.event,
     CreateObjectType.place,

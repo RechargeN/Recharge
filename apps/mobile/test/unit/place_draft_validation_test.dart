@@ -7,7 +7,6 @@ import 'package:recharge/features/create/domain/entities/place_creation_policy.d
 import 'package:recharge/features/create/domain/entities/place_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/place_validation_issue.dart';
 import 'package:recharge/features/create/domain/usecases/validate_place_draft_usecase.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   const ValidatePlaceDraftUseCase validate = ValidatePlaceDraftUseCase();

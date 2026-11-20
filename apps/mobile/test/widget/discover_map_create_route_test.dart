@@ -6,7 +6,6 @@ import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/saved_search_entity.dart';
 import 'package:recharge/features/discover/domain/entities/smart_search_history_entity.dart';
 import 'package:recharge/features/discover/presentation/pages/discover_map_page.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/core/localization/l10n_context.dart';
 import 'package:flutter/widgets.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';

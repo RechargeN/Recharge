@@ -279,7 +279,7 @@ class _SmartSearchPageState extends ConsumerState<SmartSearchPage> {
     final SmartSearchParseResult parsed = _parse(prompt);
     if (parsed.budgetError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid budget: ${parsed.budgetError!.name}')),
+        SnackBar(content: Text(context.l10n.validationCheckTheAmount)),
       );
       return;
     }

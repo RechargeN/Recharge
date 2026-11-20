@@ -45,9 +45,7 @@ class CreateTimeSlotDraft {
     final startUtc = UtcInstant.parse(start).value;
     final endUtc = UtcInstant.parse(end).value;
     if (!startUtc.isBefore(endUtc)) {
-      throw const FormatException(
-        'Stored Create time slot must have positive duration',
-      );
+      throw const FormatException('create_slot_duration_invalid');
     }
     return CreateTimeSlotDraft(
       localId: id,

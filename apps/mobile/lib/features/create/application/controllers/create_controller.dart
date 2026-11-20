@@ -1,9 +1,9 @@
 import '../../../../shared/primitives/errors/coded_refusal.dart';
 import '../../domain/usecases/build_session_content_body.dart';
-import '../../../../../shared/primitives/time/utc_instant.dart';
-import '../../../../../shared/primitives/money/money.dart';
-import '../../../../../shared/primitives/money/currency_code.dart';
-import '../../../../../shared/primitives/money/money_parser.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
+import '../../../../shared/primitives/money/money_parser.dart';
 import '../../../../shared/primitives/money/money_parse_result.dart';
 import 'dart:async';
 
@@ -23,7 +23,6 @@ import '../../../../core/parsing/input_parsers.dart';
 import '../../../../core/product_analytics/product_analytics_contract.dart';
 import '../../../../core/product_analytics/product_analytics_recorder.dart';
 import '../../../../core/telemetry/analytics_service.dart';
-import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/activity_draft_data.dart';
 import '../../domain/entities/activity_validation_issue.dart';
 import '../../domain/entities/collection_draft_data.dart';
@@ -559,8 +558,7 @@ class CreateController extends ChangeNotifier {
         _state.copyWith(
           status: CreateStatus.error,
           userId: userId,
-          message:
-              'Не удалось прочитать сохранённую цену. Черновик сохранён без изменений.',
+          message: CreateNotice.storedMoneyInvalid,
           saveStatus: CreateSaveStatus.failed,
         ),
       );
@@ -572,8 +570,7 @@ class CreateController extends ChangeNotifier {
         _state.copyWith(
           status: CreateStatus.error,
           userId: userId,
-          message:
-              'Не удалось прочитать сохранённые данные черновика. Исходная запись сохранена без изменений.',
+          message: CreateNotice.storedDraftInvalid,
           saveStatus: CreateSaveStatus.failed,
         ),
       );
@@ -3085,10 +3082,6 @@ class CreateController extends ChangeNotifier {
       return;
     }
     _updatePlace((PlaceDraftData place) {
-      final String currencyCode = place.pricing.currencyCode;
-      Money? parseMoney(String? value) => value == null
-          ? null
-          : Money.tryParseMajor(value, currencyCode: currencyCode);
       return place.copyWith(
         pricing: place.pricing.copyWith(
           entryPriceFrom: entryFrom == null ? null : parsed['entryFrom'],
@@ -3602,12 +3595,7 @@ class CreateController extends ChangeNotifier {
     if (!result.isSuccess) {
       _moneyInputErrors[field] = result.error!;
       _autosaveTimer?.cancel();
-      _setState(
-        _state.copyWith(
-          message:
-              'Проверьте сумму и валюту: лишние знаки после запятой не округляются.',
-        ),
-      );
+      _setState(_state.copyWith(message: CreateNotice.moneyInputInvalid));
       return null;
     }
     _moneyInputErrors.remove(field);
@@ -3692,8 +3680,7 @@ class CreateController extends ChangeNotifier {
         _state.copyWith(
           validationErrors: {
             ..._state.validationErrors,
-            'startDateTimeUtc':
-                'Enter an explicit UTC timestamp (YYYY-MM-DDTHH:mm:ssZ)',
+            'startDateTimeUtc': 'create.validation.utc_input_invalid',
           },
         ),
       );
@@ -3924,8 +3911,7 @@ class CreateController extends ChangeNotifier {
         _state.copyWith(
           validationErrors: {
             ..._state.validationErrors,
-            'registrationDeadlineUtc':
-                'Enter an explicit UTC timestamp (YYYY-MM-DDTHH:mm:ssZ)',
+            'registrationDeadlineUtc': 'create.validation.utc_input_invalid',
           },
         ),
       );
@@ -5212,7 +5198,7 @@ class CreateController extends ChangeNotifier {
         instantUtc: DateTime.now().toUtc(),
         timezoneId: _runtimeDefaults.timezone,
       ),
-    );
+    ).copyWith(id: _localId());
     if (draft.eventData != null) {
       draft = draft.copyWith(
         publisherRef:

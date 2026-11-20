@@ -53,8 +53,6 @@ class EvaluateScenarioReadinessUseCase {
           code: code,
           severity: ScenarioValidationSeverity.error,
           path: 'budget',
-          message:
-              'Money totals cannot be calculated safely; check amounts and currencies.',
         ),
       ],
     ),

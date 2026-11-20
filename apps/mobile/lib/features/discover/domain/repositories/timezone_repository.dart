@@ -17,11 +17,7 @@ class LocalDateTimeValue implements Comparable<LocalDateTimeValue> {
       );
     }
     if (weekday != date.weekday) {
-      throw ArgumentError.value(
-        weekday,
-        'weekday',
-        'Must match the local date',
-      );
+      throw ArgumentError.value(weekday, 'weekday', 'local_date_mismatch');
     }
   }
 

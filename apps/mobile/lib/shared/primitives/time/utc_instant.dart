@@ -49,11 +49,7 @@ class UtcInstant implements Comparable<UtcInstant> {
 
   factory UtcInstant(DateTime value) {
     if (!value.isUtc) {
-      throw ArgumentError.value(
-        value,
-        'value',
-        'An explicit UTC value is required',
-      );
+      throw ArgumentError.value(value, 'value', 'explicit_utc_required');
     }
     return UtcInstant._(value);
   }

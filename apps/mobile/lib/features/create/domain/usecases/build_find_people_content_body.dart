@@ -162,7 +162,7 @@ final class FindPeopleContentBodyMapper {
               data.expectedSpendAmount != null)
             'expectedSpend': <String, Object?>{
               'amountMinor': data.expectedSpendAmount!.minorUnits,
-              'currencyCode': data.expectedSpendAmount!.currencyCode,
+              'currencyCode': data.expectedSpendAmount!.currency.value,
             },
           if (data.costNote != null) 'costNote': data.costNote,
           'expenseSplitMode': _snake(data.expenseSplitMode.name),

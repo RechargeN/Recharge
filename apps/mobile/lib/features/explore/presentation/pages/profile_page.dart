@@ -2601,7 +2601,10 @@ _CreatorListingData? _creatorListingDataFor(
         ? l10n.discoverFree
         : RechargeFormats.money(
             draft.basePrice ??
-                Money(minorUnits: 0, currency: CurrencyCode.parse(draft.currency)),
+                Money(
+                  minorUnits: 0,
+                  currency: CurrencyCode.parse(draft.currency),
+                ),
             l10n.localeName,
           ),
     readinessLabel: missingFields.isEmpty

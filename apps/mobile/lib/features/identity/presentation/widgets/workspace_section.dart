@@ -247,15 +247,15 @@ class _WorkspaceList extends StatelessWidget {
             const SizedBox(height: 8),
           ],
           if (snapshot.canUseAdminTools)
-          _WorkspaceTile(
-            key: const ValueKey<String>('admin-tools-entry'),
-            icon: Icons.admin_panel_settings_outlined,
-            title: context.l10n.identityAdminTools,
-            subtitle: context.l10n.identityAdminSeparate,
-            selected: false,
-            enabled: !state.isBusy,
-            onTap: onAdminTools,
-          ),
+            _WorkspaceTile(
+              key: const ValueKey<String>('admin-tools-entry'),
+              icon: Icons.admin_panel_settings_outlined,
+              title: context.l10n.identityAdminTools,
+              subtitle: context.l10n.identityAdminSeparate,
+              selected: false,
+              enabled: !state.isBusy,
+              onTap: onAdminTools,
+            ),
         ],
         if (state.isBusy) ...<Widget>[
           const SizedBox(height: 18),

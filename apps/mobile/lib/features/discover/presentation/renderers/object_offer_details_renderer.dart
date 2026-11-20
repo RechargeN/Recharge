@@ -3,7 +3,6 @@ import '../../../../core/localization/recharge_formats.dart';
 import '../../../../shared/primitives/money/money.dart';
 import '../discover_formats.dart';
 import '../../../../shared/primitives/money/currency_code.dart';
-import '../../../../shared/primitives/money/money_formatter.dart';
 import 'dart:async';
 
 import 'package:design_system/design_system.dart';
@@ -3237,7 +3236,7 @@ String _moneyLabel(
   int amountMinor,
   String currencyCode,
 ) => RechargeFormats.money(
-  Money(minorUnits: amountMinor, currencyCode: currencyCode),
+  Money(minorUnits: amountMinor, currency: CurrencyCode.parse(currencyCode)),
   l10n.localeName,
 );
 
@@ -3566,18 +3565,6 @@ String _findPeopleRecruitmentLabel(
     PublishedFindPeopleRecruitmentStatus.expired =>
       l10n.discoverRecruitmentClosed,
   };
-}
-
-String _formatAmount(Money amount) {
-  try {
-    return MoneyFormatter().decimal(
-      amount,
-      locale: 'en',
-      omitZeroFraction: true,
-    );
-  } on MoneyFormatException {
-    return '—';
-  }
 }
 
 /// Internal formatting adapter only. Public renderer input is always typed.

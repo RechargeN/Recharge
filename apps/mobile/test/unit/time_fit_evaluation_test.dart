@@ -14,7 +14,6 @@ import 'package:recharge/features/discover/domain/repositories/travel_time_repos
 import 'package:recharge/features/discover/domain/usecases/apply_time_window_usecase.dart';
 import 'package:recharge/features/discover/domain/usecases/calculate_time_fit_score_usecase.dart';
 import 'package:recharge/features/discover/domain/usecases/calculate_travel_times_usecase.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   test('event exactly inside travel and buffer boundaries fits', () async {

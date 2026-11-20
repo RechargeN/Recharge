@@ -1,3 +1,4 @@
+import '../../core/localization/l10n_context.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,20 +40,18 @@ class _AdminToolsPageState extends ConsumerState<AdminToolsPage>
   Widget build(BuildContext context) {
     final access = ref.watch(activeIdentityAccessProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin tools')),
+      appBar: AppBar(title: Text(context.l10n.identityAdminTools)),
       body: access?.canUseAdminTools != true
-          ? const Center(child: Text('Admin access unavailable'))
+          ? Center(child: Text(context.l10n.adminToolsUnavailable))
           : ListView(
               padding: const EdgeInsets.all(20),
               children: [
-                const Text('Local/mock administration'),
-                const Text(
-                  'Verification and quota decisions are not available.',
-                ),
+                Text(context.l10n.adminToolsLocalMock),
+                Text(context.l10n.adminToolsNoDecisions),
                 if (access!.hasGlobalCapability('moderate.route') ||
                     access.hasGlobalCapability('manage.route'))
                   ListTile(
-                    title: const Text('Route moderation'),
+                    title: Text(context.l10n.createRouteRouteModeration),
                     onTap: () => context.push(RouteNames.routeModeration),
                   ),
               ],

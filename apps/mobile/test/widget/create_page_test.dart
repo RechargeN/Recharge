@@ -29,7 +29,6 @@ import 'package:recharge/features/create/domain/usecases/save_create_draft_useca
 import 'package:recharge/features/create/presentation/pages/create_hub_page.dart';
 import 'package:recharge/features/create/presentation/pages/create_page.dart';
 import 'package:recharge/features/create/presentation/pages/create_success_page.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/create/presentation/widgets/activity_create_block.dart';
 import 'package:recharge/features/create/presentation/widgets/server_publication_requirements.dart';
 
@@ -1121,7 +1120,7 @@ void main() {
       expect(find.text('Search page'), findsOneWidget);
       expect(find.text('Museum evening route'), findsOneWidget);
       expect(find.text('workshops_masterclasses'), findsOneWidget);
-      expect(find.text('12'), findsOneWidget);
+      expect(find.text('12.00'), findsOneWidget);
 
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();

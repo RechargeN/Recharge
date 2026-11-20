@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/money.dart';
 import 'package:uuid/uuid.dart';
 
 import '../entities/create_draft_entity.dart';
@@ -225,13 +226,13 @@ final class EventContentBodyMapper {
   }
 
   Map<String, Object?> _pricing(CreateDraftEntity draft, EventDraftData event) {
-    final EventMoneyDraft? price = event.price;
+    final Money? price = event.price;
     return <String, Object?>{
       'mode': event.pricingMode.name,
       if (event.pricingMode != EventPricingMode.free && price != null)
         'price': <String, Object?>{
-          'amountMinor': price.amountMinor,
-          'currencyCode': price.currencyCode,
+          'amountMinor': price.minorUnits,
+          'currencyCode': price.currency.value,
         },
       if (event.pricingMode != EventPricingMode.free &&
           _text(draft.pricingModel) != null)

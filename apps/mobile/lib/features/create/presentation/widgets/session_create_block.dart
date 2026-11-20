@@ -462,7 +462,7 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
         if (skipped.isNotEmpty) ...<Widget>[
           const SizedBox(height: 12),
           Text(
-            'Skipped because clocks change',
+            context.l10n.createSessionClockChangeSkipped,
             style: Theme.of(context).textTheme.labelLarge,
           ),
           for (final slot in skipped) Text(_slotLabel(slot)),
@@ -518,7 +518,11 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
                     ),
             ),
             decoration: InputDecoration(
-              labelText: context.l10n.createSessionPricePerSlotEur.replaceAll('EUR', session.price.amount?.currency.value ?? widget.state.draft.currency),
+              labelText: context.l10n.createSessionPricePerSlotEur.replaceAll(
+                'EUR',
+                session.price.amount?.currency.value ??
+                    widget.state.draft.currency,
+              ),
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (String value) {

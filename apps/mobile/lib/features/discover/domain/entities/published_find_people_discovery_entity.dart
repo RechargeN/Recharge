@@ -290,9 +290,7 @@ final class PublishedFindPeopleDiscoveryEntity {
     if (amount != null &&
         (amount.minorUnits < 0 ||
             amount.currency.value != currencyCode.trim().toUpperCase())) {
-      throw ArgumentError(
-        'Expected spend needs a nonnegative amount in the declared currency.',
-      );
+      throw ArgumentError('expected_spend_currency_invalid');
     }
     switch (costType) {
       case PublishedFindPeopleCostType.free:

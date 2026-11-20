@@ -1,3 +1,6 @@
+import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'dart:io';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -226,14 +229,21 @@ void main() {
 
       // Map's actual controller and adapter path, independently loaded.
       final map = DiscoverFeedController(
+        runtimeDefaults: const DiscoverRuntimeDefaults(
+          timezoneId: 'Europe/Riga',
+          currency: CurrencyCode.eur,
+          originLat: 56.9496,
+          originLng: 24.1052,
+        ),
         getDiscoverFeedUseCase: GetDiscoverFeedUseCase(listing),
         discoverPreferencesRepository: DiscoverPreferencesRepositoryImpl(
           localDataSource: DiscoverPreferencesLocalDataSource(
             const FlutterSecureStorage(),
+            timezoneRepository: TimezoneRepositoryImpl(),
             defaultMarketCityId: 'riga',
             defaultCenterLat: 56.9496,
             defaultCenterLng: 24.1052,
-            defaultCurrencyCode: 'EUR',
+            legacyCurrencyCode: 'EUR',
           ),
         ),
         analyticsService: SpyAnalytics(),

@@ -47,7 +47,7 @@ class DiscoverQueryModel {
       'manual_area_selected': value.manualAreaSelected,
       'search_area_dirty': value.searchAreaDirty,
       'source_screen': value.sourceScreen,
-      'query_version': 2,
+      'query_version': 3,
       'applied_at_utc': UtcInstant(value.appliedAtUtc).toString(),
       'time_window': value.timeWindow == null
           ? null
@@ -69,7 +69,7 @@ class DiscoverQueryModel {
       throw const FormatException('Invalid Discover query version');
     }
     final int sourceVersion = rawVersion as int? ?? 1;
-    if (sourceVersion > 2 || sourceVersion < 1) {
+    if (sourceVersion > 3 || sourceVersion < 1) {
       throw const FormatException('Unsupported Discover query version');
     }
     final bool manualAreaSelected =
@@ -144,7 +144,7 @@ class DiscoverQueryModel {
       manualAreaSelected: manualAreaSelected,
       searchAreaDirty: (map['search_area_dirty'] as bool?) ?? false,
       sourceScreen: (map['source_screen'] as String?) ?? 'discover',
-      queryVersion: 2,
+      queryVersion: 3,
       appliedAtUtc:
           _dateOrNull(map['applied_at_utc']) ?? DateTime.now().toUtc(),
       timeWindow: rawTimeWindow == null

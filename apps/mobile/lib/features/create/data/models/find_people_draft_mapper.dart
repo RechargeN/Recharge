@@ -2,7 +2,6 @@ import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../core/parsing/money_legacy_adapter.dart';
 import '../../../../shared/primitives/money/money_parse_result.dart';
 import '../../domain/entities/find_people_draft_data.dart';
-import '../../../../shared/primitives/money/money.dart';
 
 class FindPeopleDraftMapper {
   const FindPeopleDraftMapper._();

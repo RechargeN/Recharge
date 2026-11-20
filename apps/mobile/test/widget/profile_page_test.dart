@@ -13,7 +13,6 @@ import 'package:recharge/features/create/domain/repositories/create_draft_collec
 import 'package:recharge/features/create/domain/entities/publisher_ref.dart';
 import 'package:recharge/features/explore/presentation/widgets/scenario_library_panel.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -34,7 +33,6 @@ import 'package:recharge/features/create/domain/usecases/load_create_draft_useca
 import 'package:recharge/features/create/domain/usecases/publish_create_draft_usecase.dart';
 import 'package:recharge/features/create/domain/usecases/save_create_draft_usecase.dart';
 import 'package:recharge/features/discover/application/controllers/discover_feed_controller.dart';
-import 'package:recharge/features/discover/application/discover_runtime_defaults.dart';
 import 'package:recharge/features/discover/application/discover_providers.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
@@ -1349,7 +1347,7 @@ void main() {
     expect(find.text('Search page'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
     expect(find.text('workshops_masterclasses'), findsOneWidget);
-    expect(find.text('12'), findsOneWidget);
+    expect(find.text('12.00'), findsOneWidget);
 
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -1725,7 +1723,7 @@ void main() {
       expect(find.text('Search page'), findsOneWidget);
       expect(find.text('Draft pottery workshop'), findsOneWidget);
       expect(find.text('workshops_masterclasses'), findsOneWidget);
-      expect(find.text('8'), findsOneWidget);
+      expect(find.text('8.00'), findsOneWidget);
 
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();

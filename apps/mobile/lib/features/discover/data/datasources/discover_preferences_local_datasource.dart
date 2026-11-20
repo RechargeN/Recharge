@@ -20,8 +20,7 @@ class DiscoverPreferencesLocalDataSource {
     this.legacyCurrencyCode,
   }) : _defaultMarketCityId = defaultMarketCityId,
        _defaultCenterLat = defaultCenterLat,
-       _defaultCenterLng = defaultCenterLng,
-       _defaultCurrencyCode = defaultCurrencyCode;
+       _defaultCenterLng = defaultCenterLng;
 
   final FlutterSecureStorage _secureStorage;
   final TimezoneRepository timezoneRepository;
@@ -29,7 +28,6 @@ class DiscoverPreferencesLocalDataSource {
   final String _defaultMarketCityId;
   final double _defaultCenterLat;
   final double _defaultCenterLng;
-  final String _defaultCurrencyCode;
   static const String _lastQueryKey = 'discover.last_query';
   static const String _savedSearchesKey = 'discover.saved_searches';
   static const String _smartSearchHistoryKey = 'discover.smart_search_history';

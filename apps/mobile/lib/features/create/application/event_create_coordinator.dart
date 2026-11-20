@@ -7,7 +7,6 @@ import '../domain/entities/event_availability_projection.dart';
 import '../domain/entities/event_classification.dart';
 import '../domain/entities/event_inventory.dart';
 import '../domain/entities/event_validation_issue.dart';
-import '../../../shared/primitives/money/money.dart';
 import '../domain/repositories/event_inventory_snapshot_repository.dart';
 import '../domain/repositories/event_timezone_repository.dart';
 import '../domain/usecases/materialize_event_schedule_usecase.dart';

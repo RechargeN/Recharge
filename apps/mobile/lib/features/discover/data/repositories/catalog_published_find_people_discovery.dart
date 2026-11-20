@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
 import 'dart:math' as math;
 
 import '../../domain/entities/published_find_people_discovery_entity.dart';
@@ -114,7 +116,12 @@ final class CatalogPublishedFindPeopleDiscovery
       skillLevelLabel: item.skillLevel,
       languageLabels: item.languageCodes,
       costType: _cost(item.costType),
-      expectedSpendAmount: spend == null ? null : spend / 100,
+      expectedSpendAmount: spend == null
+          ? null
+          : Money(
+              minorUnits: spend,
+              currency: CurrencyCode.parse(item.currencyCode!),
+            ),
       currencyCode: item.currencyCode ?? '',
       publicLocation: PublishedFindPeoplePointLocation(
         meetingMode: PublishedFindPeopleMeetingMode.inPerson,

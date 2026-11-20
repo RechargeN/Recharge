@@ -5,7 +5,6 @@ import '../entities/create_draft_entity.dart';
 import '../entities/place_creation_policy.dart';
 import '../entities/place_draft_data.dart';
 import '../entities/place_validation_issue.dart';
-import '../../../../shared/primitives/money/money.dart';
 
 class ValidatePlaceDraftUseCase {
   const ValidatePlaceDraftUseCase();

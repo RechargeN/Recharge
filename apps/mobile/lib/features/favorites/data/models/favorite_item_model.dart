@@ -3,7 +3,6 @@ import '../../../../core/parsing/money_legacy_adapter.dart';
 import '../../../../shared/primitives/money/money_parse_result.dart';
 import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/favorite_item_entity.dart';
-import '../../../../shared/primitives/money/money.dart';
 
 class FavoriteItemModel {
   const FavoriteItemModel({
@@ -46,16 +45,19 @@ class FavoriteItemModel {
     Map<String, dynamic> json, {
     String? legacyCurrencyCode,
   }) {
-    final price =
-        MoneyLegacyAdapter().readOptional(
-          hasCanonicalMinorUnits: json.containsKey('priceMinorUnits'),
-          canonicalMinorUnits: json['priceMinorUnits'],
-          legacyMajorAmount: json['priceAmount'],
-          currencyCode: json.containsKey('currencyCode')
-              ? json['currencyCode']
-              : legacyCurrencyCode,
-        ) ??
-        null;
+    final price = MoneyLegacyAdapter().readOptional(
+      hasCanonicalMinorUnits: json.containsKey('priceMinorUnits'),
+      canonicalMinorUnits: json['priceMinorUnits'],
+      legacyMajorAmount: json.containsKey('price')
+          ? json['price']
+          : json['priceAmount'],
+      currencyCode: json.containsKey('currencyCode')
+          ? json['currencyCode']
+          : legacyCurrencyCode,
+    );
+    if (price == null && json['evergreen'] != true) {
+      throw const MoneyReadException(MoneyParseError.invalidCanonicalValue);
+    }
     if (price != null && price.minorUnits < 0) {
       throw const MoneyReadException(MoneyParseError.outOfRange);
     }
@@ -81,10 +83,12 @@ class FavoriteItemModel {
   }
 
   Map<String, dynamic> toJson() {
-    if (CurrencyMetadataRegistry.eurOnly.lookup(priceAmount.currency) == null) {
+    if (priceAmount != null &&
+        CurrencyMetadataRegistry.eurOnly.lookup(priceAmount!.currency) ==
+            null) {
       throw const MoneyReadException(MoneyParseError.unknownCurrency);
     }
-    if (priceAmount.minorUnits < 0) {
+    if (priceAmount != null && priceAmount!.minorUnits < 0) {
       throw const MoneyReadException(MoneyParseError.outOfRange);
     }
     return <String, dynamic>{

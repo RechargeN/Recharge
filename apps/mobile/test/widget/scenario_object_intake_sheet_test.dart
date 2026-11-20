@@ -9,7 +9,6 @@ import 'package:recharge/app/application/scenario_object_intake_facade.dart';
 import 'package:recharge/app/application/scenario_object_intake_providers.dart';
 import 'package:recharge/app/di/service_locator.dart';
 import 'package:recharge/app/presentation/scenario_object_intake_sheet.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/scenario_create_coordinator.dart';

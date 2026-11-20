@@ -284,8 +284,11 @@ void main() {
     'bad favorite price blocks add/delete without success feedback or data loss',
     () async {
       final raw = jsonEncode([favoriteRecord()..['priceMinorUnits'] = 'bad']);
-      FlutterSecureStorage.setMockInitialValues({'favorites_items_v1': raw});
+      FlutterSecureStorage.setMockInitialValues({
+        'favorites_items_v2_b3duZXI=': raw,
+      });
       final repository = FavoritesRepositoryImpl(
+        currentOwnerId: () async => 'owner',
         localDataSource: FavoritesLocalDataSource(
           storage,
           legacyCurrencyCode: 'EUR',
@@ -308,7 +311,7 @@ void main() {
         await controller.removeFavorite('favorite', sourceScreen: 'test'),
         isFalse,
       );
-      expect(await storage.read(key: 'favorites_items_v1'), raw);
+      expect(await storage.read(key: 'favorites_items_v2_b3duZXI='), raw);
     },
   );
 

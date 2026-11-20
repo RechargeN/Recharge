@@ -6,7 +6,6 @@ import 'published_route_discovery_entity.dart';
 import 'route_catalog_facts.dart';
 import 'time_fit_evaluation.dart';
 import 'time_slot.dart';
-import '../../../../shared/primitives/money/money.dart';
 
 enum DurationConfidence { exact, estimated, unknown }
 
@@ -63,7 +62,7 @@ class DiscoverItemEntity {
        assert(
          !allowsPartialAttendance || (minimumVisitDurationMinutes ?? 0) > 0,
        ) {
-    if (priceAmount.minorUnits < 0) {
+    if ((priceAmount?.minorUnits ?? 0) < 0) {
       throw ArgumentError('Price must be nonnegative');
     }
   }

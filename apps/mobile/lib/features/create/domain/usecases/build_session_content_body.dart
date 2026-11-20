@@ -243,9 +243,9 @@ final class SessionContentBodyMapper {
         'price': <String, Object?>{
           'mode': data.price.mode.name,
           if (data.price.amount != null)
-            'amount_minor': data.price.amount!.amountMinor,
+            'amount_minor': data.price.amount!.minorUnits,
           if (data.price.amount != null)
-            'currency_code': data.price.amount!.currencyCode,
+            'currency_code': data.price.amount!.currency.value,
         },
         'external_booking_url': data.externalBookingUrl,
         if (data.externalTermsUrl != null)

@@ -1,3 +1,4 @@
+import 'package:recharge/core/id/id_generator.dart' show UuidV4IdGenerator;
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -16,7 +17,7 @@ void main() {
       String? actor = 'viewer';
       var offline = false;
       Completer<Map<String, Object?>>? response;
-      final seed = ScenarioBuilderController();
+      final seed = ScenarioBuilderController(idGenerator: UuidV4IdGenerator());
       final draft = seed.state.draft;
       seed.dispose();
       final client = QuickPlanSyncClient(
@@ -33,7 +34,10 @@ void main() {
           };
         },
       );
-      final controller = ScenarioBuilderController(repository: client);
+      final controller = ScenarioBuilderController(
+        idGenerator: UuidV4IdGenerator(),
+        repository: client,
+      );
       addTearDown(controller.dispose);
       final g = QuickPlanInvitation(
         planId: draft.id,

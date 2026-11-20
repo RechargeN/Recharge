@@ -68,7 +68,6 @@ class ScenarioDraftEntity {
     required this.freeOnly,
     required this.walkingOnly,
     required this.sourcePrompt,
-    required this.currencyCode,
     required this.steps,
   });
 
@@ -80,7 +79,7 @@ class ScenarioDraftEntity {
   final bool freeOnly;
   final bool walkingOnly;
   final String sourcePrompt;
-  final String currencyCode;
+  String get currencyCode => currency.value;
   final List<ScenarioStepEntity> steps;
 
   int get totalDurationMinutes {
@@ -119,7 +118,6 @@ class ScenarioDraftEntity {
     bool? freeOnly,
     bool? walkingOnly,
     String? sourcePrompt,
-    String? currencyCode,
     List<ScenarioStepEntity>? steps,
   }) {
     return ScenarioDraftEntity(
@@ -131,7 +129,6 @@ class ScenarioDraftEntity {
       freeOnly: freeOnly ?? this.freeOnly,
       walkingOnly: walkingOnly ?? this.walkingOnly,
       sourcePrompt: sourcePrompt ?? this.sourcePrompt,
-      currencyCode: currencyCode ?? this.currencyCode,
       steps: steps ?? this.steps,
     );
   }

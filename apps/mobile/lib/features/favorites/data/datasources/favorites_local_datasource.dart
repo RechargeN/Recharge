@@ -5,8 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/favorite_item_model.dart';
 
 class FavoritesLocalDataSource {
-  FavoritesLocalDataSource(this._storage, {String? legacyCurrencyCode})
-    : legacyCurrencyCode = legacyCurrencyCode;
+  FavoritesLocalDataSource(this._storage, {this.legacyCurrencyCode});
   final String? legacyCurrencyCode;
 
   // The legacy global list has no proven owner and is deliberately not adopted.
@@ -18,7 +17,6 @@ class FavoritesLocalDataSource {
   }
 
   final FlutterSecureStorage _storage;
-  final String _defaultCurrencyCode;
 
   Future<List<FavoriteItemModel>> readFavorites(String ownerId) async {
     final String? raw = await _storage.read(key: _favoritesKey(ownerId));

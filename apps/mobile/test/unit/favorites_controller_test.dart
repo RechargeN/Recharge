@@ -9,7 +9,6 @@ import 'package:recharge/features/favorites/domain/repositories/favorites_reposi
 import 'package:recharge/features/favorites/domain/usecases/add_favorite_usecase.dart';
 import 'package:recharge/features/favorites/domain/usecases/get_favorites_usecase.dart';
 import 'package:recharge/features/favorites/domain/usecases/remove_favorite_usecase.dart';
-import 'package:recharge/shared/primitives/money/money.dart';
 
 void main() {
   late _FakeFavoritesRepository repository;

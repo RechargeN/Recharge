@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/money/currency_code.dart';
 import 'dart:math' as math;
 
 import '../../domain/entities/event_occurrence.dart';
@@ -128,7 +130,12 @@ final class CatalogPublishedEventDiscovery
       latitude: item.point?.latitude ?? double.nan,
       longitude: item.point?.longitude ?? double.nan,
       distanceKm: 0,
-      priceAmount: fixed ? price.amountMinor / 100 : 0,
+      priceAmount: Money(
+        minorUnits: fixed ? price.amountMinor : 0,
+        currency: CurrencyCode.parse(
+          fixed ? price.currencyCode! : _currencyCode,
+        ),
+      ),
       isFree: price?.free ?? false,
       currencyCode: fixed ? price.currencyCode! : _currencyCode,
       durationMinutes: minutes > 0 ? minutes : null,

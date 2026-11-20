@@ -25,7 +25,6 @@ import 'place_draft_mapper.dart';
 import 'rental_draft_mapper.dart';
 import 'route_draft_mapper.dart';
 import 'scenario_draft_mapper.dart';
-import '../../../../shared/primitives/money/money.dart';
 import 'session_draft_mapper.dart';
 import 'class_workshop_draft_mapper.dart';
 import '../../domain/entities/session_draft_data.dart';
@@ -364,9 +363,7 @@ class CreateDraftModel {
           timezoneId: timezone,
         );
       } on EventLocalTimeException {
-        throw const FormatException(
-          'Legacy Event requires a known explicit timezone',
-        );
+        throw const FormatException('legacy_event_timezone_required');
       }
     }
     final EventDraftData eventDefaults =
@@ -995,9 +992,7 @@ class CreateDraftModel {
   static String? _readUtcText(Object? raw, {bool optional = false}) {
     if (raw == null && optional) return null;
     if (raw is! String) {
-      throw const FormatException(
-        'Create UTC timestamp must be present as text',
-      );
+      throw const FormatException('create_utc_text_required');
     }
     UtcInstant.parse(raw);
     // Validation is not a migration: retain valid legacy text on read.

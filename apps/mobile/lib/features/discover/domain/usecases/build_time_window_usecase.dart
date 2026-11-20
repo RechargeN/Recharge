@@ -34,7 +34,9 @@ class BuildTimeWindowUseCase {
     try {
       UtcInstant(nowUtc);
     } on ArgumentError {
-      throw const TimeWindowValidationException('Explicit UTC now is required');
+      throw const TimeWindowValidationException(
+        TimeWindowIssue.invalidTravelContext,
+      );
     }
     if (!_timezoneRepository.isValidTimezone(timezoneId)) {
       throw const TimeWindowValidationException(
