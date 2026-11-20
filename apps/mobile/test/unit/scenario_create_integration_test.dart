@@ -1,5 +1,6 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/application/scenario_create_coordinator.dart';
 import 'package:recharge/features/create/data/models/create_draft_model.dart';
 import 'package:recharge/features/create/data/models/scenario_draft_mapper.dart';
@@ -111,6 +112,7 @@ void main() {
     scenario = coordinator.updateContext(
       scenario,
       dateMode: ScenarioDateMode.dated,
+      localToday: LocalDate(2026, 3, 28),
     );
     scenario = coordinator.addTimeBlock(
       scenario,

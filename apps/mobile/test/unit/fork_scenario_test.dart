@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/entities/scenario_budget_draft.dart';
 import 'package:recharge/features/create/domain/entities/scenario_draft_data.dart';

@@ -398,7 +398,7 @@ class ValidateRentalDraftUseCase {
             ),
           );
         }
-        if (curr.unitPrice.amountMinor > prev.unitPrice.amountMinor) {
+        if (curr.unitPrice.minorUnits > prev.unitPrice.minorUnits) {
           issues.add(
             const RentalValidationIssue(
               code: 'rental_rate_price_increases',
@@ -410,8 +410,8 @@ class ValidateRentalDraftUseCase {
         }
       }
       for (final RentalRateStep step in pricing.rateSteps) {
-        if (step.unitPrice.currencyCode != pricing.currencyCode ||
-            step.unitPrice.amountMinor < 0) {
+        if (step.unitPrice.currency.value != pricing.currencyCode ||
+            step.unitPrice.minorUnits < 0) {
           issues.add(
             const RentalValidationIssue(
               code: 'rental_rate_step_currency_or_sign',
@@ -425,7 +425,7 @@ class ValidateRentalDraftUseCase {
     }
 
     final RentalDepositPolicy deposit = pricing.deposit;
-    if (deposit.amount.currencyCode != pricing.currencyCode) {
+    if (deposit.amount.currency.value != pricing.currencyCode) {
       issues.add(
         const RentalValidationIssue(
           code: 'rental_deposit_currency_mismatch',

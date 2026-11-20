@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,7 +9,9 @@ import 'package:recharge/features/scenarios/application/state/scenario_builder_s
 
 void main() {
   test('legacy Quick Plan runtime has stable identity and revision', () {
-    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioBuilderController controller = ScenarioBuilderController(
+      idGenerator: _Ids(),
+    );
     final String initialId = controller.state.draft.id;
     final List<String> initialStepIds = controller.state.draft.steps
         .map((step) => step.id)
@@ -28,7 +31,9 @@ void main() {
   });
 
   test('initial scenario has calculated calm route totals', () {
-    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioBuilderController controller = ScenarioBuilderController(
+      idGenerator: _Ids(),
+    );
 
     expect(controller.state.draft.mood, ScenarioMood.calm);
     expect(controller.state.draft.steps, isNotEmpty);
@@ -37,7 +42,9 @@ void main() {
   });
 
   test('scenario stops include map coordinates', () {
-    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioBuilderController controller = ScenarioBuilderController(
+      idGenerator: _Ids(),
+    );
 
     expect(
       controller.state.draft.steps.every(
@@ -48,7 +55,9 @@ void main() {
   });
 
   test('freeOnly filters paid scenario steps', () {
-    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioBuilderController controller = ScenarioBuilderController(
+      idGenerator: _Ids(),
+    );
 
     controller.setFreeOnly(true);
 
@@ -66,7 +75,9 @@ void main() {
   });
 
   test('mood change rebuilds scenario steps', () {
-    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioBuilderController controller = ScenarioBuilderController(
+      idGenerator: _Ids(),
+    );
 
     controller.setMood(ScenarioMood.active);
 
@@ -75,7 +86,9 @@ void main() {
   });
 
   test('applySeed updates route conditions and source prompt', () {
-    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioBuilderController controller = ScenarioBuilderController(
+      idGenerator: _Ids(),
+    );
 
     controller.applySeed(
       mood: ScenarioMood.social,
@@ -98,7 +111,9 @@ void main() {
   });
 
   test('applySeed restores explicit step categories', () {
-    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioBuilderController controller = ScenarioBuilderController(
+      idGenerator: _Ids(),
+    );
 
     controller.applySeed(
       mood: ScenarioMood.calm,
@@ -110,7 +125,9 @@ void main() {
   });
 
   test('removeStepAt updates route totals', () {
-    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioBuilderController controller = ScenarioBuilderController(
+      idGenerator: _Ids(),
+    );
     final int initialCount = controller.state.draft.steps.length;
     final int initialDuration = controller.state.draft.totalDurationMinutes;
 
@@ -124,7 +141,9 @@ void main() {
   });
 
   test('moveStepDown reorders stops', () {
-    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioBuilderController controller = ScenarioBuilderController(
+      idGenerator: _Ids(),
+    );
     final String firstTitle = controller.state.draft.steps.first.title;
 
     controller.moveStepDown(0);
@@ -133,7 +152,9 @@ void main() {
   });
 
   test('addSuggestedStep appends an available stop', () {
-    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioBuilderController controller = ScenarioBuilderController(
+      idGenerator: _Ids(),
+    );
     controller.removeStepAt(0);
     final ScenarioStepEntity suggestion = controller.suggestedSteps.first;
 
@@ -146,7 +167,9 @@ void main() {
   });
 
   test('allows multiple occurrences from the same category', () {
-    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioBuilderController controller = ScenarioBuilderController(
+      idGenerator: _Ids(),
+    );
     final ScenarioStepEntity suggestion = controller.state.draft.steps.first;
     final int before = controller.state.draft.steps.length;
 
@@ -162,7 +185,9 @@ void main() {
   });
 
   test('suggestions do not suppress an already used category or object', () {
-    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioBuilderController controller = ScenarioBuilderController(
+      idGenerator: _Ids(),
+    );
     final ScenarioStepEntity existing = controller.state.draft.steps.first;
     controller.applySeed(
       mood: ScenarioMood.calm,
@@ -177,7 +202,9 @@ void main() {
   });
 
   test('route fit reports overloaded seeded route', () {
-    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioBuilderController controller = ScenarioBuilderController(
+      idGenerator: _Ids(),
+    );
 
     controller.applySeed(
       mood: ScenarioMood.social,
@@ -210,7 +237,9 @@ void main() {
   });
 
   test('optimizeRoute trims route to current conditions', () {
-    final ScenarioBuilderController controller = ScenarioBuilderController();
+    final ScenarioBuilderController controller = ScenarioBuilderController(
+      idGenerator: _Ids(),
+    );
 
     controller.applySeed(
       mood: ScenarioMood.social,
@@ -235,4 +264,10 @@ void main() {
     expect(controller.state.routeFit.score, greaterThanOrEqualTo(85));
     expect(controller.state.routeFit.level, ScenarioFitLevel.ready);
   });
+}
+
+class _Ids implements IdGenerator {
+  int _next = 0;
+  @override
+  String generate() => 'fixture-id-${_next++}';
 }

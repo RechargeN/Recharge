@@ -1,5 +1,8 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/application/scenario_create_coordinator.dart';
 import 'package:recharge/features/create/data/models/scenario_draft_mapper.dart';
 import 'package:recharge/features/create/domain/entities/scenario_budget_draft.dart';
@@ -16,6 +19,47 @@ void main() {
     coordinator = ScenarioCreateCoordinator(idGenerator: ids);
   });
 
+  test(
+    'after-midnight snapshot roundtrip is unchanged and malformed UTC fails closed',
+    () {
+      final draft = coordinator.initial(
+        timezoneId: 'Europe/Riga',
+        currencyCode: 'EUR',
+      );
+      final applied = coordinator.applyTransitSelection(
+        draft,
+        expectedRevision: draft.revision,
+        option: _option(departure: 25 * 3600 + 30, arrival: 26 * 3600 + 45),
+      );
+      final wire = ScenarioDraftMapper.toJson(applied.draft);
+      final restored = ScenarioDraftMapper.fromJson(wire);
+      expect(ScenarioDraftMapper.toJson(restored), wire);
+      final snapshot =
+          (((wire['items'] as List).single as Map)['source']
+                  as Map)['scheduleSnapshot']
+              as Map;
+      expect(snapshot['departureSecondsFromServiceDay'], 90030);
+      expect(snapshot['arrivalSecondsFromServiceDay'], 93645);
+      expect(snapshot['departureDayOffset'], 1);
+      for (final bad in [
+        '2026-02-30T10:00:00Z',
+        '2026-08-03T10:00:00',
+        '2026-08-03T10:00:00+03:00',
+        123,
+      ]) {
+        snapshot['retrievedAtUtc'] = bad;
+        expect(() => ScenarioDraftMapper.fromJson(wire), throwsFormatException);
+      }
+      snapshot['retrievedAtUtc'] = '2026-08-03T10:00:00.123456Z';
+      final exact = ScenarioDraftMapper.fromJson(wire);
+      final saved =
+          (exact.items.single.source as ScenarioPlannedTransportSourceDraft)
+              .scheduleSnapshot!;
+      expect(saved.retrievedAtUtc!.microsecond, 456);
+      snapshot['serviceDate'] = {'year': 2026, 'month': 2, 'day': 30};
+      expect(() => ScenarioDraftMapper.fromJson(wire), throwsFormatException);
+    },
+  );
   test('Apply adds one exact official item with permanent locations', () {
     final draft = coordinator.initial(
       timezoneId: 'Europe/Riga',
@@ -94,13 +138,13 @@ void main() {
     );
     draft = added.draft;
     final original = draft.items.single;
-    const cost = ScenarioCostDraft(
+    final cost = ScenarioCostDraft(
       components: <ScenarioMoneyEstimateDraft>[
         ScenarioMoneyEstimateDraft(
           componentCode: 'ticket',
           knowledge: ScenarioPriceKnowledge.known,
           source: ScenarioPriceSource.userOverride,
-          amount: ScenarioMoneyDraft(minorUnits: 1250, currencyCode: 'EUR'),
+          amount: Money(minorUnits: 1250, currency: CurrencyCode.parse('EUR')),
           basis: ScenarioPriceBasis.perPerson,
         ),
       ],
@@ -220,7 +264,7 @@ ScenarioTransitServiceOption _option({
   );
   return ScenarioTransitServiceOption(
     providerCode: 'provider-a',
-    serviceDate: const ScenarioTransitLocalDate(2026, 8, 3),
+    serviceDate: LocalDate(2026, 8, 3),
     tripId: 'trip-1',
     routeId: 'route-1',
     serviceId: 'weekday',

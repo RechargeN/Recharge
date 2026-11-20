@@ -1,3 +1,6 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/domain/entities/scenario_budget_draft.dart';
 import 'package:recharge/features/create/domain/entities/scenario_draft_data.dart';
@@ -169,7 +172,7 @@ void main() {
         ...source.locations,
         const ScenarioLocationDraft(
           id: 'loc_custom_home',
-          point: ScenarioGeoPointDraft(latitude: 56.95, longitude: 24.1),
+          point: GeoPoint(latitude: 56.95, longitude: 24.1),
           title: 'Temporary',
           disclosure: ScenarioLocationDisclosure.private,
         ),
@@ -190,19 +193,19 @@ void main() {
   });
 
   test('per-person price cannot overlap child pricing for one component', () {
-    const ScenarioCostDraft overlapping = ScenarioCostDraft(
+    final ScenarioCostDraft overlapping = ScenarioCostDraft(
       components: <ScenarioMoneyEstimateDraft>[
         ScenarioMoneyEstimateDraft(
           componentCode: 'admission',
           knowledge: ScenarioPriceKnowledge.known,
-          amount: ScenarioMoneyDraft(minorUnits: 1000, currencyCode: 'EUR'),
+          amount: Money(minorUnits: 1000, currency: CurrencyCode.parse('EUR')),
           basis: ScenarioPriceBasis.perPerson,
           source: ScenarioPriceSource.manual,
         ),
         ScenarioMoneyEstimateDraft(
           componentCode: 'admission',
           knowledge: ScenarioPriceKnowledge.known,
-          amount: ScenarioMoneyDraft(minorUnits: 500, currencyCode: 'EUR'),
+          amount: Money(minorUnits: 500, currency: CurrencyCode.parse('EUR')),
           basis: ScenarioPriceBasis.perChild,
           source: ScenarioPriceSource.manual,
         ),
@@ -244,12 +247,12 @@ void main() {
   });
 
   test('keeps weekend and foreign-currency data behind independent gates', () {
-    const ScenarioCostDraft dollars = ScenarioCostDraft(
+    final ScenarioCostDraft dollars = ScenarioCostDraft(
       components: <ScenarioMoneyEstimateDraft>[
         ScenarioMoneyEstimateDraft(
           componentCode: 'ticket',
           knowledge: ScenarioPriceKnowledge.known,
-          amount: ScenarioMoneyDraft(minorUnits: 2500, currencyCode: 'USD'),
+          amount: Money(minorUnits: 2500, currency: CurrencyCode.parse('USD')),
           basis: ScenarioPriceBasis.perBooking,
           source: ScenarioPriceSource.catalog,
         ),
@@ -312,7 +315,7 @@ ScenarioDraftData _validDraft() {
     locations: const <ScenarioLocationDraft>[
       ScenarioLocationDraft(
         id: 'location-1',
-        point: ScenarioGeoPointDraft(latitude: 56.9496, longitude: 24.1052),
+        point: GeoPoint(latitude: 56.9496, longitude: 24.1052),
         title: 'Private starting point',
         disclosure: ScenarioLocationDisclosure.private,
         timezoneId: 'Europe/Riga',

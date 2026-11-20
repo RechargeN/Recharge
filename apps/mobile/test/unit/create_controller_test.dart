@@ -7,7 +7,7 @@ import 'package:recharge/core/product_analytics/product_analytics_recorder.dart'
 import 'package:recharge/features/create/domain/entities/draft_publisher.dart';
 import 'package:recharge/features/create/domain/repositories/publisher_access_check.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/scenario_create_coordinator.dart';
@@ -31,6 +31,58 @@ void main() {
   late _FakeCreateRepository repository;
   late CreateController controller;
   test(
+    'restoring Event never materializes saved schedule or replaces local dates',
+    () async {
+      final saved = CreateDraftEntity.defaults(
+        organizerId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      ).copyWith(startDateTimeUtc: DateTime.utc(2026, 10, 25, 1, 30));
+      repository._stored = saved;
+      await controller.ensureLoaded(
+        userId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      expect(controller.state.draft.eventData, same(saved.eventData));
+      expect(controller.state.draft.startDateTimeUtc, saved.startDateTimeUtc);
+      expect(repository._stored, same(saved));
+    },
+  );
+  test(
+    'UTC input rejects wall times and offsets while preserving draft values',
+    () async {
+      await controller.ensureLoaded(
+        userId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+      );
+      controller.updateStartDateTime('2026-03-29T01:30:00.123456Z');
+      controller.updateRegistrationDeadline('2026-03-28T12:00:00Z');
+      final start = controller.state.draft.startDateTimeUtc;
+      final deadline = controller.state.draft.registrationDeadlineUtc;
+      for (final bad in [
+        '2026-03-29T03:30:00',
+        '2026-03-29T03:30:00+02:00',
+        '2026-02-30T01:30:00Z',
+      ]) {
+        controller.updateStartDateTime(bad);
+        controller.updateRegistrationDeadline(bad);
+        expect(controller.state.draft.startDateTimeUtc, start);
+        expect(controller.state.draft.registrationDeadlineUtc, deadline);
+        expect(
+          controller.state.validationErrors,
+          contains('registrationDeadlineUtc'),
+        );
+        expect(await controller.publishDraft(), isFalse);
+      }
+      controller.updateStartDateTime('');
+      controller.updateRegistrationDeadline('');
+      expect(controller.state.draft.startDateTimeUtc, isNull);
+      expect(controller.state.draft.registrationDeadlineUtc, isNull);
+    },
+  );
+  test(
     'Activity amount input preserves cents and blocks invalid edits',
     () async {
       await controller.ensureLoaded(
@@ -51,7 +103,7 @@ void main() {
             .activityData!
             .optionalContribution!
             .amountHint!
-            .amountMinor,
+            .minorUnits,
         1234,
       );
       await controller.saveDraft();
@@ -68,7 +120,7 @@ void main() {
             .activityData!
             .optionalContribution!
             .amountHint!
-            .amountMinor,
+            .minorUnits,
         1234,
       );
       await controller.saveDraft();
@@ -83,7 +135,7 @@ void main() {
             .activityData!
             .optionalContribution!
             .amountHint!
-            .amountMinor,
+            .minorUnits,
         29,
       );
       controller.updateActivityContributionAmountText('1.001');
@@ -102,18 +154,18 @@ void main() {
         organizerName: '',
       );
       controller.updateEventPriceText('12,34', locale: 'ru');
-      expect(controller.state.draft.eventData?.price?.amountMinor, 1234);
+      expect(controller.state.draft.eventData?.price?.minorUnits, 1234);
       expect(controller.state.draft.basePrice?.minorUnits, 1234);
       controller.updateEventPriceText('1.005');
       expect(
         controller.moneyInputErrors['event.price'],
         MoneyParseError.excessiveFractionDigits,
       );
-      expect(controller.state.draft.eventData?.price?.amountMinor, 1234);
+      expect(controller.state.draft.eventData?.price?.minorUnits, 1234);
       expect(await controller.publishDraft(), isFalse);
       controller.updateEventPriceText('0.29');
       expect(controller.moneyInputErrors, isEmpty);
-      expect(controller.state.draft.eventData?.price?.amountMinor, 29);
+      expect(controller.state.draft.eventData?.price?.minorUnits, 29);
     },
   );
 
@@ -294,6 +346,13 @@ void main() {
             analyticsService: _NoopAnalyticsService(),
             eventCreateCoordinator: createTestEventCoordinator(),
             publisherAccessCheck: reason == 'missing' ? null : access,
+            runtimeDefaults: const CreateRuntimeDefaults(
+              marketCityId: 'riga',
+              timezone: 'Europe/Riga',
+              country: 'LV',
+              city: 'Riga',
+              currency: 'EUR',
+            ),
           );
           addTearDown(guarded.dispose);
           final publisher = PublisherRef(

@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
@@ -101,17 +103,17 @@ void main() {
           pricing: RentalPricingPolicy(
             currencyCode: 'EUR',
             billingUnit: RentalBillingUnit.day,
-            rateSteps: const <RentalRateStep>[
+            rateSteps: <RentalRateStep>[
               RentalRateStep(
                 minUnits: 1,
-                unitPrice: RentalMoneyDraft(
-                  amountMinor: 2800,
-                  currencyCode: 'EUR',
+                unitPrice: Money(
+                  minorUnits: 2800,
+                  currency: CurrencyCode.parse('EUR'),
                 ),
               ),
             ],
-            deposit: const RentalDepositPolicy(
-              amount: RentalMoneyDraft(amountMinor: 0, currencyCode: 'EUR'),
+            deposit: RentalDepositPolicy(
+              amount: Money(minorUnits: 0, currency: CurrencyCode.parse('EUR')),
               collectionMethod: RentalDepositCollectionMethod.none,
             ),
             damagePolicy: 'Repair cost billed to renter.',

@@ -1,7 +1,7 @@
 import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/quick_plan_conversion_coordinator.dart';
 import 'package:recharge/features/create/application/scenario_conversion_handoff_store.dart';

@@ -1,8 +1,9 @@
+import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/visited/data/datasources/visited_places_local_datasource.dart';
 import 'package:recharge/features/visited/data/models/visited_place_model.dart';
 import 'package:recharge/features/visited/data/repositories/visited_places_repository_impl.dart';
@@ -79,6 +80,9 @@ void main() {
       ),
     );
     final useCase = RecordPlaceVisitUseCase(
+      localDateAt: (instant, zone) =>
+          TimezoneRepositoryImpl().toLocal(instant, zone).date,
+      nowUtc: () => DateTime.utc(2026, 7, 31, 12),
       repository: repository,
       idGenerator: _SequenceIdGenerator(),
     );
@@ -106,6 +110,9 @@ void main() {
       ),
     );
     final useCase = RecordPlaceVisitUseCase(
+      localDateAt: (instant, zone) =>
+          TimezoneRepositoryImpl().toLocal(instant, zone).date,
+      nowUtc: () => DateTime.utc(2026, 7, 31, 12),
       repository: repository,
       idGenerator: _SequenceIdGenerator(),
     );

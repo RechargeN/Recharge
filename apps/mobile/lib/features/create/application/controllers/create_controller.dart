@@ -1,5 +1,6 @@
 import '../../../../shared/primitives/errors/coded_refusal.dart';
 import '../../domain/usecases/build_session_content_body.dart';
+import '../../../../../shared/primitives/time/utc_instant.dart';
 import '../../../../../shared/primitives/money/money.dart';
 import '../../../../../shared/primitives/money/currency_code.dart';
 import '../../../../../shared/primitives/money/money_parser.dart';
@@ -431,9 +432,9 @@ class CreateController extends ChangeNotifier {
           currencyCode: _runtimeDefaults.currency,
           billingUnit: RentalBillingUnit.day,
           deposit: RentalDepositPolicy(
-            amount: RentalMoneyDraft(
-              amountMinor: 0,
-              currencyCode: _runtimeDefaults.currency,
+            amount: Money(
+              minorUnits: 0,
+              currency: CurrencyCode.parse(_runtimeDefaults.currency),
             ),
             collectionMethod: RentalDepositCollectionMethod.none,
           ),
@@ -491,6 +492,7 @@ class CreateController extends ChangeNotifier {
   Timer? _autosaveTimer;
   bool _draftReadBlocked = false;
   final Map<String, MoneyParseError> _moneyInputErrors = {};
+  final Set<String> _utcInputErrors = {};
   Map<String, MoneyParseError> get moneyInputErrors =>
       Map.unmodifiable(_moneyInputErrors);
   int _localIdCounter = 0;
@@ -533,6 +535,7 @@ class CreateController extends ChangeNotifier {
     _loadedUserId = userId;
     _draftReadBlocked = false;
     _moneyInputErrors.clear();
+    _utcInputErrors.clear();
     _autosaveTimer?.cancel();
     _capabilities = capabilities.toSet();
     _activePublisherRef = resolvedPublisher;
@@ -589,6 +592,10 @@ class CreateController extends ChangeNotifier {
           country: _runtimeDefaults.country,
           city: _runtimeDefaults.city,
           currency: _runtimeDefaults.currency,
+          eventLocalToday: _eventCreateCoordinator.localDateAt(
+            instantUtc: DateTime.now().toUtc(),
+            timezoneId: _runtimeDefaults.timezone,
+          ),
         );
     if (createsFreshDraft && draft.eventData != null) {
       draft = draft.copyWith(
@@ -608,7 +615,8 @@ class CreateController extends ChangeNotifier {
     if (draft.objectType == CreateObjectType.place && draft.placeData == null) {
       draft = draft.copyWith(placeData: _placeDefaults(userId));
     }
-    if (draft.objectType == CreateObjectType.event) {
+    if (draft.objectType == CreateObjectType.event &&
+        (createsFreshDraft || draft.eventData == null)) {
       draft = _eventCreateCoordinator.apply(
         draft,
         draft.eventData ?? _eventDefaults(),
@@ -767,6 +775,10 @@ class CreateController extends ChangeNotifier {
         city: _runtimeDefaults.city,
         currency: _runtimeDefaults.currency,
         publisherRef: _activePublisherRef,
+        localToday: _eventCreateCoordinator.localDateAt(
+          instantUtc: DateTime.now().toUtc(),
+          timezoneId: _runtimeDefaults.timezone,
+        ),
       );
       draft = _eventCreateCoordinator.apply(
         draft,
@@ -1203,6 +1215,10 @@ class CreateController extends ChangeNotifier {
     _applyScenario(
       coordinator.updateContext(
         current,
+        localToday: _eventCreateCoordinator.localDateAt(
+          instantUtc: DateTime.now().toUtc(),
+          timezoneId: current.defaultTimezoneId,
+        ),
         format: format,
         dateMode: dateMode,
         peopleCount: peopleCount,
@@ -2381,9 +2397,9 @@ class CreateController extends ChangeNotifier {
             : (collectionMode ?? event.paymentCollectionMode),
         price: free
             ? null
-            : EventMoneyDraft(
-                amountMinor: amountMinor ?? event.price?.amountMinor ?? 0,
-                currencyCode: event.currencyCode,
+            : Money(
+                minorUnits: amountMinor ?? event.price?.minorUnits ?? 0,
+                currency: CurrencyCode.parse(event.currencyCode),
               ),
         clearPrice: free,
       );
@@ -2787,7 +2803,8 @@ class CreateController extends ChangeNotifier {
     if (contribution == null) return;
     final amount = _parseMoneyInput(
       text,
-      currency: contribution.amountHint?.currencyCode ?? _state.draft.currency,
+      currency:
+          contribution.amountHint?.currency.value ?? _state.draft.currency,
       locale: locale,
       field: 'activity.contribution',
     );
@@ -2812,11 +2829,12 @@ class CreateController extends ChangeNotifier {
           note: trimmedNote.isEmpty ? null : trimmedNote,
           amountHint: amountMinor == null
               ? null
-              : ActivityContributionAmountDraft(
-                  amountMinor: amountMinor,
-                  currencyCode:
-                      activity.optionalContribution?.amountHint?.currencyCode ??
-                      _state.draft.currency,
+              : Money(
+                  minorUnits: amountMinor,
+                  currency: CurrencyCode.parse(
+                    activity.optionalContribution?.amountHint?.currency.value ??
+                        _state.draft.currency,
+                  ),
                 ),
         ),
       );
@@ -3662,7 +3680,25 @@ class CreateController extends ChangeNotifier {
   }
 
   void updateStartDateTime(String value) {
-    final DateTime? parsed = DateTime.tryParse(value.trim())?.toUtc();
+    final DateTime? parsed;
+    try {
+      parsed = value.trim().isEmpty
+          ? null
+          : UtcInstant.parse(value.trim()).value;
+      _utcInputErrors.remove('startDateTimeUtc');
+    } on FormatException {
+      _utcInputErrors.add('startDateTimeUtc');
+      _setState(
+        _state.copyWith(
+          validationErrors: {
+            ..._state.validationErrors,
+            'startDateTimeUtc':
+                'Enter an explicit UTC timestamp (YYYY-MM-DDTHH:mm:ssZ)',
+          },
+        ),
+      );
+      return;
+    }
     final List<CreateTimeSlotDraft> slots =
         parsed != null &&
             _state.draft.availabilityKind ==
@@ -3876,7 +3912,25 @@ class CreateController extends ChangeNotifier {
   }
 
   void updateRegistrationDeadline(String value) {
-    final DateTime? parsed = DateTime.tryParse(value.trim())?.toUtc();
+    final DateTime? parsed;
+    try {
+      parsed = value.trim().isEmpty
+          ? null
+          : UtcInstant.parse(value.trim()).value;
+      _utcInputErrors.remove('registrationDeadlineUtc');
+    } on FormatException {
+      _utcInputErrors.add('registrationDeadlineUtc');
+      _setState(
+        _state.copyWith(
+          validationErrors: {
+            ..._state.validationErrors,
+            'registrationDeadlineUtc':
+                'Enter an explicit UTC timestamp (YYYY-MM-DDTHH:mm:ssZ)',
+          },
+        ),
+      );
+      return;
+    }
     _updateDraft(
       _state.draft.copyWith(
         registrationDeadlineUtc: parsed,
@@ -4322,7 +4376,7 @@ class CreateController extends ChangeNotifier {
 
   void updateSessionPriceText(String text, {String locale = 'en'}) {
     final currency =
-        _state.draft.sessionData?.price.amount?.currencyCode ??
+        _state.draft.sessionData?.price.amount?.currency.value ??
         _state.draft.currency;
     final amount = _parseMoneyInput(
       text,
@@ -4345,9 +4399,9 @@ class CreateController extends ChangeNotifier {
       s,
       SessionPriceDisclosure(
         mode: SessionPricingMode.fixed,
-        amount: SessionMoneyDraft(
-          amountMinor: amountMinor,
-          currencyCode: currencyCode,
+        amount: Money(
+          minorUnits: amountMinor,
+          currency: CurrencyCode.parse(currencyCode),
         ),
       ),
     ),
@@ -4488,7 +4542,7 @@ class CreateController extends ChangeNotifier {
   Future<void> saveDraft() async {
     if (_state.userId.isEmpty ||
         _draftReadBlocked ||
-        _moneyInputErrors.isNotEmpty) {
+        (_moneyInputErrors.isNotEmpty || _utcInputErrors.isNotEmpty)) {
       return;
     }
     _autosaveTimer?.cancel();
@@ -4636,7 +4690,10 @@ class CreateController extends ChangeNotifier {
   /// A second call while one is already running (double tap, retry during a
   /// slow save) is ignored instead of racing the first publish.
   Future<bool> publishDraft() async {
-    if (_publishInFlight || _draftReadBlocked || _moneyInputErrors.isNotEmpty) {
+    if (_publishInFlight ||
+        _draftReadBlocked ||
+        _moneyInputErrors.isNotEmpty ||
+        _utcInputErrors.isNotEmpty) {
       return false;
     }
     _publishInFlight = true;
@@ -5141,6 +5198,7 @@ class CreateController extends ChangeNotifier {
     required String organizerName,
   }) {
     _moneyInputErrors.clear();
+    _utcInputErrors.clear();
     CreateDraftEntity draft = CreateDraftEntity.defaults(
       organizerId: organizerId,
       organizerEmail: organizerEmail,
@@ -5150,6 +5208,10 @@ class CreateController extends ChangeNotifier {
       country: _runtimeDefaults.country,
       city: _runtimeDefaults.city,
       currency: _runtimeDefaults.currency,
+      eventLocalToday: _eventCreateCoordinator.localDateAt(
+        instantUtc: DateTime.now().toUtc(),
+        timezoneId: _runtimeDefaults.timezone,
+      ),
     );
     if (draft.eventData != null) {
       draft = draft.copyWith(
@@ -5403,6 +5465,10 @@ class CreateController extends ChangeNotifier {
     timezoneId: _runtimeDefaults.timezone,
     currencyCode: _runtimeDefaults.currency,
     publisherRef: _defaultPublisher(_state.draft.organizerId),
+    localToday: _eventCreateCoordinator.localDateAt(
+      instantUtc: DateTime.now().toUtc(),
+      timezoneId: _runtimeDefaults.timezone,
+    ),
   );
 
   List<EventValidationIssue> _eventIssues({

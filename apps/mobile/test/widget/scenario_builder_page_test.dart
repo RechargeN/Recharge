@@ -8,7 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/app/application/planning_conversion_providers.dart';
 import 'package:recharge/app/adapters/legacy_quick_plan_conversion_adapter.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';

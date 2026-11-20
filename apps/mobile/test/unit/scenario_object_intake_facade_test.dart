@@ -1,8 +1,9 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/application/scenario_object_intake_facade.dart';
 import 'package:recharge/app/application/scenario_object_intake_config.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/scenario_create_coordinator.dart';
 import 'package:recharge/features/create/data/datasources/create_local_datasource.dart';
@@ -171,13 +172,13 @@ void main() {
       );
 
       expect(outcome.status, ScenarioObjectIntakeApplyStatus.rejected);
-    expect(
-      await collection.listDrafts(
-        ownerId: 'user-1',
-        type: CreateObjectType.scenario,
-      ),
-      isEmpty,
-    );
+      expect(
+        await collection.listDrafts(
+          ownerId: 'user-1',
+          type: CreateObjectType.scenario,
+        ),
+        isEmpty,
+      );
       expect(
         (await intents.load(
           ownerId: 'user-1',
@@ -215,7 +216,7 @@ ScenarioObjectIntakeIntent _intent() => ScenarioObjectIntakeIntent(
       sourceStatus: ScenarioSourceStatus.ready,
       location: const ScenarioIntakeLocationSnapshot(
         title: 'GORS',
-        point: ScenarioGeoPointDraft(latitude: 56.5099, longitude: 27.3332),
+        point: GeoPoint(latitude: 56.5099, longitude: 27.3332),
         disclosure: ScenarioLocationDisclosure.public,
       ),
     ),

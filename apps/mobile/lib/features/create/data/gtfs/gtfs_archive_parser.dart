@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 
@@ -155,8 +157,8 @@ class GtfsArchiveParser {
       );
     }
 
-    final currentTime = (nowUtc ?? DateTime.now()).toUtc();
-    final retrieval = retrievedAtUtc.toUtc();
+    final currentTime = UtcInstant(nowUtc ?? DateTime.now().toUtc()).value;
+    final retrieval = UtcInstant(retrievedAtUtc).value;
     final startDate = _parseDateOrNull(feedInfo['feed_start_date']);
     final endDate = _parseDateOrNull(feedInfo['feed_end_date']);
     final freshness = currentTime.difference(retrieval) > freshnessMaxAge
@@ -522,7 +524,7 @@ class GtfsArchiveParser {
     return value;
   }
 
-  ScenarioTransitLocalDate _requiredDate(
+  LocalDate _requiredDate(
     Map<String, String> row,
     String field,
     String fileName,
@@ -537,15 +539,12 @@ class GtfsArchiveParser {
     return result;
   }
 
-  ScenarioTransitLocalDate? _parseDateOrNull(String? value) {
+  LocalDate? _parseDateOrNull(String? value) {
     final text = _nullIfEmpty(value);
     if (text == null || !RegExp(r'^\d{8}$').hasMatch(text)) return null;
-    final result = ScenarioTransitLocalDate(
-      int.parse(text.substring(0, 4)),
-      int.parse(text.substring(4, 6)),
-      int.parse(text.substring(6, 8)),
+    return LocalDate.tryParse(
+      '${text.substring(0, 4)}-${text.substring(4, 6)}-${text.substring(6, 8)}',
     );
-    return result.isValid ? result : null;
   }
 
   int? _parseTimeOrNull(String? value) {
@@ -625,10 +624,9 @@ class _MutableCalendar {
 
   final String serviceId;
   final Set<int> weekdays;
-  final ScenarioTransitLocalDate? startDate;
-  final ScenarioTransitLocalDate? endDate;
-  final Map<ScenarioTransitLocalDate, bool> exceptions =
-      <ScenarioTransitLocalDate, bool>{};
+  final LocalDate? startDate;
+  final LocalDate? endDate;
+  final Map<LocalDate, bool> exceptions = <LocalDate, bool>{};
 
   GtfsServiceCalendar freeze() => GtfsServiceCalendar(
     serviceId: serviceId,

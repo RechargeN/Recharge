@@ -1,6 +1,7 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
 import 'package:recharge/features/create/application/controllers/scenario_transit_picker_controller.dart';
@@ -237,7 +238,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Provider: Provider A'), findsOneWidget);
       expect(find.text('Licence: CC0 1.0'), findsOneWidget);
-      expect(find.text('Service date: ${date.iso8601}'), findsOneWidget);
+      expect(find.text('Service date: ${date.toString()}'), findsOneWidget);
       expect(
         find.text('Feed retrieved: 2026-08-03T08:00:00.000Z'),
         findsOneWidget,
@@ -261,13 +262,13 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
 }
 
 ScenarioTransitServiceOption _option({
-  required ScenarioLocalDateDraft date,
+  required LocalDate date,
   int departure = 10 * 3600,
   int arrival = 11 * 3600,
   String? sha,
 }) => ScenarioTransitServiceOption(
   providerCode: 'provider-a',
-  serviceDate: ScenarioTransitLocalDate(date.year, date.month, date.day),
+  serviceDate: LocalDate(date.year, date.month, date.day),
   tripId: 'trip-1',
   routeId: 'route-1',
   serviceId: 'weekday',

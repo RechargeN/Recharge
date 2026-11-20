@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
+import '../../../../shared/primitives/time/local_date.dart';
 import 'scenario_budget_draft.dart';
 
 enum ScenarioItemKind {
@@ -55,14 +57,15 @@ class ScenarioLocalDateDraft {
       '${month.toString().padLeft(2, '0')}-'
       '${day.toString().padLeft(2, '0')}';
 
+  LocalDate get calendarDate => LocalDate(year, month, day);
+
   bool get isValid {
-    if (year < 1 || month < 1 || month > 12 || day < 1 || day > 31) {
+    try {
+      calendarDate;
+      return true;
+    } on FormatException {
       return false;
     }
-    final DateTime candidate = DateTime.utc(year, month, day);
-    return candidate.year == year &&
-        candidate.month == month &&
-        candidate.day == day;
   }
 }
 
@@ -180,7 +183,7 @@ class ScenarioScheduleSnapshotDraft {
   final String? originStopId;
   final String? destinationStopId;
   final String? feedSha256;
-  final ScenarioLocalDateDraft? serviceDate;
+  final LocalDate? serviceDate;
   final DateTime? feedUpdatedAtUtc;
   final DateTime? retrievedAtUtc;
   final String? carrierName;
@@ -321,7 +324,7 @@ class ScenarioLocationDraft {
   });
 
   final String id;
-  final ScenarioGeoPointDraft point;
+  final GeoPoint point;
   final String title;
   final String? address;
   final String? marketId;

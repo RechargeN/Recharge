@@ -5,9 +5,9 @@ import 'package:crypto/crypto.dart';
 import 'package:xml/xml.dart' show XmlParserException, XmlTagException;
 import 'package:xml/xml_events.dart';
 
-import '../../../../core/geo/geo_bounds.dart';
-import '../../../../core/geo/geo_distance.dart';
-import '../../../../core/geo/geo_point.dart';
+import '../../../../shared/primitives/geo/geo_bounds.dart';
+import '../../../../shared/primitives/geo/geo_distance.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
 import '../../domain/repositories/route_gpx_repository.dart';
 
 class RouteGpxInspector {

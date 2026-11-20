@@ -7,13 +7,7 @@ class SearchScenarioTransitOptionsUseCase {
   final ScenarioTransitScheduleRepository _repository;
 
   Future<ScenarioTransitSearchResult> call(ScenarioTransitSearchQuery query) {
-    if (!query.serviceDate.isValid) {
-      throw ArgumentError.value(
-        query.serviceDate.iso8601,
-        'serviceDate',
-        'Must be a valid local date.', // l10n-ignore: developer error, never displayed
-      );
-    }
+    // LocalDate has already validated the Gregorian calendar.
     if (query.originStopId.trim().isEmpty ||
         query.destinationStopId.trim().isEmpty ||
         query.originStopId == query.destinationStopId) {

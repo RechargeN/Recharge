@@ -3,7 +3,7 @@
 **ID:** MOB-ARCH-M2-P
 **Версия:** 1.0
 **Дата:** 2026-08-11
-**Статус:** Approved — M2-A/B Done (local/mock); M2-C Doing; M2-D/E not started
+**Статус:** Approved — M2-A/B Done (local/mock); M2-C/D/E Doing (local work; integration/removal gates open)
 **Parent:** [Recharge Mobile Architecture v3.1](RECHARGE_MOBILE_ARCHITECTURE_V3.md)
 **Depends on:** MOB-ARCH-M1 — Done, merged as `f893a931a58cff9ef9f779e17517af0d28c2f454`
 **Нормативные AC:** MOB-ARCH-AC-05–06, AC-52–53, AC-56–60, AC-74
@@ -889,3 +889,88 @@ template preservation. Full gates and failed attempts are recorded separately.
 C2b3b still owns shared Create envelope UTC, legacy generic Session slots and
 legacy Event date defaults; C3–C5 and M2-D/E remain open. No production grants,
 data migration writes, R1, device, Emulator, cloud runtime or Accepted claim.
+
+
+## 26. M2-C2b3b — shared Create UTC boundaries — 2026-11-19
+
+Create envelopes, template metadata and generic legacy slots now use UtcInstant
+at existing reader/writer boundaries. Required audit instants fail explicitly;
+optional null fields, microseconds, IDs and map keys remain compatible. Explicit
+template clocks must already be UTC. Corrupt raw drafts/templates cannot be
+silently replaced; valid reads perform no migration writes.
+
+## 27. M2-C Event defaults and Create input — 2026-11-19
+
+Fresh Event defaults receive LocalDate from the existing TZDB adapter in the
+explicit Event zone. Calendar tomorrow uses addDays, without elapsed 24-hour
+arithmetic. Compatibility factory callers without a zoned date get an empty,
+editable date instead of a fabricated current date. Template materialization
+receives the same application calendar contract.
+
+Saved Event fields and occurrences are not rematerialized during controller
+restore. For old envelopes without a typed local date, an explicit persisted
+instant is converted through the existing Event TZDB adapter; the instant and
+stored bytes remain untouched. Missing instants do not become read-time now.
+Existing Event DST gap/overlap policies and duration semantics remain unchanged.
+Generic Create inputs labelled UTC reject zone-less, offset and invalid calendar
+text, retain the previous draft values and block save/publish until correction.
+
+## 28. M2-C Scenario/transit — 2026-11-19
+
+Scenario compatibility date wrappers delegate validation/arithmetic to shared
+LocalDate. Transit service dates compare through that calendar. GTFS times
+remain feature-owned seconds from the service day, including values after
+24:00; day offsets and seconds are not converted into elapsed UTC durations.
+Dated Scenario creation receives an explicit zoned calendar from application.
+
+Scenario mapper and GTFS cache/parser/snapshot boundaries use UtcInstant,
+retaining precision and rejecting malformed or implicit instants. Calculated
+UTC intervals require both bounds in increasing order. Optional fields remain
+optional; IANA identity validation does not imply an enabled zone or market.
+Restore does not recheck providers or recalculate saved snapshots. Unknown
+snapshot fields and existing schema keys remain; corrupt drafts retain their
+raw bytes and block replacement through the existing Create storage path.
+
+## 29. M2-C Visit History — 2026-11-19
+
+The existing RecordPlaceVisitUseCase receives a calendar callback bound in app
+DI to the owning TZDB adapter. Both the picker and the domain future-date guard
+use today's LocalDate in the explicit Place zone. The retained compatibility
+`today` argument does not override that clock. Unknown or missing Place zones
+fail explicitly; the app facade no longer substitutes Europe/Riga.
+
+Visit dates and audit UTC fields validate through shared primitives without
+changing owner/place/day identity. Read-only lists may display valid siblings;
+mutations require a lossless read and preserve unreadable/future records.
+Existing foreign-owner records are retained rather than filtered out on write.
+There is no new storage writer, queue, migration or attendance inference.
+
+## 30. M2-C typed MarketConfig and verification boundary — 2026-11-19
+
+MarketConfig requires separate MarketRef, LocaleTag, CurrencyCode and
+IanaTimeZone identities. Locale lists are immutable; changing market/display
+name does not infer locale, currency or zone. Existing string getters and the
+explicit legacy constructor/registry adapter remain for M2-D consumer cleanup.
+No locale availability, enabled-market or production grant is implied.
+
+Five reversible local checkpoints have separate patches and behavioral checks.
+Complete final Windows analyzer/test, boundary self/scan/inventory, formatting
+and diff evidence are recorded in the 2026-11-19 work report. Required Linux
+GitHub Actions evidence for the new uncommitted diff is still absent; M2-C
+remains Doing until that gate passes. No commit, push, merge, deployment,
+Accepted promotion, Emulator/device/cloud or R1 acceptance is included.
+
+
+## 31. M2-D/E pre-rebase migration — 2026-11-19
+
+Consumer migration uses shared Geo, ID interface, Money and LocalDate while
+retaining compatibility declarations and exports under the owner's PR12 →
+main → PR11 rebase order. Legacy data schema keys/readers remain. Current
+local verification does not establish zero references on the combined tree.
+The private Event alias remains until its final-use migration and removal can
+be atomic. No new suppression or registry edit is used to hide this debt.
+
+The AC01–40 matrix, exact scope of local evidence, 71-exception reconciliation,
+residual UTC/fallback review, rollback and integration/publication blockers are
+in [M2-D/E verification](../verification/M2_DE_2026_11_19.md). M2-C/D/E remain
+Doing; no Done/Accepted, production, device or cloud promotion is made.

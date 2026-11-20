@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/time/utc_instant.dart';
+
 enum CreateAvailabilityKind { eventSlots, openingHours, none }
 
 class CreateTimeSlotDraft {
@@ -6,6 +8,8 @@ class CreateTimeSlotDraft {
     required this.startAtUtc,
     required this.endAtUtc,
   }) {
+    UtcInstant(startAtUtc);
+    UtcInstant(endAtUtc);
     if (localId.trim().isEmpty) throw ArgumentError.value(localId, 'localId');
     if (!startAtUtc.isBefore(endAtUtc)) {
       throw ArgumentError('startAtUtc must be before endAtUtc');
@@ -24,16 +28,33 @@ class CreateTimeSlotDraft {
 
   Map<String, Object?> toMap() => <String, Object?>{
     'local_id': localId,
-    'start_at_utc': startAtUtc.toUtc().toIso8601String(),
-    'end_at_utc': endAtUtc.toUtc().toIso8601String(),
+    'start_at_utc': UtcInstant(startAtUtc).toString(),
+    'end_at_utc': UtcInstant(endAtUtc).toString(),
   };
 
-  factory CreateTimeSlotDraft.fromMap(Map<String, Object?> map) =>
-      CreateTimeSlotDraft(
-        localId: map['local_id']! as String,
-        startAtUtc: DateTime.parse(map['start_at_utc']! as String).toUtc(),
-        endAtUtc: DateTime.parse(map['end_at_utc']! as String).toUtc(),
+  factory CreateTimeSlotDraft.fromMap(Map<String, Object?> map) {
+    final id = map['local_id'];
+    final start = map['start_at_utc'];
+    final end = map['end_at_utc'];
+    if (id is! String ||
+        id.trim().isEmpty ||
+        start is! String ||
+        end is! String) {
+      throw const FormatException('Incomplete stored Create time slot');
+    }
+    final startUtc = UtcInstant.parse(start).value;
+    final endUtc = UtcInstant.parse(end).value;
+    if (!startUtc.isBefore(endUtc)) {
+      throw const FormatException(
+        'Stored Create time slot must have positive duration',
       );
+    }
+    return CreateTimeSlotDraft(
+      localId: id,
+      startAtUtc: startUtc,
+      endAtUtc: endUtc,
+    );
+  }
 }
 
 class CreateOpeningHoursDraftRule {

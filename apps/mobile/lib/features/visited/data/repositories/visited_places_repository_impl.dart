@@ -36,7 +36,7 @@ class VisitedPlacesRepositoryImpl implements VisitedPlacesRepository {
   Future<VisitedPlaceEntity> recordVisit(VisitedPlaceEntity visit) =>
       _enqueue(() async {
         final List<VisitedPlaceModel> current = await _localDataSource
-            .readVisitedPlaces(visit.userId);
+            .readVisitedPlaces(visit.userId, requireLosslessRead: true);
         final List<VisitedPlaceEntity> entities = current
             .map((VisitedPlaceModel model) => model.toEntity())
             .where(
@@ -62,7 +62,7 @@ class VisitedPlacesRepositoryImpl implements VisitedPlacesRepository {
   Future<void> removeVisit({required String userId, required String visitId}) =>
       _enqueue(() async {
         final List<VisitedPlaceModel> current = await _localDataSource
-            .readVisitedPlaces(userId);
+            .readVisitedPlaces(userId, requireLosslessRead: true);
         final List<VisitedPlaceModel> remaining = current
             .where(
               (VisitedPlaceModel model) =>

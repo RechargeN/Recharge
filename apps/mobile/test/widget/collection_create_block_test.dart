@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/application/state/create_notice.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/collection_create_config.dart';
 import 'package:recharge/features/create/application/collection_create_coordinator.dart';

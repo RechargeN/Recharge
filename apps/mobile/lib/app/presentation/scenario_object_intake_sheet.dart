@@ -1,11 +1,12 @@
+import '../../shared/primitives/time/local_date.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/id/id_generator.dart';
 import '../../core/localization/l10n_context.dart';
 import '../../core/localization/recharge_formats.dart';
+import '../../shared/primitives/id/id_generator.dart';
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/auth/application/controllers/auth_controller.dart';
 import '../../features/auth/presentation/widgets/auth_gate_sheet.dart';
@@ -1005,12 +1006,12 @@ class _ErrorText extends StatelessWidget {
 
 String _targetSummary(BuildContext context, CreateDraftSummary target) {
   final l10n = context.l10n;
-  final ScenarioLocalDateDraft? firstDate = target.scenarioFirstDate;
+  final LocalDate? firstDate = target.scenarioFirstDate;
   final String dateLabel = target.scenarioDateMode == ScenarioDateMode.template
       ? l10n.scenarioIntakeTemplate
       : firstDate == null
       ? l10n.scenarioIntakeDated
-      : _localDate(context, firstDate.iso8601);
+      : _localDate(context, firstDate.toString());
   final ScenarioFormat? format = target.scenarioFormat;
   return <String>[
     if (format != null) createOptionText(l10n, format),

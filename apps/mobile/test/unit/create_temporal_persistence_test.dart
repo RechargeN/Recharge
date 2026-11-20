@@ -1,8 +1,10 @@
+import 'package:recharge/features/create/domain/entities/rental_draft_data.dart';
+import 'package:recharge/shared/primitives/money/money_parse_result.dart';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/data/datasources/create_local_datasource.dart';
 import 'package:recharge/features/create/data/models/create_draft_model.dart';
 import 'package:recharge/features/create/data/repositories/create_repository_impl.dart';
@@ -183,6 +185,62 @@ void main() {
     },
   );
 
+  test(
+    'Rental missing money currency preserves raw bytes and blocks replacement',
+    () async {
+      final original = draft(CreateObjectType.event).copyWith(
+        objectType: CreateObjectType.rental,
+        clearEventData: true,
+        rentalData: RentalDraftData.defaults(
+          userId: 'u1',
+          currencyCode: 'EUR',
+          timeZoneId: 'Europe/Riga',
+        ),
+      );
+      final wire = CreateDraftModel.fromEntity(original).toJson();
+      wire['currency'] = '';
+      final rental = (wire['sectionData'] as Map)['rental_details'] as Map;
+      (rental['pricing'] as Map).remove('currencyCode');
+      final raw = jsonEncode(wire);
+      await storage.write(key: 'create_draft_u1', value: raw);
+      await expectLater(
+        repository.loadDraft('u1'),
+        throwsA(isA<MoneyReadException>()),
+      );
+      await expectLater(
+        repository.saveDraft('u1', original),
+        throwsA(isA<MoneyReadException>()),
+      );
+      expect(await storage.read(key: 'create_draft_u1'), raw);
+    },
+  );
+  test(
+    'malformed Scenario calendar preserves owner bytes and blocks replacement',
+    () async {
+      final original = draft(CreateObjectType.event).copyWith(
+        objectType: CreateObjectType.scenario,
+        clearEventData: true,
+        scenarioData: ScenarioDraftData.defaults(),
+      );
+      final wire = CreateDraftModel.fromEntity(original).toJson();
+      final scenario = (wire['sectionData'] as Map)['scenario'] as Map;
+      scenario['days'] = [
+        {
+          'id': 'd',
+          'dayIndex': 0,
+          'localDate': {'year': 2026, 'month': 2, 'day': 30},
+        },
+      ];
+      final raw = jsonEncode(wire);
+      await storage.write(key: 'create_draft_u1', value: raw);
+      await expectLater(repository.loadDraft('u1'), throwsFormatException);
+      await expectLater(
+        repository.saveDraft('u1', original),
+        throwsFormatException,
+      );
+      expect(await storage.read(key: 'create_draft_u1'), raw);
+    },
+  );
   test('malformed JSON does not masquerade as a fresh draft', () async {
     await storage.write(key: 'create_draft_u1', value: '{broken');
     await expectLater(repository.loadDraft('u1'), throwsFormatException);
@@ -192,6 +250,79 @@ void main() {
     );
     expect(await storage.read(key: 'create_draft_u1'), '{broken');
   });
+
+  test(
+    'corrupt envelope UTC and generic slots preserve raw bytes on read and replacement',
+    () async {
+      final original = draft(CreateObjectType.session);
+      for (final problem in [
+        'createdAtUtcIso',
+        'updatedAtUtcIso',
+        'startDateTimeUtcIso',
+        'endDateTimeUtcIso',
+        'registrationDeadlineUtcIso',
+        'publishedAtUtcIso',
+        'missingAudit',
+        'slot',
+        'slotShape',
+      ]) {
+        final wire = CreateDraftModel.fromEntity(original).toJson();
+        if (problem == 'missingAudit') {
+          wire.remove('createdAtUtcIso');
+        } else if (problem == 'slot' || problem == 'slotShape') {
+          wire['scheduleSlots'] = problem == 'slotShape'
+              ? [null]
+              : [
+                  {
+                    'local_id': 'old',
+                    'start_at_utc': '2026-02-30T12:00:00Z',
+                    'end_at_utc': '2026-03-01T13:00:00Z',
+                  },
+                ];
+        } else {
+          wire[problem] = '2026-08-03T12:00:00';
+        }
+        final raw = jsonEncode(wire);
+        await storage.write(key: 'create_draft_u1', value: raw);
+        await expectLater(
+          repository.loadDraft('u1'),
+          throwsFormatException,
+          reason: problem,
+        );
+        await expectLater(
+          repository.saveDraft('u1', original),
+          throwsFormatException,
+          reason: problem,
+        );
+        expect(await storage.read(key: 'create_draft_u1'), raw);
+      }
+    },
+  );
+
+  test(
+    'valid old envelope text and generic slot payload survive read byte-for-byte',
+    () async {
+      final wire =
+          CreateDraftModel.fromEntity(draft(CreateObjectType.session)).toJson()
+            ..['schemaVersion'] = 1
+            ..['createdAtUtcIso'] = '2026-08-03T12:00:00Z'
+            ..['updatedAtUtcIso'] = '2026-08-03T12:00:00.1Z'
+            ..['scheduleSlots'] = [
+              {
+                'local_id': 'old',
+                'start_at_utc': '2026-08-03T12:00:00.123456Z',
+                'end_at_utc': '2026-08-03T13:00:00.123456Z',
+              },
+            ];
+      final raw = jsonEncode(wire);
+      await storage.write(key: 'create_draft_u1', value: raw);
+      final loaded = (await repository.loadDraft('u1'))!;
+      expect(loaded.updatedAtUtc, DateTime.utc(2026, 8, 3, 12, 0, 0, 100));
+      expect(loaded.scheduleSlots.single.localId, 'old');
+      expect(loaded.scheduleSlots.single.startAtUtc.microsecond, 456);
+      expect(await storage.read(key: 'create_draft_u1'), raw);
+    },
+  );
 }
 
 class _FixedIdGenerator implements IdGenerator {

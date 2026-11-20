@@ -208,7 +208,7 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
   if (existingCost != null) {
     try {
       otherCost = MoneyFormatter().decimal(
-        existingCost.toMoney(),
+        existingCost,
         locale: Localizations.localeOf(context).toLanguageTag(),
       );
     } on MoneyFormatException catch (error) {
@@ -217,7 +217,7 @@ Future<ScenarioManualLegInput?> showScenarioManualLegEditor(
   }
   MoneyParseError? moneyError =
       initialMoneyError ??
-      (existingCost != null && existingCost.currencyCode != currencyCode
+      (existingCost != null && existingCost.currency.value != currencyCode
           ? MoneyParseError.invalidCanonicalValue
           : null);
   return showModalBottomSheet<ScenarioManualLegInput>(

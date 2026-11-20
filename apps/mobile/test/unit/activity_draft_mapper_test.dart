@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:recharge/shared/primitives/money/money_parse_result.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -42,7 +43,7 @@ void main() {
         ActivityDraftMapper.toJson(restored),
         defaults: defaults,
       );
-      expect(roundTrip.optionalContribution!.amountHint!.amountMinor, 29);
+      expect(roundTrip.optionalContribution!.amountHint!.minorUnits, 29);
     },
   );
 
@@ -70,13 +71,10 @@ void main() {
       ),
       typicalDurationMinutes: const ActivityIntRangeDraft(min: 45, max: 90),
       suggestedGroupSize: const ActivityIntRangeDraft(min: 2, max: 4),
-      optionalContribution: const ActivityOptionalContributionDraft(
+      optionalContribution: ActivityOptionalContributionDraft(
         kind: ActivityContributionKind.donation,
         note: 'Donate to the park cleanup box.',
-        amountHint: ActivityContributionAmountDraft(
-          amountMinor: 300,
-          currencyCode: 'EUR',
-        ),
+        amountHint: Money(minorUnits: 300, currency: CurrencyCode.parse('EUR')),
       ),
       bestTime: const ActivityBestTimeDraft(
         timeOfDay: ActivityTimeOfDay.evening,
@@ -101,7 +99,7 @@ void main() {
       roundTripped.optionalContribution?.kind,
       ActivityContributionKind.donation,
     );
-    expect(roundTripped.optionalContribution?.amountHint?.amountMinor, 300);
+    expect(roundTripped.optionalContribution?.amountHint?.minorUnits, 300);
     expect(roundTripped.bestTime?.timeOfDay, ActivityTimeOfDay.evening);
     expect(roundTripped.bestTime?.season, ActivitySeason.autumn);
   });

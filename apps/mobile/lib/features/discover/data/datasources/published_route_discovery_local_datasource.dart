@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../../../../core/geo/geo_bounds.dart';
-import '../../../../core/geo/geo_point.dart';
+import '../../../../shared/primitives/geo/geo_bounds.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
 import '../../domain/entities/published_route_discovery_entity.dart';
 
 class PublishedRouteDiscoveryLocalDataSource {
@@ -156,8 +156,7 @@ class PublishedRouteDiscoveryLocalDataSource {
     surfaceIds: (map['surfaceIds'] as List<dynamic>? ?? <dynamic>[])
         .map((value) => value.toString())
         .toList(growable: false),
-    recommendedDifficultyId:
-        map['recommendedDifficultyId'] as String? ?? '',
+    recommendedDifficultyId: map['recommendedDifficultyId'] as String? ?? '',
     fieldVerifiedAtUtc: map['fieldVerifiedAtUtc'] == null
         ? null
         : DateTime.parse(map['fieldVerifiedAtUtc']! as String).toUtc(),

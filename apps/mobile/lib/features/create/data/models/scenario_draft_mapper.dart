@@ -1,4 +1,8 @@
 import 'dart:convert';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
+import '../../../../shared/primitives/time/iana_time_zone.dart';
+import '../../../../shared/primitives/time/local_date.dart';
 import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../shared/primitives/money/money.dart';
 import '../../../../shared/primitives/money/money_parse_result.dart';
@@ -243,10 +247,8 @@ class ScenarioDraftMapper {
       revision: _int(json['revision']) ?? fallback.revision,
       format: _enum(_formats, json['format']) ?? fallback.format,
       dateMode: _enum(_dateModes, json['dateMode']) ?? fallback.dateMode,
-      defaultTimezoneId: _string(
-        json['defaultTimezoneId'],
-        fallback.defaultTimezoneId,
-      ),
+      defaultTimezoneId:
+          _zone(json['defaultTimezoneId']) ?? fallback.defaultTimezoneId,
       displayCurrencyCode: _string(
         json['displayCurrencyCode'],
         fallback.displayCurrencyCode,
@@ -276,7 +278,7 @@ class ScenarioDraftMapper {
       'revision': value.revision,
       'format': _id(_formats, value.format),
       'dateMode': _id(_dateModes, value.dateMode),
-      'defaultTimezoneId': value.defaultTimezoneId,
+      'defaultTimezoneId': IanaTimeZone.parse(value.defaultTimezoneId).value,
       'displayCurrencyCode': value.displayCurrencyCode,
       'party': _partyToJson(value.party),
       'constraints': _constraintsToJson(value.constraints),
@@ -412,7 +414,7 @@ class ScenarioDraftMapper {
       id: _string(json['id'], ''),
       title: _string(json['title'], ''),
       dayIndex: _int(json['dayIndex']) ?? -1,
-      timezoneId: _nullableString(json['timezoneId']),
+      timezoneId: _zone(json['timezoneId']),
       localDate: _localDate(json['localDate']),
       startLocationId: _nullableString(json['startLocationId']),
       endLocationId: _nullableString(json['endLocationId']),
@@ -427,7 +429,7 @@ class ScenarioDraftMapper {
         'id': value.id,
         'title': value.title,
         'dayIndex': value.dayIndex,
-        'timezoneId': value.timezoneId,
+        'timezoneId': _zone(value.timezoneId),
         'localDate': _localDateToJson(value.localDate),
         'startLocationId': value.startLocationId,
         'endLocationId': value.endLocationId,
@@ -441,7 +443,7 @@ class ScenarioDraftMapper {
     final Map<String, Object?> point = _map(json['point']);
     return ScenarioLocationDraft(
       id: _string(json['id'], ''),
-      point: ScenarioGeoPointDraft(
+      point: GeoPoint(
         latitude: _double(point['latitude']) ?? double.nan,
         longitude: _double(point['longitude']) ?? double.nan,
       ),
@@ -449,7 +451,7 @@ class ScenarioDraftMapper {
       address: _nullableString(json['address']),
       marketId: _nullableString(json['marketId']),
       regionId: _nullableString(json['regionId']),
-      timezoneId: _nullableString(json['timezoneId']),
+      timezoneId: _zone(json['timezoneId']),
       disclosure:
           _enum(_disclosures, json['disclosure']) ??
           ScenarioLocationDisclosure.private,
@@ -466,7 +468,7 @@ class ScenarioDraftMapper {
         'address': value.address,
         'marketId': value.marketId,
         'regionId': value.regionId,
-        'timezoneId': value.timezoneId,
+        'timezoneId': _zone(value.timezoneId),
         'disclosure': _id(_disclosures, value.disclosure),
         'sourceObjectId': value.sourceObjectId,
         'sourceObjectType': value.sourceObjectType == null
@@ -635,8 +637,8 @@ class ScenarioDraftMapper {
     'destinationStopId': value.destinationStopId,
     'feedSha256': value.feedSha256,
     'serviceDate': _localDateToJson(value.serviceDate),
-    'feedUpdatedAtUtc': value.feedUpdatedAtUtc?.toUtc().toIso8601String(),
-    'retrievedAtUtc': value.retrievedAtUtc?.toUtc().toIso8601String(),
+    'feedUpdatedAtUtc': _utcText(value.feedUpdatedAtUtc),
+    'retrievedAtUtc': _utcText(value.retrievedAtUtc),
     'carrierName': value.carrierName,
     'serviceLabel': value.serviceLabel,
     'originLabel': value.originLabel,
@@ -672,7 +674,7 @@ class ScenarioDraftMapper {
     'sourceLocationVersion': value.sourceLocationVersion,
     'durationMinutes': value.durationMinutes,
     'distanceM': value.distanceM,
-    'checkedAtUtc': value.checkedAtUtc?.toUtc().toIso8601String(),
+    'checkedAtUtc': _utcText(value.checkedAtUtc),
   };
 
   static ScenarioScheduleDraft _schedule(Object? value) {
@@ -702,8 +704,8 @@ class ScenarioDraftMapper {
         windowStart: _localTime(json['windowStart']),
         windowEnd: _localTime(json['windowEnd']),
         windowEndDayOffset: _int(json['windowEndDayOffset']) ?? 0,
-        startTimezoneId: _nullableString(json['startTimezoneId']),
-        endTimezoneId: _nullableString(json['endTimezoneId']),
+        startTimezoneId: _zone(json['startTimezoneId']),
+        endTimezoneId: _zone(json['endTimezoneId']),
       );
     }
     return ScenarioTemplatePlannedTimeDraft(
@@ -714,8 +716,8 @@ class ScenarioDraftMapper {
       windowEndDayOffset: _int(json['windowEndDayOffset']) ?? 0,
       endDayIndex: _int(json['endDayIndex']),
       preferredEnd: _localTime(json['preferredEnd']),
-      startTimezoneId: _nullableString(json['startTimezoneId']),
-      endTimezoneId: _nullableString(json['endTimezoneId']),
+      startTimezoneId: _zone(json['startTimezoneId']),
+      endTimezoneId: _zone(json['endTimezoneId']),
     );
   }
 
@@ -732,18 +734,18 @@ class ScenarioDraftMapper {
         'windowEndDayOffset': time.windowEndDayOffset,
         'endDayIndex': time.endDayIndex,
         'preferredEnd': _localTimeToJson(time.preferredEnd),
-        'startTimezoneId': time.startTimezoneId,
-        'endTimezoneId': time.endTimezoneId,
+        'startTimezoneId': _zone(time.startTimezoneId),
+        'endTimezoneId': _zone(time.endTimezoneId),
       },
       ScenarioDatedPlannedTimeDraft time => <String, Object?>{
         'type': 'dated',
-        'fixedStartAtUtc': time.fixedStartAtUtc?.toUtc().toIso8601String(),
-        'fixedEndAtUtc': time.fixedEndAtUtc?.toUtc().toIso8601String(),
+        'fixedStartAtUtc': _utcText(time.fixedStartAtUtc),
+        'fixedEndAtUtc': _utcText(time.fixedEndAtUtc),
         'windowStart': _localTimeToJson(time.windowStart),
         'windowEnd': _localTimeToJson(time.windowEnd),
         'windowEndDayOffset': time.windowEndDayOffset,
-        'startTimezoneId': time.startTimezoneId,
-        'endTimezoneId': time.endTimezoneId,
+        'startTimezoneId': _zone(time.startTimezoneId),
+        'endTimezoneId': _zone(time.endTimezoneId),
       },
     };
   }
@@ -756,9 +758,12 @@ class ScenarioDraftMapper {
     if (_string(json['type'], '') == 'dated') {
       final DateTime? start = _dateTime(json['startAtUtc']);
       final DateTime? end = _dateTime(json['endAtUtc']);
-      return start == null || end == null
-          ? null
-          : ScenarioDatedCalculatedTimeDraft(startAtUtc: start, endAtUtc: end);
+      if (start == null || end == null || !start.isBefore(end)) {
+        throw const FormatException(
+          'Calculated Scenario UTC interval is incomplete or invalid',
+        );
+      }
+      return ScenarioDatedCalculatedTimeDraft(startAtUtc: start, endAtUtc: end);
     }
     final ScenarioLocalTimeDraft? start = _localTime(json['start']);
     final ScenarioLocalTimeDraft? end = _localTime(json['end']);
@@ -785,8 +790,8 @@ class ScenarioDraftMapper {
       },
       ScenarioDatedCalculatedTimeDraft time => <String, Object?>{
         'type': 'dated',
-        'startAtUtc': time.startAtUtc.toUtc().toIso8601String(),
-        'endAtUtc': time.endAtUtc.toUtc().toIso8601String(),
+        'startAtUtc': UtcInstant(time.startAtUtc).toString(),
+        'endAtUtc': UtcInstant(time.endAtUtc).toString(),
       },
     };
   }
@@ -837,7 +842,7 @@ class ScenarioDraftMapper {
             .toList(growable: false),
         'providerCode': value.providerCode,
         'warningCode': value.warningCode,
-        'updatedAtUtc': value.updatedAtUtc?.toUtc().toIso8601String(),
+        'updatedAtUtc': _utcText(value.updatedAtUtc),
         'scheduleSnapshot': value.scheduleSnapshot == null
             ? null
             : _scheduleSnapshotToJson(value.scheduleSnapshot!),
@@ -889,11 +894,11 @@ class ScenarioDraftMapper {
     'amount': value.amount == null ? null : _moneyToJson(value.amount!),
     'basis': value.basis == null ? null : _id(_priceBases, value.basis!),
     'source': _id(_priceSources, value.source),
-    'observedAtUtc': value.observedAtUtc?.toUtc().toIso8601String(),
+    'observedAtUtc': _utcText(value.observedAtUtc),
     'confidence': value.confidence,
   };
 
-  static ScenarioMoneyDraft? _money(Object? value) {
+  static Money? _money(Object? value) {
     if (value == null) return null;
     final json = _map(value);
     final minor = json['minorUnits'];
@@ -901,12 +906,10 @@ class ScenarioDraftMapper {
       throw const MoneyReadException(MoneyParseError.invalidCanonicalValue);
     }
     try {
-      return ScenarioMoneyDraft.fromMoney(
-        Money(
-          minorUnits: minor,
-          currency: CurrencyCode.parse(_string(json['currencyCode'], '')),
-        ),
-      );
+      return (Money(
+        minorUnits: minor,
+        currency: CurrencyCode.parse(_string(json['currencyCode'], '')),
+      ));
     } on FormatException {
       throw const MoneyReadException(MoneyParseError.missingCurrency);
     } on MoneyArithmeticException {
@@ -914,8 +917,8 @@ class ScenarioDraftMapper {
     }
   }
 
-  static Map<String, Object?> _moneyToJson(ScenarioMoneyDraft value) {
-    final money = value.toMoney();
+  static Map<String, Object?> _moneyToJson(Money value) {
+    final money = value;
     return <String, Object?>{
       'minorUnits': money.minorUnits,
       'currencyCode': money.currency.value,
@@ -1097,19 +1100,26 @@ class ScenarioDraftMapper {
     'liveLogistics': value.liveLogistics,
   };
 
-  static ScenarioLocalDateDraft? _localDate(Object? value) {
+  static LocalDate? _localDate(Object? value) {
     final Map<String, Object?> json = _map(value);
     final int? year = _int(json['year']);
     final int? month = _int(json['month']);
     final int? day = _int(json['day']);
-    return year == null || month == null || day == null
-        ? null
-        : ScenarioLocalDateDraft(year: year, month: month, day: day);
+    if (value == null) return null;
+    if (year == null ||
+        month == null ||
+        day == null ||
+        json['year'] != year ||
+        json['month'] != month ||
+        json['day'] != day) {
+      throw const FormatException('Incomplete Scenario calendar date');
+    }
+    final date = LocalDate(year, month, day);
+    return LocalDate(date.year, date.month, date.day);
   }
 
-  static Map<String, Object?>? _localDateToJson(
-    ScenarioLocalDateDraft? value,
-  ) => value == null
+  static Map<String, Object?>? _localDateToJson(LocalDate? value) =>
+      value == null
       ? null
       : <String, Object?>{
           'year': value.year,
@@ -1132,19 +1142,18 @@ class ScenarioDraftMapper {
       ? null
       : <String, Object?>{'hour': value.hour, 'minute': value.minute};
 
-  static ScenarioGeoPointDraft _point(Object? value) {
+  static GeoPoint _point(Object? value) {
     final Map<String, Object?> json = _map(value);
-    return ScenarioGeoPointDraft(
+    return GeoPoint(
       latitude: _double(json['latitude']) ?? double.nan,
       longitude: _double(json['longitude']) ?? double.nan,
     );
   }
 
-  static Map<String, Object?> _pointToJson(ScenarioGeoPointDraft value) =>
-      <String, Object?>{
-        'latitude': value.latitude,
-        'longitude': value.longitude,
-      };
+  static Map<String, Object?> _pointToJson(GeoPoint value) => <String, Object?>{
+    'latitude': value.latitude,
+    'longitude': value.longitude,
+  };
 
   static T? _enum<T>(Map<String, T> values, Object? value) {
     final String id = value?.toString().trim().toLowerCase() ?? '';
@@ -1205,10 +1214,23 @@ class ScenarioDraftMapper {
     _ => null,
   };
 
-  static DateTime? _dateTime(Object? value) {
-    if (value is DateTime) {
-      return value.toUtc();
+  static String? _zone(Object? value) {
+    if (value == null) return null;
+    if (value is! String) {
+      throw const FormatException('Scenario zone must be text');
     }
-    return DateTime.tryParse(value?.toString() ?? '')?.toUtc();
+    return IanaTimeZone.parse(value).value;
   }
+
+  static DateTime? _dateTime(Object? value) {
+    if (value == null) return null;
+    if (value is DateTime) return UtcInstant(value).value;
+    if (value is! String) {
+      throw const FormatException('Scenario UTC must be text');
+    }
+    return UtcInstant.parse(value).value;
+  }
+
+  static String? _utcText(DateTime? value) =>
+      value == null ? null : UtcInstant(value).toString();
 }

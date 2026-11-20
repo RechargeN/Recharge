@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/application/route_create_coordinator.dart';
 import 'package:recharge/features/create/application/route_create_config.dart';
 import 'package:recharge/features/create/application/route_draft_autosave_coordinator.dart';

@@ -1,4 +1,4 @@
-import '../entities/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import '../entities/time_fit_evaluation.dart';
 import '../entities/time_window.dart';
 

@@ -1,4 +1,4 @@
-import '../../../../core/geo/geo_point.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
 import '../../domain/entities/route_recording_data.dart';
 
 class RouteRecordingJournalMapper {

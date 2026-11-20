@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/application/session_create_coordinator.dart';
 import 'package:recharge/features/create/data/repositories/event_timezone_repository_impl.dart';
@@ -237,9 +239,12 @@ void main() {
           .ensureData(draft, timezoneId: 'Europe/Riga')
           .copyWith(
             resourceName: 'Sauna Deluxe',
-            price: const SessionPriceDisclosure(
+            price: SessionPriceDisclosure(
               mode: SessionPricingMode.fixed,
-              amount: SessionMoneyDraft(amountMinor: 2500, currencyCode: 'EUR'),
+              amount: Money(
+                minorUnits: 2500,
+                currency: CurrencyCode.parse('EUR'),
+              ),
             ),
             externalBookingUrl: 'https://sauna-riga.lv/book',
             schedule: const SessionSchedule(

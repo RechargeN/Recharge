@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/geo/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:recharge/features/create/data/models/route_draft_mapper.dart';
 import 'package:recharge/features/create/domain/entities/route_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/route_quality_data.dart';
@@ -42,10 +42,7 @@ void main() {
       calculatedAtUtc: DateTime.utc(2026, 7, 25, 13),
     );
 
-    expect(
-      first.elevation.availability,
-      RouteElevationAvailability.complete,
-    );
+    expect(first.elevation.availability, RouteElevationAvailability.complete);
     expect(first.elevation.samples[1].elevationMeters, 11);
     expect(first.elevation.ascentMeters, 2);
     expect(first.elevation.descentMeters, 0);
@@ -81,10 +78,10 @@ void main() {
       quality.difficulty.recommendedDifficultyId,
     );
     expect(restored.waypoints.single.catalogVersion, 2);
-    expect(
-      restored.waypoints.single.technicalAttributeIds,
-      <String>['steep.v1', 'roots.v1'],
-    );
+    expect(restored.waypoints.single.technicalAttributeIds, <String>[
+      'steep.v1',
+      'roots.v1',
+    ]);
     expect(restored.waypoints.single.safetyNote, 'Slippery after rain.');
   });
 
@@ -185,9 +182,7 @@ RouteDraftData _elevatedRoute(List<double> elevations) {
       effectiveDurationSeconds: 600,
       directDistanceMeters: 0,
       fallbackDistanceMeters: 0,
-      surfaceDistanceMeters: <String, double>{
-        'mixed': geometry.lengthMeters,
-      },
+      surfaceDistanceMeters: <String, double>{'mixed': geometry.lengthMeters},
     ),
   );
 }

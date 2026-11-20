@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -37,10 +39,7 @@ class ScenarioTransitPickerController extends ChangeNotifier {
     bool valid(ScenarioTransitStop stop) =>
         stop.latitude != null &&
         stop.longitude != null &&
-        ScenarioGeoPointDraft(
-          latitude: stop.latitude!,
-          longitude: stop.longitude!,
-        ).isValid;
+        GeoPoint(latitude: stop.latitude!, longitude: stop.longitude!).isValid;
     return valid(option.origin) && valid(option.destination);
   }
 
@@ -345,14 +344,7 @@ class ScenarioTransitPickerController extends ChangeNotifier {
     );
   }
 
-  bool setServiceDate(ScenarioTransitLocalDate value) {
-    if (!value.isValid) {
-      _fail(
-        ScenarioTransitPickerFailureCode.invalidSelection,
-        statusTarget: _StatusTarget.service,
-      );
-      return false;
-    }
+  bool setServiceDate(LocalDate value) {
     _invalidateServiceSearch();
     _setState(
       _state.copyWith(
@@ -888,10 +880,10 @@ class ScenarioTransitPickerController extends ChangeNotifier {
     String? providerCode,
     String? originId,
     String? destinationId,
-    ScenarioTransitLocalDate? serviceDate,
+    LocalDate? serviceDate,
     ScenarioTransitTime departAfter,
   ) =>
-      '$providerCode|$originId|$destinationId|${serviceDate?.compact}|'
+      '$providerCode|$originId|$destinationId|${serviceDate?.toString().replaceAll('-', '')}|'
       '${departAfter.secondsFromServiceDay}';
 
   void _invalidateSearches() {

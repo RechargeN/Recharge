@@ -3,8 +3,8 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 
-import '../../../core/geo/geo_point.dart';
-import '../../../core/id/id_generator.dart';
+import '../../../shared/primitives/geo/geo_point.dart';
+import '../../../shared/primitives/id/id_generator.dart';
 import '../domain/entities/create_draft_entity.dart';
 import '../domain/entities/route_draft_data.dart';
 import '../domain/entities/route_draft_save_result.dart';

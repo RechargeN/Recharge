@@ -83,6 +83,13 @@ class VisitedPlacesController extends ChangeNotifier {
     }
   }
 
+  DateTime todayInZone(String timezoneId) {
+    final useCase = _recordPlaceVisitUseCase;
+    if (useCase == null) throw StateError('Visit calendar is not configured');
+    final day = useCase.todayInZone(timezoneId);
+    return DateTime(day.year, day.month, day.day);
+  }
+
   Future<VisitedPlaceEntity> recordPlaceVisit({
     required String userId,
     required String placeId,

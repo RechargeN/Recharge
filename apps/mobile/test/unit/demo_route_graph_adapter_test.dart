@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/config/provider_cost_policy.dart';
-import 'package:recharge/core/geo/geo_bounds.dart';
-import 'package:recharge/core/geo/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_bounds.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:recharge/core/telemetry/provider_cost_ledger.dart';
 import 'package:recharge/features/create/data/routing/demo_coverage_config.dart';
 import 'package:recharge/features/create/data/routing/demo_route_graph.dart';

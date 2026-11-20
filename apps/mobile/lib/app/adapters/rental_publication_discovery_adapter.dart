@@ -65,7 +65,7 @@ class RentalPublicationDiscoveryAdapter
             .map(
               (step) => PublishedRentalRateStepRef(
                 minUnits: step.minUnits,
-                unitPriceMinor: step.unitPrice.amountMinor,
+                unitPriceMinor: step.unitPrice.minorUnits,
               ),
             )
             .toList(growable: false),
@@ -88,8 +88,8 @@ class RentalPublicationDiscoveryAdapter
   Future<PublishedRentalDiscoveryEntity?> getActiveRental(
     String rentalId,
   ) async {
-    final List<PublishedRentalDiscoveryEntity> rentals =
-        await _localDataSource.loadAll();
+    final List<PublishedRentalDiscoveryEntity> rentals = await _localDataSource
+        .loadAll();
     for (final PublishedRentalDiscoveryEntity rental in rentals) {
       if (rental.rentalId == rentalId) return rental;
     }

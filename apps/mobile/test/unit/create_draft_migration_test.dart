@@ -7,6 +7,8 @@ void main() {
     final CreateDraftModel model = CreateDraftModel.fromJson(
       <String, dynamic>{
         'id': 'draft_1',
+        'createdAtUtcIso': '2026-01-01T00:00:00Z',
+        'updatedAtUtcIso': '2026-01-01T00:00:00Z',
         'objectType': 'event',
         'country': 'Latvia',
         'city': '',
@@ -28,6 +30,8 @@ void main() {
     final CreateDraftModel model = CreateDraftModel.fromJson(
       <String, dynamic>{
         'id': 'draft_2',
+        'createdAtUtcIso': '2026-01-01T00:00:00Z',
+        'updatedAtUtcIso': '2026-01-01T00:00:00Z',
         'objectType': 'place',
         'country': 'Latvia',
         'city': 'Rezekne',
@@ -47,6 +51,8 @@ void main() {
     final CreateDraftModel model = CreateDraftModel.fromJson(
       <String, dynamic>{
         'id': 'draft_3',
+        'createdAtUtcIso': '2026-01-01T00:00:00Z',
+        'updatedAtUtcIso': '2026-01-01T00:00:00Z',
         'objectType': 'place',
         'country': 'Estonia',
         'city': 'Tartu',

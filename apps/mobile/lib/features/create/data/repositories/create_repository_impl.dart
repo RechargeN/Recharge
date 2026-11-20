@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
-import '../../../../core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/time/local_date.dart';
+import '../../../../shared/primitives/id/id_generator.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/draft_publisher.dart';
 import '../../domain/entities/publisher_ref.dart';
 import '../../domain/entities/event_draft_data.dart';
 import '../../domain/entities/route_draft_save_result.dart';
-import '../../domain/entities/scenario_item_draft.dart';
 import '../../domain/repositories/create_repository.dart';
 import '../../domain/repositories/create_draft_collection_repository.dart';
 import '../../domain/repositories/route_draft_persistence_repository.dart';
@@ -91,13 +92,13 @@ class CreateRepositoryImpl
           final scenario = entity.scenarioData;
           final dates = scenario?.days
               .map((day) => day.localDate)
-              .whereType<ScenarioLocalDateDraft>()
+              .whereType<LocalDate>()
               .toList(growable: false);
           return CreateDraftSummary(
             id: model.id,
             objectType: createObjectTypeFromId(model.objectType),
             title: model.title,
-            updatedAtUtc: DateTime.parse(model.updatedAtUtcIso).toUtc(),
+            updatedAtUtc: UtcInstant.parse(model.updatedAtUtcIso).value,
             scenarioRevision: model.scenarioRevision,
             scenarioFormat: scenario?.format,
             scenarioDateMode: scenario?.dateMode,

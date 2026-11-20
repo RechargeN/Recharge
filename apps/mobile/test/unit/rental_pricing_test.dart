@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/domain/entities/rental_draft_data.dart';
 import 'package:recharge/features/create/domain/usecases/estimate_rental_rate_usecase.dart';
@@ -8,22 +10,22 @@ void main() {
   RentalPricingPolicy pricingWithLadder() => RentalPricingPolicy(
     currencyCode: 'EUR',
     billingUnit: RentalBillingUnit.day,
-    rateSteps: const <RentalRateStep>[
+    rateSteps: <RentalRateStep>[
       RentalRateStep(
         minUnits: 1,
-        unitPrice: RentalMoneyDraft(amountMinor: 2800, currencyCode: 'EUR'),
+        unitPrice: Money(minorUnits: 2800, currency: CurrencyCode.parse('EUR')),
       ),
       RentalRateStep(
         minUnits: 3,
-        unitPrice: RentalMoneyDraft(amountMinor: 2500, currencyCode: 'EUR'),
+        unitPrice: Money(minorUnits: 2500, currency: CurrencyCode.parse('EUR')),
       ),
       RentalRateStep(
         minUnits: 7,
-        unitPrice: RentalMoneyDraft(amountMinor: 2200, currencyCode: 'EUR'),
+        unitPrice: Money(minorUnits: 2200, currency: CurrencyCode.parse('EUR')),
       ),
     ],
-    deposit: const RentalDepositPolicy(
-      amount: RentalMoneyDraft(amountMinor: 15000, currencyCode: 'EUR'),
+    deposit: RentalDepositPolicy(
+      amount: Money(minorUnits: 15000, currency: CurrencyCode.parse('EUR')),
       collectionMethod: RentalDepositCollectionMethod.externalProvider,
       terms: 'Held by provider.',
     ),
@@ -72,7 +74,7 @@ void main() {
 
   test('deposit zero/nonzero is an explicit, distinguishable state', () {
     final RentalDepositPolicy zero = RentalDepositPolicy(
-      amount: const RentalMoneyDraft(amountMinor: 0, currencyCode: 'EUR'),
+      amount: Money(minorUnits: 0, currency: CurrencyCode.parse('EUR')),
       collectionMethod: RentalDepositCollectionMethod.none,
     );
     final RentalDepositPolicy nonzero = pricingWithLadder().deposit;

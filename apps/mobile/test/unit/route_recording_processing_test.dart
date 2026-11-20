@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/geo/geo_point.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/domain/entities/route_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/route_edit_command.dart';
 import 'package:recharge/features/create/domain/entities/route_recording_data.dart';

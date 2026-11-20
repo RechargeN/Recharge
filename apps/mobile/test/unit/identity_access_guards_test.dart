@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:recharge/app/adapters/identity_publisher_access_check.dart';
 import 'package:recharge/app/adapters/identity_route_authoring_policy.dart';
 import 'package:recharge/app/config/market_config.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/core/notifications/app_notification_sink.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/domain/entities/publisher_ref.dart';

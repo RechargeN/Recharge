@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/time/local_date.dart';
 import '../../../../shared/primitives/money/money.dart';
 import 'activity_draft_data.dart';
 import 'class_workshop_draft_data.dart';
@@ -284,6 +285,7 @@ class CreateDraftEntity {
     String country = '',
     String city = '',
     String currency = '',
+    LocalDate? eventLocalToday,
   }) {
     final DateTime now = DateTime.now().toUtc();
     return CreateDraftEntity(
@@ -304,6 +306,7 @@ class CreateDraftEntity {
         city: city,
         timezoneId: timezone,
         currencyCode: currency,
+        localToday: eventLocalToday,
         publisherRef: PublisherRef(type: PublisherType.user, id: organizerId),
       ),
       placeData: null,

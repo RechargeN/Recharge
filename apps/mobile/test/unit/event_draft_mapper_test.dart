@@ -1,3 +1,6 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import 'package:recharge/features/create/data/repositories/event_timezone_repository_impl.dart';
 import 'package:recharge/shared/primitives/money/money_parse_result.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/models/create_draft_model.dart';
@@ -7,6 +10,55 @@ import 'package:recharge/features/create/domain/entities/event_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/event_admission.dart';
 
 void main() {
+  test(
+    'fresh Event defaults use zone calendar and stored fields remain unchanged',
+    () {
+      final clock = EventTimezoneRepositoryImpl();
+      final instant = DateTime.utc(2026, 3, 28, 23, 30);
+      EventDraftData defaults(String zone) => EventDraftData.defaults(
+        marketCityId: 'riga',
+        countryCode: 'LV',
+        city: 'Riga',
+        timezoneId: zone,
+        currencyCode: 'EUR',
+        localToday: clock.localDateAt(instantUtc: instant, timezoneId: zone),
+      );
+      expect(defaults('Europe/Riga').localStartDate, '2026-03-30');
+      expect(defaults('Pacific/Honolulu').localStartDate, '2026-03-29');
+      final source = defaults(
+        'Europe/Riga',
+      ).copyWith(localStartDate: '2026-10-25', startMinute: 210);
+      final wire = EventDraftMapper.toJson(source);
+      final restored = EventDraftMapper.fromJson(
+        wire,
+        defaults: defaults('Pacific/Honolulu'),
+      );
+      expect(restored.localStartDate, '2026-10-25');
+      expect(restored.startMinute, 210);
+      expect(EventDraftMapper.toJson(restored), wire);
+    },
+  );
+  test(
+    'legacy Event missing date uses explicit zone without changing original instant',
+    () {
+      final original = CreateDraftEntity.defaults(
+        organizerId: 'u',
+        organizerEmail: '',
+        organizerName: '',
+        timezone: 'Europe/Riga',
+      ).copyWith(startDateTimeUtc: DateTime.utc(2026, 3, 28, 23, 30));
+      final wire = CreateDraftModel.fromEntity(original).toJson();
+      (wire['sectionData'] as Map).remove('event_details');
+      final restored = CreateDraftModel.fromJson(wire).toEntity();
+      expect(restored.eventData!.localStartDate, '2026-03-29');
+      expect(restored.eventData!.startMinute, 90);
+      expect(restored.startDateTimeUtc, original.startDateTimeUtc);
+      expect(
+        (wire['sectionData'] as Map).containsKey('event_details'),
+        isFalse,
+      );
+    },
+  );
   EventDraftData timedEvent() {
     final start = DateTime.utc(2026, 8, 3, 12, 0, 0, 123, 456);
     final end = start.add(const Duration(hours: 1));
@@ -194,17 +246,17 @@ void main() {
       currencyCode: 'EUR',
     );
     final source = defaults.copyWith(
-      price: const EventMoneyDraft(amountMinor: 1234, currencyCode: 'EUR'),
+      price: Money(minorUnits: 1234, currency: CurrencyCode.parse('EUR')),
     );
     final json = EventDraftMapper.toJson(source);
     expect(json['price'], {'minorUnits': 1234, 'currencyCode': 'EUR'});
     expect(
-      EventDraftMapper.fromJson(json, defaults: defaults).price?.toMoney(),
-      source.price?.toMoney(),
+      EventDraftMapper.fromJson(json, defaults: defaults).price,
+      source.price,
     );
     json['price'] = {'amountMinor': '1234', 'currencyCode': 'EUR'};
     expect(
-      EventDraftMapper.fromJson(json, defaults: defaults).price?.amountMinor,
+      EventDraftMapper.fromJson(json, defaults: defaults).price?.minorUnits,
       1234,
     );
     json['price'] = {
@@ -213,7 +265,7 @@ void main() {
       'currencyCode': 'EUR',
     };
     expect(
-      EventDraftMapper.fromJson(json, defaults: defaults).price?.amountMinor,
+      EventDraftMapper.fromJson(json, defaults: defaults).price?.minorUnits,
       17,
     );
     json['price'] = {
@@ -252,7 +304,7 @@ void main() {
       ),
       pricingMode: EventPricingMode.fixed,
       paymentCollectionMode: EventPaymentCollectionMode.external,
-      price: const EventMoneyDraft(amountMinor: 1599, currencyCode: 'EUR'),
+      price: Money(minorUnits: 1599, currency: CurrencyCode.parse('EUR')),
       unknownFields: const <String, Object?>{
         'futureCapability': <String, Object?>{'enabled': true},
       },
@@ -268,7 +320,7 @@ void main() {
     expect(restored.format, EventFormat.hybrid);
     expect(restored.recurrence!.weekdays, <int>{1, 3});
     expect(restored.recurrence!.exceptionLocalDates, <String>{'2026-08-17'});
-    expect(restored.price!.amountMinor, 1599);
+    expect(restored.price!.minorUnits, 1599);
     expect(restored.unknownFields['futureCapability'], isA<Map>());
     expect(EventDraftMapper.toJson(restored)['futureCapability'], isA<Map>());
   });

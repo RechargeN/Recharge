@@ -1,7 +1,10 @@
+import '../repositories/event_timezone_repository_impl.dart';
+import '../../domain/repositories/event_timezone_repository.dart';
 import '../../../../shared/primitives/money/money_parse_result.dart';
 import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../core/parsing/money_legacy_adapter.dart';
 import '../../../../shared/primitives/money/money.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 import '../../../../core/config/recharge_taxonomy.dart';
 import '../../domain/entities/activity_draft_data.dart';
 import '../../domain/entities/collection_draft_data.dart';
@@ -268,8 +271,8 @@ class CreateDraftModel {
       shortDescription: entity.shortDescription,
       fullDescription: entity.fullDescription,
       sectionData: serializedSections,
-      startDateTimeUtcIso: entity.startDateTimeUtc?.toIso8601String(),
-      endDateTimeUtcIso: entity.endDateTimeUtc?.toIso8601String(),
+      startDateTimeUtcIso: _writeUtc(entity.startDateTimeUtc),
+      endDateTimeUtcIso: _writeUtc(entity.endDateTimeUtc),
       durationMinutes: entity.durationMinutes,
       timezone: entity.timezone,
       marketCityId: entity.marketCityId,
@@ -284,8 +287,7 @@ class CreateDraftModel {
       minimumVisitDurationMinutes: entity.minimumVisitDurationMinutes,
       bufferBeforeMinutes: entity.bufferBeforeMinutes,
       bufferAfterMinutes: entity.bufferAfterMinutes,
-      registrationDeadlineUtcIso: entity.registrationDeadlineUtc
-          ?.toIso8601String(),
+      registrationDeadlineUtcIso: _writeUtc(entity.registrationDeadlineUtc),
       format: entity.format,
       country: entity.country,
       city: entity.city,
@@ -323,9 +325,9 @@ class CreateDraftModel {
       publishStatus: entity.publishStatus.name,
       visibility: entity.visibility.name,
       reportCount: entity.reportCount,
-      createdAtUtcIso: entity.createdAtUtc.toIso8601String(),
-      updatedAtUtcIso: entity.updatedAtUtc.toIso8601String(),
-      publishedAtUtcIso: entity.publishedAtUtc?.toIso8601String(),
+      createdAtUtcIso: _writeUtc(entity.createdAtUtc)!,
+      updatedAtUtcIso: _writeUtc(entity.updatedAtUtc)!,
+      publishedAtUtcIso: _writeUtc(entity.publishedAtUtc),
     );
   }
 
@@ -345,6 +347,28 @@ class CreateDraftModel {
     final PublisherRef? publisher = _envelopePublisher(envelope);
     final PublisherRef compatibilityPublisher =
         publisher ?? const PublisherRef(type: PublisherType.user, id: '');
+    String? legacyEventDate;
+    int? legacyEventMinute;
+    final rawEvent = migratedSectionData['event_details'];
+    if (parsedObjectType == CreateObjectType.event &&
+        startDateTimeUtcIso != null &&
+        (rawEvent is! Map || rawEvent['localStartDate'] == null)) {
+      final clock = EventTimezoneRepositoryImpl();
+      final instant = UtcInstant.parse(startDateTimeUtcIso!).value;
+      try {
+        legacyEventDate = clock
+            .localDateAt(instantUtc: instant, timezoneId: timezone)
+            .toString();
+        legacyEventMinute = clock.localMinuteAt(
+          instantUtc: instant,
+          timezoneId: timezone,
+        );
+      } on EventLocalTimeException {
+        throw const FormatException(
+          'Legacy Event requires a known explicit timezone',
+        );
+      }
+    }
     final EventDraftData eventDefaults =
         EventDraftData.defaults(
           marketCityId: marketCityId,
@@ -357,18 +381,14 @@ class CreateDraftModel {
             (EventFormat value) => value.name == format,
             orElse: () => EventFormat.offline,
           ),
-          localStartDate:
-              startDateTimeUtcIso != null && startDateTimeUtcIso!.length >= 10
-              ? startDateTimeUtcIso!.substring(0, 10)
-              : null,
+          localStartDate: legacyEventDate,
+          startMinute: legacyEventMinute,
           durationMinutes: durationMinutes ?? 120,
           pricingMode: isFree ? EventPricingMode.free : EventPricingMode.fixed,
           paymentCollectionMode: isFree
               ? EventPaymentCollectionMode.none
               : EventPaymentCollectionMode.onsite,
-          price: isFree || basePrice == null
-              ? null
-              : EventMoneyDraft.fromMoney(basePrice!),
+          price: isFree || basePrice == null ? null : (basePrice!),
           capacityMode: maxParticipants == null
               ? EventCapacityMode.unknown
               : EventCapacityMode.known,
@@ -497,13 +517,39 @@ class CreateDraftModel {
                         .toList(growable: false),
                   ),
           );
+    final Object? rentalPayload = migratedSectionData['rental_details'];
+    final Object? rentalPricing = rentalPayload is Map
+        ? rentalPayload['pricing']
+        : null;
+    final Object? recordedRentalCurrency = rentalPricing is Map
+        ? rentalPricing['currencyCode']
+        : null;
+    if (parsedObjectType == CreateObjectType.rental &&
+        recordedRentalCurrency != null &&
+        recordedRentalCurrency is! String) {
+      throw const MoneyReadException(MoneyParseError.missingCurrency);
+    }
+    final rentalCurrency = recordedRentalCurrency is String
+        ? recordedRentalCurrency
+        : currency;
+    final rentalHandover = rentalPayload is Map
+        ? rentalPayload['handover']
+        : null;
+    if (parsedObjectType == CreateObjectType.rental &&
+        rentalCurrency.isEmpty &&
+        (rentalPricing != null ||
+            (rentalHandover is Map && rentalHandover['deliveryFee'] != null))) {
+      throw const MoneyReadException(MoneyParseError.missingCurrency);
+    }
+    // An incomplete legacy envelope without monetary data remains incomplete.
+    // Never invent a currency to manufacture a zero deposit during a read.
     final RentalDraftData? rentalData =
-        parsedObjectType == CreateObjectType.rental
+        parsedObjectType == CreateObjectType.rental && rentalCurrency.isNotEmpty
         ? RentalDraftMapper.fromJson(
-            migratedSectionData['rental_details'],
+            rentalPayload,
             defaults: RentalDraftData.defaults(
               userId: organizerId,
-              currencyCode: currency,
+              currencyCode: rentalCurrency,
               timeZoneId: timezone,
             ).copyWith(publisherRef: compatibilityPublisher),
           )
@@ -575,10 +621,10 @@ class CreateDraftModel {
       classWorkshopData: classWorkshopData,
       startDateTimeUtc: startDateTimeUtcIso == null
           ? null
-          : DateTime.parse(startDateTimeUtcIso!).toUtc(),
+          : UtcInstant.parse(startDateTimeUtcIso!).value,
       endDateTimeUtc: endDateTimeUtcIso == null
           ? null
-          : DateTime.parse(endDateTimeUtcIso!).toUtc(),
+          : UtcInstant.parse(endDateTimeUtcIso!).value,
       durationMinutes: durationMinutes,
       timezone: timezone,
       marketCityId: marketCityId,
@@ -598,7 +644,7 @@ class CreateDraftModel {
       bufferAfterMinutes: bufferAfterMinutes,
       registrationDeadlineUtc: registrationDeadlineUtcIso == null
           ? null
-          : DateTime.parse(registrationDeadlineUtcIso!).toUtc(),
+          : UtcInstant.parse(registrationDeadlineUtcIso!).value,
       format: format,
       country: country,
       city: city,
@@ -635,11 +681,11 @@ class CreateDraftModel {
       publishStatus: _parsePublishStatus(publishStatus),
       visibility: _parseVisibility(visibility),
       reportCount: reportCount,
-      createdAtUtc: DateTime.parse(createdAtUtcIso).toUtc(),
-      updatedAtUtc: DateTime.parse(updatedAtUtcIso).toUtc(),
+      createdAtUtc: UtcInstant.parse(createdAtUtcIso).value,
+      updatedAtUtc: UtcInstant.parse(updatedAtUtcIso).value,
       publishedAtUtc: publishedAtUtcIso == null
           ? null
-          : DateTime.parse(publishedAtUtcIso!).toUtc(),
+          : UtcInstant.parse(publishedAtUtcIso!).value,
     );
   }
 
@@ -694,15 +740,21 @@ class CreateDraftModel {
         json['sectionData'] as Map<dynamic, dynamic>? ??
             const <dynamic, dynamic>{},
       ),
-      startDateTimeUtcIso: json['startDateTimeUtcIso'] as String?,
-      endDateTimeUtcIso: json['endDateTimeUtcIso'] as String?,
+      startDateTimeUtcIso: _readUtcText(
+        json['startDateTimeUtcIso'],
+        optional: true,
+      ),
+      endDateTimeUtcIso: _readUtcText(
+        json['endDateTimeUtcIso'],
+        optional: true,
+      ),
       durationMinutes: json['durationMinutes'] as int?,
       timezone: timezone,
       marketCityId: marketCityId,
       availabilityKind:
           json['availabilityKind'] as String? ??
           CreateAvailabilityKind.none.name,
-      scheduleSlots: _mapList(json['scheduleSlots']),
+      scheduleSlots: _slotMaps(json['scheduleSlots']),
       openingHours: _mapList(json['openingHours']),
       allowsPartialAttendance:
           json['allowsPartialAttendance'] as bool? ?? false,
@@ -710,7 +762,10 @@ class CreateDraftModel {
           ?.toInt(),
       bufferBeforeMinutes: (json['bufferBeforeMinutes'] as num?)?.toInt() ?? 0,
       bufferAfterMinutes: (json['bufferAfterMinutes'] as num?)?.toInt() ?? 0,
-      registrationDeadlineUtcIso: json['registrationDeadlineUtcIso'] as String?,
+      registrationDeadlineUtcIso: _readUtcText(
+        json['registrationDeadlineUtcIso'],
+        optional: true,
+      ),
       format: json['format'] as String? ?? 'offline',
       country: country,
       city: city,
@@ -759,13 +814,12 @@ class CreateDraftModel {
       publishStatus: json['publishStatus'] as String? ?? 'draft',
       visibility: json['visibility'] as String? ?? 'public',
       reportCount: json['reportCount'] as int? ?? 0,
-      createdAtUtcIso:
-          json['createdAtUtcIso'] as String? ??
-          DateTime.now().toUtc().toIso8601String(),
-      updatedAtUtcIso:
-          json['updatedAtUtcIso'] as String? ??
-          DateTime.now().toUtc().toIso8601String(),
-      publishedAtUtcIso: json['publishedAtUtcIso'] as String?,
+      createdAtUtcIso: _readUtcText(json['createdAtUtcIso'])!,
+      updatedAtUtcIso: _readUtcText(json['updatedAtUtcIso'])!,
+      publishedAtUtcIso: _readUtcText(
+        json['publishedAtUtcIso'],
+        optional: true,
+      ),
     );
   }
 
@@ -839,6 +893,14 @@ class CreateDraftModel {
   }
 
   Map<String, dynamic> toJson() {
+    // Public constructors may carry raw storage text; validate before writing.
+    _readUtcText(createdAtUtcIso);
+    _readUtcText(updatedAtUtcIso);
+    _readUtcText(startDateTimeUtcIso, optional: true);
+    _readUtcText(endDateTimeUtcIso, optional: true);
+    _readUtcText(registrationDeadlineUtcIso, optional: true);
+    _readUtcText(publishedAtUtcIso, optional: true);
+    _slotMaps(scheduleSlots);
     return <String, dynamic>{
       'schemaVersion': schemaVersion,
       if (publisherEnvelope != null) 'publisherEnvelope': publisherEnvelope,
@@ -909,6 +971,37 @@ class CreateDraftModel {
       'updatedAtUtcIso': updatedAtUtcIso,
       'publishedAtUtcIso': publishedAtUtcIso,
     };
+  }
+
+  static List<Map<String, Object?>> _slotMaps(Object? raw) {
+    if (raw == null) return const [];
+    if (raw is! List) {
+      throw const FormatException('Stored Create slots must be a list');
+    }
+    return raw
+        .map((value) {
+          if (value is! Map<String, Object?>) {
+            throw const FormatException('Stored Create slot must be a map');
+          }
+          CreateTimeSlotDraft.fromMap(value);
+          return value;
+        })
+        .toList(growable: false);
+  }
+
+  static String? _writeUtc(DateTime? value) =>
+      value == null ? null : UtcInstant(value).toString();
+
+  static String? _readUtcText(Object? raw, {bool optional = false}) {
+    if (raw == null && optional) return null;
+    if (raw is! String) {
+      throw const FormatException(
+        'Create UTC timestamp must be present as text',
+      );
+    }
+    UtcInstant.parse(raw);
+    // Validation is not a migration: retain valid legacy text on read.
+    return raw;
   }
 
   static CreateObjectType _parseObjectType(

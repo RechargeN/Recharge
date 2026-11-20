@@ -1,4 +1,4 @@
-import '../../../../core/geo/geo_bounds.dart';
+import '../../../../shared/primitives/geo/geo_bounds.dart';
 import '../../domain/entities/route_draft_data.dart';
 
 class DemoCoverageConfig {

@@ -1,6 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/application/collection_create_coordinator.dart';
 import 'package:recharge/features/create/application/state/collection_create_state.dart';
 import 'package:recharge/features/create/data/datasources/collection_publication_local_datasource.dart';
@@ -20,19 +20,20 @@ import 'package:recharge/features/create/domain/repositories/location_search_rep
 
 const _publisher = PublisherRef(type: PublisherType.user, id: 'u1');
 
-List<CollectionItemDraft> _threeReadyItems() => List<CollectionItemDraft>.generate(
-  3,
-  (i) => CollectionItemDraft(
-    id: 'item-$i',
-    ref: CollectionObjectRef(
-      objectId: 'p$i',
-      objectType: CollectionCatalogObjectType.place,
-    ),
-    snapshot: CollectionItemSnapshotDraft(title: 'Place $i'),
-    sourceStatus: CollectionSourceStatus.ready,
-    order: i,
-  ),
-);
+List<CollectionItemDraft> _threeReadyItems() =>
+    List<CollectionItemDraft>.generate(
+      3,
+      (i) => CollectionItemDraft(
+        id: 'item-$i',
+        ref: CollectionObjectRef(
+          objectId: 'p$i',
+          objectType: CollectionCatalogObjectType.place,
+        ),
+        snapshot: CollectionItemSnapshotDraft(title: 'Place $i'),
+        sourceStatus: CollectionSourceStatus.ready,
+        order: i,
+      ),
+    );
 
 CollectionDraftData _publishableData() {
   return CollectionDraftData.defaults(publisherRef: _publisher).copyWith(
@@ -99,7 +100,10 @@ void main() {
       );
 
       expect(first.outcome, CollectionPublishOutcome.created);
-      expect(second.outcome, CollectionPublishOutcome.replayedIdempotentSuccess);
+      expect(
+        second.outcome,
+        CollectionPublishOutcome.replayedIdempotentSuccess,
+      );
       expect(second.collectionId, first.collectionId);
       expect(second.collectionVersionId, first.collectionVersionId);
     });
@@ -139,7 +143,10 @@ void main() {
       expect(coordinator.state.createDraft.id, receipt.collectionId);
       expect(coordinator.state.createDraft.id, isNot(startsWith('loc_')));
 
-      await coordinator.publish(direct: true, actorId: 'user-1'); // replay must not re-mint
+      await coordinator.publish(
+        direct: true,
+        actorId: 'user-1',
+      ); // replay must not re-mint
       expect(coordinator.state.createDraft.id, receipt.collectionId);
     });
 
@@ -155,18 +162,21 @@ void main() {
   });
 
   group('direct vs review branching', () {
-    test('direct:true activates immediately (created, publishedAtUtc set)', () async {
-      coordinator.initialize(createDraft: _draft(id: 'loc_direct'));
-      final CollectionPublishReceipt receipt = await coordinator.publish(
-        direct: true,
-        actorId: 'user-1',
-      );
+    test(
+      'direct:true activates immediately (created, publishedAtUtc set)',
+      () async {
+        coordinator.initialize(createDraft: _draft(id: 'loc_direct'));
+        final CollectionPublishReceipt receipt = await coordinator.publish(
+          direct: true,
+          actorId: 'user-1',
+        );
 
-      expect(receipt.outcome, CollectionPublishOutcome.created);
-      expect(receipt.publishedAtUtc, isNotNull);
-      expect(receipt.submittedAtUtc, isNull);
-      expect(coordinator.state.status, CollectionCreateStatus.published);
-    });
+        expect(receipt.outcome, CollectionPublishOutcome.created);
+        expect(receipt.publishedAtUtc, isNotNull);
+        expect(receipt.submittedAtUtc, isNull);
+        expect(coordinator.state.status, CollectionCreateStatus.published);
+      },
+    );
 
     test('direct:false submits for review without activating', () async {
       coordinator.initialize(createDraft: _draft(id: 'loc_review'));
@@ -178,13 +188,19 @@ void main() {
       expect(receipt.outcome, CollectionPublishOutcome.pendingReview);
       expect(receipt.submittedAtUtc, isNotNull);
       expect(receipt.publishedAtUtc, isNull);
-      expect(coordinator.state.status, CollectionCreateStatus.submittedForReview);
+      expect(
+        coordinator.state.status,
+        CollectionCreateStatus.submittedForReview,
+      );
       expect(sink.activateCalls, isEmpty);
     });
 
     test('a still-blocking validation issue throws before any write', () async {
       coordinator.initialize(
-        createDraft: _draft(id: 'loc_invalid', data: CollectionDraftData.defaults(publisherRef: _publisher)),
+        createDraft: _draft(
+          id: 'loc_invalid',
+          data: CollectionDraftData.defaults(publisherRef: _publisher),
+        ),
       );
       expect(
         () => coordinator.publish(direct: true, actorId: 'user-1'),
@@ -195,23 +211,29 @@ void main() {
   });
 
   group('archive', () {
-    test('never called on a Collection that was never published (loc_* id)', () async {
-      coordinator.initialize(createDraft: _draft(id: 'loc_unpublished'));
-      final bool synced = await coordinator.archive(actorId: 'user-1');
-      expect(synced, isTrue); // trivially in sync — nothing to archive
-      expect(sink.archiveCalls, isEmpty);
-    });
+    test(
+      'never called on a Collection that was never published (loc_* id)',
+      () async {
+        coordinator.initialize(createDraft: _draft(id: 'loc_unpublished'));
+        final bool synced = await coordinator.archive(actorId: 'user-1');
+        expect(synced, isTrue); // trivially in sync — nothing to archive
+        expect(sink.archiveCalls, isEmpty);
+      },
+    );
 
-    test('archives the permanent Collection after a successful publish', () async {
-      coordinator.initialize(createDraft: _draft(id: 'loc_toarchive'));
-      final CollectionPublishReceipt receipt = await coordinator.publish(
-        direct: true,
-        actorId: 'user-1',
-      );
-      final bool synced = await coordinator.archive(actorId: 'user-1');
-      expect(synced, isTrue);
-      expect(sink.archiveCalls, <String>[receipt.collectionId]);
-    });
+    test(
+      'archives the permanent Collection after a successful publish',
+      () async {
+        coordinator.initialize(createDraft: _draft(id: 'loc_toarchive'));
+        final CollectionPublishReceipt receipt = await coordinator.publish(
+          direct: true,
+          actorId: 'user-1',
+        );
+        final bool synced = await coordinator.archive(actorId: 'user-1');
+        expect(synced, isTrue);
+        expect(sink.archiveCalls, <String>[receipt.collectionId]);
+      },
+    );
   });
 
   group('moderation delegation', () {
@@ -287,7 +309,8 @@ class _NoopSink implements CollectionPublicationIndexSink {
   }
 }
 
-class _NoopCatalogSearchRepository implements CollectionCatalogSearchRepository {
+class _NoopCatalogSearchRepository
+    implements CollectionCatalogSearchRepository {
   @override
   Future<List<CollectionCatalogSearchResult>> search(
     CollectionCatalogSearchQuery query,

@@ -1,3 +1,5 @@
+import '../../../../shared/primitives/time/local_date.dart';
+
 enum ScenarioTransitMode { bus, train, tram, trolleybus, other }
 
 enum ScenarioTransitFreshness { current, stale, unknown, unavailable }
@@ -87,19 +89,22 @@ class ScenarioTransitLocalDate implements Comparable<ScenarioTransitLocalDate> {
       '${month.toString().padLeft(2, '0')}-'
       '${day.toString().padLeft(2, '0')}';
 
+  LocalDate get calendarDate => LocalDate(year, month, day);
+
   bool get isValid {
-    if (year < 1 || month < 1 || month > 12 || day < 1 || day > 31) {
+    try {
+      calendarDate;
+      return true;
+    } on FormatException {
       return false;
     }
-    final value = DateTime.utc(year, month, day);
-    return value.year == year && value.month == month && value.day == day;
   }
 
-  int get weekday => DateTime.utc(year, month, day).weekday;
+  int get weekday => calendarDate.weekday;
 
   @override
   int compareTo(ScenarioTransitLocalDate other) =>
-      compact.compareTo(other.compact);
+      calendarDate.compareTo(other.calendarDate);
 
   @override
   bool operator ==(Object other) =>
@@ -157,8 +162,8 @@ class ScenarioTransitFeedManifest {
   final ScenarioTransitFreshness freshness;
   final String? feedPublisherName;
   final String? feedVersion;
-  final ScenarioTransitLocalDate? feedStartDate;
-  final ScenarioTransitLocalDate? feedEndDate;
+  final LocalDate? feedStartDate;
+  final LocalDate? feedEndDate;
 
   ScenarioTransitFeedManifest withFreshness(ScenarioTransitFreshness value) =>
       ScenarioTransitFeedManifest(
@@ -213,7 +218,7 @@ class ScenarioTransitServiceOption {
   });
 
   final String providerCode;
-  final ScenarioTransitLocalDate serviceDate;
+  final LocalDate serviceDate;
   final String tripId;
   final String routeId;
   final String serviceId;
@@ -248,7 +253,7 @@ class ScenarioTransitSearchQuery {
 
   final String originStopId;
   final String destinationStopId;
-  final ScenarioTransitLocalDate serviceDate;
+  final LocalDate serviceDate;
   final ScenarioTransitTime departAfter;
   final Set<String> providerCodes;
   final Set<ScenarioTransitMode> allowedModes;

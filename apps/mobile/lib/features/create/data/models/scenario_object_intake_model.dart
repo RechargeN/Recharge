@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import '../../domain/entities/scenario_item_draft.dart';
 import '../../domain/entities/scenario_object_intake.dart';
 import '../../domain/entities/scenario_object_intake_session.dart';
@@ -148,7 +149,7 @@ class ScenarioObjectIntakeSessionModel {
           ? null
           : ScenarioIntakeLocationSnapshot(
               title: location['title'] as String,
-              point: ScenarioGeoPointDraft(
+              point: GeoPoint(
                 latitude: (location['latitude'] as num).toDouble(),
                 longitude: (location['longitude'] as num).toDouble(),
               ),

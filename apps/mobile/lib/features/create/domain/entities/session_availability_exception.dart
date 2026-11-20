@@ -1,4 +1,4 @@
-import 'session_schedule.dart';
+import 'package:recharge/shared/primitives/time/local_date.dart';
 
 /// Manual, closing-only override on top of the weekly schedule
 /// (BOOKABLE_SESSION_CREATE_BLOCK_SPEC.md §11.3). Never expands availability.
@@ -29,8 +29,8 @@ class SessionAvailabilityException {
   static const int maxPrivateNoteLength = 140;
 
   bool get isStructurallyValid {
-    final SessionLocalDate? start = SessionLocalDate.tryParse(startDateLocal);
-    final SessionLocalDate? end = SessionLocalDate.tryParse(endDateLocal);
+    final LocalDate? start = LocalDate.tryParse(startDateLocal);
+    final LocalDate? end = LocalDate.tryParse(endDateLocal);
     if (start == null || end == null || end.compareTo(start) < 0) return false;
     if (id.trim().isEmpty || createdByUserId.trim().isEmpty) return false;
     if ((privateNote?.length ?? 0) > maxPrivateNoteLength) return false;
@@ -44,12 +44,12 @@ class SessionAvailabilityException {
   /// True if this exception closes the local interval
   /// `[candidateStartMinute, candidateEndMinute)` on [date].
   bool closes({
-    required SessionLocalDate date,
+    required LocalDate date,
     required int candidateStartMinute,
     required int candidateEndMinute,
   }) {
-    final SessionLocalDate? start = SessionLocalDate.tryParse(startDateLocal);
-    final SessionLocalDate? end = SessionLocalDate.tryParse(endDateLocal);
+    final LocalDate? start = LocalDate.tryParse(startDateLocal);
+    final LocalDate? end = LocalDate.tryParse(endDateLocal);
     if (start == null || end == null) return false;
     if (date.compareTo(start) < 0 || end.compareTo(date) < 0) return false;
     if (allDay) return true;

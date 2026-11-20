@@ -1,8 +1,29 @@
+import '../../../../core/parsing/money_legacy_adapter.dart';
+import '../../../../shared/primitives/money/money_parse_result.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/rental_draft_data.dart';
 
 class RentalDraftMapper {
   const RentalDraftMapper._();
+
+  static Money _moneyFromMap(Map<String, Object?> map) {
+    final money = MoneyLegacyAdapter().readOptional(
+      hasCanonicalMinorUnits: true,
+      canonicalMinorUnits: map['amountMinor'],
+      currencyCode: map['currencyCode'],
+    );
+    if (money == null) {
+      throw const MoneyReadException(MoneyParseError.invalidCanonicalValue);
+    }
+    return money;
+  }
+
+  static Map<String, Object?> _moneyToMap(Money value) => {
+    'amountMinor': value.minorUnits,
+    'currencyCode': value.currency.value,
+  };
 
   static RentalDraftData fromJson(
     Object? raw, {
@@ -246,7 +267,9 @@ class RentalDraftMapper {
             .toList(growable: false),
         'deliveryAvailable': value.deliveryAvailable,
         'deliveryRadiusKm': value.deliveryRadiusKm,
-        'deliveryFee': value.deliveryFee?.toMap(),
+        'deliveryFee': value.deliveryFee == null
+            ? null
+            : _moneyToMap(value.deliveryFee!),
         'deliveryTerms': value.deliveryTerms,
       };
 
@@ -286,7 +309,7 @@ class RentalDraftMapper {
       deliveryAvailable: json['deliveryAvailable'] as bool? ?? false,
       deliveryRadiusKm: _double(json['deliveryRadiusKm']),
       deliveryFee: feeRaw is Map
-          ? RentalMoneyDraft.fromMap(
+          ? _moneyFromMap(
               feeRaw.map((Object? k, Object? v) => MapEntry(k.toString(), v)),
             )
           : null,
@@ -330,12 +353,12 @@ class RentalDraftMapper {
             .map(
               (RentalRateStep s) => <String, Object?>{
                 'minUnits': s.minUnits,
-                'unitPrice': s.unitPrice.toMap(),
+                'unitPrice': _moneyToMap(s.unitPrice),
               },
             )
             .toList(growable: false),
         'deposit': <String, Object?>{
-          'amount': value.deposit.amount.toMap(),
+          'amount': _moneyToMap(value.deposit.amount),
           'collectionMethod': value.deposit.collectionMethod.name,
           'terms': value.deposit.terms,
         },
@@ -365,12 +388,12 @@ class RentalDraftMapper {
       ).map(_rateStep).whereType<RentalRateStep>().toList(growable: false),
       deposit: RentalDepositPolicy(
         amount: amountRaw is Map
-            ? RentalMoneyDraft.fromMap(
+            ? _moneyFromMap(
                 amountRaw.map(
                   (Object? k, Object? v) => MapEntry(k.toString(), v),
                 ),
               )
-            : RentalMoneyDraft(amountMinor: 0, currencyCode: currencyCode),
+            : Money(minorUnits: 0, currency: CurrencyCode.parse(currencyCode)),
         collectionMethod:
             _enumValue(
               RentalDepositCollectionMethod.values,
@@ -396,7 +419,7 @@ class RentalDraftMapper {
     if (minUnits == null || priceRaw is! Map) return null;
     return RentalRateStep(
       minUnits: minUnits,
-      unitPrice: RentalMoneyDraft.fromMap(
+      unitPrice: _moneyFromMap(
         priceRaw.map((Object? k, Object? v) => MapEntry(k.toString(), v)),
       ),
     );

@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/geo/geo_bounds.dart';
-import 'package:recharge/core/geo/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_bounds.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:recharge/core/map/authoring_map_surface.dart';
 import 'package:recharge/core/map/consumer_map_renderer.dart';
 import 'package:recharge/core/map/map_scene.dart';

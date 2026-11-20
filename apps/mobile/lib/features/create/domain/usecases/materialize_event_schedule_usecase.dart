@@ -8,6 +8,14 @@ class MaterializeEventScheduleUseCase {
 
   final EventTimezoneRepository _timezoneRepository;
 
+  LocalDate localDateAt({
+    required DateTime instantUtc,
+    required String timezoneId,
+  }) => _timezoneRepository.localDateAt(
+    instantUtc: instantUtc,
+    timezoneId: timezoneId,
+  );
+
   List<EventOccurrenceDraft> call(
     EventDraftData draft, {
     int maxProjectionCount = 180,

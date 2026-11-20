@@ -49,7 +49,7 @@ class ScenarioMoneyEstimateDraft {
 
   final String componentCode;
   final ScenarioPriceKnowledge knowledge;
-  final ScenarioMoneyDraft? amount;
+  final Money? amount;
   final ScenarioPriceBasis? basis;
   final ScenarioPriceSource source;
   final DateTime? observedAtUtc;
@@ -155,11 +155,11 @@ class ScenarioTotalsDraft {
   final int implicitWaitingMinutes;
   final int stayNights;
   final List<ScenarioDayTotalsDraft> dayTotals;
-  final ScenarioMoneyDraft? displayIncludedExperienceCost;
-  final ScenarioMoneyDraft? displayIncludedStayCost;
-  final ScenarioMoneyDraft? displayIncludedLocalTravelCost;
-  final ScenarioMoneyDraft? displayIncludedPlannedTransportCost;
-  final ScenarioMoneyDraft? displayFromTotalCost;
+  final Money? displayIncludedExperienceCost;
+  final Money? displayIncludedStayCost;
+  final Money? displayIncludedLocalTravelCost;
+  final Money? displayIncludedPlannedTransportCost;
+  final Money? displayFromTotalCost;
   final List<ScenarioCurrencySubtotalDraft> originalCurrencySubtotals;
   final String? exchangeRateSnapshotId;
   final int estimatedCostCount;

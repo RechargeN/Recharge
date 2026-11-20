@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/application/scenario_transit_disclosure.dart';
 import 'package:recharge/features/create/domain/entities/scenario_item_draft.dart';
@@ -110,7 +111,7 @@ ScenarioPlannedTransportSourceDraft _official({
         providerDisplayName: 'Official Provider',
         licenseName: 'CC BY 4.0',
         tripId: 'trip-1',
-        serviceDate: const ScenarioLocalDateDraft(year: 2026, month: 8, day: 3),
+        serviceDate: LocalDate(2026, 8, 3),
         retrievedAtUtc: DateTime.utc(2026, 8, 3, 8),
         feedSha256: 'a' * 64,
         originLabel: 'Riga Central',

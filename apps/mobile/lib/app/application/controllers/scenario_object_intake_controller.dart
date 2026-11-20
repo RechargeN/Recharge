@@ -398,7 +398,7 @@ class ScenarioObjectIntakeController extends ChangeNotifier {
             id: day.id,
             title: day.title,
             itemCount: day.itemIds.length,
-            dateLabel: day.localDate?.iso8601,
+            dateLabel: day.localDate?.toString(),
           ),
         )
         .toList(growable: false);

@@ -18,6 +18,7 @@ import '../../features/library/data/library_sync_client.dart';
 import 'dart:ui' show Locale, PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import '../../shared/primitives/money/currency_code.dart';
 import '../../features/identity/domain/usecases/submit_managed_page_field_edit_usecase.dart';
 import '../../features/identity/domain/usecases/send_team_invitation_usecase.dart';
@@ -62,7 +63,7 @@ import '../../features/create/domain/repositories/create_media_store.dart';
 import '../adapters/route_geolocator_adapter.dart';
 import '../../core/telemetry/analytics_service.dart';
 import '../../core/product_analytics/product_analytics_recorder.dart';
-import '../../core/id/id_generator.dart';
+import '../../core/id/id_generator.dart' show UuidV4IdGenerator;
 import '../../core/notifications/app_notification_sink.dart';
 import '../../core/localization/app_locale_policy.dart';
 import '../../core/localization/locale_controller.dart';
@@ -1259,7 +1260,12 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
       () => GetVisitedPlacesUseCase(sl()),
     )
     ..registerFactory<RecordPlaceVisitUseCase>(
-      () => RecordPlaceVisitUseCase(repository: sl(), idGenerator: sl()),
+      () => RecordPlaceVisitUseCase(
+        repository: sl(),
+        idGenerator: sl(),
+        localDateAt: (instant, zone) =>
+            sl<TimezoneRepository>().toLocal(instant, zone).date,
+      ),
     )
     ..registerFactory<RemoveVisitUseCase>(() => RemoveVisitUseCase(sl()));
   if (devAuth != null) {

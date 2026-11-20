@@ -25,6 +25,9 @@ class LocaleTag {
 
   const LocaleTag._(this.value);
   final String value;
+  static const en = LocaleTag._('en');
+  static const lv = LocaleTag._('lv');
+  static const ru = LocaleTag._('ru');
 
   @override
   bool operator ==(Object other) => other is LocaleTag && value == other.value;

@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import '../entities/discover_item_entity.dart';
 import '../entities/discover_query.dart';
-import '../entities/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:recharge/shared/primitives/time/local_date.dart';
 import '../entities/opening_hours_rule.dart';
 import '../entities/time_fit_evaluation.dart';

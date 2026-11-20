@@ -84,6 +84,17 @@ class EventTimezoneRepositoryImpl implements EventTimezoneRepository {
     }
   }
 
+  int localMinuteAt({
+    required DateTime instantUtc,
+    required String timezoneId,
+  }) {
+    final local = timezone.TZDateTime.from(
+      UtcInstant(instantUtc).value,
+      _location(timezoneId),
+    );
+    return local.hour * 60 + local.minute;
+  }
+
   @override
   LocalDate localDateAt({
     required DateTime instantUtc,

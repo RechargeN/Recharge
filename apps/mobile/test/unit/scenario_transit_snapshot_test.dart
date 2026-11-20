@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/domain/entities/scenario_item_draft.dart';
 import 'package:recharge/features/create/domain/entities/scenario_transit_schedule.dart';
@@ -28,7 +29,7 @@ void main() {
       expect(snapshot.originStopId, 'riga');
       expect(snapshot.destinationStopId, 'sigulda');
       expect(snapshot.feedSha256, 'a' * 64);
-      expect(snapshot.serviceDate?.iso8601, '2026-08-03');
+      expect(snapshot.serviceDate?.toString(), '2026-08-03');
       expect(snapshot.plannedDeparture?.hhmm, '23:59');
       expect(snapshot.plannedArrival?.hhmm, '00:00');
       expect(snapshot.departureSecondsFromServiceDay, 86370);
@@ -82,7 +83,7 @@ ScenarioTransitServiceOption _option({
   const providerCode = 'lv_vivi_train';
   return ScenarioTransitServiceOption(
     providerCode: providerCode,
-    serviceDate: const ScenarioTransitLocalDate(2026, 8, 3),
+    serviceDate: LocalDate(2026, 8, 3),
     tripId: 'trip-42',
     routeId: 'route-riga-valga',
     serviceId: 'weekday',

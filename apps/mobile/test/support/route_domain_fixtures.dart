@@ -1,4 +1,4 @@
-import 'package:recharge/core/geo/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:recharge/features/create/domain/entities/route_draft_data.dart';
 import 'package:recharge/features/create/domain/usecases/validate_route_draft_usecase.dart';
 

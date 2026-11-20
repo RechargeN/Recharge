@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../shared/primitives/money/money.dart';
 import '../../../../shared/primitives/id/id_generator.dart';
@@ -139,10 +140,7 @@ class ExpandQuickPlanToScenarioUseCase {
       locations.add(
         ScenarioLocationDraft(
           id: locationId,
-          point: ScenarioGeoPointDraft(
-            latitude: stop.latitude,
-            longitude: stop.longitude,
-          ),
+          point: GeoPoint(latitude: stop.latitude, longitude: stop.longitude),
           title: stop.title,
           timezoneId: source.timezoneId,
           disclosure: ScenarioLocationDisclosure.private,
@@ -272,9 +270,9 @@ class ExpandQuickPlanToScenarioUseCase {
             componentCode: 'experience',
             knowledge: ScenarioPriceKnowledge.free,
             source: ScenarioPriceSource.manual,
-            amount: ScenarioMoneyDraft(
+            amount: Money(
               minorUnits: 0,
-              currencyCode: currencyCode,
+              currency: CurrencyCode.parse(currencyCode),
             ),
             basis: ScenarioPriceBasis.perPerson,
           ),
@@ -299,7 +297,7 @@ class ExpandQuickPlanToScenarioUseCase {
           componentCode: 'experience',
           knowledge: ScenarioPriceKnowledge.estimated,
           source: ScenarioPriceSource.manual,
-          amount: ScenarioMoneyDraft.fromMoney(amount),
+          amount: (amount),
           basis: ScenarioPriceBasis.perPerson,
           confidence: 0.5,
         ),

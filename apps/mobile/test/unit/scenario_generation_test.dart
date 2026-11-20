@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/application/scenario_create_coordinator.dart';
 import 'package:recharge/features/create/application/scenario_generation_coordinator.dart';
 import 'package:recharge/features/create/data/datasources/catalog_object_picker_mock_datasource.dart';

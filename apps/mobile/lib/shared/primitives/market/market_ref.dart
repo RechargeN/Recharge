@@ -12,6 +12,8 @@ class MarketRef {
 
   const MarketRef._(this.value);
   final String value;
+  static const riga = MarketRef._('riga');
+  static const rezekneLegacy = MarketRef._('rezekne');
 
   @override
   bool operator ==(Object other) => other is MarketRef && value == other.value;

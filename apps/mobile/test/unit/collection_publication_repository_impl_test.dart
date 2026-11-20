@@ -1,7 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/adapters/collection_publication_discovery_adapter.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/data/datasources/collection_publication_local_datasource.dart';
 import 'package:recharge/features/create/data/datasources/collection_publication_store.dart';
 import 'package:recharge/features/create/data/repositories/collection_publication_repository_impl.dart';

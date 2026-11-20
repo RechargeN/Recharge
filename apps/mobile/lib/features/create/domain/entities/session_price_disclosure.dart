@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/money.dart';
+
 enum SessionPricingMode { free, fixed }
 
 class SessionMoneyDraft {
@@ -31,16 +33,16 @@ class SessionPriceDisclosure {
   const SessionPriceDisclosure({required this.mode, this.amount});
 
   final SessionPricingMode mode;
-  final SessionMoneyDraft? amount;
+  final Money? amount;
 
   bool get isValid => switch (mode) {
     SessionPricingMode.free => true,
-    SessionPricingMode.fixed => amount != null && amount!.isValid,
+    SessionPricingMode.fixed => amount != null && amount!.minorUnits > 0,
   };
 
   SessionPriceDisclosure copyWith({
     SessionPricingMode? mode,
-    SessionMoneyDraft? amount,
+    Money? amount,
     bool clearAmount = false,
   }) => SessionPriceDisclosure(
     mode: mode ?? this.mode,

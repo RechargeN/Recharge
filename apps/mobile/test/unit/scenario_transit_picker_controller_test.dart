@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -155,7 +156,7 @@ void main() {
       controller.useOfficialSchedule();
       controller.selectOrigin(origin);
       controller.selectDestination(destination);
-      controller.setServiceDate(const ScenarioTransitLocalDate(2026, 8, 3));
+      controller.setServiceDate(LocalDate(2026, 8, 3));
       controller.setDepartAfter(const ScenarioTransitTime(9 * 3600));
 
       await controller.searchServices();
@@ -165,7 +166,7 @@ void main() {
       });
       expect(repository.lastServiceQuery?.originStopId, 'origin');
       expect(repository.lastServiceQuery?.destinationStopId, 'destination');
-      expect(repository.lastServiceQuery?.serviceDate.iso8601, '2026-08-03');
+      expect(repository.lastServiceQuery?.serviceDate.toString(), '2026-08-03');
       expect(
         repository.lastServiceQuery?.departAfter.secondsFromServiceDay,
         9 * 3600,
@@ -216,13 +217,13 @@ void main() {
       await controller.initialize();
       controller.useOfficialSchedule();
       controller.selectOrigin(_stop('origin', 'Origin'));
-      controller.setServiceDate(const ScenarioTransitLocalDate(2026, 8, 3));
+      controller.setServiceDate(LocalDate(2026, 8, 3));
 
       controller.useManualEntry();
 
       expect(controller.state.mode, ScenarioTransitPickerMode.manual);
       expect(controller.state.origin, isNull);
-      expect(controller.state.serviceDate?.iso8601, '2026-08-03');
+      expect(controller.state.serviceDate?.toString(), '2026-08-03');
       expect(controller.state.serviceOptions, isEmpty);
       expect(controller.state.cacheInspections['provider-a']?.isUsable, isTrue);
     },
@@ -255,7 +256,7 @@ ScenarioTransitServiceOption _service({
   required ScenarioTransitStop destination,
 }) => ScenarioTransitServiceOption(
   providerCode: 'provider-a',
-  serviceDate: const ScenarioTransitLocalDate(2026, 8, 3),
+  serviceDate: LocalDate(2026, 8, 3),
   tripId: 'trip-1',
   routeId: 'route-1',
   serviceId: 'weekday',

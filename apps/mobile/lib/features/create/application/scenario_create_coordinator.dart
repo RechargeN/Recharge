@@ -1,4 +1,8 @@
-import '../../../core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
+import '../../../../shared/primitives/time/local_date.dart';
+import '../../../shared/primitives/id/id_generator.dart';
 import '../domain/entities/scenario_budget_draft.dart';
 import '../domain/entities/scenario_draft_data.dart';
 import '../domain/entities/scenario_item_draft.dart';
@@ -86,6 +90,7 @@ class ScenarioCreateCoordinator {
     ScenarioPartyKind? partyKind,
     ScenarioPace? pace,
     ScenarioBudgetBasis? budgetBasis,
+    LocalDate? localToday,
   }) {
     final ScenarioFormat nextFormat = format ?? draft.format;
     final ScenarioDateMode nextDateMode = dateMode ?? draft.dateMode;
@@ -93,9 +98,12 @@ class ScenarioCreateCoordinator {
         nextFormat == ScenarioFormat.weekend ||
         nextFormat == ScenarioFormat.trip;
     final bool dateModeChanged = nextDateMode != draft.dateMode;
-    final DateTime firstDate = DateTime.now().toUtc().add(
-      const Duration(days: 1),
-    );
+    if (dateModeChanged &&
+        nextDateMode == ScenarioDateMode.dated &&
+        localToday == null) {
+      throw ArgumentError('An explicit zoned calendar date is required');
+    }
+    final firstDate = localToday?.addDays(1);
     final Map<String, int> dayIndexById = <String, int>{
       for (final ScenarioDayDraft day in draft.days) day.id: day.dayIndex,
     };
@@ -106,19 +114,17 @@ class ScenarioCreateCoordinator {
         days: dateModeChanged
             ? draft.days
                   .map((ScenarioDayDraft day) {
-                    final DateTime localDate = firstDate.add(
-                      Duration(days: day.dayIndex),
-                    );
+                    final localDate = firstDate?.addDays(day.dayIndex);
                     return ScenarioDayDraft(
                       id: day.id,
                       title: day.title,
                       dayIndex: day.dayIndex,
                       timezoneId: day.timezoneId ?? draft.defaultTimezoneId,
                       localDate: nextDateMode == ScenarioDateMode.dated
-                          ? ScenarioLocalDateDraft(
-                              year: localDate.year,
-                              month: localDate.month,
-                              day: localDate.day,
+                          ? LocalDate(
+                              localDate!.year,
+                              localDate.month,
+                              localDate.day,
                             )
                           : null,
                       startLocationId: day.startLocationId,
@@ -305,8 +311,7 @@ class ScenarioCreateCoordinator {
     if (normalizedService.isEmpty || durationMinutes <= 0) {
       return draft;
     }
-    final ScenarioLocalDateDraft? serviceDate =
-        draft.dateMode == ScenarioDateMode.dated
+    final LocalDate? serviceDate = draft.dateMode == ScenarioDateMode.dated
         ? draft.days.first.localDate
         : null;
     final ScenarioScheduleSnapshotDraft snapshot =
@@ -380,9 +385,9 @@ class ScenarioCreateCoordinator {
           componentCode: 'travel_extra',
           knowledge: ScenarioPriceKnowledge.known,
           source: ScenarioPriceSource.manual,
-          amount: ScenarioMoneyDraft(
+          amount: Money(
             minorUnits: otherCostMinorUnits,
-            currencyCode: draft.displayCurrencyCode,
+            currency: CurrencyCode.parse(draft.displayCurrencyCode),
           ),
           basis: ScenarioPriceBasis.perGroup,
           observedAtUtc: DateTime.now().toUtc(),
@@ -431,16 +436,13 @@ class ScenarioCreateCoordinator {
     final String normalizedTitle = title.trim();
     if (normalizedTitle.isEmpty ||
         durationMinutes <= 0 ||
-        !ScenarioGeoPointDraft(
-          latitude: latitude,
-          longitude: longitude,
-        ).isValid) {
+        !GeoPoint(latitude: latitude, longitude: longitude).isValid) {
       return draft;
     }
     final String locationId = _idGenerator.generate();
     final ScenarioLocationDraft location = ScenarioLocationDraft(
       id: locationId,
-      point: ScenarioGeoPointDraft(latitude: latitude, longitude: longitude),
+      point: GeoPoint(latitude: latitude, longitude: longitude),
       title: normalizedTitle,
       timezoneId: draft.defaultTimezoneId,
       disclosure: ScenarioLocationDisclosure.private,

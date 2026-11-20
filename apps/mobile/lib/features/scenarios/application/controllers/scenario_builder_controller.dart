@@ -1,16 +1,16 @@
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/id/id_generator.dart';
 import '../../domain/entities/scenario_draft_entity.dart';
 import '../../domain/repositories/quick_plan_repository.dart';
 import '../state/scenario_builder_state.dart';
 
 class ScenarioBuilderController extends ChangeNotifier {
   ScenarioBuilderController({
-    IdGenerator? idGenerator,
+    required IdGenerator idGenerator,
     QuickPlanRepository? repository,
   }) : _repository = repository {
-    _idGenerator = idGenerator ?? UuidV4IdGenerator();
+    _idGenerator = idGenerator;
     _state = ScenarioBuilderState.initial(
       draftId: _idGenerator.generate(),
       generateId: _idGenerator.generate,

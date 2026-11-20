@@ -1,7 +1,7 @@
 import 'package:recharge/app/adapters/identity_route_authoring_policy.dart';
 import 'identity_access_guards_test.dart' show GuardRepository, guardSnapshot;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/application/route_publication_coordinator.dart';
 import 'package:recharge/features/create/application/route_quality_workflow_coordinator.dart';
 import 'package:recharge/features/create/data/datasources/route_publication_memory_datasource.dart';

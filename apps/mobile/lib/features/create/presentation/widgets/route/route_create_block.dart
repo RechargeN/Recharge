@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../create_media_pick_actions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/geo/geo_point.dart';
+import '../../../../../shared/primitives/geo/geo_point.dart';
 import '../../../application/controllers/create_controller.dart';
 import '../../../application/controllers/route_gpx_transfer_controller.dart';
 import '../../../application/controllers/route_recording_controller.dart';

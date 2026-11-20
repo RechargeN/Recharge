@@ -1,5 +1,5 @@
-import '../geo/geo_bounds.dart';
-import '../geo/geo_point.dart';
+import '../../shared/primitives/geo/geo_bounds.dart';
+import '../../shared/primitives/geo/geo_point.dart';
 
 class MapCameraState {
   const MapCameraState({

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/core/config/provider_cost_policy.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/core/telemetry/provider_cost_ledger.dart';
 import 'package:recharge/features/ai_assist/application/ai_assist_coordinator.dart';
 import 'package:recharge/features/ai_assist/application/ai_assist_runtime_config.dart';

@@ -127,13 +127,13 @@ class SessionCreateCoordinator {
       basePrice: normalized.price.amount == null
           ? null
           : Money(
-              minorUnits: normalized.price.amount!.amountMinor,
+              minorUnits: normalized.price.amount!.minorUnits,
               currency: CurrencyCode.parse(
-                normalized.price.amount!.currencyCode,
+                normalized.price.amount!.currency.value,
               ),
             ),
       clearBasePrice: normalized.price.amount == null,
-      currency: normalized.price.amount?.currencyCode ?? draft.currency,
+      currency: normalized.price.amount?.currency.value ?? draft.currency,
       bookingLink: normalized.externalBookingUrl,
       updatedAtUtc: DateTime.now().toUtc(),
     );

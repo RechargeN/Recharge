@@ -11,7 +11,7 @@ import '../../../../core/telemetry/analytics_service.dart';
 import '../../../../shared/primitives/money/money.dart';
 import '../../domain/entities/discover_item_entity.dart';
 import '../../domain/entities/discover_query.dart';
-import '../../domain/entities/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import '../../domain/entities/time_window.dart';
 import '../../domain/entities/time_fit_evaluation.dart';
 import '../../domain/entities/saved_search_entity.dart';

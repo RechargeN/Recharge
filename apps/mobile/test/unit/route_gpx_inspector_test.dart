@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/data/datasources/route_gpx_memory_source_store.dart';
 import 'package:recharge/features/create/data/gpx/route_gpx_inspector.dart';
 import 'package:recharge/features/create/data/gpx/route_gpx_importer.dart';
@@ -97,10 +97,7 @@ void main() {
         () => _inspect('<gpx version="1.1"><trk>'),
         _throwsCode('gpx_xml_malformed'),
       );
-      expect(
-        () => _inspect('<root/>'),
-        _throwsCode('gpx_root_invalid'),
-      );
+      expect(() => _inspect('<root/>'), _throwsCode('gpx_root_invalid'));
       expect(
         () => _inspect('<gpx version="1.1"><trk/></gpx>'),
         _throwsCode('gpx_candidate_empty'),
@@ -224,10 +221,7 @@ void main() {
     expect(file.displayName, 'route.gpx');
     expect(inspection.candidates.single.pointCount, 2);
     await store.remove(file.token);
-    expect(
-      () => repository.inspect(file),
-      _throwsCode('gpx_file_not_found'),
-    );
+    expect(() => repository.inspect(file), _throwsCode('gpx_file_not_found'));
   });
 }
 

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/id/id_generator.dart';
+import '../../../../shared/primitives/id/id_generator.dart';
 import '../../domain/entities/route_recording_data.dart';
 import '../../domain/repositories/route_location_recording_port.dart';
 import '../../domain/repositories/route_recording_journal_repository.dart';

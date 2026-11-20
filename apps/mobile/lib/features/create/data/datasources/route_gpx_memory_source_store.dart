@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import '../../../../core/id/id_generator.dart';
+import '../../../../shared/primitives/id/id_generator.dart';
 import '../../domain/repositories/route_gpx_repository.dart';
 import '../../domain/repositories/route_gpx_source_store.dart';
 

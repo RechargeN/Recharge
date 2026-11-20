@@ -1,6 +1,6 @@
-import '../../../../core/geo/geo_bounds.dart';
-import '../../../../core/geo/geo_point.dart';
 import '../../domain/entities/publisher_ref.dart';
+import '../../../../shared/primitives/geo/geo_bounds.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
 import '../../domain/entities/route_draft_data.dart';
 import '../../domain/entities/route_quality_data.dart';
 

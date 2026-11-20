@@ -1,4 +1,4 @@
-import '../../../core/id/id_generator.dart';
+import '../../../shared/primitives/id/id_generator.dart';
 import '../domain/entities/create_draft_entity.dart';
 import '../domain/entities/route_publication_data.dart';
 import '../domain/repositories/route_authoring_policy.dart';

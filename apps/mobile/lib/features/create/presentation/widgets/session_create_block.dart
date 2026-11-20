@@ -492,9 +492,9 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
               label: Text(context.l10n.createSessionPriceFixed),
               selected: !isFree,
               onSelected: (_) => widget.controller.setSessionPriceFixed(
-                amountMinor: session.price.amount?.amountMinor ?? 0,
+                amountMinor: session.price.amount?.minorUnits ?? 0,
                 currencyCode:
-                    session.price.amount?.currencyCode ??
+                    session.price.amount?.currency.value ??
                     widget.state.draft.currency,
               ),
             ),
@@ -509,16 +509,16 @@ class _SessionCreateBlockState extends State<SessionCreateBlock> {
                   ? ''
                   : MoneyFormatter().decimal(
                       Money(
-                        minorUnits: session.price.amount!.amountMinor,
+                        minorUnits: session.price.amount!.minorUnits,
                         currency: CurrencyCode.parse(
-                          session.price.amount!.currencyCode,
+                          session.price.amount!.currency.value,
                         ),
                       ),
                       locale: Localizations.localeOf(context).toLanguageTag(),
                     ),
             ),
             decoration: InputDecoration(
-              labelText: context.l10n.createSessionPricePerSlotEur.replaceAll('EUR', session.price.amount?.currencyCode ?? widget.state.draft.currency),
+              labelText: context.l10n.createSessionPricePerSlotEur.replaceAll('EUR', session.price.amount?.currency.value ?? widget.state.draft.currency),
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (String value) {

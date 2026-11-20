@@ -1,13 +1,60 @@
+import 'package:recharge/shared/primitives/market/market_ref.dart';
+import 'package:recharge/shared/primitives/locale/locale_tag.dart';
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/time/iana_time_zone.dart';
 import 'package:recharge/features/discover/data/models/discover_query_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/config/market_config.dart';
 import 'package:recharge/app/config/travel_policy_config.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
-import 'package:recharge/features/discover/domain/entities/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:recharge/features/discover/domain/entities/time_window.dart';
 import 'package:recharge/features/discover/data/repositories/timezone_repository_impl.dart';
 
 void main() {
+  test(
+    'market locale currency and zone are explicit independent identities',
+    () {
+      final locales = [LocaleTag.parse('ru'), LocaleTag.parse('en-US')];
+      final config = MarketConfig(
+        market: MarketRef.riga,
+        countryCode: 'LV',
+        cityName: 'Renamed display',
+        timezone: IanaTimeZone.parse('Pacific/Honolulu'),
+        currency: CurrencyCode.parse('USD'),
+        defaultLocale: LocaleTag.ru,
+        supportedLocales: locales,
+        centerLat: 56,
+        centerLng: 24,
+      );
+      locales.clear();
+      expect(config.market, MarketRef.riga);
+      expect(config.defaultLocale, LocaleTag.ru);
+      expect(config.currency.value, 'USD');
+      expect(config.timezone.value, 'Pacific/Honolulu');
+      expect(config.supportedLocaleCodes, ['ru', 'en-US']);
+      expect(() => config.supportedLocales.clear(), throwsUnsupportedError);
+      expect(
+        MarketRegistry(active: config, markets: [config]).byRef(MarketRef.riga),
+        same(config),
+      );
+      final legacy = MarketConfig.legacy(
+        marketCityId: 'riga',
+        countryCode: 'LV',
+        cityName: 'Riga',
+        timezoneId: 'UTC',
+        currencyCode: 'JPY',
+        defaultLocaleCode: 'en-US',
+        supportedLocaleCodes: ['en-US'],
+        centerLat: 56,
+        centerLng: 24,
+      );
+      expect(legacy.timezoneId, 'UTC');
+      expect(legacy.currencyCode, 'JPY');
+      expect(legacy.defaultLocaleCode, 'en-US');
+      expect(legacy.marketCityId, 'riga');
+    },
+  );
   test('active market is Riga and query defaults are v3', () {
     const MarketConfig market = MarketConfig.riga;
     final DiscoverQuery query = DiscoverQuery.defaults(

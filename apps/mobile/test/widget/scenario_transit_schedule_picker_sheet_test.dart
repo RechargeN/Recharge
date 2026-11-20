@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/application/controllers/scenario_transit_picker_controller.dart';
@@ -80,7 +81,7 @@ void main() {
     await _openPicker(
       tester,
       controller: controller,
-      initialServiceDate: const ScenarioTransitLocalDate(2026, 8, 3),
+      initialServiceDate: LocalDate(2026, 8, 3),
       initialDepartAfter: const ScenarioTransitTime(9 * 3600),
       dateLocked: true,
       onResult: (value) => result = value,
@@ -142,7 +143,7 @@ void main() {
     expect(scenarioMutationCount, 0);
     expect(repository.lastServiceQuery?.originStopId, 'origin');
     expect(repository.lastServiceQuery?.destinationStopId, 'destination');
-    expect(repository.lastServiceQuery?.serviceDate.iso8601, '2026-08-03');
+    expect(repository.lastServiceQuery?.serviceDate.toString(), '2026-08-03');
   });
 
   testWidgets('offline update keeps stale cache available', (
@@ -159,7 +160,7 @@ void main() {
     await _openPicker(
       tester,
       controller: controller,
-      initialServiceDate: const ScenarioTransitLocalDate(2026, 8, 3),
+      initialServiceDate: LocalDate(2026, 8, 3),
     );
     await _tapVisible(
       tester,
@@ -187,7 +188,7 @@ Future<void> _setPhoneViewport(WidgetTester tester) async {
 Future<void> _openPicker(
   WidgetTester tester, {
   required ScenarioTransitPickerController controller,
-  ScenarioTransitLocalDate? initialServiceDate,
+  LocalDate? initialServiceDate,
   ScenarioTransitTime? initialDepartAfter,
   bool dateLocked = false,
   double textScale = 1,
@@ -243,7 +244,7 @@ ScenarioTransitServiceOption _service({
   required ScenarioTransitStop destination,
 }) => ScenarioTransitServiceOption(
   providerCode: 'provider-a',
-  serviceDate: const ScenarioTransitLocalDate(2026, 8, 3),
+  serviceDate: LocalDate(2026, 8, 3),
   tripId: 'trip-1',
   routeId: 'route-1',
   serviceId: 'weekday',

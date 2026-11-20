@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/geo/geo_point.dart' as compatibility;
+import 'package:recharge/shared/primitives/geo/geo_point.dart' as compatibility;
 import 'package:recharge/shared/primitives/geo/geo_bounds.dart';
 import 'package:recharge/shared/primitives/geo/geo_distance.dart';
 import 'package:recharge/shared/primitives/geo/geo_point.dart';

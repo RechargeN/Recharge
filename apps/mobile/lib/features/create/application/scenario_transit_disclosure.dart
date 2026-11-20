@@ -79,7 +79,7 @@ class BuildScenarioTransitDisclosure {
         kind: ScenarioTransitDisclosureKind.manual,
         freshness: ScenarioTransitDisclosureFreshness.notApplicable,
         title: title,
-        serviceDateLabel: snapshot?.serviceDate?.iso8601,
+        serviceDateLabel: snapshot?.serviceDate?.toString(),
         retrievedAtLabel: _utc(snapshot?.retrievedAtUtc),
         originLabel: _nonEmpty(snapshot?.originLabel),
         destinationLabel: _nonEmpty(snapshot?.destinationLabel),
@@ -97,7 +97,7 @@ class BuildScenarioTransitDisclosure {
     final completeProvenance =
         _nonEmpty(snapshot.providerDisplayName) != null &&
         _nonEmpty(snapshot.licenseName) != null &&
-        snapshot.serviceDate?.isValid == true &&
+        snapshot.serviceDate != null &&
         snapshot.retrievedAtUtc != null &&
         RegExp(r'^[0-9a-fA-F]{64}$').hasMatch(snapshot.feedSha256 ?? '');
     final freshness = completeProvenance
@@ -109,7 +109,7 @@ class BuildScenarioTransitDisclosure {
       title: title,
       providerLabel: providerLabel,
       licenseLabel: _nonEmpty(snapshot.licenseName),
-      serviceDateLabel: snapshot.serviceDate?.iso8601,
+      serviceDateLabel: snapshot.serviceDate?.toString(),
       retrievedAtLabel: _utc(snapshot.retrievedAtUtc),
       digestLabel: _nonEmpty(snapshot.feedSha256)?.toLowerCase(),
       originLabel: _nonEmpty(snapshot.originLabel),

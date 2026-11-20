@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import '../../../../shared/primitives/id/id_generator.dart';
 import '../entities/scenario_budget_draft.dart';
 import '../entities/scenario_draft_data.dart';
@@ -210,10 +211,7 @@ class ApplyScenarioTransitSelectionUseCase {
     ScenarioDraftData draft,
   ) => ScenarioLocationDraft(
     id: id,
-    point: ScenarioGeoPointDraft(
-      latitude: stop.latitude!,
-      longitude: stop.longitude!,
-    ),
+    point: GeoPoint(latitude: stop.latitude!, longitude: stop.longitude!),
     title: stop.name,
     timezoneId: draft.defaultTimezoneId,
     disclosure: ScenarioLocationDisclosure.private,
@@ -272,7 +270,7 @@ class ApplyScenarioTransitSelectionUseCase {
   bool _validStopPoint(double? latitude, double? longitude) =>
       latitude != null &&
       longitude != null &&
-      ScenarioGeoPointDraft(latitude: latitude, longitude: longitude).isValid;
+      GeoPoint(latitude: latitude, longitude: longitude).isValid;
 
   String _replacementLocationId(
     ScenarioDraftData draft,

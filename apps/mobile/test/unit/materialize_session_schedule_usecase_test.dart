@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/data/repositories/event_timezone_repository_impl.dart';
 import 'package:recharge/features/create/domain/entities/session_availability_exception.dart';
@@ -423,7 +424,7 @@ void main() {
       expect(value.isStructurallyValid, isTrue);
       expect(
         value.closes(
-          date: SessionLocalDate(2026, 3, 1),
+          date: LocalDate(2026, 3, 1),
           candidateStartMinute: 590,
           candidateEndMinute: 650,
         ),
@@ -431,7 +432,7 @@ void main() {
       );
       expect(
         value.closes(
-          date: SessionLocalDate(2026, 3, 1),
+          date: LocalDate(2026, 3, 1),
           candidateStartMinute: 600,
           candidateEndMinute: 660,
         ),
@@ -439,7 +440,7 @@ void main() {
       );
       expect(
         value.closes(
-          date: SessionLocalDate(2026, 3, 2),
+          date: LocalDate(2026, 3, 2),
           candidateStartMinute: 540,
           candidateEndMinute: 600,
         ),

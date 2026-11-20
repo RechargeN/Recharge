@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/identity/application/controllers/team_invitation_controller.dart';
 import 'package:recharge/features/identity/application/identity_workspace_providers.dart';
 import 'package:recharge/features/identity/domain/entities/identity_access_snapshot.dart';

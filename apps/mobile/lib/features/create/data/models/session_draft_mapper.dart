@@ -1,3 +1,4 @@
+import '../../../../core/parsing/money_legacy_adapter.dart';
 import '../../domain/entities/create_availability.dart';
 import '../../domain/entities/legacy_session_schedule.dart';
 import '../../domain/entities/session_availability_exception.dart';
@@ -191,8 +192,8 @@ abstract final class SessionDraftMapper {
   static Map<String, Object?> _priceToJson(SessionPriceDisclosure p) =>
       <String, Object?>{
         'mode': p.mode.name,
-        'amount_minor': p.amount?.amountMinor,
-        'currency_code': p.amount?.currencyCode,
+        'amount_minor': p.amount?.minorUnits,
+        'currency_code': p.amount?.currency.value,
       };
 
   static SessionPriceDisclosure _priceFromJson(Object? raw) {
@@ -201,17 +202,12 @@ abstract final class SessionDraftMapper {
       (SessionPricingMode value) => value.name == raw['mode'],
       orElse: () => SessionPricingMode.free,
     );
-    final int? amountMinor = (raw['amount_minor'] as num?)?.toInt();
-    final String? currencyCode = raw['currency_code'] as String?;
-    return SessionPriceDisclosure(
-      mode: mode,
-      amount: amountMinor == null || currencyCode == null
-          ? null
-          : SessionMoneyDraft(
-              amountMinor: amountMinor,
-              currencyCode: currencyCode,
-            ),
+    final amount = MoneyLegacyAdapter().readOptional(
+      hasCanonicalMinorUnits: true,
+      canonicalMinorUnits: raw['amount_minor'],
+      currencyCode: raw['currency_code'],
     );
+    return SessionPriceDisclosure(mode: mode, amount: amount);
   }
 
   static int _intOr(Object? value, int fallback) {

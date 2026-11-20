@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/identity/domain/entities/identity_access_snapshot.dart';
 import 'package:recharge/features/identity/domain/entities/managed_page_entity.dart';
 import 'package:recharge/features/identity/domain/entities/managed_page_membership_entity.dart';

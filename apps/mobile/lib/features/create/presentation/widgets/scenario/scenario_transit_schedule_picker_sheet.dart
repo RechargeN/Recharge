@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -56,12 +57,12 @@ Future<ScenarioTransitEntryChoice?> showScenarioTransitEntryChoice(
 Future<ScenarioTransitPickerSheetResult?> showScenarioTransitSchedulePicker(
   BuildContext context, {
   required ScenarioTransitPickerController controller,
-  ScenarioTransitLocalDate? initialServiceDate,
+  LocalDate? initialServiceDate,
   ScenarioTransitTime? initialDepartAfter,
   bool dateLocked = false,
 }) {
   controller.useOfficialSchedule();
-  if (initialServiceDate != null && initialServiceDate.isValid) {
+  if (initialServiceDate != null) {
     controller.setServiceDate(initialServiceDate);
   }
   if (initialDepartAfter != null) {
@@ -469,7 +470,7 @@ class _DateAndTime extends StatelessWidget {
                 ? dateLocked
                       ? context.l10n.createScenarioScenarioDateMissing
                       : context.l10n.createScenarioChooseDate
-                : '${state.serviceDate!.iso8601}${dateLocked ? ' · Scenario' : ''}',
+                : '${state.serviceDate!.toString()}${dateLocked ? ' · Scenario' : ''}',
           ),
         ),
       ),
@@ -502,7 +503,7 @@ class _DateAndTime extends StatelessWidget {
     );
     if (chosen != null) {
       controller.setServiceDate(
-        ScenarioTransitLocalDate(chosen.year, chosen.month, chosen.day),
+        LocalDate(chosen.year, chosen.month, chosen.day),
       );
     }
   }
@@ -675,7 +676,7 @@ class _SelectedServicePreview extends StatelessWidget {
           const SizedBox(height: 6),
           Text('${option.origin.name} → ${option.destination.name}'),
           Text(
-            '${option.serviceDate.iso8601} · ${option.departure.hhmm} → '
+            '${option.serviceDate.toString()} · ${option.departure.hhmm} → '
             '${option.arrival.hhmm}',
           ),
           Text(

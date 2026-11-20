@@ -5,7 +5,7 @@ import 'package:recharge/features/discover/data/repositories/timezone_repository
 import 'package:recharge/features/discover/data/repositories/travel_time_repository_impl.dart';
 import 'package:recharge/features/discover/domain/entities/discover_item_entity.dart';
 import 'package:recharge/features/discover/domain/entities/discover_query.dart';
-import 'package:recharge/features/discover/domain/entities/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:recharge/features/discover/domain/entities/opening_hours_rule.dart';
 import 'package:recharge/features/discover/domain/entities/time_fit_evaluation.dart';
 import 'package:recharge/features/discover/domain/entities/time_slot.dart';

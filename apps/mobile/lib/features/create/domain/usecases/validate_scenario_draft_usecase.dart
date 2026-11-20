@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/money/money.dart';
 import '../entities/scenario_budget_draft.dart';
 import '../entities/scenario_draft_data.dart';
 import '../entities/scenario_item_draft.dart';
@@ -321,8 +322,8 @@ class ValidateScenarioDraftUseCase {
     })
     issue,
   ) {
-    final ScenarioMoneyDraft? budget = draft.constraints.totalBudgetLimit;
-    if (budget != null && !budget.isStructurallyValid) {
+    final Money? budget = draft.constraints.totalBudgetLimit;
+    if (budget != null && budget.minorUnits < 0) {
       issue(
         code: 'budget_invalid',
         path: 'constraints.totalBudgetLimit',
@@ -387,7 +388,7 @@ class ValidateScenarioDraftUseCase {
       );
     }
     if (draft.dateMode == ScenarioDateMode.dated) {
-      if (day.localDate == null || !day.localDate!.isValid) {
+      if (day.localDate == null) {
         issue(
           code: 'dated_day_date_missing',
           path: 'days.localDate',
@@ -776,14 +777,12 @@ class ValidateScenarioDraftUseCase {
     final Map<String, Set<ScenarioPriceBasis>> componentBases =
         <String, Set<ScenarioPriceBasis>>{};
     for (final ScenarioMoneyEstimateDraft estimate in cost.components) {
-      final ScenarioMoneyDraft? amount = estimate.amount;
+      final Money? amount = estimate.amount;
       final bool amountValid = switch (estimate.knowledge) {
         ScenarioPriceKnowledge.free =>
-          amount != null &&
-              amount.minorUnits == 0 &&
-              amount.isStructurallyValid,
+          amount != null && amount.minorUnits == 0 && amount.minorUnits >= 0,
         ScenarioPriceKnowledge.known || ScenarioPriceKnowledge.estimated =>
-          amount != null && amount.isStructurallyValid,
+          amount != null && amount.minorUnits >= 0,
         ScenarioPriceKnowledge.unknown => amount == null,
       };
       if (estimate.componentCode.trim().isEmpty || !amountValid) {
@@ -1011,10 +1010,10 @@ class ValidateScenarioDraftUseCase {
         for (final ScenarioItemDraft item in draft.items)
           for (final ScenarioMoneyEstimateDraft estimate
               in item.cost.components)
-            if (estimate.amount != null) estimate.amount!.currencyCode,
+            if (estimate.amount != null) estimate.amount!.currency.value,
         for (final ScenarioLegDraft leg in draft.legs)
           for (final ScenarioMoneyEstimateDraft estimate in leg.cost.components)
-            if (estimate.amount != null) estimate.amount!.currencyCode,
+            if (estimate.amount != null) estimate.amount!.currency.value,
       };
       if (costCurrencies.any(
         (String code) => code != draft.displayCurrencyCode,

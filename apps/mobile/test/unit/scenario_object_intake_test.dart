@@ -1,5 +1,6 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/entities/scenario_budget_draft.dart';
 import 'package:recharge/features/create/domain/entities/scenario_draft_data.dart';
@@ -28,7 +29,7 @@ void main() {
       ScenarioCatalogObjectType.place,
       location: const ScenarioIntakeLocationSnapshot(
         title: 'Old Riga',
-        point: ScenarioGeoPointDraft(latitude: 56.9496, longitude: 24.1052),
+        point: GeoPoint(latitude: 56.9496, longitude: 24.1052),
         disclosure: ScenarioLocationDisclosure.approximate,
       ),
     );
@@ -363,13 +364,13 @@ CreateDraftEntity _target({
     locations.addAll(const <ScenarioLocationDraft>[
       ScenarioLocationDraft(
         id: 'location-a',
-        point: ScenarioGeoPointDraft(latitude: 56.94, longitude: 24.10),
+        point: GeoPoint(latitude: 56.94, longitude: 24.10),
         title: 'A',
         disclosure: ScenarioLocationDisclosure.private,
       ),
       ScenarioLocationDraft(
         id: 'location-b',
-        point: ScenarioGeoPointDraft(latitude: 56.95, longitude: 24.11),
+        point: GeoPoint(latitude: 56.95, longitude: 24.11),
         title: 'B',
         disclosure: ScenarioLocationDisclosure.private,
       ),

@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
@@ -621,7 +622,7 @@ class EventCreateBlock extends StatelessWidget {
             value: event.price == null
                 ? ''
                 : MoneyFormatter().decimal(
-                    event.price!.toMoney(),
+                    event.price!,
                     locale: Localizations.localeOf(context).toLanguageTag(),
                   ),
             error: _error(context, 'price'),
@@ -757,8 +758,8 @@ class EventCreateBlock extends StatelessWidget {
                 ? context.l10n.createFormFree
                 : RechargeFormats.money(
                     Money(
-                      minorUnits: event.price?.amountMinor ?? 0,
-                      currencyCode: event.currencyCode,
+                      minorUnits: event.price?.minorUnits ?? 0,
+                      currency: CurrencyCode.parse(event.currencyCode),
                     ),
                     Localizations.localeOf(context).languageCode,
                   ),

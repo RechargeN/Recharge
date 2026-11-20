@@ -464,7 +464,7 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
     final DateTime today;
     try {
       today = ref.read(visitHistoryFacadeProvider).todayAtPlace(item);
-    } on ArgumentError {
+    } on Object {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.detailsPlaceTimezoneUnavailable)),
       );

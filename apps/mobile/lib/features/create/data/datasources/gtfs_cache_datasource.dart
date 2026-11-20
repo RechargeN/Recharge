@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/time/utc_instant.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -54,6 +55,7 @@ class GtfsCacheDataSource {
 
   Future<void> write(CachedGtfsArchive archive) async {
     _validateProviderCode(archive.providerCode);
+    final retrieval = UtcInstant(archive.retrievedAtUtc).toString();
     final actualDigest = sha256.convert(archive.bytes).toString();
     if (actualDigest != archive.sha256) {
       throw StateError('GTFS cache digest does not match archive bytes.');
@@ -73,7 +75,7 @@ class GtfsCacheDataSource {
         'schema_version': 1,
         'provider_code': archive.providerCode,
         'source_url': archive.sourceUrl,
-        'retrieved_at_utc': archive.retrievedAtUtc.toUtc().toIso8601String(),
+        'retrieved_at_utc': retrieval,
         'sha256': archive.sha256,
       }),
       flush: true,
@@ -163,13 +165,12 @@ class GtfsCacheDataSource {
         return const GtfsCacheReadResult(status: GtfsCacheReadStatus.corrupt);
       }
       final sourceUrl = json['source_url'] as String?;
-      final retrievedAt = DateTime.tryParse(
+      final retrievedAt = UtcInstant.parse(
         json['retrieved_at_utc'] as String? ?? '',
-      );
+      ).value;
       final expectedDigest = json['sha256'] as String?;
       if (sourceUrl == null ||
           Uri.tryParse(sourceUrl)?.scheme != 'https' ||
-          retrievedAt == null ||
           expectedDigest == null) {
         return const GtfsCacheReadResult(status: GtfsCacheReadStatus.corrupt);
       }
@@ -182,7 +183,7 @@ class GtfsCacheDataSource {
         archive: CachedGtfsArchive(
           providerCode: expectedProviderCode,
           sourceUrl: sourceUrl,
-          retrievedAtUtc: retrievedAt.toUtc(),
+          retrievedAtUtc: retrievedAt,
           sha256: expectedDigest,
           bytes: List<int>.unmodifiable(bytes),
         ),

@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import '../support/publisher_access_test_support.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -183,17 +185,17 @@ void main() {
           pricing: RentalPricingPolicy(
             currencyCode: 'EUR',
             billingUnit: RentalBillingUnit.day,
-            rateSteps: const <RentalRateStep>[
+            rateSteps: <RentalRateStep>[
               RentalRateStep(
                 minUnits: 1,
-                unitPrice: RentalMoneyDraft(
-                  amountMinor: 2500,
-                  currencyCode: 'EUR',
+                unitPrice: Money(
+                  minorUnits: 2500,
+                  currency: CurrencyCode.parse('EUR'),
                 ),
               ),
             ],
-            deposit: const RentalDepositPolicy(
-              amount: RentalMoneyDraft(amountMinor: 0, currencyCode: 'EUR'),
+            deposit: RentalDepositPolicy(
+              amount: Money(minorUnits: 0, currency: CurrencyCode.parse('EUR')),
               collectionMethod: RentalDepositCollectionMethod.none,
             ),
             damagePolicy: 'Repair cost billed to renter.',

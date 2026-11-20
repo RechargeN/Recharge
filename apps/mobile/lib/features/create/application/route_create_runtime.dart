@@ -1,4 +1,4 @@
-import '../../../core/geo/geo_bounds.dart';
+import '../../../shared/primitives/geo/geo_bounds.dart';
 import '../../../core/map/map_scene.dart';
 import '../domain/entities/route_draft_data.dart';
 import 'route_create_coordinator.dart';

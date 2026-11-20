@@ -209,13 +209,13 @@ void main() {
         MoneyParseError.excessiveFractionDigits,
       );
       expect(
-        controller.state.draft.sessionData?.price.amount?.amountMinor,
+        controller.state.draft.sessionData?.price.amount?.minorUnits,
         1234,
       );
       await tester.enterText(price, '0.29');
       await tester.pump();
       expect(controller.moneyInputErrors, isEmpty);
-      expect(controller.state.draft.sessionData?.price.amount?.amountMinor, 29);
+      expect(controller.state.draft.sessionData?.price.amount?.minorUnits, 29);
       expect(controller.state.draft.basePrice?.minorUnits, 29);
       await tester.pump(const Duration(milliseconds: 800));
     },

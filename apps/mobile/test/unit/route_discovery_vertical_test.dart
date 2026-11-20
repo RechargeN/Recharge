@@ -1,8 +1,8 @@
 import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/geo/geo_bounds.dart';
-import 'package:recharge/core/geo/geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_bounds.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:recharge/features/discover/data/datasources/discover_remote_datasource.dart';
 import 'package:recharge/features/discover/data/datasources/published_route_discovery_local_datasource.dart';
 import 'package:recharge/features/discover/data/models/discover_item_model.dart';

@@ -1,8 +1,10 @@
+import 'package:recharge/shared/primitives/money/currency_code.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/features/create/domain/entities/scenario_budget_draft.dart';
 import 'package:recharge/features/create/presentation/widgets/scenario/scenario_transport_editor_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/create/application/controllers/create_controller.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
@@ -23,7 +25,7 @@ void main() {
     'opening an existing manual leg preserves its price without re-entry',
     (tester) async {
       ScenarioManualLegInput? result;
-      const current = ScenarioLegDraft(
+      final current = ScenarioLegDraft(
         id: 'leg',
         dayId: 'day',
         fromLocationId: 'a',
@@ -38,7 +40,10 @@ void main() {
             ScenarioMoneyEstimateDraft(
               componentCode: 'travel_extra',
               knowledge: ScenarioPriceKnowledge.known,
-              amount: ScenarioMoneyDraft(minorUnits: 1234, currencyCode: 'EUR'),
+              amount: Money(
+                minorUnits: 1234,
+                currency: CurrencyCode.parse('EUR'),
+              ),
               basis: ScenarioPriceBasis.perGroup,
               source: ScenarioPriceSource.manual,
             ),

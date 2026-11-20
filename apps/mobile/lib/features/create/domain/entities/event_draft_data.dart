@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/time/local_date.dart';
 import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../shared/primitives/money/money.dart';
 import 'event_admission.dart';
@@ -314,7 +315,7 @@ class EventDraftData {
   final String currencyCode;
   final EventPricingMode pricingMode;
   final EventPaymentCollectionMode paymentCollectionMode;
-  final EventMoneyDraft? price;
+  final Money? price;
   final EventCapacityMode capacityMode;
   final int? capacity;
   final EventRegistrationMode registrationMode;
@@ -332,11 +333,11 @@ class EventDraftData {
     required String timezoneId,
     required String currencyCode,
     PublisherRef? publisherRef,
+    LocalDate? localToday,
   }) {
-    final DateTime tomorrow = DateTime.now().toUtc().add(
-      const Duration(days: 1),
-    );
-    final String localDate = _isoDate(tomorrow);
+    // Application supplies the calendar in the explicit Event zone.
+    // A compatibility caller without a calendar must select a date.
+    final String localDate = localToday?.addDays(1).toString() ?? '';
     return EventDraftData(
       schemaVersion: classificationSchemaVersion,
       revision: 0,
@@ -427,7 +428,7 @@ class EventDraftData {
     String? currencyCode,
     EventPricingMode? pricingMode,
     EventPaymentCollectionMode? paymentCollectionMode,
-    EventMoneyDraft? price,
+    Money? price,
     bool clearPrice = false,
     EventCapacityMode? capacityMode,
     int? capacity,
@@ -497,8 +498,3 @@ class EventDraftData {
 
   EventDraftData nextRevision() => copyWith(revision: revision + 1);
 }
-
-String _isoDate(DateTime value) =>
-    '${value.year.toString().padLeft(4, '0')}-'
-    '${value.month.toString().padLeft(2, '0')}-'
-    '${value.day.toString().padLeft(2, '0')}';

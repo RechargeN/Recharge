@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'package:recharge/shared/primitives/money/currency_code.dart';
 import 'package:recharge/shared/primitives/money/money.dart';
 import 'package:recharge/shared/primitives/money/money_parse_result.dart';
@@ -10,14 +12,11 @@ import 'package:recharge/features/create/domain/entities/scenario_logistics_draf
 
 void main() {
   test('Scenario wrappers preserve distinct currencies without exchange', () {
-    const eur = ScenarioMoneyDraft(minorUnits: 1234, currencyCode: 'EUR');
-    const usd = ScenarioMoneyDraft(minorUnits: 1234, currencyCode: 'USD');
-    expect(eur.toMoney().currency, CurrencyCode.eur);
-    expect(ScenarioMoneyDraft.fromMoney(usd.toMoney()).currencyCode, 'USD');
-    expect(
-      () => eur.toMoney() + usd.toMoney(),
-      throwsA(isA<MoneyArithmeticException>()),
-    );
+    final eur = Money(minorUnits: 1234, currency: CurrencyCode.parse('EUR'));
+    final usd = Money(minorUnits: 1234, currency: CurrencyCode.parse('USD'));
+    expect(eur.currency, CurrencyCode.eur);
+    expect((usd).currency.value, 'USD');
+    expect(() => eur + usd, throwsA(isA<MoneyArithmeticException>()));
   });
   test('Scenario canonical monetary fields reject fractional minor units', () {
     final json = ScenarioDraftMapper.toJson(_fixture());
@@ -241,7 +240,7 @@ void main() {
   });
 
   test('official transit snapshot preserves provenance and future fields', () {
-    const snapshot = ScenarioScheduleSnapshotDraft(
+    final snapshot = ScenarioScheduleSnapshotDraft(
       freshness: ScenarioScheduleFreshness.current,
       providerCode: 'lv_vivi_train',
       providerDisplayName: 'Vivi',
@@ -253,7 +252,7 @@ void main() {
       destinationStopId: 'sigulda',
       feedSha256:
           'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-      serviceDate: ScenarioLocalDateDraft(year: 2026, month: 8, day: 3),
+      serviceDate: LocalDate(2026, 8, 3),
       carrierName: 'Vivi',
       serviceLabel: 'Rīga–Valga',
       originLabel: 'Rīga',
@@ -270,7 +269,7 @@ void main() {
       },
     );
     final source = ScenarioDraftData.defaults().copyWith(
-      items: const <ScenarioItemDraft>[
+      items: <ScenarioItemDraft>[
         ScenarioItemDraft(
           id: 'transport-1',
           kind: ScenarioItemKind.plannedTransport,
@@ -325,7 +324,7 @@ void main() {
     'legacy manual transit snapshot stays readable without new metadata',
     () {
       final source = ScenarioDraftData.defaults().copyWith(
-        items: const <ScenarioItemDraft>[
+        items: <ScenarioItemDraft>[
           ScenarioItemDraft(
             id: 'manual-transport',
             kind: ScenarioItemKind.plannedTransport,
@@ -375,7 +374,7 @@ void main() {
 ScenarioDraftData _fixture() {
   const ScenarioLocationDraft start = ScenarioLocationDraft(
     id: 'location-start',
-    point: ScenarioGeoPointDraft(latitude: 56.9496, longitude: 24.1052),
+    point: GeoPoint(latitude: 56.9496, longitude: 24.1052),
     title: 'Old Riga',
     disclosure: ScenarioLocationDisclosure.public,
     timezoneId: 'Europe/Riga',
@@ -384,7 +383,7 @@ ScenarioDraftData _fixture() {
   );
   const ScenarioLocationDraft finish = ScenarioLocationDraft(
     id: 'location-finish',
-    point: ScenarioGeoPointDraft(latitude: 56.956, longitude: 24.113),
+    point: GeoPoint(latitude: 56.956, longitude: 24.113),
     title: 'Cinema',
     disclosure: ScenarioLocationDisclosure.approximate,
     timezoneId: 'Europe/Riga',
@@ -406,7 +405,7 @@ ScenarioDraftData _fixture() {
       end: ScenarioLocalTimeDraft(hour: 12, minute: 0),
     ),
   );
-  const ScenarioItemDraft route = ScenarioItemDraft(
+  final ScenarioItemDraft route = ScenarioItemDraft(
     id: 'item-route',
     dayId: 'day-1',
     startLocationId: 'location-start',
@@ -429,7 +428,7 @@ ScenarioDraftData _fixture() {
         ScenarioMoneyEstimateDraft(
           componentCode: 'admission',
           knowledge: ScenarioPriceKnowledge.known,
-          amount: ScenarioMoneyDraft(minorUnits: 1200, currencyCode: 'EUR'),
+          amount: Money(minorUnits: 1200, currency: CurrencyCode.parse('EUR')),
           basis: ScenarioPriceBasis.perPerson,
           source: ScenarioPriceSource.catalog,
         ),
@@ -474,10 +473,10 @@ ScenarioDraftData _fixture() {
       peopleCount: 2,
       kind: ScenarioPartyKind.couple,
     ),
-    constraints: const ScenarioConstraintsDraft(
-      totalBudgetLimit: ScenarioMoneyDraft(
+    constraints: ScenarioConstraintsDraft(
+      totalBudgetLimit: Money(
         minorUnits: 10000,
-        currencyCode: 'EUR',
+        currency: CurrencyCode.parse('EUR'),
       ),
       budgetBasis: ScenarioBudgetBasis.wholeGroup,
       primaryTravelMode: ScenarioTravelMode.walking,
@@ -504,7 +503,7 @@ ScenarioDraftData _fixture() {
       ),
     ],
     locations: const <ScenarioLocationDraft>[start, finish],
-    items: const <ScenarioItemDraft>[route, breakItem],
+    items: <ScenarioItemDraft>[route, breakItem],
     unscheduledItemIds: const <String>[],
     legs: const <ScenarioLegDraft>[
       ScenarioLegDraft(

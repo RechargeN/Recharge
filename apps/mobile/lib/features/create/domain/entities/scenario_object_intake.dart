@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'create_draft_entity.dart';
 import 'scenario_item_draft.dart';
 
@@ -33,7 +34,7 @@ class ScenarioIntakeLocationSnapshot {
   });
 
   final String title;
-  final ScenarioGeoPointDraft point;
+  final GeoPoint point;
   final String? address;
   final String? marketId;
   final String? regionId;

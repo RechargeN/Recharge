@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
@@ -71,7 +72,7 @@ class MaterializeSessionScheduleUseCase {
     final int windowDays = schedule.projectionWindowDays > 0
         ? schedule.projectionWindowDays
         : 1;
-    final SessionLocalDate startDate;
+    final LocalDate startDate;
     try {
       startDate = _timezoneRepository.localDateAt(
         instantUtc: now,
@@ -103,7 +104,7 @@ class MaterializeSessionScheduleUseCase {
 
     dayLoop:
     for (int offset = 0; offset < windowDays; offset++) {
-      final SessionLocalDate date = startDate.addDays(offset);
+      final LocalDate date = startDate.addDays(offset);
       final int weekday = date.weekday;
       final List<SessionWeeklyRule> rulesForDay =
           schedule.weeklyRules
@@ -246,7 +247,7 @@ class MaterializeSessionScheduleUseCase {
   }
 
   ResolvedEventLocalTime? _resolve(
-    SessionLocalDate date,
+    LocalDate date,
     int minuteOfDay,
     String timezoneId,
   ) {

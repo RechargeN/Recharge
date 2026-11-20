@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 import '../entities/scenario_item_draft.dart';
 import '../entities/scenario_transit_schedule.dart';
 
@@ -34,12 +36,12 @@ class BuildScenarioTransitSnapshotUseCase {
       originStopId: option.origin.id.trim(),
       destinationStopId: option.destination.id.trim(),
       feedSha256: manifest.sha256.toLowerCase(),
-      serviceDate: ScenarioLocalDateDraft(
-        year: option.serviceDate.year,
-        month: option.serviceDate.month,
-        day: option.serviceDate.day,
+      serviceDate: LocalDate(
+        option.serviceDate.year,
+        option.serviceDate.month,
+        option.serviceDate.day,
       ),
-      retrievedAtUtc: manifest.retrievedAtUtc.toUtc(),
+      retrievedAtUtc: UtcInstant(manifest.retrievedAtUtc).value,
       carrierName: carrierName,
       serviceLabel: serviceLabel,
       originLabel: option.origin.name.trim(),
@@ -83,8 +85,7 @@ class BuildScenarioTransitSnapshotUseCase {
     if (requiredValues.any((String value) => value.trim().isEmpty)) {
       throw const FormatException('Transit option contains empty provenance.');
     }
-    if (!option.serviceDate.isValid ||
-        option.providerCode != manifest.providerCode ||
+    if (option.providerCode != manifest.providerCode ||
         option.origin.providerCode != option.providerCode ||
         option.destination.providerCode != option.providerCode ||
         option.origin.id == option.destination.id) {

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import '../../../../core/geo/geo_bounds.dart';
-import '../../../../core/geo/geo_point.dart';
+import '../../../../shared/primitives/geo/geo_bounds.dart';
+import '../../../../shared/primitives/geo/geo_point.dart';
 import '../../domain/entities/route_draft_data.dart';
 import 'demo_coverage_config.dart';
 

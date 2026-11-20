@@ -343,7 +343,7 @@ class EvaluateScenarioReadinessUseCase {
       if (component.knowledge == ScenarioPriceKnowledge.estimated) {
         estimated += 1;
       }
-      final ScenarioMoneyDraft? money = component.amount;
+      final Money? money = component.amount;
       if (money == null || money.minorUnits < 0) {
         continue;
       }
@@ -359,7 +359,7 @@ class EvaluateScenarioReadinessUseCase {
         ScenarioPriceBasis.perBooking ||
         null => 1,
       };
-      final value = money.toMoney().scaledBy(multiplier);
+      final value = money.scaledBy(multiplier);
       final int total = value.minorUnits;
       final _MoneyAccumulator currency = currencyTotals.putIfAbsent(
         value.currency.value,
@@ -391,15 +391,10 @@ class EvaluateScenarioReadinessUseCase {
     );
   }
 
-  static ScenarioMoneyDraft? _moneyOrNull(
-    _MoneyAccumulator value,
-    String currencyCode,
-  ) {
+  static Money? _moneyOrNull(_MoneyAccumulator value, String currencyCode) {
     final Money total = value.knownMoney + value.estimatedMoney;
     total.minorUnitsIn(CurrencyCode.parse(currencyCode));
-    return value.includedCount == 0 || value.incomplete
-        ? null
-        : ScenarioMoneyDraft.fromMoney(total);
+    return value.includedCount == 0 || value.incomplete ? null : (total);
   }
 
   static bool _legIsRelevant(

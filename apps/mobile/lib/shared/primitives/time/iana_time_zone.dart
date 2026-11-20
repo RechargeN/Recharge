@@ -15,6 +15,8 @@ class IanaTimeZone {
 
   const IanaTimeZone._(this.value);
   final String value;
+  static const utc = IanaTimeZone._('UTC');
+  static const europeRiga = IanaTimeZone._('Europe/Riga');
 
   @override
   bool operator ==(Object other) =>

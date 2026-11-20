@@ -511,7 +511,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                 widget.controller.updateActivityOptionalContribution(
                   kind: kind,
                   note: contribution.note,
-                  amountMinor: contribution.amountHint?.amountMinor,
+                  amountMinor: contribution.amountHint?.minorUnits,
                 );
               }
             },
@@ -526,7 +526,7 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                 widget.controller.updateActivityOptionalContribution(
                   kind: contribution.kind,
                   note: value,
-                  amountMinor: contribution.amountHint?.amountMinor,
+                  amountMinor: contribution.amountHint?.minorUnits,
                 ),
           ),
           TextFormField(
@@ -536,9 +536,9 @@ class _ActivityCreateBlockState extends State<ActivityCreateBlock> {
                   ? ''
                   : MoneyFormatter().decimal(
                       Money(
-                        minorUnits: contribution.amountHint!.amountMinor,
+                        minorUnits: contribution.amountHint!.minorUnits,
                         currency: CurrencyCode.parse(
-                          contribution.amountHint!.currencyCode,
+                          contribution.amountHint!.currency.value,
                         ),
                       ),
                       locale: Localizations.localeOf(context).toLanguageTag(),

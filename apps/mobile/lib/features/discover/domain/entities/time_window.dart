@@ -1,4 +1,4 @@
-import 'geo_point.dart';
+import 'package:recharge/shared/primitives/geo/geo_point.dart';
 import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'package:recharge/shared/primitives/time/iana_time_zone.dart';
 

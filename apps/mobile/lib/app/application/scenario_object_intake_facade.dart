@@ -1,4 +1,4 @@
-import '../../core/id/id_generator.dart';
+import '../../shared/primitives/id/id_generator.dart';
 import '../../features/create/application/create_runtime_defaults.dart';
 import '../../features/create/application/scenario_create_coordinator.dart';
 import '../../features/create/domain/entities/create_draft_entity.dart';

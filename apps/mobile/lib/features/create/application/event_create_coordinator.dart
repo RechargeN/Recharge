@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/time/local_date.dart';
 import '../domain/entities/create_availability.dart';
 import '../domain/entities/create_draft_entity.dart';
 import '../domain/entities/event_draft_data.dart';
@@ -38,6 +39,14 @@ class EventCreateCoordinator {
        _suggestLegacyAdmission = suggestLegacyAdmission,
        _projectAvailability = projectAvailability,
        _inventorySnapshotRepository = inventorySnapshotRepository;
+
+  LocalDate localDateAt({
+    required DateTime instantUtc,
+    required String timezoneId,
+  }) => _materializeSchedule.localDateAt(
+    instantUtc: instantUtc,
+    timezoneId: timezoneId,
+  );
 
   final MaterializeEventScheduleUseCase _materializeSchedule;
   final ValidateEventDraftUseCase _validateDraft;
@@ -293,7 +302,7 @@ class EventCreateCoordinator {
         : occurrences.first;
     final bool isFree = switch (normalized.pricingMode) {
       EventPricingMode.free => true,
-      EventPricingMode.donation => (normalized.price?.amountMinor ?? 0) <= 0,
+      EventPricingMode.donation => (normalized.price?.minorUnits ?? 0) <= 0,
       EventPricingMode.fixed || EventPricingMode.ticketTypes => false,
     };
     return draft.copyWith(
@@ -337,7 +346,7 @@ class EventCreateCoordinator {
         'wheelchair_accessible',
       ),
       isFree: isFree,
-      basePrice: normalized.price?.toMoney(),
+      basePrice: normalized.price,
       clearBasePrice: normalized.price == null,
       currency: normalized.currencyCode,
       pricingModel: normalized.pricingMode.name,

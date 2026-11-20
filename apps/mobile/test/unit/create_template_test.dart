@@ -5,7 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/domain/entities/rental_draft_data.dart';
 import 'package:recharge/features/create/domain/entities/draft_publisher.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import 'package:recharge/features/create/data/datasources/create_template_local_datasource.dart';
 import 'package:recharge/features/create/data/repositories/create_template_repository_impl.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
@@ -18,6 +18,101 @@ import 'package:recharge/features/create/domain/usecases/manage_create_template_
 
 void main() {
   late ManageCreateTemplateUseCase useCase;
+  test(
+    'template metadata preserves UTC precision and rejects malformed clocks',
+    () {
+      final instant = DateTime.utc(2026, 11, 19, 10, 20, 30, 123, 456);
+      final template = useCase.create(
+        userId: 'user-1',
+        name: 'UTC',
+        draft: _eventDraft(),
+        nowUtc: instant,
+      );
+      final wire = CreateTemplateModel.fromEntity(template).toJson();
+      CreateTemplateEntity read(Map<String, dynamic> value) =>
+          CreateTemplateModel.fromJson(
+            value,
+            activeMarketCityId: 'riga',
+            activeTimezone: 'Europe/Riga',
+            activeCountry: 'LV',
+            activeCity: 'Riga',
+            activeCurrency: 'EUR',
+          ).toEntity();
+      expect(read(wire).createdAtUtc, instant);
+      expect(read(wire).updatedAtUtc, instant);
+      expect(read(wire).lastUsedAtUtc, instant);
+      for (final key in [
+        'createdAtUtcIso',
+        'updatedAtUtcIso',
+        'lastUsedAtUtcIso',
+      ]) {
+        for (final invalid in [
+          123,
+          '2026-02-30T10:00:00Z',
+          '2026-11-19T10:00:00+02:00',
+          '2026-11-19T10:00:00',
+        ]) {
+          expect(() => read({...wire, key: invalid}), throwsFormatException);
+        }
+      }
+      for (final key in ['createdAtUtcIso', 'updatedAtUtcIso']) {
+        expect(() => read({...wire}..remove(key)), throwsFormatException);
+      }
+      expect(read({...wire}..remove('lastUsedAtUtcIso')).lastUsedAtUtc, isNull);
+      expect(read({...wire, 'lastUsedAtUtcIso': null}).lastUsedAtUtc, isNull);
+      final local = DateTime(2026, 11, 19);
+      expect(
+        () => useCase.create(
+          userId: 'user-1',
+          name: 'UTC',
+          draft: _eventDraft(),
+          nowUtc: local,
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => useCase.replace(
+          template: template,
+          userId: 'user-1',
+          draft: _eventDraft(),
+          nowUtc: local,
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => useCase.rename(
+          template: template,
+          userId: 'user-1',
+          name: 'UTC',
+          nowUtc: local,
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => useCase.markUsed(
+          template: template,
+          userId: 'user-1',
+          nowUtc: local,
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => useCase.materializeEvent(
+          template: template,
+          userId: 'user-1',
+          organizerEmail: 'a@b.com',
+          organizerName: 'Host',
+          marketCityId: 'riga',
+          timezone: 'Europe/Riga',
+          country: 'LV',
+          city: 'Riga',
+          currency: 'EUR',
+          nowUtc: local,
+        ),
+        throwsArgumentError,
+      );
+    },
+  );
   test('corrupt template UTC cannot be erased by upsert or deletion', () async {
     const storage = FlutterSecureStorage();
     final template = useCase.create(

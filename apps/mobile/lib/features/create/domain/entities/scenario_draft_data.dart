@@ -1,3 +1,5 @@
+import 'package:recharge/shared/primitives/time/local_date.dart';
+import 'package:recharge/shared/primitives/money/money.dart';
 import 'scenario_budget_draft.dart';
 import 'scenario_item_draft.dart';
 import 'scenario_logistics_draft.dart';
@@ -86,7 +88,7 @@ class ScenarioConstraintsDraft {
     this.maxTravelMinutesPerDay,
   });
 
-  final ScenarioMoneyDraft? totalBudgetLimit;
+  final Money? totalBudgetLimit;
   final ScenarioBudgetBasis budgetBasis;
   final ScenarioTravelMode primaryTravelMode;
   final Set<ScenarioTravelMode> allowedTravelModes;
@@ -117,7 +119,7 @@ class ScenarioDayDraft {
   final String title;
   final int dayIndex;
   final String? timezoneId;
-  final ScenarioLocalDateDraft? localDate;
+  final LocalDate? localDate;
   final String? startLocationId;
   final String? endLocationId;
   final ScenarioLocalTimeDraft? preferredStartTime;

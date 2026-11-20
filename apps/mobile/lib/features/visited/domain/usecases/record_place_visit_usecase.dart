@@ -1,3 +1,6 @@
+import '../../../../shared/primitives/time/local_date.dart';
+import '../../../../shared/primitives/time/iana_time_zone.dart';
+import '../../../../shared/primitives/time/utc_instant.dart';
 import '../../../../shared/primitives/id/id_generator.dart';
 import '../entities/visited_place_entity.dart';
 import '../repositories/visited_places_repository.dart';
@@ -15,11 +18,31 @@ class RecordPlaceVisitUseCase {
   const RecordPlaceVisitUseCase({
     required VisitedPlacesRepository repository,
     required IdGenerator idGenerator,
+    required LocalDate Function(DateTime instantUtc, String timezoneId)
+    localDateAt,
+    DateTime Function()? nowUtc,
   }) : _repository = repository,
-       _idGenerator = idGenerator;
+       _idGenerator = idGenerator,
+       _localDateAt = localDateAt,
+       _nowUtc = nowUtc;
 
   final VisitedPlacesRepository _repository;
   final IdGenerator _idGenerator;
+  final LocalDate Function(DateTime, String) _localDateAt;
+  final DateTime Function()? _nowUtc;
+
+  LocalDate todayInZone(String timezoneId) => _dayAt(_instant(), timezoneId);
+  DateTime _instant() =>
+      UtcInstant(_nowUtc?.call() ?? DateTime.now().toUtc()).value;
+  LocalDate _dayAt(DateTime instant, String timezoneId) {
+    try {
+      return _localDateAt(instant, IanaTimeZone.parse(timezoneId).value);
+    } on Object {
+      throw const VisitHistoryValidationException(
+        'A known explicit Place timezone is required',
+      );
+    }
+  }
 
   Future<VisitedPlaceEntity> call({
     required String userId,
@@ -29,7 +52,8 @@ class RecordPlaceVisitUseCase {
     required String city,
     required String category,
     required DateTime visitedOn,
-    required DateTime today,
+    DateTime?
+    today, // Retained read-compatibility argument; never used as the Place clock.
     required String timezoneId,
     String coverImageUrl = '',
   }) {
@@ -38,24 +62,13 @@ class RecordPlaceVisitUseCase {
         'Visit owner and place are required', // l10n-ignore: developer error
       );
     }
-    final DateTime normalizedDay = DateTime(
-      visitedOn.year,
-      visitedOn.month,
-      visitedOn.day,
-    );
-    final DateTime normalizedToday = DateTime(
-      today.year,
-      today.month,
-      today.day,
-    );
-    if (normalizedDay.isAfter(normalizedToday)) {
+    final instant = _instant();
+    final day = LocalDate(visitedOn.year, visitedOn.month, visitedOn.day);
+    final placeToday = _dayAt(instant, timezoneId);
+    if (day.compareTo(placeToday) > 0) {
       throw const VisitHistoryValidationException(
         'A visit date cannot be in the future', // l10n-ignore: developer error
       );
-    }
-    final String normalizedTimezone = timezoneId.trim();
-    if (normalizedTimezone.isEmpty) {
-      throw const VisitHistoryValidationException('Visit timezone is required');
     }
 
     return _repository.recordVisit(
@@ -67,10 +80,10 @@ class RecordPlaceVisitUseCase {
         subtitle: subtitle.trim(),
         city: city.trim(),
         category: category,
-        visitedOn: normalizedDay,
-        timezoneId: normalizedTimezone,
+        visitedOn: DateTime(day.year, day.month, day.day),
+        timezoneId: IanaTimeZone.parse(timezoneId).value,
         evidence: VisitEvidence.selfReported,
-        recordedAtUtc: DateTime.now().toUtc(),
+        recordedAtUtc: instant,
         coverImageUrl: coverImageUrl,
       ),
     );

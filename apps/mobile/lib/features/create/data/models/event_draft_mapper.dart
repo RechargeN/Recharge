@@ -360,8 +360,8 @@ class EventDraftMapper {
       'price': value.price == null
           ? null
           : <String, Object?>{
-              'minorUnits': value.price!.toMoney().minorUnits,
-              'currencyCode': value.price!.toMoney().currency.value,
+              'minorUnits': value.price!.minorUnits,
+              'currencyCode': value.price!.currency.value,
             },
       'capacityMode': value.capacityMode.name,
       'capacity': value.capacity,
@@ -911,7 +911,7 @@ class EventDraftMapper {
     );
   }
 
-  static EventMoneyDraft? _money(Object? raw, String fallbackCurrency) {
+  static Money? _money(Object? raw, String fallbackCurrency) {
     if (raw == null) return null;
     final json = _map(raw);
     final canonical = json.containsKey('minorUnits');
@@ -927,14 +927,12 @@ class EventDraftMapper {
       throw const MoneyReadException(MoneyParseError.invalidCanonicalValue);
     }
     try {
-      return EventMoneyDraft.fromMoney(
-        Money(
-          minorUnits: amount,
-          currency: CurrencyCode.parse(
-            _string(json['currencyCode'], fallbackCurrency),
-          ),
+      return (Money(
+        minorUnits: amount,
+        currency: CurrencyCode.parse(
+          _string(json['currencyCode'], fallbackCurrency),
         ),
-      );
+      ));
     } on FormatException {
       throw const MoneyReadException(MoneyParseError.missingCurrency);
     } on MoneyArithmeticException {
