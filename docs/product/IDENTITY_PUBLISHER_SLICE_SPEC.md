@@ -3,7 +3,7 @@
 Status: Approved; bounded local/mock implementation allowed during stabilization
 Version: 1.3.2
 Date: 2026-10-10
-Related: ADR 0013, ADR 0015, ADR 0016, ADR 0017, ADR 0021,
+Related: ADR 0013, ADR 0015, ADR 0016, ADR 0017, ADR 0021, ADR 0023,
 `docs/architecture/FIREBASE_ARCHITECTURE.md`
 
 ## 1. Purpose
@@ -687,3 +687,82 @@ visibility gates; смена названия не создаёт searchable ide
 runtime-миграции. Draft/Open profile требования, Follow, Legal/minors,
 retention и step-up остаются со своей прежней зрелостью; production gates
 не изменены. Текущий runtime и проверки — в передаче PVR-01/03.
+
+
+## 18. Approved local/mock reconciliation amendment — 2026-11-20
+
+Basis: the owner's 2026-11-20 integration plan and Accepted ADR 0023. This is
+an implementation reconciliation of the existing Approved slice, not a new
+production authorization or verification decision. Sections 1–17 remain
+historical context where superseded by ADR 0023 and the following clarifications.
+
+### 18.1 Roles and verification precedence
+
+- IDP-AC-02/03/05/06/17 are read under ADR 0023: the personal product role is
+  User, Admin is internal, and a Professional Page is exact membership rather
+  than a role. A legacy Creator role is interpreted as User. There is no
+  separate Creator workspace or non-Admin role badge.
+- Identity verification is a separate trust fact. Existing internal
+  `CreatorVerificationStatus` wire names remain compatible reads of that fact;
+  they do not grant or display a Creator product role.
+- IDP-AC-04 concerns risky capabilities (paid content, booking, rental and money
+  collection). Free personal authoring is not gated by a Creator role. Client
+  creation hints are presentation only. Every mutation still requires its
+  fresh authoritative capability and exact publisher; no production grants
+  are created here. The generic privileged action port keeps a conservative
+  verification-required default; only a classified free personal action may
+  explicitly use the ADR 0023 exception.
+- Existing bounded Page-creation/activation eligibility and risk rules remain
+  capability/fact checks in local/mock composition; this slice supplies no
+  production Page-verification decision or approval of extra quota.
+
+### 18.2 Canonical new-draft and restore rules
+
+All ten accepted Create types use the same `draft_publisher.dart` reader and
+versioned common publisher envelope. Event remains the original typed reference:
+its separation of fresh context capture and stored identity is applicable to
+every type; its schedule and publication policies are not copied to other types.
+
+| Type | Stored typed publisher, when available | Fresh draft | Restore/legacy | Existing copy surface |
+|---|---|---|---|---|
+| Event | `eventData.publisherRef` | Capture active Personal/Page once | Stored envelope or versioned typed publisher; no workspace lookup | Event template → new capture |
+| Place | `placeData.publisherRef` | Same common capture | Same; missing identity requires selection | No whole-draft template/duplicate surface |
+| Activity | `activityData.publisherRef` | Same common capture | Same | No whole-draft template/duplicate surface |
+| Find People | typed `publisherType/publisherId` | Same common capture | Same | No whole-draft template/duplicate surface |
+| Rental | `rentalData.publisherRef` | Same common capture | Same | Rental template and Duplicate listing → new capture |
+| Collection | `collectionData.publisherRef` | Same common capture | Same | No whole-draft template/duplicate surface |
+| Session | Common envelope | Same common capture | Stored envelope; unproven legacy identity requires selection | No whole-draft template/duplicate surface |
+| Scenario | Common envelope | Same common capture | Same | Quick Plan expansion is not whole-draft template copying |
+| Route | `routeData.publisherRef` plus envelope | Same common capture | Read the stored Route publisher; reject conflicts with envelope | New Route revision remains the existing publisher's revision |
+| Class / Workshop | Common envelope | Same common capture | Stored envelope; unproven legacy identity requires selection | No whole-draft template/duplicate surface |
+
+Changing workspace or switching blocks never rewrites an existing draft. A new
+copy captures the active context only where an actual copy/template surface
+exists; this amendment does not introduce copy UI for unsupported types.
+Capturing a Page in the envelope does not enable Page publication for a type
+whose existing publication policy remains personal-only. Unknown or conflicting
+publisher envelopes stay selection-required and preserve the original data.
+
+### 18.3 Access and Admin surface
+
+Personal actions require the actor's own publisher and the action's fresh
+capabilities. Page actions additionally require exact active membership,
+Page lifecycle and Page capability; Page A never authorizes Page B. Admin tools
+require Admin plus their explicit capability, use a separate route, and are
+neither workspace nor publisher. Admin preview changes presentation only.
+Revocation is checked while a screen is open and before its action. A confirmed
+account switch clears the old access. A recoverable AUTH-ROT-02 guest interval
+retains navigation/workspace preference but supplies no current access authority.
+
+The three duplicated criteria in §15 keep their historical citations and receive
+unambiguous reconciliation identifiers: second IDP-AC-21 → IDP-AC-26 (revocation),
+second IDP-AC-22 → IDP-AC-27 (Admin entry), second IDP-AC-23 → IDP-AC-28 (independent
+market/locale/currency/timezone). Their requirements are unchanged.
+
+### 18.4 Evidence and acceptance boundary
+
+CP2 supplies a ten-type lifecycle matrix and a Personal/Page/Admin allow/deny
+matrix with fresh test evidence, plus complete analyze/test gates. Historical
+isolated green tests are not a substitute. Owner acceptance remains separate;
+no status is promoted to Done by the coding agent. R1, device, cloud, production
+identity grants and real verification decisions remain outside this amendment.
