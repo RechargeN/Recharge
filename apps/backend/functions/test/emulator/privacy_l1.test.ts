@@ -500,7 +500,7 @@ l1(
 );
 
 l1(
-  'L1-T-W6/W7 Content: drafts, bindings and publications stay; blocked PB-18, PB-02, PB-05',
+  'L1-T-W6/W7 Content: a private unpublished draft is erased; bindings and publications stay',
   async () => {
     await account(S);
     await seed('contentDrafts', 'draft-1', {
@@ -517,8 +517,51 @@ l1(
       'PB-05',
       'PB-18',
     ]);
-    assert.ok(await doc('contentDrafts', 'draft-1'));
+    // PB-18 closed for drafts (round 1, 2026-11-20); W7 bindings stay PB-18.
+    assert.equal(await doc('contentDrafts', 'draft-1'), undefined);
+    assert.ok(await doc('contentExternalBindings', `local-import:v1:${S}:loc_1`));
     assert.ok(await doc('contentPublishedRevisions', 'rev-1'));
+  },
+);
+
+l1(
+  'L1-T-W6b Content: published, submitted and Page drafts are not personal private data and stay',
+  async () => {
+    await account(S);
+    await seed('contentPublicationPointers', 'content-pub', { contentId: 'content-pub' });
+    await seed('contentDrafts', 'draft-published', {
+      createdByUserId: S,
+      contentId: 'content-pub',
+      status: 'editing',
+      publisherRef: { type: 'user', id: S },
+    });
+    await seed('contentDrafts', 'draft-submitted', {
+      createdByUserId: S,
+      contentId: 'content-sub',
+      status: 'submitted',
+      publisherRef: { type: 'user', id: S },
+    });
+    await seed('contentDrafts', 'draft-page', {
+      createdByUserId: S,
+      contentId: 'content-page',
+      status: 'editing',
+      publisherRef: { type: 'page', id: 'page-1' },
+    });
+    await seed('contentDrafts', 'draft-private', {
+      createdByUserId: S,
+      contentId: 'content-private',
+      status: 'editing',
+      publisherRef: { type: 'user', id: S },
+    });
+    const r = await request(['content']);
+    assert.equal(await drive(runner(), r.requestId, 'content'), 'blocked');
+    const codes = (await task(r.requestId, 'content')).blockedCodes ?? [];
+    assert.ok(codes.includes('PB-02'));
+    assert.ok(codes.includes('PB-03'));
+    assert.ok(await doc('contentDrafts', 'draft-published'));
+    assert.ok(await doc('contentDrafts', 'draft-submitted'));
+    assert.ok(await doc('contentDrafts', 'draft-page'));
+    assert.equal(await doc('contentDrafts', 'draft-private'), undefined);
   },
 );
 

@@ -128,7 +128,9 @@ export const privacyWriterRegistry: readonly PrivacyRegistryEntry[] = deepFreeze
   ]),
   ...rows('W6', 'content', [
     // No Content command erases a draft: a D4.1 rollback keeps the body.
-    ['contentDrafts', 'createdByUserId', blocked('PB-18')],
+    // PB-18 closed (round 1, 2026-11-20): the Content owner applier erases private
+    // unpublished personal drafts; published, submitted and Page drafts stay.
+    ['contentDrafts', 'createdByUserId', del],
     ['contentSubmissions', null, blocked('PB-02')],
     ['contentPublishedRevisions', 'publisherRef.id', blocked('PB-02')],
     ['contentIdempotency', 'actorUserId', blocked('PB-05')],
