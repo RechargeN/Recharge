@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 import 'create_media_asset_ref.dart';
+import '../domain/entities/content_validation_violation.dart';
 import '../domain/entities/create_draft_entity.dart';
 import '../domain/entities/event_draft_data.dart';
 import '../domain/entities/event_publication.dart';
@@ -59,6 +60,7 @@ final class EventPublicationViewState {
     this.message,
     this.myObjects = const <EventPublicationObjectView>[],
     this.bookingTarget,
+    this.violations = const <ContentValidationViolation>[],
   });
 
   final EventPublicationPhase phase;
@@ -76,6 +78,9 @@ final class EventPublicationViewState {
 
   /// Set only while the server reports this Event visible.
   final EventBookingTestTarget? bookingTarget;
+
+  /// The fields of the last `validation_failed` refusal (empty otherwise).
+  final List<ContentValidationViolation> violations;
 
   bool get _idle => phase == EventPublicationPhase.ready;
   bool get canSave => _idle && draftTitle != null;
@@ -364,7 +369,7 @@ final class EventPublicationController extends ChangeNotifier {
           '${refusal.violations.map((v) => '${v.code}@${v.fieldPath}').join(',')}',
         );
       }
-      _emit(phase: done, message: refusal.code);
+      _emit(phase: done, message: refusal.code, violations: refusal.violations);
     } on _LocalRefusal catch (refusal) {
       _emit(phase: done, message: refusal.code);
     } on EventPublicationUnavailable catch (failure) {
@@ -375,7 +380,12 @@ final class EventPublicationController extends ChangeNotifier {
     }
   }
 
-  void _emit({required EventPublicationPhase phase, String? message}) {
+  void _emit({
+    required EventPublicationPhase phase,
+    String? message,
+    List<ContentValidationViolation> violations =
+        const <ContentValidationViolation>[],
+  }) {
     _state = EventPublicationViewState(
       phase: phase,
       draftTitle: _state.draftTitle ?? _draft?.title,
@@ -384,6 +394,7 @@ final class EventPublicationController extends ChangeNotifier {
       message: message,
       myObjects: _state.myObjects,
       bookingTarget: _state.bookingTarget,
+      violations: violations,
     );
     notifyListeners();
   }
