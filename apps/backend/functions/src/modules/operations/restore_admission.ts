@@ -152,6 +152,8 @@ export class PrivacyRunnerRedeletion implements RedeletionPort {
     private readonly restored: Firestore,
     private readonly clock: ServerClock,
     private readonly domainIds: readonly string[],
+    /** Step 2: a dev/stage cloud copy sweeps Emulator-only modules without owner appliers. */
+    private readonly runnerOptions: Readonly<{ cloudRuntime?: boolean }> = {},
   ) {}
 
   async reapply(decision: DeletionAuthorityDecision, nowUtc: string): Promise<ReapplyOutcome> {
@@ -190,6 +192,7 @@ export class PrivacyRunnerRedeletion implements RedeletionPort {
     const runner = new PrivacyDomainTaskRunner(this.restored, repository, service, {
       leaseOwner: `restore:${requestId.slice(0, 8)}`,
       clock: this.clock,
+      ...(this.runnerOptions.cloudRuntime === true ? { cloudRuntime: true } : {}),
     });
     for (const domainId of this.domainIds) {
       for (let run = 0; run < 50; run += 1) {
