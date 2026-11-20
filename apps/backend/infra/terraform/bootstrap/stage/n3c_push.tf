@@ -97,3 +97,25 @@ resource "google_project_iam_member" "n3c_auth" {
   role       = "projects/${local.n2c_project}/roles/devIdentityFirebaseVerifier"
   member     = local.n3c_member
 }
+
+# Round 1 stage 1.3 (owner decision 2026-11-20, "Уведомления о бронях в облаке —
+# да"): Eventarc delivers created bookingOutbox records to the Notifications
+# trigger as runtime-notifications, which may therefore receive events and
+# invoke exactly that one Cloud Run service (Firebase deploy creates it).
+resource "google_project_iam_member" "n3c_eventarc" {
+  count      = local.n3c_on ? 1 : 0
+  depends_on = [terraform_data.n3c_guard, module.runtime_identities]
+  project    = google_project.stage.project_id
+  role       = "roles/eventarc.eventReceiver"
+  member     = local.n3c_member
+}
+
+resource "google_cloud_run_v2_service_iam_member" "n3c_invoker_booking" {
+  count      = local.n3c_on ? 1 : 0
+  depends_on = [terraform_data.n3c_guard, module.runtime_identities]
+  project    = google_project.stage.project_id
+  location   = "europe-west1"
+  name       = "consumebookingnotificationeffectv1"
+  role       = "roles/run.invoker"
+  member     = local.n3c_member
+}

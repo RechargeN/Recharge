@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
 import { inventoryDigest } from "./check-n3b-plan.mjs";
+import { isReviewedProject } from "./runtime-projects.mjs";
 
 // Independent check of a serialized N3c plan (terraform show -json); no
 // Terraform or cloud execution. Everything that exists stays no-op/read; the
@@ -49,7 +50,28 @@ const creates = new Map([
   ],
 ]);
 
+/**
+ * Round 2 (owner decision 2026-11-20, stage 1.3 "Уведомления о бронях в облаке
+ * — да"): Eventarc delivers bookingOutbox records to the Notifications trigger,
+ * so runtime-notifications receives events and may invoke exactly that one
+ * Cloud Run service. dev or staging; nothing else is created.
+ */
+const roundTwoCreates = new Map([
+  [
+    "google_project_iam_member.n3c_eventarc[0]",
+    { role: "roles/eventarc.eventReceiver" },
+  ],
+  [
+    "google_cloud_run_v2_service_iam_member.n3c_invoker_booking[0]",
+    {
+      role: "roles/run.invoker",
+      serviceName: "consumebookingnotificationeffectv1",
+    },
+  ],
+]);
+
 export function checkN3cPlan(plan, expected) {
+  if (expected.round === 2) return checkRoundTwo(plan, expected);
   const errors = [];
   const vars = plan?.variables ?? {};
   if (expected.projectId !== project)
@@ -99,6 +121,54 @@ export function checkN3cPlan(plan, expected) {
     }
   }
   for (const address of creates.keys())
+    if (!seen.has(address)) errors.push(`reviewed create missing: ${address}`);
+  return errors;
+}
+
+function checkRoundTwo(plan, expected) {
+  const errors = [];
+  const vars = plan?.variables ?? {};
+  const target = expected.projectId;
+  if (!isReviewedProject(target))
+    return ["N3c round 2 targets the reviewed dev or staging project only"];
+  const roundMember = `serviceAccount:runtime-notifications@${target}.iam.gserviceaccount.com`;
+  if (vars.project_id?.value !== target) errors.push("project mismatch");
+  if (vars.n3c_enabled?.value !== true || vars.n2c_enabled?.value !== true)
+    errors.push("N3c plan must set n3c_enabled and keep n2c_enabled");
+  if (vars.release_commit_sha?.value !== expected.commitSha)
+    errors.push("source mismatch");
+  if (inventoryDigest(plan) !== expected.inventorySha256)
+    errors.push("reviewed inventory mismatch");
+  const seen = new Set();
+  for (const c of plan.resource_changes ?? []) {
+    const actions = c.change?.actions ?? [];
+    const after = c.change?.after ?? {};
+    if (
+      actions.length !== 1 ||
+      !["create", "read", "no-op"].includes(actions[0])
+    )
+      errors.push(`forbidden action ${actions.join("+")}: ${c.address}`);
+    if (actions[0] !== "create") continue;
+    const rule = roundTwoCreates.get(c.address);
+    if (rule === undefined) {
+      errors.push(`unreviewed create: ${c.address}`);
+      continue;
+    }
+    seen.add(c.address);
+    const project = after.project ?? after.project_id;
+    if (project && project !== target)
+      errors.push(`foreign target: ${c.address}`);
+    if (after.role !== rule.role || after.member !== roundMember)
+      errors.push(`IAM mismatch: ${c.address}`);
+    if ((after.condition?.[0]?.expression ?? null) !== null)
+      errors.push(`IAM condition mismatch: ${c.address}`);
+    if (
+      rule.serviceName !== undefined &&
+      (after.name !== rule.serviceName || after.location !== "europe-west1")
+    )
+      errors.push(`invoker target mismatch: ${c.address}`);
+  }
+  for (const address of roundTwoCreates.keys())
     if (!seen.has(address)) errors.push(`reviewed create missing: ${address}`);
   return errors;
 }

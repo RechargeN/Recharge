@@ -25,6 +25,7 @@ import {
   processEventBookingOutboxDocument,
   runPendingEventBookingDeliveries,
 } from './booking/event_projection_runtime.js';
+import { useCloudBookingNotificationEffects } from './booking/notification_effects.js';
 import {
   cloudReconfirmationGate,
   runReconfirmationDeadlineWorker,
@@ -85,6 +86,17 @@ function runtimeOpen(environment: NodeJS.ProcessEnv): boolean {
     environment.FIREBASE_AUTH_EMULATOR_HOST === undefined
   );
 }
+
+/**
+ * Round 1 stage 1.3 (owner 2026-11-20): Booking notification effects in the
+ * cloud, behind a deploy switch (a new Operations switch would change the pinned
+ * execution manifest). Off unless the runtime itself is open.
+ */
+export function bookingNotificationsOpen(environment: NodeJS.ProcessEnv): boolean {
+  return runtimeOpen(environment) && environment.N4C_BOOKING_NOTIFICATIONS_ENABLED === 'true';
+}
+if (runtimeOpen(process.env))
+  useCloudBookingNotificationEffects(bookingNotificationsOpen(process.env));
 
 /** The runtime switch and the owner allowlist; anything missing is 503 (fail closed). */
 export function devBookingOpen(environment: NodeJS.ProcessEnv): readonly string[] | null {

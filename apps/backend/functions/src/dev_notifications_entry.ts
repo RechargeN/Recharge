@@ -1,11 +1,13 @@
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { info } from 'firebase-functions/logger';
+import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { onRequest, type Request } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import type { Response } from 'express';
 
 import {
+  consumeCloudBookingEffect,
   createDevNotifications,
   handleDevNotifications,
   type DevNotificationsCallable,
@@ -135,5 +137,39 @@ export const reconcilePushV1 = onSchedule(
       firestore: getFirestore(firebase),
     }).push.reconcile();
     info('dev_push_reconcile', report);
+  },
+);
+
+/**
+ * Round 1 stage 1.3 (owner 2026-11-20): Booking effects reach the inbox and push
+ * in the cloud. Deploy switch N3C_BOOKING_CONSUME_ENABLED on top of the runtime
+ * switch (a new Operations switch would change the pinned execution manifest);
+ * the pinned incident switch is checked per record. No retry: a missed record is
+ * left for reconciliation, never redelivered blindly.
+ */
+export function bookingConsumeOpen(environment: NodeJS.ProcessEnv): boolean {
+  return (
+    devNotificationsOpen(environment) !== null && environment.N3C_BOOKING_CONSUME_ENABLED === 'true'
+  );
+}
+
+export const consumeBookingNotificationEffectV1 = onDocumentCreated(
+  { ...scheduleOptions, document: 'bookingOutbox/{outboxId}', retry: false },
+  async (event) => {
+    if (!bookingConsumeOpen(process.env)) return;
+    const firebase = app();
+    const firestore = getFirestore(firebase);
+    try {
+      const outcome = await consumeCloudBookingEffect({
+        firestore,
+        collection: 'bookingOutbox',
+        outboxId: event.params.outboxId,
+        data: event.data?.data(),
+        compose: () => createDevNotifications({ app: firebase, firestore }),
+      });
+      info('dev_booking_effect_consumed', { outcome });
+    } catch (error) {
+      info('dev_booking_effect_failure', failureShape(error));
+    }
   },
 );
