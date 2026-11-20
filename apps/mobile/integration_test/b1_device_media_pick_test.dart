@@ -9,7 +9,7 @@ import 'package:image/image.dart' as img;
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:recharge/app/adapters/create_image_picker_adapter.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/core/id/id_generator.dart' show UuidV4IdGenerator;
 import 'package:recharge/features/create/application/create_media_picking.dart';
 import 'package:recharge/features/create/data/media/create_image_normalizer_impl.dart';
 import 'package:recharge/features/create/data/media/file_create_media_store.dart';

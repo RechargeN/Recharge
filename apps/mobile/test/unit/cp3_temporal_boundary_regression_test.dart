@@ -199,14 +199,7 @@ void main() {
         ),
       ).toJson();
       final before = jsonEncode(source);
-      final restored = CreateDraftModel.fromJson(
-        source,
-        activeMarketCityId: 'riga',
-        activeTimezone: 'Europe/Riga',
-        activeCurrency: 'EUR',
-        activeCity: 'Riga',
-        activeCountry: 'LV',
-      );
+      final restored = CreateDraftModel.fromJson(source);
       expect(restored.marketCityId, 'explicit-market');
       expect(restored.timezone, 'Pacific/Honolulu');
       expect(restored.currency, 'USD');
@@ -214,12 +207,7 @@ void main() {
       source.remove('currency');
       source.remove('timezone');
       source.remove('marketCityId');
-      final incomplete = CreateDraftModel.fromJson(
-        source,
-        activeMarketCityId: 'riga',
-        activeTimezone: 'Europe/Riga',
-        activeCurrency: 'EUR',
-      );
+      final incomplete = CreateDraftModel.fromJson(source);
       expect(incomplete.marketCityId, isEmpty);
       expect(incomplete.timezone, isEmpty);
       expect(incomplete.currency, isEmpty);

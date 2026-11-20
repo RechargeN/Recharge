@@ -371,10 +371,6 @@ void main() {
     ).toJson();
     final CreateDraftEntity restored = CreateDraftModel.fromJson(
       json,
-      activeMarketCityId: 'riga',
-      activeTimezone: 'Europe/Riga',
-      activeCountry: 'LV',
-      activeCity: 'Riga',
     ).toEntity();
 
     expect(json['schemaVersion'], 9);

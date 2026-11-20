@@ -6,21 +6,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/create_template_model.dart';
 
 class CreateTemplateLocalDataSource {
-  const CreateTemplateLocalDataSource(
-    this._storage, {
-    required this.activeMarketCityId,
-    required this.activeTimezone,
-    required this.activeCountry,
-    required this.activeCity,
-    this.activeCurrency,
-  });
+  const CreateTemplateLocalDataSource(this._storage);
 
   final FlutterSecureStorage _storage;
-  final String activeMarketCityId;
-  final String activeTimezone;
-  final String activeCountry;
-  final String activeCity;
-  final String? activeCurrency;
 
   String _key(String userId) => 'create_templates_v1_$userId';
 
@@ -51,11 +39,6 @@ class CreateTemplateLocalDataSource {
         try {
           final model = CreateTemplateModel.fromJson(
             Map<String, dynamic>.from(item),
-            activeMarketCityId: activeMarketCityId,
-            activeTimezone: activeTimezone,
-            activeCountry: activeCountry,
-            activeCity: activeCity,
-            activeCurrency: activeCurrency,
           );
           if (requireLosslessRead) model.toEntity();
           result.add(model);

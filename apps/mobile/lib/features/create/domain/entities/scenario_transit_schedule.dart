@@ -72,51 +72,6 @@ class ScenarioTransitCacheInspection {
           status == ScenarioTransitCacheStatus.unknown);
 }
 
-class ScenarioTransitLocalDate implements Comparable<ScenarioTransitLocalDate> {
-  const ScenarioTransitLocalDate(this.year, this.month, this.day);
-
-  final int year;
-  final int month;
-  final int day;
-
-  String get compact =>
-      '${year.toString().padLeft(4, '0')}'
-      '${month.toString().padLeft(2, '0')}'
-      '${day.toString().padLeft(2, '0')}';
-
-  String get iso8601 =>
-      '${year.toString().padLeft(4, '0')}-'
-      '${month.toString().padLeft(2, '0')}-'
-      '${day.toString().padLeft(2, '0')}';
-
-  LocalDate get calendarDate => LocalDate(year, month, day);
-
-  bool get isValid {
-    try {
-      calendarDate;
-      return true;
-    } on FormatException {
-      return false;
-    }
-  }
-
-  int get weekday => calendarDate.weekday;
-
-  @override
-  int compareTo(ScenarioTransitLocalDate other) =>
-      calendarDate.compareTo(other.calendarDate);
-
-  @override
-  bool operator ==(Object other) =>
-      other is ScenarioTransitLocalDate &&
-      year == other.year &&
-      month == other.month &&
-      day == other.day;
-
-  @override
-  int get hashCode => Object.hash(year, month, day);
-}
-
 class ScenarioTransitTime implements Comparable<ScenarioTransitTime> {
   const ScenarioTransitTime(this.secondsFromServiceDay);
 

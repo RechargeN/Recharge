@@ -20,7 +20,6 @@ import 'dart:ui' show Locale, PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
 import 'package:recharge/shared/primitives/id/id_generator.dart';
-import '../../shared/primitives/money/currency_code.dart';
 import '../../features/identity/domain/usecases/submit_managed_page_field_edit_usecase.dart';
 import '../../features/identity/domain/usecases/send_team_invitation_usecase.dart';
 import '../../features/identity/domain/usecases/revoke_team_invitation_usecase.dart';
@@ -327,26 +326,26 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     )
     ..registerLazySingleton<DiscoverQuery>(
       () => DiscoverQuery.defaults(
-        marketCityId: sl<MarketConfig>().marketCityId,
+        marketCityId: sl<MarketConfig>().market.value,
         centerLat: sl<MarketConfig>().centerLat,
         centerLng: sl<MarketConfig>().centerLng,
       ),
     )
     ..registerLazySingleton<CreateRuntimeDefaults>(
       () => CreateRuntimeDefaults(
-        marketCityId: sl<MarketConfig>().marketCityId,
-        timezone: sl<MarketConfig>().timezoneId,
+        marketCityId: sl<MarketConfig>().market.value,
+        timezone: sl<MarketConfig>().timezone.value,
         country: sl<MarketConfig>().countryCode,
         city: sl<MarketConfig>().cityName,
-        currency: sl<MarketConfig>().currencyCode,
+        currency: sl<MarketConfig>().currency.value,
         marketCenterLat: sl<MarketConfig>().centerLat,
         marketCenterLng: sl<MarketConfig>().centerLng,
       ),
     )
     ..registerLazySingleton<DiscoverRuntimeDefaults>(
       () => DiscoverRuntimeDefaults(
-        currency: CurrencyCode.parse(sl<MarketConfig>().currencyCode),
-        timezoneId: sl<MarketConfig>().timezoneId,
+        currency: sl<MarketConfig>().currency,
+        timezoneId: sl<MarketConfig>().timezone.value,
         originLat: sl<MarketConfig>().centerLat,
         originLng: sl<MarketConfig>().centerLng,
       ),
@@ -367,7 +366,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
       () => LocaleController(
         policy: AppLocalePolicy(
           supportedLanguageCodes: AppLocalePolicy.r1LanguageCodes,
-          fallbackLanguageCode: sl<MarketConfig>().defaultLocaleCode,
+          fallbackLanguageCode: sl<MarketConfig>().defaultLocale.value,
         ),
         store: sl<LocalePreferenceStore>(),
         deviceLanguageTags: PlatformDispatcher.instance.locales
@@ -581,24 +580,10 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
       MockDiscoverRemoteDataSource.new,
     )
     ..registerLazySingleton<CreateLocalDataSource>(
-      () => CreateLocalDataSource(
-        sl(),
-        activeMarketCityId: sl<CreateRuntimeDefaults>().marketCityId,
-        activeTimezone: sl<CreateRuntimeDefaults>().timezone,
-        activeCountry: sl<CreateRuntimeDefaults>().country,
-        activeCity: sl<CreateRuntimeDefaults>().city,
-        activeCurrency: sl<CreateRuntimeDefaults>().currency,
-      ),
+      () => CreateLocalDataSource(sl()),
     )
     ..registerLazySingleton<CreateTemplateLocalDataSource>(
-      () => CreateTemplateLocalDataSource(
-        sl(),
-        activeMarketCityId: sl<CreateRuntimeDefaults>().marketCityId,
-        activeTimezone: sl<CreateRuntimeDefaults>().timezone,
-        activeCountry: sl<CreateRuntimeDefaults>().country,
-        activeCity: sl<CreateRuntimeDefaults>().city,
-        activeCurrency: sl<CreateRuntimeDefaults>().currency,
-      ),
+      () => CreateTemplateLocalDataSource(sl()),
     )
     ..registerLazySingleton<ScenarioObjectIntakeLocalDataSource>(
       () => ScenarioObjectIntakeLocalDataSource(sl()),
@@ -681,7 +666,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
         local: PublishedEventDiscoveryLocalDataSource.new,
         port: sl(),
         session: sl(),
-        currencyCode: sl<MarketConfig>().currencyCode,
+        currencyCode: sl<MarketConfig>().currency.value,
       ),
     )
     // Find People (DTL-FP-01) — public read-only mock projection. It is
@@ -1014,7 +999,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
         timezoneRepository: sl(),
         // v1 LV records predate currency storage; their recorded contract was EUR.
         legacyCurrencyCode: 'EUR',
-        defaultMarketCityId: sl<MarketConfig>().marketCityId,
+        defaultMarketCityId: sl<MarketConfig>().market.value,
         defaultCenterLat: sl<MarketConfig>().centerLat,
         defaultCenterLng: sl<MarketConfig>().centerLng,
       ),
@@ -1025,12 +1010,12 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
         local: () => DiscoverRepositoryImpl(
           remoteDataSource: sl(),
           publishedRoutes: sl(),
-          currency: CurrencyCode.parse(sl<MarketConfig>().currencyCode),
+          currency: sl<MarketConfig>().currency,
         ),
         port: sl(),
         session: sl(),
         marketId: catalogMarketIdFor(sl<MarketConfig>().market),
-        currencyCode: sl<MarketConfig>().currencyCode,
+        currencyCode: sl<MarketConfig>().currency.value,
       ),
     )
     ..registerLazySingleton<TimezoneRepository>(TimezoneRepositoryImpl.new)

@@ -32,33 +32,36 @@ void main() {
       expect(config.defaultLocale, LocaleTag.ru);
       expect(config.currency.value, 'USD');
       expect(config.timezone.value, 'Pacific/Honolulu');
-      expect(config.supportedLocaleCodes, ['ru', 'en-US']);
+      expect(config.supportedLocales.map((locale) => locale.value), [
+        'ru',
+        'en-US',
+      ]);
       expect(() => config.supportedLocales.clear(), throwsUnsupportedError);
       expect(
         MarketRegistry(active: config, markets: [config]).byRef(MarketRef.riga),
         same(config),
       );
-      final legacy = MarketConfig.legacy(
-        marketCityId: 'riga',
+      final legacy = MarketConfig(
+        market: MarketRef.riga,
         countryCode: 'LV',
         cityName: 'Riga',
-        timezoneId: 'UTC',
-        currencyCode: 'JPY',
-        defaultLocaleCode: 'en-US',
-        supportedLocaleCodes: ['en-US'],
+        timezone: IanaTimeZone.parse('UTC'),
+        currency: CurrencyCode.parse('JPY'),
+        defaultLocale: LocaleTag.parse('en-US'),
+        supportedLocales: [LocaleTag.parse('en-US')],
         centerLat: 56,
         centerLng: 24,
       );
-      expect(legacy.timezoneId, 'UTC');
-      expect(legacy.currencyCode, 'JPY');
-      expect(legacy.defaultLocaleCode, 'en-US');
-      expect(legacy.marketCityId, 'riga');
+      expect(legacy.timezone.value, 'UTC');
+      expect(legacy.currency.value, 'JPY');
+      expect(legacy.defaultLocale.value, 'en-US');
+      expect(legacy.market.value, 'riga');
     },
   );
   test('active market is Riga and query defaults are v3', () {
     const MarketConfig market = MarketConfig.riga;
     final DiscoverQuery query = DiscoverQuery.defaults(
-      marketCityId: market.marketCityId,
+      marketCityId: market.market.value,
       centerLat: market.centerLat,
       centerLng: market.centerLng,
     );

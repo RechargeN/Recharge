@@ -6,7 +6,7 @@ import 'package:recharge/app/di/backend_binding_manifest.dart';
 import 'package:recharge/app/di/booking_backend_selection.dart';
 import 'package:recharge/app/di/collection_content_publication_composition.dart';
 import 'package:recharge/app/di/event_publication_composition.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/core/id/id_generator.dart' show UuidV4IdGenerator;
 import 'package:recharge/features/booking/data/booking_callable_adapter.dart';
 import 'package:recharge/features/booking/data/booking_transport_runtime.dart';
 import 'package:recharge/features/create/application/collection_content_publication_controller.dart';

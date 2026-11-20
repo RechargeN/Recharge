@@ -319,14 +319,15 @@ class IdentityWorkspaceController extends ChangeNotifier {
         input: ProfessionalPageCreationInput(
           kind: kind,
           displayName: displayName,
-          marketId: _marketConfig.marketCityId,
+          marketId: _marketConfig.market.value,
           countryCode: _marketConfig.countryCode,
           defaultLocale: AppLocalePolicy.canonicalTag(
-            _marketConfig.defaultLocaleCode,
+            _marketConfig.defaultLocale.value,
           ),
-          timezone: _marketConfig.timezoneId,
-          defaultCurrency: _marketConfig.currencyCode,
-          supportedLocales: _marketConfig.supportedLocaleCodes
+          timezone: _marketConfig.timezone.value,
+          defaultCurrency: _marketConfig.currency.value,
+          supportedLocales: _marketConfig.supportedLocales
+              .map((locale) => locale.value)
               .map(AppLocalePolicy.canonicalTag)
               .toList(growable: false),
         ),

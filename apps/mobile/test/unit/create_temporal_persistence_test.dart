@@ -21,14 +21,7 @@ void main() {
   late CreateRepositoryImpl repository;
   setUp(() {
     FlutterSecureStorage.setMockInitialValues({});
-    source = CreateLocalDataSource(
-      storage,
-      activeMarketCityId: 'riga',
-      activeTimezone: 'Europe/Riga',
-      activeCountry: 'LV',
-      activeCity: 'Riga',
-      activeCurrency: 'EUR',
-    );
+    source = CreateLocalDataSource(storage);
     repository = CreateRepositoryImpl(
       localDataSource: source,
       idGenerator: const _FixedIdGenerator(),

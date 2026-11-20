@@ -2,33 +2,6 @@ import 'package:recharge/shared/primitives/money/money.dart';
 
 enum SessionPricingMode { free, fixed }
 
-class SessionMoneyDraft {
-  const SessionMoneyDraft({
-    required this.amountMinor,
-    required this.currencyCode,
-  });
-
-  final int amountMinor;
-  final String currencyCode;
-
-  bool get isValid => amountMinor > 0 && currencyCode.trim().isNotEmpty;
-
-  SessionMoneyDraft copyWith({int? amountMinor, String? currencyCode}) =>
-      SessionMoneyDraft(
-        amountMinor: amountMinor ?? this.amountMinor,
-        currencyCode: currencyCode ?? this.currencyCode,
-      );
-
-  @override
-  bool operator ==(Object other) =>
-      other is SessionMoneyDraft &&
-      amountMinor == other.amountMinor &&
-      currencyCode == other.currencyCode;
-
-  @override
-  int get hashCode => Object.hash(amountMinor, currencyCode);
-}
-
 class SessionPriceDisclosure {
   const SessionPriceDisclosure({required this.mode, this.amount});
 

@@ -64,7 +64,7 @@ void main() {
         throwsA(isA<MoneyReadException>()),
       );
       expect(
-        () => CreateDraftModel.fromJson(json, activeCurrency: 'EUR'),
+        () => CreateDraftModel.fromJson(json),
         throwsA(isA<MoneyReadException>()),
       );
       json['currency'] = 123;
@@ -75,7 +75,7 @@ void main() {
       json.remove('currency');
       json['basePrice'] = 1.234;
       expect(
-        () => CreateDraftModel.fromJson(json, activeCurrency: 'EUR'),
+        () => CreateDraftModel.fromJson(json),
         throwsA(isA<MoneyReadException>()),
       );
     },

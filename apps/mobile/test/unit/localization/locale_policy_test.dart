@@ -16,7 +16,7 @@ import 'package:recharge/features/auth/data/repositories/auth_repository_impl.da
 void main() {
   final AppLocalePolicy policy = AppLocalePolicy(
     supportedLanguageCodes: AppLocalePolicy.r1LanguageCodes,
-    fallbackLanguageCode: MarketConfig.riga.defaultLocaleCode,
+    fallbackLanguageCode: MarketConfig.riga.defaultLocale.value,
   );
 
   group('AppLocalePolicy', () {

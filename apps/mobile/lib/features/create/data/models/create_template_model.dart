@@ -42,14 +42,7 @@ class CreateTemplateModel {
     );
   }
 
-  factory CreateTemplateModel.fromJson(
-    Map<String, dynamic> json, {
-    required String activeMarketCityId,
-    required String activeTimezone,
-    required String activeCountry,
-    required String activeCity,
-    String? activeCurrency,
-  }) {
+  factory CreateTemplateModel.fromJson(Map<String, dynamic> json) {
     final int schemaVersion = (json['schemaVersion'] as num?)?.toInt() ?? 0;
     if (schemaVersion != CreateTemplateEntity.currentSchemaVersion) {
       throw const FormatException('Unsupported create template schema.');
@@ -66,11 +59,6 @@ class CreateTemplateModel {
       name: json['name'] as String,
       snapshot: CreateDraftModel.fromJson(
         Map<String, dynamic>.from(rawSnapshot),
-        activeMarketCityId: activeMarketCityId,
-        activeTimezone: activeTimezone,
-        activeCountry: activeCountry,
-        activeCity: activeCity,
-        activeCurrency: activeCurrency,
       ),
       createdAtUtcIso: _readUtcText(json['createdAtUtcIso'])!,
       updatedAtUtcIso: _readUtcText(json['updatedAtUtcIso'])!,

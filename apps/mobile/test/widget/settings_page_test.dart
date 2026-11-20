@@ -335,7 +335,7 @@ void main() {
     final LocaleController locale = LocaleController(
       policy: AppLocalePolicy(
         supportedLanguageCodes: AppLocalePolicy.r1LanguageCodes,
-        fallbackLanguageCode: MarketConfig.riga.defaultLocaleCode,
+        fallbackLanguageCode: MarketConfig.riga.defaultLocale.value,
       ),
       store: store,
       deviceLanguageTags: const <String>['de-DE'],
@@ -401,8 +401,8 @@ void main() {
         settingsBefore.notificationsEnabled,
       );
       expect(exploreRepository.settings['u'], isNull);
-      expect(MarketConfig.riga.currencyCode, 'EUR');
-      expect(MarketConfig.riga.timezoneId, 'Europe/Riga');
+      expect(MarketConfig.riga.currency.value, 'EUR');
+      expect(MarketConfig.riga.timezone.value, 'Europe/Riga');
       expect(MarketConfig.riga.countryCode, 'LV');
     }
   });

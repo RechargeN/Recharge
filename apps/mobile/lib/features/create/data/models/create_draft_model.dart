@@ -686,14 +686,7 @@ class CreateDraftModel {
     );
   }
 
-  factory CreateDraftModel.fromJson(
-    Map<String, dynamic> json, {
-    String activeMarketCityId = '',
-    String activeTimezone = 'UTC',
-    String activeCountry = '',
-    String activeCity = '',
-    String? activeCurrency,
-  }) {
+  factory CreateDraftModel.fromJson(Map<String, dynamic> json) {
     final int sourceVersion = (json['schemaVersion'] as num?)?.toInt() ?? 1;
     final String country = json['country'] as String? ?? '';
     final String city = json['city'] as String? ?? '';

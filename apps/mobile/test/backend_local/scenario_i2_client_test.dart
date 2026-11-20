@@ -9,7 +9,7 @@ import 'package:recharge/app/di/booking_backend_selection.dart';
 import 'package:recharge/app/di/scenario_sync_composition.dart';
 import 'package:recharge/app/adapters/legacy_quick_plan_conversion_adapter.dart';
 import 'package:recharge/app/application/planning_conversion_facade.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/core/id/id_generator.dart' show UlidIdGenerator;
 import 'package:recharge/features/booking/data/booking_transport_runtime.dart';
 import 'package:recharge/features/create/application/create_runtime_defaults.dart';
 import 'package:recharge/features/create/application/quick_plan_conversion_coordinator.dart';

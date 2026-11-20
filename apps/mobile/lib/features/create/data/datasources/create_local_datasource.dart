@@ -37,21 +37,9 @@ class CreateCollectionConditionalSaveResult {
 }
 
 class CreateLocalDataSource {
-  CreateLocalDataSource(
-    this._storage, {
-    this.activeMarketCityId = '',
-    this.activeTimezone = 'UTC',
-    this.activeCountry = '',
-    this.activeCity = '',
-    this.activeCurrency,
-  });
+  CreateLocalDataSource(this._storage);
 
   final FlutterSecureStorage _storage;
-  final String activeMarketCityId;
-  final String activeTimezone;
-  final String activeCountry;
-  final String activeCity;
-  final String? activeCurrency;
   final Map<String, Future<void>> _conditionalSaveQueues =
       <String, Future<void>>{};
 
@@ -91,14 +79,7 @@ class CreateLocalDataSource {
     final String? raw = await _storage.read(key: _draftKey(userId));
     if (raw == null || raw.isEmpty) return null;
     final Map<String, dynamic> json = jsonDecode(raw) as Map<String, dynamic>;
-    return CreateDraftModel.fromJson(
-      json,
-      activeMarketCityId: activeMarketCityId,
-      activeTimezone: activeTimezone,
-      activeCountry: activeCountry,
-      activeCity: activeCity,
-      activeCurrency: activeCurrency,
-    );
+    return CreateDraftModel.fromJson(json);
   }
 
   /// RNT-PUB-01 §1.2.0: routed through [_enqueueDraftMutation] on this
@@ -469,14 +450,7 @@ class CreateLocalDataSource {
     final raw = await _storage.read(key: _collectionDraftKey(ownerId, draftId));
     if (raw == null || raw.isEmpty) return null;
     final json = jsonDecode(raw) as Map<String, dynamic>;
-    return CreateDraftModel.fromJson(
-      json,
-      activeMarketCityId: activeMarketCityId,
-      activeTimezone: activeTimezone,
-      activeCountry: activeCountry,
-      activeCity: activeCity,
-      activeCurrency: activeCurrency,
-    );
+    return CreateDraftModel.fromJson(json);
   }
 
   Future<void> _writeAndVerifyCollectionDraft(
@@ -511,14 +485,7 @@ class CreateLocalDataSource {
       if (!entry.key.startsWith(prefix) || entry.value.isEmpty) continue;
       try {
         final json = jsonDecode(entry.value) as Map<String, dynamic>;
-        final model = CreateDraftModel.fromJson(
-          json,
-          activeMarketCityId: activeMarketCityId,
-          activeTimezone: activeTimezone,
-          activeCountry: activeCountry,
-          activeCity: activeCity,
-          activeCurrency: activeCurrency,
-        );
+        final model = CreateDraftModel.fromJson(json);
         model.toEntity();
         if (model.organizerId == ownerId &&
             _collectionDraftKey(ownerId, model.id) == entry.key &&
@@ -731,14 +698,7 @@ class CreateLocalDataSource {
       json['publishStatus'] = 'published';
       json['moderationStatus'] = 'none';
       json['publishedAtUtcIso'] = DateTime.now().toUtc().toIso8601String();
-      final CreateDraftModel promoted = CreateDraftModel.fromJson(
-        json,
-        activeMarketCityId: activeMarketCityId,
-        activeTimezone: activeTimezone,
-        activeCountry: activeCountry,
-        activeCity: activeCity,
-        activeCurrency: activeCurrency,
-      );
+      final CreateDraftModel promoted = CreateDraftModel.fromJson(json);
       await _writeDraftUnlocked(userId, promoted);
       return RentalPromotionResult(
         status: RentalPromotionStatus.promoted,

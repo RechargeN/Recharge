@@ -144,8 +144,8 @@ void main() {
     expect(AppLocalePolicy.r1LanguageCodes, <String>['en', 'lv', 'ru']);
     for (final MarketConfig market in const MarketRegistry().markets) {
       expect(market.countryCode, 'LV');
-      expect(market.currencyCode, 'EUR');
-      expect(market.timezoneId, 'Europe/Riga');
+      expect(market.currency.value, 'EUR');
+      expect(market.timezone.value, 'Europe/Riga');
     }
     final Map<String, dynamic> config =
         jsonDecode(

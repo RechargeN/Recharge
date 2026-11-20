@@ -5,7 +5,8 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../../core/id/id_generator.dart';
+import 'package:recharge/core/id/id_generator.dart' show UlidIdGenerator;
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import '../../domain/entities/route_draft_data.dart';
 import '../../domain/entities/route_sync_data.dart';
 import '../../domain/repositories/route_gpx_repository.dart';

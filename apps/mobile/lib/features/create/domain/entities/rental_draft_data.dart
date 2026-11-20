@@ -9,43 +9,6 @@ export 'publisher_ref.dart';
 /// `Money`. Migrates to the shared `Money` primitive
 /// (`shared/primitives/money/`) without semantic change once M2-B lands —
 /// see docs/architecture/MOBILE_ARCHITECTURE_M2_PRIMITIVE_RECONCILIATION_PLAN.md.
-class RentalMoneyDraft {
-  const RentalMoneyDraft({
-    required this.amountMinor,
-    required this.currencyCode,
-  });
-
-  final int amountMinor;
-  final String currencyCode;
-
-  RentalMoneyDraft copyWith({int? amountMinor, String? currencyCode}) {
-    return RentalMoneyDraft(
-      amountMinor: amountMinor ?? this.amountMinor,
-      currencyCode: currencyCode ?? this.currencyCode,
-    );
-  }
-
-  Map<String, Object?> toMap() => <String, Object?>{
-    'amountMinor': amountMinor,
-    'currencyCode': currencyCode,
-  };
-
-  factory RentalMoneyDraft.fromMap(Map<String, Object?> map) =>
-      RentalMoneyDraft(
-        amountMinor: (map['amountMinor'] as num).toInt(),
-        currencyCode: map['currencyCode']! as String,
-      );
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is RentalMoneyDraft &&
-          amountMinor == other.amountMinor &&
-          currencyCode == other.currencyCode;
-
-  @override
-  int get hashCode => Object.hash(amountMinor, currencyCode);
-}
 
 enum RentalCondition { rentalNew, likeNew, good, worn }
 

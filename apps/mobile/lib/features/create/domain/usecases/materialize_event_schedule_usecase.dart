@@ -28,13 +28,12 @@ class MaterializeEventScheduleUseCase {
         LocalDate.parse(exception);
       }
     }
-    final List<_LocalDate> dates = switch (draft.scheduleMode) {
-      EventScheduleMode.oneTime => <_LocalDate>[
-        _LocalDate.parse(draft.localStartDate),
+    final List<LocalDate> dates = switch (draft.scheduleMode) {
+      EventScheduleMode.oneTime => <LocalDate>[
+        LocalDate.parse(draft.localStartDate),
       ],
       EventScheduleMode.multiDate =>
-        draft.multiDateLocalDates.map(_LocalDate.parse).toSet().toList()
-          ..sort(),
+        draft.multiDateLocalDates.map(LocalDate.parse).toSet().toList()..sort(),
       EventScheduleMode.recurring => _recurringDates(
         draft,
         maxProjectionCount: maxProjectionCount,
@@ -55,7 +54,7 @@ class MaterializeEventScheduleUseCase {
         ? draft.occurrences.single.id
         : null;
     final List<EventOccurrenceDraft> result = <EventOccurrenceDraft>[];
-    for (final _LocalDate date in dates) {
+    for (final LocalDate date in dates) {
       if (rule?.exceptionLocalDates.contains(date.toString()) ?? false) {
         continue;
       }
@@ -71,7 +70,7 @@ class MaterializeEventScheduleUseCase {
       );
       final DateTime end;
       if (draft.allDay) {
-        final _LocalDate endDate = date.addDays(draft.durationMinutes ~/ 1440);
+        final LocalDate endDate = date.addDays(draft.durationMinutes ~/ 1440);
         end = _timezoneRepository
             .resolve(
               timezoneId: draft.timezoneId,
@@ -107,32 +106,32 @@ class MaterializeEventScheduleUseCase {
     return List<EventOccurrenceDraft>.unmodifiable(result);
   }
 
-  List<_LocalDate> _recurringDates(
+  List<LocalDate> _recurringDates(
     EventDraftData draft, {
     required int maxProjectionCount,
     required DateTime projectionNowUtc,
   }) {
     final rule = draft.recurrence;
-    if (rule == null) return const <_LocalDate>[];
-    final _LocalDate anchor = _LocalDate.parse(draft.localStartDate);
+    if (rule == null) return const <LocalDate>[];
+    final LocalDate anchor = LocalDate.parse(draft.localStartDate);
     // Preserve the existing 548 elapsed-day UTC projection cutoff policy.
     final horizonUtc = projectionNowUtc.add(const Duration(days: 548));
-    final _LocalDate horizon = LocalDate(
+    final LocalDate horizon = LocalDate(
       horizonUtc.year,
       horizonUtc.month,
       horizonUtc.day,
     );
-    final _LocalDate? until = rule.endMode == EventRecurrenceEndMode.untilDate
+    final LocalDate? until = rule.endMode == EventRecurrenceEndMode.untilDate
         ? LocalDate.parse(rule.untilLocalDate ?? '')
         : null;
     final int targetCount =
         rule.endMode == EventRecurrenceEndMode.occurrenceCount
         ? (rule.occurrenceCount ?? 0)
         : maxProjectionCount;
-    if (targetCount <= 0 || rule.interval <= 0) return const <_LocalDate>[];
+    if (targetCount <= 0 || rule.interval <= 0) return const <LocalDate>[];
 
-    final List<_LocalDate> result = <_LocalDate>[];
-    _LocalDate cursor = anchor;
+    final List<LocalDate> result = <LocalDate>[];
+    LocalDate cursor = anchor;
     while (result.length < targetCount && cursor.compareTo(horizon) <= 0) {
       if (until != null && cursor.compareTo(until) > 0) break;
       if (_matches(anchor, cursor, rule) &&
@@ -150,8 +149,8 @@ class MaterializeEventScheduleUseCase {
   }
 
   bool _matches(
-    _LocalDate anchor,
-    _LocalDate candidate,
+    LocalDate anchor,
+    LocalDate candidate,
     EventRecurrenceRuleDraft rule,
   ) {
     final int days = candidate.daysSince(anchor);
@@ -176,8 +175,8 @@ class MaterializeEventScheduleUseCase {
   }
 
   bool _matchesMonthly(
-    _LocalDate anchor,
-    _LocalDate candidate,
+    LocalDate anchor,
+    LocalDate candidate,
     EventRecurrenceRuleDraft rule,
   ) {
     final int monthDelta =
@@ -189,8 +188,5 @@ class MaterializeEventScheduleUseCase {
         candidate.day == _daysInMonth(candidate.year, candidate.month);
   }
 }
-
-// Temporary name compatibility; final reference migration/removal belongs to M2-D.
-typedef _LocalDate = LocalDate;
 
 int _daysInMonth(int year, int month) => DateTime.utc(year, month + 1, 0).day;

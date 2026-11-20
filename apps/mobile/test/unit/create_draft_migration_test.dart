@@ -6,21 +6,16 @@ void main() {
   test(
     'AC-34 legacy Latvia identities are never guessed from active market',
     () {
-      final CreateDraftModel model = CreateDraftModel.fromJson(
-        <String, dynamic>{
-          'id': 'draft_1',
-          'createdAtUtcIso': '2026-01-01T00:00:00Z',
-          'updatedAtUtcIso': '2026-01-01T00:00:00Z',
-          'objectType': 'event',
-          'country': 'Latvia',
-          'city': '',
-          'timezone': 'Europe/Moscow',
-        },
-        activeMarketCityId: 'riga',
-        activeTimezone: 'Europe/Riga',
-        activeCountry: 'LV',
-        activeCity: 'Riga',
-      );
+      final CreateDraftModel model =
+          CreateDraftModel.fromJson(<String, dynamic>{
+            'id': 'draft_1',
+            'createdAtUtcIso': '2026-01-01T00:00:00Z',
+            'updatedAtUtcIso': '2026-01-01T00:00:00Z',
+            'objectType': 'event',
+            'country': 'Latvia',
+            'city': '',
+            'timezone': 'Europe/Moscow',
+          });
 
       expect(model.schemaVersion, 9);
       expect(model.marketCityId, isEmpty);
@@ -32,21 +27,16 @@ void main() {
   test(
     'AC-36 legacy Rezekne preserves recorded timezone without market inference',
     () {
-      final CreateDraftModel model = CreateDraftModel.fromJson(
-        <String, dynamic>{
-          'id': 'draft_2',
-          'createdAtUtcIso': '2026-01-01T00:00:00Z',
-          'updatedAtUtcIso': '2026-01-01T00:00:00Z',
-          'objectType': 'place',
-          'country': 'Latvia',
-          'city': 'Rezekne',
-          'timezone': 'Europe/Moscow',
-        },
-        activeMarketCityId: 'riga',
-        activeTimezone: 'Europe/Riga',
-        activeCountry: 'LV',
-        activeCity: 'Riga',
-      );
+      final CreateDraftModel model =
+          CreateDraftModel.fromJson(<String, dynamic>{
+            'id': 'draft_2',
+            'createdAtUtcIso': '2026-01-01T00:00:00Z',
+            'updatedAtUtcIso': '2026-01-01T00:00:00Z',
+            'objectType': 'place',
+            'country': 'Latvia',
+            'city': 'Rezekne',
+            'timezone': 'Europe/Moscow',
+          });
 
       expect(model.marketCityId, isEmpty);
       expect(model.timezone, 'Europe/Moscow');
@@ -54,21 +44,15 @@ void main() {
   );
 
   test('unknown legacy location is not overwritten', () {
-    final CreateDraftModel model = CreateDraftModel.fromJson(
-      <String, dynamic>{
-        'id': 'draft_3',
-        'createdAtUtcIso': '2026-01-01T00:00:00Z',
-        'updatedAtUtcIso': '2026-01-01T00:00:00Z',
-        'objectType': 'place',
-        'country': 'Estonia',
-        'city': 'Tartu',
-        'timezone': 'Europe/Tallinn',
-      },
-      activeMarketCityId: 'riga',
-      activeTimezone: 'Europe/Riga',
-      activeCountry: 'LV',
-      activeCity: 'Riga',
-    );
+    final CreateDraftModel model = CreateDraftModel.fromJson(<String, dynamic>{
+      'id': 'draft_3',
+      'createdAtUtcIso': '2026-01-01T00:00:00Z',
+      'updatedAtUtcIso': '2026-01-01T00:00:00Z',
+      'objectType': 'place',
+      'country': 'Estonia',
+      'city': 'Tartu',
+      'timezone': 'Europe/Tallinn',
+    });
 
     expect(model.marketCityId, isEmpty);
     expect(model.timezone, 'Europe/Tallinn');

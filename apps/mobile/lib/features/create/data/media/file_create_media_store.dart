@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
-import '../../../../core/id/id_generator.dart';
+import 'package:recharge/shared/primitives/id/id_generator.dart';
 import '../../domain/repositories/create_image_picker_port.dart';
 import '../../domain/repositories/create_media_store.dart';
 

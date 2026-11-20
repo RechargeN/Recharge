@@ -1,5 +1,4 @@
 import '../../../../shared/primitives/time/local_date.dart';
-import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../shared/primitives/money/money.dart';
 import 'event_admission.dart';
 import 'event_inventory.dart';
@@ -30,31 +29,6 @@ enum EventPricingMode { free, fixed, ticketTypes, donation }
 enum EventPaymentCollectionMode { none, onsite, external, internal }
 
 enum EventVisibility { public, unlisted, private }
-
-class EventMoneyDraft {
-  const EventMoneyDraft({
-    required this.amountMinor,
-    required this.currencyCode,
-  });
-
-  final int amountMinor;
-  final String currencyCode;
-
-  Money toMoney() => Money(
-    minorUnits: amountMinor,
-    currency: CurrencyCode.parse(currencyCode),
-  );
-  factory EventMoneyDraft.fromMoney(Money value) => EventMoneyDraft(
-    amountMinor: value.minorUnits,
-    currencyCode: value.currency.value,
-  );
-
-  EventMoneyDraft copyWith({int? amountMinor, String? currencyCode}) =>
-      EventMoneyDraft(
-        amountMinor: amountMinor ?? this.amountMinor,
-        currencyCode: currencyCode ?? this.currencyCode,
-      );
-}
 
 class EventLocationDraft {
   const EventLocationDraft({

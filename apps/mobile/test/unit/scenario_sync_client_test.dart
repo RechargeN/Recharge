@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/core/id/id_generator.dart' show UlidIdGenerator;
 import 'package:recharge/features/create/data/repositories/scenario_sync_client.dart';
 import 'package:recharge/features/create/data/repositories/create_repository_impl.dart';
 import 'package:recharge/features/create/data/datasources/create_local_datasource.dart';

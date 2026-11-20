@@ -1,8 +1,3 @@
-import '../../../../shared/primitives/time/local_date.dart';
-
-// Temporary name compatibility; migrate final references in M2-D.
-typedef SessionLocalDate = LocalDate;
-
 /// One non-overlapping local time range on a specific ISO weekday.
 class SessionWeeklyRule {
   const SessionWeeklyRule({

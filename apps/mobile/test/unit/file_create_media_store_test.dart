@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:recharge/core/id/id_generator.dart';
+import 'package:recharge/core/id/id_generator.dart' show UuidV4IdGenerator;
 import 'package:recharge/features/create/data/media/file_create_media_store.dart';
 import 'package:recharge/features/create/domain/repositories/create_image_picker_port.dart';
 import 'package:recharge/features/create/domain/repositories/create_media_store.dart';

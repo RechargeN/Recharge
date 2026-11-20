@@ -100,14 +100,7 @@ void main() {
       );
       final wire = CreateTemplateModel.fromEntity(template).toJson();
       CreateTemplateEntity read(Map<String, dynamic> value) =>
-          CreateTemplateModel.fromJson(
-            value,
-            activeMarketCityId: 'riga',
-            activeTimezone: 'Europe/Riga',
-            activeCountry: 'LV',
-            activeCity: 'Riga',
-            activeCurrency: 'EUR',
-          ).toEntity();
+          CreateTemplateModel.fromJson(value).toEntity();
       expect(read(wire).createdAtUtc, instant);
       expect(read(wire).updatedAtUtc, instant);
       expect(read(wire).lastUsedAtUtc, instant);
@@ -210,14 +203,7 @@ void main() {
     });
     await storage.write(key: 'create_templates_v1_user-1', value: raw);
     final repository = CreateTemplateRepositoryImpl(
-      CreateTemplateLocalDataSource(
-        storage,
-        activeMarketCityId: 'riga',
-        activeTimezone: 'Europe/Riga',
-        activeCountry: 'LV',
-        activeCity: 'Riga',
-        activeCurrency: 'EUR',
-      ),
+      CreateTemplateLocalDataSource(storage),
     );
     final listed = await repository.listTemplates(
       userId: 'user-1',
@@ -261,14 +247,7 @@ void main() {
           'templates': [wire],
         });
         await storage.write(key: 'create_templates_v1_user-1', value: raw);
-        final source = CreateTemplateLocalDataSource(
-          storage,
-          activeMarketCityId: 'riga',
-          activeTimezone: 'Europe/Riga',
-          activeCountry: 'LV',
-          activeCity: 'Riga',
-          activeCurrency: 'EUR',
-        );
+        final source = CreateTemplateLocalDataSource(storage);
         final repository = CreateTemplateRepositoryImpl(source);
         expect(
           await repository.listTemplates(
@@ -539,13 +518,7 @@ void main() {
     'repository keeps multiple templates isolated by owner and type',
     () async {
       const CreateTemplateLocalDataSource dataSource =
-          CreateTemplateLocalDataSource(
-            FlutterSecureStorage(),
-            activeMarketCityId: 'riga',
-            activeTimezone: 'Europe/Riga',
-            activeCountry: 'LV',
-            activeCity: 'Riga',
-          );
+          CreateTemplateLocalDataSource(FlutterSecureStorage());
       const CreateTemplateRepositoryImpl repository =
           CreateTemplateRepositoryImpl(dataSource);
       final CreateTemplateEntity first = useCase.create(

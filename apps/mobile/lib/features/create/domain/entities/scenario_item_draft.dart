@@ -41,34 +41,6 @@ enum ScenarioPlannedTransportKind {
 
 enum ScenarioScheduleFreshness { current, stale, unknown, notApplicable }
 
-class ScenarioLocalDateDraft {
-  const ScenarioLocalDateDraft({
-    required this.year,
-    required this.month,
-    required this.day,
-  });
-
-  final int year;
-  final int month;
-  final int day;
-
-  String get iso8601 =>
-      '${year.toString().padLeft(4, '0')}-'
-      '${month.toString().padLeft(2, '0')}-'
-      '${day.toString().padLeft(2, '0')}';
-
-  LocalDate get calendarDate => LocalDate(year, month, day);
-
-  bool get isValid {
-    try {
-      calendarDate;
-      return true;
-    } on FormatException {
-      return false;
-    }
-  }
-}
-
 class ScenarioLocalTimeDraft {
   const ScenarioLocalTimeDraft({required this.hour, required this.minute});
 
@@ -82,24 +54,6 @@ class ScenarioLocalTimeDraft {
       '${minute.toString().padLeft(2, '0')}';
 
   bool get isValid => hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
-}
-
-class ScenarioGeoPointDraft {
-  const ScenarioGeoPointDraft({
-    required this.latitude,
-    required this.longitude,
-  });
-
-  final double latitude;
-  final double longitude;
-
-  bool get isValid =>
-      latitude.isFinite &&
-      longitude.isFinite &&
-      latitude >= -90 &&
-      latitude <= 90 &&
-      longitude >= -180 &&
-      longitude <= 180;
 }
 
 class ScenarioObjectSnapshotDraft {

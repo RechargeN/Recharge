@@ -80,24 +80,6 @@ class ActivityLocationDraft {
   );
 }
 
-class ActivityContributionAmountDraft {
-  const ActivityContributionAmountDraft({
-    required this.amountMinor,
-    required this.currencyCode,
-  });
-
-  final int amountMinor;
-  final String currencyCode;
-
-  ActivityContributionAmountDraft copyWith({
-    int? amountMinor,
-    String? currencyCode,
-  }) => ActivityContributionAmountDraft(
-    amountMinor: amountMinor ?? this.amountMinor,
-    currencyCode: currencyCode ?? this.currencyCode,
-  );
-}
-
 class ActivityOptionalContributionDraft {
   const ActivityOptionalContributionDraft({
     this.kind,
