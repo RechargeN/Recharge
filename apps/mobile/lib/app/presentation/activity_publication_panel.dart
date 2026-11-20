@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../features/create/application/activity_validation_feedback_provider.dart';
 import '../../features/create/application/create_providers.dart';
 import '../../features/create/application/state/create_state.dart';
@@ -57,6 +59,11 @@ class _ActivityPublicationPanelState
   void _captureFeedback() {
     final controller = _created;
     if (mounted && controller != null) {
+      // MEDIA-PICK-02: ready assets replace the local copies in the form.
+      final Map<String, String> ready = controller.takeReadyMediaRefs();
+      if (ready.isNotEmpty) {
+        unawaited(ref.read(createControllerProvider).promoteReadyMedia(ready));
+      }
       ref.read(activityValidationFeedbackProvider).capture(controller);
     }
   }

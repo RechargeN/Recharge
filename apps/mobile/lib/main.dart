@@ -11,6 +11,7 @@ import 'app/google_maps_web_loader.dart';
 import 'core/localization/locale_controller.dart';
 import 'core/localization/locale_providers.dart';
 import 'features/create/application/content_server_path.dart';
+import 'core/config/cloud_environment.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +26,7 @@ Future<void> main() async {
         // L4: the persisted, device-scoped UI language owner.
         localeControllerProvider.overrideWith((ref) => sl<LocaleController>()),
       ],
-      child: appFlavor == 'dev'
+      child: CloudEnvironment.forFlavor(appFlavor) != null
           ? const AuthLifecycleBoundary(child: RechargeApp())
           : const RechargeApp(),
     ),

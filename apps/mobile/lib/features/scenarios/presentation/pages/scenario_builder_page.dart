@@ -1,3 +1,4 @@
+import '../../../../core/layout/page_list_padding.dart';
 import '../../../../core/localization/l10n_context.dart';
 import '../../../../core/localization/recharge_formats.dart';
 import '../../../../core/localization/taxonomy_labels.dart';
@@ -305,7 +306,7 @@ class _QuickPlanPageState extends ConsumerState<QuickPlanPage>
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: pageListPadding(context, const EdgeInsets.all(16)),
         children: [
           Text(context.l10n.quickPlanReadOnlyOnline),
           // L4.8: a coded refusal is said in words; anything else gets the fact.

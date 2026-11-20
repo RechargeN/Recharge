@@ -29,7 +29,7 @@ import { grantStandStaff } from './stand_moderation.js';
 import { assertStandEnvironment, isAuthUserNotFound } from './stand_guard.js';
 import {
   standBookings,
-  standCreatorVerification,
+  standIdentityVerification,
   standEmulatorPassword,
   standEvent,
   standMarketId,
@@ -182,13 +182,13 @@ async function bootstrapCreatorAndPages(
     verificationDecisions: new LocalVerificationDecisionAdapter(new Set([staffId])),
     pagePolicy: new LocalPageCreationPolicy(true, standMaximumOwnedPages),
   });
-  await authority.creatorVerification.submit({
+  await authority.identityVerification.submit({
     userId: creatorId,
-    verificationId: standCreatorVerification.verificationId,
-    evidenceRefIds: standCreatorVerification.evidenceRefIds,
+    verificationId: standIdentityVerification.verificationId,
+    evidenceRefIds: standIdentityVerification.evidenceRefIds,
     nowUtc,
   });
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: staffId,
     userId: creatorId,
     status: 'verified',

@@ -27,6 +27,7 @@ import '../../domain/entities/place_validation_issue.dart';
 import 'location_search_suggestion_list.dart';
 import 'create_texts.dart';
 import 'create_form_texts.dart';
+import '../../application/create_media_asset_ref.dart';
 
 class PlaceCreateBlock extends StatefulWidget {
   const PlaceCreateBlock({
@@ -1279,7 +1280,9 @@ class _PlaceCreateBlockState extends State<PlaceCreateBlock> {
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.image_outlined),
                     title: Text(
-                      draft.media.gallery[index],
+                      promotedMediaAssetId(draft.media.gallery[index]) != null
+                          ? context.l10n.createMediaUploadedToServer
+                          : draft.media.gallery[index],
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

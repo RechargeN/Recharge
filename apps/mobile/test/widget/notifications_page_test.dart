@@ -477,7 +477,7 @@ void main() {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
-    expect(find.text('Creator profile'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
     expect(find.text('Publish status'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Notification actions').first);

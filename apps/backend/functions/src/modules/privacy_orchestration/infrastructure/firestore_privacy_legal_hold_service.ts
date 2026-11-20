@@ -1,5 +1,5 @@
 import type { Firestore, Transaction } from 'firebase-admin/firestore';
-import { assertContentEmulatorContext } from '../../content/infrastructure/firestore_content_repository.js';
+import { assertMediaChainPersistenceContext } from '../../content/infrastructure/firestore_content_repository.js';
 import {
   changePrivacyLegalHold,
   placePrivacyLegalHold,
@@ -32,11 +32,12 @@ export type PrivacyHoldResult =
  * L1 legal hold authority (amendment §7). Only an actor registered in the
  * server-side authority registry may place, change or release a hold; there
  * is no client entry. Every change is revisioned and audited without its basis.
- * Emulator-only, like the registry it reads.
+ * Emulator, or the reviewed dev/stage cloud behind the persistence switch
+ * (step 2, owner decision 2026-11-20); never production.
  */
 export class FirestorePrivacyLegalHoldService {
   constructor(private readonly db: Firestore) {
-    assertContentEmulatorContext(db);
+    assertMediaChainPersistenceContext(db);
   }
 
   place(input: {

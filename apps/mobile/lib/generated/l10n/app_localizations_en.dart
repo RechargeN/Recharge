@@ -116,6 +116,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSearchHint => 'Saved searches and discovery filters';
 
   @override
+  String get settingsBookingTestEntry => 'Booking test (debug)';
+
+  @override
   String get settingsNotificationsHint => 'Inbox and route updates';
 
   @override
@@ -374,6 +377,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This upload cannot be retried. Start a new upload.';
 
   @override
+  String get mediaErrorQuarantined =>
+      'The file has not passed the safety check yet. Try uploading it again later.';
+
+  @override
   String get bookingErrorSoldOut => 'This event is sold out.';
 
   @override
@@ -473,6 +480,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createMediaCoverSelected => 'Cover photo selected';
+
+  @override
+  String get createMediaUploadedToServer => 'Photo uploaded to the server';
 
   @override
   String get localErrorMediaUnsupported =>
@@ -661,7 +671,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publicationTestPath => 'Test publication path (local Emulator)';
 
   @override
-  String get publicationTestPathDevCloud => 'Test publication path (dev cloud)';
+  String publicationTestPathCloud(String kind) {
+    String _temp0 = intl.Intl.selectLogic(kind, {
+      'dev': 'Test publication path (dev cloud)',
+      'staging': 'Test publication path (staging cloud)',
+      'other': 'Test publication path (cloud)',
+    });
+    return '$_temp0';
+  }
 
   @override
   String publicationNoDraft(String type) {
@@ -793,6 +810,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get publicationUploadMedia => 'Upload media';
+
+  @override
+  String get publicationCheckingPhoto =>
+      'Checking the photo… The first check can take up to 20 seconds.';
 
   @override
   String get publicationUploadCover => 'Upload cover';
@@ -1173,6 +1194,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsLoadFailed => 'Notifications could not be loaded';
 
   @override
+  String get notificationsAccessDenied =>
+      'This account has no access to notifications';
+
+  @override
   String get notificationsEmpty => 'No notifications yet';
 
   @override
@@ -1219,7 +1244,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'search': 'Search',
       'publishStatus': 'Publish status',
       'create': 'Create',
-      'creatorProfile': 'Creator profile',
+      'creatorProfile': 'Profile',
       'discover': 'Discover',
       'other': 'Update',
     });
@@ -8515,7 +8540,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discoverRentalQuantitiesDisclaimer =>
-      'Listed quantities are Creator-declared, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.';
+      'Listed quantities are declared by the publisher, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.';
 
   @override
   String discoverDeliveryWithin(String value) {
@@ -9128,7 +9153,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discoverForYouHint =>
-      'Personal picks, saved ideas and creator tools stay one tap away.';
+      'Personal picks, saved ideas and create tools stay one tap away.';
 
   @override
   String get discoverSmartSearchIdea => 'Smart search idea';
@@ -9405,7 +9430,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get identityLimitRequestPending => 'Additional page request pending';
 
   @override
-  String get identityCreator => 'Creator';
+  String get identityCreator => 'User';
 
   @override
   String get identityOk => 'OK';
@@ -9589,7 +9614,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileFinishDraft => 'Finish draft';
 
   @override
-  String get profileCreatorNextSteps => 'Creator next steps';
+  String get profileCreatorNextSteps => 'Next steps';
 
   @override
   String get profileMapListingArea => 'Map listing area';
@@ -9604,7 +9629,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileOpenCreate => 'Open Create';
 
   @override
-  String get profileCreatorListing => 'Creator listing';
+  String get profileCreatorListing => 'My listing';
 
   @override
   String get profileBuildRoute => 'Build route';
@@ -9617,7 +9642,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Manage drafts and published listings from the same workspace.';
 
   @override
-  String get profileCreatorPublications => 'Creator publications';
+  String get profileCreatorPublications => 'My publications';
 
   @override
   String get profileListingFromLatestSmart =>
@@ -9751,7 +9776,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileCreateRoute => 'Create route';
 
   @override
-  String get profileOpenTaxonomyFlow => 'Open taxonomy-based creator flow';
+  String get profileOpenTaxonomyFlow => 'Open creation by category';
 
   @override
   String get profileViewAllEvents => 'View all events';
@@ -9794,7 +9819,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Check verification and available tools in Settings';
 
   @override
-  String get profileCreatorTools => 'Creator tools';
+  String get profileCreatorTools => 'Create tools';
 
   @override
   String get profileSavedList => 'Saved list';
@@ -10394,10 +10419,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String profileRoleTitle(String value) {
     String _temp0 = intl.Intl.selectLogic(value, {
+      'admin': 'Administrator',
       'pro_generator': 'Pro generator',
-      'creator': 'Creator',
+      'creator': 'User',
       'user': 'User',
-      'other': 'Creator',
+      'other': 'User',
     });
     return '$_temp0';
   }

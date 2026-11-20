@@ -362,6 +362,9 @@ abstract final class UserMessageCatalog {
         'consent_missing': (l) => l.localErrorConsentMissing,
         'share_token_unavailable': (l) => l.localErrorShareUnavailable,
         'media_unavailable': (l) => l.localErrorMediaUnavailable,
+        // N4b: the asset waits in quarantine (scan undecided or processing
+        // failed). The server reports a lifecycle, not a refusal code.
+        'media_quarantined': (l) => l.mediaErrorQuarantined,
         // MEDIA-PICK-01 §9: the photo picker and its client copy.
         'media_unsupported': (l) => l.localErrorMediaUnsupported,
         'media_decode_failed': (l) => l.localErrorMediaDecodeFailed,

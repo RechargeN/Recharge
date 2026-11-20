@@ -1,14 +1,14 @@
 import { recordVerificationDecision } from '../domain/account.js';
 import {
-  decideCreatorVerification,
-  submitCreatorVerification,
-  type CreatorVerification,
-} from '../domain/creator_verification.js';
+  decideIdentityVerification,
+  submitIdentityVerification,
+  type IdentityVerification,
+} from '../domain/identity_verification.js';
 import { IdentityFailure } from '../domain/failures.js';
 import type { IdentityAuthorityRepository } from '../domain/repositories.js';
 import type { VerificationDecisionPort } from './ports/verification_decision_port.js';
 
-export class CreatorVerificationService {
+export class IdentityVerificationService {
   constructor(
     private readonly repository: IdentityAuthorityRepository,
     private readonly decisionPort: VerificationDecisionPort,
@@ -19,7 +19,7 @@ export class CreatorVerificationService {
     readonly verificationId: string;
     readonly evidenceRefIds: readonly string[];
     readonly nowUtc: string;
-  }): Promise<CreatorVerification> {
+  }): Promise<IdentityVerification> {
     return this.repository.transact(async (transaction) => {
       const account = await transaction.account(input.userId);
       if (account === null || account.status !== 'active')
@@ -27,7 +27,7 @@ export class CreatorVerificationService {
       const existing = await transaction.verificationForUser(input.userId);
       if (existing !== null && !['rejected', 'revoked'].includes(existing.status))
         throw new IdentityFailure('invalid_transition');
-      const verification = submitCreatorVerification({
+      const verification = submitIdentityVerification({
         verificationId: input.verificationId,
         userId: input.userId,
         evidenceRefIds: input.evidenceRefIds,
@@ -43,7 +43,7 @@ export class CreatorVerificationService {
     readonly userId: string;
     readonly status: 'verified' | 'rejected' | 'suspended' | 'revoked';
     readonly nowUtc: string;
-  }): Promise<CreatorVerification> {
+  }): Promise<IdentityVerification> {
     if (!(await this.decisionPort.mayDecide(input.reviewerId)))
       throw new IdentityFailure('not_found_or_not_accessible');
     return this.repository.transact(async (transaction) => {
@@ -51,7 +51,7 @@ export class CreatorVerificationService {
       const current = await transaction.verificationForUser(input.userId);
       if (account === null || current === null)
         throw new IdentityFailure('not_found_or_not_accessible');
-      const next = decideCreatorVerification(current, input.status, input.nowUtc);
+      const next = decideIdentityVerification(current, input.status, input.nowUtc);
       transaction.putVerification(next);
       const nextAccount = recordVerificationDecision(account, input.nowUtc);
       transaction.putAccount(nextAccount);

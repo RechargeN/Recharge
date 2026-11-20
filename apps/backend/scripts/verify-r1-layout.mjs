@@ -105,6 +105,8 @@ const approvedSubsequentSlicePaths = [
   "apps/backend/functions/test/unit/security/dev_identity_entry.test.ts",
   "apps/backend/functions/test/unit/security/dev_identity_session_binding.test.ts",
   "apps/backend/functions/test/unit/security/dev_identity_session_handler.test.ts",
+  // N4a (owner-approved plan 2026-11-13): the immutable release candidate schema.
+  "apps/backend/config/release-candidate.schema.json",
 ];
 
 if (

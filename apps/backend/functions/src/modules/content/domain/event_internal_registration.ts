@@ -16,7 +16,7 @@ import {
  * materiality rule and the plan of Booking facts for one Content effect.
  *
  * Everything here is test-only and Emulator-only: the bounds are not product
- * defaults, and nothing a Creator sends is ever replaced by a default.
+ * defaults, and nothing a User sends is ever replaced by a default.
  */
 export const eventInternalRegistrationConfig = Object.freeze({
   maxPartySize: 21,

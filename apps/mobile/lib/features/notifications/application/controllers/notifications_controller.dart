@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/notification_item_entity.dart';
+import '../../domain/failures/notifications_access_denied.dart';
 import '../../domain/usecases/get_notifications_usecase.dart';
 import '../../domain/usecases/mark_notification_read_usecase.dart';
 import '../state/notifications_state.dart';
@@ -9,6 +10,9 @@ import '../state/notifications_state.dart';
 class NotificationsController extends ChangeNotifier {
   /// L4: stable message code; the UI localizes it.
   static const String loadFailedMessage = 'notifications_load_failed';
+
+  /// The server refused this account; retrying does not help.
+  static const String accessDeniedMessage = 'notifications_access_denied';
 
   NotificationsController({
     required GetNotificationsUseCase getNotificationsUseCase,
@@ -62,6 +66,17 @@ class NotificationsController extends ChangeNotifier {
           'item_count': items.length,
           'unread_count': _state.unreadCount,
         },
+      );
+    } on NotificationsAccessDenied {
+      _setState(
+        _state.copyWith(
+          status: NotificationsStatus.error,
+          message: accessDeniedMessage,
+        ),
+      );
+      _analyticsService.track(
+        'notifications_load_failed',
+        params: const <String, Object?>{'error_group': 'access_denied'},
       );
     } on Exception {
       _setState(

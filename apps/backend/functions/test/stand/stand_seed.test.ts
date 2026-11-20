@@ -6,7 +6,7 @@ import { assertStandEnvironment, StandGuardError } from './stand_guard.js';
 import { standInvariantProblems } from './stand_invariants.js';
 import {
   standBookings,
-  standCreatorVerification,
+  standIdentityVerification,
   standEvent,
   standMaximumOwnedPages,
   standPages,
@@ -46,8 +46,8 @@ void test('plan is internally consistent and uses only canonical ids', () => {
   assert.equal(standPages.length, standMaximumOwnedPages);
   for (const id of [
     ...standPages.flatMap((page) => [page.pageId, page.membershipId]),
-    standCreatorVerification.verificationId,
-    ...standCreatorVerification.evidenceRefIds,
+    standIdentityVerification.verificationId,
+    ...standIdentityVerification.evidenceRefIds,
   ]) {
     assert.doesNotThrow(() => parseEntityId(id), id);
   }

@@ -1,3 +1,4 @@
+import '../../../../core/layout/page_list_padding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -80,7 +81,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       capabilities: user.capabilities,
     );
     final ProfilePersonalPresentation presentation =
-        ProfilePersonalPresentation(accessSummary: accessRoleSummary);
+        ProfilePersonalPresentation(
+          accessSummary: accessRoleSummary,
+          isAdmin: user.role.trim().toLowerCase() == 'admin',
+        );
     final _ProfileWorkspaceData workspaceData = _profileWorkspaceDataFor(
       context.l10n,
       favoritesState.items,
@@ -93,7 +97,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Scaffold(
       backgroundColor: RechargeTheme.profileBackground,
       appBar: AppBar(
-        title: Text(context.l10n.profileRoleTitle(presentation.titleId)),
+        title: Text(context.l10n.navProfile),
         backgroundColor: RechargeTheme.profileBackground,
         foregroundColor: RechargeTheme.ink,
         centerTitle: true,
@@ -128,7 +132,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           },
         ),
         ExploreStatus.ready || ExploreStatus.saving => ListView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          padding: pageListPadding(
+            context,
+            const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          ),
           children: <Widget>[
             _ProfileHero(
               displayName: state.profile.displayName,
@@ -170,8 +177,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               data: workspaceData,
               canCreate: presentation.canShowCreatorTools,
               onViewAll: () => context.push(RouteNames.profileWorkspace),
-              onOpenListing: (listing) =>
-                  context.push(_searchRouteForCreateListing(listing)),
+              // A34 2026-11-13: a draft opens its editor, as in the workspace;
+              // only a published card leads to search.
+              onOpenListing: (listing) => context.push(
+                profileCreatedListingRoute(
+                  isPublished: listing.isPublished,
+                  searchRoute: () => _searchRouteForCreateListing(listing),
+                ),
+              ),
               onCreate: () => context.push(RouteNames.create),
               onCreateRoute: () => context.push(
                 Uri(
@@ -317,7 +330,10 @@ class _ProfileWorkspacePageState extends ConsumerState<ProfileWorkspacePage> {
         surfaceTintColor: Colors.transparent,
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        padding: pageListPadding(
+          context,
+          const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        ),
         children: <Widget>[
           _RoleWorkspace(
             roleSummary: roleSummary,
@@ -527,12 +543,15 @@ class _ProfileHero extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  _HeroPill(
-                    label: context.l10n
-                        .profileRoleTitle(presentation.titleId)
-                        .toUpperCase(),
-                  ),
+                  // ADR 0023: no role badge for an ordinary account.
+                  if (presentation.roleBadgeId != null) ...<Widget>[
+                    const SizedBox(height: 8),
+                    _HeroPill(
+                      label: context.l10n
+                          .profileRoleTitle(presentation.roleBadgeId!)
+                          .toUpperCase(),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -761,6 +780,9 @@ class _LatestCreatedEvents extends StatelessWidget {
                 else
                   for (final _CreatorListingData listing in listings.take(3))
                     _CreatedEventRow(
+                      key: ValueKey<String>(
+                        'profile-latest-created-${listing.title}',
+                      ),
                       listing: listing,
                       onTap: () => onOpenListing(listing),
                     ),
@@ -839,7 +861,11 @@ class _LatestCreatedEvents extends StatelessWidget {
 }
 
 class _CreatedEventRow extends StatelessWidget {
-  const _CreatedEventRow({required this.listing, required this.onTap});
+  const _CreatedEventRow({
+    super.key,
+    required this.listing,
+    required this.onTap,
+  });
 
   final _CreatorListingData listing;
   final VoidCallback onTap;
@@ -2772,6 +2798,14 @@ String _mapRouteForSmartSearch(SmartSearchHistoryEntity item) {
   }
   return _discoverRouteForSavedSearch(RouteNames.discoverMap, item.query);
 }
+
+/// A34 2026-11-13: a draft card in "latest created" opens its editor (as in
+/// the workspace); only a published card leads to search.
+@visibleForTesting
+String profileCreatedListingRoute({
+  required bool isPublished,
+  required String Function() searchRoute,
+}) => isPublished ? searchRoute() : RouteNames.create;
 
 String _searchRouteForCreateListing(_CreatorListingData listing) {
   return _discoverRouteForCreateListing(RouteNames.search, listing.draft);

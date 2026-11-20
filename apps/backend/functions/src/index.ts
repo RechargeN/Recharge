@@ -1033,7 +1033,7 @@ export const purgeFindPeoplePrivateLocationsV1 = onSchedule(
 // `content.collection.authoring`) is on; each type's own flag gates the commands that
 // create or change publishable content (D3.1 §2.2), while the owner's hide and
 // reads stay available. Owner commands and queries only: the Content service
-// re-checks Session, verified Creator, exact Page, Media readiness and the C2
+// re-checks Session, identity verification where required, exact Page, Media readiness and the C2
 // review on every call; dispositions are never accepted here.
 /** ADR 0023 (2026-11-08): the author's DSA Art. 30 seller declaration (Emulator). */
 export const sellerDeclarationV1 = onCall<unknown>(callableOptions, async (request) => {

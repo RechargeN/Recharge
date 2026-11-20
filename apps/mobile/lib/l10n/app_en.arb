@@ -140,6 +140,10 @@
   "@settingsSearchHint": {
     "description": "Settings item subtitle."
   },
+  "settingsBookingTestEntry": "Booking test (debug)",
+  "@settingsBookingTestEntry": {
+    "description": "Settings: debug-only entry to the Booking test Event."
+  },
   "settingsNotificationsHint": "Inbox and route updates",
   "@settingsNotificationsHint": {
     "description": "Settings item subtitle."
@@ -442,6 +446,10 @@
   "@mediaErrorRetryNotAllowed": {
     "description": "Media retry not allowed."
   },
+  "mediaErrorQuarantined": "The file has not passed the safety check yet. Try uploading it again later.",
+  "@mediaErrorQuarantined": {
+    "description": "Media upload kept in quarantine: the safety scan could not decide yet or processing failed (N4b)."
+  },
   "bookingErrorSoldOut": "This event is sold out.",
   "@bookingErrorSoldOut": {
     "description": "Booking: sold out."
@@ -553,6 +561,10 @@
   "createMediaCoverSelected": "Cover photo selected",
   "@createMediaCoverSelected": {
     "description": "Create media: the cover is a photo picked on this device."
+  },
+  "createMediaUploadedToServer": "Photo uploaded to the server",
+  "@createMediaUploadedToServer": {
+    "description": "MEDIA-PICK-02: the photo is a ready server asset; the local copy was removed."
   },
   "localErrorMediaUnsupported": "This image can't be used. Choose a photo.",
   "@localErrorMediaUnsupported": {
@@ -774,9 +786,14 @@
   "@publicationTestPath": {
     "description": "Header of a default-off publication test page."
   },
-  "publicationTestPathDevCloud": "Test publication path (dev cloud)",
-  "@publicationTestPathDevCloud": {
-    "description": "Header of the publication test page when it talks to the dev cloud (N3a.2), not the local Emulator."
+  "publicationTestPathCloud": "{kind, select, dev{Test publication path (dev cloud)} staging{Test publication path (staging cloud)} other{Test publication path (cloud)}}",
+  "@publicationTestPathCloud": {
+    "description": "Header of the publication test page when it talks to a reviewed cloud project (N3a.2 dev, N4b staging), not the local Emulator.",
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
   },
   "publicationNoDraft": "{type, select, event{No Event draft in Create} place{No Place draft in Create} rental{No Rental draft in Create} session{No Session draft in Create} activity{No Activity draft in Create} collection{No Collection draft in Create} findPeople{No Find People draft in Create} route{No Route draft in Create} scenario{No Scenario draft in Create} classWorkshop{No Class / Workshop draft in Create} other{No draft in Create}}",
   "@publicationNoDraft": {
@@ -939,6 +956,10 @@
   "publicationUploadMedia": "Upload media",
   "@publicationUploadMedia": {
     "description": "Publication button."
+  },
+  "publicationCheckingPhoto": "Checking the photo… The first check can take up to 20 seconds.",
+  "@publicationCheckingPhoto": {
+    "description": "Publication: shown while uploaded photos are scanned on the server."
   },
   "publicationUploadCover": "Upload cover",
   "@publicationUploadCover": {
@@ -1404,6 +1425,10 @@
   "@notificationsLoadFailed": {
     "description": "Notifications: load error."
   },
+  "notificationsAccessDenied": "This account has no access to notifications",
+  "@notificationsAccessDenied": {
+    "description": "Notifications: the server refused this account access to the inbox."
+  },
   "notificationsEmpty": "No notifications yet",
   "@notificationsEmpty": {
     "description": "Notifications: empty inbox."
@@ -1452,7 +1477,7 @@
   "@notificationsShowAll": {
     "description": "Notifications: reset the filter."
   },
-  "notificationDestination": "{kind, select, legacy{Legacy notification} routeMap{Route map} map{Map} details{Details} saved{Saved plan} search{Search} publishStatus{Publish status} create{Create} creatorProfile{Creator profile} discover{Discover} other{Update}}",
+  "notificationDestination": "{kind, select, legacy{Legacy notification} routeMap{Route map} map{Map} details{Details} saved{Saved plan} search{Search} publishStatus{Publish status} create{Create} creatorProfile{Profile} discover{Discover} other{Update}}",
   "@notificationDestination": {
     "description": "Where a notification leads; kind is a stable id.",
     "placeholders": {
@@ -9108,7 +9133,7 @@
       }
     }
   },
-  "discoverRentalQuantitiesDisclaimer": "Listed quantities are Creator-declared, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.",
+  "discoverRentalQuantitiesDisclaimer": "Listed quantities are declared by the publisher, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.",
   "@discoverRentalQuantitiesDisclaimer": {
     "description": "Discover: Rental quantities are declared, not live."
   },
@@ -9902,7 +9927,7 @@
       }
     }
   },
-  "discoverForYouHint": "Personal picks, saved ideas and creator tools stay one tap away.",
+  "discoverForYouHint": "Personal picks, saved ideas and create tools stay one tap away.",
   "@discoverForYouHint": {
     "description": "Discover: home: what the For you block holds."
   },
@@ -10254,7 +10279,7 @@
   "@identityLimitRequestPending": {
     "description": "L4.6: Profile, workspace switcher — title."
   },
-  "identityCreator": "Creator",
+  "identityCreator": "User",
   "@identityCreator": {
     "description": "L4.6: Profile, workspace switcher — title."
   },
@@ -10482,7 +10507,7 @@
   "@profileFinishDraft": {
     "description": "L4.6: Profile page — title."
   },
-  "profileCreatorNextSteps": "Creator next steps",
+  "profileCreatorNextSteps": "Next steps",
   "@profileCreatorNextSteps": {
     "description": "L4.6: Profile page — text."
   },
@@ -10502,7 +10527,7 @@
   "@profileOpenCreate": {
     "description": "L4.6: Profile page — text."
   },
-  "profileCreatorListing": "Creator listing",
+  "profileCreatorListing": "My listing",
   "@profileCreatorListing": {
     "description": "L4.6: Profile page — text."
   },
@@ -10518,7 +10543,7 @@
   "@profileManageDrafts": {
     "description": "L4.6: Profile page — text."
   },
-  "profileCreatorPublications": "Creator publications",
+  "profileCreatorPublications": "My publications",
   "@profileCreatorPublications": {
     "description": "L4.6: Profile page — text."
   },
@@ -10690,7 +10715,7 @@
   "@profileCreateRoute": {
     "description": "L4.6: Profile page — title."
   },
-  "profileOpenTaxonomyFlow": "Open taxonomy-based creator flow",
+  "profileOpenTaxonomyFlow": "Open creation by category",
   "@profileOpenTaxonomyFlow": {
     "description": "L4.6: Profile page — secondary line."
   },
@@ -10746,7 +10771,7 @@
   "@profileCheckVerification": {
     "description": "L4.6: Profile page — secondary line."
   },
-  "profileCreatorTools": "Creator tools",
+  "profileCreatorTools": "Create tools",
   "@profileCreatorTools": {
     "description": "L4.6: Profile page — title."
   },
@@ -11432,7 +11457,7 @@
       }
     }
   },
-  "profileRoleTitle": "{value, select, pro_generator{Pro generator}creator{Creator}user{User} other{Creator}}",
+  "profileRoleTitle": "{value, select, admin{Administrator}pro_generator{Pro generator}creator{User}user{User} other{User}}",
   "@profileRoleTitle": {
     "description": "L4.6: profile role title for a stable role id (Creator stays untranslated until the glossary).",
     "placeholders": {

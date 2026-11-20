@@ -1,6 +1,6 @@
 import type { Account } from './account.js';
 import type { AuthIdentity } from './auth_identity.js';
-import type { CreatorVerification } from './creator_verification.js';
+import type { IdentityVerification } from './identity_verification.js';
 import type { ManagedPage } from './managed_page.js';
 import type { PageMembership } from './page_membership.js';
 import type { SellerDeclaration } from './seller_declaration.js';
@@ -18,8 +18,8 @@ export interface IdentityAuthorityTransaction {
   putSession(session: IdentitySession): void;
   accessSnapshot(sessionId: string): Promise<AccessSnapshot | null>;
   putAccessSnapshot(snapshot: AccessSnapshot): void;
-  verificationForUser(userId: string): Promise<CreatorVerification | null>;
-  putVerification(verification: CreatorVerification): void;
+  verificationForUser(userId: string): Promise<IdentityVerification | null>;
+  putVerification(verification: IdentityVerification): void;
   page(pageId: string): Promise<ManagedPage | null>;
   pagesForOwner(userId: string): Promise<readonly ManagedPage[]>;
   putPage(page: ManagedPage): void;

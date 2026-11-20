@@ -1,8 +1,12 @@
+import '../../../../core/layout/page_list_padding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import '../../../../app/router/route_names.dart';
+import '../../../../app/testing/seeded_event_fixture.dart'
+    show seededBookingEventId;
 import '../../../../app/config/legal_links.dart';
 import '../../../../core/localization/app_locale_policy.dart';
 import '../../../../core/localization/l10n_context.dart';
@@ -86,7 +90,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           },
         ),
         ExploreStatus.ready || ExploreStatus.saving => ListView(
-          padding: const EdgeInsets.all(16),
+          padding: pageListPadding(context, const EdgeInsets.all(16)),
           children: <Widget>[
             _SettingsSectionTitle(l10n.settingsSectionAccount),
             const SizedBox(height: 8),
@@ -135,6 +139,30 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push(RouteNames.notifications),
             ),
+            // Debug test entry (define RECHARGE_TEST_BOOKING_ENTRY): opens the
+            // Booking test Event in the running app, so the signed-in Session is
+            // used. The route guard still decides; release builds never show it.
+            if (_bookingTestEntryDefined && !kReleaseMode)
+              ListTile(
+                key: const Key('settings-booking-test-entry'),
+                leading: const Icon(Icons.event_available_outlined),
+                title: Text(l10n.settingsBookingTestEntry),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(
+                  '${RouteNames.testEventBooking}/$seededBookingEventId',
+                ),
+              ),
+            // Debug test entry (define RECHARGE_TEST_EVENT_PUBLICATION): the
+            // only way to the Event publication test page in the running app.
+            // The route guard still decides; release builds never show it.
+            if (_eventPublicationTestEntryDefined && !kReleaseMode)
+              ListTile(
+                key: const Key('settings-event-publication-test-entry'),
+                leading: const Icon(Icons.publish_outlined),
+                title: Text(l10n.publicationPageTitle('event')),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(RouteNames.testEventPublication),
+              ),
             const Divider(height: 28),
             _SettingsSectionTitle(l10n.settingsSectionPreferences),
             // L4: the device-scoped UI language. It changes text only, never
@@ -438,3 +466,11 @@ class _LabeledField extends StatelessWidget {
     );
   }
 }
+
+const bool _bookingTestEntryDefined = bool.fromEnvironment(
+  'RECHARGE_TEST_BOOKING_ENTRY',
+);
+
+const bool _eventPublicationTestEntryDefined = bool.fromEnvironment(
+  'RECHARGE_TEST_EVENT_PUBLICATION',
+);

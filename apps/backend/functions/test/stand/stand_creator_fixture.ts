@@ -47,13 +47,13 @@ export async function ensureSecondCreator(
   let created = false;
   if (before.verification?.status !== 'verified') {
     if (before.verification === null)
-      await authority.creatorVerification.submit({
+      await authority.identityVerification.submit({
         userId,
         verificationId: standSecondCreator.verificationId,
         evidenceRefIds: standSecondCreator.evidenceRefIds,
         nowUtc,
       });
-    await authority.creatorVerification.decide({
+    await authority.identityVerification.decide({
       reviewerId: staffId,
       userId,
       status: 'verified',

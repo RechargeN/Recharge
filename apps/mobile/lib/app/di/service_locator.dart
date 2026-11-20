@@ -1,6 +1,7 @@
 import '../../features/auth/domain/repositories/auth_session_events.dart';
 import 'dart:io';
 import 'dev_auth_bundle.dart';
+import 'dev_booking_cloud.dart';
 import 'dev_content_media_port.dart';
 import '../../features/identity/data/repositories/dev_identity_workspace_repository.dart';
 import '../../features/auth/domain/usecases/sign_in_with_google_usecase.dart';
@@ -264,11 +265,14 @@ import '../../features/visited/domain/repositories/visited_places_repository.dar
 import '../../features/visited/domain/usecases/get_visited_places_usecase.dart';
 import '../../features/visited/domain/usecases/record_place_visit_usecase.dart';
 import '../../features/visited/domain/usecases/remove_visit_usecase.dart';
+import '../../core/config/cloud_environment.dart';
 
 final GetIt sl = GetIt.instance;
 
 Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
-  final dev = appFlavor == 'dev';
+  // N4b: a reviewed cloud flavor (dev or stage) needs the server auth bundle.
+  final CloudEnvironment? cloud = CloudEnvironment.forFlavor(appFlavor);
+  final dev = cloud != null;
   if (dev != (devAuth != null)) {
     throw StateError('dev_auth_composition_required');
   }
@@ -282,7 +286,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     final root = await getApplicationSupportDirectory();
     if (!dev) return root;
     return Directory(
-      '${root.path}${Platform.pathSeparator}dev-recharge-dev-n2a01',
+      '${root.path}${Platform.pathSeparator}dev-${cloud.projectId}',
     ).create(recursive: true);
   }
 
@@ -372,7 +376,10 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
           : sl<BookingBackendBindingController>().endpoint,
     )
     ..registerLazySingleton<BookingTestEntryGuard>(
-      () => BookingTestEntryGuard.fromEnvironment(sl()),
+      () => BookingTestEntryGuard.fromEnvironment(
+        sl(),
+        cloudBooking: devAuth?.booking != null,
+      ),
     )
     ..registerLazySingleton<EventPublicationTestEntryGuard>(
       () => EventPublicationTestEntryGuard.fromEnvironment(sl()),
@@ -484,7 +491,14 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
       ),
     )
     ..registerLazySingletonAsync<BookingTransportRuntime>(
-      () => sl<BookingTransportRuntimeFactory>().create(),
+      // Debt plan round 1: a dev/stage debug build with N4C_DEV_BOOKING talks
+      // to the cloud Booking runtime of its project; everything else as before.
+      () => devAuth?.booking != null
+          ? createDevCloudBookingRuntime(
+              port: devAuth!.booking!,
+              supportDirectory: supportDirectory,
+            )
+          : sl<BookingTransportRuntimeFactory>().create(),
     )
     ..registerLazySingleton<RouteRecordingSecureStore>(
       () => EncryptedFileRouteRecordingStore(
@@ -514,9 +528,11 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     ..registerLazySingleton<AuthLocalDataSource>(
       () => AuthLocalDataSource(
         sl(),
-        environment: dev
-            ? AuthCacheEnvironment.dev
-            : AuthCacheEnvironment.local,
+        environment: switch (cloud) {
+          CloudEnvironment.dev => AuthCacheEnvironment.dev,
+          CloudEnvironment.staging => AuthCacheEnvironment.staging,
+          null => AuthCacheEnvironment.local,
+        },
       ),
     )
     ..registerLazySingleton<AuthRepository>(

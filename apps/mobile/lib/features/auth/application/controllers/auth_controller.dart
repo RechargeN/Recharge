@@ -33,6 +33,18 @@ class AuthController extends ChangeNotifier {
   /// kept, no authority is granted, and the controller retries by itself.
   static const String offlineMessage = 'NETWORK_UNAVAILABLE';
 
+  /// The server refused for now (rate limit): credentials are kept and the
+  /// controller retries by itself, but only after the longest backoff step.
+  static const String rateLimitedMessage = 'AUTH_TOO_MANY_ATTEMPTS';
+
+  /// Another auth operation holds the repository; not a decision about the
+  /// Session, so restore simply tries again.
+  static const String busyCode = 'auth_operation_in_progress';
+
+  /// Outcomes that keep the stored Session and the SDK user.
+  static bool _keepsCredentials(String code) =>
+      code == offlineMessage || code == rateLimitedMessage;
+
   /// The user closed the provider picker; shown as no error at all.
   static const String cancelledCode = 'auth_cancelled';
 
@@ -76,6 +88,10 @@ class AuthController extends ChangeNotifier {
   Timer? _serverExpiry;
   Timer? _silentRefresh;
   Timer? _offlineRetry;
+
+  /// The server's rate-limit wait; unlike [_offlineRetry] it survives the
+  /// background, since resuming inside it must send nothing.
+  Timer? _rateLimitRetry;
   int _offlineAttempt = 0;
   StreamSubscription<void>? _sessionSubscription;
   int _generation = 0;
@@ -249,6 +265,10 @@ class AuthController extends ChangeNotifier {
   /// a sign-in is still completing (its own result is fresh server authority).
   Future<void> restoreAfterBackground() {
     if (_federatedSignInInProgress) return Future<void>.value();
+    // Inside the server's rate-limit wait nothing is sent: denied attempts
+    // count in its window (N4b A34 staging 2026-11-15). The wait's own timer
+    // tries again when it ends.
+    if (_rateLimitRetry?.isActive ?? false) return Future<void>.value();
     // A34 2026-11-08: after a long offline sleep the backoff sat at 60 s, and
     // the resume attempt usually runs before Wi-Fi is back, so the sign-in
     // screen stayed for a minute. Coming back starts the short delays again.
@@ -272,14 +292,14 @@ class AuthController extends ChangeNotifier {
     // Credentials kept while offline: the button resumes them instead of a
     // fresh Google sign-in (which would refuse with an SDK user present and
     // wipe everything). Only a server refusal falls through to a new sign-in.
-    if (_state.errorCode == offlineMessage) {
+    if (_keepsCredentials(_state.errorCode ?? '')) {
       try {
         await restoreSession();
       } catch (_) {
         /* Reflected in state. */
       }
       if (_state.isAuthenticated) return true;
-      if (_state.errorCode == offlineMessage) return false;
+      if (_keepsCredentials(_state.errorCode ?? '')) return false;
     }
     final generation = ++_generation;
     _federatedSignInInProgress = true;
@@ -358,6 +378,8 @@ class AuthController extends ChangeNotifier {
       final result = await _restoreSessionUseCase();
       if (supportsGoogleSignIn && generation != _generation) return;
       _cancelOfflineRetry(resetBackoff: true);
+      _rateLimitRetry?.cancel();
+      _rateLimitRetry = null;
       if (result == null) {
         _setState(const AuthState.guest());
         return;
@@ -375,16 +397,41 @@ class AuthController extends ChangeNotifier {
         debugPrint('recharge-auth: restore failed code=${e.code}');
       }
       if (supportsGoogleSignIn && generation != _generation) return;
-      if (supportsGoogleSignIn && e.code == offlineMessage) {
+      if (supportsGoogleSignIn && e.code == busyCode) {
+        // N4b A34 2026-11-15: another auth operation was running; the Session
+        // was not judged, so nothing is shown and restore tries again.
+        _scheduleOfflineRetry();
+        return;
+      }
+      if (supportsGoogleSignIn && _keepsCredentials(e.code)) {
         // Keep the current UI authority while its snapshot is still valid;
-        // otherwise show "no connection" (not "session expired") and retry.
+        // otherwise say what happened (not "session expired") and retry.
         if (!wasAuthenticated) {
           _setState(
             const AuthState.guest().copyWith(
-              errorCode: offlineMessage,
-              message: offlineMessage,
+              errorCode: e.code,
+              message: e.code,
             ),
           );
+        }
+        if (e.code == rateLimitedMessage) {
+          // Denied attempts count in the server's window too: never retry
+          // before the server's own retryAfter, nor faster than the longest
+          // backoff step. The wait survives the background (N4b A34 staging
+          // 2026-11-15).
+          _cancelOfflineRetry(resetBackoff: true);
+          final longest = offlineRetryDelays.last;
+          final retryAfter = e.retryAfter;
+          final wait = retryAfter != null && retryAfter > longest
+              ? retryAfter
+              : longest;
+          _rateLimitRetry?.cancel();
+          _rateLimitRetry = Timer(wait, () {
+            _rateLimitRetry = null;
+            if (_federatedSignInInProgress) return;
+            unawaited(restoreSession().catchError((Object _) {}));
+          });
+          return;
         }
         _scheduleOfflineRetry();
         return;
@@ -460,7 +507,10 @@ class AuthController extends ChangeNotifier {
         return;
       }
       _serverExpiry = Timer(remaining, () {
-        _generation++;
+        // Not a user action: a refresh that is still running (A34 2026-11-19:
+        // after sleep both timers fire together) must still be able to sign
+        // the user back in, so the generation is left as it is. Sign-out and
+        // suspension still invalidate it.
         clearPendingTarget();
         _silentRefresh?.cancel();
         _setState(
@@ -509,6 +559,8 @@ class AuthController extends ChangeNotifier {
   void _cancelBackgroundRevalidation() {
     _silentRefresh?.cancel();
     _silentRefresh = null;
+    _rateLimitRetry?.cancel();
+    _rateLimitRetry = null;
     _cancelOfflineRetry(resetBackoff: true);
   }
 

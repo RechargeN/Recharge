@@ -76,3 +76,20 @@ already placed in an **isolated named database**:
    runner bound to the copy. Cutover is still a separate, absent step.
 
 A check on a synthetic snapshot is not a restore of a production backup.
+
+## Privacy L1 in dev/staging (2026-11-20, PRIV-CLOUD-01)
+
+- **Open/close:** the privacy runtime opens only with the deploy switch `N5D_PRIVACY_ENABLED=true`
+  (`N5D_PRIVACY=on python -I n4c_cloud.py code-dev|code-staging`); `off` closes intake and worker.
+- **Operator path** (`privacyOperatorV1`, private; synthetic subjects 1..20 only): `n5d_privacy.py seed|
+  submit|run|status|hold|release|docs <env> <n>`. A legal hold is placed and released only here, by the
+  operator actor `n5d-operator`; the subject never sees a basis.
+- **Worker:** `runPrivacyRequestsV1` every 5 minutes runs open domain tasks and reconciles; one pass may be
+  forced with `n5d_privacy.py run`. A request ends `partially_completed` while PB-blocked domains retain
+  records; that is honest, not a failure.
+- **Restore without resurrection:** clone into a named database (never `(default)`), then
+  `admitRestoredCopy` with `FirestoreDeletionAuthority(live)` and
+  `PrivacyRunnerRedeletion(restored, …, { cloudRuntime: true })` (`n5d_n4d.py`). Only `admitted`
+  (or an honest `incomplete`) copies may be used; `closed` stays closed. A clone inherits delete
+  protection: disable it, then delete the clone. Production still needs a deletion ledger outside the
+  restored database (OB-04/PB-15).

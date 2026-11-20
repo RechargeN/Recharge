@@ -186,13 +186,13 @@ async function bootstrap() {
       accountCreationEnabled: true,
     });
   }
-  await authority.creatorVerification.submit({
+  await authority.identityVerification.submit({
     userId: u1,
     verificationId: verification1,
     evidenceRefIds: [evidence],
     nowUtc: '2026-09-29T09:59:10.000Z',
   });
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: u1,
     status: 'verified',
@@ -348,13 +348,13 @@ void test('ADR 0023: an unverified User creates a free personal draft (no Creato
 
 void test("another verified Creator cannot read, edit, submit or publish someone else's content", async () => {
   const { authority, service, repository } = await bootstrap();
-  await authority.creatorVerification.submit({
+  await authority.identityVerification.submit({
     userId: u2,
     verificationId: verification2,
     evidenceRefIds: [evidence],
     nowUtc: '2026-09-29T09:59:11.000Z',
   });
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: u2,
     status: 'verified',
@@ -443,7 +443,7 @@ void test('revoked Creator verification blocks publish of an already approved su
   const submission = await ok<{ submissionId: string }>(
     service.execute(actor1, submit(draft.draftId, 1)),
   );
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: u1,
     status: 'revoked',
@@ -536,13 +536,13 @@ async function publishedPersonally(context: Awaited<ReturnType<typeof bootstrap>
 void test("another verified Creator cannot withdraw or roll back someone else's publication", async () => {
   const context = await bootstrap();
   const { authority, service, repository } = context;
-  await authority.creatorVerification.submit({
+  await authority.identityVerification.submit({
     userId: u2,
     verificationId: verification2,
     evidenceRefIds: [evidence],
     nowUtc: '2026-09-29T09:59:11.000Z',
   });
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: u2,
     status: 'verified',
@@ -594,7 +594,7 @@ void test('lost Creator authority blocks owner takedown and rollback; moderation
   const context = await bootstrap();
   const { authority, service, repository } = context;
   const { draft, revision } = await publishedPersonally(context);
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: u1,
     status: 'revoked',
@@ -672,13 +672,13 @@ async function verifiedStranger(
   context: Awaited<ReturnType<typeof bootstrap>>,
 ): Promise<ContentActor> {
   const { authority } = context;
-  await authority.creatorVerification.submit({
+  await authority.identityVerification.submit({
     userId: u2,
     verificationId: verification2,
     evidenceRefIds: [evidence],
     nowUtc: '2026-09-29T09:59:11.000Z',
   });
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: u2,
     status: 'verified',
@@ -779,7 +779,7 @@ void test('revoked Creator verification of the Page owner blocks a delegated sub
   );
   assert.equal(created.kind, 'succeeded');
   const draftId = (created as { data: { draftId: string } }).data.draftId;
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: u1,
     status: 'revoked',
@@ -883,6 +883,10 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/content_translation/firestore_content_translation_service.ts',
     'content_effects_entry.ts',
     'content_entry.ts',
+    // Round 2.2 (owner 2026-11-18): the dev/stage cloud entry of the Content
+    // effects handoff; it only composes content_effects_entry behind the
+    // reviewed dev-cloud persistence switch, never Content storage itself.
+    'dev_content_effects_entry.ts',
     // N3a.2: dev-cloud Content + Media composition (Place only, no publication).
     'dev_content_media_composition.ts',
     // D2: the composition root of Content's reaction to late Media restriction.
@@ -973,8 +977,10 @@ void test('delegated import never reaches Content storage except through the Con
       'assertContentEmulatorContext',
       'contentCollections',
     ],
+    // Step 2 (owner decision 2026-11-20): the hold authority also runs in the
+    // reviewed dev/stage cloud behind the persistence switch.
     'modules/privacy_orchestration/infrastructure/firestore_privacy_legal_hold_service.ts': [
-      'assertContentEmulatorContext',
+      'assertMediaChainPersistenceContext',
     ],
     'modules/operations/operations_console.ts': ['assertContentEmulatorContext'],
     'modules/product_analytics/firestore_product_analytics_service.ts': [
@@ -995,6 +1001,7 @@ void test('delegated import never reaches Content storage except through the Con
       'applyContentSafety',
     ],
     'content_effects_entry.ts': ['createEmulatorEventBookingHandoff'],
+    'dev_content_effects_entry.ts': ['devCloudPersistenceSwitch'],
     'content_entry.ts': [
       'ContentPublicationService',
       'ContentActor',

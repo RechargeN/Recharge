@@ -79,10 +79,7 @@ void main() {
     );
     await tester.pumpWidget(app);
     await tester.pumpAndSettle();
-    expect(
-      find.text(l10nFor(locale).profileRoleTitle('creator')),
-      findsWidgets,
-    );
+    expect(find.text(l10nFor(locale).navProfile), findsWidgets);
     await l10nScrollThrough(tester);
   });
 
@@ -106,8 +103,9 @@ void main() {
         );
         await tester.pumpWidget(app);
         await tester.pumpAndSettle();
-        expect(find.text('Creator'), findsOneWidget);
-        expect(find.text('CREATOR'), findsOneWidget);
+        expect(find.text('Profile'), findsOneWidget);
+        // ADR 0023: no role badge for an ordinary account.
+        expect(find.text('CREATOR'), findsNothing);
         expect(find.text('Created'), findsOneWidget);
         expect(find.text('Visited'), findsOneWidget);
         expect(find.text('Saved list'), findsOneWidget);
@@ -180,7 +178,7 @@ void main() {
     final app = await _unifiedUserApp(textScaler: const TextScaler.linear(1.5));
     await tester.pumpWidget(app);
     await tester.pumpAndSettle();
-    expect(find.text('Creator'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await tester.scrollUntilVisible(
       find.text('Create Scenario'),
@@ -263,8 +261,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Creator'), findsOneWidget);
-    expect(find.text('CREATOR'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+    // ADR 0023: no role badge for an ordinary account.
+    expect(find.text('CREATOR'), findsNothing);
     expect(find.text('Created'), findsOneWidget);
     expect(find.text('Visited'), findsOneWidget);
     expect(find.text('Photos'), findsOneWidget);
@@ -369,7 +368,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Creator'), findsOneWidget);
+      expect(find.text('Profile'), findsOneWidget);
       expect(find.text('VIEWER'), findsNothing);
       expect(find.text('Visited'), findsOneWidget);
       expect(find.text('Photos'), findsOneWidget);
@@ -446,7 +445,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Creator'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
     expect(find.text('PRO GENERATOR'), findsNothing);
     expect(find.text('Visited'), findsOneWidget);
     expect(find.text('Created'), findsOneWidget);
@@ -1323,7 +1322,7 @@ void main() {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
-    expect(find.text('Creator listing'), findsOneWidget);
+    expect(find.text('My listing'), findsOneWidget);
     expect(find.text('Museum evening route'), findsOneWidget);
     expect(find.text('Pending review'), findsOneWidget);
     expect(find.text('Workshops & masterclasses'), findsOneWidget);
@@ -1496,7 +1495,7 @@ void main() {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
-    expect(find.text('Creator listing'), findsOneWidget);
+    expect(find.text('My listing'), findsOneWidget);
     expect(find.text('Published route'), findsOneWidget);
     expect(find.text('Calm coffee walking route'), findsWidgets);
     expect(find.text('Walking tour'), findsOneWidget);
@@ -1688,9 +1687,9 @@ void main() {
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();
 
-      expect(find.text('Creator publications'), findsOneWidget);
+      expect(find.text('My publications'), findsOneWidget);
       expect(find.text('2 active'), findsOneWidget);
-      expect(find.text('Creator listing'), findsNWidgets(2));
+      expect(find.text('My listing'), findsNWidgets(2));
       // L4.6: the stage and the status are both localized labels now.
       expect(find.text('Draft'), findsNWidgets(2));
       expect(find.text('Published'), findsOneWidget);
@@ -1698,7 +1697,7 @@ void main() {
       expect(find.text('Published calm route'), findsWidgets);
       expect(find.text('Ready to publish'), findsOneWidget);
       expect(find.text('Published-ready'), findsOneWidget);
-      expect(find.text('Creator next steps'), findsOneWidget);
+      expect(find.text('Next steps'), findsOneWidget);
       expect(find.text('2 actions'), findsOneWidget);
       expect(find.text('Find draft audience'), findsOneWidget);
       expect(find.text('Open route map'), findsOneWidget);
@@ -1832,13 +1831,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Creator publications'), findsOneWidget);
+    expect(find.text('My publications'), findsOneWidget);
     expect(find.text('Incomplete breathwork draft'), findsOneWidget);
     // Recharge Activity no longer requires startDateTimeUtc (ACT-CRT-01
     // spec AC #2: self-directed, evergreen, no start time) — only the
     // cover image is missing from this draft now.
     expect(find.text('1 missing'), findsOneWidget);
-    expect(find.text('Creator next steps'), findsOneWidget);
+    expect(find.text('Next steps'), findsOneWidget);
     expect(find.text('Finish draft'), findsOneWidget);
     expect(find.text('Missing: cover image'), findsWidgets);
 

@@ -1,0 +1,7 @@
+# Future approved migration only. Copy as backend.tf after successful bootstrap.
+terraform {
+  backend "gcs" {}
+}
+# init -migrate-state -backend-config=bucket=<exact-staging-project>-tfstate
+#      -backend-config=prefix=terraform/bootstrap/stage
+# No state push, destroy, force-copy, state removal or re-creation.

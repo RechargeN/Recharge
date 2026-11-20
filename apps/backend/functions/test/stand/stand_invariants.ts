@@ -124,7 +124,7 @@ export function standInvariantProblems(raw: RawStandState): string[] {
     if (asset?.lifecycle !== 'ready') problems.push('the Content Event cover is not ready');
   }
 
-  const verifications = docs(identityAuthorityCollections.creatorVerifications);
+  const verifications = docs(identityAuthorityCollections.identityVerifications);
   if (verifications.length !== 1 || verifications[0]?.[1].status !== 'verified') {
     problems.push('exactly one verified Creator verification is required');
   }

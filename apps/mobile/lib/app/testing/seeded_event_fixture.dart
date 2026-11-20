@@ -50,3 +50,65 @@ PublishedEventDiscoveryEntity seededBookingEventProjection() {
     publishedAtUtc: DateTime.utc(2026, 10),
   );
 }
+
+/// Debug-only: a published cloud Event opened from the Event publication test
+/// page (no Discover in the cloud). Only ids and times travel in the route;
+/// the server decides availability and every command. Null for bad input.
+PublishedEventDiscoveryEntity? publishedTestBookingEventProjection({
+  required String eventId,
+  required Map<String, String> query,
+}) {
+  final RegExp id = RegExp(r'^[A-Za-z0-9_-]{1,128}$');
+  final String? occurrenceId = query['occurrence'];
+  final DateTime? start = DateTime.tryParse(query['start'] ?? '');
+  final DateTime? end = DateTime.tryParse(query['end'] ?? '');
+  if (!id.hasMatch(eventId) ||
+      occurrenceId == null ||
+      !id.hasMatch(occurrenceId) ||
+      start == null ||
+      end == null ||
+      !end.isAfter(start)) {
+    return null;
+  }
+  final String? channel = query['channel'];
+  if (channel != null && channel != 'onsite' && channel != 'online') {
+    return null;
+  }
+  final String title = (query['title'] ?? '').trim();
+  return PublishedEventDiscoveryEntity(
+    eventId: eventId,
+    publisherId: '',
+    publisherType: 'user',
+    publisherName: '',
+    title: title.isEmpty ? eventId : title,
+    subtitle: '',
+    fullDescription: '',
+    category: '',
+    city: '',
+    latitude: 0,
+    longitude: 0,
+    distanceKm: 0,
+    priceAmount: 0,
+    isFree: true,
+    currencyCode: 'EUR',
+    durationConfidence: DurationConfidence.unknown,
+    scheduleMode: EventScheduleMode.oneTime,
+    occurrences: <EventOccurrence>[
+      EventOccurrence(
+        id: occurrenceId,
+        startAtUtc: start.toUtc(),
+        endAtUtc: end.toUtc(),
+        status: EventOccurrenceStatus.scheduled,
+        // E2b: Details shows the Booking panel; its terms come from Booking.
+        bookingRef: EventBookingRef(
+          eventId: eventId,
+          occurrenceId: occurrenceId,
+          channel: channel,
+        ),
+      ),
+    ],
+    displayOccurrenceId: occurrenceId,
+    timezoneId: 'Europe/Riga',
+    publishedAtUtc: start.toUtc(),
+  );
+}

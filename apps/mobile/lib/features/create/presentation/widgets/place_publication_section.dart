@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/config/cloud_environment.dart';
 import '../../../../core/localization/l10n_context.dart';
 import 'publication_texts.dart';
 import '../../application/place_publication_controller.dart';
@@ -12,13 +13,14 @@ class PlacePublicationSection extends StatelessWidget {
   const PlacePublicationSection({
     super.key,
     required this.controller,
-    this.devCloud = false,
+    this.cloud,
   });
 
   final PlacePublicationController controller;
 
-  /// N3a.2: the page talks to the dev cloud, not the local Emulator.
-  final bool devCloud;
+  /// N3a.2/N4b: the cloud project the page talks to; null is the local
+  /// Emulator.
+  final CloudEnvironment? cloud;
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +33,9 @@ class PlacePublicationSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              devCloud
-                  ? context.l10n.publicationTestPathDevCloud
-                  : context.l10n.publicationTestPath,
+              cloud == null
+                  ? context.l10n.publicationTestPath
+                  : context.l10n.publicationTestPathCloud(cloud!.name),
               key: const Key('place-publication-path'),
               style: Theme.of(context).textTheme.titleMedium,
             ),
@@ -74,6 +76,24 @@ class PlacePublicationSection extends StatelessWidget {
                   '${state.conflict!.serverRevision}',
                 ),
                 key: const Key('place-publication-conflict'),
+              ),
+            if (state.phase == PlacePublicationPhase.working &&
+                controller.checkingMedia)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Row(
+                  key: const Key('place-publication-checking-media'),
+                  children: <Widget>[
+                    const SizedBox.square(
+                      dimension: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(context.l10n.publicationCheckingPhoto),
+                    ),
+                  ],
+                ),
               ),
             const SizedBox(height: 8),
             Wrap(

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 
+import 'create_media_asset_ref.dart';
 import '../domain/entities/create_draft_entity.dart';
 import '../domain/entities/event_publication.dart';
 import '../domain/entities/publisher_ref.dart';
@@ -233,19 +234,29 @@ final class RouteContentPublicationController extends ChangeNotifier {
     final CreateDraftEntity draft = _draft!;
     if (!rightsConfirmed) throw const _LocalRefusal('media_rights_required');
     RouteContentPublicationRecord record = _state.record!;
-    final Uint8List? bytes = await _mediaSource.read(draft.media.coverImage);
-    if (bytes == null) throw const _LocalRefusal('media_missing');
-    final String digest = sha256.convert(bytes).toString();
+    // MEDIA-PICK-02: a promoted cover already is a ready server asset.
+    final String? promoted = promotedMediaAssetId(draft.media.coverImage);
+    final Uint8List? bytes = promoted != null
+        ? null
+        : await _mediaSource.read(draft.media.coverImage);
+    if (promoted == null && bytes == null) {
+      throw const _LocalRefusal('media_missing');
+    }
+    final String digest = promoted != null
+        ? promotedMediaDigest(draft.media.coverImage)
+        : sha256.convert(bytes!).toString();
     final String assetId =
-        record.coverSha256 == digest && record.coverAssetId != null
-        ? record.coverAssetId!
-        : await _uploader.upload(
-            intentId: 'rte-cover:${record.routeId}:${digest.substring(0, 16)}',
-            bytes: bytes,
-            declaredMediaType: _mediaType(bytes),
-            publisherRef: record.publisherRef,
-            contentId: record.routeId,
-          );
+        promoted ??
+        (record.coverSha256 == digest && record.coverAssetId != null
+            ? record.coverAssetId!
+            : await _uploader.upload(
+                intentId:
+                    'rte-cover:${record.routeId}:${digest.substring(0, 16)}',
+                bytes: bytes!,
+                declaredMediaType: _mediaType(bytes),
+                publisherRef: record.publisherRef,
+                contentId: record.routeId,
+              ));
     record = record.copyWith(coverAssetId: assetId, coverSha256: digest);
     final Map<String, Object?> body = _body(draft, record);
     final EventServerDraftRef ref = await _content.updateDraft(

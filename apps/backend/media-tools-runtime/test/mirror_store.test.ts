@@ -7,6 +7,7 @@ import test from 'node:test';
 
 import {
   MirrorStore,
+  mirrorBucketFor,
   newestSet,
   parseCvdHeader,
   parseMirrorSet,
@@ -16,16 +17,25 @@ import {
 import { publish, readDatabaseDir } from '../src/publish_databases.js';
 import { fetchNewestSet } from '../src/scanner_prepare.js';
 
-/** In-memory GCS JSON API: list, media download, create-only media upload, metadata. */
-function fakeGcs() {
+/**
+ * In-memory GCS JSON API: list, media download, create-only media upload, and
+ * the metadata server (token and the running project's id).
+ */
+function fakeGcs(projectId = 'recharge-dev-n2a01') {
   const objects = new Map<string, Buffer>();
   const calls: string[] = [];
+  const buckets = new Set<string>();
   const fetchImpl: Fetch = (url, init) => {
     const target = new URL(url);
     const method = init?.method ?? 'GET';
     calls.push(`${method} ${target.pathname}`);
-    if (target.hostname === 'metadata.google.internal')
+    if (target.hostname === 'metadata.google.internal') {
+      if (target.pathname === '/computeMetadata/v1/project/project-id')
+        return Promise.resolve(new Response(projectId));
       return Promise.resolve(Response.json({ access_token: 'tok', expires_in: 3600 }));
+    }
+    const bucket = /\/b\/([^/]+)\/o/u.exec(target.pathname)?.[1];
+    if (bucket !== undefined) buckets.add(bucket);
     if (new Headers(init?.headers).get('authorization') !== 'Bearer tok')
       return Promise.resolve(new Response('', { status: 401 }));
     const upload = /^\/upload\/storage\/v1\/b\/[^/]+\/o$/u.test(target.pathname);
@@ -64,7 +74,7 @@ function fakeGcs() {
     }
     return Promise.resolve(new Response('', { status: 404 }));
   };
-  return { objects, calls, store: new MirrorStore(fetchImpl) };
+  return { objects, calls, buckets, store: new MirrorStore(fetchImpl) };
 }
 
 function cvd(version: number, stime: number, body: string): Buffer {
@@ -212,4 +222,49 @@ void test('scanner fetch: newest set only, every byte checked against the set', 
     for (const dir of [older, newer, target, tampered])
       rmSync(dir, { recursive: true, force: true });
   }
+});
+
+void test('N4b: each reviewed project uses only its own mirror bucket', async () => {
+  for (const project of ['recharge-dev-n2a01', 'recharge-staging-y9y2y']) {
+    const gcs = fakeGcs(project);
+    const dir = databaseDir(27801);
+    const target = mkdtempSync(path.join(tmpdir(), 'n4b-fetch-'));
+    try {
+      await publish(gcs.store, dir, new Date('2026-11-15T18:00:00Z'));
+      await fetchNewestSet(gcs.store, target);
+      assert.deepEqual([...gcs.buckets], [`${project}-clamav-mirror`]);
+      assert.equal(mirrorBucketFor(project), `${project}-clamav-mirror`);
+    } finally {
+      for (const d of [dir, target]) rmSync(d, { recursive: true, force: true });
+    }
+  }
+});
+
+void test('N4b: an unreviewed project never reaches any bucket', async () => {
+  for (const project of ['recharge-prod', '', 'recharge-dev-n2a01-x']) {
+    const gcs = fakeGcs(project);
+    const dir = databaseDir(27801);
+    try {
+      await assert.rejects(
+        publish(gcs.store, dir, new Date('2026-11-15T18:00:00Z')),
+        /project not reviewed/u,
+      );
+      assert.equal(gcs.buckets.size, 0);
+      assert.ok(gcs.calls.every((call) => !call.includes('/storage/')));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+    assert.throws(() => mirrorBucketFor(project), /project not reviewed/u);
+  }
+});
+
+void test('N4b: the mirror list matches the reviewed cloud projects of the functions', () => {
+  const source = readFileSync(
+    // Compiled to build/media-tools-runtime/test/: four levels up is apps/backend.
+    new URL('../../../../functions/src/shared/cloud_runtime_projects.ts', import.meta.url),
+    'utf8',
+  );
+  const declared = [...source.matchAll(/CloudProject = '([^']+)'/gu)].map((m) => m[1]);
+  assert.deepEqual(declared, ['recharge-dev-n2a01', 'recharge-staging-y9y2y']);
+  for (const project of declared) assert.doesNotThrow(() => mirrorBucketFor(project!));
 });

@@ -39,16 +39,21 @@ void main() {
     }
     // N3a.2 opens only the five Content/Media calls; delivery stays closed.
     expect(() => endpoint.callableUri('mediaDeliveryV1'), throwsArgumentError);
-    expect(
-      () => endpoint.callableUri('createInternalBookingV1'),
-      throwsArgumentError,
-    );
-    // N3c opens the four Notifications calls; Booking and Discover stay closed.
+    // The staging load ingress is never an app call.
+    expect(() => endpoint.callableUri('bookingLoadV1'), throwsArgumentError);
+    // N3c opens the four Notifications calls; the debt plan round 1 opens the
+    // six interactive Booking calls; Discover stays closed.
     for (final name in [
       'notificationsQueryV1',
       'notificationsCommandV1',
       'pushDeviceCommandV1',
       'sendSelfTestNotificationV1',
+      'createInternalBookingV1',
+      'cancelInternalBookingV1',
+      'reconfirmInternalBookingV1',
+      'getMyBookingV1',
+      'listMyBookingsV1',
+      'getEventAvailabilityV1',
     ]) {
       expect(endpoint.callableUri(name).path, '/$name');
     }

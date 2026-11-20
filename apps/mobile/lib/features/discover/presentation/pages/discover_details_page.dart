@@ -201,10 +201,7 @@ class _DiscoverDetailsPageState extends ConsumerState<DiscoverDetailsPage> {
             ),
           },
         );
-        final DetailsRendererFamily family =
-            item.catalogObjectType == CatalogObjectType.route
-            ? DetailsRendererFamily.route
-            : DetailsRendererFamily.objectOffer;
+        final DetailsRendererFamily family = detailsRendererFamilyFor(item);
         return DetailsScreenAvailable(
           // ADR 0022: Find People is never offered for translation.
           supplement: item.catalogObjectType == CatalogObjectType.findPeople
@@ -637,3 +634,13 @@ String _createRouteLocationForDetails(DiscoverItemEntity item) {
     },
   ).toString();
 }
+
+/// The renderer family of [item]. The Route renderer needs the Route itself
+/// (a local published Route or Catalog Route facts); a Route-typed item that
+/// arrived without them (an older projection, a partial Catalog answer) uses
+/// the shared object renderer instead of failing (debug assertion at
+/// route_details_renderer.dart, null check in release).
+DetailsRendererFamily detailsRendererFamilyFor(DiscoverItemEntity item) =>
+    item.catalogObjectType == CatalogObjectType.route && item.isRoute
+    ? DetailsRendererFamily.route
+    : DetailsRendererFamily.objectOffer;

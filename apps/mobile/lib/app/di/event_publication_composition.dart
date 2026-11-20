@@ -18,6 +18,7 @@ import 'backend_binding_manifest.dart';
 import 'booking_backend_selection.dart';
 import 'booking_test_entry_guard.dart';
 import 'media_composition.dart';
+import 'dev_content_media_port.dart';
 import 'service_locator.dart';
 
 /// Compile-time switch, separate from the Booking one. `bool.fromEnvironment`
@@ -37,6 +38,8 @@ final class EventPublicationTestEntryGuard
     required this.flag,
     required this.releaseMode,
     required BookingBackendBindingController binding,
+    this.devFlag = false,
+    this.devPort,
   }) : _binding = binding;
 
   factory EventPublicationTestEntryGuard.fromEnvironment(
@@ -45,7 +48,17 @@ final class EventPublicationTestEntryGuard
     flag: eventPublicationTestEntryDefined,
     releaseMode: kReleaseMode,
     binding: binding,
+    devFlag: eventPublicationTestEntryDefined && n3a2DevPlaceDraftDefined,
+    devPort: sl.isRegistered<DevContentMediaPort>()
+        ? sl<DevContentMediaPort>()
+        : null,
   );
+
+  /// Owner decision 2026-11-19 (publish without pre-review): the dev/stage
+  /// cloud Content runtime over the N2c Session, as the Place path (N3a.2).
+  final bool devFlag;
+  final DevContentMediaPort? devPort;
+  bool get devCloudAllowed => devFlag && !releaseMode && devPort != null;
 
   final bool flag;
   final bool releaseMode;
@@ -53,10 +66,11 @@ final class EventPublicationTestEntryGuard
 
   @override
   bool get allowed =>
-      flag &&
-      !releaseMode &&
-      _binding.mode == BackendBindingMode.testBackend &&
-      isLoopbackDemoEmulatorBinding(_binding);
+      devCloudAllowed ||
+      (flag &&
+          !releaseMode &&
+          _binding.mode == BackendBindingMode.testBackend &&
+          isLoopbackDemoEmulatorBinding(_binding));
 
   @override
   void assertAllowed() {
@@ -169,10 +183,15 @@ Future<EventPublicationController?> createEventPublicationController({
   final EventPublicationTestEntryGuard guard =
       sl<EventPublicationTestEntryGuard>();
   if (!guard.allowed) return null;
-  final BookingTransportRuntime runtime = await sl
-      .getAsync<BookingTransportRuntime>();
-  final BookingCallablePort? port = runtime.port;
-  if (!runtime.remoteCommandsEnabled || port == null) return null;
+  final BookingCallablePort? port;
+  if (guard.devCloudAllowed) {
+    port = guard.devPort!.port;
+  } else {
+    final BookingTransportRuntime runtime = await sl
+        .getAsync<BookingTransportRuntime>();
+    port = runtime.remoteCommandsEnabled ? runtime.port : null;
+  }
+  if (port == null) return null;
   final Directory support = await sl<BookingSupportDirectoryProvider>()();
   final String separator = Platform.pathSeparator;
   return eventPublicationControllerFor(

@@ -33,13 +33,29 @@ final class BookingTransportRuntime {
          identitySessions: identitySessions,
        );
 
+  /// Debt plan round 1 (2026-11-17): the cloud Booking runtime of the dev or
+  /// staging project (codebase n4c-booking), over the same authenticated dev
+  /// transport as Content/Media and Notifications. Debug builds only; the
+  /// server still checks the Session, the uid allowlist and every command.
+  const BookingTransportRuntime.devCloud({
+    required BookingCallableAdapter adapter,
+    required BookingCallablePort port,
+  }) : this._(
+         binding: BookingBackendBinding.devIdentity,
+         adapter: adapter,
+         port: port,
+       );
+
   final BookingBackendBinding binding;
   final BookingCallableAdapter? adapter;
   final BookingCallablePort? port;
   final FunctionsIdentitySessionClient? identitySessions;
 
   bool get remoteCommandsEnabled =>
-      binding == BookingBackendBinding.devEmulator && adapter != null;
+      (binding == BookingBackendBinding.devEmulator ||
+          binding == BookingBackendBinding.devIdentity) &&
+      adapter != null &&
+      port != null;
 }
 
 /// Lazily creates the mobile Booking transport. Local/mock remains the default

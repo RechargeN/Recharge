@@ -66,6 +66,14 @@ export interface PrivacyRunnerOptions {
     readonly references: AttachmentReferencePort;
     readonly retentionPolicyAvailable: boolean;
   };
+  /**
+   * Dev/stage cloud (step 2, owner decision 2026-11-20): Library, Quick Plan,
+   * Scenario and Route run only on the Emulator, so their owner services are
+   * not built here. Their families are swept by the registry without owner
+   * appliers: none found succeeds, any found stays blocked (PB-05), never
+   * reported done.
+   */
+  readonly cloudRuntime?: boolean;
   /** Bounded work per run. */
   readonly maxPages?: number;
   readonly pageSize?: number;
@@ -324,6 +332,7 @@ export class PrivacyDomainTaskRunner {
         return scope === '*' || scope === domainId;
       });
     };
+    const emulatorOnly = this.options.cloudRuntime === true;
     return new Map<string, PrivacyDomainHandler>([
       [
         'booking',
@@ -363,16 +372,18 @@ export class PrivacyDomainTaskRunner {
       ],
       [
         'library',
-        {
-          handle: async (run: PrivacyDomainRun) =>
-            fromDomainResult(
-              await new LibraryPrivacyTaskHandler(db).handle({
-                taskType: run.taskType,
-                subjectId: run.subjectId,
-                erase: () => registry('library', libraryPrivacyAppliers).handle(run),
-              }),
-            ),
-        },
+        emulatorOnly
+          ? registry('library')
+          : {
+              handle: async (run: PrivacyDomainRun) =>
+                fromDomainResult(
+                  await new LibraryPrivacyTaskHandler(db).handle({
+                    taskType: run.taskType,
+                    subjectId: run.subjectId,
+                    erase: () => registry('library', libraryPrivacyAppliers).handle(run),
+                  }),
+                ),
+            },
       ],
       ['content_translation', registry('content_translation', contentTranslationPrivacyAppliers)],
       ['identity', registry('identity')],
@@ -391,30 +402,40 @@ export class PrivacyDomainTaskRunner {
       ['admin_support', registry('admin_support')],
       [
         'quick_plan',
-        lazy(() => {
-          const service = new FirestoreQuickPlanService(db, clock);
-          return registry('quick_plan', {
-            quickPlans: { inTransaction: (tx, ref, data) => service.privacyErasure(tx, ref, data) },
-          });
-        }),
+        emulatorOnly
+          ? registry('quick_plan')
+          : lazy(() => {
+              const service = new FirestoreQuickPlanService(db, clock);
+              return registry('quick_plan', {
+                quickPlans: {
+                  inTransaction: (tx, ref, data) => service.privacyErasure(tx, ref, data),
+                },
+              });
+            }),
       ],
       [
         'scenario',
-        lazy(() => {
-          const service = new FirestoreScenarioService(db, clock);
-          return registry('scenario', {
-            scenarios: { inTransaction: (tx, ref, data) => service.privacyErasure(tx, ref, data) },
-          });
-        }),
+        emulatorOnly
+          ? registry('scenario')
+          : lazy(() => {
+              const service = new FirestoreScenarioService(db, clock);
+              return registry('scenario', {
+                scenarios: {
+                  inTransaction: (tx, ref, data) => service.privacyErasure(tx, ref, data),
+                },
+              });
+            }),
       ],
       [
         'route',
-        lazy(() => {
-          const service = new FirestoreRouteService(db, clock);
-          return registry('route', {
-            routes: { inTransaction: (tx, ref, data) => service.privacyErasure(tx, ref, data) },
-          });
-        }),
+        emulatorOnly
+          ? registry('route')
+          : lazy(() => {
+              const service = new FirestoreRouteService(db, clock);
+              return registry('route', {
+                routes: { inTransaction: (tx, ref, data) => service.privacyErasure(tx, ref, data) },
+              });
+            }),
       ],
     ]);
   }

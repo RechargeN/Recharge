@@ -34,6 +34,100 @@ import 'package:recharge/features/explore/presentation/pages/settings_page.dart'
 import '../support/l10n/l10n_screenshot.dart';
 
 void main() {
+  // N4b A34 2026-11-15 (edge-to-edge Android): the Sign out button at the
+  // end of the list sat half under the system navigation bar.
+  testWidgets('the end of the list clears the system navigation bar', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(360, 800)
+      ..devicePixelRatio = 1
+      ..padding = const FakeViewPadding(bottom: 48)
+      ..viewPadding = const FakeViewPadding(bottom: 48);
+    addTearDown(() {
+      tester.view
+        ..resetPhysicalSize()
+        ..resetDevicePixelRatio()
+        ..resetPadding()
+        ..resetViewPadding();
+    });
+    final authController = AuthController(
+      signInUseCase: SignInUseCase(_NoopAuthRepository()),
+      restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+      signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+      getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await authController.signIn(
+      email: 'user@example.com',
+      password: 'password123',
+      sourceScreen: 'test',
+      sourceAction: 'seed',
+    );
+
+    final exploreRepository = _FakeExploreRepository();
+    final exploreController = ExploreController(
+      loadProfileEditableUseCase: LoadProfileEditableUseCase(exploreRepository),
+      saveProfileEditableUseCase: SaveProfileEditableUseCase(exploreRepository),
+      loadSettingsUseCase: LoadSettingsUseCase(exploreRepository),
+      saveSettingsUseCase: SaveSettingsUseCase(exploreRepository),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await exploreController.ensureLoaded(
+      userId: 'u',
+      email: 'user@example.com',
+      role: 'user',
+      favoritesCount: 0,
+    );
+
+    final router = GoRouter(
+      initialLocation: RouteNames.settings,
+      routes: [
+        GoRoute(
+          path: RouteNames.settings,
+          builder: (_, _) => const SettingsPage(),
+        ),
+        GoRoute(
+          path: RouteNames.discover,
+          builder: (_, _) => const Scaffold(body: Text('Logged out home')),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          authControllerProvider.overrideWith((ref) => authController),
+          exploreControllerProvider.overrideWith((ref) => exploreController),
+        ],
+        child: MaterialApp.router(
+          routerConfig: router,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(1.5)),
+            child: child!,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Finder signOut = find.text('Sign out');
+    await tester.scrollUntilVisible(
+      signOut,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    // Scroll to the very end of the list.
+    await tester.drag(find.byType(ListView).first, const Offset(0, -2000));
+    await tester.pumpAndSettle();
+    final Rect button = tester.getRect(
+      find.ancestor(of: signOut, matching: find.byType(FilledButton)),
+    );
+    expect(button.bottom, lessThanOrEqualTo(800 - 48));
+  });
+
   testWidgets('renders settings controls for authenticated user', (
     tester,
   ) async {

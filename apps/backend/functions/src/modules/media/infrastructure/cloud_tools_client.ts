@@ -17,6 +17,10 @@ import {
   type ToolsTransport,
 } from './local_tools_client.js';
 import { clientDeadlines } from './media_tool_limits.js';
+import {
+  cloudProjectNumber,
+  isReviewedCloudProject,
+} from '../../../shared/cloud_runtime_projects.js';
 
 /**
  * N3b adapters behind `ScannerPort` and `ProcessorPort` for recharge-dev-n2a01
@@ -32,6 +36,14 @@ export const devCloudToolsUrls = Object.freeze({
   scanner: 'https://media-scanner-420479958348.europe-west1.run.app',
   processor: 'https://media-processor-420479958348.europe-west1.run.app',
 });
+
+/** N4a: the deterministic Cloud Run URLs of the two services in a reviewed project. */
+export function cloudToolsUrlsFor(projectNumber: string) {
+  return Object.freeze({
+    scanner: `https://media-scanner-${projectNumber}.europe-west1.run.app`,
+    processor: `https://media-processor-${projectNumber}.europe-west1.run.app`,
+  });
+}
 export const toolsTokenHeader = 'x-recharge-tools-token';
 
 /** Google ID token for an audience (the service URL). */
@@ -214,15 +226,21 @@ export function cloudToolsConfigFrom(
   const mode = environment.RECHARGE_MEDIA_TOOLS;
   if (mode === undefined || mode === '') return null;
   if (mode !== 'dev-cloud') throw new Error('RECHARGE_MEDIA_TOOLS: not dev-cloud');
-  if (environment.GCLOUD_PROJECT !== devCloudToolsProject)
-    throw new Error('RECHARGE_MEDIA_TOOLS: dev-cloud is bound to recharge-dev-n2a01');
+  // N4a: dev or staging (reviewed, never production); the URLs follow the project number.
+  const project = environment.GCLOUD_PROJECT;
+  const projectNumber = isReviewedCloudProject(project)
+    ? cloudProjectNumber(project, environment)
+    : null;
+  if (projectNumber === null)
+    throw new Error('RECHARGE_MEDIA_TOOLS: dev-cloud is bound to a reviewed project');
   for (const name of emulatorVariables)
     if ((environment[name] ?? '') !== '')
       throw new Error(`RECHARGE_MEDIA_TOOLS: dev-cloud with ${name} set`);
   const token = environment.RECHARGE_MEDIA_TOOLS_TOKEN ?? '';
   if (!/^[0-9a-f]{64}$/u.test(token)) throw new Error('RECHARGE_MEDIA_TOOLS_TOKEN: invalid');
+  const urls = cloudToolsUrlsFor(projectNumber);
   return {
-    scanner: { url: devCloudToolsUrls.scanner, token, idToken },
-    processor: { url: devCloudToolsUrls.processor, token, idToken },
+    scanner: { url: urls.scanner, token, idToken },
+    processor: { url: urls.processor, token, idToken },
   };
 }

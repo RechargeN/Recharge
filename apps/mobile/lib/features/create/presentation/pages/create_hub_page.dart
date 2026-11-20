@@ -1,3 +1,4 @@
+import '../../../../core/layout/page_list_padding.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -44,7 +45,7 @@ class CreateHubPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.createFormCreateHub)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: pageListPadding(context, const EdgeInsets.all(16)),
         children: <Widget>[
           Text(
             context.l10n.createFormWhatDoYouWantCreate,

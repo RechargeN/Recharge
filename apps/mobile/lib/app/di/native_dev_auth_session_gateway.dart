@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:uuid/uuid.dart';
+import '../../features/booking/data/booking_callable_adapter.dart';
 import '../../features/booking/data/booking_dev_android_identity.dart';
 import '../../features/booking/data/booking_functions_transport.dart';
 import '../../features/booking/data/booking_identity_failure.dart';
@@ -76,6 +77,19 @@ final class NativeDevAuthSessionGateway implements DevAuthSessionGateway {
           'transient=${isTransientIdentityFailure(error)}',
         );
       }
+      if (identityFailureCode(error) == 'rate-limited') {
+        throw AuthException(
+          code: rateLimitedAuthErrorCode,
+          message: rateLimitedAuthErrorCode,
+          retryAfter: error is BookingCallableFailure ? error.retryAfter : null,
+        );
+      }
+      if (identityFailureCode(error) == 'snapshot-stale') {
+        throw const AuthException(
+          code: staleSnapshotAuthErrorCode,
+          message: staleSnapshotAuthErrorCode,
+        );
+      }
       if (isTransientIdentityFailure(error)) {
         throw const AuthException(code: offlineCode, message: offlineCode);
       }
@@ -110,23 +124,32 @@ final class NativeDevAuthSessionGateway implements DevAuthSessionGateway {
   Future<ServerAuthContext?> current() => _offlineAware(_current);
 
   Future<ServerAuthContext?> _current() async {
-    if (await store.read() == null ||
-        await coordinator.identity.currentIdToken() == null) {
-      return null;
-    }
+    if (await store.read() == null) return null;
     ServerAuthContext? result;
     final installation = await installations.current();
-    await coordinator.sessions.readCurrent(
-      requestId: const Uuid().v4(),
-      onAuthContext: (data) {
-        result = ServerAuthContext.fromResponse(
-          data,
-          installationId: installation,
-          now: _now(),
-        );
-        return Future<void>.value();
-      },
-    );
+    Future<void> capture(Map<String, Object?> data) {
+      result = ServerAuthContext.fromResponse(
+        data,
+        installationId: installation,
+        now: _now(),
+      );
+      return Future<void>.value();
+    }
+
+    if (await coordinator.identity.currentIdToken() == null) {
+      // Cold start: token access is armed only after the Firebase user is
+      // back. Re-arm and read (no rotation; N4b A34 staging 2026-11-15).
+      final read = await coordinator.readSession(
+        requestId: const Uuid().v4(),
+        onAuthContext: capture,
+      );
+      if (read == null) return null;
+    } else {
+      await coordinator.sessions.readCurrent(
+        requestId: const Uuid().v4(),
+        onAuthContext: capture,
+      );
+    }
     if (result == null) throw StateError('server_auth_context_missing');
     return result;
   }

@@ -13,8 +13,13 @@ import type {
   RemovalResult,
 } from '../application/ports/object_store_port.js';
 import { detectMediaType } from './storage_emulator_object_store.js';
+import { isReviewedCloudProject, mediaBucketFor } from '../../../shared/cloud_runtime_projects.js';
 
-/** N3a: the only cloud target. No default-bucket inference, no other project. */
+/**
+ * N3a: the dev cloud target (kept for tests and docs). N4a: the same code runs
+ * in any reviewed non-production project with exactly its own `<project>-media`
+ * bucket; no default-bucket inference, never production.
+ */
 export const devCloudMediaProjectId = 'recharge-dev-n2a01';
 export const devCloudMediaBucketName = 'recharge-dev-n2a01-media';
 /** Explicit opt-in; Local/Emulator stays the default everywhere else. */
@@ -71,12 +76,12 @@ export function assertDevCloudStorageContext(
 ): void {
   if (environment.RECHARGE_MEDIA_STORAGE !== devCloudMediaStorageMode)
     throw new DevCloudStorageContextError('dev_cloud_mode_not_selected');
-  if (environment.GCLOUD_PROJECT !== devCloudMediaProjectId)
-    throw new DevCloudStorageContextError('project_not_dev');
+  const project = environment.GCLOUD_PROJECT;
+  if (!isReviewedCloudProject(project)) throw new DevCloudStorageContextError('project_not_dev');
   for (const name of emulatorVariables)
     if ((environment[name] ?? '') !== '')
       throw new DevCloudStorageContextError('emulator_and_cloud_both_configured');
-  if (bucketName !== devCloudMediaBucketName)
+  if (bucketName !== mediaBucketFor(project))
     throw new DevCloudStorageContextError('bucket_not_dev_media');
 }
 
@@ -310,9 +315,11 @@ export function createDevCloudObjectStore(
   maxObjectBytes: number,
   environment: NodeJS.ProcessEnv = process.env,
 ): DevCloudObjectStore {
-  if (app.options.projectId !== devCloudMediaProjectId)
+  const project = app.options.projectId;
+  if (!isReviewedCloudProject(project) || project !== environment.GCLOUD_PROJECT)
     throw new DevCloudStorageContextError('app_project_not_dev');
-  assertDevCloudStorageContext(devCloudMediaBucketName, environment);
-  const bucket = getStorage(app).bucket(devCloudMediaBucketName) as unknown as DevCloudBucketLike;
+  const bucketName = mediaBucketFor(project);
+  assertDevCloudStorageContext(bucketName, environment);
+  const bucket = getStorage(app).bucket(bucketName) as unknown as DevCloudBucketLike;
   return new DevCloudObjectStore(bucket, maxObjectBytes, environment);
 }

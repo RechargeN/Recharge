@@ -3,7 +3,7 @@ import type { Firestore, Transaction } from 'firebase-admin/firestore';
 import type { AccessSnapshot } from '../domain/access_snapshot.js';
 import { normalizeLegacyAccount, type Account } from '../domain/account.js';
 import type { AuthIdentity } from '../domain/auth_identity.js';
-import type { CreatorVerification } from '../domain/creator_verification.js';
+import type { IdentityVerification } from '../domain/identity_verification.js';
 import type { ManagedPage } from '../domain/managed_page.js';
 import type { PageMembership } from '../domain/page_membership.js';
 import type { SellerDeclaration } from '../domain/seller_declaration.js';
@@ -18,7 +18,7 @@ export const identityAuthorityCollections = Object.freeze({
   providerLinks: 'identityProviderLinks',
   sessions: 'identitySessions',
   accessSnapshots: 'identityAccessSnapshots',
-  creatorVerifications: 'identityCreatorVerifications',
+  identityVerifications: 'identityCreatorVerifications', // wire name kept (ADR 0023)
   managedPages: 'identityManagedPages',
   pageMemberships: 'identityPageMemberships',
   /** ADR 0023 (2026-11-08): DSA Art. 30 seller declarations, keyed by userId. */
@@ -101,13 +101,13 @@ class FirestoreIdentityAuthorityTransaction implements IdentityAuthorityTransact
     );
   }
 
-  verificationForUser(userId: string): Promise<CreatorVerification | null> {
-    return this.readDocument(identityAuthorityCollections.creatorVerifications, userId);
+  verificationForUser(userId: string): Promise<IdentityVerification | null> {
+    return this.readDocument(identityAuthorityCollections.identityVerifications, userId);
   }
 
-  putVerification(verification: CreatorVerification): void {
+  putVerification(verification: IdentityVerification): void {
     this.write(
-      identityAuthorityCollections.creatorVerifications,
+      identityAuthorityCollections.identityVerifications,
       verification.userId,
       verification,
     );

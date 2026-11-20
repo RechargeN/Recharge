@@ -23,24 +23,32 @@ final class BookingTestEntryGuard implements BookingCommandGate {
     required this.flag,
     required this.releaseMode,
     required BookingBackendBindingController binding,
+    this.cloudBooking = false,
   }) : _binding = binding;
 
   /// Production wiring: reads the real define and build mode.
   factory BookingTestEntryGuard.fromEnvironment(
-    BookingBackendBindingController binding,
-  ) => BookingTestEntryGuard(
+    BookingBackendBindingController binding, {
+    bool cloudBooking = false,
+  }) => BookingTestEntryGuard(
     flag: bookingTestEntryDefined,
     releaseMode: kReleaseMode,
     binding: binding,
+    cloudBooking: cloudBooking,
   );
 
   final bool flag;
   final bool releaseMode;
+
+  /// The cloud Booking transport of a dev/stage debug build is wired (debt
+  /// plan round 1). The server, not this flag, decides every command.
+  final bool cloudBooking;
   final BookingBackendBindingController _binding;
 
   @override
   bool get allowed {
     if (!flag || releaseMode) return false;
+    if (cloudBooking) return true;
     if (_binding.mode != BackendBindingMode.testBackend) return false;
     return isLoopbackDemoEmulatorBinding(_binding);
   }

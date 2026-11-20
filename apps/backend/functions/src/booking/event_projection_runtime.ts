@@ -1,6 +1,7 @@
 import { FieldPath, Timestamp, type Firestore } from 'firebase-admin/firestore';
 import { FirestoreFeatureFlagGate } from '../platform/config/firestore_feature_flag_gate.js';
-import { bookingFlagIds } from '../shared/feature_flags.js';
+import { emergencySwitchState } from '../modules/operations/emergency_switch.js';
+import { bookingFlagIds, operationsEmergencySwitchIds } from '../shared/feature_flags.js';
 import {
   deliverEventBookingProjection,
   ensureEventBookingDelivery,
@@ -9,14 +10,42 @@ import {
 
 const discoveryCheckpointId = 'event-outbox-v1';
 
+/**
+ * Whether Event → Booking delivery is active. The Emulator reads the local
+ * product flag; the cloud runtime passes its own gate (the Operations switch),
+ * because product flags are Emulator-only and always off in the cloud.
+ */
+export type EventDeliveryGate = () => Promise<boolean>;
+
+export function emulatorEventDeliveryGate(firestore: Firestore): EventDeliveryGate {
+  return () =>
+    new FirestoreFeatureFlagGate(firestore, 'local', 'LV').isEnabled(
+      bookingFlagIds.eventProjectionDelivery,
+    );
+}
+
+/**
+ * Product flags are Emulator-only (always off in the cloud), so the cloud
+ * Event → Booking delivery is active exactly while its Operations emergency
+ * switch is open (round 2.1: a missing switch is contained). A34 staging
+ * 2026-11-19: with the Emulator flag the outbox trigger answered 200 and
+ * delivered nothing.
+ */
+export function cloudEventDeliveryGate(firestore: Firestore): EventDeliveryGate {
+  return async () =>
+    (await emergencySwitchState(
+      firestore,
+      operationsEmergencySwitchIds.eventProjectionDelivery,
+    )) === 'open';
+}
+
 export async function processEventBookingOutboxDocument(
   firestore: Firestore,
   outboxId: string,
   nowUtc: string,
+  gate: EventDeliveryGate = emulatorEventDeliveryGate(firestore),
 ): Promise<'disabled' | Awaited<ReturnType<typeof deliverEventBookingProjection>>> {
-  const enabled = await new FirestoreFeatureFlagGate(firestore, 'local', 'LV').isEnabled(
-    bookingFlagIds.eventProjectionDelivery,
-  );
+  const enabled = await gate();
   if (!enabled) return 'disabled';
   return deliverEventBookingProjection(firestore, outboxId, nowUtc);
 }
@@ -68,11 +97,10 @@ export async function runPendingEventBookingDeliveries(
   firestore: Firestore,
   nowUtc: string,
   limit = 20,
+  gate: EventDeliveryGate = emulatorEventDeliveryGate(firestore),
 ): Promise<Readonly<{ examined: number; attempted: number; discovered: number }>> {
   assertLimit(limit);
-  const enabled = await new FirestoreFeatureFlagGate(firestore, 'local', 'LV').isEnabled(
-    bookingFlagIds.eventProjectionDelivery,
-  );
+  const enabled = await gate();
   if (!enabled) return { examined: 0, attempted: 0, discovered: 0 };
   const discovery = await discoverEventBookingDeliveries(firestore, nowUtc, 100);
   const due = await firestore

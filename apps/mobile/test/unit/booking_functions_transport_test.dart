@@ -146,6 +146,44 @@ void main() {
     expect(jsonEncode(sent), isNot(contains('capabilities')));
   });
 
+  test(
+    'an infrastructure error page is a typed failure, not a crash',
+    () async {
+      // A34 staging 2026-11-19 21:17: Cloud Run answered 500 with a plain
+      // text page ("aborted after waiting too long for an available
+      // instance"); the transport threw FormatException and the Event
+      // publication page stayed stuck.
+      final sessions = InMemoryBookingIdentitySessionStore();
+      await sessions.saveServerIssued(session);
+      for (final (int status, String code) in <(int, String)>[
+        (500, 'internal'),
+        (503, 'internal'),
+        (429, 'unknown'),
+      ]) {
+        final port = FunctionsBookingCallablePort(
+          endpoint: endpoint,
+          client: MockClient(
+            (_) async => http.Response('upstream request timeout', status),
+          ),
+          tokens: const _TokenProvider('firebase-id-token'),
+          sessions: sessions,
+        );
+        await expectLater(
+          port.invoke('contentQueryV1', <String, Object?>{
+            'schemaVersion': 1,
+            'queryType': 'getPublicationStatus',
+            'payload': <String, Object?>{'contentId': 'content-1'},
+          }),
+          throwsA(
+            isA<BookingCallableFailure>()
+                .having((f) => f.code, 'code', code)
+                .having((f) => f.dispatched, 'dispatched', isTrue),
+          ),
+        );
+      }
+    },
+  );
+
   test('missing real token or server Session fails before dispatch', () async {
     var requests = 0;
     final port = FunctionsBookingCallablePort(
@@ -169,63 +207,69 @@ void main() {
     expect(requests, 0);
   });
 
-  test('transport performs one forced Firebase token refresh after unauthenticated', () async {
-    var requests = 0;
-    final tokens = _TrackingTokenProvider();
-    final sessions = InMemoryBookingIdentitySessionStore();
-    await sessions.saveServerIssued(session);
-    final port = FunctionsBookingCallablePort(
-      endpoint: endpoint,
-      client: MockClient((_) async {
-        requests += 1;
-        if (requests == 1) {
+  test(
+    'transport performs one forced Firebase token refresh after unauthenticated',
+    () async {
+      var requests = 0;
+      final tokens = _TrackingTokenProvider();
+      final sessions = InMemoryBookingIdentitySessionStore();
+      await sessions.saveServerIssued(session);
+      final port = FunctionsBookingCallablePort(
+        endpoint: endpoint,
+        client: MockClient((_) async {
+          requests += 1;
+          if (requests == 1) {
+            return http.Response(
+              jsonEncode(<String, Object?>{
+                'error': <String, Object?>{'status': 'UNAUTHENTICATED'},
+              }),
+              401,
+            );
+          }
           return http.Response(
-            jsonEncode(<String, Object?>{
-              'error': <String, Object?>{'status': 'UNAUTHENTICATED'},
-            }),
-            401,
+            jsonEncode(<String, Object?>{'result': _commandSuccess()}),
+            200,
           );
-        }
-        return http.Response(
-          jsonEncode(<String, Object?>{'result': _commandSuccess()}),
-          200,
-        );
-      }),
-      tokens: tokens,
-      sessions: sessions,
-    );
-    expect(
-      (await port.invoke('createInternalBookingV1', <String, Object?>{
-        'schemaVersion': 1,
-        'commandType': 'createBooking',
-        'requestId': 'request-token-refresh',
-        'idempotencyKey': 'idempotency-token-refresh',
-        'payload': <String, Object?>{
-          'occurrenceId': 'occurrence_001',
-          'participantUnits': 1,
-        },
-      }))['kind'],
-      'succeeded',
-    );
-    expect(tokens.forceRefreshCalls, 1);
-    expect(requests, 2);
-  });
+        }),
+        tokens: tokens,
+        sessions: sessions,
+      );
+      expect(
+        (await port.invoke('createInternalBookingV1', <String, Object?>{
+          'schemaVersion': 1,
+          'commandType': 'createBooking',
+          'requestId': 'request-token-refresh',
+          'idempotencyKey': 'idempotency-token-refresh',
+          'payload': <String, Object?>{
+            'occurrenceId': 'occurrence_001',
+            'participantUnits': 1,
+          },
+        }))['kind'],
+        'succeeded',
+      );
+      expect(tokens.forceRefreshCalls, 1);
+      expect(requests, 2);
+    },
+  );
 
-  test('release selector never initializes Firebase and always returns disabled provider', () async {
-    var initialized = false;
-    final provider = bookingFirebaseTokenProviderFor(
-      endpoint: endpoint,
-      emulator: const BookingAuthEmulatorConfig(host: '127.0.0.1'),
-      releaseMode: true,
-      authFactory: () async {
-        initialized = true;
-        throw StateError('Firebase must not initialize in release');
-      },
-    );
-    expect(provider, isA<DisabledBookingFirebaseIdTokenProvider>());
-    expect(await provider.currentIdToken(), isNull);
-    expect(initialized, isFalse);
-  });
+  test(
+    'release selector never initializes Firebase and always returns disabled provider',
+    () async {
+      var initialized = false;
+      final provider = bookingFirebaseTokenProviderFor(
+        endpoint: endpoint,
+        emulator: const BookingAuthEmulatorConfig(host: '127.0.0.1'),
+        releaseMode: true,
+        authFactory: () async {
+          initialized = true;
+          throw StateError('Firebase must not initialize in release');
+        },
+      );
+      expect(provider, isA<DisabledBookingFirebaseIdTokenProvider>());
+      expect(await provider.currentIdToken(), isNull);
+      expect(initialized, isFalse);
+    },
+  );
 
   test(
     'network timeout after send is an ambiguous dispatched failure',

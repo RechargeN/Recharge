@@ -1,3 +1,4 @@
+import 'package:recharge/core/config/cloud_environment.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -27,8 +28,14 @@ final class _NoDraft implements PlaceDraftSource {
 
 /// A34 2026-11-08: the dev-cloud page was labelled "local Emulator".
 void main() {
-  for (final bool devCloud in <bool>[false, true]) {
-    testWidgets('the header names the backend (devCloud=$devCloud)', (
+  // N4b A34 2026-11-15: the staging build said "dev cloud".
+  for (final (CloudEnvironment?, String) backend
+      in <(CloudEnvironment?, String)>[
+        (null, 'Тестовый путь публикации (локальный эмулятор)'),
+        (CloudEnvironment.dev, 'Тестовый путь публикации (dev-облако)'),
+        (CloudEnvironment.staging, 'Тестовый путь публикации (staging-облако)'),
+      ]) {
+    testWidgets('the header names the backend (${backend.$1})', (
       WidgetTester tester,
     ) async {
       final Directory dir = Directory.systemTemp.createTempSync('place-pub-');
@@ -62,19 +69,12 @@ void main() {
           home: Scaffold(
             body: PlacePublicationSection(
               controller: controller,
-              devCloud: devCloud,
+              cloud: backend.$1,
             ),
           ),
         ),
       );
-      expect(
-        find.text(
-          devCloud
-              ? 'Тестовый путь публикации (dev-облако)'
-              : 'Тестовый путь публикации (локальный эмулятор)',
-        ),
-        findsOneWidget,
-      );
+      expect(find.text(backend.$2), findsOneWidget);
     });
   }
 }

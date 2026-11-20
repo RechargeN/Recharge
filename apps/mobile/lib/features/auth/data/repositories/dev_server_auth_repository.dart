@@ -17,6 +17,13 @@ abstract interface class DevAuthSessionGateway {
 /// Auth code for transient (offline/overloaded) outcomes: credentials stay.
 const String offlineAuthErrorCode = 'NETWORK_UNAVAILABLE';
 
+/// Auth code for a server rate limit: transient as well, credentials stay.
+const String rateLimitedAuthErrorCode = 'AUTH_TOO_MANY_ATTEMPTS';
+
+/// A read found the server snapshot run out (no rotation within its hour).
+/// Not a decision about the Session: credentials stay and restore rotates.
+const String staleSnapshotAuthErrorCode = 'SNAPSHOT_STALE';
+
 final class DevServerAuthRepository implements FederatedAuthRepository {
   DevServerAuthRepository({required this.gateway, DateTime Function()? now})
     : _now = now ?? (() => DateTime.now().toUtc());
@@ -53,9 +60,32 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
     return result;
   }
 
+  /// Rotation threshold of a restore. Above the controller's silent-refresh
+  /// lead (5 min), so the timer that fires before expiry still rotates.
+  static const Duration rotateWhenLessThan = Duration(minutes: 10);
+
+  /// Every start and every return to the app revalidates with the server. A
+  /// read is enough while the snapshot has time left; rotating each time spent
+  /// the server's per-Session rotation budget (6/h) and a few app switches
+  /// ended in a refusal (N4b, A34 staging 2026-11-15).
   @override
   Future<AuthResultEntity?> restoreSession() async =>
-      (await _run(gateway.refresh))?.result;
+      (await _run(_currentOrRotate))?.result;
+
+  Future<ServerAuthContext?> _currentOrRotate() async {
+    ServerAuthContext? current;
+    try {
+      current = await gateway.current();
+    } on AuthException catch (error) {
+      if (error.code != staleSnapshotAuthErrorCode) rethrow;
+    }
+    if (current != null &&
+        current.result.session.expiresAtUtc.difference(_now().toUtc()) >
+            rotateWhenLessThan) {
+      return current;
+    }
+    return gateway.refresh();
+  }
 
   Future<ServerAuthContext?> revalidateContext() => _run(gateway.current);
 
@@ -88,13 +118,23 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
     } catch (error, stack) {
       if (kDebugMode) {
         // Type and our own constant code only; never messages, tokens or ids.
-        final code = error is AuthException ? error.code : '';
+        // A FormatException message is printed only when it is one of our own
+        // short constant codes (A34/emulator sign-in loss, 2026-11-18).
+        final formatCode =
+            error is FormatException &&
+                RegExp(r'^[A-Za-z_ -]{1,64}$').hasMatch(error.message)
+            ? error.message
+            : '';
+        final code = error is AuthException ? error.code : formatCode;
         debugPrint(
           'recharge-auth: dev operation failed type=${error.runtimeType} $code',
         );
       }
       final offline =
-          error is AuthException && error.code == offlineAuthErrorCode;
+          error is AuthException &&
+          (error.code == offlineAuthErrorCode ||
+              error.code == rateLimitedAuthErrorCode ||
+              error.code == staleSnapshotAuthErrorCode);
       if (!offline) {
         try {
           await gateway.clearLocal();

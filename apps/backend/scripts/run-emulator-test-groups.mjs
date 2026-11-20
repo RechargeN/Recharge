@@ -85,6 +85,8 @@ export const emulatorTestGroups = Object.freeze([
       ["lib/test/emulator/booking_security.test.js"],
       ["lib/test/emulator/booking_abuse_controls.test.js"],
       ["lib/test/emulator/booking_full_integration_flow.test.js"],
+      // N4c: the cloud Booking composition against the Firestore Emulator.
+      ["lib/test/emulator/dev_booking_cloud_pipeline.test.js"],
     ],
   },
   {

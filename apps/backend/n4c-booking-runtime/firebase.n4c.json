@@ -1,0 +1,19 @@
+{
+  "functions": [
+    {
+      "source": "stage",
+      "codebase": "n4c-booking",
+      "runtime": "nodejs22",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "stage-manifest.json",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ],
+      "predeploy": [
+        "node ../scripts/package-n4c-booking-runtime.mjs --verify stage"
+      ]
+    }
+  ]
+}

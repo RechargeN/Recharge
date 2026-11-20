@@ -44,10 +44,11 @@ void test("all 40 original invocations, flags, globs and their order are retaine
   const tasks = emulatorTestGroups
     .filter((group) => !addedGroups.has(group.name))
     .flatMap((group) => group.tasks);
-  assert.equal(tasks.length, 46);
-  assert.equal(emulatorTestGroups.flatMap((group) => group.tasks).length, 65);
+  assert.equal(tasks.length, 48);
+  assert.equal(emulatorTestGroups.flatMap((group) => group.tasks).length, 67);
   // Added after the snapshot: D3.8 Activity Catalog, the D3.3 Rental group,
-  // the D3.4 Collection group and the D4.1 import group.
+  // the D3.4 Collection group, the D4.1 import group and the N3c push flow
+  // (0fab794 added it to handoff-notifications without updating this list).
   const added = new Set([
     "lib/test/emulator/activity_catalog_emulator_flow.test.js",
     "lib/test/emulator/content_rental_callable.test.js",
@@ -55,6 +56,9 @@ void test("all 40 original invocations, flags, globs and their order are retaine
     "lib/test/emulator/content_collection_callable.test.js",
     "lib/test/emulator/content_collection_emulator_flow.test.js",
     "lib/test/emulator/content_local_import_rollback.test.js",
+    "lib/test/emulator/notifications_push_emulator_flow.test.js",
+    // N4c: cloud Booking composition, added to the booking group.
+    "lib/test/emulator/dev_booking_cloud_pipeline.test.js",
   ]);
   const originalTasks = tasks.filter((task) => !added.has(task[0]));
   assert.equal(originalTasks.length, 40);

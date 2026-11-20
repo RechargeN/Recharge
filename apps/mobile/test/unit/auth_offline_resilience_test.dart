@@ -33,11 +33,18 @@ AuthResultEntity _result(DateTime now, Duration lifetime) => AuthResultEntity(
   ),
 );
 
+/// A restore that answers only after [delay] (a slow refresh round trip).
+class _Slow {
+  const _Slow(this.delay, this.lifetime);
+  final Duration delay;
+  final Duration lifetime;
+}
+
 class _ScriptedRepository implements FederatedAuthRepository {
   _ScriptedRepository(this.clock);
   final DateTime Function() clock;
   final List<Object> restoreScript =
-      <Object>[]; // 'offline' | 'refused' | Duration
+      <Object>[]; // 'offline' | 'refused' | 'busy' | 'rate-limited' | Duration
   int restoreCalls = 0;
   int signOuts = 0;
 
@@ -50,6 +57,26 @@ class _ScriptedRepository implements FederatedAuthRepository {
     }
     if (step == 'refused') {
       throw const AuthException(code: 'unauthenticated', message: '');
+    }
+    if (step == 'busy') {
+      throw const AuthException(
+        code: 'auth_operation_in_progress',
+        message: '',
+      );
+    }
+    if (step == 'rate-limited') {
+      throw const AuthException(code: 'AUTH_TOO_MANY_ATTEMPTS', message: '');
+    }
+    if (step is _Slow) {
+      await Future<void>.delayed(step.delay);
+      return _result(clock(), step.lifetime);
+    }
+    if (step == 'rate-limited-10m') {
+      throw const AuthException(
+        code: 'AUTH_TOO_MANY_ATTEMPTS',
+        message: '',
+        retryAfter: Duration(minutes: 10),
+      );
     }
     return _result(clock(), step as Duration);
   }
@@ -291,4 +318,150 @@ void main() {
       controller.dispose();
     });
   });
+
+  // N4b A34 2026-11-15 (staging): a restore that met another auth operation
+  // (`auth_operation_in_progress`) or the server's rotation limit
+  // (`rate-limited`) showed "Session expired" although the Session lived.
+  test(
+    'a busy repository during restore is retried, never shown as expiry',
+    () {
+      fakeAsync((async) {
+        final repo = _ScriptedRepository(DateTime.now);
+        repo.restoreScript.addAll(<Object>['busy', const Duration(hours: 1)]);
+        final controller = _controller(repo);
+        unawaited(controller.restoreSession());
+        async.flushMicrotasks();
+        expect(
+          controller.state.message,
+          isNot(AuthController.sessionExpiredMessage),
+        );
+        expect(repo.signOuts, 0);
+        async.elapse(const Duration(seconds: 2));
+        expect(controller.state.isAuthenticated, isTrue);
+        expect(repo.restoreCalls, 2);
+        controller.dispose();
+      });
+    },
+  );
+
+  test(
+    'rate-limited restore keeps the sign-in, says so, and retries slowly',
+    () {
+      fakeAsync((async) {
+        final repo = _ScriptedRepository(DateTime.now);
+        repo.restoreScript.addAll(<Object>[
+          'rate-limited',
+          const Duration(hours: 1),
+        ]);
+        final controller = _controller(repo);
+        unawaited(controller.restoreSession());
+        async.flushMicrotasks();
+        expect(controller.state.isAuthenticated, isFalse);
+        expect(controller.state.message, AuthController.rateLimitedMessage);
+        expect(repo.signOuts, 0);
+        async.elapse(const Duration(seconds: 30));
+        expect(repo.restoreCalls, 1, reason: 'no fast retry into the limit');
+        async.elapse(const Duration(seconds: 30));
+        expect(repo.restoreCalls, 2);
+        expect(controller.state.isAuthenticated, isTrue);
+        controller.dispose();
+      });
+    },
+  );
+
+  test('rate-limited while signed in keeps the signed-in UI', () {
+    fakeAsync((async) {
+      final repo = _ScriptedRepository(DateTime.now);
+      repo.restoreScript.addAll(<Object>[
+        const Duration(hours: 1),
+        'rate-limited',
+      ]);
+      final controller = _controller(repo);
+      unawaited(controller.restoreSession());
+      async.flushMicrotasks();
+      expect(controller.state.isAuthenticated, isTrue);
+      unawaited(controller.restoreSession());
+      async.flushMicrotasks();
+      expect(controller.state.isAuthenticated, isTrue);
+      expect(repo.signOuts, 0);
+      controller.dispose();
+    });
+  });
+
+  // Denied attempts count in the server's window: retrying before the
+  // server's retryAfter would keep the window full forever.
+  test('rate-limited restore waits for the server retryAfter', () {
+    fakeAsync((async) {
+      final repo = _ScriptedRepository(DateTime.now);
+      repo.restoreScript.addAll(<Object>[
+        'rate-limited-10m',
+        const Duration(hours: 1),
+      ]);
+      final controller = _controller(repo);
+      unawaited(controller.restoreSession());
+      async.flushMicrotasks();
+      async.elapse(const Duration(minutes: 9, seconds: 59));
+      expect(repo.restoreCalls, 1);
+      async.elapse(const Duration(seconds: 1));
+      expect(repo.restoreCalls, 2);
+      expect(controller.state.isAuthenticated, isTrue);
+      controller.dispose();
+    });
+  });
+
+  // Going to the background cancelled the wait, and every return to the app
+  // tried again at once: each denied attempt refilled the server's window.
+  test(
+    'the rate-limit wait survives the background; resume inside it sends nothing',
+    () {
+      fakeAsync((async) {
+        final repo = _ScriptedRepository(DateTime.now);
+        repo.restoreScript.addAll(<Object>[
+          'rate-limited-10m',
+          const Duration(hours: 1),
+        ]);
+        final controller = _controller(repo);
+        unawaited(controller.restoreSession());
+        async.flushMicrotasks();
+        expect(repo.restoreCalls, 1);
+        async.elapse(const Duration(minutes: 1));
+        controller.suspendForBackground();
+        async.elapse(const Duration(minutes: 2));
+        unawaited(controller.restoreAfterBackground());
+        async.flushMicrotasks();
+        expect(repo.restoreCalls, 1, reason: 'no attempt inside retryAfter');
+        async.elapse(const Duration(minutes: 7));
+        expect(repo.restoreCalls, 2);
+        expect(controller.state.isAuthenticated, isTrue);
+        controller.dispose();
+      });
+    },
+  );
+  test(
+    'a refresh still running when the snapshot runs out is not thrown away',
+    () {
+      // A34 staging 2026-11-19 21:01: the phone slept past the snapshot, so on
+      // wake the silent refresh and the expiry fired together. The refresh
+      // (snapshot_stale -> rotate) took seconds; expiry showed "no connection"
+      // and its retry joined the running refresh, whose success was then
+      // dropped as stale: the app stayed signed out with a live Session.
+      fakeAsync((async) {
+        final repo = _ScriptedRepository(DateTime.now);
+        final controller = _controller(repo);
+        unawaited(controller.signInWithGoogle());
+        async.flushMicrotasks();
+        repo.restoreScript.add(
+          const _Slow(Duration(minutes: 6), Duration(hours: 1)),
+        );
+        async.elapse(const Duration(minutes: 55)); // silent refresh starts
+        expect(repo.restoreCalls, 1);
+        async.elapse(const Duration(minutes: 5)); // snapshot over mid-refresh
+        async.elapse(const Duration(minutes: 2)); // the refresh succeeds
+        expect(controller.state.isAuthenticated, isTrue);
+        expect(controller.state.message, isNull);
+        expect(repo.signOuts, 0);
+        controller.dispose();
+      });
+    },
+  );
 }

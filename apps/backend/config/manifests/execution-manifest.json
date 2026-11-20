@@ -214,15 +214,15 @@
         {
           "name": "runtime-media",
           "kind": "runtime",
-          "purpose": "Media service: library only, fake adapters, no runtime",
-          "deployed": false,
+          "purpose": "Media service: staging Content + Media runtime (N4a, same release candidate as dev)",
+          "deployed": true,
           "authorized": false
         },
         {
           "name": "runtime-notifications",
           "kind": "runtime",
-          "purpose": "Notifications: library only, no runtime",
-          "deployed": false,
+          "purpose": "Notifications: staging inbox, preferences and FCM push (N4a)",
+          "deployed": true,
           "authorized": false
         },
         {
@@ -280,7 +280,7 @@
         "status": "proposed",
         "decisionRef": "BCK05-OD04-COST-01",
         "currency": "EUR",
-        "guardrailMonthlyEur": 75,
+        "guardrailMonthlyEur": 5,
         "thresholdsPercent": [50, 75, 90, 100],
         "anomalyAlerts": true,
         "responseOwnerRole": "Finance owner",

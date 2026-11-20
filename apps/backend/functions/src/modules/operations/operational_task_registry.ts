@@ -298,6 +298,8 @@ export const operationalTaskRegistry: readonly OperationalTaskFamily[] = deepFre
       mod('privacy_orchestration', 'infrastructure/registry_privacy_task_handler.ts'),
       // Restore admission re-applies DSR tasks with the same runner (OPS-L2 §6).
       mod('operations', 'restore_admission.ts'),
+      // Step 2 (owner decision 2026-11-20): the dev/stage cloud intake and worker.
+      'dev_privacy_entry.ts',
     ],
     triggers: [],
     recovery: [

@@ -11,11 +11,13 @@ import {
 } from './dev_content_media_composition.js';
 import { failureShape } from './shared/failure_shape.js';
 import { createDevFirebaseProviderIdentityVerifier } from './modules/identity_publisher/infrastructure/dev_firebase_provider_identity_verifier.js';
+import { loadTimeCloudProject, runtimeServiceAccount } from './shared/cloud_runtime_projects.js';
 
 // N3a.2 isolated entry (codebase n3a2-content-media). Not re-exported by
 // index.ts. Callable wire protocol over onRequest, as in N2c: the mobile dev
 // transport posts {data} with the Firebase ID token and receives {result}.
-const projectId = 'recharge-dev-n2a01';
+// N4a: dev or staging from the deploy environment (reviewed list, never production).
+const projectId = loadTimeCloudProject(process.env);
 const options = {
   region: 'europe-west1',
   memory: '512MiB' as const,
@@ -24,7 +26,7 @@ const options = {
   minInstances: 0,
   maxInstances: 1,
   concurrency: 1,
-  serviceAccount: 'runtime-media@recharge-dev-n2a01.iam.gserviceaccount.com',
+  serviceAccount: runtimeServiceAccount('runtime-media', projectId),
   invoker: 'public' as const,
   secrets: ['MEDIA_TOOLS_TOKEN'],
 };

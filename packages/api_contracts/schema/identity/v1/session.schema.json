@@ -42,6 +42,13 @@
       "type": "string",
       "pattern": "^[a-f0-9]{64}$"
     },
+    "previousHandleHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "previousHandleValidUntilUtc": {
+      "$ref": "identity_common.schema.json#/$defs/utcInstant"
+    },
     "issuedAtUtc": { "$ref": "identity_common.schema.json#/$defs/utcInstant" },
     "lastActiveAtUtc": {
       "$ref": "identity_common.schema.json#/$defs/utcInstant"

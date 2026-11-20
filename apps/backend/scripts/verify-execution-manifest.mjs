@@ -106,7 +106,8 @@ const blockingSwitches = {
 // stage/prod: proposed BCK05-OD-04 baseline. dev: owner target €5/month
 // (2026-11-04, N1 minimal synthetic dev), below the €25 baseline.
 // A guardrail is an alert threshold, never a spending permission.
-const guardrails = { dev: 5, stage: 75, prod: 150 };
+// N4a (owner 2026-11-13): staging is an alert at €5/month like dev; not a hard cap.
+const guardrails = { dev: 5, stage: 5, prod: 150 };
 const secretLike =
   /-----BEGIN|AIza[0-9A-Za-z_-]{20,}|gh[pousr]_[0-9A-Za-z]{20,}|\.iam\.gserviceaccount\.com|@[a-z0-9-]+\.[a-z]{2,}/u;
 

@@ -1,5 +1,6 @@
 import 'content_server_requirements.dart';
 import 'publication_media_type.dart';
+import 'create_media_asset_ref.dart';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
@@ -179,6 +180,16 @@ final class CollectionContentPublicationController extends ChangeNotifier {
     await _refreshAll();
   });
 
+  Map<String, String> _readyMediaRefs = const <String, String>{};
+
+  /// MEDIA-PICK-02: local photo copies that became ready server assets in the
+  /// last successful upload (local path -> asset id). Read once, then empty.
+  Map<String, String> takeReadyMediaRefs() {
+    final Map<String, String> refs = _readyMediaRefs;
+    _readyMediaRefs = const <String, String>{};
+    return refs;
+  }
+
   /// Uploads the cover and every gallery photo that changed, then binds them.
   Future<void> uploadMedia() => _run(() async {
     final CreateDraftEntity draft = _requireDraft();
@@ -190,6 +201,18 @@ final class CollectionContentPublicationController extends ChangeNotifier {
       draft,
       scope,
     )) {
+      // MEDIA-PICK-02: a promoted field already is a ready server asset.
+      final String? promoted = promotedMediaAssetId(item.localRef);
+      if (promoted != null) {
+        uploaded.add(
+          CollectionAttachmentRecord(
+            attachmentId: item.attachmentId,
+            assetId: promoted,
+            sha256: promotedMediaDigest(item.localRef),
+          ),
+        );
+        continue;
+      }
       final Uint8List? bytes = await _mediaSource.read(item.localRef);
       if (bytes == null) throw const _LocalRefusal('media_missing');
       final String digest = sha256.convert(bytes).toString();
@@ -230,6 +253,14 @@ final class CollectionContentPublicationController extends ChangeNotifier {
     record = record.copyWith(attachments: uploaded);
     await _journal.save(record);
     await _saveBody(draft, scope, record);
+    // MEDIA-PICK-02: every photo is a ready asset bound to the saved body;
+    // the Create form may now point its fields at the assets.
+    _readyMediaRefs = <String, String>{
+      for (final item in _mapper.attachmentsOf(draft, scope))
+        if (promotedMediaAssetId(item.localRef) == null &&
+            record.attachment(item.attachmentId) != null)
+          item.localRef: record.attachment(item.attachmentId)!.assetId,
+    };
     await _refreshAll();
   });
 
@@ -488,6 +519,11 @@ final class CollectionContentPublicationController extends ChangeNotifier {
       draft,
       scope,
     )) {
+      final String? promoted = promotedMediaAssetId(item.localRef);
+      if (promoted != null) {
+        assets[item.attachmentId] = promoted;
+        continue;
+      }
       final CollectionAttachmentRecord? known = record.attachment(
         item.attachmentId,
       );

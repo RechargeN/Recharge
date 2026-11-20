@@ -52,6 +52,44 @@ void test('corrupt counter fails closed as unavailable policy evidence', async (
   );
 });
 
+// N4b, A34 on staging 2026-11-15: a denied attempt is recorded too and the
+// oldest timestamp drops out of the stored window, so the retryAfter of the
+// oldest timestamp was always too early: a client that waited exactly that
+// long was denied again, forever. retryAfter now matches the stored window.
+void test('waiting exactly retryAfter after a denial is allowed', async () => {
+  const limiter = new FirestoreAbuseRateLimiter(firestore);
+  const start = Date.parse('2026-09-27T10:00:00.000Z');
+  const at = (minutes: number) => new Date(start + minutes * 60_000);
+  // identity.session.rotate: 6 per session per hour.
+  for (const [index, minute] of [0, 10, 20, 30, 40, 50].entries()) {
+    const allowed = await limiter.consume(rotate(`req-rotate-${index}`, at(minute)));
+    assert.equal(allowed.allowed, true);
+  }
+  const denied = await limiter.consume(rotate('req-rotate-denied', at(55)));
+  assert.equal(denied.allowed, false);
+  if (denied.allowed) return;
+  // The stored window is now 10, 20, 30, 40, 50 and 55: free when 10 ends.
+  assert.equal(denied.retryAfterSeconds, 15 * 60);
+  const after = await limiter.consume(
+    rotate('req-rotate-after-wait', new Date(at(55).getTime() + denied.retryAfterSeconds * 1000)),
+  );
+  assert.equal(after.allowed, true);
+});
+
+function rotate(attemptRequestId: string, now: Date) {
+  return {
+    operation: 'identity.session.rotate' as const,
+    attemptRequestId,
+    accountId: 'user-rotate-limit',
+    installationId: 'install-rotate-limit',
+    sessionId: 'session-rotate-limit',
+    environmentId: 'local' as const,
+    marketId: 'LV' as const,
+    now,
+    correlationId: attemptRequestId,
+  };
+}
+
 function request(
   operation: 'booking.create' | 'booking.cancel' | 'booking.query',
   attemptRequestId: string,

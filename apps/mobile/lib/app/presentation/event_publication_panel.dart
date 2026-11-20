@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../core/localization/l10n_context.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/create/application/event_publication_controller.dart';
 import '../../features/create/presentation/widgets/event_publication_section.dart';
 import '../di/event_publication_composition.dart';
+import '../router/route_names.dart';
 
 /// Default-off test page for the Event publication path (C3). It hosts the
 /// section for the signed-in user's own Create Event draft and shows nothing
@@ -75,7 +77,21 @@ class _EventPublicationPanelState extends ConsumerState<EventPublicationPanel> {
           ) {
             final EventPublicationController? controller = snapshot.data;
             if (controller == null) return const SizedBox.shrink();
-            return EventPublicationSection(controller: controller);
+            return EventPublicationSection(
+              controller: controller,
+              onOpenBooking: (EventBookingTestTarget target) => context.push(
+                Uri(
+                  path: '${RouteNames.testEventBooking}/${target.eventId}',
+                  queryParameters: <String, String>{
+                    'occurrence': target.occurrenceId,
+                    'start': target.startAtUtc.toIso8601String(),
+                    'end': target.endAtUtc.toIso8601String(),
+                    'title': target.title,
+                    if (target.channel != null) 'channel': target.channel!,
+                  },
+                ).toString(),
+              ),
+            );
           },
     );
   }

@@ -310,6 +310,12 @@ abstract class AppLocalizations {
   /// **'Saved searches and discovery filters'**
   String get settingsSearchHint;
 
+  /// Settings: debug-only entry to the Booking test Event.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking test (debug)'**
+  String get settingsBookingTestEntry;
+
   /// Settings item subtitle.
   ///
   /// In en, this message translates to:
@@ -754,6 +760,12 @@ abstract class AppLocalizations {
   /// **'This upload cannot be retried. Start a new upload.'**
   String get mediaErrorRetryNotAllowed;
 
+  /// Media upload kept in quarantine: the safety scan could not decide yet or processing failed (N4b).
+  ///
+  /// In en, this message translates to:
+  /// **'The file has not passed the safety check yet. Try uploading it again later.'**
+  String get mediaErrorQuarantined;
+
   /// Booking: sold out.
   ///
   /// In en, this message translates to:
@@ -921,6 +933,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cover photo selected'**
   String get createMediaCoverSelected;
+
+  /// MEDIA-PICK-02: the photo is a ready server asset; the local copy was removed.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo uploaded to the server'**
+  String get createMediaUploadedToServer;
 
   /// Client refusal media_unsupported.
   ///
@@ -1186,11 +1204,11 @@ abstract class AppLocalizations {
   /// **'Test publication path (local Emulator)'**
   String get publicationTestPath;
 
-  /// Header of the publication test page when it talks to the dev cloud (N3a.2), not the local Emulator.
+  /// Header of the publication test page when it talks to a reviewed cloud project (N3a.2 dev, N4b staging), not the local Emulator.
   ///
   /// In en, this message translates to:
-  /// **'Test publication path (dev cloud)'**
-  String get publicationTestPathDevCloud;
+  /// **'{kind, select, dev{Test publication path (dev cloud)} staging{Test publication path (staging cloud)} other{Test publication path (cloud)}}'**
+  String publicationTestPathCloud(String kind);
 
   /// No local draft of the type; type is the stable Create type id.
   ///
@@ -1311,6 +1329,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upload media'**
   String get publicationUploadMedia;
+
+  /// Publication: shown while uploaded photos are scanned on the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking the photo… The first check can take up to 20 seconds.'**
+  String get publicationCheckingPhoto;
 
   /// Publication button.
   ///
@@ -1754,6 +1778,12 @@ abstract class AppLocalizations {
   /// **'Notifications could not be loaded'**
   String get notificationsLoadFailed;
 
+  /// Notifications: the server refused this account access to the inbox.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has no access to notifications'**
+  String get notificationsAccessDenied;
+
   /// Notifications: empty inbox.
   ///
   /// In en, this message translates to:
@@ -1829,7 +1859,7 @@ abstract class AppLocalizations {
   /// Where a notification leads; kind is a stable id.
   ///
   /// In en, this message translates to:
-  /// **'{kind, select, legacy{Legacy notification} routeMap{Route map} map{Map} details{Details} saved{Saved plan} search{Search} publishStatus{Publish status} create{Create} creatorProfile{Creator profile} discover{Discover} other{Update}}'**
+  /// **'{kind, select, legacy{Legacy notification} routeMap{Route map} map{Map} details{Details} saved{Saved plan} search{Search} publishStatus{Publish status} create{Create} creatorProfile{Profile} discover{Discover} other{Update}}'**
   String notificationDestination(String kind);
 
   /// Action that opens a notification's destination; kind is a stable id.
@@ -12225,7 +12255,7 @@ abstract class AppLocalizations {
   /// Discover: Rental quantities are declared, not live.
   ///
   /// In en, this message translates to:
-  /// **'Listed quantities are Creator-declared, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.'**
+  /// **'Listed quantities are declared by the publisher, not a live booking guarantee or confirmed-fresh count. Confirm on the provider site before relying on them.'**
   String get discoverRentalQuantitiesDisclaimer;
 
   /// Discover: Rental delivery radius.
@@ -12849,7 +12879,7 @@ abstract class AppLocalizations {
   /// Discover: home: what the For you block holds.
   ///
   /// In en, this message translates to:
-  /// **'Personal picks, saved ideas and creator tools stay one tap away.'**
+  /// **'Personal picks, saved ideas and create tools stay one tap away.'**
   String get discoverForYouHint;
 
   /// Discover: idea title from Smart Search without a query.
@@ -13269,7 +13299,7 @@ abstract class AppLocalizations {
   /// L4.6: Profile, workspace switcher — title.
   ///
   /// In en, this message translates to:
-  /// **'Creator'**
+  /// **'User'**
   String get identityCreator;
 
   /// L4.6: Profile, workspace switcher — button label.
@@ -13611,7 +13641,7 @@ abstract class AppLocalizations {
   /// L4.6: Profile page — text.
   ///
   /// In en, this message translates to:
-  /// **'Creator next steps'**
+  /// **'Next steps'**
   String get profileCreatorNextSteps;
 
   /// L4.6: Profile page — button tooltip.
@@ -13641,7 +13671,7 @@ abstract class AppLocalizations {
   /// L4.6: Profile page — text.
   ///
   /// In en, this message translates to:
-  /// **'Creator listing'**
+  /// **'My listing'**
   String get profileCreatorListing;
 
   /// L4.6: Profile page — button label.
@@ -13665,7 +13695,7 @@ abstract class AppLocalizations {
   /// L4.6: Profile page — text.
   ///
   /// In en, this message translates to:
-  /// **'Creator publications'**
+  /// **'My publications'**
   String get profileCreatorPublications;
 
   /// L4.6: Profile page — button tooltip.
@@ -13923,7 +13953,7 @@ abstract class AppLocalizations {
   /// L4.6: Profile page — secondary line.
   ///
   /// In en, this message translates to:
-  /// **'Open taxonomy-based creator flow'**
+  /// **'Open creation by category'**
   String get profileOpenTaxonomyFlow;
 
   /// L4.6: Profile page — title.
@@ -14007,7 +14037,7 @@ abstract class AppLocalizations {
   /// L4.6: Profile page — title.
   ///
   /// In en, this message translates to:
-  /// **'Creator tools'**
+  /// **'Create tools'**
   String get profileCreatorTools;
 
   /// L4.6: Profile page — title.
@@ -14973,7 +15003,7 @@ abstract class AppLocalizations {
   /// L4.6: profile role title for a stable role id (Creator stays untranslated until the glossary).
   ///
   /// In en, this message translates to:
-  /// **'{value, select, pro_generator{Pro generator}creator{Creator}user{User} other{Creator}}'**
+  /// **'{value, select, admin{Administrator}pro_generator{Pro generator}creator{User}user{User} other{User}}'**
   String profileRoleTitle(String value);
 
   /// L4.6: Quick Plan route fit level (stable value).

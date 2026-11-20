@@ -10,6 +10,14 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { treeDigest } from "./package-n2c-identity-runtime.mjs";
+import {
+  cliTarget,
+  codeTreeDigest,
+  envFileFor,
+  isReviewedProject,
+  projectNumberEnvLines,
+  resolveProjectNumber,
+} from "./runtime-projects.mjs";
 
 // Stages the Firebase CLI source directory of the N3a.2 dev Content + Media
 // codebase. Local only: no npm install, network, Firebase CLI or cloud call.
@@ -109,7 +117,13 @@ export function closurePackages(functionsRoot, files) {
   return [...names].sort();
 }
 
-export function renderEnv({ runtimeEnabled, allowedUids }) {
+export function renderEnv({
+  runtimeEnabled,
+  allowedUids,
+  projectId: target = projectId,
+  projectNumber,
+}) {
+  const number = resolveProjectNumber(target, projectNumber);
   if (typeof runtimeEnabled !== "boolean")
     throw new Error("runtimeEnabled must be boolean");
   if (
@@ -124,6 +138,7 @@ export function renderEnv({ runtimeEnabled, allowedUids }) {
     "RECHARGE_MEDIA_STORAGE=dev-cloud",
     "RECHARGE_MEDIA_TOOLS=dev-cloud",
     `N3A2_ALLOWED_FIREBASE_UIDS=${allowedUids.join(",")}`,
+    ...projectNumberEnvLines(target, number),
     "",
   ].join("\n");
 }
@@ -132,9 +147,12 @@ export function stageRuntime({
   outDir,
   runtimeEnabled,
   allowedUids,
+  projectId: target = projectId,
+  projectNumber,
   functionsRoot = path.join(backend, "functions"),
   runtimeRoot = path.join(backend, "n3a2-content-media-runtime"),
 }) {
+  const number = resolveProjectNumber(target, projectNumber);
   const pkg = JSON.parse(
     readFileSync(path.join(runtimeRoot, "package.json"), "utf8"),
   );
@@ -150,7 +168,12 @@ export function stageRuntime({
     throw new Error("lockfile root dependencies differ from package.json");
   if (Object.values(pkg.dependencies).some((v) => !/^\d+\.\d+\.\d+$/u.test(v)))
     throw new Error("runtime dependencies must be exact versions");
-  const env = renderEnv({ runtimeEnabled, allowedUids });
+  const env = renderEnv({
+    runtimeEnabled,
+    allowedUids,
+    projectId: target,
+    projectNumber: number,
+  });
   const files = importClosure(functionsRoot);
   // 2026-11-08: the first cloud analysis failed on ajv/ajv-formats missing here.
   const missing = closurePackages(functionsRoot, files).filter(
@@ -189,14 +212,16 @@ export function stageRuntime({
           `contracts/${group}/v1/${name}`,
           readFileSync(path.join(schemaRoot, group, "v1", name)),
         );
-  write(envFile, env);
+  write(envFileFor(target), env);
   const digest = treeDigest(outDir);
   const manifest = {
     schemaVersion: 1,
-    projectId,
+    projectId: target,
+    projectNumber: number,
     entry,
     runtimeEnabled,
     allowedUids,
+    codeTreeSha256: codeTreeDigest(outDir),
     treeSha256: digest.sha256,
     files: digest.files,
   };
@@ -216,6 +241,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
       outDir,
       runtimeEnabled: enabled === "true",
       allowedUids: uids.split(","),
+      ...cliTarget(process.env),
     });
     process.stdout.write(
       `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled})\n`,

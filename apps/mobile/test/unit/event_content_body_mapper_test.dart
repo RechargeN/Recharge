@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/domain/entities/event_admission.dart';
+import 'package:recharge/features/create/domain/entities/event_inventory.dart';
 import 'package:recharge/features/create/domain/usecases/build_event_content_body.dart';
 
 import 'package:recharge/features/create/data/models/event_draft_mapper.dart';
@@ -211,4 +212,104 @@ void main() {
       throwsArgumentError,
     );
   });
+  test(
+    'internal registration v1 carries Recharge seats as one general group',
+    () {
+      // A34 2026-11-19: the wizard asks who manages the seats, so a valid
+      // internal Event always has an inventory configuration. v1 carries it as
+      // the event capacity when it is one Recharge-managed general group of the
+      // same known size (or nobody manages seats); anything richer is refused.
+      EventInventoryPoolDraft pool({int capacity = 20}) =>
+          EventInventoryPoolDraft(
+            id: 'pool-1',
+            label: 'Gen20',
+            shape: InventoryShape.generalCapacity,
+            channel: InventoryChannel.onsite,
+            capacityMode: EventCapacityMode.known,
+            capacity: capacity,
+          );
+      CreateDraftEntity withInventory(EventInventoryConfiguration inventory) {
+        final base = withInternalRegistration(draft);
+        return base.copyWith(
+          eventData: base.eventData!.copyWith(inventory: inventory),
+        );
+      }
+
+      final recharge = mapper.map(
+        withInventory(
+          EventInventoryConfiguration(
+            authority: InventoryAuthority.recharge,
+            primaryShape: InventoryShape.generalCapacity,
+            pools: <EventInventoryPoolDraft>[pool()],
+          ),
+        ),
+      );
+      expect(recharge.unsupported, isEmpty);
+      expect(recharge.body['participants'], <String, Object?>{
+        'capacityMode': 'known',
+        'capacity': 20,
+      });
+      expect(
+        mapper
+            .map(
+              withInventory(
+                const EventInventoryConfiguration(
+                  authority: InventoryAuthority.none,
+                ),
+              ),
+            )
+            .unsupported,
+        isEmpty,
+      );
+      for (final EventInventoryConfiguration refused
+          in <EventInventoryConfiguration>[
+            EventInventoryConfiguration(
+              authority: InventoryAuthority.recharge,
+              primaryShape: InventoryShape.generalCapacity,
+              pools: <EventInventoryPoolDraft>[pool(capacity: 10)],
+            ),
+            EventInventoryConfiguration(
+              authority: InventoryAuthority.recharge,
+              primaryShape: InventoryShape.generalCapacity,
+              pools: <EventInventoryPoolDraft>[
+                pool(capacity: 10),
+                pool(capacity: 10).copyWith(id: 'pool-2'),
+              ],
+            ),
+            EventInventoryConfiguration(
+              authority: InventoryAuthority.recharge,
+              primaryShape: InventoryShape.zones,
+              pools: <EventInventoryPoolDraft>[
+                pool().copyWith(shape: InventoryShape.zones),
+              ],
+            ),
+            EventInventoryConfiguration(
+              authority: InventoryAuthority.externalProvider,
+              primaryShape: InventoryShape.generalCapacity,
+              pools: <EventInventoryPoolDraft>[pool()],
+            ),
+          ]) {
+        expect(mapper.map(withInventory(refused)).unsupported, <String>[
+          'inventory',
+        ]);
+      }
+      // Without internal registration an inventory stays unsupported.
+      expect(
+        mapper
+            .map(
+              draft.copyWith(
+                eventData: draft.eventData!.copyWith(
+                  inventory: EventInventoryConfiguration(
+                    authority: InventoryAuthority.recharge,
+                    primaryShape: InventoryShape.generalCapacity,
+                    pools: <EventInventoryPoolDraft>[pool()],
+                  ),
+                ),
+              ),
+            )
+            .unsupported,
+        contains('inventory'),
+      );
+    },
+  );
 }

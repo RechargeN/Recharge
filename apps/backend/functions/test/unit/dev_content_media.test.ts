@@ -1,3 +1,4 @@
+import { ownerMediaCommands } from '../../src/media_entry.js';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -7,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import type { Firestore } from 'firebase-admin/firestore';
 
 import {
-  closedModeration,
+  postModeration,
   devContentTypes,
   devOperations,
   handleDevContentMedia,
@@ -35,17 +36,18 @@ const neverCompose = (): DevContentMedia => {
   throw new Error('composition must not be built');
 };
 
-void test('only Place and the owner draft/media operations exist; publication paths are closed', async () => {
-  assert.deepEqual([...devContentTypes], ['place']);
+void test('Place and Event, owner draft/publication/media operations only; staff and import paths are closed', async () => {
+  // Owner decision 2026-11-19 (variant B): owners publish without pre-review.
+  assert.deepEqual([...devContentTypes], ['place', 'event']);
   for (const [callable, data] of [
-    ['contentCommandV1', { commandType: 'submitForPublication' }],
-    ['contentCommandV1', { commandType: 'publishApprovedRevision' }],
-    ['contentCommandV1', { commandType: 'withdrawPublication' }],
     ['contentCommandV1', { commandType: 'activatePublishedRevision' }],
     ['contentCommandV1', { commandType: 'rollbackImportedDraft' }],
     ['contentCommandV1', { commandType: 'applyModerationDisposition' }],
     ['contentQueryV1', { queryType: 'getPublishedRevision' }],
     ['mediaCommandV1', { commandType: 'deleteAsset' }],
+    ['mediaCommandV1', { commandType: 'detachAsset' }],
+    ['mediaCommandV1', { commandType: 'applyRestriction' }],
+    ['mediaCommandV1', { commandType: 'reconcileOrphan' }],
     ['mediaQueryV1', { queryType: 'deliver' }],
     ['contentCommandV1', {}],
     ['contentCommandV1', 'not an object'],
@@ -59,7 +61,25 @@ void test('only Place and the owner draft/media operations exist; publication pa
     });
     assert.deepEqual(result, { schemaVersion: 1, kind: 'rejected', code: 'capability_denied' });
   }
-  assert.deepEqual(devOperations.contentCommandV1, ['createDraft', 'updateDraft']);
+  assert.deepEqual(devOperations.contentCommandV1, [
+    'createDraft',
+    'updateDraft',
+    'submitForPublication',
+    'publishApprovedRevision',
+    'withdrawPublication',
+  ]);
+  // N4b: an owner may ask the server to process a quarantined asset again
+  // (bounded attempts, no deletion); nothing else was added. Every operation
+  // the cloud runtime lets through must also be one the owner handler serves
+  // (the first retry came back capability_denied from media_entry).
+  for (const operation of devOperations.mediaCommandV1)
+    assert.ok(ownerMediaCommands.includes(operation), operation);
+  assert.deepEqual(devOperations.mediaCommandV1, [
+    'createUploadSession',
+    'confirmUpload',
+    'finalizeAsset',
+    'retryProcessing',
+  ]);
 });
 
 void test('no Recharge Session in the payload: unauthenticated before any read', async () => {
@@ -128,16 +148,22 @@ void test('Media never starts without the dev-cloud tools (no fake or local fall
   );
 });
 
-void test('no moderation in dev: no profile, no verified disposition', async () => {
+void test('post-moderation (owner 2026-11-19): approved by the recorded policy decision, no disposition verified', async () => {
   assert.deepEqual(
-    await closedModeration.profileFor({
-      typeId: 'place',
+    await postModeration.profileFor({
+      typeId: 'event',
       marketId: 'LV',
       publisherRef: { type: 'user', id: uid as never },
     }),
-    { available: false },
+    {
+      available: true,
+      profileId: 'owner.post-moderation',
+      requiresPrePublicationModeration: false,
+      policyRevision: 'owner-2026-11-19-post-moderation-1',
+      policyDecisionId: 'owner-decision-2026-11-19-publish-without-pre-review',
+    },
   );
-  assert.deepEqual(await closedModeration.verifyDisposition({ payload: {} as never, nowUtc: '' }), {
+  assert.deepEqual(await postModeration.verifyDisposition({ payload: {} as never, nowUtc: '' }), {
     verified: false,
   });
 });

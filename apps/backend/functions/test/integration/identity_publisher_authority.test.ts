@@ -294,13 +294,13 @@ void test('verified Creator obtains exact personal and page Publisher authority 
   });
   // ADR 0023: an unverified User is a personal publisher (money is checked by Content).
   assert.equal(unverified.reason, 'eligible');
-  await authority.creatorVerification.submit({
+  await authority.identityVerification.submit({
     userId: ids.user1,
     verificationId: ids.verification1,
     evidenceRefIds: [ids.evidence1],
     nowUtc: '2026-09-22T00:00:03.000Z',
   });
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: ids.user1,
     status: 'verified',
@@ -401,13 +401,13 @@ void test('membership and account revocation invalidate cached authority', async
     installationId: 'install-1',
     snapshotExpiresAtUtc: '2026-09-22T00:05:01.000Z',
   });
-  await authority.creatorVerification.submit({
+  await authority.identityVerification.submit({
     userId: ids.user1,
     verificationId: ids.verification1,
     evidenceRefIds: [ids.evidence1],
     nowUtc: '2026-09-22T00:00:02.000Z',
   });
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: ids.user1,
     status: 'verified',
@@ -557,13 +557,13 @@ void test('page grants are role-bounded and suspended pages become restricted', 
     nowUtc: '2026-09-22T00:00:00.000Z',
     accountCreationEnabled: true,
   });
-  await authority.creatorVerification.submit({
+  await authority.identityVerification.submit({
     userId: ids.user1,
     verificationId: ids.verification1,
     evidenceRefIds: [ids.evidence1],
     nowUtc: '2026-09-22T00:00:01.000Z',
   });
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: ids.user1,
     status: 'verified',
@@ -663,13 +663,13 @@ void test('restricted pages do not consume active page creation quota', async ()
     nowUtc: '2026-09-22T00:00:00.000Z',
     accountCreationEnabled: true,
   });
-  await authority.creatorVerification.submit({
+  await authority.identityVerification.submit({
     userId: ids.user1,
     verificationId: ids.verification1,
     evidenceRefIds: [ids.evidence1],
     nowUtc: '2026-09-22T00:00:01.000Z',
   });
-  await authority.creatorVerification.decide({
+  await authority.identityVerification.decide({
     reviewerId: 'reviewer',
     userId: ids.user1,
     status: 'verified',
@@ -696,4 +696,108 @@ void test('restricted pages do not consume active page creation quota', async ()
     nowUtc: '2026-09-22T00:00:05.000Z',
   });
   assert.equal(replacement.page.status, 'pendingReview');
+});
+
+void test('a lost rotation answer keeps the sign-in; the new handle retires the old one (owner 2026-11-19)', async () => {
+  const { authority } = setup();
+  await authority.accounts.ensureAccount({
+    proof: googleProof('lost-rotation'),
+    proposedUserId: ids.user1,
+    proposedIdentityId: ids.identity1,
+    nowUtc: '2026-09-22T00:00:00.000Z',
+    accountCreationEnabled: true,
+  });
+  const issued = await authority.sessions.issue({
+    userId: ids.user1,
+    sessionId: ids.session1,
+    issuedAtUtc: '2026-09-22T00:00:01.000Z',
+    firebaseUid: 'firebase-lost',
+    installationId: 'install-lost',
+    snapshotExpiresAtUtc: '2026-09-22T01:00:01.000Z',
+  });
+  const binding = {
+    sessionId: ids.session1,
+    firebaseUid: 'firebase-lost',
+    installationId: 'install-lost',
+  };
+  const rotate = (sessionHandle: string, nowUtc: string) =>
+    authority.sessions.rotate({
+      ...binding,
+      sessionHandle,
+      nowUtc,
+      snapshotExpiresAtUtc: new Date(Date.parse(nowUtc) + 60 * 60 * 1000).toISOString(),
+    });
+  const read = (sessionHandle: string, nowUtc: string) =>
+    authority.sessions.readCurrent({ ...binding, sessionHandle, nowUtc });
+  const failsWith = (code: string) => (error: unknown) =>
+    error instanceof IdentityFailure && error.code === code;
+
+  // The server rotates, but the answer never reaches the device.
+  const lost = await rotate(issued.sessionHandle, '2026-09-22T00:55:00.000Z');
+  // The device still holds the old handle: a read asks it to rotate, it is not signed out.
+  await assert.rejects(
+    read(issued.sessionHandle, '2026-09-22T01:45:00.000Z'),
+    failsWith('snapshot_stale'),
+  );
+  // Rotating with the old handle succeeds, as often as the answers keep getting lost.
+  const repaired = await rotate(issued.sessionHandle, '2026-09-22T01:45:01.000Z');
+  const again = await rotate(issued.sessionHandle, '2026-09-22T01:46:00.000Z');
+  assert.notEqual(again.sessionHandle, lost.sessionHandle);
+  assert.notEqual(again.sessionHandle, repaired.sessionHandle);
+  // The device uses its new handle once: from now on the old one is refused.
+  await read(again.sessionHandle, '2026-09-22T01:47:00.000Z');
+  await assert.rejects(
+    read(issued.sessionHandle, '2026-09-22T01:48:00.000Z'),
+    failsWith('unauthenticated'),
+  );
+  await assert.rejects(
+    rotate(issued.sessionHandle, '2026-09-22T01:48:01.000Z'),
+    failsWith('not_found_or_not_accessible'),
+  );
+  // A superseded new handle (never used) is not a previous handle either.
+  await assert.rejects(
+    read(lost.sessionHandle, '2026-09-22T01:49:00.000Z'),
+    failsWith('unauthenticated'),
+  );
+  // An ordinary rotation with the current handle keeps working.
+  await rotate(again.sessionHandle, '2026-09-22T01:50:00.000Z');
+});
+
+void test('the previous handle never outlives the session and needs the same installation', async () => {
+  const { authority } = setup();
+  await authority.accounts.ensureAccount({
+    proof: googleProof('lost-rotation-bounds'),
+    proposedUserId: ids.user1,
+    proposedIdentityId: ids.identity1,
+    nowUtc: '2026-09-22T00:00:00.000Z',
+    accountCreationEnabled: true,
+  });
+  const issued = await authority.sessions.issue({
+    userId: ids.user1,
+    sessionId: ids.session1,
+    issuedAtUtc: '2026-09-22T00:00:01.000Z',
+    firebaseUid: 'firebase-bounds',
+    installationId: 'install-bounds',
+    snapshotExpiresAtUtc: '2026-09-22T01:00:01.000Z',
+  });
+  await authority.sessions.rotate({
+    sessionId: ids.session1,
+    sessionHandle: issued.sessionHandle,
+    firebaseUid: 'firebase-bounds',
+    installationId: 'install-bounds',
+    nowUtc: '2026-09-22T00:55:00.000Z',
+    snapshotExpiresAtUtc: '2026-09-22T01:55:00.000Z',
+  });
+  await assert.rejects(
+    authority.sessions.rotate({
+      sessionId: ids.session1,
+      sessionHandle: issued.sessionHandle,
+      firebaseUid: 'firebase-bounds',
+      installationId: 'another-installation',
+      nowUtc: '2026-09-22T01:00:00.000Z',
+      snapshotExpiresAtUtc: '2026-09-22T02:00:00.000Z',
+    }),
+    (error: unknown) =>
+      error instanceof IdentityFailure && error.code === 'not_found_or_not_accessible',
+  );
 });

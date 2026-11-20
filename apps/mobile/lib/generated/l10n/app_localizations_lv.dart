@@ -116,6 +116,9 @@ class AppLocalizationsLv extends AppLocalizations {
   String get settingsSearchHint => 'Saglabātie meklējumi un kataloga filtri';
 
   @override
+  String get settingsBookingTestEntry => 'Rezervācijas tests (atkļūdošana)';
+
+  @override
   String get settingsNotificationsHint => 'Iesūtne un maršrutu jaunumi';
 
   @override
@@ -379,6 +382,10 @@ class AppLocalizationsLv extends AppLocalizations {
       'Šo augšupielādi nevar atkārtot. Sāciet jaunu augšupielādi.';
 
   @override
+  String get mediaErrorQuarantined =>
+      'Fails vēl nav izgājis drošības pārbaudi. Mēģiniet to augšupielādēt vēlāk.';
+
+  @override
   String get bookingErrorSoldOut => 'Šim pasākumam vairs nav brīvu vietu.';
 
   @override
@@ -478,6 +485,9 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get createMediaCoverSelected => 'Vāka attēls izvēlēts';
+
+  @override
+  String get createMediaUploadedToServer => 'Foto ir augšupielādēts serverī';
 
   @override
   String get localErrorMediaUnsupported =>
@@ -670,8 +680,14 @@ class AppLocalizationsLv extends AppLocalizations {
       'Testa publicēšanas ceļš (lokālais emulators)';
 
   @override
-  String get publicationTestPathDevCloud =>
-      'Testa publicēšanas ceļš (izstrādes mākonis)';
+  String publicationTestPathCloud(String kind) {
+    String _temp0 = intl.Intl.selectLogic(kind, {
+      'dev': 'Testa publicēšanas ceļš (izstrādes mākonis)',
+      'staging': 'Testa publicēšanas ceļš (testēšanas mākonis)',
+      'other': 'Testa publicēšanas ceļš (mākonis)',
+    });
+    return '$_temp0';
+  }
 
   @override
   String publicationNoDraft(String type) {
@@ -803,6 +819,10 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get publicationUploadMedia => 'Augšupielādēt multividi';
+
+  @override
+  String get publicationCheckingPhoto =>
+      'Pārbaudām fotoattēlu… Pirmā pārbaude var ilgt līdz 20 sekundēm.';
 
   @override
   String get publicationUploadCover => 'Augšupielādēt vāku';
@@ -1186,6 +1206,10 @@ class AppLocalizationsLv extends AppLocalizations {
   String get notificationsLoadFailed => 'Paziņojumus neizdevās ielādēt';
 
   @override
+  String get notificationsAccessDenied =>
+      'Šim kontam nav piekļuves paziņojumiem';
+
+  @override
   String get notificationsEmpty => 'Paziņojumu vēl nav';
 
   @override
@@ -1232,7 +1256,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'search': 'Meklēšana',
       'publishStatus': 'Publicēšanas statuss',
       'create': 'Izveidot',
-      'creatorProfile': 'Autora profils',
+      'creatorProfile': 'Profils',
       'discover': 'Atklāt',
       'other': 'Jaunums',
     });
@@ -3527,7 +3551,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get createFormCouldRental => 'Vai tā varētu būt noma?';
 
   @override
-  String get createFormRechargeCreate => 'Recharge Create';
+  String get createFormRechargeCreate => 'Recharge: veidošana';
 
   @override
   String get createFormSaveDraft => 'Saglabāt melnrakstu';
@@ -3844,7 +3868,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get createFormEventDraftUnavailableReopenCreateHub =>
-      'Pasākuma melnraksts nav pieejams. Atveriet Create Hub vēlreiz.';
+      'Pasākuma melnraksts nav pieejams. Atveriet veidošanas centru vēlreiz.';
 
   @override
   String get createFormClosesAtUtcIso8601 => 'Aizveras UTC (ISO 8601)';
@@ -4446,7 +4470,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get createFormWhatDoYouWantCreate => 'Ko vēlaties izveidot?';
 
   @override
-  String get createFormCreateHub => 'Create Hub';
+  String get createFormCreateHub => 'Veidošanas centrs';
 
   @override
   String get createFormRefreshPreview => 'Atjaunināt priekšskatījumu';
@@ -8619,7 +8643,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get discoverRentalQuantitiesDisclaimer =>
-      'Norādītos daudzumus deklarē autors; tā nav reāllaika rezervācijas garantija vai apstiprināts aktuāls skaits. Pirms paļauties uz tiem, pārbaudiet pakalpojuma sniedzēja vietnē.';
+      'Norādītos daudzumus deklarē publicētājs; tā nav reāllaika rezervācijas garantija vai apstiprināts aktuāls skaits. Pirms paļauties uz tiem, pārbaudiet pakalpojuma sniedzēja vietnē.';
 
   @override
   String discoverDeliveryWithin(String value) {
@@ -8770,37 +8794,38 @@ class AppLocalizationsLv extends AppLocalizations {
       'Ierakstiet vaicājumu vai izmantojiet balss ievadi. Recharge saprot laiku, vietu, budžetu un noskaņojumu un parāda piemērotas iespējas.';
 
   @override
-  String get discoverSmartPromptCalmEveningNearby => 'Calm evening nearby';
+  String get discoverSmartPromptCalmEveningNearby =>
+      'Gribu mierīgu vakaru tuvumā';
 
   @override
   String get discoverSmartPromptSomethingForTwoHours =>
-      'Find something interesting for 2 hours';
+      'Atrodi kaut ko interesantu uz 2 stundām';
 
   @override
-  String get discoverSmartPromptForTwoNearby => 'Where to go for two nearby';
+  String get discoverSmartPromptForTwoNearby => 'Kur aiziet divatā netālu';
 
   @override
   String get discoverSmartPromptExample =>
-      'Something calm nearby tonight, up to 20 EUR';
+      'Gribu šovakar kaut ko mierīgu tuvumā, līdz 20 EUR';
 
   @override
   String get discoverSmartPromptExampleHint =>
-      'Piemēram: “Something calm nearby tonight, up to €20”';
+      'Piemēram: “Gribu šovakar kaut ko mierīgu tuvumā, līdz 20 €”';
 
   @override
-  String get discoverSmartPromptNearNow => 'Something interesting nearby now';
+  String get discoverSmartPromptNearNow => 'Kaut kas interesants tuvumā tagad';
 
   @override
-  String get discoverSmartPromptForTwo => 'Where to go for two';
+  String get discoverSmartPromptForTwo => 'Kur aiziet divatā';
 
   @override
-  String get discoverSmartPromptCalmEvening => 'Calm evening';
+  String get discoverSmartPromptCalmEvening => 'Gribu mierīgu vakaru';
 
   @override
-  String get discoverSmartPromptTwoHours => 'Find a plan for 2 hours';
+  String get discoverSmartPromptTwoHours => 'Atrodi plānu uz 2 stundām';
 
   @override
-  String get discoverSmartPromptUpTo20 => 'Find something up to 20 EUR';
+  String get discoverSmartPromptUpTo20 => 'Atrodi kaut ko līdz 20 EUR';
 
   @override
   String discoverRentalBaseRate(String type, String price) {
@@ -9249,7 +9274,7 @@ class AppLocalizationsLv extends AppLocalizations {
 
   @override
   String get discoverForYouHint =>
-      'Personīgas izvēles, saglabātas idejas un veidotāja rīki — viena pieskāriena attālumā.';
+      'Personīgas izvēles, saglabātas idejas un izveides rīki — viena pieskāriena attālumā.';
 
   @override
   String get discoverSmartSearchIdea => 'Viedās meklēšanas ideja';
@@ -9528,7 +9553,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'Papildu lapas pieprasījums gaida izskatīšanu';
 
   @override
-  String get identityCreator => 'Autors';
+  String get identityCreator => 'Lietotājs';
 
   @override
   String get identityOk => 'Labi';
@@ -9712,7 +9737,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get profileFinishDraft => 'Pabeigt melnrakstu';
 
   @override
-  String get profileCreatorNextSteps => 'Autora nākamie soļi';
+  String get profileCreatorNextSteps => 'Nākamie soļi';
 
   @override
   String get profileMapListingArea => 'Sludinājuma zona kartē';
@@ -9727,7 +9752,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get profileOpenCreate => 'Atvērt veidošanu';
 
   @override
-  String get profileCreatorListing => 'Autora sludinājums';
+  String get profileCreatorListing => 'Mans sludinājums';
 
   @override
   String get profileBuildRoute => 'Veidot maršrutu';
@@ -9740,7 +9765,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'Pārvaldiet melnrakstus un publicētos sludinājumus vienā darbvietā.';
 
   @override
-  String get profileCreatorPublications => 'Autora publikācijas';
+  String get profileCreatorPublications => 'Manas publikācijas';
 
   @override
   String get profileListingFromLatestSmart =>
@@ -9877,7 +9902,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get profileCreateRoute => 'Izveidot maršrutu';
 
   @override
-  String get profileOpenTaxonomyFlow => 'Atvērt veidošanu pēc kategorijām';
+  String get profileOpenTaxonomyFlow => 'Atvērt izveidi pa kategorijām';
 
   @override
   String get profileViewAllEvents => 'Skatīt visus pasākumus';
@@ -9920,7 +9945,7 @@ class AppLocalizationsLv extends AppLocalizations {
       'Pārbaudi un pieejamos rīkus skatiet iestatījumos';
 
   @override
-  String get profileCreatorTools => 'Autora rīki';
+  String get profileCreatorTools => 'Izveides rīki';
 
   @override
   String get profileSavedList => 'Saglabātais saraksts';
@@ -10232,7 +10257,7 @@ class AppLocalizationsLv extends AppLocalizations {
   String get quickPlanInvitationsAccess => 'Ielūgumi un piekļuve';
 
   @override
-  String get quickPlanQuickPlan => 'Quick Plan';
+  String get quickPlanQuickPlan => 'Ātrais plāns';
 
   @override
   String get quickPlanMyQuickPlan => 'Mans Quick Plan';
@@ -10526,10 +10551,11 @@ class AppLocalizationsLv extends AppLocalizations {
   @override
   String profileRoleTitle(String value) {
     String _temp0 = intl.Intl.selectLogic(value, {
+      'admin': 'Administrators',
       'pro_generator': 'Pro ģenerators',
-      'creator': 'Autors',
+      'creator': 'Lietotājs',
       'user': 'Lietotājs',
-      'other': 'Autors',
+      'other': 'Lietotājs',
     });
     return '$_temp0';
   }

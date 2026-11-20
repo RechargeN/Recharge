@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
@@ -423,6 +424,15 @@ final class FunctionsIdentitySessionClient {
       final retryAfterSeconds = details is Map
           ? (details['retryAfter'] ?? details['retryAfterSeconds'])
           : null;
+      if (kDebugMode) {
+        // Debug diagnostics (sign-in loss 2026-11-18): whether the server sent
+        // a code, or the client fell back to `unauthenticated`. Server codes
+        // are constants; nothing else from the response is printed.
+        debugPrint(
+          'recharge-auth: server refusal command=$commandType '
+          'serverCode=${code is String && RegExp(r'^[a-z_-]{1,64}$').hasMatch(code) ? code : '<none>'}',
+        );
+      }
       throw BookingCallableFailure(
         code: code is String ? code.replaceAll('_', '-') : 'unauthenticated',
         dispatched: true,
@@ -603,13 +613,30 @@ Future<Map<String, Object?>> _invokeCallable({
       dispatched: true,
     );
   }
+  final bool httpOk = response.statusCode >= 200 && response.statusCode < 300;
   Object? decoded;
   try {
     decoded = jsonDecode(utf8.decode(bytes, allowMalformed: false));
   } on Object {
+    // A non-2xx page that is not the Functions envelope comes from the
+    // infrastructure in front of it (Cloud Run "no available instance", a
+    // proxy): a typed failure like any other 5xx, never an uncaught crash.
+    // A malformed 2xx body stays a protocol error.
+    if (!httpOk) {
+      throw BookingCallableFailure(
+        code: response.statusCode >= 500 ? 'internal' : 'unknown',
+        dispatched: true,
+      );
+    }
     throw const FormatException('Malformed Functions callable response');
   }
   if (decoded is! Map) {
+    if (!httpOk) {
+      throw BookingCallableFailure(
+        code: response.statusCode >= 500 ? 'internal' : 'unknown',
+        dispatched: true,
+      );
+    }
     throw const FormatException('Functions callable response is not an object');
   }
   final envelope = Map<String, Object?>.from(decoded);
@@ -715,7 +742,9 @@ const int _maximumCallableResponseBytes = 256 * 1024;
 enum BookingIdentityCacheEnvironment {
   local('booking'),
   emulator('booking.emulator.demo-recharge'),
-  dev('booking.dev.recharge-dev-n2a01');
+  dev('booking.dev.recharge-dev-n2a01'),
+  // N4b (2026-11-13): staging keys and handles never mix with dev.
+  staging('booking.staging.recharge-staging-y9y2y');
 
   const BookingIdentityCacheEnvironment(this.namespace);
   final String namespace;

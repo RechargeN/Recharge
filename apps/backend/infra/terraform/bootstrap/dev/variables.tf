@@ -120,3 +120,45 @@ variable "n3c_authorization_record_sha256" {
   type    = string
   default = ""
 }
+
+# ---- N4c (Booking runtime grants). Absent by default; needs the N4c record.
+variable "n4c_enabled" {
+  description = "Desired presence of the N4c runtime grants. Not execution authority."
+  type        = bool
+  default     = false
+}
+
+variable "n4c_authorization_record_path" {
+  description = "Private owner-issued N4c plan record. Never stored in Git."
+  type        = string
+  default     = ""
+}
+
+variable "n4c_authorization_record_sha256" {
+  type    = string
+  default = ""
+}
+
+# ---- N4e (staging service monitoring). Absent by default; needs the N4e record.
+variable "n4e_enabled" {
+  description = "Desired presence of the N4e monitoring resources. Not execution authority."
+  type        = bool
+  default     = false
+}
+
+variable "n4e_authorization_record_path" {
+  description = "Private owner-issued N4e plan record. Never stored in Git."
+  type        = string
+  default     = ""
+}
+
+variable "n4e_authorization_record_sha256" {
+  type    = string
+  default = ""
+}
+
+variable "alert_email" {
+  description = "Dedicated Recharge alert mailbox for Critical alerts. Private tfvars only; empty means none."
+  type        = string
+  default     = ""
+}

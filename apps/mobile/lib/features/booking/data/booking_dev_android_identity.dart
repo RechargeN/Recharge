@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -6,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import 'booking_functions_transport.dart';
 import 'booking_identity_failure.dart';
+import '../../../core/config/cloud_environment.dart';
 
 /// Provider credentials only; never supplies Recharge roles or Session authority.
 abstract interface class DevGoogleAuthenticationDriver {
@@ -65,12 +67,14 @@ final class NativeDevGoogleAuthenticationDriver
 }
 
 void _assertDevAndroidApp(FirebaseApp app) {
-  if (app.name != 'recharge-dev-android' ||
-      app.options.projectId != 'recharge-dev-n2a01' ||
-      app.options.messagingSenderId != '420479958348' ||
-      !RegExp(
-        r'^1:420479958348:android:[a-f0-9]+$',
-      ).hasMatch(app.options.appId)) {
+  // N4b: exactly one reviewed cloud project per named app (dev or staging).
+  final CloudEnvironment? cloud = CloudEnvironment.values
+      .where((CloudEnvironment e) => e.firebaseAppName == app.name)
+      .firstOrNull;
+  if (cloud == null ||
+      app.options.projectId != cloud.projectId ||
+      app.options.messagingSenderId != cloud.projectNumber ||
+      !cloud.isAndroidAppId(app.options.appId)) {
     throw StateError('dev_android_firebase_binding_invalid');
   }
 }
@@ -82,11 +86,20 @@ final class DevAndroidGoogleIdentity implements BookingFirebaseIdTokenProvider {
     required FirebaseAuth auth,
     required DevGoogleAuthenticationDriver google,
     required BookingIdentitySessionStore sessions,
+    void Function(String entry)? onLocalSignOut,
   }) : _auth = auth,
        _google = google,
-       _sessions = sessions {
+       _sessions = sessions,
+       _onLocalSignOut = onLocalSignOut {
     _assertDevAndroidApp(auth.app);
   }
+
+  /// Debug diagnostics (A34 staging 2026-11-16: the sign-in was wiped on a
+  /// resume while the server Session stayed active, and it did not reproduce).
+  /// Records which code path wiped the local sign-in, with the calling frames
+  /// (file and line only) and whether the SDK user was present. No tokens, ids
+  /// or e-mails.
+  final void Function(String entry)? _onLocalSignOut;
 
   final FirebaseAuth _auth;
   final DevGoogleAuthenticationDriver _google;
@@ -151,6 +164,33 @@ final class DevAndroidGoogleIdentity implements BookingFirebaseIdTokenProvider {
 
   /// Local logout only; global Firebase/Recharge revocation is a server operation.
   Future<void> signOutLocal() async {
+    final void Function(String entry)? journal = _onLocalSignOut;
+    if (journal != null) {
+      try {
+        final List<String> frames = StackTrace.current
+            .toString()
+            .split('\n')
+            .skip(1)
+            .where((String line) => line.contains('package:recharge/'))
+            .take(6)
+            .map(
+              (String line) => line
+                  .replaceAll(RegExp(r'^#\d+\s+'), '')
+                  .replaceAll(RegExp(r'\s+'), ' ')
+                  .trim(),
+            )
+            .toList();
+        journal(
+          jsonEncode(<String, Object>{
+            'sdkUser': _auth.currentUser != null,
+            'armed': _tokenAccessEnabled,
+            'frames': frames,
+          }),
+        );
+      } catch (_) {
+        /* Diagnostics never block the sign-out. */
+      }
+    }
     _assertDevAndroidApp(_auth.app);
     if (_busy) throw StateError('dev_identity_operation_in_progress');
     _busy = true;
@@ -217,7 +257,8 @@ final class DevAndroidIdentitySessionCoordinator {
     final store = identity._sessions;
     if (!sessions.isDevGoogleFor(store, identity) ||
         (store is SecureBookingIdentitySessionStore &&
-            store.environment != BookingIdentityCacheEnvironment.dev)) {
+            store.environment != BookingIdentityCacheEnvironment.dev &&
+            store.environment != BookingIdentityCacheEnvironment.staging)) {
       throw StateError('dev_identity_session_composition_invalid');
     }
   }
@@ -225,10 +266,34 @@ final class DevAndroidIdentitySessionCoordinator {
   final FunctionsIdentitySessionClient sessions;
   bool _busy = false;
 
+  /// Revalidates the stored Session with a read (no rotation). Like
+  /// [restoreSession], it first waits for the same Firebase user and re-arms
+  /// token access (cold start); the server still checks every credential.
+  Future<BookingIdentitySessionContext?> readSession({
+    required String requestId,
+    required Future<void> Function(Map<String, Object?> data) onAuthContext,
+  }) => _armed(
+    () => sessions.readCurrent(
+      requestId: requestId,
+      onAuthContext: onAuthContext,
+    ),
+  );
+
   Future<BookingIdentitySessionContext?> restoreSession({
     required String requestId,
     Future<void> Function(Map<String, Object?> data)? onAuthContext,
-  }) async {
+  }) => _armed(
+    () => sessions.refresh(
+      requestId: requestId,
+      requireExistingSession: true,
+      forceRefreshToken: true,
+      onAuthContext: onAuthContext,
+    ),
+  );
+
+  Future<BookingIdentitySessionContext?> _armed(
+    Future<BookingIdentitySessionContext> Function() operation,
+  ) async {
     if (_busy) throw StateError('dev_identity_operation_in_progress');
     _busy = true;
     try {
@@ -246,12 +311,7 @@ final class DevAndroidIdentitySessionCoordinator {
       // Only transport credentials are enabled here; server verifies the old handle/uid.
       identity._authenticatedUid = user.uid;
       identity._tokenAccessEnabled = true;
-      return await sessions.refresh(
-        requestId: requestId,
-        requireExistingSession: true,
-        forceRefreshToken: true,
-        onAuthContext: onAuthContext,
-      );
+      return await operation();
     } catch (error, stack) {
       if (!isTransientIdentityFailure(error)) {
         try {

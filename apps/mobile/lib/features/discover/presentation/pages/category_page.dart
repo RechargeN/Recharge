@@ -1,3 +1,4 @@
+import '../../../../core/layout/page_list_padding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -84,7 +85,10 @@ class _CategoryPageState extends ConsumerState<CategoryPage> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+        padding: pageListPadding(
+          context,
+          const EdgeInsets.fromLTRB(16, 16, 16, 28),
+        ),
         children: <Widget>[
           _CategoryHeading(group: group),
           const SizedBox(height: 18),

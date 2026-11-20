@@ -3,7 +3,9 @@ import '../../domain/usecases/build_session_content_body.dart';
 import 'dart:async';
 
 import '../class_workshop_create_coordinator.dart';
+import '../create_media_asset_ref.dart';
 import '../create_media_picking.dart';
+import '../../domain/repositories/create_media_store.dart';
 import '../../domain/repositories/create_image_picker_port.dart';
 import '../../domain/entities/class_workshop_draft_data.dart';
 import '../../domain/entities/class_workshop_validation_issue.dart';
@@ -602,6 +604,7 @@ class CreateController extends ChangeNotifier {
       ),
     );
     await _loadEventTemplates(userId);
+    await _sweepReleasedCopies(userId);
     _analyticsService.track(
       'create_draft_loaded',
       params: <String, Object?>{
@@ -3214,7 +3217,13 @@ class CreateController extends ChangeNotifier {
     final CreateMediaPicking? picking = _mediaPicking;
     if (picking == null || !picking.config.enabled) return null;
     try {
-      final String? path = await picking.pickInto(_state.draft.id, source);
+      // MEDIA-PICK-02: each account's copies live in its own folder.
+      final String? path = await picking.pickInto(
+        _state.userId.isEmpty
+            ? _state.draft.id
+            : createMediaDraftKey(_state.userId, _state.draft.id),
+        source,
+      );
       if (path == null) return null;
       if (!apply(path)) await picking.store.remove(path);
       return null;
@@ -3222,6 +3231,112 @@ class CreateController extends ChangeNotifier {
       return error.code;
     } catch (_) {
       return 'media_decode_failed';
+    }
+  }
+
+  /// MEDIA-PICK-02: points the photo fields at the server assets the upload
+  /// made ready ([refs]: local copy -> asset id), saves the draft, and only
+  /// after that save succeeds releases the local copies no field still uses.
+  /// Returns false (nothing replaced, nothing deleted) when the save fails or
+  /// the draft changed to another one meanwhile.
+  Future<bool> promoteReadyMedia(Map<String, String> refs) async {
+    if (refs.isEmpty || _state.userId.isEmpty) return false;
+    final String userId = _state.userId;
+    final CreateDraftEntity before = _state.draft;
+    String swap(String value) {
+      final String? assetId = refs[value];
+      return assetId == null ? value : promotedMediaRef(assetId);
+    }
+
+    final MediaEntity media = before.media;
+    final MediaEntity promoted = media.copyWith(
+      coverImage: swap(media.coverImage),
+      gallery: media.gallery.map(swap).toList(),
+    );
+    if (promoted.coverImage == media.coverImage &&
+        listEquals(promoted.gallery, media.gallery)) {
+      return false;
+    }
+    final CreateDraftEntity after = before.copyWith(
+      media: promoted,
+      sectionData: _renameGalleryAltKeys(before.sectionData, swap),
+      updatedAtUtc: DateTime.now().toUtc(),
+    );
+    try {
+      await _saveCreateDraftUseCase(userId: userId, draft: after);
+    } catch (_) {
+      // Not saved: the draft keeps its local copies; nothing is deleted.
+      return false;
+    }
+    if (_state.userId != userId || _state.draft.id != before.id) return true;
+    // Edits made while saving stay; only the promoted fields change.
+    final MediaEntity current = _state.draft.media;
+    _setState(
+      _state.copyWith(
+        draft: _state.draft.copyWith(
+          media: current.copyWith(
+            coverImage: swap(current.coverImage),
+            gallery: current.gallery.map(swap).toList(),
+          ),
+          sectionData: _renameGalleryAltKeys(_state.draft.sectionData, swap),
+        ),
+      ),
+    );
+    await _releaseCopies(userId, refs.keys);
+    return true;
+  }
+
+  /// Photo descriptions are keyed by the photo reference (Class / Workshop,
+  /// Session: `galleryAltText`); they follow the photo to its asset reference.
+  static Map<String, Object?> _renameGalleryAltKeys(
+    Map<String, Object?> sectionData,
+    String Function(String) swap,
+  ) => <String, Object?>{
+    for (final MapEntry<String, Object?> section in sectionData.entries)
+      section.key: section.value is Map<String, Object?>
+          ? <String, Object?>{
+              for (final MapEntry<String, Object?> field
+                  in (section.value as Map<String, Object?>).entries)
+                field.key: field.key == 'galleryAltText' && field.value is Map
+                    ? <String, Object?>{
+                        for (final MapEntry<Object?, Object?> alt
+                            in (field.value as Map).entries)
+                          swap(alt.key.toString()): alt.value,
+                      }
+                    : field.value,
+            }
+          : section.value,
+  };
+
+  Future<void> _releaseCopies(String userId, Iterable<String> paths) async {
+    final CreateMediaPicking? picking = _mediaPicking;
+    if (picking == null) return;
+    final MediaEntity media = _state.draft.media;
+    for (final String path in paths) {
+      if (!picking.store.owns(path)) continue;
+      if (media.coverImage == path || media.gallery.contains(path)) continue;
+      try {
+        await picking.store.release(ownerId: userId, path: path);
+      } catch (_) {
+        // The release journal finishes it on the next start.
+      }
+    }
+  }
+
+  /// MEDIA-PICK-02: finishes releases an interrupted run left, for this
+  /// account only; copies the loaded draft still uses are kept.
+  Future<void> _sweepReleasedCopies(String userId) async {
+    final CreateMediaPicking? picking = _mediaPicking;
+    if (picking == null || userId.isEmpty) return;
+    final MediaEntity media = _state.draft.media;
+    try {
+      await picking.store.sweepReleased(
+        ownerId: userId,
+        referenced: (String path) =>
+            media.coverImage == path || media.gallery.contains(path),
+      );
+    } catch (_) {
+      // Retried on the next load; a kept copy loses nothing.
     }
   }
 

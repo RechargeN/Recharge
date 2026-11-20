@@ -160,7 +160,7 @@ function differingPaths(before, after, prefix = "", out = []) {
 }
 
 /** An update is allowed only when the review lists it and its diff is exactly the reviewed one. */
-function reviewedUpdate(c, expected) {
+export function reviewedUpdate(c, expected) {
   const rule = reviewedUpdates[c.address];
   if (!rule || !(expected.allowedUpdates ?? []).includes(c.address))
     return false;

@@ -1,5 +1,9 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show appFlavor;
+
+import '../../core/config/cloud_environment.dart';
 import '../../core/localization/l10n_context.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,6 +11,7 @@ import '../../features/create/domain/entities/create_draft_entity.dart';
 
 import '../../features/auth/application/auth_providers.dart';
 import '../../features/create/application/content_server_path.dart';
+import '../../features/create/application/create_providers.dart';
 import '../../features/create/application/place_publication_controller.dart';
 import '../../features/create/presentation/widgets/place_publication_section.dart';
 import '../di/place_publication_composition.dart';
@@ -54,6 +59,11 @@ class _PlacePublicationPanelState extends ConsumerState<PlacePublicationPanel> {
   void _captureFeedback() {
     final controller = _created;
     if (mounted && controller != null) {
+      // MEDIA-PICK-02: ready assets replace the local copies in the form.
+      final Map<String, String> ready = controller.takeReadyMediaRefs();
+      if (ready.isNotEmpty) {
+        unawaited(ref.read(createControllerProvider).promoteReadyMedia(ready));
+      }
       ref
           .read(contentValidationFeedbackProvider(CreateObjectType.place))
           .capture(
@@ -100,9 +110,11 @@ class _PlacePublicationPanelState extends ConsumerState<PlacePublicationPanel> {
             if (controller == null) return const SizedBox.shrink();
             return PlacePublicationSection(
               controller: controller,
-              devCloud:
+              cloud:
                   sl.isRegistered<PlacePublicationTestEntryGuard>() &&
-                  sl<PlacePublicationTestEntryGuard>().devCloudAllowed,
+                      sl<PlacePublicationTestEntryGuard>().devCloudAllowed
+                  ? CloudEnvironment.forFlavor(appFlavor)
+                  : null,
             );
           },
     );

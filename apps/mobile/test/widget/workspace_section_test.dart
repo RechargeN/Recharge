@@ -121,7 +121,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('workspace-personal')), findsOneWidget);
-      expect(find.text('Creator'), findsOneWidget);
+      expect(find.text('User'), findsOneWidget);
       expect(
         find.text('Personal profile · Verification not started'),
         findsOneWidget,
@@ -209,7 +209,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byKey(const ValueKey('workspace-personal')),
-          matching: find.text('Creator'),
+          matching: find.text('User'),
         ),
         findsOneWidget,
       );

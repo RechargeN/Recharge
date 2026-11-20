@@ -1,3 +1,4 @@
+import '../../../../core/layout/page_list_padding.dart';
 import '../../../../core/localization/l10n_context.dart';
 import 'dart:async';
 
@@ -58,7 +59,7 @@ class _ProfessionalPageWorkspacePageState
     return Scaffold(
       appBar: AppBar(title: Text(_title(context.l10n, section))),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: pageListPadding(context, const EdgeInsets.all(20)),
         children: <Widget>[
           if (page == null)
             _EmptyProfessionalExperience(section: section)

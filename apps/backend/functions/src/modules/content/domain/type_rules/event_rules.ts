@@ -158,7 +158,7 @@ const unsupportedCapabilities = new Set([
   'freshness',
 ]);
 
-/** Server-owned or derived state a Creator can never author. */
+/** Server-owned or derived state a User can never author. */
 const serverOwnedKeys = new Set([
   'lifecycleStatus',
   'moderationStatus',

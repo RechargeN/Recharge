@@ -17,7 +17,7 @@ variables {
   notification_email              = "synthetic@example.invalid"
   authorization_record_path       = "tests/synthetic-n2c-base-record.json"
   authorization_record_sha256     = filesha256("tests/synthetic-n2c-base-record.json")
-  manifest_sha256                 = "d1c7e980d9110dc7efc76b03a1a7830bda2454d13774f48646f5e2f221a550dc"
+  manifest_sha256                 = "9ff3f547118d045a571addbc494d1beed0fe34ca2ff6efadafb54a258e9bac39"
   release_commit_sha              = "0000000000000000000000000000000000000000"
   delivery_receipt_path           = "tests/never-created-receipt.json"
   n2c_enabled                     = true

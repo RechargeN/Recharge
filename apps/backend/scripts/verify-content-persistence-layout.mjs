@@ -149,10 +149,12 @@ const approvedOutsideUsers = {
   // I1 Quick Plan (2026-10-17): only the Emulator guard; its own collections,
   // no Content read or write.
   "modules/quick_plan/firestore_quick_plan_service.ts": guardOnly,
-  // L1 legal hold authority (PRIVACY_L1 amendment §7): only the Emulator
-  // guard; it writes its own hold and audit collections, no Content.
+  // L1 legal hold authority (PRIVACY_L1 amendment §7): only the persistence
+  // guard (Emulator, or the reviewed dev/stage cloud behind the switch — step 2,
+  // owner decision 2026-11-20); it writes its own hold and audit collections,
+  // no Content.
   "modules/privacy_orchestration/infrastructure/firestore_privacy_legal_hold_service.ts":
-    guardOnly,
+    { firestore_content_repository: ["assertMediaChainPersistenceContext"] },
   // L2 operations console (OPS-L2 §3.6): only the Emulator guard; it writes
   // its own audit and the family emergency switches, no Content.
   "modules/operations/operations_console.ts": guardOnly,
@@ -182,6 +184,11 @@ const approvedOutsideUsers = {
       "assertContentEmulatorContext",
       "contentCollections",
     ],
+  },
+  // Round 2.2 (owner approval 2026-11-19): the cloud handoff entry reads only
+  // the reviewed dev-cloud switch name.
+  "dev_content_effects_entry.ts": {
+    firestore_content_repository: ["devCloudPersistenceSwitch"],
   },
   "modules/library/firestore_library_service.ts": {
     firestore_content_repository: [

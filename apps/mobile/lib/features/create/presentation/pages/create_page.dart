@@ -1,3 +1,4 @@
+import '../../../../core/layout/page_list_padding.dart';
 import '../../../../core/localization/taxonomy_labels.dart';
 import '../../application/activity_validation_feedback_provider.dart';
 import 'package:design_system/design_system.dart';
@@ -39,6 +40,7 @@ import '../widgets/scenario/scenario_create_block.dart';
 import '../widgets/create_texts.dart';
 import '../../../../core/localization/recharge_formats.dart';
 import '../../domain/personal_creation_hints.dart';
+import '../../application/create_media_asset_ref.dart';
 
 class CreatePage extends ConsumerStatefulWidget {
   const CreatePage({
@@ -197,7 +199,7 @@ class _CreatePageState extends ConsumerState<CreatePage> {
         CreateStatus.saving ||
         CreateStatus.publishing ||
         CreateStatus.publishSuccess => ListView(
-          padding: const EdgeInsets.all(16),
+          padding: pageListPadding(context, const EdgeInsets.all(16)),
           children: <Widget>[
             _CreateHubHeader(draft: state.draft),
             if (_needsRentalReview(state.draft)) ...<Widget>[
@@ -575,7 +577,14 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                   children: List<Widget>.generate(
                     state.draft.media.gallery.length,
                     (int index) => InputChip(
-                      label: Text(state.draft.media.gallery[index]),
+                      label: Text(
+                        promotedMediaAssetId(
+                                  state.draft.media.gallery[index],
+                                ) !=
+                                null
+                            ? context.l10n.createMediaUploadedToServer
+                            : state.draft.media.gallery[index],
+                      ),
                       onDeleted: () => controller.removeGalleryImageAt(index),
                     ),
                   ),

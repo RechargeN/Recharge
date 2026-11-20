@@ -1,4 +1,5 @@
 import 'publication_media_type.dart';
+import 'create_media_asset_ref.dart';
 import '../domain/entities/content_validation_violation.dart';
 import 'dart:convert';
 
@@ -162,6 +163,16 @@ final class ActivityPublicationController extends ChangeNotifier {
     await _refreshAll();
   });
 
+  Map<String, String> _readyMediaRefs = const <String, String>{};
+
+  /// MEDIA-PICK-02: local photo copies that became ready server assets in the
+  /// last successful upload (local path -> asset id). Read once, then empty.
+  Map<String, String> takeReadyMediaRefs() {
+    final Map<String, String> refs = _readyMediaRefs;
+    _readyMediaRefs = const <String, String>{};
+    return refs;
+  }
+
   /// Uploads the cover and every gallery photo that changed, then binds them.
   Future<void> uploadMedia() => _run(() async {
     final CreateDraftEntity draft = await _reloadCurrentDraft();
@@ -170,6 +181,18 @@ final class ActivityPublicationController extends ChangeNotifier {
     final List<ActivityAttachmentRecord> uploaded =
         <ActivityAttachmentRecord>[];
     for (final ActivityMediaAttachment item in _attachments(draft, scope)) {
+      // MEDIA-PICK-02: a promoted field already is a ready server asset.
+      final String? promoted = promotedMediaAssetId(item.localRef);
+      if (promoted != null) {
+        uploaded.add(
+          ActivityAttachmentRecord(
+            attachmentId: item.attachmentId,
+            assetId: promoted,
+            sha256: promotedMediaDigest(item.localRef),
+          ),
+        );
+        continue;
+      }
       final Uint8List? bytes = await _mediaSource.read(item.localRef);
       if (bytes == null) throw const _LocalRefusal('media_missing');
       final String digest = sha256.convert(bytes).toString();
@@ -210,6 +233,14 @@ final class ActivityPublicationController extends ChangeNotifier {
     record = record.copyWith(attachments: uploaded);
     await _journal.save(record);
     await _saveBody(draft, scope, record);
+    // MEDIA-PICK-02: every photo is a ready asset bound to the saved body;
+    // the Create form may now point its fields at the assets.
+    _readyMediaRefs = <String, String>{
+      for (final item in _attachments(draft, scope))
+        if (promotedMediaAssetId(item.localRef) == null &&
+            record.attachment(item.attachmentId) != null)
+          item.localRef: record.attachment(item.attachmentId)!.assetId,
+    };
     await _refreshAll();
   });
 
@@ -544,6 +575,11 @@ final class ActivityPublicationController extends ChangeNotifier {
   ) async {
     final Map<String, String> assets = <String, String>{};
     for (final ActivityMediaAttachment item in _attachments(draft, scope)) {
+      final String? promoted = promotedMediaAssetId(item.localRef);
+      if (promoted != null) {
+        assets[item.attachmentId] = promoted;
+        continue;
+      }
       final ActivityAttachmentRecord? known = record.attachment(
         item.attachmentId,
       );

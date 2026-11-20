@@ -8,9 +8,9 @@ import {
   recordVerificationDecision,
 } from '../../../src/modules/identity_publisher/domain/account.js';
 import {
-  decideCreatorVerification,
-  submitCreatorVerification,
-} from '../../../src/modules/identity_publisher/domain/creator_verification.js';
+  decideIdentityVerification,
+  submitIdentityVerification,
+} from '../../../src/modules/identity_publisher/domain/identity_verification.js';
 import { IdentityFailure } from '../../../src/modules/identity_publisher/domain/failures.js';
 import {
   assertCurrentSession,
@@ -45,16 +45,16 @@ void test('session and account revocation fences are monotonic', () => {
 });
 
 void test('Creator verification cannot be granted by skipping pending review', () => {
-  const pending = submitCreatorVerification({
+  const pending = submitIdentityVerification({
     verificationId,
     userId,
     evidenceRefIds: [evidenceId],
     submittedAtUtc: '2026-09-22T00:00:00.000Z',
   });
-  const verified = decideCreatorVerification(pending, 'verified', '2026-09-22T00:01:00.000Z');
-  const suspended = decideCreatorVerification(verified, 'suspended', '2026-09-22T00:02:00.000Z');
+  const verified = decideIdentityVerification(pending, 'verified', '2026-09-22T00:01:00.000Z');
+  const suspended = decideIdentityVerification(verified, 'suspended', '2026-09-22T00:02:00.000Z');
   assert.equal(suspended.status, 'suspended');
-  assert.throws(() => decideCreatorVerification(pending, 'suspended', '2026-09-22T00:03:00.000Z'));
+  assert.throws(() => decideIdentityVerification(pending, 'suspended', '2026-09-22T00:03:00.000Z'));
 });
 
 void test('revision fences allow same-instant issuance and stale changed authority', () => {

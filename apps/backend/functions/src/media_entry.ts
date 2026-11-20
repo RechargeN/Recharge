@@ -22,7 +22,12 @@ const commandResultTypes: Readonly<Record<string, MediaResultType>> = Object.fre
   createUploadSession: 'uploadSession',
   confirmUpload: 'assetStatus',
   finalizeAsset: 'assetStatus',
+  // N4b: the owner may have a quarantined asset processed again (bounded).
+  retryProcessing: 'assetStatus',
 });
+
+/** The commands an owner may send; delete, detach and system ones are not. */
+export const ownerMediaCommands: readonly string[] = Object.freeze(Object.keys(commandResultTypes));
 const queryResultTypes: Readonly<Record<string, MediaResultType>> = Object.freeze({
   getAssetStatus: 'assetStatus',
   getProcessingReceipt: 'processingReceipt',

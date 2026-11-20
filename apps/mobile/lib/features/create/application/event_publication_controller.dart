@@ -4,7 +4,9 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
+import 'create_media_asset_ref.dart';
 import '../domain/entities/create_draft_entity.dart';
+import '../domain/entities/event_draft_data.dart';
 import '../domain/entities/event_publication.dart';
 import '../domain/entities/publisher_ref.dart';
 import '../domain/repositories/event_publication_gateway.dart';
@@ -26,6 +28,28 @@ final class EventPublicationObjectView {
   final String? failureCode;
 }
 
+/// Debug-only: the published Event and its first occurrence, so the default-off
+/// Booking test entry can open exactly this Event (no Discover in the cloud).
+final class EventBookingTestTarget {
+  const EventBookingTestTarget({
+    required this.eventId,
+    required this.occurrenceId,
+    required this.startAtUtc,
+    required this.endAtUtc,
+    required this.title,
+    this.channel,
+  });
+
+  final String eventId;
+  final String occurrenceId;
+  final DateTime startAtUtc;
+  final DateTime endAtUtc;
+  final String title;
+
+  /// Booking's inventory channel of this occurrence (`onsite` / `online`).
+  final String? channel;
+}
+
 final class EventPublicationViewState {
   const EventPublicationViewState({
     required this.phase,
@@ -34,6 +58,7 @@ final class EventPublicationViewState {
     this.status,
     this.message,
     this.myObjects = const <EventPublicationObjectView>[],
+    this.bookingTarget,
   });
 
   final EventPublicationPhase phase;
@@ -48,6 +73,9 @@ final class EventPublicationViewState {
   /// Last refusal or failure code (server code, or a local `*_required`).
   final String? message;
   final List<EventPublicationObjectView> myObjects;
+
+  /// Set only while the server reports this Event visible.
+  final EventBookingTestTarget? bookingTarget;
 
   bool get _idle => phase == EventPublicationPhase.ready;
   bool get canSave => _idle && draftTitle != null;
@@ -130,6 +158,13 @@ final class EventPublicationController extends ChangeNotifier {
   Future<void> uploadCover() => _run(() async {
     final CreateDraftEntity draft = _requireDraft();
     EventPublicationRecord record = await _requireRecord(draft);
+    // MEDIA-PICK-02: a cover that already became a ready server asset has
+    // no local bytes; it is bound by its id and nothing is uploaded again.
+    if (promotedMediaAssetId(draft.media.coverImage) != null) {
+      await _saveDraft(draft, record);
+      await _refreshAll();
+      return;
+    }
     final Uint8List? bytes = await _coverSource.read(draft.media.coverImage);
     if (bytes == null) throw const _LocalRefusal('cover_required');
     final String digest = sha256.convert(bytes).toString();
@@ -260,6 +295,8 @@ final class EventPublicationController extends ChangeNotifier {
     CreateDraftEntity draft,
     EventPublicationRecord? record,
   ) async {
+    final String? promoted = promotedMediaAssetId(draft.media.coverImage);
+    if (promoted != null) return promoted;
     if (record?.coverAssetId == null) return null;
     final Uint8List? bytes = await _coverSource.read(draft.media.coverImage);
     if (bytes == null) return null;
@@ -301,6 +338,7 @@ final class EventPublicationController extends ChangeNotifier {
       status: status,
       message: _state.message,
       myObjects: List<EventPublicationObjectView>.unmodifiable(objects),
+      bookingTarget: _bookingTarget(draft, record, status),
     );
   }
 
@@ -319,6 +357,13 @@ final class EventPublicationController extends ChangeNotifier {
       await action();
       _emit(phase: done, message: null);
     } on EventPublicationRejected catch (refusal) {
+      // Debug builds only: the server's codes and field paths (no values).
+      if (kDebugMode) {
+        debugPrint(
+          'event publication refusal code=${refusal.code} violations='
+          '${refusal.violations.map((v) => '${v.code}@${v.fieldPath}').join(',')}',
+        );
+      }
       _emit(phase: done, message: refusal.code);
     } on _LocalRefusal catch (refusal) {
       _emit(phase: done, message: refusal.code);
@@ -338,8 +383,40 @@ final class EventPublicationController extends ChangeNotifier {
       status: _state.status,
       message: message,
       myObjects: _state.myObjects,
+      bookingTarget: _state.bookingTarget,
     );
     notifyListeners();
+  }
+
+  static EventBookingTestTarget? _bookingTarget(
+    CreateDraftEntity? draft,
+    EventPublicationRecord? record,
+    EventPublicationStatus? status,
+  ) {
+    final occurrences = draft?.eventData?.occurrences;
+    if (draft == null ||
+        record == null ||
+        status?.visibility != 'visible' ||
+        occurrences == null ||
+        occurrences.isEmpty) {
+      return null;
+    }
+    final occurrence = occurrences.first;
+    return EventBookingTestTarget(
+      eventId: record.contentId,
+      occurrenceId: EventContentBodyMapper.serverOccurrenceId(
+        draft.id,
+        occurrence.id,
+      ),
+      startAtUtc: occurrence.startAtUtc.toUtc(),
+      endAtUtc: occurrence.endAtUtc.toUtc(),
+      title: draft.title,
+      channel: switch (draft.eventData!.format) {
+        EventFormat.offline => 'onsite',
+        EventFormat.online => 'online',
+        EventFormat.hybrid => null,
+      },
+    );
   }
 
   CreateDraftEntity _requireDraft() {

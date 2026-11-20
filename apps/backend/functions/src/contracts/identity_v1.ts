@@ -6,7 +6,7 @@ export type IdentityProvider = 'google' | 'apple';
 export type AccountStatus = 'active' | 'restricted' | 'blocked' | 'deleted';
 export type IdentitySessionStatus =
   'active' | 'stepUpRequired' | 'revoked' | 'expired' | 'compromised';
-export type CreatorVerificationStatus =
+export type IdentityVerificationStatus =
   'pendingReview' | 'verified' | 'rejected' | 'suspended' | 'revoked';
 
 export interface AccountV1 {
@@ -73,6 +73,13 @@ export interface IdentitySessionV1 {
   readonly firebaseUid: string;
   readonly installationId: string;
   readonly handleHash: string;
+  /**
+   * The handle a rotation replaced, while the client has not yet shown it
+   * received the new one (owner 2026-11-19: a lost rotation answer must not
+   * end the sign-in). Cleared by the first use of the current handle.
+   */
+  readonly previousHandleHash?: string;
+  readonly previousHandleValidUntilUtc?: UtcInstant;
   readonly issuedAtUtc: UtcInstant;
   readonly lastActiveAtUtc: UtcInstant;
   readonly idleExpiresAtUtc: UtcInstant;
@@ -100,11 +107,11 @@ export interface AccessSnapshotV1 {
   readonly expiresAtUtc: UtcInstant;
 }
 
-export interface CreatorVerificationV1 {
+export interface IdentityVerificationV1 {
   readonly schemaVersion: 1;
   readonly verificationId: EntityId;
   readonly userId: EntityId;
-  readonly status: CreatorVerificationStatus;
+  readonly status: IdentityVerificationStatus;
   readonly revision: number;
   readonly submittedAtUtc: UtcInstant;
   readonly decidedAtUtc?: UtcInstant;

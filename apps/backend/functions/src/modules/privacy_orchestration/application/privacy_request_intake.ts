@@ -77,6 +77,23 @@ export class PrivacyRequestIntake {
     const subjectId = decision.userId;
     if (input.subjectId !== undefined && input.subjectId !== subjectId)
       return { ok: false, code: 'subject_mismatch' };
+    return this.submitForVerifiedSubject(subjectId, input);
+  }
+
+  /**
+   * The same submission for a subject the caller has already verified: the
+   * Session path above, or an operator ingress restricted by its own gate to
+   * synthetic subjects (dev/stage step 2, owner decision 2026-11-20).
+   */
+  async submitForVerifiedSubject(
+    subjectId: string,
+    input: {
+      readonly requestId: string;
+      readonly requestType: 'access' | 'erasure' | 'restriction';
+      readonly idempotencyKey: string;
+      readonly nowUtc: string;
+    },
+  ): Promise<PrivacyIntakeResult> {
     const requiredDomainIds = [...privacyErasureDomainIds];
     const semanticHash = `sha256:${createHash('sha256')
       .update(JSON.stringify({ requestType: input.requestType, requiredDomainIds }), 'utf8')

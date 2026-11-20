@@ -21,28 +21,63 @@ import type { EntityId } from './shared/ids.js';
 import { systemServerClock, type ServerClock } from './shared/server_clock.js';
 
 /**
- * N3a.2 dev-cloud Content + Media for recharge-dev-n2a01 (owner-approved plan
- * 2026-11-07). Exactly one authoring type (Place). Owners create, update and
- * read their own draft and attach images that the real ClamAV/sharp services
- * check. Submission, publication, withdrawal, import and every staff path are
- * closed here: no review exists in dev, so nothing can become public, and
- * nothing is deleted (D-07).
+ * N3a.2 dev-cloud Content + Media (owner-approved plan 2026-11-07). Owners
+ * create, update and read their own draft and attach images that the real
+ * ClamAV/sharp services check. Owner decision 2026-11-19 (variant B): content
+ * publishes without pre-publication review — moderation acts on reports — so
+ * the owner may submit, publish and withdraw their own Place or Event. Import
+ * and every staff path stay closed; nothing is deleted (D-07).
  */
-export const devContentTypes: ReadonlySet<ContentTypeId> = new Set<ContentTypeId>(['place']);
+export const devContentTypes: ReadonlySet<ContentTypeId> = new Set<ContentTypeId>([
+  'place',
+  'event',
+]);
 
 /** The only owner operations the dev runtime serves; everything else is `capability_denied`. */
 export const devOperations = Object.freeze({
-  contentCommandV1: Object.freeze(['createDraft', 'updateDraft']),
+  contentCommandV1: Object.freeze([
+    'createDraft',
+    'updateDraft',
+    'submitForPublication',
+    'publishApprovedRevision',
+    'withdrawPublication',
+  ]),
   contentQueryV1: Object.freeze(['getDraft', 'getPublicationStatus']),
-  mediaCommandV1: Object.freeze(['createUploadSession', 'confirmUpload', 'finalizeAsset']),
+  // N4b (A34 staging 2026-11-15): retryProcessing lets the owner have a
+  // quarantined asset (scanner unavailable) processed again; the server bounds
+  // the attempts and nothing is deleted.
+  mediaCommandV1: Object.freeze([
+    'createUploadSession',
+    'confirmUpload',
+    'finalizeAsset',
+    'retryProcessing',
+  ]),
   mediaQueryV1: Object.freeze(['getAssetStatus', 'getProcessingReceipt']),
   uploadMediaBytesV1: Object.freeze([] as string[]),
 });
 export type DevCallableName = keyof typeof devOperations;
 
-/** No moderation exists in dev: no profile is available and no disposition is ever verified. */
-export const closedModeration: ModerationDispositionPort = Object.freeze({
-  profileFor: () => Promise.resolve({ available: false } as const),
+/**
+ * Owner decision 2026-11-19 (variant B): no pre-publication review; a
+ * submission is approved by this recorded policy decision and moderation acts
+ * on reports afterwards. Seller-declaration eligibility for paid content is
+ * not moderation and still applies. No disposition is verified here (the cloud
+ * has no staff decisions yet).
+ */
+export const ownerPostModerationPolicy = Object.freeze({
+  profileId: 'owner.post-moderation',
+  policyRevision: 'owner-2026-11-19-post-moderation-1',
+  policyDecisionId: 'owner-decision-2026-11-19-publish-without-pre-review',
+});
+export const postModeration: ModerationDispositionPort = Object.freeze({
+  profileFor: () =>
+    Promise.resolve({
+      available: true,
+      profileId: ownerPostModerationPolicy.profileId,
+      requiresPrePublicationModeration: false,
+      policyRevision: ownerPostModerationPolicy.policyRevision,
+      policyDecisionId: ownerPostModerationPolicy.policyDecisionId,
+    } as const),
   verifyDisposition: () => Promise.resolve({ verified: false } as const),
 });
 
@@ -74,7 +109,7 @@ export function createDevContentMedia(input: {
       new FirestoreIdentityAuthorityRepository(input.firestore),
     ),
     referenceData: new EmulatorSyntheticReferenceData(),
-    moderation: closedModeration,
+    moderation: postModeration,
     media: media.readiness,
     clock,
     ids: { newId: () => randomUUID() as EntityId },

@@ -15,6 +15,10 @@ import {
   type AbuseRateRequest,
 } from '../../../platform/security/firestore_abuse_rate_limiter.js';
 import type { DevFirebaseProviderIdentityVerifier } from './dev_firebase_provider_identity_verifier.js';
+import {
+  isReviewedCloudProject,
+  type ReviewedCloudProject,
+} from '../../../shared/cloud_runtime_projects.js';
 
 interface Credentials {
   readonly proof: ProviderIdentityProof;
@@ -30,6 +34,7 @@ interface SessionCredentials extends Credentials {
 /** Disconnected dev binding of existing authorities; not an exported endpoint/runtime. */
 export class DevIdentitySessionBinding {
   private readonly sessions: SessionAuthorityService;
+  private readonly projectId: ReviewedCloudProject;
   constructor(
     projectId: string,
     private readonly repository: IdentityAuthorityRepository,
@@ -42,7 +47,9 @@ export class DevIdentitySessionBinding {
       state: 'missing' | 'invalid' | 'expired' | 'valid',
     ) => void = () => {},
   ) {
-    if (projectId !== 'recharge-dev-n2a01') throw new TypeError('dev_session_binding_invalid');
+    // N4a: the reviewed dev or staging project only, never production.
+    if (!isReviewedCloudProject(projectId)) throw new TypeError('dev_session_binding_invalid');
+    this.projectId = projectId;
     this.sessions = new SessionAuthorityService(repository);
   }
 
@@ -184,7 +191,7 @@ export class DevIdentitySessionBinding {
       operation,
       attemptRequestId: input.attemptRequestId,
       installationId: input.installationId,
-      environmentId: 'recharge-dev-n2a01',
+      environmentId: this.projectId,
       marketId: 'LV',
       now,
       correlationId: input.attemptRequestId,
@@ -206,8 +213,9 @@ export function createDevIdentitySessionBinding(
     readonly observeAppCheck: (state: 'missing' | 'invalid' | 'expired' | 'valid') => void;
   },
 ): DevIdentitySessionBinding {
+  const projectId = app.options.projectId;
   if (
-    app.options.projectId !== 'recharge-dev-n2a01' ||
+    !isReviewedCloudProject(projectId) ||
     process.env.FIREBASE_AUTH_EMULATOR_HOST !== undefined ||
     process.env.FIRESTORE_EMULATOR_HOST !== undefined
   ) {
@@ -215,7 +223,7 @@ export function createDevIdentitySessionBinding(
   }
   const firestore = getFirestore(app);
   return new DevIdentitySessionBinding(
-    'recharge-dev-n2a01',
+    projectId,
     new FirestoreIdentityAuthorityRepository(firestore),
     createDevFirebaseProviderIdentityVerifier(app),
     createDevFirebaseAppCheckPort(app, allowedAppIds),

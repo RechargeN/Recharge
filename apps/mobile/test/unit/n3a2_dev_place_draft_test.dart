@@ -61,7 +61,7 @@ void main() {
   });
 
   test(
-    'dev endpoint: Content/Media calls allowed, Booking still forbidden',
+    'dev endpoint: Content/Media calls allowed; delivery and moderation forbidden',
     () {
       final BookingBackendEndpoint endpoint =
           BookingBackendEndpoint.devIdentity(
@@ -82,9 +82,10 @@ void main() {
           'https://europe-west1-recharge-dev-n2a01.cloudfunctions.net/$name',
         );
       }
+      // The cloud Booking calls opened in the debt plan round 1 (2026-11-17)
+      // are covered by dev_identity_transport_test.dart.
       for (final String name in <String>[
-        'createInternalBookingV1',
-        'getMyBookingV1',
+        'bookingLoadV1',
         'mediaDeliveryV1',
         'moderationCommandV1',
       ]) {

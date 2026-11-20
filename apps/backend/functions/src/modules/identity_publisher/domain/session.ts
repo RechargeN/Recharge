@@ -79,6 +79,28 @@ export function assertCurrentSession(
   if (account.status !== 'active') throw new IdentityFailure('account_blocked');
 }
 
+/** Whether [handleHash] is the still-valid previous handle of [session]. */
+export function isPreviousSessionHandle(
+  session: IdentitySession,
+  handleHash: string,
+  nowUtc: string,
+): boolean {
+  return (
+    session.previousHandleHash !== undefined &&
+    session.previousHandleHash === handleHash &&
+    session.previousHandleValidUntilUtc !== undefined &&
+    Date.parse(session.previousHandleValidUntilUtc) > Date.parse(nowUtc)
+  );
+}
+
+/** The session once its current handle has been used: no previous handle. */
+export function withoutPreviousSessionHandle(session: IdentitySession): IdentitySession {
+  const rest = { ...session };
+  delete (rest as { previousHandleHash?: string }).previousHandleHash;
+  delete (rest as { previousHandleValidUntilUtc?: string }).previousHandleValidUntilUtc;
+  return deepFreeze(rest);
+}
+
 export function hashSessionHandle(value: string): string {
   if (!/^[A-Za-z0-9_-]{43}$/u.test(value)) throw new TypeError('session_handle_invalid');
   return createHash('sha256').update(value, 'utf8').digest('hex');
@@ -106,16 +128,30 @@ export function refreshSessionAuthorization(
   });
 }
 
+/**
+ * A rotation keeps the handle it replaces as the previous handle until the
+ * client uses the new one, so a lost rotation answer can be repaired by
+ * rotating again with the old handle. A rotation made with the previous handle
+ * keeps that same previous handle and its deadline (the client still holds it).
+ */
 export function rotateSessionHandle(
   session: IdentitySession,
   sessionHandle: string,
   nowUtc: string,
+  viaPreviousHandle = false,
 ): IdentitySession {
   if (session.status !== 'active') throw new IdentityFailure('session_revoked');
+  const idleExpiresAtUtc = parseUtcInstant(
+    new Date(Date.parse(nowUtc) + identitySessionIdleLifetimeMs).toISOString(),
+  );
   return deepFreeze({
     ...session,
     revision: session.revision + 1,
     handleHash: hashSessionHandle(sessionHandle),
+    previousHandleHash: viaPreviousHandle ? session.previousHandleHash! : session.handleHash,
+    previousHandleValidUntilUtc: viaPreviousHandle
+      ? session.previousHandleValidUntilUtc!
+      : idleExpiresAtUtc,
     lastActiveAtUtc: parseUtcInstant(nowUtc),
     idleExpiresAtUtc: parseUtcInstant(
       new Date(Date.parse(nowUtc) + identitySessionIdleLifetimeMs).toISOString(),

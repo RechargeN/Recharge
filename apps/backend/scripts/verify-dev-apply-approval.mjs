@@ -17,13 +17,22 @@ export function verifyDevApplyApproval({
   now = new Date(),
 }) {
   const problems = [];
-  if (!/^recharge-dev-[a-z0-9]{4,20}$/u.test(projectId ?? ""))
-    problems.push("exact dev project required");
+  // N4a (owner-approved 2026-11-13): dev, or exactly the reviewed staging project.
+  const environment = /^recharge-dev-[a-z0-9]{4,20}$/u.test(projectId ?? "")
+    ? "dev"
+    : projectId === "recharge-staging-y9y2y"
+      ? "stage"
+      : null;
+  if (environment === null)
+    problems.push("exact dev or reviewed staging project required");
   if (!/^[a-f0-9]{40}$/u.test(commitSha ?? ""))
     problems.push("full commit SHA required");
   if (approval?.schemaVersion !== 1 || approval?.status !== "approved")
     problems.push("approved versioned record required");
-  if (approval?.environment !== "dev" || approval?.projectId !== projectId)
+  if (
+    approval?.environment !== environment ||
+    approval?.projectId !== projectId
+  )
     problems.push("environment/project mismatch");
   if (approval?.commitSha !== commitSha) problems.push("source mismatch");
   if (approval?.manifestSha256 !== sha256(manifestBytes))

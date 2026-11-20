@@ -17,7 +17,7 @@ export interface PublisherAccessDecision {
  * reads an AccessSnapshot, so a cached client snapshot is never authority
  * (BCK-14 §6, BCK-06).
  *
- * ADR 0023 (User = Creator; owner decision 2026-11-08, marketplace rule, DSA
+ * ADR 0023 (one role User; owner decision 2026-11-08, marketplace rule, DSA
  * Art. 30): no Creator role. For the personal publisher the caller passes the
  * commerce of the publication: `none` publishes freely; `external` (paid, or a
  * booking outside Recharge) needs the seller declaration; `inApp` needs it too,

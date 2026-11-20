@@ -8,6 +8,10 @@ import {
   type AbuseOperation,
   type AbuseSubjectKind,
 } from '../../security/abuse_policy.js';
+import {
+  isReviewedCloudProject,
+  type ReviewedCloudProject,
+} from '../../shared/cloud_runtime_projects.js';
 
 export const abuseCollections = Object.freeze({
   counters: 'securityRateLimitCounters',
@@ -39,7 +43,7 @@ export interface AbuseRateRequest {
   readonly installationId: string;
   readonly sessionId?: string;
   readonly networkRiskHash?: string;
-  readonly environmentId: 'local' | 'recharge-dev-n2a01';
+  readonly environmentId: 'local' | ReviewedCloudProject;
   readonly marketId: 'LV' | 'EE' | 'LT';
   readonly now: Date;
   readonly correlationId: string;
@@ -95,8 +99,14 @@ export class FirestoreAbuseRateLimiter {
         (timestamp) => Number.isSafeInteger(timestamp) && timestamp > cutoff && timestamp <= nowMs,
       );
       const exceeded = recent.length >= rule.limit;
+      // The attempt is stored even when denied and the oldest timestamp drops
+      // out (counter write below), so the window frees when the oldest STORED
+      // timestamp expires. Using the oldest current one made a client that
+      // waited exactly retryAfter meet a full window again, forever (N4b A34
+      // staging 2026-11-15).
+      const kept = [...recent, nowMs].slice(-rule.limit);
       const retryAfterSeconds = exceeded
-        ? Math.max(1, Math.ceil(((recent[0] ?? nowMs) + rule.windowSeconds * 1000 - nowMs) / 1000))
+        ? Math.max(1, Math.ceil(((kept[0] ?? nowMs) + rule.windowSeconds * 1000 - nowMs) / 1000))
         : 0;
       return { rule, recent, exceeded, retryAfterSeconds };
     });
@@ -255,7 +265,7 @@ function assertCounterCompatible(
 
 function assertRequest(input: AbuseRateRequest): void {
   if (
-    (input.environmentId !== 'local' && input.environmentId !== 'recharge-dev-n2a01') ||
+    (input.environmentId !== 'local' && !isReviewedCloudProject(input.environmentId)) ||
     !['LV', 'EE', 'LT'].includes(input.marketId) ||
     !/^(?!__name__$)[A-Za-z0-9_-]{1,128}$/u.test(input.attemptRequestId) ||
     !Number.isFinite(input.now.getTime()) ||

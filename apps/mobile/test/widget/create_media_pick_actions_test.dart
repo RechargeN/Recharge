@@ -300,6 +300,16 @@ class _MemoryStore implements CreateMediaStore {
 
   @override
   Future<int> removePartialWrites() async => 0;
+
+  @override
+  Future<void> release({required String ownerId, required String path}) =>
+      remove(path);
+
+  @override
+  Future<int> sweepReleased({
+    required String ownerId,
+    required bool Function(String path) referenced,
+  }) async => 0;
 }
 
 class _NoopAnalyticsService implements AnalyticsService {

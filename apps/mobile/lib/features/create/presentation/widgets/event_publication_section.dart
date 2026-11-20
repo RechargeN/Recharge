@@ -9,9 +9,16 @@ import '../../domain/entities/event_publication.dart';
 /// state and forwards taps; it holds no rule and no second form: the Event
 /// itself is the user's Create draft.
 class EventPublicationSection extends StatelessWidget {
-  const EventPublicationSection({super.key, required this.controller});
+  const EventPublicationSection({
+    super.key,
+    required this.controller,
+    this.onOpenBooking,
+  });
 
   final EventPublicationController controller;
+
+  /// Debug-only: opens the Booking test entry for the published Event.
+  final void Function(EventBookingTestTarget target)? onOpenBooking;
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +98,12 @@ class EventPublicationSection extends StatelessWidget {
                   state.canHide,
                   controller.hide,
                 ),
+                if (onOpenBooking != null && state.bookingTarget != null)
+                  OutlinedButton(
+                    key: const Key('event-publication-open-booking'),
+                    onPressed: () => onOpenBooking!(state.bookingTarget!),
+                    child: Text(context.l10n.settingsBookingTestEntry),
+                  ),
               ],
             ),
             const SizedBox(height: 12),
