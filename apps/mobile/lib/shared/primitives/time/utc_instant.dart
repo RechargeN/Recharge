@@ -42,6 +42,15 @@ class UtcInstant implements Comparable<UtcInstant> {
     return UtcInstant._(value);
   }
 
+  /// A non-throwing UTC boundary for optional records and user input.
+  static UtcInstant? tryParse(String source) {
+    try {
+      return UtcInstant.parse(source);
+    } on FormatException {
+      return null;
+    }
+  }
+
   static final RegExp _utcText = RegExp(
     r'^([0-9]{4}|-[0-9]{4}|[+-][0-9]{6})-([0-9]{2})-([0-9]{2})T'
     r'([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.([0-9]{1,6}))?Z$',

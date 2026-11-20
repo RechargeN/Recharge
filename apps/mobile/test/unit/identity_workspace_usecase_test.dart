@@ -276,39 +276,48 @@ void main() {
     expect(_accessWithPageCount(3).availablePages, hasLength(3));
   });
 
-  test('creates pages one through three and blocks page four', () async {
-    final repository = _MemoryIdentityWorkspaceRepository(
-      const MockIdentityFixture().accessForUser(userId),
-    );
-    final useCase = CreateProfessionalPageUseCase(
-      repository: repository,
-      idGenerator: _SequenceIdGenerator(),
-      utcNow: () => DateTime.utc(2026, 7, 31, 12),
-    );
-
-    for (int index = 1; index <= 3; index += 1) {
-      await useCase(userId: userId, input: _creationInput('User Page $index'));
-    }
-
-    expect(
-      (await repository.loadAccessSnapshot(userId)).ownedPages,
-      hasLength(3),
-    );
-    await expectLater(
-      () => useCase(userId: userId, input: _creationInput('Blocked Page')),
-      throwsA(
-        isA<CreateProfessionalPageException>().having(
-          (CreateProfessionalPageException error) => error.code,
-          'code',
-          'self_service_page_limit_reached',
+  test(
+    'verified User creates pages one through three and blocks page four',
+    () async {
+      final repository = _MemoryIdentityWorkspaceRepository(
+        _replaceAccess(
+          const MockIdentityFixture().accessForUser(userId),
+          role: 'user',
         ),
-      ),
-    );
-    expect(
-      (await repository.loadAccessSnapshot(userId)).ownedPages,
-      hasLength(3),
-    );
-  });
+      );
+      final useCase = CreateProfessionalPageUseCase(
+        repository: repository,
+        idGenerator: _SequenceIdGenerator(),
+        utcNow: () => DateTime.utc(2026, 7, 31, 12),
+      );
+
+      for (int index = 1; index <= 3; index += 1) {
+        await useCase(
+          userId: userId,
+          input: _creationInput('User Page $index'),
+        );
+      }
+
+      expect(
+        (await repository.loadAccessSnapshot(userId)).ownedPages,
+        hasLength(3),
+      );
+      await expectLater(
+        () => useCase(userId: userId, input: _creationInput('Blocked Page')),
+        throwsA(
+          isA<CreateProfessionalPageException>().having(
+            (CreateProfessionalPageException error) => error.code,
+            'code',
+            'self_service_page_limit_reached',
+          ),
+        ),
+      );
+      expect(
+        (await repository.loadAccessSnapshot(userId)).ownedPages,
+        hasLength(3),
+      );
+    },
+  );
 
   test('additional-page request is pending and idempotent', () async {
     final repository = _MemoryIdentityWorkspaceRepository(

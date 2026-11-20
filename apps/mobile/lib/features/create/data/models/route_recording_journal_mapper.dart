@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../../../shared/primitives/geo/geo_point.dart';
 import '../../domain/entities/route_recording_data.dart';
 
@@ -18,9 +19,9 @@ class RouteRecordingJournalMapper {
       };
 
   RouteRecordingSample sampleFromJson(Map<String, Object?> json) {
-    final capturedAtUtc = DateTime.parse(
+    final capturedAtUtc = UtcInstant.parse(
       _requiredString(json, 'capturedAtUtc'),
-    );
+    ).value;
     final sample = RouteRecordingSample(
       position: GeoPoint(
         latitude: _requiredNum(json, 'latitude').toDouble(),
@@ -100,8 +101,12 @@ class RouteRecordingJournalMapper {
       revision: _requiredNum(manifest, 'revision').toInt(),
       sessionId: _requiredString(manifest, 'sessionId'),
       draftId: _requiredString(manifest, 'draftId'),
-      startedAtUtc: DateTime.parse(_requiredString(manifest, 'startedAtUtc')),
-      updatedAtUtc: DateTime.parse(_requiredString(manifest, 'updatedAtUtc')),
+      startedAtUtc: UtcInstant.parse(
+        _requiredString(manifest, 'startedAtUtc'),
+      ).value,
+      updatedAtUtc: UtcInstant.parse(
+        _requiredString(manifest, 'updatedAtUtc'),
+      ).value,
       status: RouteRecordingJournalStatus.values.byName(
         _requiredString(manifest, 'status'),
       ),

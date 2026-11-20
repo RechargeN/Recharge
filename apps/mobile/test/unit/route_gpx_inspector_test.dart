@@ -178,6 +178,28 @@ void main() {
       expect(inspection.candidates.single.bounds.crossesAntimeridian, isTrue);
     });
 
+    test(
+      'AC-35 GPX permits explicit offsets and flags impossible or zoneless timestamps',
+      () {
+        for (final text in [
+          '2026-07-25T10:00:00+02:00',
+          '2026-07-25T08:00:00Z',
+          '2026-02-30T08:00:00Z',
+          '2026-07-25T08:00:00',
+          '2026-07-25T08:00:00+14:01',
+        ]) {
+          final inspection = _inspect(
+            '<gpx version="1.1"><trk><trkseg><trkpt lat="56.95" lon="24.10"><time>$text</time></trkpt><trkpt lat="56.96" lon="24.11"/></trkseg></trk></gpx>',
+          );
+          expect(
+            inspection.issueCodes.contains('gpx_timestamp_invalid'),
+            !(text.endsWith('+02:00') || text == '2026-07-25T08:00:00Z'),
+            reason: text,
+          );
+        }
+      },
+    );
+
     test('flags timestamp anomalies without rejecting safe geometry', () {
       final inspection = _inspect('''
 <gpx version="1.1"><trk><trkseg>

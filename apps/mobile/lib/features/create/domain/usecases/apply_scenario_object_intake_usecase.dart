@@ -171,9 +171,7 @@ class ApplyScenarioObjectIntakeUseCase {
             address: _trimmedOrNull(locationSnapshot.address),
             marketId: _trimmedOrNull(locationSnapshot.marketId),
             regionId: _trimmedOrNull(locationSnapshot.regionId),
-            timezoneId:
-                _trimmedOrNull(locationSnapshot.timezoneId) ??
-                scenario.defaultTimezoneId,
+            timezoneId: _trimmedOrNull(locationSnapshot.timezoneId),
             disclosure: locationSnapshot.disclosure,
             sourceObjectId: ref.objectId,
             sourceObjectType: ref.objectType,

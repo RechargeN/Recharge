@@ -1,3 +1,5 @@
+import '../../../../core/parsing/recorded_identity_text.dart';
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../../../core/parsing/money_legacy_adapter.dart';
 import '../../../../shared/primitives/money/money_parse_result.dart';
 import 'package:recharge/shared/primitives/money/currency_code.dart';
@@ -176,7 +178,11 @@ class RentalDraftMapper {
   ) {
     final Map<String, Object?> json = _map(raw) ?? const <String, Object?>{};
     return RentalAvailabilityCalendar(
-      timeZoneId: _string(json['timeZoneId']) ?? defaults.timeZoneId,
+      timeZoneId: recordedIdentityText(
+        json,
+        'timeZoneId',
+        recordedContext: defaults.timeZoneId,
+      ),
       coverage: _coverage(json['coverage']),
       blocks: _list(json['blocks'])
           .map(_block)
@@ -373,8 +379,10 @@ class RentalDraftMapper {
     RentalPricingPolicy defaults,
   ) {
     final Map<String, Object?> json = _map(raw) ?? const <String, Object?>{};
-    final String currencyCode =
-        _string(json['currencyCode']) ?? defaults.currencyCode;
+    final String currencyCode = MoneyLegacyAdapter.recordedCurrency(
+      json,
+      recordedContext: defaults.currencyCode,
+    );
     final Map<String, Object?> depositJson =
         _map(json['deposit']) ?? const <String, Object?>{};
     final Object? amountRaw = depositJson['amount'];
@@ -488,7 +496,7 @@ class RentalDraftMapper {
   static int? _int(Object? raw) => raw is num ? raw.toInt() : null;
   static double? _double(Object? raw) => raw is num ? raw.toDouble() : null;
   static DateTime? _dateTime(Object? raw) =>
-      raw is String ? DateTime.tryParse(raw)?.toUtc() : null;
+      raw == null ? null : UtcInstant.parse(raw as String).value;
 
   static T? _enumValue<T extends Enum>(List<T> values, Object? raw) {
     if (raw is! String) return null;

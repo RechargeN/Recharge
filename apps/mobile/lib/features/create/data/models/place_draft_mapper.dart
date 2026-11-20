@@ -1,3 +1,5 @@
+import '../../../../core/parsing/recorded_identity_text.dart';
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../../../shared/primitives/money/currency_code.dart';
 import '../../../../core/parsing/money_legacy_adapter.dart';
 import '../../domain/entities/place_draft_data.dart';
@@ -199,7 +201,11 @@ class PlaceDraftMapper {
   ) {
     final Map<String, Object?> json = _map(raw) ?? const <String, Object?>{};
     return PlaceLocationDraft(
-      marketCityId: _string(json['marketCityId']) ?? defaults.marketCityId,
+      marketCityId: recordedIdentityText(
+        json,
+        'marketCityId',
+        recordedContext: defaults.marketCityId,
+      ),
       countryCode: _string(json['countryCode']) ?? defaults.countryCode,
       city: _string(json['city']) ?? defaults.city,
       district: _string(json['district']),
@@ -208,7 +214,11 @@ class PlaceDraftMapper {
       entranceHint: _string(json['entranceHint']),
       latitude: _double(json['latitude']),
       longitude: _double(json['longitude']),
-      timezoneId: _string(json['timezoneId']) ?? defaults.timezoneId,
+      timezoneId: recordedIdentityText(
+        json,
+        'timezoneId',
+        recordedContext: defaults.timezoneId,
+      ),
       accuracy:
           _enumValue(PlaceLocationAccuracy.values, json['accuracy']) ??
           defaults.accuracy,
@@ -301,27 +311,42 @@ class PlaceDraftMapper {
         hasCanonicalMinorUnits: json.containsKey('entryPriceFromMinorUnits'),
         canonicalMinorUnits: json['entryPriceFromMinorUnits'],
         legacyMajorAmount: json['entryPriceFrom'],
-        currencyCode: _string(json['currencyCode']) ?? defaultCurrency,
+        currencyCode: MoneyLegacyAdapter.recordedCurrency(
+          json,
+          recordedContext: defaultCurrency,
+        ),
       ),
       entryPriceTo: MoneyLegacyAdapter().readOptional(
         hasCanonicalMinorUnits: json.containsKey('entryPriceToMinorUnits'),
         canonicalMinorUnits: json['entryPriceToMinorUnits'],
         legacyMajorAmount: json['entryPriceTo'],
-        currencyCode: _string(json['currencyCode']) ?? defaultCurrency,
+        currencyCode: MoneyLegacyAdapter.recordedCurrency(
+          json,
+          recordedContext: defaultCurrency,
+        ),
       ),
       typicalSpendFrom: MoneyLegacyAdapter().readOptional(
         hasCanonicalMinorUnits: json.containsKey('typicalSpendFromMinorUnits'),
         canonicalMinorUnits: json['typicalSpendFromMinorUnits'],
         legacyMajorAmount: json['typicalSpendFrom'],
-        currencyCode: _string(json['currencyCode']) ?? defaultCurrency,
+        currencyCode: MoneyLegacyAdapter.recordedCurrency(
+          json,
+          recordedContext: defaultCurrency,
+        ),
       ),
       typicalSpendTo: MoneyLegacyAdapter().readOptional(
         hasCanonicalMinorUnits: json.containsKey('typicalSpendToMinorUnits'),
         canonicalMinorUnits: json['typicalSpendToMinorUnits'],
         legacyMajorAmount: json['typicalSpendTo'],
-        currencyCode: _string(json['currencyCode']) ?? defaultCurrency,
+        currencyCode: MoneyLegacyAdapter.recordedCurrency(
+          json,
+          recordedContext: defaultCurrency,
+        ),
       ),
-      currencyCode: _string(json['currencyCode']) ?? defaultCurrency,
+      currencyCode: MoneyLegacyAdapter.recordedCurrency(
+        json,
+        recordedContext: defaultCurrency,
+      ),
       pricingNote: _string(json['pricingNote']),
       officialPricingUrl: _string(json['officialPricingUrl']),
     );
@@ -380,7 +405,7 @@ class PlaceDraftMapper {
   static int? _int(Object? raw) => raw is num ? raw.toInt() : null;
   static double? _double(Object? raw) => raw is num ? raw.toDouble() : null;
   static DateTime? _dateTime(Object? raw) =>
-      raw is String ? DateTime.tryParse(raw)?.toUtc() : null;
+      raw == null ? null : UtcInstant.parse(raw as String).value;
 
   static T? _enumValue<T extends Enum>(List<T> values, Object? raw) {
     if (raw is! String) return null;

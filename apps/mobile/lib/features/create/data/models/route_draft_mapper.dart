@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../domain/entities/publisher_ref.dart';
 import '../../../../shared/primitives/geo/geo_bounds.dart';
 import '../../../../shared/primitives/geo/geo_point.dart';
@@ -987,7 +988,7 @@ abstract final class RouteDraftMapper {
 
   static DateTime _dateTime(Object? value, String path) {
     if (value is! String) throw RouteDraftFormatException(path);
-    final parsed = DateTime.tryParse(value);
+    final parsed = UtcInstant.tryParse(value)?.value;
     if (parsed == null) throw RouteDraftFormatException(path);
     return parsed.toUtc();
   }

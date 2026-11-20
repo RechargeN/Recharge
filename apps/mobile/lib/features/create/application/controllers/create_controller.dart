@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/time/local_date.dart';
 import '../../../../shared/primitives/errors/coded_refusal.dart';
 import '../../domain/usecases/build_session_content_body.dart';
 import '../../../../shared/primitives/time/utc_instant.dart';
@@ -2950,7 +2951,7 @@ class CreateController extends ChangeNotifier {
             ? <LocalOpeningPeriod>[
                 LocalOpeningPeriod(
                   id: _localId(),
-                  dayOfWeek: DateTime.tryParse(localDate)?.weekday ?? 1,
+                  dayOfWeek: LocalDate.tryParse(localDate)?.weekday ?? 1,
                   openMinute: 9 * 60,
                   closeMinute: 18 * 60,
                   closesNextDay: false,

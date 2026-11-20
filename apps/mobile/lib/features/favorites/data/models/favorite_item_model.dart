@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../../../shared/primitives/money/currency_metadata.dart';
 import '../../../../core/parsing/money_legacy_adapter.dart';
 import '../../../../shared/primitives/money/money_parse_result.dart';
@@ -142,11 +143,11 @@ class FavoriteItemModel {
       category: category,
       startsAtUtc: startsAtUtcIso == null
           ? null
-          : DateTime.parse(startsAtUtcIso!).toUtc(),
+          : UtcInstant.parse(startsAtUtcIso!).value,
       distanceKm: distanceKm,
       priceAmount: priceAmount,
       isFree: isFree,
-      savedAtUtc: DateTime.parse(savedAtUtcIso).toUtc(),
+      savedAtUtc: UtcInstant.parse(savedAtUtcIso).value,
       targetRoute: targetRoute,
       planningTargetKind: FavoritePlanningTargetKind.values
           .where((value) => value.name == planningTargetKind)

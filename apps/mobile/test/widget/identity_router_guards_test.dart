@@ -1,3 +1,7 @@
+import 'package:recharge/app/di/booking_test_entry_guard.dart';
+import 'package:recharge/app/di/booking_backend_selection.dart';
+import 'package:recharge/app/di/backend_binding_manifest.dart';
+import 'package:recharge/app/presentation/event_details_page.dart';
 import 'package:recharge/app/application/active_creator_verification_provider.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_session_entity.dart';
@@ -63,6 +67,39 @@ void main() {
 
   String location() =>
       container.read(appRouterProvider).routeInformationProvider.value.uri.path;
+
+  testWidgets(
+    'CP3 debug Booking route opens with .000Z query produced by toIso8601String',
+    (tester) async {
+      await sl.unregister<BookingTestEntryGuard>();
+      sl.registerSingleton<BookingTestEntryGuard>(
+        BookingTestEntryGuard(
+          flag: true,
+          releaseMode: false,
+          binding: BookingBackendBindingController(
+            emulatorBase: Uri.parse(
+              'http://127.0.0.1:5001/demo-recharge/europe-west1',
+            ),
+            releaseMode: false,
+            initial: BackendBindingMode.testBackend,
+          ),
+        ),
+      );
+      final uri = Uri(
+        path: '${RouteNames.testEventBooking}/evt-1',
+        queryParameters: {
+          'occurrence': 'occ-1',
+          'start': DateTime.utc(2026, 11, 20, 16).toIso8601String(),
+          'end': DateTime.utc(2026, 11, 20, 18).toIso8601String(),
+          'title': 'UTC route regression',
+        },
+      );
+      await open(tester, uri.toString());
+      expect(location(), '${RouteNames.testEventBooking}/evt-1');
+      expect(find.byType(EventDetailsPage), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('ADR0023 User with zero pages retains personal Create hints', (
     tester,

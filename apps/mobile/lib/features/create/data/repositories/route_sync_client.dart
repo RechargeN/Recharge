@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
@@ -482,7 +483,9 @@ class RouteSyncClient implements RouteSyncRepository {
               revision: raw['revision']! as int,
               deleted: raw['status'] == 'deleted',
               title: raw['title'] as String? ?? '',
-              updatedAtUtc: DateTime.parse(raw['updatedAtUtc']! as String),
+              updatedAtUtc: UtcInstant.parse(
+                raw['updatedAtUtc']! as String,
+              ).value,
             ),
           );
         }
@@ -536,7 +539,7 @@ class RouteSyncClient implements RouteSyncRepository {
         revision: raw['revision']! as int,
         deleted: deleted,
         title: route?['title'] as String? ?? '',
-        updatedAtUtc: DateTime.parse(raw['updatedAtUtc']! as String),
+        updatedAtUtc: UtcInstant.parse(raw['updatedAtUtc']! as String).value,
         route: route == null ? null : Map<String, Object?>.from(route),
         privacyTrim: trim == null
             ? null

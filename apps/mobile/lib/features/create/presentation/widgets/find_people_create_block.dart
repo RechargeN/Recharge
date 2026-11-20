@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../../../shared/primitives/money/money_formatter.dart';
 import 'package:flutter/material.dart';
 
@@ -453,7 +454,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               value: data.pollResponseDeadlineUtc?.toIso8601String() ?? '',
               hint: '2026-08-18T18:00:00Z',
               onChanged: (String value) {
-                final DateTime? date = DateTime.tryParse(value)?.toUtc();
+                final DateTime? date = UtcInstant.tryParse(value)?.value;
                 _update(
                   data.copyWith(
                     pollResponseDeadlineUtc: date,
@@ -486,7 +487,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
               label: context.l10n.createFindPeopleSeriesEndUtc,
               value: data.seriesEndAtUtc?.toIso8601String() ?? '',
               onChanged: (String value) {
-                final DateTime? date = DateTime.tryParse(value)?.toUtc();
+                final DateTime? date = UtcInstant.tryParse(value)?.value;
                 _update(
                   data.copyWith(
                     seriesEndAtUtc: date,
@@ -1362,7 +1363,7 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
                     context.l10n.createFindPeopleSchedulePublicationUtcOptional,
                 value: data.publishAtUtc?.toIso8601String() ?? '',
                 onChanged: (String value) {
-                  final DateTime? date = DateTime.tryParse(value)?.toUtc();
+                  final DateTime? date = UtcInstant.tryParse(value)?.value;
                   _update(
                     data.copyWith(
                       publishAtUtc: date,
@@ -1520,8 +1521,8 @@ class _FindPeopleCreateBlockState extends State<FindPeopleCreateBlock> {
   }
 
   void _addSlot(CreateDraftEntity draft, FindPeopleDraftData data) {
-    final DateTime? start = DateTime.tryParse(_slotStart.text)?.toUtc();
-    final DateTime? end = DateTime.tryParse(_slotEnd.text)?.toUtc();
+    final DateTime? start = UtcInstant.tryParse(_slotStart.text)?.value;
+    final DateTime? end = UtcInstant.tryParse(_slotEnd.text)?.value;
     if (start == null || end == null || !start.isBefore(end)) return;
     final CreateTimeSlotDraft slot = CreateTimeSlotDraft(
       localId: 'loc_${DateTime.now().toUtc().microsecondsSinceEpoch}',

@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'publisher_ref.dart';
 
 /// Dry-run class of one local item (D4 §5.2, BCK-18 §33.5).
@@ -505,10 +506,11 @@ bool _optionalGeneration(Object? value) =>
     value == null || (value is int && value >= 1);
 
 DateTime? _instant(Object? value) =>
-    value is String ? DateTime.tryParse(value)?.toUtc() : null;
+    value is String ? UtcInstant.tryParse(value)?.value : null;
 
 bool _optionalInstant(Object? value) =>
-    value == null || (value is String && DateTime.tryParse(value) != null);
+    value == null ||
+    (value is String && UtcInstant.tryParse(value)?.value != null);
 
 /// Absent → empty; anything but attachment id → positive attempt is malformed.
 Map<String, int>? _attempts(Object? value) {

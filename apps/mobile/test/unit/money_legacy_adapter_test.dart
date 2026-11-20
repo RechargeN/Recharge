@@ -4,6 +4,33 @@ import 'package:recharge/shared/primitives/money/money_parse_result.dart';
 import 'package:recharge/core/parsing/money_legacy_adapter.dart';
 
 void main() {
+  test(
+    'AC-34/35 recorded nested currency never masks present invalid data',
+    () {
+      expect(
+        MoneyLegacyAdapter.recordedCurrency({}, recordedContext: 'EUR'),
+        'EUR',
+      );
+      expect(
+        MoneyLegacyAdapter.recordedCurrency({
+          'currencyCode': null,
+        }, recordedContext: 'EUR'),
+        isEmpty,
+      );
+      expect(
+        MoneyLegacyAdapter.recordedCurrency({
+          'currencyCode': '',
+        }, recordedContext: 'EUR'),
+        isEmpty,
+      );
+      expect(
+        () => MoneyLegacyAdapter.recordedCurrency({
+          'currencyCode': 123,
+        }, recordedContext: 'EUR'),
+        throwsA(isA<MoneyReadException>()),
+      );
+    },
+  );
   final adapter = MoneyLegacyAdapter();
   MoneyParseResult legacy(Object? amount) => adapter.read(
     hasCanonicalMinorUnits: false,

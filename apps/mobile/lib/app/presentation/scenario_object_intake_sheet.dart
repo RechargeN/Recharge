@@ -766,7 +766,7 @@ class _CandidateCard extends StatelessWidget {
                         context.l10n.scenarioIntakeFixedStart(
                           RechargeFormats.dateTime(
                             fixed.fixedStartAtUtc!,
-                            fixed.startTimezoneId ?? 'UTC',
+                            fixed.startTimezoneId ?? '',
                             Localizations.localeOf(context).languageCode,
                           ),
                         ),

@@ -3,49 +3,55 @@ import 'package:recharge/features/create/data/models/create_draft_model.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 
 void main() {
-  test('legacy broken Latvia default migrates to Riga market and timezone', () {
-    final CreateDraftModel model = CreateDraftModel.fromJson(
-      <String, dynamic>{
-        'id': 'draft_1',
-        'createdAtUtcIso': '2026-01-01T00:00:00Z',
-        'updatedAtUtcIso': '2026-01-01T00:00:00Z',
-        'objectType': 'event',
-        'country': 'Latvia',
-        'city': '',
-        'timezone': 'Europe/Moscow',
-      },
-      activeMarketCityId: 'riga',
-      activeTimezone: 'Europe/Riga',
-      activeCountry: 'LV',
-      activeCity: 'Riga',
-    );
+  test(
+    'AC-34 legacy Latvia identities are never guessed from active market',
+    () {
+      final CreateDraftModel model = CreateDraftModel.fromJson(
+        <String, dynamic>{
+          'id': 'draft_1',
+          'createdAtUtcIso': '2026-01-01T00:00:00Z',
+          'updatedAtUtcIso': '2026-01-01T00:00:00Z',
+          'objectType': 'event',
+          'country': 'Latvia',
+          'city': '',
+          'timezone': 'Europe/Moscow',
+        },
+        activeMarketCityId: 'riga',
+        activeTimezone: 'Europe/Riga',
+        activeCountry: 'LV',
+        activeCity: 'Riga',
+      );
 
-    expect(model.schemaVersion, 9);
-    expect(model.marketCityId, 'riga');
-    expect(model.timezone, 'Europe/Riga');
-    expect(model.toJson()['schemaVersion'], 9);
-  });
+      expect(model.schemaVersion, 9);
+      expect(model.marketCityId, isEmpty);
+      expect(model.timezone, 'Europe/Moscow');
+      expect(model.toJson()['schemaVersion'], 9);
+    },
+  );
 
-  test('legacy Rezekne remains legacy market with Riga timezone', () {
-    final CreateDraftModel model = CreateDraftModel.fromJson(
-      <String, dynamic>{
-        'id': 'draft_2',
-        'createdAtUtcIso': '2026-01-01T00:00:00Z',
-        'updatedAtUtcIso': '2026-01-01T00:00:00Z',
-        'objectType': 'place',
-        'country': 'Latvia',
-        'city': 'Rezekne',
-        'timezone': 'Europe/Moscow',
-      },
-      activeMarketCityId: 'riga',
-      activeTimezone: 'Europe/Riga',
-      activeCountry: 'LV',
-      activeCity: 'Riga',
-    );
+  test(
+    'AC-36 legacy Rezekne preserves recorded timezone without market inference',
+    () {
+      final CreateDraftModel model = CreateDraftModel.fromJson(
+        <String, dynamic>{
+          'id': 'draft_2',
+          'createdAtUtcIso': '2026-01-01T00:00:00Z',
+          'updatedAtUtcIso': '2026-01-01T00:00:00Z',
+          'objectType': 'place',
+          'country': 'Latvia',
+          'city': 'Rezekne',
+          'timezone': 'Europe/Moscow',
+        },
+        activeMarketCityId: 'riga',
+        activeTimezone: 'Europe/Riga',
+        activeCountry: 'LV',
+        activeCity: 'Riga',
+      );
 
-    expect(model.marketCityId, 'rezekne');
-    expect(model.timezone, 'Europe/Riga');
-  });
+      expect(model.marketCityId, isEmpty);
+      expect(model.timezone, 'Europe/Moscow');
+    },
+  );
 
   test('unknown legacy location is not overwritten', () {
     final CreateDraftModel model = CreateDraftModel.fromJson(

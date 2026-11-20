@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../../../shared/primitives/errors/coded_refusal.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
@@ -498,7 +499,7 @@ class ScenarioSyncClient implements CreateDraftCollectionRepository {
             id: e['scenarioId'] as String,
             objectType: CreateObjectType.scenario,
             title: e['title'] as String,
-            updatedAtUtc: DateTime.parse(e['updatedAtUtc'] as String),
+            updatedAtUtc: UtcInstant.parse(e['updatedAtUtc'] as String).value,
             scenarioRevision: e['revision'] as int,
           ),
         )

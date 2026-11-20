@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'backend_contract.dart';
 import 'backend_transport.dart';
 
@@ -29,7 +30,7 @@ final class BackendResultMapper {
         return BackendSuccess<T>(
           value: decode(Map<String, Object?>.from(rawValue)),
           serverRevision: revision,
-          committedAtUtc: DateTime.parse(committedAt).toUtc(),
+          committedAtUtc: UtcInstant.parse(committedAt).value,
         );
       } on Object {
         return BackendRejected<T>(

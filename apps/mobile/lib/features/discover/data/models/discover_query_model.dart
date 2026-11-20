@@ -119,7 +119,9 @@ class DiscoverQueryModel {
         legacyMajorAmount: map['budget_min'],
         currencyCode: map.containsKey('currency_code')
             ? map['currency_code']
-            : legacyCurrencyCode,
+            : sourceVersion < 3
+            ? legacyCurrencyCode
+            : null,
       ),
       budgetMax: MoneyLegacyAdapter().readOptional(
         hasCanonicalMinorUnits: map.containsKey('budget_max_minor_units'),
@@ -127,7 +129,9 @@ class DiscoverQueryModel {
         legacyMajorAmount: map['budget_max'],
         currencyCode: map.containsKey('currency_code')
             ? map['currency_code']
-            : legacyCurrencyCode,
+            : sourceVersion < 3
+            ? legacyCurrencyCode
+            : null,
       ),
       freeOnly: (map['free_only'] as bool?) ?? false,
       centerLat: centerLat,

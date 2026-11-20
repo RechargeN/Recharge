@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -146,14 +147,14 @@ final class FileBookingPersistenceStore {
     return BookingOperationRecord(
       idempotencyKey: idempotencyKey,
       operationId: map['operationId'] as String? ?? idempotencyKey,
-      firstAttemptAtUtc: DateTime.parse(
+      firstAttemptAtUtc: UtcInstant.parse(
         map['firstAttemptAtUtc']! as String,
-      ).toUtc(),
+      ).value,
       state: BookingOperationState.values.byName(map['state']! as String),
       reconciliationAttempts: map['reconciliationAttempts'] as int? ?? 0,
       lastReconciledAtUtc: map['lastReconciledAtUtc'] == null
           ? null
-          : DateTime.parse(map['lastReconciledAtUtc']! as String).toUtc(),
+          : UtcInstant.parse(map['lastReconciledAtUtc']! as String).value,
       reconciliationCallableName: map['reconciliationCallableName'] as String?,
       reconciliationQuery: map['reconciliationQuery'] is Map
           ? Map<String, Object?>.unmodifiable(
@@ -238,7 +239,7 @@ final class FileBookingPersistenceStore {
   bool _isOlderThanWindow(Object? value, DateTime now) {
     if (value is! Map) return false;
     final raw = value['storedAtUtc'] ?? value['firstAttemptAtUtc'];
-    final instant = raw is String ? DateTime.tryParse(raw)?.toUtc() : null;
+    final instant = raw is String ? UtcInstant.tryParse(raw)?.value : null;
     return instant != null && now.difference(instant) > retryWindow;
   }
 
@@ -282,7 +283,7 @@ final class FileBookingPersistenceStore {
     if (value is Map) {
       final raw = value['storedAtUtc'] ?? value['firstAttemptAtUtc'];
       if (raw is String) {
-        final parsed = DateTime.tryParse(raw);
+        final parsed = UtcInstant.tryParse(raw)?.value;
         if (parsed != null) return parsed.toUtc();
       }
     }

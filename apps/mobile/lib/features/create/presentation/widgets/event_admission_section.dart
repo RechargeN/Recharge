@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'package:flutter/material.dart';
 
 import '../../application/controllers/create_controller.dart';
@@ -546,7 +547,7 @@ class _AccessWindowEditor extends StatelessWidget {
               labelText: context.l10n.createFormOpensAtUtcIso8601,
             ),
             onChanged: (raw) => onChanged(
-              value!.copyWith(opensAtUtc: DateTime.tryParse(raw)?.toUtc()),
+              value!.copyWith(opensAtUtc: UtcInstant.tryParse(raw)?.value),
             ),
           ),
           const SizedBox(height: 8),
@@ -559,7 +560,7 @@ class _AccessWindowEditor extends StatelessWidget {
               labelText: context.l10n.createFormClosesAtUtcIso8601,
             ),
             onChanged: (raw) => onChanged(
-              value!.copyWith(closesAtUtc: DateTime.tryParse(raw)?.toUtc()),
+              value!.copyWith(closesAtUtc: UtcInstant.tryParse(raw)?.value),
             ),
           ),
         ],

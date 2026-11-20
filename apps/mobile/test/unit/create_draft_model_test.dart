@@ -64,11 +64,8 @@ void main() {
         throwsA(isA<MoneyReadException>()),
       );
       expect(
-        CreateDraftModel.fromJson(
-          json,
-          activeCurrency: 'EUR',
-        ).basePrice?.minorUnits,
-        1234,
+        () => CreateDraftModel.fromJson(json, activeCurrency: 'EUR'),
+        throwsA(isA<MoneyReadException>()),
       );
       json['currency'] = 123;
       expect(

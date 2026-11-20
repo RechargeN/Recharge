@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../../../core/parsing/money_legacy_adapter.dart';
 import '../../../../shared/primitives/money/money_parse_result.dart';
 import '../../domain/entities/discover_item_entity.dart';
@@ -68,7 +69,7 @@ class DiscoverItemModel extends DiscoverItemEntity {
       city: map['city']! as String,
       category: map['category']! as String,
       subcategory: map['subcategory'] as String? ?? '',
-      startsAtUtc: DateTime.parse(map['starts_at_utc']! as String),
+      startsAtUtc: UtcInstant.parse(map['starts_at_utc']! as String).value,
       latitude: (map['latitude']! as num).toDouble(),
       longitude: (map['longitude']! as num).toDouble(),
       priceAmount: price,

@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/time/local_date.dart';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
@@ -326,14 +327,14 @@ final class ClassWorkshopContentBodyMapper {
     ClassWorkshopDraftData data,
     ClassWorkshopOccurrence item,
   ) {
-    final DateTime? date = DateTime.tryParse('${item.localDate}T00:00:00Z');
+    final LocalDate? date = LocalDate.tryParse(item.localDate);
     if (date == null ||
         item.startMinuteLocal < 0 ||
         item.endMinuteLocal > 1440 ||
         item.startMinuteLocal >= item.endMinuteLocal) {
       return null;
     }
-    DateTime? resolve(DateTime day, int minute) {
+    DateTime? resolve(LocalDate day, int minute) {
       try {
         final ResolvedEventLocalTime resolved = _timezones.resolve(
           timezoneId: data.timezoneId,
@@ -355,7 +356,7 @@ final class ClassWorkshopContentBodyMapper {
 
     final DateTime? start = resolve(date, item.startMinuteLocal);
     final DateTime? end = item.endMinuteLocal == 1440
-        ? resolve(date.add(const Duration(days: 1)), 0)
+        ? resolve(date.addDays(1), 0)
         : resolve(date, item.endMinuteLocal);
     if (start == null || end == null) return null;
     return (start: start, end: end);
@@ -364,7 +365,7 @@ final class ClassWorkshopContentBodyMapper {
   /// True when the wall time exists twice in the zone (DST overlap), so the
   /// Creator must choose the earlier or later offset.
   bool isAmbiguous(String timezoneId, String localDate, int minuteOfDay) {
-    final DateTime? date = DateTime.tryParse('${localDate}T00:00:00Z');
+    final LocalDate? date = LocalDate.tryParse(localDate);
     if (date == null) return false;
     try {
       return _timezones

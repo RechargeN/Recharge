@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'event_publication.dart';
 import 'publisher_ref.dart';
 
@@ -21,7 +22,9 @@ final class FindPeopleConsentView {
     if (value is! Map) return null;
     final Object? state = value['state'];
     final Object? revision = value['revision'];
-    final DateTime? expires = DateTime.tryParse('${value['expiresAtUtc']}');
+    final DateTime? expires = UtcInstant.tryParse(
+      '${value['expiresAtUtc']}',
+    )?.value;
     if (state is! String || revision is! int || expires == null) return null;
     return FindPeopleConsentView(
       state: state,
@@ -136,9 +139,9 @@ final class FindPeoplePublicationRecord {
     final Object? serverOwnerUserId = value['serverOwnerUserId'];
     final Object? authorApplied = value['authorApplied'];
     final Object? title = value['title'];
-    final DateTime? createdAt = DateTime.tryParse(
+    final DateTime? createdAt = UtcInstant.tryParse(
       '${value['createdAtUtc'] ?? ''}',
-    );
+    )?.value;
     final Object? submissionId = value['submissionId'];
     if (accountId is! String ||
         publisherType == null ||

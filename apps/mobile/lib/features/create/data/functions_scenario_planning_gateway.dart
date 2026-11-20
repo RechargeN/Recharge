@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'package:uuid/uuid.dart';
 
 import '../domain/entities/event_publication.dart';
@@ -80,7 +81,9 @@ final class FunctionsScenarioPlanningGateway
       idempotencyKey,
       <String, Object?>{'ttlDays': ?ttlDays},
     );
-    final DateTime? expires = DateTime.tryParse('${result['expiresAtUtc']}');
+    final DateTime? expires = UtcInstant.tryParse(
+      '${result['expiresAtUtc']}',
+    )?.value;
     if (expires == null) {
       throw const EventPublicationRejected('invalid_contract');
     }

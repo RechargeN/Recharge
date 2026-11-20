@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../shared/primitives/money/money.dart';
 import '../../shared/primitives/money/currency_code.dart';
 import '../../features/discover/domain/entities/discover_item_entity.dart'
@@ -62,8 +63,8 @@ PublishedEventDiscoveryEntity? publishedTestBookingEventProjection({
 }) {
   final RegExp id = RegExp(r'^[A-Za-z0-9_-]{1,128}$');
   final String? occurrenceId = query['occurrence'];
-  final DateTime? start = DateTime.tryParse(query['start'] ?? '');
-  final DateTime? end = DateTime.tryParse(query['end'] ?? '');
+  final DateTime? start = UtcInstant.tryParse(query['start'] ?? '')?.value;
+  final DateTime? end = UtcInstant.tryParse(query['end'] ?? '')?.value;
   if (!id.hasMatch(eventId) ||
       occurrenceId == null ||
       !id.hasMatch(occurrenceId) ||

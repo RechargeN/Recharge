@@ -697,25 +697,10 @@ class CreateDraftModel {
     final int sourceVersion = (json['schemaVersion'] as num?)?.toInt() ?? 1;
     final String country = json['country'] as String? ?? '';
     final String city = json['city'] as String? ?? '';
-    String timezone = json['timezone'] as String? ?? 'UTC';
-    String marketCityId = json['marketCityId'] as String? ?? '';
-    if (sourceVersion < 2 && marketCityId.isEmpty) {
-      final String normalizedCity = city.trim().toLowerCase();
-      final String normalizedCountry = country.trim().toLowerCase();
-      if (normalizedCity == 'rezekne' || normalizedCity == 'rēzekne') {
-        marketCityId = 'rezekne';
-      } else if (normalizedCity == activeCity.trim().toLowerCase()) {
-        marketCityId = activeMarketCityId;
-      } else if ((normalizedCountry == 'latvia' ||
-              normalizedCountry == activeCountry.trim().toLowerCase()) &&
-          normalizedCity.isEmpty &&
-          timezone == 'Europe/Moscow') {
-        marketCityId = activeMarketCityId;
-      }
-      if (marketCityId.isNotEmpty && timezone == 'Europe/Moscow') {
-        timezone = marketCityId == 'rezekne' ? 'Europe/Riga' : activeTimezone;
-      }
-    }
+    // Restore recorded identities verbatim. Active workspace/configuration is
+    // only a default for NEW drafts, never evidence for a stored legacy draft.
+    final String timezone = json['timezone'] as String? ?? '';
+    final String marketCityId = json['marketCityId'] as String? ?? '';
     return CreateDraftModel(
       schemaVersion: sourceVersion > 9 ? sourceVersion : 9,
       id: json['id'] as String,
@@ -785,10 +770,10 @@ class CreateDraftModel {
         hasCanonicalMinorUnits: json.containsKey('basePriceMinorUnits'),
         canonicalMinorUnits: json['basePriceMinorUnits'],
         legacyMajorAmount: json['basePrice'],
-        currencyCode: json['currency'] ?? activeCurrency,
+        currencyCode: json['currency'],
       ),
       currency: json['currency'] == null
-          ? activeCurrency ?? ''
+          ? ''
           : json['currency'] is String
           ? json['currency'] as String
           : throw const MoneyReadException(MoneyParseError.missingCurrency),

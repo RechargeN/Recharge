@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -131,7 +132,7 @@ class PublishedRouteDiscoveryLocalDataSource {
     subtitle: map['subtitle'] as String? ?? '',
     city: map['city'] as String? ?? '',
     marketCityId: map['marketCityId'] as String? ?? '',
-    timezoneId: map['timezoneId'] as String? ?? 'UTC',
+    timezoneId: map['timezoneId'] as String? ?? '',
     categoryId: map['categoryId'] as String? ?? '',
     subcategoryId: map['subcategoryId'] as String? ?? '',
     coverImage: map['coverImage'] as String? ?? '',
@@ -159,7 +160,7 @@ class PublishedRouteDiscoveryLocalDataSource {
     recommendedDifficultyId: map['recommendedDifficultyId'] as String? ?? '',
     fieldVerifiedAtUtc: map['fieldVerifiedAtUtc'] == null
         ? null
-        : DateTime.parse(map['fieldVerifiedAtUtc']! as String).toUtc(),
+        : UtcInstant.parse(map['fieldVerifiedAtUtc']! as String).value,
     waypointCount: (map['waypointCount'] as num?)?.toInt() ?? 0,
     demoOnly: map['demoOnly'] as bool? ?? false,
     searchTokens: (map['searchTokens'] as List<dynamic>? ?? <dynamic>[])
@@ -168,6 +169,6 @@ class PublishedRouteDiscoveryLocalDataSource {
     attributions: (map['attributions'] as List<dynamic>? ?? <dynamic>[])
         .map((value) => value.toString())
         .toList(growable: false),
-    publishedAtUtc: DateTime.parse(map['publishedAtUtc']! as String).toUtc(),
+    publishedAtUtc: UtcInstant.parse(map['publishedAtUtc']! as String).value,
   );
 }

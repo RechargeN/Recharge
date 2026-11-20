@@ -1,3 +1,5 @@
+import '../../shared/primitives/time/utc_instant.dart';
+import '../../shared/primitives/time/local_date.dart';
 import '../../features/favorites/domain/entities/favorite_item_entity.dart';
 import '../../features/favorites/domain/repositories/favorites_repository.dart';
 import '../../features/visited/domain/entities/visited_place_entity.dart';
@@ -30,7 +32,7 @@ final class ServerFavoritesRepository implements FavoritesRepository {
         distanceKm: null,
         priceAmount: null,
         isFree: false,
-        savedAtUtc: DateTime.parse(e['updatedAtUtc']! as String),
+        savedAtUtc: UtcInstant.parse(e['updatedAtUtc']! as String).value,
         targetRoute: null,
       );
     }).toList();
@@ -82,10 +84,10 @@ final class ServerVisitedPlacesRepository implements VisitedPlacesRepository {
       subtitle: '',
       city: snapshot['city']! as String,
       category: snapshot['category']! as String,
-      visitedOn: DateTime.parse(e['visitedOn']! as String),
+      visitedOn: _localCalendar(e['visitedOn']! as String),
       timezoneId: e['timezoneId']! as String,
       evidence: VisitEvidence.selfReported,
-      recordedAtUtc: DateTime.parse(e['updatedAtUtc']! as String),
+      recordedAtUtc: UtcInstant.parse(e['updatedAtUtc']! as String).value,
     );
   }
 
@@ -145,4 +147,10 @@ final class ServerVisitedPlacesRepository implements VisitedPlacesRepository {
       visitedOn: entry['visitedOn']! as String,
     );
   }
+}
+
+// Legacy Visit API exposes DateTime; the stored contract is a local date.
+DateTime _localCalendar(String text) {
+  final date = LocalDate.parse(text);
+  return DateTime(date.year, date.month, date.day);
 }

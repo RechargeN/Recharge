@@ -555,7 +555,7 @@ class CollectionCreateCoordinator {
         .toSet();
     final CollectionCompositionReview review = CollectionCompositionReview(
       draftRevision: current.revision,
-      reviewedAtUtc: _clock(),
+      reviewedAtUtc: _clock().toUtc(),
       acknowledgedUnavailableStableKeys: unavailable,
     );
     _stateOrNull = current.copyWith(

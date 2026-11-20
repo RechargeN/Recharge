@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import '../../../../core/layout/page_list_padding.dart';
 import '../../../../core/localization/taxonomy_labels.dart';
 import '../../application/activity_validation_feedback_provider.dart';
@@ -2529,7 +2530,7 @@ bool _seedIsFree(Map<String, String> params, Money? basePrice) {
 DateTime _seedStartDateTime(Map<String, String> params) {
   for (final String key in <String>['start', 'startsAt', 'dateFrom']) {
     final String raw = _seedParam(params, <String>[key]);
-    final DateTime? parsed = DateTime.tryParse(raw)?.toUtc();
+    final DateTime? parsed = UtcInstant.tryParse(raw)?.value;
     if (parsed != null) return parsed;
   }
   return DateTime.now().toUtc().add(const Duration(days: 3));

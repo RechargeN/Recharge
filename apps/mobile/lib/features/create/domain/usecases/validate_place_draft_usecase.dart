@@ -1,3 +1,4 @@
+import '../../../../shared/primitives/time/local_date.dart';
 import '../../../../shared/primitives/money/money.dart';
 import 'dart:math' as math;
 
@@ -392,17 +393,8 @@ class ValidatePlaceDraftUseCase {
         longitude <= 180;
   }
 
-  static bool _validLocalDate(String? value) {
-    if (value == null || !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value)) {
-      return false;
-    }
-    final DateTime? parsed = DateTime.tryParse(value);
-    return parsed != null &&
-        '${parsed.year.toString().padLeft(4, '0')}-'
-                '${parsed.month.toString().padLeft(2, '0')}-'
-                '${parsed.day.toString().padLeft(2, '0')}' ==
-            value;
-  }
+  static bool _validLocalDate(String? value) =>
+      value != null && LocalDate.tryParse(value) != null;
 
   static bool _validHttpsUrl(String value) {
     final Uri? uri = Uri.tryParse(value.trim());

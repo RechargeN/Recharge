@@ -1,3 +1,4 @@
+import '../config/catalog_market_binding.dart';
 import '../../features/auth/domain/repositories/auth_session_events.dart';
 import 'dart:io';
 import 'dev_auth_bundle.dart';
@@ -444,7 +445,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     ..registerLazySingleton<ActivityPlaceLinkRepository>(
       () => CatalogActivityPlaceLinkRepository(
         query: sl<CatalogQueryPort>().query,
-        marketId: sl<MarketConfig>().countryCode,
+        marketId: catalogMarketIdFor(sl<MarketConfig>().market),
         enabled: activityLinkedPlaceTestEntryDefined && !kReleaseMode,
       ),
     )
@@ -762,7 +763,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
           guard: sl(),
           runtime: () => sl.getAsync<BookingTransportRuntime>(),
         ),
-        marketId: sl<MarketConfig>().countryCode,
+        marketId: catalogMarketIdFor(sl<MarketConfig>().market),
       ),
     )
     ..registerLazySingleton<CollectionCatalogSearchRepository>(
@@ -1011,7 +1012,8 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
       () => DiscoverPreferencesLocalDataSource(
         sl(),
         timezoneRepository: sl(),
-        legacyCurrencyCode: sl<MarketConfig>().currencyCode,
+        // v1 LV records predate currency storage; their recorded contract was EUR.
+        legacyCurrencyCode: 'EUR',
         defaultMarketCityId: sl<MarketConfig>().marketCityId,
         defaultCenterLat: sl<MarketConfig>().centerLat,
         defaultCenterLng: sl<MarketConfig>().centerLng,
@@ -1027,7 +1029,7 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
         ),
         port: sl(),
         session: sl(),
-        marketId: sl<MarketConfig>().countryCode,
+        marketId: catalogMarketIdFor(sl<MarketConfig>().market),
         currencyCode: sl<MarketConfig>().currencyCode,
       ),
     )
@@ -1057,7 +1059,8 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     ..registerLazySingleton<FavoritesLocalDataSource>(
       () => FavoritesLocalDataSource(
         sl(),
-        legacyCurrencyCode: sl<MarketConfig>().currencyCode,
+        // v1 LV records predate currency storage; their recorded contract was EUR.
+        legacyCurrencyCode: 'EUR',
       ),
     )
     ..registerLazySingleton<ContentTranslationPort>(

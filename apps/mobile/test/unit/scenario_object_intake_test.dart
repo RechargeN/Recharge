@@ -48,6 +48,7 @@ void main() {
     ]);
     expect(result.draft.scenarioData!.items, hasLength(2));
     expect(result.draft.scenarioData!.locations.single.id, 'id-2');
+    expect(result.draft.scenarioData!.locations.single.timezoneId, isNull);
     expect(result.draft.updatedAtUtc, DateTime.utc(2026, 8, 3, 12));
     expect(result.replayedIdempotentSuccess, isFalse);
   });

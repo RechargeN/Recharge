@@ -1,3 +1,4 @@
+import 'package:recharge/shared/primitives/time/utc_instant.dart';
 import 'dart:convert';
 
 import '../../../../shared/primitives/geo/geo_bounds.dart';
@@ -144,9 +145,9 @@ class DemoRouteGraph {
         graphId: _string(manifestJson, 'graphId'),
         graphVersion: _string(manifestJson, 'graphVersion'),
         dataVersion: _string(manifestJson, 'dataVersion'),
-        generatedAtUtc: DateTime.parse(
+        generatedAtUtc: UtcInstant.parse(
           _string(manifestJson, 'generatedAtUtc'),
-        ).toUtc(),
+        ).value,
         sourceId: _string(manifestJson, 'sourceId'),
         sourceUrl: _string(manifestJson, 'sourceUrl'),
         sourceSnapshotSha256: _string(manifestJson, 'sourceSnapshotSha256'),

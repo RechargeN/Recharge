@@ -233,7 +233,9 @@ class ScenarioDraftMapper {
     Map<String, Object?> json, {
     ScenarioDraftData? defaults,
   }) {
-    final ScenarioDraftData fallback = defaults ?? ScenarioDraftData.defaults();
+    final ScenarioDraftData fallback =
+        defaults ??
+        ScenarioDraftData.defaults(timezoneId: '', currencyCode: '');
     final int sourceVersion = _int(json['schemaVersion']) ?? 1;
     if (sourceVersion > ScenarioDraftData.currentSchemaVersion) {
       return fallback.copyWith(unknownFields: Map<String, Object?>.from(json));
@@ -1035,10 +1037,16 @@ class ScenarioDraftMapper {
 
   static ScenarioCurrencySubtotalDraft _currencySubtotal(Object? value) {
     final Map<String, Object?> json = _map(value);
+    Money amount(String field) => _money({
+      'minorUnits': json[field] ?? 0,
+      'currencyCode': json['currencyCode'],
+    })!;
+    final known = amount('knownMinorUnits');
+    final estimated = amount('estimatedMinorUnits');
     return ScenarioCurrencySubtotalDraft(
-      currencyCode: _string(json['currencyCode'], '').toUpperCase(),
-      knownMinorUnits: _int(json['knownMinorUnits']) ?? 0,
-      estimatedMinorUnits: _int(json['estimatedMinorUnits']) ?? 0,
+      currencyCode: known.currency.value,
+      knownMinorUnits: known.minorUnits,
+      estimatedMinorUnits: estimated.minorUnits,
     );
   }
 

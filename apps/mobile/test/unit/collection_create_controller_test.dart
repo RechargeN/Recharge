@@ -206,6 +206,15 @@ void main() {
         CollectionCreateStatus.published,
       );
       expect(sink.activateCalls, hasLength(1));
+      expect(
+        controller
+            .collectionCreateState!
+            .collectionData
+            .compositionReview!
+            .reviewedAtUtc
+            .isUtc,
+        isTrue,
+      );
       controller.dispose();
     },
   );

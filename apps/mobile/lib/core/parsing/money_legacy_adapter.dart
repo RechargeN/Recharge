@@ -10,6 +10,21 @@ class MoneyLegacyAdapter {
     : _parser = MoneyParser(metadata: metadata);
   final MoneyParser _parser;
 
+  /// A missing nested key may inherit its recorded envelope context. An
+  /// explicit unknown/invalid key must never be replaced by that context.
+  static String recordedCurrency(
+    Map<dynamic, dynamic> record, {
+    required String recordedContext,
+  }) {
+    if (!record.containsKey('currencyCode')) return recordedContext;
+    final raw = record['currencyCode'];
+    if (raw == null) return '';
+    if (raw is! String) {
+      throw const MoneyReadException(MoneyParseError.missingCurrency);
+    }
+    return raw;
+  }
+
   Money? readOptional({
     required bool hasCanonicalMinorUnits,
     Object? canonicalMinorUnits,
