@@ -169,7 +169,9 @@ void main() {
           .activeWorkspace;
       await tester.pump(const Duration(minutes: 2));
       await tester.pumpAndSettle();
-      expect(auth.state.isGuest, isTrue);
+      // Round 1 (2026-11-20): offline the user stays signed in, never authorized.
+      expect(auth.state.isOffline, isTrue);
+      expect(auth.state.isAuthenticated, isFalse);
       expect(auth.state.errorCode, AuthController.offlineMessage);
       expect(location(), RouteNames.professionalPage);
       expect(

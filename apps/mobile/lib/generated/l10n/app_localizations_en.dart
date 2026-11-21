@@ -13553,4 +13553,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String discoverDateUntil(String date) {
     return 'Until $date';
   }
+
+  @override
+  String get authOfflineBanner => 'No connection — showing saved content';
+
+  @override
+  String get authOfflineNeedsConnection =>
+      'This needs a connection. Try again when you are back online.';
 }

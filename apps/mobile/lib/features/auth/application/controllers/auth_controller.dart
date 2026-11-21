@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/product_analytics/product_analytics_recorder.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/auth_result_entity.dart';
+import '../../domain/entities/auth_user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/restore_session_usecase.dart';
@@ -109,6 +110,25 @@ class AuthController extends ChangeNotifier {
 
   AuthState _state = const AuthState.guest();
   AuthState get state => _state;
+
+  /// The last user the server confirmed in this process; kept through an
+  /// offline spell, dropped on sign-out, suspension or a server refusal.
+  AuthUserEntity? _lastConfirmedUser;
+
+  /// Round 1 (owner 2026-11-20, "человек в метро"): without network a signed-in
+  /// user stays signed in on the saved screens instead of becoming a guest.
+  AuthState _offlineOrGuest(String code) {
+    final user = _lastConfirmedUser;
+    if (user == null) {
+      return const AuthState.guest().copyWith(errorCode: code, message: code);
+    }
+    return AuthState(
+      status: AuthStatus.offline,
+      user: user,
+      errorCode: code,
+      message: code,
+    );
+  }
 
   Future<void>? _restoreSessionFuture;
 
@@ -249,6 +269,7 @@ class AuthController extends ChangeNotifier {
     _serverExpiry?.cancel();
     _cancelBackgroundRevalidation();
     clearPendingTarget();
+    _lastConfirmedUser = null;
     _setState(const AuthState.guest());
   }
 
@@ -371,7 +392,8 @@ class AuthController extends ChangeNotifier {
       },
     );
     final wasAuthenticated = _state.isAuthenticated;
-    if (!wasAuthenticated) {
+    // Offline stays offline while the check runs: no sign-in flash.
+    if (!wasAuthenticated && !_state.isOffline) {
       _setState(_state.copyWith(status: AuthStatus.loading, clearError: true));
     }
     try {
@@ -381,6 +403,7 @@ class AuthController extends ChangeNotifier {
       _rateLimitRetry?.cancel();
       _rateLimitRetry = null;
       if (result == null) {
+        _lastConfirmedUser = null;
         _setState(const AuthState.guest());
         return;
       }
@@ -406,14 +429,7 @@ class AuthController extends ChangeNotifier {
       if (supportsGoogleSignIn && _keepsCredentials(e.code)) {
         // Keep the current UI authority while its snapshot is still valid;
         // otherwise say what happened (not "session expired") and retry.
-        if (!wasAuthenticated) {
-          _setState(
-            const AuthState.guest().copyWith(
-              errorCode: e.code,
-              message: e.code,
-            ),
-          );
-        }
+        if (!wasAuthenticated) _setState(_offlineOrGuest(e.code));
         if (e.code == rateLimitedMessage) {
           // Denied attempts count in the server's window too: never retry
           // before the server's own retryAfter, nor faster than the longest
@@ -437,6 +453,8 @@ class AuthController extends ChangeNotifier {
         return;
       }
       _cancelOfflineRetry(resetBackoff: true);
+      // An explicit server refusal: the kept user is gone too.
+      _lastConfirmedUser = null;
       _setState(
         const AuthState.guest().copyWith(
           errorCode: e.code,
@@ -459,6 +477,7 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
+    _lastConfirmedUser = null;
     if (supportsGoogleSignIn) {
       _generation++;
       _serverExpiry?.cancel();
@@ -513,12 +532,7 @@ class AuthController extends ChangeNotifier {
         // suspension still invalidate it.
         clearPendingTarget();
         _silentRefresh?.cancel();
-        _setState(
-          const AuthState.guest().copyWith(
-            errorCode: offlineMessage,
-            message: offlineMessage,
-          ),
-        );
+        _setState(_offlineOrGuest(offlineMessage));
         // The snapshot ran out without a successful refresh (offline): the
         // Session itself lives on the server, so try again automatically.
         if (supportsGoogleSignIn) _scheduleOfflineRetry();
@@ -533,6 +547,7 @@ class AuthController extends ChangeNotifier {
         });
       }
     }
+    _lastConfirmedUser = result.user;
     _setState(AuthState(status: AuthStatus.authenticated, user: result.user));
   }
 
@@ -569,9 +584,8 @@ class AuthController extends ChangeNotifier {
     if (state.status == AuthStatus.guest) _serverExpiry?.cancel();
     // L3: product analytics queues follow the signed-in account; sign-out or
     // another account deletes every other account's queue (amendment §6).
-    _productAnalytics?.bindAccount(
-      state.isAuthenticated ? state.user?.id : null,
-    );
+    // Offline keeps the account: it is not a sign-out.
+    _productAnalytics?.bindAccount(state.isSignedIn ? state.user?.id : null);
     notifyListeners();
   }
 
