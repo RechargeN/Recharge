@@ -111,5 +111,7 @@ void test('only the Content, Media, Moderation, Event-handoff and legal hold sto
     // Pilot 2.4 (owner 2026-11-21): Quick Plan and Scenario sync in the cloud.
     'modules/quick_plan/firestore_quick_plan_service.ts',
     'modules/quick_plan/firestore_scenario_service.ts',
+    // Pilot 2.5 (owner 2026-11-21): Route sync and publication in the cloud.
+    'modules/route/firestore_route_service.ts',
   ]);
 });

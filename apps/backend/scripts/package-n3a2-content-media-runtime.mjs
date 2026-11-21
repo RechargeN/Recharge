@@ -124,6 +124,7 @@ export function renderEnv({
   sessionClassEnabled = false,
   catalogEnabled = false,
   planningEnabled = false,
+  routeEnabled = false,
   projectId: target = projectId,
   projectNumber,
 }) {
@@ -138,6 +139,8 @@ export function renderEnv({
     throw new Error("catalogEnabled must be boolean");
   if (typeof planningEnabled !== "boolean")
     throw new Error("planningEnabled must be boolean");
+  if (typeof routeEnabled !== "boolean")
+    throw new Error("routeEnabled must be boolean");
   if (
     !Array.isArray(allowedUids) ||
     allowedUids.length === 0 ||
@@ -158,6 +161,9 @@ export function renderEnv({
     `P2_CATALOG_ENABLED=${runtimeEnabled && catalogEnabled}`,
     // Pilot 2.4: Quick Plan and Scenario sync, own switch.
     `P2_PLANNING_ENABLED=${runtimeEnabled && planningEnabled}`,
+    // Pilot 2.5: Route sync and publication; Discover lists Routes with it.
+    `P2_ROUTE_ENABLED=${runtimeEnabled && routeEnabled}`,
+    `RECHARGE_TEST_ROUTE_CATALOG=${runtimeEnabled && routeEnabled}`,
     ...projectNumberEnvLines(target, number),
     "",
   ].join("\n");
@@ -171,6 +177,7 @@ export function stageRuntime({
   sessionClassEnabled = false,
   catalogEnabled = false,
   planningEnabled = false,
+  routeEnabled = false,
   projectId: target = projectId,
   projectNumber,
   functionsRoot = path.join(backend, "functions"),
@@ -199,6 +206,7 @@ export function stageRuntime({
     sessionClassEnabled,
     catalogEnabled,
     planningEnabled,
+    routeEnabled,
     projectId: target,
     projectNumber: number,
   });
@@ -253,6 +261,7 @@ export function stageRuntime({
     sessionClassEnabled,
     catalogEnabled,
     planningEnabled,
+    routeEnabled,
     codeTreeSha256: codeTreeDigest(outDir),
     treeSha256: digest.sha256,
     files: digest.files,
@@ -262,8 +271,16 @@ export function stageRuntime({
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
-  const [outDir, enabled, uids, library, sessionClass, catalog, planning] =
-    process.argv.slice(2);
+  const [
+    outDir,
+    enabled,
+    uids,
+    library,
+    sessionClass,
+    catalog,
+    planning,
+    route,
+  ] = process.argv.slice(2);
   if (
     !outDir ||
     !["true", "false"].includes(enabled) ||
@@ -271,10 +288,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
     ![undefined, "true", "false"].includes(library) ||
     ![undefined, "true", "false"].includes(sessionClass) ||
     ![undefined, "true", "false"].includes(catalog) ||
-    ![undefined, "true", "false"].includes(planning)
+    ![undefined, "true", "false"].includes(planning) ||
+    ![undefined, "true", "false"].includes(route)
   ) {
     process.stderr.write(
-      "usage: node package-n3a2-content-media-runtime.mjs <stageDir> <true|false> <uid[,uid]> [<libraryEnabled> [<sessionClassEnabled> [<catalogEnabled> [<planningEnabled>]]]]\n",
+      "usage: node package-n3a2-content-media-runtime.mjs <stageDir> <true|false> <uid[,uid]> [<libraryEnabled> [<sessionClassEnabled> [<catalogEnabled> [<planningEnabled> [<routeEnabled>]]]]]\n",
     );
     process.exitCode = 1;
   } else {
@@ -286,10 +304,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
       sessionClassEnabled: sessionClass === "true",
       catalogEnabled: catalog === "true",
       planningEnabled: planning === "true",
+      routeEnabled: route === "true",
       ...cliTarget(process.env),
     });
     process.stdout.write(
-      `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled}, libraryEnabled=${manifest.libraryEnabled}, sessionClassEnabled=${manifest.sessionClassEnabled}, catalogEnabled=${manifest.catalogEnabled}, planningEnabled=${manifest.planningEnabled})\n`,
+      `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled}, libraryEnabled=${manifest.libraryEnabled}, sessionClassEnabled=${manifest.sessionClassEnabled}, catalogEnabled=${manifest.catalogEnabled}, planningEnabled=${manifest.planningEnabled}, routeEnabled=${manifest.routeEnabled})\n`,
     );
   }
 }

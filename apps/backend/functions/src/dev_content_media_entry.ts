@@ -116,6 +116,7 @@ async function dispatch(callable: DevCallableName, request: Request, response: R
       contentTypes: devContentTypesFor(process.env),
       catalogEnabled:
         devRuntimeOpen(process.env) !== null && process.env.P2_CATALOG_ENABLED === 'true',
+      routeEnabled: devRuntimeOpen(process.env) !== null && process.env.P2_ROUTE_ENABLED === 'true',
       planningEnabled:
         devRuntimeOpen(process.env) !== null && process.env.P2_PLANNING_ENABLED === 'true',
       compose: () =>
@@ -175,6 +176,10 @@ export const scenarioCommandV1 = onRequest(options, (req, res) =>
 export const scenarioQueryV1 = onRequest(options, (req, res) =>
   dispatch('scenarioQueryV1', req, res),
 );
+export const routeCommandV1 = onRequest(options, (req, res) =>
+  dispatch('routeCommandV1', req, res),
+);
+export const routeQueryV1 = onRequest(options, (req, res) => dispatch('routeQueryV1', req, res));
 export const discoverQueryV1 = onRequest(options, (req, res) =>
   dispatch('discoverQueryV1', req, res),
 );

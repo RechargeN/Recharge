@@ -174,9 +174,11 @@ const approvedOutsideUsers = {
   "modules/product_analytics/firestore_product_analytics_service.ts": guardOnly,
   // J1 Route (2026-10-20): only the Emulator guard; its own collections.
   // J2 / RTE-PUB-01 (2026-10-21): plus one read-only standing check, RP-11.
+  // Pilot 2.5 (owner 2026-11-21): Route in the cloud, the reviewed guard too.
   "modules/route/firestore_route_service.ts": {
     firestore_content_repository: [
       "assertContentEmulatorContext",
+      "assertMediaChainPersistenceContext",
       "routePublicationStanding",
     ],
   },

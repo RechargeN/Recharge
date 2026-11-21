@@ -24,7 +24,7 @@ const number = "30205452447";
 test("env: switch, exact owner allowlist, load run closed by default", () => {
   assert.equal(
     renderEnv({ runtimeEnabled: false, allowedUids: [uid] }),
-    `N4C_BOOKING_ENABLED=false\nN4C_BOOKING_CREATE_DISABLE=false\nN4C_ALLOWED_FIREBASE_UIDS=${uid}\nN4C_LOAD_ENABLED=false\nN4C_LOAD_MAX_INSTANCES=1\nN4C_LOAD_CONCURRENCY=1\nN4F_CONTENT_EFFECTS_ENABLED=false\nRECHARGE_DEV_RUNTIME=content-media\nN5D_PRIVACY_ENABLED=false\nN4C_BOOKING_NOTIFICATIONS_ENABLED=false\nP2_CATALOG_ENABLED=false\n`,
+    `N4C_BOOKING_ENABLED=false\nN4C_BOOKING_CREATE_DISABLE=false\nN4C_ALLOWED_FIREBASE_UIDS=${uid}\nN4C_LOAD_ENABLED=false\nN4C_LOAD_MAX_INSTANCES=1\nN4C_LOAD_CONCURRENCY=1\nN4F_CONTENT_EFFECTS_ENABLED=false\nRECHARGE_DEV_RUNTIME=content-media\nN5D_PRIVACY_ENABLED=false\nN4C_BOOKING_NOTIFICATIONS_ENABLED=false\nP2_CATALOG_ENABLED=false\nRECHARGE_TEST_ROUTE_CATALOG=false\n`,
   );
   assert.throws(() => renderEnv({ runtimeEnabled: true, allowedUids: [] }));
   assert.throws(() => renderEnv({ runtimeEnabled: "yes", allowedUids: [uid] }));

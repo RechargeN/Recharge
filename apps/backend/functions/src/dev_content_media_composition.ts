@@ -17,6 +17,8 @@ import { FirestoreLibraryService } from './modules/library/firestore_library_ser
 import { handleDiscoverQuery } from './catalog_entry.js';
 import { scenarioStopsFor } from './content_entry.js';
 import { FirestoreQuickPlanService } from './modules/quick_plan/firestore_quick_plan_service.js';
+import { FirestoreRouteService } from './modules/route/firestore_route_service.js';
+import { routeFlag, routePublicationFlag } from './modules/route/route_contract.js';
 import { FirestoreScenarioService } from './modules/quick_plan/firestore_scenario_service.js';
 import { quickPlanFlag } from './modules/quick_plan/quick_plan_contract.js';
 import { scenarioFlagIds } from './shared/feature_flags.js';
@@ -51,9 +53,12 @@ export const pilotContentTypes: readonly ContentTypeId[] = Object.freeze([
 ]);
 
 export function devContentTypesFor(environment: NodeJS.ProcessEnv): ReadonlySet<ContentTypeId> {
-  return environment.P2_SESSION_CLASS_ENABLED === 'true'
-    ? new Set<ContentTypeId>([...devContentTypes, ...pilotContentTypes])
-    : devContentTypes;
+  const types = new Set<ContentTypeId>(devContentTypes);
+  if (environment.P2_SESSION_CLASS_ENABLED === 'true')
+    for (const type of pilotContentTypes) types.add(type);
+  // Pilot 2.5: Route publication (J2) with the Route switch.
+  if (environment.P2_ROUTE_ENABLED === 'true') types.add('route');
+  return types.size === devContentTypes.size ? devContentTypes : types;
 }
 
 /** The only owner operations the dev runtime serves; everything else is `capability_denied`. */
@@ -88,6 +93,9 @@ export const devOperations = Object.freeze({
   quickPlanQueryV1: Object.freeze([] as string[]),
   scenarioCommandV1: Object.freeze([] as string[]),
   scenarioQueryV1: Object.freeze([] as string[]),
+  // Pilot 2.5 (owner 2026-11-21): Route sync and publication (J1/J2).
+  routeCommandV1: Object.freeze([] as string[]),
+  routeQueryV1: Object.freeze([] as string[]),
   // Pilot 2.3 (owner 2026-11-21): Discover reads over the cloud Catalog.
   discoverQueryV1: Object.freeze([
     'feed',
@@ -111,6 +119,8 @@ const planningCallables: ReadonlySet<string> = new Set([
   'quickPlanQueryV1',
   'scenarioCommandV1',
   'scenarioQueryV1',
+  'routeCommandV1',
+  'routeQueryV1',
 ]);
 
 /** Pilot 2.4: one switch opens Quick Plan and Scenario sync; I3 publication and share stay closed. */
@@ -265,6 +275,8 @@ export async function handleDevContentMedia(input: {
   readonly catalogEnabled?: boolean;
   /** Pilot 2.4: the Planning deploy switch (`P2_PLANNING_ENABLED`); closed when absent. */
   readonly planningEnabled?: boolean;
+  /** Pilot 2.5: the Route deploy switch (`P2_ROUTE_ENABLED`); closed when absent. */
+  readonly routeEnabled?: boolean;
 }): Promise<Readonly<Record<string, unknown>>> {
   const allowed = devOperations[input.callable];
   if (
@@ -288,6 +300,17 @@ export async function handleDevContentMedia(input: {
     bookingAccessCapability,
   );
   if (!decision.allowed) return rejected('unauthenticated');
+  if (input.callable === 'routeCommandV1' || input.callable === 'routeQueryV1') {
+    const routeOn = input.routeEnabled === true;
+    const routes = new FirestoreRouteService(input.firestore, systemServerClock, {
+      [routeFlag]: routeOn,
+      [routePublicationFlag]: routeOn,
+    });
+    const data = withoutSessionContext(input.data);
+    return input.callable === 'routeCommandV1'
+      ? routes.command(actor.actor, data)
+      : routes.query(actor.actor, data);
+  }
   if (planningCallables.has(input.callable)) {
     const flags = planningCloudFlags(input.planningEnabled === true);
     const data = withoutSessionContext(input.data);

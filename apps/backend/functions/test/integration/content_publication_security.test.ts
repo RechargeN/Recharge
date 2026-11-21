@@ -943,6 +943,8 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/quick_plan/quick_plan_contract.ts': ['canonicalJson', 'sha256Hex'],
     'modules/route/firestore_route_service.ts': [
       'assertContentEmulatorContext',
+      // Pilot 2.5 (owner 2026-11-21): the reviewed dev-cloud guard.
+      'assertMediaChainPersistenceContext',
       // J2: read-only standing check before a Route mutation, like I3 below.
       'routePublicationStanding',
       'canonicalJson',
