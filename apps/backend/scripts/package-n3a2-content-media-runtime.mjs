@@ -120,12 +120,15 @@ export function closurePackages(functionsRoot, files) {
 export function renderEnv({
   runtimeEnabled,
   allowedUids,
+  libraryEnabled = false,
   projectId: target = projectId,
   projectNumber,
 }) {
   const number = resolveProjectNumber(target, projectNumber);
   if (typeof runtimeEnabled !== "boolean")
     throw new Error("runtimeEnabled must be boolean");
+  if (typeof libraryEnabled !== "boolean")
+    throw new Error("libraryEnabled must be boolean");
   if (
     !Array.isArray(allowedUids) ||
     allowedUids.length === 0 ||
@@ -138,6 +141,8 @@ export function renderEnv({
     "RECHARGE_MEDIA_STORAGE=dev-cloud",
     "RECHARGE_MEDIA_TOOLS=dev-cloud",
     `N3A2_ALLOWED_FIREBASE_UIDS=${allowedUids.join(",")}`,
+    // Pilot 2.1 (owner 2026-11-21): the Library only with the runtime and its own switch.
+    `P2_LIBRARY_ENABLED=${runtimeEnabled && libraryEnabled}`,
     ...projectNumberEnvLines(target, number),
     "",
   ].join("\n");
@@ -147,6 +152,7 @@ export function stageRuntime({
   outDir,
   runtimeEnabled,
   allowedUids,
+  libraryEnabled = false,
   projectId: target = projectId,
   projectNumber,
   functionsRoot = path.join(backend, "functions"),
@@ -171,6 +177,7 @@ export function stageRuntime({
   const env = renderEnv({
     runtimeEnabled,
     allowedUids,
+    libraryEnabled,
     projectId: target,
     projectNumber: number,
   });
@@ -221,6 +228,7 @@ export function stageRuntime({
     entry,
     runtimeEnabled,
     allowedUids,
+    libraryEnabled,
     codeTreeSha256: codeTreeDigest(outDir),
     treeSha256: digest.sha256,
     files: digest.files,
@@ -230,10 +238,15 @@ export function stageRuntime({
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
-  const [outDir, enabled, uids] = process.argv.slice(2);
-  if (!outDir || !["true", "false"].includes(enabled) || !uids) {
+  const [outDir, enabled, uids, library] = process.argv.slice(2);
+  if (
+    !outDir ||
+    !["true", "false"].includes(enabled) ||
+    !uids ||
+    ![undefined, "true", "false"].includes(library)
+  ) {
     process.stderr.write(
-      "usage: node package-n3a2-content-media-runtime.mjs <stageDir> <true|false> <uid[,uid]>\n",
+      "usage: node package-n3a2-content-media-runtime.mjs <stageDir> <true|false> <uid[,uid]> [<libraryEnabled>]\n",
     );
     process.exitCode = 1;
   } else {
@@ -241,10 +254,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
       outDir,
       runtimeEnabled: enabled === "true",
       allowedUids: uids.split(","),
+      libraryEnabled: library === "true",
       ...cliTarget(process.env),
     });
     process.stdout.write(
-      `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled})\n`,
+      `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled}, libraryEnabled=${manifest.libraryEnabled})\n`,
     );
   }
 }

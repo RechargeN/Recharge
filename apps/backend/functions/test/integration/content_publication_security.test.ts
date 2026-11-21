@@ -918,6 +918,8 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/admin_support/admin_support_service.ts': ['assertContentEmulatorContext'],
     'modules/library/firestore_library_service.ts': [
       'assertContentEmulatorContext',
+      // Pilot 2.1 (owner 2026-11-21): the reviewed dev-cloud guard.
+      'assertMediaChainPersistenceContext',
       'contentCollections',
       'canonicalJson',
       'sha256Hex',

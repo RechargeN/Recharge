@@ -1067,12 +1067,21 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
         invoke: libraryInvoke(
           binding: sl(),
           runtime: () => sl.getAsync<BookingTransportRuntime>(),
+          devPort: sl.isRegistered<DevContentMediaPort>()
+              ? sl<DevContentMediaPort>()
+              : null,
         ),
         storage: sl(),
       ),
     )
     ..registerLazySingleton<FavoritesRepository>(
-      () => libraryRemoteAllowed(sl())
+      () =>
+          libraryRemoteAllowed(
+            sl(),
+            devPort: sl.isRegistered<DevContentMediaPort>()
+                ? sl<DevContentMediaPort>()
+                : null,
+          )
           ? ServerFavoritesRepository(sl())
           : FavoritesRepositoryImpl(
               localDataSource: sl(),
@@ -1116,7 +1125,13 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
       () => VisitedPlacesLocalDataSource(sl()),
     )
     ..registerLazySingleton<VisitedPlacesRepository>(
-      () => libraryRemoteAllowed(sl())
+      () =>
+          libraryRemoteAllowed(
+            sl(),
+            devPort: sl.isRegistered<DevContentMediaPort>()
+                ? sl<DevContentMediaPort>()
+                : null,
+          )
           ? ServerVisitedPlacesRepository(sl())
           : VisitedPlacesRepositoryImpl(localDataSource: sl()),
     )

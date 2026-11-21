@@ -192,9 +192,12 @@ const approvedOutsideUsers = {
   "dev_content_effects_entry.ts": {
     firestore_content_repository: ["devCloudPersistenceSwitch"],
   },
+  // Pilot 2.1 (owner 2026-11-21, variant A): the Library in the dev/stage
+  // cloud uses the reviewed dev-cloud guard; it still writes only its own data.
   "modules/library/firestore_library_service.ts": {
     firestore_content_repository: [
       "assertContentEmulatorContext",
+      "assertMediaChainPersistenceContext",
       "contentCollections",
     ],
   },

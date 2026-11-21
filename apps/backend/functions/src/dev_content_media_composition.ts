@@ -13,6 +13,7 @@ import { EmulatorSyntheticReferenceData } from './modules/content/infrastructure
 import { FirestoreContentRepository } from './modules/content/infrastructure/firestore_content_repository.js';
 import { IdentityPublisherEligibility } from './modules/content/infrastructure/identity_publisher_eligibility.js';
 import { FirestoreIdentityAuthorityRepository } from './modules/identity_publisher/infrastructure/firestore_identity_authority_repository.js';
+import { FirestoreLibraryService } from './modules/library/firestore_library_service.js';
 import type { IdTokenSource } from './modules/media/infrastructure/cloud_tools_client.js';
 import { createDevMediaComposition } from './modules/media/infrastructure/dev_media_composition.js';
 import { bookingAccessCapability } from './shared/booking_access_authority.js';
@@ -54,6 +55,10 @@ export const devOperations = Object.freeze({
   ]),
   mediaQueryV1: Object.freeze(['getAssetStatus', 'getProcessingReceipt']),
   uploadMediaBytesV1: Object.freeze([] as string[]),
+  // Pilot 2.1 (owner 2026-11-21): the owner's Library. The Library service
+  // validates its exact request shape (its query has no type field).
+  libraryCommandV1: Object.freeze(['addFavorite', 'removeFavorite', 'recordVisit', 'removeVisit']),
+  libraryQueryV1: Object.freeze([] as string[]),
 });
 export type DevCallableName = keyof typeof devOperations;
 
@@ -124,6 +129,8 @@ const rejected = (code: string) => ({ schemaVersion: 1, kind: 'rejected', code }
 function operationOf(callable: DevCallableName, data: unknown): string | undefined {
   if (typeof data !== 'object' || data === null || Array.isArray(data)) return undefined;
   const record = data as Record<string, unknown>;
+  if (callable === 'libraryCommandV1')
+    return typeof record.commandType === 'string' ? record.commandType : undefined;
   const value = callable.startsWith('content')
     ? callable.endsWith('QueryV1')
       ? record.queryType
@@ -147,9 +154,11 @@ export async function handleDevContentMedia(input: {
   readonly firestore: Firestore;
   readonly compose: () => DevContentMedia;
   readonly now?: () => Date;
+  /** Pilot 2.1: the Library deploy switch (`P2_LIBRARY_ENABLED`); closed when absent. */
+  readonly libraryEnabled?: boolean;
 }): Promise<Readonly<Record<string, unknown>>> {
   const allowed = devOperations[input.callable];
-  if (input.callable !== 'uploadMediaBytesV1') {
+  if (input.callable !== 'uploadMediaBytesV1' && input.callable !== 'libraryQueryV1') {
     const operation = operationOf(input.callable, input.data);
     if (operation === undefined || !allowed.includes(operation))
       return rejected('capability_denied');
@@ -166,6 +175,16 @@ export async function handleDevContentMedia(input: {
     bookingAccessCapability,
   );
   if (!decision.allowed) return rejected('unauthenticated');
+  if (input.callable === 'libraryCommandV1' || input.callable === 'libraryQueryV1') {
+    // The Library service re-authorizes the same Session inside its transaction.
+    const library = new FirestoreLibraryService(input.firestore, systemServerClock, {
+      cloud: { enabled: input.libraryEnabled === true },
+    });
+    const data = withoutSessionContext(input.data);
+    return input.callable === 'libraryCommandV1'
+      ? library.command(actor.actor, data)
+      : library.query(actor.actor, data);
+  }
   const ids = {
     userId: decision.userId as never,
     sessionId: actor.actor.sessionId as never,
@@ -198,4 +217,11 @@ export async function handleDevContentMedia(input: {
         input.data,
       );
   }
+}
+
+function withoutSessionContext(data: unknown): unknown {
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) return data;
+  const { sessionContext, ...rest } = data as Record<string, unknown>;
+  void sessionContext;
+  return rest;
 }

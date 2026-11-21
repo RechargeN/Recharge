@@ -100,6 +100,8 @@ void test('only the Content, Media, Moderation, Event-handoff and legal hold sto
     'modules/content/infrastructure/firestore_content_repository.ts',
     // Round 2.2 (owner approval 2026-11-19): Event → Booking handoff in the cloud.
     'modules/content/infrastructure/firestore_event_booking_handoff_repository.ts',
+    // Pilot 2.1 (owner 2026-11-21, variant A): the Library in the cloud.
+    'modules/library/firestore_library_service.ts',
     'modules/media/infrastructure/firestore_media_repository.ts',
     'modules/moderation/infrastructure/firestore_moderation_repository.ts',
     // Step 2 (owner decision 2026-11-20): the L1 legal hold authority in the cloud.
