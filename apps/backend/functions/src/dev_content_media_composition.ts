@@ -34,6 +34,22 @@ export const devContentTypes: ReadonlySet<ContentTypeId> = new Set<ContentTypeId
   'event',
 ]);
 
+/**
+ * Pilot 2.2 (owner 2026-11-21, variant A): Session and Class/Workshop join Place
+ * and Event only with the runtime's deploy switch `P2_SESSION_CLASS_ENABLED`;
+ * publication without Booking (external link), as validated by Content.
+ */
+export const pilotContentTypes: readonly ContentTypeId[] = Object.freeze([
+  'session',
+  'class_workshop',
+]);
+
+export function devContentTypesFor(environment: NodeJS.ProcessEnv): ReadonlySet<ContentTypeId> {
+  return environment.P2_SESSION_CLASS_ENABLED === 'true'
+    ? new Set<ContentTypeId>([...devContentTypes, ...pilotContentTypes])
+    : devContentTypes;
+}
+
 /** The only owner operations the dev runtime serves; everything else is `capability_denied`. */
 export const devOperations = Object.freeze({
   contentCommandV1: Object.freeze([
@@ -118,7 +134,7 @@ export function createDevContentMedia(input: {
     media: media.readiness,
     clock,
     ids: { newId: () => randomUUID() as EntityId },
-    enabledTypes: devContentTypes,
+    enabledTypes: devContentTypesFor(input.environment),
     compositionRules: emulatorCompositionRules,
   });
   return Object.freeze({ content, media });
@@ -156,6 +172,8 @@ export async function handleDevContentMedia(input: {
   readonly now?: () => Date;
   /** Pilot 2.1: the Library deploy switch (`P2_LIBRARY_ENABLED`); closed when absent. */
   readonly libraryEnabled?: boolean;
+  /** Pilot 2.2: the enabled Content types; Place and Event when absent. */
+  readonly contentTypes?: ReadonlySet<ContentTypeId>;
 }): Promise<Readonly<Record<string, unknown>>> {
   const allowed = devOperations[input.callable];
   if (input.callable !== 'uploadMediaBytesV1' && input.callable !== 'libraryQueryV1') {
@@ -193,12 +211,22 @@ export async function handleDevContentMedia(input: {
   switch (input.callable) {
     case 'contentCommandV1':
       return handleContentCommand(
-        { actor: ids, firestore: input.firestore, enabledTypes: devContentTypes, content },
+        {
+          actor: ids,
+          firestore: input.firestore,
+          enabledTypes: input.contentTypes ?? devContentTypes,
+          content,
+        },
         input.data,
       );
     case 'contentQueryV1':
       return handleContentQuery(
-        { actor: ids, firestore: input.firestore, enabledTypes: devContentTypes, content },
+        {
+          actor: ids,
+          firestore: input.firestore,
+          enabledTypes: input.contentTypes ?? devContentTypes,
+          content,
+        },
         input.data,
       );
     case 'mediaCommandV1':

@@ -6,6 +6,7 @@ import type { Response } from 'express';
 
 import {
   createDevContentMedia,
+  devContentTypesFor,
   handleDevContentMedia,
   type DevCallableName,
 } from './dev_content_media_composition.js';
@@ -112,6 +113,7 @@ async function dispatch(callable: DevCallableName, request: Request, response: R
       data: body.data,
       firestore,
       libraryEnabled: libraryOpen(process.env),
+      contentTypes: devContentTypesFor(process.env),
       compose: () =>
         createDevContentMedia({
           app: firebase,

@@ -49,6 +49,7 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
       runtimeEnabled: manifest.runtimeEnabled,
       allowedUids: manifest.allowedUids,
       libraryEnabled: manifest.libraryEnabled ?? false,
+      sessionClassEnabled: manifest.sessionClassEnabled ?? false,
       projectId: manifest.projectId,
       projectNumber: manifest.projectNumber,
     });
@@ -88,6 +89,8 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
     record.runtimeEnabled !== manifest.runtimeEnabled ||
     // Pilot 2.1: a record without the switch approves it closed only.
     (record.libraryEnabled ?? false) !== (manifest.libraryEnabled ?? false) ||
+    (record.sessionClassEnabled ?? false) !==
+      (manifest.sessionClassEnabled ?? false) ||
     record.publication !== false ||
     record.automaticDeletion !== false ||
     !(record.ownerApprovalEvidenceRef?.length > 0) ||

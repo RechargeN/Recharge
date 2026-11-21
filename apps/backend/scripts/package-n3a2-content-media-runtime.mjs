@@ -121,6 +121,7 @@ export function renderEnv({
   runtimeEnabled,
   allowedUids,
   libraryEnabled = false,
+  sessionClassEnabled = false,
   projectId: target = projectId,
   projectNumber,
 }) {
@@ -129,6 +130,8 @@ export function renderEnv({
     throw new Error("runtimeEnabled must be boolean");
   if (typeof libraryEnabled !== "boolean")
     throw new Error("libraryEnabled must be boolean");
+  if (typeof sessionClassEnabled !== "boolean")
+    throw new Error("sessionClassEnabled must be boolean");
   if (
     !Array.isArray(allowedUids) ||
     allowedUids.length === 0 ||
@@ -143,6 +146,8 @@ export function renderEnv({
     `N3A2_ALLOWED_FIREBASE_UIDS=${allowedUids.join(",")}`,
     // Pilot 2.1 (owner 2026-11-21): the Library only with the runtime and its own switch.
     `P2_LIBRARY_ENABLED=${runtimeEnabled && libraryEnabled}`,
+    // Pilot 2.2: Session and Class/Workshop publication, own switch.
+    `P2_SESSION_CLASS_ENABLED=${runtimeEnabled && sessionClassEnabled}`,
     ...projectNumberEnvLines(target, number),
     "",
   ].join("\n");
@@ -153,6 +158,7 @@ export function stageRuntime({
   runtimeEnabled,
   allowedUids,
   libraryEnabled = false,
+  sessionClassEnabled = false,
   projectId: target = projectId,
   projectNumber,
   functionsRoot = path.join(backend, "functions"),
@@ -178,6 +184,7 @@ export function stageRuntime({
     runtimeEnabled,
     allowedUids,
     libraryEnabled,
+    sessionClassEnabled,
     projectId: target,
     projectNumber: number,
   });
@@ -229,6 +236,7 @@ export function stageRuntime({
     runtimeEnabled,
     allowedUids,
     libraryEnabled,
+    sessionClassEnabled,
     codeTreeSha256: codeTreeDigest(outDir),
     treeSha256: digest.sha256,
     files: digest.files,
@@ -238,15 +246,16 @@ export function stageRuntime({
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
-  const [outDir, enabled, uids, library] = process.argv.slice(2);
+  const [outDir, enabled, uids, library, sessionClass] = process.argv.slice(2);
   if (
     !outDir ||
     !["true", "false"].includes(enabled) ||
     !uids ||
-    ![undefined, "true", "false"].includes(library)
+    ![undefined, "true", "false"].includes(library) ||
+    ![undefined, "true", "false"].includes(sessionClass)
   ) {
     process.stderr.write(
-      "usage: node package-n3a2-content-media-runtime.mjs <stageDir> <true|false> <uid[,uid]> [<libraryEnabled>]\n",
+      "usage: node package-n3a2-content-media-runtime.mjs <stageDir> <true|false> <uid[,uid]> [<libraryEnabled> [<sessionClassEnabled>]]\n",
     );
     process.exitCode = 1;
   } else {
@@ -255,10 +264,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
       runtimeEnabled: enabled === "true",
       allowedUids: uids.split(","),
       libraryEnabled: library === "true",
+      sessionClassEnabled: sessionClass === "true",
       ...cliTarget(process.env),
     });
     process.stdout.write(
-      `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled}, libraryEnabled=${manifest.libraryEnabled})\n`,
+      `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled}, libraryEnabled=${manifest.libraryEnabled}, sessionClassEnabled=${manifest.sessionClassEnabled})\n`,
     );
   }
 }
