@@ -3,11 +3,19 @@ import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { error as logError } from 'firebase-functions/logger';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 
-import { bookingHandoffEffectConsumer, deliverContentEffects } from './content_effects_entry.js';
+import {
+  bookingHandoffEffectConsumer,
+  catalogEffectConsumer,
+  deliverContentEffects,
+} from './content_effects_entry.js';
 import { devCloudPersistenceSwitch } from './modules/content/infrastructure/firestore_content_repository.js';
 import { emergencySwitchState } from './modules/operations/emergency_switch.js';
 import { loadTimeCloudProject, runtimeServiceAccount } from './shared/cloud_runtime_projects.js';
-import { contentFlagIds, operationsEmergencySwitchIds } from './shared/feature_flags.js';
+import {
+  catalogFlagIds,
+  contentFlagIds,
+  operationsEmergencySwitchIds,
+} from './shared/feature_flags.js';
 
 // Round 2.2 (owner approval 2026-11-19), codebase n4f-content-effects. Not
 // re-exported by index.ts. The only Content effect consumer in the cloud is
@@ -38,9 +46,16 @@ export function devContentEffectsOpen(environment: NodeJS.ProcessEnv): boolean {
  * is open (round 2.1: a missing switch is contained): one switch stops the whole
  * pipeline. Every other consumer is off.
  */
+/** Pilot 2.3: Catalog projection deploy switch, only with the effects runtime open. */
+export function catalogDeliveryOpen(environment: NodeJS.ProcessEnv): boolean {
+  return devContentEffectsOpen(environment) && environment.P2_CATALOG_ENABLED === 'true';
+}
+
 export function cloudEffectFlags(firestore: Firestore) {
   return {
     async isEnabled(flagId: string): Promise<boolean> {
+      // Pilot 2.3 (owner 2026-11-21): the Catalog projection with its deploy switch.
+      if (flagId === catalogFlagIds.delivery) return catalogDeliveryOpen(process.env);
       if (flagId !== contentFlagIds.eventBookingHandoff) return false;
       return (
         (await emergencySwitchState(
@@ -71,7 +86,7 @@ export const consumeContentEffectV1 = onDocumentCreated(
     const firestore = getFirestore(app());
     const outcomes = await deliverContentEffects(firestore, {
       flags: cloudEffectFlags(firestore),
-      consumers: [bookingHandoffEffectConsumer()],
+      consumers: [bookingHandoffEffectConsumer(), catalogEffectConsumer()],
     });
     for (const outcome of outcomes)
       if (outcome.status === 'failed' || outcome.status === 'stopped')

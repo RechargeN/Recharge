@@ -16,6 +16,7 @@ import '../../features/discover/domain/repositories/published_find_people_discov
 import 'backend_binding_manifest.dart';
 import 'booking_backend_selection.dart';
 import 'booking_test_entry_guard.dart';
+import 'dev_content_media_port.dart';
 
 /// Capability id under which the Discover read binding is recorded in a
 /// [BackendBindingManifest] (E2).
@@ -57,26 +58,41 @@ final class DiscoverCatalogTestEntryGuard {
     required this.flag,
     required this.releaseMode,
     required BookingBackendBindingController binding,
+    this.devFlag = false,
+    this.devPort,
   }) : _binding = binding;
 
   factory DiscoverCatalogTestEntryGuard.fromEnvironment(
-    BookingBackendBindingController binding,
-  ) => DiscoverCatalogTestEntryGuard(
+    BookingBackendBindingController binding, {
+    DevContentMediaPort? devPort,
+  }) => DiscoverCatalogTestEntryGuard(
     flag: discoverCatalogTestEntryDefined,
     releaseMode: kReleaseMode,
     binding: binding,
+    devFlag: p2DevCatalogDefined,
+    devPort: devPort,
   );
 
   final bool flag;
   final bool releaseMode;
   final BookingBackendBindingController _binding;
 
+  /// Pilot 2.3 (owner 2026-11-21): Discover over the dev/stage cloud Catalog
+  /// through the authenticated Content/Media dev transport. Debug only.
+  final bool devFlag;
+  final DevContentMediaPort? devPort;
+  bool get devCloudAllowed => devFlag && !releaseMode && devPort != null;
+
   bool get allowed =>
-      flag &&
-      !releaseMode &&
-      _binding.mode == BackendBindingMode.testBackend &&
-      isLoopbackDemoEmulatorBinding(_binding);
+      devCloudAllowed ||
+      (flag &&
+          !releaseMode &&
+          _binding.mode == BackendBindingMode.testBackend &&
+          isLoopbackDemoEmulatorBinding(_binding));
 }
+
+/// Pilot 2.3: `--dart-define=P2_DEV_CATALOG=true` (with N3A2_DEV_PLACE_DRAFT).
+const bool p2DevCatalogDefined = bool.fromEnvironment('P2_DEV_CATALOG');
 
 /// The Discover binding manifest: `testBackend` only while the whole test entry
 /// is allowed, otherwise the existing local Discover data (`localOnly`). A
@@ -109,6 +125,13 @@ final class BookingPortCatalogAdapter implements CatalogQueryPort {
   Future<Map<String, Object?>> query(Map<String, Object?> request) async {
     if (!_guard.allowed) {
       throw const CatalogTransportFailure('test_entry_disabled');
+    }
+    if (_guard.devCloudAllowed) {
+      try {
+        return await _guard.devPort!.port.invoke('discoverQueryV1', request);
+      } on BookingCallableFailure catch (error) {
+        throw CatalogTransportFailure(error.code);
+      }
     }
     final BookingTransportRuntime runtime = await _runtime();
     final BookingCallablePort? port = runtime.port;
