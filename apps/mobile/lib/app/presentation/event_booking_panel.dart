@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/booking/application/event_booking_controller.dart';
 import '../../features/booking/presentation/event_booking_section.dart';
 import '../../features/discover/domain/entities/event_occurrence.dart';
+import '../../features/auth/application/auth_providers.dart';
+import '../../features/auth/domain/usecases/restore_session_usecase.dart';
 import '../di/event_booking_composition.dart';
+import '../di/service_locator.dart';
 
 /// Hosts the Booking section inside Event Details. It shows nothing unless the
 /// default-off test entry builds a controller: for the B2 fixture Event
@@ -60,9 +64,20 @@ class _EventBookingPanelState extends State<EventBookingPanel> {
           (BuildContext context, AsyncSnapshot<EventBookingController?> s) {
             final EventBookingController? controller = s.data;
             if (controller == null) return const SizedBox.shrink();
-            return EventBookingSection(
-              controller: controller,
-              eventTimeZoneId: widget.eventTimeZoneId,
+            // Without the Auth composition (isolated tests) nothing is offline.
+            if (!sl.isRegistered<RestoreSessionUseCase>()) {
+              return EventBookingSection(
+                controller: controller,
+                eventTimeZoneId: widget.eventTimeZoneId,
+              );
+            }
+            return Consumer(
+              builder: (BuildContext context, WidgetRef ref, Widget? _) =>
+                  EventBookingSection(
+                    controller: controller,
+                    eventTimeZoneId: widget.eventTimeZoneId,
+                    offline: ref.watch(authControllerProvider).state.isOffline,
+                  ),
             );
           },
     );

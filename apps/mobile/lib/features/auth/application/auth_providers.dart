@@ -1,3 +1,4 @@
+import '../data/datasources/auth_local_datasource.dart';
 import '../domain/repositories/auth_session_events.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,6 +26,9 @@ final authControllerProvider = ChangeNotifierProvider<AuthController>((ref) {
     analyticsService: sl(),
     productAnalytics: sl.isRegistered<ProductAnalyticsRecorder>()
         ? sl<ProductAnalyticsRecorder>()
+        : null,
+    offlineAccount: sl.isRegistered<AuthLocalDataSource>()
+        ? sl<AuthLocalDataSource>()
         : null,
   );
 });

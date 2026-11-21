@@ -8,6 +8,7 @@ import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/auth_result_entity.dart';
 import '../../domain/entities/auth_user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repositories/offline_account_store.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/restore_session_usecase.dart';
 import '../../domain/usecases/sign_in_usecase.dart';
@@ -71,7 +72,9 @@ class AuthController extends ChangeNotifier {
     ProductAnalyticsRecorder? productAnalytics,
     SignInWithGoogleUseCase? signInWithGoogleUseCase,
     AuthSessionEvents? sessionEvents,
-  }) : _signInWithGoogleUseCase = signInWithGoogleUseCase,
+    OfflineAccountStore? offlineAccount,
+  }) : _offlineAccount = offlineAccount,
+       _signInWithGoogleUseCase = signInWithGoogleUseCase,
        _signInUseCase = signInUseCase,
        _restoreSessionUseCase = restoreSessionUseCase,
        _signOutUseCase = signOutUseCase,
@@ -79,9 +82,26 @@ class AuthController extends ChangeNotifier {
        _analyticsService = analyticsService,
        _productAnalytics = productAnalytics {
     _sessionSubscription = sessionEvents?.invalidated.listen((_) {
+      // A server-confirmed end of access (explicit refusal, never a network
+      // error): the account's personal cache on this phone goes too
+      // (owner decision 2026-11-21, item 5).
+      final ended = _lastConfirmedUser?.id;
       suspendServerAuthority();
       unawaited(_signOutUseCase().catchError((Object _) {}));
+      final store = _offlineAccount;
+      if (ended != null && store != null) {
+        unawaited(store.wipeAccountData(ended).catchError((Object _) {}));
+      }
     });
+  }
+
+  final OfflineAccountStore? _offlineAccount;
+
+  void _forgetOfflineProfile() {
+    final store = _offlineAccount;
+    if (store != null) {
+      unawaited(store.clearOfflineProfile().catchError((Object _) {}));
+    }
   }
 
   final SignInWithGoogleUseCase? _signInWithGoogleUseCase;
@@ -384,6 +404,17 @@ class AuthController extends ChangeNotifier {
 
   Future<void> _restoreSession() async {
     final generation = _generation;
+    // Cold start without network: the kept profile lets the saved screens
+    // open signed in (no role, no capabilities, no server authority).
+    final store = _offlineAccount;
+    if (_lastConfirmedUser == null && store != null) {
+      try {
+        _lastConfirmedUser = await store.readOfflineProfile();
+      } catch (_) {
+        /* No profile: the user starts as a guest, as before. */
+      }
+      if (supportsGoogleSignIn && generation != _generation) return;
+    }
     _analyticsService.track(
       'auth_session_restore_started',
       params: <String, Object?>{
@@ -404,6 +435,7 @@ class AuthController extends ChangeNotifier {
       _rateLimitRetry = null;
       if (result == null) {
         _lastConfirmedUser = null;
+        _forgetOfflineProfile();
         _setState(const AuthState.guest());
         return;
       }
@@ -478,6 +510,7 @@ class AuthController extends ChangeNotifier {
 
   Future<void> signOut() async {
     _lastConfirmedUser = null;
+    _forgetOfflineProfile();
     if (supportsGoogleSignIn) {
       _generation++;
       _serverExpiry?.cancel();
@@ -548,6 +581,12 @@ class AuthController extends ChangeNotifier {
       }
     }
     _lastConfirmedUser = result.user;
+    final store = _offlineAccount;
+    if (store != null) {
+      unawaited(
+        store.saveOfflineProfile(result.user).catchError((Object _) {}),
+      );
+    }
     _setState(AuthState(status: AuthStatus.authenticated, user: result.user));
   }
 
