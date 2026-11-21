@@ -108,5 +108,8 @@ void test('only the Content, Media, Moderation, Event-handoff and legal hold sto
     'modules/moderation/infrastructure/firestore_moderation_repository.ts',
     // Step 2 (owner decision 2026-11-20): the L1 legal hold authority in the cloud.
     'modules/privacy_orchestration/infrastructure/firestore_privacy_legal_hold_service.ts',
+    // Pilot 2.4 (owner 2026-11-21): Quick Plan and Scenario sync in the cloud.
+    'modules/quick_plan/firestore_quick_plan_service.ts',
+    'modules/quick_plan/firestore_scenario_service.ts',
   ]);
 });

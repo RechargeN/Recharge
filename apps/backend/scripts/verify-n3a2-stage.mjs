@@ -51,6 +51,7 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
       libraryEnabled: manifest.libraryEnabled ?? false,
       sessionClassEnabled: manifest.sessionClassEnabled ?? false,
       catalogEnabled: manifest.catalogEnabled ?? false,
+      planningEnabled: manifest.planningEnabled ?? false,
       projectId: manifest.projectId,
       projectNumber: manifest.projectNumber,
     });
@@ -93,6 +94,7 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
     (record.sessionClassEnabled ?? false) !==
       (manifest.sessionClassEnabled ?? false) ||
     (record.catalogEnabled ?? false) !== (manifest.catalogEnabled ?? false) ||
+    (record.planningEnabled ?? false) !== (manifest.planningEnabled ?? false) ||
     record.publication !== false ||
     record.automaticDeletion !== false ||
     !(record.ownerApprovalEvidenceRef?.length > 0) ||

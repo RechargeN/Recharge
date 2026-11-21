@@ -15,6 +15,11 @@ import { IdentityPublisherEligibility } from './modules/content/infrastructure/i
 import { FirestoreIdentityAuthorityRepository } from './modules/identity_publisher/infrastructure/firestore_identity_authority_repository.js';
 import { FirestoreLibraryService } from './modules/library/firestore_library_service.js';
 import { handleDiscoverQuery } from './catalog_entry.js';
+import { scenarioStopsFor } from './content_entry.js';
+import { FirestoreQuickPlanService } from './modules/quick_plan/firestore_quick_plan_service.js';
+import { FirestoreScenarioService } from './modules/quick_plan/firestore_scenario_service.js';
+import { quickPlanFlag } from './modules/quick_plan/quick_plan_contract.js';
+import { scenarioFlagIds } from './shared/feature_flags.js';
 import type { IdTokenSource } from './modules/media/infrastructure/cloud_tools_client.js';
 import { createDevMediaComposition } from './modules/media/infrastructure/dev_media_composition.js';
 import { bookingAccessCapability } from './shared/booking_access_authority.js';
@@ -76,6 +81,13 @@ export const devOperations = Object.freeze({
   // validates its exact request shape (its query has no type field).
   libraryCommandV1: Object.freeze(['addFavorite', 'removeFavorite', 'recordVisit', 'removeVisit']),
   libraryQueryV1: Object.freeze([] as string[]),
+  // Pilot 2.4 (owner 2026-11-21): Quick Plan and Scenario sync (I1/I2). The
+  // services validate their exact request shapes; Scenario publication and
+  // share (I3) stay off in the cloud.
+  quickPlanCommandV1: Object.freeze([] as string[]),
+  quickPlanQueryV1: Object.freeze([] as string[]),
+  scenarioCommandV1: Object.freeze([] as string[]),
+  scenarioQueryV1: Object.freeze([] as string[]),
   // Pilot 2.3 (owner 2026-11-21): Discover reads over the cloud Catalog.
   discoverQueryV1: Object.freeze([
     'feed',
@@ -94,6 +106,23 @@ export const devOperations = Object.freeze({
  * 05/08/10 stay open): page at most 20, radius at most 50 km, at most 3 Discover
  * reads per second per user (in memory: the dev runtime runs one instance).
  */
+const planningCallables: ReadonlySet<string> = new Set([
+  'quickPlanCommandV1',
+  'quickPlanQueryV1',
+  'scenarioCommandV1',
+  'scenarioQueryV1',
+]);
+
+/** Pilot 2.4: one switch opens Quick Plan and Scenario sync; I3 publication and share stay closed. */
+export function planningCloudFlags(enabled: boolean): Readonly<Record<string, boolean>> {
+  return Object.freeze({
+    [quickPlanFlag]: enabled,
+    [scenarioFlagIds.sync]: enabled,
+    [scenarioFlagIds.publication]: false,
+    [scenarioFlagIds.share]: false,
+  });
+}
+
 export const pilotCatalogLimits = Object.freeze({
   pageSizeMax: 20,
   radiusKmMax: 50,
@@ -234,9 +263,15 @@ export async function handleDevContentMedia(input: {
   readonly contentTypes?: ReadonlySet<ContentTypeId>;
   /** Pilot 2.3: the Catalog deploy switch (`P2_CATALOG_ENABLED`); closed when absent. */
   readonly catalogEnabled?: boolean;
+  /** Pilot 2.4: the Planning deploy switch (`P2_PLANNING_ENABLED`); closed when absent. */
+  readonly planningEnabled?: boolean;
 }): Promise<Readonly<Record<string, unknown>>> {
   const allowed = devOperations[input.callable];
-  if (input.callable !== 'uploadMediaBytesV1' && input.callable !== 'libraryQueryV1') {
+  if (
+    input.callable !== 'uploadMediaBytesV1' &&
+    input.callable !== 'libraryQueryV1' &&
+    !planningCallables.has(input.callable)
+  ) {
     const operation = operationOf(input.callable, input.data);
     if (operation === undefined || !allowed.includes(operation))
       return rejected('capability_denied');
@@ -253,6 +288,27 @@ export async function handleDevContentMedia(input: {
     bookingAccessCapability,
   );
   if (!decision.allowed) return rejected('unauthenticated');
+  if (planningCallables.has(input.callable)) {
+    const flags = planningCloudFlags(input.planningEnabled === true);
+    const data = withoutSessionContext(input.data);
+    if (input.callable === 'quickPlanCommandV1' || input.callable === 'quickPlanQueryV1') {
+      const service = new FirestoreQuickPlanService(input.firestore, systemServerClock, {
+        cloud: flags,
+      });
+      return input.callable === 'quickPlanCommandV1'
+        ? service.command(actor.actor, data)
+        : service.query(actor.actor, data);
+    }
+    const scenarios = new FirestoreScenarioService(
+      input.firestore,
+      systemServerClock,
+      scenarioStopsFor(input.firestore),
+      flags,
+    );
+    return input.callable === 'scenarioCommandV1'
+      ? scenarios.command(actor.actor, data)
+      : scenarios.query(actor.actor, data);
+  }
   if (input.callable === 'discoverQueryV1') {
     if (input.catalogEnabled !== true) return rejected('feature_disabled');
     const now = (input.now ?? (() => new Date()))();
@@ -316,6 +372,9 @@ export async function handleDevContentMedia(input: {
         { actor: ids, firestore: input.firestore, composition: media },
         input.data,
       );
+    default:
+      // Library, Planning and Discover are answered above.
+      return rejected('capability_denied');
   }
 }
 

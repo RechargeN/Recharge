@@ -936,6 +936,8 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/reviews/review_target.ts': ['contentCollections', 'canonicalJson', 'sha256Hex'],
     'modules/quick_plan/firestore_quick_plan_service.ts': [
       'assertContentEmulatorContext',
+      // Pilot 2.4 (owner 2026-11-21): the reviewed dev-cloud guard.
+      'assertMediaChainPersistenceContext',
       'sha256Hex',
     ],
     'modules/quick_plan/quick_plan_contract.ts': ['canonicalJson', 'sha256Hex'],
@@ -949,6 +951,8 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/route/route_contract.ts': ['canonicalJson', 'sha256Hex'],
     'modules/quick_plan/firestore_scenario_service.ts': [
       'assertContentEmulatorContext',
+      // Pilot 2.4 (owner 2026-11-21): the reviewed dev-cloud guard.
+      'assertMediaChainPersistenceContext',
       'scenarioPublicationStanding',
       'canonicalJson',
       'sha256Hex',

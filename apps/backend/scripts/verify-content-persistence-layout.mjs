@@ -153,7 +153,13 @@ const approvedOutsideUsers = {
   "modules/reviews/firestore_review_service.ts": guardOnly,
   // I1 Quick Plan (2026-10-17): only the Emulator guard; its own collections,
   // no Content read or write.
-  "modules/quick_plan/firestore_quick_plan_service.ts": guardOnly,
+  // Pilot 2.4 (owner 2026-11-21): Quick Plan in the cloud, the reviewed guard too.
+  "modules/quick_plan/firestore_quick_plan_service.ts": {
+    firestore_content_repository: [
+      "assertContentEmulatorContext",
+      "assertMediaChainPersistenceContext",
+    ],
+  },
   // L1 legal hold authority (PRIVACY_L1 amendment §7): only the persistence
   // guard (Emulator, or the reviewed dev/stage cloud behind the switch — step 2,
   // owner decision 2026-11-20); it writes its own hold and audit collections,
@@ -175,9 +181,11 @@ const approvedOutsideUsers = {
     ],
   },
   // I3 / SCN-PUB-01 (2026-10-20): plus one read-only pointer check, SP-11.
+  // Pilot 2.4 (owner 2026-11-21): Scenario sync in the cloud, the reviewed guard too.
   "modules/quick_plan/firestore_scenario_service.ts": {
     firestore_content_repository: [
       "assertContentEmulatorContext",
+      "assertMediaChainPersistenceContext",
       "scenarioPublicationStanding",
     ],
   },

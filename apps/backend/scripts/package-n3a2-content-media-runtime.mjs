@@ -123,6 +123,7 @@ export function renderEnv({
   libraryEnabled = false,
   sessionClassEnabled = false,
   catalogEnabled = false,
+  planningEnabled = false,
   projectId: target = projectId,
   projectNumber,
 }) {
@@ -135,6 +136,8 @@ export function renderEnv({
     throw new Error("sessionClassEnabled must be boolean");
   if (typeof catalogEnabled !== "boolean")
     throw new Error("catalogEnabled must be boolean");
+  if (typeof planningEnabled !== "boolean")
+    throw new Error("planningEnabled must be boolean");
   if (
     !Array.isArray(allowedUids) ||
     allowedUids.length === 0 ||
@@ -153,6 +156,8 @@ export function renderEnv({
     `P2_SESSION_CLASS_ENABLED=${runtimeEnabled && sessionClassEnabled}`,
     // Pilot 2.3: Discover reads over the cloud Catalog, own switch.
     `P2_CATALOG_ENABLED=${runtimeEnabled && catalogEnabled}`,
+    // Pilot 2.4: Quick Plan and Scenario sync, own switch.
+    `P2_PLANNING_ENABLED=${runtimeEnabled && planningEnabled}`,
     ...projectNumberEnvLines(target, number),
     "",
   ].join("\n");
@@ -165,6 +170,7 @@ export function stageRuntime({
   libraryEnabled = false,
   sessionClassEnabled = false,
   catalogEnabled = false,
+  planningEnabled = false,
   projectId: target = projectId,
   projectNumber,
   functionsRoot = path.join(backend, "functions"),
@@ -192,6 +198,7 @@ export function stageRuntime({
     libraryEnabled,
     sessionClassEnabled,
     catalogEnabled,
+    planningEnabled,
     projectId: target,
     projectNumber: number,
   });
@@ -245,6 +252,7 @@ export function stageRuntime({
     libraryEnabled,
     sessionClassEnabled,
     catalogEnabled,
+    planningEnabled,
     codeTreeSha256: codeTreeDigest(outDir),
     treeSha256: digest.sha256,
     files: digest.files,
@@ -254,7 +262,7 @@ export function stageRuntime({
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
-  const [outDir, enabled, uids, library, sessionClass, catalog] =
+  const [outDir, enabled, uids, library, sessionClass, catalog, planning] =
     process.argv.slice(2);
   if (
     !outDir ||
@@ -262,10 +270,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
     !uids ||
     ![undefined, "true", "false"].includes(library) ||
     ![undefined, "true", "false"].includes(sessionClass) ||
-    ![undefined, "true", "false"].includes(catalog)
+    ![undefined, "true", "false"].includes(catalog) ||
+    ![undefined, "true", "false"].includes(planning)
   ) {
     process.stderr.write(
-      "usage: node package-n3a2-content-media-runtime.mjs <stageDir> <true|false> <uid[,uid]> [<libraryEnabled> [<sessionClassEnabled> [<catalogEnabled>]]]\n",
+      "usage: node package-n3a2-content-media-runtime.mjs <stageDir> <true|false> <uid[,uid]> [<libraryEnabled> [<sessionClassEnabled> [<catalogEnabled> [<planningEnabled>]]]]\n",
     );
     process.exitCode = 1;
   } else {
@@ -276,10 +285,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
       libraryEnabled: library === "true",
       sessionClassEnabled: sessionClass === "true",
       catalogEnabled: catalog === "true",
+      planningEnabled: planning === "true",
       ...cliTarget(process.env),
     });
     process.stdout.write(
-      `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled}, libraryEnabled=${manifest.libraryEnabled}, sessionClassEnabled=${manifest.sessionClassEnabled}, catalogEnabled=${manifest.catalogEnabled})\n`,
+      `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled}, libraryEnabled=${manifest.libraryEnabled}, sessionClassEnabled=${manifest.sessionClassEnabled}, catalogEnabled=${manifest.catalogEnabled}, planningEnabled=${manifest.planningEnabled})\n`,
     );
   }
 }

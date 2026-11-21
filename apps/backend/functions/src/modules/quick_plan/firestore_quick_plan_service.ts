@@ -3,7 +3,10 @@ import { FirestoreBookingAccessAuthority } from '../../booking/firestore_booking
 import type { BookingAccessHint } from '../../shared/booking_access_authority.js';
 import type { ServerClock } from '../../shared/server_clock.js';
 import { FirestoreFeatureFlagGate } from '../../platform/config/firestore_feature_flag_gate.js';
-import { assertContentEmulatorContext } from '../content/infrastructure/firestore_content_repository.js';
+import {
+  assertContentEmulatorContext,
+  assertMediaChainPersistenceContext,
+} from '../content/infrastructure/firestore_content_repository.js';
 import { sha256Hex } from '../content/domain/published_revision.js';
 import { exact, record } from '../library/library_contract.js';
 import { isEntityId } from '../../shared/ids.js';
@@ -19,13 +22,22 @@ import {
   type QuickPlanCommand,
 } from './quick_plan_contract.js';
 
-/** Emulator-only Quick Plan authority; no Content/Catalog/Scenario writes. */
+/** Owner deploy switches of a cloud runtime, keyed by the local flag id (pilot 2.4). */
+export type CloudPlanningFlags = Readonly<Record<string, boolean>>;
+
+/**
+ * Quick Plan authority; no Content/Catalog/Scenario writes. Emulator by default;
+ * pilot 2.4 (owner 2026-11-21, variant A): the dev/stage cloud entry passes its
+ * deploy switches under the reviewed dev-cloud persistence guard.
+ */
 export class FirestoreQuickPlanService {
   constructor(
     private readonly db: Firestore,
     private readonly clock: ServerClock,
+    private readonly options: Readonly<{ cloud?: CloudPlanningFlags }> = {},
   ) {
-    assertContentEmulatorContext(db);
+    if (options.cloud === undefined) assertContentEmulatorContext(db);
+    else assertMediaChainPersistenceContext(db);
   }
   private async owner(tx: Transaction, hint: BookingAccessHint): Promise<string | null> {
     try {
@@ -41,6 +53,8 @@ export class FirestoreQuickPlanService {
     }
   }
   private enabled(tx: Transaction) {
+    if (this.options.cloud !== undefined)
+      return Promise.resolve(this.options.cloud[quickPlanFlag] === true);
     return new FirestoreFeatureFlagGate(this.db, 'local', 'LV').isEnabled(quickPlanFlag, tx);
   }
   async command(hint: BookingAccessHint, raw: unknown): Promise<Result> {

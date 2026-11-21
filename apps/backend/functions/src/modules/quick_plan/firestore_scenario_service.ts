@@ -6,6 +6,7 @@ import type { ServerClock } from '../../shared/server_clock.js';
 import { isEntityId, isIdempotencyKey } from '../../shared/ids.js';
 import {
   assertContentEmulatorContext,
+  assertMediaChainPersistenceContext,
   scenarioPublicationStanding,
 } from '../content/infrastructure/firestore_content_repository.js';
 import { canonicalJson, sha256Hex } from '../content/domain/published_revision.js';
@@ -277,10 +278,14 @@ export class FirestoreScenarioService {
     private readonly clock: ServerClock,
     /** SCN-PUB-01: Catalog-owned stop status; without it catalog stops fail closed. */
     private readonly stops?: ScenarioStopsPort,
+    /** Pilot 2.4: the cloud deploy switches by local flag id; Emulator flags when absent. */
+    private readonly cloud?: Readonly<Record<string, boolean>>,
   ) {
-    assertContentEmulatorContext(db);
+    if (cloud === undefined) assertContentEmulatorContext(db);
+    else assertMediaChainPersistenceContext(db);
   }
   private flag(tx: Transaction, id: string) {
+    if (this.cloud !== undefined) return Promise.resolve(this.cloud[id] === true);
     return new FirestoreFeatureFlagGate(this.db, 'local', 'LV').isEnabled(id, tx);
   }
   private async actor(tx: Transaction, hint: BookingAccessHint) {
@@ -297,7 +302,7 @@ export class FirestoreScenarioService {
     }
   }
   private enabled(tx: Transaction) {
-    return new FirestoreFeatureFlagGate(this.db, 'local', 'LV').isEnabled(scenarioFlag, tx);
+    return this.flag(tx, scenarioFlag);
   }
   private memberRef(id: string, actor: string) {
     return this.db.collection(scenarioCollections.members).doc(id + ':' + actor);
@@ -573,10 +578,7 @@ export class FirestoreScenarioService {
         return reject('access_revoked');
       let source: QuickSource | undefined;
       if (type === 'expand') {
-        if (
-          !(await new FirestoreFeatureFlagGate(this.db, 'local', 'LV').isEnabled(quickPlanFlag, tx))
-        )
-          return reject('feature_disabled');
+        if (!(await this.flag(tx, quickPlanFlag))) return reject('feature_disabled');
         source = (
           await tx.get(
             this.db.collection(quickPlanCollections.plans).doc(actor + ':' + String(c.sourceId)),
