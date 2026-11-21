@@ -1,6 +1,6 @@
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { info } from 'firebase-functions/logger';
+import { error as logError, info } from 'firebase-functions/logger';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { onRequest, type Request } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
@@ -137,15 +137,21 @@ export const reconcilePushV1 = onSchedule(
     // Round 1 (2026-11-21): with the Booking consumer switch on, the pass also
     // retries and catches up Booking effects (and still runs the push pass).
     if (bookingConsumeOpen(process.env)) {
-      const report = await reconcileCloudBookingNotifications({ app: firebase, firestore });
-      info('dev_booking_reconcile', {
-        complete: report.complete,
-        scanned: report.scanned,
-        outcomes: report.outcomes,
-        findings: report.findings.length,
-        push: report.push ?? null,
-      });
-      return;
+      try {
+        const report = await reconcileCloudBookingNotifications({ app: firebase, firestore });
+        info('dev_booking_reconcile', {
+          complete: report.complete,
+          scanned: report.scanned,
+          outcomes: report.outcomes,
+          findings: report.findings.length,
+          push: report.push ?? null,
+        });
+        return;
+      } catch (error) {
+        // A failed Booking pass (e.g. an index still building) is reported and
+        // never stops the push pass below.
+        logError('dev_booking_reconcile_failure', failureShape(error));
+      }
     }
     const report = await createDevNotifications({ app: firebase, firestore }).push.reconcile();
     info('dev_push_reconcile', report);
