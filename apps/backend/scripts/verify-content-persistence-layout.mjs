@@ -139,7 +139,13 @@ const approvedOutsideUsers = {
   // H/K1/K2 and Library privacy (d4e3971, 8f26a98): only the Emulator guard,
   // or read-only checks of Content pointers, revisions and drafts; none of
   // them writes Content. Reviewed 2026-10-16 when the baseline gate was fixed.
-  "modules/library/library_privacy_task_handler.ts": guardOnly,
+  // Pilot 2.7 (owner 2026-11-21): Library erasure in the cloud, the reviewed guard too.
+  "modules/library/library_privacy_task_handler.ts": {
+    firestore_content_repository: [
+      "assertContentEmulatorContext",
+      "assertMediaChainPersistenceContext",
+    ],
+  },
   // ADR 0022 stage 1: read-only checks of the published pointer and revision;
   // it writes only its own contentTranslation* collections, no Content.
   "modules/content_translation/firestore_content_translation_service.ts": {

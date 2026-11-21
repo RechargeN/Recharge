@@ -926,7 +926,11 @@ void test('delegated import never reaches Content storage except through the Con
       'resolveContentType',
     ],
     'modules/library/library_contract.ts': ['canonicalJson', 'sha256Hex'],
-    'modules/library/library_privacy_task_handler.ts': ['assertContentEmulatorContext'],
+    'modules/library/library_privacy_task_handler.ts': [
+      'assertContentEmulatorContext',
+      // Pilot 2.7 (owner 2026-11-21): Library erasure in the cloud.
+      'assertMediaChainPersistenceContext',
+    ],
     'modules/moderation/application/k1_workflows.ts': [
       'assertContentEmulatorContext',
       'canonicalJson',
