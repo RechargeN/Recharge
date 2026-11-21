@@ -162,9 +162,9 @@ test("only the dev project, with N3c enabled", () => {
   );
 });
 
-// Round 2 (owner decision 2026-11-20, stage 1.3): only the Eventarc receiver
-// and the invoker of the one Booking-effect trigger, in dev or staging.
-function roundTwo(target, mutate = () => {}) {
+// Rounds 2 and 3 (stage 1.3): the Eventarc receiver first, then the invoker of
+// the one Booking-effect trigger, in dev or staging.
+function grantRound(round, target, mutate = () => {}) {
   const who = `serviceAccount:runtime-notifications@${target}.iam.gserviceaccount.com`;
   const c = [
     change("google_project.stage", "google_project", { project_id: target }, [
@@ -187,6 +187,9 @@ function roundTwo(target, mutate = () => {}) {
       },
     ),
   ];
+  // Round 2 plans only the receiver; round 3 has it applied (no-op).
+  if (round === 2) c.pop();
+  else c[1].change.actions = ["no-op"];
   mutate(c);
   const p = {
     variables: {
@@ -201,11 +204,29 @@ function roundTwo(target, mutate = () => {}) {
     projectId: target,
     commitSha: "a".repeat(40),
     inventorySha256: inventoryDigest(p),
-    round: 2,
+    round,
   });
 }
+const roundTwo = (target, mutate) => grantRound(3, target, mutate);
 
-test("round 2: exactly the two Booking-consumer grants, dev or staging", () => {
+test("round 2: only the Eventarc receiver, dev or staging", () => {
+  assert.deepEqual(grantRound(2, project), []);
+  assert.deepEqual(grantRound(2, "recharge-staging-y9y2y"), []);
+  assert.match(
+    grantRound(2, project, (c) => {
+      c[1].change.after.role = "roles/eventarc.admin";
+    }).join(),
+    /IAM mismatch/u,
+  );
+  assert.match(
+    grantRound(2, project, (c) => {
+      c.pop();
+    }).join(),
+    /reviewed create missing/u,
+  );
+});
+
+test("round 3: only the invoker of the one Booking-effect trigger", () => {
   assert.deepEqual(roundTwo(project), []);
   assert.deepEqual(roundTwo("recharge-staging-y9y2y"), []);
   assert.match(roundTwo("recharge-prod").join(), /reviewed dev or staging/u);
@@ -217,13 +238,13 @@ test("round 2: exactly the two Booking-consumer grants, dev or staging", () => {
   );
   assert.match(
     roundTwo(project, (c) => {
-      c[1].change.after.role = "roles/eventarc.admin";
+      c[2].change.after.role = "roles/run.admin";
     }).join(),
     /IAM mismatch/u,
   );
   assert.match(
     roundTwo(project, (c) => {
-      c[1].change.after.member =
+      c[2].change.after.member =
         "serviceAccount:runtime-booking@x.iam.gserviceaccount.com";
     }).join(),
     /IAM mismatch/u,

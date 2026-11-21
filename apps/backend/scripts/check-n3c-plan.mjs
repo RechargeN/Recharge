@@ -51,16 +51,20 @@ const creates = new Map([
 ]);
 
 /**
- * Round 2 (owner decision 2026-11-20, stage 1.3 "Уведомления о бронях в облаке
- * — да"): Eventarc delivers bookingOutbox records to the Notifications trigger,
- * so runtime-notifications receives events and may invoke exactly that one
- * Cloud Run service. dev or staging; nothing else is created.
+ * Rounds 2 and 3 (owner decisions 2026-11-20 "Уведомления о бронях в облаке —
+ * да" and 2026-11-21 "Да, выдавай"): Eventarc delivers bookingOutbox records to
+ * the Notifications trigger as runtime-notifications. Round 2 is only the event
+ * receiver (the trigger cannot be created without it); round 3, after the
+ * deploy created the service, only the invoker of exactly that one Cloud Run
+ * service. dev or staging; nothing else is created.
  */
 const roundTwoCreates = new Map([
   [
     "google_project_iam_member.n3c_eventarc[0]",
     { role: "roles/eventarc.eventReceiver" },
   ],
+]);
+const roundThreeCreates = new Map([
   [
     "google_cloud_run_v2_service_iam_member.n3c_invoker_booking[0]",
     {
@@ -71,7 +75,10 @@ const roundTwoCreates = new Map([
 ]);
 
 export function checkN3cPlan(plan, expected) {
-  if (expected.round === 2) return checkRoundTwo(plan, expected);
+  if (expected.round === 2)
+    return checkGrantRound(plan, expected, roundTwoCreates);
+  if (expected.round === 3)
+    return checkGrantRound(plan, expected, roundThreeCreates);
   const errors = [];
   const vars = plan?.variables ?? {};
   if (expected.projectId !== project)
@@ -125,12 +132,12 @@ export function checkN3cPlan(plan, expected) {
   return errors;
 }
 
-function checkRoundTwo(plan, expected) {
+function checkGrantRound(plan, expected, creates) {
   const errors = [];
   const vars = plan?.variables ?? {};
   const target = expected.projectId;
   if (!isReviewedProject(target))
-    return ["N3c round 2 targets the reviewed dev or staging project only"];
+    return ["N3c grant rounds target the reviewed dev or staging project only"];
   const roundMember = `serviceAccount:runtime-notifications@${target}.iam.gserviceaccount.com`;
   if (vars.project_id?.value !== target) errors.push("project mismatch");
   if (vars.n3c_enabled?.value !== true || vars.n2c_enabled?.value !== true)
@@ -149,7 +156,7 @@ function checkRoundTwo(plan, expected) {
     )
       errors.push(`forbidden action ${actions.join("+")}: ${c.address}`);
     if (actions[0] !== "create") continue;
-    const rule = roundTwoCreates.get(c.address);
+    const rule = creates.get(c.address);
     if (rule === undefined) {
       errors.push(`unreviewed create: ${c.address}`);
       continue;
@@ -168,7 +175,7 @@ function checkRoundTwo(plan, expected) {
     )
       errors.push(`invoker target mismatch: ${c.address}`);
   }
-  for (const address of roundTwoCreates.keys())
+  for (const address of creates.keys())
     if (!seen.has(address)) errors.push(`reviewed create missing: ${address}`);
   return errors;
 }
