@@ -114,6 +114,8 @@ async function dispatch(callable: DevCallableName, request: Request, response: R
       firestore,
       libraryEnabled: libraryOpen(process.env),
       contentTypes: devContentTypesFor(process.env),
+      catalogEnabled:
+        devRuntimeOpen(process.env) !== null && process.env.P2_CATALOG_ENABLED === 'true',
       compose: () =>
         createDevContentMedia({
           app: firebase,
@@ -157,6 +159,10 @@ export const libraryCommandV1 = onRequest(options, (req, res) =>
 );
 export const libraryQueryV1 = onRequest(options, (req, res) =>
   dispatch('libraryQueryV1', req, res),
+);
+
+export const discoverQueryV1 = onRequest(options, (req, res) =>
+  dispatch('discoverQueryV1', req, res),
 );
 
 export { failureShape };

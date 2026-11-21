@@ -97,6 +97,8 @@ void test('only the Content, Media, Moderation, Event-handoff and legal hold sto
     .map((file) => path.relative(src, file).replaceAll('\\', '/'))
     .sort();
   assert.deepEqual(users, [
+    // Pilot 2.3 (owner 2026-11-21, variant A): the Catalog projection in the cloud.
+    'modules/catalog/infrastructure/firestore_catalog_repository.ts',
     'modules/content/infrastructure/firestore_content_repository.ts',
     // Round 2.2 (owner approval 2026-11-19): Event → Booking handoff in the cloud.
     'modules/content/infrastructure/firestore_event_booking_handoff_repository.ts',

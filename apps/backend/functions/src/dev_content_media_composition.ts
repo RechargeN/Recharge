@@ -14,6 +14,7 @@ import { FirestoreContentRepository } from './modules/content/infrastructure/fir
 import { IdentityPublisherEligibility } from './modules/content/infrastructure/identity_publisher_eligibility.js';
 import { FirestoreIdentityAuthorityRepository } from './modules/identity_publisher/infrastructure/firestore_identity_authority_repository.js';
 import { FirestoreLibraryService } from './modules/library/firestore_library_service.js';
+import { handleDiscoverQuery } from './catalog_entry.js';
 import type { IdTokenSource } from './modules/media/infrastructure/cloud_tools_client.js';
 import { createDevMediaComposition } from './modules/media/infrastructure/dev_media_composition.js';
 import { bookingAccessCapability } from './shared/booking_access_authority.js';
@@ -75,7 +76,62 @@ export const devOperations = Object.freeze({
   // validates its exact request shape (its query has no type field).
   libraryCommandV1: Object.freeze(['addFavorite', 'removeFavorite', 'recordVisit', 'removeVisit']),
   libraryQueryV1: Object.freeze([] as string[]),
+  // Pilot 2.3 (owner 2026-11-21): Discover reads over the cloud Catalog.
+  discoverQueryV1: Object.freeze([
+    'feed',
+    'search',
+    'map',
+    'details',
+    'publishedObject',
+    'publishedObjectCandidates',
+    'placeLink',
+    'placeCandidates',
+  ]),
 });
+
+/**
+ * Pilot 2.3 temporary Catalog limits (owner 2026-11-21; not final, BCK08-OD-04/
+ * 05/08/10 stay open): page at most 20, radius at most 50 km, at most 3 Discover
+ * reads per second per user (in memory: the dev runtime runs one instance).
+ */
+export const pilotCatalogLimits = Object.freeze({
+  pageSizeMax: 20,
+  radiusKmMax: 50,
+  readsPerSecond: 3,
+});
+const discoverReads = new Map<string, number[]>();
+
+export function discoverRateAllowed(userId: string, nowMs: number): boolean {
+  const recent = (discoverReads.get(userId) ?? []).filter((at) => nowMs - at < 1000);
+  if (recent.length >= pilotCatalogLimits.readsPerSecond) {
+    discoverReads.set(userId, recent);
+    return false;
+  }
+  recent.push(nowMs);
+  discoverReads.set(userId, recent);
+  if (discoverReads.size > 1000) discoverReads.clear();
+  return true;
+}
+
+/** Applies the page and radius limits; a radius above the limit is refused. */
+export function limitDiscoverRequest(data: unknown): { data: unknown } | { refused: string } {
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) return { data };
+  const request = data as Record<string, unknown>;
+  const payload = request.payload as Record<string, unknown> | undefined;
+  const query = payload?.query as Record<string, unknown> | undefined;
+  if (query === undefined || query === null || typeof query !== 'object') return { data };
+  const geo = query.geo as Record<string, unknown> | undefined;
+  if (typeof geo?.radiusKm === 'number' && geo.radiusKm > pilotCatalogLimits.radiusKmMax)
+    return { refused: 'radius_too_large' };
+  if (typeof query.pageSize === 'number' && query.pageSize > pilotCatalogLimits.pageSizeMax)
+    return {
+      data: {
+        ...request,
+        payload: { ...payload, query: { ...query, pageSize: pilotCatalogLimits.pageSizeMax } },
+      },
+    };
+  return { data };
+}
 export type DevCallableName = keyof typeof devOperations;
 
 /**
@@ -147,6 +203,8 @@ function operationOf(callable: DevCallableName, data: unknown): string | undefin
   const record = data as Record<string, unknown>;
   if (callable === 'libraryCommandV1')
     return typeof record.commandType === 'string' ? record.commandType : undefined;
+  if (callable === 'discoverQueryV1')
+    return typeof record.queryType === 'string' ? record.queryType : undefined;
   const value = callable.startsWith('content')
     ? callable.endsWith('QueryV1')
       ? record.queryType
@@ -174,6 +232,8 @@ export async function handleDevContentMedia(input: {
   readonly libraryEnabled?: boolean;
   /** Pilot 2.2: the enabled Content types; Place and Event when absent. */
   readonly contentTypes?: ReadonlySet<ContentTypeId>;
+  /** Pilot 2.3: the Catalog deploy switch (`P2_CATALOG_ENABLED`); closed when absent. */
+  readonly catalogEnabled?: boolean;
 }): Promise<Readonly<Record<string, unknown>>> {
   const allowed = devOperations[input.callable];
   if (input.callable !== 'uploadMediaBytesV1' && input.callable !== 'libraryQueryV1') {
@@ -193,6 +253,18 @@ export async function handleDevContentMedia(input: {
     bookingAccessCapability,
   );
   if (!decision.allowed) return rejected('unauthenticated');
+  if (input.callable === 'discoverQueryV1') {
+    if (input.catalogEnabled !== true) return rejected('feature_disabled');
+    const now = (input.now ?? (() => new Date()))();
+    if (!discoverRateAllowed(decision.userId, now.getTime())) return rejected('rate_limited');
+    const limited = limitDiscoverRequest(input.data);
+    if ('refused' in limited) return rejected(limited.refused);
+    // Find People stays off in the cloud (OD-11).
+    return handleDiscoverQuery(
+      { firestore: input.firestore, userId: decision.userId, findPeopleEnabled: false },
+      limited.data,
+    );
+  }
   if (input.callable === 'libraryCommandV1' || input.callable === 'libraryQueryV1') {
     // The Library service re-authorizes the same Session inside its transaction.
     const library = new FirestoreLibraryService(input.firestore, systemServerClock, {

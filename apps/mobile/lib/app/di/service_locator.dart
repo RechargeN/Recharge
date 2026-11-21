@@ -433,7 +433,12 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     )
     // E2: default-off Discover over the server Catalog; `localOnly` otherwise.
     ..registerLazySingleton<DiscoverCatalogTestEntryGuard>(
-      () => DiscoverCatalogTestEntryGuard.fromEnvironment(sl()),
+      () => DiscoverCatalogTestEntryGuard.fromEnvironment(
+        sl(),
+        devPort: sl.isRegistered<DevContentMediaPort>()
+            ? sl<DevContentMediaPort>()
+            : null,
+      ),
     )
     ..registerLazySingleton<CatalogSnapshotSession>(CatalogSnapshotSession.new)
     ..registerLazySingleton<CatalogQueryPort>(

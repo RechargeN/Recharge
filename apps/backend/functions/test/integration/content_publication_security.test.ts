@@ -1056,8 +1056,9 @@ void test('delegated import never reaches Content storage except through the Con
       // D3.7 §6: the fresh Find People read gate (Content pointer, consent, age, K2).
       'FirestoreFindPeoplePrivacy',
     ],
+    // Pilot 2.3 (owner 2026-11-21): the reviewed dev-cloud guard.
     'modules/catalog/infrastructure/firestore_catalog_repository.ts': [
-      'assertContentEmulatorContext',
+      'assertMediaChainPersistenceContext',
     ],
     'modules/media/infrastructure/emulator_media_composition.ts': [
       'ContentMediaScope',

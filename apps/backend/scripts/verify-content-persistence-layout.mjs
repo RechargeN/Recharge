@@ -129,7 +129,10 @@ const approvedOutsideUsers = {
   "modules/catalog/infrastructure/emulator_catalog_composition.ts": {
     firestore_content_repository: ["FirestoreContentRepository"],
   },
-  "modules/catalog/infrastructure/firestore_catalog_repository.ts": guardOnly,
+  // Pilot 2.3 (owner 2026-11-21): the Catalog projection in the cloud borrows
+  // only the Emulator-or-dev-cloud guard, as the Media chain does.
+  "modules/catalog/infrastructure/firestore_catalog_repository.ts":
+    mediaChainGuardOnly,
   // Library (favorites and visits): read-only checks of the published pointer
   // and revision inside its own transaction, under the Emulator guard; it
   // writes nothing of Content.
