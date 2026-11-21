@@ -9,6 +9,7 @@ import type { Response } from 'express';
 import {
   consumeCloudBookingEffect,
   createDevNotifications,
+  reconcileCloudBookingNotifications,
   handleDevNotifications,
   type DevNotificationsCallable,
 } from './dev_notifications_composition.js';
@@ -132,10 +133,21 @@ export const reconcilePushV1 = onSchedule(
   async () => {
     if (devNotificationsOpen(process.env) === null) return;
     const firebase = app();
-    const report = await createDevNotifications({
-      app: firebase,
-      firestore: getFirestore(firebase),
-    }).push.reconcile();
+    const firestore = getFirestore(firebase);
+    // Round 1 (2026-11-21): with the Booking consumer switch on, the pass also
+    // retries and catches up Booking effects (and still runs the push pass).
+    if (bookingConsumeOpen(process.env)) {
+      const report = await reconcileCloudBookingNotifications({ app: firebase, firestore });
+      info('dev_booking_reconcile', {
+        complete: report.complete,
+        scanned: report.scanned,
+        outcomes: report.outcomes,
+        findings: report.findings.length,
+        push: report.push ?? null,
+      });
+      return;
+    }
+    const report = await createDevNotifications({ app: firebase, firestore }).push.reconcile();
     info('dev_push_reconcile', report);
   },
 );

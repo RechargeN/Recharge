@@ -6,6 +6,10 @@ import { info } from 'firebase-functions/logger';
 
 import { FirestoreBookingAccessAuthority } from './booking/firestore_booking_access_authority.js';
 import { NotificationEffectConsumer } from './modules/notifications/application/consume_notification_effect.js';
+import {
+  NotificationReconciler,
+  type ReconcileReport,
+} from './modules/notifications/application/notification_reconciler.js';
 import { handleNotificationsCommandRequest } from './modules/notifications/application/notifications_command_handler.js';
 import { handleNotificationsQueryRequest } from './modules/notifications/application/notifications_query_handler.js';
 import { handlePushDeviceCommand } from './modules/notifications/application/push_device_command_handler.js';
@@ -16,7 +20,10 @@ import {
 } from './modules/notifications/application/push_dispatcher.js';
 import type { NotificationsStore } from './modules/notifications/domain/repositories.js';
 import { FcmPushProvider } from './modules/notifications/infrastructure/fcm_push_provider.js';
-import { bookingOutboxCollection } from './modules/notifications/infrastructure/firestore_notification_sources.js';
+import {
+  bookingOutboxCollection,
+  FirestoreBookingOutboxSource,
+} from './modules/notifications/infrastructure/firestore_notification_sources.js';
 import { FirestoreNotificationsStore } from './modules/notifications/infrastructure/firestore_notifications_repository.js';
 import {
   FirestorePushSessions,
@@ -199,4 +206,39 @@ export async function consumeCloudBookingEffect(input: {
   )
     return 'disabled';
   return input.compose().consumer.consume(input.outboxId, input.data);
+}
+
+/**
+ * Round 1 (owner 2026-11-21): the cloud had no Booking reconciliation, so a
+ * transient consumer failure (`retry_scheduled`) or a trigger that never fired
+ * stayed undelivered for good. One pass: Booking outbox records without a
+ * receipt, due retries and expiries, then the push pass. Its consumer is
+ * contained by the pinned incident switch (the self-test consumer is not).
+ */
+export async function reconcileCloudBookingNotifications(input: {
+  readonly app: App;
+  readonly firestore: Firestore;
+  readonly clock?: ServerClock;
+}): Promise<ReconcileReport> {
+  const clock = input.clock ?? systemServerClock;
+  const notifications = createDevNotifications(input);
+  const consumer = new NotificationEffectConsumer({
+    store: notifications.store,
+    clock,
+    afterInboxCreated: (notificationId) =>
+      dispatchPushFor(notifications.store, notifications.push, notificationId),
+    contained: async () =>
+      (await emergencySwitchState(
+        input.firestore,
+        operationsEmergencySwitchIds.notificationsConsumeBooking,
+      )) !== 'open',
+  });
+  return new NotificationReconciler(
+    notifications.store,
+    new FirestoreBookingOutboxSource(input.firestore),
+    consumer,
+    clock,
+    {},
+    notifications.push,
+  ).reconcile();
 }
