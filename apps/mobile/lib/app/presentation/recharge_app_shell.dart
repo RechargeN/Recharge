@@ -15,12 +15,16 @@ class RechargeAppShell extends ConsumerStatefulWidget {
     required this.child,
     this.userId = '',
     this.routerGuardsWorkspace = false,
+    this.offline = false,
   });
 
   final String currentLocation;
   final Widget child;
   final String userId;
   final bool routerGuardsWorkspace;
+
+  /// Round 1 (2026-11-20): signed in without network; shows the offline banner.
+  final bool offline;
 
   @override
   ConsumerState<RechargeAppShell> createState() => _RechargeAppShellState();
@@ -131,7 +135,54 @@ class _RechargeAppShellState extends ConsumerState<RechargeAppShell> {
 
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      body: AccountExperienceScope(experience: experience, child: widget.child),
+      body: AccountExperienceScope(
+        experience: experience,
+        child: widget.offline
+            ? Column(
+                children: <Widget>[
+                  // Round 1 (owner 2026-11-20): offline the user stays signed
+                  // in on saved screens; this says why nothing refreshes.
+                  Material(
+                    color: colorScheme.secondaryContainer,
+                    child: SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: Row(
+                          children: <Widget>[
+                            Icon(
+                              Icons.cloud_off_outlined,
+                              size: 18,
+                              color: colorScheme.onSecondaryContainer,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                context.l10n.authOfflineBanner,
+                                style: TextStyle(
+                                  color: colorScheme.onSecondaryContainer,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: MediaQuery.removePadding(
+                      context: context,
+                      removeTop: true,
+                      child: widget.child,
+                    ),
+                  ),
+                ],
+              )
+            : widget.child,
+      ),
       bottomNavigationBar: NavigationBar(
         height: 64,
         selectedIndex: _selectedIndexFor(widget.currentLocation, destinations),

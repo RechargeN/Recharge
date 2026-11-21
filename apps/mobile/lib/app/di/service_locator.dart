@@ -1,4 +1,5 @@
 import '../config/catalog_market_binding.dart';
+import '../../features/auth/domain/repositories/offline_account_store.dart';
 import '../../features/auth/domain/repositories/auth_session_events.dart';
 import 'dart:io';
 import 'dev_auth_bundle.dart';
@@ -542,6 +543,11 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
           null => AuthCacheEnvironment.local,
         },
       ),
+    )
+    // Round 1 (owner 2026-11-21): the offline profile and the confirmed-
+    // revocation wipe, behind the domain interface (application -> domain).
+    ..registerLazySingleton<OfflineAccountStore>(
+      () => sl<AuthLocalDataSource>(),
     )
     ..registerLazySingleton<AuthRepository>(
       () =>

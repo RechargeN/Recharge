@@ -43,7 +43,16 @@ export interface RedeletionPort {
 export type RestoreAdmission =
   | {
       readonly state: 'closed';
-      readonly reason: 'not_isolated' | 'deletion_authority_unavailable' | 'redeletion_failed';
+      readonly reason:
+        | 'not_isolated'
+        | 'deletion_authority_unavailable'
+        | 'redeletion_failed'
+        /**
+         * Round 1 stage 1.6 (staging 2026-11-21): a PITR copy can serve reads
+         * while it still refuses writes ("undergoing a restore"). Not a failed
+         * re-deletion: the copy stays closed and the admission is retried later.
+         */
+        | 'restore_in_progress';
       readonly decisions: number;
       readonly failed: number;
     }
@@ -75,20 +84,34 @@ export async function admitRestoredCopy(input: {
     return { state: 'closed', reason: 'deletion_authority_unavailable', decisions: 0, failed: 0 };
   let failed = 0;
   let retained = 0;
+  let restoring = 0;
   for (const decision of snapshot.decisions) {
     let outcome: ReapplyOutcome;
     try {
       outcome = await input.redeletion.reapply(decision, input.clock.now().toISOString());
-    } catch {
+    } catch (error) {
+      if (isRestoreInProgress(error)) restoring += 1;
       outcome = 'failed';
     }
     if (outcome === 'failed') failed += 1;
     if (outcome === 'retained') retained += 1;
   }
   const decisions = snapshot.decisions.length;
+  if (restoring > 0 && restoring === failed)
+    return { state: 'closed', reason: 'restore_in_progress', decisions, failed };
   if (failed > 0) return { state: 'closed', reason: 'redeletion_failed', decisions, failed };
   if (retained > 0) return { state: 'incomplete', decisions, retained };
   return { state: 'admitted', decisions };
+}
+
+/** Firestore FAILED_PRECONDITION while a restored database still refuses writes. */
+function isRestoreInProgress(error: unknown): boolean {
+  const value = error as { code?: unknown; details?: unknown; message?: unknown } | null;
+  const code = value?.code;
+  const text = `${typeof value?.details === 'string' ? value.details : ''} ${
+    typeof value?.message === 'string' ? value.message : ''
+  }`;
+  return (code === 9 || code === 'failed-precondition') && /undergoing a restore/iu.test(text);
 }
 
 const decidedStatuses = new Set([

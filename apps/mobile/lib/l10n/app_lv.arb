@@ -3349,5 +3349,7 @@
   "discoverTimeFilterInvalid": "Nederīgs laika filtrs. Mainiet meklēšanas filtrus.",
   "discoverDateUnavailable": "Datums nav pieejams",
   "discoverDateFrom": "No {date}",
-  "discoverDateUntil": "Līdz {date}"
+  "discoverDateUntil": "Līdz {date}",
+  "authOfflineBanner": "Nav savienojuma — rādīts saglabātais",
+  "authOfflineNeedsConnection": "Šim nepieciešams savienojums. Mēģiniet vēlreiz, kad būsiet tiešsaistē."
 }

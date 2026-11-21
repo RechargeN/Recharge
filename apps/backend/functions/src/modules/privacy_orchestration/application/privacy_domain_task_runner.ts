@@ -39,6 +39,7 @@ import { FirestoreScenarioService } from '../../quick_plan/firestore_scenario_se
 import { FirestoreRouteService } from '../../route/firestore_route_service.js';
 import { safetyPrivacyAppliers } from '../../trust_safety/safety_privacy.js';
 import { mediaPrivacyApplier } from '../../media/infrastructure/media_privacy_applier.js';
+import { contentPrivacyAppliers } from '../../content/infrastructure/content_privacy_applier.js';
 import type { MediaDeletionService } from '../../media/application/media_deletion_service.js';
 import type { AttachmentReferencePort } from '../../media/application/ports/attachment_reference_port.js';
 
@@ -388,7 +389,7 @@ export class PrivacyDomainTaskRunner {
       ['content_translation', registry('content_translation', contentTranslationPrivacyAppliers)],
       ['identity', registry('identity')],
       ['security', registry('security')],
-      ['content', registry('content')],
+      ['content', registry('content', contentPrivacyAppliers)],
       [
         'media',
         registry(

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/features/create/application/event_publication_controller.dart';
+import 'package:recharge/features/create/domain/entities/content_validation_violation.dart';
 import 'package:recharge/features/create/domain/entities/create_draft_entity.dart';
 import 'package:recharge/features/create/domain/entities/event_admission.dart';
 import 'package:recharge/features/create/domain/entities/event_publication.dart';
@@ -210,6 +211,27 @@ void main() {
     expect(c.state.record, isNull);
     expect(await journal.list(), isEmpty);
   });
+
+  test('Round 1: a field refusal keeps its violations for the panel, and the '
+      'next attempt clears them', () async {
+    gateway.refuseCreate = 'validation_failed';
+    gateway.refuseViolations = const <ContentValidationViolation>[
+      ContentValidationViolation(
+        code: 'event.full_description_length',
+        fieldPath: '/body/fullDescription',
+      ),
+    ];
+    final c = controller();
+    await c.load();
+    await c.save();
+    expect(c.state.message, 'validation_failed');
+    expect(c.state.violations.single.code, 'event.full_description_length');
+    expect(c.state.violations.single.fieldPath, '/body/fullDescription');
+
+    gateway.refuseCreate = null;
+    await c.save();
+    expect(c.state.violations, isEmpty);
+  });
 }
 
 final class _Gate implements EventPublicationCommandGate {
@@ -291,6 +313,8 @@ final class _Gateway implements EventPublicationGateway {
   String? visibility;
   int pointerRevision = 0;
   String? refuseCreate;
+  List<ContentValidationViolation> refuseViolations =
+      const <ContentValidationViolation>[];
   final Map<String, String> publishReplies = <String, String>{};
   int publications = 0;
   bool losePublishAnswer = false;
@@ -310,7 +334,12 @@ final class _Gateway implements EventPublicationGateway {
         'key': idempotencyKey,
       },
     ));
-    if (refuseCreate != null) throw EventPublicationRejected(refuseCreate!);
+    if (refuseCreate != null) {
+      throw EventPublicationRejected(
+        refuseCreate!,
+        violations: refuseViolations,
+      );
+    }
     revision = 1;
     return const EventServerDraftRef(
       contentId: 'content-1',

@@ -15438,5 +15438,13 @@
         "type": "String"
       }
     }
+  },
+  "authOfflineBanner": "No connection — showing saved content",
+  "authOfflineNeedsConnection": "This needs a connection. Try again when you are back online.",
+  "@authOfflineBanner": {
+    "description": "Banner while a signed-in user has no network and sees saved screens."
+  },
+  "@authOfflineNeedsConnection": {
+    "description": "Shown when an action needs the server while offline."
   }
 }

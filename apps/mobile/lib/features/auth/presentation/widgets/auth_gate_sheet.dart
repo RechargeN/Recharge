@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../core/localization/l10n_context.dart';
+import '../../application/auth_providers.dart';
 import '../../application/controllers/auth_controller.dart';
 
 Future<void> showAuthGateSheet(
@@ -14,6 +16,18 @@ Future<void> showAuthGateSheet(
   required VoidCallback onContinueAsGuest,
   bool allowGuest = true,
 }) {
+  // Round 1 (owner 2026-11-20): offline the user is still signed in; the
+  // action needs the server, not a new sign-in.
+  final bool offline = ProviderScope.containerOf(
+    context,
+    listen: false,
+  ).read(authControllerProvider).state.isOffline;
+  if (offline) {
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(content: Text(context.l10n.authOfflineNeedsConnection)),
+    );
+    return Future<void>.value();
+  }
   final parentContext = context;
   return showModalBottomSheet<void>(
     context: parentContext,

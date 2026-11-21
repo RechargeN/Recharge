@@ -144,6 +144,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) => RechargeAppShell(
           routerGuardsWorkspace: true,
+          offline: authController.state.isOffline,
           currentLocation: state.uri.path,
           userId: authController.state.user?.id ?? '',
           child: child,
@@ -657,6 +658,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // AUTH-ROT-02: retain navigation/preference while credentials recover.
       // Access providers stay empty and every protected action revalidates.
       if (isProtected && recoveringSession()) return null;
+      // Round 1 (2026-11-20): offline the user stays signed in on saved
+      // screens; never the sign-in screen for a missing network.
+      if (isProtected && authController.state.isOffline) return null;
       if (isProtected && !authController.state.isAuthenticated) {
         final encodedOrigin = Uri.encodeComponent(state.uri.toString());
         return '${RouteNames.signIn}?originRoute=$encodedOrigin';

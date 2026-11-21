@@ -48,6 +48,8 @@ const allowedCloud = new Set(
     // D3.7: Emulator-only privacy reads and Content-owned retention.
     "find_people_privacy_adapter.ts",
     "find_people_private_location_retention.ts",
+    // PB-18 (round 1, owner decisions 2026-11-20): the Content owner DSR applier.
+    "content_privacy_applier.ts",
   ].map((name) => path.join("modules", "content", "infrastructure", name)),
 );
 for (const file of sourceFiles(path.join(functionsSrc, "modules", "content"))) {

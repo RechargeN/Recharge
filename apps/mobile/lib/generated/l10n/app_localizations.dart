@@ -20211,6 +20211,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Until {date}'**
   String discoverDateUntil(String date);
+
+  /// Banner while a signed-in user has no network and sees saved screens.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection — showing saved content'**
+  String get authOfflineBanner;
+
+  /// Shown when an action needs the server while offline.
+  ///
+  /// In en, this message translates to:
+  /// **'This needs a connection. Try again when you are back online.'**
+  String get authOfflineNeedsConnection;
 }
 
 class _AppLocalizationsDelegate
