@@ -70,6 +70,10 @@ already placed in an **isolated named database**:
 2. `closed: deletion_authority_unavailable` — the deletion authority failed or
    answered for a moment before the restore began. Keep the copy closed.
 3. `closed: redeletion_failed` — a decision could not be re-applied. Closed.
+   `closed: restore_in_progress` — the copy still refuses writes ("undergoing a
+   restore"; seen on staging 2026-11-21 after the clone operation had finished
+   and reads already worked). Closed; wait until the copy accepts a write, then
+   admit again. This is not a failed re-deletion.
 4. `incomplete` — every decision re-applied, but L1 keeps blocked or held
    records (PB codes). Not admitted.
 5. `admitted` — every erasure and restriction re-applied through the L1
@@ -89,7 +93,8 @@ A check on a synthetic snapshot is not a restore of a production backup.
   records; that is honest, not a failure.
 - **Restore without resurrection:** clone into a named database (never `(default)`), then
   `admitRestoredCopy` with `FirestoreDeletionAuthority(live)` and
-  `PrivacyRunnerRedeletion(restored, …, { cloudRuntime: true })` (`n5d_n4d.py`). Only `admitted`
+  `PrivacyRunnerRedeletion(restored, …, { cloudRuntime: true })` (`n5d_n4d.py`). Wait until the clone accepts a
+  write before admission (`n5d_n4d.py` probes a scratch document). Only `admitted`
   (or an honest `incomplete`) copies may be used; `closed` stays closed. A clone inherits delete
   protection: disable it, then delete the clone. Production still needs a deletion ledger outside the
   restored database (OB-04/PB-15).
