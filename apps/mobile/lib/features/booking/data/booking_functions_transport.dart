@@ -562,7 +562,14 @@ final class FunctionsBookingCallablePort implements BookingCallablePort {
             code == 'session_revoked' ||
             code == 'session_expired')) {
       try {
-        await _identitySessions.refresh(requestId: const Uuid().v4());
+        await _identitySessions.refresh(
+          requestId: const Uuid().v4(),
+          // A repair renews the Session it has. A parallel refusal may have
+          // emptied the store: signing in again here would undo a revocation
+          // (decision 2026-11-21 #5), and only the user signs in.
+          requireExistingSession:
+              _endpoint.binding == BookingBackendBinding.devIdentity,
+        );
       } catch (error) {
         if (confirmsEndedAccess(error)) onAccessEnded?.call();
         rethrow;
