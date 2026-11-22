@@ -144,7 +144,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) => RechargeAppShell(
           routerGuardsWorkspace: true,
-          offline: authController.state.isOffline,
+          offline: authController.state.needsConnection,
           currentLocation: state.uri.path,
           userId: authController.state.user?.id ?? '',
           child: child,

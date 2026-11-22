@@ -17,9 +17,13 @@ class EventBookingPanel extends StatefulWidget {
     super.key,
     this.target,
     required this.eventTimeZoneId,
+    @visibleForTesting this.createController,
   });
 
   final EventBookingRef? target;
+
+  /// Tests supply the controller; the app always uses its composition.
+  final Future<EventBookingController?> Function()? createController;
 
   /// L4: the Event's IANA zone for every Booking time shown.
   final String eventTimeZoneId;
@@ -36,7 +40,10 @@ class _EventBookingPanelState extends State<EventBookingPanel> {
   void initState() {
     super.initState();
     final EventBookingRef? target = widget.target;
-    final Future<EventBookingController?> created = target == null
+    final create = widget.createController;
+    final Future<EventBookingController?> created = create != null
+        ? create()
+        : target == null
         ? createEventBookingController()
         : createEventBookingControllerFor(
             eventId: target.eventId,
@@ -76,7 +83,10 @@ class _EventBookingPanelState extends State<EventBookingPanel> {
                   EventBookingSection(
                     controller: controller,
                     eventTimeZoneId: widget.eventTimeZoneId,
-                    offline: ref.watch(authControllerProvider).state.isOffline,
+                    offline: ref
+                        .watch(authControllerProvider)
+                        .state
+                        .needsConnection,
                   ),
             );
           },
