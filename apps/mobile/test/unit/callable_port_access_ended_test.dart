@@ -100,6 +100,70 @@ Future<int> _signals({
   return signals;
 }
 
+/// Two calls in flight (a resume loads the inbox and the Library together): the
+/// first repair is refused and empties the store, then the slower answer comes.
+/// The token access stays on, as it does until the local clear has run.
+Future<List<String>> _establishedAfter(String refusal) async {
+  final store = InMemoryBookingIdentitySessionStore();
+  await store.saveServerIssued(
+    BookingIdentitySessionContext(
+      sessionId: 'session-server',
+      sessionHandle: 'A' * 43,
+      installationId: 'install-dev',
+    ),
+  );
+  final endpoint = BookingBackendEndpoint.devIdentity(
+    Uri.parse('https://europe-west1-recharge-dev-n2a01.cloudfunctions.net'),
+  );
+  final slow = Completer<void>();
+  final dispatched = Completer<void>();
+  final established = <String>[];
+  final client = MockClient((request) async {
+    final path = request.url.path;
+    if (path.contains('establish')) established.add(path);
+    if (path.endsWith('mediaQueryV1')) {
+      if (!dispatched.isCompleted) dispatched.complete();
+      await slow.future;
+    }
+    return _rejected(
+      request,
+      path.endsWith('refreshIdentitySessionV1') ? refusal : 'session_revoked',
+    );
+  });
+  final port = FunctionsBookingCallablePort(
+    endpoint: endpoint,
+    client: client,
+    tokens: _Tokens(),
+    sessions: store,
+    identitySessions: FunctionsIdentitySessionClient(
+      endpoint: endpoint,
+      client: client,
+      tokens: _Tokens(),
+      installations: _Installations(),
+      sessions: store,
+      appCheck: _AppCheck(),
+      identityProvider: 'google',
+    ),
+  );
+  Future<void> call(String name) async {
+    try {
+      await port.invoke(name, <String, Object?>{
+        'schemaVersion': 1,
+        'requestId': name,
+      });
+    } on BookingCallableFailure {
+      // Each caller still gets the refusal.
+    }
+  }
+
+  final slower = call('mediaQueryV1');
+  await dispatched.future;
+  await call('notificationsQueryV1');
+  slow.complete();
+  await slower;
+  return established;
+}
+
 http.Response _rejected(http.Request request, String code) {
   final data = (jsonDecode(request.body) as Map)['data'] as Map;
   return http.Response(
@@ -162,6 +226,17 @@ void main() {
       0,
     );
   });
+
+  for (final refusal in <String>[
+    'session_revoked',
+    'account_blocked',
+    'session_expired',
+    'unauthenticated',
+  ]) {
+    test('a repair never opens a new Session after $refusal', () async {
+      expect(await _establishedAfter(refusal), isEmpty);
+    });
+  }
 
   test('the repository announces it once and clears the sign-in', () async {
     final gateway = _Gateway();
