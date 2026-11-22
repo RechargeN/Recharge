@@ -236,12 +236,16 @@ export function strictest(...states: readonly Freshness[]): Freshness {
 }
 
 /** Projection age against the last successful delivery or reconciliation. */
-export function projectionFreshness(lastSourceSyncAtUtc: string | null, nowMs: number): Freshness {
+export function projectionFreshness(
+  lastSourceSyncAtUtc: string | null,
+  nowMs: number,
+  maxAgeSeconds: number = catalogTestOnlyConfig.projectionMaxAgeSeconds,
+): Freshness {
   if (lastSourceSyncAtUtc === null) return 'unknown';
   const age = nowMs - Date.parse(lastSourceSyncAtUtc);
   // A sync time in the future is clock skew: never claimed as fresh.
   if (!Number.isFinite(age) || age < 0) return 'unknown';
-  return age <= catalogTestOnlyConfig.projectionMaxAgeSeconds * 1000 ? 'fresh' : 'stale';
+  return age <= maxAgeSeconds * 1000 ? 'fresh' : 'stale';
 }
 
 /** Reference component: an item pinned to other revisions than current is stale. */

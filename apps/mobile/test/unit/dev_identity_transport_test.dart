@@ -42,7 +42,8 @@ void main() {
     // The staging load ingress is never an app call.
     expect(() => endpoint.callableUri('bookingLoadV1'), throwsArgumentError);
     // N3c opens the four Notifications calls; the debt plan round 1 opens the
-    // six interactive Booking calls; Discover stays closed.
+    // six interactive Booking calls; pilot round 2 (owner 2026-11-21) opens
+    // Library, Discover, Quick Plan, Scenario and Route.
     for (final name in [
       'notificationsQueryV1',
       'notificationsCommandV1',
@@ -54,10 +55,27 @@ void main() {
       'getMyBookingV1',
       'listMyBookingsV1',
       'getEventAvailabilityV1',
+      'libraryCommandV1',
+      'libraryQueryV1',
+      'discoverQueryV1',
+      'quickPlanCommandV1',
+      'quickPlanQueryV1',
+      'scenarioCommandV1',
+      'scenarioQueryV1',
+      'routeCommandV1',
+      'routeQueryV1',
     ]) {
       expect(endpoint.callableUri(name).path, '/$name');
     }
-    expect(() => endpoint.callableUri('discoverQueryV1'), throwsArgumentError);
+    // Find People (OD-11), translation and the seller declaration stay closed.
+    for (final name in [
+      'findPeopleConsentCommandV1',
+      'findPeopleConsentQueryV1',
+      'translateContentV1',
+      'sellerDeclarationV1',
+    ]) {
+      expect(() => endpoint.callableUri(name), throwsArgumentError);
+    }
   });
   test(
     'requires App Check before dispatch and accepts only correlated server Session',

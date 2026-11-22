@@ -18,6 +18,7 @@ import { handleDiscoverQuery } from './catalog_entry.js';
 import { scenarioStopsFor } from './content_entry.js';
 import { FirestoreQuickPlanService } from './modules/quick_plan/firestore_quick_plan_service.js';
 import { FirestoreRouteService } from './modules/route/firestore_route_service.js';
+import { FirestoreRouteRevisionReader } from './modules/route/route_publication.js';
 import { routeFlag, routePublicationFlag } from './modules/route/route_contract.js';
 import { FirestoreScenarioService } from './modules/quick_plan/firestore_scenario_service.js';
 import { quickPlanFlag } from './modules/quick_plan/quick_plan_contract.js';
@@ -111,7 +112,8 @@ export const devOperations = Object.freeze({
 
 /**
  * Pilot 2.3 temporary Catalog limits (owner 2026-11-21; not final, BCK08-OD-04/
- * 05/08/10 stay open): page at most 20, radius at most 50 km, at most 3 Discover
+ * 05/08/10 stay open): page and candidate list at most 20, radius at most 50 km,
+ * projection fresh for at most 5 minutes, at most 3 Discover
  * reads per second per user (in memory: the dev runtime runs one instance).
  */
 const planningCallables: ReadonlySet<string> = new Set([
@@ -137,7 +139,10 @@ export const pilotCatalogLimits = Object.freeze({
   pageSizeMax: 20,
   radiusKmMax: 50,
   readsPerSecond: 3,
+  projectionMaxAgeSeconds: 300,
 });
+/** The handler's own bound of a candidate `limit`; above it stays its refusal. */
+const candidateLimitMax = 50;
 const discoverReads = new Map<string, number[]>();
 
 export function discoverRateAllowed(userId: string, nowMs: number): boolean {
@@ -152,11 +157,20 @@ export function discoverRateAllowed(userId: string, nowMs: number): boolean {
   return true;
 }
 
-/** Applies the page and radius limits; a radius above the limit is refused. */
+/** Applies the page, candidate and radius limits; a radius above the limit is refused. */
 export function limitDiscoverRequest(data: unknown): { data: unknown } | { refused: string } {
   if (typeof data !== 'object' || data === null || Array.isArray(data)) return { data };
   const request = data as Record<string, unknown>;
   const payload = request.payload as Record<string, unknown> | undefined;
+  if (
+    typeof payload?.limit === 'number' &&
+    Number.isInteger(payload.limit) &&
+    payload.limit > pilotCatalogLimits.pageSizeMax &&
+    payload.limit <= candidateLimitMax
+  )
+    return {
+      data: { ...request, payload: { ...payload, limit: pilotCatalogLimits.pageSizeMax } },
+    };
   const query = payload?.query as Record<string, unknown> | undefined;
   if (query === undefined || query === null || typeof query !== 'object') return { data };
   const geo = query.geo as Record<string, unknown> | undefined;
@@ -171,6 +185,16 @@ export function limitDiscoverRequest(data: unknown): { data: unknown } | { refus
     };
   return { data };
 }
+/** The caller behind every cloud Discover read; Find People stays off (OD-11). */
+export function pilotDiscoverCaller(firestore: Firestore, userId: string) {
+  return {
+    firestore,
+    userId,
+    findPeopleEnabled: false,
+    projectionMaxAgeSeconds: pilotCatalogLimits.projectionMaxAgeSeconds,
+  };
+}
+
 export type DevCallableName = keyof typeof devOperations;
 
 /**
@@ -231,6 +255,8 @@ export function createDevContentMedia(input: {
     ids: { newId: () => randomUUID() as EntityId },
     enabledTypes: devContentTypesFor(input.environment),
     compositionRules: emulatorCompositionRules,
+    // Pilot 2.5: without Route's own answer every Route revision is refused (J2).
+    routeRevisions: new FirestoreRouteRevisionReader(input.firestore),
   });
   return Object.freeze({ content, media });
 }
@@ -338,11 +364,7 @@ export async function handleDevContentMedia(input: {
     if (!discoverRateAllowed(decision.userId, now.getTime())) return rejected('rate_limited');
     const limited = limitDiscoverRequest(input.data);
     if ('refused' in limited) return rejected(limited.refused);
-    // Find People stays off in the cloud (OD-11).
-    return handleDiscoverQuery(
-      { firestore: input.firestore, userId: decision.userId, findPeopleEnabled: false },
-      limited.data,
-    );
+    return handleDiscoverQuery(pilotDiscoverCaller(input.firestore, decision.userId), limited.data);
   }
   if (input.callable === 'libraryCommandV1' || input.callable === 'libraryQueryV1') {
     // The Library service re-authorizes the same Session inside its transaction.

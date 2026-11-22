@@ -214,6 +214,8 @@ export class CatalogQueryService {
     private readonly findPeopleEnabled = false,
     /** J2 / BCK08-OD-04-R: the default-off local Route family. */
     private readonly routeEnabled = false,
+    /** Absent: the local `catalogTestOnlyConfig` age. */
+    private readonly projectionMaxAgeSeconds?: number,
   ) {}
 
   /** SP-09: fresh status of one stop; anything but `eligible` is unavailable. */
@@ -707,7 +709,11 @@ export class CatalogQueryService {
       });
     }
     eligible.sort((left, right) => compareKeys(left.key, right.key));
-    const projection = projectionFreshness(set.lastSourceSyncAtUtc, requestNow);
+    const projection = projectionFreshness(
+      set.lastSourceSyncAtUtc,
+      requestNow,
+      this.projectionMaxAgeSeconds,
+    );
     return {
       query: parsed.query,
       pageSize: parsed.pageSize,
