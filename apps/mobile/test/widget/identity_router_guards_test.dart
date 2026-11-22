@@ -15,6 +15,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/di/service_locator.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_in_with_google_usecase.dart';
+import 'package:recharge/features/favorites/domain/entities/favorite_item_entity.dart';
+import 'package:recharge/features/favorites/domain/repositories/favorites_repository.dart';
 import 'package:recharge/app/router/app_router.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
@@ -493,6 +495,26 @@ void main() {
     await stopRetries(tester);
   });
 
+  testWidgets('Saved is read again when the connection is back', (
+    tester,
+  ) async {
+    final network = RouterNetworkStatus();
+    sl.registerSingleton<NetworkStatus>(network);
+    final favorites = CountingFavorites();
+    await sl.unregister<FavoritesRepository>();
+    sl.registerSingleton<FavoritesRepository>(favorites);
+    await open(tester, RouteNames.favorites);
+    final before = favorites.reads;
+    expect(before, greaterThan(0));
+    network.become(online: false);
+    await tester.pumpAndSettle();
+    expect(favorites.reads, before);
+
+    network.become(online: true);
+    await tester.pumpAndSettle();
+    expect(favorites.reads, before + 1);
+  });
+
   testWidgets('failed fresh read denies protected route', (tester) async {
     repository.failReads = true;
     await open(tester, RouteNames.adminTools);
@@ -515,6 +537,22 @@ class RouterNetworkStatus implements NetworkStatus {
     _online = online;
     _changes.add(online);
   }
+}
+
+class CountingFavorites implements FavoritesRepository {
+  int reads = 0;
+
+  @override
+  Future<List<FavoriteItemEntity>> getFavorites() async {
+    reads++;
+    return const <FavoriteItemEntity>[];
+  }
+
+  @override
+  Future<void> addFavorite(FavoriteItemEntity item) async {}
+
+  @override
+  Future<void> removeFavorite(String itemId) async {}
 }
 
 class OfflineFederatedAuth implements FederatedAuthRepository {

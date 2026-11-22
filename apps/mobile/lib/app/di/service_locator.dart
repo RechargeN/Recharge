@@ -1076,7 +1076,19 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     )
     ..registerLazySingleton<FavoritesRepository>(
       () => libraryRemoteAllowed(sl())
-          ? ServerFavoritesRepository(sl())
+          ? ServerFavoritesRepository(
+              sl(),
+              // OFFLINE-01: the server list opens without a network too.
+              savedCopy: FavoritesLocalDataSource.savedCopy(
+                sl(),
+                legacyCurrencyCode: 'EUR',
+              ),
+              currentOwnerId: () => savedOwnerId(
+                serverAuth: devAuth != null,
+                auth: sl(),
+                account: sl(),
+              ),
+            )
           : FavoritesRepositoryImpl(
               localDataSource: sl(),
               // OFFLINE-01: the phone-kept list opens without a network.

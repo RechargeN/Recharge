@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../features/auth/application/controllers/auth_controller.dart';
 import '../di/session_publication_composition.dart';
 import '../di/class_workshop_publication_composition.dart';
@@ -103,6 +105,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Decision 2026-11-21 #5: in the cloud the inbox copy lives in memory
       // only, and it must not outlive its account.
       if (previous != null) ref.invalidate(notificationsControllerProvider);
+    },
+  );
+  // OFFLINE-01: what was shown from the phone is read again with a connection.
+  // A data reload only: the router itself is not refreshed (ee499466).
+  ref.listen<bool>(
+    authControllerProvider.select(
+      (controller) => controller.state.needsConnection,
+    ),
+    (previous, next) {
+      if (previous == true && !next && authController.state.isAuthenticated) {
+        unawaited(ref.read(favoritesControllerProvider).reloadIfLoaded());
+      }
     },
   );
   final AnalyticsService analyticsService = sl<AnalyticsService>();
