@@ -7,6 +7,7 @@ import '../../features/identity/application/controllers/identity_workspace_contr
 import '../../features/identity/application/identity_workspace_providers.dart';
 import '../../core/localization/l10n_context.dart';
 import '../router/route_names.dart';
+import 'offline_banner.dart';
 
 class RechargeAppShell extends ConsumerStatefulWidget {
   const RechargeAppShell({
@@ -140,38 +141,7 @@ class _RechargeAppShellState extends ConsumerState<RechargeAppShell> {
         child: widget.offline
             ? Column(
                 children: <Widget>[
-                  // Round 1 (owner 2026-11-20): offline the user stays signed
-                  // in on saved screens; this says why nothing refreshes.
-                  Material(
-                    color: colorScheme.secondaryContainer,
-                    child: SafeArea(
-                      bottom: false,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          children: <Widget>[
-                            Icon(
-                              Icons.cloud_off_outlined,
-                              size: 18,
-                              color: colorScheme.onSecondaryContainer,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                context.l10n.authOfflineBanner,
-                                style: TextStyle(
-                                  color: colorScheme.onSecondaryContainer,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  const OfflineBanner(),
                   Expanded(
                     child: MediaQuery.removePadding(
                       context: context,

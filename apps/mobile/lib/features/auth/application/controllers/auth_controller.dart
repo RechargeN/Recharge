@@ -8,6 +8,7 @@ import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/auth_result_entity.dart';
 import '../../domain/entities/auth_user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repositories/network_status.dart';
 import '../../domain/repositories/offline_account_store.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/restore_session_usecase.dart';
@@ -73,7 +74,9 @@ class AuthController extends ChangeNotifier {
     SignInWithGoogleUseCase? signInWithGoogleUseCase,
     AuthSessionEvents? sessionEvents,
     OfflineAccountStore? offlineAccount,
+    NetworkStatus? networkStatus,
   }) : _offlineAccount = offlineAccount,
+       _networkStatus = networkStatus,
        _signInWithGoogleUseCase = signInWithGoogleUseCase,
        _signInUseCase = signInUseCase,
        _restoreSessionUseCase = restoreSessionUseCase,
@@ -93,9 +96,51 @@ class AuthController extends ChangeNotifier {
         unawaited(store.wipeAccountData(ended).catchError((Object _) {}));
       }
     });
+    _networkSubscription = networkStatus?.changes.listen(
+      _onNetwork,
+      onError: (Object _) {},
+    );
+    unawaited(_readNetwork());
   }
 
   final OfflineAccountStore? _offlineAccount;
+
+  final NetworkStatus? _networkStatus;
+  StreamSubscription<bool>? _networkSubscription;
+
+  /// The phone says there is no network.
+  bool _networkLost = false;
+
+  /// The last Session check did not reach the server.
+  bool _serverUnreachable = false;
+
+  /// Android reports no changes to a background app, and nothing is sent from
+  /// there: the resume reads the status again.
+  bool _inBackground = false;
+  bool _disposed = false;
+
+  Future<void> _readNetwork() async {
+    final status = _networkStatus;
+    if (status == null) return;
+    final online = await status.isOnline();
+    if (!_disposed) _onNetwork(online);
+  }
+
+  /// A34 2026-11-22: the network signal changes only what needs a connection,
+  /// never the Session. The server answer stays the last word: a successful
+  /// check clears a wrong "no network".
+  void _onNetwork(bool online) {
+    if (_networkLost != online) return; // Unchanged.
+    _networkLost = !online;
+    _publishConnection();
+    if (_inBackground || !_state.isSignedIn || !supportsGoogleSignIn) return;
+    if (!online) {
+      if (!(_offlineRetry?.isActive ?? false)) _scheduleOfflineRetry();
+    } else if (!(_rateLimitRetry?.isActive ?? false)) {
+      _cancelOfflineRetry(resetBackoff: true);
+      unawaited(restoreSession().catchError((Object _) {}));
+    }
+  }
 
   void _forgetOfflineProfile() {
     final store = _offlineAccount;
@@ -130,6 +175,12 @@ class AuthController extends ChangeNotifier {
 
   AuthState _state = const AuthState.guest();
   AuthState get state => _state;
+  final ValueNotifier<int> _authority = ValueNotifier<int>(0);
+
+  /// For the router: every state change except a change of the connection
+  /// alone. Its redirect reads access from the server, so re-running it when
+  /// the network drops would eject the user from protected screens.
+  Listenable get authorityChanges => _authority;
 
   /// The last user the server confirmed in this process; kept through an
   /// offline spell, dropped on sign-out, suspension or a server refusal.
@@ -299,13 +350,16 @@ class AuthController extends ChangeNotifier {
   /// return to the foreground revalidates. Pending retries wait for resume.
   void suspendForBackground() {
     if (_federatedSignInInProgress) return;
+    _inBackground = true;
     _offlineRetry?.cancel();
   }
 
   /// Returning from the background revalidates with the server; skipped while
   /// a sign-in is still completing (its own result is fresh server authority).
   Future<void> restoreAfterBackground() {
+    _inBackground = false;
     if (_federatedSignInInProgress) return Future<void>.value();
+    unawaited(_readNetwork());
     // Inside the server's rate-limit wait nothing is sent: denied attempts
     // count in its window (N4b A34 staging 2026-11-15). The wait's own timer
     // tries again when it ends.
@@ -434,6 +488,7 @@ class AuthController extends ChangeNotifier {
       _rateLimitRetry?.cancel();
       _rateLimitRetry = null;
       if (result == null) {
+        _serverUnreachable = false;
         _lastConfirmedUser = null;
         _forgetOfflineProfile();
         _setState(const AuthState.guest());
@@ -461,7 +516,14 @@ class AuthController extends ChangeNotifier {
       if (supportsGoogleSignIn && _keepsCredentials(e.code)) {
         // Keep the current UI authority while its snapshot is still valid;
         // otherwise say what happened (not "session expired") and retry.
-        if (!wasAuthenticated) _setState(_offlineOrGuest(e.code));
+        _serverUnreachable = e.code == offlineMessage;
+        // Authority lasts as long as the snapshot; the need for a connection
+        // shows now.
+        if (wasAuthenticated) {
+          _publishConnection();
+        } else {
+          _setState(_offlineOrGuest(e.code));
+        }
         if (e.code == rateLimitedMessage) {
           // Denied attempts count in the server's window too: never retry
           // before the server's own retryAfter, nor faster than the longest
@@ -486,6 +548,7 @@ class AuthController extends ChangeNotifier {
       }
       _cancelOfflineRetry(resetBackoff: true);
       // An explicit server refusal: the kept user is gone too.
+      _serverUnreachable = false;
       _lastConfirmedUser = null;
       _setState(
         const AuthState.guest().copyWith(
@@ -580,6 +643,8 @@ class AuthController extends ChangeNotifier {
         });
       }
     }
+    _networkLost = false;
+    _serverUnreachable = false;
     _lastConfirmedUser = result.user;
     final store = _offlineAccount;
     if (store != null) {
@@ -618,7 +683,18 @@ class AuthController extends ChangeNotifier {
     _cancelOfflineRetry(resetBackoff: true);
   }
 
-  void _setState(AuthState state) {
+  /// Only the need for a connection changed: widgets hear it, the router not.
+  void _publishConnection() {
+    final unavailable = _networkLost || _serverUnreachable;
+    if (_state.networkUnavailable == unavailable) return;
+    _state = _state.copyWith(networkUnavailable: unavailable);
+    notifyListeners();
+  }
+
+  void _setState(AuthState next) {
+    final state = next.copyWith(
+      networkUnavailable: _networkLost || _serverUnreachable,
+    );
     _state = state;
     if (state.status == AuthStatus.guest) _serverExpiry?.cancel();
     // L3: product analytics queues follow the signed-in account; sign-out or
@@ -626,13 +702,18 @@ class AuthController extends ChangeNotifier {
     // Offline keeps the account: it is not a sign-out.
     _productAnalytics?.bindAccount(state.isSignedIn ? state.user?.id : null);
     notifyListeners();
+    // After the listeners: the router's actor is synchronized before it redirects.
+    _authority.value++;
   }
 
   @override
   void dispose() {
     _serverExpiry?.cancel();
     _cancelBackgroundRevalidation();
+    _disposed = true;
+    unawaited(_networkSubscription?.cancel());
     unawaited(_sessionSubscription?.cancel());
+    _authority.dispose();
     super.dispose();
   }
 

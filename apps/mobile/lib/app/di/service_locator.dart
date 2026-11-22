@@ -1,7 +1,9 @@
 import '../config/catalog_market_binding.dart';
+import '../../features/auth/domain/repositories/network_status.dart';
 import '../../features/auth/domain/repositories/offline_account_store.dart';
 import '../../features/auth/domain/repositories/auth_session_events.dart';
 import 'dart:io';
+import 'connectivity_network_status.dart';
 import 'dev_auth_bundle.dart';
 import 'dev_booking_cloud.dart';
 import 'dev_content_media_port.dart';
@@ -1297,6 +1299,8 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
         );
     }
     sl.registerSingleton<AuthSessionEvents>(devAuth);
+    // OFFLINE-01: only this composition has a server Session to revalidate.
+    sl.registerSingleton<NetworkStatus>(ConnectivityNetworkStatus());
     sl.registerFactory<SignInWithGoogleUseCase>(
       () => SignInWithGoogleUseCase(devAuth.auth),
     );

@@ -21,6 +21,7 @@ import '../../../favorites/application/favorites_providers.dart';
 import '../../../favorites/application/state/favorites_state.dart';
 import '../../../favorites/domain/entities/favorite_item_entity.dart';
 import '../../application/auth_providers.dart';
+import '../auth_messages.dart';
 
 // Kept as a non-constant compatibility gate until the M10 code deletion.
 // Main intentionally exposes neither Scenario nor legacy Quick Plan.
@@ -330,7 +331,8 @@ class _DiscoverHubPageState extends ConsumerState<DiscoverHubPage> {
               if (authState.message != null) ...<Widget>[
                 const SizedBox(height: 16),
                 Text(
-                  authState.message!,
+                  authMessage(context.l10n, authState.message!),
+                  key: const Key('home-auth-message'),
                   style: const TextStyle(color: Colors.white),
                 ),
               ],
