@@ -36,6 +36,8 @@ final class DevAuthBundle implements AuthSessionEvents {
   final Stream<void> invalidated;
   final FlutterSecureStorage storage;
   final DevServerAuthRepository auth;
+  @override
+  Stream<void> get accessEnded => auth.accessEnded;
   final DevIdentityWorkspaceRepository workspace;
   final BookingIdentitySessionStore sessions;
 

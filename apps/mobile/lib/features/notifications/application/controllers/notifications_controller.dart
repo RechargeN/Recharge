@@ -330,7 +330,17 @@ class NotificationsController extends ChangeNotifier {
     return pairMinimum < third ? pairMinimum : third;
   }
 
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   void _setState(NotificationsState state) {
+    // The account can end while its inbox is still loading.
+    if (_disposed) return;
     _state = state;
     notifyListeners();
   }

@@ -342,6 +342,123 @@ void main() {
     expect(await sessions.read(), isNotNull);
   });
 
+  // Owner decision 2026-11-21 #5 (scope chosen 2026-11-22): only a server answer
+  // "revoked" or "blocked" confirms the end of access and lets the cache be wiped.
+  for (final entry in <(String, bool)>[
+    ('session_revoked', true),
+    ('account_blocked', true),
+    ('account_restricted', false),
+    ('session_expired', false),
+    // A34 2026-11-21: this answer was a server bug, not the end of access.
+    ('unauthenticated', false),
+    ('provider_assertion_invalid', false),
+    ('snapshot_stale', false),
+    ('rate_limited', false),
+    ('temporarily_unavailable', false),
+    ('no-code', false),
+    ('http-401', false),
+    ('http-500', false),
+    ('not-json', false),
+    ('wrong-request-id', false),
+    ('network', false),
+  ]) {
+    for (final path in <String>[
+      'restore after a cold start',
+      'router revalidation',
+      'rotation',
+    ]) {
+      test('access ended: ${entry.$1} on $path -> ${entry.$2}', () async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.android;
+        if (path == 'router revalidation') {
+          // A running app: token access is already armed.
+          await identity.signInWithGoogle();
+        } else {
+          auth.currentUser = _User();
+        }
+        await sessions.saveServerIssued(
+          BookingIdentitySessionContext(
+            sessionId: 'old-session',
+            sessionHandle: 'A' * 43,
+            installationId: 'test-installation',
+          ),
+        );
+        final client = FunctionsIdentitySessionClient(
+          endpoint: BookingBackendEndpoint.devIdentity(
+            Uri.parse(
+              'https://europe-west1-recharge-dev-n2a01.cloudfunctions.net',
+            ),
+          ),
+          client: MockClient((request) async {
+            final command = (jsonDecode(request.body) as Map)['data'] as Map;
+            var failure = entry.$1;
+            // The rotation path: the read only says that the snapshot ran out.
+            if (path == 'rotation' &&
+                request.url.path == '/readIdentitySessionV1') {
+              failure = 'snapshot_stale';
+            }
+            switch (failure) {
+              case 'network':
+                throw http.ClientException('connection failed');
+              case 'not-json':
+                return http.Response('<html></html>', 200);
+              case 'http-401':
+                return http.Response(
+                  '{"error":{"status":"UNAUTHENTICATED"}}',
+                  401,
+                );
+              case 'http-500':
+                return http.Response('{"error":{"status":"INTERNAL"}}', 500);
+            }
+            return http.Response(
+              jsonEncode({
+                'result': {
+                  'schemaVersion': 1,
+                  'commandType': command['commandType'],
+                  'requestId': failure == 'wrong-request-id'
+                      ? 'another-request'
+                      : command['requestId'],
+                  'kind': 'rejected',
+                  if (failure != 'no-code') 'error': {'code': failure},
+                },
+              }),
+              200,
+            );
+          }),
+          tokens: identity,
+          installations: _Installations(),
+          sessions: sessions,
+          appCheck: DevAndroidAppCheckTokens(_AppCheck()),
+          identityProvider: 'google',
+        );
+        final repository = DevServerAuthRepository(
+          gateway: NativeDevAuthSessionGateway(
+            coordinator: DevAndroidIdentitySessionCoordinator(
+              identity: identity,
+              sessions: client,
+            ),
+            installations: _Installations(),
+            store: sessions,
+            revokeCurrentSession: () async {},
+          ),
+        );
+        var ended = 0;
+        final subscription = repository.accessEnded.listen((_) => ended++);
+        try {
+          if (path == 'router revalidation') {
+            await repository.revalidateContext();
+          } else {
+            await repository.restoreSession();
+          }
+        } on Object {
+          // Every failure is thrown; this test is about the signal.
+        }
+        await Future<void>.delayed(Duration.zero);
+        expect(ended, entry.$2 ? 1 : 0);
+        await subscription.cancel();
+      });
+    }
+  }
+
   test('coordinator rejects a different Firebase token provider', () {
     final client = FunctionsIdentitySessionClient(
       endpoint: BookingBackendEndpoint.devIdentity(

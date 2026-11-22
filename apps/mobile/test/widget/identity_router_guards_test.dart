@@ -25,6 +25,7 @@ import 'package:recharge/features/identity/domain/repositories/identity_workspac
 import 'package:recharge/features/identity/domain/entities/workspace_ref.dart';
 import 'package:recharge/features/identity/domain/entities/managed_page_membership_entity.dart';
 import 'package:recharge/features/identity/application/identity_workspace_providers.dart';
+import 'package:recharge/features/notifications/application/notifications_providers.dart';
 import '../unit/identity_access_guards_test.dart';
 
 void main() {
@@ -377,6 +378,21 @@ void main() {
       expect(location(), path);
     });
   }
+
+  testWidgets('decision 5: the inbox in memory ends with the account', (
+    tester,
+  ) async {
+    await open(tester, RouteNames.profile);
+    final before = container.read(notificationsControllerProvider);
+
+    await container.read(authControllerProvider).signOut();
+    await tester.pumpAndSettle();
+
+    expect(
+      container.read(notificationsControllerProvider),
+      isNot(same(before)),
+    );
+  });
 
   testWidgets('OFFLINE-01: the shell banner follows the network', (
     tester,

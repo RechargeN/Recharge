@@ -85,6 +85,7 @@ import '../../features/visited/application/visited_places_providers.dart';
 import '../../features/identity/presentation/pages/professional_page_workspace_page.dart';
 import '../../features/identity/presentation/pages/public_professional_page.dart';
 import '../../features/identity/domain/usecases/resolve_public_professional_page_usecase.dart';
+import '../../features/notifications/application/notifications_providers.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/scenarios/presentation/pages/scenario_builder_page.dart';
 import '../../features/visited/presentation/pages/visited_places_page.dart';
@@ -99,6 +100,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (previous == next) return;
       ref.invalidate(favoritesControllerProvider);
       ref.invalidate(visitedPlacesControllerProvider);
+      // Decision 2026-11-21 #5: in the cloud the inbox copy lives in memory
+      // only, and it must not outlive its account.
+      if (previous != null) ref.invalidate(notificationsControllerProvider);
     },
   );
   final AnalyticsService analyticsService = sl<AnalyticsService>();

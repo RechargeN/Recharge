@@ -14,7 +14,8 @@ abstract interface class OfflineAccountStore {
   /// Sign-out or a missing Session: forget the profile only.
   Future<void> clearOfflineProfile();
 
-  /// A server-confirmed end of access: also wipe the account's personal
-  /// cached data on this phone (favorites, visits, inbox, drafts, workspace).
+  /// A server-confirmed end of access: also wipe the copies of server data
+  /// (inbox, workspace, page copies). Never the user's own work (drafts,
+  /// templates, photos, recordings, favorites, visits, unsent operations).
   Future<void> wipeAccountData(String userId);
 }

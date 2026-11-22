@@ -95,18 +95,17 @@ class AuthLocalDataSource implements OfflineAccountStore {
   @override
   Future<void> wipeAccountData(String userId) async {
     if (userId.isEmpty) return;
-    // Personal stores key their records by the account id: raw, sanitized
-    // (visits) or base64url (Create collections).
-    final forms = <String>{
-      userId,
-      userId.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_'),
-      base64Url.encode(utf8.encode(userId)).replaceAll('=', ''),
-    };
-    final all = await _secureStorage.readAll();
-    for (final key in all.keys) {
-      if (forms.any(key.contains)) await _secureStorage.delete(key: key);
-    }
     await clearOfflineProfile();
+    // An exact list, never a match by account id: owner decision 2026-11-22
+    // wipes copies of server data only. Drafts, templates, photos, recordings,
+    // favorites, visits and unsent operations may exist only on this phone.
+    for (final key in <String>[
+      'notifications_items_$userId',
+      'identity_active_workspace_$userId',
+      'identity_managed_pages_$userId',
+    ]) {
+      await _secureStorage.delete(key: key);
+    }
   }
 }
 

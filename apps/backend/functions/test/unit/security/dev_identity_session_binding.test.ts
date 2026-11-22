@@ -261,3 +261,46 @@ void test('a refresh whose answer was lost can be repeated with the previous han
   await binding.read({ ...held, sessionHandle: repaired.sessionHandle });
   await assert.rejects(binding.refresh(held), 'using the new handle retires the previous one');
 });
+
+// Mobile decision 2026-11-21 #5 wipes copies of server data only on these two
+// answers. A restriction moves the revocation fence, so it answers as a
+// revocation too (accepted by the owner 2026-11-22).
+for (const end of ['logoutAll', 'recovery', 'restricted', 'blocked', 'deleted'] as const) {
+  void test(`end of access answers read and refresh with its own code: ${end}`, async () => {
+    const f = fixture();
+    const held = await f.binding.establish(input);
+    const other = await f.binding.establish({ ...input, installationId: 'install-other' });
+    if (end === 'logoutAll') {
+      await f.binding.revoke(
+        {
+          ...input,
+          installationId: 'install-other',
+          sessionId: other.session.sessionId,
+          sessionHandle: other.sessionHandle,
+        },
+        true,
+      );
+    } else if (end === 'recovery') {
+      await f.binding.recover({ ...input, installationId: 'install-other' });
+    } else {
+      await f.repository.transact(async (tx) => {
+        const account = await tx.account(held.session.userId);
+        assert.ok(account);
+        tx.putAccount(changeAccountStatus(account, end, instant.toISOString()));
+      });
+    }
+    const presented = {
+      ...input,
+      sessionId: held.session.sessionId,
+      sessionHandle: held.sessionHandle,
+    };
+    for (const call of [() => f.binding.read(presented), () => f.binding.refresh(presented)])
+      await assert.rejects(call, (error: { code?: string }) => {
+        assert.ok(
+          error.code === 'session_revoked' || error.code === 'account_blocked',
+          `code: ${String(error.code)}`,
+        );
+        return true;
+      });
+  });
+}
