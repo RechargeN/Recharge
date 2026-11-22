@@ -222,6 +222,21 @@ void main() {
     });
   });
 
+  test('losing the connection is not a change of authority', () {
+    _run((async, repository, network, controller) {
+      var authority = 0;
+      controller.authorityChanges.addListener(() => authority++);
+      repository.reachable = false;
+      network.become(online: false);
+      // Failed checks repeat with the backoff: none of them may re-run the
+      // router redirect, which reads access from the server.
+      async.elapse(const Duration(minutes: 2));
+
+      expect(controller.state.needsConnection, isTrue);
+      expect(authority, 0);
+    });
+  });
+
   test('a guest without a network gets no offline state and no requests', () {
     _run(signedIn: false, (async, repository, network, controller) {
       final before = repository.restores;

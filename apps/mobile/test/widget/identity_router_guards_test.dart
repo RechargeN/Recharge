@@ -7,6 +7,8 @@ import 'package:recharge/features/auth/application/controllers/auth_controller.d
 import 'package:recharge/features/auth/domain/entities/auth_session_entity.dart';
 import 'package:recharge/features/identity/domain/entities/identity_access_snapshot.dart';
 import 'package:recharge/features/create/presentation/pages/create_hub_page.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -16,6 +18,7 @@ import 'package:recharge/app/router/app_router.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/domain/repositories/auth_repository.dart';
+import 'package:recharge/features/auth/domain/repositories/network_status.dart';
 import 'package:recharge/features/auth/domain/entities/auth_user_entity.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
 import 'package:recharge/features/identity/domain/repositories/identity_workspace_repository.dart';
@@ -348,12 +351,72 @@ void main() {
     );
     expect(find.text('Private Page A'), findsNothing);
   });
+  for (final path in <String>[
+    RouteNames.adminTools,
+    RouteNames.professionalPage,
+  ]) {
+    testWidgets('OFFLINE-01: losing the network does not eject from $path', (
+      tester,
+    ) async {
+      final network = RouterNetworkStatus();
+      sl.registerSingleton<NetworkStatus>(network);
+      repository.workspace = WorkspaceRef.page('page-a');
+      if (path == RouteNames.adminTools) repository.workspace = null;
+      await open(tester, path);
+      expect(location(), path);
+
+      // In dev and staging the access snapshot is a server read: offline it fails.
+      repository.failReads = true;
+      network.become(online: false);
+      await tester.pumpAndSettle();
+
+      expect(
+        container.read(authControllerProvider).state.needsConnection,
+        isTrue,
+      );
+      expect(location(), path);
+    });
+  }
+
+  testWidgets('OFFLINE-01: the shell banner follows the network', (
+    tester,
+  ) async {
+    final network = RouterNetworkStatus();
+    sl.registerSingleton<NetworkStatus>(network);
+    await open(tester, RouteNames.profile);
+    expect(find.byKey(const Key('offline-banner')), findsNothing);
+
+    network.become(online: false);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('offline-banner')), findsOneWidget);
+
+    network.become(online: true);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('offline-banner')), findsNothing);
+  });
+
   testWidgets('failed fresh read denies protected route', (tester) async {
     repository.failReads = true;
     await open(tester, RouteNames.adminTools);
     expect(location(), RouteNames.settings);
     expect(find.text('Local/mock administration'), findsNothing);
   });
+}
+
+class RouterNetworkStatus implements NetworkStatus {
+  final StreamController<bool> _changes = StreamController<bool>.broadcast();
+  bool _online = true;
+
+  @override
+  Future<bool> isOnline() async => _online;
+
+  @override
+  Stream<bool> get changes => _changes.stream;
+
+  void become({required bool online}) {
+    _online = online;
+    _changes.add(online);
+  }
 }
 
 class RouterAuthRepository implements AuthRepository {

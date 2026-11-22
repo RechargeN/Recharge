@@ -131,7 +131,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   ref.onDispose(() => authController.removeListener(synchronizeActor));
   return GoRouter(
     initialLocation: RouteNames.splash,
-    refreshListenable: Listenable.merge([authController, identity]),
+    refreshListenable: Listenable.merge([
+      authController.authorityChanges,
+      identity,
+    ]),
     observers: <NavigatorObserver>[
       AppRouteObserver(analyticsService: analyticsService),
     ],
@@ -142,12 +145,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SplashPage(),
       ),
       ShellRoute(
-        builder: (context, state, child) => RechargeAppShell(
-          routerGuardsWorkspace: true,
-          offline: authController.state.needsConnection,
-          currentLocation: state.uri.path,
-          userId: authController.state.user?.id ?? '',
-          child: child,
+        // A Consumer: the router does not rebuild the shell for an unchanged
+        // location, and a connection change must not refresh the router.
+        builder: (context, state, child) => Consumer(
+          builder: (context, ref, _) => RechargeAppShell(
+            routerGuardsWorkspace: true,
+            offline: ref.watch(
+              authControllerProvider.select(
+                (controller) => controller.state.needsConnection,
+              ),
+            ),
+            currentLocation: state.uri.path,
+            userId: authController.state.user?.id ?? '',
+            child: child,
+          ),
         ),
         routes: <RouteBase>[
           GoRoute(

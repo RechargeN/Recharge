@@ -132,7 +132,7 @@ class AuthController extends ChangeNotifier {
   void _onNetwork(bool online) {
     if (_networkLost != online) return; // Unchanged.
     _networkLost = !online;
-    _setState(_state);
+    _publishConnection();
     if (_inBackground || !_state.isSignedIn || !supportsGoogleSignIn) return;
     if (!online) {
       if (!(_offlineRetry?.isActive ?? false)) _scheduleOfflineRetry();
@@ -175,6 +175,12 @@ class AuthController extends ChangeNotifier {
 
   AuthState _state = const AuthState.guest();
   AuthState get state => _state;
+  final ValueNotifier<int> _authority = ValueNotifier<int>(0);
+
+  /// For the router: every state change except a change of the connection
+  /// alone. Its redirect reads access from the server, so re-running it when
+  /// the network drops would eject the user from protected screens.
+  Listenable get authorityChanges => _authority;
 
   /// The last user the server confirmed in this process; kept through an
   /// offline spell, dropped on sign-out, suspension or a server refusal.
@@ -513,7 +519,11 @@ class AuthController extends ChangeNotifier {
         _serverUnreachable = e.code == offlineMessage;
         // Authority lasts as long as the snapshot; the need for a connection
         // shows now.
-        _setState(wasAuthenticated ? _state : _offlineOrGuest(e.code));
+        if (wasAuthenticated) {
+          _publishConnection();
+        } else {
+          _setState(_offlineOrGuest(e.code));
+        }
         if (e.code == rateLimitedMessage) {
           // Denied attempts count in the server's window too: never retry
           // before the server's own retryAfter, nor faster than the longest
@@ -673,6 +683,14 @@ class AuthController extends ChangeNotifier {
     _cancelOfflineRetry(resetBackoff: true);
   }
 
+  /// Only the need for a connection changed: widgets hear it, the router not.
+  void _publishConnection() {
+    final unavailable = _networkLost || _serverUnreachable;
+    if (_state.networkUnavailable == unavailable) return;
+    _state = _state.copyWith(networkUnavailable: unavailable);
+    notifyListeners();
+  }
+
   void _setState(AuthState next) {
     final state = next.copyWith(
       networkUnavailable: _networkLost || _serverUnreachable,
@@ -684,6 +702,8 @@ class AuthController extends ChangeNotifier {
     // Offline keeps the account: it is not a sign-out.
     _productAnalytics?.bindAccount(state.isSignedIn ? state.user?.id : null);
     notifyListeners();
+    // After the listeners: the router's actor is synchronized before it redirects.
+    _authority.value++;
   }
 
   @override
@@ -693,6 +713,7 @@ class AuthController extends ChangeNotifier {
     _disposed = true;
     unawaited(_networkSubscription?.cancel());
     unawaited(_sessionSubscription?.cancel());
+    _authority.dispose();
     super.dispose();
   }
 
