@@ -3349,5 +3349,7 @@
   "discoverTimeFilterInvalid": "Некорректный фильтр времени. Измените условия поиска.",
   "discoverDateUnavailable": "Дата недоступна",
   "discoverDateFrom": "С {date}",
-  "discoverDateUntil": "До {date}"
+  "discoverDateUntil": "До {date}",
+  "authOfflineBanner": "Нет связи — показано сохранённое",
+  "authOfflineNeedsConnection": "Для этого нужна связь. Попробуйте снова, когда появится интернет."
 }

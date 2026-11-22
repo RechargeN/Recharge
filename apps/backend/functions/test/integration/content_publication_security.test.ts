@@ -875,6 +875,8 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/privacy_orchestration/infrastructure/firestore_privacy_legal_hold_service.ts',
     // L2: the operations console borrows only the Emulator guard.
     'modules/operations/operations_console.ts',
+    // PB-18: the L1 runner wires the Content owner DSR applier.
+    'modules/privacy_orchestration/application/privacy_domain_task_runner.ts',
     // L3: analytics borrows only the Emulator guard, never Content storage.
     'modules/product_analytics/firestore_product_analytics_service.ts',
     // ADR 0022 stage 1 and amendment 1: read-only checks of the published
@@ -983,6 +985,9 @@ void test('delegated import never reaches Content storage except through the Con
       'assertMediaChainPersistenceContext',
     ],
     'modules/operations/operations_console.ts': ['assertContentEmulatorContext'],
+    'modules/privacy_orchestration/application/privacy_domain_task_runner.ts': [
+      'contentPrivacyAppliers',
+    ],
     'modules/product_analytics/firestore_product_analytics_service.ts': [
       'assertContentEmulatorContext',
     ],
@@ -1154,6 +1159,9 @@ void test('Content stays framework-neutral: no Firebase, transport, Booking or e
     // D3.7: the Emulator-only Find People privacy adapter and retention erasure.
     path.join('infrastructure', 'find_people_privacy_adapter.ts'),
     path.join('infrastructure', 'find_people_private_location_retention.ts'),
+    // PB-18 (round 1, owner decisions 2026-11-20): the Content owner DSR applier
+    // (types only; it runs inside the L1 sweep transaction).
+    path.join('infrastructure', 'content_privacy_applier.ts'),
   ]);
   for (const file of files) {
     const text = readFileSync(file, 'utf8');

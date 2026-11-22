@@ -7,6 +7,7 @@ import '../../features/identity/application/controllers/identity_workspace_contr
 import '../../features/identity/application/identity_workspace_providers.dart';
 import '../../core/localization/l10n_context.dart';
 import '../router/route_names.dart';
+import 'offline_banner.dart';
 
 class RechargeAppShell extends ConsumerStatefulWidget {
   const RechargeAppShell({
@@ -15,12 +16,16 @@ class RechargeAppShell extends ConsumerStatefulWidget {
     required this.child,
     this.userId = '',
     this.routerGuardsWorkspace = false,
+    this.offline = false,
   });
 
   final String currentLocation;
   final Widget child;
   final String userId;
   final bool routerGuardsWorkspace;
+
+  /// Round 1 (2026-11-20): signed in without network; shows the offline banner.
+  final bool offline;
 
   @override
   ConsumerState<RechargeAppShell> createState() => _RechargeAppShellState();
@@ -131,7 +136,23 @@ class _RechargeAppShellState extends ConsumerState<RechargeAppShell> {
 
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      body: AccountExperienceScope(experience: experience, child: widget.child),
+      body: AccountExperienceScope(
+        experience: experience,
+        child: widget.offline
+            ? Column(
+                children: <Widget>[
+                  const OfflineBanner(),
+                  Expanded(
+                    child: MediaQuery.removePadding(
+                      context: context,
+                      removeTop: true,
+                      child: widget.child,
+                    ),
+                  ),
+                ],
+              )
+            : widget.child,
+      ),
       bottomNavigationBar: NavigationBar(
         height: 64,
         selectedIndex: _selectedIndexFor(widget.currentLocation, destinations),

@@ -1,6 +1,10 @@
 import '../config/catalog_market_binding.dart';
+import '../../features/auth/domain/repositories/network_status.dart';
+import '../../features/auth/domain/repositories/offline_account_store.dart';
 import '../../features/auth/domain/repositories/auth_session_events.dart';
 import 'dart:io';
+import 'connectivity_network_status.dart';
+import 'saved_owner.dart';
 import 'dev_auth_bundle.dart';
 import 'dev_booking_cloud.dart';
 import 'dev_content_media_port.dart';
@@ -543,6 +547,11 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
         },
       ),
     )
+    // Round 1 (owner 2026-11-21): the offline profile and the confirmed-
+    // revocation wipe, behind the domain interface (application -> domain).
+    ..registerLazySingleton<OfflineAccountStore>(
+      () => sl<AuthLocalDataSource>(),
+    )
     ..registerLazySingleton<AuthRepository>(
       () =>
           devAuth?.auth ??
@@ -1067,11 +1076,27 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
     )
     ..registerLazySingleton<FavoritesRepository>(
       () => libraryRemoteAllowed(sl())
-          ? ServerFavoritesRepository(sl())
+          ? ServerFavoritesRepository(
+              sl(),
+              // OFFLINE-01: the server list opens without a network too.
+              savedCopy: FavoritesLocalDataSource.savedCopy(
+                sl(),
+                legacyCurrencyCode: 'EUR',
+              ),
+              currentOwnerId: () => savedOwnerId(
+                serverAuth: devAuth != null,
+                auth: sl(),
+                account: sl(),
+              ),
+            )
           : FavoritesRepositoryImpl(
               localDataSource: sl(),
-              currentOwnerId: () async =>
-                  (await sl<AuthRepository>().getCurrentUser())?.id,
+              // OFFLINE-01: the phone-kept list opens without a network.
+              currentOwnerId: () => savedOwnerId(
+                serverAuth: devAuth != null,
+                auth: sl(),
+                account: sl(),
+              ),
             ),
     )
     ..registerLazySingleton<NotificationsLocalDataSource>(
@@ -1271,6 +1296,8 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
         );
     }
     sl.registerSingleton<AuthSessionEvents>(devAuth);
+    // OFFLINE-01: only this composition has a server Session to revalidate.
+    sl.registerSingleton<NetworkStatus>(ConnectivityNetworkStatus());
     sl.registerFactory<SignInWithGoogleUseCase>(
       () => SignInWithGoogleUseCase(devAuth.auth),
     );

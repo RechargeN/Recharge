@@ -1851,6 +1851,8 @@ void test('an imported submission passes the same validation and moderation as m
     {
       kind: 'rejected',
       code: 'validation_failed',
+      // Round 1 (2026-11-20): Event refusals name their field.
+      violations: [{ code: 'event.title_length', fieldPath: '/body/title' }],
     },
   );
   // Same moderation: the change class reaches the review policy, and a type

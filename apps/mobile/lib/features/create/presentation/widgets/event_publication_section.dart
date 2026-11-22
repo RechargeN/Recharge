@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/localization/l10n_context.dart';
 import 'publication_texts.dart';
+import 'server_publication_requirements.dart';
+import '../../application/content_validation_feedback.dart';
 import '../../application/event_publication_controller.dart';
+import '../../domain/entities/create_draft_entity.dart';
 import '../../domain/entities/event_publication.dart';
 
 /// Test-path view of the Event publication (C3). It renders the controller's
@@ -55,6 +58,16 @@ class EventPublicationSection extends StatelessWidget {
                 PublicationTexts.message(context.l10n, state.message!),
                 key: const Key('event-publication-message'),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            // Round 1 (2026-11-20): name the fields the server refused.
+            if (state.violations.isNotEmpty)
+              ServerPublicationRequirements(
+                fields: contentFieldFeedback(
+                  CreateObjectType.event,
+                  state.violations,
+                ),
+                labelFor: contentFieldLabel,
+                generalRefusal: true,
               ),
             const SizedBox(height: 8),
             Wrap(

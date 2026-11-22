@@ -13727,4 +13727,11 @@ class AppLocalizationsLv extends AppLocalizations {
   String discoverDateUntil(String date) {
     return 'Līdz $date';
   }
+
+  @override
+  String get authOfflineBanner => 'Nav savienojuma — rādīts saglabātais';
+
+  @override
+  String get authOfflineNeedsConnection =>
+      'Šim nepieciešams savienojums. Mēģiniet vēlreiz, kad būsiet tiešsaistē.';
 }

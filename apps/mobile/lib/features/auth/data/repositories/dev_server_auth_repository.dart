@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/auth_result_entity.dart';
 import '../../domain/entities/auth_user_entity.dart';
@@ -12,6 +14,9 @@ abstract interface class DevAuthSessionGateway {
   Future<void> revokeAndSignOut();
   Future<void> clearLocal();
 }
+
+/// The server's own answer "Session revoked" or "account blocked".
+const String accessEndedAuthErrorCode = 'ACCESS_ENDED';
 
 /// No demo authority, no persisted permission cache, no fabricated bearer tokens.
 /// Auth code for transient (offline/overloaded) outcomes: credentials stay.
@@ -32,6 +37,24 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
   bool _busy = false;
   bool _signingOut = false;
   int _generation = 0;
+
+  /// Sync: listeners still know the account when they hear it.
+  final StreamController<void> _accessEnded = StreamController<void>.broadcast(
+    sync: true,
+  );
+
+  /// Raised here, not where restore is awaited: whichever call meets the
+  /// refusal first (often the router's revalidation) clears the Session, and
+  /// the next restore would only find that there is none.
+  Stream<void> get accessEnded => _accessEnded.stream;
+
+  /// The same end of access, met by a callable that repairs the Session by
+  /// itself. The SDK user goes too, else the next Google sign-in is refused.
+  void endAccessFromTransport() {
+    _generation++;
+    _accessEnded.add(null);
+    unawaited(gateway.clearLocal().catchError((Object _) {}));
+  }
 
   @override
   Future<AuthResultEntity> signIn({
@@ -135,6 +158,9 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
           (error.code == offlineAuthErrorCode ||
               error.code == rateLimitedAuthErrorCode ||
               error.code == staleSnapshotAuthErrorCode);
+      if (error is AuthException && error.code == accessEndedAuthErrorCode) {
+        _accessEnded.add(null);
+      }
       if (!offline) {
         try {
           await gateway.clearLocal();

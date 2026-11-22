@@ -17,7 +17,31 @@ const uid = "abcdefghijklmnopqrstuvwxyz012345";
 test("env: switch and exact owner allowlist", () => {
   assert.equal(
     renderEnv({ runtimeEnabled: false, allowedUids: [uid] }),
-    `N3C_DEV_ENABLED=false\nN3C_ALLOWED_FIREBASE_UIDS=${uid}\n`,
+    `N3C_DEV_ENABLED=false\nN3C_ALLOWED_FIREBASE_UIDS=${uid}\nN3C_BOOKING_CONSUME_ENABLED=false\n`,
+  );
+  // Round 1 stage 1.3: the Booking consumer switch never opens without the runtime.
+  assert.match(
+    renderEnv({
+      runtimeEnabled: true,
+      allowedUids: [uid],
+      bookingConsumeEnabled: true,
+    }),
+    /^N3C_BOOKING_CONSUME_ENABLED=true$/mu,
+  );
+  assert.match(
+    renderEnv({
+      runtimeEnabled: false,
+      allowedUids: [uid],
+      bookingConsumeEnabled: true,
+    }),
+    /^N3C_BOOKING_CONSUME_ENABLED=false$/mu,
+  );
+  assert.throws(() =>
+    renderEnv({
+      runtimeEnabled: true,
+      allowedUids: [uid],
+      bookingConsumeEnabled: "true",
+    }),
   );
   assert.throws(() => renderEnv({ runtimeEnabled: true, allowedUids: [] }));
   assert.throws(() => renderEnv({ runtimeEnabled: "yes", allowedUids: [uid] }));
@@ -32,6 +56,7 @@ function record(dir, manifest, overrides = {}) {
     projectId: "recharge-dev-n2a01",
     stageTreeSha256: manifest.treeSha256,
     runtimeEnabled: manifest.runtimeEnabled,
+    bookingConsumeEnabled: manifest.bookingConsumeEnabled,
     automaticDeletion: false,
     ownerApprovalEvidenceRef: "SYNTHETIC-TEST",
     issuedAtUtc: "2020-01-01T00:00:00Z",
@@ -73,6 +98,7 @@ test("stage: the dev Notifications closure, verified against the owner record", 
     for (const overrides of [
       { stageTreeSha256: "0".repeat(64) },
       { runtimeEnabled: true },
+      { bookingConsumeEnabled: true },
       { automaticDeletion: true },
       { stage: "n3a2-deploy" },
       { ownerApprovalEvidenceRef: "" },

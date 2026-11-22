@@ -2,10 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../domain/entities/auth_user_entity.dart';
+import '../../domain/repositories/offline_account_store.dart';
 import '../models/auth_session_model.dart';
 import '../models/auth_user_model.dart';
 
-class AuthLocalDataSource {
+class AuthLocalDataSource implements OfflineAccountStore {
   const AuthLocalDataSource(
     this._secureStorage, {
     this.environment = AuthCacheEnvironment.local,
@@ -53,6 +55,57 @@ class AuthLocalDataSource {
   Future<void> clear() async {
     await _secureStorage.delete(key: _sessionKey);
     await _secureStorage.delete(key: _userKey);
+  }
+
+  String get _offlineProfileKey => '${environment.namespace}.offlineProfile';
+
+  @override
+  Future<void> saveOfflineProfile(AuthUserEntity user) {
+    return _secureStorage.write(
+      key: _offlineProfileKey,
+      value: jsonEncode(<String, String>{'id': user.id, 'email': user.email}),
+    );
+  }
+
+  @override
+  Future<AuthUserEntity?> readOfflineProfile() async {
+    try {
+      final raw = await _secureStorage.read(key: _offlineProfileKey);
+      if (raw == null || raw.isEmpty) return null;
+      final json = jsonDecode(raw) as Map<String, dynamic>;
+      final id = json['id'];
+      final email = json['email'];
+      if (id is! String || id.isEmpty || email is! String) return null;
+      return AuthUserEntity(
+        id: id,
+        email: email,
+        role: '',
+        capabilities: const <String>[],
+        profileStatus: 'offline',
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Future<void> clearOfflineProfile() =>
+      _secureStorage.delete(key: _offlineProfileKey);
+
+  @override
+  Future<void> wipeAccountData(String userId) async {
+    if (userId.isEmpty) return;
+    await clearOfflineProfile();
+    // An exact list, never a match by account id: owner decision 2026-11-22
+    // wipes copies of server data only. Drafts, templates, photos, recordings,
+    // favorites, visits and unsent operations may exist only on this phone.
+    for (final key in <String>[
+      'notifications_items_$userId',
+      'identity_active_workspace_$userId',
+      'identity_managed_pages_$userId',
+    ]) {
+      await _secureStorage.delete(key: key);
+    }
   }
 }
 

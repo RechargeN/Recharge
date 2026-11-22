@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../features/auth/application/controllers/auth_controller.dart';
 import '../di/session_publication_composition.dart';
 import '../di/class_workshop_publication_composition.dart';
@@ -85,6 +87,7 @@ import '../../features/visited/application/visited_places_providers.dart';
 import '../../features/identity/presentation/pages/professional_page_workspace_page.dart';
 import '../../features/identity/presentation/pages/public_professional_page.dart';
 import '../../features/identity/domain/usecases/resolve_public_professional_page_usecase.dart';
+import '../../features/notifications/application/notifications_providers.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/scenarios/presentation/pages/scenario_builder_page.dart';
 import '../../features/visited/presentation/pages/visited_places_page.dart';
@@ -99,9 +102,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (previous == next) return;
       ref.invalidate(favoritesControllerProvider);
       ref.invalidate(visitedPlacesControllerProvider);
+      // Decision 2026-11-21 #5: in the cloud the inbox copy lives in memory
+      // only, and it must not outlive its account.
+      if (previous != null) ref.invalidate(notificationsControllerProvider);
+    },
+  );
+  // OFFLINE-01: what was shown from the phone is read again with a connection.
+  // A data reload only: the router itself is not refreshed (ee499466).
+  ref.listen<bool>(
+    authControllerProvider.select(
+      (controller) => controller.state.needsConnection,
+    ),
+    (previous, next) {
+      if (previous == true && !next && authController.state.isAuthenticated) {
+        unawaited(ref.read(favoritesControllerProvider).reloadIfLoaded());
+      }
     },
   );
   final AnalyticsService analyticsService = sl<AnalyticsService>();
+  // The screen whose access the last fresh check granted.
+  String? grantedPath;
 
   final identity = ref.read(identityWorkspaceControllerProvider);
   var lastAuthenticatedActor = authController.state.user?.id ?? '';
@@ -131,7 +151,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   ref.onDispose(() => authController.removeListener(synchronizeActor));
   return GoRouter(
     initialLocation: RouteNames.splash,
-    refreshListenable: Listenable.merge([authController, identity]),
+    refreshListenable: Listenable.merge([
+      authController.authorityChanges,
+      identity,
+    ]),
     observers: <NavigatorObserver>[
       AppRouteObserver(analyticsService: analyticsService),
     ],
@@ -142,11 +165,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SplashPage(),
       ),
       ShellRoute(
-        builder: (context, state, child) => RechargeAppShell(
-          routerGuardsWorkspace: true,
-          currentLocation: state.uri.path,
-          userId: authController.state.user?.id ?? '',
-          child: child,
+        // A Consumer: the router does not rebuild the shell for an unchanged
+        // location, and a connection change must not refresh the router.
+        builder: (context, state, child) => Consumer(
+          builder: (context, ref, _) => RechargeAppShell(
+            routerGuardsWorkspace: true,
+            offline: ref.watch(
+              authControllerProvider.select(
+                (controller) => controller.state.needsConnection,
+              ),
+            ),
+            currentLocation: state.uri.path,
+            userId: authController.state.user?.id ?? '',
+            child: child,
+          ),
         ),
         routes: <RouteBase>[
           GoRoute(
@@ -630,6 +662,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
     redirect: (context, state) async {
+      final currentPath = state.uri.path;
+      if (currentPath != grantedPath) grantedPath = null;
       final isProtected =
           state.matchedLocation == RouteNames.profile ||
           state.matchedLocation == RouteNames.profileWorkspace ||
@@ -656,7 +690,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // AUTH-ROT-02: retain navigation/preference while credentials recover.
       // Access providers stay empty and every protected action revalidates.
-      if (isProtected && recoveringSession()) return null;
+      // Round 1 (2026-11-20): offline the user stays signed in on saved
+      // screens; never the sign-in screen for a missing network. A screen that
+      // needs a fresh access check is only retained, never newly opened.
+      if (isProtected &&
+          (recoveringSession() || authController.state.isOffline)) {
+        return _needsFreshAccess(currentPath) && currentPath != grantedPath
+            ? RouteNames.settings
+            : null;
+      }
       if (isProtected && !authController.state.isAuthenticated) {
         final encodedOrigin = Uri.encodeComponent(state.uri.toString());
         return '${RouteNames.signIn}?originRoute=$encodedOrigin';
@@ -683,14 +725,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             preview: identity.state.adminPreview,
           );
           if (denied != null) return denied;
+          grantedPath = currentPath;
         } on Object {
-          final path = state.uri.path;
-          if (path == RouteNames.adminTools ||
-              path == RouteNames.routeModeration ||
-              path == RouteNames.professionalPage ||
-              path.startsWith('/page/')) {
-            return RouteNames.settings;
-          }
+          if (_needsFreshAccess(currentPath)) return RouteNames.settings;
         }
       }
 
@@ -866,6 +903,13 @@ VoidCallback? _placeServerTestEntry(BuildContext context) =>
         sl<PlacePublicationTestEntryGuard>().allowed
     ? () => context.push(RouteNames.testPlacePublication)
     : null;
+
+/// Screens that are closed whenever access cannot be checked freshly.
+bool _needsFreshAccess(String path) =>
+    path == RouteNames.adminTools ||
+    path == RouteNames.routeModeration ||
+    path == RouteNames.professionalPage ||
+    path.startsWith('${RouteNames.professionalPage}/');
 
 /// Local route policy over the same fresh snapshot used by application guards.
 /// A destination never grants a workspace, membership or publisher.

@@ -10,8 +10,12 @@ import '../di/service_locator.dart';
 final activeIdentityAccessProvider = Provider<IdentityAccessSnapshot?>((ref) {
   if (!sl.isRegistered<LoadIdentityWorkspaceUseCase>()) return null;
   final state = ref.watch(identityWorkspaceControllerProvider).state;
+  // Round 1 (2026-11-20): an offline user keeps the account but no access;
+  // only a server-confirmed Session grants it.
   final actor = sl.isRegistered<GetCurrentUserUseCase>()
-      ? ref.watch(authControllerProvider).state.user?.id
+      ? (ref.watch(authControllerProvider).state.isAuthenticated
+            ? ref.watch(authControllerProvider).state.user?.id
+            : null)
       : state.userId;
   if (!state.isLoaded ||
       state.userId != actor ||

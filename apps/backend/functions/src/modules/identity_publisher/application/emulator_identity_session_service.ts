@@ -92,7 +92,7 @@ export async function rotateEmulatorIdentitySession(input: {
   const sessions = new SessionAuthorityService(
     new FirestoreIdentityAuthorityRepository(input.firestore),
   );
-  const userId = await sessions.resolveSessionOwner({
+  const userId = await sessions.resolveRotationOwner({
     sessionId: input.sessionId,
     sessionHandle: input.sessionHandle,
     firebaseUid: input.firebaseUid,

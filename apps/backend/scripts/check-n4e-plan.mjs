@@ -54,6 +54,32 @@ export const roundThreeCreates = Object.freeze([
 const roundThreeUpdatable =
   /^google_monitoring_alert_policy\.n4e_(fast_burn|probe)\[0\]$/u;
 const mailboxAddress = "google_monitoring_notification_channel.n4e_alerts[0]";
+/** Round 5 (2026-11-22): the two budget-spent policies closed after 24 h while the budget was
+ * spent (staging 2026-11-20 20:30 UTC). Only their gap settings change in place. */
+const roundFiveUpdatable =
+  /^google_monitoring_alert_policy\.n4e_budget_spent\["(50|75)"\]$/u;
+const gapSettings = (policy) =>
+  JSON.stringify({
+    ...policy,
+    alert_strategy: (policy?.alert_strategy ?? []).map(
+      ({ auto_close: _a, ...rest }) => rest,
+    ),
+    conditions: (policy?.conditions ?? []).map((c) => ({
+      ...c,
+      condition_threshold: (c.condition_threshold ?? []).map(
+        ({ duration: _d, evaluation_missing_data: _m, ...rest }) => rest,
+      ),
+    })),
+  });
+const staysOpenThroughGaps = (policy) =>
+  policy?.alert_strategy?.[0]?.auto_close === "604800s" &&
+  (policy?.conditions ?? []).length > 0 &&
+  policy.conditions.every(
+    (c) =>
+      c.condition_threshold?.[0]?.duration === "60s" &&
+      c.condition_threshold?.[0]?.evaluation_missing_data ===
+        "EVALUATION_MISSING_DATA_ACTIVE",
+  );
 
 export function checkN4ePlan(plan, expected) {
   const errors = [];
@@ -82,7 +108,7 @@ export function checkN4ePlan(plan, expected) {
   )
     errors.push("round 4 must repoint the main e-mail channel");
   const expectedCreates =
-    expected.round === 4
+    expected.round === 4 || expected.round === 5
       ? []
       : expected.round === 3
         ? roundThreeCreates
@@ -127,6 +153,21 @@ export function checkN4ePlan(plan, expected) {
         // Local Terraform record only: its input re-reads the delivery receipt after the channel
         // change; its precondition (delivered and owner-acknowledged) is still enforced at apply.
         c.address === "terraform_data.budget_delivery_gate");
+    const roundFiveUpdate =
+      expected.round === 5 &&
+      actions.length === 1 &&
+      actions[0] === "update" &&
+      (roundFiveUpdatable.test(c.address) ||
+        c.address === "terraform_data.budget_delivery_gate");
+    if (roundFiveUpdate && roundFiveUpdatable.test(c.address)) {
+      seen.add(c.address);
+      if (gapSettings(c.change?.before) !== gapSettings(after))
+        errors.push(`only the gap settings may change: ${c.address}`);
+      if (!staysOpenThroughGaps(after))
+        errors.push(
+          `budget policy must stay open through data gaps: ${c.address}`,
+        );
+    }
     if (
       roundFourUpdate &&
       c.address === "terraform_data.budget_delivery_gate"
@@ -168,6 +209,7 @@ export function checkN4ePlan(plan, expected) {
       !roundTwoUpdate &&
       !roundThreeUpdate &&
       !roundFourUpdate &&
+      !roundFiveUpdate &&
       (actions.length !== 1 ||
         !["create", "read", "no-op"].includes(actions[0]))
     )
@@ -246,6 +288,11 @@ export function checkN4ePlan(plan, expected) {
   }
   for (const address of expectedCreates)
     if (!seen.has(address)) errors.push(`reviewed create missing: ${address}`);
+  if (expected.round === 5)
+    for (const key of ["50", "75"]) {
+      const address = `google_monitoring_alert_policy.n4e_budget_spent["${key}"]`;
+      if (!seen.has(address)) errors.push(`budget policy missing: ${address}`);
+    }
   return errors;
 }
 

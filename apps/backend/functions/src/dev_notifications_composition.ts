@@ -6,6 +6,10 @@ import { info } from 'firebase-functions/logger';
 
 import { FirestoreBookingAccessAuthority } from './booking/firestore_booking_access_authority.js';
 import { NotificationEffectConsumer } from './modules/notifications/application/consume_notification_effect.js';
+import {
+  NotificationReconciler,
+  type ReconcileReport,
+} from './modules/notifications/application/notification_reconciler.js';
 import { handleNotificationsCommandRequest } from './modules/notifications/application/notifications_command_handler.js';
 import { handleNotificationsQueryRequest } from './modules/notifications/application/notifications_query_handler.js';
 import { handlePushDeviceCommand } from './modules/notifications/application/push_device_command_handler.js';
@@ -16,13 +20,19 @@ import {
 } from './modules/notifications/application/push_dispatcher.js';
 import type { NotificationsStore } from './modules/notifications/domain/repositories.js';
 import { FcmPushProvider } from './modules/notifications/infrastructure/fcm_push_provider.js';
+import {
+  bookingOutboxCollection,
+  FirestoreBookingOutboxSource,
+} from './modules/notifications/infrastructure/firestore_notification_sources.js';
 import { FirestoreNotificationsStore } from './modules/notifications/infrastructure/firestore_notifications_repository.js';
 import {
   FirestorePushSessions,
   FirestorePushStore,
 } from './modules/notifications/infrastructure/firestore_push_store.js';
+import { emergencySwitchState } from './modules/operations/emergency_switch.js';
 import { resolveBookingActor } from './shared/auth_context.js';
 import { bookingAccessCapability } from './shared/booking_access_authority.js';
+import { operationsEmergencySwitchIds } from './shared/feature_flags.js';
 import { systemServerClock, type ServerClock } from './shared/server_clock.js';
 
 /**
@@ -159,4 +169,76 @@ export async function handleDevNotifications(input: {
       return { schemaVersion: 1, kind: 'succeeded', outcome };
     }
   }
+}
+
+const outboxIdPattern = /^[A-Za-z0-9_.:-]{1,200}$/u;
+
+export type CloudBookingConsumeOutcome =
+  | Awaited<ReturnType<NotificationEffectConsumer['consume']>>
+  | 'source_refused'
+  | 'not_activated'
+  | 'disabled';
+
+/**
+ * Round 1 stage 1.3 (owner 2026-11-20): one created Booking outbox record in the
+ * cloud. Only a v2 Booking effect whose id is the document id is consumed; a v1
+ * `suppressedPreActivation` record is never consumed. The pinned Operations
+ * switch `notifications.consume.booking.incidentDisable` must be open (a missing
+ * pointer is closed outside the Emulator). Inbox first, then push (composition).
+ */
+export async function consumeCloudBookingEffect(input: {
+  readonly firestore: Firestore;
+  readonly collection: string;
+  readonly outboxId: string;
+  readonly data: unknown;
+  readonly compose: () => Pick<DevNotifications, 'consumer'>;
+}): Promise<CloudBookingConsumeOutcome> {
+  if (input.collection !== bookingOutboxCollection || !outboxIdPattern.test(input.outboxId))
+    return 'source_refused';
+  const data = input.data as Record<string, unknown> | null | undefined;
+  if (data?.schemaVersion !== 2) return 'not_activated';
+  if (data.producer !== 'booking' || data.eventId !== input.outboxId) return 'source_refused';
+  if (
+    (await emergencySwitchState(
+      input.firestore,
+      operationsEmergencySwitchIds.notificationsConsumeBooking,
+    )) !== 'open'
+  )
+    return 'disabled';
+  return input.compose().consumer.consume(input.outboxId, input.data);
+}
+
+/**
+ * Round 1 (owner 2026-11-21): the cloud had no Booking reconciliation, so a
+ * transient consumer failure (`retry_scheduled`) or a trigger that never fired
+ * stayed undelivered for good. One pass: Booking outbox records without a
+ * receipt, due retries and expiries, then the push pass. Its consumer is
+ * contained by the pinned incident switch (the self-test consumer is not).
+ */
+export async function reconcileCloudBookingNotifications(input: {
+  readonly app: App;
+  readonly firestore: Firestore;
+  readonly clock?: ServerClock;
+}): Promise<ReconcileReport> {
+  const clock = input.clock ?? systemServerClock;
+  const notifications = createDevNotifications(input);
+  const consumer = new NotificationEffectConsumer({
+    store: notifications.store,
+    clock,
+    afterInboxCreated: (notificationId) =>
+      dispatchPushFor(notifications.store, notifications.push, notificationId),
+    contained: async () =>
+      (await emergencySwitchState(
+        input.firestore,
+        operationsEmergencySwitchIds.notificationsConsumeBooking,
+      )) !== 'open',
+  });
+  return new NotificationReconciler(
+    notifications.store,
+    new FirestoreBookingOutboxSource(input.firestore),
+    consumer,
+    clock,
+    {},
+    notifications.push,
+  ).reconcile();
 }

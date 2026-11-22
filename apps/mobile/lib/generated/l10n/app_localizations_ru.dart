@@ -13804,4 +13804,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String discoverDateUntil(String date) {
     return 'До $date';
   }
+
+  @override
+  String get authOfflineBanner => 'Нет связи — показано сохранённое';
+
+  @override
+  String get authOfflineNeedsConnection =>
+      'Для этого нужна связь. Попробуйте снова, когда появится интернет.';
 }

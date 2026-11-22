@@ -90,6 +90,12 @@ final class NativeDevAuthSessionGateway implements DevAuthSessionGateway {
           message: staleSnapshotAuthErrorCode,
         );
       }
+      if (confirmsEndedAccess(error)) {
+        throw const AuthException(
+          code: accessEndedAuthErrorCode,
+          message: accessEndedAuthErrorCode,
+        );
+      }
       if (isTransientIdentityFailure(error)) {
         throw const AuthException(code: offlineCode, message: offlineCode);
       }

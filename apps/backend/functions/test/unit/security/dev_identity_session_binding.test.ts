@@ -151,8 +151,11 @@ void test('dev Session uses owning authority, rotates handles and revokes withou
   assert.equal(afterRead.session.revision, issued.session.revision);
   const refreshed = await binding.refresh(credentials);
   assert.notEqual(refreshed.sessionHandle, credentials.sessionHandle);
-  await assert.rejects(binding.refresh(credentials));
   const current = { ...credentials, sessionHandle: refreshed.sessionHandle };
+  // Owner 2026-11-19, confirmed 2026-11-22 (replaces the N2c single-use rule): the
+  // replaced handle repairs a lost answer until the new one is used, then it is refused.
+  await binding.read(current);
+  await assert.rejects(binding.refresh(credentials));
   await binding.revoke(current);
   await assert.rejects(binding.refresh(current));
 });
@@ -236,3 +239,68 @@ void test('observe mode records App Check state without granting it authority; d
   defaultMode.denyAppCheck();
   await assert.rejects(defaultMode.binding.establish(input));
 });
+
+// A34 staging 2026-11-21 00:26 UTC: the rotation answer was lost, then the
+// refresh with the previous handle was refused before it reached rotate().
+void test('a refresh whose answer was lost can be repeated with the previous handle until the new one is used', async () => {
+  const { binding } = fixture();
+  const issued = await binding.establish(input);
+  const held = {
+    ...input,
+    sessionId: issued.session.sessionId,
+    sessionHandle: issued.sessionHandle,
+  };
+  await binding.refresh(held); // the answer never reaches the device
+
+  const repaired = await binding.refresh(held);
+  assert.notEqual(repaired.sessionHandle, held.sessionHandle);
+
+  await assert.rejects(binding.refresh({ ...held, installationId: 'other-install' }));
+  await assert.rejects(binding.revoke(held), 'a previous handle only repairs a rotation');
+
+  await binding.read({ ...held, sessionHandle: repaired.sessionHandle });
+  await assert.rejects(binding.refresh(held), 'using the new handle retires the previous one');
+});
+
+// Mobile decision 2026-11-21 #5 wipes copies of server data only on these two
+// answers. A restriction moves the revocation fence, so it answers as a
+// revocation too (accepted by the owner 2026-11-22).
+for (const end of ['logoutAll', 'recovery', 'restricted', 'blocked', 'deleted'] as const) {
+  void test(`end of access answers read and refresh with its own code: ${end}`, async () => {
+    const f = fixture();
+    const held = await f.binding.establish(input);
+    const other = await f.binding.establish({ ...input, installationId: 'install-other' });
+    if (end === 'logoutAll') {
+      await f.binding.revoke(
+        {
+          ...input,
+          installationId: 'install-other',
+          sessionId: other.session.sessionId,
+          sessionHandle: other.sessionHandle,
+        },
+        true,
+      );
+    } else if (end === 'recovery') {
+      await f.binding.recover({ ...input, installationId: 'install-other' });
+    } else {
+      await f.repository.transact(async (tx) => {
+        const account = await tx.account(held.session.userId);
+        assert.ok(account);
+        tx.putAccount(changeAccountStatus(account, end, instant.toISOString()));
+      });
+    }
+    const presented = {
+      ...input,
+      sessionId: held.session.sessionId,
+      sessionHandle: held.sessionHandle,
+    };
+    for (const call of [() => f.binding.read(presented), () => f.binding.refresh(presented)])
+      await assert.rejects(call, (error: { code?: string }) => {
+        assert.ok(
+          error.code === 'session_revoked' || error.code === 'account_blocked',
+          `code: ${String(error.code)}`,
+        );
+        return true;
+      });
+  });
+}

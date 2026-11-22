@@ -24,7 +24,7 @@ const number = "30205452447";
 test("env: switch, exact owner allowlist, load run closed by default", () => {
   assert.equal(
     renderEnv({ runtimeEnabled: false, allowedUids: [uid] }),
-    `N4C_BOOKING_ENABLED=false\nN4C_BOOKING_CREATE_DISABLE=false\nN4C_ALLOWED_FIREBASE_UIDS=${uid}\nN4C_LOAD_ENABLED=false\nN4C_LOAD_MAX_INSTANCES=1\nN4C_LOAD_CONCURRENCY=1\nN4F_CONTENT_EFFECTS_ENABLED=false\nRECHARGE_DEV_RUNTIME=content-media\nN5D_PRIVACY_ENABLED=false\n`,
+    `N4C_BOOKING_ENABLED=false\nN4C_BOOKING_CREATE_DISABLE=false\nN4C_ALLOWED_FIREBASE_UIDS=${uid}\nN4C_LOAD_ENABLED=false\nN4C_LOAD_MAX_INSTANCES=1\nN4C_LOAD_CONCURRENCY=1\nN4F_CONTENT_EFFECTS_ENABLED=false\nRECHARGE_DEV_RUNTIME=content-media\nN5D_PRIVACY_ENABLED=false\nN4C_BOOKING_NOTIFICATIONS_ENABLED=false\n`,
   );
   assert.throws(() => renderEnv({ runtimeEnabled: true, allowedUids: [] }));
   assert.throws(() => renderEnv({ runtimeEnabled: "yes", allowedUids: [uid] }));
@@ -79,6 +79,7 @@ function record(dir, manifest, overrides = {}) {
     loadConcurrency: manifest.load.concurrency,
     createDisabled: manifest.createDisabled,
     privacyEnabled: manifest.privacyEnabled,
+    notificationsEnabled: manifest.notificationsEnabled,
     automaticDeletion: false,
     ownerApprovalEvidenceRef: "SYNTHETIC-TEST",
     issuedAtUtc: "2020-01-01T00:00:00Z",
@@ -236,6 +237,49 @@ test("stage: staging carries the load settings into the manifest and the record"
         projectNumber: number,
       }),
       /^N5D_PRIVACY_ENABLED=false$/mu,
+    );
+    // Round 1 stage 1.3: the Booking notification effects switch is closed by
+    // default, approved by the owner record, and never opens without the runtime.
+    const notifications = stageRuntime({
+      outDir: stage,
+      runtimeEnabled: true,
+      allowedUids: [uid],
+      privacyEnabled: true,
+      notificationsEnabled: true,
+      projectId: staging,
+      projectNumber: number,
+    });
+    assert.match(
+      readFileSync(path.join(stage, `.env.${staging}`), "utf8"),
+      /^N4C_BOOKING_NOTIFICATIONS_ENABLED=true$/mu,
+    );
+    assert.deepEqual(
+      verifyStage({ stageDir: stage, env: record(dir, notifications) }),
+      [],
+    );
+    assert.match(
+      verifyStage({
+        stageDir: stage,
+        env: record(dir, notifications, { notificationsEnabled: false }),
+      }).join(),
+      /notificationsEnabled mismatch/u,
+    );
+    assert.match(
+      renderEnv({
+        runtimeEnabled: false,
+        allowedUids: [uid],
+        notificationsEnabled: true,
+        projectId: staging,
+        projectNumber: number,
+      }),
+      /^N4C_BOOKING_NOTIFICATIONS_ENABLED=false$/mu,
+    );
+    assert.throws(() =>
+      renderEnv({
+        runtimeEnabled: true,
+        allowedUids: [uid],
+        notificationsEnabled: "true",
+      }),
     );
   } finally {
     rmSync(dir, { recursive: true, force: true });

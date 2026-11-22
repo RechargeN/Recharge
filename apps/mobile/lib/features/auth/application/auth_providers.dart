@@ -1,4 +1,6 @@
 import '../domain/repositories/auth_session_events.dart';
+import '../domain/repositories/network_status.dart';
+import '../domain/repositories/offline_account_store.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/service_locator.dart';
@@ -25,6 +27,12 @@ final authControllerProvider = ChangeNotifierProvider<AuthController>((ref) {
     analyticsService: sl(),
     productAnalytics: sl.isRegistered<ProductAnalyticsRecorder>()
         ? sl<ProductAnalyticsRecorder>()
+        : null,
+    networkStatus: sl.isRegistered<NetworkStatus>()
+        ? sl<NetworkStatus>()
+        : null,
+    offlineAccount: sl.isRegistered<OfflineAccountStore>()
+        ? sl<OfflineAccountStore>()
         : null,
   );
 });

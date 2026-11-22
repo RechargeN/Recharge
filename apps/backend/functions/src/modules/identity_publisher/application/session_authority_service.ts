@@ -247,6 +247,37 @@ export class SessionAuthorityService {
     });
   }
 
+  /**
+   * The owner to charge for a rotation, resolved before rate limiting. It accepts
+   * exactly the handles rotate() accepts: the current one, or the previous one of
+   * a rotation whose answer was lost. Nothing else may use the previous handle.
+   */
+  resolveRotationOwner(input: {
+    readonly sessionId: string;
+    readonly sessionHandle: string;
+    readonly firebaseUid: string;
+    readonly installationId: string;
+    readonly nowUtc: string;
+  }): Promise<string> {
+    return this.repository.transact(async (transaction) => {
+      const session = await transaction.session(input.sessionId);
+      if (session === null) throw new IdentityFailure('unauthenticated');
+      const account = await transaction.account(session.userId);
+      if (account === null) throw new IdentityFailure('unauthenticated');
+      assertCurrentSession(session, account, input.nowUtc);
+      const presented = hashSessionHandle(input.sessionHandle);
+      if (
+        (session.handleHash !== presented &&
+          !isPreviousSessionHandle(session, presented, input.nowUtc)) ||
+        session.firebaseUid !== input.firebaseUid ||
+        session.installationId !== input.installationId
+      ) {
+        throw new IdentityFailure('unauthenticated');
+      }
+      return session.userId;
+    });
+  }
+
   logoutAll(input: {
     readonly actorUserId: string;
     readonly currentSessionId: string;

@@ -104,6 +104,15 @@ run "n4e_round1_shape" {
     error_message = "Two budget-spent policies (50 % and 75 % spent), one condition per SLO."
   }
   assert {
+    # An exhausted budget is a state, not an event: the engine must not read a
+    # gap in SLO data as recovery (staging 2026-11-20 20:30 UTC closed at -2.91).
+    condition = alltrue([for k, p in google_monitoring_alert_policy.n4e_budget_spent :
+      p.alert_strategy[0].auto_close == "604800s" && alltrue([for c in p.conditions :
+        c.condition_threshold[0].duration == "60s"
+    && c.condition_threshold[0].evaluation_missing_data == "EVALUATION_MISSING_DATA_ACTIVE"])])
+    error_message = "Budget-spent alerts stay open through data gaps (60 s, missing data = violation, 7-day auto-close)."
+  }
+  assert {
     condition = (length(google_monitoring_alert_policy.n4e_telemetry_absent[0].conditions) == 3
       && google_monitoring_alert_policy.n4e_telemetry_absent[0].conditions[0].condition_absent[0].duration == "1800s"
       && google_monitoring_alert_policy.n4e_telemetry_absent[0].conditions[0].condition_absent[0].aggregations[0].cross_series_reducer == "REDUCE_SUM"

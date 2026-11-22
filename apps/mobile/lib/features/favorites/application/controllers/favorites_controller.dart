@@ -80,6 +80,12 @@ class FavoritesController extends ChangeNotifier {
     }
   }
 
+  /// The connection is back: what was shown from the phone is read again, in
+  /// the same controller, so that an open screen follows.
+  Future<void> reloadIfLoaded() async {
+    if (_requestedOnce) await loadFavorites();
+  }
+
   bool isFavorite(String itemId) {
     return _state.favoriteIds.contains(itemId);
   }
