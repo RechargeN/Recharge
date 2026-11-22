@@ -151,8 +151,11 @@ void test('dev Session uses owning authority, rotates handles and revokes withou
   assert.equal(afterRead.session.revision, issued.session.revision);
   const refreshed = await binding.refresh(credentials);
   assert.notEqual(refreshed.sessionHandle, credentials.sessionHandle);
-  await assert.rejects(binding.refresh(credentials));
   const current = { ...credentials, sessionHandle: refreshed.sessionHandle };
+  // Owner 2026-11-19, confirmed 2026-11-22 (replaces the N2c single-use rule): the
+  // replaced handle repairs a lost answer until the new one is used, then it is refused.
+  await binding.read(current);
+  await assert.rejects(binding.refresh(credentials));
   await binding.revoke(current);
   await assert.rejects(binding.refresh(current));
 });
@@ -235,4 +238,26 @@ void test('observe mode records App Check state without granting it authority; d
   const defaultMode = fixture();
   defaultMode.denyAppCheck();
   await assert.rejects(defaultMode.binding.establish(input));
+});
+
+// A34 staging 2026-11-21 00:26 UTC: the rotation answer was lost, then the
+// refresh with the previous handle was refused before it reached rotate().
+void test('a refresh whose answer was lost can be repeated with the previous handle until the new one is used', async () => {
+  const { binding } = fixture();
+  const issued = await binding.establish(input);
+  const held = {
+    ...input,
+    sessionId: issued.session.sessionId,
+    sessionHandle: issued.sessionHandle,
+  };
+  await binding.refresh(held); // the answer never reaches the device
+
+  const repaired = await binding.refresh(held);
+  assert.notEqual(repaired.sessionHandle, held.sessionHandle);
+
+  await assert.rejects(binding.refresh({ ...held, installationId: 'other-install' }));
+  await assert.rejects(binding.revoke(held), 'a previous handle only repairs a rotation');
+
+  await binding.read({ ...held, sessionHandle: repaired.sessionHandle });
+  await assert.rejects(binding.refresh(held), 'using the new handle retires the previous one');
 });

@@ -70,10 +70,10 @@ already placed in an **isolated named database**:
 2. `closed: deletion_authority_unavailable` — the deletion authority failed or
    answered for a moment before the restore began. Keep the copy closed.
 3. `closed: redeletion_failed` — a decision could not be re-applied. Closed.
-   `closed: restore_in_progress` — the copy still refuses writes ("undergoing a
-   restore"; seen on staging 2026-11-21 after the clone operation had finished
-   and reads already worked). Closed; wait until the copy accepts a write, then
-   admit again. This is not a failed re-deletion.
+   `closed: restore_in_progress` — every re-deletion failed with Firestore's
+   "undergoing a restore" error. Closed; admit again later. The error was seen
+   once on a fresh staging clone (2026-11-21) outside admission; this outcome
+   itself is tested with an injected failure and has not been seen on a clone.
 4. `incomplete` — every decision re-applied, but L1 keeps blocked or held
    records (PB codes). Not admitted.
 5. `admitted` — every erasure and restriction re-applied through the L1

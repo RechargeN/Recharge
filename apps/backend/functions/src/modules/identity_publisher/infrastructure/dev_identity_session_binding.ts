@@ -70,7 +70,7 @@ export class DevIdentitySessionBinding {
 
   async refresh(input: SessionCredentials) {
     const context = await this.authenticate(input);
-    const owner = await this.sessions.resolveSessionOwner({
+    const owner = await this.sessions.resolveRotationOwner({
       ...input,
       firebaseUid: context.identity.firebaseUid,
       nowUtc: context.now.toISOString(),

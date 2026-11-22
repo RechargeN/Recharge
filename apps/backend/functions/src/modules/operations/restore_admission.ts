@@ -48,9 +48,9 @@ export type RestoreAdmission =
         | 'deletion_authority_unavailable'
         | 'redeletion_failed'
         /**
-         * Round 1 stage 1.6 (staging 2026-11-21): a PITR copy can serve reads
-         * while it still refuses writes ("undergoing a restore"). Not a failed
-         * re-deletion: the copy stays closed and the admission is retried later.
+         * Every re-deletion failed with Firestore's "undergoing a restore" error
+         * (seen once on a fresh staging clone 2026-11-21, outside admission).
+         * The copy stays closed and the admission is retried later.
          */
         | 'restore_in_progress';
       readonly decisions: number;
@@ -104,7 +104,7 @@ export async function admitRestoredCopy(input: {
   return { state: 'admitted', decisions };
 }
 
-/** Firestore FAILED_PRECONDITION while a restored database still refuses writes. */
+/** Firestore FAILED_PRECONDITION of a database that is still being restored. */
 function isRestoreInProgress(error: unknown): boolean {
   const value = error as { code?: unknown; details?: unknown; message?: unknown } | null;
   const code = value?.code;
