@@ -67,14 +67,6 @@ final class NativeDevAuthSessionGateway implements DevAuthSessionGateway {
   /// Offline or overloaded: keep credentials, grant nothing, let Auth retry.
   static const offlineCode = 'NETWORK_UNAVAILABLE';
 
-  /// Owner decision 2026-11-21 #5, scope of 2026-11-22: the only answers that
-  /// confirm the end of access. Never `unauthenticated` (it was a server bug on
-  /// A34, 2026-11-21), restriction, expiry or anything made up by the client.
-  static const Set<String> _accessEndedCodes = <String>{
-    'session-revoked',
-    'account-blocked',
-  };
-
   Future<T> _offlineAware<T>(Future<T> Function() operation) async {
     try {
       return await operation();
@@ -98,9 +90,7 @@ final class NativeDevAuthSessionGateway implements DevAuthSessionGateway {
           message: staleSnapshotAuthErrorCode,
         );
       }
-      if (error is BookingCallableFailure &&
-          error.dispatched &&
-          _accessEndedCodes.contains(error.code)) {
+      if (confirmsEndedAccess(error)) {
         throw const AuthException(
           code: accessEndedAuthErrorCode,
           message: accessEndedAuthErrorCode,

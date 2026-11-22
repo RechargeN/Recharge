@@ -48,6 +48,14 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
   /// the next restore would only find that there is none.
   Stream<void> get accessEnded => _accessEnded.stream;
 
+  /// The same end of access, met by a callable that repairs the Session by
+  /// itself. The SDK user goes too, else the next Google sign-in is refused.
+  void endAccessFromTransport() {
+    _generation++;
+    _accessEnded.add(null);
+    unawaited(gateway.clearLocal().catchError((Object _) {}));
+  }
+
   @override
   Future<AuthResultEntity> signIn({
     required String email,

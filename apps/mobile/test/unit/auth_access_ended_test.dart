@@ -257,6 +257,32 @@ void main() {
     });
   }
 
+  test('a stale snapshot is no refusal: the profile stays', () async {
+    await signedIn();
+    repository.failure = 'SNAPSHOT_STALE';
+    await controller.restoreSession();
+    await settle();
+
+    expect(store.profile, isNotNull);
+    expect(store.wiped, isEmpty);
+  });
+
+  test('a sign-out during the profile read brings nobody back', () async {
+    store.profile = _user;
+    store.slowRead = Completer<AuthUserEntity?>();
+    final restoring = controller.restoreSession();
+    await controller.signOut();
+    store.slowRead!.complete(_user);
+    await restoring;
+    store.slowRead = null;
+    repository.failure = AuthController.offlineMessage;
+    await controller.restoreSession();
+    await settle();
+
+    expect(controller.state.isOffline, isFalse);
+    expect(controller.state.user, isNull);
+  });
+
   test('sign-out forgets the profile and wipes nothing', () async {
     await signedIn();
     await controller.signOut();
