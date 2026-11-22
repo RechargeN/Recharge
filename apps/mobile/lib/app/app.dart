@@ -14,6 +14,7 @@ import '../features/notifications/application/notifications_providers.dart';
 import 'di/dev_push_registrar.dart';
 import 'di/service_locator.dart';
 import 'observers/app_lifecycle_observer.dart';
+import 'push_announcer.dart';
 import 'router/app_router.dart';
 import 'router/route_names.dart';
 
@@ -29,6 +30,7 @@ class _RechargeAppState extends ConsumerState<RechargeApp>
   late final AppLifecycleObserver _lifecycleObserver;
   final GlobalKey<ScaffoldMessengerState> _messenger =
       GlobalKey<ScaffoldMessengerState>();
+  late final PushAnnouncer _announcer = PushAnnouncer(_messenger);
 
   @override
   void initState() {
@@ -70,15 +72,13 @@ class _RechargeAppState extends ConsumerState<RechargeApp>
   /// Android does not show a push while the app is open; the inbox has it.
   void _announcePush() {
     _reloadInbox();
-    final ScaffoldMessengerState? messenger = _messenger.currentState;
-    if (messenger == null) return;
-    messenger.showSnackBar(
-      SnackBar(
+    _announcer.announce(
+      (BuildContext context) => SnackBar(
         // With an action a SnackBar would stay until dismissed (A34 2026-11-13).
         persist: false,
-        content: Text(messenger.context.l10n.notificationsPushArrived),
+        content: Text(context.l10n.notificationsPushArrived),
         action: SnackBarAction(
-          label: messenger.context.l10n.notificationsPushOpen,
+          label: context.l10n.notificationsPushOpen,
           onPressed: _openInbox,
         ),
       ),
