@@ -491,3 +491,121 @@ test("round 4: the main channel repointed in place to the mailbox, Critical poli
     /forbidden action update/u,
   );
 });
+
+test("round 5: the two budget policies stay open through data gaps, nothing else changes", () => {
+  const condition = (duration, missing) => ({
+    display_name: "auth-availability error budget 50 % spent",
+    condition_threshold: [
+      {
+        comparison: "COMPARISON_LT",
+        threshold_value: 0.5,
+        duration,
+        evaluation_missing_data: missing,
+      },
+    ],
+  });
+  const budget = (key, after = {}) => ({
+    address: `google_monitoring_alert_policy.n4e_budget_spent["${key}"]`,
+    type: "google_monitoring_alert_policy",
+    change: {
+      actions: ["update"],
+      before: {
+        project,
+        enabled: true,
+        notification_channels: [],
+        alert_strategy: [{ auto_close: "86400s" }],
+        conditions: [condition("0s", null)],
+      },
+      after: {
+        project,
+        enabled: true,
+        notification_channels: [],
+        alert_strategy: [{ auto_close: "604800s" }],
+        conditions: [condition("60s", "EVALUATION_MISSING_DATA_ACTIVE")],
+        ...after,
+      },
+    },
+  });
+  const list = (extra = []) => [
+    changes()[0],
+    budget("50"),
+    budget("75"),
+    ...extra,
+  ];
+  const run = (l) => {
+    const p = plan(l);
+    return checkN4ePlan(p, { ...expected(p), round: 5 }).join();
+  };
+  assert.equal(run(list()), "");
+  const gate = {
+    address: "terraform_data.budget_delivery_gate",
+    type: "terraform_data",
+    change: { actions: ["update"], before: {}, after: {} },
+  };
+  assert.equal(run(list([gate])), "");
+  assert.match(
+    run([
+      changes()[0],
+      budget("50", { notification_channels: [channel] }),
+      budget("75"),
+    ]),
+    /only the gap settings may change/u,
+  );
+  assert.match(
+    run([
+      changes()[0],
+      budget("50", { alert_strategy: [{ auto_close: "86400s" }] }),
+      budget("75"),
+    ]),
+    /must stay open through data gaps/u,
+  );
+  assert.match(
+    run([
+      changes()[0],
+      budget("50", {
+        conditions: [condition("60s", "EVALUATION_MISSING_DATA_INACTIVE")],
+      }),
+      budget("75"),
+    ]),
+    /must stay open through data gaps/u,
+  );
+  assert.match(
+    run([
+      changes()[0],
+      budget("50", {
+        conditions: [
+          {
+            ...condition("60s", "EVALUATION_MISSING_DATA_ACTIVE"),
+            display_name: "x",
+          },
+        ],
+      }),
+      budget("75"),
+    ]),
+    /only the gap settings may change/u,
+  );
+  assert.match(
+    run(
+      list([
+        {
+          ...budget("50"),
+          address: "google_monitoring_alert_policy.n4e_slow_burn[0]",
+        },
+      ]),
+    ),
+    /forbidden action update/u,
+  );
+  assert.match(
+    run(
+      list([
+        change(
+          "google_monitoring_alert_policy.extra[0]",
+          "google_monitoring_alert_policy",
+          { project },
+        ),
+      ]),
+    ),
+    /unreviewed create/u,
+  );
+  assert.match(run([changes()[0], budget("50")]), /budget policy missing/u);
+});

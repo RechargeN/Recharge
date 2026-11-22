@@ -361,12 +361,19 @@ resource "google_monitoring_alert_policy" "n4e_budget_spent" {
         filter          = "select_slo_budget_fraction(\"${google_monitoring_slo.n4e[conditions.key].name}\")"
         comparison      = "COMPARISON_LT"
         threshold_value = each.value
-        duration        = "0s"
+        # An exhausted budget is a state: a gap in SLO data is not recovery.
+        # With "0s" missing data was ignored and the incident auto-closed after
+        # 24 h at a budget of -2.91 (staging 2026-11-20 20:30 UTC). 60 s is the
+        # shortest window that honours evaluation_missing_data.
+        duration                = "60s"
+        evaluation_missing_data = "EVALUATION_MISSING_DATA_ACTIVE"
       }
     }
   }
   alert_strategy {
-    auto_close = "86400s"
+    # The longest allowed: the incident closes only after data comes back above
+    # the threshold, or after 7 days (+24 h) without any data.
+    auto_close = "604800s"
   }
   documentation {
     content   = "Error budget ${each.key} % spent: ${each.key == "75" ? "reliability work only, except approved safety and security fixes" : "no expansion and no risky flags for that journey"}. ${local.n4e_runbook}"
