@@ -19,7 +19,7 @@ const uid = "abcdefghijklmnopqrstuvwxyz012345";
 test("env: every dev switch, exact owner allowlist, boolean runtime", () => {
   assert.equal(
     renderEnv({ runtimeEnabled: false, allowedUids: [uid] }),
-    `N3A2_DEV_ENABLED=false\nRECHARGE_DEV_RUNTIME=content-media\nRECHARGE_MEDIA_STORAGE=dev-cloud\nRECHARGE_MEDIA_TOOLS=dev-cloud\nN3A2_ALLOWED_FIREBASE_UIDS=${uid}\n`,
+    `N3A2_DEV_ENABLED=false\nRECHARGE_DEV_RUNTIME=content-media\nRECHARGE_MEDIA_STORAGE=dev-cloud\nRECHARGE_MEDIA_TOOLS=dev-cloud\nN3A2_ALLOWED_FIREBASE_UIDS=${uid}\nP2_LIBRARY_ENABLED=false\nP2_SESSION_CLASS_ENABLED=false\nP2_CATALOG_ENABLED=false\nP2_PLANNING_ENABLED=false\nP2_ROUTE_ENABLED=false\nRECHARGE_TEST_ROUTE_CATALOG=false\n`,
   );
   assert.throws(() => renderEnv({ runtimeEnabled: true, allowedUids: [] }));
   assert.throws(() =>

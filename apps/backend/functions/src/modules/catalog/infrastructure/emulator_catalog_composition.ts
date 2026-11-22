@@ -30,6 +30,8 @@ export function createEmulatorCatalogComposition(
     readonly clock?: ServerClock;
     /** D3.7: the local `catalog.findPeople` flag, read by the caller (default off). */
     readonly findPeopleEnabled?: boolean;
+    /** Pilot 2.3: a stricter projection age than the local TEST-ONLY one. */
+    readonly projectionMaxAgeSeconds?: number;
     readonly environment?: NodeJS.ProcessEnv;
     /** Tests wrap the source to simulate an unavailable read. */
     readonly source?: (source: ContentCatalogSource) => ContentCatalogSource;
@@ -75,7 +77,9 @@ export function createEmulatorCatalogComposition(
   // Planning ask it only behind their own Scenario flags.
   const scenarioStops = new PublishedObjectLinkService(source, true, safetyAllowed);
   const findPeopleEnabled = options.findPeopleEnabled === true;
-  const findPeoplePrivacy = new FirestoreFindPeoplePrivacy(firestore);
+  // Find People authority is Emulator-only (OD-11): built only while its flag is
+  // on, so the rest of the Catalog runs in the cloud and Find People fails closed.
+  const findPeoplePrivacy = findPeopleEnabled ? new FirestoreFindPeoplePrivacy(firestore) : null;
   const projector = new CatalogProjector({
     repository,
     source,
@@ -96,7 +100,8 @@ export function createEmulatorCatalogComposition(
     publishedObjects,
     async (item, direct) => {
       // D3.7 §6: no anonymous reads; the fresh gate decides every response.
-      if (item.typeId === 'find_people')
+      if (item.typeId === 'find_people') {
+        if (findPeoplePrivacy === null) return false;
         return findPeoplePrivacy.catalogItemVisible({
           viewerUserId: options.viewerId,
           contentId: item.contentId,
@@ -106,6 +111,7 @@ export function createEmulatorCatalogComposition(
           meetingEndUtc: item.occurrences[0]?.endAtUtc ?? null,
           nowUtc: clock.now().toISOString(),
         });
+      }
       const user = await publisherUser(firestore, item.publisherRef);
       if (user === null)
         return !(await safetyRestricted(firestore, 'catalog', '', clock.now(), item.contentId));
@@ -118,6 +124,7 @@ export function createEmulatorCatalogComposition(
     { enabled: scenarioEnabled, stops: scenarioStops },
     findPeopleEnabled,
     routeEnabled,
+    options.projectionMaxAgeSeconds,
   );
   return Object.freeze({
     repository,

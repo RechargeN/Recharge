@@ -97,12 +97,23 @@ void test('only the Content, Media, Moderation, Event-handoff and legal hold sto
     .map((file) => path.relative(src, file).replaceAll('\\', '/'))
     .sort();
   assert.deepEqual(users, [
+    // Pilot 2.3 (owner 2026-11-21, variant A): the Catalog projection in the cloud.
+    'modules/catalog/infrastructure/firestore_catalog_repository.ts',
     'modules/content/infrastructure/firestore_content_repository.ts',
     // Round 2.2 (owner approval 2026-11-19): Event → Booking handoff in the cloud.
     'modules/content/infrastructure/firestore_event_booking_handoff_repository.ts',
+    // Pilot 2.1 (owner 2026-11-21, variant A): the Library in the cloud.
+    'modules/library/firestore_library_service.ts',
+    // Pilot 2.7 (owner 2026-11-21): Library erasure in the cloud.
+    'modules/library/library_privacy_task_handler.ts',
     'modules/media/infrastructure/firestore_media_repository.ts',
     'modules/moderation/infrastructure/firestore_moderation_repository.ts',
     // Step 2 (owner decision 2026-11-20): the L1 legal hold authority in the cloud.
     'modules/privacy_orchestration/infrastructure/firestore_privacy_legal_hold_service.ts',
+    // Pilot 2.4 (owner 2026-11-21): Quick Plan and Scenario sync in the cloud.
+    'modules/quick_plan/firestore_quick_plan_service.ts',
+    'modules/quick_plan/firestore_scenario_service.ts',
+    // Pilot 2.5 (owner 2026-11-21): Route sync and publication in the cloud.
+    'modules/route/firestore_route_service.ts',
   ]);
 });

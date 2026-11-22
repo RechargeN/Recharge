@@ -48,6 +48,11 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
     expectedEnv = renderEnv({
       runtimeEnabled: manifest.runtimeEnabled,
       allowedUids: manifest.allowedUids,
+      libraryEnabled: manifest.libraryEnabled ?? false,
+      sessionClassEnabled: manifest.sessionClassEnabled ?? false,
+      catalogEnabled: manifest.catalogEnabled ?? false,
+      planningEnabled: manifest.planningEnabled ?? false,
+      routeEnabled: manifest.routeEnabled ?? false,
       projectId: manifest.projectId,
       projectNumber: manifest.projectNumber,
     });
@@ -85,6 +90,13 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
     record.projectId !== manifest.projectId ||
     record.stageTreeSha256 !== manifest.treeSha256 ||
     record.runtimeEnabled !== manifest.runtimeEnabled ||
+    // Pilot 2.1: a record without the switch approves it closed only.
+    (record.libraryEnabled ?? false) !== (manifest.libraryEnabled ?? false) ||
+    (record.sessionClassEnabled ?? false) !==
+      (manifest.sessionClassEnabled ?? false) ||
+    (record.catalogEnabled ?? false) !== (manifest.catalogEnabled ?? false) ||
+    (record.planningEnabled ?? false) !== (manifest.planningEnabled ?? false) ||
+    (record.routeEnabled ?? false) !== (manifest.routeEnabled ?? false) ||
     record.publication !== false ||
     record.automaticDeletion !== false ||
     !(record.ownerApprovalEvidenceRef?.length > 0) ||

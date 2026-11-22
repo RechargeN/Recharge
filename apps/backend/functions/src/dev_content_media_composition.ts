@@ -13,6 +13,16 @@ import { EmulatorSyntheticReferenceData } from './modules/content/infrastructure
 import { FirestoreContentRepository } from './modules/content/infrastructure/firestore_content_repository.js';
 import { IdentityPublisherEligibility } from './modules/content/infrastructure/identity_publisher_eligibility.js';
 import { FirestoreIdentityAuthorityRepository } from './modules/identity_publisher/infrastructure/firestore_identity_authority_repository.js';
+import { FirestoreLibraryService } from './modules/library/firestore_library_service.js';
+import { handleDiscoverQuery } from './catalog_entry.js';
+import { scenarioStopsFor } from './content_entry.js';
+import { FirestoreQuickPlanService } from './modules/quick_plan/firestore_quick_plan_service.js';
+import { FirestoreRouteService } from './modules/route/firestore_route_service.js';
+import { FirestoreRouteRevisionReader } from './modules/route/route_publication.js';
+import { routeFlag, routePublicationFlag } from './modules/route/route_contract.js';
+import { FirestoreScenarioService } from './modules/quick_plan/firestore_scenario_service.js';
+import { quickPlanFlag } from './modules/quick_plan/quick_plan_contract.js';
+import { scenarioFlagIds } from './shared/feature_flags.js';
 import type { IdTokenSource } from './modules/media/infrastructure/cloud_tools_client.js';
 import { createDevMediaComposition } from './modules/media/infrastructure/dev_media_composition.js';
 import { bookingAccessCapability } from './shared/booking_access_authority.js';
@@ -32,6 +42,25 @@ export const devContentTypes: ReadonlySet<ContentTypeId> = new Set<ContentTypeId
   'place',
   'event',
 ]);
+
+/**
+ * Pilot 2.2 (owner 2026-11-21, variant A): Session and Class/Workshop join Place
+ * and Event only with the runtime's deploy switch `P2_SESSION_CLASS_ENABLED`;
+ * publication without Booking (external link), as validated by Content.
+ */
+export const pilotContentTypes: readonly ContentTypeId[] = Object.freeze([
+  'session',
+  'class_workshop',
+]);
+
+export function devContentTypesFor(environment: NodeJS.ProcessEnv): ReadonlySet<ContentTypeId> {
+  const types = new Set<ContentTypeId>(devContentTypes);
+  if (environment.P2_SESSION_CLASS_ENABLED === 'true')
+    for (const type of pilotContentTypes) types.add(type);
+  // Pilot 2.5: Route publication (J2) with the Route switch.
+  if (environment.P2_ROUTE_ENABLED === 'true') types.add('route');
+  return types.size === devContentTypes.size ? devContentTypes : types;
+}
 
 /** The only owner operations the dev runtime serves; everything else is `capability_denied`. */
 export const devOperations = Object.freeze({
@@ -54,7 +83,118 @@ export const devOperations = Object.freeze({
   ]),
   mediaQueryV1: Object.freeze(['getAssetStatus', 'getProcessingReceipt']),
   uploadMediaBytesV1: Object.freeze([] as string[]),
+  // Pilot 2.1 (owner 2026-11-21): the owner's Library. The Library service
+  // validates its exact request shape (its query has no type field).
+  libraryCommandV1: Object.freeze(['addFavorite', 'removeFavorite', 'recordVisit', 'removeVisit']),
+  libraryQueryV1: Object.freeze([] as string[]),
+  // Pilot 2.4 (owner 2026-11-21): Quick Plan and Scenario sync (I1/I2). The
+  // services validate their exact request shapes; Scenario publication and
+  // share (I3) stay off in the cloud.
+  quickPlanCommandV1: Object.freeze([] as string[]),
+  quickPlanQueryV1: Object.freeze([] as string[]),
+  scenarioCommandV1: Object.freeze([] as string[]),
+  scenarioQueryV1: Object.freeze([] as string[]),
+  // Pilot 2.5 (owner 2026-11-21): Route sync and publication (J1/J2).
+  routeCommandV1: Object.freeze([] as string[]),
+  routeQueryV1: Object.freeze([] as string[]),
+  // Pilot 2.3 (owner 2026-11-21): Discover reads over the cloud Catalog.
+  discoverQueryV1: Object.freeze([
+    'feed',
+    'search',
+    'map',
+    'details',
+    'publishedObject',
+    'publishedObjectCandidates',
+    'placeLink',
+    'placeCandidates',
+  ]),
 });
+
+/**
+ * Pilot 2.3 temporary Catalog limits (owner 2026-11-21; not final, BCK08-OD-04/
+ * 05/08/10 stay open): page and candidate list at most 20, radius at most 50 km,
+ * projection fresh for at most 5 minutes, at most 3 Discover
+ * reads per second per user (in memory: the dev runtime runs one instance).
+ */
+const planningCallables: ReadonlySet<string> = new Set([
+  'quickPlanCommandV1',
+  'quickPlanQueryV1',
+  'scenarioCommandV1',
+  'scenarioQueryV1',
+  'routeCommandV1',
+  'routeQueryV1',
+]);
+
+/** Pilot 2.4: one switch opens Quick Plan and Scenario sync; I3 publication and share stay closed. */
+export function planningCloudFlags(enabled: boolean): Readonly<Record<string, boolean>> {
+  return Object.freeze({
+    [quickPlanFlag]: enabled,
+    [scenarioFlagIds.sync]: enabled,
+    [scenarioFlagIds.publication]: false,
+    [scenarioFlagIds.share]: false,
+  });
+}
+
+export const pilotCatalogLimits = Object.freeze({
+  pageSizeMax: 20,
+  radiusKmMax: 50,
+  readsPerSecond: 3,
+  projectionMaxAgeSeconds: 300,
+});
+/** The handler's own bound of a candidate `limit`; above it stays its refusal. */
+const candidateLimitMax = 50;
+const discoverReads = new Map<string, number[]>();
+
+export function discoverRateAllowed(userId: string, nowMs: number): boolean {
+  const recent = (discoverReads.get(userId) ?? []).filter((at) => nowMs - at < 1000);
+  if (recent.length >= pilotCatalogLimits.readsPerSecond) {
+    discoverReads.set(userId, recent);
+    return false;
+  }
+  recent.push(nowMs);
+  discoverReads.set(userId, recent);
+  if (discoverReads.size > 1000) discoverReads.clear();
+  return true;
+}
+
+/** Applies the page, candidate and radius limits; a radius above the limit is refused. */
+export function limitDiscoverRequest(data: unknown): { data: unknown } | { refused: string } {
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) return { data };
+  const request = data as Record<string, unknown>;
+  const payload = request.payload as Record<string, unknown> | undefined;
+  if (
+    typeof payload?.limit === 'number' &&
+    Number.isInteger(payload.limit) &&
+    payload.limit > pilotCatalogLimits.pageSizeMax &&
+    payload.limit <= candidateLimitMax
+  )
+    return {
+      data: { ...request, payload: { ...payload, limit: pilotCatalogLimits.pageSizeMax } },
+    };
+  const query = payload?.query as Record<string, unknown> | undefined;
+  if (query === undefined || query === null || typeof query !== 'object') return { data };
+  const geo = query.geo as Record<string, unknown> | undefined;
+  if (typeof geo?.radiusKm === 'number' && geo.radiusKm > pilotCatalogLimits.radiusKmMax)
+    return { refused: 'radius_too_large' };
+  if (typeof query.pageSize === 'number' && query.pageSize > pilotCatalogLimits.pageSizeMax)
+    return {
+      data: {
+        ...request,
+        payload: { ...payload, query: { ...query, pageSize: pilotCatalogLimits.pageSizeMax } },
+      },
+    };
+  return { data };
+}
+/** The caller behind every cloud Discover read; Find People stays off (OD-11). */
+export function pilotDiscoverCaller(firestore: Firestore, userId: string) {
+  return {
+    firestore,
+    userId,
+    findPeopleEnabled: false,
+    projectionMaxAgeSeconds: pilotCatalogLimits.projectionMaxAgeSeconds,
+  };
+}
+
 export type DevCallableName = keyof typeof devOperations;
 
 /**
@@ -113,8 +253,10 @@ export function createDevContentMedia(input: {
     media: media.readiness,
     clock,
     ids: { newId: () => randomUUID() as EntityId },
-    enabledTypes: devContentTypes,
+    enabledTypes: devContentTypesFor(input.environment),
     compositionRules: emulatorCompositionRules,
+    // Pilot 2.5: without Route's own answer every Route revision is refused (J2).
+    routeRevisions: new FirestoreRouteRevisionReader(input.firestore),
   });
   return Object.freeze({ content, media });
 }
@@ -124,6 +266,10 @@ const rejected = (code: string) => ({ schemaVersion: 1, kind: 'rejected', code }
 function operationOf(callable: DevCallableName, data: unknown): string | undefined {
   if (typeof data !== 'object' || data === null || Array.isArray(data)) return undefined;
   const record = data as Record<string, unknown>;
+  if (callable === 'libraryCommandV1')
+    return typeof record.commandType === 'string' ? record.commandType : undefined;
+  if (callable === 'discoverQueryV1')
+    return typeof record.queryType === 'string' ? record.queryType : undefined;
   const value = callable.startsWith('content')
     ? callable.endsWith('QueryV1')
       ? record.queryType
@@ -147,9 +293,23 @@ export async function handleDevContentMedia(input: {
   readonly firestore: Firestore;
   readonly compose: () => DevContentMedia;
   readonly now?: () => Date;
+  /** Pilot 2.1: the Library deploy switch (`P2_LIBRARY_ENABLED`); closed when absent. */
+  readonly libraryEnabled?: boolean;
+  /** Pilot 2.2: the enabled Content types; Place and Event when absent. */
+  readonly contentTypes?: ReadonlySet<ContentTypeId>;
+  /** Pilot 2.3: the Catalog deploy switch (`P2_CATALOG_ENABLED`); closed when absent. */
+  readonly catalogEnabled?: boolean;
+  /** Pilot 2.4: the Planning deploy switch (`P2_PLANNING_ENABLED`); closed when absent. */
+  readonly planningEnabled?: boolean;
+  /** Pilot 2.5: the Route deploy switch (`P2_ROUTE_ENABLED`); closed when absent. */
+  readonly routeEnabled?: boolean;
 }): Promise<Readonly<Record<string, unknown>>> {
   const allowed = devOperations[input.callable];
-  if (input.callable !== 'uploadMediaBytesV1') {
+  if (
+    input.callable !== 'uploadMediaBytesV1' &&
+    input.callable !== 'libraryQueryV1' &&
+    !planningCallables.has(input.callable)
+  ) {
     const operation = operationOf(input.callable, input.data);
     if (operation === undefined || !allowed.includes(operation))
       return rejected('capability_denied');
@@ -166,6 +326,56 @@ export async function handleDevContentMedia(input: {
     bookingAccessCapability,
   );
   if (!decision.allowed) return rejected('unauthenticated');
+  if (input.callable === 'routeCommandV1' || input.callable === 'routeQueryV1') {
+    const routeOn = input.routeEnabled === true;
+    const routes = new FirestoreRouteService(input.firestore, systemServerClock, {
+      [routeFlag]: routeOn,
+      [routePublicationFlag]: routeOn,
+    });
+    const data = withoutSessionContext(input.data);
+    return input.callable === 'routeCommandV1'
+      ? routes.command(actor.actor, data)
+      : routes.query(actor.actor, data);
+  }
+  if (planningCallables.has(input.callable)) {
+    const flags = planningCloudFlags(input.planningEnabled === true);
+    const data = withoutSessionContext(input.data);
+    if (input.callable === 'quickPlanCommandV1' || input.callable === 'quickPlanQueryV1') {
+      const service = new FirestoreQuickPlanService(input.firestore, systemServerClock, {
+        cloud: flags,
+      });
+      return input.callable === 'quickPlanCommandV1'
+        ? service.command(actor.actor, data)
+        : service.query(actor.actor, data);
+    }
+    const scenarios = new FirestoreScenarioService(
+      input.firestore,
+      systemServerClock,
+      scenarioStopsFor(input.firestore),
+      flags,
+    );
+    return input.callable === 'scenarioCommandV1'
+      ? scenarios.command(actor.actor, data)
+      : scenarios.query(actor.actor, data);
+  }
+  if (input.callable === 'discoverQueryV1') {
+    if (input.catalogEnabled !== true) return rejected('feature_disabled');
+    const now = (input.now ?? (() => new Date()))();
+    if (!discoverRateAllowed(decision.userId, now.getTime())) return rejected('rate_limited');
+    const limited = limitDiscoverRequest(input.data);
+    if ('refused' in limited) return rejected(limited.refused);
+    return handleDiscoverQuery(pilotDiscoverCaller(input.firestore, decision.userId), limited.data);
+  }
+  if (input.callable === 'libraryCommandV1' || input.callable === 'libraryQueryV1') {
+    // The Library service re-authorizes the same Session inside its transaction.
+    const library = new FirestoreLibraryService(input.firestore, systemServerClock, {
+      cloud: { enabled: input.libraryEnabled === true },
+    });
+    const data = withoutSessionContext(input.data);
+    return input.callable === 'libraryCommandV1'
+      ? library.command(actor.actor, data)
+      : library.query(actor.actor, data);
+  }
   const ids = {
     userId: decision.userId as never,
     sessionId: actor.actor.sessionId as never,
@@ -174,12 +384,22 @@ export async function handleDevContentMedia(input: {
   switch (input.callable) {
     case 'contentCommandV1':
       return handleContentCommand(
-        { actor: ids, firestore: input.firestore, enabledTypes: devContentTypes, content },
+        {
+          actor: ids,
+          firestore: input.firestore,
+          enabledTypes: input.contentTypes ?? devContentTypes,
+          content,
+        },
         input.data,
       );
     case 'contentQueryV1':
       return handleContentQuery(
-        { actor: ids, firestore: input.firestore, enabledTypes: devContentTypes, content },
+        {
+          actor: ids,
+          firestore: input.firestore,
+          enabledTypes: input.contentTypes ?? devContentTypes,
+          content,
+        },
         input.data,
       );
     case 'mediaCommandV1':
@@ -197,5 +417,15 @@ export async function handleDevContentMedia(input: {
         { actor: ids, firestore: input.firestore, composition: media },
         input.data,
       );
+    default:
+      // Library, Planning and Discover are answered above.
+      return rejected('capability_denied');
   }
+}
+
+function withoutSessionContext(data: unknown): unknown {
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) return data;
+  const { sessionContext, ...rest } = data as Record<string, unknown>;
+  void sessionContext;
+  return rest;
 }

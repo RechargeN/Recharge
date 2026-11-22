@@ -592,6 +592,17 @@ final class BookingBackendEndpoint {
           'getMyBookingV1',
           'listMyBookingsV1',
           'getEventAvailabilityV1',
+          // Pilot round 2 (owner 2026-11-21): the cloud Library, Discover,
+          // Planning and Route. Find People stays closed (OD-11).
+          'libraryCommandV1',
+          'libraryQueryV1',
+          'discoverQueryV1',
+          'quickPlanCommandV1',
+          'quickPlanQueryV1',
+          'scenarioCommandV1',
+          'scenarioQueryV1',
+          'routeCommandV1',
+          'routeQueryV1',
         }.contains(callableName)) {
       throw ArgumentError('dev_identity_callable_forbidden');
     }

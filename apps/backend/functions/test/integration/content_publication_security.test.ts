@@ -918,13 +918,19 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/admin_support/admin_support_service.ts': ['assertContentEmulatorContext'],
     'modules/library/firestore_library_service.ts': [
       'assertContentEmulatorContext',
+      // Pilot 2.1 (owner 2026-11-21): the reviewed dev-cloud guard.
+      'assertMediaChainPersistenceContext',
       'contentCollections',
       'canonicalJson',
       'sha256Hex',
       'resolveContentType',
     ],
     'modules/library/library_contract.ts': ['canonicalJson', 'sha256Hex'],
-    'modules/library/library_privacy_task_handler.ts': ['assertContentEmulatorContext'],
+    'modules/library/library_privacy_task_handler.ts': [
+      'assertContentEmulatorContext',
+      // Pilot 2.7 (owner 2026-11-21): Library erasure in the cloud.
+      'assertMediaChainPersistenceContext',
+    ],
     'modules/moderation/application/k1_workflows.ts': [
       'assertContentEmulatorContext',
       'canonicalJson',
@@ -934,11 +940,15 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/reviews/review_target.ts': ['contentCollections', 'canonicalJson', 'sha256Hex'],
     'modules/quick_plan/firestore_quick_plan_service.ts': [
       'assertContentEmulatorContext',
+      // Pilot 2.4 (owner 2026-11-21): the reviewed dev-cloud guard.
+      'assertMediaChainPersistenceContext',
       'sha256Hex',
     ],
     'modules/quick_plan/quick_plan_contract.ts': ['canonicalJson', 'sha256Hex'],
     'modules/route/firestore_route_service.ts': [
       'assertContentEmulatorContext',
+      // Pilot 2.5 (owner 2026-11-21): the reviewed dev-cloud guard.
+      'assertMediaChainPersistenceContext',
       // J2: read-only standing check before a Route mutation, like I3 below.
       'routePublicationStanding',
       'canonicalJson',
@@ -947,6 +957,8 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/route/route_contract.ts': ['canonicalJson', 'sha256Hex'],
     'modules/quick_plan/firestore_scenario_service.ts': [
       'assertContentEmulatorContext',
+      // Pilot 2.4 (owner 2026-11-21): the reviewed dev-cloud guard.
+      'assertMediaChainPersistenceContext',
       'scenarioPublicationStanding',
       'canonicalJson',
       'sha256Hex',
@@ -1054,8 +1066,9 @@ void test('delegated import never reaches Content storage except through the Con
       // D3.7 §6: the fresh Find People read gate (Content pointer, consent, age, K2).
       'FirestoreFindPeoplePrivacy',
     ],
+    // Pilot 2.3 (owner 2026-11-21): the reviewed dev-cloud guard.
     'modules/catalog/infrastructure/firestore_catalog_repository.ts': [
-      'assertContentEmulatorContext',
+      'assertMediaChainPersistenceContext',
     ],
     'modules/media/infrastructure/emulator_media_composition.ts': [
       'ContentMediaScope',

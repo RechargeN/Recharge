@@ -6,6 +6,7 @@ import type { ServerClock } from '../../shared/server_clock.js';
 import { FirestoreFeatureFlagGate } from '../../platform/config/firestore_feature_flag_gate.js';
 import {
   assertContentEmulatorContext,
+  assertMediaChainPersistenceContext,
   contentCollections,
 } from '../content/infrastructure/firestore_content_repository.js';
 import { canonicalJson, sha256Hex } from '../content/domain/published_revision.js';
@@ -26,13 +27,20 @@ import {
 } from './library_contract.js';
 
 const hash = (s: string) => createHash('sha256').update(s).digest('hex');
-/** Emulator-only persistence. Actor is resolved from a verified session inside every transaction. */
+/**
+ * Library persistence. Actor is resolved from a verified session inside every
+ * transaction. Emulator by default; pilot 2.1 (owner 2026-11-21, variant A):
+ * the dev/stage cloud entry passes `cloud` with its deploy switch, under the
+ * reviewed dev-cloud persistence context, instead of the Emulator-only flag.
+ */
 export class FirestoreLibraryService {
   constructor(
     private readonly db: Firestore,
     private readonly clock: ServerClock,
+    private readonly options: Readonly<{ cloud?: Readonly<{ enabled: boolean }> }> = {},
   ) {
-    assertContentEmulatorContext(db);
+    if (options.cloud === undefined) assertContentEmulatorContext(db);
+    else assertMediaChainPersistenceContext(db);
   }
   private async actor(tx: Transaction, hint: BookingAccessHint): Promise<string | null> {
     try {
@@ -48,6 +56,7 @@ export class FirestoreLibraryService {
     }
   }
   private flag(tx: Transaction): Promise<boolean> {
+    if (this.options.cloud !== undefined) return Promise.resolve(this.options.cloud.enabled);
     return new FirestoreFeatureFlagGate(this.db, 'local', 'LV').isEnabled(libraryFlagId, tx);
   }
   async command(hint: BookingAccessHint, raw: unknown): Promise<LibraryResult> {
