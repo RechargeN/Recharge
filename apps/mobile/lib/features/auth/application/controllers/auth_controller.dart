@@ -40,9 +40,6 @@ class AuthController extends ChangeNotifier {
   /// controller retries by itself, but only after the longest backoff step.
   static const String rateLimitedMessage = 'AUTH_TOO_MANY_ATTEMPTS';
 
-  /// The snapshot could not be renewed; the Session itself was not refused.
-  static const String staleSnapshotCode = 'SNAPSHOT_STALE';
-
   /// Another auth operation holds the repository; not a decision about the
   /// Session, so restore simply tries again.
   static const String busyCode = 'auth_operation_in_progress';
@@ -577,10 +574,10 @@ class AuthController extends ChangeNotifier {
       _lastConfirmedUser = null;
       // Decision #4: the sign-in is gone, so a cold start without network must
       // not show it as signed in. The cache stays: nothing is confirmed.
-      // A stale snapshot is no refusal: the Session is kept, so is the profile.
-      if (supportsGoogleSignIn && e.code != staleSnapshotCode) {
-        _forgetOfflineProfile();
-      }
+      // Also for a stale snapshot: the app shows a guest from here, and a guest
+      // must have no kept owner, because the Saved copy outlives a revocation.
+      // The next confirmed answer saves the profile again.
+      if (supportsGoogleSignIn) _forgetOfflineProfile();
       _setState(
         const AuthState.guest().copyWith(
           errorCode: e.code,
@@ -649,6 +646,7 @@ class AuthController extends ChangeNotifier {
         DateTime.now().toUtc(),
       );
       if (remaining <= Duration.zero) {
+        _forgetOfflineProfile();
         _setState(const AuthState.guest());
         return;
       }
