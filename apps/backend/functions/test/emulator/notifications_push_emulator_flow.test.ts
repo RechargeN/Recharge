@@ -94,12 +94,14 @@ async function waitFor(
   field: string,
   value: string,
   count: number,
+  settled: (document: DocumentData) => boolean = () => true,
 ): Promise<DocumentData[]> {
   const deadline = Date.now() + 30_000;
   for (;;) {
     const snapshot = await firestore.collection(collection).where(field, '==', value).get();
-    if (snapshot.size >= count || Date.now() > deadline)
-      return snapshot.docs.map((document) => document.data());
+    const documents = snapshot.docs.map((document) => document.data());
+    if ((documents.length >= count && documents.every(settled)) || Date.now() > deadline)
+      return documents;
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
 }
@@ -145,7 +147,14 @@ void test('register, inbox item, then one push hint; unregister stops push', asy
   await book(owner, '01JN3CPUSHFLOW00000000001', 'occ_01JN3CPUSHFLOW000000001');
   const items = await waitFor(notificationCollections.inboxItems, 'recipientId', owner, 1);
   assert.equal(items.length, 1, 'the inbox record comes first');
-  const attempts = await waitFor(pushCollections.attempts, 'userId', owner, 1);
+  // The dispatcher commits the attempt as `sending` before it calls the provider.
+  const attempts = await waitFor(
+    pushCollections.attempts,
+    'userId',
+    owner,
+    1,
+    (attempt) => attempt.state !== 'sending',
+  );
   assert.equal(attempts.length, 1);
   assert.equal(attempts[0]?.state, 'sent');
   assert.equal(attempts[0]?.notificationId, items[0]?.notificationId);
