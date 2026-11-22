@@ -1,5 +1,12 @@
+import 'dart:io';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+
 import '../../shared/primitives/time/utc_instant.dart';
 import '../../shared/primitives/time/local_date.dart';
+import '../../features/favorites/data/datasources/favorites_local_datasource.dart';
+import '../../features/favorites/data/models/favorite_item_model.dart';
 import '../../features/favorites/domain/entities/favorite_item_entity.dart';
 import '../../features/favorites/domain/repositories/favorites_repository.dart';
 import '../../features/visited/domain/entities/visited_place_entity.dart';
@@ -11,12 +18,59 @@ Map<String, Object?> _snapshot(Map<String, Object?> entry) =>
 
 /// App-level mapping keeps Library, Favorites and Visit History feature boundaries separate.
 final class ServerFavoritesRepository implements FavoritesRepository {
-  const ServerFavoritesRepository(this.client);
+  const ServerFavoritesRepository(
+    this.client, {
+    this.savedCopy,
+    this.currentOwnerId,
+  });
   final LibrarySyncClient client;
+  final FavoritesLocalDataSource? savedCopy;
+  final Future<String?> Function()? currentOwnerId;
+
+  /// Failures that say nothing about the list. `unauthenticated` is one of
+  /// them: a cold start without a network has no armed token yet, and an
+  /// ended sign-in has no kept owner to read a copy for.
+  static bool _noAnswer(Object error) => switch (error) {
+    LibraryFailure(:final code) => const <String>{
+      'unavailable',
+      'deadline-exceeded',
+      'unauthenticated',
+    }.contains(code),
+    FirebaseAuthException(:final code) => code == 'network-request-failed',
+    SocketException() => true,
+    _ => false,
+  };
 
   @override
   Future<List<FavoriteItemEntity>> getFavorites() async {
-    await client.refresh();
+    try {
+      await client.refresh();
+    } catch (error) {
+      if (!_noAnswer(error)) rethrow;
+      final owner = await currentOwnerId?.call();
+      final copy = savedCopy;
+      if (owner == null || copy == null || !await copy.hasFavorites(owner)) {
+        rethrow;
+      }
+      final saved = await copy.readFavorites(owner);
+      return saved.map((item) => item.toEntity()).toList(growable: false);
+    }
+    final items = _serverFavorites();
+    final owner = client.ownerId;
+    if (owner != null) {
+      try {
+        await savedCopy?.writeFavorites(
+          owner,
+          items.map(FavoriteItemModel.fromEntity).toList(growable: false),
+        );
+      } on Exception catch (error) {
+        debugPrint('recharge-favorites: copy not saved ${error.runtimeType}');
+      }
+    }
+    return items;
+  }
+
+  List<FavoriteItemEntity> _serverFavorites() {
     final result = client.entries.where((e) => e['kind'] == 'favorite').map((
       e,
     ) {
