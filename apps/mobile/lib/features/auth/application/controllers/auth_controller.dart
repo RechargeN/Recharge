@@ -40,6 +40,9 @@ class AuthController extends ChangeNotifier {
   /// controller retries by itself, but only after the longest backoff step.
   static const String rateLimitedMessage = 'AUTH_TOO_MANY_ATTEMPTS';
 
+  /// The snapshot could not be renewed; the Session itself was not refused.
+  static const String staleSnapshotCode = 'SNAPSHOT_STALE';
+
   /// Another auth operation holds the repository; not a decision about the
   /// Session, so restore simply tries again.
   static const String busyCode = 'auth_operation_in_progress';
@@ -85,16 +88,25 @@ class AuthController extends ChangeNotifier {
        _analyticsService = analyticsService,
        _productAnalytics = productAnalytics {
     _sessionSubscription = sessionEvents?.invalidated.listen((_) {
-      // A server-confirmed end of access (explicit refusal, never a network
-      // error): the account's personal cache on this phone goes too
-      // (owner decision 2026-11-21, item 5).
-      final ended = _lastConfirmedUser?.id;
+      // The SDK lost its user. The server confirmed nothing, so no cache is
+      // wiped (decision 2026-11-21 #5); the phone only signs out (#4).
       suspendServerAuthority();
+      _forgetOfflineProfile();
       unawaited(_signOutUseCase().catchError((Object _) {}));
-      final store = _offlineAccount;
-      if (ended != null && store != null) {
-        unawaited(store.wipeAccountData(ended).catchError((Object _) {}));
-      }
+    });
+    _accessEndedSubscription = sessionEvents?.accessEnded.listen((_) {
+      // The server revoked the Session or blocked the account: nothing is left
+      // to revoke, and the cached copies of server data go (decision #5).
+      final ended = _lastConfirmedUser?.id;
+      _serverUnreachable = false;
+      suspendServerAuthority();
+      _setState(
+        const AuthState.guest().copyWith(
+          errorCode: sessionExpiredMessage,
+          message: sessionExpiredMessage,
+        ),
+      );
+      unawaited(_wipeEndedAccount(ended).catchError((Object _) {}));
     });
     _networkSubscription = networkStatus?.changes.listen(
       _onNetwork,
@@ -142,6 +154,15 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  Future<void> _wipeEndedAccount(String? endedUserId) async {
+    final store = _offlineAccount;
+    if (store == null) return;
+    // A cold start may hear the refusal before it knows the kept account.
+    final userId = endedUserId ?? (await store.readOfflineProfile())?.id;
+    if (userId == null) return store.clearOfflineProfile();
+    await store.wipeAccountData(userId);
+  }
+
   void _forgetOfflineProfile() {
     final store = _offlineAccount;
     if (store != null) {
@@ -160,6 +181,7 @@ class AuthController extends ChangeNotifier {
   Timer? _rateLimitRetry;
   int _offlineAttempt = 0;
   StreamSubscription<void>? _sessionSubscription;
+  StreamSubscription<void>? _accessEndedSubscription;
   int _generation = 0;
   bool _federatedSignInInProgress = false;
 
@@ -462,12 +484,15 @@ class AuthController extends ChangeNotifier {
     // open signed in (no role, no capabilities, no server authority).
     final store = _offlineAccount;
     if (_lastConfirmedUser == null && store != null) {
+      AuthUserEntity? kept;
       try {
-        _lastConfirmedUser = await store.readOfflineProfile();
+        kept = await store.readOfflineProfile();
       } catch (_) {
         /* No profile: the user starts as a guest, as before. */
       }
+      // A sign-out during the read must not bring the user back.
       if (supportsGoogleSignIn && generation != _generation) return;
+      _lastConfirmedUser = kept;
     }
     _analyticsService.track(
       'auth_session_restore_started',
@@ -550,6 +575,12 @@ class AuthController extends ChangeNotifier {
       // An explicit server refusal: the kept user is gone too.
       _serverUnreachable = false;
       _lastConfirmedUser = null;
+      // Decision #4: the sign-in is gone, so a cold start without network must
+      // not show it as signed in. The cache stays: nothing is confirmed.
+      // A stale snapshot is no refusal: the Session is kept, so is the profile.
+      if (supportsGoogleSignIn && e.code != staleSnapshotCode) {
+        _forgetOfflineProfile();
+      }
       _setState(
         const AuthState.guest().copyWith(
           errorCode: e.code,
@@ -713,6 +744,7 @@ class AuthController extends ChangeNotifier {
     _disposed = true;
     unawaited(_networkSubscription?.cancel());
     unawaited(_sessionSubscription?.cancel());
+    unawaited(_accessEndedSubscription?.cancel());
     _authority.dispose();
     super.dispose();
   }

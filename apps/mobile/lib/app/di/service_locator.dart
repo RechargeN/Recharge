@@ -4,6 +4,7 @@ import '../../features/auth/domain/repositories/offline_account_store.dart';
 import '../../features/auth/domain/repositories/auth_session_events.dart';
 import 'dart:io';
 import 'connectivity_network_status.dart';
+import 'saved_owner.dart';
 import 'dev_auth_bundle.dart';
 import 'dev_booking_cloud.dart';
 import 'dev_content_media_port.dart';
@@ -1092,8 +1093,12 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
           ? ServerFavoritesRepository(sl())
           : FavoritesRepositoryImpl(
               localDataSource: sl(),
-              currentOwnerId: () async =>
-                  (await sl<AuthRepository>().getCurrentUser())?.id,
+              // OFFLINE-01: the phone-kept list opens without a network.
+              currentOwnerId: () => savedOwnerId(
+                serverAuth: devAuth != null,
+                auth: sl(),
+                account: sl(),
+              ),
             ),
     )
     ..registerLazySingleton<NotificationsLocalDataSource>(

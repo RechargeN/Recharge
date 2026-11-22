@@ -323,4 +323,6 @@ class _SessionEvents implements AuthSessionEvents {
   final source = StreamController<void>();
   @override
   Stream<void> get invalidated => source.stream;
+  @override
+  Stream<void> get accessEnded => const Stream<void>.empty();
 }
