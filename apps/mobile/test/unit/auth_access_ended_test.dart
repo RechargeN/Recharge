@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recharge/app/di/saved_owner.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
@@ -70,6 +71,7 @@ class _Repository implements FederatedAuthRepository {
   bool ended = false;
   int signOuts = 0;
   bool signedOut = false;
+  Duration lifetime = const Duration(hours: 1);
 
   @override
   Future<AuthResultEntity?> restoreSession() async {
@@ -85,7 +87,7 @@ class _Repository implements FederatedAuthRepository {
         sessionId: 'server',
         serverSessionHandle: 'A' * 43,
         installationId: 'install',
-        expiresAtUtc: DateTime.now().toUtc().add(const Duration(hours: 1)),
+        expiresAtUtc: DateTime.now().toUtc().add(lifetime),
       ),
       user: _user,
     );
@@ -257,14 +259,32 @@ void main() {
     });
   }
 
-  test('a stale snapshot is no refusal: the profile stays', () async {
+  // The Saved copy outlives a revocation (owner 2026-11-22), so the owner that
+  // the real resolver reads must be gone whenever the app shows a guest.
+  Future<void> expectGuestHasNoSavedOwner() async {
+    await settle();
+    expect(controller.state.isGuest, isTrue);
+    final owner = await savedOwnerId(
+      serverAuth: true,
+      auth: repository,
+      account: store,
+    );
+    expect(owner, isNull);
+    expect(store.wiped, isEmpty);
+  }
+
+  test('a stale snapshot leaves a guest without a Saved owner', () async {
     await signedIn();
     repository.failure = 'SNAPSHOT_STALE';
     await controller.restoreSession();
-    await settle();
+    await expectGuestHasNoSavedOwner();
+  });
 
-    expect(store.profile, isNotNull);
-    expect(store.wiped, isEmpty);
+  test('an expired answer leaves a guest without a Saved owner', () async {
+    await signedIn();
+    repository.lifetime = const Duration(seconds: -1);
+    await controller.restoreSession();
+    await expectGuestHasNoSavedOwner();
   });
 
   test('a sign-out during the profile read brings nobody back', () async {
