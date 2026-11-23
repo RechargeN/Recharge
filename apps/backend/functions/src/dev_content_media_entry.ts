@@ -31,6 +31,15 @@ const options = {
   invoker: 'public' as const,
   secrets: ['MEDIA_TOOLS_TOKEN'],
 };
+/**
+ * Gap plan round 1, item 1.3 (owner approval 2026-11-23): read endpoints the
+ * app calls in parallel take 10 requests per instance. With concurrency 1 a
+ * parallel request waited for the single instance and failed with 500
+ * (staging contentQueryV1, 2026-11-19). maxInstances and cpu are unchanged, so
+ * the cost ceiling is the same.
+ */
+export const readQueryConcurrency = 10;
+const readOptions = { ...options, concurrency: readQueryConcurrency };
 /** 1 MiB image as base64 plus the envelope. */
 const maxBodyBytes = 1_500_000;
 
@@ -146,7 +155,7 @@ async function dispatch(callable: DevCallableName, request: Request, response: R
 export const contentCommandV1 = onRequest(options, (req, res) =>
   dispatch('contentCommandV1', req, res),
 );
-export const contentQueryV1 = onRequest(options, (req, res) =>
+export const contentQueryV1 = onRequest(readOptions, (req, res) =>
   dispatch('contentQueryV1', req, res),
 );
 export const mediaCommandV1 = onRequest(options, (req, res) =>
