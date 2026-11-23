@@ -483,19 +483,38 @@ final class FunctionsBookingCallablePort implements BookingCallablePort {
     required BookingFirebaseIdTokenProvider tokens,
     required BookingIdentitySessionStore sessions,
     FunctionsIdentitySessionClient? identitySessions,
+    BookingAppCheckTokenProvider? appCheck,
     this.onAccessEnded,
     this.timeout = const Duration(seconds: 35),
   }) : _endpoint = endpoint,
        _client = client,
        _tokens = tokens,
        _sessions = sessions,
-       _identitySessions = identitySessions;
+       _identitySessions = identitySessions,
+       _appCheck = appCheck;
 
   final BookingBackendEndpoint _endpoint;
   final http.Client _client;
   final BookingFirebaseIdTokenProvider _tokens;
   final BookingIdentitySessionStore _sessions;
   final FunctionsIdentitySessionClient? _identitySessions;
+
+  /// App Check in observe mode (gap plan round 2, item 2.6): every product
+  /// call carries the token when one is available; a missing or failing token
+  /// never blocks or fails the call. Enforcement is a separate decision.
+  final BookingAppCheckTokenProvider? _appCheck;
+
+  Future<Map<String, String>> _appCheckHeaders() async {
+    final appCheck = _appCheck;
+    if (appCheck == null) return const {};
+    try {
+      final token = await appCheck.currentToken();
+      if (token.trim().isEmpty) return const {};
+      return {'X-Firebase-AppCheck': token};
+    } on Object {
+      return const {};
+    }
+  }
 
   /// The Session repair below goes past the auth repository and clears the
   /// stored Session on a refusal, so a confirmed end of access is told here
@@ -531,6 +550,7 @@ final class FunctionsBookingCallablePort implements BookingCallablePort {
     final payload = Map<String, Object?>.from(command)
       ..remove('sessionContext')
       ..['sessionContext'] = session.toJson();
+    final appCheckHeaders = await _appCheckHeaders();
     Map<String, Object?> result;
     try {
       result = await _invokeCallable(
@@ -540,6 +560,7 @@ final class FunctionsBookingCallablePort implements BookingCallablePort {
         data: payload,
         idToken: token,
         timeout: timeout,
+        additionalHeaders: appCheckHeaders,
       );
     } on BookingCallableFailure catch (error) {
       if (!allowSessionRepair || error.code != 'unauthenticated') rethrow;
@@ -552,6 +573,7 @@ final class FunctionsBookingCallablePort implements BookingCallablePort {
         data: payload,
         idToken: token,
         timeout: timeout,
+        additionalHeaders: appCheckHeaders,
       );
     }
     final error = result['error'];
