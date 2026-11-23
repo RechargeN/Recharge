@@ -2,17 +2,6 @@ name: Backend R0 toolchain and emulator feasibility
 
 on:
   pull_request:
-    paths:
-      - ".github/workflows/backend-r0.yml"
-      - "apps/backend/**"
-      - "packages/api_contracts/schema/booking/v1/**"
-      - "docs/evidence/backend/r0/**"
-      - "docs/product/BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md"
-      - "docs/product/BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md"
-      - "docs/product/BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md"
-      - "docs/product/BACKEND_R0_APPROVAL_DECISION_RECORD.md"
-      - "docs/product/BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md"
-      - "docs/product/BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md"
   push:
     paths:
       - ".github/workflows/backend-r0.yml"
@@ -22,13 +11,50 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: backend-r0-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    # Always runs, so the required gate below never waits on a workflow that
+    # did not start (path filters on the trigger made that impossible).
+    name: R0 changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      backend: ${{ steps.match.outputs.matched }}
+    steps:
+      - name: Checkout scripts only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+          fetch-depth: 1
+      - name: Match changed paths
+        id: match
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          bash .github/scripts/pr-touches.test.sh
+          bash .github/scripts/pr-touches.sh \
+            '.github/workflows/backend-r0.yml' \
+            'apps/backend/*' \
+            'packages/api_contracts/schema/booking/v1/*' \
+            'docs/evidence/backend/r0/*' \
+            'docs/product/BACKEND_RUNTIME_TOOLCHAIN_STANDARD.md' \
+            'docs/product/BACKEND_RUNTIME_TOOLCHAIN_TECHNICAL_REVIEW.md' \
+            'docs/product/BACKEND_R0_TOOLCHAIN_EMULATOR_SLICE_SPEC.md' \
+            'docs/product/BACKEND_R0_APPROVAL_DECISION_RECORD.md' \
+            'docs/product/BACKEND_EVENT_BOOKING_RAW_BODY_EMULATOR_SLICE_SPEC.md' \
+            'docs/product/BACKEND_EVENT_BOOKING_DISABLED_RUNTIME_ADAPTER_SLICE_SPEC.md'
+
   verify:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     name: R0 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 118
@@ -172,3 +198,25 @@ jobs:
       - name: Terraform validate
         working-directory: apps/backend/infra/terraform
         run: terraform validate -no-color
+
+  gate:
+    # The one check name branch protection requires for this workflow.
+    # Success when the heavy job passed, or was skipped because the PR does
+    # not touch its paths; failure otherwise (failed, cancelled, timed out).
+    name: Backend R0 gate
+    needs: [changes, verify]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Evaluate verify
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          RESULT: ${{ needs.verify.result }}
+        run: |
+          echo "changes=$CHANGES verify=$RESULT"
+          if [ "$CHANGES" != "success" ]; then exit 1; fi
+          case "$RESULT" in
+            success|skipped) exit 0 ;;
+            *) exit 1 ;;
+          esac

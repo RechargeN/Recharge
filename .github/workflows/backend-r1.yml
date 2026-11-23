@@ -2,25 +2,51 @@ name: Backend R1 local platform foundation
 
 on:
   pull_request:
-    paths:
-      - ".github/workflows/backend-r1.yml"
-      - "apps/backend/**"
-      - "packages/api_contracts/schema/platform/v1/**"
-      - "packages/api_contracts/schema/reference_data/v1/**"
-      - "packages/api_contracts/schema/privacy/v1/**"
-      - "packages/api_contracts/schema/identity/v1/**"
-      - "docs/product/RECHARGE_BACKEND_DELIVERY_MAP.md"
   workflow_dispatch:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: backend-r1-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    # Always runs, so the required gate below never waits on a workflow that
+    # did not start (path filters on the trigger made that impossible).
+    name: R1 changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      backend: ${{ steps.match.outputs.matched }}
+    steps:
+      - name: Checkout scripts only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+          fetch-depth: 1
+      - name: Match changed paths
+        id: match
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          bash .github/scripts/pr-touches.test.sh
+          bash .github/scripts/pr-touches.sh \
+            '.github/workflows/backend-r1.yml' \
+            'apps/backend/*' \
+            'packages/api_contracts/schema/platform/v1/*' \
+            'packages/api_contracts/schema/reference_data/v1/*' \
+            'packages/api_contracts/schema/privacy/v1/*' \
+            'packages/api_contracts/schema/identity/v1/*' \
+            'docs/product/RECHARGE_BACKEND_DELIVERY_MAP.md'
+
   verify:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     name: Credential-free R1 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     # 2026-11-09: the full Emulator suite alone takes ~40 min on windows-2025
@@ -114,3 +140,25 @@ jobs:
       - name: Empty unbound Terraform plan
         working-directory: apps/backend/functions
         run: npm run infra:r1:plan
+
+  gate:
+    # The one check name branch protection requires for this workflow.
+    # Success when the heavy job passed, or was skipped because the PR does
+    # not touch its paths; failure otherwise (failed, cancelled, timed out).
+    name: Backend R1 gate
+    needs: [changes, verify]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Evaluate verify
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          RESULT: ${{ needs.verify.result }}
+        run: |
+          echo "changes=$CHANGES verify=$RESULT"
+          if [ "$CHANGES" != "success" ]; then exit 1; fi
+          case "$RESULT" in
+            success|skipped) exit 0 ;;
+            *) exit 1 ;;
+          esac

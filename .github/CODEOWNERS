@@ -1,0 +1,13 @@
+# Every change needs the repository owner's review (O1 B-02, 2026-11-23).
+# Branch rules on `main` and `codex/recharge-integration` require one approval;
+# the owner is the only code owner until a second reviewer is named (D-01).
+*                         @RechargeN
+
+# Release, CI and infrastructure paths: listed explicitly so a later split of
+# ownership cannot silently drop them.
+/.github/                 @RechargeN
+/apps/backend/infra/      @RechargeN
+/apps/backend/config/     @RechargeN
+/apps/backend/firestore.rules @RechargeN
+/apps/backend/storage.rules   @RechargeN
+/tools/scripts/           @RechargeN
