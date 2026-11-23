@@ -15,11 +15,14 @@ final class NativeDevAuthSessionGateway implements DevAuthSessionGateway {
     required this.coordinator,
     required this.installations,
     required this.store,
-    Future<void> Function()? revokeCurrentSession,
+    Future<void> Function({bool allSessions})? revokeCurrentSession,
     DateTime Function()? now,
   }) : revokeCurrentSession =
            revokeCurrentSession ??
-           (() => coordinator.sessions.revoke(requestId: const Uuid().v4())),
+           (({bool allSessions = false}) => coordinator.sessions.revoke(
+             requestId: const Uuid().v4(),
+             allSessions: allSessions,
+           )),
        _now = now ?? (() => DateTime.now().toUtc()) {
     if (!coordinator.sessions.isDevGoogleFor(store, coordinator.identity)) {
       throw StateError('dev_auth_gateway_binding_invalid');
@@ -28,7 +31,7 @@ final class NativeDevAuthSessionGateway implements DevAuthSessionGateway {
   final DevAndroidIdentitySessionCoordinator coordinator;
   final BookingInstallationIdProvider installations;
   final BookingIdentitySessionStore store;
-  final Future<void> Function() revokeCurrentSession;
+  final Future<void> Function({bool allSessions}) revokeCurrentSession;
   final DateTime Function() _now;
 
   /// The user closed the Google account picker: nothing failed.
@@ -161,9 +164,9 @@ final class NativeDevAuthSessionGateway implements DevAuthSessionGateway {
   }
 
   @override
-  Future<void> revokeAndSignOut() async {
+  Future<void> revokeAndSignOut({bool allSessions = false}) async {
     try {
-      await revokeCurrentSession();
+      await revokeCurrentSession(allSessions: allSessions);
     } finally {
       await clearLocal();
     }

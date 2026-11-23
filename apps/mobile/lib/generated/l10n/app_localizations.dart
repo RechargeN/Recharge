@@ -358,6 +358,24 @@ abstract class AppLocalizations {
   /// **'Sign out'**
   String get settingsSignOut;
 
+  /// Settings button: the server ends every Session of the account (owner 2026-11-23).
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out on all devices'**
+  String get settingsSignOutEverywhere;
+
+  /// Confirmation dialog title for signing out on all devices.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out on all devices?'**
+  String get settingsSignOutEverywhereTitle;
+
+  /// Confirmation dialog text: every signed-in phone signs out; nothing is deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Every phone signed in to this account will be signed out. Nothing is deleted from your phones.'**
+  String get settingsSignOutEverywhereBody;
+
   /// Settings section.
   ///
   /// In en, this message translates to:

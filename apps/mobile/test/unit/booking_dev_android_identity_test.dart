@@ -191,7 +191,7 @@ void main() {
         coordinator: coordinator,
         installations: _Installations(),
         store: sessions,
-        revokeCurrentSession: () async {},
+        revokeCurrentSession: ({bool allSessions = false}) async {},
         now: () => current,
       );
       final repository = DevServerAuthRepository(
@@ -438,7 +438,7 @@ void main() {
             ),
             installations: _Installations(),
             store: sessions,
-            revokeCurrentSession: () async {},
+            revokeCurrentSession: ({bool allSessions = false}) async {},
           ),
         );
         var ended = 0;

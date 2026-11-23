@@ -140,6 +140,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSignOut => 'Sign out';
 
   @override
+  String get settingsSignOutEverywhere => 'Sign out on all devices';
+
+  @override
+  String get settingsSignOutEverywhereTitle => 'Sign out on all devices?';
+
+  @override
+  String get settingsSignOutEverywhereBody =>
+      'Every phone signed in to this account will be signed out. Nothing is deleted from your phones.';
+
+  @override
   String get settingsProfileInformation => 'Profile information';
 
   @override

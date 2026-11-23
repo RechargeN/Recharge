@@ -140,6 +140,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsSignOut => 'Выйти';
 
   @override
+  String get settingsSignOutEverywhere => 'Выйти на всех устройствах';
+
+  @override
+  String get settingsSignOutEverywhereTitle => 'Выйти на всех устройствах?';
+
+  @override
+  String get settingsSignOutEverywhereBody =>
+      'Все телефоны с этим аккаунтом выйдут из него. С телефонов ничего не удаляется.';
+
+  @override
   String get settingsProfileInformation => 'Информация профиля';
 
   @override

@@ -30,7 +30,7 @@ class Gateway implements DevAuthSessionGateway {
   @override
   Future<void> clearLocal() async {}
   @override
-  Future<void> revokeAndSignOut() async {
+  Future<void> revokeAndSignOut({bool allSessions = false}) async {
     revoked = true;
   }
 }

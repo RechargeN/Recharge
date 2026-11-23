@@ -243,6 +243,37 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               },
               child: Text(l10n.settingsSignOut),
             ),
+            // Owner 2026-11-23: the server ends every Session of the account.
+            if (authController.supportsSignOutEverywhere) ...<Widget>[
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: () async {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (dialogContext) => AlertDialog(
+                      title: Text(l10n.settingsSignOutEverywhereTitle),
+                      content: Text(l10n.settingsSignOutEverywhereBody),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () =>
+                              Navigator.of(dialogContext).pop(false),
+                          child: Text(l10n.commonCancel),
+                        ),
+                        FilledButton(
+                          onPressed: () =>
+                              Navigator.of(dialogContext).pop(true),
+                          child: Text(l10n.settingsSignOutEverywhere),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed != true) return;
+                  await authController.signOutEverywhere();
+                  if (context.mounted) context.go(RouteNames.discover);
+                },
+                child: Text(l10n.settingsSignOutEverywhere),
+              ),
+            ],
           ],
         ),
       },
