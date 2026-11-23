@@ -9,6 +9,7 @@ import '../../domain/entities/auth_result_entity.dart';
 import '../../domain/entities/auth_user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/repositories/network_status.dart';
+import '../../domain/repositories/sign_out_everywhere.dart';
 import '../../domain/repositories/offline_account_store.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/restore_session_usecase.dart';
@@ -75,7 +76,9 @@ class AuthController extends ChangeNotifier {
     AuthSessionEvents? sessionEvents,
     OfflineAccountStore? offlineAccount,
     NetworkStatus? networkStatus,
+    SignOutEverywhere? signOutEverywhere,
   }) : _offlineAccount = offlineAccount,
+       _signOutEverywhere = signOutEverywhere,
        _networkStatus = networkStatus,
        _signInWithGoogleUseCase = signInWithGoogleUseCase,
        _signInUseCase = signInUseCase,
@@ -114,6 +117,10 @@ class AuthController extends ChangeNotifier {
   }
 
   final OfflineAccountStore? _offlineAccount;
+
+  /// Owner 2026-11-23: "Sign out on all devices" (only with a server Session).
+  final SignOutEverywhere? _signOutEverywhere;
+  bool get supportsSignOutEverywhere => _signOutEverywhere != null;
 
   final NetworkStatus? _networkStatus;
   StreamSubscription<bool>? _networkSubscription;
@@ -591,7 +598,19 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  Future<void> signOut() async {
+  Future<void> signOut() => _signOutWith(() => _signOutUseCase());
+
+  /// The server ends every Session of the account; this phone signs out and
+  /// forgets the offline profile. Nothing else on the phone is wiped.
+  Future<void> signOutEverywhere() {
+    final everywhere = _signOutEverywhere;
+    if (everywhere == null) {
+      throw StateError('sign_out_everywhere_unavailable');
+    }
+    return _signOutWith(everywhere.signOutEverywhere);
+  }
+
+  Future<void> _signOutWith(Future<void> Function() end) async {
     _lastConfirmedUser = null;
     _forgetOfflineProfile();
     if (supportsGoogleSignIn) {
@@ -605,7 +624,7 @@ class AuthController extends ChangeNotifier {
       params: <String, Object?>{'source_screen': 'profile'},
     );
     try {
-      await _signOutUseCase();
+      await end();
       final restored = await _restoreSessionUseCase();
       if (restored == null) {
         _setState(const AuthState.guest());

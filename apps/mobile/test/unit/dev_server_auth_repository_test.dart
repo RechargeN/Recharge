@@ -38,7 +38,8 @@ class Gateway implements DevAuthSessionGateway {
   }
 
   @override
-  Future<void> revokeAndSignOut() => logout?.future ?? Future<void>.value();
+  Future<void> revokeAndSignOut({bool allSessions = false}) =>
+      logout?.future ?? Future<void>.value();
 }
 
 void main() {

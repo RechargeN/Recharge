@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:recharge/features/auth/domain/repositories/sign_out_everywhere.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/app/config/market_config.dart';
 import 'package:recharge/core/localization/app_locale_policy.dart';
@@ -275,6 +276,8 @@ void main() {
     expect(find.text('Privacy Policy'), findsOneWidget);
     expect(find.text('Terms of Service'), findsOneWidget);
     expect(find.text('Sign out'), findsOneWidget);
+    // Without a server Session there is nothing to end everywhere.
+    expect(find.text('Sign out on all devices'), findsNothing);
     expect(tester.takeException(), isNull);
     await tester.tap(find.text('Sign out'));
     await tester.pumpAndSettle();
@@ -406,6 +409,96 @@ void main() {
       expect(MarketConfig.riga.countryCode, 'LV');
     }
   });
+
+  // Owner 2026-11-23 (variant B): "Sign out on all devices" with a
+  // confirmation; shown only where a server Session can be ended everywhere.
+  testWidgets('sign out on all devices asks first, then ends every Session', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(400, 900)
+      ..devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view
+        ..resetPhysicalSize()
+        ..resetDevicePixelRatio();
+    });
+    final everywhere = _Everywhere();
+    final authController = AuthController(
+      signInUseCase: SignInUseCase(_NoopAuthRepository()),
+      restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+      signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+      getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+      analyticsService: _NoopAnalyticsService(),
+      signOutEverywhere: everywhere,
+    );
+    await authController.signIn(
+      email: 'user@example.com',
+      password: 'password123',
+      sourceScreen: 'test',
+      sourceAction: 'seed',
+    );
+    final exploreRepository = _FakeExploreRepository();
+    final exploreController = ExploreController(
+      loadProfileEditableUseCase: LoadProfileEditableUseCase(exploreRepository),
+      saveProfileEditableUseCase: SaveProfileEditableUseCase(exploreRepository),
+      loadSettingsUseCase: LoadSettingsUseCase(exploreRepository),
+      saveSettingsUseCase: SaveSettingsUseCase(exploreRepository),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    await exploreController.ensureLoaded(
+      userId: 'u',
+      email: 'user@example.com',
+      role: 'user',
+      favoritesCount: 0,
+    );
+    final router = GoRouter(
+      initialLocation: RouteNames.settings,
+      routes: [
+        GoRoute(
+          path: RouteNames.settings,
+          builder: (_, _) => const SettingsPage(),
+        ),
+        GoRoute(
+          path: RouteNames.discover,
+          builder: (_, _) => const Scaffold(body: Text('Logged out home')),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          authControllerProvider.overrideWith((ref) => authController),
+          exploreControllerProvider.overrideWith((ref) => exploreController),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final button = find.text('Sign out on all devices');
+    await tester.scrollUntilVisible(
+      button,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    expect(find.text('Sign out on all devices?'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(everywhere.calls, 0, reason: 'cancel does nothing');
+
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'Sign out on all devices'),
+    );
+    await tester.pumpAndSettle();
+    expect(everywhere.calls, 1);
+    expect(authController.state.isAuthenticated, isFalse);
+    expect(find.text('Logged out home'), findsOneWidget);
+  });
 }
 
 class _NoopAnalyticsService implements AnalyticsService {
@@ -471,4 +564,10 @@ class _FakeExploreRepository implements ExploreRepository {
   Future<void> saveSettings(String userId, SettingsEntity settings) async {
     this.settings[userId] = settings;
   }
+}
+
+class _Everywhere implements SignOutEverywhere {
+  int calls = 0;
+  @override
+  Future<void> signOutEverywhere() async => calls++;
 }

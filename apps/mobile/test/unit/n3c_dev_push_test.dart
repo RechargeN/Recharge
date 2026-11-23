@@ -82,7 +82,8 @@ class _Gateway implements DevAuthSessionGateway {
   Future<ServerAuthContext?> current() async => _context();
 
   @override
-  Future<void> revokeAndSignOut() async => events.add('revoke');
+  Future<void> revokeAndSignOut({bool allSessions = false}) async =>
+      events.add('revoke');
 
   @override
   Future<void> clearLocal() async => events.add('clear');

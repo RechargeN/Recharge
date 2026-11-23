@@ -47,7 +47,7 @@ class _Gateway implements DevAuthSessionGateway {
   Future<ServerAuthContext> signInWithGoogle() => throw UnimplementedError();
 
   @override
-  Future<void> revokeAndSignOut() async {}
+  Future<void> revokeAndSignOut({bool allSessions = false}) async {}
 }
 
 /// [callable] is the answer of the inbox query, [session] of the repair.

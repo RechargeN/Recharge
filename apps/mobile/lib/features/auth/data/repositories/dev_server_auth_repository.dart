@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/auth_result_entity.dart';
 import '../../domain/entities/auth_user_entity.dart';
+import '../../domain/repositories/sign_out_everywhere.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../models/server_auth_context.dart';
 
@@ -11,7 +12,9 @@ abstract interface class DevAuthSessionGateway {
   Future<ServerAuthContext> signInWithGoogle();
   Future<ServerAuthContext?> refresh();
   Future<ServerAuthContext?> current();
-  Future<void> revokeAndSignOut();
+
+  /// [allSessions]: the server ends every Session of the account.
+  Future<void> revokeAndSignOut({bool allSessions = false});
   Future<void> clearLocal();
 }
 
@@ -29,7 +32,8 @@ const String rateLimitedAuthErrorCode = 'AUTH_TOO_MANY_ATTEMPTS';
 /// Not a decision about the Session: credentials stay and restore rotates.
 const String staleSnapshotAuthErrorCode = 'SNAPSHOT_STALE';
 
-final class DevServerAuthRepository implements FederatedAuthRepository {
+final class DevServerAuthRepository
+    implements FederatedAuthRepository, SignOutEverywhere {
   DevServerAuthRepository({required this.gateway, DateTime Function()? now})
     : _now = now ?? (() => DateTime.now().toUtc());
   final DevAuthSessionGateway gateway;
@@ -181,7 +185,12 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
   }
 
   @override
-  Future<void> signOut() async {
+  Future<void> signOut() => _signOut(allSessions: false);
+
+  @override
+  Future<void> signOutEverywhere() => _signOut(allSessions: true);
+
+  Future<void> _signOut({required bool allSessions}) async {
     if (_signingOut) {
       throw const AuthException(
         code: 'auth_operation_in_progress',
@@ -191,7 +200,7 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
     _signingOut = true;
     _generation++;
     try {
-      await gateway.revokeAndSignOut();
+      await gateway.revokeAndSignOut(allSessions: allSessions);
     } finally {
       try {
         await gateway.clearLocal();

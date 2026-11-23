@@ -140,6 +140,16 @@ class AppLocalizationsLv extends AppLocalizations {
   String get settingsSignOut => 'Izrakstīties';
 
   @override
+  String get settingsSignOutEverywhere => 'Izrakstīties visās ierīcēs';
+
+  @override
+  String get settingsSignOutEverywhereTitle => 'Izrakstīties visās ierīcēs?';
+
+  @override
+  String get settingsSignOutEverywhereBody =>
+      'Visi tālruņi, kuros ir šis konts, tiks izrakstīti. No tālruņiem nekas netiek dzēsts.';
+
+  @override
   String get settingsProfileInformation => 'Profila informācija';
 
   @override
