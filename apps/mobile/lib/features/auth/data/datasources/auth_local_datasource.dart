@@ -91,22 +91,6 @@ class AuthLocalDataSource implements OfflineAccountStore {
   @override
   Future<void> clearOfflineProfile() =>
       _secureStorage.delete(key: _offlineProfileKey);
-
-  @override
-  Future<void> wipeAccountData(String userId) async {
-    if (userId.isEmpty) return;
-    await clearOfflineProfile();
-    // An exact list, never a match by account id: owner decision 2026-11-22
-    // wipes copies of server data only. Drafts, templates, photos, recordings,
-    // favorites, visits and unsent operations may exist only on this phone.
-    for (final key in <String>[
-      'notifications_items_$userId',
-      'identity_active_workspace_$userId',
-      'identity_managed_pages_$userId',
-    ]) {
-      await _secureStorage.delete(key: key);
-    }
-  }
 }
 
 /// Persisted authority must never cross Local, Emulator, and dev boundaries.
