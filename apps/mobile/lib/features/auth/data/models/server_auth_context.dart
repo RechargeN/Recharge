@@ -4,6 +4,9 @@ import '../../domain/entities/auth_session_entity.dart';
 import '../../domain/entities/auth_user_entity.dart';
 
 /// Server-issued personal projection; never deserialized from the Local auth cache.
+/// How far the phone clock may lag the server when a sign-in answer is read.
+const Duration serverClockSkewTolerance = Duration(minutes: 2);
+
 final class ServerAuthContext {
   ServerAuthContext._(this.result, this.accountRevision);
   final AuthResultEntity result;
@@ -151,7 +154,10 @@ final class ServerAuthContext {
     if (instant(session['expiresAtUtc']) != expires ||
         !expires.isAfter(now.toUtc()) ||
         !expires.isAfter(evaluated) ||
-        evaluated.isAfter(now.toUtc())) {
+        // A34/emulator 2026-11-23: a phone clock seconds behind the server
+        // refused every sign-in. A small skew is the phone's clock, not a
+        // forged answer; the answer must still be unexpired on the phone.
+        evaluated.isAfter(now.toUtc().add(serverClockSkewTolerance))) {
       invalid();
     }
     return ServerAuthContext._(
