@@ -5,52 +5,78 @@ name: Backend IaC and execution manifest validation
 
 on:
   pull_request:
-    paths:
-      - ".github/workflows/backend-iac-validate.yml"
-      - "apps/backend/infra/**"
-      - "apps/backend/config/**"
-      - "apps/backend/firestore.rules"
-      - "apps/backend/firestore.indexes.json"
-      - "apps/backend/scripts/verify-execution-manifest.mjs"
-      - "apps/backend/scripts/verify-iac-topology.mjs"
-      - "apps/backend/scripts/verify-dev-apply-approval.mjs"
-      - "apps/backend/scripts/verify-dev-apply-approval.test.mjs"
-      - "apps/backend/scripts/wait-dev-budget-delivery*.mjs"
-      - "apps/backend/scripts/check-dev-bootstrap-plan*.mjs"
-      - "apps/backend/scripts/check-n2c-plan*.mjs"
-      - "apps/backend/scripts/check-n3b-plan*.mjs"
-      - "apps/backend/scripts/check-n3a2-plan*.mjs"
-      - "apps/backend/scripts/package-n3a2-content-media-runtime*.mjs"
-      - "apps/backend/scripts/verify-n3a2-stage.mjs"
-      - "apps/backend/n3a2-content-media-runtime/**"
-      - "apps/backend/scripts/check-n3c-plan*.mjs"
-      - "apps/backend/scripts/package-n3c-notifications-runtime*.mjs"
-      - "apps/backend/n3c-notifications-runtime/**"
-      - "apps/backend/scripts/check-n4c-plan*.mjs"
-      - "apps/backend/scripts/check-n4e-plan*.mjs"
-      - "apps/backend/scripts/package-n4c-booking-runtime*.mjs"
-      - "apps/backend/n4c-booking-runtime/**"
-      - "apps/backend/scripts/build-release-candidate*.mjs"
-      - "apps/backend/scripts/runtime-projects*.mjs"
-      - "apps/backend/scripts/check-n4a-plan*.mjs"
-      - "apps/backend/scripts/package-media-tools-runtime*.mjs"
-      - "apps/backend/media-tools-runtime/**"
-      - "apps/backend/scripts/package-n2c-identity-runtime*.mjs"
-      - "apps/backend/scripts/verify-n2c-stage.mjs"
-      - "apps/backend/n2c-identity-runtime/**"
-      - ".github/workflows/backend-deploy.yml"
-      - "docs/runbooks/backend-*.md"
   workflow_dispatch:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: backend-iac-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    # Always runs, so the required gate below never waits on a workflow that
+    # did not start (path filters on the trigger made that impossible).
+    name: IaC changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      backend: ${{ steps.match.outputs.matched }}
+    steps:
+      - name: Checkout scripts only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+          fetch-depth: 1
+      - name: Match changed paths
+        id: match
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          bash .github/scripts/pr-touches.test.sh
+          bash .github/scripts/pr-touches.sh \
+            '.github/workflows/backend-iac-validate.yml' \
+            'apps/backend/infra/*' \
+            'apps/backend/config/*' \
+            'apps/backend/firestore.rules' \
+            'apps/backend/firestore.indexes.json' \
+            'apps/backend/scripts/verify-execution-manifest.mjs' \
+            'apps/backend/scripts/verify-iac-topology.mjs' \
+            'apps/backend/scripts/verify-dev-apply-approval.mjs' \
+            'apps/backend/scripts/verify-dev-apply-approval.test.mjs' \
+            'apps/backend/scripts/wait-dev-budget-delivery*.mjs' \
+            'apps/backend/scripts/check-dev-bootstrap-plan*.mjs' \
+            'apps/backend/scripts/check-n2c-plan*.mjs' \
+            'apps/backend/scripts/check-n3b-plan*.mjs' \
+            'apps/backend/scripts/check-n3a2-plan*.mjs' \
+            'apps/backend/scripts/package-n3a2-content-media-runtime*.mjs' \
+            'apps/backend/scripts/verify-n3a2-stage.mjs' \
+            'apps/backend/n3a2-content-media-runtime/*' \
+            'apps/backend/scripts/check-n3c-plan*.mjs' \
+            'apps/backend/scripts/package-n3c-notifications-runtime*.mjs' \
+            'apps/backend/n3c-notifications-runtime/*' \
+            'apps/backend/scripts/check-n4c-plan*.mjs' \
+            'apps/backend/scripts/check-n4e-plan*.mjs' \
+            'apps/backend/scripts/package-n4c-booking-runtime*.mjs' \
+            'apps/backend/n4c-booking-runtime/*' \
+            'apps/backend/scripts/build-release-candidate*.mjs' \
+            'apps/backend/scripts/runtime-projects*.mjs' \
+            'apps/backend/scripts/check-n4a-plan*.mjs' \
+            'apps/backend/scripts/package-media-tools-runtime*.mjs' \
+            'apps/backend/media-tools-runtime/*' \
+            'apps/backend/scripts/package-n2c-identity-runtime*.mjs' \
+            'apps/backend/scripts/verify-n2c-stage.mjs' \
+            'apps/backend/n2c-identity-runtime/*' \
+            '.github/workflows/backend-deploy.yml' \
+            'docs/runbooks/backend-*.md'
+
   validate:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     name: IaC ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
@@ -130,3 +156,25 @@ jobs:
         run: |
           terraform validate -no-color
           terraform test -no-color
+
+  gate:
+    # The one check name branch protection requires for this workflow.
+    # Success when the heavy job passed, or was skipped because the PR does
+    # not touch its paths; failure otherwise (failed, cancelled, timed out).
+    name: Backend IaC gate
+    needs: [changes, validate]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Evaluate validate
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          RESULT: ${{ needs.validate.result }}
+        run: |
+          echo "changes=$CHANGES validate=$RESULT"
+          if [ "$CHANGES" != "success" ]; then exit 1; fi
+          case "$RESULT" in
+            success|skipped) exit 0 ;;
+            *) exit 1 ;;
+          esac
