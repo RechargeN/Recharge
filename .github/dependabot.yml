@@ -1,0 +1,31 @@
+# Dependabot: security updates only (O1 B-02, 2026-11-23).
+#
+# `open-pull-requests-limit: 0` turns off routine version-update PRs: runtime
+# dependencies are pinned through lock files and toolchain locks and move only
+# with a reviewed change. Security-update PRs are not limited by this value and
+# still open once "Dependabot security updates" is enabled in repository
+# settings. GitHub opens security-update PRs against the default branch
+# (`main`) regardless of `target-branch`; retarget them to
+# `codex/recharge-integration` before review (docs/runbooks/branch-protection-setup.md).
+version: 2
+updates:
+  - package-ecosystem: pub
+    directory: /apps/mobile
+    target-branch: codex/recharge-integration
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+
+  - package-ecosystem: npm
+    directory: /apps/backend/functions
+    target-branch: codex/recharge-integration
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: codex/recharge-integration
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0

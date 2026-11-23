@@ -50,6 +50,16 @@ const options = {
 const maxBodyBytes = 16_384;
 
 /**
+ * Gap plan round 1, item 1.3 (owner approval 2026-11-23): read endpoints the
+ * app calls in parallel take 10 requests per instance. With concurrency 1 a
+ * parallel request waited for the single instance and failed with 500
+ * (staging contentQueryV1, 2026-11-19). maxInstances and cpu are unchanged, so
+ * the cost ceiling is the same.
+ */
+export const readQueryConcurrency = 10;
+const readOptions = { ...options, concurrency: readQueryConcurrency };
+
+/**
  * Load-run limits (owner decision 2026-11-16: raised for the Booking load run in
  * staging only). Read at deploy from the staging `.env`; anything missing,
  * malformed or outside the reviewed bounds falls back to one instance and one
@@ -209,13 +219,13 @@ export const cancelInternalBookingV1 = onRequest(options, (req, res) =>
 export const reconfirmInternalBookingV1 = onRequest(options, (req, res) =>
   dispatch('reconfirmInternalBookingV1', req, res),
 );
-export const getMyBookingV1 = onRequest(options, (req, res) =>
+export const getMyBookingV1 = onRequest(readOptions, (req, res) =>
   dispatch('getMyBookingV1', req, res),
 );
 export const listMyBookingsV1 = onRequest(options, (req, res) =>
   dispatch('listMyBookingsV1', req, res),
 );
-export const getEventAvailabilityV1 = onRequest(options, (req, res) =>
+export const getEventAvailabilityV1 = onRequest(readOptions, (req, res) =>
   dispatch('getEventAvailabilityV1', req, res),
 );
 
