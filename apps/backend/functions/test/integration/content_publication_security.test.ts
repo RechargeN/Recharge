@@ -875,6 +875,8 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/privacy_orchestration/infrastructure/firestore_privacy_legal_hold_service.ts',
     // L2: the operations console borrows only the Emulator guard.
     'modules/operations/operations_console.ts',
+    // PB-18: the L1 runner wires the Content owner DSR applier.
+    'modules/privacy_orchestration/application/privacy_domain_task_runner.ts',
     // L3: analytics borrows only the Emulator guard, never Content storage.
     'modules/product_analytics/firestore_product_analytics_service.ts',
     // ADR 0022 stage 1 and amendment 1: read-only checks of the published
@@ -916,13 +918,19 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/admin_support/admin_support_service.ts': ['assertContentEmulatorContext'],
     'modules/library/firestore_library_service.ts': [
       'assertContentEmulatorContext',
+      // Pilot 2.1 (owner 2026-11-21): the reviewed dev-cloud guard.
+      'assertMediaChainPersistenceContext',
       'contentCollections',
       'canonicalJson',
       'sha256Hex',
       'resolveContentType',
     ],
     'modules/library/library_contract.ts': ['canonicalJson', 'sha256Hex'],
-    'modules/library/library_privacy_task_handler.ts': ['assertContentEmulatorContext'],
+    'modules/library/library_privacy_task_handler.ts': [
+      'assertContentEmulatorContext',
+      // Pilot 2.7 (owner 2026-11-21): Library erasure in the cloud.
+      'assertMediaChainPersistenceContext',
+    ],
     'modules/moderation/application/k1_workflows.ts': [
       'assertContentEmulatorContext',
       'canonicalJson',
@@ -932,11 +940,15 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/reviews/review_target.ts': ['contentCollections', 'canonicalJson', 'sha256Hex'],
     'modules/quick_plan/firestore_quick_plan_service.ts': [
       'assertContentEmulatorContext',
+      // Pilot 2.4 (owner 2026-11-21): the reviewed dev-cloud guard.
+      'assertMediaChainPersistenceContext',
       'sha256Hex',
     ],
     'modules/quick_plan/quick_plan_contract.ts': ['canonicalJson', 'sha256Hex'],
     'modules/route/firestore_route_service.ts': [
       'assertContentEmulatorContext',
+      // Pilot 2.5 (owner 2026-11-21): the reviewed dev-cloud guard.
+      'assertMediaChainPersistenceContext',
       // J2: read-only standing check before a Route mutation, like I3 below.
       'routePublicationStanding',
       'canonicalJson',
@@ -945,6 +957,8 @@ void test('delegated import never reaches Content storage except through the Con
     'modules/route/route_contract.ts': ['canonicalJson', 'sha256Hex'],
     'modules/quick_plan/firestore_scenario_service.ts': [
       'assertContentEmulatorContext',
+      // Pilot 2.4 (owner 2026-11-21): the reviewed dev-cloud guard.
+      'assertMediaChainPersistenceContext',
       'scenarioPublicationStanding',
       'canonicalJson',
       'sha256Hex',
@@ -983,6 +997,9 @@ void test('delegated import never reaches Content storage except through the Con
       'assertMediaChainPersistenceContext',
     ],
     'modules/operations/operations_console.ts': ['assertContentEmulatorContext'],
+    'modules/privacy_orchestration/application/privacy_domain_task_runner.ts': [
+      'contentPrivacyAppliers',
+    ],
     'modules/product_analytics/firestore_product_analytics_service.ts': [
       'assertContentEmulatorContext',
     ],
@@ -1049,8 +1066,9 @@ void test('delegated import never reaches Content storage except through the Con
       // D3.7 §6: the fresh Find People read gate (Content pointer, consent, age, K2).
       'FirestoreFindPeoplePrivacy',
     ],
+    // Pilot 2.3 (owner 2026-11-21): the reviewed dev-cloud guard.
     'modules/catalog/infrastructure/firestore_catalog_repository.ts': [
-      'assertContentEmulatorContext',
+      'assertMediaChainPersistenceContext',
     ],
     'modules/media/infrastructure/emulator_media_composition.ts': [
       'ContentMediaScope',
@@ -1154,6 +1172,9 @@ void test('Content stays framework-neutral: no Firebase, transport, Booking or e
     // D3.7: the Emulator-only Find People privacy adapter and retention erasure.
     path.join('infrastructure', 'find_people_privacy_adapter.ts'),
     path.join('infrastructure', 'find_people_private_location_retention.ts'),
+    // PB-18 (round 1, owner decisions 2026-11-20): the Content owner DSR applier
+    // (types only; it runs inside the L1 sweep transaction).
+    path.join('infrastructure', 'content_privacy_applier.ts'),
   ]);
   for (const file of files) {
     const text = readFileSync(file, 'utf8');

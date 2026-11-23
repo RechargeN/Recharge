@@ -358,6 +358,24 @@ abstract class AppLocalizations {
   /// **'Sign out'**
   String get settingsSignOut;
 
+  /// Settings button: the server ends every Session of the account (owner 2026-11-23).
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out on all devices'**
+  String get settingsSignOutEverywhere;
+
+  /// Confirmation dialog title for signing out on all devices.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out on all devices?'**
+  String get settingsSignOutEverywhereTitle;
+
+  /// Confirmation dialog text: every signed-in phone signs out; nothing is deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Every phone signed in to this account will be signed out. Nothing is deleted from your phones.'**
+  String get settingsSignOutEverywhereBody;
+
   /// Settings section.
   ///
   /// In en, this message translates to:
@@ -20211,6 +20229,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Until {date}'**
   String discoverDateUntil(String date);
+
+  /// Banner while a signed-in user has no network and sees saved screens.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection — showing saved content'**
+  String get authOfflineBanner;
+
+  /// Shown when an action needs the server while offline.
+  ///
+  /// In en, this message translates to:
+  /// **'This needs a connection. Try again when you are back online.'**
+  String get authOfflineNeedsConnection;
 }
 
 class _AppLocalizationsDelegate

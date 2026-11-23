@@ -1,5 +1,8 @@
 import type { Firestore } from 'firebase-admin/firestore';
-import { assertContentEmulatorContext } from '../content/infrastructure/firestore_content_repository.js';
+import {
+  assertContentEmulatorContext,
+  assertMediaChainPersistenceContext,
+} from '../content/infrastructure/firestore_content_repository.js';
 import { libraryCollections as cols } from './library_contract.js';
 import type { PrivacyApplier } from '../privacy_orchestration/infrastructure/firestore_privacy_subject_sweep.js';
 import type { PrivacyDomainOutcome } from '../privacy_orchestration/infrastructure/registry_privacy_task_handler.js';
@@ -28,8 +31,13 @@ export const libraryPrivacyAppliers: Readonly<Record<string, PrivacyApplier>> = 
 
 /** Same access/restriction/erasure lifecycle as the existing Privacy runner. */
 export class LibraryPrivacyTaskHandler {
-  constructor(private readonly db: Firestore) {
-    assertContentEmulatorContext(db);
+  /** Pilot 2.7 (owner 2026-11-21): `cloud` under the reviewed dev-cloud guard. */
+  constructor(
+    private readonly db: Firestore,
+    options: Readonly<{ cloud?: boolean }> = {},
+  ) {
+    if (options.cloud === true) assertMediaChainPersistenceContext(db);
+    else assertContentEmulatorContext(db);
   }
   /**
    * `erase`, when given, deletes the entries and receipts through the L1

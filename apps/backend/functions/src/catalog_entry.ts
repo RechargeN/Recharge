@@ -9,6 +9,8 @@ export interface DiscoverCaller {
   readonly userId?: string;
   /** D3.7: the local `catalog.findPeople` flag (default off). */
   readonly findPeopleEnabled?: boolean;
+  /** Pilot 2.3: the cloud projection age limit (default: the local one). */
+  readonly projectionMaxAgeSeconds?: number;
 }
 
 function stripTransport(data: unknown): unknown {
@@ -29,6 +31,9 @@ export function handleDiscoverQuery(
   const catalog = createEmulatorCatalogComposition(caller.firestore, {
     ...(caller.userId ? { viewerId: caller.userId } : {}),
     findPeopleEnabled: caller.findPeopleEnabled === true,
+    ...(caller.projectionMaxAgeSeconds === undefined
+      ? {}
+      : { projectionMaxAgeSeconds: caller.projectionMaxAgeSeconds }),
   });
   return handleDiscoverQueryRequest(catalog.query, stripTransport(data));
 }

@@ -48,6 +48,8 @@ const allowedCloud = new Set(
     // D3.7: Emulator-only privacy reads and Content-owned retention.
     "find_people_privacy_adapter.ts",
     "find_people_private_location_retention.ts",
+    // PB-18 (round 1, owner decisions 2026-11-20): the Content owner DSR applier.
+    "content_privacy_applier.ts",
   ].map((name) => path.join("modules", "content", "infrastructure", name)),
 );
 for (const file of sourceFiles(path.join(functionsSrc, "modules", "content"))) {
@@ -127,14 +129,23 @@ const approvedOutsideUsers = {
   "modules/catalog/infrastructure/emulator_catalog_composition.ts": {
     firestore_content_repository: ["FirestoreContentRepository"],
   },
-  "modules/catalog/infrastructure/firestore_catalog_repository.ts": guardOnly,
+  // Pilot 2.3 (owner 2026-11-21): the Catalog projection in the cloud borrows
+  // only the Emulator-or-dev-cloud guard, as the Media chain does.
+  "modules/catalog/infrastructure/firestore_catalog_repository.ts":
+    mediaChainGuardOnly,
   // Library (favorites and visits): read-only checks of the published pointer
   // and revision inside its own transaction, under the Emulator guard; it
   // writes nothing of Content.
   // H/K1/K2 and Library privacy (d4e3971, 8f26a98): only the Emulator guard,
   // or read-only checks of Content pointers, revisions and drafts; none of
   // them writes Content. Reviewed 2026-10-16 when the baseline gate was fixed.
-  "modules/library/library_privacy_task_handler.ts": guardOnly,
+  // Pilot 2.7 (owner 2026-11-21): Library erasure in the cloud, the reviewed guard too.
+  "modules/library/library_privacy_task_handler.ts": {
+    firestore_content_repository: [
+      "assertContentEmulatorContext",
+      "assertMediaChainPersistenceContext",
+    ],
+  },
   // ADR 0022 stage 1: read-only checks of the published pointer and revision;
   // it writes only its own contentTranslation* collections, no Content.
   "modules/content_translation/firestore_content_translation_service.ts": {
@@ -148,7 +159,13 @@ const approvedOutsideUsers = {
   "modules/reviews/firestore_review_service.ts": guardOnly,
   // I1 Quick Plan (2026-10-17): only the Emulator guard; its own collections,
   // no Content read or write.
-  "modules/quick_plan/firestore_quick_plan_service.ts": guardOnly,
+  // Pilot 2.4 (owner 2026-11-21): Quick Plan in the cloud, the reviewed guard too.
+  "modules/quick_plan/firestore_quick_plan_service.ts": {
+    firestore_content_repository: [
+      "assertContentEmulatorContext",
+      "assertMediaChainPersistenceContext",
+    ],
+  },
   // L1 legal hold authority (PRIVACY_L1 amendment §7): only the persistence
   // guard (Emulator, or the reviewed dev/stage cloud behind the switch — step 2,
   // owner decision 2026-11-20); it writes its own hold and audit collections,
@@ -163,16 +180,20 @@ const approvedOutsideUsers = {
   "modules/product_analytics/firestore_product_analytics_service.ts": guardOnly,
   // J1 Route (2026-10-20): only the Emulator guard; its own collections.
   // J2 / RTE-PUB-01 (2026-10-21): plus one read-only standing check, RP-11.
+  // Pilot 2.5 (owner 2026-11-21): Route in the cloud, the reviewed guard too.
   "modules/route/firestore_route_service.ts": {
     firestore_content_repository: [
       "assertContentEmulatorContext",
+      "assertMediaChainPersistenceContext",
       "routePublicationStanding",
     ],
   },
   // I3 / SCN-PUB-01 (2026-10-20): plus one read-only pointer check, SP-11.
+  // Pilot 2.4 (owner 2026-11-21): Scenario sync in the cloud, the reviewed guard too.
   "modules/quick_plan/firestore_scenario_service.ts": {
     firestore_content_repository: [
       "assertContentEmulatorContext",
+      "assertMediaChainPersistenceContext",
       "scenarioPublicationStanding",
     ],
   },
@@ -190,9 +211,12 @@ const approvedOutsideUsers = {
   "dev_content_effects_entry.ts": {
     firestore_content_repository: ["devCloudPersistenceSwitch"],
   },
+  // Pilot 2.1 (owner 2026-11-21, variant A): the Library in the dev/stage
+  // cloud uses the reviewed dev-cloud guard; it still writes only its own data.
   "modules/library/firestore_library_service.ts": {
     firestore_content_repository: [
       "assertContentEmulatorContext",
+      "assertMediaChainPersistenceContext",
       "contentCollections",
     ],
   },

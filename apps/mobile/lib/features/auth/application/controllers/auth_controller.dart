@@ -6,7 +6,11 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/product_analytics/product_analytics_recorder.dart';
 import '../../../../core/telemetry/analytics_service.dart';
 import '../../domain/entities/auth_result_entity.dart';
+import '../../domain/entities/auth_user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repositories/network_status.dart';
+import '../../domain/repositories/sign_out_everywhere.dart';
+import '../../domain/repositories/offline_account_store.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/restore_session_usecase.dart';
 import '../../domain/usecases/sign_in_usecase.dart';
@@ -70,7 +74,13 @@ class AuthController extends ChangeNotifier {
     ProductAnalyticsRecorder? productAnalytics,
     SignInWithGoogleUseCase? signInWithGoogleUseCase,
     AuthSessionEvents? sessionEvents,
-  }) : _signInWithGoogleUseCase = signInWithGoogleUseCase,
+    OfflineAccountStore? offlineAccount,
+    NetworkStatus? networkStatus,
+    SignOutEverywhere? signOutEverywhere,
+  }) : _offlineAccount = offlineAccount,
+       _signOutEverywhere = signOutEverywhere,
+       _networkStatus = networkStatus,
+       _signInWithGoogleUseCase = signInWithGoogleUseCase,
        _signInUseCase = signInUseCase,
        _restoreSessionUseCase = restoreSessionUseCase,
        _signOutUseCase = signOutUseCase,
@@ -78,9 +88,82 @@ class AuthController extends ChangeNotifier {
        _analyticsService = analyticsService,
        _productAnalytics = productAnalytics {
     _sessionSubscription = sessionEvents?.invalidated.listen((_) {
+      // The SDK lost its user: the phone only signs out (decision #4).
+      // Nothing on the phone is wiped (owner 2026-11-23).
       suspendServerAuthority();
+      _forgetOfflineProfile();
       unawaited(_signOutUseCase().catchError((Object _) {}));
     });
+    _accessEndedSubscription = sessionEvents?.accessEnded.listen((_) {
+      // The server revoked the Session or blocked the account: nothing is left
+      // to revoke. The phone signs out and forgets the offline profile; owner
+      // 2026-11-23 ("Всё стирание из кода") reversed decision #5, so nothing
+      // else on the phone is wiped.
+      _serverUnreachable = false;
+      suspendServerAuthority();
+      _setState(
+        const AuthState.guest().copyWith(
+          errorCode: sessionExpiredMessage,
+          message: sessionExpiredMessage,
+        ),
+      );
+      _forgetOfflineProfile();
+    });
+    _networkSubscription = networkStatus?.changes.listen(
+      _onNetwork,
+      onError: (Object _) {},
+    );
+    unawaited(_readNetwork());
+  }
+
+  final OfflineAccountStore? _offlineAccount;
+
+  /// Owner 2026-11-23: "Sign out on all devices" (only with a server Session).
+  final SignOutEverywhere? _signOutEverywhere;
+  bool get supportsSignOutEverywhere => _signOutEverywhere != null;
+
+  final NetworkStatus? _networkStatus;
+  StreamSubscription<bool>? _networkSubscription;
+
+  /// The phone says there is no network.
+  bool _networkLost = false;
+
+  /// The last Session check did not reach the server.
+  bool _serverUnreachable = false;
+
+  /// Android reports no changes to a background app, and nothing is sent from
+  /// there: the resume reads the status again.
+  bool _inBackground = false;
+  bool _disposed = false;
+
+  Future<void> _readNetwork() async {
+    final status = _networkStatus;
+    if (status == null) return;
+    final online = await status.isOnline();
+    if (!_disposed) _onNetwork(online);
+  }
+
+  /// A34 2026-11-22: the network signal changes only what needs a connection,
+  /// never the Session. The server answer stays the last word: a successful
+  /// check clears a wrong "no network".
+  void _onNetwork(bool online) {
+    if (_networkLost != online) return; // Unchanged.
+    _networkLost = !online;
+    _publishConnection();
+    if (_inBackground || !_state.isSignedIn || !supportsGoogleSignIn) return;
+    if (!online) {
+      if (!(_offlineRetry?.isActive ?? false)) _scheduleOfflineRetry();
+    } else if (!(_rateLimitRetry?.isActive ?? false)) {
+      _cancelOfflineRetry(resetBackoff: true);
+      unawaited(restoreSession().catchError((Object _) {}));
+    }
+  }
+
+  void _forgetOfflineProfile() {
+    final store = _offlineAccount;
+    if (store != null) {
+      unawaited(store.clearOfflineProfile().catchError((Object _) {}));
+    }
   }
 
   final SignInWithGoogleUseCase? _signInWithGoogleUseCase;
@@ -94,6 +177,7 @@ class AuthController extends ChangeNotifier {
   Timer? _rateLimitRetry;
   int _offlineAttempt = 0;
   StreamSubscription<void>? _sessionSubscription;
+  StreamSubscription<void>? _accessEndedSubscription;
   int _generation = 0;
   bool _federatedSignInInProgress = false;
 
@@ -109,6 +193,31 @@ class AuthController extends ChangeNotifier {
 
   AuthState _state = const AuthState.guest();
   AuthState get state => _state;
+  final ValueNotifier<int> _authority = ValueNotifier<int>(0);
+
+  /// For the router: every state change except a change of the connection
+  /// alone. Its redirect reads access from the server, so re-running it when
+  /// the network drops would eject the user from protected screens.
+  Listenable get authorityChanges => _authority;
+
+  /// The last user the server confirmed in this process; kept through an
+  /// offline spell, dropped on sign-out, suspension or a server refusal.
+  AuthUserEntity? _lastConfirmedUser;
+
+  /// Round 1 (owner 2026-11-20, "человек в метро"): without network a signed-in
+  /// user stays signed in on the saved screens instead of becoming a guest.
+  AuthState _offlineOrGuest(String code) {
+    final user = _lastConfirmedUser;
+    if (user == null) {
+      return const AuthState.guest().copyWith(errorCode: code, message: code);
+    }
+    return AuthState(
+      status: AuthStatus.offline,
+      user: user,
+      errorCode: code,
+      message: code,
+    );
+  }
 
   Future<void>? _restoreSessionFuture;
 
@@ -249,6 +358,7 @@ class AuthController extends ChangeNotifier {
     _serverExpiry?.cancel();
     _cancelBackgroundRevalidation();
     clearPendingTarget();
+    _lastConfirmedUser = null;
     _setState(const AuthState.guest());
   }
 
@@ -258,13 +368,16 @@ class AuthController extends ChangeNotifier {
   /// return to the foreground revalidates. Pending retries wait for resume.
   void suspendForBackground() {
     if (_federatedSignInInProgress) return;
+    _inBackground = true;
     _offlineRetry?.cancel();
   }
 
   /// Returning from the background revalidates with the server; skipped while
   /// a sign-in is still completing (its own result is fresh server authority).
   Future<void> restoreAfterBackground() {
+    _inBackground = false;
     if (_federatedSignInInProgress) return Future<void>.value();
+    unawaited(_readNetwork());
     // Inside the server's rate-limit wait nothing is sent: denied attempts
     // count in its window (N4b A34 staging 2026-11-15). The wait's own timer
     // tries again when it ends.
@@ -363,6 +476,20 @@ class AuthController extends ChangeNotifier {
 
   Future<void> _restoreSession() async {
     final generation = _generation;
+    // Cold start without network: the kept profile lets the saved screens
+    // open signed in (no role, no capabilities, no server authority).
+    final store = _offlineAccount;
+    if (_lastConfirmedUser == null && store != null) {
+      AuthUserEntity? kept;
+      try {
+        kept = await store.readOfflineProfile();
+      } catch (_) {
+        /* No profile: the user starts as a guest, as before. */
+      }
+      // A sign-out during the read must not bring the user back.
+      if (supportsGoogleSignIn && generation != _generation) return;
+      _lastConfirmedUser = kept;
+    }
     _analyticsService.track(
       'auth_session_restore_started',
       params: <String, Object?>{
@@ -371,7 +498,8 @@ class AuthController extends ChangeNotifier {
       },
     );
     final wasAuthenticated = _state.isAuthenticated;
-    if (!wasAuthenticated) {
+    // Offline stays offline while the check runs: no sign-in flash.
+    if (!wasAuthenticated && !_state.isOffline) {
       _setState(_state.copyWith(status: AuthStatus.loading, clearError: true));
     }
     try {
@@ -381,6 +509,9 @@ class AuthController extends ChangeNotifier {
       _rateLimitRetry?.cancel();
       _rateLimitRetry = null;
       if (result == null) {
+        _serverUnreachable = false;
+        _lastConfirmedUser = null;
+        _forgetOfflineProfile();
         _setState(const AuthState.guest());
         return;
       }
@@ -406,13 +537,13 @@ class AuthController extends ChangeNotifier {
       if (supportsGoogleSignIn && _keepsCredentials(e.code)) {
         // Keep the current UI authority while its snapshot is still valid;
         // otherwise say what happened (not "session expired") and retry.
-        if (!wasAuthenticated) {
-          _setState(
-            const AuthState.guest().copyWith(
-              errorCode: e.code,
-              message: e.code,
-            ),
-          );
+        _serverUnreachable = e.code == offlineMessage;
+        // Authority lasts as long as the snapshot; the need for a connection
+        // shows now.
+        if (wasAuthenticated) {
+          _publishConnection();
+        } else {
+          _setState(_offlineOrGuest(e.code));
         }
         if (e.code == rateLimitedMessage) {
           // Denied attempts count in the server's window too: never retry
@@ -437,6 +568,15 @@ class AuthController extends ChangeNotifier {
         return;
       }
       _cancelOfflineRetry(resetBackoff: true);
+      // An explicit server refusal: the kept user is gone too.
+      _serverUnreachable = false;
+      _lastConfirmedUser = null;
+      // Decision #4: the sign-in is gone, so a cold start without network must
+      // not show it as signed in. The cache stays: nothing is confirmed.
+      // Also for a stale snapshot: the app shows a guest from here, and a guest
+      // must have no kept owner, because the Saved copy outlives a revocation.
+      // The next confirmed answer saves the profile again.
+      if (supportsGoogleSignIn) _forgetOfflineProfile();
       _setState(
         const AuthState.guest().copyWith(
           errorCode: e.code,
@@ -458,7 +598,21 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  Future<void> signOut() async {
+  Future<void> signOut() => _signOutWith(() => _signOutUseCase());
+
+  /// The server ends every Session of the account; this phone signs out and
+  /// forgets the offline profile. Nothing else on the phone is wiped.
+  Future<void> signOutEverywhere() {
+    final everywhere = _signOutEverywhere;
+    if (everywhere == null) {
+      throw StateError('sign_out_everywhere_unavailable');
+    }
+    return _signOutWith(everywhere.signOutEverywhere);
+  }
+
+  Future<void> _signOutWith(Future<void> Function() end) async {
+    _lastConfirmedUser = null;
+    _forgetOfflineProfile();
     if (supportsGoogleSignIn) {
       _generation++;
       _serverExpiry?.cancel();
@@ -470,7 +624,7 @@ class AuthController extends ChangeNotifier {
       params: <String, Object?>{'source_screen': 'profile'},
     );
     try {
-      await _signOutUseCase();
+      await end();
       final restored = await _restoreSessionUseCase();
       if (restored == null) {
         _setState(const AuthState.guest());
@@ -503,6 +657,7 @@ class AuthController extends ChangeNotifier {
         DateTime.now().toUtc(),
       );
       if (remaining <= Duration.zero) {
+        _forgetOfflineProfile();
         _setState(const AuthState.guest());
         return;
       }
@@ -513,12 +668,7 @@ class AuthController extends ChangeNotifier {
         // suspension still invalidate it.
         clearPendingTarget();
         _silentRefresh?.cancel();
-        _setState(
-          const AuthState.guest().copyWith(
-            errorCode: offlineMessage,
-            message: offlineMessage,
-          ),
-        );
+        _setState(_offlineOrGuest(offlineMessage));
         // The snapshot ran out without a successful refresh (offline): the
         // Session itself lives on the server, so try again automatically.
         if (supportsGoogleSignIn) _scheduleOfflineRetry();
@@ -532,6 +682,15 @@ class AuthController extends ChangeNotifier {
           unawaited(restoreSession().catchError((Object _) {}));
         });
       }
+    }
+    _networkLost = false;
+    _serverUnreachable = false;
+    _lastConfirmedUser = result.user;
+    final store = _offlineAccount;
+    if (store != null) {
+      unawaited(
+        store.saveOfflineProfile(result.user).catchError((Object _) {}),
+      );
     }
     _setState(AuthState(status: AuthStatus.authenticated, user: result.user));
   }
@@ -564,22 +723,38 @@ class AuthController extends ChangeNotifier {
     _cancelOfflineRetry(resetBackoff: true);
   }
 
-  void _setState(AuthState state) {
+  /// Only the need for a connection changed: widgets hear it, the router not.
+  void _publishConnection() {
+    final unavailable = _networkLost || _serverUnreachable;
+    if (_state.networkUnavailable == unavailable) return;
+    _state = _state.copyWith(networkUnavailable: unavailable);
+    notifyListeners();
+  }
+
+  void _setState(AuthState next) {
+    final state = next.copyWith(
+      networkUnavailable: _networkLost || _serverUnreachable,
+    );
     _state = state;
     if (state.status == AuthStatus.guest) _serverExpiry?.cancel();
     // L3: product analytics queues follow the signed-in account; sign-out or
     // another account deletes every other account's queue (amendment §6).
-    _productAnalytics?.bindAccount(
-      state.isAuthenticated ? state.user?.id : null,
-    );
+    // Offline keeps the account: it is not a sign-out.
+    _productAnalytics?.bindAccount(state.isSignedIn ? state.user?.id : null);
     notifyListeners();
+    // After the listeners: the router's actor is synchronized before it redirects.
+    _authority.value++;
   }
 
   @override
   void dispose() {
     _serverExpiry?.cancel();
     _cancelBackgroundRevalidation();
+    _disposed = true;
+    unawaited(_networkSubscription?.cancel());
     unawaited(_sessionSubscription?.cancel());
+    unawaited(_accessEndedSubscription?.cancel());
+    _authority.dispose();
     super.dispose();
   }
 

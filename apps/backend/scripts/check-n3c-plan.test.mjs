@@ -161,3 +161,120 @@ test("only the dev project, with N3c enabled", () => {
     /recharge-dev-n2a01 only/u,
   );
 });
+
+// Rounds 2 and 3 (stage 1.3): the Eventarc receiver first, then the invoker of
+// the one Booking-effect trigger, in dev or staging.
+function grantRound(round, target, mutate = () => {}) {
+  const who = `serviceAccount:runtime-notifications@${target}.iam.gserviceaccount.com`;
+  const c = [
+    change("google_project.stage", "google_project", { project_id: target }, [
+      "no-op",
+    ]),
+    change(
+      "google_project_iam_member.n3c_eventarc[0]",
+      "google_project_iam_member",
+      { project: target, role: "roles/eventarc.eventReceiver", member: who },
+    ),
+    change(
+      "google_cloud_run_v2_service_iam_member.n3c_invoker_booking[0]",
+      "google_cloud_run_v2_service_iam_member",
+      {
+        project: target,
+        location: "europe-west1",
+        name: "consumebookingnotificationeffectv1",
+        role: "roles/run.invoker",
+        member: who,
+      },
+    ),
+  ];
+  // Round 2 plans only the receiver; round 3 has it applied (no-op).
+  if (round === 2) c.pop();
+  else c[1].change.actions = ["no-op"];
+  mutate(c);
+  const p = {
+    variables: {
+      project_id: { value: target },
+      n3c_enabled: { value: true },
+      n2c_enabled: { value: true },
+      release_commit_sha: { value: "a".repeat(40) },
+    },
+    resource_changes: c,
+  };
+  return checkN3cPlan(p, {
+    projectId: target,
+    commitSha: "a".repeat(40),
+    inventorySha256: inventoryDigest(p),
+    round,
+  });
+}
+const roundTwo = (target, mutate) => grantRound(3, target, mutate);
+
+test("round 2: only the Eventarc receiver, dev or staging", () => {
+  assert.deepEqual(grantRound(2, project), []);
+  assert.deepEqual(grantRound(2, "recharge-staging-y9y2y"), []);
+  assert.match(
+    grantRound(2, project, (c) => {
+      c[1].change.after.role = "roles/eventarc.admin";
+    }).join(),
+    /IAM mismatch/u,
+  );
+  assert.match(
+    grantRound(2, project, (c) => {
+      c.pop();
+    }).join(),
+    /reviewed create missing/u,
+  );
+});
+
+test("round 3: only the invoker of the one Booking-effect trigger", () => {
+  assert.deepEqual(roundTwo(project), []);
+  assert.deepEqual(roundTwo("recharge-staging-y9y2y"), []);
+  assert.match(roundTwo("recharge-prod").join(), /reviewed dev or staging/u);
+  assert.match(
+    roundTwo(project, (c) => {
+      c[2].change.after.name = "notificationsqueryv1";
+    }).join(),
+    /invoker target mismatch/u,
+  );
+  assert.match(
+    roundTwo(project, (c) => {
+      c[2].change.after.role = "roles/run.admin";
+    }).join(),
+    /IAM mismatch/u,
+  );
+  assert.match(
+    roundTwo(project, (c) => {
+      c[2].change.after.member =
+        "serviceAccount:runtime-booking@x.iam.gserviceaccount.com";
+    }).join(),
+    /IAM mismatch/u,
+  );
+  assert.match(
+    roundTwo(project, (c) => {
+      c.pop();
+    }).join(),
+    /reviewed create missing/u,
+  );
+  assert.match(
+    roundTwo(project, (c) => {
+      c.push(
+        change(
+          "google_project_iam_member.extra[0]",
+          "google_project_iam_member",
+          {
+            project,
+            role: "roles/owner",
+            member,
+          },
+        ),
+      );
+    }).join(),
+    /unreviewed create/u,
+  );
+  assert.match(
+    roundTwo(project, (c) => {
+      c[0].change.actions = ["delete"];
+    }).join(),
+    /forbidden action/u,
+  );
+});

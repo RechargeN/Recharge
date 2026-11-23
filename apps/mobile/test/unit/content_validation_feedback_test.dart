@@ -57,6 +57,43 @@ void main() {
     });
   }
 
+  test('Round 1: Event codes the server names by field get the field text '
+      'and a field name of their own', () {
+    const Map<String, (String, String)> expected = <String, (String, String)>{
+      'event.title_length': ('/body/title', 'validationCheckTheTitleLength'),
+      'event.full_description_length': (
+        '/body/fullDescription',
+        'validationCheckTheDescriptionLength',
+      ),
+      'event.cover_required': ('/body/media', 'validationAddACoverPhoto'),
+      'event.location_required': ('/body/location', 'validationSetTheLocation'),
+      'event.pricing_required': ('/body/pricing', 'validationAddThePrices'),
+    };
+    for (final MapEntry<String, (String, String)> item in expected.entries) {
+      final Map<String, String> feedback = contentFieldFeedback(
+        CreateObjectType.event,
+        ContentValidationViolation.fromWire(<Object?>[
+          <String, Object?>{'code': item.key, 'fieldPath': item.value.$1},
+        ]),
+      );
+      expect(feedback, <String, String>{item.value.$1: item.value.$2});
+      expect(contentFieldLabel(item.value.$1), isNot('fieldLabelDraft'));
+    }
+    // A known code on another path stays general.
+    expect(
+      contentFieldFeedback(
+        CreateObjectType.event,
+        ContentValidationViolation.fromWire(<Object?>[
+          <String, Object?>{
+            'code': 'event.title_length',
+            'fieldPath': '/body/fullDescription',
+          },
+        ]),
+      ),
+      isEmpty,
+    );
+  });
+
   test('unknown codes and mismatched paths stay general', () {
     final List<ContentValidationViolation> violations =
         ContentValidationViolation.fromWire(<Object?>[

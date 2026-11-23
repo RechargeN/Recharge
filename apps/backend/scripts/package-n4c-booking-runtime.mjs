@@ -75,6 +75,9 @@ export function renderEnv({
   load,
   createDisabled = false,
   privacyEnabled = false,
+  notificationsEnabled = false,
+  catalogEnabled = false,
+  routeCatalogEnabled = false,
   projectId: target = projectId,
   projectNumber,
 }) {
@@ -92,6 +95,12 @@ export function renderEnv({
     throw new Error("createDisabled must be boolean");
   if (typeof privacyEnabled !== "boolean")
     throw new Error("privacyEnabled must be boolean");
+  if (typeof notificationsEnabled !== "boolean")
+    throw new Error("notificationsEnabled must be boolean");
+  if (typeof catalogEnabled !== "boolean")
+    throw new Error("catalogEnabled must be boolean");
+  if (typeof routeCatalogEnabled !== "boolean")
+    throw new Error("routeCatalogEnabled must be boolean");
   return [
     `N4C_BOOKING_ENABLED=${runtimeEnabled}`,
     `N4C_BOOKING_CREATE_DISABLE=${createDisabled}`,
@@ -106,6 +115,13 @@ export function renderEnv({
     // Step 2 (owner decision 2026-11-20): the DSR intake and worker open only
     // with the runtime and an explicit privacy deploy switch.
     `N5D_PRIVACY_ENABLED=${runtimeEnabled && privacyEnabled}`,
+    // Round 1 stage 1.3 (owner 2026-11-20): Booking notification effects (v2
+    // outbox records) only with the runtime and their own deploy switch.
+    `N4C_BOOKING_NOTIFICATIONS_ENABLED=${runtimeEnabled && notificationsEnabled}`,
+    // Pilot 2.3 (owner 2026-11-21): the Catalog projection in the Content effect trigger.
+    `P2_CATALOG_ENABLED=${runtimeEnabled && catalogEnabled}`,
+    // Pilot 2.5 (owner 2026-11-21): Routes in the Catalog projection.
+    `RECHARGE_TEST_ROUTE_CATALOG=${runtimeEnabled && routeCatalogEnabled}`,
     ...projectNumberEnvLines(target, number),
     "",
   ].join("\n");
@@ -118,6 +134,9 @@ export function stageRuntime({
   load,
   createDisabled = false,
   privacyEnabled = false,
+  notificationsEnabled = false,
+  catalogEnabled = false,
+  routeCatalogEnabled = false,
   projectId: target = projectId,
   projectNumber,
   functionsRoot = path.join(backend, "functions"),
@@ -146,6 +165,9 @@ export function stageRuntime({
     load: settings,
     createDisabled,
     privacyEnabled,
+    notificationsEnabled,
+    catalogEnabled,
+    routeCatalogEnabled,
     projectId: target,
     projectNumber: number,
   });
@@ -199,6 +221,9 @@ export function stageRuntime({
     load: settings,
     createDisabled,
     privacyEnabled,
+    notificationsEnabled,
+    catalogEnabled,
+    routeCatalogEnabled,
     codeTreeSha256: codeTreeDigest(outDir),
     treeSha256: digest.sha256,
     files: digest.files,
@@ -239,6 +264,9 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
       load: manifest.load,
       createDisabled: manifest.createDisabled,
       privacyEnabled: manifest.privacyEnabled ?? false,
+      notificationsEnabled: manifest.notificationsEnabled ?? false,
+      catalogEnabled: manifest.catalogEnabled ?? false,
+      routeCatalogEnabled: manifest.routeCatalogEnabled ?? false,
       projectId: manifest.projectId,
       projectNumber: manifest.projectNumber,
     });
@@ -285,6 +313,19 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
   };
   for (const [key, value] of Object.entries(expected))
     if (record[key] !== value) errors.push(`deploy record ${key} mismatch`);
+  // Round 1 stage 1.3: a record without the switch approves it closed only.
+  if (
+    (record.notificationsEnabled ?? false) !==
+    (manifest.notificationsEnabled ?? false)
+  )
+    errors.push("deploy record notificationsEnabled mismatch");
+  if ((record.catalogEnabled ?? false) !== (manifest.catalogEnabled ?? false))
+    errors.push("deploy record catalogEnabled mismatch");
+  if (
+    (record.routeCatalogEnabled ?? false) !==
+    (manifest.routeCatalogEnabled ?? false)
+  )
+    errors.push("deploy record routeCatalogEnabled mismatch");
   if (
     typeof record.ownerApprovalEvidenceRef !== "string" ||
     record.ownerApprovalEvidenceRef === ""
@@ -319,6 +360,9 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
       concurrency,
       createDisabled,
       privacyEnabled,
+      notificationsEnabled,
+      catalogEnabled,
+      routeCatalogEnabled,
     ] = args;
     if (
       !outDir ||
@@ -326,10 +370,13 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
       !uids ||
       ![undefined, "true", "false"].includes(loadEnabled) ||
       ![undefined, "true", "false"].includes(createDisabled) ||
-      ![undefined, "true", "false"].includes(privacyEnabled)
+      ![undefined, "true", "false"].includes(privacyEnabled) ||
+      ![undefined, "true", "false"].includes(notificationsEnabled) ||
+      ![undefined, "true", "false"].includes(catalogEnabled) ||
+      ![undefined, "true", "false"].includes(routeCatalogEnabled)
     ) {
       process.stderr.write(
-        "usage: node package-n4c-booking-runtime.mjs <stageDir> <true|false> <uid[,uid]> [<loadEnabled> <maxInstances> <concurrency> [<createDisabled> [<privacyEnabled>]]] | --verify <stageDir>\n",
+        "usage: node package-n4c-booking-runtime.mjs <stageDir> <true|false> <uid[,uid]> [<loadEnabled> <maxInstances> <concurrency> [<createDisabled> [<privacyEnabled> [<notificationsEnabled> [<catalogEnabled> [<routeCatalogEnabled>]]]]]] | --verify <stageDir>\n",
       );
       process.exitCode = 1;
     } else {
@@ -348,10 +395,13 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
             }),
         createDisabled: createDisabled === "true",
         privacyEnabled: privacyEnabled === "true",
+        notificationsEnabled: notificationsEnabled === "true",
+        catalogEnabled: catalogEnabled === "true",
+        routeCatalogEnabled: routeCatalogEnabled === "true",
         ...cliTarget(process.env),
       });
       process.stdout.write(
-        `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled}, load=${manifest.load.enabled}, createDisabled=${manifest.createDisabled}, privacyEnabled=${manifest.privacyEnabled})\n`,
+        `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled}, load=${manifest.load.enabled}, createDisabled=${manifest.createDisabled}, privacyEnabled=${manifest.privacyEnabled}, notificationsEnabled=${manifest.notificationsEnabled}, catalogEnabled=${manifest.catalogEnabled}, routeCatalogEnabled=${manifest.routeCatalogEnabled})\n`,
       );
     }
   }

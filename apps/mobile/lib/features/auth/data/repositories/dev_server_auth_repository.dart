@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/auth_result_entity.dart';
 import '../../domain/entities/auth_user_entity.dart';
+import '../../domain/repositories/sign_out_everywhere.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../models/server_auth_context.dart';
 
@@ -9,9 +12,14 @@ abstract interface class DevAuthSessionGateway {
   Future<ServerAuthContext> signInWithGoogle();
   Future<ServerAuthContext?> refresh();
   Future<ServerAuthContext?> current();
-  Future<void> revokeAndSignOut();
+
+  /// [allSessions]: the server ends every Session of the account.
+  Future<void> revokeAndSignOut({bool allSessions = false});
   Future<void> clearLocal();
 }
+
+/// The server's own answer "Session revoked" or "account blocked".
+const String accessEndedAuthErrorCode = 'ACCESS_ENDED';
 
 /// No demo authority, no persisted permission cache, no fabricated bearer tokens.
 /// Auth code for transient (offline/overloaded) outcomes: credentials stay.
@@ -24,7 +32,8 @@ const String rateLimitedAuthErrorCode = 'AUTH_TOO_MANY_ATTEMPTS';
 /// Not a decision about the Session: credentials stay and restore rotates.
 const String staleSnapshotAuthErrorCode = 'SNAPSHOT_STALE';
 
-final class DevServerAuthRepository implements FederatedAuthRepository {
+final class DevServerAuthRepository
+    implements FederatedAuthRepository, SignOutEverywhere {
   DevServerAuthRepository({required this.gateway, DateTime Function()? now})
     : _now = now ?? (() => DateTime.now().toUtc());
   final DevAuthSessionGateway gateway;
@@ -32,6 +41,24 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
   bool _busy = false;
   bool _signingOut = false;
   int _generation = 0;
+
+  /// Sync: listeners still know the account when they hear it.
+  final StreamController<void> _accessEnded = StreamController<void>.broadcast(
+    sync: true,
+  );
+
+  /// Raised here, not where restore is awaited: whichever call meets the
+  /// refusal first (often the router's revalidation) clears the Session, and
+  /// the next restore would only find that there is none.
+  Stream<void> get accessEnded => _accessEnded.stream;
+
+  /// The same end of access, met by a callable that repairs the Session by
+  /// itself. The SDK user goes too, else the next Google sign-in is refused.
+  void endAccessFromTransport() {
+    _generation++;
+    _accessEnded.add(null);
+    unawaited(gateway.clearLocal().catchError((Object _) {}));
+  }
 
   @override
   Future<AuthResultEntity> signIn({
@@ -135,6 +162,9 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
           (error.code == offlineAuthErrorCode ||
               error.code == rateLimitedAuthErrorCode ||
               error.code == staleSnapshotAuthErrorCode);
+      if (error is AuthException && error.code == accessEndedAuthErrorCode) {
+        _accessEnded.add(null);
+      }
       if (!offline) {
         try {
           await gateway.clearLocal();
@@ -155,7 +185,12 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
   }
 
   @override
-  Future<void> signOut() async {
+  Future<void> signOut() => _signOut(allSessions: false);
+
+  @override
+  Future<void> signOutEverywhere() => _signOut(allSessions: true);
+
+  Future<void> _signOut({required bool allSessions}) async {
     if (_signingOut) {
       throw const AuthException(
         code: 'auth_operation_in_progress',
@@ -165,7 +200,7 @@ final class DevServerAuthRepository implements FederatedAuthRepository {
     _signingOut = true;
     _generation++;
     try {
-      await gateway.revokeAndSignOut();
+      await gateway.revokeAndSignOut(allSessions: allSessions);
     } finally {
       try {
         await gateway.clearLocal();

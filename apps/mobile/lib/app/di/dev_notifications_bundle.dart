@@ -82,9 +82,9 @@ final class PushAwareDevAuthSessionGateway implements DevAuthSessionGateway {
   Future<ServerAuthContext?> current() => _inner.current();
 
   @override
-  Future<void> revokeAndSignOut() async {
+  Future<void> revokeAndSignOut({bool allSessions = false}) async {
     await _registrar.unregister();
-    await _inner.revokeAndSignOut();
+    await _inner.revokeAndSignOut(allSessions: allSessions);
   }
 
   @override

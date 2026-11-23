@@ -6,6 +6,7 @@ import type { Response } from 'express';
 
 import {
   createDevContentMedia,
+  devContentTypesFor,
   handleDevContentMedia,
   type DevCallableName,
 } from './dev_content_media_composition.js';
@@ -61,6 +62,14 @@ export function devRuntimeOpen(environment: NodeJS.ProcessEnv): readonly string[
   return allowed;
 }
 
+/**
+ * Pilot 2.1 (owner 2026-11-21, variant A): the Library opens only with the
+ * runtime and its own deploy switch; the pinned execution manifest is unchanged.
+ */
+export function libraryOpen(environment: NodeJS.ProcessEnv): boolean {
+  return devRuntimeOpen(environment) !== null && environment.P2_LIBRARY_ENABLED === 'true';
+}
+
 async function dispatch(callable: DevCallableName, request: Request, response: Response) {
   response.set('Cache-Control', 'no-store');
   const allowed = devRuntimeOpen(process.env);
@@ -103,6 +112,13 @@ async function dispatch(callable: DevCallableName, request: Request, response: R
       firebaseUid: identity.firebaseUid,
       data: body.data,
       firestore,
+      libraryEnabled: libraryOpen(process.env),
+      contentTypes: devContentTypesFor(process.env),
+      catalogEnabled:
+        devRuntimeOpen(process.env) !== null && process.env.P2_CATALOG_ENABLED === 'true',
+      routeEnabled: devRuntimeOpen(process.env) !== null && process.env.P2_ROUTE_ENABLED === 'true',
+      planningEnabled:
+        devRuntimeOpen(process.env) !== null && process.env.P2_PLANNING_ENABLED === 'true',
       compose: () =>
         createDevContentMedia({
           app: firebase,
@@ -139,6 +155,33 @@ export const mediaCommandV1 = onRequest(options, (req, res) =>
 export const mediaQueryV1 = onRequest(options, (req, res) => dispatch('mediaQueryV1', req, res));
 export const uploadMediaBytesV1 = onRequest(options, (req, res) =>
   dispatch('uploadMediaBytesV1', req, res),
+);
+
+export const libraryCommandV1 = onRequest(options, (req, res) =>
+  dispatch('libraryCommandV1', req, res),
+);
+export const libraryQueryV1 = onRequest(options, (req, res) =>
+  dispatch('libraryQueryV1', req, res),
+);
+
+export const quickPlanCommandV1 = onRequest(options, (req, res) =>
+  dispatch('quickPlanCommandV1', req, res),
+);
+export const quickPlanQueryV1 = onRequest(options, (req, res) =>
+  dispatch('quickPlanQueryV1', req, res),
+);
+export const scenarioCommandV1 = onRequest(options, (req, res) =>
+  dispatch('scenarioCommandV1', req, res),
+);
+export const scenarioQueryV1 = onRequest(options, (req, res) =>
+  dispatch('scenarioQueryV1', req, res),
+);
+export const routeCommandV1 = onRequest(options, (req, res) =>
+  dispatch('routeCommandV1', req, res),
+);
+export const routeQueryV1 = onRequest(options, (req, res) => dispatch('routeQueryV1', req, res));
+export const discoverQueryV1 = onRequest(options, (req, res) =>
+  dispatch('discoverQueryV1', req, res),
 );
 
 export { failureShape };

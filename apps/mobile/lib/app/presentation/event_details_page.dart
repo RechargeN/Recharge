@@ -26,6 +26,7 @@ import '../di/booking_test_entry_guard.dart';
 import '../di/service_locator.dart';
 import '../testing/seeded_event_fixture.dart';
 import 'event_booking_panel.dart';
+import 'offline_banner.dart';
 import '../router/route_names.dart';
 import 'scenario_object_intake_sheet.dart';
 
@@ -127,6 +128,26 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
       ),
     );
 
+    // OFFLINE-01: this page lives outside the shell that carries the banner.
+    final bool needsConnection = ref
+        .watch(authControllerProvider)
+        .state
+        .needsConnection;
+    final Widget details = needsConnection
+        ? Column(
+            children: <Widget>[
+              const OfflineBanner(),
+              Expanded(
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: true,
+                  child: shell,
+                ),
+              ),
+            ],
+          )
+        : shell;
+
     // Default-off test entry, only when the whole guard (define, non-release,
     // testBackend, loopback demo-recharge) allows it: the seeded B2 fixture
     // Event, or the displayed occurrence of a Content Event with internal
@@ -139,7 +160,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
         sl<BookingTestEntryGuard>().allowed) {
       return Column(
         children: <Widget>[
-          Expanded(child: shell),
+          Expanded(child: details),
           EventBookingPanel(
             target: fixture ? null : bookingRef,
             eventTimeZoneId: projection.timezoneId,
@@ -147,7 +168,7 @@ class _EventDetailsPageState extends ConsumerState<EventDetailsPage> {
         ],
       );
     }
-    return shell;
+    return details;
   }
 
   void _trackViewOnce(PublishedEventDiscoveryEntity projection) {

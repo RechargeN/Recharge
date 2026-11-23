@@ -82,12 +82,12 @@ test("Content allowlist rejects outsiders and extra symbols", () => {
       "firestore_catalog_repository.ts",
     );
     const source = fs.readFileSync(allowed, "utf8");
-    assert.match(source, /import \{ assertContentEmulatorContext \}/u);
+    assert.match(source, /import \{ assertMediaChainPersistenceContext \}/u);
     fs.writeFileSync(
       allowed,
       source.replace(
-        "import { assertContentEmulatorContext }",
-        "import { assertContentEmulatorContext, FirestoreContentRepository }",
+        "import { assertMediaChainPersistenceContext }",
+        "import { assertMediaChainPersistenceContext, FirestoreContentRepository }",
       ),
     );
     const extra = run();

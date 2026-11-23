@@ -695,7 +695,9 @@ void test('restricted pages do not consume active page creation quota', async ()
     marketId: 'LV',
     nowUtc: '2026-09-22T00:00:05.000Z',
   });
-  assert.equal(replacement.page.status, 'pendingReview');
+  // Owner 2026-11-23, variant A: a new Page is active at once and unverified.
+  assert.equal(replacement.page.status, 'active');
+  assert.equal(replacement.page.verificationStatus, 'unverified');
 });
 
 void test('a lost rotation answer keeps the sign-in; the new handle retires the old one (owner 2026-11-19)', async () => {

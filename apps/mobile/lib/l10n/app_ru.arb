@@ -43,6 +43,9 @@
   "settingsPrivacyPolicy": "Политика конфиденциальности",
   "settingsTerms": "Условия использования",
   "settingsSignOut": "Выйти",
+  "settingsSignOutEverywhere": "Выйти на всех устройствах",
+  "settingsSignOutEverywhereTitle": "Выйти на всех устройствах?",
+  "settingsSignOutEverywhereBody": "Все телефоны с этим аккаунтом выйдут из него. С телефонов ничего не удаляется.",
   "settingsProfileInformation": "Информация профиля",
   "settingsDisplayName": "Отображаемое имя",
   "settingsAbout": "О себе",
@@ -3349,5 +3352,7 @@
   "discoverTimeFilterInvalid": "Некорректный фильтр времени. Измените условия поиска.",
   "discoverDateUnavailable": "Дата недоступна",
   "discoverDateFrom": "С {date}",
-  "discoverDateUntil": "До {date}"
+  "discoverDateUntil": "До {date}",
+  "authOfflineBanner": "Нет связи — показано сохранённое",
+  "authOfflineNeedsConnection": "Для этого нужна связь. Попробуйте снова, когда появится интернет."
 }

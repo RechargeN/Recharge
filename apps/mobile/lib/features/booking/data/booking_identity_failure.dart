@@ -24,6 +24,20 @@ const Set<String> terminalIdentityCallableCodes = <String>{
   'not-found',
 };
 
+/// Owner decision 2026-11-21 #5: the only answers that confirm the end of
+/// access (the phone signs out at once; owner 2026-11-23: nothing is wiped). Never
+/// `unauthenticated` (it was a server bug on A34, 2026-11-21), restriction,
+/// expiry or anything made up by the client.
+const Set<String> accessEndedCallableCodes = <String>{
+  'session-revoked',
+  'account-blocked',
+};
+
+bool confirmsEndedAccess(Object error) =>
+    error is BookingCallableFailure &&
+    error.dispatched &&
+    accessEndedCallableCodes.contains(error.code);
+
 /// Firebase Auth outcomes that mean the provider account itself is gone or
 /// its credentials are no longer valid.
 const Set<String> terminalFirebaseAuthCodes = <String>{

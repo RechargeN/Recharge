@@ -39,17 +39,9 @@ export class PublisherEligibilityService {
           input.snapshot.authzRevision,
           input.nowUtc,
         );
-      // ADR 0023: no Creator role. The personal publisher needs no verification
-      // here (money is checked where content leaves the draft); a Page does.
-      const verification = await transaction.verificationForUser(input.snapshot.userId);
-      if (input.requestedPublisher.type !== 'user' && verification?.status !== 'verified')
-        return result(
-          input.requestedPublisher,
-          false,
-          'identity_verification_required',
-          account.securityRevision,
-          input.nowUtc,
-        );
+      // ADR 0023: no Creator role. Neither the personal publisher nor a Page
+      // needs verification here (owner 2026-11-23, variant A): money is checked
+      // where content leaves the draft.
       if (input.requestedPublisher.type === 'user') {
         if (input.requestedPublisher.id !== input.snapshot.userId)
           return result(
@@ -96,7 +88,7 @@ export class PublisherEligibilityService {
           account.securityRevision,
           input.nowUtc,
         );
-      if (page?.status !== 'active' || page.verificationStatus !== 'verified')
+      if (page?.status !== 'active')
         return result(
           input.requestedPublisher,
           false,

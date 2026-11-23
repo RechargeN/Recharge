@@ -36,6 +36,8 @@ final class DevAuthBundle implements AuthSessionEvents {
   final Stream<void> invalidated;
   final FlutterSecureStorage storage;
   final DevServerAuthRepository auth;
+  @override
+  Stream<void> get accessEnded => auth.accessEnded;
   final DevIdentityWorkspaceRepository workspace;
   final BookingIdentitySessionStore sessions;
 
@@ -128,12 +130,14 @@ Future<DevAuthBundle> createDevAuthBundleFromEnvironment() async {
     identity: identity,
     sessions: client,
   );
+  late final DevServerAuthRepository auth;
   final callables = FunctionsBookingCallablePort(
     endpoint: endpoint,
     client: httpClient,
     tokens: identity,
     sessions: sessions,
     identitySessions: client,
+    onAccessEnded: () => auth.endAccessFromTransport(),
   );
   DevNotificationsBundle? notifications;
   DevAuthSessionGateway gateway = NativeDevAuthSessionGateway(
@@ -156,7 +160,7 @@ Future<DevAuthBundle> createDevAuthBundleFromEnvironment() async {
       registrar: notifications.registrar,
     );
   }
-  final auth = DevServerAuthRepository(gateway: gateway);
+  auth = DevServerAuthRepository(gateway: gateway);
   return DevAuthBundle(
     storage: storage,
     auth: auth,

@@ -52,6 +52,19 @@ void main() {
     expect(controller.state.searchQuery, isEmpty);
   });
 
+  test('decision 5: a load that answers after dispose is ignored', () async {
+    final disposed = NotificationsController(
+      getNotificationsUseCase: GetNotificationsUseCase(repository),
+      markNotificationReadUseCase: MarkNotificationReadUseCase(repository),
+      analyticsService: _NoopAnalyticsService(),
+    );
+    final load = disposed.loadNotifications(userId: 'u1');
+    disposed.dispose(); // The account ended while the inbox was loading.
+
+    await expectLater(load, completes);
+    expect(disposed.state.items, isEmpty);
+  });
+
   test('markAsRead updates unread count', () async {
     await controller.ensureLoaded(userId: 'u1');
 

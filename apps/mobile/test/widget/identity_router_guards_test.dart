@@ -7,21 +7,28 @@ import 'package:recharge/features/auth/application/controllers/auth_controller.d
 import 'package:recharge/features/auth/domain/entities/auth_session_entity.dart';
 import 'package:recharge/features/identity/domain/entities/identity_access_snapshot.dart';
 import 'package:recharge/features/create/presentation/pages/create_hub_page.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recharge/app/di/service_locator.dart';
+import 'package:recharge/features/auth/domain/usecases/sign_in_with_google_usecase.dart';
+import 'package:recharge/features/favorites/domain/entities/favorite_item_entity.dart';
+import 'package:recharge/features/favorites/domain/repositories/favorites_repository.dart';
 import 'package:recharge/app/router/app_router.dart';
 import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/domain/repositories/auth_repository.dart';
+import 'package:recharge/features/auth/domain/repositories/network_status.dart';
 import 'package:recharge/features/auth/domain/entities/auth_user_entity.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
 import 'package:recharge/features/identity/domain/repositories/identity_workspace_repository.dart';
 import 'package:recharge/features/identity/domain/entities/workspace_ref.dart';
 import 'package:recharge/features/identity/domain/entities/managed_page_membership_entity.dart';
 import 'package:recharge/features/identity/application/identity_workspace_providers.dart';
+import 'package:recharge/features/notifications/application/notifications_providers.dart';
 import '../unit/identity_access_guards_test.dart';
 
 void main() {
@@ -48,6 +55,7 @@ void main() {
     WidgetTester tester,
     String path, {
     bool authenticated = true,
+    bool settle = true,
   }) async {
     if (authenticated) {
       await container
@@ -62,7 +70,14 @@ void main() {
         child: MaterialApp.router(routerConfig: router),
       ),
     );
-    await tester.pumpAndSettle();
+    if (settle) {
+      await tester.pumpAndSettle();
+      return;
+    }
+    // A screen that keeps a spinner offline never settles.
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 300));
+    }
   }
 
   String location() =>
@@ -100,6 +115,30 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  // Owner 2026-11-23: the personal Create types never depend on a client
+  // access check. A34 2026-11-23: the first workspace load failed at a cold
+  // start and Place, Route and Collection stayed hidden for the whole session.
+  testWidgets('personal Create types show even when the access load fails', (
+    tester,
+  ) async {
+    repository.failReads = true;
+    await open(tester, RouteNames.create);
+    expect(
+      container.read(activeCreateCapabilitiesProvider),
+      containsAll(['create.place', 'create.route', 'create.collection']),
+    );
+    final hub = tester.widget<CreateHubPage>(find.byType(CreateHubPage));
+    expect(
+      hub.capabilities,
+      containsAll(['create.place', 'create.route', 'create.collection']),
+    );
+    expect(
+      container.read(activeCreateCapabilitiesProvider),
+      isNot(contains('manage.route')),
+      reason: 'moderation stays server-granted',
+    );
+  });
 
   testWidgets('ADR0023 User with zero pages retains personal Create hints', (
     tester,
@@ -169,7 +208,9 @@ void main() {
           .activeWorkspace;
       await tester.pump(const Duration(minutes: 2));
       await tester.pumpAndSettle();
-      expect(auth.state.isGuest, isTrue);
+      // Round 1 (2026-11-20): offline the user stays signed in, never authorized.
+      expect(auth.state.isOffline, isTrue);
+      expect(auth.state.isAuthenticated, isFalse);
       expect(auth.state.errorCode, AuthController.offlineMessage);
       expect(location(), RouteNames.professionalPage);
       expect(
@@ -346,6 +387,158 @@ void main() {
     );
     expect(find.text('Private Page A'), findsNothing);
   });
+  for (final path in <String>[
+    RouteNames.adminTools,
+    RouteNames.professionalPage,
+  ]) {
+    testWidgets('OFFLINE-01: losing the network does not eject from $path', (
+      tester,
+    ) async {
+      final network = RouterNetworkStatus();
+      sl.registerSingleton<NetworkStatus>(network);
+      repository.workspace = WorkspaceRef.page('page-a');
+      if (path == RouteNames.adminTools) repository.workspace = null;
+      await open(tester, path);
+      expect(location(), path);
+
+      // In dev and staging the access snapshot is a server read: offline it fails.
+      repository.failReads = true;
+      network.become(online: false);
+      await tester.pumpAndSettle();
+
+      expect(
+        container.read(authControllerProvider).state.needsConnection,
+        isTrue,
+      );
+      expect(location(), path);
+    });
+  }
+
+  testWidgets('decision 5: the inbox in memory ends with the account', (
+    tester,
+  ) async {
+    await open(tester, RouteNames.profile);
+    final before = container.read(notificationsControllerProvider);
+
+    await container.read(authControllerProvider).signOut();
+    await tester.pumpAndSettle();
+
+    expect(
+      container.read(notificationsControllerProvider),
+      isNot(same(before)),
+    );
+  });
+
+  testWidgets('OFFLINE-01: the shell banner follows the network', (
+    tester,
+  ) async {
+    final network = RouterNetworkStatus();
+    sl.registerSingleton<NetworkStatus>(network);
+    await open(tester, RouteNames.profile);
+    expect(find.byKey(const Key('offline-banner')), findsNothing);
+
+    network.become(online: false);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('offline-banner')), findsOneWidget);
+
+    network.become(online: true);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('offline-banner')), findsNothing);
+  });
+
+  // Decision 2026-11-21 #4: a kept profile is not a permission.
+  Future<void> openColdOffline(WidgetTester tester, String path) async {
+    FlutterSecureStorage.setMockInitialValues({
+      'auth.offlineProfile': '{"id":"alice","email":"alice@example.test"}',
+    });
+    sl.registerFactory<SignInWithGoogleUseCase>(
+      () => SignInWithGoogleUseCase(OfflineFederatedAuth()),
+    );
+    authRepository.failure = const AuthException(
+      code: AuthController.offlineMessage,
+      message: AuthController.offlineMessage,
+    );
+    repository.failReads = true;
+    await container.read(authControllerProvider).restoreSession();
+    expect(container.read(authControllerProvider).state.isOffline, isTrue);
+    await open(tester, path, authenticated: false, settle: false);
+  }
+
+  Future<void> stopRetries(WidgetTester tester) async {
+    authRepository.failure = null;
+    await container.read(authControllerProvider).signOut();
+    await tester.pumpAndSettle();
+  }
+
+  for (final path in <String>[
+    RouteNames.adminTools,
+    RouteNames.routeModeration,
+    RouteNames.professionalPage,
+    RouteNames.professionalPageAccount,
+    RouteNames.professionalPagePreviewFor('page-a'),
+  ]) {
+    testWidgets('offline cold start cannot open $path', (tester) async {
+      await openColdOffline(tester, path);
+      expect(location(), RouteNames.settings);
+      await stopRetries(tester);
+    });
+  }
+
+  for (final path in <String>[RouteNames.favorites, RouteNames.profile]) {
+    testWidgets('offline cold start keeps the saved screen $path', (
+      tester,
+    ) async {
+      await openColdOffline(tester, path);
+      expect(location(), path);
+      await stopRetries(tester);
+    });
+  }
+
+  testWidgets('offline after the snapshot: no new privileged navigation', (
+    tester,
+  ) async {
+    authRepository.restored = AuthResultEntity(
+      user: authRepository.user!,
+      session: AuthSessionEntity.serverIssued(
+        sessionId: 'test',
+        expiresAtUtc: DateTime.now().toUtc().add(const Duration(minutes: 1)),
+        serverSessionHandle: 'local-test',
+        installationId: 'local-test',
+      ),
+    );
+    await container.read(authControllerProvider).restoreSession();
+    await open(tester, RouteNames.profile, authenticated: false);
+    await tester.pump(const Duration(minutes: 2));
+    await tester.pumpAndSettle();
+    expect(container.read(authControllerProvider).state.isOffline, isTrue);
+
+    container.read(appRouterProvider).go(RouteNames.adminTools);
+    await tester.pumpAndSettle();
+    expect(location(), RouteNames.settings);
+    authRepository.restored = null;
+    await stopRetries(tester);
+  });
+
+  testWidgets('Saved is read again when the connection is back', (
+    tester,
+  ) async {
+    final network = RouterNetworkStatus();
+    sl.registerSingleton<NetworkStatus>(network);
+    final favorites = CountingFavorites();
+    await sl.unregister<FavoritesRepository>();
+    sl.registerSingleton<FavoritesRepository>(favorites);
+    await open(tester, RouteNames.favorites);
+    final before = favorites.reads;
+    expect(before, greaterThan(0));
+    network.become(online: false);
+    await tester.pumpAndSettle();
+    expect(favorites.reads, before);
+
+    network.become(online: true);
+    await tester.pumpAndSettle();
+    expect(favorites.reads, before + 1);
+  });
+
   testWidgets('failed fresh read denies protected route', (tester) async {
     repository.failReads = true;
     await open(tester, RouteNames.adminTools);
@@ -354,7 +547,45 @@ void main() {
   });
 }
 
+class RouterNetworkStatus implements NetworkStatus {
+  final StreamController<bool> _changes = StreamController<bool>.broadcast();
+  bool _online = true;
+
+  @override
+  Future<bool> isOnline() async => _online;
+
+  @override
+  Stream<bool> get changes => _changes.stream;
+
+  void become({required bool online}) {
+    _online = online;
+    _changes.add(online);
+  }
+}
+
+class CountingFavorites implements FavoritesRepository {
+  int reads = 0;
+
+  @override
+  Future<List<FavoriteItemEntity>> getFavorites() async {
+    reads++;
+    return const <FavoriteItemEntity>[];
+  }
+
+  @override
+  Future<void> addFavorite(FavoriteItemEntity item) async {}
+
+  @override
+  Future<void> removeFavorite(String itemId) async {}
+}
+
+class OfflineFederatedAuth implements FederatedAuthRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 class RouterAuthRepository implements AuthRepository {
+  AuthException? failure;
   AuthResultEntity? restored;
   AuthUserEntity? user = userFor('alice');
   static AuthUserEntity userFor(String id) => AuthUserEntity(
@@ -372,7 +603,11 @@ class RouterAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AuthResultEntity?> restoreSession() async => restored;
+  Future<AuthResultEntity?> restoreSession() async {
+    if (failure != null) throw failure!;
+    return restored;
+  }
+
   @override
   Future<AuthResultEntity> signIn({
     required String email,

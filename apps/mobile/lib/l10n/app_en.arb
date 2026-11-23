@@ -172,6 +172,18 @@
   "@settingsSignOut": {
     "description": "Settings button."
   },
+  "settingsSignOutEverywhere": "Sign out on all devices",
+  "settingsSignOutEverywhereTitle": "Sign out on all devices?",
+  "settingsSignOutEverywhereBody": "Every phone signed in to this account will be signed out. Nothing is deleted from your phones.",
+  "@settingsSignOutEverywhere": {
+    "description": "Settings button: the server ends every Session of the account (owner 2026-11-23)."
+  },
+  "@settingsSignOutEverywhereTitle": {
+    "description": "Confirmation dialog title for signing out on all devices."
+  },
+  "@settingsSignOutEverywhereBody": {
+    "description": "Confirmation dialog text: every signed-in phone signs out; nothing is deleted."
+  },
   "settingsProfileInformation": "Profile information",
   "@settingsProfileInformation": {
     "description": "Settings section."
@@ -15438,5 +15450,13 @@
         "type": "String"
       }
     }
+  },
+  "authOfflineBanner": "No connection — showing saved content",
+  "authOfflineNeedsConnection": "This needs a connection. Try again when you are back online.",
+  "@authOfflineBanner": {
+    "description": "Banner while a signed-in user has no network and sees saved screens."
+  },
+  "@authOfflineNeedsConnection": {
+    "description": "Shown when an action needs the server while offline."
   }
 }

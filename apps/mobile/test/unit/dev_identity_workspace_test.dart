@@ -30,7 +30,7 @@ class Gateway implements DevAuthSessionGateway {
   @override
   Future<void> clearLocal() async {}
   @override
-  Future<void> revokeAndSignOut() async {
+  Future<void> revokeAndSignOut({bool allSessions = false}) async {
     revoked = true;
   }
 }
@@ -45,7 +45,9 @@ void main() {
       const user = '018FQ2Z8Q9N4M7K2T6V3W1X5YA';
       final snapshot = await workspace.loadAccessSnapshot(user);
       expect(snapshot.globalRole, 'user');
-      expect(snapshot.isVerifiedCreator, isFalse);
+      // Owner 2026-11-23: identity is the Google (later Apple) sign-in that
+      // made this server Session.
+      expect(snapshot.isVerifiedCreator, isTrue);
       expect(snapshot.globalCapabilities, {'booking.self_service'});
       expect(snapshot.pages, isEmpty);
       expect(snapshot.memberships, isEmpty);

@@ -44,10 +44,13 @@ const uidPattern = /^[A-Za-z0-9]{20,128}$/u;
 export function renderEnv({
   runtimeEnabled,
   allowedUids,
+  bookingConsumeEnabled = false,
   projectId: target = projectId,
   projectNumber,
 }) {
   const number = resolveProjectNumber(target, projectNumber);
+  if (typeof bookingConsumeEnabled !== "boolean")
+    throw new Error("bookingConsumeEnabled must be boolean");
   if (typeof runtimeEnabled !== "boolean")
     throw new Error("runtimeEnabled must be boolean");
   if (
@@ -59,6 +62,9 @@ export function renderEnv({
   return [
     `N3C_DEV_ENABLED=${runtimeEnabled}`,
     `N3C_ALLOWED_FIREBASE_UIDS=${allowedUids.join(",")}`,
+    // Round 1 stage 1.3 (owner 2026-11-20): the cloud Booking effect consumer
+    // runs only with the runtime and its own deploy switch.
+    `N3C_BOOKING_CONSUME_ENABLED=${runtimeEnabled && bookingConsumeEnabled}`,
     ...projectNumberEnvLines(target, number),
     "",
   ].join("\n");
@@ -68,6 +74,7 @@ export function stageRuntime({
   outDir,
   runtimeEnabled,
   allowedUids,
+  bookingConsumeEnabled = false,
   projectId: target = projectId,
   projectNumber,
   functionsRoot = path.join(backend, "functions"),
@@ -92,6 +99,7 @@ export function stageRuntime({
   const env = renderEnv({
     runtimeEnabled,
     allowedUids,
+    bookingConsumeEnabled,
     projectId: target,
     projectNumber: number,
   });
@@ -126,6 +134,7 @@ export function stageRuntime({
     entry,
     runtimeEnabled,
     allowedUids,
+    bookingConsumeEnabled,
     codeTreeSha256: codeTreeDigest(outDir),
     treeSha256: digest.sha256,
     files: digest.files,
@@ -163,6 +172,7 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
     expectedEnv = renderEnv({
       runtimeEnabled: manifest.runtimeEnabled,
       allowedUids: manifest.allowedUids,
+      bookingConsumeEnabled: manifest.bookingConsumeEnabled ?? false,
       projectId: manifest.projectId,
       projectNumber: manifest.projectNumber,
     });
@@ -204,6 +214,12 @@ export function verifyStage({ stageDir, env, now = new Date() }) {
   };
   for (const [key, value] of Object.entries(expected))
     if (record[key] !== value) errors.push(`deploy record ${key} mismatch`);
+  // Round 1 stage 1.3: a record without the switch approves it closed only.
+  if (
+    (record.bookingConsumeEnabled ?? false) !==
+    (manifest.bookingConsumeEnabled ?? false)
+  )
+    errors.push("deploy record bookingConsumeEnabled mismatch");
   if (
     typeof record.ownerApprovalEvidenceRef !== "string" ||
     record.ownerApprovalEvidenceRef === ""
@@ -229,10 +245,15 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
       process.exitCode = 1;
     } else process.stdout.write("N3c stage verified\n");
   } else {
-    const [outDir, enabled, uids] = args;
-    if (!outDir || !["true", "false"].includes(enabled) || !uids) {
+    const [outDir, enabled, uids, consume] = args;
+    if (
+      !outDir ||
+      !["true", "false"].includes(enabled) ||
+      !uids ||
+      ![undefined, "true", "false"].includes(consume)
+    ) {
       process.stderr.write(
-        "usage: node package-n3c-notifications-runtime.mjs <stageDir> <true|false> <uid[,uid]> | --verify <stageDir>\n",
+        "usage: node package-n3c-notifications-runtime.mjs <stageDir> <true|false> <uid[,uid]> [<bookingConsumeEnabled>] | --verify <stageDir>\n",
       );
       process.exitCode = 1;
     } else {
@@ -240,10 +261,11 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
         outDir,
         runtimeEnabled: enabled === "true",
         allowedUids: uids.split(","),
+        bookingConsumeEnabled: consume === "true",
         ...cliTarget(process.env),
       });
       process.stdout.write(
-        `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled})\n`,
+        `${manifest.treeSha256}  ${manifest.files.length} staged files (runtimeEnabled=${manifest.runtimeEnabled}, bookingConsumeEnabled=${manifest.bookingConsumeEnabled})\n`,
       );
     }
   }

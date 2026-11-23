@@ -13,9 +13,14 @@ class EventBookingSection extends StatelessWidget {
     super.key,
     required this.controller,
     required this.eventTimeZoneId,
+    this.offline = false,
   });
 
   final EventBookingController controller;
+
+  /// Round 1 (owner decision 2026-11-21, item 6): signed in without network.
+  /// Booking commands are disabled and the panel says why; nothing is queued.
+  final bool offline;
 
   /// L4: the Event's own IANA zone; Booking times are shown in it, never in
   /// the device zone, whatever the UI language.
@@ -135,6 +140,14 @@ class EventBookingSection extends StatelessWidget {
             ],
           ),
         const SizedBox(height: 8),
+        if (offline)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              l10n.authOfflineNeedsConnection,
+              key: const Key('event-booking-offline'),
+            ),
+          ),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -142,19 +155,19 @@ class EventBookingSection extends StatelessWidget {
             if (state.canBook || busy)
               FilledButton(
                 key: const Key('event-booking-create'),
-                onPressed: state.canBook ? controller.book : null,
+                onPressed: state.canBook && !offline ? controller.book : null,
                 child: Text(l10n.bookingBookSeats(state.seats)),
               ),
             if (state.canReconfirm)
               FilledButton(
                 key: const Key('event-booking-reconfirm'),
-                onPressed: controller.reconfirm,
+                onPressed: offline ? null : controller.reconfirm,
                 child: Text(l10n.bookingConfirmAttendance),
               ),
             if (state.canCancel)
               OutlinedButton(
                 key: const Key('event-booking-cancel'),
-                onPressed: controller.cancel,
+                onPressed: offline ? null : controller.cancel,
                 child: Text(l10n.bookingCancel),
               ),
             if (state.canRetry)

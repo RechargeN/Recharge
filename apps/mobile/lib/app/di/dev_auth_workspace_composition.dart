@@ -13,7 +13,9 @@ DevIdentityWorkspaceRepository createDevIdentityWorkspaceRepository(
     return IdentityAccessSnapshot(
       userId: userId,
       globalRole: context.result.user.role,
-      creatorVerificationStatus: CreatorVerificationStatus.notStarted,
+      // Owner 2026-11-23: identity is the Google (later Apple) sign-in that
+      // made this server Session. Paid and booking rules stay on the server.
+      creatorVerificationStatus: CreatorVerificationStatus.verified,
       globalCapabilities: Set<String>.unmodifiable(
         context.result.user.capabilities,
       ),

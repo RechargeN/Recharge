@@ -9,6 +9,7 @@ import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
+import 'package:recharge/features/auth/application/state/auth_state.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
 import 'package:recharge/features/auth/domain/entities/auth_session_entity.dart';
 import 'package:recharge/features/auth/domain/entities/auth_user_entity.dart';
@@ -40,6 +41,22 @@ import 'package:recharge/features/favorites/domain/usecases/remove_favorite_usec
 import 'widget_test_viewport.dart';
 
 void main() {
+  fullPageTestWidgets('OFFLINE-01: home never shows a raw network code', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _HomeTestApp(authController: _OfflineHomeAuthController()),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('home-auth-message')),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('NETWORK_UNAVAILABLE'), findsNothing);
+  });
+
   fullPageTestWidgets('renders consumer home showcase', (tester) async {
     await tester.pumpWidget(_HomeTestApp());
     await tester.pumpAndSettle();
@@ -498,19 +515,24 @@ class _HomeTestApp extends StatelessWidget {
     List<FavoriteItemEntity>? favoriteItems,
     List<SavedSearchEntity>? savedSearches,
     List<SmartSearchHistoryEntity>? smartSearchHistory,
-  }) : _favoritesRepository = _FakeFavoritesRepository(initial: favoriteItems),
+    AuthController? authController,
+  }) : _authControllerOverride = authController,
+       _favoritesRepository = _FakeFavoritesRepository(initial: favoriteItems),
        _discoverPreferencesRepository = _FakeDiscoverPreferencesRepository(
          initialSavedSearches: savedSearches,
          initialSmartSearchHistory: smartSearchHistory,
        );
 
-  final AuthController _authController = AuthController(
-    signInUseCase: SignInUseCase(_NoopAuthRepository()),
-    restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
-    signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
-    getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
-    analyticsService: _NoopAnalyticsService(),
-  );
+  final AuthController? _authControllerOverride;
+  late final AuthController _authController =
+      _authControllerOverride ??
+      AuthController(
+        signInUseCase: SignInUseCase(_NoopAuthRepository()),
+        restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+        signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+        getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+        analyticsService: _NoopAnalyticsService(),
+      );
 
   final _FakeFavoritesRepository _favoritesRepository;
   final _FakeDiscoverPreferencesRepository _discoverPreferencesRepository;
@@ -671,6 +693,31 @@ class _HomeTestApp extends StatelessWidget {
 class _NoopAnalyticsService implements AnalyticsService {
   @override
   void track(String eventName, {Map<String, Object?> params = const {}}) {}
+}
+
+class _OfflineHomeAuthController extends AuthController {
+  _OfflineHomeAuthController()
+    : super(
+        signInUseCase: SignInUseCase(_NoopAuthRepository()),
+        restoreSessionUseCase: RestoreSessionUseCase(_NoopAuthRepository()),
+        signOutUseCase: SignOutUseCase(_NoopAuthRepository()),
+        getCurrentUserUseCase: GetCurrentUserUseCase(_NoopAuthRepository()),
+        analyticsService: _NoopAnalyticsService(),
+      );
+
+  @override
+  AuthState get state => const AuthState(
+    status: AuthStatus.offline,
+    errorCode: AuthController.offlineMessage,
+    message: AuthController.offlineMessage,
+    user: AuthUserEntity(
+      id: 'u',
+      email: '',
+      role: '',
+      capabilities: <String>[],
+      profileStatus: 'active',
+    ),
+  );
 }
 
 class _NoopAuthRepository implements AuthRepository {

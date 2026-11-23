@@ -31,11 +31,26 @@ export interface BookingNotificationSubject {
   readonly occurrenceId: string;
 }
 
+let cloudEffects: boolean | undefined;
+
 /**
- * Reads the local producer activation flag before the Booking transaction. The
- * gate is always closed outside the Emulator, so cloud keeps writing v1.
+ * Round 1 (owner 2026-11-20, stage 1.3): the isolated cloud entry (n4c-booking)
+ * fixes producer activation from its deploy switch, because the local flag gate
+ * is always closed outside the Emulator. Called only by a cloud runtime that has
+ * already checked it runs in its own project; never by index.ts or the Emulator.
+ * `undefined` returns to the Emulator flag (tests only).
+ */
+export function useCloudBookingNotificationEffects(enabled: boolean | undefined): void {
+  cloudEffects = enabled;
+}
+
+/**
+ * Producer activation, read before the Booking transaction: the cloud deploy
+ * switch when a cloud entry set it, otherwise the local Emulator flag (closed
+ * outside the Emulator, so a cloud runtime without the switch keeps writing v1).
  */
 export function bookingNotificationEffectsEnabled(firestore: Firestore): Promise<boolean> {
+  if (cloudEffects !== undefined) return Promise.resolve(cloudEffects);
   return new FirestoreFeatureFlagGate(firestore, 'local', 'LV').isEnabled(
     bookingNotificationFlagIds.effects,
   );

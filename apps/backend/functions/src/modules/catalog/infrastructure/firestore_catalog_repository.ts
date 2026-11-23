@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { FieldPath, type Firestore, type Query, type Transaction } from 'firebase-admin/firestore';
 
-import { assertContentEmulatorContext } from '../../content/infrastructure/firestore_content_repository.js';
+import { assertMediaChainPersistenceContext } from '../../content/infrastructure/firestore_content_repository.js';
 import type {
   ActivePointerRecord,
   CatalogReportRecord,
@@ -56,7 +56,9 @@ export class FirestoreCatalogRepository implements CatalogRepository {
     private readonly firestore: Firestore,
     environment: NodeJS.ProcessEnv = process.env,
   ) {
-    assertContentEmulatorContext(firestore, environment);
+    // Pilot 2.3 (owner 2026-11-21): the reviewed dev-cloud guard; without its
+    // switch it is exactly the Emulator check.
+    assertMediaChainPersistenceContext(firestore, environment);
   }
 
   transact<T>(operation: (transaction: CatalogTransaction) => T | Promise<T>): Promise<T> {

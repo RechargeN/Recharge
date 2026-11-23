@@ -483,6 +483,7 @@ final class FunctionsBookingCallablePort implements BookingCallablePort {
     required BookingFirebaseIdTokenProvider tokens,
     required BookingIdentitySessionStore sessions,
     FunctionsIdentitySessionClient? identitySessions,
+    this.onAccessEnded,
     this.timeout = const Duration(seconds: 35),
   }) : _endpoint = endpoint,
        _client = client,
@@ -495,6 +496,11 @@ final class FunctionsBookingCallablePort implements BookingCallablePort {
   final BookingFirebaseIdTokenProvider _tokens;
   final BookingIdentitySessionStore _sessions;
   final FunctionsIdentitySessionClient? _identitySessions;
+
+  /// The Session repair below goes past the auth repository and clears the
+  /// stored Session on a refusal, so a confirmed end of access is told here
+  /// (decision 2026-11-21 #5); the next check would only find no Session.
+  final void Function()? onAccessEnded;
   final Duration timeout;
 
   @override
@@ -555,7 +561,19 @@ final class FunctionsBookingCallablePort implements BookingCallablePort {
         (code == 'session_refresh_required' ||
             code == 'session_revoked' ||
             code == 'session_expired')) {
-      await _identitySessions.refresh(requestId: const Uuid().v4());
+      try {
+        await _identitySessions.refresh(
+          requestId: const Uuid().v4(),
+          // A repair renews the Session it has. A parallel refusal may have
+          // emptied the store: signing in again here would undo a revocation
+          // (decision 2026-11-21 #5), and only the user signs in.
+          requireExistingSession:
+              _endpoint.binding == BookingBackendBinding.devIdentity,
+        );
+      } catch (error) {
+        if (confirmsEndedAccess(error)) onAccessEnded?.call();
+        rethrow;
+      }
       final retry = Map<String, Object?>.from(command)
         ..['requestId'] = const Uuid().v4();
       return _invokeWithSession(callableName, retry, allowSessionRepair: false);

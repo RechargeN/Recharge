@@ -355,6 +355,7 @@ const Map<String, String> _labels = <String, String>{
   '/body/media/coverImage': 'fieldLabelCoverImage',
   '/body/media/gallery': 'fieldLabelGallery',
   '/body/mediaRefs': 'fieldLabelPhotos',
+  '/body/media': 'fieldLabelPhotos',
   '/body/pricing': 'fieldLabelPrices',
   '/body/pricing/entryType': 'fieldLabelEntry',
   '/body/pricing/currencyCode': 'fieldLabelCurrency',
@@ -383,11 +384,52 @@ const Map<String, String> _labels = <String, String>{
   '/body/compositionReview': 'fieldLabelGuideReview',
 };
 
+/// Round 1 (2026-11-20, A34): Event refusals the server names by field; other
+/// Event codes fall back to the general message.
+const Map<String, (String, String)> _event = <String, (String, String)>{
+  'event.title_length': ('/body/title', 'validationCheckTheTitleLength'),
+  'event.short_description_length': (
+    '/body/shortDescription',
+    'validationCheckTheShortDescriptionLength',
+  ),
+  'event.full_description_length': (
+    '/body/fullDescription',
+    'validationCheckTheDescriptionLength',
+  ),
+  'event.category_required': ('/body/categoryId', 'validationChooseACategory'),
+  'event.subcategory_required': (
+    '/body/subcategoryId',
+    'validationChooseASubcategory',
+  ),
+  'event.subcategory_not_applicable': (
+    '/body/subcategoryId',
+    'validationChooseASubcategoryFromTheCategoryList',
+  ),
+  'event.cover_required': ('/body/media', 'validationAddACoverPhoto'),
+  'event.gallery_invalid': ('/body/media', 'validationCheckTheGalleryImages'),
+  'event.local_id_unreplaced': (
+    '/body/media',
+    'validationCheckTheGalleryImages',
+  ),
+  'event.location_required': ('/body/location', 'validationSetTheLocation'),
+  'event.location_coordinates_required': (
+    '/body/location',
+    'validationSetTheMapPin',
+  ),
+  'event.location_pin_unconfirmed': (
+    '/body/location',
+    'validationConfirmTheMapPin',
+  ),
+  'event.pricing_required': ('/body/pricing', 'validationAddThePrices'),
+  'event.fixed_price_required': ('/body/pricing', 'validationAddThePrices'),
+};
+
 Map<String, (String, String)>? _tableFor(CreateObjectType type) =>
     switch (type) {
       CreateObjectType.place => _place,
       CreateObjectType.rental => _rental,
       CreateObjectType.collection => _collection,
+      CreateObjectType.event => _event,
       _ => null,
     };
 

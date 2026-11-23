@@ -11,6 +11,7 @@ import 'package:recharge/app/router/route_names.dart';
 import 'package:recharge/core/telemetry/analytics_service.dart';
 import 'package:recharge/features/auth/application/auth_providers.dart';
 import 'package:recharge/features/auth/application/controllers/auth_controller.dart';
+import 'package:recharge/features/auth/application/state/auth_state.dart';
 import 'package:recharge/features/auth/domain/entities/auth_result_entity.dart';
 import 'package:recharge/features/auth/domain/entities/auth_session_entity.dart';
 import 'package:recharge/features/auth/domain/entities/auth_user_entity.dart';
@@ -155,6 +156,15 @@ void main() {
     expect(find.text('Organizer page page-1'), findsOneWidget);
   });
 
+  fullPageTestWidgets('OFFLINE-01: the Event page says there is no network', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(await _app(noNetwork: true));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('offline-banner')), findsOneWidget);
+  });
+
   fullPageTestWidgets('free CTA is an honest acknowledgement and is tracked', (
     WidgetTester tester,
   ) async {
@@ -170,14 +180,34 @@ void main() {
 
 final DateTime _startAtUtc = DateTime.utc(2026, 9, 5, 15);
 
-Future<Widget> _app({String revisionRef = ''}) async {
-  final AuthController authController = AuthController(
-    signInUseCase: SignInUseCase(_FakeAuthRepository()),
-    restoreSessionUseCase: RestoreSessionUseCase(_FakeAuthRepository()),
-    signOutUseCase: SignOutUseCase(_FakeAuthRepository()),
-    getCurrentUserUseCase: GetCurrentUserUseCase(_FakeAuthRepository()),
-    analyticsService: sl<AnalyticsService>(),
+class _NoNetworkAuthController extends AuthController {
+  _NoNetworkAuthController()
+    : super(
+        signInUseCase: SignInUseCase(_FakeAuthRepository()),
+        restoreSessionUseCase: RestoreSessionUseCase(_FakeAuthRepository()),
+        signOutUseCase: SignOutUseCase(_FakeAuthRepository()),
+        getCurrentUserUseCase: GetCurrentUserUseCase(_FakeAuthRepository()),
+        analyticsService: sl<AnalyticsService>(),
+      );
+
+  @override
+  AuthState get state => AuthState(
+    status: super.state.status,
+    user: super.state.user,
+    networkUnavailable: true,
   );
+}
+
+Future<Widget> _app({String revisionRef = '', bool noNetwork = false}) async {
+  final AuthController authController = noNetwork
+      ? _NoNetworkAuthController()
+      : AuthController(
+          signInUseCase: SignInUseCase(_FakeAuthRepository()),
+          restoreSessionUseCase: RestoreSessionUseCase(_FakeAuthRepository()),
+          signOutUseCase: SignOutUseCase(_FakeAuthRepository()),
+          getCurrentUserUseCase: GetCurrentUserUseCase(_FakeAuthRepository()),
+          analyticsService: sl<AnalyticsService>(),
+        );
   await authController.signIn(
     email: 'user@example.com',
     password: 'password123',

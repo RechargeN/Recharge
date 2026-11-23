@@ -49,7 +49,7 @@ class _OfflineGateway implements DevAuthSessionGateway {
   @override
   Future<void> clearLocal() async => clears++;
   @override
-  Future<void> revokeAndSignOut() async {}
+  Future<void> revokeAndSignOut({bool allSessions = false}) async {}
 }
 
 Future<InMemoryBookingIdentitySessionStore> _storeWithSession() async {

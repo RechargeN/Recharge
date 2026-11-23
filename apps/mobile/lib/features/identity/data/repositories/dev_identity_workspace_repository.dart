@@ -15,8 +15,7 @@ final class DevIdentityWorkspaceRepository
     final snapshot = await revalidate(userId);
     if (snapshot.userId != userId ||
         snapshot.pages.isNotEmpty ||
-        snapshot.memberships.isNotEmpty ||
-        snapshot.isVerifiedCreator) {
+        snapshot.memberships.isNotEmpty) {
       throw StateError('dev_workspace_authority_invalid');
     }
     return snapshot;

@@ -1,4 +1,8 @@
+import '../domain/repositories/sign_out_everywhere.dart';
+import '../domain/repositories/auth_repository.dart';
 import '../domain/repositories/auth_session_events.dart';
+import '../domain/repositories/network_status.dart';
+import '../domain/repositories/offline_account_store.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/di/service_locator.dart';
@@ -21,10 +25,21 @@ final authControllerProvider = ChangeNotifierProvider<AuthController>((ref) {
         : null,
     restoreSessionUseCase: sl<RestoreSessionUseCase>(),
     signOutUseCase: sl<SignOutUseCase>(),
+    // Owner 2026-11-23: only a server Session can be ended everywhere.
+    signOutEverywhere: switch (sl<AuthRepository>()) {
+      final SignOutEverywhere everywhere => everywhere,
+      _ => null,
+    },
     getCurrentUserUseCase: sl<GetCurrentUserUseCase>(),
     analyticsService: sl(),
     productAnalytics: sl.isRegistered<ProductAnalyticsRecorder>()
         ? sl<ProductAnalyticsRecorder>()
+        : null,
+    networkStatus: sl.isRegistered<NetworkStatus>()
+        ? sl<NetworkStatus>()
+        : null,
+    offlineAccount: sl.isRegistered<OfflineAccountStore>()
+        ? sl<OfflineAccountStore>()
         : null,
   );
 });

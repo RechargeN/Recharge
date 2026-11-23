@@ -6,6 +6,7 @@ import type { ServerClock } from '../../shared/server_clock.js';
 import { FirestoreFeatureFlagGate } from '../../platform/config/firestore_feature_flag_gate.js';
 import {
   assertContentEmulatorContext,
+  assertMediaChainPersistenceContext,
   routePublicationStanding,
 } from '../content/infrastructure/firestore_content_repository.js';
 import { canonicalJson, sha256Hex } from '../content/domain/published_revision.js';
@@ -50,8 +51,11 @@ export class FirestoreRouteService {
   constructor(
     private readonly db: Firestore,
     private readonly clock: ServerClock,
+    /** Pilot 2.5 (owner 2026-11-21): cloud deploy switches by local flag id. */
+    private readonly cloud?: Readonly<Record<string, boolean>>,
   ) {
-    assertContentEmulatorContext(db);
+    if (cloud === undefined) assertContentEmulatorContext(db);
+    else assertMediaChainPersistenceContext(db);
   }
   private async owner(tx: Transaction, hint: BookingAccessHint): Promise<string | null> {
     try {
@@ -67,6 +71,7 @@ export class FirestoreRouteService {
     }
   }
   private enabled(tx: Transaction, flag: string = routeFlag) {
+    if (this.cloud !== undefined) return Promise.resolve(this.cloud[flag] === true);
     return new FirestoreFeatureFlagGate(this.db, 'local', 'LV').isEnabled(flag, tx);
   }
   private ref(owner: string, routeId: string) {

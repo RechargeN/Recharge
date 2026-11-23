@@ -23,6 +23,7 @@ import '../../features/media/data/functions_media_upload_gateway.dart';
 import 'backend_binding_manifest.dart';
 import 'booking_backend_selection.dart';
 import 'booking_test_entry_guard.dart';
+import 'dev_content_media_port.dart';
 import 'event_publication_composition.dart';
 import 'media_composition.dart';
 import 'service_locator.dart';
@@ -43,6 +44,8 @@ final class RoutePublicationTestEntryGuard
     required this.flag,
     required this.releaseMode,
     required BookingBackendBindingController binding,
+    this.devFlag = false,
+    this.devPort,
   }) : _binding = binding;
 
   factory RoutePublicationTestEntryGuard.fromEnvironment(
@@ -51,18 +54,29 @@ final class RoutePublicationTestEntryGuard
     flag: routePublicationTestEntryDefined,
     releaseMode: kReleaseMode,
     binding: binding,
+    devFlag: routePublicationTestEntryDefined && n3a2DevPlaceDraftDefined,
+    devPort: sl.isRegistered<DevContentMediaPort>()
+        ? sl<DevContentMediaPort>()
+        : null,
   );
 
   final bool flag;
   final bool releaseMode;
   final BookingBackendBindingController _binding;
 
+  /// Pilot 2.5 (owner 2026-11-21): the dev/stage cloud over the N2c Session,
+  /// as the Event path; the server opens Route only with its deploy switch.
+  final bool devFlag;
+  final DevContentMediaPort? devPort;
+  bool get devCloudAllowed => devFlag && !releaseMode && devPort != null;
+
   @override
   bool get allowed =>
-      flag &&
-      !releaseMode &&
-      _binding.mode == BackendBindingMode.testBackend &&
-      isLoopbackDemoEmulatorBinding(_binding);
+      devCloudAllowed ||
+      (flag &&
+          !releaseMode &&
+          _binding.mode == BackendBindingMode.testBackend &&
+          isLoopbackDemoEmulatorBinding(_binding));
 
   @override
   void assertAllowed() {
@@ -154,10 +168,15 @@ createRouteContentPublicationController({
   final RoutePublicationTestEntryGuard guard =
       sl<RoutePublicationTestEntryGuard>();
   if (!guard.allowed) return null;
-  final BookingTransportRuntime runtime = await sl
-      .getAsync<BookingTransportRuntime>();
-  final BookingCallablePort? port = runtime.port;
-  if (!runtime.remoteCommandsEnabled || port == null) return null;
+  final BookingCallablePort? port;
+  if (guard.devCloudAllowed) {
+    port = guard.devPort!.port;
+  } else {
+    final BookingTransportRuntime runtime = await sl
+        .getAsync<BookingTransportRuntime>();
+    port = runtime.remoteCommandsEnabled ? runtime.port : null;
+  }
+  if (port == null) return null;
   final Directory support = await sl<BookingSupportDirectoryProvider>()();
   final String separator = Platform.pathSeparator;
   final String installationId = await sl<BookingInstallationIdProvider>()
