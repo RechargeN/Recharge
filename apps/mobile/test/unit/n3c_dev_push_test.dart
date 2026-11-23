@@ -133,6 +133,40 @@ void main() {
     );
   });
 
+  // L4 9.2 (gap plan round 2, item 2.8): the server picks the lock-screen
+  // text by the language stored with the device registration. A language
+  // change in the app must reach the server without a new sign-in; signed
+  // out, nothing is sent.
+  test('a language change re-registers with the new language', () async {
+    final port = _Port();
+    var language = 'en';
+    final registrar = DevPushRegistrar(port: port, messages: _Messages())
+      ..wireLocale = () => language;
+    await registrar.register();
+    language = 'ru';
+    await registrar.languageChanged();
+    expect(port.calls, hasLength(2));
+    expect(port.calls.last.$2['commandType'], 'registerPushDevice');
+    expect(
+      (port.calls.last.$2['payload']! as Map<String, Object?>)['locale'],
+      'ru',
+    );
+
+    await registrar.unregister();
+    final afterSignOut = port.calls.length;
+    language = 'lv-LV';
+    await registrar.languageChanged();
+    expect(port.calls, hasLength(afterSignOut));
+  });
+
+  test('a language change before sign-in sends nothing', () async {
+    final port = _Port();
+    final registrar = DevPushRegistrar(port: port, messages: _Messages())
+      ..wireLocale = () => 'ru';
+    await registrar.languageChanged();
+    expect(port.calls, isEmpty);
+  });
+
   test('no consent means no token on the server', () async {
     final port = _Port();
     final registrar = DevPushRegistrar(
