@@ -75,7 +75,11 @@ if (-not $Apply) {
   return
 }
 
-$existing = gh api "/repos/$Repository/rulesets" --jq ".[] | select(.name == `"$RulesetName`") | .id"
+# Filter in PowerShell: Windows PowerShell 5.1 strips the inner quotes of a
+# jq expression passed to a native exe, so `select(.name == "...")` breaks.
+$existing = (gh api "/repos/$Repository/rulesets" | ConvertFrom-Json) |
+  Where-Object { $_.name -eq $RulesetName } |
+  Select-Object -ExpandProperty id -First 1
 $tmp = [System.IO.Path]::GetTempFileName()
 [System.IO.File]::WriteAllText($tmp, $json, (New-Object System.Text.UTF8Encoding($false)))
 try {
