@@ -27,9 +27,15 @@ final activeIdentityAccessProvider = Provider<IdentityAccessSnapshot?>((ref) {
 final activeCreatorVerificationProvider = Provider<bool>(
   (ref) => ref.watch(activeIdentityAccessProvider)?.isVerifiedCreator ?? false,
 );
+
+/// ADR 0023 (User = Creator): the personal Create types are interface hints
+/// for every user and never wait for a client access check (owner 2026-11-23;
+/// A34: a failed first workspace load hid Place, Route and Collection for the
+/// whole session). The server decides every command. Moderation, admin and
+/// paid capabilities still come only from the server snapshot.
 final activeCreateCapabilitiesProvider = Provider<List<String>>((ref) {
   final access = ref.watch(activeIdentityAccessProvider);
-  return access == null
-      ? const <String>[]
-      : withPersonalCreationHints(access.globalCapabilities);
+  return withPersonalCreationHints(
+    access?.globalCapabilities ?? const <String>{},
+  );
 });

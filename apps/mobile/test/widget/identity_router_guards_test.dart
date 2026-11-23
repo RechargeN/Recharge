@@ -116,6 +116,30 @@ void main() {
     },
   );
 
+  // Owner 2026-11-23: the personal Create types never depend on a client
+  // access check. A34 2026-11-23: the first workspace load failed at a cold
+  // start and Place, Route and Collection stayed hidden for the whole session.
+  testWidgets('personal Create types show even when the access load fails', (
+    tester,
+  ) async {
+    repository.failReads = true;
+    await open(tester, RouteNames.create);
+    expect(
+      container.read(activeCreateCapabilitiesProvider),
+      containsAll(['create.place', 'create.route', 'create.collection']),
+    );
+    final hub = tester.widget<CreateHubPage>(find.byType(CreateHubPage));
+    expect(
+      hub.capabilities,
+      containsAll(['create.place', 'create.route', 'create.collection']),
+    );
+    expect(
+      container.read(activeCreateCapabilitiesProvider),
+      isNot(contains('manage.route')),
+      reason: 'moderation stays server-granted',
+    );
+  });
+
   testWidgets('ADR0023 User with zero pages retains personal Create hints', (
     tester,
   ) async {
