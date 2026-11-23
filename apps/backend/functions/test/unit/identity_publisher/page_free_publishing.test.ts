@@ -9,9 +9,10 @@ import type { MarketId } from '../../../src/modules/reference_data/domain/identi
 
 // Owner 2026-11-23, variant A (ADR 0023 amendment): free content from a
 // Professional Page needs neither a verified Page nor a verified User, as on
-// Facebook or LinkedIn pages. Paid or bookable content from a Page, and the
-// "verified" badge, still need both verifications. Membership, an active Page
-// and the capability are always checked.
+// Facebook or LinkedIn pages. Identity is the Google (later Apple) sign-in.
+// Paid or bookable content from a Page needs the verified Page and the seller
+// declaration; a trader selling inside the app also needs provider KYC.
+// Membership, an active Page and the capability are always checked.
 
 const ids = {
   user1: '018FQ2Z8Q9N4M7K2T6V3W1X5YA',
@@ -21,8 +22,6 @@ const ids = {
   session1: '018FQ2Z8Q9N4M7K2T6V3W1X5YE',
   session2: '018FQ2Z8Q9N4M7K2T6V3W1X5YF',
   session3: '018FQ2Z8Q9N4M7K2T6V3W1X5YJ',
-  verification1: '018FQ2Z8Q9N4M7K2T6V3W1X5YG',
-  evidence1: '018FQ2Z8Q9N4M7K2T6V3W1X5YH',
   page1: '018FQ2Z8Q9N4M7K2T6V3W1X5YK',
   membership1: '018FQ2Z8Q9N4M7K2T6V3W1X5YM',
 } as const;
@@ -85,25 +84,14 @@ const fromPage = (
   nowUtc: now,
 });
 
-async function verifyUserAndPage(local: Local) {
-  await local.authority.identityVerification.submit({
-    userId: ids.user1,
-    verificationId: ids.verification1,
-    evidenceRefIds: [ids.evidence1],
-    nowUtc: '2026-09-22T00:00:03.000Z',
-  });
-  await local.authority.identityVerification.decide({
-    reviewerId: 'reviewer',
-    userId: ids.user1,
-    status: 'verified',
-    nowUtc: '2026-09-22T00:00:04.000Z',
-  });
+async function verifyPage(local: Local) {
   await local.authority.pages.decidePage({
     reviewerId: 'reviewer',
     pageId: ids.page1,
     decision: 'verified',
     nowUtc: '2026-09-22T00:00:05.000Z',
   });
+  // The security revision may move: a fresh Session.
   await local.authority.sessions.issue({
     userId: ids.user1,
     sessionId: ids.session2,
@@ -114,28 +102,78 @@ async function verifyUserAndPage(local: Local) {
   });
 }
 
+async function declare(local: Local, status: 'private' | 'trader', revisionHint: number) {
+  void revisionHint;
+  await local.authority.sellers.declare({
+    userId: ids.user1,
+    body:
+      status === 'private'
+        ? { status: 'private', contact: { email: 'seller@example.com' }, dac7ActivityTypes: [] }
+        : {
+            status: 'trader',
+            contact: { phone: '+37120000000' },
+            trader: {
+              legalName: 'Example SIA',
+              registrationNumber: '40003000000',
+              address: {
+                line1: 'Brivibas iela 1',
+                city: 'Riga',
+                postalCode: 'LV-1010',
+                countryCode: 'LV',
+              },
+            },
+            dac7ActivityTypes: ['personalServices'],
+          },
+    expectedRevision: 0,
+    nowUtc: '2026-09-22T00:00:06.500Z',
+  });
+}
+
 void test('an unverified User publishes free content from an unverified Page', async () => {
   const local = await userWithPage();
   const eligibility = new IdentityPublisherEligibility(local.repository);
   assert.equal((await eligibility.evaluate(fromPage('none'))).reason, 'eligible');
 });
 
-void test('paid or bookable content from a Page still needs both verifications', async () => {
+// Owner 2026-11-23 scheme: a paid Page publication needs the verified Page and
+// the seller declaration; a trader selling inside the app also needs the
+// payment provider's KYC (none connected yet).
+void test('paid or bookable content from a Page needs the verified Page and the declaration', async () => {
   const local = await userWithPage();
   const eligibility = new IdentityPublisherEligibility(local.repository);
   for (const commerce of ['external', 'inApp'] as const)
     assert.equal(
       (await eligibility.evaluate(fromPage(commerce))).reason,
-      'identity_verification_required',
-      commerce,
+      'publisher_not_accessible',
+      `unverified Page, ${commerce}`,
     );
-  await verifyUserAndPage(local);
+  await verifyPage(local);
+  assert.equal(
+    (await eligibility.evaluate(fromPage('external', ids.user1, ids.session2))).reason,
+    'seller_declaration_required',
+  );
+  await declare(local, 'private', 2);
   for (const commerce of ['external', 'inApp'] as const)
     assert.equal(
       (await eligibility.evaluate(fromPage(commerce, ids.user1, ids.session2))).reason,
       'eligible',
-      commerce,
+      `private seller, ${commerce}`,
     );
+});
+
+void test('a trader Page selling inside the app needs provider KYC (none connected)', async () => {
+  const local = await userWithPage();
+  await verifyPage(local);
+  await declare(local, 'trader', 2);
+  const eligibility = new IdentityPublisherEligibility(local.repository);
+  assert.equal(
+    (await eligibility.evaluate(fromPage('external', ids.user1, ids.session2))).reason,
+    'eligible',
+  );
+  assert.equal(
+    (await eligibility.evaluate(fromPage('inApp', ids.user1, ids.session2))).reason,
+    'identity_verification_required',
+  );
 });
 
 void test('a User outside the Page cannot publish from it, even free', async () => {
