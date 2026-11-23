@@ -10,6 +10,7 @@ import {
   contentCollections,
 } from '../content/infrastructure/firestore_content_repository.js';
 import { canonicalJson, sha256Hex } from '../content/domain/published_revision.js';
+import { publishedRevisionBody } from './library_target_body.js';
 import { resolveContentType } from '../content/domain/content_type_registry.js';
 import {
   commandHash,
@@ -175,7 +176,7 @@ export class FirestoreLibraryService {
           .doc(pointer.currentPublishedRevisionId),
       )
     ).data();
-    const body = record(revision?.body);
+    const body = publishedRevisionBody(revision);
     if (
       !revision ||
       !body ||

@@ -61,7 +61,9 @@ async function target(id: string, typeId: string, timezoneId = 'Europe/Riga') {
       publishedRevisionId: revisionId,
       typeId,
       marketId: 'LV',
-      body,
+      // As Content stores it (A34 2026-11-23: Library read a field never written).
+      bodyJson: JSON.stringify(body),
+      mediaAssetIds: [],
       bodyHash: sha256Hex(canonicalJson(body)),
     });
   await db.collection(contentCollections.pointers).doc(id).set({
