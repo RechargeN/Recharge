@@ -19,8 +19,10 @@ export function createManagedPage(input: {
     pageId: parseEntityId(input.pageId),
     ownerUserId: parseEntityId(input.ownerUserId),
     marketId: parseMarketId(input.marketId),
-    status: 'pendingReview',
-    verificationStatus: 'pendingReview',
+    // Owner 2026-11-23, variant A: a new Page publishes free content at once;
+    // verification is optional (paid, booking and the "verified" badge).
+    status: 'active',
+    verificationStatus: 'unverified',
     revision: 1,
     createdAtUtc: now,
     updatedAtUtc: now,

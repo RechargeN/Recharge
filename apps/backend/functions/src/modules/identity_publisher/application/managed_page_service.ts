@@ -37,11 +37,10 @@ export class ManagedPageService {
       });
       if (policy !== 'allowed') throw new IdentityFailure('policy_unavailable');
       const account = await transaction.account(input.userId);
-      const verification = await transaction.verificationForUser(input.userId);
       if (account === null || account.status !== 'active')
         throw new IdentityFailure('not_found_or_not_accessible');
-      if (verification?.status !== 'verified')
-        throw new IdentityFailure('identity_verification_required');
+      // Owner 2026-11-23, variant A: creating a Page needs no identity
+      // verification; paid or bookable content from it does.
       if ((await transaction.page(input.pageId)) !== null)
         throw new IdentityFailure('revision_conflict');
       const page = createManagedPage({

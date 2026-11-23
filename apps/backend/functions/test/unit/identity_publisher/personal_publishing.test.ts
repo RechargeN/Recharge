@@ -198,7 +198,10 @@ void test('paid or bookable content needs the seller declaration (DSA Art. 30)',
     );
 });
 
-void test('a trader selling in the app is verified before sales start; outside, the declaration is enough', async () => {
+// Owner 2026-11-23: identity = the Google (later Apple) sign-in; a trader
+// selling inside the app needs the payment provider's KYC before sales, and no
+// provider is connected, so a manual verification no longer opens it.
+void test('a trader selling in the app needs provider KYC before sales; outside, the declaration is enough', async () => {
   const local = await plainUser();
   await declare(local, traderSeller);
   const eligibility = new IdentityPublisherEligibility(local.repository);
@@ -215,7 +218,7 @@ void test('a trader selling in the app is verified before sales start; outside, 
     ...request('event', ids.user1, ids.session2, 'inApp'),
     nowUtc: '2026-09-22T00:00:05.000Z',
   });
-  assert.equal(verified.reason, 'eligible');
+  assert.equal(verified.reason, 'identity_verification_required');
 });
 
 void test('suspected fraud: a step-up makes any paid or bookable publication need verification', async () => {

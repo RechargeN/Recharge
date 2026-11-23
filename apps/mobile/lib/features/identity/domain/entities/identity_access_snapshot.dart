@@ -38,8 +38,11 @@ class IdentityAccessSnapshot {
       isAdmin && hasGlobalCapability('admin.tools.view');
   bool get canPreviewExperience =>
       isAdmin && hasGlobalCapability('admin.experience.preview');
-  bool get canCreatePage =>
-      isVerifiedCreator && hasGlobalCapability('page.create');
+
+  /// Owner 2026-11-23, variant A: creating a Page and publishing free content
+  /// from it need no identity verification; paid and booking content does
+  /// (checked by the server).
+  bool get canCreatePage => hasGlobalCapability('page.create');
 
   bool canUsePage(String actor, String pageId, String capability) =>
       belongsTo(actor) &&
@@ -72,8 +75,7 @@ class IdentityAccessSnapshot {
   bool canActivatePage(String pageId) {
     final ManagedPageEntity? page = pageById(pageId);
     final ManagedPageMembershipEntity? membership = membershipFor(pageId);
-    return isVerifiedCreator &&
-        page != null &&
+    return page != null &&
         page.isActive &&
         membership != null &&
         membership.isActive &&

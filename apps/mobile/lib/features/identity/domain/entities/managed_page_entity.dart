@@ -65,9 +65,12 @@ class ManagedPageEntity {
 
   bool get isActive => lifecycle == ManagedPageLifecycle.active;
 
+  /// Owner 2026-11-23, variant A: an active Page is public before it is
+  /// verified (it publishes free content); a rejected or revoked one is not.
   bool get isPubliclyVisible =>
-      verificationStatus == ManagedPageVerificationStatus.verified &&
-      lifecycle == ManagedPageLifecycle.active;
+      lifecycle == ManagedPageLifecycle.active &&
+      verificationStatus != ManagedPageVerificationStatus.rejected &&
+      verificationStatus != ManagedPageVerificationStatus.revoked;
 
   static String localSlug({
     required String displayName,
