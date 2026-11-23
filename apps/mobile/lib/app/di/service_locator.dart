@@ -552,8 +552,8 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
         },
       ),
     )
-    // Round 1 (owner 2026-11-21): the offline profile and the confirmed-
-    // revocation wipe, behind the domain interface (application -> domain).
+    // Round 1 (owner 2026-11-21): the offline profile behind the domain
+    // interface (application -> domain). No wipe (owner 2026-11-23).
     ..registerLazySingleton<OfflineAccountStore>(
       () => sl<AuthLocalDataSource>(),
     )

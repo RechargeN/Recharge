@@ -16,8 +16,9 @@ import 'package:recharge/features/auth/domain/usecases/sign_in_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_in_with_google_usecase.dart';
 import 'package:recharge/features/auth/domain/usecases/sign_out_usecase.dart';
 
-// Owner decisions 2026-11-21 #4–5: a confirmed end of access wipes the cache;
-// every other end of sign-in forgets the offline profile only; no network,
+// Owner 2026-11-23 ("Всё стирание из кода", reverses decision 2026-11-21 #5):
+// no end of sign-in wipes anything on the phone. A confirmed end of access and
+// every other end of sign-in forget the offline profile only (#4); no network,
 // timeout or server error changes nothing.
 
 const _user = AuthUserEntity(
@@ -42,7 +43,6 @@ class _Events implements AuthSessionEvents {
 class _Store implements OfflineAccountStore {
   AuthUserEntity? profile;
   Completer<AuthUserEntity?>? slowRead;
-  final List<String> wiped = <String>[];
 
   @override
   Future<void> saveOfflineProfile(AuthUserEntity user) async => profile = user;
@@ -53,12 +53,6 @@ class _Store implements OfflineAccountStore {
 
   @override
   Future<void> clearOfflineProfile() async => profile = null;
-
-  @override
-  Future<void> wipeAccountData(String userId) async {
-    wiped.add(userId);
-    profile = null;
-  }
 }
 
 class _Repository implements FederatedAuthRepository {
@@ -157,51 +151,41 @@ void main() {
     expect(store.profile, isNotNull);
   }
 
-  test(
-    'end of access seen by any call signs out and wipes the cache',
-    () async {
-      await signedIn();
-      // Not through restore: the router's revalidation got the refusal.
-      events.ends.add(null);
-      await settle();
+  test('end of access seen by any call signs out and wipes nothing', () async {
+    await signedIn();
+    // Not through restore: the router's revalidation got the refusal.
+    events.ends.add(null);
+    await settle();
+    expect(store.profile, isNull);
+    expect(controller.state.isGuest, isTrue);
+    expect(controller.state.message, AuthController.sessionExpiredMessage);
+    expect(repository.signOuts, 0, reason: 'nothing is left to revoke');
+  });
 
-      expect(store.wiped, <String>['server-user']);
-      expect(store.profile, isNull);
-      expect(controller.state.isGuest, isTrue);
-      expect(controller.state.message, AuthController.sessionExpiredMessage);
-      expect(repository.signOuts, 0, reason: 'nothing is left to revoke');
-    },
-  );
-
-  test('end of access during a restore wipes once', () async {
+  test('end of access during a restore wipes nothing', () async {
     await signedIn();
     repository.ended = true;
     await controller.restoreSession();
     await settle();
-
-    expect(store.wiped, <String>['server-user']);
     expect(store.profile, isNull);
     expect(controller.state.isGuest, isTrue);
   });
 
-  test('end of access on a cold start wipes the kept account', () async {
+  test('end of access on a cold start forgets the kept profile only', () async {
     store.profile = _user;
     repository.ended = true;
     await controller.restoreSession();
     await settle();
-
-    expect(store.wiped, <String>['server-user']);
     expect(store.profile, isNull);
   });
 
-  test('end of access before the profile was read still wipes it', () async {
-    store.slowRead = Completer<AuthUserEntity?>();
+  test('end of access before any restore forgets the kept profile', () async {
+    store.profile = _user;
     events.ends.add(null);
     await settle();
-    store.slowRead!.complete(_user);
-    await settle();
 
-    expect(store.wiped, <String>['server-user']);
+    expect(store.profile, isNull);
+    expect(controller.state.isGuest, isTrue);
   });
 
   test(
@@ -218,7 +202,6 @@ void main() {
         isNull,
         reason: 'decision 4: not signed in offline',
       );
-      expect(store.wiped, isEmpty);
     },
   );
 
@@ -229,7 +212,6 @@ void main() {
     await settle();
 
     expect(store.profile, isNull);
-    expect(store.wiped, isEmpty);
   });
 
   test('a lost SDK user forgets the profile and wipes nothing', () async {
@@ -239,7 +221,6 @@ void main() {
 
     expect(controller.state.isGuest, isTrue);
     expect(store.profile, isNull);
-    expect(store.wiped, isEmpty);
   });
 
   for (final code in <String>[
@@ -255,7 +236,6 @@ void main() {
 
       expect(controller.state.isAuthenticated, isTrue);
       expect(store.profile, isNotNull);
-      expect(store.wiped, isEmpty);
     });
   }
 
@@ -270,7 +250,6 @@ void main() {
       account: store,
     );
     expect(owner, isNull);
-    expect(store.wiped, isEmpty);
   }
 
   test('a stale snapshot leaves a guest without a Saved owner', () async {
@@ -309,6 +288,5 @@ void main() {
     await settle();
 
     expect(store.profile, isNull);
-    expect(store.wiped, isEmpty);
   });
 }

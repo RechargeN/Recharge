@@ -85,16 +85,17 @@ class AuthController extends ChangeNotifier {
        _analyticsService = analyticsService,
        _productAnalytics = productAnalytics {
     _sessionSubscription = sessionEvents?.invalidated.listen((_) {
-      // The SDK lost its user. The server confirmed nothing, so no cache is
-      // wiped (decision 2026-11-21 #5); the phone only signs out (#4).
+      // The SDK lost its user: the phone only signs out (decision #4).
+      // Nothing on the phone is wiped (owner 2026-11-23).
       suspendServerAuthority();
       _forgetOfflineProfile();
       unawaited(_signOutUseCase().catchError((Object _) {}));
     });
     _accessEndedSubscription = sessionEvents?.accessEnded.listen((_) {
       // The server revoked the Session or blocked the account: nothing is left
-      // to revoke, and the cached copies of server data go (decision #5).
-      final ended = _lastConfirmedUser?.id;
+      // to revoke. The phone signs out and forgets the offline profile; owner
+      // 2026-11-23 ("Всё стирание из кода") reversed decision #5, so nothing
+      // else on the phone is wiped.
       _serverUnreachable = false;
       suspendServerAuthority();
       _setState(
@@ -103,7 +104,7 @@ class AuthController extends ChangeNotifier {
           message: sessionExpiredMessage,
         ),
       );
-      unawaited(_wipeEndedAccount(ended).catchError((Object _) {}));
+      _forgetOfflineProfile();
     });
     _networkSubscription = networkStatus?.changes.listen(
       _onNetwork,
@@ -149,15 +150,6 @@ class AuthController extends ChangeNotifier {
       _cancelOfflineRetry(resetBackoff: true);
       unawaited(restoreSession().catchError((Object _) {}));
     }
-  }
-
-  Future<void> _wipeEndedAccount(String? endedUserId) async {
-    final store = _offlineAccount;
-    if (store == null) return;
-    // A cold start may hear the refusal before it knows the kept account.
-    final userId = endedUserId ?? (await store.readOfflineProfile())?.id;
-    if (userId == null) return store.clearOfflineProfile();
-    await store.wipeAccountData(userId);
   }
 
   void _forgetOfflineProfile() {

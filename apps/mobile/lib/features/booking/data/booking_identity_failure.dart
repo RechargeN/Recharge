@@ -24,8 +24,8 @@ const Set<String> terminalIdentityCallableCodes = <String>{
   'not-found',
 };
 
-/// Owner decision 2026-11-21 #5, scope of 2026-11-22: the only answers that
-/// confirm the end of access and so wipe the copies of server data. Never
+/// Owner decision 2026-11-21 #5: the only answers that confirm the end of
+/// access (the phone signs out at once; owner 2026-11-23: nothing is wiped). Never
 /// `unauthenticated` (it was a server bug on A34, 2026-11-21), restriction,
 /// expiry or anything made up by the client.
 const Set<String> accessEndedCallableCodes = <String>{

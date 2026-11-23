@@ -138,7 +138,8 @@ void main() {
   );
 
   test('a revocation keeps the copy for the same account', () async {
-    await const AuthLocalDataSource(_storage).wipeAccountData('alice');
+    // A revocation only forgets the offline profile (owner 2026-11-23).
+    await const AuthLocalDataSource(_storage).clearOfflineProfile();
     failure = const LibraryFailure('unavailable');
     expect((await repository().getFavorites()).single.id, 'kept');
   });
