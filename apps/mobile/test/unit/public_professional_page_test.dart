@@ -16,7 +16,9 @@ import 'package:recharge/features/identity/domain/usecases/resolve_public_profes
 
 void main() {
   group('public Professional Page resolver', () {
-    test('only verified and active resolves publicly', () async {
+    // Owner 2026-11-23, variant A: an active Page is public before it is
+    // verified; a rejected or revoked one stays hidden.
+    test('active and not rejected or revoked resolves publicly', () async {
       for (final ManagedPageVerificationStatus verification
           in ManagedPageVerificationStatus.values) {
         for (final ManagedPageLifecycle lifecycle
@@ -35,8 +37,9 @@ void main() {
 
           expect(
             result.isPublicPage,
-            verification == ManagedPageVerificationStatus.verified &&
-                lifecycle == ManagedPageLifecycle.active,
+            lifecycle == ManagedPageLifecycle.active &&
+                verification != ManagedPageVerificationStatus.rejected &&
+                verification != ManagedPageVerificationStatus.revoked,
             reason: '${verification.name}/${lifecycle.name}',
           );
         }
@@ -45,7 +48,7 @@ void main() {
 
     test('missing and hidden pages return the same result type', () async {
       final ManagedPageEntity hidden = _page(
-        verification: ManagedPageVerificationStatus.pending,
+        verification: ManagedPageVerificationStatus.rejected,
       );
       final ResolvePublicProfessionalPageUseCase resolver = _resolver(hidden);
 
@@ -128,10 +131,7 @@ void main() {
           requestedLocale: 'en',
         );
 
-        expect(
-          result.projection!.shortDescription,
-          'Bike tours across Riga',
-        );
+        expect(result.projection!.shortDescription, 'Bike tours across Riga');
         expect(
           result.projection!.description,
           'Full-day and half-day guided routes.',
@@ -347,7 +347,8 @@ void main() {
 
 ResolvePublicProfessionalPageUseCase _resolver(
   ManagedPageEntity page, {
-  List<ManagedPageFieldModerationOverlay> overlays = const <ManagedPageFieldModerationOverlay>[],
+  List<ManagedPageFieldModerationOverlay> overlays =
+      const <ManagedPageFieldModerationOverlay>[],
 }) {
   return ResolvePublicProfessionalPageUseCase(
     repository: _MemoryPublicPageRepository(<ManagedPageEntity>[page]),

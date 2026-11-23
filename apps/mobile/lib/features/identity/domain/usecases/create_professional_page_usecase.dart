@@ -99,7 +99,8 @@ class CreateProfessionalPageUseCase {
         pageId: pageId,
       ),
       avatar: '',
-      verificationStatus: ManagedPageVerificationStatus.pending,
+      // Owner 2026-11-23, variant A: active at once, verification optional.
+      verificationStatus: ManagedPageVerificationStatus.unverified,
       lifecycle: ManagedPageLifecycle.active,
       marketId: input.marketId.trim(),
       countryCode: input.countryCode.trim().toUpperCase(),

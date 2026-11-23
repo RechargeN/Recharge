@@ -23,7 +23,9 @@ export interface PublisherAccessDecision {
  * booking outside Recharge) needs the seller declaration; `inApp` needs it too,
  * and a trader also needs the identity verification fact. On suspected fraud
  * (`stepUpRequired`) any paid or bookable publication needs verification.
- * Page publishing keeps the verification fact as before.
+ * A Page (owner 2026-11-23, variant A): free content needs the exact active
+ * membership, an active Page and the capability; paid or bookable content also
+ * needs the verified User and the verified Page.
  */
 export async function evaluatePublisherAccess(
   transaction: IdentityAuthorityTransaction,
@@ -71,11 +73,12 @@ export async function evaluatePublisherAccess(
     }
     return { eligible: true, reason: 'eligible', authorityRevision: revision };
   }
-  if (!(await verified())) return deny('identity_verification_required');
+  const paid = input.commerce !== 'none';
+  if (paid && !(await verified())) return deny('identity_verification_required');
   const membership = await transaction.membership(input.publisherRef.id, input.userId);
   if (membership?.status !== 'active') return deny('membership_inactive');
   const page = await transaction.page(input.publisherRef.id);
-  if (page?.status !== 'active' || page.verificationStatus !== 'verified')
+  if (page?.status !== 'active' || (paid && page.verificationStatus !== 'verified'))
     return deny('publisher_not_accessible');
   if (!membership.capabilityIds.includes(input.requiredCapability))
     return deny('capability_denied');
