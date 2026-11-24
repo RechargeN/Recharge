@@ -103,6 +103,21 @@ final class DevPushRegistrar {
     }
   }
 
+  /// The app language changed (L4 9.2): the registration carries the
+  /// language the server uses for the lock-screen text, so it is sent again
+  /// with the new one. Signed out, or without consent or token, nothing is
+  /// sent. Never throws: push is a hint.
+  Future<void> languageChanged() async {
+    if (!_signedIn) return;
+    try {
+      final String? token = await _messages.token();
+      if (token == null || token.isEmpty) return;
+      await _register(token);
+    } on Object {
+      // The next sign-in or token rotation registers again.
+    }
+  }
+
   /// Before the Session is revoked (the server also ends it with the Session).
   Future<void> unregister() async {
     _signedIn = false;
