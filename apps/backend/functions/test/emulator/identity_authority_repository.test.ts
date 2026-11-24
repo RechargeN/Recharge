@@ -13,6 +13,8 @@ import { LocalVerificationDecisionAdapter } from '../../src/modules/identity_pub
 import { SyntheticProviderIdentityVerifier } from '../../src/modules/identity_publisher/infrastructure/synthetic_provider_identity_verifier.js';
 import { emulatorFirestore } from '../support/booking_emulator.js';
 
+const personal = ['booking.self_service', 'content.create', 'content.submit', 'content.publish'];
+
 const firestore = emulatorFirestore();
 const repository = new FirestoreIdentityAuthorityRepository(firestore);
 const authority = new IdentityPublisherAuthority({
@@ -51,7 +53,8 @@ void test('Firestore Identity atomically stores opaque Session and baseline acce
     snapshotExpiresAtUtc: '2026-09-24T10:06:00.000Z',
   });
   assert.match(issued.sessionHandle, /^[A-Za-z0-9_-]{43}$/u);
-  assert.deepEqual(issued.accessSnapshot.capabilityIds, ['booking.self_service']);
+  // ADR 0023: every active User authors personal content (sorted).
+  assert.deepEqual(issued.accessSnapshot.capabilityIds, [...personal].sort());
 
   const [session, snapshot] = await firestore.getAll(
     firestore.collection(identityAuthorityCollections.sessions).doc(sessionId),
@@ -63,7 +66,7 @@ void test('Firestore Identity atomically stores opaque Session and baseline acce
   assert.match(String(session.get('handleHash')), /^[a-f0-9]{64}$/u);
   assert.equal(session.get('firebaseUid'), 'firebase-user-1');
   assert.equal(snapshot.get('sessionId'), sessionId);
-  assert.deepEqual(snapshot.get('capabilityIds'), ['booking.self_service']);
+  assert.deepEqual(snapshot.get('capabilityIds'), [...personal].sort());
 });
 
 void test('duplicate provider and concurrent Session issuance remain transactional', async () => {

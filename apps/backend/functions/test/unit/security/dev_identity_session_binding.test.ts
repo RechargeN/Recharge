@@ -304,3 +304,23 @@ for (const end of ['logoutAll', 'recovery', 'restricted', 'blocked', 'deleted'] 
       });
   });
 }
+
+// A34 2026-11-24 (staging, RC 15df1cb): the phone's Session context carried
+// only `booking.self_service`, so Create refused Session, Class/Workshop and
+// Route before any request. ADR 0023: every active User authors personal
+// content; the Session snapshot carries the same personal set as the access
+// snapshot service (money still needs verification, checked per command).
+void test('Session snapshots carry the ADR 0023 personal capabilities on establish, refresh and recovery', async () => {
+  const personal = ['booking.self_service', 'content.create', 'content.publish', 'content.submit'];
+  const f = fixture();
+  const issued = await f.binding.establish(input);
+  assert.deepEqual([...issued.accessSnapshot.capabilityIds].sort(), personal);
+  const refreshed = await f.binding.refresh({
+    ...input,
+    sessionId: issued.session.sessionId,
+    sessionHandle: issued.sessionHandle,
+  });
+  assert.deepEqual([...refreshed.accessSnapshot.capabilityIds].sort(), personal);
+  const recovered = await f.binding.recover(input);
+  assert.deepEqual([...recovered.accessSnapshot.capabilityIds].sort(), personal);
+});
