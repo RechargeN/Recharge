@@ -1,7 +1,14 @@
 # Backend rollback (Draft, not executed)
 
-Status: **Draft — never rehearsed.** No rollback is claimed proven until it is
+Status: **Draft — partially rehearsed.** No rollback is claimed proven until it is
 rehearsed on stage (BCK-05 §25). It grants no authority.
+
+**Staging fact (RUN-02, 2026-11-24):** 2026-11-17 a rollback of Booking code and of
+the media image was checked. 2026-11-20 a repeat was cancelled: rolling back to a
+version without Privacy would delete functions. Release candidates older than
+`d09afb8d` have a sign-in defect, so the earliest safe rollback target is a
+candidate at or after `d09afb8d`. A full rehearsal is planned with the owner
+(runbooks README, rehearsal 3.5).
 
 ## Order (fastest safe action first)
 

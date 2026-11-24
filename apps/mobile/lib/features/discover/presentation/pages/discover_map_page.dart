@@ -1565,7 +1565,7 @@ class _MapFilterPanel extends StatelessWidget {
                 if (savedSearches.isNotEmpty ||
                     smartSearchHistory.isNotEmpty) ...<Widget>[
                   const SizedBox(height: 8),
-                  _MapSavedIntentShelf(
+                  MapSavedIntentShelf(
                     savedSearches: savedSearches,
                     smartSearchHistory: smartSearchHistory,
                     onApplySavedSearch: onApplySavedSearch,
@@ -1585,8 +1585,11 @@ class _MapFilterPanel extends StatelessWidget {
   }
 }
 
-class _MapSavedIntentShelf extends StatelessWidget {
-  const _MapSavedIntentShelf({
+/// Public only for widget tests (overflow check on narrow cards).
+@visibleForTesting
+class MapSavedIntentShelf extends StatelessWidget {
+  const MapSavedIntentShelf({
+    super.key,
     required this.savedSearches,
     required this.smartSearchHistory,
     required this.onApplySavedSearch,
@@ -1665,13 +1668,22 @@ class _MapSavedIntentShelf extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          height: 112,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (BuildContext context, int index) => cards[index],
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemCount: cards.length,
+        // Height follows the cards: a fixed height cut the card off in every
+        // language (A34 2026-11-24, "BOTTOM OVERFLOWED"), more so with an
+        // enlarged system font. The shelf holds a few saved/smart intents,
+        // so a non-lazy row is fine.
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                for (int index = 0; index < cards.length; index++) ...<Widget>[
+                  if (index > 0) const SizedBox(width: 8),
+                  cards[index],
+                ],
+              ],
+            ),
           ),
         ),
       ],
@@ -1761,16 +1773,25 @@ class _MapSavedIntentCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
+              const SizedBox(height: 8),
               const Spacer(),
               Row(
                 children: <Widget>[
                   Expanded(
                     child: Tooltip(
                       message: applyTooltip,
-                      child: FilledButton.icon(
+                      // One line in every language: the word is scaled down
+                      // instead of being broken across two lines.
+                      child: FilledButton(
                         onPressed: onApply,
-                        icon: const Icon(Icons.travel_explore),
-                        label: Text(context.l10n.discoverApply),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            context.l10n.discoverApply,
+                            maxLines: 1,
+                            softWrap: false,
+                          ),
+                        ),
                       ),
                     ),
                   ),

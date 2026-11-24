@@ -40,6 +40,7 @@ final class DevServerAuthRepository
   final DateTime Function() _now;
   bool _busy = false;
   bool _signingOut = false;
+  Future<ServerAuthContext?>? _inFlight;
   int _generation = 0;
 
   /// Sync: listeners still know the account when they hear it.
@@ -114,13 +115,36 @@ final class DevServerAuthRepository
     return gateway.refresh();
   }
 
-  Future<ServerAuthContext?> revalidateContext() => _run(gateway.current);
+  /// A read that arrives while a restore, refresh or sign-in is running joins
+  /// that operation's answer instead of failing with
+  /// `auth_operation_in_progress` (A34 2026-11-24: the Identity workspace
+  /// read at start-up failed that way, stayed in error and Create had no
+  /// access). Signing out still refuses every read.
+  Future<ServerAuthContext?> revalidateContext() {
+    final Future<ServerAuthContext?>? inFlight = _inFlight;
+    if (inFlight != null && _busy && !_signingOut) return inFlight;
+    return _run(gateway.current);
+  }
 
   @override
   Future<AuthUserEntity?> getCurrentUser() async =>
       (await revalidateContext())?.result.user;
 
   Future<ServerAuthContext?> _run(
+    Future<ServerAuthContext?> Function() operation,
+  ) async {
+    // A refused second operation must not replace the one in flight.
+    if (_busy || _signingOut) return _runExclusive(operation);
+    final Future<ServerAuthContext?> running = _runExclusive(operation);
+    _inFlight = running;
+    try {
+      return await running;
+    } finally {
+      if (identical(_inFlight, running)) _inFlight = null;
+    }
+  }
+
+  Future<ServerAuthContext?> _runExclusive(
     Future<ServerAuthContext?> Function() operation,
   ) async {
     if (_busy || _signingOut) {

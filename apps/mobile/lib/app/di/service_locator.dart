@@ -2,6 +2,7 @@ import '../config/catalog_market_binding.dart';
 import '../../features/auth/domain/repositories/network_status.dart';
 import '../../features/auth/domain/repositories/offline_account_store.dart';
 import '../../features/auth/domain/repositories/auth_session_events.dart';
+import 'dart:async';
 import 'dart:io';
 import 'connectivity_network_status.dart';
 import 'saved_owner.dart';
@@ -1309,6 +1310,15 @@ Future<void> setupDependencies({DevAuthBundle? devAuth}) async {
       // The lock-screen push text follows the app language (A34 2026-11-13).
       notifications.registrar.wireLocale = () =>
           sl<LocaleController>().apiLocale;
+      // L4 9.2: a language change reaches the push registration at once.
+      final LocaleController locales = sl<LocaleController>();
+      String lastPushLocale = locales.apiLocale;
+      locales.addListener(() {
+        final String current = locales.apiLocale;
+        if (current == lastPushLocale) return;
+        lastPushLocale = current;
+        unawaited(notifications.registrar.languageChanged());
+      });
       sl
         ..registerSingleton<DevPushRegistrar>(notifications.registrar)
         ..registerSingleton<NotificationChannelSettingsRepository>(

@@ -175,7 +175,7 @@ final class ServerAuthContext {
           // from an older server reads as `user` and grants nothing more.
           role: (roles).contains('Admin') ? 'admin' : 'user',
           capabilities: List<String>.unmodifiable(
-            (capabilities).cast<String>(),
+            clientCapabilitiesFromServer(capabilities.cast<String>()),
           ),
           profileStatus: 'active',
         ),
@@ -183,4 +183,37 @@ final class ServerAuthContext {
       snapshot['accountRevision'] as int,
     );
   }
+}
+
+/// Content types the cloud publishes for a personal user (O1 L-01): Place,
+/// Event, Session, Class/Workshop and Route. Other types stay closed until
+/// they run in the cloud.
+const List<String> cloudPersonalContentTypes = <String>[
+  'event',
+  'place',
+  'session',
+  'class_workshop',
+  'route',
+];
+
+/// ADR 0023: the server grants every active user the generic
+/// `content.create`, `content.submit` and `content.publish`. Create gates on
+/// per-type ids (`create.route`, `submit.session`, `publish.event.direct`).
+/// The server answer is translated here, once, for the cloud types; each
+/// server id opens only its own verb. The server ids are kept, and the
+/// server remains the authority on every command (A34 2026-11-24: Session,
+/// Class/Workshop and Route were refused on the phone before any request).
+List<String> clientCapabilitiesFromServer(Iterable<String> server) {
+  final Set<String> granted = server.toSet();
+  final List<String> result = <String>[...server];
+  void add(String capability) {
+    if (!result.contains(capability)) result.add(capability);
+  }
+
+  for (final String type in cloudPersonalContentTypes) {
+    if (granted.contains('content.create')) add('create.$type');
+    if (granted.contains('content.submit')) add('submit.$type');
+    if (granted.contains('content.publish')) add('publish.$type.direct');
+  }
+  return result;
 }

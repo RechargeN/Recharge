@@ -19,6 +19,7 @@ class Gateway implements DevAuthSessionGateway {
   bool reject = false;
   Completer<ServerAuthContext>? pending;
   Completer<void>? logout;
+  Completer<ServerAuthContext>? pendingRefresh;
   @override
   Future<ServerAuthContext?> current() => refresh();
   @override
@@ -27,6 +28,9 @@ class Gateway implements DevAuthSessionGateway {
   @override
   Future<ServerAuthContext?> refresh() {
     refreshes++;
+    if (pendingRefresh case final Completer<ServerAuthContext> pending) {
+      return pending.future;
+    }
     return reject
         ? Future.error(StateError('revoked'))
         : Future.value(context());
@@ -159,6 +163,43 @@ void main() {
       );
     },
   );
+  // A34 2026-11-24: at start-up the Identity workspace asked for the current
+  // context while the Session restore was running; the read failed at once
+  // with `auth_operation_in_progress`, the workspace stayed in error and
+  // Create had no access (Session, Class/Workshop, Route refused). A read
+  // joins the operation in flight instead of failing.
+  test('a context read during a restore joins it instead of failing', () async {
+    final gateway = Gateway()..pendingRefresh = Completer<ServerAuthContext>();
+    final repository = DevServerAuthRepository(
+      gateway: gateway,
+      now: () => now,
+    );
+    final restore = repository.restoreSession();
+    final read = repository.revalidateContext();
+    gateway.pendingRefresh!.complete(context());
+    final restored = await restore;
+    final joined = await read;
+    expect(restored, isNotNull);
+    expect(joined?.result.user.id, restored!.user.id);
+    expect(gateway.refreshes, 1);
+  });
+
+  test('a context read still fails while signing out', () async {
+    final gateway = Gateway()..logout = Completer<void>();
+    final repository = DevServerAuthRepository(
+      gateway: gateway,
+      now: () => now,
+    );
+    await repository.restoreSession();
+    final out = repository.signOut();
+    await expectLater(
+      repository.revalidateContext(),
+      throwsA(isA<AuthException>()),
+    );
+    gateway.logout!.complete();
+    await out;
+  });
+
   test('logout fences an in-flight login and concurrent restore', () async {
     final gateway = Gateway()..pending = Completer<ServerAuthContext>();
     final repository = DevServerAuthRepository(
