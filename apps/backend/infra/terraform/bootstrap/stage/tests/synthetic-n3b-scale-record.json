@@ -5,7 +5,7 @@
   "environment": "stage",
   "projectId": "recharge-staging-y9y2y",
   "commitSha": "0000000000000000000000000000000000000000",
-  "manifestSha256": "9ff3f547118d045a571addbc494d1beed0fe34ca2ff6efadafb54a258e9bac39",
+  "manifestSha256": "4e014c501c7bc2f9cc06dd80251bab59069ad67b3de42f676b179c432b25f5fb",
   "operations": [
     "plan"
   ],
