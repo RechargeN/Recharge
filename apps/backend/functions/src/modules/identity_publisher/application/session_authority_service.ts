@@ -1,3 +1,4 @@
+import { personalCapabilityIds } from '../domain/capability.js';
 import { randomBytes } from 'node:crypto';
 import type { Account } from '../domain/account.js';
 import { advanceRevocationFence } from '../domain/account.js';
@@ -77,7 +78,7 @@ export class SessionAuthorityService {
       const accessSnapshot = createAccessSnapshot({
         account,
         session,
-        personalCapabilityIds: ['booking.self_service'],
+        personalCapabilityIds,
         capabilityPolicyRevision: input.capabilityPolicyRevision ?? 1,
         evaluatedAtUtc: input.issuedAtUtc,
         expiresAtUtc: input.snapshotExpiresAtUtc,
@@ -353,7 +354,7 @@ export class SessionAuthorityService {
       const accessSnapshot = createAccessSnapshot({
         account: nextAccount,
         session,
-        personalCapabilityIds: ['booking.self_service'],
+        personalCapabilityIds,
         capabilityPolicyRevision: 1,
         evaluatedAtUtc: input.nowUtc,
         expiresAtUtc: input.snapshotExpiresAtUtc,

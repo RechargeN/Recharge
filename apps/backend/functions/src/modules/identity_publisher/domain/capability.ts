@@ -15,3 +15,17 @@ export function parseLocalIdentityCapability(value: string): LocalIdentityCapabi
     throw new TypeError('capability_unsupported');
   return value as LocalIdentityCapability;
 }
+
+/**
+ * ADR 0023: every active User authors free personal content and books for
+ * themselves. One list for every personal access snapshot (Session establish,
+ * refresh, recovery and the access snapshot service), so the phone sees the
+ * same authority the commands enforce. Money still needs the seller
+ * declaration and verification, checked per command, not here.
+ */
+export const personalCapabilityIds: readonly LocalIdentityCapability[] = Object.freeze([
+  'booking.self_service',
+  'content.create',
+  'content.submit',
+  'content.publish',
+]);

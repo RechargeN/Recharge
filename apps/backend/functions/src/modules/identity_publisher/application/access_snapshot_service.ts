@@ -1,3 +1,4 @@
+import { personalCapabilityIds } from '../domain/capability.js';
 import {
   createAccessSnapshot,
   isAccessSnapshotFresh,
@@ -27,12 +28,6 @@ export class AccessSnapshotService {
       assertCurrentSession(session, account, input.evaluatedAtUtc);
       // ADR 0023: every active User authors personal content; taking money
       // needs the verification fact, checked where content leaves the draft.
-      const personalCapabilityIds = [
-        'booking.self_service',
-        'content.create',
-        'content.submit',
-        'content.publish',
-      ];
       const membership =
         input.pageId === undefined
           ? undefined

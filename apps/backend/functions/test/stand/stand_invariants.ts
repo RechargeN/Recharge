@@ -43,8 +43,16 @@ export function standInvariantProblems(raw: RawStandState): string[] {
   }
   for (const [, snapshot] of docs(identityAuthorityCollections.accessSnapshots)) {
     const capabilities = Array.isArray(snapshot.capabilityIds) ? snapshot.capabilityIds : [];
-    if (capabilities.some((capability) => capability !== 'booking.self_service')) {
-      problems.push('Session snapshot carries more than booking.self_service');
+    // ADR 0023 (User = Creator): a Session snapshot carries exactly the
+    // personal set; staff or page capabilities never appear here.
+    const personal = new Set([
+      'booking.self_service',
+      'content.create',
+      'content.submit',
+      'content.publish',
+    ]);
+    if (capabilities.some((capability) => !personal.has(String(capability)))) {
+      problems.push('Session snapshot carries more than the ADR 0023 personal capabilities');
     }
   }
 
