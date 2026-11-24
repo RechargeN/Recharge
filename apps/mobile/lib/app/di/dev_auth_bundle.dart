@@ -111,18 +111,21 @@ Future<DevAuthBundle> createDevAuthBundleFromEnvironment() async {
     Uri.parse(cloud.functionsBase),
   );
   final httpClient = http.Client();
+  // One observe-mode App Check source for the Session calls and every product
+  // call through the callable port (gap plan round 2, item 2.6).
+  final appCheck = ObservedDevAppCheckTokens(
+    DevAndroidAppCheckTokens(
+      FirebaseAppCheck.instanceFor(app: app),
+      mode: DevAndroidAttestationMode.debug,
+    ),
+  );
   final client = FunctionsIdentitySessionClient(
     endpoint: endpoint,
     client: httpClient,
     tokens: identity,
     installations: installations,
     sessions: sessions,
-    appCheck: ObservedDevAppCheckTokens(
-      DevAndroidAppCheckTokens(
-        FirebaseAppCheck.instanceFor(app: app),
-        mode: DevAndroidAttestationMode.debug,
-      ),
-    ),
+    appCheck: appCheck,
     observeAppCheck: true,
     identityProvider: 'google',
   );
@@ -137,6 +140,7 @@ Future<DevAuthBundle> createDevAuthBundleFromEnvironment() async {
     tokens: identity,
     sessions: sessions,
     identitySessions: client,
+    appCheck: appCheck,
     onAccessEnded: () => auth.endAccessFromTransport(),
   );
   DevNotificationsBundle? notifications;
