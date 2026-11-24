@@ -611,7 +611,6 @@
         "owner": "firebase_cli",
         "ttlFields": ["expiresAt"],
         "compositeIndexes": [
-          ["occurrenceId:ASCENDING", "__name__:ASCENDING"],
           ["userId:ASCENDING", "createdAt:DESCENDING", "__name__:DESCENDING"],
           [
             "userId:ASCENDING",

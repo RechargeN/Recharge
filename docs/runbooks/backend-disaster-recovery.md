@@ -1,7 +1,15 @@
 # Backend backup, restore and disaster recovery (Draft, not executed)
 
-Status: **Draft.** RPO/RTO and retention are BCK05-OD-05 (Proposed); no
-protection or restore runtime exists. Nothing here is evidence.
+Status: **Draft.** RPO/RTO and retention are BCK05-OD-05 (Proposed; recommendation in
+`docs/product/PRODUCTION_PREP_OWNER_DECISIONS_2026_11_24.md`, D-04).
+
+**Staging fact (RUN-05, 2026-11-24):** PITR, delete protection and a daily backup kept
+7 days are on in `recharge-staging-y9y2y` (dev: PITR, no schedule). Drill N4d
+(2026-11-16/21, synthetic): PITR clone into an isolated database — data loss 12 s,
+13.5 min to a verified state; restore from a scheduled backup — 12 min; after a
+restore the Privacy module re-applies erasures to the copy (`admitRestoredCopy`).
+Not proven: Auth restore, full RTO, a deletion journal outside the database
+(PB-15). Temporary databases are deleted by name after the drill.
 
 ## Procedure (when a provisioning slice and OD-05 are accepted)
 
