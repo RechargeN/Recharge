@@ -324,3 +324,33 @@ void test('Session snapshots carry the ADR 0023 personal capabilities on establi
   const recovered = await f.binding.recover(input);
   assert.deepEqual([...recovered.accessSnapshot.capabilityIds].sort(), personal);
 });
+
+// A34 2026-11-24 (staging, RC-2): a Session issued before the personal set
+// was deployed kept `['booking.self_service']` across refreshes, because a
+// refresh copied the previous snapshot. A personal snapshot is re-evaluated
+// on refresh; a Page snapshot keeps its membership capabilities.
+void test('a refresh re-evaluates a personal snapshot issued under the old capability set', async () => {
+  const f = fixture();
+  const issued = await f.binding.establish(input);
+  await f.repository.transact(async (tx) => {
+    const current = await tx.accessSnapshot(issued.session.sessionId);
+    assert.ok(current !== null);
+    tx.putAccessSnapshot({ ...current, capabilityIds: ['booking.self_service'] });
+  });
+  const refreshed = await f.binding.refresh({
+    ...input,
+    sessionId: issued.session.sessionId,
+    sessionHandle: issued.sessionHandle,
+  });
+  assert.deepEqual([...refreshed.accessSnapshot.capabilityIds].sort(), [
+    'booking.self_service',
+    'content.create',
+    'content.publish',
+    'content.submit',
+  ]);
+  const stored = await f.repository.transact((tx) => tx.accessSnapshot(issued.session.sessionId));
+  assert.deepEqual(
+    [...(stored?.capabilityIds ?? [])].sort(),
+    [...refreshed.accessSnapshot.capabilityIds].sort(),
+  );
+});

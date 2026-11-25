@@ -161,8 +161,14 @@ export class SessionAuthorityService {
       }
       if (sessionHandle.length === 0) throw new IdentityFailure('temporarily_unavailable');
       const session = rotateSessionHandle(current, sessionHandle, input.nowUtc, viaPreviousHandle);
+      // A personal snapshot is re-evaluated, so a Session issued before a
+      // change of the personal set (ADR 0023, 2026-11-24) does not keep the
+      // old one across refreshes; a Page snapshot keeps its membership ids.
       const accessSnapshot = Object.freeze({
         ...snapshot,
+        ...(snapshot.pageId === undefined
+          ? { capabilityIds: [...new Set(personalCapabilityIds)].sort() }
+          : {}),
         accountRevision: account.revision,
         sessionRevision: session.revision,
         authzRevision: session.authzRevision,
